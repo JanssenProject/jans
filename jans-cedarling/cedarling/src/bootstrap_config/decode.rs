@@ -152,7 +152,7 @@ fn build_policy_store_config(
                 refresh_interval_secs: raw.policy_store_refresh_interval_secs,
                 max_file_size: raw.policy_store_max_file_size,
             })
-        }
+        },
         // Case: get the policy store from a URI
         (None, Some(policy_store_uri), None, None) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::Uri(policy_store_uri),
@@ -176,7 +176,9 @@ fn build_policy_store_config(
                     .and_then(|ext| ext.to_str())
                     .map(str::to_lowercase);
                 match file_ext.as_deref() {
-                    Some("json") => return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported),
+                    Some("json") => {
+                        return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported);
+                    },
                     Some("yaml" | "yml") => PolicyStoreSource::FileYaml(path.into()),
                     Some("cjar") => PolicyStoreSource::CjarFile(path.into()),
                     _ => {
@@ -287,7 +289,10 @@ mod tests {
             "An unset HTTP cap must inherit the policy store cap, so a download \
              is never larger than the largest entry we would decompress"
         );
-        assert_eq!(config.policy_store_config.max_file_size, 4096);
+        assert_eq!(
+            config.policy_store_config.max_file_size, 4096,
+            "The policy store cap itself must carry the configured value"
+        );
     }
 
     #[test]
@@ -317,7 +322,10 @@ mod tests {
             Some(8192),
             "An explicitly set HTTP cap must not be overridden by the fallback"
         );
-        assert_eq!(config.policy_store_config.max_file_size, 4096);
+        assert_eq!(
+            config.policy_store_config.max_file_size, 4096,
+            "An explicit HTTP cap must not disturb the policy store cap"
+        );
     }
 
     #[test]
@@ -330,7 +338,10 @@ mod tests {
             explicit_zero.http_client_config.max_response_size_bytes, None,
             "An explicit 0 must disable the HTTP cap, not inherit 4096"
         );
-        assert_eq!(explicit_zero.policy_store_config.max_file_size, 4096);
+        assert_eq!(
+            explicit_zero.policy_store_config.max_file_size, 4096,
+            "Disabling the HTTP cap must leave the policy store cap enforced"
+        );
 
         let inherited_zero = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 0"#);
         assert_eq!(
@@ -347,10 +358,14 @@ mod tests {
             r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 512"#,
         ))
         .expect("JSON bootstrap config should load");
-        assert_eq!(from_json.policy_store_config.max_file_size, 512);
+        assert_eq!(
+            from_json.policy_store_config.max_file_size, 512,
+            "The policy store cap must be honored from JSON"
+        );
         assert_eq!(
             from_json.http_client_config.max_response_size_bytes,
-            Some(512)
+            Some(512),
+            "The JSON-supplied cap must propagate to the HTTP cap"
         );
 
         let yaml = concat!(
@@ -361,10 +376,14 @@ mod tests {
         let raw: BootstrapConfigRaw =
             serde_yaml_ng::from_str(yaml).expect("YAML bootstrap config should deserialize");
         let from_yaml = BootstrapConfig::try_from(raw).expect("YAML config should decode");
-        assert_eq!(from_yaml.policy_store_config.max_file_size, 512);
+        assert_eq!(
+            from_yaml.policy_store_config.max_file_size, 512,
+            "The policy store cap must be honored from YAML"
+        );
         assert_eq!(
             from_yaml.http_client_config.max_response_size_bytes,
-            Some(512)
+            Some(512),
+            "The YAML-supplied cap must propagate to the HTTP cap"
         );
     }
 
@@ -374,10 +393,14 @@ mod tests {
         // through `deserialize_or_parse_string_as_json`.
         let config = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": "4096""#);
 
-        assert_eq!(config.policy_store_config.max_file_size, 4096);
+        assert_eq!(
+            config.policy_store_config.max_file_size, 4096,
+            "A string-valued cap must parse to the same number"
+        );
         assert_eq!(
             config.http_client_config.max_response_size_bytes,
-            Some(4096)
+            Some(4096),
+            "The string-parsed cap must propagate to the HTTP cap"
         );
     }
 
@@ -394,8 +417,7 @@ mod tests {
                 local_policy_store: Some(case.to_string()),
                 ..Default::default()
             };
-            let err = build_policy_store_config(&raw)
-                .expect_err("legacy JSON must be rejected");
+            let err = build_policy_store_config(&raw).expect_err("legacy JSON must be rejected");
             assert!(
                 matches!(err, BootstrapConfigLoadingError::LegacyJsonNotSupported),
                 "expected LegacyJsonNotSupported for input: {case}, got {err:?}"

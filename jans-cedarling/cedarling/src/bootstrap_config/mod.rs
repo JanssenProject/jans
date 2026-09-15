@@ -300,6 +300,7 @@ mod tests {
         assert_eq!(
             config.policy_store_config.max_file_size,
             crate::common::policy_store::archive_handler::ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE,
+            "The shipped default config must carry the bundled archive cap"
         );
         assert_eq!(
             config.http_client_config.max_response_size_bytes,
