@@ -26,6 +26,7 @@ use std::io::{Cursor, Read, Seek};
 #[cfg(not(target_arch = "wasm32"))]
 use std::path::Path;
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicU64, Ordering};
 use zip::ZipArchive;
 
 /// Resource limits bounding what [`ArchiveVfs`] will decompress into memory.
@@ -95,6 +96,11 @@ pub(super) struct ArchiveVfs<T> {
     archive: Mutex<ZipArchive<T>>,
     /// Resource limits enforced at construction and on every `read_file`.
     limits: ArchiveLimits,
+    /// Bytes actually decompressed so far, charged against
+    /// `limits.max_total_size`. The construction-time total can only use
+    /// author-controlled central-directory sizes, so this is where the
+    /// whole-archive guarantee is actually enforced.
+    total_read: AtomicU64,
 }
 
 impl<T> ArchiveVfs<T>
@@ -206,6 +212,7 @@ where
         Ok(Self {
             archive: Mutex::new(archive),
             limits,
+            total_read: AtomicU64::new(0),
         })
     }
 }
@@ -300,6 +307,25 @@ where
         } else {
             path.to_string()
         }
+    }
+
+    /// Charge `len` decompressed bytes against `limits.max_total_size`.
+    /// Rejected reads still count: the bytes were decompressed either way.
+    fn charge_total(&self, len: usize) -> Result<(), std::io::Error> {
+        let max_total = self.limits.max_total_size;
+        if max_total == 0 {
+            return Ok(());
+        }
+
+        let len = len as u64;
+        let previous = self.total_read.fetch_add(len, Ordering::Relaxed);
+        if previous.saturating_add(len) > max_total {
+            return Err(std::io::Error::other(ArchiveError::ArchiveSizeExceeded {
+                limit: max_total,
+            }));
+        }
+
+        Ok(())
     }
 
     /// Check if a path exists in the archive (file or directory).
@@ -412,20 +438,21 @@ where
 
         if max_entry_size == 0 {
             file.read_to_end(&mut contents)?;
-            return Ok(contents);
+        } else {
+            // One byte past the cap is enough to detect a central directory that
+            // understated this entry and slipped past the check in `from_reader`.
+            file.take(max_entry_size.saturating_add(1))
+                .read_to_end(&mut contents)?;
+
+            if contents.len() as u64 > max_entry_size {
+                return Err(std::io::Error::other(ArchiveError::EntrySizeExceeded {
+                    path: path.to_string(),
+                    limit: max_entry_size,
+                }));
+            }
         }
 
-        // One byte past the cap is enough to detect a central directory that
-        // understated this entry and slipped past the check in `from_reader`.
-        file.take(max_entry_size.saturating_add(1))
-            .read_to_end(&mut contents)?;
-
-        if contents.len() as u64 > max_entry_size {
-            return Err(std::io::Error::other(ArchiveError::EntrySizeExceeded {
-                path: path.to_string(),
-                limit: max_entry_size,
-            }));
-        }
+        self.charge_total(contents.len())?;
 
         Ok(contents)
     }
@@ -908,6 +935,65 @@ mod limit_tests {
         let vfs = ArchiveVfs::from_buffer(bytes, limits)
             .expect("Size caps must be disabled when the limit is 0");
         assert_eq!(vfs.read_file("metadata.json").unwrap().len(), 64 * 1024);
+    }
+
+    /// Overwrite every little-endian `u32` occurrence of `from` with `to`,
+    /// which rewrites an entry's size in both the local header and the central
+    /// directory. Returns how many fields were patched.
+    fn patch_declared_size(bytes: &mut [u8], from: u32, to: u32) -> usize {
+        let (from, to) = (from.to_le_bytes(), to.to_le_bytes());
+        let mut patched = 0;
+        for i in 0..bytes.len().saturating_sub(4) {
+            if bytes[i..i + 4] == from {
+                bytes[i..i + 4].copy_from_slice(&to);
+                patched += 1;
+            }
+        }
+        patched
+    }
+
+    #[test]
+    fn test_total_size_is_enforced_against_bytes_actually_read() {
+        // Understating every entry lets the archive past the construction-time
+        // total, which can only see declared sizes. Each entry still fits under
+        // the per-entry cap, so only the running total of real decompressed
+        // bytes catches it.
+        let entry = small_limit_bytes();
+        let mut bytes = create_archive_with_sizes(vec![("a.json", entry), ("b.json", entry)]);
+        let patched = patch_declared_size(
+            &mut bytes,
+            u32::try_from(entry).expect("entry size fits in u32"),
+            1,
+        );
+        assert!(
+            patched >= 4,
+            "expected to patch 4 size fields, patched {patched}"
+        );
+
+        let limits = ArchiveLimits {
+            max_entry_size: SMALL_LIMIT,
+            max_total_size: SMALL_LIMIT + 1000,
+            max_entries: 100,
+        };
+        let vfs = ArchiveVfs::from_buffer(bytes, limits)
+            .expect("understated sizes must pass the construction-time total");
+
+        assert_eq!(
+            vfs.read_file("a.json").expect("first entry fits").len(),
+            entry
+        );
+
+        let err = vfs
+            .read_file("b.json")
+            .expect_err("the second entry must push the running total past the cap");
+        let source = err
+            .get_ref()
+            .and_then(|e| e.downcast_ref::<ArchiveError>())
+            .expect("io::Error must carry the typed ArchiveError");
+        assert!(
+            matches!(source, ArchiveError::ArchiveSizeExceeded { .. }),
+            "Expected ArchiveSizeExceeded, got: {source:?}"
+        );
     }
 
     #[test]

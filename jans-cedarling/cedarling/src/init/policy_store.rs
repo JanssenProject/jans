@@ -662,10 +662,13 @@ mod test {
             policy_store_local_fn: Some("../test_files/policy-store_generated.json".to_string()),
             ..Default::default()
         };
-        let err = BootstrapConfig::from_raw_config(&raw)
-            .expect_err("legacy JSON file must be rejected");
+        let err =
+            BootstrapConfig::from_raw_config(&raw).expect_err("legacy JSON file must be rejected");
         assert!(
-            matches!(err, crate::BootstrapConfigLoadingError::LegacyJsonNotSupported),
+            matches!(
+                err,
+                crate::BootstrapConfigLoadingError::LegacyJsonNotSupported
+            ),
             "expected LegacyJsonNotSupported, got {err:?}"
         );
     }
@@ -680,7 +683,10 @@ mod test {
         let err = BootstrapConfig::from_raw_config(&raw)
             .expect_err("legacy JSON inline must be rejected");
         assert!(
-            matches!(err, crate::BootstrapConfigLoadingError::LegacyJsonNotSupported),
+            matches!(
+                err,
+                crate::BootstrapConfigLoadingError::LegacyJsonNotSupported
+            ),
             "expected LegacyJsonNotSupported, got {err:?}"
         );
     }

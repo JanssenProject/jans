@@ -881,6 +881,32 @@ mod tests {
     }
 
     #[test]
+    fn test_policy_store_max_file_size_rejects_invalid_values() {
+        // `0` is the documented disable sentinel and stays valid; anything that
+        // isn't a non-negative integer must fail the bootstrap rather than
+        // silently fall back to the default cap.
+        with_env_vars(&[("CEDARLING_POLICY_STORE_MAX_FILE_SIZE", "0")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None)
+                .expect("0 is the disable sentinel and must be accepted");
+            assert_eq!(
+                config.policy_store_max_file_size, 0,
+                "0 must be preserved rather than replaced by the default"
+            );
+        });
+
+        for invalid in ["-1", "not-a-number"] {
+            with_env_vars(&[("CEDARLING_POLICY_STORE_MAX_FILE_SIZE", invalid)], || {
+                let err = BootstrapConfigRaw::from_raw_config_and_env(None)
+                    .expect_err("a non-u64 max file size must be rejected");
+                assert!(
+                    matches!(err, BootstrapConfigLoadingError::DecodingJSON(_)),
+                    "expected a decoding error for input {invalid:?}, got {err:?}"
+                );
+            });
+        }
+    }
+
+    #[test]
     fn test_jwks_refresh_interval_from_env_var() {
         with_env_vars(
             &[
