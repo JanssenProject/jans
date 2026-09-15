@@ -4737,7 +4737,6 @@ paths:
                 - software_roles
                 - grant_types
                 - one_time_use
-                - rotate_ssa
               type: object
               properties:
                 org_id:
