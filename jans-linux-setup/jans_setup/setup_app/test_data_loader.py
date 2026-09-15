@@ -82,13 +82,21 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         if Config.rdbm_type == 'pgsql':
             ssl_public_cert_path = Config.postgresql_ca_crt_fn
             target = os.path.join(output_dir, 'postgresql.crt')
+            self.copyFile(ssl_public_cert_path, target)
         else:
             _, data_dir = self.dbUtils.exec_raw_sql_cmd("SHOW VARIABLES LIKE 'datadir'")
-            _, ssl_public_cert_fn = self.dbUtils.exec_raw_sql_cmd("SHOW VARIABLES LIKE 'ssl_cert'")
-            ssl_public_cert_path = os.path.join(data_dir, ssl_public_cert_fn)
-            target = os.path.join(output_dir, 'mysql.crt')
+            _, ssl_ca_fn = self.dbUtils.exec_raw_sql_cmd("SHOW VARIABLES LIKE 'ssl_ca'")
+            ssl_ca_fn_path = os.path.join(data_dir, ssl_ca_fn)
+            self.run([Config.cmd_keytool,
+                '-importcert',
+                '-noprompt',
+                '-alias', 'mysql-ca',
+                '-file', ssl_ca_fn_path,
+                '-keystore', os.path.join(output_dir, 'mysql.p12'),
+                '-storetype', 'PKCS12',
+                '-storepass', 'changeit'
+                  ])
 
-        self.copyFile(ssl_public_cert_path, target)
 
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
