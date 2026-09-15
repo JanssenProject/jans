@@ -296,6 +296,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         Config.pbar.progress(self.service_name, "Restarting Services", False)
 
+        # copy postgresql cert file to output directory
+        self.copyFile(Config.postgresql_ca_crt_fn, os.path.join(Config.output_dir, 'test/jans-orm/conf'))
+
         # Disable token binding module
         if base.os_name in ('ubuntu18', 'ubuntu20'):
             self.run(['a2dismod', 'mod_token_binding'])
