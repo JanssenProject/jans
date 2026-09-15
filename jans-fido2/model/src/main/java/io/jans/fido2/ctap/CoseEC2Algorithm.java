@@ -12,8 +12,10 @@ import java.util.Map;
 public enum CoseEC2Algorithm {
 
     ES256(-7), // ECDSA w/ SHA-256
+    ESP256(-9), // ECDSA using P-256 curve w/ SHA-256 (fully specified)
     ES384(-35), // ECDSA w/ SHA-384
     ES512(-36), // ECDSA w/ SHA-512
+    ESP384(-51), // ECDSA using P-384 curve w/ SHA-384 (fully specified)
     ECDH_ES_HKDF_256(-25);
 
     private static final Map<Integer, CoseEC2Algorithm> ALGORITHM_MAPPINGS = new HashMap<>();

@@ -83,7 +83,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/templates/jans-config-api \
     /opt/jans/bin
 
-ARG JANS_SOURCE_VERSION=0ec865687513582fc63980c40c6cc980295182d3
+ARG JANS_SOURCE_VERSION=1f9dcae94e09bc6a672f02685fe01397035292e8
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources

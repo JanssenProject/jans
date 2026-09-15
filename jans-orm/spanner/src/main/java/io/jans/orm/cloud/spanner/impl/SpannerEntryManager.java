@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,6 +204,9 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
 
                 escapeValues(realValues);
 
+                // Spanner ORM not supports native binary type yet. Convert binary values to base64 strings
+                realValues = convertBinaryValuesToBase64(realValues);
+
                 AttributeData resultAttributeData;
                 if (Boolean.TRUE.equals(multiValued)) {
                 	resultAttributeData = new AttributeData(toInternalAttribute(attributeName), realValues, multiValued);
@@ -261,10 +265,8 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
                     modification = createModification(attribute, modificationType, toInternalAttribute(attributeName), multiValued, attributeValues, oldAttributeValues);
                 } else {
                     if ((AttributeModificationType.REMOVE == modificationType)) {
-                		if ((attribute == null) && isEmptyAttributeValues(oldAttribute)) {
-							// It's RDBS case. We don't need to set null to already empty table cell
-                			continue;
-                		}
+                		// REMOVE for already empty table cells not reaches this method. For entities with
+                		// forceUpdate DB state is unknown, hence REMOVE should set null to table cell
                         modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(oldAttributeName), multiValued, oldAttributeValues, null);
                     } else if ((AttributeModificationType.REPLACE == modificationType)) {
                         modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(attributeName), multiValued, attributeValues, oldAttributeValues);
@@ -732,7 +734,10 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
         }
 
         escapeValues(realValues);
-        
+
+        // Spanner ORM not supports native binary type yet. Convert binary values to base64 strings
+        realValues = convertBinaryValuesToBase64(realValues);
+
         if (AttributeModificationType.REPLACE == type) {
             escapeValues(oldAttributeValues);
         	return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues, multiValued),
@@ -741,6 +746,25 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
         	return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues, multiValued));
         }
     }
+
+    private Object[] convertBinaryValuesToBase64(Object[] realValues) {
+		if (realValues == null) {
+			// Return empty array to avoid NPE in callers code
+			return new Object[0];
+		}
+
+		Object[] resultValues = realValues;
+		for (int i = 0; i < realValues.length; i++) {
+			if (realValues[i] instanceof byte[]) {
+				if (resultValues == realValues) {
+					resultValues = java.util.Arrays.copyOf(realValues, realValues.length);
+				}
+				resultValues[i] = Base64.encodeBase64String((byte[]) realValues[i]);
+			}
+		}
+
+		return resultValues;
+	}
 
     protected Sort buildSort(String sortBy, SortOrder sortOrder) {
     	Sort requestedSort = null;

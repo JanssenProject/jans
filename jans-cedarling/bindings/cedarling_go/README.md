@@ -142,7 +142,7 @@ config := map[string]any{
     "CEDARLING_APPLICATION_NAME":     "MyApp",
     "CEDARLING_LOG_LEVEL":            "INFO",
     "CEDARLING_LOG_TYPE":             "std_out",
-    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
 }
 
 instance, err := cedarling_go.NewCedarling(config)
@@ -387,11 +387,6 @@ Cedarling supports multiple ways to load policy stores. See [Policy Store Format
 **Example configurations:**
 
 ```go
-// From a local JSON file
-config := map[string]any{
-    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
-}
-
 // From a directory with human-readable Cedar files
 config := map[string]any{
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store/",
@@ -413,7 +408,7 @@ config := map[string]any{
 
 // From Lock Server
 config := map[string]any{
-    "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store",
+    "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store.cjar",
 }
 ```
 
@@ -428,7 +423,7 @@ config := map[string]any{
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
     "CEDARLING_LOG_TYPE":             "std_out",
     "CEDARLING_LOG_LEVEL":            "DEBUG",
-    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/test-policy-store.json",
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/test-policy-store.yaml",
 }
 ```
 

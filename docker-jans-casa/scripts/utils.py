@@ -1,19 +1,6 @@
-from datetime import datetime
-from datetime import UTC
 from hashlib import md5
 
 from jans.pycloudlib.utils import exec_cmd
-
-
-def utcnow():
-    return datetime.now(UTC)
-
-
-def generalized_time_utc(dtime=None):
-    """Calculate LDAP generalized time."""
-    if not dtime:
-        dtime = utcnow()
-    return dtime.strftime("%Y%m%d%H%M%SZ")
 
 
 def get_ads_project_base64(path):

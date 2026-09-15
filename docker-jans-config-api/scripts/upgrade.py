@@ -8,6 +8,7 @@ from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import utcnow
 
 from plugins import discover_plugins
 from settings import LOGGING_CONFIG
@@ -16,7 +17,7 @@ from utils import AUI_AGAMA_PW_ARCHIVE
 from utils import AUI_AGAMA_PW_DEPLOYMENT_ID
 from utils import get_ads_project_base64
 from utils import get_ads_project_md5sum
-from utils import utcnow
+from utils import URLModifier
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-config-api")
@@ -287,6 +288,23 @@ class Upgrade:
             entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
 
         conf, should_update = _transform_api_dynamic_config(entry.attrs["jansConfDyn"])
+
+        injected_urls = URLModifier(self.backend.client).get_injected_urls()
+
+        # config-api to auth URL mapping
+        url_mapping = {
+            "authIssuerUrl": "issuer",
+            "authOpenidConfigurationUrl": "openIdConfigurationEndpoint",
+            "authOpenidIntrospectionUrl": "introspectionEndpoint",
+            "authOpenidTokenUrl": "tokenEndpoint",
+        }
+
+        for config_api_attr, auth_attr in url_mapping.items():
+            if auth_attr not in injected_urls:
+                continue
+            if conf.get(config_api_attr) != injected_urls[auth_attr]:
+                conf[config_api_attr] = injected_urls[auth_attr]
+                should_update = True
 
         if should_update:
             entry.attrs["jansConfDyn"] = json.dumps(conf)
