@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.mgt.filters;
 
+import io.jans.configapi.core.filter.BaseFilter;
 import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.util.*;
 import jakarta.annotation.Priority;
@@ -12,7 +13,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 
@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 
 @Provider
 @Priority(Priorities.AUTHORIZATION)
-public class UserResourceFilter implements ContainerRequestFilter {
+public class UserResourceFilter extends BaseFilter {
 
     private static final String AUTHENTICATION_SCHEME = "Bearer";
 
@@ -58,28 +58,21 @@ public class UserResourceFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.info("========================================================================");
-            log.info("Inside UserResourceFilter filter...");
-            log.info("========================================================================");
+            log.info("======================== Inside UserResourceFilter filter... ========================");
 
             // Verify current UserRolePermission
             validateUserRolePermission(resourceInfo, httpHeaders);
 
-        } catch(WebApplicationException wae) {
-            log.error("UserResourceFilter - bad request {} {}: {} {}", requestContext.getMethod(),
-                    info.getPath(), wae.getMessage(), wae.getResponse().getStatus());
-            abortWithUnauthorized(requestContext, wae.getResponse().getStatusInfo().toEnum(), wae.getMessage());
-        }
-        catch (Exception ex) {
+        }catch (Exception ex) {
+            Response.Status status = Response.Status.UNAUTHORIZED;
+            if(ex instanceof WebApplicationException) {
+                status = ((WebApplicationException)ex).getResponse().getStatusInfo().toEnum();
+            }
+
             log.error("UserResourceFilter - authorization failed for {} {}: {}", requestContext.getMethod(),
                     info.getPath(), ex.getMessage(), ex);
-            abortWithUnauthorized(requestContext,Response.Status.UNAUTHORIZED, ex.getMessage());
-        }
-    }
-
-    private void abortWithUnauthorized(ContainerRequestContext requestContext, Response.Status status, String errMsg) {
-        requestContext.abortWith(Response.status(status).entity(errMsg)
-                .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
+            abortWithUnauthorized(requestContext, status, ex.getMessage());
+        }        
     }
 
     private void validateUserRolePermission(ResourceInfo resourceInfo, HttpHeaders httpHeaders) {
@@ -97,24 +90,24 @@ public class UserResourceFilter implements ContainerRequestFilter {
 
         //Fetch current UserRolePermission of user using `User-inum` in httpHeaders
         Set<String> userCurrentScopes = authUtil.getUserRolePermission(httpHeaders);
-        log.info("userCurrentScopes:{}", userCurrentScopes);
+        log.debug("userCurrentScopes:{}", userCurrentScopes);
 
         // Find missing permission viz-a-viz scopes as defined in resourceInfo
         Map<ProtectionScopeType, List<String>> resourceScopesByType = authUtil.getResourceScopesByType(resourceInfo);
-        log.info("resourceScopesByType:{}", resourceScopesByType);
+        log.debug("resourceScopesByType:{}", resourceScopesByType);
         if (resourceScopesByType == null || resourceScopesByType.isEmpty()) {
             return;
         }
 
         List<String> resourceScopes = authUtil.getAllScopeList(resourceScopesByType);
-        log.info("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
+        log.debug("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
 
         //For any missing scopes throw unauthorized error
         List<String> safeList = new ArrayList<>(userCurrentScopes);
         List<String> missingScopes = authUtil.findMissingScopes(resourceScopesByType, safeList);
         log.info("missingScopes:{}", missingScopes);
         if (missingScopes != null && !missingScopes.isEmpty()) {
-            log.info("Insufficient scopes!!! for new token as well - Required scope:{}, userCurrentScopes:{}",
+            log.error("Insufficient scopes!!! for new token as well - Required scope:{}, userCurrentScopes:{}",
                     resourceScopes, userCurrentScopes);
             throw new WebApplicationException(
                     "Insufficient scopes!!! Required scope: " + resourceScopes + ", token scopes: " + missingScopes,
