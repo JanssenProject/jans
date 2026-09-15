@@ -4773,12 +4773,12 @@ paths:
                     - client_credentials
                 one_time_use:
                   type: boolean
-                  description: Defined whether the SSA will be used only once or can be used multiple times.
+                  description: Defined whether the SSA will be used only once or can be used multiple times. Cannot be `true` at the same time as `rotate_ssa`.
                   default: true
                 rotate_ssa:
                   type: boolean
-                  description: TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.
-                  default: true
+                  description: TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. Cannot be `true` at the same time as `one_time_use`.
+                  default: false
                 lifetime:
                   type: integer
                   description: SSA lifetime in seconds.

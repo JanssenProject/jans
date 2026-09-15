@@ -98,8 +98,12 @@ If `expiration` is not set take expiration from `ssaConfiguration.ssaExpirationI
 | grant_types    | Fixed value Fixed value `["client_credentials"]`.                                                                        | false    |
 | expiration     | Expiration date. `(Default value: calculated based on global SSA settings)`                                              | false     |
 | one_time_use   | Defined whether the SSA will be used only once or can be used multiple times. `(Default value: true)`                    | false     |
-| rotate_ssa     | TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. `(Default value: true)` | false     |
+| rotate_ssa     | TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. `(Default value: false)` | false     |
 | lifetime       | SSA Lifetime in seconds. If not set calculates lifetime, `lifetime = expiration - now`                                   | false     |
+
+**Note:** `one_time_use` and `rotate_ssa` cannot both be `true` in the same request. Since a one-time-use SSA is
+consumed on its first use, rotating it does not apply, and the request is rejected with `400` (`invalid_ssa_metadata`)
+if both are set to `true`.
 
 **Note:** You can add more `custom attributes` in the request, (you must have previously configured in the SSA global
 configuration).
