@@ -3453,8 +3453,8 @@ If <code>expiration</code> is not set take expiration from <code>ssaConfiguratio
 </tr>
 <tr>
 <td>rotate_ssa</td>
-<td>TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. <code>(Default value: true)</code></td>
-<td>false</td>
+<td>TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. <code>(Default value: false)</code></td>
+<td>true</td>
 </tr>
 <tr>
 <td>lifetime</td>
@@ -3463,6 +3463,9 @@ If <code>expiration</code> is not set take expiration from <code>ssaConfiguratio
 </tr>
 </tbody>
 </table>
+<p><strong>Note:</strong> <code>one_time_use</code> and <code>rotate_ssa</code> cannot both be <code>true</code> in the same request. Since a one-time-use SSA is
+consumed on its first use, rotating it does not apply, and the request is rejected with <code>400</code> (<code>invalid_ssa_metadata</code>)
+if both are set to <code>true</code>.</p>
 <p><strong>Note:</strong> You can add more <code>custom attributes</code> in the request, (you must have previously configured in the SSA global
 configuration).
 It should be clarified that these values are persisted in the database and are not returned in the SSA JWT.</p>
@@ -3887,7 +3890,7 @@ Connection: Keep-Alive
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    April 08, 2026
+    September 15, 2026
   </span>
 
     
