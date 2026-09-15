@@ -97,8 +97,13 @@ impl BootstrapConfig {
             retry_delay: Duration::from_secs(raw.http_client_request_retry_delay),
             #[cfg(not(target_arch = "wasm32"))]
             request_timeout: Duration::from_secs(raw.http_client_request_timeout),
-            // `0` is the documented "no cap" sentinel.
-            max_response_size_bytes: match raw.http_client_max_response_size_bytes {
+            // Unset falls back to the policy-store entry cap, so a download is
+            // never larger than the largest archive entry we would decompress.
+            // `0` is the documented "no cap" sentinel for either property.
+            max_response_size_bytes: match raw
+                .http_client_max_response_size_bytes
+                .unwrap_or(raw.policy_store_max_file_size)
+            {
                 0 => None,
                 n => Some(n),
             },
@@ -145,17 +150,20 @@ fn build_policy_store_config(
             Ok(PolicyStoreConfig {
                 source: PolicyStoreSource::Yaml(policy_store),
                 refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+                max_file_size: raw.policy_store_max_file_size,
             })
-        }
+        },
         // Case: get the policy store from a URI
         (None, Some(policy_store_uri), None, None) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::Uri(policy_store_uri),
             refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+            max_file_size: raw.policy_store_max_file_size,
         }),
         // Case: get the policy store from a CjarUrl
         (None, None, None, Some(policy_store_cjar_url)) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::CjarUrl(policy_store_cjar_url),
             refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+            max_file_size: raw.policy_store_max_file_size,
         }),
         // Case: get the policy store from a local file or directory
         (None, None, Some(raw_path), None) => {
@@ -168,7 +176,9 @@ fn build_policy_store_config(
                     .and_then(|ext| ext.to_str())
                     .map(str::to_lowercase);
                 match file_ext.as_deref() {
-                    Some("json") => return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported),
+                    Some("json") => {
+                        return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported);
+                    },
                     Some("yaml" | "yml") => PolicyStoreSource::FileYaml(path.into()),
                     Some("cjar") => PolicyStoreSource::CjarFile(path.into()),
                     _ => {
@@ -181,6 +191,7 @@ fn build_policy_store_config(
             Ok(PolicyStoreConfig {
                 source,
                 refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+                max_file_size: raw.policy_store_max_file_size,
             })
         },
         // Case: multiple policy stores were set
@@ -247,6 +258,151 @@ fn resolve_log_type(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
+
+    /// Minimal config body; a policy store source is required, and the inline
+    /// YAML source keeps these tests off the filesystem and network. Inline
+    /// JSON is rejected as a legacy policy store, so the value must be YAML.
+    fn raw_config_json(extra: &str) -> String {
+        format!(
+            r#"{{
+                "CEDARLING_APPLICATION_NAME": "test",
+                "CEDARLING_POLICY_STORE_LOCAL": "cedar_version: v4.0.0\npolicy_stores: {{}}"
+                {extra}
+            }}"#
+        )
+    }
+
+    fn decode(extra: &str) -> BootstrapConfig {
+        let raw: BootstrapConfigRaw = serde_json::from_str(&raw_config_json(extra))
+            .expect("raw bootstrap config should deserialize");
+        BootstrapConfig::try_from(raw).expect("raw config should decode")
+    }
+
+    #[test]
+    fn unset_http_cap_falls_back_to_policy_store_max_file_size() {
+        let config = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 4096"#);
+
+        assert_eq!(
+            config.http_client_config.max_response_size_bytes,
+            Some(4096),
+            "An unset HTTP cap must inherit the policy store cap, so a download \
+             is never larger than the largest entry we would decompress"
+        );
+        assert_eq!(
+            config.policy_store_config.max_file_size, 4096,
+            "The policy store cap itself must carry the configured value"
+        );
+    }
+
+    #[test]
+    fn unset_http_cap_falls_back_to_the_default_when_neither_is_set() {
+        let config = decode("");
+
+        assert_eq!(
+            config.http_client_config.max_response_size_bytes,
+            Some(ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE),
+            "With neither property set both should land on the 10 MB default"
+        );
+        assert_eq!(
+            config.policy_store_config.max_file_size,
+            ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE
+        );
+    }
+
+    #[test]
+    fn explicit_http_cap_wins_over_policy_store_max_file_size() {
+        let config = decode(
+            r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 4096,
+                "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES": 8192"#,
+        );
+
+        assert_eq!(
+            config.http_client_config.max_response_size_bytes,
+            Some(8192),
+            "An explicitly set HTTP cap must not be overridden by the fallback"
+        );
+        assert_eq!(
+            config.policy_store_config.max_file_size, 4096,
+            "An explicit HTTP cap must not disturb the policy store cap"
+        );
+    }
+
+    #[test]
+    fn zero_disables_each_cap_independently() {
+        let explicit_zero = decode(
+            r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 4096,
+                "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES": 0"#,
+        );
+        assert_eq!(
+            explicit_zero.http_client_config.max_response_size_bytes, None,
+            "An explicit 0 must disable the HTTP cap, not inherit 4096"
+        );
+        assert_eq!(
+            explicit_zero.policy_store_config.max_file_size, 4096,
+            "Disabling the HTTP cap must leave the policy store cap enforced"
+        );
+
+        let inherited_zero = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 0"#);
+        assert_eq!(
+            inherited_zero.http_client_config.max_response_size_bytes, None,
+            "A 0 policy store cap must carry through the fallback as no cap"
+        );
+    }
+
+    #[test]
+    fn max_file_size_is_honored_from_json_and_yaml() {
+        // Env is covered by the `raw_config` tests; these two are the remaining
+        // documented input formats.
+        let from_json = BootstrapConfig::load_from_json(&raw_config_json(
+            r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 512"#,
+        ))
+        .expect("JSON bootstrap config should load");
+        assert_eq!(
+            from_json.policy_store_config.max_file_size, 512,
+            "The policy store cap must be honored from JSON"
+        );
+        assert_eq!(
+            from_json.http_client_config.max_response_size_bytes,
+            Some(512),
+            "The JSON-supplied cap must propagate to the HTTP cap"
+        );
+
+        let yaml = concat!(
+            "CEDARLING_APPLICATION_NAME: test\n",
+            "CEDARLING_POLICY_STORE_LOCAL: 'cedar_version: v4.0.0'\n",
+            "CEDARLING_POLICY_STORE_MAX_FILE_SIZE: 512\n",
+        );
+        let raw: BootstrapConfigRaw =
+            serde_yaml_ng::from_str(yaml).expect("YAML bootstrap config should deserialize");
+        let from_yaml = BootstrapConfig::try_from(raw).expect("YAML config should decode");
+        assert_eq!(
+            from_yaml.policy_store_config.max_file_size, 512,
+            "The policy store cap must be honored from YAML"
+        );
+        assert_eq!(
+            from_yaml.http_client_config.max_response_size_bytes,
+            Some(512),
+            "The YAML-supplied cap must propagate to the HTTP cap"
+        );
+    }
+
+    #[test]
+    fn max_file_size_is_honored_from_a_string_valued_env_var() {
+        // Env vars always arrive as strings, so the numeric properties go
+        // through `deserialize_or_parse_string_as_json`.
+        let config = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": "4096""#);
+
+        assert_eq!(
+            config.policy_store_config.max_file_size, 4096,
+            "A string-valued cap must parse to the same number"
+        );
+        assert_eq!(
+            config.http_client_config.max_response_size_bytes,
+            Some(4096),
+            "The string-parsed cap must propagate to the HTTP cap"
+        );
+    }
 
     #[test]
     fn test_reject_legacy_json_inline() {
@@ -261,8 +417,7 @@ mod tests {
                 local_policy_store: Some(case.to_string()),
                 ..Default::default()
             };
-            let err = build_policy_store_config(&raw)
-                .expect_err("legacy JSON must be rejected");
+            let err = build_policy_store_config(&raw).expect_err("legacy JSON must be rejected");
             assert!(
                 matches!(err, BootstrapConfigLoadingError::LegacyJsonNotSupported),
                 "expected LegacyJsonNotSupported for input: {case}, got {err:?}"
@@ -294,4 +449,3 @@ mod tests {
         }
     }
 }
-
