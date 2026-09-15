@@ -6,6 +6,10 @@
 
 package io.jans.fido2.service.shared;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.service.metric.Fido2MetricsService;
@@ -386,4 +390,147 @@ class MetricServiceTest {
         );
     }
 
+
+    // ---------------------------------------------------------------------------------------------
+    // Trusted proxy validation (#13850)
+    //
+    // The recorded IP comes from headers the caller supplies. These pin which of them are believed,
+    // and under what configuration, so that a client cannot choose the address stored against its own
+    // ceremony.
+    // ---------------------------------------------------------------------------------------------
+
+    private void stubRequest(String remoteAddr, String forwardedFor) {
+        when(httpRequest.getRemoteAddr()).thenReturn(remoteAddr);
+        when(httpRequest.getHeader("X-Forwarded-For")).thenReturn(forwardedFor);
+    }
+
+    @Test
+    void extractIpAddress_whenTrustUnset_keepsLegacyBehaviour() {
+        // Unset is the default, so upgrading must not change what is recorded.
+        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(null);
+        stubRequest("10.1.1.1", "203.0.113.9, 10.0.0.5");
+
+        assertEquals("203.0.113.9", metricService.extractIpAddress(httpRequest));
+    }
+
+    @Test
+    void extractIpAddress_whenTrustDisabled_ignoresHeadersEntirely() {
+        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(Boolean.FALSE);
+        stubRequest("10.1.1.1", "203.0.113.9");
+
+        assertEquals("10.1.1.1", metricService.extractIpAddress(httpRequest));
+    }
+
+    @Test
+    void extractIpAddress_whenTrustEnabledButNoRangesConfigured_ignoresHeaders() {
+        // Enabling the check while trusting nothing must fail closed, not fall back to trusting all.
+        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(Boolean.TRUE);
+        when(appConfiguration.getTrustedProxyIpRanges()).thenReturn(Collections.emptyList());
+        stubRequest("10.1.1.1", "203.0.113.9");
+
+        assertEquals("10.1.1.1", metricService.extractIpAddress(httpRequest));
+    }
+
+    @Test
+    void extractIpAddress_whenCallerIsNotATrustedProxy_ignoresItsHeaders() {
+        // This is the defect: a direct caller spoofing X-Forwarded-For must not be believed.
+        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(Boolean.TRUE);
+        when(appConfiguration.getTrustedProxyIpRanges()).thenReturn(List.of("10.0.0.0/8"));
+        stubRequest("198.51.100.7", "203.0.113.9");
+
+        assertEquals("198.51.100.7", metricService.extractIpAddress(httpRequest));
+    }
+
+    @Test
+    void extractIpAddress_whenCallerIsATrustedProxy_usesTheForwardedAddress() {
+        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(Boolean.TRUE);
+        when(appConfiguration.getTrustedProxyIpRanges()).thenReturn(List.of("10.0.0.0/8"));
+        stubRequest("10.1.1.1", "203.0.113.9");
+
+        assertEquals("203.0.113.9", metricService.extractIpAddress(httpRequest));
+    }
+
+    /**
+     * The chain is read right to left. A client can prepend anything before the real proxy appends, so
+     * the leftmost entry is attacker-controlled and taking it would defeat the whole check.
+     */
+    @Test
+    void extractIpAddress_whenChainIsSpoofedOnTheLeft_takesTheFirstUntrustedHopFromTheRight() {
+        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(Boolean.TRUE);
+        when(appConfiguration.getTrustedProxyIpRanges()).thenReturn(List.of("10.0.0.0/8"));
+        stubRequest("10.1.1.1", "1.2.3.4, 203.0.113.9, 10.0.0.5");
+
+        assertEquals("203.0.113.9", metricService.extractIpAddress(httpRequest));
+    }
+
+    @Test
+    void extractIpAddress_whenEveryHopIsATrustedProxy_fallsBackToTheSocketAddress() {
+        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(Boolean.TRUE);
+        when(appConfiguration.getTrustedProxyIpRanges()).thenReturn(List.of("10.0.0.0/8"));
+        stubRequest("10.1.1.1", "10.0.0.5, 10.0.0.6");
+
+        assertEquals("10.1.1.1", metricService.extractIpAddress(httpRequest));
+    }
+
+    @Test
+    void isIpInCidr_matchesIpv4Ranges() {
+        assertTrue(metricService.isIpInCidr("10.1.2.3", "10.0.0.0/8"));
+        assertTrue(metricService.isIpInCidr("192.168.1.42", "192.168.1.0/24"));
+        assertFalse(metricService.isIpInCidr("11.1.2.3", "10.0.0.0/8"));
+        assertFalse(metricService.isIpInCidr("192.168.2.1", "192.168.1.0/24"));
+    }
+
+    @Test
+    void isIpInCidr_matchesIpv6AndNeverMixesFamilies() {
+        assertTrue(metricService.isIpInCidr("::1", "::1/128"));
+        assertTrue(metricService.isIpInCidr("2001:db8::5", "2001:db8::/32"));
+        assertFalse(metricService.isIpInCidr("2001:db9::5", "2001:db8::/32"));
+        // An IPv4 address cannot fall inside an IPv6 range, or the reverse.
+        assertFalse(metricService.isIpInCidr("10.1.2.3", "2001:db8::/32"));
+        assertFalse(metricService.isIpInCidr("2001:db8::5", "10.0.0.0/8"));
+    }
+
+    /**
+     * A dual-stack JVM can return the IPv4-mapped form from getRemoteAddr(), which must still match an
+     * IPv4 range -- otherwise the proxy stops being recognised depending on how the JVM was started.
+     */
+    @Test
+    void isIpInCidr_matchesIpv4MappedAddressesAgainstIpv4Ranges() {
+        assertTrue(metricService.isIpInCidr("::ffff:10.1.2.3", "10.0.0.0/8"));
+        assertFalse(metricService.isIpInCidr("::ffff:11.1.2.3", "10.0.0.0/8"));
+    }
+
+    @Test
+    void isIpInCidr_withBareAddressUsesAFullMask() {
+        assertTrue(metricService.isIpInCidr("10.1.1.1", "10.1.1.1"));
+        assertFalse(metricService.isIpInCidr("10.1.1.2", "10.1.1.1"));
+    }
+
+    /**
+     * Both sides must be IP literals. InetAddress.getByName resolves a hostname through DNS, and this
+     * runs on the request path for every metrics write, so a mistyped range must be rejected outright
+     * rather than becoming a blocking lookup.
+     */
+    @Test
+    void isIpInCidr_rejectsNonLiteralsRatherThanResolvingThem() {
+        assertFalse(metricService.isIpInCidr("10.1.1.1", "example.com/24"));
+        assertFalse(metricService.isIpInCidr("example.com", "10.0.0.0/8"));
+        assertFalse(metricService.isIpInCidr("10.1.1.1", "not-an-ip"));
+    }
+
+    @Test
+    void isIpInCidr_rejectsOutOfRangePrefixLengths() {
+        assertFalse(metricService.isIpInCidr("10.1.1.1", "10.0.0.0/33"));
+        assertFalse(metricService.isIpInCidr("10.1.1.1", "10.0.0.0/-1"));
+        assertFalse(metricService.isIpInCidr("10.1.1.1", "10.0.0.0/abc"));
+    }
+
+    @Test
+    void isFromTrustedProxy_toleratesMissingAndMalformedConfiguration() {
+        assertFalse(metricService.isFromTrustedProxy("10.1.1.1", null));
+        assertFalse(metricService.isFromTrustedProxy(null, List.of("10.0.0.0/8")));
+        assertFalse(metricService.isFromTrustedProxy("10.1.1.1", Collections.emptyList()));
+        // One unusable entry must not stop a later valid one from matching.
+        assertTrue(metricService.isFromTrustedProxy("10.1.1.1", Arrays.asList("garbage", "10.0.0.0/8")));
+    }
 }
