@@ -65,7 +65,7 @@ db.disable.time-zone=true
 ######### MYSQL PROPERTIES ##############
 
 connection.uri=jdbc:mysql://${rdbm_host}:${rdbm_port}/${rdbm_db}?enabledTLSProtocols=TLSv1.2
-onnection.driver-property.sslMode=VERIFY_CA                                                                                                                                                                                         
+connection.driver-property.sslMode=VERIFY_CA
 connection.driver-property.trustCertificateKeyStoreUrl=file:mysql.p12
 connection.driver-property.trustCertificateKeyStoreType=PKCS12
 connection.driver-property.trustCertificateKeyStorePassword=changeit
