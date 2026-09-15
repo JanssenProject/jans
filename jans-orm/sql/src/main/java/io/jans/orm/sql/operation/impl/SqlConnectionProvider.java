@@ -315,7 +315,7 @@ public class SqlConnectionProvider {
 
 		File resolvedFile = new File(jansBase + File.separator + "conf" + File.separator + path);
 		connectionProperties.setProperty(filePropertyName, "file:" + resolvedFile.getAbsolutePath());
-		System.out.println(connectionProperties);
+		LOG.info("Props: {}", connectionProperties);
 	}
 
 	private void loadTableMetaData(DatabaseMetaData databaseMetaData, Connection con) throws SQLException {
