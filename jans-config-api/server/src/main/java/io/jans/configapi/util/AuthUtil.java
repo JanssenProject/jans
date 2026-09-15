@@ -580,28 +580,6 @@ public class AuthUtil {
         }
     }
 
-    public List<String> validateUserRolePermission(ResourceInfo resourceInfo, HttpHeaders httpHeaders) {
-        List<String> missingScopes = null;
-        Set<String> userCurrentScopes = this.getUserRolePermission(httpHeaders);
-        log.info("userCurrentScopes:{}", userCurrentScopes);
-
-        // find missing scopes
-        Map<ProtectionScopeType, List<String>> resourceScopesByType = getResourceScopesByType(resourceInfo);
-        log.info("resourceScopesByType:{}", resourceScopesByType);
-        if (resourceScopesByType == null || resourceScopesByType.isEmpty()) {
-            return missingScopes;
-        }
-
-        List<String> resourceScopes = getAllScopeList(resourceScopesByType);
-        log.debug("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
-
-        List<String> safeList = new ArrayList<>(userCurrentScopes);
-        missingScopes = findMissingScopes(resourceScopesByType, safeList);
-        log.info("missingScopes:{}", missingScopes);
-
-        return missingScopes;
-    }
-
     public List<String> findMissingScopes(Map<ProtectionScopeType, List<String>> scopeMap, List<String> tokenScopes) {
         log.info("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
         List<String> scopeList = new ArrayList<>();

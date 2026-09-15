@@ -28,8 +28,6 @@ import org.slf4j.Logger;
 @Priority(Priorities.AUTHORIZATION)
 public class UserResourceFilter extends BaseFilter {
 
-    private static final String AUTHENTICATION_SCHEME = "Bearer";
-
     @Inject
     Logger log;
 
