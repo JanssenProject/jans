@@ -24,6 +24,8 @@ import io.jans.service.EncryptionService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,6 +52,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ResourceInfo;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -100,12 +103,96 @@ public class AuthUtil {
         return this.configurationService.find().getIssuer();
     }
 
+    /**
+     * Resolves an endpoint that config-api calls itself.
+     *
+     * <p>
+     * When endpoint injection is enabled the injected URL is preferred, so that
+     * config-api reaches the auth server over the address it was configured
+     * with instead of the externally published one. Deployments where both run
+     * in the same container or pod can then keep the call internal. Falls back
+     * to the auth server configuration when injection is disabled or the
+     * injected value is not set.
+     * </p>
+     *
+     * @param injectedUrl  endpoint injected into the config-api configuration
+     * @param publishedUrl endpoint published by the auth server
+     * @return the endpoint to call
+     */
+    private String resolveEndpoint(String injectedUrl, String publishedUrl) {
+        if (this.configurationFactory.getApiAppConfiguration().isEndpointInjectionEnabled()
+                && StringUtils.isNotBlank(injectedUrl)) {
+            log.debug("Using injected endpoint:{} instead of published endpoint:{}", injectedUrl, publishedUrl);
+            return injectedUrl;
+        }
+        return publishedUrl;
+    }
+
+    /**
+     * Rebases a URL published by the auth server onto the injected auth server
+     * address.
+     *
+     * <p>
+     * Used for endpoints that have no injected counterpart of their own. The
+     * path, query and fragment of the published URL are preserved and only the
+     * scheme and authority are replaced, which mirrors how the injected
+     * endpoints are derived in the first place. Returns the published URL
+     * unchanged when injection is disabled, when no injected issuer is
+     * configured, or when either value cannot be parsed.
+     * </p>
+     *
+     * @param publishedUrl URL published by the auth server
+     * @return the URL to call
+     */
+    public String resolveAuthServerUrl(String publishedUrl) {
+        String injectedIssuer = this.configurationFactory.getApiAppConfiguration().getAuthIssuerUrl();
+        if (!this.configurationFactory.getApiAppConfiguration().isEndpointInjectionEnabled()
+                || StringUtils.isBlank(injectedIssuer) || StringUtils.isBlank(publishedUrl)) {
+            return publishedUrl;
+        }
+
+        try {
+            URI published = new URI(publishedUrl);
+            URI injected = new URI(injectedIssuer);
+
+            if (StringUtils.isBlank(injected.getScheme()) || StringUtils.isBlank(injected.getRawAuthority())) {
+                log.warn("Injected issuer:{} is not an absolute url, using published url:{}", injectedIssuer,
+                        publishedUrl);
+                return publishedUrl;
+            }
+
+            // Raw components are copied verbatim so that encoded delimiters in
+            // the published url keep their meaning.
+            StringBuilder resolved = new StringBuilder(injected.getScheme()).append("://")
+                    .append(injected.getRawAuthority());
+            if (StringUtils.isNotEmpty(published.getRawPath())) {
+                resolved.append(published.getRawPath());
+            }
+            if (published.getRawQuery() != null) {
+                resolved.append('?').append(published.getRawQuery());
+            }
+            if (published.getRawFragment() != null) {
+                resolved.append('#').append(published.getRawFragment());
+            }
+
+            log.debug("Rebased published url:{} onto injected issuer:{} as:{}", publishedUrl, injectedIssuer,
+                    resolved);
+            return resolved.toString();
+        } catch (URISyntaxException ex) {
+            log.warn("Could not rebase published url:{} onto injected issuer:{}, using published url", publishedUrl,
+                    injectedIssuer, ex);
+            return publishedUrl;
+        }
+    }
+
     public String getIntrospectionEndpoint() {
-        return configurationService.find().getIntrospectionEndpoint();
+        return resolveEndpoint(this.configurationFactory.getApiAppConfiguration().getAuthOpenidIntrospectionUrl(),
+                configurationService.find().getIntrospectionEndpoint());
     }
 
     public String getTokenEndpoint() {
-        return configurationService.find().getTokenEndpoint();
+        return resolveEndpoint(this.configurationFactory.getApiAppConfiguration().getAuthOpenidTokenUrl(),
+                configurationService.find().getTokenEndpoint());
     }
 
     public String getEndSessionEndpoint() {
@@ -138,7 +225,8 @@ public class AuthUtil {
     }
 
     public String getTokenUrl() {
-        return this.configurationService.find().getTokenEndpoint();
+        return resolveEndpoint(this.configurationFactory.getApiAppConfiguration().getAuthOpenidTokenUrl(),
+                this.configurationService.find().getTokenEndpoint());
     }
 
     public String getTokenRevocationEndpoint() {

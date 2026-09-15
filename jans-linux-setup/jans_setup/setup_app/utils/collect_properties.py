@@ -75,6 +75,11 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if dbUtils.local_session:
             dbUtils.rdm_automapper()
 
+        if Config.rdbm_type == 'pgsql':
+            sql_query_result = dbUtils.exec_raw_sql_cmd("SHOW ssl_cert_file")
+            if sql_query_result:
+                Config.postgresql_ca_crt_fn = sql_query_result[0]
+
         # find admin inum
         admin_prop = dbUtils.search('ou=people,o=jans', search_filter='(&(uid=admin)(objectClass=jansPerson))', search_scope=SearchScopes.SUBTREE)
         if admin_prop and 'inum' in admin_prop:

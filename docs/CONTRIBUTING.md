@@ -221,7 +221,7 @@ Janssen Project documentation uses Markdown. Guidelines below are intended to br
 
 !!! Testing
 
-    [Janssen Project documentation site](https://docs.jans.io) is published using MkDocs. Markdown parsers used by GitHub and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between GitHub and [Janssen Project documentation site](https://docs.jans.io). Hence it is critical to [test documentation](contribute/testing.md#contributing-to-the-documentation) changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.
+    [Janssen Project documentation site](https://docs.jans.io) is published using Zensical. Markdown parsers used by GitHub and the one used by Zensical may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between GitHub and [Janssen Project documentation site](https://docs.jans.io). Hence it is critical to [test documentation](contribute/testing.md#contributing-to-the-documentation) changes locally before pushing to repository. This will ensure that final HTML rendering of documents by Zensical is as desired.
 
 #### Document Title
 
@@ -237,7 +237,7 @@ The document title summarises what the document aims to achieve and at the same 
 
 #### Document Tags
 
-Janssen Project documentation uses [tags](https://squidfunk.github.io/mkdocs-material/setup/setting-up-tags/#adding-tags) to make the search more accurate and add context to search results. Following are guidelines and examples to follow while adding tags to a document.
+Janssen Project documentation uses [tags](https://zensical.org/docs/setup/tags/#add-tags) to make the search more accurate and add context to search results. Following are guidelines and examples to follow while adding tags to a document.
 
 * Maximum 6 tags
 * First three should establish the context of the section hierarchy under which the document belongs. See the example below.
