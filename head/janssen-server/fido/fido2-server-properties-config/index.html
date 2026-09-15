@@ -1027,6 +1027,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="FIDO2 Server Configuration Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#client-ip-in-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Client IP in metrics
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1942,6 +1959,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="FIDO2 Server Configuration Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#client-ip-in-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Client IP in metrics
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2302,12 +2336,64 @@
 <td style="text-align: left;">Whether passkey operation durations are tracked for performance analytics.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>trustedProxyEnabled</code></td>
+<td style="text-align: left;"><code>true</code>, <code>false</code>, or unset</td>
+<td style="text-align: left;">Whether forwarded proxy headers may be trusted when recording the client IP on a metrics entry. Unset keeps the legacy behaviour of trusting them unconditionally; <code>false</code> never reads them; <code>true</code> trusts them only from the addresses in <code>trustedProxyIpRanges</code>. See <a href="#client-ip-in-metrics">Client IP in metrics</a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>trustedProxyIpRanges</code></td>
+<td style="text-align: left;"><code>["10.0.0.0/8", "192.168.1.0/24"]</code></td>
+<td style="text-align: left;">Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation. Only consulted when <code>trustedProxyEnabled</code> is <code>true</code>; an empty list trusts nothing.</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>fido2Configuration</code></td>
 <td style="text-align: left;">Object</td>
 <td style="text-align: left;">Nested object containing FIDO2 protocol-specific details (see structure below).</td>
 </tr>
 </tbody>
 </table>
+<h3 id="client-ip-in-metrics">Client IP in metrics<a class="headerlink" href="#client-ip-in-metrics" title="Permanent link">#</a></h3>
+<p>The <code>ipAddress</code> recorded on a passkey metrics entry is taken from forwarded proxy headers
+(<code>X-Forwarded-For</code> and several older equivalents) before falling back to the address the request actually
+came from. Those headers are set by whoever sends the request, so <code>trustedProxyEnabled</code> controls whether
+they are believed:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Value</th>
+<th style="text-align: left;">Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">unset (default)</td>
+<td style="text-align: left;">Headers are trusted unconditionally. Any caller able to reach a FIDO2 endpoint can choose the address recorded against its own ceremony.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>false</code></td>
+<td style="text-align: left;">Headers are ignored; the connecting address is recorded.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">Headers are read only when the connecting address falls inside <code>trustedProxyIpRanges</code>. An empty list trusts nothing.</td>
+</tr>
+</tbody>
+</table>
+<p>The default is unset so that upgrading changes nothing. <strong>Deployments that want the recorded address to be
+trustworthy must set this explicitly.</strong></p>
+<p>When trusted, <code>X-Forwarded-For</code> is read right to left: hops that are themselves listed as trusted proxies
+are skipped, and the first remaining address is recorded. Reading from the right matters because a client
+can prepend any value before the real proxy appends to the chain — so the leftmost entry is only used when
+no closer untrusted hop exists, such as a single-entry header from a trusted proxy.</p>
+<p>Ranges accept IPv4 and IPv6 CIDR notation; a bare address is treated as a full-length mask. An
+IPv4-mapped IPv6 address such as <code>::ffff:10.1.2.3</code> matches an IPv4 range, since a dual-stack JVM may report
+the connecting address in that form. Both sides of a comparison must be IP literals — a hostname is
+rejected and logged rather than resolved, because this runs on the request path.</p>
+<blockquote>
+<p><strong>Note on a common topology.</strong> Where a reverse proxy runs on the same host, requests reach the FIDO2
+server from <code>127.0.0.1</code>, and so do any sent directly to it. Trusting loopback therefore does not, on its
+own, distinguish the proxy from a direct caller.</p>
+</blockquote>
 <hr />
 <h2 id="fido2-configuration-object-fido2configuration">FIDO2 Configuration Object (<code>fido2Configuration</code>)<a class="headerlink" href="#fido2-configuration-object-fido2configuration" title="Permanent link">#</a></h2>
 <p>This nested block defines WebAuthn and FIDO2 attestation and assertion policy behavior.</p>
