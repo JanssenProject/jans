@@ -6,6 +6,7 @@
 
 package io.jans.configapi.filters;
 
+import io.jans.configapi.core.filter.BaseFilter;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.util.ApiConstants;
@@ -15,7 +16,6 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -31,9 +31,7 @@ import org.slf4j.Logger;
 @Provider
 @ProtectedApi
 @Priority(Priorities.AUTHENTICATION)
-public class AuthorizationFilter implements ContainerRequestFilter {
-
-    private static final String AUTHENTICATION_SCHEME = "Bearer";
+public class AuthorizationFilter extends BaseFilter {
 
     @Inject
     Logger log;
@@ -72,13 +70,13 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             log.warn("AuthorizationFilter - token-based authorization required for {} {}", context.getMethod(),
                     info.getPath());
-            abortWithUnauthorized(context, "ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED!");
+            abortWithUnauthorized(context, Response.Status.UNAUTHORIZED, "ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED!");
             log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
         }
         try {
             authorizationHeader = this.authorizationService.processAuthorization(authorizationHeader, issuer,
-                    resourceInfo, context.getMethod(), request.getRequestURI());
+                    resourceInfo, context.getMethod(), request.getRequestURI(), httpHeaders);
 
             if (authorizationHeader != null && authorizationHeader.trim().length() > 0) {
                 context.getHeaders().remove(HttpHeaders.AUTHORIZATION);
@@ -88,7 +86,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         } catch (Exception ex) {
             log.error("AuthorizationFilter - authorization failed for {} {}: {}", context.getMethod(), info.getPath(),
                     ex.getMessage(), ex);
-            abortWithUnauthorized(context, ex.getMessage());
+            abortWithUnauthorized(context, Response.Status.UNAUTHORIZED, ex.getMessage());
         }
 
     }
@@ -97,10 +95,4 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         return authorizationHeader != null
                 && authorizationHeader.toLowerCase().startsWith(AUTHENTICATION_SCHEME.toLowerCase() + " ");
     }
-
-    private void abortWithUnauthorized(ContainerRequestContext requestContext, String errMsg) {
-        requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).entity(errMsg)
-                .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
-    }
-
 }
