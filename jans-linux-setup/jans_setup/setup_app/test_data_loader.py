@@ -76,6 +76,20 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         base.current_app.RDBMInstaller.create_tables([self.schema_file])
         self.dbUtils.rdm_automapper(True)
 
+    def copy_ssl_public_cert(self):
+        # copy postgresql cert file to output directory
+        output_dir = os.path.join(Config.output_dir, 'test/jans-orm/conf')
+        if Config.rdbm_type == 'pgsql':
+            ssl_public_cert_path = Config.postgresql_ca_crt_fn
+            target = os.path.join(output_dir, 'postgresql.crt')
+        else:
+            _, data_dir = self.dbUtils.exec_raw_sql_cmd("SHOW VARIABLES LIKE 'datadir'")
+            _, ssl_public_cert_fn = self.dbUtils.exec_raw_sql_cmd("SHOW VARIABLES LIKE 'ssl_cert'")
+            ssl_public_cert_path = os.path.join(data_dir, ssl_public_cert_fn)
+            target = os.path.join(output_dir, 'mysql.crt')
+
+        self.copyFile(ssl_public_cert_path, target)
+
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
         self.logIt("Re-binding database")
@@ -296,8 +310,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         Config.pbar.progress(self.service_name, "Restarting Services", False)
 
-        # copy postgresql cert file to output directory
-        self.copyFile(Config.postgresql_ca_crt_fn, os.path.join(Config.output_dir, 'test/jans-orm/conf'))
+        self.copy_ssl_public_cert()
 
         # Disable token binding module
         if base.os_name in ('ubuntu18', 'ubuntu20'):
