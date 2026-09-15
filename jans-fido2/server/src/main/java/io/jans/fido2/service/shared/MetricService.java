@@ -751,15 +751,17 @@ public class MetricService extends io.jans.service.metric.MetricService {
         String directRemoteAddr = request.getRemoteAddr();
         Boolean trustedProxyEnabled = appConfiguration.getTrustedProxyEnabled();
 
-        if (Boolean.FALSE.equals(trustedProxyEnabled)) {
-            return directRemoteAddr;
+        // Unset is its own state, not a synonym for false: it keeps the pre-existing behaviour so that
+        // upgrading changes nothing. Testing it first keeps the three states visibly distinct.
+        if (trustedProxyEnabled == null) {
+            return extractLegacy(request, directRemoteAddr);
         }
 
-        if (Boolean.TRUE.equals(trustedProxyEnabled)) {
+        if (trustedProxyEnabled.booleanValue()) {
             return extractFromTrustedProxy(request, directRemoteAddr);
         }
 
-        return extractLegacy(request, directRemoteAddr);
+        return directRemoteAddr;
     }
 
     /**
@@ -795,19 +797,42 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
-     * Pre-existing behaviour, kept for deployments that have not configured proxy trust: take the leftmost
-     * value of the first proxy header that parses.
+     * Pre-existing behaviour, kept byte-for-byte for deployments that have not configured proxy trust:
+     * walk every proxy header in order and take the leftmost value of the first one that parses.
+     * <p>
+     * Every header is split on commas, not just {@code X-Forwarded-For}. Any of them can arrive carrying a
+     * chain, and the previous implementation split them all - narrowing that would silently change which
+     * address an untouched deployment records.
      */
     private String extractLegacy(HttpServletRequest request, String directRemoteAddr) {
-        String forwardedFor = request.getHeader(X_FORWARDED_FOR);
-        if (StringUtils.isNotBlank(forwardedFor)) {
-            String leftmost = forwardedFor.split(",")[0].trim();
-            if (isUsableForwardedAddress(leftmost)) {
+        String leftmost = leftmostUsableAddress(request.getHeader(X_FORWARDED_FOR));
+        if (leftmost != null) {
+            return leftmost;
+        }
+
+        for (String header : SINGLE_VALUE_PROXY_HEADERS) {
+            leftmost = leftmostUsableAddress(request.getHeader(header));
+            if (leftmost != null) {
                 return leftmost;
             }
         }
 
-        return firstUsableSingleValueHeader(request, directRemoteAddr);
+        return directRemoteAddr;
+    }
+
+    /**
+     * The leftmost address of a possibly comma-separated header value, or {@code null} when there is
+     * nothing usable. Legacy mode only - the leftmost entry is the one a client controls, so trusted mode
+     * must never resolve a header this way.
+     */
+    private String leftmostUsableAddress(String headerValue) {
+        if (StringUtils.isBlank(headerValue)) {
+            return null;
+        }
+
+        String leftmost = headerValue.split(",")[0].trim();
+
+        return isUsableForwardedAddress(leftmost) ? leftmost : null;
     }
 
     private String firstUsableSingleValueHeader(HttpServletRequest request, String directRemoteAddr) {

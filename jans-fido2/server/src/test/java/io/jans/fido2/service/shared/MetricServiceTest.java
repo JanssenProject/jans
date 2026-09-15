@@ -20,6 +20,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -431,43 +433,51 @@ class MetricServiceTest {
         assertEquals("10.1.1.1", metricService.extractIpAddress(httpRequest));
     }
 
-    @Test
-    void extractIpAddress_whenCallerIsNotATrustedProxy_ignoresItsHeaders() {
-        // This is the defect: a direct caller spoofing X-Forwarded-For must not be believed.
+    /**
+     * The four cases that matter once a deployment has declared its trusted proxies. They share the same
+     * configuration and differ only in what arrives, so they are one parameterized test.
+     * <ul>
+     * <li><b>untrusted caller</b> - the defect itself: a direct caller spoofing the header is not believed.
+     * <li><b>trusted caller</b> - a real proxy is believed.
+     * <li><b>chain spoofed on the left</b> - the chain is read right to left, so a value the client
+     * prepended before the proxy appended is skipped. Reading left to right would defeat the whole check.
+     * <li><b>every hop trusted</b> - nothing identifies a client, so the socket address stands.
+     * </ul>
+     */
+    @ParameterizedTest(name = "{0}")
+    @CsvSource({
+            "untrusted caller is ignored,     198.51.100.7, 203.0.113.9,                      198.51.100.7",
+            "trusted caller is believed,      10.1.1.1,     203.0.113.9,                      203.0.113.9",
+            "chain spoofed on the left,       10.1.1.1,     '1.2.3.4, 203.0.113.9, 10.0.0.5', 203.0.113.9",
+            "every hop is a trusted proxy,    10.1.1.1,     '10.0.0.5, 10.0.0.6',             10.1.1.1" })
+    void extractIpAddress_whenTrustEnabled_resolvesTheClientAddress(String scenario, String remoteAddr,
+            String forwardedFor, String expected) {
         when(appConfiguration.getTrustedProxyEnabled()).thenReturn(Boolean.TRUE);
         when(appConfiguration.getTrustedProxyIpRanges()).thenReturn(List.of("10.0.0.0/8"));
-        stubRequest("198.51.100.7", "203.0.113.9");
+        stubRequest(remoteAddr, forwardedFor);
 
-        assertEquals("198.51.100.7", metricService.extractIpAddress(httpRequest));
-    }
-
-    @Test
-    void extractIpAddress_whenCallerIsATrustedProxy_usesTheForwardedAddress() {
-        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(Boolean.TRUE);
-        when(appConfiguration.getTrustedProxyIpRanges()).thenReturn(List.of("10.0.0.0/8"));
-        stubRequest("10.1.1.1", "203.0.113.9");
-
-        assertEquals("203.0.113.9", metricService.extractIpAddress(httpRequest));
+        assertEquals(expected, metricService.extractIpAddress(httpRequest), scenario);
     }
 
     /**
-     * The chain is read right to left. A client can prepend anything before the real proxy appends, so
-     * the leftmost entry is attacker-controlled and taking it would defeat the whole check.
+     * Legacy mode must stay byte-for-byte identical, and the previous implementation split every proxy
+     * header on commas - not only X-Forwarded-For. Validating an alternative header as a whole value
+     * would reject a chain it used to accept and silently record a different address after an upgrade.
      */
     @Test
-    void extractIpAddress_whenChainIsSpoofedOnTheLeft_takesTheFirstUntrustedHopFromTheRight() {
-        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(Boolean.TRUE);
-        when(appConfiguration.getTrustedProxyIpRanges()).thenReturn(List.of("10.0.0.0/8"));
-        stubRequest("10.1.1.1", "1.2.3.4, 203.0.113.9, 10.0.0.5");
+    void extractIpAddress_whenTrustUnset_splitsChainsInAlternativeHeadersToo() {
+        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(null);
+        when(httpRequest.getRemoteAddr()).thenReturn("10.1.1.1");
+        when(httpRequest.getHeader("X-Forwarded-For")).thenReturn(null);
+        when(httpRequest.getHeader("Proxy-Client-IP")).thenReturn("203.0.113.9, 10.0.0.5");
 
         assertEquals("203.0.113.9", metricService.extractIpAddress(httpRequest));
     }
 
     @Test
-    void extractIpAddress_whenEveryHopIsATrustedProxy_fallsBackToTheSocketAddress() {
-        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(Boolean.TRUE);
-        when(appConfiguration.getTrustedProxyIpRanges()).thenReturn(List.of("10.0.0.0/8"));
-        stubRequest("10.1.1.1", "10.0.0.5, 10.0.0.6");
+    void extractIpAddress_whenTrustUnsetAndNoHeaders_usesTheSocketAddress() {
+        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(null);
+        when(httpRequest.getRemoteAddr()).thenReturn("10.1.1.1");
 
         assertEquals("10.1.1.1", metricService.extractIpAddress(httpRequest));
     }
