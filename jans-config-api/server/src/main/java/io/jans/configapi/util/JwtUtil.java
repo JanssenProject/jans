@@ -76,6 +76,11 @@ public class JwtUtil {
             // Parse Token
             Jwt jwt = this.parse(token);
           
+            if(jwt == null) {
+                throw new WebApplicationException("JWT is blank",
+                        Response.status(Response.Status.UNAUTHORIZED).build());    
+            }
+            
             final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
             List<String> scopes = jwt.getClaims().getClaimAsStringList("scope");
@@ -117,79 +122,6 @@ public class JwtUtil {
         } catch (InvalidJwtException exp) {
             log.error("Not a valid Jwt token", exp);
             throw new WebApplicationException("Not a valid Jwt token - could not parse Jwt", exp);
-        }
-
-    }
-
-    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, JsonProcessingException {
-        log.trace("Validate Jwt Token - token:{}, resourceScopes:{}", token, resourceScopes );
-        // 1. Parse Jwt token
-        // 2. Validate Token
-        // 3. Validate Issuer
-        // 4. Retrieve Auth Server JSON Web Keys - jwks_uri"
-        // :"https://localhost/jans-auth/restv1/jwks",
-        // 5. Verify the signature used to sign the access token
-        // 6. Verify the scopes
-
-        try {
-            // Parse Token
-            Jwt jwt = this.parse(token);
-            
-            if(jwt == null) {
-                throw new WebApplicationException("JWT is blank",
-                        Response.status(Response.Status.UNAUTHORIZED).build());    
-            }
-            
-            final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
-            String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
-            List<String> scopes = jwt.getClaims().getClaimAsStringList("scope");
-
-
-            // Validate token is not expired
-            log.info("Validate JWT");
-            final Date now = new Date();
-            if (now.after(expiresAt)) {
-                log.error("ID Token is expired. (It is after {})", now);
-                throw new WebApplicationException("ID Token is expired",
-                        Response.status(Response.Status.UNAUTHORIZED).build());
-            }
-
-            // Validate issuer
-            log.info("Validate JWT Issuer");
-            if (!authUtil.isValidIssuer(issuer)) {
-                throw new WebApplicationException("Jwt Issuer is Invalid.",
-                        Response.status(Response.Status.UNAUTHORIZED).build());
-            }
-
-            // Retrieve JSON Web Key Set Uri
-            log.info("Retrieve JSON Web Key Set URI");
-            String jwksUri = this.getJwksUri(issuer);
-
-            // Retrieve JSON Web Key Set
-            log.info("Retrieve JSON Web Key Set");
-            JSONWebKeySet jsonWebKeySet = this.getJSONWebKeys(jwksUri);
-          
-            // Verify the signature used to sign the access token
-            log.info("Verify JWT signature");
-            boolean isJwtSignatureValid = this.validateSignature(jwt, jsonWebKeySet);
-           
-
-            if (!isJwtSignatureValid) {
-                throw new WebApplicationException("Jwt Signature is Invalid.",
-                        Response.status(Response.Status.UNAUTHORIZED).build());
-            }
-
-            // Validate Scopes
-            log.info("Validate token scopes");
-            if (!authUtil.validateScope(scopes, resourceScopes)) {
-                log.error("Insufficient scopes - Required scope:{},  token scopes: {}" , resourceScopes, scopes);
-                throw new WebApplicationException("Insufficient scopes. Required scope",
-                        Response.status(Response.Status.UNAUTHORIZED).build());
-            }
-
-        } catch (InvalidJwtException exp) {
-            log.error("Not a valid Jwt token", exp);
-            throw new WebApplicationException("Error while validating token is - ", exp);
         }
 
     }
