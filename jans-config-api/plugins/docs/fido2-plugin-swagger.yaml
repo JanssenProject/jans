@@ -1761,34 +1761,6 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        authenticationAttempts:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        period:
-          type: string
         errorCounts:
           type: object
           additionalProperties:
@@ -1802,16 +1774,44 @@ components:
         fallbackEvents:
           type: integer
           format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        registrationFailures:
+        period:
+          type: string
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        registrationAttempts:
           type: integer
           format: int64
         registrationSuccesses:
           type: integer
           format: int64
-        registrationAttempts:
+        registrationFailures:
+          type: integer
+          format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationFailures:
+          type: integer
+          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
           type: integer
           format: int64
         baseDn:

@@ -15696,7 +15696,9 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanEdit:
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
@@ -15704,9 +15706,7 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -17646,6 +17646,14 @@ components:
           type: boolean
           description: Flag to enable/disable User Role-Permission mapping check while
             authentication. Default value `true`.
+        validateUserInumInIntrospectionFlag:
+          type: boolean
+          description: Flag to enable/disable validating `User-inum` in Introspection
+            response. Default value `true`.
+        fetchUserRoleInIntrospectionFlag:
+          type: boolean
+          description: Flag to enable/disable to get user-role in Introspection response.
+            Default value `true`.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.

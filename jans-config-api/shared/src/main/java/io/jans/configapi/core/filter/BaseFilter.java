@@ -12,10 +12,15 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 
 public abstract class BaseFilter implements ContainerRequestFilter {
+    
     protected static final String AUTHENTICATION_SCHEME = "Bearer";
 
     protected void abortWithUnauthorized(ContainerRequestContext ctx, Response.Status status, String errMsg) {
         ctx.abortWith(Response.status(status).entity(errMsg)
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
+    }
+    
+    protected String getAuthorizationHeader(ContainerRequestContext context) {
+        return context.getHeaderString(HttpHeaders.AUTHORIZATION);
     }
 }

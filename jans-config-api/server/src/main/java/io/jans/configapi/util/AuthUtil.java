@@ -1,9 +1,13 @@
 package io.jans.configapi.util;
 
 import com.unboundid.ldap.sdk.DN;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.as.client.TokenResponse;
-import io.jans.as.common.model.registration.Client;
+import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
@@ -88,6 +92,9 @@ public class AuthUtil {
     
     @Inject 
     RolePermissionMappingService rolePermissionMappingService;
+    
+    @Inject
+    IntrospectionService introspectionService;
 
     public String getOpenIdConfigurationEndpoint() {
         return this.configurationService.find().getOpenIdConfigurationEndpoint();
@@ -113,6 +120,14 @@ public class AuthUtil {
         return this.configurationFactory.getApiAppConfiguration().isUserRolePermissionValidationEnabled();
     }
 
+    public boolean isValidateUserInumInIntrospectionFlag() {
+        return this.configurationFactory.getApiAppConfiguration().isValidateUserInumInIntrospectionFlag();
+    }
+    
+    public boolean isFetchUserRoleInIntrospectionFlag() {
+        return this.configurationFactory.getApiAppConfiguration().isFetchUserRoleInIntrospectionFlag();
+    }
+    
     public String getIssuer() {
         return this.configurationService.find().getIssuer();
     }
@@ -639,7 +654,7 @@ public class AuthUtil {
         // Get user
         String userInum = getUserInum(httpHeaders);
         log.info("userInum:{}", userInum);
-        
+
         // Get User details
         User user = getUserByInum(userInum);
         log.info("userInum:{}, user:{}", userInum, user);
@@ -673,7 +688,7 @@ public class AuthUtil {
             }
             userPermissionSet.addAll(rolePermissionMapping.getPermissions());
         }
-        
+
         log.info("userPermissionSet:{}", userPermissionSet);
         return userPermissionSet;
     }
@@ -681,11 +696,11 @@ public class AuthUtil {
     public List<String> getUserRole(User user) {
         log.info("getUserRole user:{}", user);
         List<String> userRoleList = null;
-        
-        if(user == null) {
+
+        if (user == null) {
             return userRoleList;
         }
-        
+
         List<CustomObjectAttribute> customAttributes = user.getCustomAttributes();
         if (customAttributes == null || customAttributes.isEmpty()) {
             return userRoleList;
@@ -724,7 +739,7 @@ public class AuthUtil {
             if (obj.getClass().equals(String.class)) {
                 attributeValueList.add(String.class.cast(obj));
             }
-        }   
+        }
 
         return attributeValueList;
 
@@ -751,4 +766,17 @@ public class AuthUtil {
     public RolePermissionMapping getPermissionsMappingByRole(String role) {
         return rolePermissionMappingService.getPermissionsMappingByRole(role);
     }
+
+    public IntrospectionResponse getIntrospectionResponse(String token) {
+        return introspectionService.introspectToken(token, token);
+    }
+
+    public String getJsonNodeKeyValue(JsonNode jsonNode, String key) {
+        String keyValue = null;
+        if (jsonNode == null || StringUtils.isBlank(key)) {
+            return keyValue;
+        }
+        return jsonNode.get(key).asText();
+    }
+
 }

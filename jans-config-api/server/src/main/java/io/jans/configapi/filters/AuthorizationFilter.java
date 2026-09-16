@@ -56,7 +56,7 @@ public class AuthorizationFilter extends BaseFilter {
         log.debug("AuthorizationFilter - {} {} from IP:{}", context.getMethod(), info.getPath(),
                 request.getRemoteAddr());
 
-        String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
+        String authorizationHeader = getAuthorizationHeader(context);
         String issuer = context.getHeaderString(ApiConstants.ISSUER);
         boolean configOauthEnabled = authorizationService.isConfigOauthEnabled();
         log.debug("AuthorizationFilter - issuer:{}, configOauthEnabled:{}", issuer, configOauthEnabled);
