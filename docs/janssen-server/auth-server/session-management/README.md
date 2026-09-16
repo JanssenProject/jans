@@ -50,8 +50,16 @@ The following Auth Server configuration properties are related to sessions:
 ## SameSite attribute
 
 `cookieSameSite` controls the `SameSite` attribute of all cookies the OP
-creates, including the session-related ones. It defaults to `None` so that
-upgrading does not change existing behavior for any deployment.
+creates, including the session-related ones. It defaults to `None`, which for
+SameSite-aware, spec-compliant clients preserves the cross-site SSO behavior
+these cookies already relied on before this attribute existed. It is not
+identical to sending no `SameSite` attribute at all: a documented set of older
+or non-compliant clients (e.g. Safari on macOS 10.14/iOS 12, Chrome/Chromium
+&lt;= 67, some embedded WebViews, UC Browser &lt; 12.13.2) mishandle an
+explicit `SameSite=None` value and may reject or drop the cookie even though
+they accepted the same cookie with no `SameSite` attribute. Deployments that
+must still support such legacy clients should account for this before
+upgrading.
 
 `CookieService` sets `Secure` on all of these cookies, but `HttpOnly` only on
 `session_id`, `uma_session_id`, `current_sessions`, `consent_session_id` and
