@@ -1,8 +1,8 @@
 ---
 tags:
-  - administration
-  - auth-server
-  - session
+ - administration
+ - auth-server
+ - session
 ---
 
 # Session Management
@@ -36,7 +36,7 @@ The following Auth Server configuration properties are related to sessions:
 - **sessionIdCookieLifetime** - The lifetime of `session_id` cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends. Default value is `86400`.
 - **sessionIdLifetime** - lifetime of the OP session in seconds (server side object). If not set, falls back to `session_id` cookie expiration set by `sessionIdCookieLifetime` configuration property.
 - **sessionIdUnusedLifetime** - unused OP session lifetime in seconds. If an OP session is not used for a given amount of time, the OP session is removed.
-Default value is `86400`.
+  Default value is `86400`.
 - **sessionIdUnauthenticatedUnusedLifetime** - lifetime in seconds of `unauthenticated` OP session. This determines how long the user can be on the login page while unauthenticated. Default value is `120`.
 - **sessionIdRequestParameterEnabled** - Boolean value specifying whether to enable `session_id` HTTP request parameter. Default value is `False`.
 - **sessionIdPersistOnPromptNone** - specifies whether to persist or update the session object with data if `prompt=none`. Default value is `True`.
@@ -45,6 +45,44 @@ Default value is `86400`.
 - **sessionIdPersistInCache** - If True, sessions are stored according to `cacheProviderType`. Otherwise, sessions are persisted in the database.
  Default value is `False`.
 - **sessionIdPersistInCache** Default value is `False`.
+- **cookieSameSite** - `SameSite` attribute value (`None`, `Lax` or `Strict`) set on all cookies created by the OP (`session_id`, `uma_session_id`, `session_state`, `opbs`, `current_sessions`, `consent_session_id`, `rp_origin_id`). Default value is `None`. See [SameSite attribute](#samesite-attribute) below before changing it.
+
+## SameSite attribute
+
+`cookieSameSite` controls the `SameSite` attribute of all cookies the OP
+creates, including the session-related ones. It defaults to `None` so that
+upgrading does not change existing
+behavior for any deployment. `None` (with the `Secure` attribute, which is
+always set) provides no CSRF hardening beyond what `Secure`+`HttpOnly` already
+give, but it preserves every cross-site SSO flow that Janssen supports today.
+
+Changing the value tightens CSRF defense-in-depth but can break SSO for RPs
+hosted on a different site (eTLD+1) than the OP, which is the common Janssen
+deployment topology:
+
+- **`Lax`** breaks:
+ - Silent authentication / silent token renewal via a hidden cross-site
+   iframe (`prompt=none`, e.g. `oidc-client-js` `signinSilent()`). Browsers
+   do not attach `Lax` cookies to cross-site iframe navigations, so the OP
+   can't see the existing session and returns `login_required` (or
+   re-prompts) instead of silently confirming it.
+ - Authorization requests submitted to `/authorize` via a cross-site
+   auto-submitted HTML form `POST` instead of a `GET` redirect - `Lax`
+   excludes cross-site `POST`, so the session isn't recognized and the user
+   is forced to re-authenticate.
+ - Any deployment that embeds OP-hosted login/consent UI in a cross-site
+   iframe.
+- **`Strict`** breaks everything `Lax` breaks, plus the core SSO redirect
+  itself: a normal top-level, cross-site `GET` redirect from an RP to
+  `/authorize` no longer carries the session cookie at all, since RP and OP
+  are almost always different sites. Every login looks like a first-time
+  visit, effectively disabling SSO for any RP not on the same site as the OP.
+  RP-initiated logout redirects to `/end_session` lose the session cookie
+  too, so session termination has to rely solely on `id_token_hint`/`sid`
+  instead of the cookie.
+
+Only set `cookieSameSite` to `Lax` or `Strict` after confirming none
+of your RPs rely on the patterns above.
 
 For both `unused` properties, Jans Auth Server calculates this period as `currentUnusedPeriod = now - session.lastUsedAt`. So for OP session with states:
 
@@ -68,8 +106,8 @@ To end another person's session, Jans Auth Server supports [Global Token Revocat
 It is possible to add custom business logic as Jans Auth Server detects
 session events, see:
 
-  * [Application Session](../../../script-catalog/application_session/application-session.md)
-  * [End Session](../../../script-catalog/end_session/end-session.md)
+* [Application Session](../../../script-catalog/application_session/application-session.md)
+* [End Session](../../../script-catalog/end_session/end-session.md)
 
 
 ## Session data structure in Persistence

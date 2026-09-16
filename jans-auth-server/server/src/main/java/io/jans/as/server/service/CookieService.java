@@ -49,6 +49,7 @@ public class CookieService {
     private static final String UMA_SESSION_ID_COOKIE_NAME = "uma_session_id";
     public static final String CONSENT_SESSION_ID_COOKIE_NAME = "consent_session_id";
     private static final String CURRENT_SESSIONS_COOKIE_NAME = "current_sessions";
+    private static final String SAME_SITE_NONE = "None";
 
     @Inject
     private Logger log;
@@ -312,6 +313,7 @@ public class CookieService {
                 header += "Domain=" + appConfiguration.getCookieDomain() + ";";
             }
         }
+        header = appendSameSite(header);
         httpResponse.addHeader("Set-Cookie", header);
     }
 
@@ -327,9 +329,27 @@ public class CookieService {
             }
         }
 
+        header = appendSameSite(header);
         header = externalCookieService.modifyCookieHeader(cookieName, header);
 
         httpResponse.addHeader("Set-Cookie", header);
+    }
+
+    /**
+     * Appends the configured SameSite attribute to a Set-Cookie header.
+     * <p>
+     * Defaults to "None" (no change from pre-SameSite behavior) because setting
+     * "Lax" breaks silent/iframe-based authentication (prompt=none) and cross-site
+     * POST to the authorization endpoint for RPs hosted on a different site than the
+     * OP, and "Strict" additionally breaks normal top-level cross-site SSO redirects.
+     * See {@link AppConfiguration#getCookieSameSite()}.
+     */
+    private String appendSameSite(String header) {
+        String sameSite = appConfiguration.getCookieSameSite();
+        if (StringUtils.isBlank(sameSite)) {
+            sameSite = SAME_SITE_NONE;
+        }
+        return header + "; SameSite=" + sameSite;
     }
 
     public void removeSessionIdCookie(HttpServletResponse httpResponse) {

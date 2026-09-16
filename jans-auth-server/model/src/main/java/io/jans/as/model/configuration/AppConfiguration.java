@@ -685,6 +685,16 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Sets cookie domain for all cookies created by OP")
     private String cookieDomain;
 
+    @DocProperty(description = "Sets SameSite attribute value (None, Lax or Strict) for all cookies created by OP " +
+            "(session_id, uma_session_id, session_state, opbs, current_sessions, consent_session_id, rp_origin_id). " +
+            "Defaults to None to preserve cross-site SSO flows (silent authentication via hidden iframe with " +
+            "prompt=none, cross-site POST to the authorization endpoint). Setting Lax breaks silent/iframe-based " +
+            "authentication and cross-site POST to the authorization endpoint for RPs hosted on a different site " +
+            "than the OP. Setting Strict additionally breaks normal top-level cross-site SSO redirects, " +
+            "effectively disabling SSO for any RP not on the same site as the OP. See auth-server session " +
+            "management docs before changing.", defaultValue = "None")
+    private String cookieSameSite = "None";
+
     @DocProperty(description = "enable OAuth Audit Logging")
     private Boolean enabledOAuthAuditLogging;
 
@@ -3079,6 +3089,14 @@ public class AppConfiguration implements Configuration {
 
     public void setCookieDomain(String cookieDomain) {
         this.cookieDomain = cookieDomain;
+    }
+
+    public String getCookieSameSite() {
+        return cookieSameSite;
+    }
+
+    public void setCookieSameSite(String cookieSameSite) {
+        this.cookieSameSite = cookieSameSite;
     }
 
     public Boolean getEnabledOAuthAuditLogging() {

@@ -89,6 +89,7 @@ tags:
 | connectionServiceConfiguration | Connection service Configuration | [Details](#connectionserviceconfiguration) |
 | consentGatheringScriptBackwardCompatibility | Boolean value specifying whether to turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration | [Details](#consentgatheringscriptbackwardcompatibility) |
 | cookieDomain | Sets cookie domain for all cookies created by OP | [Details](#cookiedomain) |
+| cookieSameSite | Sets SameSite attribute value (None, Lax or Strict) for all cookies created by OP (session_id, uma_session_id, session_state, opbs, current_sessions, consent_session_id, rp_origin_id). Defaults to None to preserve cross-site SSO flows (silent authentication via hidden iframe with prompt=none, cross-site POST to the authorization endpoint). Setting Lax breaks silent/iframe-based authentication and cross-site POST to the authorization endpoint for RPs hosted on a different site than the OP. Setting Strict additionally breaks normal top-level cross-site SSO redirects, effectively disabling SSO for any RP not on the same site as the OP. See auth-server session management docs before changing. | [Details](#cookiesamesite) |
 | corsConfigurationFilters | This list specifies the CORS configuration filters | [Details](#corsconfigurationfilters) |
 | cssLocation | The location for CSS files | [Details](#csslocation) |
 | customHeadersWithAuthorizationResponse | Choose whether to enable the custom response header parameter to return custom headers with the authorization response | [Details](#customheaderswithauthorizationresponse) |
@@ -1053,6 +1054,15 @@ tags:
 ## cookieDomain
 
 - Description: Sets cookie domain for all cookies created by OP
+
+- Required: No
+
+- Default value: None
+
+
+## cookieSameSite
+
+- Description: Sets SameSite attribute value (None, Lax or Strict) for all cookies created by OP (session_id, uma_session_id, session_state, opbs, current_sessions, consent_session_id, rp_origin_id). Defaults to None to preserve cross-site SSO flows (silent authentication via hidden iframe with prompt=none, cross-site POST to the authorization endpoint). Setting Lax breaks silent/iframe-based authentication and cross-site POST to the authorization endpoint for RPs hosted on a different site than the OP. Setting Strict additionally breaks normal top-level cross-site SSO redirects, effectively disabling SSO for any RP not on the same site as the OP. See auth-server session management docs before changing.
 
 - Required: No
 
