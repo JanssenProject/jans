@@ -1,6 +1,6 @@
 # Cedarling Cross-Platform Benchmark Contract
 
-Single source of truth for how every binding bench (Java/UniFFI, Go, Python, WASM, C) must behave so the results are directly comparable.
+Single source of truth for how every binding bench (Rust, Java/UniFFI, Go, Python, WASM, C) must behave so the results are directly comparable.
 
 ## Fixtures (`fixtures/scenarios.json`)
 
@@ -64,7 +64,7 @@ One JSON object per scenario × binding, one per line on stdout. Example:
 
 | field | type | notes |
 |---|---|---|
-| `binding` | string | `"java"`, `"go"`, `"python"`, `"wasm"`, `"c"` |
+| `binding` | string | `"rust"`, `"java"`, `"go"`, `"python"`, `"wasm"`, `"c"` |
 | `scenario` | string | matches `id` from the manifest |
 | `iter` | number | `measure_iters` executed |
 | `mean_ns` / `p50_ns` / `p95_ns` / `p99_ns` / `min_ns` / `max_ns` | number | wall-clock per call, nanoseconds |

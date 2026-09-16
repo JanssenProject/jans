@@ -33,7 +33,39 @@ The following properties represent the dynamic configuration for the Janssen FID
 | `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored with passkey metrics. |
 | `fido2ErrorCategorization` | `true` | Whether passkey operation failures are categorized for the error-analysis endpoint. |
 | `fido2PerformanceMetrics` | `true` | Whether passkey operation durations are tracked for performance analytics. |
+| `trustedProxyEnabled` | `true`, `false`, or unset | Whether forwarded proxy headers may be trusted when recording the client IP on a metrics entry. Unset keeps the legacy behaviour of trusting them unconditionally; `false` never reads them; `true` trusts them only from the addresses in `trustedProxyIpRanges`. See [Client IP in metrics](#client-ip-in-metrics). |
+| `trustedProxyIpRanges` | `["10.0.0.0/8", "192.168.1.0/24"]` | Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation. Only consulted when `trustedProxyEnabled` is `true`; an empty list trusts nothing. |
 | `fido2Configuration` | Object | Nested object containing FIDO2 protocol-specific details (see structure below). |
+
+### Client IP in metrics
+
+The `ipAddress` recorded on a passkey metrics entry is taken from forwarded proxy headers
+(`X-Forwarded-For` and several older equivalents) before falling back to the address the request actually
+came from. Those headers are set by whoever sends the request, so `trustedProxyEnabled` controls whether
+they are believed:
+
+| Value | Behaviour |
+| :--- | :--- |
+| unset (default) | Headers are trusted unconditionally. Any caller able to reach a FIDO2 endpoint can choose the address recorded against its own ceremony. |
+| `false` | Headers are ignored; the connecting address is recorded. |
+| `true` | Headers are read only when the connecting address falls inside `trustedProxyIpRanges`. An empty list trusts nothing. |
+
+The default is unset so that upgrading changes nothing. **Deployments that want the recorded address to be
+trustworthy must set this explicitly.**
+
+When trusted, `X-Forwarded-For` is read right to left: hops that are themselves listed as trusted proxies
+are skipped, and the first remaining address is recorded. Reading from the right matters because a client
+can prepend any value before the real proxy appends to the chain — so the leftmost entry is only used when
+no closer untrusted hop exists, such as a single-entry header from a trusted proxy.
+
+Ranges accept IPv4 and IPv6 CIDR notation; a bare address is treated as a full-length mask. An
+IPv4-mapped IPv6 address such as `::ffff:10.1.2.3` matches an IPv4 range, since a dual-stack JVM may report
+the connecting address in that form. Both sides of a comparison must be IP literals — a hostname is
+rejected and logged rather than resolved, because this runs on the request path.
+
+> **Note on a common topology.** Where a reverse proxy runs on the same host, requests reach the FIDO2
+> server from `127.0.0.1`, and so do any sent directly to it. Trusting loopback therefore does not, on its
+> own, distinguish the proxy from a direct caller.
 
 ---
 
@@ -50,7 +82,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `unfinishedRequestExpiration` | Integer | `120` | Expiration time in seconds for incomplete registration/authentication requests. |
 | `metadataRefreshInterval` | Integer | `1296000` | Expiration time in seconds (e.g., 15 days) before checking and reloading the FIDO Alliance MDS TOC. |
 | <span id="servermetadatafolder">`serverMetadataFolder`</span> | String | `"/etc/jans/conf/fido2/server_metadata"` | Folder where local vendor metadata statement JSON files are placed manually. |
-| `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS65535`, `ES256`, `EdDSA` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. |
+| `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS384`, `RS512`, `RS65535`, `PS256`, `PS384`, `PS512`, `ES256`, `ES384`, `ES512`, `ESP256`, `ESP384`, `EdDSA`, `Ed25519`, `Ed448`, `ML-DSA-44`, `ML-DSA-65`, `ML-DSA-87` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. A recognised name the deployment cannot actually complete a registration with is logged at `ERROR` and left out of `pubKeyCredParams` — see [Advertised algorithms](#advertised-algorithms). |
 | `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. |
 | `metadataServers` | Array of Objects | `[ { "url": "https://mds.fidoalliance.org/" } ]` | External FIDO Metadata Service endpoints to download statement catalogs. |
 | `disableMetadataService` | Boolean | `false` | If set to `true`, the FIDO2 server skips validating authenticators against the MDS3 service. |
@@ -59,5 +91,70 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `hints` | Array of Strings | `["security-key", "client-device", "hybrid"]` | Preferred authenticator type hints presented to the Relying Party. |
 | `enterpriseAttestation` | Boolean | `false` | Enables support for enterprise-specific hardware attestation profiles. |
 | `attestationMode` | String | `"monitor"` | Options are: `disabled` (skip attestation checks), `monitor` (log/validate but allow credentials if attestation is absent/unknown), and `enforced` (fail credential creation if attestation check fails). |
+| `allowedTopOrigins` | Array of Strings | `[]` | Full origins permitted to frame a cross-origin ceremony, each written as scheme, host and optional port (for example `https://portal.example.com`). Empty — the default — denies every framed ceremony. See [Cross-origin ceremonies](#cross-origin-ceremonies). |
+
+### Advertised algorithms
+
+The algorithms offered to the authenticator in `pubKeyCredParams` are not taken from `enabledFidoAlgorithms`
+directly. An algorithm is advertised only when this server can complete a registration with it end-to-end:
+decode the credential public key and verify a signature made with it, using the crypto provider the
+deployment is actually running. Anything else is dropped: a configured name that does not survive the
+check is logged at `ERROR`, and a default that does not survive it is logged at `WARN`.
+
+This matters most on the FIPS build, whose provider supports strictly fewer algorithms than the standard
+one. Deriving the advertised set from real capability means a FIPS deployment simply offers less, rather
+than offering an algorithm and then failing the ceremony once the authenticator picks it.
+
+If no configured algorithm survives the check, the server logs an error and falls back to whichever of the
+defaults it does support. In a deployment that supports none of them that fallback is itself empty, and
+`pubKeyCredParams` is sent empty — a state worth alerting on, since the log will already carry the reason.
+
+### Fully-specified ECDSA algorithms
+
+`ESP256` and `ESP384` name their elliptic curve in the COSE code point itself rather than leaving it to the
+credential: `ESP256` is P-256 only and `ESP384` is P-384 only. A credential that pairs one of them with any
+other curve is rejected during registration. `ES256`, `ES384` and `ES512` are not fully specified and take
+whichever curve the key carries.
+
+### Fully-specified EdDSA algorithms
+
+`EdDSA` is the original COSE code point and takes whichever Edwards curve the credential carries — both
+Ed25519 and Ed448 keys are accepted under it. `Ed25519` and `Ed448` are separate, fully-specified code
+points that name their curve: a credential pairing `Ed25519` with an Ed448 key, or the reverse, is rejected
+during registration.
+
+Existing credentials are unaffected — they were registered under `EdDSA`, whose behaviour is unchanged.
+
+### Post-quantum algorithms (ML-DSA)
+
+`ML-DSA-44`, `ML-DSA-65` and `ML-DSA-87` are supported on the standard build. They are **not** available on
+the FIPS build, because no released `bc-fips` provider implements them yet.
+
+This needs no special handling from an administrator. Because the advertised set is derived from real
+provider capability (see [Advertised algorithms](#advertised-algorithms)), a FIPS deployment that lists an
+ML-DSA name simply logs it at `ERROR` and leaves it out of `pubKeyCredParams` — it never offers an
+algorithm it would then fail to verify. The same configuration is therefore safe to share between the two
+build variants.
+
+Both the IANA spelling (`ML-DSA-44`) and the underscore form (`ML_DSA_44`) are accepted.
+
+### Cross-origin ceremonies
+
+As WebAuthn Level 3 requires, the server reads the `crossOrigin` member of `CollectedClientData`. An absent
+member is treated as `false`; both a non-boolean value and an explicit `null` fail with `invalid_request`.
+
+When `crossOrigin` is `true`, the ceremony is allowed only if its `topOrigin` — the origin of the page that
+framed it — appears in `allowedTopOrigins`. The request fails with `cross_origin_not_allowed` when:
+
+- `allowedTopOrigins` is empty, which is the default and denies every framed ceremony
+- `topOrigin` is absent, `null`, not a string, or blank
+- `topOrigin` is not listed
+
+Entries are compared against the whole origin, ignoring case and surrounding whitespace. A different scheme
+or port is a different origin, so `https://portal.example.com` does not permit `http://portal.example.com`.
+
+`allowedTopOrigins` is deliberately separate from the `origins` under `rp`. Those say which origin may
+*serve* a ceremony; this says which origin may *frame* one. Reusing the former would silently widen the
+framing policy of every existing deployment.
 
 

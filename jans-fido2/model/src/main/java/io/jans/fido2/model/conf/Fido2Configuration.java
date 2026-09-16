@@ -64,6 +64,8 @@ public class Fido2Configuration {
 	private boolean enterpriseAttestation = false;
 	@DocProperty(description = "String value indicating whether MDS validation should be omitted during attestation", defaultValue = "monitor")
 	private String attestationMode = "monitor";
+	@DocProperty(description = "Full origins (scheme, host and optional port) permitted to frame a cross-origin ceremony; empty denies every framed ceremony")
+	private List<String> allowedTopOrigins = new ArrayList<>();
 
 	public boolean isRecordAbandonedAssertions() {
 		return recordAbandonedAssertions;
@@ -135,6 +137,14 @@ public class Fido2Configuration {
 
 	public void setRequestedParties(List<RequestedParty> requestedParties) {
 		this.requestedParties = requestedParties;
+	}
+
+	public List<String> getAllowedTopOrigins() {
+		return allowedTopOrigins;
+	}
+
+	public void setAllowedTopOrigins(List<String> allowedTopOrigins) {
+		this.allowedTopOrigins = allowedTopOrigins;
 	}
 
 	public List<String> getHints() {
@@ -232,7 +242,7 @@ public class Fido2Configuration {
 				+ userAutoEnrollment + ", unfinishedRequestExpiration=" + unfinishedRequestExpiration
 				+ ", authenticationHistoryExpiration=" + authenticationHistoryExpiration + ", serverMetadataFolder="
 				+ serverMetadataFolder + ", enabledFidoAlgorithms=" + enabledFidoAlgorithms + ", requestedParties="
-				+ requestedParties + ", metadataServers=" + metadataServers + ", disableMetadataService="
+				+ requestedParties + ", metadataServers=" + metadataServers + ", allowedTopOrigins=" + allowedTopOrigins + ", disableMetadataService="
 				+ disableMetadataService + ", mdsDownloadStartupRetries=" + mdsDownloadStartupRetries
 				+ ", mdsDownloadStartupRetryInterval=" + mdsDownloadStartupRetryInterval + ", hints=" + hints
 				+ ", enterpriseAttestation=" + enterpriseAttestation + ", attestationMode=" + attestationMode + "]";

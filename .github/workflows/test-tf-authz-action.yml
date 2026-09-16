@@ -45,9 +45,9 @@ on:
       - 'jans-cedarling/cedarling_opa/demo/terraform/PERMISSIONS.md'
       - 'jans-cedarling/cedarling_opa/demo/terraform/check-policy-checklist.sh'
       - '.github/actions/opa-up/action.yml'
-  # A tagged release builds cedarling-opa:<version> via "Build Docker Images"; run the demo tests only after that image is published, not on the tag push.
+  # A tagged release builds cedarling-opa:<version> via "Build: Docker Images"; run the demo tests only after that image is published, not on the tag push.
   workflow_run:
-    workflows: ["Build Docker Images"]
+    workflows: ["Build: Docker Images"]
     types: [completed]
 
 jobs:

@@ -14,13 +14,15 @@ One row per workflow under `.github/workflows/`. See
 | Workflow | Trigger | Purpose |
 |---|---|---|
 | `build-publish.yml` | tag `v**`/`nightly`, dispatch | build Java modules, publish to GitHub Packages Maven + release assets (SLSA-signed). Chain hub. |
-| `build-docker-images.yml` | `workflow_run` (Build & Publish), push/PR, dispatch | build & push the 14 container images to ghcr, cosign-signed. |
-| `build-packages.yml` | `workflow_run` (Build & Publish), dispatch | deb/rpm, Python wheels, cedarling wasm/python/go/uniffi packages + SLSA provenance. |
+| `build-docker-images.yml` | `workflow_run` (Build: Publish), push/PR, dispatch | build & push the 14 container images to ghcr, cosign-signed. |
+| `build-packages.yml` | `workflow_run` (Build: Publish), dispatch | deb/rpm, Python wheels, cedarling wasm/python/go/uniffi packages + SLSA provenance. |
 | `build-nightly.yml` | cron 23:00, dispatch | recreate the `nightly` tag/release; call `release-cedarling`. |
 | `build-sandbox.yml` | dispatch | build a branch and deploy to an ephemeral DigitalOcean VM. |
-| `build-docs.yml` | push/PR to docs, release, dispatch | mkdocs + Helm chart publish to GitHub Pages. |
+| `build-docs.yml` | push/PR to docs, release, dispatch | Zensical build published to GitHub Pages, retiring versions past the retention window. |
+| `release-helm-charts.yml` | release, dispatch | package, cosign-sign and publish the Helm charts to the release, GHCR (OCI) and the chart index, with SLSA provenance. |
 | `release-trigger.yml` | dispatch | version bump, tag `v<version>`, create release; call `release-cedarling`. |
 | `release-cedarling.yml` | `workflow_call`, dispatch | publish the cedarling crate to crates.io (reusable). |
+| `release-terraform-provider.yml` | `workflow_run` (Test: Terraform Provider) at a `v*` ref, dispatch | Zulip ping + `terraform-provider-release` environment approval, then call `ops-sync-tf` to mirror and tag downstream so goreleaser publishes to the Terraform/OpenTofu registries. |
 | `release-backport.yml` | `pull_request_target` | open backport PRs from a merged labelled PR. |
 
 ## Tests & checks
@@ -31,9 +33,9 @@ One row per workflow under `.github/workflows/`. See
 | `lint-python.yml` | push/PR (py paths) | flake8 over pycloudlib/cli-tui/linux-setup. |
 | `test-cedarling.yml` | PR (cedarling paths) | Rust/wasm/python/go/C/Java/pgrx test matrix. |
 | `test-integration.yml` | cron 04:00, dispatch, PR (filtered paths) | full TestNG suite against source-built AIO on a DO droplet. PR runs only on the docker/service paths; the nightly cron and dispatch cover changes outside them. |
-| `test-terraform-provider.yml` | push/PR/tag, cron, dispatch | provider acceptance tests against the prebuilt AIO compose stack. |
-| `test-tf-authz-action.yml` | push/PR, `workflow_run` (Build Docker Images) | tf-authz composite-action + Cedar policy tests via OPA. |
-| `test-tf-authz-jwt.yml` | push/PR, `workflow_run` (Build Docker Images) | self-hosted-OPA JWT allow/deny assertions (see `scripts/authz_assert.sh`). |
+| `test-terraform-provider.yml` | push/PR (main), cron, dispatch (incl. from `build-docker-images` at a release tag, which passes the release AIO image; otherwise nightly) | provider acceptance tests against the prebuilt AIO compose stack. No tag trigger: on a tag push the release image does not exist yet. |
+| `test-tf-authz-action.yml` | push/PR, `workflow_run` (Build: Docker Images) | tf-authz composite-action + Cedar policy tests via OPA. |
+| `test-tf-authz-jwt.yml` | push/PR, `workflow_run` (Build: Docker Images) | self-hosted-OPA JWT allow/deny assertions (see `scripts/authz_assert.sh`). |
 | `test-pycloudlib.yml` | push/PR (pycloudlib paths) | pytest matrix. |
 
 ## Scans
@@ -45,7 +47,7 @@ One row per workflow under `.github/workflows/`. See
 | `scan-sonar.yml` | push/PR, dispatch | SonarCloud quality/security scan per module. |
 | `scan-scorecard.yml` | push main, weekly | OpenSSF Scorecard. |
 | `scan-sbom.yml` | tag `v**`/`nightly` | enriched SBOM + compliance reports to release assets. |
-| `scan-pentest.yml` | `workflow_run` (Build Docker Images) for nightly/`v**`, dispatch | full DAST pen-test against the live AIO for each persistence backend (MYSQL, PGSQL); one consolidated report (report-only). |
+| `scan-pentest.yml` | dispatch from `build-docker-images` at the nightly/`v**` ref (with that ref's AIO image), or manual | full DAST pen-test against the live AIO for each persistence backend (MYSQL, PGSQL); one consolidated report (report-only). |
 
 ## Ops
 
@@ -53,6 +55,6 @@ One row per workflow under `.github/workflows/`. See
 |---|---|---|
 | `ops-label.yml` | PR/issue events, dispatch | apply labels, add issues to the project board. |
 | `ops-pr-ref-issue.yml` | PR opened, dispatch | ensure each PR references an open issue. |
-| `ops-sync-tf.yml` | push main (tf paths), dispatch | subtree-sync the provider to its downstream repo. |
+| `ops-sync-tf.yml` | push main (tf paths), `workflow_call`, dispatch | rsync `terraform-provider-jans/` onto the downstream mirror repo (its `.github/` excluded); with a `tag` input, push that tag to cut the registry release. |
 | `ops-cache-cleanup.yml` | PR closed, dispatch | delete Actions caches for the branch. |
 | `ops-runs-cleanup.yml` | cron every 2 days, dispatch | prune old workflow runs. |

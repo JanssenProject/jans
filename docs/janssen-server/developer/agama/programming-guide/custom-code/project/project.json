@@ -1,0 +1,19 @@
+{
+  "projectName": "custom-code",
+  "version": "1.0.0",
+  "author": "Gluu Inc.",
+  "license": "apache-2.0",
+  "description": "Demostrates onboarding of custom code in Janssen server",
+  "configs": {
+    "com.acme.workaday.club_survey": {
+      "showIntro": true,
+      "pages": [
+          { "id": "recommend", "template": "recommend.ftlh" },
+          { "id": "entertain", "template": "meetings_entertaining.ftlh" },
+          { "id": "topics", "template": "meetings_newtopics.ftlh" },
+          { "id": "frequency", "template": "meetings_frequency.ftlh" },
+          { "id": "payment", "template": "paid_membership.ftlh" }
+      ]
+    }
+  }
+}

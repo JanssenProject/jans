@@ -202,6 +202,14 @@ else
     }
   done
   [ "$img_rc" -eq 0 ] || exit 1
+  # The images pin jans-linux-setup at JANS_SOURCE_VERSION, so this checkout's schema must be
+  # overlaid or the loader creates the tables from the pinned one.
+  for svc in persistence-loader config-api auth-server scim fido2; do
+    docker build -q -t "local/$svc:ci" -f - jans-linux-setup/jans_setup/schema >/dev/null <<EOF
+FROM local/$svc:ci
+COPY jans_schema.json custom_schema.json /app/schema/
+EOF
+  done
   docker build -t local/aio:ci \
     --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
     --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
@@ -244,7 +252,7 @@ export MYSQL_MEM_LIMIT="${MYSQL_MEM_LIMIT:-3G}"
 # Run the demo in the background and relax its mode-600 TLS certs as they appear, so the
 # in-container configurator (uid 1000) reads ca.key/web_https.key on its FIRST run. A restart
 # instead would re-run key-gen against a half-initialised keystore and corrupt jansConfWebKeys.
-bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "$JANS_PERSISTENCE" "" 127.0.0.1 &
+bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "$JANS_PERSISTENCE" "" 127.0.0.1 "${JANS_CI_CD_RUN:-}" &
 demo_pid=$!
 for _ in $(seq 1 120); do
   [ -d automation/jans-aio-demo/templates ] && chmod -R a+rX automation/jans-aio-demo/templates 2>/dev/null || true
@@ -514,6 +522,11 @@ find jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2 \
      agama jans-cedarling/bindings/cedarling-java jans-lock/lock-server \
   -path '*/target/surefire-reports/*.xml' 2>/dev/null | while read -r f; do
   mod=$(printf '%s' "$f" | sed -E 's#/target/surefire-reports/.*##; s#[/ ]+#_#g')
+  # TEST-TestSuite.xml repeats the per-class reports; the JUnit reporter counts both.
+  if [ "$(basename "$f")" = "TEST-TestSuite.xml" ] && [ -n "$(find "$(dirname "$f")" \
+       -maxdepth 1 -name 'TEST-*.xml' ! -name 'TEST-TestSuite.xml' -print -quit)" ]; then
+    continue
+  fi
   cp "$f" "test-reports/${mod}-$(basename "$f")" 2>/dev/null || true
 done
 echo "collected $(find test-reports -name '*.xml' 2>/dev/null | wc -l) report files"

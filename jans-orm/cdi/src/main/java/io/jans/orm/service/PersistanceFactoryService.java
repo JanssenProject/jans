@@ -47,11 +47,14 @@ public class PersistanceFactoryService implements BaseFactoryService {
 			BASE_DIR = null;
 		}
 	}
+
+	public static String DB_PROPERTY_MYSQL_SIMPLE_JSON = "mysql.simple-json";
+	public static String DB_PROPERTY_ORM_VALIDATE_AFTER_UPDATE = "orm.validate-after-update";
+	public static String DB_PROPERTY_CONNECTION_WAIT_UNTIL_READY_TIME = "connection.wait-until-ready-time";
+	public static String DB_PROPERTY_CONNECTION_FAILURE_RETRY_WINDOW_TIME = "connection.failure-retry-window-time";
 	
-	private static final String DB_PROPERTY_MYSQL_SIMPLE_JSON = "mysql.simple-json";
-	private static final String DB_PROPERTY_ORM_VALIDATE_AFTER_UPDATE = "orm.validate-after-update";
-	
-	private static final List<String> ADDIONAL_ENV_DB_PROPERTIES = Arrays.asList(DB_PROPERTY_MYSQL_SIMPLE_JSON, DB_PROPERTY_ORM_VALIDATE_AFTER_UPDATE);
+	private static final List<String> ADDIONAL_ENV_DB_PROPERTIES = Arrays.asList(DB_PROPERTY_MYSQL_SIMPLE_JSON, DB_PROPERTY_ORM_VALIDATE_AFTER_UPDATE,
+			DB_PROPERTY_CONNECTION_WAIT_UNTIL_READY_TIME, DB_PROPERTY_CONNECTION_FAILURE_RETRY_WINDOW_TIME);
 
 	public static final String BASE_DIR;
 	public static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;

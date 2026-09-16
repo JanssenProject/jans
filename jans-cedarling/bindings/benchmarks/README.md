@@ -13,6 +13,7 @@ Every binding loads the same manifest, runs the same iteration policy (100 warmu
 
 | Binding | Cd to | Invocation |
 |---|---|---|
+| **Rust** | `cedarling` | `cargo run --release --example bench_jsonl` |
 | **Java / UniFFI** | `bindings/cedarling_uniffi/javaApp` | `mvn -q compile exec:java -Dexec.mainClass=org.example.Benchmark` |
 | **Go** | `bindings/cedarling_go` | `LD_LIBRARY_PATH="$(pwd)" go run ./benchmarks/` |
 | **Python** | `bindings/cedarling_python` | `tox -e benchmark` *(or)* `python3 benchmarks/benchmark_cedarling.py` |

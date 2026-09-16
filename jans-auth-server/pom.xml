@@ -414,6 +414,7 @@
 							<exclude>**/selenium/*</exclude>
 							<exclude>**/webdriver/*</exclude>
 							<exclude>**/xml/*</exclude>
+							<exclude>**/comp/db/*</exclude>
 						</excludes>
 
 						<suiteXmlFiles>

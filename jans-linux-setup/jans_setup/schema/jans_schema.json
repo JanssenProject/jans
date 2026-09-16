@@ -5484,7 +5484,9 @@
         "ssnId",
         "jansUmaPermission",
         "uuid",
-        "dpop"
+        "dpop",
+        "jansId",
+        "jti"
       ],
       "must": [
         "objectclass"
@@ -5755,7 +5757,9 @@
         "tknCde",
         "ssnId",
         "jansClaimValues",
-        "dpop"
+        "dpop",
+        "jansId",
+        "jti"
       ],
       "must": [
         "objectclass"

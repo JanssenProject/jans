@@ -530,7 +530,7 @@ JANS_FQDN=$1
 JANS_PERSISTENCE=$2
 JANS_VERSION=$3
 EXT_IP=$4
-JANS_CI_CD_RUN=$5
+JANS_CI_CD_RUN=${5:-${JANS_CI_CD_RUN:-}}
 
 if [[ ! "$JANS_FQDN" ]]; then
     read -rp "Enter Hostname [demoexample.jans.io]: " JANS_FQDN
