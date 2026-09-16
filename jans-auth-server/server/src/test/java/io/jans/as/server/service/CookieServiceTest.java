@@ -7,6 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -27,6 +28,9 @@ public class CookieServiceTest {
 
     @Mock
     private AppConfiguration appConfiguration;
+
+    @Mock
+    private Logger log;
 
     @Mock
     private ExternalCookieService externalCookieService;
@@ -85,6 +89,36 @@ public class CookieServiceTest {
     }
 
     @Test
+    public void createCookie_whenSameSiteIsLowercaseLax_shouldNormalizeToCanonicalLax() {
+        when(appConfiguration.getCookieSameSite()).thenReturn("lax");
+        stubModifyCookieHeaderPassThrough();
+
+        cookieService.createCookie("foo", "foo=bar", httpResponse);
+
+        assertLastSetCookieHeaderContains("SameSite=Lax");
+    }
+
+    @Test
+    public void createCookie_whenSameSiteIsUppercaseStrict_shouldNormalizeToCanonicalStrict() {
+        when(appConfiguration.getCookieSameSite()).thenReturn("STRICT");
+        stubModifyCookieHeaderPassThrough();
+
+        cookieService.createCookie("foo", "foo=bar", httpResponse);
+
+        assertLastSetCookieHeaderContains("SameSite=Strict");
+    }
+
+    @Test
+    public void createCookie_whenSameSiteIsInvalid_shouldFallBackToNone() {
+        when(appConfiguration.getCookieSameSite()).thenReturn("invalid-value");
+        stubModifyCookieHeaderPassThrough();
+
+        cookieService.createCookie("foo", "foo=bar", httpResponse);
+
+        assertLastSetCookieHeaderContains("SameSite=None");
+    }
+
+    @Test
     public void createOPBrowserStateCookie_whenSameSiteIsNull_shouldDefaultToNone() {
         when(appConfiguration.getCookieSameSite()).thenReturn(null);
 
@@ -127,6 +161,24 @@ public class CookieServiceTest {
         cookieService.createOPBrowserStateCookie("opbsValue", httpResponse);
 
         assertLastSetCookieHeaderContains("SameSite=Strict");
+    }
+
+    @Test
+    public void createOPBrowserStateCookie_whenSameSiteIsLowercaseNone_shouldNormalizeToCanonicalNone() {
+        when(appConfiguration.getCookieSameSite()).thenReturn("none");
+
+        cookieService.createOPBrowserStateCookie("opbsValue", httpResponse);
+
+        assertLastSetCookieHeaderContains("SameSite=None");
+    }
+
+    @Test
+    public void createOPBrowserStateCookie_whenSameSiteIsInvalid_shouldFallBackToNone() {
+        when(appConfiguration.getCookieSameSite()).thenReturn("invalid-value");
+
+        cookieService.createOPBrowserStateCookie("opbsValue", httpResponse);
+
+        assertLastSetCookieHeaderContains("SameSite=None");
     }
 
     private void stubModifyCookieHeaderPassThrough() {

@@ -691,8 +691,9 @@ public class AppConfiguration implements Configuration {
             "prompt=none, cross-site POST to the authorization endpoint). Setting Lax breaks silent/iframe-based " +
             "authentication and cross-site POST to the authorization endpoint for RPs hosted on a different site " +
             "than the OP. Setting Strict additionally breaks normal top-level cross-site SSO redirects, " +
-            "effectively disabling SSO for any RP not on the same site as the OP. See auth-server session " +
-            "management docs before changing.", defaultValue = "None")
+            "effectively disabling SSO for any RP not on the same site as the OP. Value is matched case-" +
+            "insensitively against None/Lax/Strict; any other value falls back to None. See auth-server " +
+            "session management docs before changing.", defaultValue = "None")
     private String cookieSameSite = "None";
 
     @DocProperty(description = "enable OAuth Audit Logging")

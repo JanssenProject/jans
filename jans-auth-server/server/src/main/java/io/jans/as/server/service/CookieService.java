@@ -50,6 +50,8 @@ public class CookieService {
     public static final String CONSENT_SESSION_ID_COOKIE_NAME = "consent_session_id";
     private static final String CURRENT_SESSIONS_COOKIE_NAME = "current_sessions";
     private static final String SAME_SITE_NONE = "None";
+    private static final String SAME_SITE_LAX = "Lax";
+    private static final String SAME_SITE_STRICT = "Strict";
 
     @Inject
     private Logger log;
@@ -345,11 +347,31 @@ public class CookieService {
      * See {@link AppConfiguration#getCookieSameSite()}.
      */
     private String appendSameSite(String header) {
+        return header + "; SameSite=" + resolveSameSite();
+    }
+
+    /**
+     * Validates the configured SameSite value case-insensitively against None/Lax/Strict
+     * and returns the canonical spelling. Falls back to "None" (logging the problem) for
+     * blank or unrecognized values instead of throwing, since this runs on every cookie
+     * write - a config typo must not turn into an outage for every request.
+     */
+    private String resolveSameSite() {
         String sameSite = appConfiguration.getCookieSameSite();
         if (StringUtils.isBlank(sameSite)) {
-            sameSite = SAME_SITE_NONE;
+            return SAME_SITE_NONE;
         }
-        return header + "; SameSite=" + sameSite;
+        if (SAME_SITE_NONE.equalsIgnoreCase(sameSite)) {
+            return SAME_SITE_NONE;
+        }
+        if (SAME_SITE_LAX.equalsIgnoreCase(sameSite)) {
+            return SAME_SITE_LAX;
+        }
+        if (SAME_SITE_STRICT.equalsIgnoreCase(sameSite)) {
+            return SAME_SITE_STRICT;
+        }
+        log.error("Invalid cookieSameSite configuration value: '{}'. Expected None, Lax or Strict. Falling back to None.", sameSite);
+        return SAME_SITE_NONE;
     }
 
     public void removeSessionIdCookie(HttpServletResponse httpResponse) {
