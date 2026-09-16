@@ -4,7 +4,6 @@ import com.unboundid.ldap.sdk.DN;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.as.client.TokenResponse;
-import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.IntrospectionResponse;
@@ -94,7 +93,7 @@ public class AuthUtil {
     RolePermissionMappingService rolePermissionMappingService;
     
     @Inject
-    IntrospectionService introspectionService;
+    AuthClientFactory authClientFactory;
 
     public String getOpenIdConfigurationEndpoint() {
         return this.configurationService.find().getOpenIdConfigurationEndpoint();
@@ -768,7 +767,8 @@ public class AuthUtil {
     }
 
     public IntrospectionResponse getIntrospectionResponse(String token) {
-        return introspectionService.introspectToken(token, token);
+        return AuthClientFactory.getIntrospectionResponse(token,
+                token.substring("Bearer".length()).trim(), this.getIssuer(),false);
     }
 
     public String getJsonNodeKeyValue(JsonNode jsonNode, String key) {

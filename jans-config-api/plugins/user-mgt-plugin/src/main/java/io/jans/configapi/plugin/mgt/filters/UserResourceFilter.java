@@ -136,7 +136,7 @@ public class UserResourceFilter extends BaseFilter {
 
         String inum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
         log.debug("Header userInum :{} and  token Introspection inum:{}", userInum, inum);
-        if (StringUtils.isBlank(inum) || inum.equalsIgnoreCase(userInum)) {
+        if (StringUtils.isBlank(inum) || !inum.equalsIgnoreCase(userInum)) {
             throw new WebApplicationException("Header attribute `User-inum` does not correspond to User token",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }

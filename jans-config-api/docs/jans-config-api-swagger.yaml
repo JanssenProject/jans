@@ -15694,19 +15694,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
+        adminCanAccess:
           type: boolean
-        userCanEdit:
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -16678,6 +16678,8 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16687,8 +16689,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
