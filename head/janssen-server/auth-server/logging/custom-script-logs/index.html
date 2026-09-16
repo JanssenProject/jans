@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/developer/customization/custom-client-logs/">
+        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/auth-server/logging/custom-script-logs/">
       
       
-        <link rel="prev" href="../customize-web-pages/">
+        <link rel="prev" href="../../../kubernetes-ops/logs/">
       
       
-        <link rel="next" href="../../../../contribute/implementation-design/">
+        <link rel="next" href="../../../developer/scripts/interception-scripts-debug/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>Custom client logs - Janssen Documentation</title>
+        <title>Custom scripts Logs - Janssen Documentation</title>
       
     
     
@@ -94,7 +94,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#custom-client-logs" class="md-skip">
+        <a href="#custom-scripts-logs" class="md-skip">
           Skip to content
         </a>
       
@@ -145,7 +145,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Custom client logs
+              Custom scripts Logs
             
           </span>
         </div>
@@ -580,177 +580,6 @@
                 
   
   
-    
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../../architecture/" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Architecture & Concepts
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_2" id="__nav_1_2_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-  Architecture & Concepts
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../planning/components/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Components Overview
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    
-  
-  
-  
-    <a href="../../../auth-server/endpoints/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Auth Server Internals
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
   
   
     
@@ -758,424 +587,6 @@
       
         
           
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2_4" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Developer Guide
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_2_4" id="__nav_1_2_4_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_2_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_2_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-  Developer Guide
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../external-libraries/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  External Libraries
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../cors/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  CORS
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../xframe/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  X-Frame-Options
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../managed-beans/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Managed Beans
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2_4_6" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Customization
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_2_4_6" id="__nav_1_2_4_6_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_2_4_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_2_4_6">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-  Customization
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../customize-web-pages/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Customize Web Pages
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      
-        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Custom Client Logs
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="././" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Custom Client Logs
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-        
-
-
-  
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        This content is in progress
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Have questions in the meantime?
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Want to contribute?
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
         
       
         
@@ -1206,14 +617,14 @@
   
   
   
-    <a href="../../../../contribute/implementation-design/" class="md-nav__link">
+    <a href="../../../architecture/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-  Implementation Design
+  Architecture &amp; Concepts
 
     
   </span>
@@ -1253,79 +664,6 @@
       
         
       
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../reference/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Reference
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
         
       
         
@@ -1348,7 +686,7 @@
   
   
   
-    <a href="../../../auth-server/" class="md-nav__link">
+    <a href="../../" class="md-nav__link">
       
   
   
@@ -1455,6 +793,8 @@
                 
   
   
+    
+  
   
   
     
@@ -1484,6 +824,586 @@
     
     
       
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../test-debug/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Test & Debug
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Test & Debug
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Logging
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_5_2" id="__nav_1_5_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_5_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Logging
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../standard-logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Standard Logs
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../log-levels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Log Levels
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../audit-logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Audit Logs
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Custom Logs
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../log4j2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  log4j2 Configuration
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../fido/logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  FIDO Logs
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../scim/logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  SCIM Logs
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vm-ops/logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  VM Logs
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../kubernetes-ops/logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Kubernetes Logs
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Custom Scripts Logs
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Custom Scripts Logs
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Overview
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-custom-logging-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How custom logging works
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-log-statements-python-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Adding log statements Python example
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-log-statements-java-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Adding log statements Java example
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-the-log-level-and-target" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Configuring the log level and target
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viewing-the-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Viewing the logs
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Best practices
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#have-questions-in-the-meantime" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Have questions in the meantime?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#want-to-contribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Want to contribute?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
         
         
       
@@ -1494,14 +1414,14 @@
   
   
   
-    <a href="../../../test-debug/" class="md-nav__link">
+    <a href="../../../developer/scripts/interception-scripts-debug/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-  Test &amp; Debug
+  Debugging
 
     
   </span>
@@ -1514,6 +1434,246 @@
     </a>
   
 
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../kubernetes-ops/health-check/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Health Checks
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../reporting-metrics/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Monitoring
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../contribute/testing/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Testing
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../install/install-faq/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  FAQ & Troubleshooting
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -1840,10 +2000,76 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        This content is in progress
+        Overview
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-custom-logging-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How custom logging works
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-log-statements-python-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Adding log statements Python example
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-log-statements-java-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Adding log statements Java example
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-the-log-level-and-target" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Configuring the log level and target
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viewing-the-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Viewing the logs
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Best practices
       </span>
     </span>
   </a>
@@ -1977,16 +2203,18 @@
       
         
       
+        
+      
     
     
     
     
       <li class="md-path__item">
-        <a href="../../../architecture/" class="md-path__link">
+        <a href="../../../test-debug/" class="md-path__link">
           
   
   <span class="md-ellipsis">
-    Architecture & Concepts
+    Test & Debug
   </span>
 
         </a>
@@ -2015,32 +2243,10 @@
       
         
       
-    
-    
-    
-    
-      <li class="md-path__item">
-        <a href="../../" class="md-path__link">
-          
-  
-  <span class="md-ellipsis">
-    Developer Guide
-  </span>
-
-        </a>
-      </li>
-    
-  
-
+        
       
         
-  
-  
-    
-    
       
-        
-          
         
       
         
@@ -2056,7 +2262,7 @@
           
   
   <span class="md-ellipsis">
-    Customization
+    Logging
   </span>
 
         </a>
@@ -2077,13 +2283,158 @@
   
 
 
-<h1 id="custom-client-logs">Custom client logs<a class="headerlink" href="#custom-client-logs" title="Permanent link">#</a></h1>
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
+<h1 id="custom-scripts-logs">Custom scripts Logs<a class="headerlink" href="#custom-scripts-logs" title="Permanent link">#</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p><a href="../../../developer/scripts/">Interception scripts</a>
+(also called the custom scripts) 
+are widely used to customize the behavior of the Janssen Server.</p>
+<p>While writing or debugging any custom script, you'll often want visibility
+into what your code is doing at runtime — which branch of logic ran, what
+values were read, why a particular decision was made, and so on.</p>
+<p>This page explains how to add your own log statements inside a custom
+script, where those messages end up, and how to control their verbosity.
+The mechanism described here works the same way regardless of which
+interception script type you're implementing person authentication,
+consent gathering, client registration, update token, introspection,
+dynamic scope, application session, and the rest all support it identically.</p>
+<h2 id="how-custom-logging-works">How custom logging works<a class="headerlink" href="#how-custom-logging-works" title="Permanent link">#</a></h2>
+<p>Every interception script has access to a dedicated logger, separate from
+the Auth Server's main application logger. Writing to this logger sends
+your messages to a script-specific log file instead of mixing them into the
+general Auth Server log, which makes it much easier to isolate the output
+of your own code from everything else the server is doing.</p>
+<ul>
+<li><strong>Java scripts</strong> use SLF4J's <code>Logger</code>, obtained from
+  <code>LoggerFactory.getLogger(CustomScriptManager.class)</code>.</li>
+<li><strong>Python (Jython) scripts</strong> a logger named <code>scriptLogger</code> is injected
+  into the script's namespace automatically; you do not need to import or
+  instantiate anything.</li>
+</ul>
+<p>Anything written through this logger is routed to:</p>
+<div class="highlight"><pre><span></span><code>/opt/jans/jetty/jans-auth/logs/jans-auth_script.log
+</code></pre></div>
+<p>on a VM/package installation, or to the <code>auth-server</code> container's
+<code>script_log_target</code> output (<code>FILE</code> or <code>STDOUT</code>) on a container/Kubernetes
+installation. This keeps custom script output separate from <code>jans-auth.log</code>,
+<code>jans-auth_persistence.log</code>, and the other standard Auth Server logs, no
+matter which script type wrote it.</p>
+<h2 id="adding-log-statements-python-example">Adding log statements Python example<a class="headerlink" href="#adding-log-statements-python-example" title="Permanent link">#</a></h2>
+<p>The example below shows the pattern in a generic script. The same
+<code>scriptLogger</code> calls apply whether <code>init</code>, <code>destroy</code>, or any interface
+method belongs to a <code>PersonAuthenticationType</code>, <code>ClientRegistrationType</code>,
+<code>UpdateTokenType</code>, <code>ConsentGatheringType</code>, or any other script type.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.SOME_PACKAGE</span><span class="w"> </span><span class="kn">import</span> <span class="n">SomeScriptType</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomScript</span><span class="p">(</span><span class="n">SomeScriptType</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="n">scriptLogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Custom script. Initialized&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">someInterfaceMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="n">scriptLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Entering someInterfaceMethod with context: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scriptLogger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Context was not supplied - aborting&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">scriptLogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing completed successfully&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="n">scriptLogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Custom script. Destroyed&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+</code></pre></div>
+<p><code>scriptLogger</code> supports the usual levels — <code>debug</code>, <code>info</code>, <code>warning</code>
+(<code>warn</code>), <code>error</code>, <code>fatal</code> — matching SLF4J semantics.</p>
+<h2 id="adding-log-statements-java-example">Adding log statements Java example<a class="headerlink" href="#adding-log-statements-java-example" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.SOME_PACKAGE.SomeScriptType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CustomScript</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">SomeScriptType</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="c1">// Writing to this logger sends output to jans-auth_script.log</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">scriptLogger</span><span class="w"> </span><span class="o">=</span>
+<span class="w">            </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Custom script. Initialized&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Other interface methods omitted for brevity</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p>Do not use <code>System.out.println</code> or Python's built-in <code>print</code> for
+diagnostics in production scripts. Those calls bypass the logging
+framework entirely, are not level-controlled, and typically end up
+mixed into <code>jans-auth.log</code> or lost.</p>
+</blockquote>
+<h2 id="configuring-the-log-level-and-target">Configuring the log level and target<a class="headerlink" href="#configuring-the-log-level-and-target" title="Permanent link">#</a></h2>
+<p>Script log verbosity is controlled by the Auth Server's <code>script_log_level</code>
+(and, on containerized deployments, <code>script_log_target</code>) setting, which is
+managed the same way as other Auth Server logging properties, and applies
+uniformly to every custom script regardless of type.</p>
+<p><strong>Using Jans TUI</strong></p>
+<ol>
+<li>Run <code>jans tui</code>.</li>
+<li>Navigate to <strong>Auth Server → Logging</strong>.</li>
+<li>Set the logging level (<code>TRACE</code>, <code>DEBUG</code>, <code>INFO</code>, <code>WARN</code>, <code>ERROR</code>, <code>FATAL</code>,
+   or <code>OFF</code>) that should apply to script output, then save.</li>
+</ol>
+<p><strong>Using Jans CLI</strong></p>
+<div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-config-logging
+</code></pre></div>
+<p>Update the <code>loggingLevel</code> field and <code>PUT</code> it back with <code>put-config-logging</code>
+to raise or lower verbosity for example, switch to <code>DEBUG</code> or <code>TRACE</code>
+temporarily while diagnosing a script issue, then return to <code>INFO</code>
+afterward to avoid excessive log volume in production.</p>
+<p><strong>On Kubernetes</strong></p>
+<p>Override <code>scriptLogLevel</code> (and optionally <code>scriptLogTarget</code>) under
+<code>global.auth-server.appLoggers</code> in your Helm values file and apply with
+<code>helm upgrade</code>.</p>
+<h2 id="viewing-the-logs">Viewing the logs<a class="headerlink" href="#viewing-the-logs" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>VM / package install:</strong> tail the file directly:
+  <div class="highlight"><pre><span></span><code>tail<span class="w"> </span>-f<span class="w"> </span>/opt/jans/jetty/jans-auth/logs/jans-auth_script.log
+</code></pre></div></li>
+<li><strong>Kubernetes:</strong>
+  <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>deployment/&lt;helm-release-name&gt;-auth-server<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+</code></pre></div>
+  (only if <code>script_log_target</code> is set to <code>STDOUT</code>; otherwise read the file
+  from inside the pod).</li>
+</ul>
+<h2 id="best-practices">Best practices<a class="headerlink" href="#best-practices" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Log at the right level.</strong> Use <code>debug</code>/<code>trace</code> for verbose, per-request
+  detail you only need while developing; use <code>info</code> for high-level
+  lifecycle events (script init/destroy, a key decision point); use
+  <code>warning</code>/<code>error</code> for conditions that need operator attention.</li>
+<li><strong>Never log secrets.</strong> Avoid writing passwords, client secrets, tokens,
+  or full request/response headers to the script log.</li>
+<li><strong>Include a correlation identifier.</strong> Logging a request ID, session ID,
+  or similar identifier alongside each message makes it far easier to trace
+  a single flow through the log when several script types or executions
+  are interleaved.</li>
+<li><strong>Keep it low-volume in production.</strong> High-frequency <code>debug</code>/<code>trace</code>
+  logging in a script that runs on every request can generate large log
+  volumes; lower the level once you've finished diagnosing an issue.</li>
+</ul>
 <h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/">community chat on Zulip</a>. Any questions you have will help determine what information our documentation should cover.</p>
+<p>If something here doesn't match what you're seeing, ask through
+<a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or
+the <a href="https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/">community chat on Zulip</a>.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<p>If you'd like to improve or extend this page, see the
+<a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
 
   <nav class="md-tags" >
@@ -2099,14 +2450,14 @@
       
       
       
-        <span class="md-tag">customization</span>
+        <span class="md-tag">auth-server</span>
       
     
       
       
       
       
-        <span class="md-tag">developer</span>
+        <span class="md-tag">custom-script-log</span>
       
     
   </nav>
@@ -2133,7 +2484,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 16, 2025
+    September 16, 2026
   </span>
 
     
@@ -2143,7 +2494,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    September 27, 2024
+    September 16, 2026
   </span>
 
     

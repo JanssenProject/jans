@@ -127,9 +127,6 @@
         <loc>https://docs.jans.io/head/janssen-server/developer/customization/customize-web-pages/</loc>
       </url>
       <url>
-        <loc>https://docs.jans.io/head/janssen-server/developer/customization/custom-client-logs/</loc>
-      </url>
-      <url>
         <loc>https://docs.jans.io/head/contribute/implementation-design/</loc>
       </url>
       <url>
@@ -830,6 +827,9 @@
       </url>
       <url>
         <loc>https://docs.jans.io/head/janssen-server/kubernetes-ops/logs/</loc>
+      </url>
+      <url>
+        <loc>https://docs.jans.io/head/janssen-server/auth-server/logging/custom-script-logs/</loc>
       </url>
       <url>
         <loc>https://docs.jans.io/head/janssen-server/developer/scripts/interception-scripts-debug/</loc>
