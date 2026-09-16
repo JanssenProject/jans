@@ -143,7 +143,7 @@ class UpdateToken(UpdateTokenType):
         exp = jwtClaims.getClaimAsLong("exp")
         if exp is None:
             raise BadRequestException("The User-Info JWT does not contain the required exp claim")
-        if System.currentTimeMillis() / 1000 > exp:
+        if System.currentTimeMillis() / 1000 >= exp:
             print "Exception occured. The User-Info JWT has expired"
             raise BadRequestException("The User-Info JWT has expired")
 
