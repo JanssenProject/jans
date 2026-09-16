@@ -2385,10 +2385,39 @@ trustworthy must set this explicitly.</strong></p>
 are skipped, and the first remaining address is recorded. Reading from the right matters because a client
 can prepend any value before the real proxy appends to the chain — so the leftmost entry is only used when
 no closer untrusted hop exists, such as a single-entry header from a trusted proxy.</p>
+<p><code>X-Forwarded-For</code> is the only header consulted in this mode. The older alternatives (<code>Proxy-Client-IP</code>,
+<code>WL-Proxy-Client-IP</code> and the <code>HTTP_*</code> variants) are ignored, because a reverse proxy overwrites
+<code>X-Forwarded-For</code> but passes other request headers through as the client sent them. Legacy mode still
+reads all of them. If nothing usable is found, the connecting address is recorded.</p>
 <p>Ranges accept IPv4 and IPv6 CIDR notation; a bare address is treated as a full-length mask. An
-IPv4-mapped IPv6 address such as <code>::ffff:10.1.2.3</code> matches an IPv4 range, since a dual-stack JVM may report
-the connecting address in that form. Both sides of a comparison must be IP literals — a hostname is
-rejected and logged rather than resolved, because this runs on the request path.</p>
+IPv4-mapped IPv6 address such as <code>::ffff:10.1.2.3</code> matches an IPv4 range, since a dual-stack JVM may
+report the connecting address in that form.</p>
+<p>A range may also be <em>written</em> in that form. Its prefix is then read on whichever scale it can only
+mean, so an existing IPv4-scale range keeps working:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Prefix on a mapped range</th>
+<th style="text-align: left;">Read as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>0</code>–<code>32</code></td>
+<td style="text-align: left;">IPv4 scale, as written — <code>::ffff:10.0.0.0/8</code> selects <code>10.0.0.0/8</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>96</code>–<code>128</code></td>
+<td style="text-align: left;">IPv6 scale, less the 96 bits of the mapping — <code>::ffff:10.0.0.0/104</code> also selects <code>10.0.0.0/8</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>33</code>–<code>95</code></td>
+<td style="text-align: left;">Rejected and logged: the prefix covers part of the mapping itself, so it means nothing on either scale</td>
+</tr>
+</tbody>
+</table>
+<p>Both sides of a comparison must be IP literals — a hostname is rejected and logged rather than
+resolved, because this runs on the request path.</p>
 <blockquote>
 <p><strong>Note on a common topology.</strong> Where a reverse proxy runs on the same host, requests reach the FIDO2
 server from <code>127.0.0.1</code>, and so do any sent directly to it. Trusting loopback therefore does not, on its
@@ -2600,7 +2629,7 @@ framing policy of every existing deployment.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 15, 2026
+    September 16, 2026
   </span>
 
     
