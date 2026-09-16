@@ -58,9 +58,16 @@ are skipped, and the first remaining address is recorded. Reading from the right
 can prepend any value before the real proxy appends to the chain — so the leftmost entry is only used when
 no closer untrusted hop exists, such as a single-entry header from a trusted proxy.
 
+`X-Forwarded-For` is the only header consulted in this mode. The older alternatives (`Proxy-Client-IP`,
+`WL-Proxy-Client-IP` and the `HTTP_*` variants) are ignored, because a reverse proxy overwrites
+`X-Forwarded-For` but passes other request headers through as the client sent them. Legacy mode still
+reads all of them. If nothing usable is found, the connecting address is recorded.
+
 Ranges accept IPv4 and IPv6 CIDR notation; a bare address is treated as a full-length mask. An
 IPv4-mapped IPv6 address such as `::ffff:10.1.2.3` matches an IPv4 range, since a dual-stack JVM may report
-the connecting address in that form. Both sides of a comparison must be IP literals — a hostname is
+the connecting address in that form. A range may also be *written* in that form, in which case its prefix
+is read on the IPv6 scale — `::ffff:10.0.0.0/104` and `10.0.0.0/8` select the same addresses. A prefix
+below 96 on a mapped range reaches into the mapping itself and is rejected. Both sides of a comparison must be IP literals — a hostname is
 rejected and logged rather than resolved, because this runs on the request path.
 
 > **Note on a common topology.** Where a reverse proxy runs on the same host, requests reach the FIDO2
