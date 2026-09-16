@@ -55,7 +55,7 @@ SameSite-aware, spec-compliant clients preserves the cross-site SSO behavior
 these cookies already relied on before this attribute existed. It is not
 identical to sending no `SameSite` attribute at all: a documented set of older
 or non-compliant clients (e.g. Safari on macOS 10.14/iOS 12, Chrome/Chromium
-&lt;= 67, some embedded WebViews, UC Browser &lt; 12.13.2) mishandle an
+51-66, some embedded WebViews, UC Browser &lt; 12.13.2) mishandle an
 explicit `SameSite=None` value and may reject or drop the cookie even though
 they accepted the same cookie with no `SameSite` attribute. Deployments that
 must still support such legacy clients should account for this before
