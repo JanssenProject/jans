@@ -58,10 +58,26 @@ are skipped, and the first remaining address is recorded. Reading from the right
 can prepend any value before the real proxy appends to the chain — so the leftmost entry is only used when
 no closer untrusted hop exists, such as a single-entry header from a trusted proxy.
 
+`X-Forwarded-For` is the only header consulted in this mode. The older alternatives (`Proxy-Client-IP`,
+`WL-Proxy-Client-IP` and the `HTTP_*` variants) are ignored, because a reverse proxy overwrites
+`X-Forwarded-For` but passes other request headers through as the client sent them. Legacy mode still
+reads all of them. If nothing usable is found, the connecting address is recorded.
+
 Ranges accept IPv4 and IPv6 CIDR notation; a bare address is treated as a full-length mask. An
-IPv4-mapped IPv6 address such as `::ffff:10.1.2.3` matches an IPv4 range, since a dual-stack JVM may report
-the connecting address in that form. Both sides of a comparison must be IP literals — a hostname is
-rejected and logged rather than resolved, because this runs on the request path.
+IPv4-mapped IPv6 address such as `::ffff:10.1.2.3` matches an IPv4 range, since a dual-stack JVM may
+report the connecting address in that form.
+
+A range may also be *written* in that form. Its prefix is then read on whichever scale it can only
+mean, so an existing IPv4-scale range keeps working:
+
+| Prefix on a mapped range | Read as |
+| :--- | :--- |
+| `0`–`32` | IPv4 scale, as written — `::ffff:10.0.0.0/8` selects `10.0.0.0/8` |
+| `96`–`128` | IPv6 scale, less the 96 bits of the mapping — `::ffff:10.0.0.0/104` also selects `10.0.0.0/8` |
+| `33`–`95` | Rejected and logged: the prefix covers part of the mapping itself, so it means nothing on either scale |
+
+Both sides of a comparison must be IP literals — a hostname is rejected and logged rather than
+resolved, because this runs on the request path.
 
 > **Note on a common topology.** Where a reverse proxy runs on the same host, requests reach the FIDO2
 > server from `127.0.0.1`, and so do any sent directly to it. Trusting loopback therefore does not, on its

@@ -716,12 +716,22 @@ public class MetricService extends io.jans.service.metric.MetricService {
         log.debug("FIDO2 Timer updated: {} - {} ms", fido2MetricType.getMetricName(), duration);
     }
 
-    /** Proxy headers that carry a single address rather than a hop chain. */
-    private static final String[] SINGLE_VALUE_PROXY_HEADERS = { "Proxy-Client-IP", "WL-Proxy-Client-IP",
+    /**
+     * The proxy headers other than X-Forwarded-For, consulted only in legacy mode. Trusted mode ignores
+     * them: a proxy overwrites X-Forwarded-For but passes these through as the client sent them.
+     */
+    private static final String[] LEGACY_PROXY_HEADERS = { "Proxy-Client-IP", "WL-Proxy-Client-IP",
             "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP", "HTTP_CLIENT_IP",
             "HTTP_FORWARDED_FOR", "HTTP_FORWARDED" };
 
     private static final String X_FORWARDED_FOR = "X-Forwarded-For";
+
+    /** Bits the ::ffff: mapping occupies before the embedded IPv4 address. */
+    private static final int IPV4_MAPPED_PREFIX_BITS = 96;
+
+    private static final int IPV4_ADDRESS_BITS = 32;
+
+    private static final int IPV6_ADDRESS_BITS = 128;
 
     /**
      * Extracts the client IP to record against a metrics entry.
@@ -793,7 +803,11 @@ public class MetricService extends io.jans.service.metric.MetricService {
             }
         }
 
-        return firstUsableSingleValueHeader(request, directRemoteAddr);
+        // No usable X-Forwarded-For. The alternative proxy headers are deliberately NOT consulted here:
+        // a proxy overwrites X-Forwarded-For but passes other request headers through untouched, so one
+        // the client set would arrive intact and has passed no trusted-range check. A deployment that has
+        // declared its proxies is stating that X-Forwarded-For is the contract.
+        return directRemoteAddr;
     }
 
     /**
@@ -810,7 +824,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             return leftmost;
         }
 
-        for (String header : SINGLE_VALUE_PROXY_HEADERS) {
+        for (String header : LEGACY_PROXY_HEADERS) {
             leftmost = leftmostUsableAddress(request.getHeader(header));
             if (leftmost != null) {
                 return leftmost;
@@ -833,20 +847,6 @@ public class MetricService extends io.jans.service.metric.MetricService {
         String leftmost = headerValue.split(",")[0].trim();
 
         return isUsableForwardedAddress(leftmost) ? leftmost : null;
-    }
-
-    private String firstUsableSingleValueHeader(HttpServletRequest request, String directRemoteAddr) {
-        for (String header : SINGLE_VALUE_PROXY_HEADERS) {
-            String ip = request.getHeader(header);
-            if (ip != null) {
-                ip = ip.trim();
-                if (isUsableForwardedAddress(ip)) {
-                    return ip;
-                }
-            }
-        }
-
-        return directRemoteAddr;
     }
 
     private boolean isUsableForwardedAddress(String value) {
@@ -898,11 +898,18 @@ public class MetricService extends io.jans.service.metric.MetricService {
                 return false;
             }
 
+            // Written as IPv6 is decided from the text, not the parsed type: InetAddress.getByName
+            // collapses an IPv4-mapped literal to an Inet4Address itself, so the parsed object no longer
+            // remembers how the administrator wrote it, while the prefix they chose does.
+            boolean writtenAsIpv6 = parts[0].indexOf(':') >= 0;
             int maxBits = cidrBytes.length * Byte.SIZE;
-            int prefixLength = (parts.length == 2) ? Integer.parseInt(parts[1].trim()) : maxBits;
+            int typedPrefix = (parts.length == 2) ? Integer.parseInt(parts[1].trim())
+                    : (writtenAsIpv6 ? IPV6_ADDRESS_BITS : IPV4_ADDRESS_BITS);
+            int prefixLength = prefixAfterNormalising(typedPrefix, writtenAsIpv6, cidrBytes.length);
             if ((prefixLength < 0) || (prefixLength > maxBits)) {
+                // Reported as typed, since that is what the administrator wrote.
                 log.warn("Ignoring trusted proxy range '{}': prefix length {} is out of range", cidr,
-                        prefixLength);
+                        typedPrefix);
 
                 return false;
             }
@@ -932,6 +939,35 @@ public class MetricService extends io.jans.service.metric.MetricService {
         }
 
         return isValidIpv4Address(value);
+    }
+
+    /**
+     * Re-expresses a prefix length against the normalised address.
+     * <p>
+     * An administrator writes the prefix against the range as typed, but {@link #normalizeAddress} narrows
+     * an IPv4-mapped range to its 4-byte form. A prefix written against the 16-byte form therefore has to
+     * shed the 96 bits the {@code ::ffff:} mapping occupies to keep meaning the same thing, so that
+     * {@code ::ffff:10.0.0.0/104} and {@code 10.0.0.0/8} select the same addresses. Without this the
+     * former is rejected as out of range and the range is silently ignored.
+     * <p>
+     * A prefix of 32 or less is left as written: that form already worked and is a natural thing to
+     * configure, so re-reading it would break a range in use. Between 33 and 95 a mapped prefix covers
+     * part of the mapping itself and is meaningless either way; it goes negative here and is rejected.
+     */
+    private static int prefixAfterNormalising(int typedPrefix, boolean writtenAsIpv6, int normalisedLength) {
+        boolean narrowedToIpv4 = writtenAsIpv6 && (normalisedLength == Integer.BYTES);
+        if (!narrowedToIpv4) {
+            return typedPrefix;
+        }
+
+        // A prefix that would fit an IPv4 mask is left alone. Writing ::ffff:10.0.0.0/8 is natural when
+        // the address was copied from a log on a dual-stack JVM, it already worked, and re-reading it on
+        // the IPv6 scale would silently stop honouring a range that is in use.
+        if (typedPrefix <= IPV4_ADDRESS_BITS) {
+            return typedPrefix;
+        }
+
+        return typedPrefix - IPV4_MAPPED_PREFIX_BITS;
     }
 
     private static boolean matchesPrefix(byte[] cidrBytes, byte[] testBytes, int prefixLength) {
