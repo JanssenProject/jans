@@ -112,7 +112,7 @@ class UpdateToken(UpdateTokenType):
 
     def validateSignature(self, userInfoJwt):
         if userInfoJwt.getHeader().getSignatureAlgorithm().getAlgorithm() == None:
-            print "Error: Unsigned JWT not allowed. The User-Info JWT is not valid"
+            print "Exception occured. Unsigned JWT not allowed. The User-Info JWT is not valid"
             raise BadRequestException("Unsigned JWT not allowed. The User-Info JWT is not valid")
 
         configObj = CdiUtil.bean(ConfigurationFactory)
@@ -120,21 +120,23 @@ class UpdateToken(UpdateTokenType):
         authCryptoProvider = AuthCryptoProvider()
         validJwt = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), jwks, None, userInfoJwt.getHeader().getSignatureAlgorithm())
         if not validJwt:
-            print "Error: The User-Info JWT is not valid"
+            print "Exception occured. The User-Info JWT is not valid"
             raise BadRequestException("The User-Info JWT is not valid")
 
     def validateAudience(self, jwtClaims, adminUIConfig):
         aud = jwtClaims.getClaim("aud")
         if aud is None:
+            print "Exception occured. The User-Info JWT does not contain the required aud claim"
             raise BadRequestException("The User-Info JWT does not contain the required aud claim")
 
         clientId = adminUIConfig.getMainSettings().getOidcConfig().getAuiWebClient().getClientId()
         if clientId is None:
+            print "Exception occured. The AUI web client id is not configured"
             raise BadRequestException("The AUI web client id is not configured")
 
         audiences = [aud] if isinstance(aud, String) else aud
         if clientId not in audiences:
-            print "Error: The User-Info JWT aud {} does not match AUI web client id {}".format(audiences, clientId)
+            print "Exception occured. The User-Info JWT aud {} does not match AUI web client id {}".format(audiences, clientId)
             raise BadRequestException("The User-Info JWT audience does not match the client")
 
     def validateExpiration(self, jwtClaims):
@@ -142,11 +144,13 @@ class UpdateToken(UpdateTokenType):
         if exp is None:
             raise BadRequestException("The User-Info JWT does not contain the required exp claim")
         if System.currentTimeMillis() / 1000 > exp:
+            print "Exception occured. The User-Info JWT has expired"
             raise BadRequestException("The User-Info JWT has expired")
 
     def validateUserInum(self, jwtClaims):
         userInum = jwtClaims.getClaim("inum")
         if userInum is None:
+            print "Exception occured. The User-Info JWT does not contain the required (user) inum claim"
             raise BadRequestException("The User-Info JWT does not contain the required (user) inum claim")
         return userInum
 
@@ -167,7 +171,7 @@ class UpdateToken(UpdateTokenType):
                 scopesWithMatchingTags = self.filterScopesMatchingWithTags(permissionTagArr, permissions)
                 scopes = self.createScopeListMatchingWithTags(scopesWithMatchingTags, scopes)
         except Exception as e:
-            print "Error:  Failed to fetch/parse Admin UI roleScopeMapping from DB"
+            print "Exception occured. Failed to fetch/parse Admin UI roleScopeMapping from DB"
             print e
         return scopes
 
