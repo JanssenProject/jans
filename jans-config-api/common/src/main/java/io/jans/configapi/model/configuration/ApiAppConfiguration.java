@@ -24,12 +24,21 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Protection mode for the Lock server (OAuth or Cedarling)")
     private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
 
-    @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `true`Default value `false`.")
+    @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `false`.")
     private boolean disableLoggerTimer;
-
+    
+    @Schema(description = "Flag to enable/disable User Role-Permission mapping check while authentication. Default value `true`.")
+    private boolean userRolePermissionValidationEnabled = true;
+    
+    @Schema(description = "Flag to enable/disable validating `User-inum` in Introspection response. Default value `true`.")
+    private boolean validateUserInumInIntrospectionFlag = true;
+        
+    @Schema(description = "Flag to enable/disable to get user-role in Introspection response. Default value `true`.")
+    private boolean fetchUserRoleInIntrospectionFlag = true;
+    
     @Schema(description = "Flag to enable/disable request audit. Default value `false`.")
     private boolean disableAuditLogger;
-
+ 
     @Schema(description = "Flag to enable/disable check if custom attribue is declared in schema. Default value `true`.")
     private boolean customAttributeValidationEnabled;
 
@@ -152,6 +161,30 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setDisableLoggerTimer(boolean disableLoggerTimer) {
         this.disableLoggerTimer = disableLoggerTimer;
+    }
+    
+    public boolean isUserRolePermissionValidationEnabled() {
+        return userRolePermissionValidationEnabled;
+    }
+
+    public void setUserRolePermissionValidationEnabled(boolean userRolePermissionValidationEnabled) {
+        this.userRolePermissionValidationEnabled = userRolePermissionValidationEnabled;
+    }
+    
+    public boolean isValidateUserInumInIntrospectionFlag() {
+        return validateUserInumInIntrospectionFlag;
+    }
+
+    public void setValidateUserInumInIntrospectionFlag(boolean validateUserInumInIntrospectionFlag) {
+        this.validateUserInumInIntrospectionFlag = validateUserInumInIntrospectionFlag;
+    }
+    
+    public boolean isFetchUserRoleInIntrospectionFlag() {
+        return fetchUserRoleInIntrospectionFlag;
+    }
+
+    public void setFetchUserRoleInIntrospectionFlag(boolean fetchUserRoleInIntrospectionFlag) {
+        this.fetchUserRoleInIntrospectionFlag = fetchUserRoleInIntrospectionFlag;
     }
 
     public boolean isDisableAuditLogger() {
@@ -417,6 +450,9 @@ public class ApiAppConfiguration implements Configuration {
     public String toString() {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
                 + " ,protectionMode=" + protectionMode + ", disableLoggerTimer=" + disableLoggerTimer
+                +" ,userRolePermissionValidationEnabled=" + userRolePermissionValidationEnabled
+                +" ,validateUserInumInIntrospectionFlag=" + validateUserInumInIntrospectionFlag
+                +" ,fetchUserRoleInIntrospectionFlag=" + fetchUserRoleInIntrospectionFlag
                 + ", disableAuditLogger=" + disableAuditLogger + ", customAttributeValidationEnabled="
                 + customAttributeValidationEnabled + ", acrValidationEnabled=" + acrValidationEnabled
                 + ", returnClientSecretInResponse=" + returnClientSecretInResponse

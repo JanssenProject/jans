@@ -1658,6 +1658,9 @@ components:
           type: boolean
         fido2MetricsAggregationEnabled:
           type: boolean
+        fido2MetricsAggregationInterval:
+          type: integer
+          format: int32
         personCustomObjectClassList:
           type: array
           items:
@@ -1766,8 +1769,21 @@ components:
           type: object
           additionalProperties:
             type: object
+        fallbackEvents:
+          type: integer
+          format: int64
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
         period:
           type: string
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
         registrationAttempts:
           type: integer
           format: int64
@@ -1777,40 +1793,27 @@ components:
         registrationFailures:
           type: integer
           format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
         authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationFailures:
           type: integer
           format: int64
         authenticationSuccesses:
           type: integer
           format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        authenticationSuccessRate:
+        authenticationAvgDuration:
           type: number
           format: double
         registrationAvgDuration:
           type: number
           format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
