@@ -51,10 +51,15 @@ The following Auth Server configuration properties are related to sessions:
 
 `cookieSameSite` controls the `SameSite` attribute of all cookies the OP
 creates, including the session-related ones. It defaults to `None` so that
-upgrading does not change existing
-behavior for any deployment. `None` (with the `Secure` attribute, which is
-always set) provides no CSRF hardening beyond what `Secure`+`HttpOnly` already
-give, but it preserves every cross-site SSO flow that Janssen supports today.
+upgrading does not change existing behavior for any deployment.
+
+`CookieService` sets `Secure` on all of these cookies, but `HttpOnly` only on
+`session_id`, `uma_session_id`, `current_sessions`, `consent_session_id` and
+`rp_origin_id` - `session_state` and `opbs` intentionally omit `HttpOnly` so
+OP-hosted iframe JavaScript can read them for OIDC Session Management. Neither
+`Secure` (HTTPS-only transmission) nor `HttpOnly` (blocks JS access) is a CSRF
+defense; `SameSite=None` adds no CSRF hardening of its own, it simply
+preserves every cross-site SSO flow that Janssen supports today.
 
 Changing the value tightens CSRF defense-in-depth but can break SSO for RPs
 hosted on a different site (eTLD+1) than the OP, which is the common Janssen
