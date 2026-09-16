@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -117,6 +118,21 @@ public class CookieServiceTest {
         cookieService.createCookie("foo", "foo=bar", httpResponse);
 
         assertLastSetCookieHeaderContains("SameSite=None");
+    }
+
+    @Test
+    public void createCookie_whenExternalCookieScriptReplacesHeader_shouldUseScriptOutput() {
+        // By design, ExternalCookieService.modifyCookieHeader() is a full-override hook that
+        // runs after SameSite (and every other attribute) is applied, so a script can replace
+        // the header, including dropping SameSite - same as it already could for Secure/HttpOnly.
+        when(appConfiguration.getCookieSameSite()).thenReturn("Lax");
+        when(externalCookieService.modifyCookieHeader(eq("foo"), anyString())).thenReturn("foo=bar; Path=/");
+
+        cookieService.createCookie("foo", "foo=bar", httpResponse);
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(httpResponse).addHeader(eq("Set-Cookie"), captor.capture());
+        assertEquals(captor.getValue(), "foo=bar; Path=/");
     }
 
     @Test

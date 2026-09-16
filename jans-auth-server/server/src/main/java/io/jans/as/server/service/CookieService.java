@@ -336,6 +336,11 @@ public class CookieService {
             }
         }
 
+        // SameSite is applied before the external cookie script, same as every other
+        // attribute set above (Path/Secure/HttpOnly/Expires/Domain): modifyCookieHeader()
+        // is an intentional full-override hook, so a script can already replace or strip
+        // any of them. Applying SameSite after the hook instead would single it out from
+        // that contract and would double it up for a script that already appends its own.
         header = appendSameSite(header);
         header = externalCookieService.modifyCookieHeader(cookieName, header);
 
