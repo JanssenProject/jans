@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertTrue;
@@ -116,6 +117,31 @@ public class CookieServiceTest {
         cookieService.createCookie("foo", "foo=bar", httpResponse);
 
         assertLastSetCookieHeaderContains("SameSite=None");
+    }
+
+    @Test
+    public void createCookie_whenSameInvalidValueUsedRepeatedly_shouldLogItOnlyOnce() {
+        // LOGGED_INVALID_SAME_SITE_VALUES is static, so use a value unique to this test
+        // to avoid interference from other tests exercising the same invalid value.
+        String invalidValue = "repeated-invalid-value";
+        when(appConfiguration.getCookieSameSite()).thenReturn(invalidValue);
+        stubModifyCookieHeaderPassThrough();
+
+        cookieService.createCookie("foo", "foo=bar", httpResponse);
+        cookieService.createCookie("foo", "foo=bar", httpResponse);
+
+        verify(log, times(1)).error(anyString(), eq(invalidValue));
+    }
+
+    @Test
+    public void createCookie_whenNewDistinctInvalidValue_shouldStillLogIt() {
+        String invalidValue = "distinct-invalid-value";
+        when(appConfiguration.getCookieSameSite()).thenReturn(invalidValue);
+        stubModifyCookieHeaderPassThrough();
+
+        cookieService.createCookie("foo", "foo=bar", httpResponse);
+
+        verify(log, times(1)).error(anyString(), eq(invalidValue));
     }
 
     @Test

@@ -33,6 +33,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.jans.as.model.util.StringUtils.toList;
 
@@ -52,6 +53,10 @@ public class CookieService {
     private static final String SAME_SITE_NONE = "None";
     private static final String SAME_SITE_LAX = "Lax";
     private static final String SAME_SITE_STRICT = "Strict";
+
+    // CookieService is @RequestScoped (a new instance per request), so this has to be static
+    // to actually dedupe log spam across requests, not just within a single instance.
+    private static final Set<String> LOGGED_INVALID_SAME_SITE_VALUES = ConcurrentHashMap.newKeySet();
 
     @Inject
     private Logger log;
@@ -352,9 +357,11 @@ public class CookieService {
 
     /**
      * Validates the configured SameSite value case-insensitively against None/Lax/Strict
-     * and returns the canonical spelling. Falls back to "None" (logging the problem) for
-     * blank or unrecognized values instead of throwing, since this runs on every cookie
-     * write - a config typo must not turn into an outage for every request.
+     * and returns the canonical spelling. Falls back to "None" for blank or unrecognized
+     * values instead of throwing, since this runs on every cookie write - a config typo
+     * must not turn into an outage for every request. An unrecognized value is logged
+     * only once per distinct value (not once per request) to avoid log spam for as long
+     * as the misconfiguration persists.
      */
     private String resolveSameSite() {
         String sameSite = appConfiguration.getCookieSameSite();
@@ -370,7 +377,9 @@ public class CookieService {
         if (SAME_SITE_STRICT.equalsIgnoreCase(sameSite)) {
             return SAME_SITE_STRICT;
         }
-        log.error("Invalid cookieSameSite configuration value: '{}'. Expected None, Lax or Strict. Falling back to None.", sameSite);
+        if (LOGGED_INVALID_SAME_SITE_VALUES.add(sameSite)) {
+            log.error("Invalid cookieSameSite configuration value: '{}'. Expected None, Lax or Strict. Falling back to None.", sameSite);
+        }
         return SAME_SITE_NONE;
     }
 
