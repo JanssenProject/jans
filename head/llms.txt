@@ -128,6 +128,7 @@ Janssen Project is a Linux Foundation-hosted platform for building identity and 
 - [OpenID Connect Client](https://docs.jans.io/head/janssen-server/config-guide/config-tools/config-api/openid-client/index.md)
 - [Plugins](https://docs.jans.io/head/janssen-server/config-guide/config-tools/config-api/plugins/index.md)
 - [Security](https://docs.jans.io/head/janssen-server/config-guide/config-tools/config-api/security/index.md)
+- [User Management — Role/Permission Authorization](https://docs.jans.io/head/janssen-server/config-guide/config-tools/config-api/user-mgt-plugin/index.md)
 - [CURL Guide](https://docs.jans.io/head/janssen-server/config-guide/config-tools/curl-guide/index.md)
 - [CLI (Command Line)](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md)
 - [TUI - Text based User Interface](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-tui/index.md)
