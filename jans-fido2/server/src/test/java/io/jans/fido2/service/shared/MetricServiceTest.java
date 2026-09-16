@@ -482,6 +482,87 @@ class MetricServiceTest {
         assertEquals("10.1.1.1", metricService.extractIpAddress(httpRequest));
     }
 
+    // ---------------------------------------------------------------------------------------------
+    // Follow-ups to the trusted-proxy work (#15097, #15098)
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * #15097. A proxy overwrites X-Forwarded-For but passes other request headers through as the client
+     * sent them, so in trusted mode they carry no guarantee and must not be recorded. Consulting them
+     * would reopen the very spoofing route the trusted-range check exists to close.
+     */
+    @ParameterizedTest(name = "trusted mode ignores {0}")
+    @CsvSource({ "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_FORWARDED_FOR" })
+    void extractIpAddress_whenTrustEnabled_ignoresTheAlternativeProxyHeaders(String header) {
+        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(Boolean.TRUE);
+        when(appConfiguration.getTrustedProxyIpRanges()).thenReturn(List.of("10.0.0.0/8"));
+        when(httpRequest.getRemoteAddr()).thenReturn("10.1.1.1");
+        when(httpRequest.getHeader("X-Forwarded-For")).thenReturn(null);
+        when(httpRequest.getHeader(header)).thenReturn("203.0.113.9");
+
+        assertEquals("10.1.1.1", metricService.extractIpAddress(httpRequest));
+    }
+
+    /**
+     * The same headers must keep working in legacy mode, which is relied on for backward compatibility.
+     */
+    @ParameterizedTest(name = "legacy mode still reads {0}")
+    @CsvSource({ "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_FORWARDED_FOR" })
+    void extractIpAddress_whenTrustUnset_stillReadsTheAlternativeProxyHeaders(String header) {
+        when(appConfiguration.getTrustedProxyEnabled()).thenReturn(null);
+        when(httpRequest.getRemoteAddr()).thenReturn("10.1.1.1");
+        when(httpRequest.getHeader("X-Forwarded-For")).thenReturn(null);
+        when(httpRequest.getHeader(header)).thenReturn("203.0.113.9");
+
+        assertEquals("203.0.113.9", metricService.extractIpAddress(httpRequest));
+    }
+
+    /**
+     * #15098. The prefix is written against the range as typed, but normalisation narrows a mapped range
+     * to four bytes, so the prefix has to shed the 96 bits of the ::ffff: mapping. Without that,
+     * ::ffff:10.0.0.0/104 is rejected as out of range and the configured proxy is silently untrusted.
+     */
+    @Test
+    void isIpInCidr_honoursIpv4MappedRangesWrittenWithAnIpv6Prefix() {
+        // /104 on the mapped form is the same set as /8 on the IPv4 form.
+        assertTrue(metricService.isIpInCidr("10.1.2.3", "::ffff:10.0.0.0/104"));
+        assertTrue(metricService.isIpInCidr("::ffff:10.1.2.3", "::ffff:10.0.0.0/104"));
+        assertFalse(metricService.isIpInCidr("11.1.2.3", "::ffff:10.0.0.0/104"));
+
+        // /120 == /24
+        assertTrue(metricService.isIpInCidr("192.168.1.42", "::ffff:192.168.1.0/120"));
+        assertFalse(metricService.isIpInCidr("192.168.2.42", "::ffff:192.168.1.0/120"));
+    }
+
+    @Test
+    void isIpInCidr_withBareIpv4MappedAddressUsesAFullMask() {
+        assertTrue(metricService.isIpInCidr("10.1.1.1", "::ffff:10.1.1.1"));
+        assertFalse(metricService.isIpInCidr("10.1.1.2", "::ffff:10.1.1.1"));
+    }
+
+    /**
+     * A mapped range whose prefix would fit an IPv4 mask keeps its existing meaning. This form already
+     * worked before the prefix adjustment - InetAddress collapses the literal to an Inet4Address - and is
+     * a natural thing to configure after copying an address out of a log on a dual-stack JVM, so
+     * re-reading it on the IPv6 scale would silently stop honouring a range in use.
+     */
+    @Test
+    void isIpInCidr_leavesAnIpv4ScalePrefixOnAMappedRangeAlone() {
+        assertTrue(metricService.isIpInCidr("10.1.2.3", "::ffff:10.0.0.0/8"));
+        assertFalse(metricService.isIpInCidr("11.1.2.3", "::ffff:10.0.0.0/8"));
+        assertTrue(metricService.isIpInCidr("192.168.1.42", "::ffff:192.168.1.0/24"));
+    }
+
+    /**
+     * Between 33 and 95 a mapped prefix covers part of the mapping itself and means nothing on either
+     * scale, so it is still rejected.
+     */
+    @Test
+    void isIpInCidr_rejectsAMappedPrefixThatCoversTheMapping() {
+        assertFalse(metricService.isIpInCidr("10.1.2.3", "::ffff:10.0.0.0/33"));
+        assertFalse(metricService.isIpInCidr("10.1.2.3", "::ffff:10.0.0.0/95"));
+    }
+
     @Test
     void isIpInCidr_matchesIpv4Ranges() {
         assertTrue(metricService.isIpInCidr("10.1.2.3", "10.0.0.0/8"));
