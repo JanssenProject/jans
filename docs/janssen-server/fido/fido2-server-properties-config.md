@@ -33,7 +33,55 @@ The following properties represent the dynamic configuration for the Janssen FID
 | `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored with passkey metrics. |
 | `fido2ErrorCategorization` | `true` | Whether passkey operation failures are categorized for the error-analysis endpoint. |
 | `fido2PerformanceMetrics` | `true` | Whether passkey operation durations are tracked for performance analytics. |
+| `trustedProxyEnabled` | `true`, `false`, or unset | Whether forwarded proxy headers may be trusted when recording the client IP on a metrics entry. Unset keeps the legacy behaviour of trusting them unconditionally; `false` never reads them; `true` trusts them only from the addresses in `trustedProxyIpRanges`. See [Client IP in metrics](#client-ip-in-metrics). |
+| `trustedProxyIpRanges` | `["10.0.0.0/8", "192.168.1.0/24"]` | Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation. Only consulted when `trustedProxyEnabled` is `true`; an empty list trusts nothing. |
 | `fido2Configuration` | Object | Nested object containing FIDO2 protocol-specific details (see structure below). |
+
+### Client IP in metrics
+
+The `ipAddress` recorded on a passkey metrics entry is taken from forwarded proxy headers
+(`X-Forwarded-For` and several older equivalents) before falling back to the address the request actually
+came from. Those headers are set by whoever sends the request, so `trustedProxyEnabled` controls whether
+they are believed:
+
+| Value | Behaviour |
+| :--- | :--- |
+| unset (default) | Headers are trusted unconditionally. Any caller able to reach a FIDO2 endpoint can choose the address recorded against its own ceremony. |
+| `false` | Headers are ignored; the connecting address is recorded. |
+| `true` | Headers are read only when the connecting address falls inside `trustedProxyIpRanges`. An empty list trusts nothing. |
+
+The default is unset so that upgrading changes nothing. **Deployments that want the recorded address to be
+trustworthy must set this explicitly.**
+
+When trusted, `X-Forwarded-For` is read right to left: hops that are themselves listed as trusted proxies
+are skipped, and the first remaining address is recorded. Reading from the right matters because a client
+can prepend any value before the real proxy appends to the chain — so the leftmost entry is only used when
+no closer untrusted hop exists, such as a single-entry header from a trusted proxy.
+
+`X-Forwarded-For` is the only header consulted in this mode. The older alternatives (`Proxy-Client-IP`,
+`WL-Proxy-Client-IP` and the `HTTP_*` variants) are ignored, because a reverse proxy overwrites
+`X-Forwarded-For` but passes other request headers through as the client sent them. Legacy mode still
+reads all of them. If nothing usable is found, the connecting address is recorded.
+
+Ranges accept IPv4 and IPv6 CIDR notation; a bare address is treated as a full-length mask. An
+IPv4-mapped IPv6 address such as `::ffff:10.1.2.3` matches an IPv4 range, since a dual-stack JVM may
+report the connecting address in that form.
+
+A range may also be *written* in that form. Its prefix is then read on whichever scale it can only
+mean, so an existing IPv4-scale range keeps working:
+
+| Prefix on a mapped range | Read as |
+| :--- | :--- |
+| `0`–`32` | IPv4 scale, as written — `::ffff:10.0.0.0/8` selects `10.0.0.0/8` |
+| `96`–`128` | IPv6 scale, less the 96 bits of the mapping — `::ffff:10.0.0.0/104` also selects `10.0.0.0/8` |
+| `33`–`95` | Rejected and logged: the prefix covers part of the mapping itself, so it means nothing on either scale |
+
+Both sides of a comparison must be IP literals — a hostname is rejected and logged rather than
+resolved, because this runs on the request path.
+
+> **Note on a common topology.** Where a reverse proxy runs on the same host, requests reach the FIDO2
+> server from `127.0.0.1`, and so do any sent directly to it. Trusting loopback therefore does not, on its
+> own, distinguish the proxy from a direct caller.
 
 ---
 

@@ -88,6 +88,16 @@ public class AppConfiguration implements Configuration, Serializable {
 	
 	@DocProperty(description = "Boolean value specifying whether FIDO2 metrics aggregation is enabled", defaultValue = "true")
     private boolean fido2MetricsAggregationEnabled = true;
+
+	@DocProperty(description = "Whether proxy headers may be trusted when recording the client IP in metrics. "
+			+ "Unset preserves the legacy behaviour of trusting them unconditionally. False never reads them. "
+			+ "True trusts them only from the source addresses listed in trustedProxyIpRanges.")
+    private Boolean trustedProxyEnabled;
+
+	@DocProperty(description = "Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation "
+			+ "(for example [\"10.0.0.0/8\", \"192.168.1.0/24\"]). Only consulted when trustedProxyEnabled is true; "
+			+ "an empty list trusts nothing.")
+    private List<String> trustedProxyIpRanges;
 	
 	@DocProperty(description = "Custom object class list for dynamic person enrolment")
     private List<String> personCustomObjectClassList;
@@ -241,6 +251,22 @@ public class AppConfiguration implements Configuration, Serializable {
 
 	public void setFido2PerformanceMetrics(boolean fido2PerformanceMetrics) {
 		this.fido2PerformanceMetrics = fido2PerformanceMetrics;
+	}
+
+	public Boolean getTrustedProxyEnabled() {
+		return trustedProxyEnabled;
+	}
+
+	public void setTrustedProxyEnabled(Boolean trustedProxyEnabled) {
+		this.trustedProxyEnabled = trustedProxyEnabled;
+	}
+
+	public List<String> getTrustedProxyIpRanges() {
+		return trustedProxyIpRanges;
+	}
+
+	public void setTrustedProxyIpRanges(List<String> trustedProxyIpRanges) {
+		this.trustedProxyIpRanges = trustedProxyIpRanges;
 	}
 
 	public boolean isFido2MetricsAggregationEnabled() {
