@@ -82,6 +82,9 @@ public class TPMProcessor implements AttestationFormatProcessor {
 	private Logger log;
 
 	@Inject
+	private io.jans.fido2.service.RpPolicyService rpPolicyService;
+
+	@Inject
 	private CertificateService certificateService;
 
 	@Inject
@@ -138,8 +141,8 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		byte[] hashedBuffer = getHashedBuffer(alg, authData.getAttestationBuffer(), clientDataHash);
 
 		// if attestation mode is enabled in the global config
-		if (!appConfiguration.getFido2Configuration().getAttestationMode()
-				.equalsIgnoreCase(AttestationMode.DISABLED.getValue())) {
+		if (!AttestationMode.DISABLED.getValue()
+				.equalsIgnoreCase(rpPolicyService.resolveAttestationMode(credential.getRpId()))) {
 			Iterator<JsonNode> i = attStmt.get("x5c").elements();
 
 			
@@ -155,7 +158,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				List<X509Certificate> certificates = certificateService.getCertificates(certificatePath);
 				List<X509Certificate> aikCertificates = certificateService.getCertificates(aikCertificatePath);
 				List<X509Certificate> trustAnchorCertificates = attestationCertificateService
-						.getAttestationRootCertificates(authData, aikCertificates);
+						.getAttestationRootCertificates(authData, aikCertificates, credential.getRpId());
 				X509Certificate aikCertificate = aikCertificates.get(0);
 
 				X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates,
@@ -195,7 +198,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
 		credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
 		credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
-		credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
+		credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData, credential.getRpId()));
 		credIdAndCounters.setSignatureAlgorithm(alg);
 	}
 

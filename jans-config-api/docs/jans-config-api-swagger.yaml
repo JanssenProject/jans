@@ -15694,19 +15694,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        whitePagesCanView:
-          type: boolean
         adminCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -17641,7 +17641,19 @@ components:
         disableLoggerTimer:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
-            changes. Default value `true`Default value `false`.
+            changes. Default value `false`.
+        userRolePermissionValidationEnabled:
+          type: boolean
+          description: Flag to enable/disable User Role-Permission mapping check while
+            authentication. Default value `true`.
+        validateUserInumInIntrospectionFlag:
+          type: boolean
+          description: Flag to enable/disable validating `User-inum` in Introspection
+            response. Default value `true`.
+        fetchUserRoleInIntrospectionFlag:
+          type: boolean
+          description: Flag to enable/disable to get user-role in Introspection response.
+            Default value `true`.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
