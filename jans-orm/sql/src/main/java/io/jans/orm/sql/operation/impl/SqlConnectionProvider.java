@@ -157,7 +157,11 @@ public class SqlConnectionProvider {
 		connectionProperties.setProperty("user", userName);
 		connectionProperties.setProperty("password", userPassword);
 
-		resolveSslFactoryArgPath();
+		// PostgreSQL
+		resolveTrustStorePropertyPath("sslfactoryarg");
+
+		// MySQL
+		resolveTrustStorePropertyPath("trustCertificateKeyStoreUrl");
 
 		if (props.containsKey("db.disable.time-zone")) {
 			disableTimeZone = StringHelper.toBoolean(props.getProperty("db.disable.time-zone"), false);
@@ -293,8 +297,8 @@ public class SqlConnectionProvider {
 		this.creationResultCode = ResultCode.SUCCESS_INT_VALUE;
 	}
 
-	private void resolveSslFactoryArgPath() {
-		String sslFactoryArg = connectionProperties.getProperty("sslfactoryarg");
+	private void resolveTrustStorePropertyPath(String filePropertyName) {
+		String sslFactoryArg = connectionProperties.getProperty(filePropertyName);
 		if (StringHelper.isEmpty(sslFactoryArg) || !sslFactoryArg.startsWith("file:")) {
 			return;
 		}
@@ -310,7 +314,7 @@ public class SqlConnectionProvider {
 		}
 
 		File resolvedFile = new File(jansBase + File.separator + "conf" + File.separator + path);
-		connectionProperties.setProperty("sslfactoryarg", "file:" + resolvedFile.getAbsolutePath());
+		connectionProperties.setProperty(filePropertyName, "file:" + resolvedFile.getAbsolutePath());
 	}
 
 	private void loadTableMetaData(DatabaseMetaData databaseMetaData, Connection con) throws SQLException {
