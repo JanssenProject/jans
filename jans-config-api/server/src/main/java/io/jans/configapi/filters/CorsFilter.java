@@ -9,6 +9,7 @@ package io.jans.configapi.filters;
 import io.jans.configapi.model.configuration.CorsConfiguration;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -34,6 +35,7 @@ public class CorsFilter implements Filter {
     private CorsConfiguration corsConfiguration;
 
     private static final Pattern COMMA_SEPARATED_SPLIT_REGEX = Pattern.compile("\\s*,\\s*");
+
     public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
     public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
     public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
@@ -42,6 +44,10 @@ public class CorsFilter implements Filter {
     public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
     public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
     public static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
+    public static final String VARY = "Vary";
+
+    /** Literal wildcard token that may appear in the configured allow list. */
+    private static final String WILDCARD = "*";
 
     /**
      * The Access-Control-Allow-Headers header indicates, as part of the response to
@@ -60,7 +66,33 @@ public class CorsFilter implements Filter {
 
         String origin = request.getHeader("Origin");
         log.debug("CorsFilter::doFilter() - origin:{}", origin);
+
         if (corsConfiguration == null || StringUtils.isBlank(origin) || !corsConfiguration.isEnabled()) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
+
+        // The response varies based on the request's Origin header, so caches must not
+        // serve one origin's CORS response to a different origin.
+        response.addHeader(VARY, "Origin");
+
+        final Collection<String> allowedOrigins = corsConfiguration.getAllowedOrigins();
+        final boolean hasExplicitAllowList = allowedOrigins != null && !allowedOrigins.isEmpty();
+        final boolean wildcardConfigured = hasExplicitAllowList && allowedOrigins.contains(WILDCARD);
+
+        // Security requirement: an explicit, non-empty allow list is mandatory.
+        // A missing/empty configuration must NEVER be treated as "allow all" -
+        // it must instead deny CORS for every origin.
+        final boolean originAllowed = hasExplicitAllowList && !wildcardConfigured
+                && corsConfiguration.isOriginAllowed(origin);
+
+        log.debug("CorsFilter::doFilter() - hasExplicitAllowList:{}, wildcardConfigured:{}, originAllowed:{}",
+                hasExplicitAllowList, wildcardConfigured, originAllowed);
+
+        if (!wildcardConfigured && !originAllowed) {
+            // Origin did not match the explicit allow list: emit no CORS headers at all.
+            // Browsers will then refuse to expose the response to the calling page.
+            log.debug("CorsFilter::doFilter() - origin:{} not in allow list, skipping CORS headers", origin);
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
@@ -68,37 +100,32 @@ public class CorsFilter implements Filter {
         // Method check
         final String requestedMethods = request.getHeader(ACCESS_CONTROL_REQUEST_METHOD);
         log.debug("CorsFilter::doFilter() - requestedMethods:{}", requestedMethods);
-
-        // Process Methods
         processMethods(response, requestedMethods);
 
         // Header check
         final String requestedHeaders = request.getHeader(ACCESS_CONTROL_REQUEST_HEADERS);
-        log.debug("CorsFilter::doFilter() -  requestedHeaders:{}", requestedHeaders);
+        log.debug("CorsFilter::doFilter() - requestedHeaders:{}", requestedHeaders);
         if (StringUtils.isNotBlank(requestedHeaders)) {
             processRequestedHeaders(response, requestedHeaders);
         }
 
-        // Origin check
-        log.debug("CorsFilter::doFilter() - corsConfiguration.getAllowedOrigins():{} ",
-                corsConfiguration.getAllowedOrigins());
-        boolean allowOrigin = (corsConfiguration.getAllowedOrigins() == null
-                || corsConfiguration.getAllowedOrigins().isEmpty() || corsConfiguration.isOriginAllowed(origin));
-        log.debug("CorsFilter::doFilter() - allowOrigin:{} ", allowOrigin);
-        if (allowOrigin) {
-            log.debug("CorsFilter::doFilter() - setting allowOrigin");
+        final boolean supportsCredentials = corsConfiguration.isSupportsCredentials();
+        log.debug("CorsFilter::doFilter() - supportsCredentials:{}", supportsCredentials);
+
+        if (wildcardConfigured) {
+            // Security requirement: "*" must never be paired with Access-Control-Allow-Credentials.
+            // Browsers reject that combination anyway, but the server must not emit it either -
+            // a wildcard response is only ever safe for anonymous (non-credentialed) requests.
+            response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD);
+            log.debug("CorsFilter::doFilter() - wildcard origin configured; Allow-Credentials will not be sent");
+        } else {
+            // originAllowed == true here: echo back only the exact, validated origin -
+            // never an unvalidated reflection of the request's Origin header.
             response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+            if (supportsCredentials) {
+                response.addHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+            }
         }
-
-        // allowCredentials check
-        log.debug("CorsFilter::doFilter() - corsConfiguration.isSupportsCredentials():{} ",
-                corsConfiguration.isSupportsCredentials());
-        boolean allowCredentials = corsConfiguration.isSupportsCredentials()
-                || (corsConfiguration.getAllowedOrigins() != null && corsConfiguration.isOriginAllowed(origin)
-                        && !corsConfiguration.getAllowedOrigins().contains("*"));
-
-        log.debug("CorsFilter::doFilter() - allowCredentials:{} ", allowCredentials);
-        response.addHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, String.valueOf(allowCredentials));
 
         // exposedHeaders check
         log.debug("CorsFilter::doFilter() - corsConfiguration.getExposedHeaders():{}",
@@ -122,14 +149,12 @@ public class CorsFilter implements Filter {
             log.debug("CorsFilter::doFilter() - chaining request ");
             filterChain.doFilter(servletRequest, servletResponse);
         }
-
     }
 
     private void processRequestedHeaders(HttpServletResponse response, String allowHeadersValue) {
         log.debug(
                 " CorsFilter::processRequestedHeaders() - allowHeadersValue:{} , corsConfiguration.getAllowedHttpHeaders():{}",
                 allowHeadersValue, corsConfiguration.getAllowedHttpHeaders());
-
         if (corsConfiguration.getAllowedHttpHeaders() == null || corsConfiguration.getAllowedHttpHeaders().isEmpty()) {
             response.addHeader(ACCESS_CONTROL_ALLOW_HEADERS, allowHeadersValue);
         } else {
@@ -137,10 +162,10 @@ public class CorsFilter implements Filter {
             for (String requestedHeader : COMMA_SEPARATED_SPLIT_REGEX.split(allowHeadersValue)) {
                 requestedHeaders.add(requestedHeader.toLowerCase());
             }
-
             log.debug(
                     "CorsFilter::processRequestedHeaders() - requestedHeaders:{}, corsConfiguration.getAllowedHttpHeaders():{}",
                     requestedHeaders, corsConfiguration.getAllowedHttpHeaders());
+
             List<String> validRequestedHeaders = new ArrayList<>();
             for (String configHeader : corsConfiguration.getAllowedHttpHeaders()) {
                 log.debug("CorsFilter::processRequestedHeaders() - configHeader:{}", configHeader);
@@ -159,22 +184,17 @@ public class CorsFilter implements Filter {
         log.debug(
                 " CorsFilter::processMethods() - allowMethodsValue:{} , corsConfiguration.getAllowedHttpMethods():{} ",
                 allowMethodsValue, corsConfiguration.getAllowedHttpMethods());
-
         if (StringUtils.isBlank(allowMethodsValue)) {
             return;
         }
-
         if (corsConfiguration.getAllowedHttpMethods() == null || corsConfiguration.getAllowedHttpMethods().isEmpty()) {
-
             response.addHeader(ACCESS_CONTROL_ALLOW_METHODS, allowMethodsValue);
         } else {
-
             List<String> requestedMethods = new ArrayList<>();
             for (String requestedMethod : COMMA_SEPARATED_SPLIT_REGEX.split(allowMethodsValue)) {
                 log.debug(" CorsFilter::processMethods() - requestedMethod:{}", requestedMethod);
                 requestedMethods.add(requestedMethod.toLowerCase());
             }
-
             log.debug(
                     " CorsFilter::processMethods() - requestedMethods:{} , corsConfiguration.getAllowedHttpMethods():{}",
                     requestedMethods, corsConfiguration.getAllowedHttpMethods());
@@ -188,11 +208,9 @@ public class CorsFilter implements Filter {
                 }
             }
             log.debug(" CorsFilter::processMethods() - validRequestedMethods:{}", validRequestedMethods);
-
             if (!validRequestedMethods.isEmpty()) {
                 response.addHeader(ACCESS_CONTROL_ALLOW_METHODS, String.join(",", validRequestedMethods));
             }
         }
     }
-
 }
