@@ -38,6 +38,9 @@ class AttestationCertificateServiceTest {
     private AttestationCertificateService attestationCertificateService;
 
     @Mock
+    private io.jans.fido2.service.RpPolicyService rpPolicyService;
+
+    @Mock
     private Logger log;
     @Mock
     private AppConfiguration appConfiguration;
@@ -58,7 +61,7 @@ class AttestationCertificateServiceTest {
         Fido2Configuration cfg = mock(Fido2Configuration.class);
         when(cfg.isEnterpriseAttestation()).thenReturn(false);
         when(cfg.isDisableMetadataService()).thenReturn(false);
-        when(cfg.getAttestationMode()).thenReturn(mode);
+        when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(mode);
         when(appConfiguration.getFido2Configuration()).thenReturn(cfg);
     }
 
@@ -71,7 +74,7 @@ class AttestationCertificateServiceTest {
 
         // CONF-22: enforced mode must surface the metadata-fetch failure rather than swallow it.
         assertThrows(Fido2RuntimeException.class,
-                () -> attestationCertificateService.getAttestationRootCertificates(authData, certs));
+                () -> attestationCertificateService.getAttestationRootCertificates(authData, certs, "example.com"));
     }
 
     @Test
@@ -84,7 +87,7 @@ class AttestationCertificateServiceTest {
         when(certificateService.selectRootCertificates(any(), any())).thenReturn(certs);
 
         // Regression guard: monitor/disabled keep the previous lenient behavior — fall back, do not throw.
-        assertDoesNotThrow(() -> attestationCertificateService.getAttestationRootCertificates(authData, certs));
+        assertDoesNotThrow(() -> attestationCertificateService.getAttestationRootCertificates(authData, certs, "example.com"));
     }
 
     // #14602 — Apple root CA presence surfaced by the trust/attestation/config endpoint.
