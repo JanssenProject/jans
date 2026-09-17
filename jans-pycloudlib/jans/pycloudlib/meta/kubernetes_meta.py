@@ -63,7 +63,7 @@ class KubernetesMeta(BaseMeta):
         return self._client
 
     def get_containers(self, label: str) -> list[V1Pod]:
-        """Get list of pods based on label in a namespace.
+        """Get list of pods in RUNNING status based on label in a namespace.
 
         The namespace is resolved from value of `CN_CONTAINER_METADATA_NAMESPACE`
         environment variable.
@@ -74,9 +74,10 @@ class KubernetesMeta(BaseMeta):
         Returns:
             List of pod objects.
         """
+        field_selector = "status.phase=Running"
         namespace = os.environ.get("CN_CONTAINER_METADATA_NAMESPACE", "default")
         try:
-            pods: list[V1Pod] = self.client.list_namespaced_pod(namespace, label_selector=label).items
+            pods: list[V1Pod] = self.client.list_namespaced_pod(namespace, label_selector=label, field_selector=field_selector).items
         except AttributeError:
             # client is not set due to missing k8s config
             pods = []
