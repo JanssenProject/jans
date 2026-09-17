@@ -15,7 +15,7 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 
 /**
- * Sample entry with binary attributes. jansData column should has binary type
+ * Sample entry with binary attributes. jansDataBin column should has binary type
  * (bytea/BLOB) and jansDataStr column should has string type to check base64
  * fallback conversion.
  *
@@ -34,8 +34,8 @@ public class SimpleBinaryEntry implements Serializable {
     private String displayName;
 
     @BinaryData
-    @AttributeName(name = "jansData")
-    private byte[] data;
+    @AttributeName(name = "jansDataBin")
+    private byte[] dataBin;
 
     @BinaryData
     @AttributeName(name = "jansDataStr")
@@ -57,12 +57,12 @@ public class SimpleBinaryEntry implements Serializable {
         this.displayName = displayName;
     }
 
-    public byte[] getData() {
-        return data;
+    public byte[] getDataBin() {
+        return dataBin;
     }
 
-    public void setData(byte[] data) {
-        this.data = data;
+    public void setDataBin(byte[] dataBin) {
+        this.dataBin = dataBin;
     }
 
     public byte[] getDataStr() {
@@ -76,7 +76,7 @@ public class SimpleBinaryEntry implements Serializable {
     @Override
     public String toString() {
         return String.format("SimpleBinaryEntry [dn=%s, displayName=%s, data=%s bytes, dataStr=%s bytes]", dn, displayName,
-                (data == null) ? null : data.length, (dataStr == null) ? null : dataStr.length);
+                (dataBin == null) ? null : dataBin.length, (dataStr == null) ? null : dataStr.length);
     }
 
 }

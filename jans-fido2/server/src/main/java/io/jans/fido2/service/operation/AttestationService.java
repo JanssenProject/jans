@@ -14,6 +14,7 @@ import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseRSAAlgorithm;
 import io.jans.fido2.ctap.CoseEdDSAAlgorithm;
+import io.jans.fido2.ctap.CoseMLDSAAlgorithm;
 import io.jans.fido2.model.attestation.*;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.common.*;
@@ -519,6 +520,7 @@ public class AttestationService {
 			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveRsaNumericValue);
 			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveEc2NumericValue);
 			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveEdDsaNumericValue);
+			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveMlDsaNumericValue);
 
 			if (credentialParametersSets.isEmpty()) {
 				// Advertising nothing lets the client fall back to its own defaults, which is a worse
@@ -600,6 +602,12 @@ public class AttestationService {
 		} catch (IllegalArgumentException ex) {
 			return null;
 		}
+	}
+
+	private static Integer resolveMlDsaNumericValue(String enabledFidoAlgorithm) {
+		CoseMLDSAAlgorithm algorithm = CoseMLDSAAlgorithm.fromName(enabledFidoAlgorithm);
+
+		return (algorithm == null) ? null : algorithm.getNumericValue();
 	}
 
 	private static Integer resolveEdDsaNumericValue(String enabledFidoAlgorithm) {

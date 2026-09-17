@@ -13,10 +13,10 @@
  *   const cedarling = await init(config);
  *
  * Option 3: Custom fetch with auth headers
- *   Use init_from_archive_bytes() for advanced scenarios:
+ *   Use initFromArchiveBytes() for advanced scenarios:
  *   const response = await fetch(url, { headers: { Authorization: '...' } });
  *   const bytes = new Uint8Array(await response.arrayBuffer());
- *   const cedarling = await init_from_archive_bytes(config, bytes);
+ *   const cedarling = await initFromArchiveBytes(config, bytes);
  *
  * NOT SUPPORTED IN WASM:
  *   - CEDARLING_POLICY_STORE_LOCAL_FN (requires filesystem)
