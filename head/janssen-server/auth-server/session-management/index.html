@@ -1976,6 +1976,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#samesite-attribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        SameSite attribute
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#killing-sessions" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2283,7 +2294,7 @@ retrieving the session will vary depending on whether the session is stored in m
 <li><strong>sessionIdCookieLifetime</strong> - The lifetime of <code>session_id</code> cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends. Default value is <code>86400</code>.</li>
 <li><strong>sessionIdLifetime</strong> - lifetime of the OP session in seconds (server side object). If not set, falls back to <code>session_id</code> cookie expiration set by <code>sessionIdCookieLifetime</code> configuration property.</li>
 <li><strong>sessionIdUnusedLifetime</strong> - unused OP session lifetime in seconds. If an OP session is not used for a given amount of time, the OP session is removed.
-Default value is <code>86400</code>.</li>
+  Default value is <code>86400</code>.</li>
 <li><strong>sessionIdUnauthenticatedUnusedLifetime</strong> - lifetime in seconds of <code>unauthenticated</code> OP session. This determines how long the user can be on the login page while unauthenticated. Default value is <code>120</code>.</li>
 <li><strong>sessionIdRequestParameterEnabled</strong> - Boolean value specifying whether to enable <code>session_id</code> HTTP request parameter. Default value is <code>False</code>.</li>
 <li><strong>sessionIdPersistOnPromptNone</strong> - specifies whether to persist or update the session object with data if <code>prompt=none</code>. Default value is <code>True</code>.</li>
@@ -2292,7 +2303,54 @@ Default value is <code>86400</code>.</li>
 <li><strong>sessionIdPersistInCache</strong> - If True, sessions are stored according to <code>cacheProviderType</code>. Otherwise, sessions are persisted in the database.
  Default value is <code>False</code>.</li>
 <li><strong>sessionIdPersistInCache</strong> Default value is <code>False</code>.</li>
+<li><strong>cookieSameSite</strong> - <code>SameSite</code> attribute value (<code>None</code>, <code>Lax</code> or <code>Strict</code>) set on all cookies created by the OP (<code>session_id</code>, <code>uma_session_id</code>, <code>session_state</code>, <code>opbs</code>, <code>current_sessions</code>, <code>consent_session_id</code>, <code>rp_origin_id</code>). Default value is <code>None</code>. See <a href="#samesite-attribute">SameSite attribute</a> below before changing it.</li>
 </ul>
+<h2 id="samesite-attribute">SameSite attribute<a class="headerlink" href="#samesite-attribute" title="Permanent link">#</a></h2>
+<p><code>cookieSameSite</code> controls the <code>SameSite</code> attribute of all cookies the OP
+creates, including the session-related ones. It defaults to <code>None</code>, which for
+SameSite-aware, spec-compliant clients preserves the cross-site SSO behavior
+these cookies already relied on before this attribute existed. It is not
+identical to sending no <code>SameSite</code> attribute at all: a documented set of older
+or non-compliant clients (e.g. Safari on macOS 10.14/iOS 12, Chrome/Chromium
+51-66, some embedded WebViews, UC Browser &lt; 12.13.2) mishandle an
+explicit <code>SameSite=None</code> value and may reject or drop the cookie even though
+they accepted the same cookie with no <code>SameSite</code> attribute. Deployments that
+must still support such legacy clients should account for this before
+upgrading.</p>
+<p><code>CookieService</code> sets <code>Secure</code> on all of these cookies, but <code>HttpOnly</code> only on
+<code>session_id</code>, <code>uma_session_id</code>, <code>current_sessions</code>, <code>consent_session_id</code> and
+<code>rp_origin_id</code> - <code>session_state</code> and <code>opbs</code> intentionally omit <code>HttpOnly</code> so
+OP-hosted iframe JavaScript can read them for OIDC Session Management. Neither
+<code>Secure</code> (HTTPS-only transmission) nor <code>HttpOnly</code> (blocks JS access) is a CSRF
+defense; <code>SameSite=None</code> adds no CSRF hardening of its own, it simply
+preserves every cross-site SSO flow that Janssen supports today.</p>
+<p>Changing the value tightens CSRF defense-in-depth but can break SSO for RPs
+hosted on a different site (eTLD+1) than the OP, which is the common Janssen
+deployment topology:</p>
+<ul>
+<li><strong><code>Lax</code></strong> breaks:</li>
+<li>Silent authentication / silent token renewal via a hidden cross-site
+   iframe (<code>prompt=none</code>, e.g. <code>oidc-client-js</code> <code>signinSilent()</code>). Browsers
+   do not attach <code>Lax</code> cookies to cross-site iframe navigations, so the OP
+   can't see the existing session and returns <code>login_required</code> (or
+   re-prompts) instead of silently confirming it.</li>
+<li>Authorization requests submitted to <code>/authorize</code> via a cross-site
+   auto-submitted HTML form <code>POST</code> instead of a <code>GET</code> redirect - <code>Lax</code>
+   excludes cross-site <code>POST</code>, so the session isn't recognized and the user
+   is forced to re-authenticate.</li>
+<li>Any deployment that embeds OP-hosted login/consent UI in a cross-site
+   iframe.</li>
+<li><strong><code>Strict</code></strong> breaks everything <code>Lax</code> breaks, plus the core SSO redirect
+  itself: a normal top-level, cross-site <code>GET</code> redirect from an RP to
+  <code>/authorize</code> no longer carries the session cookie at all, since RP and OP
+  are almost always different sites. Every login looks like a first-time
+  visit, effectively disabling SSO for any RP not on the same site as the OP.
+  RP-initiated logout redirects to <code>/end_session</code> lose the session cookie
+  too, so session termination has to rely solely on <code>id_token_hint</code>/<code>sid</code>
+  instead of the cookie.</li>
+</ul>
+<p>Only set <code>cookieSameSite</code> to <code>Lax</code> or <code>Strict</code> after confirming none
+of your RPs rely on the patterns above.</p>
 <p>For both <code>unused</code> properties, Jans Auth Server calculates this period as <code>currentUnusedPeriod = now - session.lastUsedAt</code>. So for OP session with states:</p>
 <ul>
 <li><code>unauthenticated</code> - if <code>currentUnusedPeriod</code> &gt;= <code>sessionIdUnauthenticatedUnusedLifetime</code>, then the session object is removed.</li>
@@ -2375,7 +2433,7 @@ undesirable default browser behavior.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    February 04, 2026
+    September 17, 2026
   </span>
 
     

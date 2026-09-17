@@ -2122,6 +2122,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cookiesamesite" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        cookieSameSite
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#corsconfigurationfilters" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -6646,6 +6657,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cookiesamesite" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        cookieSameSite
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#corsconfigurationfilters" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -10119,6 +10141,11 @@
 <td><a href="#cookiedomain">Details</a></td>
 </tr>
 <tr>
+<td>cookieSameSite</td>
+<td>Sets SameSite attribute value (None, Lax or Strict) for all cookies created by OP (session_id, uma_session_id, session_state, opbs, current_sessions, consent_session_id, rp_origin_id). Defaults to None to preserve cross-site SSO flows (silent authentication via hidden iframe with prompt=none, cross-site POST to the authorization endpoint). Setting Lax breaks silent/iframe-based authentication and cross-site POST to the authorization endpoint for RPs hosted on a different site than the OP. Setting Strict additionally breaks normal top-level cross-site SSO redirects, effectively disabling SSO for any RP not on the same site as the OP. Value is matched case-insensitively against None/Lax/Strict; any other value falls back to None. See auth-server session management docs before changing.</td>
+<td><a href="#cookiesamesite">Details</a></td>
+</tr>
+<tr>
 <td>corsConfigurationFilters</td>
 <td>This list specifies the CORS configuration filters</td>
 <td><a href="#corsconfigurationfilters">Details</a></td>
@@ -12345,6 +12372,18 @@
 <ul>
 <li>
 <p>Description: Sets cookie domain for all cookies created by OP</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: None</p>
+</li>
+</ul>
+<h2 id="cookiesamesite">cookieSameSite<a class="headerlink" href="#cookiesamesite" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Sets SameSite attribute value (None, Lax or Strict) for all cookies created by OP (session_id, uma_session_id, session_state, opbs, current_sessions, consent_session_id, rp_origin_id). Defaults to None to preserve cross-site SSO flows (silent authentication via hidden iframe with prompt=none, cross-site POST to the authorization endpoint). Setting Lax breaks silent/iframe-based authentication and cross-site POST to the authorization endpoint for RPs hosted on a different site than the OP. Setting Strict additionally breaks normal top-level cross-site SSO redirects, effectively disabling SSO for any RP not on the same site as the OP. Value is matched case-insensitively against None/Lax/Strict; any other value falls back to None. See auth-server session management docs before changing.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -15493,7 +15532,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    August 24, 2026
+    September 17, 2026
   </span>
 
     
