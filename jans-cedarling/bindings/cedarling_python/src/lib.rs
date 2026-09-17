@@ -23,6 +23,7 @@ fn cedarling_python(m: &Bound<'_, PyModule>) -> PyResult<()> {
     context_data_api::register_entities(m)?;
 
     m.add_class::<cedarling::Cedarling>()?;
+    m.add_class::<cedarling::MetricsSnapshot>()?;
 
     Ok(())
 }

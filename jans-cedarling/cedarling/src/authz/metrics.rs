@@ -14,6 +14,7 @@
 
 use chrono::{DateTime, Utc};
 use hdrhistogram::Histogram;
+use serde::Serialize;
 use std::{
     collections::HashMap,
     sync::{
@@ -113,12 +114,61 @@ pub(crate) struct PolicyStatsSnapshot {
 /// Telemetry snapshot containing the three metric maps and interval duration.
 ///
 /// Produced by [`MetricsCollector::snapshot_and_reset`].
-#[derive(Debug, Clone)]
-pub(crate) struct MetricsSnapshot {
+#[derive(Debug, Clone, Serialize)]
+pub struct MetricsSnapshot {
+    /// Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
     pub policy_stats: HashMap<String, i64>,
+    /// Classified error counters keyed by the error's metric key.
     pub error_counters: HashMap<String, i64>,
+    /// Operational counters and gauges (authorization, cache, JWT, data, lock).
     pub operational_stats: HashMap<String, i64>,
+    /// Duration of the snapshot interval in seconds.
     pub interval_secs: i64,
+}
+
+/// Error returned by [`crate::Cedarling::drain_metrics`] when
+/// local metric snapshots are not available.
+#[derive(Debug, thiserror::Error)]
+pub enum MetricsError {
+    /// Local metrics collection is disabled at bootstrap. Enable it by setting
+    /// `CEDARLING_METRICS_COLLECTION=enabled`.
+    #[error("metrics collection is disabled")]
+    Disabled,
+    /// The metrics collector is owned by the Lock telemetry ticker, so local
+    /// snapshots would steal its counters. Enabling
+    /// `CEDARLING_METRICS_COLLECTION` will not help.
+    #[error("metrics collection is owned by the lock telemetry ticker")]
+    LockTelemetry,
+}
+
+/// How metric snapshots are exposed. Computed once at bootstrap.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum MetricsMode {
+    /// Metrics are not collected; local snapshots fail with
+    /// [`MetricsError::Disabled`].
+    Disabled,
+    /// Metrics are collected locally and can be snapshotted by the caller.
+    Local,
+    /// A Lock telemetry ticker owns the collector; local snapshots fail with
+    /// [`MetricsError::LockTelemetry`].
+    LockTelemetry,
+}
+
+/// Resolve the collector mode from the lock-telemetry and local-collection flags.
+///
+/// Lock telemetry always takes precedence: when it is active, the ticker owns
+/// the collector and local snapshotting would steal its counters.
+pub(crate) fn resolve_metrics_mode(
+    lock_telemetry_active: bool,
+    metrics_collection: bool,
+) -> MetricsMode {
+    if lock_telemetry_active {
+        MetricsMode::LockTelemetry
+    } else if metrics_collection {
+        MetricsMode::Local
+    } else {
+        MetricsMode::Disabled
+    }
 }
 
 /// All state that resets at each telemetry interval.
@@ -1574,6 +1624,34 @@ mod tests {
         assert!(
             snap.error_counters.is_empty(),
             "error_counters must be empty when disabled"
+        );
+    }
+
+    #[test]
+    fn resolve_metrics_mode_lock_telemetry_wins() {
+        assert_eq!(
+            resolve_metrics_mode(true, true),
+            MetricsMode::LockTelemetry,
+            "lock telemetry must take precedence even when local collection is on"
+        );
+        assert_eq!(
+            resolve_metrics_mode(true, false),
+            MetricsMode::LockTelemetry,
+            "lock telemetry must take precedence with local collection off"
+        );
+    }
+
+    #[test]
+    fn resolve_metrics_mode_local_requires_flag() {
+        assert_eq!(
+            resolve_metrics_mode(false, true),
+            MetricsMode::Local,
+            "local collection on and no lock telemetry must enable local snapshots"
+        );
+        assert_eq!(
+            resolve_metrics_mode(false, false),
+            MetricsMode::Disabled,
+            "local collection off must disable snapshots"
         );
     }
 }
