@@ -9,7 +9,8 @@ tags:
 
 # Getting Started with Cedarling in a JavaScript app
 
-This guide combines the JavaScript usage instructions with the WebAssembly (WASM) build and API reference for Cedarling.
+This guide explains how to install, build, and use the Cedarling WebAssembly
+(WASM) package from JavaScript.
 
 ## Installation
 
@@ -60,37 +61,39 @@ Clone the Janssen server repository from the GitHub and change the directory to 
 cd /path/to/jans/jans-cedarling/bindings/cedarling_wasm
 ```
 
-Build the WebAssembly package in release mode after you've reached the `cedarling_wasm` directory. `wasm-pack` automatically optimizes the WebAssembly binary file using `wasm-opt` for better performance.
+Generate the web-target binding used as the JavaScript package's build input:
 
 ```bash title="Command"
-wasm-pack build --release --target web
+wasm-pack build --release --locked --target web --scope janssenproject
 ```
 
-To view the WebAssembly project in action, you can run a local server. One way to do this is by using the following command:
+This creates the intermediate `pkg/` directory. Assemble the publishable package
+from the handwritten source in `js/`:
 
 ```bash title="Command"
-python3 -m http.server
+cd js
+npm ci --ignore-scripts
+npm run build
 ```
+
+See the [JavaScript package maintainer guide](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/js/docs/maintainer.md)
+for the complete build and verification workflow.
 
 ## Usage
 
 !!! info "Sample Apps"
 
-    You can find usage examples at the following locations in the Janssen server
-    repository:
-
-    - A [sample app](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/index.html) that demonstrates basic usage.
-    - A fully featured [Cedarling browser](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/cedarling_app.html) app where you can test and validate your configuration.
+    See the [maintained JavaScript examples](https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_wasm/js/examples)
+    for Node.js ESM, Node.js CommonJS, React with Vite, webpack, and Cloudflare
+    Workers integrations.
 
 ### Initialization
 
-Since Cedarling is a WASM module, you need to initialize it first.
+The package loads its bundled WASM module when `init()` creates a Cedarling
+instance.
 
 ```js
-import initWasm, { init } from "@janssenproject/cedarling_wasm";
-
-// initialize the WASM binary
-await initWasm();
+import { init } from "@janssenproject/cedarling_wasm";
 
 let cedarling = await init({
   "CEDARLING_APPLICATION_NAME": "My App",
@@ -104,21 +107,29 @@ let cedarling = await init({
 
 ### Policy Store Sources (WASM)
 
-In WASM environments, filesystem access is not available. Use one of these options:
+Choose the loading method that matches how your application obtains the policy
+archive.
+
+#### Load an archive from a URL
+
+Pass the archive URL through `CEDARLING_POLICY_STORE_URI` when calling `init()`:
 
 ```javascript
-// Option 1: URL-based loading (simple)
-let cedarling = await init({
+import { init } from "@janssenproject/cedarling_wasm";
+
+const cedarling = await init({
+  CEDARLING_APPLICATION_NAME: "My App",
   CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
-  // ... other config
 });
+```
 
-// Option 2: In-memory archive bytes (e.g. fetched with custom auth headers)
-import initWasm, {
-  init_from_archive_bytes,
-} from "@janssenproject/cedarling_wasm";
+#### Load archive bytes
 
-await initWasm();
+Use `initFromArchiveBytes()` when the application fetches or otherwise obtains
+the archive itself:
+
+```javascript
+import { initFromArchiveBytes } from "@janssenproject/cedarling_wasm";
 
 const token = "<your-bearer-token>";
 const config = {
@@ -130,7 +141,7 @@ const response = await fetch("https://example.com/policy-store.cjar", {
   headers: { Authorization: `Bearer ${token}` },
 });
 const bytes = new Uint8Array(await response.arrayBuffer());
-let cedarling = await init_from_archive_bytes(config, bytes);
+const cedarling = await initFromArchiveBytes(config, bytes);
 ```
 
 For the directory-based format, package your policy store as a `.cjar` file and host it:
@@ -150,7 +161,7 @@ Cedarling provides two main interfaces for performing authorization checks: **To
 
 #### Token-Based Authorization (Multi-Issuer)
 
-For token-based authorization, use `authorize_multi_issuer` which processes JWT tokens and maps them to Cedar entities based on the `token_metadata` configuration in your policy store.
+For token-based authorization, use `authorizeMultiIssuer` which processes JWT tokens and maps them to Cedar entities based on the `token_metadata` configuration in your policy store.
 
 **1. Prepare tokens**
 
@@ -213,7 +224,7 @@ const request = {
 };
 
 // the request is passed as a JSON string
-const result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
+const result = await cedarling.authorizeMultiIssuer(JSON.stringify(request));
 ```
 
 See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
@@ -290,10 +301,10 @@ const request = {
 
 **6. Perform Authorization**
 
-Finally, call the `authorize_unsigned` function to check whether the principal is allowed to perform the specified action on the resource. The request is passed as a JSON string.
+Finally, call the `authorizeUnsigned` function to check whether the principal is allowed to perform the specified action on the resource. The request is passed as a JSON string.
 
 ```js
-const result = await cedarling.authorize_unsigned(JSON.stringify(request));
+const result = await cedarling.authorizeUnsigned(JSON.stringify(request));
 ```
 
 #### Batch Authorization
@@ -309,7 +320,7 @@ const request = {
   ],
 };
 
-const response = await cedarling.authorize_unsigned_batch(JSON.stringify(request));
+const response = await cedarling.authorizeUnsignedBatch(JSON.stringify(request));
 
 console.log('batch_id:', response.batch_id);
 response.results.forEach((r, i) => {
@@ -323,206 +334,27 @@ response.results.forEach((r, i) => {
 });
 ```
 
-For multi-issuer, swap `{ principal, items }` for `{ tokens, items }` and call `authorize_multi_issuer_batch`. `context` is optional on each item and defaults to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
+For multi-issuer, swap `{ principal, items }` for `{ tokens, items }` and call `authorizeMultiIssuerBatch`. `context` is optional on each item and defaults to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
 ### Logging
 
-The logs could be retrieved using the `pop_logs` function.
+The logs could be retrieved using the `popLogs` function.
 
 ```js
-const logs = cedarling.pop_logs();
+const logs = cedarling.popLogs();
 console.log(logs);
 ```
 
-## Defined API
+## API reference
 
-```
-/**
- * Create a new instance of the Cedarling application.
- * This function can take as config parameter the eather `Map` other `Object`
- */
-export function init(config: any): Promise<Cedarling>;
-/**
- * A WASM wrapper for the Rust `cedarling::AuthorizeResult` struct.
- * Represents the result of an authorization request.
- */
-export class AuthorizeResult {
+`@janssenproject/cedarling_wasm` ships TypeScript declarations for every public
+export. The package exposes them through its public entry points, so editors and
+TypeScript resolve the authoritative API automatically after installation.
 
-  /**
-   * Convert `AuthorizeResult` to json string value
-   */
-  json_string(): string;
-  /**
-   * The Cedar response for this authorization call.
-   */
-  readonly response: AuthorizeResultResponse;
-  /**
-   * Result of authorization
-   * true means `ALLOW`
-   * false means `Deny`
-   *
-   * this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
-   */
-  decision: boolean;
-  /**
-   * Request ID of the authorization request
-   */
-  request_id: string;
-}
-/**
- * A WASM wrapper for the Rust `cedar_policy::Response` struct.
- * Represents the result of an authorization request.
- */
-export class AuthorizeResultResponse {
-
-  /**
-   * Authorization decision
-   */
-  readonly decision: boolean;
-  /**
-   * Diagnostics providing more information on how this decision was reached
-   */
-  readonly diagnostics: Diagnostics;
-}
-/**
- * The instance of the Cedarling application.
- */
-export class Cedarling {
-
-  /**
-   * Create a new instance of the Cedarling application.
-   * Assume that config is `Object`
-   */
-  static new(config: object): Promise<Cedarling>;
-  /**
-   * Create a new instance of the Cedarling application.
-   * Assume that config is `Map`
-   */
-  static new_from_map(config: Map<any, any>): Promise<Cedarling>;
-  /**
-   * Authorize request for an unsigned (optional) principal.
-   * makes authorization decision based on the [`RequestUnsigned`]
-   * The request is passed as a JSON string, e.g. `JSON.stringify(request)`.
-   */
-  authorize_unsigned(request: string): Promise<AuthorizeResult>;
-  /**
-   * Authorize request using multi-issuer tokens.
-   * makes authorization decision based on the [`AuthorizeMultiIssuerRequest`]
-   * The request is passed as a JSON string, e.g. `JSON.stringify(request)`.
-   */
-  authorize_multi_issuer(request: string): Promise<AuthorizeResult>;
-  /**
-   * Authorize a batch of unsigned requests.
-   * The request is passed as a JSON string matching `BatchAuthorizeUnsignedRequest`.
-   */
-  authorize_unsigned_batch(request: string): Promise<BatchAuthorizeUnsignedResponse>;
-  /**
-   * Authorize a batch of multi-issuer requests.
-   * The request is passed as a JSON string matching `BatchAuthorizeMultiIssuerRequest`.
-   */
-  authorize_multi_issuer_batch(request: string): Promise<BatchAuthorizeMultiIssuerResponse>;
-  /**
-   * Get logs and remove them from the storage.
-   * Returns `Array` of `Map`
-   */
-  pop_logs(): Array<any>;
-  /**
-   * Get specific log entry.
-   * Returns `Map` with values or `null`.
-   */
-  get_log_by_id(id: string): any;
-  /**
-   * Returns a list of all log ids.
-   * Returns `Array` of `String`
-   */
-  get_log_ids(): Array<any>;
-  /**
-   * Get logs by tag, like `log_kind` or `log level`.
-   * Tag can be `log_kind`, `log_level`.
-   */
-  get_logs_by_tag(tag: string): any[];
-  /**
-   * Get logs by request_id.
-   * Return log entries that match the given request_id.
-   */
-  get_logs_by_request_id(request_id: string): any[];
-  /**
-   * Get log by request_id and tag, like composite key `request_id` + `log_kind`.
-   * Tag can be `log_kind`, `log_level`.
-   * Return log entries that match the given request_id and tag.
-   */
-  get_logs_by_request_id_and_tag(request_id: string, tag: string): any[];
-}
-/**
- * Diagnostics
- * ===========
- *
- * Provides detailed information about how a policy decision was made, including policies that contributed to the decision and any errors encountered during evaluation.
- */
-export class Diagnostics {
-
-  /**
-   * `PolicyId`s of the policies that contributed to the decision.
-   * If no policies applied to the request, this set will be empty.
-   *
-   * The ids should be treated as unordered,
-   */
-  readonly reason: string[];
-  /**
-   * Errors that occurred during authorization. The errors should be
-   * treated as unordered, since policies may be evaluated in any order.
-   */
-  readonly errors: PolicyEvaluationError[];
-}
-export class JsJsonLogic {
-  apply(logic: any, data: any): any;
-}
-/**
- * PolicyEvaluationError
- * =====================
- *
- * Represents an error that occurred when evaluating a Cedar policy.
- */
-export class PolicyEvaluationError {
-
-  /**
-   * Id of the policy with an error
-   */
-  readonly id: string;
-  /**
-   * Underlying evaluation error string representation
-   */
-  readonly error: string;
-}
-
-export class BatchItemError {
-  readonly category: string;
-  readonly item_index: number;
-  readonly message: string;
-}
-
-export class BatchItemUnsignedResult {
-  readonly is_ok: boolean;
-  unwrap(): AuthorizeResult;
-  readonly error: BatchItemError;
-}
-
-export class BatchItemMultiIssuerResult {
-  readonly is_ok: boolean;
-  unwrap(): AuthorizeResult;
-  readonly error: BatchItemError;
-}
-
-export class BatchAuthorizeUnsignedResponse {
-  readonly batch_id: string;
-  readonly results: BatchItemUnsignedResult[];
-}
-
-export class BatchAuthorizeMultiIssuerResponse {
-  readonly batch_id: string;
-  readonly results: BatchItemMultiIssuerResult[];
-}
-```
+See the Cedarling references for [authorization](../reference/cedarling-authz.md),
+[bootstrap properties](../reference/cedarling-properties.md),
+[policy stores](../reference/cedarling-policy-store.md), and
+[logs](../reference/cedarling-logs.md).
 
 ---
 
