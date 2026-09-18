@@ -266,6 +266,9 @@ jobs:
     strategy:
       matrix:
         node-version: ['22.x', '24.x', '26.x']
+        include:
+          - node-version: '22.x'
+            publication: true
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -299,6 +302,9 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: npm
         cache-dependency-path: jans-cedarling/bindings/cedarling_wasm/js/package-lock.json
+    - name: Install npm used for Cedarling WebAssembly package publication
+      if: matrix.publication
+      run: npm install --global npm@12.0.2
     - name: Build WASM for Cedarling WebAssembly JavaScript package
       working-directory: jans-cedarling/bindings/cedarling_wasm
       run: wasm-pack build --release --locked --target web --scope janssenproject
@@ -311,6 +317,13 @@ jobs:
     - name: Run Cedarling WebAssembly JavaScript checks
       working-directory: jans-cedarling/bindings/cedarling_wasm/js
       run: npm run check
+    - name: Qualify publishable Cedarling WebAssembly JavaScript archive
+      if: matrix.publication
+      working-directory: jans-cedarling/bindings/cedarling_wasm/js
+      run: |
+        output="${RUNNER_TEMP}/cedarling-wasm-publish"
+        node scripts/stage-packages.mjs --version 0.0.0-ci --publishable --output "${output}"
+        npm publish "${output}/janssenproject-cedarling_wasm-0.0.0-ci.tgz" --dry-run --access=public --tag ci
   python_tests:
     runs-on: ubuntu-latest
     strategy:
