@@ -97,13 +97,8 @@ impl BootstrapConfig {
             retry_delay: Duration::from_secs(raw.http_client_request_retry_delay),
             #[cfg(not(target_arch = "wasm32"))]
             request_timeout: Duration::from_secs(raw.http_client_request_timeout),
-            // Unset falls back to the policy-store entry cap, so a download is
-            // never larger than the largest archive entry we would decompress.
-            // `0` is the documented "no cap" sentinel for either property.
-            max_response_size_bytes: match raw
-                .http_client_max_response_size_bytes
-                .unwrap_or(raw.policy_store_max_file_size)
-            {
+            // `0` is the documented "no cap" sentinel.
+            max_response_size_bytes: match raw.http_client_max_response_size_bytes {
                 0 => None,
                 n => Some(n),
             },
@@ -280,73 +275,67 @@ mod tests {
     }
 
     #[test]
-    fn unset_http_cap_falls_back_to_policy_store_max_file_size() {
-        let config = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 4096"#);
+    fn archive_cap_does_not_move_the_http_cap() {
+        // The two caps bound different memory (decompressed output vs. buffered
+        // response body), so tuning the archive cap must leave every other
+        // HTTP fetch on its own default.
+        let http_default = Some(HttpClientConfig::DEFAULT_MAX_RESPONSE_SIZE_BYTES);
 
+        let neither = decode("");
         assert_eq!(
-            config.http_client_config.max_response_size_bytes,
-            Some(4096),
-            "An unset HTTP cap must inherit the policy store cap, so a download \
-             is never larger than the largest entry we would decompress"
+            neither.http_client_config.max_response_size_bytes, http_default,
+            "With neither property set the HTTP cap must use its own default"
         );
         assert_eq!(
-            config.policy_store_config.max_file_size, 4096,
-            "The policy store cap itself must carry the configured value"
+            neither.policy_store_config.max_file_size,
+            ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE,
+            "With neither property set the archive cap must use its own default"
+        );
+
+        let small = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 4096"#);
+        assert_eq!(
+            small.http_client_config.max_response_size_bytes, http_default,
+            "A small archive cap must not shrink unrelated HTTP responses"
+        );
+        assert_eq!(
+            small.policy_store_config.max_file_size, 4096,
+            "The archive cap must carry the configured value"
+        );
+
+        let disabled = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 0"#);
+        assert_eq!(
+            disabled.http_client_config.max_response_size_bytes, http_default,
+            "Disabling the archive cap must not remove the HTTP cap"
         );
     }
 
     #[test]
-    fn unset_http_cap_falls_back_to_the_default_when_neither_is_set() {
-        let config = decode("");
-
-        assert_eq!(
-            config.http_client_config.max_response_size_bytes,
-            Some(ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE),
-            "With neither property set both should land on the 10 MB default"
-        );
-        assert_eq!(
-            config.policy_store_config.max_file_size,
-            ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE
-        );
-    }
-
-    #[test]
-    fn explicit_http_cap_wins_over_policy_store_max_file_size() {
-        let config = decode(
+    fn http_cap_does_not_move_the_archive_cap() {
+        let explicit = decode(
             r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 4096,
                 "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES": 8192"#,
         );
-
         assert_eq!(
-            config.http_client_config.max_response_size_bytes,
+            explicit.http_client_config.max_response_size_bytes,
             Some(8192),
-            "An explicitly set HTTP cap must not be overridden by the fallback"
+            "An explicit HTTP cap must be used as given"
         );
         assert_eq!(
-            config.policy_store_config.max_file_size, 4096,
-            "An explicit HTTP cap must not disturb the policy store cap"
+            explicit.policy_store_config.max_file_size, 4096,
+            "An explicit HTTP cap must not disturb the archive cap"
         );
-    }
 
-    #[test]
-    fn zero_disables_each_cap_independently() {
-        let explicit_zero = decode(
+        let disabled = decode(
             r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 4096,
                 "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES": 0"#,
         );
         assert_eq!(
-            explicit_zero.http_client_config.max_response_size_bytes, None,
-            "An explicit 0 must disable the HTTP cap, not inherit 4096"
+            disabled.http_client_config.max_response_size_bytes, None,
+            "An explicit 0 must disable the HTTP cap"
         );
         assert_eq!(
-            explicit_zero.policy_store_config.max_file_size, 4096,
-            "Disabling the HTTP cap must leave the policy store cap enforced"
-        );
-
-        let inherited_zero = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 0"#);
-        assert_eq!(
-            inherited_zero.http_client_config.max_response_size_bytes, None,
-            "A 0 policy store cap must carry through the fallback as no cap"
+            disabled.policy_store_config.max_file_size, 4096,
+            "Disabling the HTTP cap must leave the archive cap enforced"
         );
     }
 
@@ -362,11 +351,6 @@ mod tests {
             from_json.policy_store_config.max_file_size, 512,
             "The policy store cap must be honored from JSON"
         );
-        assert_eq!(
-            from_json.http_client_config.max_response_size_bytes,
-            Some(512),
-            "The JSON-supplied cap must propagate to the HTTP cap"
-        );
 
         let yaml = concat!(
             "CEDARLING_APPLICATION_NAME: test\n",
@@ -380,11 +364,6 @@ mod tests {
             from_yaml.policy_store_config.max_file_size, 512,
             "The policy store cap must be honored from YAML"
         );
-        assert_eq!(
-            from_yaml.http_client_config.max_response_size_bytes,
-            Some(512),
-            "The YAML-supplied cap must propagate to the HTTP cap"
-        );
     }
 
     #[test]
@@ -396,11 +375,6 @@ mod tests {
         assert_eq!(
             config.policy_store_config.max_file_size, 4096,
             "A string-valued cap must parse to the same number"
-        );
-        assert_eq!(
-            config.http_client_config.max_response_size_bytes,
-            Some(4096),
-            "The string-parsed cap must propagate to the HTTP cap"
         );
     }
 
