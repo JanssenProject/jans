@@ -1090,6 +1090,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#limiting-policy-store-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Limiting policy store size
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#optional-properties" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1486,6 +1497,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#limiting-policy-store-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Limiting policy store size
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#optional-properties" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1680,6 +1702,13 @@ See <a href=".././cedarling-policy-store/#policy-store-formats">Policy Store For
 <ul>
 <li><strong><code>CEDARLING_POLICY_STORE_REFRESH_INTERVAL</code></strong> : Background refresh interval in seconds for URL-based policy store sources (<code>CEDARLING_POLICY_STORE_URI</code> pointing at a Cedar Archive URL). When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory <code>Authz</code> instance when the upstream changes. A server-side <code>Cache-Control: max-age</code> / <code>Expires</code> hint may <em>shorten</em> the next interval but never extends it. Default is <code>0</code> (refresh disabled — load-once-at-startup behavior). Non-zero values below <code>5</code> seconds are clamped to <code>5</code>. Ignored for local sources (<code>CEDARLING_POLICY_STORE_LOCAL_FN</code>, <code>CEDARLING_POLICY_STORE_LOCAL</code>). See <a href=".././cedarling-policy-store/#background-refresh">Background refresh</a> for the per-request consistency model, the strategy ladder, and the emitted metric keys.</li>
 </ul>
+<h3 id="limiting-policy-store-size">Limiting policy store size<a class="headerlink" href="#limiting-policy-store-size" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p><strong><code>CEDARLING_POLICY_STORE_MAX_FILE_SIZE</code></strong> : Maximum decompressed size, in bytes, of a single file inside a Cedar Archive (<code>.cjar</code>). Archives are ZIP files, so a small download can expand into a very large buffer in memory (a "zip bomb"); an archive whose entry exceeds this limit is rejected with an error rather than being decompressed. The whole-archive decompressed size is capped at ten times this value, and an archive may hold at most 10000 entries. Set to <code>0</code> to disable the size caps. Default is <code>10485760</code> (10 MB).</p>
+<p>This limit is independent of <code>CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES</code>, which bounds the compressed archive while it is downloaded. Serving a <code>.cjar</code> over HTTP whose compressed size exceeds <code>CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES</code> (10 MB by default) requires raising that property as well.</p>
+</li>
+</ul>
 <h3 id="optional-properties">Optional properties<a class="headerlink" href="#optional-properties" title="Permanent link">#</a></h3>
 <p>Properties listed here are optional. If a property value is not set, 
 the Cedarling will use the default value as specified in the property definition below.</p>
@@ -1844,7 +1873,7 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 11, 2026
+    September 18, 2026
   </span>
 
     
