@@ -2,7 +2,7 @@
 
 Earlier, in other examples, it was mentioned low-level details and computations of flows are delegated to an underlying foreign language. Agama itself does not offer means to write business logic of much use - it's only focused on the "skeleton" of flows. Engines are in charge of providing mechanisms to "bridge" Agama to more powerful tools of computation.
 
-The [`Call`](../../../../../agama/language-reference.md#foreign-routines) directive is the vehicle engines use to implement such kind of "bridge" to interface with external languages. In the case of the Janssen engine, for instance, [Java/Groovy](../../agama/jans-agama-engine.md#foreign-calls) code can be invoked via `Call`.
+The [`Call`](../../../../../agama/language-reference.md#foreign-routines) directive is the vehicle engines use to implement such kind of "bridge" to interface with external languages. In the case of the Janssen engine, for instance, [Java/Groovy](../../jans-agama-engine.md#foreign-calls) code can be invoked via `Call`.
 
 **Note**: Acquaintance with Java or Groovy is not strictly required to study the examples shown in this page. Code shown is simple and explained wherever possible. A thorough understanding of the foreign calls is not necessary to figure out the purpose of the computations presented.
 
