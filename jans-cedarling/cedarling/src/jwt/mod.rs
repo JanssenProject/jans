@@ -132,6 +132,28 @@ pub(crate) fn parse_numeric_date(value: &serde_json::Value) -> Option<i64> {
         .map(|f| f.floor() as i64)
 }
 
+/// Entity type -> token key index, built from the full config so it doesn't depend on
+/// async loading. Sorted so duplicates in an unvalidated config resolve deterministically.
+fn index_token_keys_by_entity_type(
+    trusted_issuers: &HashMap<String, TrustedIssuer>,
+) -> HashMap<String, String> {
+    let mut issuers: Vec<_> = trusted_issuers.iter().collect();
+    issuers.sort_unstable_by(|a, b| a.0.cmp(b.0));
+
+    let mut index = HashMap::new();
+    for (_, issuer) in issuers {
+        let mut tokens: Vec<_> = issuer.token_metadata.iter().collect();
+        tokens.sort_unstable_by(|a, b| a.0.cmp(b.0));
+
+        for (token_key, metadata) in tokens {
+            index
+                .entry(metadata.entity_type_name.clone())
+                .or_insert_with(|| token_key.clone());
+        }
+    }
+    index
+}
+
 /// Handles JWT validation
 pub(crate) struct JwtService {
     validators: Arc<JwtValidatorCache>,
@@ -146,6 +168,9 @@ pub(crate) struct JwtService {
     /// Cancellation token to stop all background JWKS refresh tasks on drop
     jwks_cancel_token: CancellationToken,
     metrics: Arc<MetricsCollector>,
+    /// Reverse lookup from a token's Cedar entity type name to its
+    /// `token_metadata` key, e.g. `Dolphin::Access_Token` -> `access_token`.
+    token_keys_by_entity_type: HashMap<String, String>,
 }
 
 struct IssuerConfig {
@@ -210,6 +235,7 @@ impl JwtService {
         );
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
+        let token_keys_by_entity_type = index_token_keys_by_entity_type(&trusted_issuers);
         let loading_state = Arc::new(TrustedIssuerLoadingState::new(trusted_issuers.len()));
 
         let jwks_refresh_notifiers = Arc::new(Mutex::new(HashMap::new()));
@@ -259,6 +285,7 @@ impl JwtService {
             jwks_refresh_notifiers,
             jwks_cancel_token,
             metrics,
+            token_keys_by_entity_type,
         })
     }
 
@@ -795,15 +822,11 @@ impl JwtService {
     /// Find the token metadata key for a given entity type name
     /// e.g., "`Dolphin::Access_Token`" -> "`access_token`"
     fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a str) -> Cow<'a, str> {
-        if let Some(token_key) = self
-            .issuer_configs
-            .find_token_metadata_key(entity_type_name)
-        {
-            return Cow::Owned(token_key);
+        match self.token_keys_by_entity_type.get(entity_type_name) {
+            Some(token_key) => Cow::Borrowed(token_key),
+            // If not found, return the original mapping (fallback)
+            None => Cow::Borrowed(entity_type_name),
         }
-
-        // If not found, return the original mapping (fallback)
-        Cow::Borrowed(entity_type_name)
     }
 }
 
