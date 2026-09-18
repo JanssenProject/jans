@@ -50,7 +50,7 @@ To load the policy store, one of the following properties must be set:
 
 - **`CEDARLING_POLICY_STORE_MAX_FILE_SIZE`** : Maximum decompressed size, in bytes, of a single file inside a Cedar Archive (`.cjar`). Archives are ZIP files, so a small download can expand into a very large buffer in memory (a "zip bomb"); an archive whose entry exceeds this limit is rejected with an error rather than being decompressed. The whole-archive decompressed size is capped at ten times this value, and an archive may hold at most 10000 entries. Set to `0` to disable the size caps. Default is `10485760` (10 MB).
 
-    This limit is independent of `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`, which bounds the compressed archive while it is downloaded. Serving a `.cjar` over HTTP whose compressed size exceeds 10 MB requires raising that property as well.
+    This limit is independent of `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`, which bounds the compressed archive while it is downloaded. Serving a `.cjar` over HTTP whose compressed size exceeds `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES` (10 MB by default) requires raising that property as well.
 
 ### Optional properties
 
