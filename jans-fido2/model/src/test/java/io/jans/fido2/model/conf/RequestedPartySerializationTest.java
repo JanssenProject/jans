@@ -15,6 +15,7 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -25,6 +26,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class RequestedPartySerializationTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
+
+    /**
+     * The Config-API serialises its responses with {@code NON_EMPTY} inclusion - see
+     * {@code ObjectMapperContextResolver} in {@code jans-config-api/shared} - so what a client actually
+     * receives is not what a default mapper produces. This module cannot depend on the Config-API to
+     * borrow that resolver, so the one setting that decides whether an unset field reaches the wire is
+     * mirrored here.
+     */
+    private final ObjectMapper apiMapper = new ObjectMapper()
+            .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
     private RequestedParty withPolicy(String attestationMode) {
         RequestedParty requestedParty = new RequestedParty();
@@ -73,11 +84,23 @@ class RequestedPartySerializationTest {
         requestedParty.setId("example.com");
         requestedParty.setOrigins(Arrays.asList("https://login.example.com"));
 
-        String json = mapper.writeValueAsString(requestedParty);
+        String json = apiMapper.writeValueAsString(requestedParty);
 
         assertTrue(json.contains("\"id\""), json);
         assertTrue(json.contains("\"origins\""), json);
-        assertTrue(json.contains("\"policy\":null") || !json.contains("\"policy\""), json);
+        assertFalse(json.contains("\"policy\""), json);
+    }
+
+    /**
+     * The omission above would also hold if the policy never reached the wire at all, so this pins the
+     * other half: under the same inclusion rule, a policy that is set is still published.
+     */
+    @Test
+    void aPolicyThatIsSetIsStillSerialised() throws Exception {
+        String json = apiMapper.writeValueAsString(withPolicy(AttestationMode.ENFORCED.getValue()));
+
+        assertTrue(json.contains("\"policy\""), json);
+        assertTrue(json.contains("\"attestationMode\":\"enforced\""), json);
     }
 
     /** An unknown field must not break parsing, as {@code @JsonIgnoreProperties} on both types intends. */
