@@ -46,7 +46,7 @@ The `post-user` operation creates a new user in Janssen Server. User information
    {
      "userId": "testcliuser",
      "mail": "user@example.com",
-     "userPassword": "your-password",
+     "userPassword": "<your-password>",
      "status": "active",
      "displayName": "Test User",
      "givenName": "Test"
@@ -187,7 +187,7 @@ You can also provide the user information and claim directly with the `--data` o
 ```bash
 jans cli --operation-id put-user \
   --data '{
-    "userId": "updatedtestuser",
+    "userId": "testcliuser",
     "givenName": "Update given name",
     "displayName": "Updated display name",
     "mail": "cli-test-user@example.com",
