@@ -2,13 +2,13 @@
 
 Earlier, in other examples, it was mentioned low-level details and computations of flows are delegated to an underlying foreign language. Agama itself does not offer means to write business logic of much use - it's only focused on the "skeleton" of flows. Engines are in charge of providing mechanisms to "bridge" Agama to more powerful tools of computation.
 
-The [`Call`](https://docs.jans.io/stable/agama/language-reference/#foreign-routines) directive is the vehicle engines use to implement such kind of "bridge" to interface with external languages. In the case of the Janssen engine, for instance, [Java/Groovy](https://docs.jans.io/stable/janssen-server/developer/agama/jans-agama-engine/#foreign-calls) code can be invoked via `Call`.
+The [`Call`](../../../../../agama/language-reference.md#foreign-routines) directive is the vehicle engines use to implement such kind of "bridge" to interface with external languages. In the case of the Janssen engine, for instance, [Java/Groovy](../../agama/jans-agama-engine.md#foreign-calls) code can be invoked via `Call`.
 
 **Note**: Acquaintance with Java or Groovy is not strictly required to study the examples shown in this page. Code shown is simple and explained wherever possible. A thorough understanding of the foreign calls is not necessary to figure out the purpose of the computations presented.
 
 ## Basic examples
 
-Flow [`com.acme.basic.foreign_1`](./project/code/com.acme.basic.foreign_1.flow) is divided into several sections that exemplify simple calls.
+Flow [`com.acme.basic.foreign_1`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/foreign/project/code/com.acme.basic.foreign_1.flow) is divided into several sections that exemplify simple calls.
 
 ### Concatenation
 
@@ -89,9 +89,9 @@ If a method that returns nothing throws an exception, it can be caught like `| E
 
 ## Intermediate examples
 
-Flow [`com.acme.basic.foreign_2`](./project/code/com.acme.basic.foreign_2.flow) contains `Call` examples which are a bit more advanced and requires background in Java. Developers are encouraged to take a look at this flow. Explanations are found in the form of comments there.
+Flow [`com.acme.basic.foreign_2`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/foreign/project/code/com.acme.basic.foreign_2.flow) contains `Call` examples which are a bit more advanced and requires background in Java. Developers are encouraged to take a look at this flow. Explanations are found in the form of comments there.
 
-Ideally, Java developers would like to go over the [Foreign Calls](https://docs.jans.io/stable/janssen-server/developer/agama/jans-agama-engine/#foreign-calls) section of the Janssen's Agama engine documentation page for a deeper, more formal insight on how calls work. Important topics like rules of conversion between Agama and Java data types are covered. 
+Ideally, Java developers would like to go over the [Foreign Calls](../../jans-agama-engine.md#foreign-calls) section of the Janssen's Agama engine documentation page for a deeper, more formal insight on how calls work. Important topics like rules of conversion between Agama and Java data types are covered. 
 
 <!--
 difficult to explain:
