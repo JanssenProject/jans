@@ -799,10 +799,10 @@
 
 <h1 id="calling-foreign-code">Calling foreign code<a class="headerlink" href="#calling-foreign-code" title="Permanent link">#</a></h1>
 <p>Earlier, in other examples, it was mentioned low-level details and computations of flows are delegated to an underlying foreign language. Agama itself does not offer means to write business logic of much use - it's only focused on the "skeleton" of flows. Engines are in charge of providing mechanisms to "bridge" Agama to more powerful tools of computation.</p>
-<p>The <a href="https://docs.jans.io/stable/agama/language-reference/#foreign-routines"><code>Call</code></a> directive is the vehicle engines use to implement such kind of "bridge" to interface with external languages. In the case of the Janssen engine, for instance, <a href="https://docs.jans.io/stable/janssen-server/developer/agama/jans-agama-engine/#foreign-calls">Java/Groovy</a> code can be invoked via <code>Call</code>.</p>
+<p>The <a href="../../../../../agama/language-reference/#foreign-routines"><code>Call</code></a> directive is the vehicle engines use to implement such kind of "bridge" to interface with external languages. In the case of the Janssen engine, for instance, <a href="../../jans-agama-engine/#foreign-calls">Java/Groovy</a> code can be invoked via <code>Call</code>.</p>
 <p><strong>Note</strong>: Acquaintance with Java or Groovy is not strictly required to study the examples shown in this page. Code shown is simple and explained wherever possible. A thorough understanding of the foreign calls is not necessary to figure out the purpose of the computations presented.</p>
 <h2 id="basic-examples">Basic examples<a class="headerlink" href="#basic-examples" title="Permanent link">#</a></h2>
-<p>Flow <a href="./project/code/com.acme.basic.foreign_1.flow"><code>com.acme.basic.foreign_1</code></a> is divided into several sections that exemplify simple calls.</p>
+<p>Flow <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/foreign/project/code/com.acme.basic.foreign_1.flow"><code>com.acme.basic.foreign_1</code></a> is divided into several sections that exemplify simple calls.</p>
 <h3 id="concatenation">Concatenation<a class="headerlink" href="#concatenation" title="Permanent link">#</a></h3>
 <p>The below code shows how to concatenate some strings:</p>
 <div class="highlight"><pre><span></span><code>strings = [ &quot;Better&quot;, &quot;safe&quot;, &quot;than&quot;, &quot;sorry&quot; ]
@@ -846,8 +846,8 @@ Log &quot;@e An error occurred.&quot; E.message
 <p>In this case, <code>number</code> will be <code>null</code> and <code>E</code> will be an instance of <code>NumberFormatException</code>. The output in the log would read: <code>An error occurred. For input string: "Aha!" under radix 16</code>. Here, <code>E.message</code> is the equivalent of doing <code>getMessage()</code> on the Java exception. If instead of "Aha!", "Aba" was used, <code>number</code> would have a value of 2746 while <code>E</code> would be <code>null</code>.</p>
 <p>If a method that returns nothing throws an exception, it can be caught like <code>| E = Call ...</code>, i.e. the assignment variable is not present.   </p>
 <h2 id="intermediate-examples">Intermediate examples<a class="headerlink" href="#intermediate-examples" title="Permanent link">#</a></h2>
-<p>Flow <a href="./project/code/com.acme.basic.foreign_2.flow"><code>com.acme.basic.foreign_2</code></a> contains <code>Call</code> examples which are a bit more advanced and requires background in Java. Developers are encouraged to take a look at this flow. Explanations are found in the form of comments there.</p>
-<p>Ideally, Java developers would like to go over the <a href="https://docs.jans.io/stable/janssen-server/developer/agama/jans-agama-engine/#foreign-calls">Foreign Calls</a> section of the Janssen's Agama engine documentation page for a deeper, more formal insight on how calls work. Important topics like rules of conversion between Agama and Java data types are covered. </p>
+<p>Flow <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/foreign/project/code/com.acme.basic.foreign_2.flow"><code>com.acme.basic.foreign_2</code></a> contains <code>Call</code> examples which are a bit more advanced and requires background in Java. Developers are encouraged to take a look at this flow. Explanations are found in the form of comments there.</p>
+<p>Ideally, Java developers would like to go over the <a href="../../jans-agama-engine/#foreign-calls">Foreign Calls</a> section of the Janssen's Agama engine documentation page for a deeper, more formal insight on how calls work. Important topics like rules of conversion between Agama and Java data types are covered. </p>
 <!--
 difficult to explain:
 
@@ -897,7 +897,7 @@ Call x methodD … z …
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 11, 2026
+    September 18, 2026
   </span>
 
     

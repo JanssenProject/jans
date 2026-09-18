@@ -837,7 +837,7 @@
 
 
 <h1 id="conditionals-and-matching">Conditionals and matching<a class="headerlink" href="#conditionals-and-matching" title="Permanent link">#</a></h1>
-<p>This page illustrates the usage of <a href="https://docs.jans.io/stable/agama/language-reference/#conditionals-and-branching"><code>When</code>/<code>Otherwise</code></a> in Agama. They are equivalent to <code>if</code>/<code>else</code> in other programming languages.</p>
+<p>This page illustrates the usage of <a href="../../../../../agama/language-reference/#conditionals-and-branching"><code>When</code>/<code>Otherwise</code></a> in Agama. They are equivalent to <code>if</code>/<code>else</code> in other programming languages.</p>
 <h2 id="when-and-how">When and how<a class="headerlink" href="#when-and-how" title="Permanent link">#</a></h2>
 <p>To write a conditionals, <code>When</code> must be followed by a logical expression. This kind of expression consists of one or more equality comparisons chained by disjunction or conjunction operators. In Agama, there are only two equality comparison operators: <code>is</code> and <code>is not</code> (equivalent to <code>==</code> and <code>!=</code> in <code>C</code> language). The disjunction and conjunction operators are <code>or</code> and <code>and</code> respectively (equivalent to <code>||</code> and <code>&amp;&amp;</code>).</p>
 <p>The block of code to execute in case the logical expression evaluates to <code>true</code> must be indented under <code>When</code>. Here is an example:</p>
@@ -882,7 +882,7 @@ Otherwise
         Finish true
 </code></pre></div>
 <h3 id="application-template">Application template<a class="headerlink" href="#application-template" title="Permanent link">#</a></h3>
-<p>Template <a href="./project/web/application.ftlh"><code>application.ftlh</code></a> has a form to capture name and e-mail. It also generates checkboxes dynamically for the interests which are passed in the <em>map</em> parameter <code>RRF</code> receives. This is done as follows:</p>
+<p>Template <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/application.ftlh"><code>application.ftlh</code></a> has a form to capture name and e-mail. It also generates checkboxes dynamically for the interests which are passed in the <em>map</em> parameter <code>RRF</code> receives. This is done as follows:</p>
 <div class="highlight"><pre><span></span><code>&lt;#list interests as val&gt;            
     &lt;input type=&quot;checkbox&quot; id=&quot;interest_${val?counter}&quot; name=&quot;interest&quot; value=&quot;${val}&quot; /&gt;
     &lt;label for=&quot;interest_${val?counter}&quot;&gt;${val}&lt;/label&gt;
@@ -904,7 +904,7 @@ etcetera...
 <p>If the logical expression evaluates <code>false</code> (<code>interest</code> exists), code execution continues at the <code>Otherwise</code> block where another <code>When</code> is found. The check there is regarding the length of the list <code>interest</code> in <code>regData</code>. If the list length is four, the rejection page is displayed as well and the flow finishes with failure. </p>
 <p>In case the list length length is not four, the flow finishes successfully; no UI feedback shown to the user.  </p>
 <h3 id="rejection-template">Rejection template<a class="headerlink" href="#rejection-template" title="Permanent link">#</a></h3>
-<p>Template <a href="./project/web/rejected.ftlh"><code>rejected.ftlh</code></a> is self-explanatory. It just shows a message upfront and an "OK" button to proceed. The message displayed is whatever was passed to <code>RRF</code> (key <code>msg</code>).  </p>
+<p>Template <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/rejected.ftlh"><code>rejected.ftlh</code></a> is self-explanatory. It just shows a message upfront and an "OK" button to proceed. The message displayed is whatever was passed to <code>RRF</code> (key <code>msg</code>).  </p>
 <h3 id="flow-analysis">Flow analysis<a class="headerlink" href="#flow-analysis" title="Permanent link">#</a></h3>
 <p><code>com.acme.basic.club_application1</code> illustrates well the use of <code>When</code>/<code>Otherwise</code>, however it has unnecessary nesting of blocks. If the <code>Finish</code> inside the first <code>When</code> is hit, that would be the last instruction executed in the flow, so having an <code>Otherwise</code> is actually not needed. The same applies to the second <code>When</code>. The less nesting, the shorter and easier-to-understand code.</p>
 <p>The flow code can also be shortened if the rejection page shows a generic error message instead of specifying what went specifically wrong. The below is an improved, more compact version of the flow:</p>
@@ -922,7 +922,7 @@ When list is null or list.length is 4
 
 Finish true
 </code></pre></div>
-<p>Here <a href="./project/web/rejected2.ftlh"><code>rejected2.ftlh</code></a> is a pure HTML page with a static message.</p>
+<p>Here <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/rejected2.ftlh"><code>rejected2.ftlh</code></a> is a pure HTML page with a static message.</p>
 <h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">#</a></h2>
 <h3 id="do-comparisons-work-with-literals-only">Do comparisons work with literals only?<a class="headerlink" href="#do-comparisons-work-with-literals-only" title="Permanent link">#</a></h3>
 <p>No. The operands for a comparison can be literals, variables, or similar things. The following are all valid logical expressions: <code>false is false</code>, <code>4 is list.length</code>, <code>list.length is myNumber</code>, <code>list.length is not myMap.myKey</code>.</p>
@@ -931,7 +931,7 @@ Finish true
 <h3 id="is-there-an-elsif-equivalent-in-agama">Is there an <code>elsif</code> equivalent in Agama?<a class="headerlink" href="#is-there-an-elsif-equivalent-in-agama" title="Permanent link">#</a></h3>
 <p>No.</p>
 <h3 id="is-there-a-switch-equivalent">Is there a <code>switch</code> equivalent?<a class="headerlink" href="#is-there-a-switch-equivalent" title="Permanent link">#</a></h3>
-<p>Yes. This is done via <a href="https://docs.jans.io/stable/agama/language-reference/#advanced-matching"><code>Match</code></a>.</p>
+<p>Yes. This is done via <a href="../../../../../agama/language-reference/#advanced-matching"><code>Match</code></a>.</p>
 
 
 
@@ -956,7 +956,7 @@ Finish true
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 11, 2026
+    September 18, 2026
   </span>
 
     

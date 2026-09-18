@@ -828,7 +828,7 @@
 </code></pre></div>
 <h3 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">#</a></h3>
 <p>Inputs are parameters used to drive flow behavior - think of the arguments passed when calling a function or method in a programming language. They are directly supplied by callers at runtime.</p>
-<p>So far none of the flow examples has input parameters, however, most of times flows will need to receive one or more input parameters in practice. For instance, recall the <a href="../loops/project/code/com.acme.basic.numberguess.flow">number guess game</a> where the user is requested to enter numbers between 0 and 5, and expected to guess a secret random number in 3 attempts at most. This is fairly static behavior. A good improvement would be to parameterize the interval used for guessing and the maximum number of attempts. Here is where <a href="https://docs.jans.io/stable/agama/language-reference/#inputs"><code>Inputs</code></a> comes to the spotlight:</p>
+<p>So far none of the flow examples has input parameters, however, most of times flows will need to receive one or more input parameters in practice. For instance, recall the <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.numberguess.flow">number guess game</a> where the user is requested to enter numbers between 0 and 5, and expected to guess a secret random number in 3 attempts at most. This is fairly static behavior. A good improvement would be to parameterize the interval used for guessing and the maximum number of attempts. Here is where <a href="../../../../../agama/language-reference/#inputs"><code>Inputs</code></a> comes to the spotlight:</p>
 <div class="highlight"><pre><span></span><code>Flow com.acme.basic.numberguess
     Basepath &quot;guess&quot;
     Inputs interval maxAttempts
@@ -838,8 +838,8 @@
 <p>So far, if the reader has been testing the examples, has noticed flows are basically invoked directly from the browser with the help of some web-like application for building a lengthy "launch URL". In the next chapter it will be seen how a flow can invoke another flow so essentially there are two type of callers.</p>
 <p>The way callers pass inputs to flows differ: browsers send inputs in the <a href="../running/#sending-parameters">launch URL</a> while flows do it directly in Agama code using the <code>Trigger</code> directive. This directive will be studied in an upcoming lesson.</p>
 <h2 id="project-metadata">Project metadata<a class="headerlink" href="#project-metadata" title="Permanent link">#</a></h2>
-<p>Projects presented in this series are structured a minimalist way. However, note besides flow files and templates, real-world projects may contain foreign language code and libraries, descriptors, localized UI labels, and web-related assets like javascript, stylesheets, images, etc. This is described more formally in <a href="https://docs.jans.io/stable/agama/gama-format/">"The .gama file format"</a>.</p>
-<p>Of big importance is <a href="https://docs.jans.io/stable/agama/gama-format/"><code>project.json</code></a> - a descriptor file found at the project's root that contains metadata in JSON format about the project contents. In the current context, the <code>configs</code> section is of special interest.</p>
+<p>Projects presented in this series are structured a minimalist way. However, note besides flow files and templates, real-world projects may contain foreign language code and libraries, descriptors, localized UI labels, and web-related assets like javascript, stylesheets, images, etc. This is described more formally in <a href="../../../../../agama/gama-format/">"The .gama file format"</a>.</p>
+<p>Of big importance is <a href="../../../../../agama/gama-format/#anatomy-of-a-project"><code>project.json</code></a> - a descriptor file found at the project's root that contains metadata in JSON format about the project contents. In the current context, the <code>configs</code> section is of special interest.</p>
 <p><code>configs</code> is expected to be a JSON object resembling how the configuration properties of flows in the project may look like. These are not the actual configuration properties - just sample data. Agama projects can be distributed freely so having confidential bits like addresses, passwords, secrets, etc., easily discovered by others is not acceptable.</p>
 <p><code>configs</code> consists of several JSON objects. One for every flow requiring configuration properties. The example below shows the content of a <code>project.json</code> file for a project consisting of two authentication flows. One which prompts the user to enter his phone number where a passcode will be sent via SMS (<code>com.acme.authn.sms</code>), and another for a typical username/password authentication (<code>com.acme.authn.userpwd</code>).</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -891,7 +891,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 11, 2026
+    September 18, 2026
   </span>
 
     

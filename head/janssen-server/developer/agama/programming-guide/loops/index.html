@@ -737,9 +737,9 @@
 
 
 <h1 id="loops">Loops<a class="headerlink" href="#loops" title="Permanent link">#</a></h1>
-<p>Agama provides two mechanisms to write loops: <a href="https://docs.jans.io/stable/agama/language-reference/#repeat"><code>Repeat</code></a> and <a href="https://docs.jans.io/stable/agama/language-reference#iterate-over"><code>Iterate Over</code></a>. This page will cover <code>Repeat</code> only. Readers are encouraged to write some code using <code>Iterate Over</code>.</p>
+<p>Agama provides two mechanisms to write loops: <a href="../../../../../agama/language-reference/#repeat"><code>Repeat</code></a> and <a href="../../../../../agama/language-reference/#iterate-over"><code>Iterate Over</code></a>. This page will cover <code>Repeat</code> only. Readers are encouraged to write some code using <code>Iterate Over</code>.</p>
 <h2 id="a-number-guess-game">A number guess game<a class="headerlink" href="#a-number-guess-game" title="Permanent link">#</a></h2>
-<p>In this example a simple "number guess" game is tackled. In flow <a href="./project/code/com.acme.basic.numberguess.flow"><code>com.acme.basic.numberguess</code></a>, a random integer between zero and five is generated, and then the user is given up to three chances to guess the number. A dissection of the code follows.</p>
+<p>In this example a simple "number guess" game is tackled. In flow <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.numberguess.flow"><code>com.acme.basic.numberguess</code></a>, a random integer between zero and five is generated, and then the user is given up to three chances to guess the number. A dissection of the code follows.</p>
 <p>These lines generate the random number and convert it to string:</p>
 <div class="highlight"><pre><span></span><code>sr = Call java.security.SecureRandom#new
 rand = Call sr nextInt 6
@@ -752,7 +752,7 @@ Repeat 3 times max
     obj = RRF &quot;number_guess.ftlh&quot; data
 </code></pre></div>
 <p><code>data</code> contains info to be passed to the guessing page. <code>Repeat</code> is followed by how many times the indented block of code will be executed. Note loops can terminate earlier - this will  be seen in the second example.</p>
-<p>Next the <a href="./project/web/guess/number_guess.ftlh">guessing</a> page is presented to the user. It looks like this:</p>
+<p>Next the <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/web/guess/number_guess.ftlh">guessing</a> page is presented to the user. It looks like this:</p>
 <div class="highlight"><pre><span></span><code><span class="cp">&lt;!doctype html&gt;</span>
 <span class="p">&lt;</span><span class="nt">html</span> <span class="na">xmlns</span><span class="o">=</span><span class="s">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="p">&gt;</span>
 <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
@@ -775,7 +775,7 @@ Repeat 3 times max
     RRF &quot;congrats.ftlh&quot;
     Finish true
 </code></pre></div>
-<p><code>obj.guess</code> has the value the user entered and is compared to match with <code>strRand</code>. When they are equal a <a href="./project/web/guess/congrats.ftlh">congratulations</a> page is shown, and then the flow finish successfully. If that is not the case, the below is executed before the loop starts again:</p>
+<p><code>obj.guess</code> has the value the user entered and is compared to match with <code>strRand</code>. When they are equal a <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/web/guess/congrats.ftlh">congratulations</a> page is shown, and then the flow finish successfully. If that is not the case, the below is executed before the loop starts again:</p>
 <div class="highlight"><pre><span></span><code>data.failed = true
 Log &quot;Attempt % failed&quot; idx[0]
 </code></pre></div>
@@ -784,7 +784,7 @@ Log &quot;Attempt % failed&quot; idx[0]
 <p><strong>A note on Basepath</strong>: Readers may have noticed this flow has <code>Basepath "guess"</code> in its header. This indicates that paths to templates passed in RRF are relative to the <code>guess</code> directory found inside <code>web</code> folder of the project. <code>Basepath</code> helps achieve a better organization of UI assets.   </p>
 <h2 id="club-referrals">Club referrals<a class="headerlink" href="#club-referrals" title="Permanent link">#</a></h2>
 <p><a href="../conditionals-matching/#example-the-unforgiving-club">Earlier</a>, an example regarded the procedure for admission to a peculiar club. Once accepted, the new member fills a form for referring friends so they can get invitations to join too.</p>
-<p>The rules are simple: at minimum one and at maximum three referrals can be supplied. This behavior is implemented in flow <a href="./project/code/com.acme.basic.referrals.flow"><code>com.acme.basic.referrals</code></a>. A dissection of the code follows.</p>
+<p>The rules are simple: at minimum one and at maximum three referrals can be supplied. This behavior is implemented in flow <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.referrals.flow"><code>com.acme.basic.referrals</code></a>. A dissection of the code follows.</p>
 <p>Before entering the loop, a couple of initialization statements:</p>
 <div class="highlight"><pre><span></span><code>refs = [ ]
 pageData = { first: true }
@@ -797,7 +797,7 @@ pageData = { first: true }
 
     Quit When name is null
 </code></pre></div>
-<p>The <a href="./project/web/referrals/referred.ftlh">page</a> to enter a referral will be displayed at most three times. It has two sections:</p>
+<p>The <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/web/referrals/referred.ftlh">page</a> to enter a referral will be displayed at most three times. It has two sections:</p>
 <ul>
 <li>The top section is shown only after a first referral has been added. It displays a link that submits an empty form that the flow will interpret as no more contacts will be submitted</li>
 <li>The lower section is always shown and has a form with fields for entering name and e-mail</li>
@@ -817,7 +817,7 @@ pageData = { first: false, name: name }
 RRF &quot;thanks.ftlh&quot; pageData
 Finish true
 </code></pre></div>
-<p><code>pageData</code> is overwritten with a map containing the elicited data and then passed to <a href="./project/web/referrals/thanks.ftlh">"thank you"</a> template in <code>RRF</code>. This page displays a summary of the contacts supplied: a comma-separated list of their names.</p>
+<p><code>pageData</code> is overwritten with a map containing the elicited data and then passed to <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/web/referrals/thanks.ftlh">"thank you"</a> template in <code>RRF</code>. This page displays a summary of the contacts supplied: a comma-separated list of their names.</p>
 <h2 id="on-flow-interruption">On flow interruption<a class="headerlink" href="#on-flow-interruption" title="Permanent link">#</a></h2>
 <p><code>Quit When</code> is expected to be found at the top level of a loop at most once. In other words, the below are all illegal:</p>
 <div class="highlight"><pre><span></span><code>Repeat some times max
@@ -872,7 +872,7 @@ Finish true
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 11, 2026
+    September 18, 2026
   </span>
 
     

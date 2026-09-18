@@ -727,10 +727,10 @@
 
 <h1 id="decomposition-and-reuse">Decomposition and reuse<a class="headerlink" href="#decomposition-and-reuse" title="Permanent link">#</a></h1>
 <p>Agama is capable of dealing with complexity. As in other languages, Agama allows to break down problems into smaller ones that can be tackled more easily. The opposite approach is applicable too: "sophisticated" solutions can be built by "orchestrating" existing flows that solve less challenging problems. In other words, Agama allows composition and flow reuse as it will be shown here.</p>
-<p>An Agama flow can be understood as a unit that solves a specific problem. Think of a function/method in regular programming. If well-designed, it can be invoked from some other flow or flows to make more interesting stuff. Invocation in Agama is performed through the <a href="https://docs.jans.io/stable/agama/language-reference/#subflows"><code>Trigger</code></a> directive. It is equivalent to <code>Call</code> except it is not for foreign but native Agama code.</p>
+<p>An Agama flow can be understood as a unit that solves a specific problem. Think of a function/method in regular programming. If well-designed, it can be invoked from some other flow or flows to make more interesting stuff. Invocation in Agama is performed through the <a href="../../../../../agama/language-reference/#subflows"><code>Trigger</code></a> directive. It is equivalent to <code>Call</code> except it is not for foreign but native Agama code.</p>
 <h2 id="the-club-revisited">The club revisited<a class="headerlink" href="#the-club-revisited" title="Permanent link">#</a></h2>
 <p>The unforgiving club has been helpful to illustrate Agama basics like <a href="../conditionals-matching/#example-the-unforgiving-club">conditionals</a> and <a href="../loops/#club-referrals">looping</a>; and it is back again - for good. Tired of emitting admission approvals manually, the board decided to accept anyone having what they consider the "right" amount of personal interests. This way, acceptance can be done automatically and the compilation of referrals can be done in a single online process. That's very good news!</p>
-<p>Flow <a href="../conditionals-matching/project/code/com.acme.basic.club_application2.flow"><code>com.acme.basic.club_application2</code></a> already handles admissions while <a href="../loops/project/code/com.acme.basic.referrals.flow"><code>com.acme.basic.referrals</code></a> does the referrals stuff. All that's left is gluing these together:</p>
+<p>Flow <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/conditionals-matching/project/code/com.acme.basic.club_application2.flow"><code>com.acme.basic.club_application2</code></a> already handles admissions while <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.referrals.flow"><code>com.acme.basic.referrals</code></a> does the referrals stuff. All that's left is gluing these together:</p>
 <div class="highlight"><pre><span></span><code>Flow com.acme.workaday.club_admission1
     Basepath &quot;&quot;
 
@@ -742,10 +742,10 @@ When obj.success is true
 Finish false
 </code></pre></div>
 <p>It's straightforward: flow <code>com.acme.basic.club_application2</code> is launched (triggered), if it finishes successfully <code>com.acme.basic.referrals</code> is subsequently triggered and then the process ends positively, otherwise <code>com.acme.workaday.club_admission1</code> terminates with failure.</p>
-<p>See the outcome of <code>com.acme.basic.club_application2</code> is assigned to variable <code>obj</code>. Recall <code>Finish true</code> is merely a compact form of ending a flow supplying a <em>map</em> like <code>{ success: true }</code> to its caller. That's the reason the conditional reads <code>When obj.success is true</code> instead of <code>When obj is true</code>. Learn more about <code>Finish</code> <a href="https://docs.jans.io/stable/agama/language-reference/#flow-finish">here</a>.</p>
+<p>See the outcome of <code>com.acme.basic.club_application2</code> is assigned to variable <code>obj</code>. Recall <code>Finish true</code> is merely a compact form of ending a flow supplying a <em>map</em> like <code>{ success: true }</code> to its caller. That's the reason the conditional reads <code>When obj.success is true</code> instead of <code>When obj is true</code>. Learn more about <code>Finish</code> <a href="../../../../../agama/language-reference/#flow-finish">here</a>.</p>
 <p>The outcome of <code>com.acme.basic.referrals</code> is ignored because that flow always terminates successfully. This is uncommon in practice though: most flows either terminate successfully or failed, and even attach extra data for their callers to do some form of post-processing. </p>
 <h2 id="improvements">Improvements<a class="headerlink" href="#improvements" title="Permanent link">#</a></h2>
-<p>Flow <code>com.acme.basic.club_application2</code> hard-codes important facts: the available interests and the minimum and maximum number of them that are acceptable for being admitted. Flow <a href="./project/code/com.acme.workaday.club_application.flow"><code>com.acme.workaday.club_application</code></a> is an enhanced version that makes use of input parameters:</p>
+<p>Flow <code>com.acme.basic.club_application2</code> hard-codes important facts: the available interests and the minimum and maximum number of them that are acceptable for being admitted. Flow <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/decomposition-reuse/project/code/com.acme.workaday.club_application.flow"><code>com.acme.workaday.club_application</code></a> is an enhanced version that makes use of input parameters:</p>
 <div class="highlight"><pre><span></span><code>Flow com.acme.workaday.club_application
     Basepath &quot;&quot;
     Inputs interests minAllowed maxAllowed
@@ -771,10 +771,10 @@ When mid is not len
 obj = { success: true, data: { name: name } } 
 Finish obj
 </code></pre></div>
-<p>Variables <code>interests</code>, <code>minAllowed</code>, and <code>maxAllowed</code> will hold the values the caller will pass: a <em>list</em> of <em>string</em>s, and two (integer) <em>number</em>s. The value of variable <code>len</code> is the number of interests selected by the user in the form found in <a href="./project/web/application.ftlh"><code>application.ftlh</code></a>. This template is not the same file used in the former referrals flow. It's a file found under the current <a href="./project">project</a>.</p>
+<p>Variables <code>interests</code>, <code>minAllowed</code>, and <code>maxAllowed</code> will hold the values the caller will pass: a <em>list</em> of <em>string</em>s, and two (integer) <em>number</em>s. The value of variable <code>len</code> is the number of interests selected by the user in the form found in <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/decomposition-reuse/project/web/application.ftlh"><code>application.ftlh</code></a>. This template is not the same file used in the former referrals flow. It's a file found under the current <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/decomposition-reuse/project">project</a>.</p>
 <p>Then calculation of <code>mid</code> comes. This is clever way to determine if <code>minAllowed &lt;= len &lt;= maxAllowed</code> is true, which is the criterion for club acceptance: think of sorting an array whose elements are <code>len</code>, <code>minAllowed</code>, <code>maxAllowed</code> and then accessing the element in the second (middle) position. Such value should be equal to <code>len</code>. This computation is carried out with the help of Java's <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/PriorityQueue.html"><code>PriorityQueue</code></a>.</p>
 <p>When the acceptance criterion is fulfilled, the flow terminates successfully, and additionally the name of the applicant is attached so the caller can do something with it afterward. </p>
-<p>Template <a href="./project/web/rejected.ftlh"><code>rejected.ftlh</code></a> is a variation of the original <a href="../conditionals-matching/project/web/rejected2.ftlh"><code>rejected2.ftlh</code></a> template.</p>
+<p>Template <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/decomposition-reuse/project/web/rejected.ftlh"><code>rejected.ftlh</code></a> is a variation of the original <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/rejected2.ftlh"><code>rejected2.ftlh</code></a> template.</p>
 <p>Regarding <code>com.acme.basic.referrals</code>, the flow will be re-used as is.</p>
 <p>A new version of <code>club_admission1</code> comes now: </p>
 <div class="highlight"><pre><span></span><code>Flow com.acme.workaday.club_admission2
@@ -790,7 +790,7 @@ When obj.success is true
 Finish false
 </code></pre></div>
 <p>Note the <code>Trigger</code> call for <code>com.acme.workaday.club_application</code> is passing the three params expected by such flow, in order. The values originate from configuration properties referenced via <code>conf</code> variable.</p>
-<p>This can be tested once proper configurations has been set for the project. File <a href="./project/project.json"><code>project.json</code></a> provides an example in its <code>configs</code> section. Ensure the <a href="../loops/project">loops</a> project is still deployed (so <code>com.acme.basic.referrals</code> can be triggered successfully).</p>
+<p>This can be tested once proper configurations has been set for the project. File <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/decomposition-reuse/project/project.json"><code>project.json</code></a> provides an example in its <code>configs</code> section. Ensure the <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project">loops</a> project is still deployed (so <code>com.acme.basic.referrals</code> can be triggered successfully).</p>
 
 
 
@@ -815,7 +815,7 @@ Finish false
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 11, 2026
+    September 18, 2026
   </span>
 
     

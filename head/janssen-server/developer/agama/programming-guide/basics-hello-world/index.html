@@ -786,7 +786,7 @@
 <p><code>web</code>: It holds web assets like UI templates, stylesheets, images, localization strings, etc.</p>
 </li>
 </ul>
-<p>In-depth details about the anatomy of a project can be found in the official documentation page: <a href="https://docs.jans.io/stable/agama/gama-format/">"The .gama file format"</a>.</p>
+<p>In-depth details about the anatomy of a project can be found in the official documentation page: <a href="../../../../../agama/gama-format/">"The .gama file format"</a>.</p>
 <p>Every flow must be identified by a "qualified" name: a sufficiently expressive name to give an idea of what the flow is about. By convention, qualified names adhere to a reverse Internet domain name notation. As an example, if a flow asks the user about their food preferences, a qualified name could be <code>com.acme.FoodSurvey</code>. Thus, the corresponding physical file should be <code>com.acme.FoodSurvey.flow</code>.</p>
 <h2 id="language-traits">Language traits<a class="headerlink" href="#language-traits" title="Permanent link">#</a></h2>
 <p>Agama is an imperative language with a terse, non-distracting syntax. An Agama flow (<code>.flow</code> file) is expected to depict the structure of a web flow only, while low-level details and computations have to be delegated to an underlying (foreign) language. For instance, the Janssen engine provides an easy and convenient way to call Java/Groovy code from Agama flows.</p>
@@ -799,7 +799,7 @@
 <div class="highlight"><pre><span></span><code>Flow com.acme.basic.helloworld
     Basepath &quot;&quot;
 </code></pre></div>
-<p>Flows start with the <code>Flow</code> keyword followed by the qualified name of the flow. For more information on this topic check the <a href="https://docs.jans.io/stable/agama/language-reference/#header-basics">Header basics</a> section of the language reference.</p>
+<p>Flows start with the <code>Flow</code> keyword followed by the qualified name of the flow. For more information on this topic check the <a href="../../../../../agama/language-reference/#header-basics">Header basics</a> section of the language reference.</p>
 <p>The statements following the header contain the actual flow implementation. In this case, a web page with a salutation will be shown. This is how it is done: </p>
 <div class="highlight"><pre><span></span><code>RRF &quot;salutation.ftlh&quot;
 </code></pre></div>
@@ -840,7 +840,7 @@ Finish true
 \── web
      \─── salutation.ftlh
 </code></pre></div>
-<p>This effectively reflects the contents of the <a href="./project">project</a> directory.</p>
+<p>This effectively reflects the contents of the <a href="https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/basics-hello-world/project">project</a> directory.</p>
 
 
 
@@ -865,7 +865,7 @@ Finish true
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 11, 2026
+    September 18, 2026
   </span>
 
     
