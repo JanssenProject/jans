@@ -5,8 +5,6 @@ package io.jans.configapi.filters;
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.filters;
-
 import io.jans.configapi.model.configuration.CorsConfiguration;
 
 import java.util.Arrays;
