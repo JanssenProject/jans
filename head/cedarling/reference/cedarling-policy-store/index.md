@@ -278,20 +278,20 @@ The directory structure can be packaged as a `.cjar` file (ZIP archive) for dist
 cd policy-store && zip -r ../policy-store.cjar .
 ```
 
-**Note:** In WASM environments, only URL-based and inline string sources are available. Use `CEDARLING_POLICY_STORE_URI` with a `.cjar` URL or `init_from_archive_bytes()` for custom fetch scenarios.
+**Note:** In WASM environments, only URL-based and inline string sources are available. Use `CEDARLING_POLICY_STORE_URI` with a `.cjar` URL or `initFromArchiveBytes()` for custom fetch scenarios.
 
 ## Advanced: Loading from Bytes
 
 For scenarios requiring custom fetch logic (e.g., auth headers), archive bytes can be loaded directly:
 
-- **WASM**: Use `init_from_archive_bytes(config, bytes)` function
+- **WASM**: Use `initFromArchiveBytes(config, bytes)` function
 - **Rust**: Use `PolicyStoreSource::ArchiveBytes(Vec<u8>)` or `load_policy_store_archive_bytes()` function
 
 ```javascript
 // WASM example with custom fetch
 const response = await fetch(url, { headers: { Authorization: "..." } });
 const bytes = new Uint8Array(await response.arrayBuffer());
-const cedarling = await init_from_archive_bytes(config, bytes);
+const cedarling = await initFromArchiveBytes(config, bytes);
 ```
 
 ## Background refresh

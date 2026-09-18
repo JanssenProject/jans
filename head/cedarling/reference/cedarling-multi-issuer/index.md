@@ -249,7 +249,7 @@ let request = {
 };
 
 // WASM binding: the request is passed as a JSON string
-let result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
+let result = await cedarling.authorizeMultiIssuer(JSON.stringify(request));
 ```
 
 **Policy**:
@@ -441,7 +441,7 @@ let tokens = [
 ];
 
 // WASM binding: the request is passed as a JSON string
-let result = await cedarling.authorize_multi_issuer(JSON.stringify({
+let result = await cedarling.authorizeMultiIssuer(JSON.stringify({
   tokens: tokens,
   action: 'Security::Action::"AccessClassified"',
   resource: {

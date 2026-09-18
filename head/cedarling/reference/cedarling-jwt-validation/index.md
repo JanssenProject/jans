@@ -79,14 +79,16 @@ In summary, for a token to be validated by Cedarling, two conditions must be met
 2. The token must be provided under a **token name** defined in the corresponding `token_metadata`
 
   ```js
-  // Example authorize_multi_issuer call
-  cedarling.authorize_multi_issuer({
-    tokens: [
-      { mapping: "Jans::Access_Token", payload: "<access_token>" }, // will be validated
-      { mapping: "Jans::Id_Token", payload: "<id_token>" },         // will be ignored unless defined in token_metadata
-    ],
-    // ...
-  })
+  // Example authorizeMultiIssuer call
+  const result = await cedarling.authorizeMultiIssuer(
+    JSON.stringify({
+      tokens: [
+        { mapping: "Jans::Access_Token", payload: "<access_token>" }, // will be validated
+        { mapping: "Jans::Id_Token", payload: "<id_token>" }, // ignored unless defined in token_metadata
+      ],
+      // ...
+    }),
+  );
   ```
 
 ## JWT Content Validation

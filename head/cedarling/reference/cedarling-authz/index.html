@@ -2167,7 +2167,7 @@ contain business specific data needed for policy evaluation.</p>
 <span class="p">};</span>
 
 <span class="c1">// Execute authorization, the request is passed as a JSON string</span>
-<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_multi_issuer</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeMultiIssuer</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
 
 <span class="c1">// Check result — single decision (no per-principal breakdown)</span>
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">decision</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -2473,7 +2473,7 @@ namespace MyApp {
 <span class="p">};</span>
 
 <span class="c1">// the request is passed as a JSON string</span>
-<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">input</span><span class="p">));</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeUnsigned</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">input</span><span class="p">));</span>
 </code></pre></div>
 <p>The <code>principal</code> field uses <code>cedar_entity_mapping</code> to define its Cedar entity type and ID. All other fields become entity attributes.</p>
 <p>The result contains a single Cedar response:</p>
@@ -2510,7 +2510,7 @@ namespace MyApp {
 <span class="p">};</span>
 
 <span class="c1">// the request is passed as a JSON string</span>
-<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">input</span><span class="p">));</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeUnsigned</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">input</span><span class="p">));</span>
 </code></pre></div>
 <p>In Rust, pass <code>principal: None</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RequestUnsigned</span><span class="w"> </span><span class="p">{</span>
@@ -2620,7 +2620,7 @@ namespace MyApp {
 <span class="w">    </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{}</span>
 <span class="w">  </span><span class="p">}]</span>
 <span class="p">});</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned_batch</span><span class="p">(</span><span class="nx">request</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeUnsignedBatch</span><span class="p">(</span><span class="nx">request</span><span class="p">);</span>
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">batch_id</span><span class="p">);</span>
 <span class="nx">response</span><span class="p">.</span><span class="nx">results</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">is_ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -2718,7 +2718,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    August 14, 2026
+    September 18, 2026
   </span>
 
     

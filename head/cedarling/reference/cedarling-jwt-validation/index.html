@@ -1913,14 +1913,16 @@
 <li>The <code>iss</code> (Issuer) claim must match the <strong>host</strong> of an <code>openid_configuration_endpoint</code> in the policy store.</li>
 <li>The token must be provided under a <strong>token name</strong> defined in the corresponding <code>token_metadata</code></li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="c1">// Example authorize_multi_issuer call</span>
-<span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_multi_issuer</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;access_token&gt;&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="c1">// will be validated</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_Token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;id_token&gt;&quot;</span><span class="w"> </span><span class="p">},</span><span class="w">         </span><span class="c1">// will be ignored unless defined in token_metadata</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="c1">// ...</span>
-<span class="p">})</span>
+<div class="highlight"><pre><span></span><code><span class="c1">// Example authorizeMultiIssuer call</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeMultiIssuer</span><span class="p">(</span>
+<span class="w">  </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;access_token&gt;&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="c1">// will be validated</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_Token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;id_token&gt;&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="c1">// ignored unless defined in token_metadata</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="w">  </span><span class="p">}),</span>
+<span class="p">);</span>
 </code></pre></div>
 <h2 id="jwt-content-validation">JWT Content Validation<a class="headerlink" href="#jwt-content-validation" title="Permanent link">#</a></h2>
 <p>Cedarling also supports validating the contents of a JWT by enforcing the presence of required claims. These requirements are defined in the <code>token_metadata</code> section of the policy store.</p>
@@ -2137,7 +2139,7 @@ namespace Acme {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    July 02, 2026
+    September 18, 2026
   </span>
 
     

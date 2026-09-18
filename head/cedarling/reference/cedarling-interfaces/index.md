@@ -188,12 +188,12 @@ by_policy = cedarling.annotations_by_policy(reason)
 #### Example (JavaScript)
 
 ```javascript
-const result = await cedarling.authorize_unsigned(JSON.stringify(request));
+const result = await cedarling.authorizeUnsigned(JSON.stringify(request));
 const reason = result.response.diagnostics.reason;
 
-const merged = cedarling.annotations_map(reason);
-const redirects = cedarling.annotation_values(reason, "redirect");
-const byPolicy = cedarling.annotations_by_policy(reason);
+const merged = cedarling.annotationsMap(reason);
+const redirects = cedarling.annotationValues(reason, "redirect");
+const byPolicy = cedarling.annotationsByPolicy(reason);
 ```
 
 ### Authz Result

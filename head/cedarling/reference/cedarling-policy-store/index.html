@@ -2820,17 +2820,17 @@ permit(
 <div class="highlight"><pre><span></span><code><span class="c1"># Create a .cjar archive from a policy store directory</span>
 <span class="nb">cd</span><span class="w"> </span>policy-store<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>zip<span class="w"> </span>-r<span class="w"> </span>../policy-store.cjar<span class="w"> </span>.
 </code></pre></div>
-<p><strong>Note:</strong> In WASM environments, only URL-based and inline string sources are available. Use <code>CEDARLING_POLICY_STORE_URI</code> with a <code>.cjar</code> URL or <code>init_from_archive_bytes()</code> for custom fetch scenarios.</p>
+<p><strong>Note:</strong> In WASM environments, only URL-based and inline string sources are available. Use <code>CEDARLING_POLICY_STORE_URI</code> with a <code>.cjar</code> URL or <code>initFromArchiveBytes()</code> for custom fetch scenarios.</p>
 <h2 id="advanced-loading-from-bytes">Advanced: Loading from Bytes<a class="headerlink" href="#advanced-loading-from-bytes" title="Permanent link">#</a></h2>
 <p>For scenarios requiring custom fetch logic (e.g., auth headers), archive bytes can be loaded directly:</p>
 <ul>
-<li><strong>WASM</strong>: Use <code>init_from_archive_bytes(config, bytes)</code> function</li>
+<li><strong>WASM</strong>: Use <code>initFromArchiveBytes(config, bytes)</code> function</li>
 <li><strong>Rust</strong>: Use <code>PolicyStoreSource::ArchiveBytes(Vec&lt;u8&gt;)</code> or <code>load_policy_store_archive_bytes()</code> function</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1">// WASM example with custom fetch</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Authorization</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Uint8Array</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">());</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init_from_archive_bytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">initFromArchiveBytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
 </code></pre></div>
 <h2 id="background-refresh">Background refresh<a class="headerlink" href="#background-refresh" title="Permanent link">#</a></h2>
 <p>For URL-based policy store sources (<code>CEDARLING_POLICY_STORE_URI</code> pointing at a Lock Server endpoint or a <code>.cjar</code>), Cedarling can periodically re-fetch the policy store and atomically swap the in-memory <code>Authz</code> instance so long-running processes see policy updates without restart. Refresh is <strong>opt-in</strong> via <a href=".././cedarling-properties/#refreshing-the-policy-store"><code>CEDARLING_POLICY_STORE_REFRESH_INTERVAL</code></a> and is silently ignored for local sources.</p>
@@ -3644,7 +3644,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 11, 2026
+    September 18, 2026
   </span>
 
     

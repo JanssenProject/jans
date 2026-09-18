@@ -1016,6 +1016,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Policy Store Sources (WASM)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#load-an-archive-from-a-url" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Load an archive from a URL
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-archive-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Load archive bytes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -1085,10 +1113,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#defined-api" class="md-nav__link">
+  <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Defined API
+        API reference
       </span>
     </span>
   </a>
@@ -1618,6 +1646,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Policy Store Sources (WASM)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#load-an-archive-from-a-url" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Load an archive from a URL
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-archive-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Load archive bytes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -1687,10 +1743,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#defined-api" class="md-nav__link">
+  <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Defined API
+        API reference
       </span>
     </span>
   </a>
@@ -1823,7 +1879,8 @@
 
 
 <h1 id="getting-started-with-cedarling-in-a-javascript-app">Getting Started with Cedarling in a JavaScript app<a class="headerlink" href="#getting-started-with-cedarling-in-a-javascript-app" title="Permanent link">#</a></h1>
-<p>This guide combines the JavaScript usage instructions with the WebAssembly (WASM) build and API reference for Cedarling.</p>
+<p>This guide explains how to install, build, and use the Cedarling WebAssembly
+(WASM) package from JavaScript.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
 <h3 id="using-the-package-manager">Using the package manager<a class="headerlink" href="#using-the-package-manager" title="Permanent link">#</a></h3>
 <p>You can easily install Cedarling using WASM.</p>
@@ -1849,28 +1906,28 @@ You can check your current version of Rust using the command below.</p>
 <p>Clone the Janssen server repository from the GitHub and change the directory to the <code>cedarling_wasm</code> directory:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/path/to/jans/jans-cedarling/bindings/cedarling_wasm
 </code></pre></div>
-<p>Build the WebAssembly package in release mode after you've reached the <code>cedarling_wasm</code> directory. <code>wasm-pack</code> automatically optimizes the WebAssembly binary file using <code>wasm-opt</code> for better performance.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wasm-pack<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--target<span class="w"> </span>web
+<p>Generate the web-target binding used as the JavaScript package's build input:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wasm-pack<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--locked<span class="w"> </span>--target<span class="w"> </span>web<span class="w"> </span>--scope<span class="w"> </span>janssenproject
 </code></pre></div>
-<p>To view the WebAssembly project in action, you can run a local server. One way to do this is by using the following command:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>http.server
+<p>This creates the intermediate <code>pkg/</code> directory. Assemble the publishable package
+from the handwritten source in <code>js/</code>:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>js
+npm<span class="w"> </span>ci<span class="w"> </span>--ignore-scripts
+npm<span class="w"> </span>run<span class="w"> </span>build
 </code></pre></div>
+<p>See the <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/js/docs/maintainer.md">JavaScript package maintainer guide</a>
+for the complete build and verification workflow.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="admonition info">
 <p class="admonition-title">Sample Apps</p>
-<p>You can find usage examples at the following locations in the Janssen server
-repository:</p>
-<ul>
-<li>A <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/index.html">sample app</a> that demonstrates basic usage.</li>
-<li>A fully featured <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/cedarling_app.html">Cedarling browser</a> app where you can test and validate your configuration.</li>
-</ul>
+<p>See the <a href="https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_wasm/js/examples">maintained JavaScript examples</a>
+for Node.js ESM, Node.js CommonJS, React with Vite, webpack, and Cloudflare
+Workers integrations.</p>
 </div>
 <h3 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">#</a></h3>
-<p>Since Cedarling is a WASM module, you need to initialize it first.</p>
-<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
-
-<span class="c1">// initialize the WASM binary</span>
-<span class="k">await</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">();</span>
+<p>The package loads its bundled WASM module when <code>init()</code> creates a Cedarling
+instance.</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
 
 <span class="kd">let</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
 <span class="w">  </span><span class="s2">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
@@ -1882,19 +1939,21 @@ repository:</p>
 <span class="p">});</span>
 </code></pre></div>
 <h3 id="policy-store-sources-wasm">Policy Store Sources (WASM)<a class="headerlink" href="#policy-store-sources-wasm" title="Permanent link">#</a></h3>
-<p>In WASM environments, filesystem access is not available. Use one of these options:</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// Option 1: URL-based loading (simple)</span>
-<span class="kd">let</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
+<p>Choose the loading method that matches how your application obtains the policy
+archive.</p>
+<h4 id="load-an-archive-from-a-url">Load an archive from a URL<a class="headerlink" href="#load-an-archive-from-a-url" title="Permanent link">#</a></h4>
+<p>Pass the archive URL through <code>CEDARLING_POLICY_STORE_URI</code> when calling <code>init()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">CEDARLING_APPLICATION_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">CEDARLING_POLICY_STORE_URI</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/policy-store.cjar&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="c1">// ... other config</span>
 <span class="p">});</span>
-
-<span class="c1">// Option 2: In-memory archive bytes (e.g. fetched with custom auth headers)</span>
-<span class="k">import</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">init_from_archive_bytes</span><span class="p">,</span>
-<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
-
-<span class="k">await</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">();</span>
+</code></pre></div>
+<h4 id="load-archive-bytes">Load archive bytes<a class="headerlink" href="#load-archive-bytes" title="Permanent link">#</a></h4>
+<p>Use <code>initFromArchiveBytes()</code> when the application fetches or otherwise obtains
+the archive itself:</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">initFromArchiveBytes</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;your-bearer-token&gt;&quot;</span><span class="p">;</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
@@ -1906,7 +1965,7 @@ repository:</p>
 <span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Authorization</span><span class="o">:</span><span class="w"> </span><span class="sb">`Bearer </span><span class="si">${</span><span class="nx">token</span><span class="si">}</span><span class="sb">`</span><span class="w"> </span><span class="p">},</span>
 <span class="p">});</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Uint8Array</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">());</span>
-<span class="kd">let</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init_from_archive_bytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">initFromArchiveBytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
 </code></pre></div>
 <p>For the directory-based format, package your policy store as a <code>.cjar</code> file and host it:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>policy-store<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>zip<span class="w"> </span>-r<span class="w"> </span>../policy-store.cjar<span class="w"> </span>.
@@ -1919,7 +1978,7 @@ repository:</p>
 <li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.</li>
 </ul>
 <h4 id="token-based-authorization-multi-issuer">Token-Based Authorization (Multi-Issuer)<a class="headerlink" href="#token-based-authorization-multi-issuer" title="Permanent link">#</a></h4>
-<p>For token-based authorization, use <code>authorize_multi_issuer</code> which processes JWT tokens and maps them to Cedar entities based on the <code>token_metadata</code> configuration in your policy store.</p>
+<p>For token-based authorization, use <code>authorizeMultiIssuer</code> which processes JWT tokens and maps them to Cedar entities based on the <code>token_metadata</code> configuration in your policy store.</p>
 <p><strong>1. Prepare tokens</strong></p>
 <p>Tokens are provided as an array of <code>TokenInput</code> objects, each specifying a mapping name and the JWT payload:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
@@ -1962,7 +2021,7 @@ repository:</p>
 <span class="p">};</span>
 
 <span class="c1">// the request is passed as a JSON string</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_multi_issuer</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeMultiIssuer</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
 </code></pre></div>
 <p>See <a href="../../reference/cedarling-multi-issuer/">Multi-Issuer Authorization</a> for more details.</p>
 <h4 id="unsigned-authorization">Unsigned Authorization<a class="headerlink" href="#unsigned-authorization" title="Permanent link">#</a></h4>
@@ -2015,8 +2074,8 @@ repository:</p>
 <span class="p">};</span>
 </code></pre></div>
 <p><strong>6. Perform Authorization</strong></p>
-<p>Finally, call the <code>authorize_unsigned</code> function to check whether the principal is allowed to perform the specified action on the resource. The request is passed as a JSON string.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
+<p>Finally, call the <code>authorizeUnsigned</code> function to check whether the principal is allowed to perform the specified action on the resource. The request is passed as a JSON string.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeUnsigned</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
 </code></pre></div>
 <h4 id="batch-authorization">Batch Authorization<a class="headerlink" href="#batch-authorization" title="Permanent link">#</a></h4>
 <p>Each entry in <code>results</code> is a <code>BatchItemUnsignedResult</code> — <code>.is_ok</code> reports whether Cedar reached a decision; <code>.unwrap()</code> returns the <code>AuthorizeResult</code> on Ok, <code>.error</code> returns the <code>BatchItemError</code> on Err. Positional mapping to <code>items[i]</code> is preserved for both branches; the shared <code>batch_id</code> (UUIDv7) is stamped on every per-item decision-log entry.</p>
@@ -2028,7 +2087,7 @@ repository:</p>
 <span class="w">  </span><span class="p">],</span>
 <span class="p">};</span>
 
-<span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned_batch</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeUnsignedBatch</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
 
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;batch_id:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">batch_id</span><span class="p">);</span>
 <span class="nx">response</span><span class="p">.</span><span class="nx">results</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
@@ -2041,199 +2100,20 @@ repository:</p>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>For multi-issuer, swap <code>{ principal, items }</code> for <code>{ tokens, items }</code> and call <code>authorize_multi_issuer_batch</code>. <code>context</code> is optional on each item and defaults to <code>{}</code>. See <a href="../../reference/cedarling-authz/#batch-authorization">Batch Authorization</a> for the request / response shape, failure model, and <code>BatchItemError</code> variant list.</p>
+<p>For multi-issuer, swap <code>{ principal, items }</code> for <code>{ tokens, items }</code> and call <code>authorizeMultiIssuerBatch</code>. <code>context</code> is optional on each item and defaults to <code>{}</code>. See <a href="../../reference/cedarling-authz/#batch-authorization">Batch Authorization</a> for the request / response shape, failure model, and <code>BatchItemError</code> variant list.</p>
 <h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h3>
-<p>The logs could be retrieved using the <code>pop_logs</code> function.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">logs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">pop_logs</span><span class="p">();</span>
+<p>The logs could be retrieved using the <code>popLogs</code> function.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">logs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">popLogs</span><span class="p">();</span>
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">logs</span><span class="p">);</span>
 </code></pre></div>
-<h2 id="defined-api">Defined API<a class="headerlink" href="#defined-api" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>/**
- * Create a new instance of the Cedarling application.
- * This function can take as config parameter the eather `Map` other `Object`
- */
-export function init(config: any): Promise&lt;Cedarling&gt;;
-/**
- * A WASM wrapper for the Rust `cedarling::AuthorizeResult` struct.
- * Represents the result of an authorization request.
- */
-export class AuthorizeResult {
-
-  /**
-   * Convert `AuthorizeResult` to json string value
-   */
-  json_string(): string;
-  /**
-   * The Cedar response for this authorization call.
-   */
-  readonly response: AuthorizeResultResponse;
-  /**
-   * Result of authorization
-   * true means `ALLOW`
-   * false means `Deny`
-   *
-   * this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
-   */
-  decision: boolean;
-  /**
-   * Request ID of the authorization request
-   */
-  request_id: string;
-}
-/**
- * A WASM wrapper for the Rust `cedar_policy::Response` struct.
- * Represents the result of an authorization request.
- */
-export class AuthorizeResultResponse {
-
-  /**
-   * Authorization decision
-   */
-  readonly decision: boolean;
-  /**
-   * Diagnostics providing more information on how this decision was reached
-   */
-  readonly diagnostics: Diagnostics;
-}
-/**
- * The instance of the Cedarling application.
- */
-export class Cedarling {
-
-  /**
-   * Create a new instance of the Cedarling application.
-   * Assume that config is `Object`
-   */
-  static new(config: object): Promise&lt;Cedarling&gt;;
-  /**
-   * Create a new instance of the Cedarling application.
-   * Assume that config is `Map`
-   */
-  static new_from_map(config: Map&lt;any, any&gt;): Promise&lt;Cedarling&gt;;
-  /**
-   * Authorize request for an unsigned (optional) principal.
-   * makes authorization decision based on the [`RequestUnsigned`]
-   * The request is passed as a JSON string, e.g. `JSON.stringify(request)`.
-   */
-  authorize_unsigned(request: string): Promise&lt;AuthorizeResult&gt;;
-  /**
-   * Authorize request using multi-issuer tokens.
-   * makes authorization decision based on the [`AuthorizeMultiIssuerRequest`]
-   * The request is passed as a JSON string, e.g. `JSON.stringify(request)`.
-   */
-  authorize_multi_issuer(request: string): Promise&lt;AuthorizeResult&gt;;
-  /**
-   * Authorize a batch of unsigned requests.
-   * The request is passed as a JSON string matching `BatchAuthorizeUnsignedRequest`.
-   */
-  authorize_unsigned_batch(request: string): Promise&lt;BatchAuthorizeUnsignedResponse&gt;;
-  /**
-   * Authorize a batch of multi-issuer requests.
-   * The request is passed as a JSON string matching `BatchAuthorizeMultiIssuerRequest`.
-   */
-  authorize_multi_issuer_batch(request: string): Promise&lt;BatchAuthorizeMultiIssuerResponse&gt;;
-  /**
-   * Get logs and remove them from the storage.
-   * Returns `Array` of `Map`
-   */
-  pop_logs(): Array&lt;any&gt;;
-  /**
-   * Get specific log entry.
-   * Returns `Map` with values or `null`.
-   */
-  get_log_by_id(id: string): any;
-  /**
-   * Returns a list of all log ids.
-   * Returns `Array` of `String`
-   */
-  get_log_ids(): Array&lt;any&gt;;
-  /**
-   * Get logs by tag, like `log_kind` or `log level`.
-   * Tag can be `log_kind`, `log_level`.
-   */
-  get_logs_by_tag(tag: string): any[];
-  /**
-   * Get logs by request_id.
-   * Return log entries that match the given request_id.
-   */
-  get_logs_by_request_id(request_id: string): any[];
-  /**
-   * Get log by request_id and tag, like composite key `request_id` + `log_kind`.
-   * Tag can be `log_kind`, `log_level`.
-   * Return log entries that match the given request_id and tag.
-   */
-  get_logs_by_request_id_and_tag(request_id: string, tag: string): any[];
-}
-/**
- * Diagnostics
- * ===========
- *
- * Provides detailed information about how a policy decision was made, including policies that contributed to the decision and any errors encountered during evaluation.
- */
-export class Diagnostics {
-
-  /**
-   * `PolicyId`s of the policies that contributed to the decision.
-   * If no policies applied to the request, this set will be empty.
-   *
-   * The ids should be treated as unordered,
-   */
-  readonly reason: string[];
-  /**
-   * Errors that occurred during authorization. The errors should be
-   * treated as unordered, since policies may be evaluated in any order.
-   */
-  readonly errors: PolicyEvaluationError[];
-}
-export class JsJsonLogic {
-  apply(logic: any, data: any): any;
-}
-/**
- * PolicyEvaluationError
- * =====================
- *
- * Represents an error that occurred when evaluating a Cedar policy.
- */
-export class PolicyEvaluationError {
-
-  /**
-   * Id of the policy with an error
-   */
-  readonly id: string;
-  /**
-   * Underlying evaluation error string representation
-   */
-  readonly error: string;
-}
-
-export class BatchItemError {
-  readonly category: string;
-  readonly item_index: number;
-  readonly message: string;
-}
-
-export class BatchItemUnsignedResult {
-  readonly is_ok: boolean;
-  unwrap(): AuthorizeResult;
-  readonly error: BatchItemError;
-}
-
-export class BatchItemMultiIssuerResult {
-  readonly is_ok: boolean;
-  unwrap(): AuthorizeResult;
-  readonly error: BatchItemError;
-}
-
-export class BatchAuthorizeUnsignedResponse {
-  readonly batch_id: string;
-  readonly results: BatchItemUnsignedResult[];
-}
-
-export class BatchAuthorizeMultiIssuerResponse {
-  readonly batch_id: string;
-  readonly results: BatchItemMultiIssuerResult[];
-}
-</code></pre></div>
+<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">#</a></h2>
+<p><code>@janssenproject/cedarling_wasm</code> ships TypeScript declarations for every public
+export. The package exposes them through its public entry points, so editors and
+TypeScript resolve the authoritative API automatically after installation.</p>
+<p>See the Cedarling references for <a href="../../reference/cedarling-authz/">authorization</a>,
+<a href="../../reference/cedarling-properties/">bootstrap properties</a>,
+<a href="../../reference/cedarling-policy-store/">policy stores</a>, and
+<a href="../../reference/cedarling-logs/">logs</a>.</p>
 <hr />
 <h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">#</a></h2>
 <ul>
@@ -2304,7 +2184,7 @@ export class BatchAuthorizeMultiIssuerResponse {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 11, 2026
+    September 18, 2026
   </span>
 
     
