@@ -590,6 +590,7 @@ fn maybe_spawn_refresh_worker(
         initial_body_hash: seed.initial_body_hash,
         initial_validators: seed.initial_validators,
         strict_schema_validation: config.authorization_config.strict_schema_validation,
+        archive_limits: config.policy_store_config.archive_limits(),
     };
     Some(Arc::new(spawn_refresh_worker(ctx)))
 }
