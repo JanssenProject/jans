@@ -4,13 +4,13 @@ This page provides guidance on how to deploy and test any of the projects in thi
 
 ## Janssen server setup
 
-The first step is setting up a [Janssen Server](https://docs.jans.io/stable/getting-started/) instance. While there are [several ways](https://docs.jans.io/stable/janssen-server/install/#installation-overview) to do so, this guide focuses on a Virtual Machine approach. Desktop Virtualization software such as Oracle VirtualBox or VMWare Fusion/Workstation can be used, however, since there is no need for a GUI, developers may consider using more command-line oriented tools like Incus.
+The first step is setting up a [Janssen Server](../../../../getting-started/index.md) instance. While there are [several ways](../../../install/#installation-overview) to do so, this guide focuses on a Virtual Machine approach. Desktop Virtualization software such as Oracle VirtualBox or VMWare Fusion/Workstation can be used, however, since there is no need for a GUI, developers may consider using more command-line oriented tools like Incus.
 
-Several [operating systems](https://docs.jans.io/stable/janssen-server/install/vm-install/vm-requirements/#supported-os-versions) are supported for Jans. For the purpose of testing here, 8GB of disk and 4GB of RAM suffices: only a couple of server components will be installed. This is assuming a minimalistic OS image was used.
+Several [operating systems](../../../install/vm-install/vm-requirements.md#supported-os-versions) are supported for Jans. For the purpose of testing here, 8GB of disk and 4GB of RAM suffices: only a couple of server components will be installed. This is assuming a minimalistic OS image was used.
 
 The next step is downloading a suitable package. Navigate to the Janssen [releases](https://github.com/JanssenProject/jans/releases) page and click on the latest stable version on the release list, e.g. `v2.3.0`. Scroll down, click on "Show all assets", and pick the file that matches the selected operating system, e.g. `jans_2.3.0-stable.ubuntu22.04_amd64.deb`.
 
-Download the file and transfer it to the VM, or preferably download it directly from the VM. Then install the file in accordance to the OS. This [page](https://docs.jans.io/stable/janssen-server/install/vm-install/) includes links with specific commands for the supported operating systems. In the case of Ubuntu, for instance, it would be a matter of issuing `sudo apt install  jans_2.3.0-stable.ubuntu24.04_amd64.deb`. Note the installation process may download package dependencies, if missing.
+Download the file and transfer it to the VM, or preferably download it directly from the VM. Then install the file in accordance to the OS. This [page](../../../install/vm-install/) includes links with specific commands for the supported operating systems. In the case of Ubuntu, for instance, it would be a matter of issuing `sudo apt install  jans_2.3.0-stable.ubuntu24.04_amd64.deb`. Note the installation process may download package dependencies, if missing.
 
 Finally, launch the Jans installer. The below command performs a non-interactive installation with the components required to run the examples: 
 
@@ -80,7 +80,7 @@ Navigate to the "Scripts" screen (keyboard shorcut should be Alt+r). Search "aga
 
 Tab again to highlight the "Save" button and press enter.
 
-The details in ["Using Text-based UI"](https://docs.jans.io/stable/janssen-server/config-guide/auth-server-config/agama-project-configuration/#using-text-based-ui) bring a helpful overview on how to manage Agama projects. Deploy the project of interest by uploading the corresponding `gama` archive. When projects do not feature metadata (no `project.json`) like `basics-hello-world`, TUI will prompt to provide a name. A project name may contain letters, digits, and hyphens.
+The details in ["Using Text-based UI"](../../../config-guide/auth-server-config/agama-project-configuration.md#using-text-based-ui) bring a helpful overview on how to manage Agama projects. Deploy the project of interest by uploading the corresponding `gama` archive. When projects do not feature metadata (no `project.json`) like `basics-hello-world`, TUI will prompt to provide a name. A project name may contain letters, digits, and hyphens.
 
 Wait one minute to ensure completion of deployment and then view the project details. Make sure to select the row for the project beforehand. The TUI doc page mentioned above explains how to get to the details screen. Note how all flows belonging to the project are listed. If errors were encountered when processing the archive, they will be displayed.   
 
@@ -118,7 +118,7 @@ In the case of failed flows, like when using `Finish false`, an "Autentication f
 
 Input parameters are also included in the launch URL (the URL Tarp generates for the window where the flow will run). Note parameters are not passed using the "additional params" field in Tarp but in the Acr value, like this: `agama_<qualified-flow-name>-<encoded-params>`.
 
-The [Agama engine doc page](https://docs.jans.io/stable/janssen-server/developer/agama/jans-agama-engine/#launching-flows) of Jans illustrates how to encode input parameters.
+The [Agama engine doc page](../jans-agama-engine.md#launching-flows) of Jans illustrates how to encode input parameters.
 
 ## Logs location
 
@@ -126,7 +126,7 @@ The output of `Log` statements in flows can be found in the authentication serve
 
 In the main AS log (`/opt/jans/jetty/jans-auth/logs/jans-auth.log`) other details can be found such as runtime errors, source code compilation errors, freemarker issues, etc. Normally, when these kind of flow "crashes" occur, relevant errors messages are displayed in-browser.
 
-Visit the [Logging Overview](https://docs.jans.io/stable/janssen-server/auth-server/logging/) for more information on Jans logging.
+Visit the [Logging Overview](../../../auth-server/logging/) for more information on Jans logging.
 
 ## Project redeployment
 
@@ -146,9 +146,9 @@ Replacing configuration properties for a project do not require redeployment. Su
 
 ### Are there alternative tools to deploy projects?
 
-TUI supports a non-interactive command-line approach for project management. Find more information [here]( https://docs.jans.io/stable/janssen-server/config-guide/auth-server-config/agama-project-configuration/#using-command-line).
+TUI supports a non-interactive command-line approach for project management. Find more information [here]( ../../../config-guide/auth-server-config/agama-project-configuration.md#using-command-line).
 
-Janssen server also provides an [API](https://docs.jans.io/stable/janssen-server/developer/agama/projects-deployment/) for these purposes. It demands quite more work as expected. Both the command-line and text-based UI make use of the API.
+Janssen server also provides an [API](../projects-deployment.md) for these purposes. It demands quite more work as expected. Both the command-line and text-based UI make use of the API.
 
 ### Are there other tools that can be used to launch flows?
 
@@ -156,4 +156,4 @@ Yes. In general any Relying Party (RP) app can be used. This demands some knowle
 
 ### Updates in Java code seem not to take effect, what to do?
 
-This issue sometimes occur (Java code stalled/not refreshed). Remove your project, [restart](https://docs.jans.io/stable/janssen-server/vm-ops/jans-command/#restart) the authentication server (`jans-auth-server`), and attempt to deploy again.
+This issue sometimes occur (Java code stalled/not refreshed). Remove your project, [restart](../../../vm-ops/jans-command.md#restart) the authentication server (`jans-auth-server`), and attempt to deploy again.
