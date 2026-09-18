@@ -334,7 +334,9 @@ class Plugin(DialogUtils):
             # Start from the relying party as it was loaded so fields this screen does not show survive.
             rp = dict(self._original_requested_party(name))
             rp['id'] = name
-            rp['origins'] = domains.splitlines()
+            # The row holds the origins comma-joined, both as loaded and as the dialog writes them back,
+            # so splitting on lines here would save every multi-origin RP as one malformed origin.
+            rp['origins'] = [origin.strip() for origin in domains.split(',') if origin.strip()]
 
             policy = dict(rp.get('policy') or {})
             if attestation_mode:
