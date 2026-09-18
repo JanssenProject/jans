@@ -15696,13 +15696,13 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
-          type: boolean
         adminCanView:
+          type: boolean
+        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
