@@ -72,6 +72,10 @@ pub(super) fn default_http_client_retry_delay_secs() -> u64 {
     HttpClientConfig::DEFAULT_RETRY_DELAY.as_secs()
 }
 
+pub(super) fn default_http_client_max_response_size_bytes() -> u64 {
+    HttpClientConfig::DEFAULT_MAX_RESPONSE_SIZE_BYTES
+}
+
 pub(super) fn default_policy_store_max_file_size() -> u64 {
     ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE
 }

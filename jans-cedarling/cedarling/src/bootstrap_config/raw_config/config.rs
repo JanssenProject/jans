@@ -7,11 +7,11 @@
 use super::super::BootstrapConfigLoadingError;
 use super::super::log_config::StdOutMode;
 use super::default_values::{
-    default_enabled_feature_toggle, default_http_client_max_retries,
-    default_http_client_retry_delay_secs, default_jti, default_jwks_refresh_min_interval,
-    default_log_channel_capacity, default_log_max_retries, default_policy_store_max_file_size,
-    default_status_list_refresh_interval_max, default_token_cache_capacity,
-    default_token_cache_max_ttl, default_true,
+    default_enabled_feature_toggle, default_http_client_max_response_size_bytes,
+    default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
+    default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
+    default_policy_store_max_file_size, default_status_list_refresh_interval_max,
+    default_token_cache_capacity, default_token_cache_max_ttl, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
@@ -444,17 +444,13 @@ pub struct BootstrapConfigRaw {
     /// Maximum HTTP response body size, in bytes. Rejects oversized responses
     /// (JWKS, OIDC config, status list, policy store, Lock Server endpoints)
     /// before they're fully buffered into memory. `0` disables the cap.
-    ///
-    /// `None` means unset, which falls back to
-    /// [`Self::policy_store_max_file_size`] rather than an independent default,
-    /// so a download is never larger than the largest entry we would
-    /// decompress.
+    /// Default: 10 MB (`10485760`).
     #[serde(
         rename = "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES",
-        default,
+        default = "default_http_client_max_response_size_bytes",
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
-    pub http_client_max_response_size_bytes: Option<u64>,
+    pub http_client_max_response_size_bytes: u64,
 
     /// Optional override for JWKS periodic refresh interval in seconds.
     /// When set, overrides the `Cache-Control: max-age` from the JWKS endpoint.
@@ -851,7 +847,7 @@ mod tests {
     }
 
     #[test]
-    fn test_policy_store_max_file_size_defaults_and_leaves_http_cap_unset() {
+    fn test_policy_store_max_file_size_and_http_cap_default_independently() {
         with_env_vars(&[], || {
             let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
 
@@ -861,9 +857,9 @@ mod tests {
                 "Policy store max file size should default to 10 MB"
             );
             assert_eq!(
-                config.http_client_max_response_size_bytes, None,
-                "An unset HTTP cap must stay None so decoding can fall back to \
-                 the policy store cap"
+                config.http_client_max_response_size_bytes,
+                crate::HttpClientConfig::DEFAULT_MAX_RESPONSE_SIZE_BYTES,
+                "An unset HTTP cap must use its own default, not the archive cap"
             );
         });
     }
