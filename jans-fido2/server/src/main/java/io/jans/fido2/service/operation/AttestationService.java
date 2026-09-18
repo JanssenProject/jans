@@ -26,6 +26,7 @@ import io.jans.fido2.service.trust.AttestationTrustDiagnostics;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.CoseService;
+import io.jans.fido2.service.RpPolicyService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
@@ -94,6 +95,9 @@ public class AttestationService {
 
 	@Inject
 	private CoseService coseService;
+
+	@Inject
+	private RpPolicyService rpPolicyService;
 
 	@Inject
 	private SignatureVerifier signatureVerifier;
@@ -187,7 +191,7 @@ public class AttestationService {
 		// authenticatorSelection may also be set in attestation options, especially for platform authenticators
 		prepareAuthenticatorSelection( credentialCreationOptions,attestationOptions) ;
 		
-		prepareAttestation(credentialCreationOptions);
+		prepareAttestation(credentialCreationOptions, origin);
 		
 		
 		// Copy extensions
@@ -468,7 +472,7 @@ public class AttestationService {
 
 	}
 
-	private void prepareAttestation(PublicKeyCredentialCreationOptions credentialCreationOptions) {
+	private void prepareAttestation(PublicKeyCredentialCreationOptions credentialCreationOptions, String origin) {
 		
 		List<String> hints = appConfiguration.getFido2Configuration().getHints();
 		
@@ -483,7 +487,8 @@ public class AttestationService {
 				{
 					credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
 				}
-				else if(appConfiguration.getFido2Configuration().getAttestationMode().equals(AttestationMode.DISABLED.getValue()))
+				else if (AttestationMode.DISABLED.getValue()
+						.equals(rpPolicyService.resolveAttestationMode(origin)))
 				{
 					credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
 				}

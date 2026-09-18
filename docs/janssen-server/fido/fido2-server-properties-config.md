@@ -99,7 +99,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `metadataRefreshInterval` | Integer | `1296000` | Expiration time in seconds (e.g., 15 days) before checking and reloading the FIDO Alliance MDS TOC. |
 | <span id="servermetadatafolder">`serverMetadataFolder`</span> | String | `"/etc/jans/conf/fido2/server_metadata"` | Folder where local vendor metadata statement JSON files are placed manually. |
 | `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS384`, `RS512`, `RS65535`, `PS256`, `PS384`, `PS512`, `ES256`, `ES384`, `ES512`, `ESP256`, `ESP384`, `EdDSA`, `Ed25519`, `Ed448`, `ML-DSA-44`, `ML-DSA-65`, `ML-DSA-87` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. A recognised name the deployment cannot actually complete a registration with is logged at `ERROR` and left out of `pubKeyCredParams` — see [Advertised algorithms](#advertised-algorithms). |
-| `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. |
+| `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. Each entry may also carry a `policy` object — see [Per-relying-party policy](#per-relying-party-policy). |
 | `metadataServers` | Array of Objects | `[ { "url": "https://mds.fidoalliance.org/" } ]` | External FIDO Metadata Service endpoints to download statement catalogs. |
 | `disableMetadataService` | Boolean | `false` | If set to `true`, the FIDO2 server skips validating authenticators against the MDS3 service. |
 | `mdsDownloadStartupRetries` | Integer | `3` | Number of times the MDS TOC download is *retried* at server startup when the TOC blob is missing (a missing TOC prevents attestation validation). This is in addition to the initial attempt, so the default of `3` means up to 4 downloads. `0` disables retries. Retries stop early once the blob is present, and are skipped when the metadata server answers HTTP 429, since it has explicitly asked the server to back off. |
@@ -108,6 +108,31 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `enterpriseAttestation` | Boolean | `false` | Enables support for enterprise-specific hardware attestation profiles. |
 | `attestationMode` | String | `"monitor"` | Options are: `disabled` (skip attestation checks), `monitor` (log/validate but allow credentials if attestation is absent/unknown), and `enforced` (fail credential creation if attestation check fails). |
 | `allowedTopOrigins` | Array of Strings | `[]` | Full origins permitted to frame a cross-origin ceremony, each written as scheme, host and optional port (for example `https://portal.example.com`). Empty — the default — denies every framed ceremony. See [Cross-origin ceremonies](#cross-origin-ceremonies). |
+
+### Per-relying-party policy
+
+An entry under `rp` may carry a `policy` object overriding the corresponding global setting for that
+relying party alone:
+
+```json
+{
+  "id": "high-assurance.example.com",
+  "origins": ["https://high-assurance.example.com"],
+  "policy": { "attestationMode": "enforced" }
+}
+```
+
+| Field | Falls back to |
+| :--- | :--- |
+| `attestationMode` | the global [`attestationMode`](#fido2-configuration-object-fido2configuration) |
+
+**An RP with no `policy`, or with the field unset, behaves exactly as it did before this existed** — the
+global value applies. The same is true for a ceremony whose origin matches no configured RP. Nothing needs
+changing on upgrade.
+
+Only `attestationMode` is settable per RP today. Further fields are added alongside the change that
+enforces them, so that anything listed here is a policy actually in effect rather than a value that is
+merely stored.
 
 ### Advertised algorithms
 
