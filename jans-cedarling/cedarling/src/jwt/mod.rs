@@ -614,10 +614,12 @@ impl JwtService {
         &self,
         ctx: &mut TokenCallCtx<'_>,
     ) -> Result<Option<Arc<Token>>, MultiIssuerValidationError> {
-        // Find the corresponding token metadata key for the entity type name
-        let token_type = self.find_token_metadata_key(&ctx.token.mapping);
-
-        let token_kind = TokenKind::AuthorizeMultiIssuer(token_type);
+        let Some(token_key) = self.token_keys_by_entity_type.get(&ctx.token.mapping) else {
+            let err = ValidateJwtError::UnknownTokenMapping(ctx.token.mapping.clone());
+            self.record_failed_jwt(ctx.index, &err);
+            return Ok(None);
+        };
+        let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(token_key));
 
         if let Some(cedar_token) = self.token_cache.find(&token_kind, &ctx.token.payload) {
             return Ok(Some(cedar_token));
@@ -673,17 +675,23 @@ impl JwtService {
                 }
             },
             Err(err) => {
-                self.metrics.record_jwt_validation(false);
-                if let Some(logger) = &self.logger {
-                    logger.log_any(JwtLogEntry::new(
-                        format!("Token validation failed at index {}: {err}", ctx.index),
-                        Some(LogLevel::WARN),
-                    ));
-                }
-                self.metrics.record_error(&err);
+                self.record_failed_jwt(ctx.index, &err);
                 Ok(None)
             },
         }
+    }
+
+    /// Record and log a JWT that failed validation. The caller skips the token
+    /// rather than failing the whole request.
+    fn record_failed_jwt(&self, index: usize, err: &ValidateJwtError) {
+        self.metrics.record_jwt_validation(false);
+        if let Some(logger) = &self.logger {
+            logger.log_any(JwtLogEntry::new(
+                format!("Token validation failed at index {index}: {err}"),
+                Some(LogLevel::WARN),
+            ));
+        }
+        self.metrics.record_error(err);
     }
 
     /// Process a single custom (non-JWT) token via the registered processor.
@@ -816,16 +824,6 @@ impl JwtService {
                 ),
                 Some(LogLevel::INFO),
             ));
-        }
-    }
-
-    /// Find the token metadata key for a given entity type name
-    /// e.g., "`Dolphin::Access_Token`" -> "`access_token`"
-    fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a str) -> Cow<'a, str> {
-        match self.token_keys_by_entity_type.get(entity_type_name) {
-            Some(token_key) => Cow::Borrowed(token_key),
-            // If not found, return the original mapping (fallback)
-            None => Cow::Borrowed(entity_type_name),
         }
     }
 }
