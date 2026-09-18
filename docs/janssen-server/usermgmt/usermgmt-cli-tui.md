@@ -36,6 +36,7 @@ Janssen Server provides command-line, text-based, and REST API interfaces for us
 The Jans CLI provides command-line operations for creating, updating, and deleting users and managing user attributes. 
 
 ### Create a User
+
 The `post-user` operation creates a new user in Janssen Server. User information can be provided either in a JSON file or directly as JSON data.
 
 #### Using a JSON File
@@ -289,5 +290,6 @@ Jans TUI provides user-management operations from the terminal. For instructions
 
 
 ## Using Configuration REST API
+
 Janssen Server Configuration REST API exposes relevant endpoints for managing and configuring the user. Endpoint details are published in the [Swagger
 document](./../reference/openapi.md).
