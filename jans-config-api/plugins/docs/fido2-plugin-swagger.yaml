@@ -1738,23 +1738,6 @@ components:
           type: array
           items:
             type: string
-        policy:
-          $ref: "#/components/schemas/RequestedPartyPolicy"
-    RequestedPartyPolicy:
-      type: object
-      description: >-
-        Assurance policy for a single relying party, overriding the corresponding global setting. Every
-        field is optional; an omitted field falls back to the global value, so a relying party with no
-        policy behaves exactly as it did before per-RP policy existed.
-      properties:
-        attestationMode:
-          type: string
-          description: >-
-            Attestation mode for this relying party. Omitted falls back to the global attestationMode.
-          enum:
-            - disabled
-            - monitor
-            - enforced
     JsonNode:
       type: object
     Fido2MetricsAggregation:
@@ -1782,38 +1765,19 @@ components:
           type: object
           additionalProperties:
             type: object
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        fallbackEvents:
-          type: integer
-          format: int64
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        period:
-          type: string
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
+        authenticationSuccesses:
           type: integer
           format: int64
         registrationFailures:
           type: integer
           format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
+        registrationSuccesses:
+          type: integer
+          format: int64
         authenticationAttempts:
+          type: integer
+          format: int64
+        registrationAttempts:
           type: integer
           format: int64
         authenticationSuccessRate:
@@ -1822,15 +1786,34 @@ components:
         authenticationFailures:
           type: integer
           format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationAvgDuration:
-          type: number
-          format: double
         registrationAvgDuration:
           type: number
           format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
+        registrationSuccessRate:
+          type: number
+          format: double
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        period:
+          type: string
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
