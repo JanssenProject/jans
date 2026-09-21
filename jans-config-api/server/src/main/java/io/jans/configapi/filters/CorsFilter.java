@@ -125,7 +125,7 @@ public class CorsFilter implements Filter {
                 request.getMethod(), corsConfiguration.getPreflightMaxAge());
         if ("OPTIONS".equals(request.getMethod())) {
             log.debug("CorsFilter::doFilter() - OPTIONS method");
-            if ((requestedHeaders != null || requestedMethods != null) && corsConfiguration.getPreflightMaxAge() != 0) {
+            if ((requestedMethods != null || requestedMethods != null) && corsConfiguration.getPreflightMaxAge() != 0) {
                 log.debug("CorsFilter::doFilter() - setting PreflightMaxAge ");
                 response.addHeader(ACCESS_CONTROL_MAX_AGE, String.valueOf(corsConfiguration.getPreflightMaxAge()));
             }

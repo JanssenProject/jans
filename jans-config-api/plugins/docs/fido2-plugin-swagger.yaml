@@ -1658,9 +1658,12 @@ components:
           type: boolean
         fido2MetricsAggregationEnabled:
           type: boolean
-        fido2MetricsAggregationInterval:
-          type: integer
-          format: int32
+        trustedProxyEnabled:
+          type: boolean
+        trustedProxyIpRanges:
+          type: array
+          items:
+            type: string
         personCustomObjectClassList:
           type: array
           items:
@@ -1718,6 +1721,10 @@ components:
           type: boolean
         attestationMode:
           type: string
+        allowedTopOrigins:
+          type: array
+          items:
+            type: string
         rp:
           type: array
           items:
@@ -1738,6 +1745,13 @@ components:
           type: array
           items:
             type: string
+        policy:
+          $ref: "#/components/schemas/RequestedPartyPolicy"
+    RequestedPartyPolicy:
+      type: object
+      properties:
+        attestationMode:
+          type: string
     JsonNode:
       type: object
     Fido2MetricsAggregation:
@@ -1770,48 +1784,48 @@ components:
           format: int64
         period:
           type: string
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
         deviceTypes:
           type: object
           additionalProperties:
             type: integer
             format: int64
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
         registrationAttempts:
           type: integer
           format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationSuccessRate:
+          type: number
+          format: double
         authenticationAvgDuration:
+          type: number
+          format: double
+        authenticationFailures:
+          type: integer
+          format: int64
+        registrationAvgDuration:
           type: number
           format: double
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        registrationSuccesses:
-          type: integer
-          format: int64
         authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationSuccessRate:
-          type: number
-          format: double
-        registrationFailures:
-          type: integer
-          format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        registrationAvgDuration:
-          type: number
-          format: double
-        authenticationFailures:
-          type: integer
-          format: int64
-        authenticationAttempts:
           type: integer
           format: int64
         baseDn:

@@ -141,7 +141,7 @@ public class CorsConfiguration implements Serializable {
      * @param decorateRequest     "true" if request needs to enhanced
      * @throws ServletException
      */
-    public void parseAndStore(final String corsEnabled, final String allowedOrigins, final String allowedHttpMethods,
+    public void parseAndStore(final String corsEnabled, final String strAllowedOrigins, final String allowedHttpMethods,
             final String allowedHttpHeaders, final String exposedHeaders, final String supportsCredentials,
             final String preflightMaxAge, final String decorateRequest) throws ServletException {
 
@@ -149,8 +149,8 @@ public class CorsConfiguration implements Serializable {
         
         // validate allowedOrigins
         Set<String> parsedAllowedOrigins = new LinkedHashSet<>();
-        if (StringUtils.isNotBlank(allowedOrigins)) {
-            for (String origin : COMMA_SEPARATED_SPLIT_REGEX.split(allowedOrigins.trim())) {
+        if (StringUtils.isNotBlank(strAllowedOrigins)) {
+            for (String origin : COMMA_SEPARATED_SPLIT_REGEX.split(strAllowedOrigins.trim())) {
                 if (StringUtils.isNotBlank(origin)) {
                     parsedAllowedOrigins.add(origin.trim());
                 }
@@ -166,21 +166,16 @@ public class CorsConfiguration implements Serializable {
         // silently dropping the wildcard or the explicit entries.
         if (parsedAllowedOrigins.contains(WILDCARD) && parsedAllowedOrigins.size() > 1) {
             log.error(
-                    "CorsConfiguration::parseAndStore() - invalid allowedOrigins '{}': '*' cannot be combined with explicit origins",
-                    allowedOrigins);
+                    "CorsConfiguration::parseAndStore() - invalid strAllowedOrigins '{}': '*' cannot be combined with explicit origins",
+                    strAllowedOrigins);
             throw new ServletException(
                     "Invalid CORS configuration: allowedOrigins cannot mix the wildcard '*' with explicit origins. "
                             + "Configure '*' alone to allow any origin, or remove it and list only the explicit origins to allow.");
         }
 
-        this.allowedOrigins = Collections.unmodifiableSet(parsedAllowedOrigins);
-
-        if (allowedOrigins != null) {
-            if (!allowedOrigins.trim().equals("*")) {
-                Set<String> setAllowedOrigins = parseStringToSet(allowedOrigins);
+        if (parsedAllowedOrigins != null && !parsedAllowedOrigins.isEmpty()) {
                 this.allowedOrigins.clear();
-                this.allowedOrigins.addAll(setAllowedOrigins);
-            }
+                this.allowedOrigins.addAll(parsedAllowedOrigins);
         }
 
         if (allowedHttpMethods != null) {
