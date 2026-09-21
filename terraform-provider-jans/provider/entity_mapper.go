@@ -124,7 +124,6 @@ func pruneUndeclared(cfg cty.Value, val any) any {
         switch typed := val.(type) {
 
         case []any:
-                // Sets are left alone, since their config order need not match the value
                 if !cfg.Type().IsListType() && !cfg.Type().IsTupleType() {
                         return val
                 }

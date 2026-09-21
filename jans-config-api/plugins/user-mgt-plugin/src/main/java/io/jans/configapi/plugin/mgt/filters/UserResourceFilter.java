@@ -85,14 +85,11 @@ public class UserResourceFilter extends BaseFilter {
             return;
         }
 
-        // Introspecting only when a check needs it keeps the previous behaviour for
-        // deployments that have turned the introspection check off
         IntrospectionResponse introspectionResponse = null;
         if (authUtil.isValidateUserInumInIntrospectionFlag() || !getExcludedClients().isEmpty()) {
             introspectionResponse = getIntrospectionResponse(requestContext);
         }
 
-        // Machine clients enrolled by an administrator carry no user to check
         if (isRolePermissionExemptClient(introspectionResponse)) {
             return;
         }
@@ -143,7 +140,6 @@ public class UserResourceFilter extends BaseFilter {
             return false;
         }
 
-        // A token that carries a user is always checked, whatever client requested it
         String tokenUserInum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(),
                 USER_INUM);
         if (StringUtils.isNotBlank(tokenUserInum)) {
