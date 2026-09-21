@@ -35,6 +35,46 @@ provider "jans" {
 Make sure that the client you authenticate with has the full list of scopes
 attached to it, or else you might not be able to manage all resources.
 
+## User Management Endpoints
+
+Config API protects its user management endpoints with an extra role check on
+top of the OAuth2 scope check, controlled by the
+`userRolePermissionValidationEnabled` attribute. That check expects a human
+behind the request and reads their role from the token. This provider
+authenticates with the `client_credentials` grant, so its token carries no
+user and cannot satisfy it.
+
+Without the exemption below, `jans_custom_user` fails on every operation:
+
+```
+Error: get request failed: bad request: Header attribute `User-inum` missing
+```
+
+A `401 Unauthorized` carrying `Header attribute 'User-inum' does not correspond
+to User token` has the same cause.
+
+Add the provider's own client ID to the allow list to resolve it:
+
+```terraform
+resource "jans_api_app_configuration" "global" {
+  user_role_permission_excluded_clients = [
+    "1800.3d29d884-e56b-47ac-83ab-b37942b83a89",
+  ]
+}
+```
+
+The check is registered only for the user management plugin, so
+`jans_api_app_configuration` itself is not affected and the allow list can be
+applied with Terraform before managing any user. Apply it once, then add the
+`jans_custom_user` resources.
+
+Other resources are unaffected — only `jans_custom_user` uses these endpoints.
+
+The client ID is read from the token introspection response, so a client cannot
+exempt itself, and a token issued for a user is checked in full even when its
+client is listed. An exempt client is authorized by its OAuth scopes alone:
+grant it only the user scopes it needs, and do not reuse it for anything else.
+
 ## Instance Configuration
 
 Every instance of Janssen comes with a set of configurations, which are valid

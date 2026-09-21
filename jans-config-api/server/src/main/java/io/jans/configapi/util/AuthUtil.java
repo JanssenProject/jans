@@ -122,6 +122,10 @@ public class AuthUtil {
     public boolean isValidateUserInumInIntrospectionFlag() {
         return this.configurationFactory.getApiAppConfiguration().isValidateUserInumInIntrospectionFlag();
     }
+
+    public List<String> getUserRolePermissionExcludedClients() {
+        return this.configurationFactory.getApiAppConfiguration().getUserRolePermissionExcludedClients();
+    }
     
     public boolean isFetchUserRoleInIntrospectionFlag() {
         return this.configurationFactory.getApiAppConfiguration().isFetchUserRoleInIntrospectionFlag();

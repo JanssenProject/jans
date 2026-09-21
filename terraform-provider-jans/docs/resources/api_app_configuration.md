@@ -60,6 +60,7 @@ resource "jans_api_app_configuration" "global" {
 - `service_name` (String) Config API service name.
 - `user_exclusion_attributes` (List of String)
 - `user_mandatory_attributes` (List of String)
+- `user_role_permission_excluded_clients` (List of String) Client IDs exempt from the user role-permission mapping check. Only honoured for tokens that carry no user, so a user token is always checked. A client using the client_credentials grant, such as this provider, has to be listed here when user_role_permission_validation_enabled is true.
 - `user_role_permission_validation_enabled` (Boolean) Flag to enable/disable the user role-permission mapping check during authentication.
 - `validate_user_inum_in_introspection_flag` (Boolean) Flag to enable/disable validating `User-inum` against the introspection response.
 

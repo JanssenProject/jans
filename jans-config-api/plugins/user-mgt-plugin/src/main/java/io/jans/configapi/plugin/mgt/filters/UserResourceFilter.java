@@ -18,6 +18,7 @@ import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
@@ -84,6 +85,18 @@ public class UserResourceFilter extends BaseFilter {
             return;
         }
 
+        // Introspecting only when a check needs it keeps the previous behaviour for
+        // deployments that have turned the introspection check off
+        IntrospectionResponse introspectionResponse = null;
+        if (authUtil.isValidateUserInumInIntrospectionFlag() || !getExcludedClients().isEmpty()) {
+            introspectionResponse = getIntrospectionResponse(requestContext);
+        }
+
+        // Machine clients enrolled by an administrator carry no user to check
+        if (isRolePermissionExemptClient(introspectionResponse)) {
+            return;
+        }
+
         // For user mgt endpoint Header attribute `User-inum` is mandatory
         String userInum = authUtil.getUserInum(httpHeaders);
         if (StringUtils.isBlank(userInum)) {
@@ -91,7 +104,7 @@ public class UserResourceFilter extends BaseFilter {
                     Response.status(Response.Status.BAD_REQUEST).build());
         }
 
-        validateDataInIntrospectionResponse(requestContext, userInum);
+        validateDataInIntrospectionResponse(introspectionResponse, userInum);
 
         // Fetch current UserRolePermission of user using `User-inum` in httpHeaders
         Set<String> userCurrentScopes = authUtil.getUserRolePermission(httpHeaders);
@@ -120,14 +133,40 @@ public class UserResourceFilter extends BaseFilter {
         }
     }
 
-    private void validateDataInIntrospectionResponse(ContainerRequestContext context, String userInum) {
+    private boolean isRolePermissionExemptClient(IntrospectionResponse introspectionResponse) {
+
+        if (introspectionResponse == null) {
+            return false;
+        }
+
+        if (!getExcludedClients().contains(introspectionResponse.getClientId())) {
+            return false;
+        }
+
+        // A token that carries a user is always checked, whatever client requested it
+        String tokenUserInum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(),
+                USER_INUM);
+        if (StringUtils.isNotBlank(tokenUserInum)) {
+            log.info("Client:{} is excluded from the user role-permission check but its token carries user:{}",
+                    introspectionResponse.getClientId(), tokenUserInum);
+            return false;
+        }
+
+        log.info("Skipping user role-permission check for excluded client:{}", introspectionResponse.getClientId());
+        return true;
+    }
+
+    private List<String> getExcludedClients() {
+        List<String> excludedClients = authUtil.getUserRolePermissionExcludedClients();
+        return excludedClients == null ? Collections.emptyList() : excludedClients;
+    }
+
+    private void validateDataInIntrospectionResponse(IntrospectionResponse introspectionResponse, String userInum) {
 
         // validate `User-inum` in Introspection response
         if (!authUtil.isValidateUserInumInIntrospectionFlag()) {
             return;
         }
-
-        IntrospectionResponse introspectionResponse = getIntrospectionResponse(context);
 
         if (introspectionResponse == null) {
             throw new WebApplicationException("Invalid token Introspection response is null.",

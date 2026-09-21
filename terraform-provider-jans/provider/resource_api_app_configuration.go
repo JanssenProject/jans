@@ -60,6 +60,14 @@ func resourceApiAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Flag to enable/disable returning the user role in the introspection response.",
 			},
+			"user_role_permission_excluded_clients": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Client IDs exempt from the user role-permission mapping check. Only honoured for tokens that carry no user, so a user token is always checked. A client using the client_credentials grant, such as this provider, has to be listed here when user_role_permission_validation_enabled is true.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"disable_audit_logger": {
 				Type:        schema.TypeBool,
 				Optional:    true,

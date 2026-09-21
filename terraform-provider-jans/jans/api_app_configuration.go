@@ -60,6 +60,7 @@ type ApiAppConfiguration struct {
         UserRolePermissionValidationEnabled   bool                      `schema:"user_role_permission_validation_enabled" json:"userRolePermissionValidationEnabled"`
         ValidateUserInumInIntrospectionFlag   bool                      `schema:"validate_user_inum_in_introspection_flag" json:"validateUserInumInIntrospectionFlag"`
         FetchUserRoleInIntrospectionFlag      bool                      `schema:"fetch_user_role_in_introspection_flag" json:"fetchUserRoleInIntrospectionFlag"`
+        UserRolePermissionExcludedClients     []string                  `schema:"user_role_permission_excluded_clients" json:"userRolePermissionExcludedClients"`
         DisableAuditLogger                    bool                      `schema:"disable_audit_logger" json:"disableAuditLogger"`
         CustomAttributeValidationEnabled      bool                      `schema:"custom_attribute_validation_enabled" json:"customAttributeValidationEnabled"`
         ArcValidationEnabled                  bool                      `schema:"acr_validation_enabled" json:"acrValidationEnabled"`
