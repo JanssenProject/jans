@@ -17656,6 +17656,16 @@ components:
           type: boolean
           description: Flag to enable/disable to get user-role in Introspection response.
             Default value `true`.
+        userRolePermissionExcludedClients:
+          type: array
+          description: Client IDs exempt from the User Role-Permission mapping check.
+            Only honoured for tokens that carry no user, so a user token is always
+            checked. Empty by default.
+          items:
+            type: string
+            description: Client IDs exempt from the User Role-Permission mapping check.
+              Only honoured for tokens that carry no user, so a user token is always
+              checked. Empty by default.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
