@@ -586,11 +586,11 @@ impl CustomTokenProcessor for ApiKeyProcessor {
 `ProcessedTokenClaims` fields:
 
 | Field | Type | Description |
-| ------------ | ---------------------------- | --- |
-| `claims`     | map<string, JSON>            | Claims for the token entity. Stored as **tags** (`Set<String>`), exactly like JWT claims. |
-| `token_id`   | string                       | Entity id of the resulting token entity supplied directly, **not** read from a claim. |
-| `expiration` | i64? (`None`)                | Optional expiration (unix seconds). The token is rejected once it passes, and the value bounds the token-cache TTL. Falls back to an `exp` claim when `None`; an explicit value wins over the claim. |
-| `cacheable`  | bool (default `true`)        | Set `false` for revocation-sensitive tokens so every request re-runs `process`. |
+| --- | --- | --- |
+| `claims` | `HashMap<String, serde_json::Value>` | Claims for the token entity. Stored as **tags** (`Set<String>`), exactly like JWT claims. |
+| `token_id` | `String` | Entity id of the resulting token entity supplied directly, **not** read from a claim. |
+| `expiration` | `Option<i64>` (default `None`) | Optional expiration (unix seconds). The token is rejected once it passes, and the value bounds the token-cache TTL. Falls back to an `exp` claim when `None`; an explicit value wins over the claim. |
+| `cacheable` | `bool` (default `true`) | Set `false` for revocation-sensitive tokens so every request re-runs `process`. |
 
 Cedarling resolves the issuer from `mapping`, which is declared by exactly one custom issuer.
 
