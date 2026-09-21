@@ -63,7 +63,7 @@ class KubernetesMeta(BaseMeta):
         return self._client
 
     def get_containers(self, label: str) -> list[V1Pod]:
-        """Get list of pods in RUNNING status based on label in a namespace.
+        """Get list of pods in RUNNING phase based on label in a namespace.
 
         The namespace is resolved from value of `CN_CONTAINER_METADATA_NAMESPACE`
         environment variable.
