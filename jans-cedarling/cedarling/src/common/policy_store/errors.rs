@@ -348,6 +348,21 @@ pub(crate) enum ArchiveError {
     #[error("Path traversal attempt detected in archive: '{path}'")]
     PathTraversal { path: String },
 
+    /// A single entry decompresses past `CEDARLING_POLICY_STORE_MAX_FILE_SIZE`.
+    #[error(
+        "Archive entry '{path}' exceeds the maximum decompressed entry size of {limit} bytes \
+         (CEDARLING_POLICY_STORE_MAX_FILE_SIZE)"
+    )]
+    EntrySizeExceeded { path: String, limit: u64 },
+
+    /// The archive's combined decompressed size exceeds the configured cap.
+    #[error("Archive exceeds the maximum total decompressed size of {limit} bytes")]
+    ArchiveSizeExceeded { limit: u64 },
+
+    /// The archive holds more entries than the configured cap.
+    #[error("Archive contains {count} entries, exceeding the maximum of {limit}")]
+    TooManyEntries { count: usize, limit: usize },
+
     /// Unsupported operation on this platform
     #[cfg(target_arch = "wasm32")]
     #[error("Archive operations are not supported on this platform")]

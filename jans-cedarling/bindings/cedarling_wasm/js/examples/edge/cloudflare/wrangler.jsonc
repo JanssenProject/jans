@@ -1,0 +1,13 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "cedarling-wasm-example",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-09-11",
+  "rules": [
+    {
+      "type": "Data",
+      "globs": ["**/*.cjar"],
+      "fallthrough": true,
+    },
+  ],
+}

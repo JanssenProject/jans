@@ -8,7 +8,7 @@ How to check this log depends on the concrete engine used. For the case of Janss
 
 ## The `Log` directive
 
-Logging a message is done via the [`Log`](https://docs.jans.io/stable/agama/language-reference/#logging) directive. The message to log is associated to a level, known as the "severity" level - a common concept in server side programming. For instance, in the case of Janssen levels are: _trace_, _debug_, _info_, _warn_, and _error_. Thus, every message conveys a "severity".
+Logging a message is done via the [`Log`](../../../../../agama/language-reference.md#logging) directive. The message to log is associated to a level, known as the "severity" level - a common concept in server side programming. For instance, in the case of Janssen levels are: _trace_, _debug_, _info_, _warn_, and _error_. Thus, every message conveys a "severity".
 
 Quick facts:
 

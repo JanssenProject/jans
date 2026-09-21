@@ -56,7 +56,7 @@ then `conf` would be structured this way:
 
 Inputs are parameters used to drive flow behavior - think of the arguments passed when calling a function or method in a programming language. They are directly supplied by callers at runtime.
 
-So far none of the flow examples has input parameters, however, most of times flows will need to receive one or more input parameters in practice. For instance, recall the [number guess game](../loops/project/code/com.acme.basic.numberguess.flow) where the user is requested to enter numbers between 0 and 5, and expected to guess a secret random number in 3 attempts at most. This is fairly static behavior. A good improvement would be to parameterize the interval used for guessing and the maximum number of attempts. Here is where [`Inputs`](https://docs.jans.io/stable/agama/language-reference/#inputs) comes to the spotlight:
+So far none of the flow examples has input parameters, however, most of times flows will need to receive one or more input parameters in practice. For instance, recall the [number guess game](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.numberguess.flow) where the user is requested to enter numbers between 0 and 5, and expected to guess a secret random number in 3 attempts at most. This is fairly static behavior. A good improvement would be to parameterize the interval used for guessing and the maximum number of attempts. Here is where [`Inputs`](../../../../../agama/language-reference.md#inputs) comes to the spotlight:
 
 ```
 Flow com.acme.basic.numberguess
@@ -74,9 +74,9 @@ The way callers pass inputs to flows differ: browsers send inputs in the [launch
 
 ## Project metadata
 
-Projects presented in this series are structured a minimalist way. However, note besides flow files and templates, real-world projects may contain foreign language code and libraries, descriptors, localized UI labels, and web-related assets like javascript, stylesheets, images, etc. This is described more formally in ["The .gama file format"](https://docs.jans.io/stable/agama/gama-format/).
+Projects presented in this series are structured a minimalist way. However, note besides flow files and templates, real-world projects may contain foreign language code and libraries, descriptors, localized UI labels, and web-related assets like javascript, stylesheets, images, etc. This is described more formally in ["The .gama file format"](../../../../../agama/gama-format.md).
 
-Of big importance is [`project.json`](https://docs.jans.io/stable/agama/gama-format/) - a descriptor file found at the project's root that contains metadata in JSON format about the project contents. In the current context, the `configs` section is of special interest.
+Of big importance is [`project.json`](../../../../../agama/gama-format.md#anatomy-of-a-project) - a descriptor file found at the project's root that contains metadata in JSON format about the project contents. In the current context, the `configs` section is of special interest.
 
 `configs` is expected to be a JSON object resembling how the configuration properties of flows in the project may look like. These are not the actual configuration properties - just sample data. Agama projects can be distributed freely so having confidential bits like addresses, passwords, secrets, etc., easily discovered by others is not acceptable.
 
