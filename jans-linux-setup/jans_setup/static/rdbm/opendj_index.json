@@ -324,5 +324,61 @@
         "type": "string",
         "index": ["presence", "equality"],
         "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceDomainId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceExecKey",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceChainPosKey",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceRecordId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceExecId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceCapKeys",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceTokenKeys",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceReceiptSeq",
+        "type": "integer",
+        "index": ["ordering"],
+        "backend": ["userRoot"]
     }
 ]

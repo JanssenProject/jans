@@ -14,5 +14,29 @@
     "description": "Permission to access policy endpoint",
     "jansDefScope": false,
     "jansScopeTyp": "oauth"
+  },
+  {
+    "inum": "4000.01.3",
+    "jansId": "https://jans.io/oauth/lock/trace.write",
+    "displayName": "Lock API scope",
+    "description": "Permission to submit TRACE evidence records",
+    "jansDefScope": false,
+    "jansScopeTyp": "oauth"
+  },
+  {
+    "inum": "4000.01.4",
+    "jansId": "https://jans.io/oauth/lock/trace.readonly",
+    "displayName": "Lock API scope",
+    "description": "Permission to read TRACE records and executions",
+    "jansDefScope": false,
+    "jansScopeTyp": "oauth"
+  },
+  {
+    "inum": "4000.01.5",
+    "jansId": "https://jans.io/oauth/lock/trace.admin",
+    "displayName": "Lock API scope",
+    "description": "Permission to manage TRACE producer keys and chains",
+    "jansDefScope": false,
+    "jansScopeTyp": "oauth"
   }
 ]

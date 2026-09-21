@@ -266,6 +266,37 @@
       "eventTime"
     ]
   },
+  "jansTraceRecord": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceRecordId",
+      "jansTraceExecKey",
+      "jansTraceExecId",
+      "jansTraceChainPosKey",
+      "jansTraceReceiptSeq",
+      "jansTraceCapKeys",
+      "jansTraceTokenKeys"
+    ]
+  },
+  "jansTraceReceipt": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceReceiptSeq",
+      "jansTraceReceiptState"
+    ]
+  },
+  "jansTraceChain": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceProducerId"
+    ]
+  },
+  "jansTraceProducerKey": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceProducerId"
+    ]
+  },
   "__common__": {
     "JSON": [
       "USING GIN (JSONB_PATH_QUERY_ARRAY(\"$field\", '$[*]'))"
