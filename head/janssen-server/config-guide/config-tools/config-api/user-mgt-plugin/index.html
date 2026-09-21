@@ -701,6 +701,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#exempting-a-machine-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Exempting a machine client
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#endpoint-required-oauth-scopes" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -758,6 +769,22 @@
 <li><strong>Mandatory header</strong>: <code>User-inum</code> must be present in <code>httpHeaders</code>.
   Missing → <code>400 Bad Request</code> — <code>"Header attribute 'User-inum' missing"</code>.</li>
 </ul>
+<h2 id="exempting-a-machine-client">Exempting a machine client<a class="headerlink" href="#exempting-a-machine-client" title="Permanent link">#</a></h2>
+<p>The <code>User Filter</code> assumes a human behind the request. A client using the
+<code>client_credentials</code> grant has no user, so it can satisfy neither the
+<code>User-inum</code> header nor the role lookup behind it. Automation such as the
+Terraform provider is therefore rejected while the filter is on.</p>
+<p>List such clients in the <code>userRolePermissionExcludedClients</code> Config API
+attribute, by client ID:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;userRolePermissionExcludedClients&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;1800.3d29d884-e56b-47ac-83ab-b37942b83a89&quot;</span><span class="p">]</span>
+</code></pre></div>
+<p>The list is empty by default. The client ID is read from the token
+introspection response, never from a request header, so a client cannot exempt
+itself. The exemption applies only when the token carries no user; a token
+issued for a user goes through the full role check even when its client is
+listed. An exempt client is authorized by its granted OAuth scopes alone, so
+grant it only the user scopes it needs and do not share it with other
+integrations.</p>
 <h2 id="endpoint-required-oauth-scopes">Endpoint → required OAuth scopes<a class="headerlink" href="#endpoint-required-oauth-scopes" title="Permanent link">#</a></h2>
 <table>
 <thead>
@@ -880,7 +907,7 @@ User{&lt;loggedInUserInum&gt;} does not have &#39;admin&#39; role to fetch/modif
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 16, 2026
+    September 21, 2026
   </span>
 
     
