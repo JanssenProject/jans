@@ -651,7 +651,7 @@ func (c *Client) deleteEntity(ctx context.Context, path, token, scope string, en
 }
 
 // createRequest builds an *http.Request from requestParams, setting method, URL, payload,
-// query params, and all necessary headers (Accept, Content-Type, jans-client, user-inum).
+// query params, and all necessary headers (Accept, Content-Type, jans-client).
 // Authorization header is added only if params.token is non-empty.
 func (c *Client) createRequest(ctx context.Context, params requestParams, url string) (*http.Request, error) {
         req, err := http.NewRequestWithContext(ctx, params.method, url, bytes.NewReader(params.payload))
@@ -670,7 +670,6 @@ func (c *Client) createRequest(ctx context.Context, params requestParams, url st
         req.Header.Add("Accept", params.accept)
         req.Header.Add("Content-Type", params.contentType)
         req.Header.Add("jans-client", "infrastructure-as-code-tool")
-        req.Header.Add("user-inum", c.clientId)
 
         if params.token != "" {
                 req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", params.token))

@@ -12,6 +12,7 @@ import io.jans.configapi.core.service.ConfigUserService;
 import io.jans.configapi.core.model.role.*;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,12 +51,20 @@ public class RolePermissionMappingService {
         if (StringUtils.isBlank(inum)) {
             return user;
         }
-        user = configUserService.getUserByInum(inum);
+        try {
+            user = configUserService.getUserByInum(inum);
+        } catch (EntryPersistenceException epe) {
+            if (epe.getCause() != null) {
+                throw epe;
+            }
+            logger.debug("User not found :{}", inum, epe);
+            return null;
+        }
         if (user == null) {
-            logger.error("User not found :{}", inum);
+            logger.debug("User not found :{}", inum);
             return user;
         }
-        logger.error("user.getUserId():{}", user.getUserId());
+        logger.debug("user.getUserId():{}", user.getUserId());
 
         return user;
 
