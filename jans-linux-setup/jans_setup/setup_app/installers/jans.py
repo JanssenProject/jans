@@ -165,7 +165,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         self.run([paths.cmd_chown, '-R', 'root:jans', Config.certFolder])
         self.run([paths.cmd_chmod, '551', Config.certFolder])
-        self.run([paths.cmd_chmod, 'ga+w', "/tmp"]) # Allow write to /tmp
 
         self.chown(Config.jansOptBinFolder, user=Config.root_user, group=Config.jetty_user)
 
