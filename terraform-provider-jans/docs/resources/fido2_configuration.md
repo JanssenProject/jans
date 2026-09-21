@@ -121,6 +121,7 @@ Optional:
 - `name` (String) Name of the requested party.
 - `policy` (Block List, Max: 1) Per-relying-party assurance policy. Omitted falls back to the global configuration. (see [below for nested schema](#nestedblock--fido2_configuration--requested_parties--policy))
 
+
 <a id="nestedblock--fido2_configuration--requested_parties--policy"></a>
 ### Nested Schema for `fido2_configuration.requested_parties.policy`
 

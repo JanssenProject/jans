@@ -54,6 +54,10 @@ public class RolePermissionMappingService {
         try {
             user = configUserService.getUserByInum(inum);
         } catch (EntryPersistenceException epe) {
+            // The ORM reports a missing entry with no cause and a backend failure with one
+            if (epe.getCause() != null) {
+                throw epe;
+            }
             logger.debug("User not found :{}", inum, epe);
             return null;
         }

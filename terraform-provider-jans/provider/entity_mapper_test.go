@@ -534,3 +534,59 @@ func TestDecoderKeepsUndeclaredFields(t *testing.T) {
 		t.Errorf("Got different entity after merge: %s", diff)
 	}
 }
+
+func TestPruneUndeclared(t *testing.T) {
+
+	blockType := cty.Object(map[string]cty.Type{
+		"attestation_mode": cty.String,
+		"metadata_servers": cty.List(cty.Object(map[string]cty.Type{
+			"url": cty.String,
+		})),
+	})
+
+	cfg := cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+		"attestation_mode": cty.StringVal("enforced"),
+		"metadata_servers": cty.NullVal(blockType.AttributeType("metadata_servers")),
+	})})
+
+	val := []any{map[string]any{
+		"attestation_mode": "enforced",
+		"metadata_servers": []any{},
+	}}
+
+	pruned, ok := pruneUndeclared(cfg, val).([]any)
+	if !ok {
+		t.Fatalf("Got %T, expected []any", pruneUndeclared(cfg, val))
+	}
+
+	entry, ok := pruned[0].(map[string]any)
+	if !ok {
+		t.Fatalf("Got %T, expected map[string]any", pruned[0])
+	}
+
+	if _, present := entry["metadata_servers"]; present {
+		t.Error("Undeclared metadata_servers was kept")
+	}
+
+	if entry["attestation_mode"] != "enforced" {
+		t.Errorf("Got %v, expected enforced", entry["attestation_mode"])
+	}
+}
+
+func TestPruneUndeclaredKeepsDeclaredZeroValue(t *testing.T) {
+
+	cfg := cty.ObjectVal(map[string]cty.Value{
+		"attestation_mode": cty.StringVal(""),
+	})
+
+	val := map[string]any{"attestation_mode": ""}
+
+	pruned, ok := pruneUndeclared(cfg, val).(map[string]any)
+	if !ok {
+		t.Fatalf("Got %T, expected map[string]any", pruneUndeclared(cfg, val))
+	}
+
+	if _, present := pruned["attestation_mode"]; !present {
+		t.Error("Declared empty attestation_mode was dropped")
+	}
+}

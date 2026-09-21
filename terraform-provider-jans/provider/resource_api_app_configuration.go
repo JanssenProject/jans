@@ -371,7 +371,7 @@ func resourceApiAppConfiguration() *schema.Resource {
 										Type:        schema.TypeString,
 										Optional:    true,
 										Sensitive:   true,
-										Description: "Authorization token used to access the policy store URI.",
+										Description: "Authorization token used to access the policy store URI. Declaring a policy source without this attribute clears the token stored on the server.",
 									},
 									"policy_store_uri": {
 										Type:        schema.TypeString,

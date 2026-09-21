@@ -103,13 +103,69 @@ func mergeFromSchemaResource(d *schema.ResourceData, entity any) error {
                 case configNull:
                         return nil, false
                 case configSet:
-                        return d.Get(key), true
+                        return pruneUndeclared(rawConfig.GetAttr(key), d.Get(key)), true
                 default:
                         return d.GetOk(key)
                 }
         }
 
         return decoder(getter, entity)
+}
+
+// pruneUndeclared drops the attributes of a nested block that the practitioner
+// did not declare, so that decoding the block leaves those fields of the entity
+// at their current value instead of overwriting them with a zero value.
+func pruneUndeclared(cfg cty.Value, val any) any {
+
+        if cfg.IsNull() || !cfg.IsKnown() {
+                return val
+        }
+
+        switch typed := val.(type) {
+
+        case []any:
+                // Sets are left alone, since their config order need not match the value
+                if !cfg.Type().IsListType() && !cfg.Type().IsTupleType() {
+                        return val
+                }
+
+                elements := cfg.AsValueSlice()
+                pruned := make([]any, len(typed))
+                for i, element := range typed {
+                        if i >= len(elements) {
+                                pruned[i] = element
+                                continue
+                        }
+                        pruned[i] = pruneUndeclared(elements[i], element)
+                }
+
+                return pruned
+
+        case map[string]any:
+                if !cfg.Type().IsObjectType() {
+                        return val
+                }
+
+                pruned := make(map[string]any, len(typed))
+                for key, value := range typed {
+                        if !cfg.Type().HasAttribute(key) {
+                                pruned[key] = value
+                                continue
+                        }
+
+                        attr := cfg.GetAttr(key)
+                        if attr.IsNull() {
+                                continue
+                        }
+
+                        pruned[key] = pruneUndeclared(attr, value)
+                }
+
+                return pruned
+
+        default:
+                return val
+        }
 }
 
 // patchFromResourceData creates a list of patch requests from the

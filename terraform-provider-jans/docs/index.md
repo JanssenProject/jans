@@ -112,9 +112,11 @@ terraform import jans_smtp_configuration.global global
 
 Note that the resource identifier can be any other valid identifier, instead of `global`.
 
-Only the attributes declared in the configuration are sent on update; every other
-attribute keeps its current server value. A resource that declares a single
-attribute therefore leaves the rest of the configuration alone.
+On update the provider overlays the attributes declared in the configuration
+onto the configuration currently stored on the server. Declared values override
+what the server holds, and every attribute that is not declared is preserved. A
+resource that declares a single attribute therefore leaves the rest of the
+configuration alone.
 
 The following resources can also not be created from within Terraform, but can be imported,
 updated, or deleted (unlike with the instance configurations, deletion will result in the

@@ -127,7 +127,7 @@ Optional:
 
 Optional:
 
-- `authorization_token` (String, Sensitive) Authorization token used to access the policy store URI.
+- `authorization_token` (String, Sensitive) Authorization token used to access the policy store URI. Declaring a policy source without this attribute clears the token stored on the server.
 - `enabled` (Boolean) Specify if the policy source is enabled.
 - `policy_store_uri` (String) URI of the policy store. The store can be either json or zip.
 
