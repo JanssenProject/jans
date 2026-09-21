@@ -77,7 +77,12 @@ class KubernetesMeta(BaseMeta):
         field_selector = "status.phase=Running"
         namespace = os.environ.get("CN_CONTAINER_METADATA_NAMESPACE", "default")
         try:
-            pods: list[V1Pod] = self.client.list_namespaced_pod(namespace, label_selector=label, field_selector=field_selector).items
+            temp_pods: list[V1Pod] = self.client.list_namespaced_pod(namespace, label_selector=label, field_selector=field_selector).items
+            pods: list[V1Pod] = [
+                p for p in temp_pods 
+                if not p.metadata.deletion_timestamp 
+                and any(c.type == "Ready" and c.status == "True" for c in (p.status.conditions or []))
+            ]
         except AttributeError:
             # client is not set due to missing k8s config
             pods = []
