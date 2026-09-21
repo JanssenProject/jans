@@ -169,16 +169,6 @@ func resourceFido2Configuration() *schema.Resource {
                                         },
                                 },
                         },
-                        "old_u2f_migration_enabled": {
-                                Type:        schema.TypeBool,
-                                Optional:    true,
-                                Description: "Boolean value to indicate if U2F migration is to be enabled.",
-                        },
-                        "super_gluu_enabled": {
-                                Type:        schema.TypeBool,
-                                Optional:    true,
-                                Description: "Boolean value to indicate if SuperGluu is to be enabled.",
-                        },
                 },
         }
 }
