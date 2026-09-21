@@ -134,7 +134,7 @@ current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
 current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 current_number_of_cpu = multiprocessing.cpu_count()
 
-disk_st = os.statvfs(snap_common if snap else '/')
+disk_st = os.statvfs(snap_common if snap else '/opt')
 current_free_disk_space = round(disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024), 1)
 
 class current_app:
@@ -200,7 +200,7 @@ def check_resources():
 
 
     if current_free_disk_space < static.suggested_free_disk_space:
-        print(("{0}Warning: Available free disk space was determined to be {1} "
+        print(("{0}Warning: Available free disk space on /opt was determined to be {1} "
             "GB. This is less than the required disk space of {2} GB.{3}".format(
                                                         static.colors.WARNING,
                                                         current_free_disk_space,
