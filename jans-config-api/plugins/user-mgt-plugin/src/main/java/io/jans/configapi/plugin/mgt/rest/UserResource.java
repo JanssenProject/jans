@@ -182,6 +182,9 @@ public class UserResource extends BaseResource {
         } catch (InvalidAttributeException iae) {
             logger.error("InvalidAttributeException while fetching user is:{}, cause:{}", iae, iae.getCause());
             throwBadRequestException("FETCH_DATA_ERROR", iae.getMessage());
+        } catch (WebApplicationException wae) {
+            // 404 and 400 raised deliberately must not be reported as a server error
+            throw wae;
         } catch (Exception ex) {
             logger.error("Exception while fetching user is - ", ex);
             throwInternalServerException(ex);
@@ -253,6 +256,9 @@ public class UserResource extends BaseResource {
         } catch (InvalidAttributeException iae) {
             logger.error("InvalidAttributeException while creating user is:{}, cause:{}", iae, iae.getCause());
             throwBadRequestException("USER_CREATION_ERROR", iae.getMessage());
+        } catch (WebApplicationException wae) {
+            // 404 and 400 raised deliberately must not be reported as a server error
+            throw wae;
         } catch (Exception ex) {
             logger.error("Exception while creating user is - ", ex);
             throwInternalServerException(ex);
@@ -330,6 +336,9 @@ public class UserResource extends BaseResource {
         } catch (InvalidAttributeException iae) {
             logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
             throwBadRequestException("USER_UPDATE_ERROR", iae.getMessage());
+        } catch (WebApplicationException wae) {
+            // 404 and 400 raised deliberately must not be reported as a server error
+            throw wae;
         } catch (Exception ex) {
             logger.error("Exception while updating user is - ", ex);
             throwInternalServerException(ex);
@@ -404,6 +413,9 @@ public class UserResource extends BaseResource {
         } catch (InvalidAttributeException iae) {
             logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
             throwBadRequestException("USER_PATCH_ERROR", iae.getMessage());
+        } catch (WebApplicationException wae) {
+            // 404 and 400 raised deliberately must not be reported as a server error
+            throw wae;
         } catch (Exception ex) {
             logger.error("Exception while pactching user is:{}, cause:{}", ex, ex.getCause());
             throwInternalServerException(ex);
