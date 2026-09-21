@@ -26,8 +26,7 @@ class JreInstaller(BaseInstaller, SetupUtils):
         self.install_var = 'install_jre'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
-        if not base.snap:
-            self.register_progess()
+        self.register_progess()
 
     def install(self):
 

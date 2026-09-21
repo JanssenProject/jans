@@ -38,9 +38,6 @@ ces_dir = Path(__file__).parent.parent.as_posix()
 par_dir = Path(__file__).parent.parent.parent.as_posix()
 pylib_dir = os.path.join(ces_dir, 'pylib')
 
-snap = os.environ.get('SNAP','')
-snap_common = snap_common_dir = os.environ.get('SNAP_COMMON','')
-
 re_split_host = re.compile(r'[^,\s,;]+')
 
 # Determine initdaemon
@@ -113,13 +110,9 @@ def get_os_description():
 
     if fipsl and fipsl[0] == 'crypto.fips_enabled' and fipsl[-1] == '1':
         descs += ' [FIPS]'
-    if snap:
-        descs += ' [SNAP]'
 
     return descs
 
-if snap:
-    snapctl = shutil.which('snapctl')
 
 systemctl = False
 systemctl_cmd = shutil.which('systemctl')
@@ -134,7 +127,7 @@ current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
 current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 current_number_of_cpu = multiprocessing.cpu_count()
 
-disk_st = os.statvfs(snap_common if snap else '/opt')
+disk_st = os.statvfs('/opt')
 current_free_disk_space = round(disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024), 1)
 
 class current_app:
@@ -284,8 +277,6 @@ def get_clean_args(args):
 
 # args = command + args, i.e. ['ls', '-ltr']
 def run(args, cwd=None, env=None, useWait=False, shell=False, get_stderr=False):
-    if snap and args[0] in [paths.cmd_chown]:
-        return ''
 
     output = ''
     log_arg = ' '.join(args) if type(args) is list else args

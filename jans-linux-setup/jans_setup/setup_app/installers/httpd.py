@@ -61,8 +61,6 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
         self.writeFile(os.path.join(self.server_root, 'index.html'), 'OK')
 
-        if base.snap:
-            icons_conf_fn = '/etc/apache2/mods-available/alias.conf'
         if base.os_type == 'suse':
             icons_conf_fn = '/etc/apache2/default-server.conf'
         elif base.clone_type == 'deb':
