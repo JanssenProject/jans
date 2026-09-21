@@ -495,8 +495,14 @@ class Cedarling:
 
     def drain_metrics(self) -> "MetricsSnapshot":
         """
-        Capture a local snapshot of the telemetry metrics and reset the
-        counters for the next interval.
+        Destructive read: return the telemetry metrics snapshot and reset
+        the counters for the next interval.
+
+        Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+        Lock telemetry ticker owns the collector. Raises `LockTelemetry`
+        whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+        server has no telemetry endpoint. `interval_secs` has 1-second
+        precision, so a drain more often than once per second reports `0`.
 
         Raises:
             ValueError: If metrics collection is disabled or owned by lock
@@ -808,14 +814,15 @@ class DataStoreStats:
 @final
 class MetricsSnapshot:
     """
-    Telemetry metrics snapshot with per-policy stats, error counters, and
-    operational counters for the current interval.
+    Destructive read: telemetry metrics snapshot with per-policy stats,
+    error counters, and operational counters for the current interval.
+    Draining resets the counters, so use a single consumer.
 
     Attributes:
         policy_stats: Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
         error_counters: Classified error counters keyed by error metric key.
         operational_stats: Operational counters and gauges (authorization, cache, JWT, data, lock).
-        interval_secs: Duration of the snapshot interval in seconds.
+        interval_secs: Duration of the snapshot interval in seconds, 1-second precision (truncated). A drain more often than once per second reports `0`. Kept for Lock proto compat (`audit.proto` `TelemetryEntry` field 8).
     """
 
     policy_stats: dict[str, int]

@@ -105,7 +105,9 @@ pub enum MetricsError {
     #[error("metrics collection is disabled")]
     NotEnabled,
     /// The metrics collector is owned by the Lock telemetry ticker; enabling
-    /// `CEDARLING_METRICS_COLLECTION` will not help.
+    /// `CEDARLING_METRICS_COLLECTION` will not help. Returned whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server
+    /// has no telemetry endpoint and metrics are not shipped anywhere.
     #[error("metrics collection is owned by the lock telemetry ticker")]
     LockTelemetry,
 }
@@ -755,8 +757,9 @@ impl Cedarling {
             .map_err(|e: core::DataError| DataError::from(e))
     }
 
-    /// Capture a local snapshot of the telemetry metrics and reset the counters
-    /// for the next interval.
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval. `interval_secs` has 1-second precision,
+    /// so a drain more often than once per second reports `0`.
     #[uniffi::method]
     pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
         self.inner

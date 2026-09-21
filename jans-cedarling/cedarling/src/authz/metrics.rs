@@ -113,6 +113,9 @@ pub(crate) struct PolicyStatsSnapshot {
 
 /// Telemetry snapshot containing the three metric maps and interval duration.
 ///
+/// Destructive read: produced by [`MetricsCollector::snapshot_and_reset`],
+/// which returns the counters and resets them.
+///
 /// Produced by [`MetricsCollector::snapshot_and_reset`].
 #[derive(Debug, Clone, Serialize)]
 pub struct MetricsSnapshot {
@@ -122,7 +125,11 @@ pub struct MetricsSnapshot {
     pub error_counters: HashMap<String, i64>,
     /// Operational counters and gauges (authorization, cache, JWT, data, lock).
     pub operational_stats: HashMap<String, i64>,
-    /// Duration of the snapshot interval in seconds.
+    /// Duration of the snapshot interval in seconds, 1-second precision
+    /// (truncated). A drain more often than once per second reports `0`.
+    /// Kept as `i64` for Lock proto compat (`audit.proto` `TelemetryEntry`
+    /// field 8); add a separate `interval_ms` field if sub-second precision
+    /// is needed.
     pub interval_secs: i64,
 }
 
@@ -137,6 +144,9 @@ pub enum MetricsError {
     /// The metrics collector is owned by the Lock telemetry ticker, so local
     /// snapshots would steal its counters. Enabling
     /// `CEDARLING_METRICS_COLLECTION` will not help.
+    /// Returned whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if
+    /// the Lock server has no telemetry endpoint and metrics are not shipped
+    /// anywhere: the ticker is spawned based on the interval alone.
     #[error("metrics collection is owned by the lock telemetry ticker")]
     LockTelemetry,
 }

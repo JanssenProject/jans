@@ -167,6 +167,20 @@ use std::time::Duration;
 ///
 ///     :returns: A DataStoreStats object
 ///     :raises DataErrorCtx: If the operation fails
+///
+/// .. method:: drain_metrics(self) -> MetricsSnapshot
+///
+///     Destructive read: returns the telemetry metrics snapshot and resets
+///     the counters for the next interval.
+///
+///     Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+///     Lock telemetry ticker owns the collector. Raises `LockTelemetry`
+///     whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+///     server has no telemetry endpoint. `interval_secs` has 1-second
+///     precision, so a drain more often than once per second reports `0`.
+///
+///     :returns: A MetricsSnapshot object
+///     :raises ValueError: If metrics collection is disabled or owned by lock telemetry.
 #[derive(Clone)]
 #[pyclass(from_py_object)]
 pub struct Cedarling {
@@ -514,8 +528,14 @@ impl Cedarling {
             .map_err(data_error_to_py)
     }
 
-    /// Capture a local snapshot of the telemetry metrics and reset the counters
-    /// for the next interval.
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval.
+    ///
+    /// Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+    /// Lock telemetry ticker owns the collector (returns `LockTelemetry`
+    /// whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+    /// server has no telemetry endpoint). `interval_secs` has 1-second
+    /// precision, so a drain more often than once per second reports `0`.
     fn drain_metrics(&self) -> PyResult<MetricsSnapshot> {
         self.inner
             .drain_metrics()
@@ -557,8 +577,9 @@ impl Cedarling {
 /// MetricsSnapshot
 /// ================
 ///
-/// Telemetry metrics snapshot with per-policy stats, error counters, and
-/// operational counters for the current interval.
+/// Destructive read: telemetry metrics snapshot with per-policy stats, error
+/// counters, and operational counters for the current interval. Draining
+/// resets the counters, so use a single consumer.
 ///
 /// Attributes
 /// ----------
@@ -570,7 +591,9 @@ impl Cedarling {
 /// operational_stats : dict
 ///     Operational counters and gauges (authorization, cache, JWT, data, lock)
 /// interval_secs : int
-///     Duration of the snapshot interval in seconds
+///     Duration of the snapshot interval in seconds, 1-second precision
+///     (truncated). A drain more often than once per second reports `0`.
+///     Kept for Lock proto compat (`audit.proto` `TelemetryEntry` field 8).
 #[derive(Debug, Clone)]
 #[pyclass(get_all, from_py_object)]
 pub struct MetricsSnapshot {
@@ -580,7 +603,7 @@ pub struct MetricsSnapshot {
     error_counters: HashMap<String, i64>,
     /// Operational counters and gauges.
     operational_stats: HashMap<String, i64>,
-    /// Duration of the snapshot interval in seconds.
+    /// Duration of the snapshot interval in seconds, 1-second precision.
     interval_secs: i64,
 }
 

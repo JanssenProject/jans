@@ -349,6 +349,22 @@ fmt.Printf("Total size: %d bytes\n", stats.TotalSizeBytes)
 fmt.Printf("Capacity usage: %.2f%%\n", stats.CapacityUsagePercent)
 ```
 
+#### Drain Metrics
+
+Destructive read: returns a metrics snapshot and resets the counters.
+
+```go
+snapshot, err := instance.DrainMetrics()
+if err != nil {
+    // Handle error: disabled collection or Lock telemetry owns the collector
+}
+```
+
+Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails whenever
+`CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has no
+telemetry endpoint. `interval_secs` has 1-second precision, so a drain more
+often than once per second reports `0`.
+
 #### Using Data in Cedar Policies
 
 Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:

@@ -742,15 +742,21 @@ impl Cedarling {
             .map_err(Error::new)
     }
 
-    /// Capture a local snapshot of the telemetry metrics and reset the counters
-    /// for the next interval.
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval.
+    ///
+    /// Fails when `CEDARLING_METRICS_COLLECTION` is disabled or whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set (even if the Lock server
+    /// has no telemetry endpoint). `interval_secs` has 1-second precision,
+    /// so a drain more often than once per second reports `0`.
     ///
     /// # Example
     ///
     /// ```javascript
-    /// const snapshot = cedarling.drain_metrics();
+    /// const snapshot = cedarling.drainMetrics();
     /// console.log(`Requests: ${snapshot.operational_stats.get("authz.requests_total")}`);
     /// ```
+    #[wasm_bindgen(js_name = drainMetrics)]
     pub fn drain_metrics(&self) -> Result<MetricsSnapshot, Error> {
         self.instance
             .drain_metrics()
@@ -1380,7 +1386,8 @@ impl From<CedarDataStoreStats> for DataStoreStats {
 
 /// A WASM wrapper for the Rust `cedarling::MetricsSnapshot` struct.
 /// Represents a snapshot of the collected telemetry metrics for the current
-/// interval. Taking a snapshot resets the collected metrics.
+/// interval. Destructive read: taking a snapshot resets the collected
+/// metrics, so use a single consumer.
 #[wasm_bindgen]
 #[derive(Clone, Debug)]
 pub struct MetricsSnapshot {
@@ -1393,16 +1400,19 @@ pub struct MetricsSnapshot {
     /// Operational counters and gauges (authorization, cache, JWT, data, lock).
     #[wasm_bindgen(getter_with_clone)]
     pub operational_stats: Map,
-    /// Duration of the snapshot interval in seconds.
-    pub interval_secs: i64,
+    /// Duration of the snapshot interval in seconds, 1-second precision.
+    /// Exposed as `Number` (not `BigInt`) so plain JS arithmetic works.
+    /// A drain more often than once per second reports `0`.
+    pub interval_secs: f64,
 }
 
 #[wasm_bindgen]
 impl MetricsSnapshot {
     /// Convert `MetricsSnapshot` to json string value.
     ///
-    /// `Policy_stats`, `error_counters` and `operational_stats` are converted
+    /// `policy_stats`, `error_counters` and `operational_stats` are converted
     /// from `Map` to plain objects so `JSON.stringify` emits their entries.
+    #[wasm_bindgen(js_name = jsonString)]
     pub fn json_string(&self) -> Result<String, Error> {
         let obj = Object::new();
         Reflect::set(
@@ -1423,7 +1433,7 @@ impl MetricsSnapshot {
         Reflect::set(
             &obj,
             &"interval_secs".into(),
-            &JsValue::from_f64(self.interval_secs as f64),
+            &JsValue::from_f64(self.interval_secs),
         )?;
         Ok(String::from(js_sys::JSON::stringify(&obj)?))
     }
@@ -1442,7 +1452,7 @@ impl From<CedarMetricsSnapshot> for MetricsSnapshot {
             policy_stats: to_map(value.policy_stats),
             error_counters: to_map(value.error_counters),
             operational_stats: to_map(value.operational_stats),
-            interval_secs: value.interval_secs,
+            interval_secs: value.interval_secs as f64,
         }
     }
 }

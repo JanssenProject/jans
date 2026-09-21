@@ -542,6 +542,33 @@ print("Total size: \(stats.totalSizeBytes) bytes")
 print("Capacity usage: \(stats.capacityUsagePercent)%")
 ```
 
+### Drain Metrics
+
+Destructive read: returns a `MetricsSnapshot` (`policyStats`,
+`errorCounters`, `operationalStats`, `intervalSecs`) and resets the
+counters.
+
+**Kotlin:**
+
+```kotlin
+val snapshot = cedarling.drainMetrics()
+println("Requests: ${snapshot.operationalStats["authz.requests_total"]}")
+println("Interval: ${snapshot.intervalSecs}s")
+```
+
+**Swift:**
+
+```swift
+let snapshot = try cedarling.drainMetrics()
+print("Requests: \(snapshot.operationalStats["authz.requests_total"] ?? 0)")
+print("Interval: \(snapshot.intervalSecs)s")
+```
+
+Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails with `LockTelemetry`
+whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server
+has no telemetry endpoint. `intervalSecs` has 1-second precision, so a drain
+more often than once per second reports `0`.
+
 ### Error Handling
 
 The Context Data API methods throw `DataException`:

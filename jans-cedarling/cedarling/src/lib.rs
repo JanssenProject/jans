@@ -283,11 +283,18 @@ impl Cedarling {
         })
     }
 
-    /// Capture a local snapshot of the telemetry metrics and reset the counters
-    /// for the next interval.
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval.
     ///
     /// Only available when `CEDARLING_METRICS_COLLECTION` is enabled at bootstrap
-    /// and no Lock telemetry ticker owns the collector.
+    /// and no Lock telemetry ticker owns the collector. Returns
+    /// [`MetricsError::LockTelemetry`] whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has
+    /// no telemetry endpoint and metrics are not shipped anywhere: the ticker
+    /// is spawned based on the interval alone.
+    ///
+    /// The returned `interval_secs` has 1-second precision (truncated), so a
+    /// drain more often than once per second reports `0`.
     pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
         match self.metrics_mode {
             MetricsMode::Local => Ok(self.metrics.snapshot_and_reset()),

@@ -78,7 +78,7 @@ the Cedarling will use the default value as specified in the property definition
 
 **Telemetry metrics:**
 
-- **`CEDARLING_METRICS_COLLECTION`** : `enabled` | `disabled`. Whether to enable local collection of telemetry metrics, exposed via the `drain_metrics` API. When enabled, `drain_metrics` returns a snapshot of the metrics and resets the interval window. It takes effect only when no Lock telemetry ticker is active; setting `CEDARLING_LOCK_TELEMETRY_INTERVAL` to a non-zero value makes the Lock ticker own the collector, in which case the local metrics snapshot will fail. Default is `disabled`.
+- **`CEDARLING_METRICS_COLLECTION`** : `enabled` | `disabled`. Whether to enable local collection of telemetry metrics, exposed via the `drain_metrics` API. `drain_metrics` is a destructive read: it returns a snapshot of the metrics and resets the interval window, so use a single consumer. It takes effect only when no Lock telemetry ticker is active; setting `CEDARLING_LOCK_TELEMETRY_INTERVAL` to a non-zero value makes the Lock ticker own the collector, even if the Lock server has no telemetry endpoint in which case the local metrics snapshot fails with `LockTelemetry`. Default is `disabled`.
 
 **HTTP client:**
 

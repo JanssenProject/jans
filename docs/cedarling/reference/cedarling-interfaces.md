@@ -368,6 +368,25 @@ The Context Data API allows you to push external data into the Cedarling evaluat
   - `memory_alert_threshold`: Memory usage threshold percentage (from config)
   - `memory_alert_triggered`: Whether memory usage exceeds the alert threshold
 
+### Drain Metrics
+
+- `drain_metrics()`
+
+  Destructive read: returns a `MetricsSnapshot` with `policy_stats`,
+  `error_counters`, `operational_stats`, and `interval_secs`, then resets
+  the counters for the next interval.
+
+  Only available when `CEDARLING_METRICS_COLLECTION` is `enabled` at bootstrap
+  and no Lock telemetry ticker owns the collector. Returns a `LockTelemetry`
+  error whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+  server has no telemetry endpoint and metrics are not shipped anywhere: the
+  ticker is spawned based on the interval alone.
+
+  `interval_secs` has 1-second precision (truncated), so a drain more often
+  than once per second reports `0`. It is kept as `int64` for Lock proto
+  compatibility (`TelemetryEntry` field 8 in `audit.proto`); a separate `interval_ms`
+  field would be needed for sub-second precision.
+
 ### Schema Requirements
 
 To use the Context Data API, your Cedar schema must include a `data` field in the action's context. You must explicitly define the expected structure of the data — Cedar does not support arbitrary/untyped records.

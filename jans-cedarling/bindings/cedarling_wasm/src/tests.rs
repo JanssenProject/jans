@@ -1579,9 +1579,13 @@ async fn test_drain_metrics_disabled_returns_error() {
         .await
         .expect("init function should be initialized");
 
-    instance
+    let err = instance
         .drain_metrics()
         .expect_err("drain_metrics must fail when metrics collection is disabled");
+    assert!(
+        err.to_string().contains("metrics collection is disabled"),
+        "error message must mention disabled collection, got: {err}"
+    );
 }
 
 /// `drain_metrics` must return a snapshot when `CEDARLING_METRICS_COLLECTION`
@@ -1676,5 +1680,50 @@ async fn test_drain_metrics_local_mode_snapshot_and_reset() {
             .as_f64(),
         Some(0.0),
         "counters must reset to a fresh zeroed window after a snapshot"
+    );
+}
+
+/// `MetricsSnapshot::json_string` must emit the three metric maps as plain
+/// objects plus a numeric `interval_secs`.
+#[wasm_bindgen_test]
+async fn test_metrics_snapshot_json_string() {
+    let mut bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    bootstrap_config_json["CEDARLING_METRICS_COLLECTION"] = json!("enabled");
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized");
+
+    let snapshot = instance
+        .drain_metrics()
+        .expect("drain_metrics should succeed when metrics collection is enabled");
+    assert!(
+        snapshot.interval_secs >= 0.0,
+        "interval_secs must be a non-negative duration, got: {}",
+        snapshot.interval_secs
+    );
+
+    let json = snapshot.json_string().expect("json_string should succeed");
+    let parsed: serde_json::Value =
+        serde_json::from_str(&json).expect("json_string output should be valid JSON");
+    assert!(
+        parsed.get("policy_stats").is_some(),
+        "json must contain policy_stats, got: {json}"
+    );
+    assert!(
+        parsed.get("error_counters").is_some(),
+        "json must contain error_counters, got: {json}"
+    );
+    assert!(
+        parsed.get("operational_stats").is_some(),
+        "json must contain operational_stats, got: {json}"
+    );
+    assert!(
+        parsed.get("interval_secs").is_some(),
+        "json must contain interval_secs, got: {json}"
     );
 }
