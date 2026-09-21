@@ -565,9 +565,8 @@ impl CustomTokenProcessor for ApiKeyProcessor {
         claims.insert("sub".to_string(), serde_json::json!("api-key-user"));
         claims.insert("scope".to_string(), serde_json::json!("admin"));
 
-        let mut processed = ProcessedTokenClaims::new(claims, "api-key-1");
-        processed.cacheable = false; // re-validate on every request (revocation-sensitive)
-        Ok(processed)
+        // Re-validate on every request (revocation-sensitive).
+        Ok(ProcessedTokenClaims::new(claims, "api-key-1").with_cacheable(false))
     }
 }
 ```
@@ -575,14 +574,15 @@ impl CustomTokenProcessor for ApiKeyProcessor {
 `ProcessedTokenClaims` fields:
 
 | Field | Type | Description |
-| ------------ | ---------------------------- | --- |
-| `claims`     | map<string, JSON>            | Claims for the token entity. Stored as **tags** (`Set<String>`), exactly like JWT claims. |
-| `token_id`   | string                       | Entity id of the resulting token entity supplied directly, **not** read from a claim. |
-| `issuer_id`  | string? (`None`)             | Which custom issuer this token belongs to. `None` falls back to the sole issuer declaring the `mapping` (an explicit value is required when several issuers share one `mapping`). |
-| `expiration` | i64? (`None`)                | Optional expiration (unix seconds). The token is rejected once it passes, and the value bounds the token-cache TTL. Falls back to an `exp` claim when `None`; an explicit value wins over the claim. |
-| `cacheable`  | bool (default `true`)        | Set `false` for revocation-sensitive tokens so every request re-runs `process`. |
+| --- | --- | --- |
+| `claims` | `HashMap<String, serde_json::Value>` | Claims for the token entity. Stored as **tags** (`Set<String>`), exactly like JWT claims. |
+| `token_id` | `String` | Entity id of the resulting token entity supplied directly, **not** read from a claim. |
+| `expiration` | `Option<i64>` (default `None`) | Optional expiration (unix seconds). The token is rejected once it passes, and the value bounds the token-cache TTL. Falls back to an `exp` claim when `None`; an explicit value wins over the claim. |
+| `cacheable` | `bool` (default `true`) | Set `false` for revocation-sensitive tokens so every request re-runs `process`. |
 
-`ProcessedTokenClaims::new(claims, token_id)` builds a cacheable result with no issuer hint or expiration.
+Cedarling resolves the issuer from `mapping`, which is declared by exactly one custom issuer.
+
+`ProcessedTokenClaims::new(claims, token_id)` builds a cacheable result with no expiration; chain `.with_cacheable(bool)` and `.with_expiration(i64)` to override either.
 
 ### 3. Register the processor
 
@@ -625,7 +625,7 @@ The matching schema types `customkeys_apikey` into `context.tokens` as `Custom::
 | `mapping` is custom but no processor registered | `NoProcessorRegistered` (fail-closed if `required`, else skipped). |
 | A `required_claims` entry is absent from the output | `MissingRequiredClaim`. |
 | The reported expiration (`expiration`, else an `exp` claim) has already passed | `Expired`. |
-| The processor returns an `issuer_id` that does not declare the requested type | `UnknownTokenType`. |
+| No custom issuer declares the requested `mapping` | `UnknownMapping`. |
 | `process` exceeds the configured timeout (> 0) | `Timeout`. |
 
 Set `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS` to bound slow processors. `0` (the default) disables the timeout; see [Cedarling Properties](./cedarling-properties.md). Keep `cacheable: true` (the default) to skip re-running `process` for an identical payload and use `false` for revocation-sensitive tokens.
