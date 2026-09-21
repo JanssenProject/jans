@@ -102,29 +102,14 @@ public class CorsFilter implements Filter {
         processMethods(response, requestedMethods);
 
         // Header check
-        final String requestedHeaders = request.getHeader(ACCESS_CONTROL_REQUEST_HEADERS);
-        log.debug("CorsFilter::doFilter() - requestedHeaders:{}", requestedHeaders);
-        if (StringUtils.isNotBlank(requestedHeaders)) {
-            processRequestedHeaders(response, requestedHeaders);
-        }
+        processRequestedHeaders(request, response);
+      
 
         final boolean supportsCredentials = corsConfiguration.isSupportsCredentials();
         log.debug("CorsFilter::doFilter() - supportsCredentials:{}", supportsCredentials);
 
-        if (wildcardConfigured) {
-            // Security requirement: "*" must never be paired with Access-Control-Allow-Credentials.
-            // Browsers reject that combination anyway, but the server must not emit it either -
-            // a wildcard response is only ever safe for anonymous (non-credentialed) requests.
-            response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD);
-            log.debug("CorsFilter::doFilter() - wildcard origin configured; Allow-Credentials will not be sent");
-        } else {
-            // originAllowed == true here: echo back only the exact, validated origin -
-            // never an unvalidated reflection of the request's Origin header.
-            response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
-            if (supportsCredentials) {
-                response.addHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
-            }
-        }
+        //process wildcard
+        processWildcardOrigin(response, origin, wildcardConfigured, supportsCredentials); 
 
         // exposedHeaders check
         log.debug("CorsFilter::doFilter() - corsConfiguration.getExposedHeaders():{}",
@@ -150,7 +135,15 @@ public class CorsFilter implements Filter {
         }
     }
 
-    private void processRequestedHeaders(HttpServletResponse response, String allowHeadersValue) {
+    private void processRequestedHeaders(HttpServletRequest request, HttpServletResponse response) {
+        
+        // Header check
+        final String allowHeadersValue = request.getHeader(ACCESS_CONTROL_REQUEST_HEADERS);
+        log.debug("CorsFilter::doFilter() - allowHeadersValue:{}", allowHeadersValue);
+        if (StringUtils.isBlank(allowHeadersValue)) {
+            return;
+        }
+        
         log.debug(
                 " CorsFilter::processRequestedHeaders() - allowHeadersValue:{} , corsConfiguration.getAllowedHttpHeaders():{}",
                 allowHeadersValue, corsConfiguration.getAllowedHttpHeaders());
@@ -209,6 +202,26 @@ public class CorsFilter implements Filter {
             log.debug(" CorsFilter::processMethods() - validRequestedMethods:{}", validRequestedMethods);
             if (!validRequestedMethods.isEmpty()) {
                 response.addHeader(ACCESS_CONTROL_ALLOW_METHODS, String.join(",", validRequestedMethods));
+            }
+        }
+    }
+    
+    private void processWildcardOrigin(HttpServletResponse response, String origin, boolean wildcardConfigured, boolean supportsCredentials) {
+        if (wildcardConfigured) {
+            // Security requirement: "*" must never be paired with
+            // Access-Control-Allow-Credentials.
+            // Browsers reject that combination anyway, but the server must not emit it
+            // either -
+            // a wildcard response is only ever safe for anonymous (non-credentialed)
+            // requests.
+            response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD);
+            log.debug("CorsFilter::doFilter() - wildcard origin configured; Allow-Credentials will not be sent");
+        } else {
+            // originAllowed == true here: echo back only the exact, validated origin -
+            // never an unvalidated reflection of the request's Origin header.
+            response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+            if (supportsCredentials) {
+                response.addHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
             }
         }
     }

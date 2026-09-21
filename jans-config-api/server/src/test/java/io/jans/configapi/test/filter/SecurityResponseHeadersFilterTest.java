@@ -34,10 +34,10 @@ import org.testng.annotations.Test;
  * NOTE: written to match the conventions visible in the existing
  * io.jans.configapi.test.auth.ClientResourceTest (BaseTest +
  * getAccessTokenForGivenScope + a plain JAX-RS Client). It has not been
- * compiled or run against the real module - verify method names on the
- * actual BaseTest in your checkout (getAccessTokenForGivenScope, propertiesMap
- * keys, base URL property name) before relying on it, they may differ
- * slightly by branch/version.
+ * compiled or run against the real module - verify method names on the actual
+ * BaseTest in your checkout (getAccessTokenForGivenScope, propertiesMap keys,
+ * base URL property name) before relying on it, they may differ slightly by
+ * branch/version.
  */
 public class SecurityResponseHeadersFilterTest extends BaseTest {
 
@@ -57,7 +57,7 @@ public class SecurityResponseHeadersFilterTest extends BaseTest {
         // propertiesMap / issuer base URL wiring follows BaseTest's existing
         // pattern (see getAccessToken()/getAccessTokenForGivenScope() there);
         // adjust the key name if your BaseTest exposes it differently.
-        issuerUrl = propertiesMap.get("issuer");
+        issuerUrl = getIssuer();
     }
 
     @AfterClass
@@ -72,12 +72,12 @@ public class SecurityResponseHeadersFilterTest extends BaseTest {
         String accessToken = getAccessTokenForGivenScope(CONFIG_READ_SCOPE);
         Assert.assertNotNull(accessToken, "Could not obtain access token for scope " + CONFIG_READ_SCOPE);
 
-        Invocation.Builder request = client.target(issuerUrl + CONFIG_ENDPOINT_PATH)
-                .request(MediaType.APPLICATION_JSON)
+        Invocation.Builder request = client.target(issuerUrl + CONFIG_ENDPOINT_PATH).request(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + accessToken);
 
         try (Response response = request.get()) {
             log.info("GET {} -> {}", CONFIG_ENDPOINT_PATH, response.getStatus());
+            Assert.assertEquals(response.getStatus(), 200, "Expected a successful authenticated response");
             assertSecurityHeaders(response);
         }
     }
@@ -111,7 +111,6 @@ public class SecurityResponseHeadersFilterTest extends BaseTest {
     private void assertHeaderEquals(Response response, String headerName, String expectedValue) {
         String actual = response.getHeaderString(headerName);
         Assert.assertNotNull(actual, headerName + " header missing from response");
-        Assert.assertEquals(actual, expectedValue,
-                headerName + " header had unexpected value");
+        Assert.assertEquals(actual, expectedValue, headerName + " header had unexpected value");
     }
 }
