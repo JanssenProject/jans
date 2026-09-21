@@ -71,8 +71,10 @@ pub struct ProcessedTokenClaims {
     /// attribute — so it satisfies a schema that declares `exp` required and is
     /// readable by a policy as `context.tokens.*.exp`, without a separate `exp` claim.
     pub expiration: Option<i64>,
-    /// Whether this validation result may be cached. Set to `false` for
-    /// revocation-sensitive tokens so every request re-runs `process`.
+    /// Whether this validation result may be cached. [`new`](Self::new) sets it to
+    /// `true`, so revocation-sensitive tokens must opt out explicitly via
+    /// [`with_cacheable(false)`](Self::with_cacheable) to make every request
+    /// re-run `process`.
     pub cacheable: bool,
 }
 
@@ -85,6 +87,20 @@ impl ProcessedTokenClaims {
             expiration: None,
             cacheable: true,
         }
+    }
+
+    /// Set whether this result may be cached. See [`cacheable`](Self::cacheable).
+    #[must_use]
+    pub fn with_cacheable(mut self, cacheable: bool) -> Self {
+        self.cacheable = cacheable;
+        self
+    }
+
+    /// Set the expiration (unix seconds). See [`expiration`](Self::expiration).
+    #[must_use]
+    pub fn with_expiration(mut self, exp: i64) -> Self {
+        self.expiration = Some(exp);
+        self
     }
 }
 

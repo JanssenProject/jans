@@ -576,9 +576,8 @@ impl CustomTokenProcessor for ApiKeyProcessor {
         claims.insert("sub".to_string(), serde_json::json!("api-key-user"));
         claims.insert("scope".to_string(), serde_json::json!("admin"));
 
-        let mut processed = ProcessedTokenClaims::new(claims, "api-key-1");
-        processed.cacheable = false; // re-validate on every request (revocation-sensitive)
-        Ok(processed)
+        // Re-validate on every request (revocation-sensitive).
+        Ok(ProcessedTokenClaims::new(claims, "api-key-1").with_cacheable(false))
     }
 }
 ```
@@ -594,7 +593,7 @@ impl CustomTokenProcessor for ApiKeyProcessor {
 
 Cedarling resolves the issuer from `mapping`, which is declared by exactly one custom issuer.
 
-`ProcessedTokenClaims::new(claims, token_id)` builds a cacheable result with no expiration.
+`ProcessedTokenClaims::new(claims, token_id)` builds a cacheable result with no expiration; chain `.with_cacheable(bool)` and `.with_expiration(i64)` to override either.
 
 ### 3. Register the processor
 
