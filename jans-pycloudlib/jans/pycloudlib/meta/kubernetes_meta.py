@@ -78,7 +78,7 @@ class KubernetesMeta(BaseMeta):
         namespace = os.environ.get("CN_CONTAINER_METADATA_NAMESPACE", "default")
         try:
             pods: list[V1Pod] = self.client.list_namespaced_pod(namespace, label_selector=label, field_selector=field_selector).items
-            # Filter pods, so that only RUNNING pods are returned. Terminating or CrashLoopBackOff phase pods are filtered out. 
+            # Filter terminating and unready pods from the Running-phase result.
             pods = [
                 p for p in pods 
                 if not p.metadata.deletion_timestamp 
