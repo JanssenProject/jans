@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,6 +22,19 @@ func resourceApiAppConfiguration() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
+			"service_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Config API service name.",
+			},
+			"protection_mode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Protection mode for the Lock server. Possible values are oauth and cedarling.",
+				ValidateDiagFunc: func(v any, p cty.Path) diag.Diagnostics {
+					return validateEnum(v, []string{"oauth", "cedarling"})
+				},
+			},
 			"config_oauth_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -30,6 +44,21 @@ func resourceApiAppConfiguration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "",
+			},
+			"user_role_permission_validation_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Flag to enable/disable the user role-permission mapping check during authentication.",
+			},
+			"validate_user_inum_in_introspection_flag": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Flag to enable/disable validating `User-inum` against the introspection response.",
+			},
+			"fetch_user_role_in_introspection_flag": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Flag to enable/disable returning the user role in the introspection response.",
 			},
 			"disable_audit_logger": {
 				Type:        schema.TypeBool,
@@ -45,6 +74,16 @@ func resourceApiAppConfiguration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "",
+			},
+			"return_client_secret_in_response": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Flag to enable/disable sending the client secret in the response.",
+			},
+			"return_encrypted_client_secret_in_response": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Flag to enable/disable sending the encrypted client secret in the response.",
 			},
 			"api_approved_issuer": {
 				Type:        schema.TypeList,
@@ -186,10 +225,23 @@ func resourceApiAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "",
 			},
+			"disable_external_logger_configuration": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Choose whether to disable the external log4j2 configuration override.",
+			},
 			"max_count": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "",
+			},
+			"acr_exclusion_list": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of ACR values excluded from the active validation check.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"user_exclusion_attributes": {
 				Type:        schema.TypeList,
@@ -280,6 +332,72 @@ func resourceApiAppConfiguration() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
+						},
+					},
+				},
+			},
+			"cedarling_configuration": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Cedar configuration used for authorization.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Specify if Cedarling is enabled.",
+						},
+						"policy_sources": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "List of policy sources.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: "Specify if the policy source is enabled.",
+									},
+									"authorization_token": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Sensitive:   true,
+										Description: "Authorization token used to access the policy store URI.",
+									},
+									"policy_store_uri": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "URI of the policy store. The store can be either json or zip.",
+									},
+								},
+							},
+						},
+						"log_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Log type. Possible values are OFF, MEMORY and STD_OUT.",
+							ValidateDiagFunc: func(v any, p cty.Path) diag.Diagnostics {
+								return validateEnum(v, []string{"OFF", "MEMORY", "STD_OUT"})
+							},
+						},
+						"log_level": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "System log level.",
+							ValidateDiagFunc: func(v any, p cty.Path) diag.Diagnostics {
+								return validateEnum(v, []string{"FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"})
+							},
+						},
+						"external_policy_store_uri": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "External policy store URI.",
+						},
+						"max_entries": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum number of entries in the policy store file.",
 						},
 					},
 				},

@@ -3,6 +3,7 @@ package provider
 import (
         "context"
 
+        "github.com/hashicorp/go-cty/cty"
         "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
         "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
         "github.com/jans/terraform-provider-jans/jans"
@@ -40,11 +41,6 @@ func resourceFido2Configuration() *schema.Resource {
                                 Type:        schema.TypeInt,
                                 Optional:    true,
                                 Description: "Each clean up iteration fetches chunk of expired data per base dn and removes it.",
-                        },
-                        "user_info_lifetime": {
-                                Type:        schema.TypeInt,
-                                Optional:    true,
-                                Description: "User info lifetime.",
                         },
                         "use_local_cache": {
                                 Type:        schema.TypeBool,
@@ -85,6 +81,54 @@ func resourceFido2Configuration() *schema.Resource {
                                 Type:        schema.TypeInt,
                                 Optional:    true,
                                 Description: "The days to keep report data.",
+                        },
+                        "disable_external_logger_configuration": {
+                                Type:        schema.TypeBool,
+                                Optional:    true,
+                                Description: "Choose whether to disable the external log4j2 configuration override.",
+                        },
+                        "fido2_metrics_enabled": {
+                                Type:        schema.TypeBool,
+                                Optional:    true,
+                                Description: "Boolean value specifying whether FIDO2 passkey metrics collection is enabled.",
+                        },
+                        "fido2_metrics_retention_days": {
+                                Type:        schema.TypeInt,
+                                Optional:    true,
+                                Description: "Number of days to keep FIDO2 passkey metrics data.",
+                        },
+                        "fido2_device_info_collection": {
+                                Type:        schema.TypeBool,
+                                Optional:    true,
+                                Description: "Boolean value specifying whether to collect device information in FIDO2 metrics.",
+                        },
+                        "fido2_error_categorization": {
+                                Type:        schema.TypeBool,
+                                Optional:    true,
+                                Description: "Boolean value specifying whether to categorize errors in FIDO2 metrics.",
+                        },
+                        "fido2_performance_metrics": {
+                                Type:        schema.TypeBool,
+                                Optional:    true,
+                                Description: "Boolean value specifying whether to collect detailed performance metrics for FIDO2 operations.",
+                        },
+                        "fido2_metrics_aggregation_enabled": {
+                                Type:        schema.TypeBool,
+                                Optional:    true,
+                                Description: "Boolean value specifying whether FIDO2 metrics aggregation is enabled.",
+                        },
+                        "trusted_proxy_enabled": {
+                                Type:        schema.TypeBool,
+                                Optional:    true,
+                                Description: "Whether proxy headers may be trusted when recording the client IP in metrics. True trusts them only from the source addresses listed in trusted_proxy_ip_ranges.",
+                        },
+                        "trusted_proxy_ip_ranges": {
+                                Type:        schema.TypeList,
+                                Optional:    true,
+                                Description: "Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation. Only consulted when trusted_proxy_enabled is true; an empty list trusts nothing.",
+                                Elem: &schema.Schema{
+                                        Type: schema.TypeString,
+                                },
                         },
                         "person_custom_object_class_list": {
                                 Type:        schema.TypeList,
@@ -140,6 +184,24 @@ func resourceFido2Configuration() *schema.Resource {
                                                                                         Type: schema.TypeString,
                                                                                 },
                                                                         },
+                                                                        "policy": {
+                                                                                Type:        schema.TypeList,
+                                                                                Optional:    true,
+                                                                                MaxItems:    1,
+                                                                                Description: "Per-relying-party assurance policy. Omitted falls back to the global configuration.",
+                                                                                Elem: &schema.Resource{
+                                                                                        Schema: map[string]*schema.Schema{
+                                                                                                "attestation_mode": {
+                                                                                                        Type:        schema.TypeString,
+                                                                                                        Optional:    true,
+                                                                                                        Description: "Attestation mode for this relying party. Possible values are disabled, monitor and enforced.",
+                                                                                                        ValidateDiagFunc: func(v any, p cty.Path) diag.Diagnostics {
+                                                                                                                return validateEnum(v, []string{"disabled", "monitor", "enforced"})
+                                                                                                        },
+                                                                                                },
+                                                                                        },
+                                                                                },
+                                                                        },
                                                                 },
                                                         },
                                                 },
@@ -157,6 +219,84 @@ func resourceFido2Configuration() *schema.Resource {
                                                         Type:        schema.TypeInt,
                                                         Optional:    true,
                                                         Description: "Expiration time in seconds for approved authentication requests.",
+                                                },
+                                                "record_abandoned_assertions": {
+                                                        Type:        schema.TypeBool,
+                                                        Optional:    true,
+                                                        Description: "Whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled.",
+                                                },
+                                                "abandoned_request_expiration": {
+                                                        Type:        schema.TypeInt,
+                                                        Optional:    true,
+                                                        Description: "Expiration time in seconds for abandoned assertion ceremonies.",
+                                                },
+                                                "abandoned_request_sweep_interval": {
+                                                        Type:        schema.TypeInt,
+                                                        Optional:    true,
+                                                        Description: "Interval in seconds between sweeps for lapsed assertion ceremonies. Must stay below unfinished_request_expiration.",
+                                                },
+                                                "disable_metadata_service": {
+                                                        Type:        schema.TypeBool,
+                                                        Optional:    true,
+                                                        Description: "Boolean value indicating whether the MDS download should be omitted.",
+                                                },
+                                                "mds_download_startup_retries": {
+                                                        Type:        schema.TypeInt,
+                                                        Optional:    true,
+                                                        Description: "Number of times the MDS TOC download is retried at server startup when the TOC blob is missing.",
+                                                },
+                                                "mds_download_startup_retry_interval": {
+                                                        Type:        schema.TypeInt,
+                                                        Optional:    true,
+                                                        Description: "Delay in seconds between MDS TOC download retries at server startup.",
+                                                },
+                                                "enterprise_attestation": {
+                                                        Type:        schema.TypeBool,
+                                                        Optional:    true,
+                                                        Description: "Whether authenticators have been enabled for use in a specific protected environment.",
+                                                },
+                                                "attestation_mode": {
+                                                        Type:        schema.TypeString,
+                                                        Optional:    true,
+                                                        Description: "Whether MDS validation should be omitted during attestation. Possible values are disabled, monitor and enforced.",
+                                                        ValidateDiagFunc: func(v any, p cty.Path) diag.Diagnostics {
+                                                                return validateEnum(v, []string{"disabled", "monitor", "enforced"})
+                                                        },
+                                                },
+                                                "hints": {
+                                                        Type:        schema.TypeList,
+                                                        Optional:    true,
+                                                        Description: "Hints to the relying party. Possible values are security-key, client-device and hybrid.",
+                                                        Elem: &schema.Schema{
+                                                                Type: schema.TypeString,
+                                                        },
+                                                },
+                                                "allowed_top_origins": {
+                                                        Type:        schema.TypeList,
+                                                        Optional:    true,
+                                                        Description: "Full origins permitted to frame a cross-origin ceremony. An empty list denies every framed ceremony.",
+                                                        Elem: &schema.Schema{
+                                                                Type: schema.TypeString,
+                                                        },
+                                                },
+                                                "metadata_servers": {
+                                                        Type:        schema.TypeList,
+                                                        Optional:    true,
+                                                        Description: "Sources of URLs with external metadata.",
+                                                        Elem: &schema.Resource{
+                                                                Schema: map[string]*schema.Schema{
+                                                                        "url": {
+                                                                                Type:        schema.TypeString,
+                                                                                Optional:    true,
+                                                                                Description: "URL of the metadata server.",
+                                                                        },
+                                                                        "root_cert": {
+                                                                                Type:        schema.TypeString,
+                                                                                Optional:    true,
+                                                                                Description: "Root certificate of the metadata server.",
+                                                                        },
+                                                                },
+                                                        },
                                                 },
                                                 "requested_credential_types": {
                                                         Type:        schema.TypeList,

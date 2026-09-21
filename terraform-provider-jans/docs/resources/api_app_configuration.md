@@ -23,6 +23,7 @@ resource "jans_api_app_configuration" "global" {
 
 ### Optional
 
+- `acr_exclusion_list` (List of String) List of ACR values excluded from the active validation check.
 - `acr_validation_enabled` (Boolean)
 - `agama_configuration` (Block List) (see [below for nested schema](#nestedblock--agama_configuration))
 - `api_approved_issuer` (List of String)
@@ -36,22 +37,31 @@ resource "jans_api_app_configuration" "global" {
 - `auth_openid_introspection_url` (String)
 - `auth_openid_revoke_url` (String)
 - `auth_openid_token_url` (String)
+- `cedarling_configuration` (Block List, Max: 1) Cedar configuration used for authorization. (see [below for nested schema](#nestedblock--cedarling_configuration))
 - `config_oauth_enabled` (Boolean)
 - `cors_configuration_filters` (Block List) (see [below for nested schema](#nestedblock--cors_configuration_filters))
 - `custom_attribute_validation_enabled` (Boolean)
 - `data_format_conversion_conf` (Block List) (see [below for nested schema](#nestedblock--data_format_conversion_conf))
 - `disable_audit_logger` (Boolean)
+- `disable_external_logger_configuration` (Boolean) Choose whether to disable the external log4j2 configuration override.
 - `disable_jdk_logger` (Boolean)
 - `disable_logger_timer` (Boolean)
 - `endpoint_injection_enabled` (Boolean)
 - `exclusive_auth_scopes` (List of String)
 - `external_logger_configuration` (String)
+- `fetch_user_role_in_introspection_flag` (Boolean) Flag to enable/disable returning the user role in the introspection response.
 - `logging_layout` (String)
 - `logging_level` (String)
 - `max_count` (Number)
 - `plugins` (Block List) (see [below for nested schema](#nestedblock--plugins))
+- `protection_mode` (String) Protection mode for the Lock server. Possible values are oauth and cedarling.
+- `return_client_secret_in_response` (Boolean) Flag to enable/disable sending the client secret in the response.
+- `return_encrypted_client_secret_in_response` (Boolean) Flag to enable/disable sending the encrypted client secret in the response.
+- `service_name` (String) Config API service name.
 - `user_exclusion_attributes` (List of String)
 - `user_mandatory_attributes` (List of String)
+- `user_role_permission_validation_enabled` (Boolean) Flag to enable/disable the user role-permission mapping check during authentication.
+- `validate_user_inum_in_introspection_flag` (Boolean) Flag to enable/disable validating `User-inum` against the introspection response.
 
 ### Read-Only
 
@@ -96,6 +106,29 @@ Optional:
 - `enabled` (Boolean)
 - `header_attributes` (List of String)
 - `ignore_http_method` (List of String)
+
+
+<a id="nestedblock--cedarling_configuration"></a>
+### Nested Schema for `cedarling_configuration`
+
+Optional:
+
+- `enabled` (Boolean) Specify if Cedarling is enabled.
+- `external_policy_store_uri` (String) External policy store URI.
+- `log_level` (String) System log level.
+- `log_type` (String) Log type. Possible values are OFF, MEMORY and STD_OUT.
+- `max_entries` (Number) Maximum number of entries in the policy store file.
+- `policy_sources` (Block List) List of policy sources. (see [below for nested schema](#nestedblock--cedarling_configuration--policy_sources))
+
+
+<a id="nestedblock--cedarling_configuration--policy_sources"></a>
+### Nested Schema for `cedarling_configuration.policy_sources`
+
+Optional:
+
+- `authorization_token` (String, Sensitive) Authorization token used to access the policy store URI.
+- `enabled` (Boolean) Specify if the policy source is enabled.
+- `policy_store_uri` (String) URI of the policy store. The store can be either json or zip.
 
 
 <a id="nestedblock--cors_configuration_filters"></a>

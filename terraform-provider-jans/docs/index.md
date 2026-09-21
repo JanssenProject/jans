@@ -55,7 +55,8 @@ The following resources are considered instance configurations:
 - jans_scim_app_configuration
 - jans_smtp_configuration
 
-It is recommended to import all of those resources before managing anything else:
+Terraform cannot create them, so each one has to be imported before it can be
+managed:
 
 ```bash
 terraform import jans_api_app_configuration.global global
@@ -70,6 +71,10 @@ terraform import jans_smtp_configuration.global global
 ```
 
 Note that the resource identifier can be any other valid identifier, instead of `global`.
+
+Only the attributes declared in the configuration are sent on update; every other
+attribute keeps its current server value. A resource that declares a single
+attribute therefore leaves the rest of the configuration alone.
 
 The following resources can also not be created from within Terraform, but can be imported,
 updated, or deleted (unlike with the instance configurations, deletion will result in the

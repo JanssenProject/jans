@@ -35,38 +35,63 @@ type AssetMgtConfiguration struct {
         AssetDirMappings               []AssetDirMapping `schema:"asset_dir_mappings" json:"assetDirMapping"`
 }
 
+type PolicySource struct {
+        Enabled            bool   `schema:"enabled" json:"enabled"`
+        AuthorizationToken string `schema:"authorization_token" json:"authorizationToken"`
+        PolicyStoreUri     string `schema:"policy_store_uri" json:"policyStoreUri"`
+}
+
+type CedarlingConfiguration struct {
+        Enabled                bool           `schema:"enabled" json:"enabled"`
+        PolicySources          []PolicySource `schema:"policy_sources" json:"policySources"`
+        LogType                string         `schema:"log_type" json:"logType"`
+        LogLevel               string         `schema:"log_level" json:"logLevel"`
+        ExternalPolicyStoreUri string         `schema:"external_policy_store_uri" json:"externalPolicyStoreUri"`
+        MaxEntries             int            `schema:"max_entries" json:"maxEntries"`
+}
+
 // PersistenceConfiguration represents the persistence configuration
 // of the Janssen server.
 type ApiAppConfiguration struct {
-        ConfigOauthEnabled               bool                      `schema:"config_oauth_enabled" json:"configOauthEnabled"`
-        DisableLoggerTimer               bool                      `schema:"disable_logger_timer" json:"disableLoggerTimer"`
-        DisableAuditLogger               bool                      `schema:"disable_audit_logger" json:"disableAuditLogger"`
-        CustomAttributeValidationEnabled bool                      `schema:"custom_attribute_validation_enabled" json:"customAttributeValidationEnabled"`
-        ArcValidationEnabled             bool                      `schema:"acr_validation_enabled" json:"acrValidationEnabled"`
-        ApiApprovedIssuer                []string                  `schema:"api_approved_issuer" json:"apiApprovedIssuer"`
-        ApiProtectionType                string                    `schema:"api_protection_type" json:"apiProtectionType"`
-        ApiClientId                      string                    `schema:"api_client_id" json:"apiClientId"`
-        ApiClientPassword                string                    `schema:"api_client_password" json:"apiClientPassword"`
-        EndpointInjectionEnabled         bool                      `schema:"endpoint_injection_enabled" json:"endpointInjectionEnabled"`
-        AuthIssuerUrl                    string                    `schema:"auth_issuer_url" json:"authIssuerUrl"`
-        AuthOpenidConfigurationUrl       string                    `schema:"auth_openid_configuration_url" json:"authOpenidConfigurationUrl"`
-        AuthOpenidIntrospectionUrl       string                    `schema:"auth_openid_introspection_url" json:"authOpenidIntrospectionUrl"`
-        AuthOpenidTokenUrl               string                    `schema:"auth_openid_token_url" json:"authOpenidTokenUrl"`
-        AuthOpenidRevokeUrl              string                    `schema:"auth_openid_revoke_url" json:"authOpenidRevokeUrl"`
-        ExclusiveAuthScopes              []string                  `schema:"exclusive_auth_scopes" json:"exclusiveAuthScopes"`
-        CorsConfigurationFilters         []CorsConfigurationFilter `schema:"cors_configuration_filters" json:"corsConfigurationFilters"`
-        LoggingLevel                     string                    `schema:"logging_level" json:"loggingLevel"`
-        LoggingLayout                    string                    `schema:"logging_layout" json:"loggingLayout"`
-        ExternalLoggerConfiguration      string                    `schema:"external_logger_configuration" json:"externalLoggerConfiguration"`
-        DisableJdkLogger                 bool                      `schema:"disable_jdk_logger" json:"disableJdkLogger"`
-        MaxCount                         int                       `schema:"max_count" json:"maxCount"`
-        UserExclusionAttributes          []string                  `schema:"user_exclusion_attributes" json:"userExclusionAttributes"`
-        UserMandatoryAttributes          []string                  `schema:"user_mandatory_attributes" json:"userMandatoryAttributes"`
-        AgamaConfiguration               AgamaConfiguration        `schema:"agama_configuration" json:"agamaConfiguration"`
-        AuditLogConf                     AuditLogConf              `schema:"audit_log_conf" json:"auditLogConf"`
-        DataFormatConversionConf         DataFormatConversionConf  `schema:"data_format_conversion_conf" json:"dataFormatConversionConf"`
-        Plugins                          []PluginConf              `schema:"plugins" json:"plugins"`
-        AssetMgtConfiguration            AssetMgtConfiguration     `schema:"asset_mgt_configuration" json:"assetMgtConfiguration"`
+        ServiceName                           string                    `schema:"service_name" json:"serviceName"`
+        ConfigOauthEnabled                    bool                      `schema:"config_oauth_enabled" json:"configOauthEnabled"`
+        ProtectionMode                        string                    `schema:"protection_mode" json:"protectionMode"`
+        DisableLoggerTimer                    bool                      `schema:"disable_logger_timer" json:"disableLoggerTimer"`
+        UserRolePermissionValidationEnabled   bool                      `schema:"user_role_permission_validation_enabled" json:"userRolePermissionValidationEnabled"`
+        ValidateUserInumInIntrospectionFlag   bool                      `schema:"validate_user_inum_in_introspection_flag" json:"validateUserInumInIntrospectionFlag"`
+        FetchUserRoleInIntrospectionFlag      bool                      `schema:"fetch_user_role_in_introspection_flag" json:"fetchUserRoleInIntrospectionFlag"`
+        DisableAuditLogger                    bool                      `schema:"disable_audit_logger" json:"disableAuditLogger"`
+        CustomAttributeValidationEnabled      bool                      `schema:"custom_attribute_validation_enabled" json:"customAttributeValidationEnabled"`
+        ArcValidationEnabled                  bool                      `schema:"acr_validation_enabled" json:"acrValidationEnabled"`
+        ReturnClientSecretInResponse          bool                      `schema:"return_client_secret_in_response" json:"returnClientSecretInResponse"`
+        ReturnEncryptedClientSecretInResponse bool                      `schema:"return_encrypted_client_secret_in_response" json:"returnEncryptedClientSecretInResponse"`
+        ApiApprovedIssuer                     []string                  `schema:"api_approved_issuer" json:"apiApprovedIssuer"`
+        ApiProtectionType                     string                    `schema:"api_protection_type" json:"apiProtectionType"`
+        ApiClientId                           string                    `schema:"api_client_id" json:"apiClientId"`
+        ApiClientPassword                     string                    `schema:"api_client_password" json:"apiClientPassword"`
+        EndpointInjectionEnabled              bool                      `schema:"endpoint_injection_enabled" json:"endpointInjectionEnabled"`
+        AuthIssuerUrl                         string                    `schema:"auth_issuer_url" json:"authIssuerUrl"`
+        AuthOpenidConfigurationUrl            string                    `schema:"auth_openid_configuration_url" json:"authOpenidConfigurationUrl"`
+        AuthOpenidIntrospectionUrl            string                    `schema:"auth_openid_introspection_url" json:"authOpenidIntrospectionUrl"`
+        AuthOpenidTokenUrl                    string                    `schema:"auth_openid_token_url" json:"authOpenidTokenUrl"`
+        AuthOpenidRevokeUrl                   string                    `schema:"auth_openid_revoke_url" json:"authOpenidRevokeUrl"`
+        ExclusiveAuthScopes                   []string                  `schema:"exclusive_auth_scopes" json:"exclusiveAuthScopes"`
+        CorsConfigurationFilters              []CorsConfigurationFilter `schema:"cors_configuration_filters" json:"corsConfigurationFilters"`
+        LoggingLevel                          string                    `schema:"logging_level" json:"loggingLevel"`
+        LoggingLayout                         string                    `schema:"logging_layout" json:"loggingLayout"`
+        ExternalLoggerConfiguration           string                    `schema:"external_logger_configuration" json:"externalLoggerConfiguration"`
+        DisableJdkLogger                      bool                      `schema:"disable_jdk_logger" json:"disableJdkLogger"`
+        DisableExternalLoggerConfiguration    bool                      `schema:"disable_external_logger_configuration" json:"disableExternalLoggerConfiguration"`
+        MaxCount                              int                       `schema:"max_count" json:"maxCount"`
+        AcrExclusionList                      []string                  `schema:"acr_exclusion_list" json:"acrExclusionList"`
+        UserExclusionAttributes               []string                  `schema:"user_exclusion_attributes" json:"userExclusionAttributes"`
+        UserMandatoryAttributes               []string                  `schema:"user_mandatory_attributes" json:"userMandatoryAttributes"`
+        AgamaConfiguration                    AgamaConfiguration        `schema:"agama_configuration" json:"agamaConfiguration"`
+        AuditLogConf                          AuditLogConf              `schema:"audit_log_conf" json:"auditLogConf"`
+        DataFormatConversionConf              DataFormatConversionConf  `schema:"data_format_conversion_conf" json:"dataFormatConversionConf"`
+        CedarlingConfiguration                CedarlingConfiguration    `schema:"cedarling_configuration" json:"cedarlingConfiguration"`
+        Plugins                               []PluginConf              `schema:"plugins" json:"plugins"`
+        AssetMgtConfiguration                 AssetMgtConfiguration     `schema:"asset_mgt_configuration" json:"assetMgtConfiguration"`
 }
 
 // GetApiAppConfiguration returns the current API configuration.
