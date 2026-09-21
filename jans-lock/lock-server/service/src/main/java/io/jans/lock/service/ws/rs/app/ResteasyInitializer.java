@@ -57,6 +57,7 @@ import jakarta.ws.rs.core.Application;
 
         tags = { @Tag(name = "Lock - Server Configuration"), @Tag(name = "Lock - Stat"), @Tag(name = "Lock - Audit Health"),
                 @Tag(name = "Lock - Audit Log"), @Tag(name = "Lock - Audit Telemetry"),
+                @Tag(name = "Lock - Audit Trace"), @Tag(name = "Lock - Audit Trace Admin"),
         },
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })
@@ -66,7 +67,10 @@ import jakarta.ws.rs.core.Application;
         @OAuthScope(name = ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS, description = "Write audit health entries"),
         @OAuthScope(name = ApiAccessConstants.LOCK_LOG_WRITE_ACCESS, description = "Write audit log entries"),
         @OAuthScope(name = ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS, description = "Write telemetry health entries"),
-        @OAuthScope(name = ApiAccessConstants.LOCK_STAT_READ_ACCESS, description = "View stat related information")
+        @OAuthScope(name = ApiAccessConstants.LOCK_STAT_READ_ACCESS, description = "View stat related information"),
+        @OAuthScope(name = ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS, description = "Permission to submit TRACE evidence records"),
+        @OAuthScope(name = ApiAccessConstants.LOCK_TRACE_READ_ACCESS, description = "Permission to read TRACE records and executions"),
+        @OAuthScope(name = ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS, description = "Permission to manage TRACE producer keys and chains")
         }
 
 )))
