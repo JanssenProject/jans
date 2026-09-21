@@ -35,6 +35,9 @@ public class ApiAppConfiguration implements Configuration {
         
     @Schema(description = "Flag to enable/disable to get user-role in Introspection response. Default value `true`.")
     private boolean fetchUserRoleInIntrospectionFlag = true;
+
+    @Schema(description = "Client IDs exempt from the User Role-Permission mapping check. Only honoured for tokens that carry no user, so a user token is always checked. Empty by default.")
+    private List<String> userRolePermissionExcludedClients;
     
     @Schema(description = "Flag to enable/disable request audit. Default value `false`.")
     private boolean disableAuditLogger;
@@ -185,6 +188,14 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setFetchUserRoleInIntrospectionFlag(boolean fetchUserRoleInIntrospectionFlag) {
         this.fetchUserRoleInIntrospectionFlag = fetchUserRoleInIntrospectionFlag;
+    }
+
+    public List<String> getUserRolePermissionExcludedClients() {
+        return userRolePermissionExcludedClients;
+    }
+
+    public void setUserRolePermissionExcludedClients(List<String> userRolePermissionExcludedClients) {
+        this.userRolePermissionExcludedClients = userRolePermissionExcludedClients;
     }
 
     public boolean isDisableAuditLogger() {
@@ -453,6 +464,7 @@ public class ApiAppConfiguration implements Configuration {
                 +" ,userRolePermissionValidationEnabled=" + userRolePermissionValidationEnabled
                 +" ,validateUserInumInIntrospectionFlag=" + validateUserInumInIntrospectionFlag
                 +" ,fetchUserRoleInIntrospectionFlag=" + fetchUserRoleInIntrospectionFlag
+                +" ,userRolePermissionExcludedClients=" + userRolePermissionExcludedClients
                 + ", disableAuditLogger=" + disableAuditLogger + ", customAttributeValidationEnabled="
                 + customAttributeValidationEnabled + ", acrValidationEnabled=" + acrValidationEnabled
                 + ", returnClientSecretInResponse=" + returnClientSecretInResponse

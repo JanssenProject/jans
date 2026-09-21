@@ -2,6 +2,7 @@ package provider
 
 import (
         "context"
+        "encoding/json"
         "errors"
         "testing"
 
@@ -148,4 +149,73 @@ func testAccResourceCheckFido2ConfigurationDestroy(s *terraform.State) error {
         }
 
         return nil
+}
+
+func TestResourceFido2Config_RequestedPartyMapping(t *testing.T) {
+
+        testCases := []struct {
+                name   string
+                policy *jans.RequestedPartyPolicy
+        }{
+                {"without policy", nil},
+                {"with policy", &jans.RequestedPartyPolicy{AttestationMode: "enforced"}},
+        }
+
+        for _, tc := range testCases {
+                t.Run(tc.name, func(t *testing.T) {
+
+                        data := resourceFido2Configuration().Data(nil)
+
+                        cfg := jans.JansFido2DynConfiguration{
+                                Fido2Configuration: jans.Fido2Configuration{
+                                        RequestedParties: []jans.RequestedParties{
+                                                {
+                                                        Id:      "https://server.example.com",
+                                                        Origins: []string{"server.example.com"},
+                                                        Policy:  tc.policy,
+                                                },
+                                        },
+                                        MetadataServers: []jans.MetadataServer{
+                                                {Url: "https://mds.example.com", RootCert: "root"},
+                                        },
+                                        AttestationMode: "monitor",
+                                        Hints:           []string{"security-key"},
+                                },
+                                Fido2MetricsEnabled:  true,
+                                TrustedProxyEnabled:  true,
+                                TrustedProxyIpRanges: []string{"10.0.0.0/8"},
+                        }
+
+                        if err := toSchemaResource(data, cfg); err != nil {
+                                t.Fatal(err)
+                        }
+
+                        newCfg := jans.JansFido2DynConfiguration{}
+                        if err := fromSchemaResource(data, &newCfg); err != nil {
+                                t.Fatal(err)
+                        }
+
+                        if diff := cmp.Diff(cfg, newCfg); diff != "" {
+                                t.Errorf("Got different configuration after mapping: %s", diff)
+                        }
+                })
+        }
+}
+
+func TestRequestedPartiesJSONNames(t *testing.T) {
+
+        rp := jans.RequestedParties{
+                Id:      "https://server.example.com",
+                Origins: []string{"server.example.com"},
+        }
+
+        b, err := json.Marshal(rp)
+        if err != nil {
+                t.Fatal(err)
+        }
+
+        expected := `{"id":"https://server.example.com","origins":["server.example.com"]}`
+        if string(b) != expected {
+                t.Errorf("Got %s, expected %s", b, expected)
+        }
 }
