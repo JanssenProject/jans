@@ -17,6 +17,8 @@ tags:
 - name: Lock - Audit Health
 - name: Lock - Audit Log
 - name: Lock - Audit Telemetry
+- name: Lock - Audit Trace
+- name: Lock - Audit Trace Admin
 paths:
   /api/v1/configuration:
     get:
@@ -708,3 +710,9 @@ components:
             https://jans.io/oauth/lock/log.write: Write audit log entries
             https://jans.io/oauth/lock/telemetry.write: Write telemetry health entries
             https://jans.io/oauth/lock/stat.readonly: View stat related information
+            https://jans.io/oauth/lock/trace.write: Permission to submit TRACE evidence
+              records
+            https://jans.io/oauth/lock/trace.readonly: Permission to read TRACE records
+              and executions
+            https://jans.io/oauth/lock/trace.admin: Permission to manage TRACE producer
+              keys and chains
