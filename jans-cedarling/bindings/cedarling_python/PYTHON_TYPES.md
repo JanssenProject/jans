@@ -389,8 +389,9 @@ Methods
     the counters for the next interval.
 
     Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
-    Lock telemetry ticker owns the collector. Raises `LockTelemetry`
-    whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+    Lock telemetry ticker owns the collector. Raises `ValueError` when
+    Lock telemetry owns the collector, i.e. whenever
+    `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
     server has no telemetry endpoint. `interval_secs` has 1-second
     precision, so a drain more often than once per second reports `0`.
 
