@@ -90,6 +90,9 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Install protobuf compiler
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
       - name: Generate javadocs
         env:
           JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
