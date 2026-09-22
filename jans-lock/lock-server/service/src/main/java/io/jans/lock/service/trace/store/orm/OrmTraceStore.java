@@ -419,8 +419,6 @@ public class OrmTraceStore implements TraceStore {
 		String mapKey = TraceKeys.producerKeyKey(key.getDomainId(), key.getProducerId(), key.getKid());
 		String dn = TraceKeys.producerKeyDn(baseDn(), mapKey);
 		TraceProducerKeyEntry entity = TraceEntityMapper.toEntity(key, dn);
-		// ProducerKey (task 12 value type) carries no registration timestamp of its own.
-		entity.setCreationDate(new Date());
 		duplicateSafeInsert(dn, TraceProducerKeyEntry.class, entity, mapKey);
 	}
 

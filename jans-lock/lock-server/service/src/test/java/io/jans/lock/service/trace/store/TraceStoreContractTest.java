@@ -97,7 +97,7 @@ public abstract class TraceStoreContractTest {
 		jwk.put("kty", "OKP");
 		jwk.put("crv", "Ed25519");
 		jwk.put("x", "abc");
-		return new ProducerKey(DOMAIN, producerId, kid, jwk, 100L, null, null, "client-1");
+		return new ProducerKey(DOMAIN, producerId, kid, jwk, 100L, null, null, "client-1", 100L);
 	}
 
 	// -- records: insert / duplicate / find --------------------------------------------------

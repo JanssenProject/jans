@@ -151,7 +151,7 @@ class TraceEntityMapperTest {
 		jwk.put("kty", "OKP");
 		jwk.put("crv", "Ed25519");
 		jwk.put("x", "abc");
-		ProducerKey key = new ProducerKey(DOMAIN, "producer-1", "kid-1", jwk, 100L, 200L, 150L, "client-1");
+		ProducerKey key = new ProducerKey(DOMAIN, "producer-1", "kid-1", jwk, 100L, 200L, 150L, "client-1", 50L);
 
 		TraceProducerKeyEntry entity = TraceEntityMapper.toEntity(key, "jansId=x,ou=keys,ou=trace,ou=lock,o=jans");
 		ProducerKey roundTripped = TraceEntityMapper.toProducerKey(entity);
@@ -164,6 +164,7 @@ class TraceEntityMapperTest {
 		assertEquals(key.getValidUntilMs(), roundTripped.getValidUntilMs());
 		assertEquals(key.getRevokedAtMs(), roundTripped.getRevokedAtMs());
 		assertEquals(key.getRegisteredBy(), roundTripped.getRegisteredBy());
+		assertEquals(key.getCreatedAtMs(), roundTripped.getCreatedAtMs());
 	}
 
 	@Test

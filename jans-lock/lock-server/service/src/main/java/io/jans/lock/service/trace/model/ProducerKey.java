@@ -36,8 +36,10 @@ public final class ProducerKey {
 
 	private final String registeredBy;
 
+	private final long createdAtMs;
+
 	public ProducerKey(String domainId, String producerId, String kid, Map<String, String> publicKeyJwk,
-			long validFromMs, Long validUntilMs, Long revokedAtMs, String registeredBy) {
+			long validFromMs, Long validUntilMs, Long revokedAtMs, String registeredBy, long createdAtMs) {
 		this.domainId = Objects.requireNonNull(domainId, "domainId");
 		this.producerId = Objects.requireNonNull(producerId, "producerId");
 		this.kid = Objects.requireNonNull(kid, "kid");
@@ -47,6 +49,7 @@ public final class ProducerKey {
 		this.validUntilMs = validUntilMs;
 		this.revokedAtMs = revokedAtMs;
 		this.registeredBy = Objects.requireNonNull(registeredBy, "registeredBy");
+		this.createdAtMs = createdAtMs;
 	}
 
 	public String getDomainId() {
@@ -91,11 +94,18 @@ public final class ProducerKey {
 	}
 
 	/**
+	 * @return the epoch-millisecond instant this key was registered
+	 */
+	public long getCreatedAtMs() {
+		return createdAtMs;
+	}
+
+	/**
 	 * @return an independent copy of this key with {@link #getRevokedAtMs()} replaced
 	 */
 	public ProducerKey withRevokedAt(long newRevokedAtMs) {
 		return new ProducerKey(domainId, producerId, kid, publicKeyJwk, validFromMs, validUntilMs, newRevokedAtMs,
-				registeredBy);
+				registeredBy, createdAtMs);
 	}
 
 	@Override
@@ -119,7 +129,7 @@ public final class ProducerKey {
 	public String toString() {
 		return "ProducerKey [domainId=" + domainId + ", producerId=" + producerId + ", kid=" + kid + ", validFromMs="
 				+ validFromMs + ", validUntilMs=" + validUntilMs + ", revokedAtMs=" + revokedAtMs + ", registeredBy="
-				+ registeredBy + "]";
+				+ registeredBy + ", createdAtMs=" + createdAtMs + "]";
 	}
 
 }

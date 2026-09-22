@@ -72,7 +72,7 @@ class OrmTraceStoreDuplicateDetectionTest {
 		jwk.put("kty", "OKP");
 		jwk.put("crv", "Ed25519");
 		jwk.put("x", "abc");
-		return new ProducerKey(DOMAIN, "producer-1", "kid-1", jwk, 100L, null, null, "client-1");
+		return new ProducerKey(DOMAIN, "producer-1", "kid-1", jwk, 100L, null, null, "client-1", 100L);
 	}
 
 	@Test

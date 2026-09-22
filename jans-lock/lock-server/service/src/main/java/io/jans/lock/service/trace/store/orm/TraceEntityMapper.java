@@ -271,6 +271,7 @@ final class TraceEntityMapper {
 		entity.setValidUntil(key.getValidUntilMs() == null ? null : new Date(key.getValidUntilMs()));
 		entity.setRevokedAt(key.getRevokedAtMs() == null ? null : new Date(key.getRevokedAtMs()));
 		entity.setRegisteredBy(key.getRegisteredBy());
+		entity.setCreationDate(new Date(key.getCreatedAtMs()));
 		return entity;
 	}
 
@@ -279,8 +280,9 @@ final class TraceEntityMapper {
 				: new LinkedHashMap<>(entity.getPublicKeyJwk());
 		Long validUntilMs = entity.getValidUntil() == null ? null : entity.getValidUntil().getTime();
 		Long revokedAtMs = entity.getRevokedAt() == null ? null : entity.getRevokedAt().getTime();
+		long createdAtMs = entity.getCreationDate() == null ? 0L : entity.getCreationDate().getTime();
 		return new ProducerKey(entity.getDomainId(), entity.getProducerId(), entity.getKid(), jwk,
-				nvl(entity.getValidFrom()), validUntilMs, revokedAtMs, entity.getRegisteredBy());
+				nvl(entity.getValidFrom()), validUntilMs, revokedAtMs, entity.getRegisteredBy(), createdAtMs);
 	}
 
 	// -- null-safety helpers --------------------------------------------------------------------

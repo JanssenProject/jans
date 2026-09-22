@@ -132,7 +132,7 @@ public class ProducerKeyRegistry {
 	 *                                  {@code (domainId, producerId, kid)} is already registered
 	 */
 	public ProducerKey register(String domainId, String producerId, String kid, Map<String, String> jwk,
-			long validFromMs, Long validUntilMs, String registeredBy) {
+			long validFromMs, Long validUntilMs, String registeredBy, long nowMs) {
 		Ed25519PublicKeys.fromJwk(jwk);
 
 		if (validUntilMs != null && validUntilMs <= validFromMs) {
@@ -149,7 +149,7 @@ public class ProducerKeyRegistry {
 		}
 
 		ProducerKey key = new ProducerKey(domainId, producerId, kid, jwk, validFromMs, validUntilMs, null,
-				registeredBy);
+				registeredBy, nowMs);
 		try {
 			traceStore.insertProducerKey(key);
 		} catch (DuplicateEntryException ex) {
