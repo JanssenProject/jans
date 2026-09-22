@@ -2,7 +2,10 @@
 set -euo pipefail
 GENERATED_DIRECTORY=$(cd "$1" && pwd)
 RELEASE_TAG=$2
-: "${DEVELOPER_DOCS_TOKEN:?DEVELOPER_DOCS_TOKEN must be set}"
+DRY_RUN=${DRY_RUN:-0}
+if [ "$DRY_RUN" != "1" ]; then
+    : "${DEVELOPER_DOCS_TOKEN:?DEVELOPER_DOCS_TOKEN must be set}"
+fi
 DEVELOPER_DOCS_REPO=${DEVELOPER_DOCS_REPO:-JanssenProject/developer-docs}
 DEVELOPER_DOCS_BRANCH=${DEVELOPER_DOCS_BRANCH:-main}
 DEVELOPER_DOCS_URL=${DEVELOPER_DOCS_URL:-https://github.com/${DEVELOPER_DOCS_REPO}.git}
@@ -77,6 +80,13 @@ if [ "${DOCS_SIGN_COMMITS:-1}" = "1" ]; then
     commit_opts+=(-S)
 fi
 git commit "${commit_opts[@]}" -m "docs: API references for ${RELEASE_TAG}"
+if [ "$DRY_RUN" = "1" ]; then
+    echo "DRY_RUN: not pushing to ${DEVELOPER_DOCS_REPO}. Publishable tree:"
+    git show --stat --oneline HEAD | head -5
+    echo "$(git ls-files | wc -l) files staged for ${DEVELOPER_DOCS_BRANCH}"
+    exit 0
+fi
+
 ASKPASS="$WORK_DIR"/askpass.sh
 cat > "$ASKPASS" <<'ASKPASS_SCRIPT'
 #!/bin/sh

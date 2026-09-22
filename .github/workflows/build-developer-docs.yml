@@ -3,6 +3,15 @@ on:
   release:
     types:
       - published
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/build-developer-docs.yml'
+      - 'automation/docs/generate-javadocs.sh'
+      - 'automation/docs/generate-python-docs.sh'
+      - 'automation/docs/generate-rustdocs.sh'
+      - 'automation/docs/publish-developer-docs.sh'
   workflow_dispatch:
     inputs:
       version:
@@ -19,7 +28,8 @@ jobs:
   publish:
     if: >-
       github.repository == 'JanssenProject/jans' &&
-      ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' ||
+       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
        (github.event_name == 'release' &&
         github.event.action == 'published' &&
         (!github.event.release.draft) &&
@@ -41,7 +51,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REQUESTED_TAG: ${{ github.event.inputs.version || github.event.release.tag_name }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            REQUESTED_TAG=$(gh release list -R "$GITHUB_REPOSITORY" --exclude-drafts --limit 50 \
+              --json tagName --jq '[.[].tagName | select(startswith("v"))] | first')
+            echo "Dry run against the latest release ${REQUESTED_TAG}"
+            echo "tag=${REQUESTED_TAG}" >> "$GITHUB_OUTPUT"
+            echo "GENERATED_DIR=${RUNNER_TEMP}/developer-docs-out" >> "$GITHUB_ENV"
+            exit 0
+          fi
           case "$REQUESTED_TAG" in
             v[0-9]*) ;;
             *)
@@ -79,6 +98,8 @@ jobs:
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+        with:
+          toolchain: stable
 
       - name: Generate javadocs
         env:
@@ -94,6 +115,7 @@ jobs:
 
       - name: Import GPG key
         id: import_gpg
+        if: github.event_name != 'pull_request'
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
         with:
           gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
@@ -105,10 +127,14 @@ jobs:
         run: |
           git config --global user.name "mo-auto"
           git config --global user.email "54212639+mo-auto@users.noreply.github.com"
-          git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+          if [ -n "${{ steps.import_gpg.outputs.keyid }}" ]; then
+            git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+          fi
 
       - name: Publish to developer-docs
         env:
           DEVELOPER_DOCS_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          DRY_RUN: ${{ github.event_name == 'pull_request' && '1' || '0' }}
+          DOCS_SIGN_COMMITS: ${{ github.event_name == 'pull_request' && '0' || '1' }}
         run: bash automation/docs/publish-developer-docs.sh "$GENERATED_DIR" "$RELEASE_TAG"
