@@ -15694,19 +15694,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
-        userCanEdit:
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
+        userCanEdit:
           type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16339,6 +16339,8 @@ components:
           type: boolean
         cookieDomain:
           type: string
+        cookieSameSite:
+          type: string
         enabledOAuthAuditLogging:
           type: boolean
         jmsBrokerURISet:
@@ -16678,8 +16680,6 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16689,6 +16689,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -18706,9 +18708,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object
