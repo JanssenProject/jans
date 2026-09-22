@@ -37,8 +37,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.install_var = 'install_jetty'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
-        if not base.snap:
-            self.register_progess()
+        self.register_progess()
         self.jetty_user_home = '/home/jetty'
         self.jetty_user_home_lib = os.path.join(self.jetty_user_home, 'lib')
 
@@ -166,9 +165,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 jetty_modules_list.append('ee9-cdi-decorate')
             jetty_modules = ','.join(jetty_modules_list)
 
-        if base.snap:
-            Config.templateRenderingDict['jetty_dist'] = self.jetty_base
-
         self.logIt("Preparing %s service base folders" % service_name)
         self.run([paths.cmd_mkdir, '-p', jetty_service_base])
 
@@ -237,15 +233,15 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         except:
             self.logIt("Error rendering service '%s' context xml" % service_name, True)
 
-        if not base.snap:
-            tmpfiles_base = '/usr/lib/tmpfiles.d'
-            if Config.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
-                self.logIt("Creating 'jetty.conf' tmpfiles daemon file")
-                jetty_tmpfiles_src = '%s/jetty.conf.tmpfiles.d' % Config.templateFolder
-                jetty_tmpfiles_dst = '%s/jetty.conf' % tmpfiles_base
-                self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
-                self.chown(jetty_tmpfiles_dst, Config.root_user, Config.root_group)
-                self.run([paths.cmd_chmod, '644', jetty_tmpfiles_dst])
+
+        tmpfiles_base = '/usr/lib/tmpfiles.d'
+        if Config.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
+            self.logIt("Creating 'jetty.conf' tmpfiles daemon file")
+            jetty_tmpfiles_src = '%s/jetty.conf.tmpfiles.d' % Config.templateFolder
+            jetty_tmpfiles_dst = '%s/jetty.conf' % tmpfiles_base
+            self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
+            self.chown(jetty_tmpfiles_dst, Config.root_user, Config.root_group)
+            self.run([paths.cmd_chmod, '644', jetty_tmpfiles_dst])
 
             self.copyFile(self.jetty_bin_sh_fn, os.path.join(Config.jansOptFolder, 'scripts', service_name), backup=False)
 
@@ -254,12 +250,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         # don't send header to server
         inifile = 'http.ini' if self.jetty_dist_string == 'jetty-home' else 'start.ini'
         self.set_jetty_param(service_name, 'jetty.httpConfig.sendServerVersion', 'false', inifile=inifile)
-
-        if base.snap:
-            run_dir = os.path.join(jetty_service_base, 'run')
-            if not os.path.exists(run_dir):
-                self.run([paths.cmd_mkdir, '-p', run_dir])
-
 
         self.update_jetty_env(self.source_files[0][0])
         jetty_service_webapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
