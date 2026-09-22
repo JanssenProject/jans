@@ -125,10 +125,16 @@ batch is dropped rather than retried inline.
 No signing, hashing, or chaining of the delivered events is performed; that is planned as later work, not
 part of this delivery path.
 
+Passkey **registration** outcomes (both successful and failed) are recorded as `fido2_registration`
+events, with `decisionResult` of `ALLOW` or `DENY`, `principalId` set to the username where known, and
+`contextInformation` carrying the relying party ID, origin, credential ID and attestation type on
+success. A failed registration records only the exception's class name, never its message, since some
+registration failure messages embed the username or challenge.
+
 !!! note
-    As of this release, the server only buffers and delivers events — nothing yet populates the buffer.
-    Registration and authentication ceremonies emitting into it is tracked separately and will be
-    reflected here once it lands, so `lockAuditEnabled: true` currently has no observable effect.
+    Passkey **authentication** outcomes do not populate the buffer yet — that is tracked separately and
+    will be reflected here once it lands. Until then, `lockAuditEnabled: true` only surfaces
+    registration events.
 
 ### Per-relying-party policy
 
