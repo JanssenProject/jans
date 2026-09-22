@@ -134,7 +134,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(RETRIEVE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveLicense() {
         GenericResponse licenseResponse = null;
@@ -178,7 +178,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(TRIAL)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response trial() {
         GenericResponse licenseResponse = null;
