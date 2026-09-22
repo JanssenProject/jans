@@ -81,9 +81,9 @@ if [ "${DOCS_SIGN_COMMITS:-1}" = "1" ]; then
 fi
 git commit "${commit_opts[@]}" -m "docs: API references for ${RELEASE_TAG}"
 if [ "$DRY_RUN" = "1" ]; then
-    echo "DRY_RUN: not pushing to ${DEVELOPER_DOCS_REPO}. Publishable tree:"
-    git show --stat --oneline HEAD | head -5
-    echo "$(git ls-files | wc -l) files staged for ${DEVELOPER_DOCS_BRANCH}"
+    echo "DRY_RUN: not pushing to ${DEVELOPER_DOCS_REPO}."
+    echo "Publishable commit: $(git log -1 --format='%h %s')"
+    echo "Files staged for ${DEVELOPER_DOCS_BRANCH}: $(git ls-files | wc -l)"
     exit 0
 fi
 
