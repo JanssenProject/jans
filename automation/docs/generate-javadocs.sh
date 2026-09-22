@@ -11,9 +11,14 @@ else
 fi
 RELEASE_URL="https://github.com/JanssenProject/jans/releases/download/$RELEASE_TAG"
 
-JVM_PROJECTS="agama jans-auth-server jans-casa jans-config-api jans-core jans-cedarling/bindings/cedarling-java jans-fido2 jans-keycloak-link jans-link jans-lock jans-orm jans-scim"
+JVM_PROJECTS="agama jans-auth-server jans-casa jans-config-api jans-core jans-cedarling/bindings/cedarling-java jans-fido2 jans-link jans-lock jans-orm jans-scim"
 for module in $JVM_PROJECTS
  do
+   module_pom="$MAIN_DIRECTORY_LOCATION/$module/pom.xml"
+   if [ ! -f "$module_pom" ]; then
+     echo "Skipping $module: no pom.xml in this revision"
+     continue
+   fi
    echo "Generating javadocs for module: $module and all it's sub-modules"
    if [ "$module" = "jans-cedarling/bindings/cedarling-java" ]; then
     BASE_DIR="$MAIN_DIRECTORY_LOCATION/jans-cedarling/bindings/cedarling-java"
@@ -25,10 +30,22 @@ for module in $JVM_PROJECTS
     wget -q "$RELEASE_URL/cedarling_uniffi-kotlin-${UNIFFI_VERSION}.zip" -O "$ZIP_PATH"
     unzip -q "$ZIP_PATH" -d "$KOTLIN_DIR"
     rm -f "$ZIP_PATH"
-    mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/"$module"/pom.xml dokka:javadoc
+    mvn -q -s "$SETTINGS" -f "$module_pom" dokka:javadoc
     doc_subpaths=("target/dokkaJavadoc")
    else
-    mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/"$module"/pom.xml javadoc:javadoc
+    # FIPS variants depend on their sibling's jar, which javadoc:javadoc never builds.
+    fips_excludes=()
+    while IFS= read -r submodule; do
+      case "$submodule" in
+        *fips*) fips_excludes+=("!$submodule") ;;
+      esac
+    done < <(sed -n 's:.*<module>\(.*\)</module>.*:\1:p' "$module_pom")
+    mvn_args=()
+    if [ ${#fips_excludes[@]} -gt 0 ]; then
+      mvn_args+=(-pl "$(IFS=,; echo "${fips_excludes[*]}")")
+      echo "Excluding FIPS modules: ${fips_excludes[*]}"
+    fi
+    mvn -q -s "$SETTINGS" -f "$module_pom" ${mvn_args[@]+"${mvn_args[@]}"} javadoc:javadoc
     doc_subpaths=("target/reports/apidocs" "target/site/apidocs")
    fi
 
