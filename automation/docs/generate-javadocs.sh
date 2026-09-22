@@ -26,31 +26,27 @@ for module in $JVM_PROJECTS
     unzip -q "$ZIP_PATH" -d "$KOTLIN_DIR"
     rm -f "$ZIP_PATH"
     mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/"$module"/pom.xml dokka:javadoc
-    echo "getting locations where javadocs got generated"
-    doc_path_pattern="*/target/dokkaJavadoc"
-    doc_subpath="target/dokkaJavadoc"
+    doc_subpaths=("target/dokkaJavadoc")
    else
     mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/"$module"/pom.xml javadoc:javadoc
-    doc_path_pattern="*/target/site/apidocs"
-    doc_subpath="target/site/apidocs"
-   fi
-
-   echo "getting locations where javadocs got generated"
-   generated_doc_paths=()
-   while IFS= read -r generated_doc_path; do
-     generated_doc_paths+=("$generated_doc_path")
-   done < <(find "$MAIN_DIRECTORY_LOCATION/$module" -type d -path "$doc_path_pattern" | sed "s|/$doc_subpath||")
-   if [ ${#generated_doc_paths[@]} -eq 0 ]; then
-     echo "ERROR: no javadocs were generated for module '$module'." >&2
-     exit 1
+    doc_subpaths=("target/reports/apidocs" "target/site/apidocs")
    fi
 
    echo "move javadocs from each location to respective documentation site location"
-   for source_path in "${generated_doc_paths[@]}"
+   copied=0
+   for doc_subpath in "${doc_subpaths[@]}"
    do
-     target_path="$OUTPUT_DIRECTORY/${source_path#"$MAIN_DIRECTORY_LOCATION"/}"
-     echo "Copying javadocs from $source_path to $target_path"
-     mkdir -p "$target_path"
-     cp -r "$source_path/$doc_subpath/"* "$target_path/"
+     while IFS= read -r generated_doc_path; do
+       source_path=${generated_doc_path%/"$doc_subpath"}
+       target_path="$OUTPUT_DIRECTORY/${source_path#"$MAIN_DIRECTORY_LOCATION"/}"
+       echo "Copying javadocs from $generated_doc_path to $target_path"
+       mkdir -p "$target_path"
+       cp -r "$generated_doc_path/." "$target_path/"
+       copied=$((copied + 1))
+     done < <(find "$MAIN_DIRECTORY_LOCATION/$module" -type d -path "*/$doc_subpath")
    done
+   if [ "$copied" -eq 0 ]; then
+     echo "ERROR: no javadocs were generated for module '$module'; looked for ${doc_subpaths[*]}." >&2
+     exit 1
+   fi
  done
