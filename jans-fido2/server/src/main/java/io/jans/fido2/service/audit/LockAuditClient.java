@@ -6,8 +6,6 @@
 
 package io.jans.fido2.service.audit;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -66,7 +64,7 @@ public class LockAuditClient {
 		if (StringHelper.isEmpty(endpoint)) {
 			throw new Fido2RuntimeException("lockAuditEndpoint is not configured");
 		}
-		requireSecureEndpoint(endpoint);
+		LockAuditUrlValidator.requireSecure(endpoint, "lockAuditEndpoint");
 
 		String accessToken = lockAuditTokenService.getAccessToken();
 		if (accessToken == null) {
@@ -102,34 +100,5 @@ public class LockAuditClient {
 
 	private static String bulkEndpoint(String endpoint) {
 		return endpoint.endsWith("/") ? endpoint + "log/bulk" : endpoint + "/log/bulk";
-	}
-
-	/**
-	 * The bearer token and audit payload must never go over the wire in clear text (CWE-319).
-	 * {@code http://localhost}/{@code http://127.0.0.1}/{@code http://[::1]} is allowed for local
-	 * development against a Lock Server run without TLS; any other {@code http://} endpoint is
-	 * rejected.
-	 */
-	private static void requireSecureEndpoint(String endpoint) {
-		URI uri;
-		try {
-			uri = new URI(endpoint);
-		} catch (URISyntaxException e) {
-			throw new Fido2RuntimeException("lockAuditEndpoint is not a valid URI: " + endpoint, e);
-		}
-
-		String scheme = uri.getScheme();
-		if ("https".equalsIgnoreCase(scheme)) {
-			return;
-		}
-		if ("http".equalsIgnoreCase(scheme) && isLoopback(uri.getHost())) {
-			return;
-		}
-		throw new Fido2RuntimeException(
-				"lockAuditEndpoint must use https (loopback http permitted for local development): " + endpoint);
-	}
-
-	private static boolean isLoopback(String host) {
-		return "localhost".equalsIgnoreCase(host) || "127.0.0.1".equals(host) || "::1".equals(host);
 	}
 }

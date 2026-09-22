@@ -121,6 +121,10 @@ public class LockAuditTokenService {
 		}
 
 		try {
+			// The discovery response is unauthenticated at this layer, so an insecure issuer would let a
+			// network attacker hand back an arbitrary token_endpoint; reject before the request is even made.
+			LockAuditUrlValidator.requireSecure(issuer, "issuer");
+
 			OpenIdConfigurationClient client = new OpenIdConfigurationClient(issuer + "/.well-known/openid-configuration");
 			client.setExecutor(TIMEOUT_ENGINE);
 			OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
@@ -128,6 +132,12 @@ public class LockAuditTokenService {
 				log.error("Failed to discover OpenID configuration for Lock audit delivery");
 				return null;
 			}
+
+			// The client secret is sent to whatever this resolves to; validate independently of the
+			// issuer check above in case a misconfigured/compromised discovery document names an
+			// insecure endpoint even though the issuer itself is https.
+			LockAuditUrlValidator.requireSecure(response.getTokenEndpoint(), "token_endpoint");
+
 			cachedTokenEndpoint = response.getTokenEndpoint();
 			return cachedTokenEndpoint;
 		} catch (Exception e) {

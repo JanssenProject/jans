@@ -51,6 +51,21 @@ class LockAuditTokenServiceTest {
 		when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
 	}
 
+	/**
+	 * The client secret is sent to whatever the issuer's discovery document resolves to; an insecure
+	 * issuer must be rejected before that request is ever made, not just before the final delivery
+	 * call in {@code LockAuditClient}.
+	 */
+	@Test
+	void getAccessToken_ifIssuerIsPlainHttp_returnsNullWithoutDiscovery() throws Exception {
+		fido2Configuration.setLockAuditClientId("client-id");
+		fido2Configuration.setLockAuditClientPassword("encrypted-secret");
+		when(encryptionService.decrypt("encrypted-secret")).thenReturn("secret");
+		when(appConfiguration.getIssuer()).thenReturn("http://issuer.example.com");
+
+		assertNull(lockAuditTokenService.getAccessToken());
+	}
+
 	@Test
 	void getAccessToken_ifClientIdMissing_returnsNullWithoutContactingTheIssuer() {
 		fido2Configuration.setLockAuditClientPassword("secret");
