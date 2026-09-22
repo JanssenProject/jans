@@ -1749,9 +1749,19 @@ components:
           $ref: "#/components/schemas/RequestedPartyPolicy"
     RequestedPartyPolicy:
       type: object
+      description: >-
+        Assurance policy for a single relying party, overriding the corresponding global setting. Every
+        field is optional; an omitted field falls back to the global value, so a relying party with no
+        policy behaves exactly as it did before per-RP policy existed.
       properties:
         attestationMode:
           type: string
+          description: >-
+            Attestation mode for this relying party. Omitted falls back to the global attestationMode.
+          enum:
+            - disabled
+            - monitor
+            - enforced
     JsonNode:
       type: object
     Fido2MetricsAggregation:
