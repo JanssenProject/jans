@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
+import io.jans.service.EncryptionService;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
@@ -39,6 +40,8 @@ class LockAuditTokenServiceTest {
 	private Logger log;
 	@Mock
 	private AppConfiguration appConfiguration;
+	@Mock
+	private EncryptionService encryptionService;
 
 	private Fido2Configuration fido2Configuration;
 

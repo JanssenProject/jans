@@ -69,7 +69,7 @@ public class Fido2Configuration {
 
 	@DocProperty(description = "Boolean value indicating whether passkey registration and authentication events are delivered to the Lock Server as audit evidence", defaultValue = "false")
 	private boolean lockAuditEnabled = false;
-	@DocProperty(description = "Base URL of the Lock Server audit endpoint (e.g. https://lock.example.com/audit), used to derive /audit/log and /audit/log/bulk")
+	@DocProperty(description = "Base URL of the Lock Server audit endpoint (e.g. https://lock.example.com/audit); /log and /log/bulk are derived from it")
 	private String lockAuditEndpoint;
 	@DocProperty(description = "OAuth2 client ID used to obtain a token (scope https://jans.io/oauth/lock/log.write) for posting Lock Server audit events")
 	private String lockAuditClientId;
