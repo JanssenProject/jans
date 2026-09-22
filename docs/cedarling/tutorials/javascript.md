@@ -131,14 +131,14 @@ the archive itself:
 ```javascript
 import { initFromArchiveBytes } from "@janssenproject/cedarling_wasm";
 
-const token = "<your-bearer-token>";
+const bearer = "<your-bearer-token>";
 const config = {
   CEDARLING_APPLICATION_NAME: "My App",
   // ... other configuration properties
 };
 
 const response = await fetch("https://example.com/policy-store.cjar", {
-  headers: { Authorization: `Bearer ${token}` },
+  headers: { Authorization: `Bearer ${bearer}` },
 });
 const bytes = new Uint8Array(await response.arrayBuffer());
 const cedarling = await initFromArchiveBytes(config, bytes);
