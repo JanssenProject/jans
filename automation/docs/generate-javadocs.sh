@@ -45,7 +45,11 @@ for module in $JVM_PROJECTS
       mvn_args+=(-pl "$(IFS=,; echo "${fips_excludes[*]}")")
       echo "Excluding FIPS modules: ${fips_excludes[*]}"
     fi
-    mvn -q -s "$SETTINGS" -f "$module_pom" ${mvn_args[@]+"${mvn_args[@]}"} javadoc:javadoc
+    # -fae: submodules depending on a sibling's unpublished jar cannot resolve under a
+    # plain javadoc:javadoc, and must not stop the modules that can be documented.
+    if ! mvn -q -fae -s "$SETTINGS" -f "$module_pom" ${mvn_args[@]+"${mvn_args[@]}"} javadoc:javadoc; then
+      echo "WARNING: some submodules of '$module' failed; publishing the javadocs that were generated."
+    fi
     doc_subpaths=("target/reports/apidocs" "target/site/apidocs")
    fi
 
