@@ -9,6 +9,7 @@ package io.jans.fido2.service.app;
 import com.google.common.collect.Lists;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.exception.ConfigurationException;
+import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.shared.LoggerService;
 import io.jans.fido2.service.shared.MetricService;
 import io.jans.fido2.service.metric.Fido2MetricsAggregationScheduler;
@@ -98,6 +99,9 @@ public class AppInitializer {
 
 	@Inject
 	private AbandonedCeremonyTimer abandonedCeremonyTimer;
+
+	@Inject
+	private LockAuditEventCollector lockAuditEventCollector;
 
 	@Inject
 	private QuartzSchedulerManager quartzSchedulerManager;
@@ -198,6 +202,13 @@ public class AppInitializer {
 			log.info("Abandoned ceremony timer initialized");
 		} catch (Exception e) {
 			log.error("Failed to initialize abandoned ceremony timer: {}", e.getMessage(), e);
+		}
+
+		try {
+			lockAuditEventCollector.initTimer();
+			log.info("Lock audit event flush timer initialized");
+		} catch (Exception e) {
+			log.error("Failed to initialize Lock audit event flush timer: {}", e.getMessage(), e);
 		}
 
 		try {
