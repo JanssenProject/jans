@@ -46,7 +46,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REQUESTED_TAG: ${{ github.event.inputs.version || github.event.release.tag_name }}
           EVENT_NAME: ${{ github.event_name }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
         run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] &&
+             [ "$DRY_RUN_INPUT" != "true" ] &&
+             [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "ERROR: publishing runs must be dispatched from main; dispatch with dry_run to test a branch." >&2
+            exit 1
+          fi
           case "$REQUESTED_TAG" in
             v[0-9]*) ;;
             *)
@@ -107,6 +114,7 @@ jobs:
 
       - name: Import GPG key
         id: import_gpg
+        if: ${{ github.event_name == 'release' || !inputs.dry_run }}
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
         with:
           gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
@@ -118,11 +126,14 @@ jobs:
         run: |
           git config --global user.name "mo-auto"
           git config --global user.email "54212639+mo-auto@users.noreply.github.com"
-          git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+          if [ -n "${{ steps.import_gpg.outputs.keyid }}" ]; then
+            git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+          fi
 
       - name: Publish to developer-docs
         env:
-          DEVELOPER_DOCS_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          DEVELOPER_DOCS_TOKEN: ${{ (github.event_name == 'release' || !inputs.dry_run) && secrets.MOAUTO_WORKFLOW_TOKEN || '' }}
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
           DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+          DOCS_SIGN_COMMITS: ${{ (github.event_name == 'release' || !inputs.dry_run) && '1' || '0' }}
         run: bash automation/docs/publish-developer-docs.sh "$GENERATED_DIR" "$RELEASE_TAG"
