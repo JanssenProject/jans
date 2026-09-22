@@ -1,28 +1,44 @@
 # Janssen FIDO2 Configuration
 
-The Janssen Server provides multiple configuration tools to perform these tasks.
+The Janssen Server provides multiple configuration tools to perform these
+tasks.
 
-Use the command line to perform actions from the terminal. Learn how to use Jans CLI [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-cli/index.md) or jump straight to the [Using Command Line](#using-command-line)
+=== "Use Command-line"
 
-Use a fully functional text-based user interface from the terminal. Learn how to use Jans Text-based UI (TUI) [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) or jump straight to the [Using Text-based UI](#using-text-based-ui)
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
 
-Use REST API for programmatic access or invoke via tools like CURL or Postman. Learn how to use Janssen Server Config API [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/config-api/index.md) or Jump straight to the [Using Configuration REST API](#using-configuration-rest-api)
+=== "Use Text-based UI"
 
-## Using Command Line
+    Use a fully functional text-based user interface from the terminal. 
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](../config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
 
-In the Janssen Server, you can deploy and customize the FIDO2 Configuration using the command line. To get the details of Janssen command line operations relevant to FIDO2 Configuration, you can check the operations under `Fido2Configuration` task using the command below:
+=== "Use REST API"
 
-Command
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](../config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
 
-```
+##  Using Command Line
+
+
+In the Janssen Server, you can deploy and customize the FIDO2 Configuration using the
+command line. To get the details of Janssen command line operations relevant to
+FIDO2 Configuration, you can check the operations under `Fido2Configuration` task using the
+command below:
+
+
+```bash title="Command"
 jans cli --info Fido2Configuration
 ```
 
 It will show the details of the available operation-ids for Fido2.
 
-Sample Output
-
-```
+```text title="Sample Output"
 Operation ID: get-properties-fido2
   Description: Gets Jans Authorization Server Fido2 configuration properties
 Operation ID: put-properties-fido2
@@ -36,15 +52,13 @@ To get sample schema type jans cli --schema <schema>, for example jans cli --sch
 
 To get the properties of Janssen Fido2 Configuration, run the command below:
 
-Command
-
-```
+```bash title="Command"
 jans cli --operation-id get-properties-fido2
 ```
 
 It will return the result as below:
 
-```
+```json title="Sample Output" linenums="1"
 {
   "issuer": "https://example.jans.io",
   "baseEndpoint": "https://example.jans.io/jans-fido2/restv1",
@@ -101,6 +115,8 @@ It will return the result as below:
     ]
   }
 }
+
+
 ```
 
 ### Update FIDO2 Configuration Properties
@@ -108,52 +124,48 @@ It will return the result as below:
 To update the configuration follow the steps below.
 
 1. [Get the current configuration](#get-the-current-fido2-configuration) and store it into a file for editing
+2. Edit and update the desired configuration values (ex: change logging level to TRACE) in the file while keeping other properties and values unchanged. Updates must adhere to the `Fido2:AppConfiguration` schema as mentioned [here](#using-command-line). The schema details can be retrieved using the command below. The schema defines what values and datatypes are acceptable for each property value.
+ ```text title="Command"
+ jans cli --schema Fido2:AppConfiguration
+ ```
+3. Use the updated file to send the update to the Janssen Server using the command below
+ ```bash title="Command"
+  jans cli --operation-id put-properties-fido2 --data /tmp/conf-data.json
+ ```
+ Upon successful execution of the update, the Janssen Server responds with updated configuration.you can check the updated value changed ("loggingLevel": "TRACE")
 
-1. Edit and update the desired configuration values (ex: change logging level to TRACE) in the file while keeping other properties and values unchanged. Updates must adhere to the `Fido2:AppConfiguration` schema as mentioned [here](#using-command-line). The schema details can be retrieved using the command below. The schema defines what values and datatypes are acceptable for each property value.
 
-   Command
+##  Using Text-based UI
 
-   ```
-   jans cli --schema Fido2:AppConfiguration
-   ```
-
-1. Use the updated file to send the update to the Janssen Server using the command below
-
-   Command
-
-   ```
-    jans cli --operation-id put-properties-fido2 --data /tmp/conf-data.json
-   ```
-
-   Upon successful execution of the update, the Janssen Server responds with updated configuration.you can check the updated value changed ("loggingLevel": "TRACE")
-
-## Using Text-based UI
-
-In the Janssen Server, you can manage FIDO2 Configuration using the [Text-Based UI](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) also.
+In the Janssen Server, you can manage FIDO2 Configuration using
+the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
 
-Command
-
-```
+```bash title="Command"
 jans tui
 ```
 
-Navigate to `FIDO` section where administrators can update dynamic and static configurations.
+Navigate to `FIDO` section where administrators can update dynamic and static
+configurations.
+
+
+![image](../../../assets/tui-fido2-dynamic-configuration.png)
 
 ## Using Configuration REST API
 
-Janssen Server Configuration REST API exposes relevant endpoints for managing and configuring the FIDO2 Configuration. Endpoint details are published in the [Swagger document](https://docs.jans.io/nightly/janssen-server/reference/openapi/index.md).
+Janssen Server Configuration REST API exposes relevant endpoints for
+managing and configuring the FIDO2 Configuration. Endpoint details
+are published in the [Swagger document](./../../reference/openapi.md).
 
 ## Locating FIDO2 Configuration in Persistence
 
 While editing directly at the database layer is not recommended, developers can locate the configuration entries inside the persistence layer.
 
 ### MySQL / PostgreSQL Layout
-
 Configuration data is held in the `jansAppConf` table:
 
-```
+```mermaid
 erDiagram
     jansAppConf {
         string doc_id PK "dn: ou=jans-fido2,o=jans"
@@ -164,7 +176,6 @@ erDiagram
 ```
 
 ## WebAuthn Endpoints
-
 The FIDO2 WebAuthn endpoints retrieve configuration profiles and the list of RP origins configured:
 
 - Configuration discovery: `https://<FQDN>/.well-known/fido2-configuration`
@@ -172,5 +183,5 @@ The FIDO2 WebAuthn endpoints retrieve configuration profiles and the list of RP 
 
 ## Related Documentation
 
-- [FIDO implementation Guide](https://docs.jans.io/nightly/janssen-server/fido/index.md)
-- [FIDO2 Server Configuration Properties](https://docs.jans.io/nightly/janssen-server/fido/fido2-server-properties-config/index.md)
+* [FIDO implementation Guide](../../fido/README.md)
+* [FIDO2 Server Configuration Properties](../../fido/fido2-server-properties-config.md)

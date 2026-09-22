@@ -33,6 +33,7 @@ In this document, occurrences of `https://oshost` will refer to the root URL whe
 
 Here, the intention is to create a policy that looks like:
 
+
 ```
 @id("alumni_restricted_access")
 permit(
@@ -68,7 +69,7 @@ with the `student` entity type in the schema:
 }
 ```
 
-For this, follow the steps found [here](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy.
+For this, follow the steps found [here](https://docs.jans.io/vreplace-janssen-version/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. 
 
 For the short of time, there is a readily available policy store [here](https://github.com/jgomer2001/CedarlingQuickstart/releases/download/v0.0.2/tarpDemo.cjar).
 
@@ -131,7 +132,7 @@ Issue a request to retrieve the documents added so far:
 curl -n -H 'Content-Type: application/json' -d @query.json https://oshost/student/_search?pretty
 ```
 
-[query.json](https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/query.json) contains a [search request](https://docs.opensearch.org/docs/latest/query-dsl/) that matches all documents in the index.
+[query.json](https://github.com/JanssenProject/jans/raw/refs/heads/main/demos/opensearch-cedarling/query.json) contains a [search request](https://docs.opensearch.org/docs/latest/query-dsl/) that matches all documents in the index. 
 
 Note that in real-world scenarios, indices already exist and policies are built in conformance afterward. Every resource to add in the schema should resemble existing indices structures. More specifically, resources should at least contain the attributes which are needed for policy evaluation.
 
@@ -172,7 +173,7 @@ The `search_pipeline` is required so the response to the query is intercepted an
 
 Once the work to get all of the pieces running is done, making changes to the plugin is rather straightforward: the Java code is in `src` directory and compilation is a matter of issuing `./gradlew clean compileJava`.
 
-In package-based installations, OpenSearch log is found at `/var/log/opensearch/opensearch.log`. To be able to see the logging statements produced by this plugin, add a line like the below to `/etc/opensearch/opensearch.yml` and restart opensearch (`systemctl restart opensearch.service`):
+In package-based installations, OpenSearch log is found at `/var/log/opensearch/opensearch.log`. To be able to see the logging statements produced by this plugin, add a line like the below to `/etc/opensearch/opensearch.yml` and restart opensearch (`systemctl restart opensearch.service`): 
 
 ```
 logger.io.jans.cedarling: trace

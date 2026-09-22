@@ -6,54 +6,58 @@ Go bindings for the Jans Cedarling authorization engine, providing policy-based 
 
 ### Build with dynamic linking
 
-1. Download the appropriate pre-built binary for your platform from the Jans releases page or build it from source as described above.
+1. Download the appropriate pre-built binary for your platform from the Jans releases page or build it from source as
+   described above.
 
-1. Specify linker flags in your main.go file to link against the Cedarling library.
+2. Specify linker flags in your main.go file to link against the Cedarling library.
 
-   ```
-   // #cgo LDFLAGS: -L. -lcedarling_go
-   import "C"
-   ```
+    ```go
+    // #cgo LDFLAGS: -L. -lcedarling_go
+    import "C"
+    ```
 
-   And make sure that the Cedarling library files are located in the same directory as your main package.
+    And make sure that the Cedarling library files are located in the same directory as your main package.
 
-1. Use `go get` to fetch the Cedarling Go package
+3. Use `go get` to fetch the Cedarling Go package
 
-   ```
-   go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
-   ```
+    ```sh
+    go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
+    ```
 
-1. Build your Go application
+4. Build your Go application
 
-   ```
-   go build .
-   ```
+    ```sh
+    go build .
+    ```
 
-1. Run the application
+5. Run the application
 
-   - **Windows**
+    - **Windows**
 
-     - Place the Rust artifacts (`cedarling_go.dll` and `cedarling_go.lib`) alongside the Go binary.
-     - Windows searches libraries in directories below in the following order
-       1. The directory containing your Go executable (recommended location)
-       1. Windows system directories (e.g., `C:\Windows\System32`)
-       1. The `PATH` environment variable directories
+        - Place the Rust artifacts (`cedarling_go.dll` and `cedarling_go.lib`) alongside the Go binary.
+        - Windows searches libraries in directories below in the
+          following order
+            1. The directory containing your Go executable (recommended location)
+            2. Windows system directories (e.g., `C:\Windows\System32`)
+            3. The `PATH` environment variable directories
 
-   - **Linux**
+    - **Linux**
 
-     Add the library directory that contains `libcedarling_go.so` to the `LD_LIBRARY_PATH` environment variable
+        Add the library directory that contains `libcedarling_go.so` to the
+        `LD_LIBRARY_PATH` environment variable
 
-     ```
-     export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
-     ```
+        ```sh
+        export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
+        ```
 
-   - **MacOS**
+    - **MacOS**
 
-     Add the library directory that contains `libcedarling_go.dylib` to the `LD_LIBRARY_PATH` environment variable
+        Add the library directory that contains `libcedarling_go.dylib` to the
+        `LD_LIBRARY_PATH` environment variable
 
-     ```
-     export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH
-     ```
+        ```sh
+        export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH
+        ```
 
 ### Build from Source
 
@@ -68,55 +72,55 @@ Follow these instructions to build from source.
 
 1. Build the Rust library
 
-   Clone the Janssen repository:
+    Clone the Janssen repository:
 
-   ```
-   git clone --depth 1 https://github.com/JanssenProject/jans.git
-   ```
+    ```sh
+    git clone --depth 1 https://github.com/JanssenProject/jans.git
+    ```
 
-   We use `--depth 1` to avoid cloning unnecessary history and minimalize the download size.
+    We use `--depth 1` to avoid cloning unnecessary history and minimalize the download size.
 
-   Navigate to the Cedarling Go bindings directory:
+    Navigate to the Cedarling Go bindings directory:
 
-   ```
-   cd jans/jans-cedarling/bindings/cedarling_go
-   ```
+    ```sh
+    cd jans/jans-cedarling/bindings/cedarling_go
+    ```
 
-   ```
-   cargo build --release -p cedarling_go
-   ```
+    ```sh
+    cargo build --release -p cedarling_go
+    ```
 
-1. Copy the built artifacts to your application directory
+2. Copy the built artifacts to your application directory
 
-   ```
-   # Windows
-   cp target/release/cedarling_go.dll .
-   cp target/release/cedarling_go.dll.lib cedarling_go.lib
+    ```sh
+    # Windows
+    cp target/release/cedarling_go.dll .
+    cp target/release/cedarling_go.dll.lib cedarling_go.lib
 
-   # Linux
-   cp target/release/libcedarling_go.so .
+    # Linux
+    cp target/release/libcedarling_go.so .
 
-   # macOS
-   cp target/release/libcedarling_go.dylib .
-   ```
+    # macOS
+    cp target/release/libcedarling_go.dylib .
+    ```
 
-   or use scripts provided in the repository to automate this process:
+    or use scripts provided in the repository to automate this process:
 
-   ```
-   sh build_and_copy_artifacts.sh
-   ```
+    ```sh
+    sh build_and_copy_artifacts.sh
+    ```
 
-   Run go test to ensure everything is working correctly:
+    Run go test to ensure everything is working correctly:
 
-   ```
-   go test .
-   ```
+    ```sh
+    go test .
+    ```
 
 ## Usage
 
 ### Initialization
 
-```
+```go
 import "github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 
 // Example configuration (populate dynamically in production)
@@ -124,7 +128,7 @@ config := map[string]any{
     "CEDARLING_APPLICATION_NAME":      "MyApp",
     "CEDARLING_LOG_LEVEL":             "INFO",
     "CEDARLING_LOG_TYPE":              "std_out",
-    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
 }
 
 instance, err := cedarling_go.NewCedarling(config)
@@ -135,11 +139,11 @@ if err != nil {
 
 ### Policy Store Sources
 
-Go bindings support all native policy store source types. See [Cedarling Properties](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/index.md) for the full list of configuration options.
+Go bindings support all native policy store source types. See [Cedarling Properties](../reference/cedarling-properties.md) for the full list of configuration options.
 
 **Example configurations:**
 
-```
+```go
 // Load from a directory
 config := map[string]any{
     "CEDARLING_APPLICATION_NAME":      "MyApp",
@@ -162,7 +166,7 @@ config := map[string]any{
 }
 ```
 
-See [Policy Store Formats](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#policy-store-formats) for more details.
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for more details.
 
 ### Authorization
 
@@ -175,7 +179,7 @@ Cedarling provides two main interfaces for performing authorization checks:
 
 **1. Define the resource:**
 
-```
+```go
 resource := cedarling_go.EntityData{
     CedarMapping: cedarling_go.CedarMapping{
         EntityType: "Jans::Issue",
@@ -190,13 +194,13 @@ resource := cedarling_go.EntityData{
 
 **2. Define the action:**
 
-```
+```go
 action := `Jans::Action::"Update"`
 ```
 
 **3. Build the request with tokens:**
 
-```
+```go
 tokens := []cedarling_go.TokenInput{
     {Mapping: "Jans::Access_token", Payload: "your.jwt.token"},
     {Mapping: "Jans::Id_token", Payload: "your.id.token"},
@@ -211,7 +215,7 @@ request := cedarling_go.AuthorizeMultiIssuerRequest{
 
 **4. Authorize:**
 
-```
+```go
 result, err := instance.AuthorizeMultiIssuer(request)
 if err != nil {
     // Handle error
@@ -224,7 +228,7 @@ if result.Decision {
 }
 ```
 
-See [Multi-Issuer Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-multi-issuer/index.md) for more details.
+See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
 
 #### Unsigned Authorization
 
@@ -232,7 +236,7 @@ In unsigned authorization, you pass a Principal directly, without relying on tok
 
 **1. Define the principal:**
 
-```
+```go
 principal := &cedarling_go.EntityData{
     CedarMapping: cedarling_go.CedarMapping{
         EntityType: "Jans::User",
@@ -248,7 +252,7 @@ principal := &cedarling_go.EntityData{
 
 **2. Build the request:**
 
-```
+```go
 request := cedarling_go.RequestUnsigned{
     Principal: principal,
     Action:    `Jans::Action::"Update"`,
@@ -258,7 +262,7 @@ request := cedarling_go.RequestUnsigned{
 
 **3. Authorize:**
 
-```
+```go
 result, err := instance.AuthorizeUnsigned(request)
 if err != nil {
     // Handle error
@@ -276,7 +280,7 @@ Multi-issuer authorization allows you to make authorization decisions based on m
 
 **1. Create tokens with explicit type mappings:**
 
-```
+```go
 tokens := []cedarling_go.TokenInput{
     {
         Mapping: "Jans::Access_Token",
@@ -295,7 +299,7 @@ tokens := []cedarling_go.TokenInput{
 
 **2. Define the resource:**
 
-```
+```go
 resource := cedarling_go.EntityData{
     CedarMapping: cedarling_go.CedarMapping{
         EntityType: "Jans::Document",
@@ -310,7 +314,7 @@ resource := cedarling_go.EntityData{
 
 **3. Build the multi-issuer request:**
 
-```
+```go
 request := cedarling_go.AuthorizeMultiIssuerRequest{
     Tokens:   tokens,
     Action:   `Jans::Action::"Read"`,
@@ -324,7 +328,7 @@ request := cedarling_go.AuthorizeMultiIssuerRequest{
 
 **4. Authorize:**
 
-```
+```go
 result, err := instance.AuthorizeMultiIssuer(request)
 if err != nil {
     // Handle error
@@ -361,7 +365,7 @@ if result.Decision {
 
 **Policy Example for Multi-Issuer:**
 
-```
+```cedar
 // Require token from specific issuer with claim
 permit(
   principal,
@@ -391,7 +395,7 @@ permit(
 
 Each entry in `Results` is a `BatchItemUnsignedResult` — `IsOk()` reports whether Cedar reached a decision; `.Ok` and `.Err` are pointer-nullable to the `AuthorizeResult` / `BatchItemError`. Positional mapping to `Items[i]` is preserved for both branches; the shared `BatchID` (UUIDv7) is stamped on every per-item decision-log entry.
 
-```
+```go
 request := cedarling_go.BatchAuthorizeUnsignedRequest{
     Principal: principal,
     Items: []cedarling_go.BatchItem{
@@ -421,13 +425,13 @@ for i, r := range response.Results {
 }
 ```
 
-For multi-issuer, use `cedarling_go.BatchAuthorizeMultiIssuerRequest{ Tokens: tokens, Items: items }` and call `AuthorizeMultiIssuerBatch`; each `Results[i]` is a `BatchItemMultiIssuerResult` with the same `IsOk()` / `Ok` / `Err` shape. `BatchItem.Context` is optional and serializes as `{}` when omitted. See [Batch Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
+For multi-issuer, use `cedarling_go.BatchAuthorizeMultiIssuerRequest{ Tokens: tokens, Items: items }` and call `AuthorizeMultiIssuerBatch`; each `Results[i]` is a `BatchItemMultiIssuerResult` with the same `IsOk()` / `Ok` / `Err` shape. `BatchItem.Context` is optional and serializes as `{}` when omitted. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
 ### Logging
 
 Retrieve logs stored in memory:
 
-```
+```go
 // Get all logs and clear the buffer
 logs := instance.PopLogs()
 
@@ -444,5 +448,5 @@ Auto-generated documentation is available on [pkg.go.dev](https://pkg.go.dev/git
 
 ## See Also
 
-- [Multi-Issuer Authorization Details](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/index.md)
-- [Policy Store Configuration](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/index.md)
+- [Multi-Issuer Authorization Details](../reference/cedarling-authz.md)
+- [Policy Store Configuration](../reference/cedarling-policy-store.md)

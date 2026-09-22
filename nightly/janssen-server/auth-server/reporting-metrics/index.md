@@ -11,24 +11,22 @@ Authorization Server (AS) supports different metric data:
 
 Statistic data (MAU, Token Issued) is returned from `/jans-auth/restv1/internal/stat` protected endpoint.
 
-Endpoint is protected by authorization token which must contain configurable scope (via `statAuthorizationScope` AS configuration property). Default scope value of `statAuthorizationScope` is `jans_stat` which means that token must contain this scope or otherwise `UNAUTHORIZED` 401 response is returned.
+Endpoint is protected by authorization token which must contain configurable scope (via `statAuthorizationScope` AS configuration property).
+Default scope value of `statAuthorizationScope`  is `jans_stat` which means that token must contain this scope or otherwise `UNAUTHORIZED` 401 response is returned.
 
 **Parameters**
-
 - `month` - specify month in YYYYMM format (e.g. `January 2022` is `202201`)
 - `start-month` - start month for range request
 - `end-month` - end month for range request
-- `format` - if no value is specified than json value is returns. Possible explicit values are `openmetrics` (open metrics format) and `jsonmonth` (all data are flattened for given month)
+- `format` - if no value is specified than json value is returns. Possible explicit values are `openmetrics` (open metrics format) and `jsonmonth` (all data are flattened for given month) 
 
 **Example:** Request single month data (recommended)
-
 ```
 GET /jans-auth/restv1/internal/stat?month=202101
 Authorization: Bearer czZCaGRSa3F0MzpnWDFmQmF0M2JW
 ```
 
 **Example:** request multiple months data
-
 ```
 GET /jans-auth/restv1/internal/stat?month=202012%20202101
 Authorization: Bearer czZCaGRSa3F0MzpnWDFmQmF0M2JW
@@ -37,7 +35,6 @@ Authorization: Bearer czZCaGRSa3F0MzpnWDFmQmF0M2JW
 It is also possible to request data by specifying month ranges via `start-month` and `end-month` parameters.
 
 **Example:** request multiple months by specifying month range (all months from February 2021 till February 2022)
-
 ```
 GET /jans-auth/restv1/internal/stat?start-month=202102&end-month=202202
 Authorization: Bearer czZCaGRSa3F0MzpnWDFmQmF0M2JW
@@ -45,7 +42,8 @@ Authorization: Bearer czZCaGRSa3F0MzpnWDFmQmF0M2JW
 
 If both month range parameters (`start-month` or `end-month` ) and `month` parameter are used at the same time AS will return 400 Bad Request error.
 
-Note that data returned by endpoint is calculated and depending on request can be **expensive** to recalculate each time. Thus data (response) is cached during one hour and is not refreshed during this period.
+Note that data returned by endpoint is calculated and depending on request can be **expensive** to recalculate each time.
+Thus data (response) is cached during one hour and is not refreshed during this period.
 
 **Example:** response when `format=jsonmonth`
 
@@ -71,10 +69,11 @@ Note that data returned by endpoint is calculated and depending on request can b
 
 ## Monthly Active Users
 
-Server uses algorithmic [HLL](https://github.com/aggregateknowledge/java-hll) approach of tracking active users. Means it is not exact number but approximation. MAU can be requested at `/jans-auth/restv1/internal/stat` protected endpoint and is returned per month in `YYYYMM` format for month.
+Server uses algorithmic [HLL](https://github.com/aggregateknowledge/java-hll) approach of tracking active users. Means it is not exact number but approximation.
+MAU can be requested at `/jans-auth/restv1/internal/stat` protected endpoint and is returned per month in `YYYYMM` format for month.
 
-Example: 10 servers with 1000000 unique users with 10M total logins. log2m=15, regwidth = 5
-
+Example:
+10 servers with 1000000 unique users with 10M total logins. log2m=15, regwidth = 5
 ```
 server0 - size: 20483bytes, cardinality: 996522
 server1 - size: 20483bytes, cardinality: 998560
@@ -90,7 +89,6 @@ UNION - size: 20483bytes, cardinality: 10010897
 ```
 
 **Example:** MAU with no `format` parameter in request
-
 ```
 {
   "response": {
@@ -103,7 +101,7 @@ UNION - size: 20483bytes, cardinality: 10010897
           ...
     },
   }
-}
+}      
 ```
 
 ## Health Check
@@ -111,8 +109,7 @@ UNION - size: 20483bytes, cardinality: 10010897
 AS provides `/sys/health-check` endpoint which can be used to perform health check.
 
 Sample reply
-
-```
+```json
 {
   "status": "running", 
   "db_status":"online"
@@ -120,8 +117,7 @@ Sample reply
 ```
 
 Sample curl
-
-```
+```curl
 curl -k https://janssen-host-name/jans-auth/sys/health-check
 ```
 
@@ -131,7 +127,7 @@ Token Issued report shows how many tokens were issued per grant type.
 
 Sample response from `/jans-auth/restv1/internal/stat` protected endpoint.
 
-```
+```json
 {
   "response": {
     "202101": {
@@ -246,14 +242,14 @@ Sample response from `/jans-auth/restv1/internal/stat` protected endpoint.
 
 ## Audit logs
 
-AS supports audit logs. Please check [audit logs page](https://docs.jans.io/nightly/janssen-server/auth-server/logging/audit-logs/index.md)
+AS supports audit logs. Please check [audit logs page](../logging/audit-logs.md)
 
 It can help answer on questions like:
+- successful (`USER_AUTHORIZATION` with `isSuccess=true`) vs failed authentication (`USER_AUTHORIZATION` with `isSuccess=false`) 
+- client registration and update, etc. 
 
-- successful (`USER_AUTHORIZATION` with `isSuccess=true`) vs failed authentication (`USER_AUTHORIZATION` with `isSuccess=false`)
-- client registration and update, etc.
-
-which can help track successful vs failed authenticatio Success vs Failed authentications
+which can help track successful vs failed authenticatio
+Success vs Failed authentications
 
 ### Have questions in the meantime?
 

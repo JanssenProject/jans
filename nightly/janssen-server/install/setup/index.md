@@ -2,58 +2,69 @@
 
 ## Running Setup
 
-After installation, executing `setup.py` will launch the SETUP Command Line by default.
+ After installation, executing `setup.py` will launch the SETUP Command Line by default.
 
-To run the script, run the following command:
+ To run the script, run the following command:
 
-```
-python3 /opt/jans/jans-setup/setup.py
-```
+ ```bash
+ python3 /opt/jans/jans-setup/setup.py
+ ```
 
-A warning will pop up if the free disk space is less than the recommended 40 GB. The installer will check that all dependant packages are installed or not, and if missing it will ask to install. When prompted Y/y at the command prompt will install all required packages.
+ A warning will pop up if the free disk space is less than the recommended 40 GB. The installer will check that all dependant packages are installed or not, and if missing it will ask to install. When prompted Y/y at the command prompt will install all required packages.
 
 1. The installer will detect which operating system, init type, and Apache version are currently on the server.
-1. The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Janssen Authorization Server. Hit Enter to accept the default values.
 
-```
-Enter IP Address:
-Enter hostname:
-Enter your city or locality:
-Enter your state or province two letter code:
-Enter two letter Country Code
-Enter Organization name:
-Enter email address for support at your organization:
-Enter maximum RAM for applications in MB:
-Enter Password for Admin User:
-```
+2. The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Janssen Authorization Server. Hit Enter to accept the default values.
 
-1. Next, pick a persistence mechanism. Choose from MySQL, PGSql that can be installed locally or remotely.
-1. Next, pick which services should be installed for this deployment:
+  ```bash
+  Enter IP Address:
+  Enter hostname:
+  Enter your city or locality:
+  Enter your state or province two letter code:
+  Enter two letter Country Code
+  Enter Organization name:
+  Enter email address for support at your organization:
+  Enter maximum RAM for applications in MB:
+  Enter Password for Admin User:
+  ```
 
-`bash Install Jans Config API? [Yes] : Install Scim Server? [Yes] : Install Fido2 Server? [Yes] : Install Gluu Casa? [No] :`
+3. Next, pick a persistence mechanism. Choose from MySQL, PGSql that can be installed locally or remotely.
 
-1. Finally, review the summary screen that gives an overview of the selections made during the setup process.
+4. Next, pick which services should be installed for this deployment:
 
-Note! After setup completed, you will be prompted to remove setup files (directories `/opt/dist` and `/opt/jans/jans-setup`). If you are not going to do any post-setup operations, type **yes** to remove setup files. If you don't respond in 10 seconds, setup files will be preserved.
+  ```bash
+Install Jans Config API? [Yes] :
+Install Scim Server? [Yes] :
+Install Fido2 Server? [Yes] :
+Install Gluu Casa? [No] :
+  ```
+
+5. Finally, review the summary screen that gives an overview of the selections made during the setup process.
+
+Note! After setup completed, you will be prompted to remove setup files (directories `/opt/dist` and `/opt/jans/jans-setup`).
+If you are not going to do any post-setup operations, type **yes** to remove setup files. If you don't respond in 10 seconds,
+setup files will be preserved.
 
 ### Avoiding common issues
 
 Avoid setup issues by acknowledging the following:
 
 - IP Address: Do not use localhost for either the IP address or hostname.
+
 - Hostname:
-- Make sure to choose the hostname carefully. Changing the hostname after installation is not a simple task.
-- Use a real hostname--this can always be managed via host file entries if adding a DNS entry is too much work for testing.
-- For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Janssen Authorization Server.
+  
+   - Make sure to choose the hostname carefully. Changing the hostname after installation is not a simple task.
+     
+   - Use a real hostname--this can always be managed via host file entries if adding a DNS entry is too much work for testing.
+     
+   - For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Janssen Authorization Server.
 
-Warning
-
-Use a FQDN (fully qualified domain name) as hostname and refrain from using 127.0.0.1 as IP address or usage of private IP is not supported and not recommended.
+!!! Warning
+    Use a FQDN (fully qualified domain name) as hostname and refrain from using 127.0.0.1 as IP address or usage of private IP is not supported and not recommended.
 
 ## Script Command Line Options
 
 To check usage of this script run help command
-
 ```
 python3 /opt/jans/jans-setup/setup.py --help
 ```
@@ -82,7 +93,7 @@ Use this script to configure your Jans Server and to add initial data. If setup.
 Below are the optional arguments:
 
 | Argument                                           | Description                                                                                               |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
 | -h, --help                                         | show this help message and exit                                                                           |
 | --version                                          | show program's version number and exit                                                                    |
 | -c                                                 | Use command line instead of TUI                                                                           |
@@ -92,8 +103,8 @@ Below are the optional arguments:
 | -N, --no-httpd                                     | No apache httpd server                                                                                    |
 | -u                                                 | Update hosts file with IP address / hostname                                                              |
 | -csx                                               | Collect setup properties, save and exit                                                                   |
-| -remote-rdbm                                       | Enables using remote RDBM server                                                                          |
-| -local-rdbm                                        | Enables installing/configuring local RDBM server                                                          |
+| -remote-rdbm {mysql,pgsql}                         | Enables using remote RDBM server                                                                          |
+| -local-rdbm {mysql,pgsql}                          | Enables installing/configuring local RDBM server                                                          |
 | -ip-address IP_ADDRESS                             | Used primarily by Apache httpd for the Listen directive                                                   |
 | -host-name HOST_NAME                               | Internet-facing FQDN that is used to generate certificates and metadata.                                  |
 | -org-name ORG_NAME                                 | Organization name field used for generating X.509 certificates                                            |

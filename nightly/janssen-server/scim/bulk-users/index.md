@@ -14,14 +14,14 @@ The bulk endpoint is accessible at `https://<your-server-mame>/jans-scim/restv1/
 
 A bulk is structured as a JSON document with two required properties:
 
-- *schemas*: A list with the single string value `urn:ietf:params:scim:api:messages:2.0:BulkRequest`
-- *Operations*: A JSON array describing every operation to perform in the order provided
+- _schemas_: A list with the single string value `urn:ietf:params:scim:api:messages:2.0:BulkRequest`
+- _Operations_: A JSON array describing every operation to perform in the order provided
 
 An operation is a JSON document with the following:
 
-- *method*: The HTTP verb of the operation to perform
-- *path*: The path of the actual endpoint to hit relative to the SCIM root. For instance, to create a user, it will be `/Users`
-- *data*: The payload of the actual operation. This is required only for POST, PUT, or PATCH
+- _method_: The HTTP verb of the operation to perform
+- _path_: The path of the actual endpoint to hit relative to the SCIM root. For instance, to create a user, it will be `/Users`
+- _data_: The payload of the actual operation. This is required only for POST, PUT, or PATCH
 
 ### Payload example for adding users
 
@@ -73,15 +73,15 @@ The above payload illustrates how to insert three users with different details e
 
 The result of a bulk operation is likewise retrieved in JSON object format:
 
-- *schemas*: A list with the single string value `urn:ietf:params:scim:api:messages:2.0:BulkResponse`
-- *Operations*: A JSON array describing the response of every operation performed whether failed or successful
+- _schemas_: A list with the single string value `urn:ietf:params:scim:api:messages:2.0:BulkResponse`
+- _Operations_: A JSON array describing the response of every operation performed whether failed or successful
 
 An operation is a JSON document with the following:
 
-- *method*: The HTTP verb of the operation performed
-- *location*: The resource endpoint URL. For example, in the case of user creation, this will be the URL where the user's details can be retrieved
-- *status*: A string value reporting the HTTP response code obtained for the given operation
-- *response*: A JSON object only present when the status does not belong to the 2XX (success) family. It contains details of the error that occurred
+- _method_: The HTTP verb of the operation performed
+- _location_: The resource endpoint URL. For example, in the case of user creation, this will be the URL where the user's details can be retrieved
+- _status_: A string value reporting the HTTP response code obtained for the given operation
+- _response_: A JSON object only present when the status does not belong to the 2XX (success) family. It contains details of the error that occurred
 
 ### Response example
 
@@ -118,5 +118,5 @@ The following contains a potential response obtained for the bulk request mentio
 
 SCIM Jans server has a couple of configuration properties related to bulk operations:
 
-- *bulkMaxOperations*: The maximum number of operations per bulk request. Default is 30
-- *bulkMaxPayloadSize*: The maximum payload size in bytes. Default value is 3072000
+- _bulkMaxOperations_: The maximum number of operations per bulk request. Default is 30
+- _bulkMaxPayloadSize_:  The maximum payload size in bytes. Default value is 3072000

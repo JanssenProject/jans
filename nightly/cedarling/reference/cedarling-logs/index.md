@@ -4,31 +4,33 @@
 
 There are three different log records produced by the Cedarling:
 
-- `Decision` - The result and diagnostics of an authz decision
-- `System` - Startup, debug and other Cedarling messages not related to authz
-- `Metric`- Performance and usage data
+* `Decision` - The result and diagnostics of an authz decision
+* `System` - Startup, debug and other Cedarling messages not related to authz
+* `Metric`- Performance and usage data
 
-Logging execution model
-
+!!! note "Logging execution model"
 All platforms (native, WASM, and tests) perform JSON serialization and writing synchronously on the calling thread. Thread-safety for output streams is provided by Mutex and Send+Sync traits, not background-thread serialization. Regardless of the runtime, the log contents and retrieval APIs remain the same.
 
-The Cedarling has four logging options, which are configurable via the `CEDARLING_LOG_TYPE` bootstrap property:
+The Cedarling has four logging options, which are configurable via the `CEDARLING_LOG_TYPE`
+bootstrap property:
 
-- `off` - no logging
-- `memory` - logs stored in Cedarling in-memory KV store, fetched by client via logging interface. This is ideal for batching logs without impeding authz performance
-- `std_out` - write logs synchronously to std_out
-- `lock` - periodically POST logs to Jans Lock Server `/audit` endpoint for central archiving.
+* `off` - no logging
+* `memory` - logs stored in Cedarling in-memory KV store, fetched by client via logging interface. This
+  is ideal for batching logs without impeding authz performance
+* `std_out` - write logs synchronously to std_out
+* `lock` - periodically POST logs to Jans Lock Server `/audit` endpoint for central archiving.
+
 
 ### System Log Levels
 
 Set with property `CEDARLING_LOG_LEVEL`
 
-- `FATAL`: Indicates very severe error events that will likely lead the application to abort. These are the most critical issues.
-- `ERROR`: Designates error events that might still allow the application to continue running but indicate a significant problem.
-- `WARN`: Designates potentially harmful situations that should be addressed to prevent future issues.
-- `INFO`: Provides informational messages that highlight the progress of the application at a coarse-grained level.
-- `DEBUG`: Designates fine-grained informational events useful for debugging the application.
-- `TRACE`: Provides finer-grained informational events than DEBUG. It is often used for detailed tracing of program execution.
+* `FATAL`: Indicates very severe error events that will likely lead the application to abort. These are the most critical issues.
+* `ERROR`: Designates error events that might still allow the application to continue running but indicate a significant problem.
+* `WARN`: Designates potentially harmful situations that should be addressed to prevent future issues.
+* `INFO`: Provides informational messages that highlight the progress of the application at a coarse-grained level.
+* `DEBUG`: Designates fine-grained informational events useful for debugging the application.
+* `TRACE`: Provides finer-grained informational events than DEBUG. It is often used for detailed tracing of program execution.
 
 ## Memory Log interface
 
@@ -38,7 +40,7 @@ Tags are used to filter logs. It can be `log_kind` and `log_level` values from l
 
 You can obtain the `request_id` from the result structure of the `authorize_unsigned` or `authorize_multi_issuer` method call.
 
-```
+```rust
 /// Log Storage
 /// interface for getting log entries from the storage
 pub trait LogStorage {
@@ -69,7 +71,10 @@ pub trait LogStorage {
 
 ## Jans Lock Server
 
-In enterprise deployments, [Janssen Lock Server](https://docs.jans.io/nightly/janssen-server/lock/lock-server/index.md) collects Cedarling logs and can stream to a database or S3 bucket. The Cedarling decision logs provide compliance evidence of usage of the domain's externalized policies. The logs are also useful for forensic analysis to show everything the attacker attempted, both allowed and denied.
+In enterprise deployments, [Janssen Lock Server](../../janssen-server/lock/lock-server.md) collects Cedarling
+logs and can stream to a database or S3 bucket. The Cedarling decision logs provide compliance
+evidence of usage of the domain's externalized policies. The logs are also useful for forensic
+analysis to show everything the attacker attempted, both allowed and denied.
 
 ## Sample logs
 
@@ -77,7 +82,7 @@ The JSON in this document is formatted for readability but is not prettified in 
 
 ### Startup Message
 
-```
+```json
 {
     "id": "0193b8a8-efc0-77ce-bd90-4a62a2998462",
     "timestamp": "2024-12-12T04:18:19.456Z",
@@ -105,7 +110,7 @@ The JSON in this document is formatted for readability but is not prettified in 
 
 In the unsigned flow, `principal` contains the Cedar entity type names of each principal. The `tokens` field is omitted since no JWTs are involved.
 
-```
+```json
 {
     "id": "019394db-f52b-7b06-88b8-a288670a32c1",
     "request_id": "019394db-f52b-7b06-88b8-a288670a32c2",
@@ -137,7 +142,7 @@ In the unsigned flow, `principal` contains the Cedar entity type names of each p
 
 In the multi-issuer flow, `principal` is empty (no principal entities are created). The `tokens` field contains JWT claim information for each validated token.
 
-```
+```json
 {
     "id": "019394db-f52b-7b06-88b8-a288670a32c3",
     "request_id": "019394db-f52b-7b06-88b8-a288670a32c4",
@@ -170,22 +175,22 @@ In the multi-issuer flow, `principal` is empty (no principal entities are create
 
 #### Field Definitions
 
-- `id`: unique identifier for this log entry
-- `request_id`: unique identifier for the decision request
-- `timestamp`: Derived if possible from the system or context--may be empty in cases where WASM can't access the system clock, and the time wasn't sent in the context.
-- `log_kind`: type of log entry (`Decision`)
-- `pdp_id`: unique identifier for the Cedarling
-- `policystore_id`: What policystore this Cedarling instance is using
-- `policystore_version`: What version of the policystore the Cedarling is using
-- `principal`: List of principal entity type names used in the authorization request (e.g. `["Jans::User"]` for unsigned; empty `[]` for multi-issuer)
-- `diagnostics`: Summary of policies that contributed to the decision and any evaluation errors
-- `lock_client_id`: If this Cedarling has registered with a Lock Server, what is the client_id it received (omitted if not registered)
-- `action`: From the request
-- `resource`: From the request
-- `decision`: `ALLOW` or `DENY`
-- `tokens`: Dictionary with the token type and claims which should be included in the log (omitted if empty)
-- `decision_time_micro_sec`: how long the decision took
-- `pushed_data`: Information about pushed data injected into the authorization context (omitted if none)
+* `id`: unique identifier for this log entry
+* `request_id`: unique identifier for the decision request
+* `timestamp`: Derived if possible from the system or context--may be empty in cases where WASM can't access the system clock, and the time wasn't sent in the context.
+* `log_kind`: type of log entry (`Decision`)
+* `pdp_id`: unique identifier for the Cedarling
+* `policystore_id`: What policystore this Cedarling instance is using
+* `policystore_version`: What version of the policystore the Cedarling is using
+* `principal`: List of principal entity type names used in the authorization request (e.g. `["Jans::User"]` for unsigned; empty `[]` for multi-issuer)
+* `diagnostics`: Summary of policies that contributed to the decision and any evaluation errors
+* `lock_client_id`: If this Cedarling has registered with a Lock Server, what is the client_id it received (omitted if not registered)
+* `action`: From the request
+* `resource`: From the request
+* `decision`: `ALLOW` or `DENY`
+* `tokens`: Dictionary with the token type and claims which should be included in the log (omitted if empty)
+* `decision_time_micro_sec`: how long the decision took
+* `pushed_data`: Information about pushed data injected into the authorization context (omitted if none)
 
 Whenever a request ends with a `DENY` and Cedar diagnostics contain errors, Cedarling also emits a separate `ERROR`-level Decision log that summarizes those diagnostics. This makes policy failures immediately visible even if the full debug log is filtered out.
 
@@ -195,7 +200,7 @@ The result of the authorization is quite extensive because we log all `cedar-pol
 
 Below is an example from `authorize_unsigned` with a single User principal:
 
-```
+```json
 {
     "id": "01937015-4649-7aad-8df8-4976e4bd8565",
     "request_id": "01937015-4649-7aad-8df8-4976e4bd8566",

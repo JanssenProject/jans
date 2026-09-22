@@ -1,24 +1,41 @@
 # Custom Assets Configuration
 
-The Janssen Server provides multiple configuration tools to configure custom assets.
+The Janssen Server provides multiple configuration tools to configure custom
+assets.
 
-Use the command line to perform actions from the terminal. Learn how to use Jans CLI [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-cli/index.md) or jump straight to the [Using Command Line](#using-the-command-line)
+=== "Use Command-line"
 
-Use a fully functional text-based user interface from the terminal. Learn how to use Jans Text-based UI (TUI) [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) or jump straight to the [Using Text-based UI](#using-text-based-ui)
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](../config-guide/config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-the-command-line)
 
-Use REST API for programmatic access or invoke via tools like CURL or Postman. Learn how to use Janssen Server Config API [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/config-api/index.md) or Jump straight to the [Using Configuration REST API](#using-configuration-rest-api)
+=== "Use Text-based UI"
 
-## Using The Command Line
+    Use a fully functional text-based user interface from the terminal. 
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](../config-guide/config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
 
-In the Janssen Server, you can deploy custom assets using the command line. To get the details of Janssen command line operations relevant to the custom assets, check the operations under the `JansAssets` task using the command below.
+=== "Use REST API"
 
-Command
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](../config-guide/config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
 
-```
+##  Using The Command Line
+
+
+In the Janssen Server, you can deploy custom assets using the
+command line. To get the details of Janssen command line operations relevant to
+the custom assets, check the operations under the `JansAssets` task using the
+command below.
+
+```bash title="Command"
 jans cli --info JansAssets
 ```
 
-```
+```test title="Sample Output" linenums="1"
 Operation ID: get-asset-by-inum
  Description: Gets an asset by inum - unique identifier
  Parameters:
@@ -57,15 +74,13 @@ To get sample schema type jans cli --schema-sample <schema>, for example jans cl
 
 ### Get All Current Custom Assets
 
-Use the operation ID `get-all-assets` to get all the currently configured custom assets on the Janssen Server.
+Use the operation ID `get-all-assets` to get all the currently configured
+custom assets on the Janssen Server.
 
-Command
-
-```
+```bash title="Command"
 jans cli --operation-id get-all-assets
 ```
-
-```
+```json title="Sample Output" linenums="1"
 {
   "start": 0,
   "totalEntriesCount": 3,
@@ -113,22 +128,22 @@ jans cli --operation-id get-all-assets
     }
   ]
 }
+
 ```
 
 ### Get Custom Asset By inum
 
-With `get-asset-by-inum` operation-id, we can get any specific asset matched with `inum`. If we know the `inum`, we can simply use the below command:
+With `get-asset-by-inum` operation-id, we can get any specific asset matched
+with `inum`. If we know the `inum`, we can simply use the below command:
 
-Command
-
-```
+```bash title="Command"
 jans cli --operation-id get-asset-by-inum \
 --url-suffix inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
 ```
-
 It returns the details as below:
 
-```
+
+```json title="Sample Output" linenums="1"
 {
   "dn": "inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans",
   "inum": "61edc29d-45f8-4ab9-8c9a-7b39e4cbe440",
@@ -145,20 +160,19 @@ It returns the details as below:
 }
 ```
 
+
 ### Get Custom Asset By Name
 
-With `get-asset-by-name` operation-id, we can get any specific asset matched with `name`. If we know the `name`, we can simply use the below command:
+With `get-asset-by-name` operation-id, we can get any specific asset matched with `name`.
+ If we know the `name`, we can simply use the below command:
 
-Command
-
-```
+```bash title="Command"
 jans cli --operation-id get-asset-by-name \
 --url-suffix name:p1.properties
 ```
-
 It returns the details as below:
 
-```
+```json title="Sample Output" linenums="1"
 {
   "start": 0,
   "totalEntriesCount": 1,
@@ -182,15 +196,15 @@ It returns the details as below:
 
 ### Get Services
 
-Get the list of Janssen Server services that support custom assets by performing `get-asset-services` operation.
 
-Command
+Get the list of Janssen Server services that support custom assets
+by performing `get-asset-services` operation.
 
-```
+```bash title="Command"
 jans cli --operation-id get-asset-services
 ```
 
-```
+```text title="Sample Output" linenums="1"
 [
  "jans-auth",
  "jans-casa",
@@ -203,17 +217,17 @@ jans cli --operation-id get-asset-services
 ]
 ```
 
+
 ### Get Valid Asset Types
 
-Get the asset types of your Janssen Server by performing `get-asset-types` operation.
+Get the asset types of your Janssen Server by performing `get-asset-types`
+operation.
 
-Command
-
-```
+```bash title="Command"
 jans cli --operation-id get-asset-types
 ```
 
-```
+```text title="Sample Output" linenums="1"
 [
  "properties",
  "jar",
@@ -229,27 +243,30 @@ jans cli --operation-id get-asset-types
 
 ### Add New Custom Asset
 
-To create a new asset, we can use `post-new-asset` operation id. As shown in the [output](#using-the-command-line) for `--info` command, the `post-new-asset` operation requires data to be sent according to `AssetForm` schema.
+To create a new asset, we can use `post-new-asset` operation id. As shown in
+the [output](#using-the-command-line) for `--info` command, the `post-new-asset`
+operation requires data to be sent according to `AssetForm` schema.
+
 
 To see the schema, use the command below:
 
-Command
-
-```
+```bash title="Command"
 jans cli --schema AssetForm
 ```
 
-For better understanding, the Janssen Server also provides a sample of data to be sent to the server. This sample conforms to the schema above. Use the command below to get the sample.
+For better understanding, the Janssen Server also provides a sample of data to
+be sent to the server. This sample conforms to the schema above. Use the command
+below to get the sample.
 
-Command
-
-```
+```bash title="Command"
 jans cli --schema-sample AssetForm
 ```
 
-Using the schema and the example above, we have added below data to the file `/tmp/add-asset.json`. Example below will load `p3.properties` file as a custom asset to the `jans-auth` service.
+Using the schema and the example above, we have added below data to the
+file `/tmp/add-asset.json`. Example below will load `p3.properties` file as
+a custom asset to the `jans-auth` service.
 
-```
+```json title="Input" linenums="1"
 {
   "document": {
     "fileName": "p3.properties",
@@ -263,21 +280,20 @@ Using the schema and the example above, we have added below data to the file `/t
   "assetFile": "/tmp/p3.properties"
 }
 ```
-
 Now let's post this Assert to the Janssen Server to be added to the existing set:
 
-Command
-
-```
+```bash title="Command"
  jans cli --operation-id post-new-asset \
  --data /tmp/add-asset.json
 ```
 
 ### Update Existing Custom Assets
 
-Use the `put-asset` operation to update an existing asset. This operation uses same schema as [add new asset](#add-new-custom-asset) operation. For example, assuming that there is an existing asset as show below:
+Use the `put-asset` operation to update an existing asset. This operation uses
+same schema as [add new asset](#add-new-custom-asset) operation. For example,
+assuming that there is an existing asset as show below:
 
-```
+```json title="Existing Asset" linenums="1"
 {
   "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
   "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
@@ -294,13 +310,15 @@ Use the `put-asset` operation to update an existing asset. This operation uses s
 }
 ```
 
-Note
+!!! Note
 
-`assetFile` attribute is optional for update operation as there may be scenario where only metadata of an asset is to be updated.
+    `assetFile` attribute is optional for update operation as there may be scenario where only metadata of an asset is to be updated.
 
-Now to update level of this asset to 6, create a text file with following content in it. Let's name this text file as `/tmp/update-asset.json`
 
-```
+Now to update level of this asset to 6, create a text file with following
+content in it. Let's name this text file as `/tmp/update-asset.json`
+
+```json title="Input" linenums="1"
 {
   "document": {
       "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
@@ -321,16 +339,14 @@ Now to update level of this asset to 6, create a text file with following conten
 
 Now use the command below to update the asset with new value for level.
 
-Sample Command
-
-```
+```bash title="Sample Command"
 jans cli --operation-id put-asset \
 --data /tmp/update-asset.json
 ```
 
 Upon successful execution, this command will return with updated asset values.
 
-```
+```json title="Return values" linenums="1"
 {
   "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
   "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
@@ -351,22 +367,20 @@ Upon successful execution, this command will return with updated asset values.
 
 You can delete any custom asset by its `inum` value.
 
-Command
-
-```
+```bash title="Command"
 jans cli --operation-id delete-asset \
 --url-suffix inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
 ```
 
 ## Using Text-based UI
 
-In Janssen, You can deploy custom asset using the [Text-Based UI](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) also.
+
+In Janssen, You can deploy custom asset using
+the [Text-Based UI](./config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
 
-Command
-
-```
+```bash title="Command"
 jans tui
 ```
 
@@ -374,12 +388,24 @@ jans tui
 
 Navigate to `Assets` tab to open the Assets screen as shown in the image below.
 
-- To get the list of currently added Assets, bring the control to the Search box (using the tab key), and press Enter. Type the search string to search for Asset with matching `inum`, or `File Name` or `Description`
+* To get the list of currently added Assets, bring the control to the Search 
+box (using the tab key), and press Enter. Type the search string to search 
+for Asset with matching `inum`, or `File Name` or `Description`
 
-- Use the `Add Asset` button to create a new asset.
 
-- From the screen below, select the custom asset that needs to be uploaded and select the Janssen Server service to which the asset will be uploaded.
+![Image](../../assets/tui-asset-screen.png)
+
+
+* Use the `Add Asset` button to create a new asset. 
+* From the screen below, select the custom asset that needs to be uploaded
+and select the Janssen Server service to which the asset will be uploaded.
+
+![Image](../../assets/tui-asset-data.png)
+
+
 
 ## Using Configuration REST API
 
-Janssen Server Configuration REST API exposes relevant endpoints for managing and configuring the custom assets. Endpoint details are published in the [Swagger document](https://docs.jans.io/nightly/janssen-server/reference/openapi/index.md).
+Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring the custom assets. Endpoint details are published in the [Swagger
+document](./../reference/openapi.md).

@@ -15,14 +15,14 @@
 
 GitHub Packages requires authentication even for public packages. Store your credentials in `~/.gradle/gradle.properties` (outside the project — never commit this file):
 
-```
+```properties
 gpr.user=YOUR_GITHUB_USERNAME
 gpr.token=YOUR_GITHUB_PAT
 ```
 
 Then in your `build.gradle.kts`:
 
-```
+```kotlin
 repositories {
     mavenCentral()
     maven {
@@ -49,15 +49,17 @@ After editing `build.gradle.kts`, click **Load Gradle Changes** in IntelliJ (or 
 
 ### Building from Source
 
-The same Cedarling java binding dependency is used here. Refer to the following [guide](https://docs.jans.io/nightly/cedarling/developer/cedarling-kotlin/#building-from-source) for steps to build the Java binding from source.
+The same Cedarling java binding dependency is used here. Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for steps to build the Java binding from source.
 
-Note
+!!! info "Note"
+    
+    The Cedarling dependency available in the GitHub Maven Registry works only in a 
+    Linux environment.
 
-The Cedarling dependency available in the GitHub Maven Registry works only in a Linux environment.
+    Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for instructions on building the Java bindings to work 
+    on macOS or Windows.
 
-Refer to the following [guide](https://docs.jans.io/nightly/cedarling/developer/cedarling-kotlin/#building-from-source) for instructions on building the Java bindings to work on macOS or Windows.
-
-______________________________________________________________________
+---
 
 ## Usage
 
@@ -65,7 +67,7 @@ ______________________________________________________________________
 
 Initialize Cedarling with a JSON bootstrap configuration before making any authorization calls.
 
-```
+```kotlin
 import uniffi.cedarling_uniffi.*
 import io.jans.cedarling.binding.wrapper.CedarlingAdapter
 
@@ -94,15 +96,15 @@ val adapter = try {
 }
 ```
 
-______________________________________________________________________
+---
 
 ### Policy Store Sources
 
-Java bindings support all native policy store source types. See [Cedarling Properties](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/index.md) for the full list of configuration options and [Policy Store Formats](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#policy-store-formats) for format details.
+Java bindings support all native policy store source types. See [Cedarling Properties](../reference/cedarling-properties.md) for the full list of configuration options and [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for format details.
 
 **Example configurations:**
 
-```
+```kotlin
 // Load from a directory
 val bootstrapJson = """
     {
@@ -128,9 +130,9 @@ val bootstrapJson = """
 """.trimIndent()
 ```
 
-See [Policy Store Formats](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#policy-store-formats) for more details.
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for more details.
 
-______________________________________________________________________
+---
 
 ### Authorization
 
@@ -139,7 +141,7 @@ Cedarling provides authorization interfaces for evaluating access requests based
 - [**Token-Based Authorization**](#token-based-authorization-multi-issuer) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly without JWTs. This is useful when you need to authorize based on internal application data.
 
-______________________________________________________________________
+---
 
 #### Token-Based Authorization (Multi-Issuer)
 
@@ -149,7 +151,7 @@ For token-based authorization, use `authorizeMultiIssuer` which processes JWT to
 
 Tokens are provided as a `Map<String, String>` with the token type as key and its JWT value:
 
-```
+```kotlin
 val tokens = mapOf(
     "Jans::Access_token"   to "<access_token_jwt>",
     "Jans::id_token"       to "<id_token_jwt>",
@@ -159,7 +161,7 @@ val tokens = mapOf(
 
 **2. Define the resource**
 
-```
+```kotlin
 import org.json.JSONObject
 
 val resource = JSONObject("""
@@ -180,19 +182,19 @@ val resource = JSONObject("""
 
 **3. Define the action**
 
-```
+```kotlin
 val action = """Jans::Action::"Read""""
 ```
 
 **4. Define context (optional)**
 
-```
+```kotlin
 val context = JSONObject("{}")
 ```
 
 **5. Authorize**
 
-```
+```kotlin
 val result = adapter.authorizeMultiIssuer(tokens, action, resource, context)
 
 if (result.decision) {
@@ -202,9 +204,9 @@ if (result.decision) {
 }
 ```
 
-See [Multi-Issuer Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-multi-issuer/index.md) for more details.
+See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
 
-______________________________________________________________________
+---
 
 #### Unsigned Authorization
 
@@ -212,9 +214,9 @@ For unsigned authorization, use `authorizeUnsigned` (JSON principal string, null
 
 **1. Define the resource**
 
-This represents the *resource* that the action will be performed on, such as a protected API endpoint or file.
+This represents the _resource_ that the action will be performed on, such as a protected API endpoint or file.
 
-```
+```kotlin
 val resource = JSONObject().apply {
     put("cedar_entity_mapping", JSONObject()
         .put("entity_type", "Jans::Issue")
@@ -226,23 +228,23 @@ val resource = JSONObject().apply {
 
 **2. Define the action**
 
-An *action* represents what the principal is trying to do to the resource — for example, read, write, or delete.
+An _action_ represents what the principal is trying to do to the resource — for example, read, write, or delete.
 
-```
+```kotlin
 val action = """Jans::Action::"Update""""
 ```
 
 **3. Define context**
 
-The *context* represents additional data that may affect the authorization decision.
+The _context_ represents additional data that may affect the authorization decision.
 
-```
+```kotlin
 val context = JSONObject()
 ```
 
 **4. Define the principal (optional)**
 
-```
+```kotlin
 val principal = EntityData.Companion.fromJson(
     JSONObject()
         .put("cedar_entity_mapping", JSONObject()
@@ -257,7 +259,7 @@ val principal = EntityData.Companion.fromJson(
 
 **5. Authorize**
 
-```
+```kotlin
 val result = adapter.authorizeUnsignedEntity(principal, action, resource, context)
 
 if (result.decision) {
@@ -267,7 +269,7 @@ if (result.decision) {
 }
 ```
 
-______________________________________________________________________
+---
 
 #### Batch Authorization
 
@@ -275,7 +277,7 @@ Each entry in `results` is a `BatchItemUnsignedOutcome` sealed class — pattern
 
 Use `adapter.batchItemFromJson(resource, action, context)` to build items without importing UniFFI types, then call `authorizeUnsignedBatch` (JSON principal, nullable) or `authorizeUnsignedBatchEntity` (`EntityData` principal):
 
-```
+```kotlin
 val items = listOf(
     adapter.batchItemFromJson(doc1Resource, """Jans::Action::"View"""", JSONObject()),
     adapter.batchItemFromJson(doc2Resource, """Jans::Action::"View"""", JSONObject()),
@@ -294,15 +296,15 @@ response.results.forEachIndexed { i, r ->
 }
 ```
 
-For multi-issuer, call `adapter.authorizeMultiIssuerBatch(tokens, items)` (accepts either `List<TokenInput>` or a `Map<String, String>` of mapping → JWT); each `results[i]` is a `BatchItemMultiIssuerOutcome`. Pass `null` for `context` on `batchItemFromJson` to default to `{}`. See [Batch Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
+For multi-issuer, call `adapter.authorizeMultiIssuerBatch(tokens, items)` (accepts either `List<TokenInput>` or a `Map<String, String>` of mapping → JWT); each `results[i]` is a `BatchItemMultiIssuerOutcome`. Pass `null` for `context` on `batchItemFromJson` to default to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
-______________________________________________________________________
+---
 
 ### Logging
 
 Retrieve logs using the `popLogs` function and related helpers.
 
-```
+```kotlin
 // Get all logs and clear the buffer
 val logs: List<String> = adapter.popLogs()
 
@@ -316,7 +318,7 @@ val logEntry: String = adapter.getLogById(logIds.first())
 val systemLogs = adapter.getLogsByTag("System")
 ```
 
-______________________________________________________________________
+---
 
 ## Defined API
 
@@ -324,6 +326,6 @@ Defined APIs are listed in the [Cedarling Java API documentation](https://jansse
 
 ## See Also
 
-- [Cedarling TBAC quickstart](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac)
-- [Cedarling Unsigned quickstart](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-application-asserted-identity)
-- [Getting Started with Cedarling Java](https://docs.jans.io/nightly/cedarling/tutorials/java/index.md)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
+- [Getting Started with Cedarling Java](./java.md)

@@ -1,27 +1,42 @@
 # DPoP (Demonstrating Proof-of-Possession at the Application Layer)
 
-Janssen Server supports `DPoP` (Demonstrating Proof-of-Possession) at the Application Layer, which is OAuth 2.0 feature to enhance the security of resources protected by access tokens.
+Janssen Server supports `DPoP` (Demonstrating Proof-of-Possession) at the Application Layer, which is OAuth 2.0 feature
+to enhance the security of resources protected by access tokens.
 
-When DPoP is being used, the Janssen Server checks whether the presenter of the access token is the one to whom the access token was issued. Hence, making sure that a stolen access token is not being used by someone else to access the protected resource. OAuth 2.0 DPoP specification is available [here](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html)
+When DPoP is being used, the Janssen Server checks whether the presenter of the access token is the one to whom the
+access token was issued. Hence, making sure that a stolen access token is not being used by someone
+else to access the protected resource. OAuth 2.0 DPoP specification is available
+[here](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html)
 
-Janssen Server also supports OAuth [MTLS(Mutual TLS)](https://docs.jans.io/nightly/janssen-server/auth-server/oauth-features/mtls/index.md) as a mechanism to ensure that the token presenting party is legitimate. While **MTLS should be preferred** whenever it is possible to use it, for other cases like single page application(SPA), DPoP can be used.
+Janssen Server also supports OAuth [MTLS(Mutual TLS)](./mtls.md) as a mechanism to ensure that the token presenting
+party is legitimate. While **MTLS should be preferred** whenever it is possible to use it, for other cases like single
+page application(SPA), DPoP can be used.
 
 ## Using DPoP
 
 ## Using DPoP Proof JWT
 
-To use DPoP protection, the client needs to create DPoP Proof JWT (or DPoP Proof) and send it using `DPoP` request header to Janssen Server when:
+To use DPoP protection, the client needs to create DPoP Proof JWT (or DPoP Proof) and send it using `DPoP`
+request header to Janssen Server when:
 
 1. Requesting for a new access token
-1. Accessing a protected resource using the access token
+2. Accessing a protected resource using the access token
 
-DPoP proofs are created differently for the cases listed above. DPoP specification describes [how](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-dpop-proof-jwts).
+DPoP proofs are created differently for the cases listed above. DPoP specification describes
+[how](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-dpop-proof-jwts).
 
-When an access token is requested with the DPoP header (1 above), the Janssen Server returns an access token (or refresh token) that is bound(mapped) to the public key attached with the DPoP proof.
+When an access token is requested with the DPoP header (1 above), the Janssen Server returns an access token (or refresh token) that
+is bound(mapped) to the public key attached with the DPoP proof.
 
-Subsequently, when the client uses the access token to access the protected resource (2 above), it again creates and attaches the DPoP Proof with the request. The resource server checks the validity of the request by ensuring that the access token used is bound to the same public key which is presented in the DPoP proof in the request. The resource server uses steps laid out in the [specification](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-checking-dpop-proofs) to ascertain this.
+Subsequently, when the client uses the access token to access the protected resource (2 above), it again creates and
+attaches the DPoP Proof with the request. The resource server checks the validity of the request by ensuring that the
+access token used is bound to the same public key which is presented in the DPoP proof in the request. The resource
+server uses steps laid out in the
+[specification](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-checking-dpop-proofs) to ascertain
+this.
 
-```
+```mermaid
+
 sequenceDiagram
 
 title DPoP sender-constraint access_token and refresh_token
@@ -45,13 +60,14 @@ RP->RS: Request resource with access_token and DPoP JWT (with "ath" - AT hash)
 RS->RS: Validates access_token against DPoP (public key match cnf/jkt)
 RS->RS: Validates DPoP against access_token (access_token hash in DPoP "ath")
 RS->RP: Return protected resource
+
 ```
 
 ### Authorization Code Binding to DPoP Key
 
 Authorization Endpoint supports `dpop_jkt` parameter for DPoP binding of authorization code.
 
-```
+```text
  GET /authorize?response_type=code&client_id=s6BhdRkqt3&state=xyz\
      &redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb\
      &code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM\
@@ -67,47 +83,44 @@ For PAR, both ways of binging are supported:
 
 ### Using Introspection Endpoint
 
-Janssen Server [introspection endpoint](https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/introspection/index.md) supports the JWK thumbprint confirmation method. Using this, the resource server can introspect an access token and obtain the hash of the public key associated with the access token. Response from the introspection endpoint will share this information in the format recommended in the [specificaiton](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-jwk-thumbprint-confirmation-)
+Janssen Server [introspection endpoint](../../auth-server/endpoints/introspection.md) supports the JWK thumbprint
+confirmation method. Using this, the resource server can introspect an access token and obtain the hash of the public
+key associated with the access token. Response from the introspection endpoint will share this information in the format
+recommended in the
+[specificaiton](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-jwk-thumbprint-confirmation-)
 
 ## Janssen Server Configuration for DPoP
 
 Following properties of the Janssen Server can be used to tailor the behavior concerning DPoP.
 
-- [dpopJtiCacheTime](https://docs.jans.io/nightly/janssen-server/reference/json/properties/janssenauthserver-properties/#dpopjticachetime)
-- [dpopSigningAlgValuesSupported](https://docs.jans.io/nightly/janssen-server/reference/json/properties/janssenauthserver-properties/#dpopsigningalgvaluessupported)
-- [dpopTimeframe](https://docs.jans.io/nightly/janssen-server/reference/json/properties/janssenauthserver-properties/#dpoptimeframe)
-- [dpopUseNonce](https://docs.jans.io/nightly/janssen-server/reference/json/properties/janssenauthserver-properties/#dpopusenonce)
-- [dpopNonceCacheTime](https://docs.jans.io/nightly/janssen-server/reference/json/properties/janssenauthserver-properties/#dpopnoncecachetime)
-- [dpopJktForceForAuthorizationCode](https://docs.jans.io/nightly/janssen-server/reference/json/properties/janssenauthserver-properties/#dpopjktforceforauthorizationcode)
+- [dpopJtiCacheTime](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopjticachetime)
+- [dpopSigningAlgValuesSupported](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopsigningalgvaluessupported)
+- [dpopTimeframe](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpoptimeframe)
+- [dpopUseNonce](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopusenonce)
+- [dpopNonceCacheTime](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopnoncecachetime)
+- [dpopJktForceForAuthorizationCode](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#dpopjktforceforauthorizationcode)
 
 ## DPoP Proof Replay mitigation(s) (with DPoP-Nonce)
 
 When a server requires stricter proof, it can issue a **nonce** (a one-time-use value) that the client must include in its next **DPoP proof**. This ensures that proofs cannot be replayed across multiple requests or sessions.
 
+
 **How It Works**
 
 1. **Client sends a request** with a DPoP proof to the resource server or authorization server.
+2. **Server responds** with a `DPoP-Nonce` HTTP header if it requires the client to include a nonce in subsequent requests.
+   - Example:
+     ```
+     HTTP/1.1 401 Unauthorized
+     DPoP-Nonce: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+     ```
+3. **Client regenerates the DPoP proof**, embedding the nonce into the JWT (`nonce` claim).
+4. **Client resends the request**, this time including the updated proof with the nonce.
+5. **Server validates** the proof, checking:
+   - The signature matches the client’s public key.
+   - The `nonce` claim matches the server-issued nonce.
+   - The nonce has not been reused.
 
-1. **Server responds** with a `DPoP-Nonce` HTTP header if it requires the client to include a nonce in subsequent requests.
-
-1. Example:
-
-   ```
-   HTTP/1.1 401 Unauthorized
-   DPoP-Nonce: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-   ```
-
-1. **Client regenerates the DPoP proof**, embedding the nonce into the JWT (`nonce` claim).
-
-1. **Client resends the request**, this time including the updated proof with the nonce.
-
-1. **Server validates** the proof, checking:
-
-1. The signature matches the client’s public key.
-
-1. The `nonce` claim matches the server-issued nonce.
-
-1. The nonce has not been reused.
 
 **Nonce Claim in DPoP Proof**
 
@@ -117,7 +130,7 @@ When a nonce is required, the DPoP proof JWT must include:
 
 Example DPoP JWT payload with nonce:
 
-```
+```json
 {
   "htu": "https://api.example.com/resource/123",
   "htm": "GET",
@@ -126,6 +139,7 @@ Example DPoP JWT payload with nonce:
   "nonce": "eyJhbGciOiJIUzI1NiIs..."
 }
 ```
+
 
 ## Have questions in the meantime?
 

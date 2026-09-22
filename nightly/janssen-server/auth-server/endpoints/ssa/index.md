@@ -1,30 +1,45 @@
 # Software Statement Assertion (SSA) Endpoint
 
-Janssen Server provides SSA endpoint that enables management of SSAs. The SSA is a JSON Web Token (JWT) containing client metadata and some custom attributes. Specification for SSAs has been outlined as part of [Dynamic Client Registration Protocol](https://www.rfc-editor.org/rfc/rfc7591#section-2.3).
+Janssen Server provides SSA endpoint that enables management of SSAs. The SSA is a JSON Web Token (JWT) containing
+client metadata and some custom attributes. Specification for SSAs has been outlined as part of
+[Dynamic Client Registration Protocol](https://www.rfc-editor.org/rfc/rfc7591#section-2.3).
 
-URL to access revocation endpoint on Janssen Server is listed in the response of Janssen Server's well-known [configuration endpoint](https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/configuration/index.md) given below.
+URL to access revocation endpoint on Janssen Server is listed in the response of Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
 
-```
+```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
-`ssa_endpoint` claim in the response specifies the URL for revocation endpoint. By default, revocation endpoint looks like below:
+`ssa_endpoint` claim in the response specifies the URL for revocation endpoint. By default, revocation endpoint
+looks like below:
 
 ```
 https://janssen.server.host/jans-auth/restv1/ssa
 ```
 
-More information about request and response of the revocation endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/SSA).
+More information about request and response of the revocation endpoint can be found in
+the OpenAPI specification
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/SSA).
 
 ## Disabling The Endpoint Using Feature Flag
 
-`/ssa` endpoint can be enabled or disable using [SSA feature flag](https://docs.jans.io/nightly/janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags/#ssa). Use [Janssen Text-based UI(TUI)](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) or [Janssen command-line interface](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-cli/index.md) to perform this task.
+`/ssa` endpoint can be enabled or disable
+using [SSA feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#ssa).
+Use [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md)
+or [Janssen command-line interface](../../config-guide/config-tools/jans-cli/README.md) to perform this task.
 
-When using TUI, navigate via `Auth Server`->`Properties`->`featureFlags` to screen below. From here, enable or disable `SSA` flag as required.
+When using TUI, navigate via `Auth Server`->`Properties`->`featureFlags` to screen below. From here, enable or
+disable `SSA` flag as required.
+
+![](../../../assets/image-tui-enable-components.png)
 
 ## Configuration Properties
 
-SSA endpoint can be further configured using Janssen Server configuration property `ssaConfiguration`. When using [Janssen Text-based UI(TUI)](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) to configure the properties, navigate via `Auth Server`->`Properties` to update value for this property. This property take JSON configuration with parameters as described below:
+SSA endpoint can be further configured using Janssen Server configuration property `ssaConfiguration`. When using
+[Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure the properties,
+navigate via `Auth Server`->`Properties` to update value for this property. This property take JSON configuration with
+parameters as described below:
 
 ```
 "ssaConfiguration": {
@@ -55,27 +70,35 @@ To call SSA services, a token of type `client_credentials` must be generated wit
 
 - `https://jans.io/auth/ssa.admin` — Allows calling all SSA services.
 - `https://jans.io/auth/ssa.portal` — Allows only call `Get SSA` service.
-- `https://jans.io/auth/ssa.developer` — Allows only call `Get SSA`, but you can only filter ssa that have been created by the same client.
+- `https://jans.io/auth/ssa.developer` — Allows only call `Get SSA`, but you can only filter ssa that have been created
+  by the same client.
 
 ## Create a new SSA
 
-Create `SSA` for the organization with `expiration` (optional). If `expiration` is not set take expiration from `ssaConfiguration.ssaExpirationInDays` AS configuration property.
+Create `SSA` for the organization with `expiration` (optional).
+If `expiration` is not set take expiration from `ssaConfiguration.ssaExpirationInDays` AS configuration property.
 
 ### Request body description
 
 | Field          | Detail                                                                                                                   | Optional |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------ | -------- |
+|----------------|--------------------------------------------------------------------------------------------------------------------------|----------|
 | org_id         | The "org_id" is used for organization identification.                                                                    | false    |
 | description    | Describe SSA                                                                                                             | false    |
 | software_id    | The "software_id" is used for software identification. If not set, generates random UUID.                                | false    |
 | software_roles | List of string values, fixed value `["password", "notify"]`.                                                             | false    |
 | grant_types    | Fixed value Fixed value `["client_credentials"]`.                                                                        | false    |
-| expiration     | Expiration date. `(Default value: calculated based on global SSA settings)`                                              | false    |
-| one_time_use   | Defined whether the SSA will be used only once or can be used multiple times. `(Default value: true)`                    | false    |
-| rotate_ssa     | TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. `(Default value: true)` | false    |
-| lifetime       | SSA Lifetime in seconds. If not set calculates lifetime, `lifetime = expiration - now`                                   | false    |
+| expiration     | Expiration date. `(Default value: calculated based on global SSA settings)`                                              | false     |
+| one_time_use   | Defined whether the SSA will be used only once or can be used multiple times. `(Default value: true)`                    | false     |
+| rotate_ssa     | TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. `(Default value: false)` | true     |
+| lifetime       | SSA Lifetime in seconds. If not set calculates lifetime, `lifetime = expiration - now`                                   | false     |
 
-**Note:** You can add more `custom attributes` in the request, (you must have previously configured in the SSA global configuration). It should be clarified that these values are persisted in the database and are not returned in the SSA JWT.
+**Note:** `one_time_use` and `rotate_ssa` cannot both be `true` in the same request. Since a one-time-use SSA is
+consumed on its first use, rotating it does not apply, and the request is rejected with `400` (`invalid_ssa_metadata`)
+if both are set to `true`.
+
+**Note:** You can add more `custom attributes` in the request, (you must have previously configured in the SSA global
+configuration).
+It should be clarified that these values are persisted in the database and are not returned in the SSA JWT.
 
 Example:
 
@@ -86,7 +109,7 @@ Example:
   ...,
   "myCustomAttr1": "Your value custom attr 1", 
   "myCustomAttr2": "Your value custom attr 2"
-}
+} 
 ```
 
 ### Response description
@@ -205,19 +228,19 @@ Get existing active SSA based on `jti` or `org_id`.
 ```
 
 - SSA
-  - `jti` — The "jti" (JWT ID) claim provides a unique identifier for the JWT.
-  - `org_id` — The "org_id" is used for organization identification.
-  - `software_id` — The "software_id" is used for software identification.
-  - `software_roles` — List of string values, fixed value `["password", "notify"]`.
-  - `grant_types` — Fixed value `["client_credentials"]`.
-  - `iss` — The "iss" (issuer) claim identifies the principal that issued the JWT.
-  - `exp` — Expiration time.
-  - `iat` — Creation time.
-  - `description` — Describe SSA.
-  - `one_time_use` — Defined whether the SSA will be used only once or can be used multiple times.
-  - `rotate_ssa` — TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.
-  - `lifetime` — SSA lifetime in seconds.
-  - `myCustom1, myCustom2, ...` — if you have custom attributes, they will be displayed here.
+    - `jti` — The "jti" (JWT ID) claim provides a unique identifier for the JWT.
+    - `org_id` — The "org_id" is used for organization identification.
+    - `software_id` — The "software_id" is used for software identification.
+    - `software_roles` — List of string values, fixed value `["password", "notify"]`.
+    - `grant_types` — Fixed value `["client_credentials"]`.
+    - `iss` — The "iss" (issuer) claim identifies the principal that issued the JWT.
+    - `exp` — Expiration time.
+    - `iat` — Creation time.
+    - `description` — Describe SSA.
+    - `one_time_use` — Defined whether the SSA will be used only once or can be used multiple times.
+    - `rotate_ssa` — TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.
+    - `lifetime` — SSA lifetime in seconds.
+    - `myCustom1, myCustom2, ...` — if you have custom attributes, they will be displayed here.
 - `iss` — The "iss" is related to the client that created this SSA.
 - `created_at` — Creation time.
 - `expiration` — Expiration time.
@@ -436,7 +459,8 @@ Connection: Keep-Alive
 
 ## SSA Custom Script
 
-The custom script will allow us to modify the SSA process. [SSA Custom Script](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/ssa_modify_response/ssa_modify_response.py)
+The custom script will allow us to modify the SSA process.
+[SSA Custom Script](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/ssa_modify_response/ssa_modify_response.py)
 
 - Modify the JWT returned by the creation SSA web service.
 - Modify the list returned by the get SSA web service.
@@ -451,10 +475,10 @@ In the following example, new fields is added to the header and payload of the J
 ```
 def create(self, jsonWebResponse, context):
     print "Modify ssa response script. Modify idToken: %s" % jsonWebResponse
-
+    
     jsonWebResponse.getHeader().setClaim("custom_header_name", "custom_header_value")
     jsonWebResponse.getClaims().setClaim("custom_claim_name", "custom_claim_value")
-
+    
     print "Modify ssa response script. After modify idToken: %s" % jsonWebResponse
     return True
 ```
@@ -507,11 +531,13 @@ The SSA entity contains the following fields:
 - `creatorType` type enum `CreatorType` — Contains the following CreatorType values (`NONE`, `CLIENT`, `USER`, `AUTO`).
 - `ttl` type `Integer` — SSA lifetime in seconds.
 - `atributes` type class `SsaAtributes`
-  - `oneTimeUse` type `Boolean` — Whether the SSA will be single use.
-  - `lifetime` type `Integer` — SSA lifetime in seconds.
-  - `rotateSsa` type `Boolean` — TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.
-  - `clientDn` type `String` — Client's DN.
-  - `customAttributes` type `Map<String, String>` — Contain additional fields, previously configured in the SSA global configuration.
-  - `softwareId` type `String` — Is used for software identification.
-  - `softwareRoles` type `List<String>` — List of string values, fixed value `["password", "notify"]`.
-  - `grantTypes` type `List<String>` — Fixed value `["client_credentials"]`.
+    - `oneTimeUse` type `Boolean` — Whether the SSA will be single use.
+    - `lifetime` type `Integer` — SSA lifetime in seconds.
+    - `rotateSsa` type `Boolean` — TODO - Will be used to rotate expiration of the SSA, currently is only saved as part
+      of the SSA.
+    - `clientDn` type `String` — Client's DN.
+    - `customAttributes` type `Map<String, String>` — Contain additional fields, previously configured in the SSA global
+      configuration.
+    - `softwareId` type `String` — Is used for software identification.
+    - `softwareRoles` type `List<String>` — List of string values, fixed value `["password", "notify"]`.
+    - `grantTypes` type `List<String>` — Fixed value `["client_credentials"]`.

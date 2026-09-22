@@ -5,17 +5,18 @@ This guide covers the prerequisites and cluster creation specific to Azure Kuber
 ## Prerequisites
 
 1. Install [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
-1. Install [Helm](https://helm.sh/docs/intro/install/)
+
+2. Install [Helm](https://helm.sh/docs/intro/install/)
 
 ## Create a Resource Group
 
-```
+```bash
 az group create --name janssen-resource-group --location eastus
 ```
 
 ## Create the AKS Cluster
 
-```
+```bash
 az aks create -g janssen-resource-group -n janssen-cluster --enable-managed-identity --node-vm-size NODE_TYPE --node-count 2 --enable-addons monitoring --enable-msi-auth-for-monitoring --generate-ssh-keys
 ```
 
@@ -23,17 +24,17 @@ Adjust `node-count` and `node-vm-size` as per your desired cluster size.
 
 ## Connect to the Cluster
 
-```
+```bash
 az aks install-cli
 az aks get-credentials --resource-group janssen-resource-group --name janssen-cluster
 ```
 
 ## Create the Janssen Namespace
 
-```
+```bash
 kubectl create namespace jans
 ```
 
 ## Next Steps
 
-Proceed to [Ingress Setup](https://docs.jans.io/nightly/janssen-server/install/helm-install/ingress-setup/index.md) to configure traffic routing.
+Proceed to [Ingress Setup](../ingress-setup.md) to configure traffic routing.

@@ -6,21 +6,21 @@ This guide covers the prerequisites and cluster creation specific to Google Kube
 
 1. Enable [GKE API](https://console.cloud.google.com/kubernetes) if not enabled yet.
 
-1. If you are using Cloud Shell, skip to step 5.
+2. If you are using Cloud Shell, skip to step 5.
 
-1. Install [gcloud CLI](https://cloud.google.com/sdk/docs/quickstarts).
+3. Install [gcloud CLI](https://cloud.google.com/sdk/docs/quickstarts).
 
-1. Install kubectl:
+4. Install kubectl:
 
-   ```
-   gcloud components install kubectl
-   ```
+    ```bash
+    gcloud components install kubectl
+    ```
 
-1. Install [Helm](https://helm.sh/docs/intro/install/).
+5. Install [Helm](https://helm.sh/docs/intro/install/).
 
 ## Create the GKE Cluster
 
-```
+```bash
 gcloud container clusters create janssen-cluster --num-nodes 2 --machine-type e2-standard-4 --zone us-west1-a
 ```
 
@@ -28,10 +28,10 @@ Adjust `num-nodes` and `machine-type` as per your desired cluster size.
 
 ## Create the Janssen Namespace
 
-```
+```bash
 kubectl create namespace jans
 ```
 
 ## Next Steps
 
-Proceed to [Ingress Setup](https://docs.jans.io/nightly/janssen-server/install/helm-install/ingress-setup/index.md) to configure traffic routing.
+Proceed to [Ingress Setup](../ingress-setup.md) to configure traffic routing.

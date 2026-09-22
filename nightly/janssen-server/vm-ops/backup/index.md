@@ -8,15 +8,17 @@ The Gluu Server should be backed up frequently--**we recommend at least one dail
 
 It's also good to have some partial configuration backup as well. Such as:
 
-- Tarball `/opt`
-- Tarball `/etc/jans`
-- Tarball `/etc/apache2`
-- Tarball `/var/jans`
+ - Tarball `/opt`
+ - Tarball `/etc/jans`
+ - Tarball `/etc/apache2`
+ - Tarball `/var/jans`
 
 ## Tarball Method
 
 All Jans Server files live in a single folder: /opt. The entire Jans Server folder can be archived using the tar command:
 
-- Stop the server: `systemctl stop list-units --all "jans*"`
-- Use tar to take a backup: `tar cvf jans-backup.tar /opt/jans/`
-- Start the server again: `systemctl start list-units --all "jans*"`
+* Stop the server: `systemctl stop list-units --all "jans*"`
+
+* Use tar to take a backup: `tar cvf jans-backup.tar /opt/jans/`
+
+* Start the server again: `systemctl start list-units --all "jans*"`

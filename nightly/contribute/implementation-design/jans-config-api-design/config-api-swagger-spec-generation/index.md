@@ -1,73 +1,87 @@
 # Config API Swagger Spec generation at build time
 
-**What Is OpenAPI?** OpenAPI Specification (formerly Swagger Specification) is an API description format for REST APIs. An OpenAPI file allows you to describe your entire API, including:
+**What Is OpenAPI?** OpenAPI Specification (formerly Swagger Specification)
+is an API description format for REST APIs. An OpenAPI file allows you to
+describe your entire API, including:
 
-- Available endpoints (/users) and operations on each endpoint (GET /users, POST /users)
-- Operation parameters Input and output for each operation
-- Authentication methods
-- Contact information, license, terms of use, and other information. API specifications can be written in YAML or JSON. The format is easy to learn and readable to both humans and machines. The complete OpenAPI Specification can be found on GitHub: [OpenAPI 3.0 Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md)
+* Available endpoints (/users) and operations on each endpoint (GET /users, POST /users)
+* Operation parameters Input and output for each operation
+* Authentication methods
+* Contact information, license, terms of use, and other information. API specifications 
+can be written in YAML or JSON. The format is easy to learn and readable to both humans 
+and machines. The complete OpenAPI Specification can be found on GitHub: 
+[OpenAPI 3.0 Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md)
+
 
 ## OpenAPI specification can be generated at;
 
-- Runtime
-- Build time
+* Runtime
+* Build time
 
 This document is related to build time generation.
 
 ## Quick start
 
-OpenAPI Specification is generated when pre-processing the API based on the meta-data added against the various resources, methods, and controllers. This is also called the code first approach.
+OpenAPI Specification is generated when pre-processing the API based on the
+meta-data added against the various resources, methods, and controllers.
+This is also called the code first approach.
 
 ### Project POM changes
 
-- Swagger-core is an open-source Java implementation of Swagger/OpenAPI. Its java-related libraries can be used for creating, consuming, and working with OpenAPI definitions. It contains a set of modules that enables integration with a JAX-RS to produce OpenAPI definitions. We use its set of annotations to decorate code with meta-data information.
+* Swagger-core is an open-source Java implementation of Swagger/OpenAPI. Its 
+java-related libraries can be used for creating, consuming, and working with 
+OpenAPI definitions. It contains a set of modules that enables integration with 
+a JAX-RS to produce OpenAPI definitions. We use its set of annotations to decorate 
+code with meta-data information.
 
 Add its dependency to the project POM.
 
-```
+```xml
   <dependencies>
   ...
-    <dependency>
-        <groupId>io.swagger.core.v3</groupId>
-        <artifactId>swagger-core-jakarta</artifactId>
-        <version>2.2.4</version>
-    </dependency>
+  	<dependency>
+  		<groupId>io.swagger.core.v3</groupId>
+  		<artifactId>swagger-core-jakarta</artifactId>
+  		<version>2.2.4</version>
+  	</dependency>
   </dependencies>
 ```
 
-- Swagger Maven Plugin This plugin is intended to use the Swagger Core library to generate OpenAPI documentation from a JAX-RS based REST service. If you want to learn more about the plugin and available configuration options, please visit its website: https://github.com/openapi-tools/swagger-maven-plugin
+* Swagger Maven Plugin This plugin is intended to use the Swagger Core library to generate 
+OpenAPI documentation from a JAX-RS based REST service. If you want to learn more about 
+the plugin and available configuration options, please visit its website: https://github.com/openapi-tools/swagger-maven-plugin 
 
 To have Swagger generate the OpenAPI specifications as part of the build, add the plugin to the POM.
 
-```
+```xml
 <build>
  <plugins>
    ...
    <plugin>
-    <groupId>io.swagger.core.v3</groupId>
-    <artifactId>swagger-maven-plugin-jakarta</artifactId>
-    <version>2.2.2</version>
-    <executions>
-        <execution>
-            <configuration>
-                <outputFormat>YAML</outputFormat>
-                <outputPath>${project.parent.basedir}/docs</outputPath>
-                <prettyPrint>true</prettyPrint>
-                <filterClass>io.jans.configapi.filters.SpecFilter</filterClass>
-            </configuration>
-            <phase>compile</phase>
-            <goals>
-                <goal>resolve</goal>
-            </goals>
-        </execution>
-    </executions>
-    <dependencies>
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-models-jakarta</artifactId>
-            <version>2.2.2</version>
-        </dependency>
-    </dependencies>
+  	<groupId>io.swagger.core.v3</groupId>
+  	<artifactId>swagger-maven-plugin-jakarta</artifactId>
+  	<version>2.2.2</version>
+  	<executions>
+  		<execution>
+  			<configuration>
+  				<outputFormat>YAML</outputFormat>
+  				<outputPath>${project.parent.basedir}/docs</outputPath>
+  				<prettyPrint>true</prettyPrint>
+  				<filterClass>io.jans.configapi.filters.SpecFilter</filterClass>
+  			</configuration>
+  			<phase>compile</phase>
+  			<goals>
+  				<goal>resolve</goal>
+  			</goals>
+  		</execution>
+  	</executions>
+  	<dependencies>
+  		<dependency>
+  			<groupId>io.swagger.core.v3</groupId>
+  			<artifactId>swagger-models-jakarta</artifactId>
+  			<version>2.2.2</version>
+  		</dependency>
+  	</dependencies>
   </plugin>
    ...
  </plugins>
@@ -78,11 +92,15 @@ Checkout a sample POM [here](https://github.com/JanssenProject/jans/blob/main/ja
 
 ### Add meta-data in code
 
-- `Defining general OpenAPI information` @OpenAPIDefinition annotation is used to populate OpenAPI object fields like - info, tags, servers, security, and externalDocs. If more than one class is annotated with OpenAPIDefinition, with the same fields defined, behaviour is inconsistent. Use this is your Application class that extends javax.ws.rs.core.Application.
+* `Defining general OpenAPI information` @OpenAPIDefinition annotation is used to 
+populate OpenAPI object fields like - info, tags, servers, security, and externalDocs. 
+If more than one class is annotated with OpenAPIDefinition, with the same fields 
+defined, behaviour is inconsistent. Use this is your Application class that extends 
+javax.ws.rs.core.Application.
 
 Sample code snippet
 
-```
+```java
 import ...
 ...
 @OpenAPIDefinition(info = @Info(title = "Jans Config API", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
@@ -117,15 +135,17 @@ import ...
 )))
 public class ApiApplication extends Application {
    ...
-
+ 
 }
 ```
 
+
 Checkout sample code [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/server/src/main/java/io/jans/configapi/rest/ApiApplication.java#L31)
+
 
 Sample code snippet
 
-```
+```java
 import ...
 ...
 package ...;
@@ -166,7 +186,7 @@ public class AttributesResource ... {
             @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) 
-            {
+			{
 
         ...
         return Response.ok(...).build();
@@ -203,11 +223,15 @@ public class AttributesResource ... {
 
 Checkout a sample code [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/server/src/main/java/io/jans/configapi/rest/resource/auth/AttributesResource.java).
 
+
 ### Generate code with Maven
 
-The Maven compile command can be used to generate the OpenAPI Swagger Specification. Specification should be generated in `outputFormat` and `outputPath` as specified in the `swagger-maven-plugin-...`
+The Maven compile command can be used to generate the OpenAPI Swagger Specification.
+Specification should be generated in `outputFormat` and `outputPath`
+as specified in the `swagger-maven-plugin-...`
 
-```
+
+```bash
 mvn compile
 ```
 

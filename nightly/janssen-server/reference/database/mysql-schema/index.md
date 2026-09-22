@@ -1,7 +1,6 @@
 # MySQL Schema
 
 ## Tables
-
 | Table names                |
 | -------------------------- |
 | adsPrjDeployment           |
@@ -44,7 +43,6 @@
 | jansUmaResourcePermission  |
 
 ### adsPrjDeployment
-
 | Field             | Type         | Null | Key | Default | Comment                                   |
 | ----------------- | ------------ | ---- | --- | ------- | ----------------------------------------- |
 | doc_id            | varchar(64)  | NO   | PRI | None    |                                           |
@@ -58,7 +56,6 @@
 | adsPrjDeplDetails | text         | YES  |     | None    | Misc details associated to an ADS project |
 
 ### agmFlow
-
 | Field             | Type         | Null | Key | Default | Comment                                                                  |
 | ----------------- | ------------ | ---- | --- | ------- | ------------------------------------------------------------------------ |
 | doc_id            | varchar(64)  | NO   | PRI | None    |                                                                          |
@@ -74,7 +71,6 @@
 | jansCustomMessage | varchar(128) | YES  |     | None    | exclude custom welcome message                                           |
 
 ### agmFlowRun
-
 | Field             | Type         | Null | Key | Default | Comment                                                  |
 | ----------------- | ------------ | ---- | --- | ------- | -------------------------------------------------------- |
 | doc_id            | varchar(64)  | NO   | PRI | None    |                                                          |
@@ -87,78 +83,75 @@
 | exp               | datetime(3)  | YES  |     | None    | jans Exp                                                 |
 
 ### jansAppConf
-
-| Field                 | Type         | Null | Key | Default | Comment                                                                     |
-| --------------------- | ------------ | ---- | --- | ------- | --------------------------------------------------------------------------- |
-| doc_id                | varchar(64)  | NO   | PRI | None    |                                                                             |
-| objectClass           | varchar(48)  | YES  |     | None    |                                                                             |
-| dn                    | varchar(128) | YES  |     | None    |                                                                             |
-| c                     | varchar(2)   | YES  |     | None    |                                                                             |
-| ou                    | varchar(64)  | YES  |     | None    |                                                                             |
-| description           | varchar(768) | YES  |     | None    |                                                                             |
-| displayName           | varchar(128) | YES  |     | None    | preferred name of a person to be used when displaying entries               |
-| jansHostname          | varchar(64)  | YES  |     | None    | The hostname of the Jans Server instance                                    |
-| jansLastUpd           | datetime(3)  | YES  |     | None    | Monitors last time the server was able to connect to the monitoring system. |
-| jansManager           | varchar(64)  | YES  |     | None    | Used to specify if a person has the manager role                            |
-| jansOrgProfileMgt     | smallint     | YES  |     | None    | enable or disable profile management feature in exclude                     |
-| jansScimEnabled       | smallint     | YES  |     | None    | exclude SCIM feature - enabled or disabled                                  |
-| jansEmail             | json         | YES  |     | None    |                                                                             |
-| jansSmtpConf          | json         | YES  |     | None    | SMTP configuration                                                          |
-| jansSslExpiry         | varchar(64)  | YES  |     | None    | SAML Trust Relationship configuration                                       |
-| jansStatus            | varchar(16)  | YES  |     | None    | Status of the entry, used by many objectclasses                             |
-| jansUrl               | varchar(64)  | YES  |     | None    | Jans instance URL                                                           |
-| inum                  | varchar(64)  | YES  |     | None    | XRI i-number                                                                |
-| o                     | varchar(64)  | YES  |     | None    |                                                                             |
-| jansAuthMode          | varchar(64)  | YES  |     | None    |                                                                             |
-| jansDbAuth            | json         | YES  |     | None    | Custom IDP authentication configuration                                     |
-| jansLogViewerConfig   | varchar(64)  | YES  |     | None    | Log viewer configuration                                                    |
-| jansLogConfigLocation | varchar(64)  | YES  |     | None    | Path to external log4j2.xml                                                 |
-| jansCacheConf         | text         | YES  |     | None    | Cache configuration                                                         |
-| jansDocStoreConf      | text         | YES  |     | None    | jansDocStoreConf                                                            |
-| jansSoftVer           | varchar(64)  | YES  |     | None    |                                                                             |
-| userPassword          | varchar(256) | YES  |     | None    |                                                                             |
-| jansConfDyn           | text         | YES  |     | None    | jans Dyn Conf                                                               |
-| jansConfErrors        | text         | YES  |     | None    | jans Errors Conf                                                            |
-| jansConfStatic        | text         | YES  |     | None    | jans Static Conf                                                            |
-| jansConfWebKeys       | text         | YES  |     | None    | jans Web Keys Conf                                                          |
-| jansWebKeysSettings   | varchar(64)  | YES  |     | None    | jans Web Keys Conf                                                          |
-| jansConfApp           | text         | YES  |     | None    | jans App Conf                                                               |
-| jansRevision          | int          | YES  |     | None    | Revision                                                                    |
+| Field                 | Type         | Null | Key | Default | Comment                                                                      |
+| --------------------- | ------------ | ---- | --- | ------- | ---------------------------------------------------------------------------- |
+| doc_id                | varchar(64)  | NO   | PRI | None    |                                                                              |
+| objectClass           | varchar(48)  | YES  |     | None    |                                                                              |
+| dn                    | varchar(128) | YES  |     | None    |                                                                              |
+| c                     | varchar(2)   | YES  |     | None    |                                                                              |
+| ou                    | varchar(64)  | YES  |     | None    |                                                                              |
+| description           | varchar(768) | YES  |     | None    |                                                                              |
+| displayName           | varchar(128) | YES  |     | None    | preferred name of a person to be used when displaying entries                |
+| jansHostname          | varchar(64)  | YES  |     | None    | The hostname of the Jans Server instance                                     |
+| jansLastUpd           | datetime(3)  | YES  |     | None    | Monitors last time the server was able to connect to  the monitoring system. |
+| jansManager           | varchar(64)  | YES  |     | None    | Used to specify if a person has the manager role                             |
+| jansOrgProfileMgt     | smallint     | YES  |     | None    | enable or disable profile management feature in exclude                      |
+| jansScimEnabled       | smallint     | YES  |     | None    | exclude SCIM feature - enabled or disabled                                   |
+| jansEmail             | json         | YES  |     | None    |                                                                              |
+| jansSmtpConf          | json         | YES  |     | None    | SMTP configuration                                                           |
+| jansSslExpiry         | varchar(64)  | YES  |     | None    | SAML Trust Relationship configuration                                        |
+| jansStatus            | varchar(16)  | YES  |     | None    | Status of the entry, used by many objectclasses                              |
+| jansUrl               | varchar(64)  | YES  |     | None    | Jans instance URL                                                            |
+| inum                  | varchar(64)  | YES  |     | None    | XRI i-number                                                                 |
+| o                     | varchar(64)  | YES  |     | None    |                                                                              |
+| jansAuthMode          | varchar(64)  | YES  |     | None    |                                                                              |
+| jansDbAuth            | json         | YES  |     | None    | Custom IDP authentication configuration                                      |
+| jansLogViewerConfig   | varchar(64)  | YES  |     | None    | Log viewer configuration                                                     |
+| jansLogConfigLocation | varchar(64)  | YES  |     | None    | Path to external log4j2.xml                                                  |
+| jansCacheConf         | text         | YES  |     | None    | Cache configuration                                                          |
+| jansDocStoreConf      | text         | YES  |     | None    | jansDocStoreConf                                                             |
+| jansSoftVer           | varchar(64)  | YES  |     | None    |                                                                              |
+| userPassword          | varchar(256) | YES  |     | None    |                                                                              |
+| jansConfDyn           | text         | YES  |     | None    | jans Dyn Conf                                                                |
+| jansConfErrors        | text         | YES  |     | None    | jans Errors Conf                                                             |
+| jansConfStatic        | text         | YES  |     | None    | jans Static Conf                                                             |
+| jansConfWebKeys       | text         | YES  |     | None    | jans Web Keys Conf                                                           |
+| jansWebKeysSettings   | varchar(64)  | YES  |     | None    | jans Web Keys Conf                                                           |
+| jansConfApp           | text         | YES  |     | None    | jans App Conf                                                                |
+| jansRevision          | int          | YES  |     | None    | Revision                                                                     |
 
 ### jansAttr
-
-| Field                 | Type         | Null | Key | Default | Comment                                                                                                                     |
-| --------------------- | ------------ | ---- | --- | ------- | --------------------------------------------------------------------------------------------------------------------------- |
-| doc_id                | varchar(64)  | NO   | PRI | None    |                                                                                                                             |
-| objectClass           | varchar(48)  | YES  |     | None    |                                                                                                                             |
-| dn                    | varchar(128) | YES  |     | None    |                                                                                                                             |
-| description           | varchar(768) | YES  | MUL | None    |                                                                                                                             |
-| displayName           | varchar(128) | YES  | MUL | None    | preferred name of a person to be used when displaying entries                                                               |
-| jansAttrEditTyp       | json         | YES  |     | None    | Specify in exclude who can update an attribute, admin or user                                                               |
-| jansAttrName          | varchar(64)  | YES  | MUL | None    | Specify an identifier for an attribute. May be multi-value where an attribute has two names, like givenName and first-name. |
-| jansAttrOrigin        | varchar(64)  | YES  | MUL | None    | Specify the person objectclass associated with the attribute, used for display purposes in exclude.                         |
-| jansAttrSystemEditTyp | varchar(64)  | YES  |     | None    | TODO - still required?                                                                                                      |
-| jansAttrTyp           | varchar(64)  | YES  |     | None    | Data type of attribute. Values can be string, photo, numeric, date                                                          |
-| jansClaimName         | varchar(64)  | YES  |     | None    | Used by jans in conjunction with jansttributeName to map claims to attributes in datastore.                                 |
-| jansAttrUsgTyp        | varchar(64)  | YES  |     | None    | TODO - Usg? Value can be OpenID                                                                                             |
-| jansAttrViewTyp       | json         | YES  |     | None    | Specify in exclude who can view an attribute, admin or user                                                                 |
-| jansSAML1URI          | varchar(64)  | YES  |     | None    | SAML 1 uri of attribute                                                                                                     |
-| jansSAML2URI          | varchar(64)  | YES  |     | None    | SAML 2 uri of attribute                                                                                                     |
-| jansStatus            | varchar(16)  | YES  |     | None    | Status of the entry, used by many objectclasses                                                                             |
-| inum                  | varchar(64)  | YES  | MUL | None    | XRI i-number                                                                                                                |
-| jansMultivaluedAttr   | smallint     | YES  |     | None    |                                                                                                                             |
-| jansHideOnDiscovery   | smallint     | YES  |     | None    |                                                                                                                             |
-| jansNameIdTyp         | varchar(64)  | YES  |     | None    | NameId Typ                                                                                                                  |
-| jansScimCustomAttr    | smallint     | YES  |     | None    |                                                                                                                             |
-| jansSourceAttr        | varchar(64)  | YES  |     | None    | Source Attr for this Attr                                                                                                   |
-| seeAlso               | varchar(64)  | YES  |     | None    |                                                                                                                             |
-| urn                   | varchar(128) | YES  |     | None    |                                                                                                                             |
-| jansRegExp            | varchar(64)  | YES  |     | None    | Regular expression used to validate attribute data                                                                          |
-| jansTooltip           | varchar(64)  | YES  |     | None    | Custom tooltip to be shown on the UI                                                                                        |
-| jansValidation        | tinytext     | YES  |     | None    | This data has information about attribute Validation                                                                        |
+| Field                 | Type         | Null | Key | Default | Comment                                                                                                                      |
+| --------------------- | ------------ | ---- | --- | ------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| doc_id                | varchar(64)  | NO   | PRI | None    |                                                                                                                              |
+| objectClass           | varchar(48)  | YES  |     | None    |                                                                                                                              |
+| dn                    | varchar(128) | YES  |     | None    |                                                                                                                              |
+| description           | varchar(768) | YES  | MUL | None    |                                                                                                                              |
+| displayName           | varchar(128) | YES  | MUL | None    | preferred name of a person to be used when displaying entries                                                                |
+| jansAttrEditTyp       | json         | YES  |     | None    | Specify in exclude who can update an attribute, admin or user                                                                |
+| jansAttrName          | varchar(64)  | YES  | MUL | None    | Specify an identifier for an attribute. May be multi-value  where an attribute has two names, like givenName and first-name. |
+| jansAttrOrigin        | varchar(64)  | YES  | MUL | None    | Specify the person objectclass associated with the attribute,  used for display purposes in exclude.                         |
+| jansAttrSystemEditTyp | varchar(64)  | YES  |     | None    | TODO - still required?                                                                                                       |
+| jansAttrTyp           | varchar(64)  | YES  |     | None    | Data type of attribute. Values can be string, photo, numeric, date                                                           |
+| jansClaimName         | varchar(64)  | YES  |     | None    | Used by jans in conjunction with jansttributeName to map claims to attributes in datastore.                                       |
+| jansAttrUsgTyp        | varchar(64)  | YES  |     | None    | TODO - Usg? Value can be OpenID                                                                                              |
+| jansAttrViewTyp       | json         | YES  |     | None    | Specify in exclude who can view an attribute, admin or user                                                                  |
+| jansSAML1URI          | varchar(64)  | YES  |     | None    | SAML 1 uri of attribute                                                                                                      |
+| jansSAML2URI          | varchar(64)  | YES  |     | None    | SAML 2 uri of attribute                                                                                                      |
+| jansStatus            | varchar(16)  | YES  |     | None    | Status of the entry, used by many objectclasses                                                                              |
+| inum                  | varchar(64)  | YES  | MUL | None    | XRI i-number                                                                                                                 |
+| jansMultivaluedAttr   | smallint     | YES  |     | None    |                                                                                                                              |
+| jansHideOnDiscovery   | smallint     | YES  |     | None    |                                                                                                                              |
+| jansNameIdTyp         | varchar(64)  | YES  |     | None    | NameId Typ                                                                                                                   |
+| jansScimCustomAttr    | smallint     | YES  |     | None    |                                                                                                                              |
+| jansSourceAttr        | varchar(64)  | YES  |     | None    | Source Attr for this Attr                                                                                                    |
+| seeAlso               | varchar(64)  | YES  |     | None    |                                                                                                                              |
+| urn                   | varchar(128) | YES  |     | None    |                                                                                                                              |
+| jansRegExp            | varchar(64)  | YES  |     | None    | Regular expression used to validate attribute data                                                                           |
+| jansTooltip           | varchar(64)  | YES  |     | None    | Custom tooltip to be shown on the UI                                                                                         |
+| jansValidation        | tinytext     | YES  |     | None    | This data has information about attribute Validation                                                                         |
 
 ### jansCache
-
 | Field       | Type         | Null | Key | Default | Comment           |
 | ----------- | ------------ | ---- | --- | ------- | ----------------- |
 | doc_id      | varchar(64)  | NO   | PRI | None    |                   |
@@ -171,7 +164,6 @@
 | dat         | text         | YES  |     | None    | OX data           |
 
 ### jansCibaReq
-
 | Field        | Type         | Null | Key | Default | Comment                                         |
 | ------------ | ------------ | ---- | --- | ------- | ----------------------------------------------- |
 | doc_id       | varchar(64)  | NO   | PRI | None    |                                                 |
@@ -185,7 +177,6 @@
 | jansStatus   | varchar(16)  | YES  | MUL | None    | Status of the entry, used by many objectclasses |
 
 ### jansClnt
-
 | Field                                   | Type         | Null | Key | Default | Comment                                                       |
 | --------------------------------------- | ------------ | ---- | --- | ------- | ------------------------------------------------------------- |
 | doc_id                                  | varchar(64)  | NO   | PRI | None    |                                                               |
@@ -266,7 +257,6 @@
 | jansBackchannelUsrCodeParameter         | smallint     | YES  |     | None    | jans Backchannel Usr Code Parameter                           |
 
 ### jansClntAuthz
-
 | Field       | Type         | Null | Key | Default | Comment         |
 | ----------- | ------------ | ---- | --- | ------- | --------------- |
 | doc_id      | varchar(100) | NO   | PRI | None    |                 |
@@ -280,7 +270,6 @@
 | jansScope   | json         | YES  |     | None    | jans Attr Scope |
 
 ### jansCustomScr
-
 | Field              | Type         | Null | Key | Default | Comment                                                                  |
 | ------------------ | ------------ | ---- | --- | ------- | ------------------------------------------------------------------------ |
 | doc_id             | varchar(64)  | NO   | PRI | None    |                                                                          |
@@ -301,7 +290,6 @@
 | jansAlias          | json         | YES  |     | None    | jansAlias                                                                |
 
 ### jansDeviceRegistration
-
 | Field                      | Type         | Null | Key | Default | Comment                                                       |
 | -------------------------- | ------------ | ---- | --- | ------- | ------------------------------------------------------------- |
 | doc_id                     | varchar(64)  | NO   | PRI | None    |                                                               |
@@ -329,7 +317,6 @@
 | jansMetaVer                | varchar(64)  | YES  |     | None    |                                                               |
 
 ### jansDocument
-
 | Field              | Type         | Null | Key | Default | Comment                                                       |
 | ------------------ | ------------ | ---- | --- | ------- | ------------------------------------------------------------- |
 | doc_id             | varchar(64)  | NO   | PRI | None    |                                                               |
@@ -347,7 +334,6 @@
 | jansEnabled        | smallint     | YES  |     | None    | Status of the entry, used by many objectclasses               |
 
 ### jansFido2AuthnEntry
-
 | Field                 | Type         | Null | Key | Default | Comment                                         |
 | --------------------- | ------------ | ---- | --- | ------- | ----------------------------------------------- |
 | doc_id                | varchar(64)  | NO   | PRI | None    |                                                 |
@@ -366,7 +352,6 @@
 | del                   | smallint     | YES  | MUL | None    | del                                             |
 
 ### jansFido2RegistrationEntry
-
 | Field                      | Type         | Null | Key | Default | Comment                                                       |
 | -------------------------- | ------------ | ---- | --- | ------- | ------------------------------------------------------------- |
 | doc_id                     | varchar(64)  | NO   | PRI | None    |                                                               |
@@ -391,7 +376,6 @@
 | del                        | smallint     | YES  | MUL | None    | del                                                           |
 
 ### jansGrant
-
 | Field       | Type         | Null | Key | Default | Comment       |
 | ----------- | ------------ | ---- | --- | ------- | ------------- |
 | doc_id      | varchar(64)  | NO   | PRI | None    |               |
@@ -401,7 +385,6 @@
 | iat         | datetime(3)  | YES  |     | None    | jans Creation |
 
 ### jansGrp
-
 | Field            | Type         | Null | Key | Default | Comment                                                       |
 | ---------------- | ------------ | ---- | --- | ------- | ------------------------------------------------------------- |
 | doc_id           | varchar(64)  | NO   | PRI | None    |                                                               |
@@ -422,7 +405,6 @@
 | jansMetaVer      | varchar(64)  | YES  |     | None    |                                                               |
 
 ### jansInumMap
-
 | Field                    | Type         | Null | Key | Default | Comment                                         |
 | ------------------------ | ------------ | ---- | --- | ------- | ----------------------------------------------- |
 | doc_id                   | varchar(64)  | NO   | PRI | None    |                                                 |
@@ -438,7 +420,6 @@
 | jansTertiaryKeyValue     | varchar(64)  | YES  |     | None    | Tertiary Key Value                              |
 
 ### jansMetric
-
 | Field            | Type         | Null | Key | Default | Comment                                        |
 | ---------------- | ------------ | ---- | --- | ------- | ---------------------------------------------- |
 | doc_id           | varchar(64)  | NO   | PRI | None    |                                                |
@@ -457,41 +438,39 @@
 | jansHost         | varchar(64)  | YES  |     | None    | jans host                                      |
 
 ### jansOrganization
-
-| Field                 | Type         | Null | Key | Default | Comment                                                                                            |
-| --------------------- | ------------ | ---- | --- | ------- | -------------------------------------------------------------------------------------------------- |
-| doc_id                | varchar(64)  | NO   | PRI | None    |                                                                                                    |
-| objectClass           | varchar(48)  | YES  |     | None    |                                                                                                    |
-| dn                    | varchar(128) | YES  |     | None    |                                                                                                    |
-| c                     | varchar(2)   | YES  |     | None    |                                                                                                    |
-| description           | varchar(768) | YES  |     | None    |                                                                                                    |
-| displayName           | varchar(128) | YES  |     | None    | preferred name of a person to be used when displaying entries                                      |
-| jansCustomMessage     | varchar(128) | YES  |     | None    | exclude custom welcome message                                                                     |
-| jansFaviconImage      | varchar(64)  | YES  |     | None    | TODO - Stores URL of favicon                                                                       |
-| jansLogoImage         | varchar(64)  | YES  |     | None    | Logo used by exclude for default look and feel.                                                    |
-| jansManager           | varchar(64)  | YES  |     | None    | Used to specify if a person has the manager role                                                   |
-| jansManagerGrp        | tinytext     | YES  |     | None    | Used in organizatoin entry to specifies the dn of the group that has admin priviledges in exclude. |
-| jansOrgShortName      | varchar(64)  | YES  |     | None    | Short description, as few letters as possible, no spaces.                                          |
-| jansThemeColor        | varchar(64)  | YES  |     | None    | exclude login page configuration                                                                   |
-| inum                  | varchar(64)  | YES  |     | None    | XRI i-number                                                                                       |
-| l                     | varchar(64)  | YES  |     | None    |                                                                                                    |
-| mail                  | varchar(96)  | YES  |     | None    |                                                                                                    |
-| memberOf              | json         | YES  |     | None    |                                                                                                    |
-| o                     | varchar(64)  | YES  |     | None    |                                                                                                    |
-| jansCreationTimestamp | datetime(3)  | YES  |     | None    | Registration time                                                                                  |
-| jansRegistrationConf  | varchar(64)  | YES  |     | None    | Registration Conf                                                                                  |
-| postalCode            | varchar(16)  | YES  |     | None    |                                                                                                    |
-| st                    | varchar(64)  | YES  |     | None    |                                                                                                    |
-| street                | tinytext     | YES  |     | None    |                                                                                                    |
-| telephoneNumber       | varchar(20)  | YES  |     | None    |                                                                                                    |
-| title                 | varchar(64)  | YES  |     | None    |                                                                                                    |
-| uid                   | varchar(64)  | YES  | MUL | None    |                                                                                                    |
-| jansLogoPath          | varchar(64)  | YES  |     | None    | jansLogoPath                                                                                       |
-| jansStatus            | varchar(16)  | YES  |     | None    | Status of the entry, used by many objectclasses                                                    |
-| jansFaviconPath       | varchar(64)  | YES  |     | None    | jansFaviconPath                                                                                    |
+| Field                 | Type         | Null | Key | Default | Comment                                                                                             |
+| --------------------- | ------------ | ---- | --- | ------- | --------------------------------------------------------------------------------------------------- |
+| doc_id                | varchar(64)  | NO   | PRI | None    |                                                                                                     |
+| objectClass           | varchar(48)  | YES  |     | None    |                                                                                                     |
+| dn                    | varchar(128) | YES  |     | None    |                                                                                                     |
+| c                     | varchar(2)   | YES  |     | None    |                                                                                                     |
+| description           | varchar(768) | YES  |     | None    |                                                                                                     |
+| displayName           | varchar(128) | YES  |     | None    | preferred name of a person to be used when displaying entries                                       |
+| jansCustomMessage     | varchar(128) | YES  |     | None    | exclude custom welcome message                                                                      |
+| jansFaviconImage      | varchar(64)  | YES  |     | None    | TODO - Stores URL of favicon                                                                        |
+| jansLogoImage         | varchar(64)  | YES  |     | None    | Logo used by exclude for default look and feel.                                                     |
+| jansManager           | varchar(64)  | YES  |     | None    | Used to specify if a person has the manager role                                                    |
+| jansManagerGrp        | tinytext     | YES  |     | None    | Used in organizatoin entry to specifies the dn of the group that  has admin priviledges in exclude. |
+| jansOrgShortName      | varchar(64)  | YES  |     | None    | Short description, as few letters as possible, no spaces.                                           |
+| jansThemeColor        | varchar(64)  | YES  |     | None    | exclude login page configuration                                                                    |
+| inum                  | varchar(64)  | YES  |     | None    | XRI i-number                                                                                        |
+| l                     | varchar(64)  | YES  |     | None    |                                                                                                     |
+| mail                  | varchar(96)  | YES  |     | None    |                                                                                                     |
+| memberOf              | json         | YES  |     | None    |                                                                                                     |
+| o                     | varchar(64)  | YES  |     | None    |                                                                                                     |
+| jansCreationTimestamp | datetime(3)  | YES  |     | None    | Registration time                                                                                   |
+| jansRegistrationConf  | varchar(64)  | YES  |     | None    | Registration Conf                                                                                   |
+| postalCode            | varchar(16)  | YES  |     | None    |                                                                                                     |
+| st                    | varchar(64)  | YES  |     | None    |                                                                                                     |
+| street                | tinytext     | YES  |     | None    |                                                                                                     |
+| telephoneNumber       | varchar(20)  | YES  |     | None    |                                                                                                     |
+| title                 | varchar(64)  | YES  |     | None    |                                                                                                     |
+| uid                   | varchar(64)  | YES  | MUL | None    |                                                                                                     |
+| jansLogoPath          | varchar(64)  | YES  |     | None    | jansLogoPath                                                                                        |
+| jansStatus            | varchar(16)  | YES  |     | None    | Status of the entry, used by many objectclasses                                                     |
+| jansFaviconPath       | varchar(64)  | YES  |     | None    | jansFaviconPath                                                                                     |
 
 ### jansPairwiseIdentifier
-
 | Field                | Type         | Null | Key | Default | Comment                |
 | -------------------- | ------------ | ---- | --- | ------- | ---------------------- |
 | doc_id               | varchar(64)  | NO   | PRI | None    |                        |
@@ -503,7 +482,6 @@
 | jansUsrId            | varchar(64)  | YES  |     | None    | jans user id           |
 
 ### jansPar
-
 | Field       | Type         | Null | Key | Default | Comment    |
 | ----------- | ------------ | ---- | --- | ------- | ---------- |
 | doc_id      | varchar(64)  | NO   | PRI | None    |            |
@@ -515,7 +493,6 @@
 | del         | smallint     | YES  | MUL | None    | del        |
 
 ### jansPassResetReq
-
 | Field        | Type         | Null | Key | Default | Comment                                        |
 | ------------ | ------------ | ---- | --- | ------- | ---------------------------------------------- |
 | doc_id       | varchar(64)  | NO   | PRI | None    |                                                |
@@ -526,7 +503,6 @@
 | personInum   | varchar(64)  | YES  |     | None    | Inum of a person                               |
 
 ### jansPerson
-
 | Field                                | Type         | Null | Key | Default | Comment                                                                                                  |
 | ------------------------------------ | ------------ | ---- | --- | ------- | -------------------------------------------------------------------------------------------------------- |
 | doc_id                               | varchar(64)  | NO   | PRI | None    |                                                                                                          |
@@ -630,7 +606,6 @@
 | jansAdminUIRole                      | json         | YES  |     | None    | jansAdminUIRole                                                                                          |
 
 ### jansPushApp
-
 | Field           | Type         | Null | Key | Default | Comment                                                       |
 | --------------- | ------------ | ---- | --- | ------- | ------------------------------------------------------------- |
 | doc_id          | varchar(64)  | NO   | PRI | None    |                                                               |
@@ -642,7 +617,6 @@
 | jansPushAppConf | varchar(64)  | YES  |     | None    | jansPush application configuration                            |
 
 ### jansPushDevice
-
 | Field              | Type         | Null | Key | Default | Comment                       |
 | ------------------ | ------------ | ---- | --- | ------- | ----------------------------- |
 | doc_id             | varchar(64)  | NO   | PRI | None    |                               |
@@ -655,7 +629,6 @@
 | jansTyp            | varchar(64)  | YES  |     | None    | jans type                     |
 
 ### jansRp
-
 | Field       | Type         | Null | Key | Default | Comment    |
 | ----------- | ------------ | ---- | --- | ------- | ---------- |
 | doc_id      | varchar(64)  | NO   | PRI | None    |            |
@@ -665,7 +638,6 @@
 | dat         | text         | YES  |     | None    | OX data    |
 
 ### jansScope
-
 | Field              | Type         | Null | Key | Default | Comment                                                       |
 | ------------------ | ------------ | ---- | --- | ------- | ------------------------------------------------------------- |
 | doc_id             | varchar(64)  | NO   | PRI | None    |                                                               |
@@ -691,7 +663,6 @@
 | del                | smallint     | YES  | MUL | None    | del                                                           |
 
 ### jansScr
-
 | Field       | Type         | Null | Key | Default | Comment                                                   |
 | ----------- | ------------ | ---- | --- | ------- | --------------------------------------------------------- |
 | doc_id      | varchar(64)  | NO   | PRI | None    |                                                           |
@@ -702,7 +673,6 @@
 | jansScrTyp  | varchar(64)  | YES  |     | None    | Attr that contains script type (e.g. python, java script) |
 
 ### jansSectorIdentifier
-
 | Field           | Type         | Null | Key | Default | Comment           |
 | --------------- | ------------ | ---- | --- | ------- | ----------------- |
 | doc_id          | varchar(64)  | NO   | PRI | None    |                   |
@@ -714,7 +684,6 @@
 | jansClntId      | json         | YES  |     | None    | jans Clnt id      |
 
 ### jansSessId
-
 | Field                    | Type         | Null | Key | Default | Comment                                                                      |
 | ------------------------ | ------------ | ---- | --- | ------- | ---------------------------------------------------------------------------- |
 | doc_id                   | varchar(64)  | NO   | PRI | None    |                                                                              |
@@ -740,7 +709,6 @@
 | jansAttrs                | text         | YES  |     | None    | jansAttrs - predefined attributes (e.g. index in status list)                |
 
 ### jansSsa
-
 | Field        | Type         | Null | Key | Default | Comment                                        |
 | ------------ | ------------ | ---- | --- | ------- | ---------------------------------------------- |
 | doc_id       | varchar(64)  | NO   | PRI | None    |                                                |
@@ -758,7 +726,6 @@
 | creationDate | datetime(3)  | YES  |     | None    | Creation Date used for password reset requests |
 
 ### jansStatEntry
-
 | Field       | Type         | Null | Key | Default | Comment    |
 | ----------- | ------------ | ---- | --- | ------- | ---------- |
 | doc_id      | varchar(64)  | NO   | PRI | None    |            |
@@ -770,7 +737,6 @@
 | attr        | text         | YES  |     | None    | Attrs      |
 
 ### jansToken
-
 | Field       | Type         | Null | Key | Default | Comment                        |
 | ----------- | ------------ | ---- | --- | ------- | ------------------------------ |
 | doc_id      | varchar(64)  | NO   | PRI | None    |                                |
@@ -802,7 +768,6 @@
 | dpop        | varchar(64)  | YES  |     | None    | DPoP Proof                     |
 
 ### jansU2fReq
-
 | Field           | Type         | Null | Key | Default | Comment                                        |
 | --------------- | ------------ | ---- | --- | ------- | ---------------------------------------------- |
 | doc_id          | varchar(64)  | NO   | PRI | None    |                                                |
@@ -818,7 +783,6 @@
 | creationDate    | datetime(3)  | YES  | MUL | None    | Creation Date used for password reset requests |
 
 ### jansUmaPCT
-
 | Field           | Type         | Null | Key | Default | Comment                        |
 | --------------- | ------------ | ---- | --- | ------- | ------------------------------ |
 | doc_id          | varchar(64)  | NO   | PRI | None    |                                |
@@ -851,7 +815,6 @@
 | tknBndCnf       | tinytext     | YES  |     | None    | jansauth - Tkn Binding Id Hash |
 
 ### jansUmaRPT
-
 | Field             | Type         | Null | Key | Default | Comment                        |
 | ----------------- | ------------ | ---- | --- | ------- | ------------------------------ |
 | doc_id            | varchar(64)  | NO   | PRI | None    |                                |
@@ -884,7 +847,6 @@
 | tknBndCnf         | tinytext     | YES  |     | None    | jansauth - Tkn Binding Id Hash |
 
 ### jansUmaResource
-
 | Field               | Type         | Null | Key | Default | Comment                                                                 |
 | ------------------- | ------------ | ---- | --- | ------- | ----------------------------------------------------------------------- |
 | doc_id              | varchar(64)  | NO   | PRI | None    |                                                                         |
@@ -908,7 +870,6 @@
 | description         | varchar(768) | YES  |     | None    |                                                                         |
 
 ### jansUmaResourcePermission
-
 | Field             | Type         | Null | Key | Default | Comment                                         |
 | ----------------- | ------------ | ---- | --- | ------- | ----------------------------------------------- |
 | doc_id            | varchar(64)  | NO   | PRI | None    |                                                 |

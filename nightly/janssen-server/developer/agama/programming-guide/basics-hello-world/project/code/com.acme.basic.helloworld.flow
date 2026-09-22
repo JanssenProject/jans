@@ -1,0 +1,5 @@
+Flow com.acme.basic.helloworld
+    Basepath ""
+    
+RRF "salutation.ftlh"
+Finish true

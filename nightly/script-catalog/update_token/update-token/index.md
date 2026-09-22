@@ -2,18 +2,22 @@
 
 By overriding the interface methods in [`UpdateTokenType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/UpdateTokenType.java) inside a custom script you can
 
-1. Enable transformation of claims and values in id_token and Access token e.g. add a custom claim to an `id_token`, change a token expiry, change the `sub` value, or remove the `nonce`.
+1. Enable transformation of claims and values in id_token and Access token e.g. add a custom claim to an `id_token`, change a token expiry, change the `sub` value, or remove the `nonce`.  
 
-Example use-case:\
-\* As per the open banking standard, the id_token should contain claim `openbanking_intent_id` and the same value should also reflect in the `sub` claim. * As specified in the [FAPI Baseline Specification](https://openid.net/specs/openid-financial-api-part-1-1_0.html) the `sub` claim should have the user id.
+   Example use-case:  
+      * As per the open banking standard, the id_token should contain claim `openbanking_intent_id` and the same value should also reflect in the `sub` claim.
+      * As specified in the [FAPI Baseline Specification](https://openid.net/specs/openid-financial-api-part-1-1_0.html) the `sub` claim should have the user id.
 
-1. Set a specific token lifetime
-1. Perform extra business logic like adding or removing scopes.
-1. Add an extra audit log for each token response.
+2. Set a specific token lifetime
+
+3. Perform extra business logic like adding or removing scopes.
+
+4. Add an extra audit log for each token response.
 
 ## Flow
 
-```
+```mermaid
+
 sequenceDiagram
 title UpdateToken script
 autonumber 1
@@ -22,6 +26,7 @@ Jans AS->>Jans AS: Is UpdateToken script is associated with client? <br/>(or is 
 Jans AS->>Jans AS: do stuff
 note  right of Jans AS: do stuff<br/>1. Enable transformation of claims and values in id_token <br/> OR 2. set token expiry <br/> or 3. add / remove scopes. <br/> or 4. perform audit logs
 Jans AS->>RP: return token(s) (Access token, ID token or Refresh Token) reflecting step 3
+
 ```
 
 ## Adding the custom script to Jans server
@@ -32,14 +37,16 @@ Jans AS->>RP: return token(s) (Access token, ID token or Refresh Token) reflecti
 /opt/jans/jans-cli/config-cli.py --schema CustomScript > /tmp/cs.json
 ```
 
-1. Edit the file's contents to reflect the addition of the UpdateToken custom script.
-1. Set enabled flag `true`
-1. Configure any parameters that the script may use.
-1. `name` field should reflect the use case
-1. `script_type` should be `UPDATE_TOKEN`
-1. `script.py` can have contents similar to [Sample Script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/update_token/sample-script/sample_script.py)) and is present in jans-cli's host machine.
+2. Edit the file's contents to reflect the addition of the UpdateToken custom script.
+
+ *  Set enabled flag `true`
+ *  Configure any parameters that the script may use.
+ *  `name` field should reflect the use case
+ *  `script_type` should be `UPDATE_TOKEN`
+ *  `script.py` can have contents similar to [Sample Script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/update_token/sample-script/sample_script.py)) and is present in jans-cli's host machine.
 
 ```
+
 {
   "dn": null,
   "inum": null,
@@ -83,21 +90,30 @@ Jans AS->>RP: return token(s) (Access token, ID token or Refresh Token) reflecti
 }
 ```
 
-- Add the custom script. Save the response, it will contain the inum of the newly added script.
-- ```
-  /opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/cs.json
-  ```
+ - Add the custom script. Save the response, it will contain the inum of the newly added script.
+ - 
+```
+/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/cs.json
+```
 
 ## Associate an Update Token script to a client (RP) [optional step]
 
 📝 Note: If the Update token script is not associated with a client, then it will not be executed. To run all scripts globally (independent from what is assigned to client) please set global AS configuration property `runAllUpdateTokenScripts` is set to `true`. Which implies that all tokens obtained using the Jans server will reflect modifications as per the script.
-
+<br/>
 To Associate an Update Token script to a client (RP), execute the command below with appropriate values for:
+ - inum of the client
+ - inum of the update_token script
 
-- inum of the client
-- inum of the update_token script
-
-`/opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-openid-clients-by-inum --url-suffix inum:inum_of_client --data '[ { "op": "add", "path": "updateTokenScriptDns", "value": ["inum={SCRIPT_ID},ou=scripts,o=jans"] } ]'`
+ ```
+ /opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-openid-clients-by-inum --url-suffix inum:inum_of_client
+  --data '[
+     {
+        "op": "add",
+        "path": "updateTokenScriptDns",
+        "value":  ["inum={SCRIPT_ID},ou=scripts,o=jans"]
+     }
+     ]'
+```
 
 ## Writing an Update token script (Pseudo code for potential usecases)
 
@@ -139,9 +155,12 @@ Pseudocode and example :
         jsonWebResponse.getClaims().setClaim("sub", claimValue)
 
         return True
+
 ```
 
-### modifyAccessToken()
+![Inspecting a modified ID token](https://github.com/JanssenProject/jans/blob/main/docs/assets/update-id-token.png)
+
+###  modifyAccessToken()
 
 #### Granularity of access control
 
@@ -153,7 +172,6 @@ An UpdateTokenType script is great for adding scopes or removing scopes to/from 
     def modifyAccessToken(self, accessToken, context):
               context.overwriteAccessTokenScopes(accessToken, Sets.newHashSet("openid", "mynewscope"))
 ```
-
 #### Perform business check before returning AT
 
 Pseudocode and example - Issue Access token only if account balance is greater than 0
@@ -195,65 +213,66 @@ Pseudocode and example - Issue Access token only if account balance is greater t
             context.getClaims().setClaim("sub", claimValue)
 
             return True
+
 ```
 
 ### Modify a specific token lifetime based on the context
 
 1. Refresh token lifetime:
 
-```
+```python
     def getRefreshTokenLifetimeInSeconds(self, context):
         return 24 * 60 * 60 # one day
 ```
 
-1. ID token lifetime:
+2. ID token lifetime:
 
-```
+```python
     def getIdTokenLifetimeInSeconds(self, context):
         return 10 * 60 * 60 # 10 hours
 ```
 
-1. Access token lifetime:
+3. Access token lifetime:
 
-```
+```python
     def getAccessTokenLifetimeInSeconds(self, context):
         return 10 * 60 * 60 # 10 hours
 ```
-
 Access token lifetime from script has highest priority (it wins from client's access token lifetime configuration).
 
-### modifyRefreshToken() :
 
+### modifyRefreshToken() :
 Used to modify claims in a Refresh Token
 
-```
+```python
     # Returns boolean, true - indicates that script applied changes. If false is returned token will not be created.
     # refreshToken is reference of io.jans.as.server.model.common.RefreshToken (note authorization grant can be taken as context.getGrant())
     # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
     def modifyRefreshToken(self, refreshToken, context):
         return True
+
 ```
 
 ## IntrospectionType script vs UpdateTokenType script
 
-|                                | [`IntrospectionType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java)                                      | [`UpdateTokenType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/UpdateTokenType.java)                                                                                                                   |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Client configuration parameter | Introspection script is invoked only when **`accessTokenAsJwt`=`true`**                                                                                                                                           | Update token script is invoked irrespective of whether `accessTokenAsJwt` is `true` or `false`                                                                                                                                                                                     |
-| Core Purpose                   | Returns access token meta information such as current validity, approved scopes, and issuance context when a Resource Server queries the [Introspection endpoint](https://datatracker.ietf.org/doc/html/rfc7662). | Enables transformation of claims and values in id_token and Access token, sets specific token lifetimes, changes access control granularity (up-scoping, down-scoping), performs audit logging for each token response, and can forbid Access token creation based on a criterion. |
-| Functionality                  | 1. Can be used to modify claims of an Access token as JWT, however this it is recommended to use UpdateToken script instead.                                                                                      | 1. Used to modify id_token, refresh token and access token                                                                                                                                                                                                                         |
-|                                | 2. Introspection script cannot change scope of AT                                                                                                                                                                 | 2. UpdateToken can change scope of AT and modify AT object in persistence irrespective of the value of `accessTokenAsJwt` as `true` or `false`                                                                                                                                     |
-| Script Invocation sequence     | 2. **After** an Access token is generated                                                                                                                                                                         | 2. **Before** the creation of AT, id_token and refresh_token                                                                                                                                                                                                                       |
+|   | [`IntrospectionType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java)| [`UpdateTokenType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/UpdateTokenType.java) |
+|---|---|---|
+| Client configuration parameter  |Introspection script is invoked only when **`accessTokenAsJwt`=`true`**   | Update token script is invoked irrespective of whether `accessTokenAsJwt` is `true` or `false`   |
+| Core Purpose   | Returns access token meta information such as current validity, approved scopes, and issuance context when a Resource Server queries the [Introspection endpoint](https://datatracker.ietf.org/doc/html/rfc7662).     | Enables transformation of claims and values in id_token and Access token, sets specific token lifetimes, changes access control granularity (up-scoping, down-scoping), performs audit logging for each token response, and can forbid Access token creation based on a criterion. |
+| Functionality  | 1. Can be used to modify claims of an Access token as JWT, however this it is recommended to use UpdateToken script instead.  |1. Used to modify id_token, refresh token and access token   |
+|  |2. Introspection script cannot change scope of AT   | 2. UpdateToken can change scope of AT and modify AT object in persistence irrespective of the value of `accessTokenAsJwt` as `true` or `false` |
+| Script Invocation sequence |2. **After** an Access token is generated   | 2. **Before** the creation of AT, id_token and refresh_token  |
 
 ## Testing
 
 1. Use this: [Reference for testing](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/AuthorizationCodeFlowHttpTest.java)
-1. Inspect the tokens. Use [jwt.io](https://jwt.io) to inspect the contents of a JWT.
+2. Inspect the tokens. Use [jwt.io](https://jwt.io) to inspect the contents of a JWT.
 
 ## FAQ
 
 1. How can I add a `dict` type object as a claim value?
 
-```
+```python
 from io.jans.as.model.uti import JwtUtil
 from org.json import JSONObject;
 
@@ -266,14 +285,14 @@ from org.json import JSONObject;
         return True
 ```
 
-1. How can I set integer value in id token claim?
+2. How can I set integer value in id token claim?
 
-```
+```python
 jsonWebResponse.getClaims().setClaim("claimY", Integer.valueOf(124456191))
 ```
 
 Get it as integer, via:
 
-```
+```python
 getClaims().getClaimAsInteger("claimY")
 ```

@@ -1,6 +1,7 @@
 # PostgreSQL Operations
 
-PostgreSQL is a versatile and reliable database management system that empowers developers and organizations to build robust and efficient applications.
+PostgreSQL is a versatile and reliable database management system that empowers developers and organizations to build robust
+and efficient applications.
 
 ## Establish Connection to Jans PostgreSQL Server
 
@@ -12,28 +13,27 @@ You will see `jansdb` in the list of database.
 
 Let's make a connection with `jansdb` : `\c jansdb`
 
+
 ## Search user
 
-- Change database: `\c jansdb`
-- Search for user `testUser`: `SELECT * FROM "jansPerson" WHERE uid = 'testuser';`
-- If you want pretty output, enable display mode with `\x`
-- Re-run search query.
+* Change database: `\c jansdb`
+* Search for user `testUser`: `SELECT * FROM "jansPerson" WHERE uid = 'testuser';`
+  * If you want pretty output, enable display mode with `\x` 
+  * Re-run search query. 
+
 
 ## Change password for user jans
 
-- Changing user 'jans' password to "secret": `ALTER USER jans WITH PASSWORD 'secret';`
+* Changing user 'jans' password to "secret": `ALTER USER jans WITH PASSWORD 'secret';` 
 
 ## Add user in Jans Group
 
-- Get DN of target user. i.e. we are searching for DN of user 'testUser' with: `SELECT * FROM "jansPerson" WHERE uid = 'testuser';`
-
-- Get DN of Jans Admin Group. i.e. `SELECT * FROM "jansGrp";`
-
-- Add ( actually append ) new user in `member` of this group:
-
-  ```
-  UPDATE "jansGrp" SET member = '["inum=d33a2ce9-e9de-4f74-8a7d-2519f73635b7,ou=people,o=jans", "inum=618d7792-caca-4915-8b92-9955bf94affb,ou=people,o=jans"]';
-  ```
+* Get DN of target user. i.e. we are searching for DN of user 'testUser' with: `SELECT * FROM "jansPerson" WHERE uid = 'testuser';`
+* Get DN of Jans Admin Group. i.e. `SELECT * FROM "jansGrp";`
+* Add ( actually append ) new user in `member` of this group: 
+```
+UPDATE "jansGrp" SET member = '["inum=d33a2ce9-e9de-4f74-8a7d-2519f73635b7,ou=people,o=jans", "inum=618d7792-caca-4915-8b92-9955bf94affb,ou=people,o=jans"]';
+```
 
 ## List users with specific filter
 
@@ -66,7 +66,6 @@ To add a custom attribute to an existing PostgreSQL table, you can use the `ALTE
 ALTER TABLE "jansPerson"
 ADD COLUMN membership_level VARCHAR(50);
 ```
-
 You can also specify additional constraints, defaults, or other attributes for the new column as needed. Here's an example with a `default` value:
 
 ```
@@ -89,8 +88,8 @@ After executing the command, the data from the specified column will be copied i
 PostgreSQL is a popular open-source relational database management system used for web applications, business intelligence, and other data-intensive applications. A critical aspect of managing a PostgreSQL database is ensuring data protection by having a backup and restore strategy in place.
 
 ### Back-up
-
-To `dump` the PostgreSQL database, you can use the `pg_dump` command-line utility. To back-up your database
+To `dump` the PostgreSQL database, you can use the `pg_dump` command-line utility.
+To back-up your database
 
 ```
 pg_dump -h localhost -U "<user>" "<dbName>" -Fc > /tmp/back-up.sql
@@ -103,6 +102,9 @@ To restore the backup file you need to use `pg_restore`.
 ```
 pg_restore -h localhost -U "<user>" -d <db_name> <back-up.sql>
 ```
+
+
+
 
 ## Want to contribute?
 

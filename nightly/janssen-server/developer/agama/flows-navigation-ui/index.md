@@ -1,18 +1,17 @@
 # Flows navigation, UI pages and assets
 
-[RRF](https://docs.jans.io/nightly/agama/language-reference/#rrf) is a powerful construct in Agama. Its syntax follows this pattern:
+[RRF](../../../agama/language-reference.md#rrf) is a powerful construct in Agama. Its syntax follows this pattern:
 
-(*assignment-var* =)? `RRF` "path-to-UI-template" *map-variable*?
+(_assignment-var_ =)? `RRF` "path-to-UI-template" _map-variable_?
 
 Execution involves several steps which can be summarized as: location of template, rendering, and user-data retrieval. The process is explained in the following.
 
 ## Template location
 
-Note
+!!! Note
+    For convenience, references to the server directory `/opt/jans/jetty/jans-auth/agama` will be replaced by `<AGAMA-DIR>` from here onwards.
 
-For convenience, references to the server directory `/opt/jans/jetty/jans-auth/agama` will be replaced by `<AGAMA-DIR>` from here onwards.
-
-A path is built by concatenating the `Basepath` of the flow this `RRF` belongs to and the actual template path, i.e. *path-to-UI-template* as in the introductory paragraph. Then the engine's templates path root is prepended to it. The "root" is the value set in the [engine configuration](https://docs.jans.io/nightly/janssen-server/developer/agama/engine-bridge-config/#engine-configuration) for the property `templatesPath`. Thus, in a default installation, the value to prepend would be `<AGAMA-DIR>/ftl`.
+A path is built by concatenating the `Basepath` of the flow this `RRF` belongs to and the actual template path, i.e. _path-to-UI-template_ as in the introductory paragraph. Then the engine's templates path root is prepended to it. The "root" is the value set in the [engine configuration](./engine-bridge-config.md#engine-configuration) for the property `templatesPath`. Thus, in a default installation, the value to prepend would be `<AGAMA-DIR>/ftl`.
 
 If there is no such file, the flow will crash right away, otherwise, processing continues.
 
@@ -24,9 +23,9 @@ Developers are encouraged to take a peep at the [FreeMarker manual](https://free
 
 ## Rendering
 
-Rendering is the process of "injecting" the variable passed (*map-variable* in the above) into a template. If no variable is present in the instruction, it is assumed an empty *map* was passed, i.e. `{ }`.
+Rendering is the process of "injecting" the variable passed (_map-variable_ in the above) into a template. If no variable is present in the instruction, it is assumed an empty _map_ was passed, i.e. `{ }`.
 
-The variable injected ("data model" in FreeMarker terms) always has to be an Agama *map*, Java bean or object implementing the `java.util.Map` interface. This will allow access to the contents of such variable from within the template.
+The variable injected ("data model" in FreeMarker terms) always has to be an Agama _map_, Java bean or object implementing the `java.util.Map` interface. This will allow access to the contents of such variable from within the template.
 
 Here is a simple example. Suppose you want to ask for a username and password in a page called `login.ftl` and that such page will be stored in `<AGAMA-DIR>/ftl/myflow/pages/login.ftl`. Assume the flow has the header directive `Basepath "myflow"`. Also, let's say we want to pass a custom salutation message to be shown at the top of the page. Here is how the Agama code would look like:
 
@@ -44,19 +43,19 @@ And here the UI page contents:
 <html xmlns="http://www.w3.org/1999/xhtml">
     ...
     <body>
-
-        <h1>${message}</h1>         
+    
+        <h1>${message}</h1>			
 
         <form method="post" enctype="application/x-www-form-urlencoded">
             <div>
                 <label for="username">Username</label>
-                <input type="text" name="username">
+        		<input type="text" name="username">
             </div>
             <div>
                 <label for="password">Password</label>
                 <input type="password" name="password">
             </div>
-            <input type="submit" value="Login">
+			<input type="submit" value="Login">
         </form>
 
     </body>
@@ -65,11 +64,13 @@ And here the UI page contents:
 
 ### Extended data model
 
-The data model (injected *map*) is attached some additional keys for convenience:
+The data model (injected _map_) is attached some additional keys for convenience:
 
 - `webCtx`. It gives easy access to often needed bits like current path, locale, etc. This is a Java object you can inspect [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/service/WebContext.java). Take a look at the getters; writing `${webCtx.contextPath}` in a template will insert the result of calling method `getContextPath` - normally the string `/jans-auth`
+
 - `cache`. Allows developers to retrieve values already stored in the Jans configured cache, e.g. `${cache.myKey}`. To avoid template errors in case of a cache miss, you can use Freemarker's safeguard [expressions](https://freemarker.apache.org/docs/dgui_template_exp.html#dgui_template_exp_missing). Note you cannot store/modify values in the cache from templates
-- `labels` and `msgs`. These give access to localized messages. They are useful when templates have to render different texts depending on user context, such as country and language. Learn more in [Localization and internationalization](https://docs.jans.io/nightly/janssen-server/developer/agama/advanced-usages/#localization-and-internationalization)
+
+- `labels` and `msgs`. These give access to localized messages. They are useful when templates have to render different texts depending on user context, such as country and language. Learn more in [Localization and internationalization](./advanced-usages.md#localization-and-internationalization)
 
 ### Assets handling
 
@@ -82,6 +83,7 @@ foo
 |- index.ftlh
 +- bar
    \- index2.ftlh
+
 ```
 
 Say `index.ftlh` has markup like `<img src="bar/me.png">` and `index2.ftlh` has `<link href="my/style.css" rel="stylesheet">` somewhere. This is how `<AGAMA-DIR>/fl` would look like:
@@ -98,7 +100,7 @@ foo
 
 Once the rendered page is shown in the browser, the flow execution is literally paused. If the user stands idly at this page, nothing will happen. To make the flow proceed, an HTTP POST must be made to the current URL. This is exactly what `login.ftl` of the above example tries to do: it provides a button that submits the form via POST for the flow to resume execution.
 
-Once the flow continues, an Agama *map* is built using all form fields received at the server and bound to the variable used in the assignment of the RRF instruction (the variable referred as *assignment-var* in the introduction of this page). This only applies when `RRF` has an assignment associated, of course.
+Once the flow continues, an Agama _map_ is built using all form fields received at the server and bound to the variable used in the assignment of the RRF instruction (the variable referred as _assignment-var_ in the introduction of this page). This only applies when `RRF` has an assignment associated, of course.
 
 If the earlier example is modified to
 
@@ -109,11 +111,11 @@ credentials = RRF "pages/login.ftl" obj
 ...
 ```
 
-the form values can then be referenced as `credentials.username` and `credentials.password` in the flow. In other words, the keys of the resulting map will correspond to the form field names. The values will all be *strings*.
+the form values can then be referenced as `credentials.username` and `credentials.password` in the flow. In other words, the keys of the resulting map will correspond to the form field names. The values will all be _strings_.
 
 ## 3-param variant
 
-In the Jans Agama engine, `RRF` can be passed a third parameter: `RRF templatePath variable boolean`. When the boolean value is `true` the callback URL will be available while `RRF` is in execution (as in [RFAC](https://docs.jans.io/nightly/janssen-server/developer/agama/jans-agama-engine/#rfac-and-callback-url)). In this case, if the callback is visited, data passed to it will be set as the result of the `RRF`. If a POST to the current URL is received first, i.e. callback not hit, behavior will be as in the two-param `RRF` invocation. This is also the case when a `false` value is passed for the third parameter.
+In the Jans Agama engine, `RRF` can be passed a third parameter: `RRF templatePath variable boolean`. When the boolean value is `true` the callback URL will be available while `RRF` is in execution (as in [RFAC](./jans-agama-engine.md#rfac-and-callback-url)). In this case, if the callback is visited, data passed to it will be set as the result of the `RRF`. If a POST to the current URL is received first, i.e. callback not hit, behavior will be as in the two-param `RRF` invocation. This is also the case when a `false` value is passed for the third parameter.
 
 The three-param variant of `RRF` can be useful when:
 

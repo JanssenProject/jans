@@ -1,26 +1,27 @@
 # Cedarling Interfaces
 
-Cedarling provides a number of methods to interface with the Cedar engine. These are described below.
+Cedarling provides a number of methods to interface with the Cedar engine.
+These are described below.
 
 ## Init
 
-These methods are used to create a `BootstrapConfig` object, which is needed to initialize a Cedarling instance. [Bootstrap properties](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/index.md) are required to do this.
+These methods are used to create a `BootstrapConfig` object, which is needed to initialize a Cedarling instance. [Bootstrap properties](./cedarling-properties.md) are required to do this.
 
 - `load_from_file(path)`
-
-  Creates a `BootstrapConfig` object by loading properties from a file
+  
+    Creates a `BootstrapConfig` object by loading properties from a file
 
 - `load_from_json(config_json)`
 
-  Creates a `BootstrapConfig` object by reading in a string encoded JSON object containing properties.
+    Creates a `BootstrapConfig` object by reading in a string encoded JSON object containing properties.
 
 - `from_env(options)`
 
-  Creates a `BootstrapConfig` object by reading environment variables. If a dictionary is passed in, it will override environment variables.
+    Creates a `BootstrapConfig` object by reading environment variables. If a dictionary is passed in, it will override environment variables.
 
 - `Cedarling(bootstrap_config)`
 
-  Initializes an instance of the Cedarling engine by reading the bootstrap configuration.
+    Initializes an instance of the Cedarling engine by reading the bootstrap configuration.
 
 ## Authz
 
@@ -28,51 +29,45 @@ These methods are called to create an authorization request, run authorization, 
 
 - `EntityData(cedar_mapping, attributes)`
 
-  Creates a principal or resource entity.
+    Creates a principal or resource entity.
 
-- `cedar_mapping`: A `CedarEntityMapping` object with `entity_type` (Cedar type name) and `id` (entity ID).
+  - `cedar_mapping`: A `CedarEntityMapping` object with `entity_type` (Cedar type name) and `id` (entity ID).
+  - `attributes`: A map of attribute names to values.
 
-- `attributes`: A map of attribute names to values.
+  - `from_json(json_str)` — Creates an `EntityData` from a JSON string (Rust).
+  - `from_dict(value)` — Creates an `EntityData` from a dictionary (Python bindings).
 
-- `from_json(json_str)` — Creates an `EntityData` from a JSON string (Rust).
-
-- `from_dict(value)` — Creates an `EntityData` from a dictionary (Python bindings).
-
-  **Note on field naming:** The Rust struct field is named `cedar_mapping`, but it serializes to `cedar_entity_mapping` in JSON (via `#[serde(rename)]`). When constructing in Rust, use `cedar_mapping`. When passing JSON (via `from_json`) or a Python dict (via `from_dict`), use `cedar_entity_mapping` as the key.
+    **Note on field naming:** The Rust struct field is named `cedar_mapping`, but it serializes to `cedar_entity_mapping` in JSON (via `#[serde(rename)]`). When constructing in Rust, use `cedar_mapping`. When passing JSON (via `from_json`) or a Python dict (via `from_dict`), use `cedar_entity_mapping` as the key.
 
 - `RequestUnsigned(principal, action, resource, context)`
 
-  Creates a `RequestUnsigned` object which contains inputs for Cedarling's unsigned authorization call.
+    Creates a `RequestUnsigned` object which contains inputs for Cedarling's unsigned authorization call.
 
-- `principal`: Optional `EntityData`. When omitted, Cedarling evaluates the request with Cedar's partial evaluator. See [Optional principal and partial evaluation](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/#optional-principal-and-partial-evaluation).
+  - `principal`: Optional `EntityData`. When omitted, Cedarling evaluates the request with Cedar's partial evaluator. See [Optional principal and partial evaluation](./cedarling-authz.md#optional-principal-and-partial-evaluation).
 
 - `TokenInput(mapping, payload)`
 
-  Creates a `TokenInput` object representing a JWT token with an explicit type mapping. Used for multi-issuer authorization.
+    Creates a `TokenInput` object representing a JWT token with an explicit type mapping. Used for multi-issuer authorization.
 
-- `mapping`: A string specifying the Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
-
-- `payload`: The JWT token string
+  - `mapping`: A string specifying the Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
+  - `payload`: The JWT token string
 
 - `AuthorizeMultiIssuerRequest(tokens, action, resource, context)`
 
-  Creates an `AuthorizeMultiIssuerRequest` object for multi-issuer authorization.
+    Creates an `AuthorizeMultiIssuerRequest` object for multi-issuer authorization.
 
-- `tokens`: Array of `TokenInput` objects
-
-- `action`: The action to be authorized (required)
-
-- `resource`: The resource entity being accessed (required)
-
-- `context`: Optional additional context for policy evaluation
+  - `tokens`: Array of `TokenInput` objects
+  - `action`: The action to be authorized (required)
+  - `resource`: The resource entity being accessed (required)
+  - `context`: Optional additional context for policy evaluation
 
 - `authorize_unsigned(request)`
 
-  Runs unsigned authorization against the provided `RequestUnsigned` object. A trusted issuer is not required for this call.
+    Runs unsigned authorization against the provided `RequestUnsigned` object. A trusted issuer is not required for this call.
 
 - `authorize_multi_issuer(request)`
 
-  Runs multi-issuer authorization against the provided `AuthorizeMultiIssuerRequest` object. Validates multiple JWT tokens from different issuers and evaluates policies based on token entities.
+    Runs multi-issuer authorization against the provided `AuthorizeMultiIssuerRequest` object. Validates multiple JWT tokens from different issuers and evaluates policies based on token entities.
 
 ### Policy Introspection
 
@@ -82,27 +77,23 @@ Both methods perform scope-level filtering only (principal/action/resource const
 
 - `get_matching_policies_unsigned(principal, actions, resources)`
 
-  Returns metadata for all policies whose scope constraints are compatible with the given principal, actions, and resources.
+    Returns metadata for all policies whose scope constraints are compatible with the given principal, actions, and resources.
 
-- `principal`: Optional `EntityData` — its `entity_type` is matched against policy principal constraints. Pass `None`/`null` to match policies regardless of principal type.
+  - `principal`: Optional `EntityData` — its `entity_type` is matched against policy principal constraints. Pass `None`/`null` to match policies regardless of principal type.
+  - `actions`: Array of action strings (e.g., `Jans::Action::"Read"`) — matched against policy action constraints
+  - `resources`: Array of `EntityData` objects — their `entity_type` is matched against policy resource constraints
 
-- `actions`: Array of action strings (e.g., `Jans::Action::"Read"`) — matched against policy action constraints
-
-- `resources`: Array of `EntityData` objects — their `entity_type` is matched against policy resource constraints
-
-Returns a list of `PolicyMetadata` objects.
+  Returns a list of `PolicyMetadata` objects.
 
 - `get_matching_policies_multi_issuer(tokens, actions, resources)`
 
-  Returns metadata for all policies whose scope constraints are compatible with the given token-derived principals, actions, and resources. Tokens are validated and their mapping types are used as principal entity types.
+    Returns metadata for all policies whose scope constraints are compatible with the given token-derived principals, actions, and resources. Tokens are validated and their mapping types are used as principal entity types.
 
-- `tokens`: Array of `TokenInput` objects — their `mapping` field is used as the principal entity type
+  - `tokens`: Array of `TokenInput` objects — their `mapping` field is used as the principal entity type
+  - `actions`: Array of action strings
+  - `resources`: Array of `EntityData` objects
 
-- `actions`: Array of action strings
-
-- `resources`: Array of `EntityData` objects
-
-Returns a list of `PolicyMetadata` objects.
+  Returns a list of `PolicyMetadata` objects.
 
 #### PolicyMetadata
 
@@ -114,7 +105,7 @@ Each returned `PolicyMetadata` object contains:
 
 #### Example (Rust)
 
-```
+```rust
 use cedarling::{Cedarling, EntityData, CedarEntityMapping, PolicyMetadata};
 
 let principal = Some(EntityData {
@@ -153,23 +144,23 @@ Policy IDs that are not present in the policy store are silently skipped. Resolv
 
 - `annotations_map(policy_ids)`
 
-  Merges the annotations of the given policies into a single map of annotation key to value.
+    Merges the annotations of the given policies into a single map of annotation key to value.
 
-  **Lossy:** if the same annotation key appears on several policies, one value wins arbitrarily. Use `annotation_values` or `annotations_by_policy` when duplicates matter.
+    **Lossy:** if the same annotation key appears on several policies, one value wins arbitrarily. Use `annotation_values` or `annotations_by_policy` when duplicates matter.
 
 - `annotation_values(policy_ids, key)`
 
-  Returns every value of the annotation `key` across the given policies, preserving duplicates. Returns an empty list when no policy carries the key.
+    Returns every value of the annotation `key` across the given policies, preserving duplicates. Returns an empty list when no policy carries the key.
 
 - `annotations_by_policy(policy_ids)`
 
-  Returns the annotations of each given policy grouped by policy ID, the loss-free companion to `annotations_map`.
+    Returns the annotations of each given policy grouped by policy ID, the loss-free companion to `annotations_map`.
 
 In Rust the methods take any iterator of `&PolicyId` (re-exported as `cedarling::PolicyId`); in Python and JavaScript they take a list/array of policy ID strings.
 
 #### Example (Rust)
 
-```
+```rust
 let result = cedarling.authorize_unsigned(request).await?;
 let reason: Vec<_> = result.response.diagnostics().reason().collect();
 
@@ -185,7 +176,7 @@ let by_policy = cedarling.annotations_by_policy(reason.iter().copied());
 
 #### Example (Python)
 
-```
+```python
 result = cedarling.authorize_unsigned(request)
 reason = list(result.response.diagnostics.reason)
 
@@ -196,13 +187,13 @@ by_policy = cedarling.annotations_by_policy(reason)
 
 #### Example (JavaScript)
 
-```
-const result = await cedarling.authorize_unsigned(JSON.stringify(request));
+```javascript
+const result = await cedarling.authorizeUnsigned(JSON.stringify(request));
 const reason = result.response.diagnostics.reason;
 
-const merged = cedarling.annotations_map(reason);
-const redirects = cedarling.annotation_values(reason, "redirect");
-const byPolicy = cedarling.annotations_by_policy(reason);
+const merged = cedarling.annotationsMap(reason);
+const redirects = cedarling.annotationValues(reason, "redirect");
+const byPolicy = cedarling.annotationsByPolicy(reason);
 ```
 
 ### Authz Result
@@ -213,44 +204,41 @@ The following methods are called on the result obtained from the authorization c
 
 - `decision`
 
-  A boolean field representing the authorization decision (`true` = allow, `false` = deny).
+    A boolean field representing the authorization decision (`true` = allow, `false` = deny).
 
 - `response`
 
-  The Cedar `Response` object for this authorization call:
+    The Cedar `Response` object for this authorization call:
 
-- `decision()`: Cedar `Decision` (`Allow` or `Deny`)
-
-- `diagnostics()`: Detailed information including `reason()` (set of policy IDs — for partial-evaluation Deny outcomes this includes the residual policy IDs) and `errors()` (list of evaluation errors)
+  - `decision()`: Cedar `Decision` (`Allow` or `Deny`)
+  - `diagnostics()`: Detailed information including `reason()` (set of policy IDs — for partial-evaluation Deny outcomes this includes the residual policy IDs) and `errors()` (list of evaluation errors)
 
 - `request_id`
 
-  The request ID for this authorization call, used for log retrieval when running in memory log mode.
+    The request ID for this authorization call, used for log retrieval when running in memory log mode.
 
 - `cedar_decision()`
 
-  Returns the Cedar `Decision` enum (`Allow` or `Deny`) based on the `decision` field.
+    Returns the Cedar `Decision` enum (`Allow` or `Deny`) based on the `decision` field.
 
 #### MultiIssuerAuthorizeResult (for `authorize_multi_issuer`)
 
 - `decision`
 
-  A boolean field representing whether the authorization request is allowed (`true`) or denied (`false`)
+    A boolean field representing whether the authorization request is allowed (`true`) or denied (`false`)
 
 - `response`
 
-  The Cedar policy engine response containing detailed decision information
+    The Cedar policy engine response containing detailed decision information
 
-- `decision()` - Returns the decision (Allow/Deny)
-
-- `diagnostics()` - Returns diagnostics including reasons and errors
-
-  - `reason()` - Set of policy IDs that contributed to an Allow decision
-  - `errors()` - List of errors encountered during policy evaluation
+  - `decision()` - Returns the decision (Allow/Deny)
+  - `diagnostics()` - Returns diagnostics including reasons and errors
+    - `reason()` - Set of policy IDs that contributed to an Allow decision
+    - `errors()` - List of errors encountered during policy evaluation
 
 - `request_id`
 
-  The request ID for this authorization call, used for log retrieval and auditing
+    The request ID for this authorization call, used for log retrieval and auditing
 
 ## Logs
 
@@ -258,27 +246,27 @@ These methods are called to retrieve logs from the memory of the Cedarling insta
 
 - `pop_logs()`
 
-  Removes and returns the latest log from the memory of the Cedarling instance
+    Removes and returns the latest log from the memory of the Cedarling instance
 
 - `get_log_by_id(id)`
 
-  Retrieves a log given the ID of an active log entry.
+    Retrieves a log given the ID of an active log entry.
 
 - `get_log_ids()`
 
-  Returns the list of all active log entries in Cedarling's memory.
+    Returns the list of all active log entries in Cedarling's memory.
 
 - `get_logs_by_tag(tag)`
 
-  Returns the list of all logs with a given tag. A tag can be either the type of log (System, Decision, Metric) or the [log level](https://docs.jans.io/nightly/cedarling/reference/cedarling-logs/#system-log-levels)
+    Returns the list of all logs with a given tag. A tag can be either the type of log (System, Decision, Metric) or the [log level](./cedarling-logs.md#system-log-levels)
 
 - `get_logs_by_request_id(request_id)`
 
-  Returns the list of all logs with a given request ID. This request ID is obtained from an authorization result.
+    Returns the list of all logs with a given request ID. This request ID is obtained from an authorization result.
 
 - `get_logs_by_request_id_and_tag(request_id, tag)`
 
-  Returns the list of all logs with a given request ID **and** tag.
+    Returns the list of all logs with a given request ID **and** tag.
 
 ## Context Data API
 
@@ -288,97 +276,94 @@ The Context Data API allows you to push external data into the Cedarling evaluat
 
 - `push_data_ctx(key, value, ttl_secs)`
 
-Pushes a value into the data store with an optional TTL (Time To Live).
-
-- `key`: The key for the data entry (string)
-- `value`: The value to store (any JSON-serializable/Cedar value: object, array, string, number, boolean, or null)
-- `ttl_secs`: Optional TTL in seconds. If not provided, uses the default TTL from configuration.
-
-**Returns:** `None` on success (or a boolean success flag, depending on the binding).
-
-**Errors:** The method may raise the following errors:
-
-- `InvalidKey`: When the key is empty
-- `StorageLimitExceeded`: When the configured storage capacity (`max_entries`) is exceeded
-- `ValueTooLarge`: When the entry size (including metadata) exceeds `max_entry_size`
-- `TTLExceeded`: When the requested TTL exceeds the configured `max_ttl` limit
-
-If the key already exists, the value will be replaced.
+  Pushes a value into the data store with an optional TTL (Time To Live).
+  
+  - `key`: The key for the data entry (string)
+  - `value`: The value to store (any JSON-serializable/Cedar value: object, array, string, number, boolean, or null)
+  - `ttl_secs`: Optional TTL in seconds. If not provided, uses the default TTL from configuration.
+  
+  **Returns:** `None` on success (or a boolean success flag, depending on the binding).
+  
+  **Errors:** The method may raise the following errors:
+  - `InvalidKey`: When the key is empty
+  - `StorageLimitExceeded`: When the configured storage capacity (`max_entries`) is exceeded
+  - `ValueTooLarge`: When the entry size (including metadata) exceeds `max_entry_size`
+  - `TTLExceeded`: When the requested TTL exceeds the configured `max_ttl` limit
+  
+  If the key already exists, the value will be replaced.
 
 ### Get Data
 
 - `get_data_ctx(key)`
 
-Retrieves a value from the data store by key.
-
-- `key`: The key to retrieve (string)
-
-Returns the value if found, or `None`/`null` if the key doesn't exist or the entry has expired.
+  Retrieves a value from the data store by key.
+  
+  - `key`: The key to retrieve (string)
+  
+  Returns the value if found, or `None`/`null` if the key doesn't exist or the entry has expired.
 
 ### Get Data Entry
 
 - `get_data_entry_ctx(key)`
 
-Retrieves a data entry with full metadata by key.
-
-- `key`: The key to retrieve (string)
-
-Returns a `DataEntry` object containing:
-
-- `key`: The entry key
-- `value`: The stored value
-- `data_type`: The inferred Cedar type (String, Long, Bool, Set, Record, Entity, Ip, Decimal, DateTime, Duration)
-- `created_at`: Timestamp when the entry was created (RFC 3339 format)
-- `expires_at`: Timestamp when the entry expires (RFC 3339 format, or null if no TTL)
-- `access_count`: Number of times this entry has been accessed
+  Retrieves a data entry with full metadata by key.
+  
+  - `key`: The key to retrieve (string)
+  
+  Returns a `DataEntry` object containing:
+  - `key`: The entry key
+  - `value`: The stored value
+  - `data_type`: The inferred Cedar type (String, Long, Bool, Set, Record, Entity, Ip, Decimal, DateTime, Duration)
+  - `created_at`: Timestamp when the entry was created (RFC 3339 format)
+  - `expires_at`: Timestamp when the entry expires (RFC 3339 format, or null if no TTL)
+  - `access_count`: Number of times this entry has been accessed
 
 ### Remove Data
 
 - `remove_data_ctx(key)`
 
-Removes a value from the data store by key.
-
-- `key`: The key to remove (string)
-
-Returns `true` if the key existed and was removed, `false` otherwise.
+  Removes a value from the data store by key.
+  
+  - `key`: The key to remove (string)
+  
+  Returns `true` if the key existed and was removed, `false` otherwise.
 
 ### Clear Data
 
 - `clear_data_ctx()`
 
-Removes all entries from the data store.
+  Removes all entries from the data store.
 
 ### List Data
 
 - `list_data_ctx()`
 
-Returns a list of all entries with their metadata.
-
-Returns an array of `DataEntry` objects containing key, value, type, and timing metadata.
+  Returns a list of all entries with their metadata.
+  
+  Returns an array of `DataEntry` objects containing key, value, type, and timing metadata.
 
 ### Get Statistics
 
 - `get_stats_ctx()`
 
-Returns statistics about the data store.
-
-Returns a `DataStoreStats` object containing:
-
-- `entry_count`: Number of entries currently stored
-- `max_entries`: Maximum number of entries allowed (0 = unlimited)
-- `max_entry_size`: Maximum size per entry in bytes (0 = unlimited)
-- `metrics_enabled`: Whether metrics tracking is enabled
-- `total_size_bytes`: Total size of all entries in bytes
-- `avg_entry_size_bytes`: Average size per entry in bytes
-- `capacity_usage_percent`: Percentage of capacity used (0.0-100.0)
-- `memory_alert_threshold`: Memory usage threshold percentage (from config)
-- `memory_alert_triggered`: Whether memory usage exceeds the alert threshold
+  Returns statistics about the data store.
+  
+  Returns a `DataStoreStats` object containing:
+  - `entry_count`: Number of entries currently stored
+  - `max_entries`: Maximum number of entries allowed (0 = unlimited)
+  - `max_entry_size`: Maximum size per entry in bytes (0 = unlimited)
+  - `metrics_enabled`: Whether metrics tracking is enabled
+  - `total_size_bytes`: Total size of all entries in bytes
+  - `avg_entry_size_bytes`: Average size per entry in bytes
+  - `capacity_usage_percent`: Percentage of capacity used (0.0-100.0)
+  - `memory_alert_threshold`: Memory usage threshold percentage (from config)
+  - `memory_alert_triggered`: Whether memory usage exceeds the alert threshold
 
 ### Schema Requirements
 
 To use the Context Data API, your Cedar schema must include a `data` field in the action's context. You must explicitly define the expected structure of the data — Cedar does not support arbitrary/untyped records.
 
-```
+```cedar
 namespace MyApp {
   // Define the structure of nested data objects
   type DataConfig = {
@@ -408,7 +393,7 @@ The `data` field should be optional (`"data"?`) since it is only present when da
 
 Always use `has` checks in policies before accessing data fields, since they are optional:
 
-```
+```cedar
 context has data && context.data has user_level && context.data.user_level == "premium"
 ```
 
@@ -417,14 +402,14 @@ context has data && context.data has user_level && context.data.user_level == "p
 Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace. The `context.data` values follow a three-tier resolution precedence:
 
 1. **Inline request context values** (highest precedence): Values provided directly in the authorization request context override all other sources.
-1. **Pushed data** (from the Context Data API): Data pushed via `push_data_ctx` overrides the default context.
-1. **Default context** (lowest precedence): Values from the default context configuration are used when not overridden by higher-precedence sources.
+2. **Pushed data** (from the Context Data API): Data pushed via `push_data_ctx` overrides the default context.
+3. **Default context** (lowest precedence): Values from the default context configuration are used when not overridden by higher-precedence sources.
 
 When keys collide, higher-precedence values shadow lower-precedence ones. The `context.data` namespace combines values from all three sources, with inline values taking precedence over pushed data, and pushed data taking precedence over default context values.
 
 **Example with safe key and attribute checks:**
 
-```
+```cedar
 permit(
     principal,
     action == Action::"read",
@@ -447,15 +432,20 @@ This interface is particularly useful when `CEDARLING_TRUSTED_ISSUER_LOADER_TYPE
 ### Methods
 
 - `is_trusted_issuer_loaded_by_name(issuer_id)` — Returns `true` if the trusted issuer with the given policy store key is loaded.
+
 - `is_trusted_issuer_loaded_by_iss(iss_claim)` — Returns `true` if the trusted issuer with the given `iss` claim value is loaded.
+
 - `total_issuers()` — Returns the total number of trusted issuers expected to be loaded (from the policy store configuration).
+
 - `loaded_trusted_issuers_count()` — Returns the number of trusted issuers that have been successfully loaded.
+
 - `loaded_trusted_issuer_ids()` — Returns the set of issuer IDs that have been successfully loaded.
+
 - `failed_trusted_issuer_ids()` — Returns the set of issuer IDs that encountered errors during loading. Failed issuers are still counted toward total processing count.
 
 ### Example
 
-```
+```rust
 use cedarling::{Cedarling, TrustedIssuerLoadingInfo};
 
 fn check_health(cedarling: &Cedarling) {

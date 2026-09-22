@@ -1,48 +1,47 @@
 # Terraform Authorization with GitHub Actions OIDC JWTs
 
-Not sure which flow to use?
+!!! tip "Not sure which flow to use?"
+    See the [Terraform authorization overview](./terraform-authz-overview.md) for a side-by-side comparison of the unsigned and JWT flows before diving into implementation details.
 
-See the [Terraform authorization overview](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz-overview/index.md) for a side-by-side comparison of the unsigned and JWT flows before diving into implementation details.
-
-This guide shows a CI/CD-first variant of the [Terraform authorization demo](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz/index.md). Instead of asserting the operator's identity through environment variables (as in the unsigned demo), the pipeline authenticates itself with a **signed GitHub Actions OIDC token**. Cedarling validates the JWT cryptographically and evaluates Cedar policies that check JWT claims — no service-account secrets or long-lived credentials required.
+This guide shows a CI/CD-first variant of the [Terraform authorization demo](./terraform-authz.md). Instead of asserting the operator's identity through environment variables (as in the unsigned demo), the pipeline authenticates itself with a **signed GitHub Actions OIDC token**. Cedarling validates the JWT cryptographically and evaluates Cedar policies that check JWT claims — no service-account secrets or long-lived credentials required.
 
 ## Why JWTs for CI/CD?
 
 The unsigned demo works well for human operators running Terraform locally. In an enterprise CI/CD pipeline, a different model is more appropriate:
 
-| Concern                  | Unsigned demo                          | JWT demo                                   |
-| ------------------------ | -------------------------------------- | ------------------------------------------ |
-| Identity source          | Environment variables (self-asserted)  | GitHub-signed OIDC token                   |
-| Secret management        | Requires secrets/service account creds | No secrets needed                          |
-| Claim verification       | Trust the caller                       | Cedarling verifies signature via JWKS      |
-| Branch enforcement       | Manual, honor-system                   | Verified `ref` claim in JWT                |
-| Production approval gate | Not built-in                           | `environment` claim proves GitHub approval |
+| Concern | Unsigned demo | JWT demo |
+|---|---|---|
+| Identity source | Environment variables (self-asserted) | GitHub-signed OIDC token |
+| Secret management | Requires secrets/service account creds | No secrets needed |
+| Claim verification | Trust the caller | Cedarling verifies signature via JWKS |
+| Branch enforcement | Manual, honor-system | Verified `ref` claim in JWT |
+| Production approval gate | Not built-in | `environment` claim proves GitHub approval |
 
 GitHub Actions automatically issues an OIDC token to every job that has `permissions: id-token: write`. The token is signed by GitHub's private key and contains claims that describe the workflow:
 
-| Claim         | Example value                                 | Meaning                                                |
-| ------------- | --------------------------------------------- | ------------------------------------------------------ |
-| `iss`         | `https://token.actions.githubusercontent.com` | Issuer — GitHub's OIDC endpoint                        |
-| `sub`         | `repo:org/myrepo:ref:refs/heads/main`         | Subject — identifies the workflow                      |
-| `repository`  | `org/myrepo`                                  | Source repository                                      |
-| `ref`         | `refs/heads/main`                             | Git ref that triggered the run                         |
-| `workflow`    | `.github/workflows/terraform.yml`             | Workflow file path                                     |
-| `environment` | `production`                                  | GitHub Environment (only present after human approval) |
+| Claim | Example value | Meaning |
+|---|---|---|
+| `iss` | `https://token.actions.githubusercontent.com` | Issuer — GitHub's OIDC endpoint |
+| `sub` | `repo:org/myrepo:ref:refs/heads/main` | Subject — identifies the workflow |
+| `repository` | `org/myrepo` | Source repository |
+| `ref` | `refs/heads/main` | Git ref that triggered the run |
+| `workflow` | `.github/workflows/terraform.yml` | Workflow file path |
+| `environment` | `production` | GitHub Environment (only present after human approval) |
 
 ## Authorization Model
 
 The demo implements a graduated trust model for CI pipelines:
 
-| Trigger                                            | Workspace     | Plan | Apply     | Destroy   |
-| -------------------------------------------------- | ------------- | ---- | --------- | --------- |
-| Any branch, trusted repo                           | any           | ✓    | ✗         | ✗         |
-| `main` branch, trusted repo                        | dev / staging | ✓    | ✓         | ✗         |
-| `main` branch, trusted repo + Environment approved | production    | ✓    | ✓         | ✗         |
-| Any CI workflow                                    | any           | ✓    | see above | ✗ (never) |
+| Trigger | Workspace | Plan | Apply | Destroy |
+|---|---|:---:|:---:|:---:|
+| Any branch, trusted repo | any | ✓ | ✗ | ✗ |
+| `main` branch, trusted repo | dev / staging | ✓ | ✓ | ✗ |
+| `main` branch, trusted repo + Environment approved | production | ✓ | ✓ | ✗ |
+| Any CI workflow | any | ✓ | see above | ✗ (never) |
 
-`Destroy` is permanently off-limits for CI. A human operator using the [unsigned wrapper](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz/index.md) with Admin-role membership is required to destroy infrastructure.
+`Destroy` is permanently off-limits for CI. A human operator using the [unsigned wrapper](./terraform-authz.md) with Admin-role membership is required to destroy infrastructure.
 
-```
+```mermaid
 sequenceDiagram
     participant GH as GitHub Actions runner
     participant GHTOKEN as GitHub token endpoint
@@ -80,7 +79,7 @@ sequenceDiagram
 
 The schema defines the principal entity that Cedarling populates from the verified JWT claims:
 
-```
+```cedar
 namespace CI {
     // URL type for TrustedIssuer's issuer_entity_id attribute.
     type Url = {"host": String, "path": String, "protocol": String};
@@ -138,8 +137,7 @@ Three policy files cover all CI scenarios.
 JWT claims are accessed through `context.tokens.ci_githubworkflow` — the token context injected by Cedarling's multi-issuer context builder. Each policy also guards on the `iss` claim to ensure the token comes from the expected GitHub OIDC endpoint.
 
 **Plan — allowed from the trusted repo on any branch:**
-
-```
+```cedar
 @id("ci-permit-plan")
 permit (
     principal,
@@ -156,8 +154,7 @@ permit (
 ```
 
 **Apply — allowed from main to non-production workspaces:**
-
-```
+```cedar
 @id("ci-permit-apply-main-non-prod")
 permit (
     principal,
@@ -176,8 +173,7 @@ permit (
 ```
 
 **Apply to production — requires `main` branch and GitHub Environment approval:**
-
-```
+```cedar
 @id("ci-permit-apply-prod-via-environment")
 permit (
     principal,
@@ -203,7 +199,7 @@ No `permit` for `Destroy` means all CI destroy attempts are implicitly denied.
 
 The Rego adapter calls `cedarling.opa.authorize_multi_issuer` instead of `authorize_unsigned`:
 
-```
+```rego
 package infra.terraform_jwt
 
 default allow := false
@@ -220,7 +216,7 @@ reasons     := result.reasons
 
 The input payload structure differs from the unsigned variant — the JWT is passed in a `tokens` array:
 
-```
+```json
 {
   "input": {
     "tokens": [
@@ -247,7 +243,7 @@ The `mapping` field tells Cedarling which Cedar entity type to instantiate from 
 
 ## OPA Configuration
 
-```
+```json
 {
   "plugins": {
     "cedarling_opa": {
@@ -275,7 +271,7 @@ Key differences from the unsigned config:
 
 `policy-store/trusted-issuers/github-actions.json`:
 
-```
+```json
 {
   "name": "CI",
   "description": "GitHub Actions OIDC token issuer. The name 'CI' must match the Cedar namespace so Cedarling can build the CI::TrustedIssuer entity. Cedarling locates this issuer by matching the JWT iss claim against the origin of configuration_endpoint.",
@@ -293,14 +289,14 @@ Key differences from the unsigned config:
 
 Field reference:
 
-| Field                    | Description                                                                                                                                                                                                                                                                                                     |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                   | Must match the Cedar namespace used in your policies and schema (e.g. `CI` maps to `CI::*` entity types). Cedarling also uses this value when constructing the `CI::TrustedIssuer` entity.                                                                                                                      |
+| Field | Description |
+|---|---|
+| `name` | Must match the Cedar namespace used in your policies and schema (e.g. `CI` maps to `CI::*` entity types). Cedarling also uses this value when constructing the `CI::TrustedIssuer` entity. |
 | `configuration_endpoint` | URL of the issuer's OpenID Connect discovery document (`.well-known/openid-configuration`). Cedarling fetches the `jwks_uri` from this document and uses it to validate JWT signatures automatically. To use a different issuer (GitLab, Okta, etc.) replace this URL with the issuer's own discovery endpoint. |
-| `token_metadata`         | A map from Cedar entity type name to per-token settings. Each key must be a fully-qualified Cedar entity type (e.g. `CI::GitHubWorkflow`).                                                                                                                                                                      |
-| `entity_type_name`       | The Cedar entity type Cedarling instantiates from the verified JWT claims. Must match the key in `token_metadata` and the type declared in your Cedar schema.                                                                                                                                                   |
-| `token_id`               | JWT claim used as the Cedar entity's unique ID (typically `jti`).                                                                                                                                                                                                                                               |
-| `required_claims`        | List of JWT claim names that must be present for the token to be considered valid. Set to `[]` to enforce no additional claims beyond signature validation.                                                                                                                                                     |
+| `token_metadata` | A map from Cedar entity type name to per-token settings. Each key must be a fully-qualified Cedar entity type (e.g. `CI::GitHubWorkflow`). |
+| `entity_type_name` | The Cedar entity type Cedarling instantiates from the verified JWT claims. Must match the key in `token_metadata` and the type declared in your Cedar schema. |
+| `token_id` | JWT claim used as the Cedar entity's unique ID (typically `jti`). |
+| `required_claims` | List of JWT claim names that must be present for the token to be considered valid. Set to `[]` to enforce no additional claims beyond signature validation. |
 
 To adapt this configuration for another issuer, create a new JSON file in `policy-store/trusted-issuers/` (one file per issuer), update `name` to the Cedar namespace you want to use, point `configuration_endpoint` at the new issuer's discovery URL, and adjust `entity_type_name` to match the Cedar entity type declared in your schema.
 
@@ -310,7 +306,7 @@ To adapt this configuration for another issuer, create a new JSON file in `polic
 
 ### Fetching the GitHub OIDC token
 
-```
+```bash
 export TF_JWT="$(./demo/terraform-jwt/tf_authz_jwt.sh --fetch-token)"
 ```
 
@@ -318,16 +314,16 @@ This calls the `ACTIONS_ID_TOKEN_REQUEST_URL` endpoint using the `ACTIONS_ID_TOK
 
 ### Environment variables
 
-| Variable        | Required | Default                 | Description                                       |
-| --------------- | -------- | ----------------------- | ------------------------------------------------- |
-| `TF_JWT`        | **yes**  | —                       | Signed OIDC JWT (GitHub or custom issuer)         |
-| `TF_WORKSPACE`  | no       | `dev`                   | Target workspace (`dev`, `staging`, `production`) |
-| `OPA_URL`       | no       | `http://localhost:8181` | OPA server base URL                               |
-| `TERRAFORM_BIN` | no       | `terraform`             | Path to the terraform binary                      |
+| Variable | Required | Default | Description |
+|---|:---:|---|---|
+| `TF_JWT` | **yes** | — | Signed OIDC JWT (GitHub or custom issuer) |
+| `TF_WORKSPACE` | no | `dev` | Target workspace (`dev`, `staging`, `production`) |
+| `OPA_URL` | no | `http://localhost:8181` | OPA server base URL |
+| `TERRAFORM_BIN` | no | `terraform` | Path to the terraform binary |
 
 ### Usage
 
-```
+```bash
 export TF_JWT="$(./demo/terraform-jwt/tf_authz_jwt.sh --fetch-token)"
 export TF_WORKSPACE=staging
 
@@ -340,7 +336,7 @@ export TF_WORKSPACE=staging
 
 The following excerpt from `github-actions-example.yml` shows the production-deploy job:
 
-```
+```yaml
 terraform-apply-production:
   runs-on: ubuntu-latest
   needs: terraform-apply-staging
@@ -378,13 +374,13 @@ For teams that want to adopt JWT authorization without copying the wrapper scrip
 
 ### Inputs
 
-| Input                         | Required | Default               | Description                                                                       |
-| ----------------------------- | -------- | --------------------- | --------------------------------------------------------------------------------- |
-| `opa_url`                     | **yes**  | —                     | Base URL of the Cedarling-OPA server (e.g. `http://opa-service:8181`)             |
-| `workspace`                   | **yes**  | —                     | Target Terraform workspace (`dev`, `staging`, `production`)                       |
-| `terraform_command`           | **yes**  | —                     | Sub-command (and flags) to authorize and run (e.g. `plan`, `apply -auto-approve`) |
-| `opa_policy_path`             | no       | `infra/terraform_jwt` | OPA path appended to `/v1/data/`                                                  |
-| `terraform_working_directory` | no       | `.`                   | Directory from which to run Terraform (relative to the repo root)                 |
+| Input | Required | Default | Description |
+|---|:---:|---|---|
+| `opa_url` | **yes** | — | Base URL of the Cedarling-OPA server (e.g. `http://opa-service:8181`) |
+| `workspace` | **yes** | — | Target Terraform workspace (`dev`, `staging`, `production`) |
+| `terraform_command` | **yes** | — | Sub-command (and flags) to authorize and run (e.g. `plan`, `apply -auto-approve`) |
+| `opa_policy_path` | no | `infra/terraform_jwt` | OPA path appended to `/v1/data/` |
+| `terraform_working_directory` | no | `.` | Directory from which to run Terraform (relative to the repo root) |
 
 The action requires the parent job to have `permissions: id-token: write` so that GitHub can issue the OIDC token.
 
@@ -392,7 +388,7 @@ The action requires the parent job to have `permissions: id-token: write` so tha
 
 Replace the manual token-fetch and `tf_authz_jwt.sh` call with a single step:
 
-```
+```yaml
 jobs:
   terraform-plan:
     runs-on: ubuntu-latest
@@ -422,7 +418,7 @@ See [`github-actions-example-composite.yml`](https://github.com/JanssenProject/j
 The composite action runs two steps internally:
 
 1. **Fetch GitHub OIDC token** — calls `ACTIONS_ID_TOKEN_REQUEST_URL` (automatically set by GitHub when `id-token: write` is present), extracts the signed JWT, and immediately masks it in the log.
-1. **Authorize and run Terraform** — maps the sub-command to a Cedar action (`Plan`, `Apply`, or `Destroy`), builds the `authorize_multi_issuer` OPA payload, queries the Cedarling-OPA server, and either runs `terraform <command>` (ALLOWED) or fails the step with the denial reason (DENIED). Non-auth commands (`init`, `fmt`, `validate`) are forwarded to Terraform directly without an OPA call.
+2. **Authorize and run Terraform** — maps the sub-command to a Cedar action (`Plan`, `Apply`, or `Destroy`), builds the `authorize_multi_issuer` OPA payload, queries the Cedarling-OPA server, and either runs `terraform <command>` (ALLOWED) or fails the step with the denial reason (DENIED). Non-auth commands (`init`, `fmt`, `validate`) are forwarded to Terraform directly without an OPA call.
 
 ## Running the Demo Locally
 
@@ -434,17 +430,17 @@ See the [demo README](https://github.com/JanssenProject/jans/tree/main/jans-ceda
 
 ## Comparing the Two Terraform Demos
 
-|                           | [Unsigned demo](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz/index.md) | JWT demo (this page)                                                              |
-| ------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| **Identity source**       | Environment variables (self-asserted)                                                         | GitHub OIDC token (cryptographically signed)                                      |
-| **Signature validation**  | None — `CEDARLING_JWT_SIG_VALIDATION: "disabled"`                                             | Enabled — Cedarling fetches GitHub's JWKS and verifies every token                |
-| **Trusted issuer config** | Not required — no `trusted-issuers/` directory needed                                         | Required — `policy-store/trusted-issuers/github-actions.json` declares the issuer |
-| **Cedarling built-in**    | `authorize_unsigned`                                                                          | `authorize_multi_issuer`                                                          |
-| **OPA endpoint**          | `/v1/data/infra/terraform`                                                                    | `/v1/data/infra/terraform_jwt`                                                    |
-| **Cedar namespace**       | `Infra`                                                                                       | `CI`                                                                              |
-| **Principal entity**      | `Infra::User` (role-based)                                                                    | `CI::GitHubWorkflow` (claim-based)                                                |
-| **Secret management**     | Requires `TF_USER_ID` / `TF_USER_ROLES`                                                       | No secrets — OIDC token issued automatically                                      |
-| **Prod approval gate**    | Role-based policy only                                                                        | `environment` JWT claim proves GitHub Environment approval                        |
-| **Best suited for**       | Human operators, local development                                                            | CI/CD pipelines requiring cryptographic identity                                  |
+| | [Unsigned demo](./terraform-authz.md) | JWT demo (this page) |
+|---|---|---|
+| **Identity source** | Environment variables (self-asserted) | GitHub OIDC token (cryptographically signed) |
+| **Signature validation** | None — `CEDARLING_JWT_SIG_VALIDATION: "disabled"` | Enabled — Cedarling fetches GitHub's JWKS and verifies every token |
+| **Trusted issuer config** | Not required — no `trusted-issuers/` directory needed | Required — `policy-store/trusted-issuers/github-actions.json` declares the issuer |
+| **Cedarling built-in** | `authorize_unsigned` | `authorize_multi_issuer` |
+| **OPA endpoint** | `/v1/data/infra/terraform` | `/v1/data/infra/terraform_jwt` |
+| **Cedar namespace** | `Infra` | `CI` |
+| **Principal entity** | `Infra::User` (role-based) | `CI::GitHubWorkflow` (claim-based) |
+| **Secret management** | Requires `TF_USER_ID` / `TF_USER_ROLES` | No secrets — OIDC token issued automatically |
+| **Prod approval gate** | Role-based policy only | `environment` JWT claim proves GitHub Environment approval |
+| **Best suited for** | Human operators, local development | CI/CD pipelines requiring cryptographic identity |
 
 Both demos use the same Cedar policy store format, the same OPA plugin, and the same `opa-cedarling` binary — only the Rego built-in and the principal model differ.

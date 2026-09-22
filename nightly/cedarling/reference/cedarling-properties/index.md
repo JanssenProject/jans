@@ -1,10 +1,10 @@
 # Cedarling Properties
 
-Cedarling bootstrap properties control the application's behavior. Properties common and specific to different authorization methods are described below.
+Cedarling bootstrap properties control the application's behavior.
+Properties common and specific to different authorization methods are described below.
 
-Tip
-
-Not sure which authorization method to use? See the [decision guide](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/#which-authorization-method-should-i-use).
+!!! tip
+    Not sure which authorization method to use? See the [decision guide](./cedarling-authz.md#which-authorization-method-should-i-use).
 
 ## Common properties
 
@@ -16,38 +16,41 @@ These properties are effective regardless of which authorization method is in us
 
 ### Loading the policy store
 
-To load the policy store, one of the following properties must be set.
+To load the policy store, one of the following properties must be set:
 
-- **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
+- **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format as one of the following. This property is not supported in WASM due to lack of file-system access. 
+      - Directories → loads as directory-based policy store
+      - `.cjar` files → loads as Cedar Archive
+      - `.yaml`/`.yml` files → loads as YAML (supported for test suites)
+      *(Note: Legacy `.json` files are no longer supported. Please migrate to the folder-based format or `.cjar` archive.)*
 
-- **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store from. Cedarling automatically detects the format as one of the following.
+- **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store archive from. The URL must point to a Cedar Archive (`.cjar` or zip archive). Legacy JSON endpoints are no longer supported.
 
-  - URL points to an archive → loads as Cedar Archive (`.cjar`)
-  - Other URLs → loads as legacy JSON from Lock Server
+- **`CEDARLING_POLICY_STORE_LOCAL`** : Inline YAML policy store string (primarily supported for test suites and inline configurations). Inline JSON format is deprecated and rejected; migrate to folder-based `.cjar` archives, directories, or inline YAML.
 
-- **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format as one of the following. This property is not supported in WASM due to lack of file-system access.
-
-  - Directories → loads as directory-based policy store
-  - `.cjar` files → loads as Cedar Archive
-  - `.json` files → loads as JSON
-  - `.yaml`/`.yml` files → loads as YAML
-
-New Directory-Based Format
-
-For native platforms, the Cedarling now supports a directory-based policy store format with human-readable Cedar files. See [Policy Store Formats](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#policy-store-formats) for details.
+!!! note "Folder-Based Policy Store Format"
+    Cedarling uses a folder-based policy store format with human-readable Cedar files (either as a directory or a `.cjar` archive). 
+    See [Policy Store Formats](./cedarling-policy-store.md#policy-store-formats) for details.
 
 ### Refreshing the policy store
 
-- **`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`** : Background refresh interval in seconds for URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Lock Server endpoint or a Cedar Archive URL. When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory `Authz` instance when the upstream changes. A server-side `Cache-Control: max-age` / `Expires` hint may *shorten* the next interval but never extends it. Default is `0` (refresh disabled — load-once-at-startup behavior). Non-zero values below `5` seconds are clamped to `5`. Ignored for local sources (`CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_LOCAL_FN`). See [Background refresh](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#background-refresh) for the per-request consistency model, the strategy ladder, and the emitted metric keys.
+- **`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`** : Background refresh interval in seconds for URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Cedar Archive URL). When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory `Authz` instance when the upstream changes. A server-side `Cache-Control: max-age` / `Expires` hint may *shorten* the next interval but never extends it. Default is `0` (refresh disabled — load-once-at-startup behavior). Non-zero values below `5` seconds are clamped to `5`. Ignored for local sources (`CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_LOCAL`). See [Background refresh](./cedarling-policy-store.md#background-refresh) for the per-request consistency model, the strategy ladder, and the emitted metric keys.
+
+### Limiting policy store size
+
+- **`CEDARLING_POLICY_STORE_MAX_FILE_SIZE`** : Maximum decompressed size, in bytes, of a single file inside a Cedar Archive (`.cjar`). Archives are ZIP files, so a small download can expand into a very large buffer in memory (a "zip bomb"); an archive whose entry exceeds this limit is rejected with an error rather than being decompressed. The whole-archive decompressed size is capped at ten times this value, and an archive may hold at most 10000 entries. Set to `0` to disable the size caps. Default is `10485760` (10 MB).
+
+    This limit is independent of `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`, which bounds the compressed archive while it is downloaded. Serving a `.cjar` over HTTP whose compressed size exceeds `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES` (10 MB by default) requires raising that property as well.
 
 ### Optional properties
 
-Properties listed here are optional. If a property value is not set, the Cedarling will use the default value as specified in the property definition below.
+Properties listed here are optional. If a property value is not set, 
+the Cedarling will use the default value as specified in the property definition below.
 
 **Log behavior:**
 
 - **`CEDARLING_LOG_TYPE`** : `off`, `memory`, `std_out`. Default is `off`.
-- **`CEDARLING_LOG_LEVEL`** : System Log Level [See here](https://docs.jans.io/nightly/cedarling/reference/cedarling-logs/index.md). Default to `WARN`
+- **`CEDARLING_LOG_LEVEL`** : System Log Level [See here](./cedarling-logs.md). Default to `WARN`
 - **`CEDARLING_LOG_TTL`** : in case of `memory` store, TTL (time to live) of log entities in seconds.
 - **`CEDARLING_LOG_MAX_ITEMS`** : Maximum number of log entities that can be stored using Memory logger. If used `0` value means no limit. And If missed or None, default value is applied.
 - **`CEDARLING_LOG_MAX_ITEM_SIZE`** : Maximum size of a single log entity in bytes using Memory logger. If used `0` value means no limit. And If missed or None, default value is applied.
@@ -58,10 +61,15 @@ Properties listed here are optional. If a property value is not set, the Cedarli
 **Context Data API:**
 
 - **`CEDARLING_DATA_STORE_MAX_ENTRIES`** : Maximum number of entries that can be stored in the data store. Default value is `10000`. Set to `0` for unlimited entries.
+
 - **`CEDARLING_DATA_STORE_MAX_ENTRY_SIZE`** : Maximum size per entry in bytes. Default value is `1048576` (1 MB). Set to `0` for unlimited size.
+
 - **`CEDARLING_DATA_STORE_DEFAULT_TTL`** : Default TTL (Time To Live) in seconds for entries that don't specify a TTL. Default value is `None` (entries will not expire). When set, entries without an explicit TTL will use this value.
+
 - **`CEDARLING_DATA_STORE_MAX_TTL`** : Maximum allowed TTL in seconds. Default value is `3600` (1 hour). Entries with TTL exceeding this value will be rejected. Note: setting to `0` results in a zero-second max TTL (immediate expiry), not unlimited. There is currently no way to configure unlimited max TTL — omitting the property uses the default (1 hour).
+
 - **`CEDARLING_DATA_STORE_ENABLE_METRICS`** : Whether to enable metrics tracking for data entries (access counts, etc.). Default value is `true`.
+
 - **`CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD`** : Memory usage threshold percentage (0.0-100.0) for triggering alerts. Default value is `80.0`. When capacity usage exceeds this threshold, `memory_alert_triggered` will be `true` in statistics.
 
 **HTTP client:**
@@ -94,9 +102,11 @@ The following bootstrap properties are only needed for the Lock Server Integrati
 - **`CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`** : Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. Default is `100`.
 - **`CEDARLING_LOCK_LOG_MAX_RETRIES`** : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff strategy. Default is `5`.
 
+
 ## authorize_multi_issuer method properties
 
-These properties are relevant only when using `authorize_multi_issuer` with signed JWT tokens from trusted identity providers. Also called Token-based Access Control (TBAC). This is the recommended authorization method for most production deployments.
+These properties are relevant only when using `authorize_multi_issuer` with signed JWT tokens from trusted identity providers. 
+Also called Token-based Access Control (TBAC). This is the recommended authorization method for most production deployments.
 
 **JWT and cryptographic behavior:**
 
@@ -118,7 +128,7 @@ These properties are relevant only when using `authorize_multi_issuer` with sign
 
 **Trusted issuer loading:**
 
-- **`CEDARLING_TRUSTED_ISSUER_LOADER_TYPE`** : `SYNC` | `ASYNC` -- Type of trusted issuer loader. If not set, synchronous loader is used. Sync loader means that trusted issuers will be loaded on initialization. `ASYNC` loader means that trusted issuers will be loaded in background. Default is `SYNC`. When using `ASYNC`, see [Trusted Issuer Loading Info](https://docs.jans.io/nightly/cedarling/reference/cedarling-interfaces/#trusted-issuer-loading-info) to check loading status.
+- **`CEDARLING_TRUSTED_ISSUER_LOADER_TYPE`** : `SYNC` | `ASYNC` -- Type of trusted issuer loader. If not set, synchronous loader is used. Sync loader means that trusted issuers will be loaded on initialization. `ASYNC` loader means that trusted issuers will be loaded in background. Default is `SYNC`. When using `ASYNC`, see [Trusted Issuer Loading Info](./cedarling-interfaces.md#trusted-issuer-loading-info) to check loading status.
 - **`CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS`** : Number of concurrent workers to use when loading trusted issuers. Applies to both `SYNC` (parallel loading during initialization) and `ASYNC` (parallel background loading) modes. Default is 10 for native targets (max 1000) or 2 for WASM targets (max 6). Values are clamped between 1 and the target-specific maximum. Zero becomes 1.
 
 **Decision logging for tokens:**

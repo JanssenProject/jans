@@ -4,7 +4,7 @@ In practice, a web flow will make use of a bunch of artifacts, like UI pages, im
 
 A project can be thought of as a container to hold all flows and related assets aimed at solving a particular problem - including metadata of the project itself. The idea of defining a standard way to specify projects brings several benefits:
 
-- Provide a uniform conceptual scheme for community actors to interchange flows
+- Provide a uniform conceptual scheme for community actors to interchange flows 
 - Provide Agama engine implementors common ground for the materialization of flows deployment
 - Serve as reference for developers interested in coding tools such as an Agama IDE
 
@@ -21,8 +21,8 @@ The below shows the structure of an Agama project:
 └── README.md
 ```
 
-- `code` directory holds all flows part of the project. Every flow - implemented in Agama language - has to reside in a separate file with extension `flow` and with file name matching the qualified name of the flow in question. This directory can have nested folders if desired
-- `lib` may contain source code files in languages other than Agama and binary libraries required by the project, if any. Every engine can make use of the contents of this folder as needed
+- `code` directory holds all flows part of the project. Every flow - implemented in Agama language - has to reside in a separate file with extension `flow` and with file name matching the qualified name of the flow in question. This directory can have nested folders if desired  
+- `lib` may contain source code files in languages other than Agama and binary libraries required by the project, if any. Every engine can make use of the contents of this folder as needed  
 - `web` is expected to hold all UI templates plus required web assets (stylesheets, images, localization strings, etc.) that all flows in this project may use
 - `project.json` file contains metadata about this project. More on this later
 - `README.md` file may contain extra documentation in markdown format
@@ -34,15 +34,15 @@ Except for `code` and `web` directories, all elements in the file structure abov
 
 `project.json` file is expected to contain metadata about the contents of the project in JSON format.
 
-| Field            | Description                                                                                                                                                                                                                                        | data type     |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `projectName`    | A unique name that will be associated to this project                                                                                                                                                                                              | *string*      |
-| `version`        | Project's version. It is recommended to use semantic versioning format                                                                                                                                                                             | *string*      |
-| `author`         | A user handle that identifies the author of the project                                                                                                                                                                                            | *string*      |
-| `license`        | A reference to applicable license terms                                                                                                                                                                                                            | *string*      |
-| `description`    |                                                                                                                                                                                                                                                    | *string*      |
-| `configs`        | Object containing exemplifying [configuration properties](https://docs.jans.io/nightly/agama/language-reference/#header-basics) for flows that may need them. The keys of this field, if any, are qualified flow names already part of the project | *json object* |
-| `noDirectLaunch` | An array holding zero or more qualified flow names. This list is used to prevent certain flows to be launched directly from a web browser. It's a security measure to avoid end-users triggering flows at will                                     | *array*       |
+|Field|Description|data type|
+|-|-|-|
+|`projectName`|A unique name that will be associated to this project|_string_|
+|`version`|Project's version. It is recommended to use semantic versioning format|_string_|
+|`author`|A user handle that identifies the author of the project|_string_|
+|`license`|A reference to applicable license terms|_string_|
+|`description`||_string_|
+|`configs`|Object containing exemplifying [configuration properties](./language-reference.md#header-basics) for flows that may need them. The keys of this field, if any, are qualified flow names already part of the project|_json object_|
+|`noDirectLaunch`|An array holding zero or more qualified flow names. This list is used to prevent certain flows to be launched directly from a web browser. It's a security measure to avoid end-users triggering flows at will|_array_|
 
 All fields are optional and more can be added if desired.
 
@@ -65,9 +65,8 @@ Below is an example of a `project.json` file:
 }
 ```
 
-Important
-
-Use the `configs` section wisely: `.gama` files **must not** contain **real** configuration properties because these files may be freely distributed; in practice, configurations hold sensitive data that should not be exposed
+!!! Important
+    Use the `configs` section wisely: `.gama` files **must not** contain **real** configuration properties because these files may be freely distributed; in practice, configurations hold sensitive data that should not be exposed
 
 ## Sample project
 

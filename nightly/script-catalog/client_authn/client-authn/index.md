@@ -1,5 +1,7 @@
 # Client Authentication Custom Script
 
+
+
 AS support different types of client authentications such as :
 
 - client_secret_basic
@@ -9,40 +11,39 @@ AS support different types of client authentications such as :
 
 Sometimes it's convenient to customize default AS client authentication process. For this reason Client Authentication custom script was introduced.
 
-If script successfully authenticated client, it should return it in `authenticateClient`. If client is not returned then AS performs built-in authentication.
+If script successfully authenticated client, it should return it in `authenticateClient`.
+If client is not returned then AS performs built-in authentication.
 
 ## Interface
-
 The Client Authentication script implements the [ClientAuthnType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/clientauthn/ClientAuthnType.java) interface. This extends methods from the base script type in addition to adding new methods:
 
 ### Inherited Methods
-
-| Method header                                                    | Method description                                                                                                                                                                                         |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `def init(self, customScript, configurationAttributes)`          | This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc                                                                    |
-| `def destroy(self, configurationAttributes)`                     | This method is called once to destroy events. It can be used to free resource and objects created in the `init()` method                                                                                   |
+| Method header | Method description |
+|:-----|:------|
+| `def init(self, customScript, configurationAttributes)` | This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc |
+| `def destroy(self, configurationAttributes)` | This method is called once to destroy events. It can be used to free resource and objects created in the `init()` method |
 | `def getApiVersion(self, configurationAttributes, customScript)` | The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10 |
 
 ### New methods
-
-| Method header                           | Method description                   |
-| --------------------------------------- | ------------------------------------ |
-| `def authenticateClient(self, context)` | Called when the request is received. |
+| Method header | Method description |
+|:-----|:------|
+|`def authenticateClient(self, context)`| Called when the request is received. |
 
 `authenticateClient` method returns authenticated `Client` object or null if authentication failed.
 
-### Objects
 
-| Object name    | Object description                                                                                                                                                             |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `customScript` | The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java)     |
-| `context`      | [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalClientAuthnContext.java) |
+### Objects
+| Object name | Object description |
+|:-----|:------|
+|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
+|`context`| [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalClientAuthnContext.java) |
+
 
 ## Sample script which demonstrates basic client authentication
 
 ### Script Type: Java
 
-```
+```java
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.Constants;
 import io.jans.as.server.service.ClientService;
@@ -131,4 +132,5 @@ public class ClientAuthn implements ClientAuthnType {
         return 11;
     }
 }
+
 ```

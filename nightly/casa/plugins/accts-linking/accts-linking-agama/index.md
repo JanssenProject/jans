@@ -1,11 +1,12 @@
 # Accounts linking project configuration
 
+
 The accounts linking Agama project must be configured in order to integrate third-party identity providers. The configuration of this project is supplied in a JSON file whose structure is like:
 
 ```
 {
 "io.jans.casa.authn.acctlinking": {
-
+    
     "providerID_1": { ... },
     "providerID_2": { ... },
     ...
@@ -29,35 +30,37 @@ Each property part of the JSON object `io.jans.casa.auth.acctlinking` holds the 
         "scopes": ["email", "profile"]
     }
 }
+   
 ```
 
 In this case, we are populating the configuration of an OAuth-based provider called "Goooogle".
 
-The tables shown in [this](https://docs.jans.io/nightly/agama-catalog/jans/inboundID/#supply-configurations) page list all possible properties to configure a provider. Particularly, two properties deserve the most detail:
+The tables shown in [this](../../../agama-catalog/jans/inboundID/README.md#supply-configurations) page list all possible properties to configure a provider. Particularly, two properties deserve the most detail:
 
-1. `flowQname`. Agama projects are made up of flows - think of small "web journeys". This property must contain the name of an existing flow capable of interfacing with the identity provider of interest. Often, there is no need to write such "interfacing" flow. The below are ready-to-use and cover most of real-world cases, specifically OpenId/OAuth providers that support the **authorization code grant** (see section 1.3 of [rfc6749](https://www.ietf.org/rfc/rfc6749)):
+1. `flowQname`. Agama projects are made up of flows - think of small "web journeys". This property must contain the name of an existing flow capable of interfacing with the identity provider of interest. Often, there is no need to write such "interfacing" flow. The below are ready-to-use and cover most of real-world cases, specifically  OpenId/OAuth providers that support the **authorization code grant** (see section 1.3 of [rfc6749](https://www.ietf.org/rfc/rfc6749)):
 
-   - `io.jans.inbound.GenericProvider`. It implements the authorization code flow where the user's browser is taken to the external site. When authentication completes, a `code` is received at a designated redirect (callback) URL. With such `code` an access token is obtained as well as user's profile data. This flow supports *dynamic client registration*
-   - `io.jans.inbound.Apple`. It implements the authorization code flow with some nuances required in order to integrate "Apple Sign In"
+    - `io.jans.inbound.GenericProvider`. It implements the authorization code flow where the user's browser is taken to the external site. When authentication completes, a `code` is received at a designated redirect (callback) URL. With such `code` an access token is obtained as well as user's profile data. This flow supports _dynamic client registration_
 
-1. `mappingClassField`. This is key for performing the attribute mapping process and the user provisioning. The remainder of this document is dedicated to these two aspects
+    - `io.jans.inbound.Apple`. It implements the authorization code flow with some nuances required in order to integrate "Apple Sign In"
 
-Note
 
-Recall `enabled` is a handy property that can be used to temporarily "deactive" a given identity provider.
+2. `mappingClassField`. This is key for performing the attribute mapping process and the user provisioning. The remainder of this document is dedicated to these two aspects
+
+!!! Note
+    Recall `enabled` is a handy property that can be used to temporarily "deactive" a given identity provider.
 
 ## Configuring attribute mappings
 
-An introduction to attribute mapping can be found [here](https://docs.jans.io/nightly/agama-catalog/jans/inboundID/#attribute-mappings). Unless an elaborated processing of attributes is required, a basic knowledge of Java language suffices to write a useful mapping.
+An introduction to attribute mapping can be found [here](../../../agama-catalog/jans/inboundID/README.md#attribute-mappings). Unless an elaborated processing of attributes is required, a basic knowledge of Java language suffices to write a useful mapping.
 
-To write a mapping, you can use the samples provided as a guideline (see folder `lib/io/jans/casa/acctlinking` in the Agama accounts linking project). You can add your mapping in the same file or create a new Java class for this purpose. Then save your changes, re-package (zip) the project, re-deploy, and update (re-import) the configuration if necessary.
+To write a mapping, you can use the samples provided as a guideline (see folder `lib/io/jans/casa/acctlinking` in the Agama accounts linking project). You can add your mapping in the same file or create a new Java class for this purpose.  Then save your changes, re-package (zip) the project, re-deploy, and update (re-import) the configuration if necessary.
 
-Specifically, for Casa accounts linking, the mapping **must** include an attribute named `ID`. While `ID` is not part of the Jans database, here it is used to supply what could be understood as the *identifier* of the user at the external site. For instance, in a social site this may be the username or email. The example below shows how to set `ID` assuming the username was returned by the external site in an attribute named `userId`:
+Specifically, for Casa accounts linking, the mapping **must** include an attribute named `ID`. While `ID` is not part of the Jans database, here it is used to supply what could be understood as the _identifier_ of the user at the external site. For instance, in a social site this may be the username or email. The example below shows how to set `ID` assuming the username was returned by the external site in an attribute named `userId`:
 
 ```
 profile -> {
     Map<String, Object> map = new HashMap<>();
-
+    
     map.put("ID", profile.get("userId"));
     ...
     return map;

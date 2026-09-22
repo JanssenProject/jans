@@ -4,12 +4,12 @@
 
 Agama was designed with reusability in mind. If a project provides functionalities of your interest but you find it does not quite achieve what you want, do not try to modify the project. Instead, create a new separate project reusing the flows and code found in the original project.
 
-It might be tempting to just take an Agama project archive, apply some editions, add files to it, repack, and redeploy it. This practice is not recommended. Think of a project as a library used to develop software. In normal situations you will not to hack or patch a library but use wrapper code to override or tailor its behavior.
+It might be tempting to just take an Agama project archive, apply some editions, add files to it, repack, and redeploy it. This practice is not recommended. Think of a project as a library used to develop software. In normal situations you will not hack or patch a library but use wrapper code to override or tailor its behavior.
 
 Agama provides a couple of vehicles to manipulate behavior and appearance:
 
-- [Template overrides](https://docs.jans.io/nightly/janssen-server/developer/agama/advanced-usages/#template-overrides)
-- [Flow cancellation](https://docs.jans.io/nightly/janssen-server/developer/agama/advanced-usages/#cancellation)
+- [Template overrides](./advanced-usages.md#template-overrides)
+- [Flow cancellation](./advanced-usages.md#cancellation)
 
 These allow you to preserve encapsulation and keep project intrusiveness controlled.
 
@@ -27,7 +27,7 @@ If a flow crashes, its parent flows (or flow) if they exist, crash as well. Tryi
 
 ## Internationalization labels
 
-When using [localization and internationalization](https://docs.jans.io/nightly/janssen-server/developer/agama/advanced-usages/#localization-and-internationalization) use meaningful label keys and prefix all of them with the name of the project in question. If your project is called `magicAuthnJourneys`, then `magicAuthnJourneys.image.caption` and `magicAuthnJourneys.start_button_label` are good examples. This is a strategy that avoids possible name collisions in labels.
+When using [localization and internationalization](./advanced-usages.md#localization-and-internationalization) use meaningful label keys and prefix all of them with the name of the project in question. If your project is called `magicAuthnJourneys`, then `magicAuthnJourneys.image.caption` and `magicAuthnJourneys.start_button_label` are good examples. This is a strategy that avoids possible name collisions in labels.
 
 ## OOP prose warning
 
@@ -50,10 +50,10 @@ Camel case is recommended. Also, in real-world flows developers would like to pr
 
 ## Finishing flows
 
-Carefully decide how to use the [`Finish`](https://docs.jans.io/nightly/agama/language-reference/#flow-finish) directive in a flow. Especially when terminating successfully, many times developers would like to attach the identity of the user in question, as in `Finish userId`. This results in a successful authentication event and makes sense, but this is not always desired. Sometimes due to decomposition practices (in order to favor re-use and better organization), small flows can arise that should not carry the user identifier.
+Carefully decide how to use the [`Finish`](../../../agama/language-reference.md#flow-finish) directive in a flow. Especially when terminating successfully, many times developers would like to attach the identity of the user in question, as in `Finish userId`. This results in a successful authentication event and makes sense, but this is not always desired. Sometimes due to decomposition practices (in order to favor re-use and better organization), small flows can arise that should not carry the user identifier.
 
 As an example, suppose several flows exist for OTP (one-time passcode) authentication, like SMS, e-mail, token-based, etc. These would receive the user identifier as an input and act accordingly by verifying the passcode the user has entered at the browser. A parent flow can be used to prompt for a username and password first, and then forward the user to the OTP flow that better matches the user's preferences. This sounds fine, however, since any flow can be triggered by means of an authentication request by default, a skilled individual might try to launch one of the OTP flows directly passing proper parameters. This would result in authentications using a single factor (i.e. no password) which is undesirable.
 
-Thus, it is recommended to include `userId` in `Finish` only when there is a reason to do so, that is, when the authentication carried out by the flow is strong enough. This largely depends on the defined organization policies, but using a two-factor authentication is often a good sign of strength. Another approach is explicitly state which flows should not be triggered from a browser directly. This can be done in the Agama [project descriptor](https://docs.jans.io/nightly/agama/gama-format/#metadata), `project.json`.
+Thus, it is recommended to include `userId` in `Finish` only when there is a reason to do so, that is, when the authentication carried out by the flow is strong enough. This largely depends on the defined organization policies, but using a two-factor authentication is often a good sign of strength. Another approach is explicitly state which flows  should not be triggered from a browser directly. This can be done in the Agama [project descriptor](../../../agama/gama-format.md#metadata), `project.json`.
 
 Recall the simplest way to express a positive authentication outcome is just `Finish true`.

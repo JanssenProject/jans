@@ -13,53 +13,51 @@ C bindings for the Jans Cedarling authorization engine, providing policy-based a
 
 1. Clone the Janssen repository:
 
-   ```
-   git clone --depth 1 https://github.com/JanssenProject/jans.git
-   ```
+    ```sh
+    git clone --depth 1 https://github.com/JanssenProject/jans.git
+    ```
 
-1. Navigate to the Cedarling C bindings directory:
+2. Navigate to the Cedarling C bindings directory:
 
-   ```
-   cd jans/jans-cedarling/bindings/cedarling_c
-   ```
+    ```sh
+    cd jans/jans-cedarling/bindings/cedarling_c
+    ```
 
-1. Build the Rust library (this also generates `target/include/cedarling_c.h` under that crate’s `target/` directory):
+3. Build the Rust library (this also generates `target/include/cedarling_c.h` under that crate’s `target/` directory):
 
-   ```
-   cargo build --release -p cedarling_c
-   ```
+    ```sh
+    cargo build --release -p cedarling_c
+    ```
 
-1. Copy the built artifacts to your project:
+4. Copy the built artifacts to your project:
 
-   - **Linux**: `cp target/release/libcedarling_c.so .`
-   - **macOS**: `cp target/release/libcedarling_c.dylib .`
-   - **Windows**: `cp target/release/cedarling_c.dll .` and `cp target/release/cedarling_c.dll.lib cedarling_c.lib`
+    - **Linux**: `cp target/release/libcedarling_c.so .`
+    - **macOS**: `cp target/release/libcedarling_c.dylib .`
+    - **Windows**: `cp target/release/cedarling_c.dll .` and `cp target/release/cedarling_c.dll.lib cedarling_c.lib`
 
 ### Linking Your Application
 
 **Linux/macOS:**
 
-```
+```sh
 gcc -o myapp myapp.c -L. -lcedarling_c -Wl,-rpath,.
 ```
 
 **Windows (MSVC):**
 
-```
+```sh
 cl myapp.c cedarling_c.lib
 ```
 
 **Runtime Notes:**
 
 - **Linux**: Add the library directory to `LD_LIBRARY_PATH`:
-
-  ```
+  ```sh
   export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
   ```
 
 - **macOS**: Add the library directory to `DYLD_LIBRARY_PATH`:
-
-  ```
+  ```sh
   export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH
   ```
 
@@ -71,7 +69,7 @@ Before performing authorization, you need to configure a Cedarling instance. Con
 
 ### Basic Configuration
 
-```
+```c
 const char* config = "{"
     "\"CEDARLING_APPLICATION_NAME\": \"MyApp\","
     "\"CEDARLING_LOG_LEVEL\": \"INFO\","
@@ -82,20 +80,20 @@ const char* config = "{"
 
 ### Configuration Properties
 
-| Property                          | Description                              |
-| --------------------------------- | ---------------------------------------- |
-| `CEDARLING_APPLICATION_NAME`      | Name of your application                 |
-| `CEDARLING_LOG_LEVEL`             | Logging level (DEBUG, INFO, WARN, ERROR) |
-| `CEDARLING_LOG_TYPE`              | Log output type (std_out, memory, off)   |
-| `CEDARLING_POLICY_STORE_LOCAL_FN` | Path to local policy store file          |
-| `CEDARLING_JWT_SIG_VALIDATION`    | Enable/disable JWT signature validation  |
-| `CEDARLING_JWT_STATUS_VALIDATION` | Enable/disable JWT status validation     |
+| Property | Description |
+|----------|-------------|
+| `CEDARLING_APPLICATION_NAME` | Name of your application |
+| `CEDARLING_LOG_LEVEL` | Logging level (DEBUG, INFO, WARN, ERROR) |
+| `CEDARLING_LOG_TYPE` | Log output type (std_out, memory, off) |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` | Path to local policy store file |
+| `CEDARLING_JWT_SIG_VALIDATION` | Enable/disable JWT signature validation |
+| `CEDARLING_JWT_STATUS_VALIDATION` | Enable/disable JWT status validation |
 
-For complete configuration documentation, see [Configuration Properties](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/index.md).
+For complete configuration documentation, see [Configuration Properties](../reference/cedarling-properties.md).
 
 ## Initialize Cedarling
 
-```
+```c
 #include <stdio.h>
 #include <stdint.h>
 #include "cedarling_c.h"
@@ -121,7 +119,7 @@ int main() {
     // Create a new instance
     CedarlingInstanceResult instance_result;
     int ret = cedarling_new(config, &instance_result);
-
+    
     if (ret != 0) {
         printf("Failed to create instance: %s\n", instance_result.error_message);
         cedarling_free_instance_result(&instance_result);
@@ -157,7 +155,7 @@ Use `cedarling_authorize_multi_issuer` when authorizing with JWT tokens:
 
 **1. Define the request JSON:**
 
-```
+```c
 const char* request = "{"
     "\"tokens\": ["
     "    {\"mapping\": \"Jans::Access_token\", \"payload\": \"eyJhbGciOiJIUzI1NiIs...\"},"
@@ -174,7 +172,7 @@ const char* request = "{"
 
 **2. Authorize:**
 
-```
+```c
 CedarlingResult auth_result;
 int ret = cedarling_authorize_multi_issuer(instance_id, request, &auth_result);
 
@@ -187,7 +185,7 @@ if (ret == 0) {
 cedarling_free_result(&auth_result);
 ```
 
-See [Multi-Issuer Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-multi-issuer/index.md) for more details.
+See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
 
 ### Unsigned Authorization
 
@@ -195,7 +193,7 @@ Use `cedarling_authorize_unsigned` when you have custom principals (not derived 
 
 **1. Define the request JSON with principals:**
 
-```
+```c
 const char* request = "{"
     "\"principals\": ["
     "    {"
@@ -215,14 +213,14 @@ const char* request = "{"
 
 **2. Authorize:**
 
-```
+```c
 CedarlingResult auth_result;
 int ret = cedarling_authorize_unsigned(instance_id, request, &auth_result);
 
 if (ret == 0) {
     char* result_str = (char*)auth_result.data;
     printf("Authorization result: %s\n", result_str);
-
+    
     // Check if decision is true
     if (strstr(result_str, "\"decision\":true") != NULL) {
         printf("Access granted\n");
@@ -241,7 +239,7 @@ The response body is a JSON string. Each `results[i]` is either `{"Ok": {decisio
 
 Request body: `{ "principal": {...} | null, "items": [ { "resource": ..., "action": "...", "context": {} }, ... ] }`.
 
-```
+```c
 const char* request =
     "{"
     "  \"principal\": { \"cedar_entity_mapping\": { \"entity_type\": \"Jans::TestPrincipal1\", \"id\": \"u1\" }, \"is_ok\": true },"
@@ -270,7 +268,7 @@ if (ret == 0) {
 cedarling_free_result(&batch_result);
 ```
 
-For multi-issuer, the request body is `{ "tokens": [...], "items": [...] }` and the call is `cedarling_authorize_multi_issuer_batch`. Same response shape and lifecycle (`cedarling_free_result` when done). See [Batch Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
+For multi-issuer, the request body is `{ "tokens": [...], "items": [...] }` and the call is `cedarling_authorize_multi_issuer_batch`. Same response shape and lifecycle (`cedarling_free_result` when done). See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
 ## Context Data API
 
@@ -282,7 +280,7 @@ Store data in the context for use in policy evaluation:
 
 TTL is given in seconds; use `<= 0` when you do not want to override the store default.
 
-```
+```c
 const char* value = "{\"role\": [\"admin\", \"editor\"], \"level\": 5}";
 CedarlingResult push_result;
 int ret = cedarling_context_push(instance_id, "user:123", value, 300, &push_result);
@@ -296,7 +294,7 @@ cedarling_free_result(&push_result);
 
 Retrieve stored data by key:
 
-```
+```c
 CedarlingResult get_result;
 int ret = cedarling_context_get(instance_id, "user:123", &get_result);
 if (ret == 0) {
@@ -314,7 +312,7 @@ cedarling_free_result(&get_result);
 
 Remove a specific entry:
 
-```
+```c
 CedarlingResult remove_result;
 int ret = cedarling_context_remove(instance_id, "user:123", &remove_result);
 if (ret == 0) {
@@ -327,7 +325,7 @@ cedarling_free_result(&remove_result);
 
 Remove all entries from the data store:
 
-```
+```c
 CedarlingResult clear_result;
 int ret = cedarling_context_clear(instance_id, &clear_result);
 cedarling_free_result(&clear_result);
@@ -337,7 +335,7 @@ cedarling_free_result(&clear_result);
 
 List all entries with their metadata:
 
-```
+```c
 CedarlingResult list_result;
 int ret = cedarling_context_list(instance_id, &list_result);
 if (ret == 0) {
@@ -350,7 +348,7 @@ cedarling_free_result(&list_result);
 
 Get statistics about the data store:
 
-```
+```c
 CedarlingResult stats_result;
 int ret = cedarling_context_stats(instance_id, &stats_result);
 if (ret == 0) {
@@ -363,7 +361,7 @@ cedarling_free_result(&stats_result);
 
 Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
 
-```
+```cedar
 permit(
     principal,
     action == Jans::Action::"read",
@@ -377,7 +375,7 @@ permit(
 
 Retrieve logs stored in memory:
 
-```
+```c
 // Get all logs and clear the buffer
 CedarlingStringArray logs;
 int ret = cedarling_pop_logs(instance_id, &logs);
@@ -422,7 +420,7 @@ cedarling_free_result(&log_result);
 
 All functions return an error code (0 for success, non-zero for failure). Additional error information is available through:
 
-```
+```c
 // Last error string is owned by the caller — free with cedarling_free_string
 char* error = cedarling_get_last_error();
 if (error) {
@@ -438,16 +436,16 @@ cedarling_clear_last_error();
 
 Values match the `CedarlingErrorCode` enum in `cedarling_c.h` (names are `SCREAMING_SNAKE_CASE` in C).
 
-| Code | Name               | Description                                              |
-| ---- | ------------------ | -------------------------------------------------------- |
-| 0    | Success            | Operation completed successfully                         |
-| 1    | InvalidArgument    | Invalid argument provided                                |
-| 2    | InstanceNotFound   | Instance not found                                       |
-| 3    | JsonError          | JSON parsing error                                       |
-| 4    | AuthorizationError | Authorization error                                      |
-| 5    | ConfigurationError | Configuration error                                      |
-| 6    | Internal           | Internal error                                           |
-| 7    | KeyNotFound        | Requested key or id does not exist (e.g. unknown log id) |
+| Code | Name | Description |
+|------|------|-------------|
+| 0 | Success | Operation completed successfully |
+| 1 | InvalidArgument | Invalid argument provided |
+| 2 | InstanceNotFound | Instance not found |
+| 3 | JsonError | JSON parsing error |
+| 4 | AuthorizationError | Authorization error |
+| 5 | ConfigurationError | Configuration error |
+| 6 | Internal | Internal error |
+| 7 | KeyNotFound | Requested key or id does not exist (e.g. unknown log id) |
 
 ## Memory Management
 
@@ -456,7 +454,7 @@ Values match the `CedarlingErrorCode` enum in `cedarling_c.h` (names are `SCREAM
 
 Free struct payloads with the matching API after use:
 
-```
+```c
 // Owned CedarlingResult
 cedarling_free_result(&result);
 
@@ -472,7 +470,7 @@ cedarling_free_string(str);
 
 ## Complete Example
 
-```
+```c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -503,7 +501,7 @@ int main() {
         cedarling_free_instance_result(&instance_result);
         return 1;
     }
-
+    
     uint64_t instance_id = instance_result.instance_id;
     cedarling_free_instance_result(&instance_result);
 
@@ -555,6 +553,6 @@ All functions in the Cedarling C library are thread-safe. Multiple threads can s
 
 ## Next Steps
 
-- Explore [Cedar Policy Language](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/index.md) for writing authorization policies
-- Learn about [Multi-Issuer Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-multi-issuer/index.md) for JWT-based authorization
-- Review [Configuration Properties](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/index.md) for all available options
+- Explore [Cedar Policy Language](../reference/cedarling-policy-store.md) for writing authorization policies
+- Learn about [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for JWT-based authorization
+- Review [Configuration Properties](../reference/cedarling-properties.md) for all available options

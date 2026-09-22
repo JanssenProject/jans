@@ -2,23 +2,45 @@
 
 The Janssen Server provides multiple configuration tools to manage the session.
 
-Use the command line to perform actions from the terminal. Learn how to use Jans CLI [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-cli/index.md) or jump straight to the [Using Command Line](#using-the-command-line)
+=== "Use Command-line"
 
-Use a fully functional text-based user interface from the terminal. Learn how to use Jans Text-based UI (TUI) [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) or jump straight to the [Using Text-based UI](#using-text-based-ui)
+    Use the command line to perform actions from the terminal. Learn how to
+    use Jans CLI [here](../config-guide/config-tools/jans-cli/README.md) or jump straight to
+    the [Using Command Line](#using-the-command-line)
 
-Use REST API for programmatic access or invoke it via tools like CURL or Postman. Learn how to use Janssen Server Config API [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/config-api/index.md) or jump straight to the [Using Configuration REST API](#using-configuration-rest-api)
+=== "Use Text-based UI"
+
+    Use a fully functional text-based user interface from the terminal.
+    Learn how to use Jans Text-based UI (TUI)
+    [here](../config-guide/config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
+
+=== "Use REST API"
+
+    Use REST API for programmatic access or invoke it via tools like CURL or
+    Postman. Learn how to use Janssen Server Config API
+    [here](../config-guide/config-tools/config-api/README.md) or jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
+
+
+
 
 ## Using The Command Line
 
-In the Janssen Server, you can get session detail using the command line. To get the details of Janssen command line operations relevant to the session, check the operations under the `AuthSessionManagement` task using the command below.
 
-Command
+In the Janssen Server, you can get session detail using the
+command line. To get the details of Janssen command line operations relevant to
+the session, check the operations under the `AuthSessionManagement` task using the
+command below.
 
-```
+
+
+
+```bash title="Command"
 jans cli --info AuthSessionManagement
 ```
 
-```
+```text title="Sample Output" linenums="1"
 Operation ID: get-session-by-id
   Description: Get session by id.
   Parameters:
@@ -42,19 +64,25 @@ Operation ID: search-session
   sortBy: Attribute whose value will be used to order the returned response [string]
   sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
   fieldValuePair: Field and value pair for seraching [string]
+
 ```
+
+
+
 
 ### Get All Sessions
 
 Use the operation ID get-sessions to get all the sessions on the Janssen Server.
 
-Command
 
-```
+```bash title="Command"
 jans cli --operation-id get-sessions
 ```
 
-```
+
+
+
+```json title="Sample Output" linenums="1"
 {
   "start": 0,
   "totalEntriesCount": 57,
@@ -105,22 +133,30 @@ jans cli --operation-id get-sessions
 .....
 .....
 .....
+
 ```
+
+
+
 
 ### Get Session by ID
 
-We can view the specific session details through its `sid` using `get-session-by-id` operation. For example, we can use `sid:bdb46abb-06e6-453e-9251-b0b697070d6a` with `--url-suffix` to retrieve the session details.
+
+We can view the specific session details through its `sid` using `get-session-by-id` operation.
+For example, we can use `sid:bdb46abb-06e6-453e-9251-b0b697070d6a` with `--url-suffix` to retrieve
+the session details.
 
 The following command is below:
 
-Command
-
-```
+```bash title="Command"
 jans cli --operation-id get-session-by-id \
 --url-suffix="sid:bdb46abb-06e6-453e-9251-b0b697070d6a"
 ```
 
-```
+
+
+
+```json title="Command Output" linenums="1"
 {
   "outsideSid": "bdb46abb-06e6-453e-9251-b0b697070d6a",
   "lastUsedAt": "2025-01-17T06:05:59",
@@ -157,20 +193,27 @@ jans cli --operation-id get-session-by-id \
   "ttl": 0,
   "opbrowserState": "870cd8ae-80da-40b5-b739-443f013285b9"
 }
+
+
 ```
+
+
+
 
 ### Search session
 
-We can search the session based on the `limit` using the `search-session` operation. For example, if we set the limit to 2, we will receive the details of two sessions.
+We can search the session based on the `limit` using the `search-session` operation.
+For example, if we set the limit to 2, we will receive the details of two sessions.
 
-Command
-
-```
+```bash title="Command"
 jans cli --operation-id search-session \
 --endpoint-args limit:2
 ```
 
-```
+
+
+
+```json title="Command Output" linenums="1"
 {
   "start": 0,
   "totalEntriesCount": 57,
@@ -249,16 +292,24 @@ jans cli --operation-id search-session \
 }
 ```
 
+
+
+
 ### Delete a session
 
-We can delete the specific session through its `sid` using delete-session`operation. For example, We can use`sid:bdb46abb-06e6-453e-9251-b0b697070d6a`with`--url-suffix\` to delete the session. The following command is below:
+We can delete the specific session through its `sid` using delete-session` operation.
+For example, We can use `sid:bdb46abb-06e6-453e-9251-b0b697070d6a` with `--url-suffix` to delete the session.
+The following command is below:
 
-Command
 
-```
+
+
+
+```bash title="Command"
 jans cli --operation-id delete-session /
 --url-suffix="sid:bdb46abb-06e6-453e-9251-b0b697070d6a"
 ```
+
 
 This message will be displayed:
 
@@ -268,14 +319,21 @@ Object was successfully deleted.
 
 ### Revoke all sessions by userDn
 
-We can revoke the session for the user through its `userDn` using `revoke-user-session` operation. For example, We can use `userDn:inum=b1175c2c-78c7-4361-8f8e-a90bbf164d28,ou=people,o=jans` with `--url-suffix` to revoke the session. The following command is below:
 
-Command
 
-```
+
+We can revoke the session for the user through its `userDn` using `revoke-user-session` operation.
+For example, We can use `userDn:inum=b1175c2c-78c7-4361-8f8e-a90bbf164d28,ou=people,o=jans` with `--url-suffix` to revoke the session.
+The following command is below:
+
+
+
+
+```bash title="Command"
 jans cli --operation-id revoke-user-session /
 --url-suffix="userDn:inum=b1175c2c-78c7-4361-8f8e-a90bbf164d28,ou=people,o=jans"
 ```
+
 
 This message will be displayed:
 
@@ -283,24 +341,40 @@ This message will be displayed:
 Object was successfully deleted.
 ```
 
+
+
+
 ## Using Text-based UI
 
 Start TUI using the command below:
 
-Command
-
-```
+```bash title="Command"
 jans tui
 ```
 
+
+
+
 ### Session screen
 
-Navigate to `Auth Server` -> `Session` to open the Session screen as shown in the image below. This screen provides the available search session functionality. where we can search sessions by user with filters for `expires after` and `expires before` dates.
+Navigate to `Auth Server` -> `Session` to open the Session screen as shown in the image below.
+This screen provides the available search session functionality.
+where we can search sessions by user with filters for `expires after`
+and `expires before` dates.
 
-To get the detail of any session, bring the control on that session (using the tab key), and press `v` key. You can also `export` the details.
+![image](../../assets/tui-session-screen.png)
+
+
+To get the detail of any session, bring the control on that session (using the tab key), and press `v` key.
+You can also `export` the details.
 
 To delete a session, bring the control on that session (using the tab key), and press `Delete` key.
 
+![image](../../assets/tui-session-detail.png)
+
+
 ## Using Configuration REST API
 
-Janssen Server Configuration REST API exposes relevant endpoints for managing and configuring the session. Endpoint details are published in the [Swagger document](https://docs.jans.io/nightly/janssen-server/reference/openapi/index.md).
+Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring the session. Endpoint details are published in the [Swagger
+document](./../reference/openapi.md).

@@ -1,5 +1,6 @@
 # SCIM Guide
 
+
 SCIM script allows you to execute custom logic when certain SCIM API operations are invoked.
 
 With SCIM scripts, custom business logic can be executed when several of the SCIM API operations are invoked. This is useful in many situations, for example:
@@ -11,7 +12,10 @@ With SCIM scripts, custom business logic can be executed when several of the SCI
 
 ### Notes:
 
-In this document, the term resources refer to those "entities" the service can manage, for instance, users or groups The term operation refers to any SCIM functionality accessible through its HTTP endpoints Basic development skills are assumed. Some grasp of Java and Python are required as well as understanding of the SCIM protocol.
+In this document, the term resources refer to those "entities" the service can manage, for instance, users or groups
+The term operation refers to any SCIM functionality accessible through its HTTP endpoints
+Basic development skills are assumed. Some grasp of Java and Python are required as well as understanding of the SCIM protocol.
+
 
 ## Interface
 
@@ -30,12 +34,11 @@ All methods contain a `configurationAttributes` parameter, this gives access to 
 **Basic Methods**
 
 These are methods not related to SCIM operations but still play key roles:
-
-| Method Name     | Description                                                                                | Return Value                                  |
-| :-------------- | :----------------------------------------------------------------------------------------- | :-------------------------------------------- |
-| `init`          | Called when the (SCIM) service starts and every time the script properties or code changes | A boolean value describing success or failure |
-| `destroy`       | Called every time the script properties or code changes (called before `init`)             | A boolean value describing success or failure |
-| `getApiVersion` | Determines what methods are effectively called when SCIM endpoints are invoked             | A positive integer                            |
+|Method Name|Description|Return Value|
+|:---|:---|:---|
+|`init`|Called when the (SCIM) service starts and every time the script properties or code changes|A boolean value describing success or failure|
+|`destroy`|Called every time the script properties or code changes (called before `init`)|A boolean value describing success or failure|
+|`getApiVersion`|Determines what methods are effectively called when SCIM endpoints are invoked|A positive integer|
 
 **Pre-resource Modification**
 
@@ -43,10 +46,10 @@ They are called when the resource is about to be persisted. The second parameter
 
 These methods are called regardless of the API version used. Names are self explanatory:
 
-| Methods                                     | 2nd param | 2nd param Class/Link                                                                                                                                                                 |
-| ------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `createUser`, `updateUser`, `deleteUser`    | `user`    | [ScimCustomPerson](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim/ScimCustomPerson.java) |
-| `createGroup`, `updateGroup`, `deleteGroup` | `group`   | [GluuGroup](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/service/src/main/java/io/jans/scim/model/GluuGroup.java)                  |
+|Methods|2nd param|2nd param Class/Link|
+|:---|:---|:---|
+|`createUser`, `updateUser`, `deleteUser`|`user`|[ScimCustomPerson](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim/ScimCustomPerson.java)|
+|`createGroup`, `updateGroup`, `deleteGroup`|`group`|[GluuGroup](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/service/src/main/java/io/jans/scim/model/GluuGroup.java)|
 
 Pre-resource modification methods return a boolean. A `False` value aborts the corresponding SCIM operation and a 500 error is returned. The same applies if the method execution crashes at runtime.
 
@@ -58,10 +61,10 @@ They are called after the resource is persisted. The second parameter in these m
 
 These methods are called if `getApiVersion` returns a number >= 2.
 
-| Methods                                                 | 2nd param | 2nd param Class/Link                                                                                                                                                                 |
-| ------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `postCreateUser`, `postUpdateUser`, `postDeleteUser`    | `user`    | [ScimCustomPerson](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim/ScimCustomPerson.java) |
-| `postCreateGroup`, `postUpdateGroup`, `postDeleteGroup` | `group`   | [GluuGroup](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/service/src/main/java/io/jans/scim/model/GluuGroup.java)                  |
+|Methods| 2nd param|2nd param Class/Link|
+|:---|:---|:---|
+|`postCreateUser`, `postUpdateUser`, `postDeleteUser`|`user`|[ScimCustomPerson](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim/ScimCustomPerson.java)|
+|`postCreateGroup`, `postUpdateGroup`, `postDeleteGroup`|`group`|[GluuGroup](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/service/src/main/java/io/jans/scim/model/GluuGroup.java)|
 
 Post-resource modification methods return a boolean. A `False` value aborts the corresponding SCIM operation and a 500 error is returned. The same applies if the method execution crashes at runtime.
 
@@ -75,10 +78,10 @@ Any change or manipulation upon the object will not be reflected in the underlyi
 
 These methods are called if `getApiVersion` returns a number >= 3.
 
-| Methods    | 2nd param | 2nd param Class/Link                                                                                                                                                                 |
-| ---------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `getUser`  | `user`    | [ScimCustomPerson](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim/ScimCustomPerson.java) |
-| `getGroup` | `group`   | [GluuGroup](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/service/src/main/java/io/jans/scim/model/GluuGroup.java)                  |
+|Methods|2nd param|2nd param Class/Link|
+|:---|:---|:---|
+|`getUser`|`user`|[ScimCustomPerson](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim/ScimCustomPerson.java)|
+|`getGroup`|`group`|[GluuGroup](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/service/src/main/java/io/jans/scim/model/GluuGroup.java)|
 
 Single resource retrieval methods return a boolean. A `False` value aborts the whole SCIM operation and a 500 error is returned. The same applies if the method execution crashes at runtime.
 
@@ -90,10 +93,10 @@ Any change or manipulation upon the object will not be reflected in the underlyi
 
 These methods are called if `getApiVersion` returns a number >= 4.
 
-| Methods            | 2nd param | 2nd param Class/Link                                                                                                                                               |
-| ------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `postSearchUsers`  | `results` | [PagedResult](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-orm/core/src/main/java/io/jans/orm/model/PagedResult.java) |
-| `postSearchGroups` | `results` | [PagedResult](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-orm/core/src/main/java/io/jans/orm/model/PagedResult.java) |
+|Methods|2nd param|2nd param Class/Link|
+|:---|:---|:---|
+|`postSearchUsers`|`results`|[PagedResult](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-orm/core/src/main/java/io/jans/orm/model/PagedResult.java)|
+|`postSearchGroups`|`results`|[PagedResult](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-orm/core/src/main/java/io/jans/orm/model/PagedResult.java)|
 
 Multiple resources retrieval methods return a boolean. A `False` value aborts the whole SCIM operation and a 500 error is returned. The same applies if the method execution crashes at runtime.
 
@@ -105,10 +108,11 @@ These are alternative methods that allow to tweak the response the service produ
 
 These methods are called if `getApiVersion` returns a number >= 5.
 
-| Methods                   |
-| ------------------------- |
-| `manageResourceOperation` |
-| `manageSearchOperation`   |
+|Methods|
+|:---|
+|`manageResourceOperation`
+|`manageSearchOperation`
+
 
 ### Example: Modifying Search Results
 
@@ -118,10 +122,8 @@ Assume you are maintaining a user base of secret agents that work for your compa
 
 Let's alter `postSearchUsers`'s second parameter (`results`) to ensure addresses are not leaked:
 
-```
-for user in results.getEntries():
-    user.setAttribute("jansAddress", None)
-```
+    for user in results.getEntries():
+        user.setAttribute("jansAddress", None)
 
 This is very straightforward code except for the usage of `jansAddress`. Shouldn't it be simply `addresses` as the known SCIM attribute?
 
@@ -131,12 +133,10 @@ While it is easy to know the SCIM name of a database attribute, the converse req
 
 With that said, save your modifications. You may like the idea of adding some prints for enlightment like:
 
-```
-print "%d entries returned of %d" % (results.getEntriesCount(), results.getTotalEntriesCount())
-for user in results.getEntries():
-    print "Flushing addresses for user %s" % user.getUid() 
-    user.setAttribute("jansAddress", None)
-```
+    print "%d entries returned of %d" % (results.getEntriesCount(), results.getTotalEntriesCount())
+    for user in results.getEntries():
+        print "Flushing addresses for user %s" % user.getUid() 
+        user.setAttribute("jansAddress", None)
 
 Ensure no addresses are returned anymore in your SCIM user searches. Happy testing!
 
@@ -150,11 +150,11 @@ This method is invoked when any following operations are executed: resource crea
 
 Parameters are described in the table below:
 
-| Name      | Description                                                                                                                                             | Class/Link                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `context` | Provides contextual information about the SCIM operation being called such as type of resource involved, HTTP verb, request headers, query params, etc. | [OperationContext](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/server/src/main/java/io/jans/scim/service/external/OperationContext.java)                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `entity`  | A non-null object representing the resource involved                                                                                                    | A descendant of [Entry](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-orm/model/src/main/java/io/jans/orm/model/base/Entry.java). If the resource is a user, it will be an instance of [ScimCustomPerson](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim/ScimCustomPerson.java). In case of a group, it will be a [GluuGroup](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/service/src/main/java/io/jans/scim/model/GluuGroup.java) |
-| `payload` | The payload sent in the invocation; `null` when the operation is removal or retrieval by ID                                                             | The datatype depends on the operation called. Check the [interface](https://github.com/JanssenProject/jans/tree/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/server/src/main/java/io/jans/scim/ws/rs/scim2) that suits best and inspect the first parameter's datatype. The class will belong to some subpackage inside [io.jans.scim.model.scim2](https://github.com/JanssenProject/jans/tree/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim2)                                                                                                                         |
+|Name|Description|Class/Link|
+|:---|:---|:---
+|`context`|Provides contextual information about the SCIM operation being called such as type of resource involved, HTTP verb, request headers, query params, etc.|[OperationContext](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/server/src/main/java/io/jans/scim/service/external/OperationContext.java)|
+|`entity`|A non-null object representing the resource involved|A descendant of [Entry](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-orm/model/src/main/java/io/jans/orm/model/base/Entry.java). If the resource is a user, it will be an instance of [ScimCustomPerson](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim/ScimCustomPerson.java). In case of a group, it will be a [GluuGroup](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/service/src/main/java/io/jans/scim/model/GluuGroup.java)|
+|`payload`|The payload sent in the invocation; `null` when the operation is removal or retrieval by ID|The datatype depends on the operation called. Check the [interface](https://github.com/JanssenProject/jans/tree/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/server/src/main/java/io/jans/scim/ws/rs/scim2) that suits best and inspect the first parameter's datatype. The class will belong to some subpackage inside [io.jans.scim.model.scim2](https://github.com/JanssenProject/jans/tree/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim2)|
 
 This method is expected to return an instance of `javax.ws.rs.core.Response` that supersedes the output of the operation itself. In other words, the actual processing of the operation is skipped in favor of the code supplied here. However note that minor validations may take place in the payload before your code is actually called.
 
@@ -176,10 +176,10 @@ This method offers a high degree of flexibility. Perform careful testing of your
 
 This method is invoked when resource searches are performed. Parameters are described in the table below:
 
-| name            | Description                                                                                                                                             | Class/Link                                                                                                                                                                                  |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `context`       | Provides contextual information about the SCIM operation being called such as type of resource involved, HTTP verb, request headers, query params, etc. | [OperationContext](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/server/src/main/java/io/jans/scim/service/external/OperationContext.java) |
-| `searchRequest` | An object representing the search parameters provided in the call (applies for both GET and POST)                                                       | [SearchRequest](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim2/SearchRequest.java)             |
+|name|Description|Class/Link
+|:---|:----|:---
+|`context`|Provides contextual information about the SCIM operation being called such as type of resource involved, HTTP verb, request headers, query params, etc.|[OperationContext](https://github.com/JanssenProject/jans/blob/6c1caa1c4c92d28571f8589cd701e6885d4d85ef/jans-scim/server/src/main/java/io/jans/scim/service/external/OperationContext.java)
+|`searchRequest`|An object representing the search parameters provided in the call (applies for both GET and POST)|[SearchRequest](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim2/SearchRequest.java)
 
 Unlike `manageResourceOperation`, no `entity` parameter is passed. This is so because making decisions based on already executed searches would have a performance impact. Instead you can use `context.setFilterPrepend(...)` to help restrict the search against the database: here you can pass a String value that will be interpreted as an SCIM filter expression (see section 3.4.2.2 of RFC 7644). When the search being performed already contains a search filter (i.e. `searchRequest.getFilter()`is non-empty), a new filter is created by appending both "subfilters" with an `and` operator.
 
@@ -200,7 +200,9 @@ To properly handle this multi-tenancy scenario, you decide to use the contextual
 The strategy to implement segmentation is rather simple:
 
 - Alter the default SCIM script by supplying a custom implementation for the methods that control execution
+
 - Make the HTTP header name be a configuration property of the script so that it is not hard-coded
+
 - Add a configuration property that contains the mapping of `userType` value vs. expected header value in JSON format
 
 **Adding and parsing config properties**
@@ -214,21 +216,17 @@ Save the changes.
 
 In the `init` method this properties should be parsed. To start, let's add some imports:
 
-```
-from io.jans.scim.ws.rs.scim2 import BaseScimWebService
-import json
-```
+    from io.jans.scim.ws.rs.scim2 import BaseScimWebService
+    import json
 
 Here is how `init` would look like:
 
-```
-def init(self, configurationAttributes):
-    self.custom_header = configurationAttributes.get("custom_header").getValue2()
-    access_map_json = configurationAttributes.get("access_map").getValue2()    
-    self.access_map = json.loads(access_map_json)
-    print "ScimEventHandler (init): Initialized successfully"
-    return True
-```
+    def init(self, configurationAttributes):
+        self.custom_header = configurationAttributes.get("custom_header").getValue2()
+        access_map_json = configurationAttributes.get("access_map").getValue2()    
+        self.access_map = json.loads(access_map_json)
+        print "ScimEventHandler (init): Initialized successfully"
+        return True
 
 Note no validations took place here: we assumed the script contains the properties, that they are non-empty and have sensible values.
 
@@ -236,15 +234,13 @@ Note no validations took place here: we assumed the script contains the properti
 
 The first step is to know the kind of application that is calling our service. For this purpose let's create a method that given incoming request headers returns the matching `userType`
 
-```
-# headers params is an instance of javax.ws.rs.core.MultivaluedMap<String, String>
-def getUserType(self, headers):
-    secret = headers.getFirst(self.custom_header)
-    if secret in self.access_map:
-        return self.access_map[secret]
-    else:
-        return None
-```
+    # headers params is an instance of javax.ws.rs.core.MultivaluedMap<String, String>
+    def getUserType(self, headers):
+        secret = headers.getFirst(self.custom_header)
+        if secret in self.access_map:
+            return self.access_map[secret]
+        else:
+            return None
 
 Now let's code `manageResourceOperation`. We should allow access only under the following conditions:
 
@@ -253,46 +249,42 @@ Now let's code `manageResourceOperation`. We should allow access only under the 
 
 Assume that if the operation invoked is not user-related, we should allow access freely. Here is how the implementation might look:
 
-```
-def manageResourceOperation(self, context, entity, payload, configurationAttributes):
+    def manageResourceOperation(self, context, entity, payload, configurationAttributes):
 
-    print "manageResourceOperation. SCIM endpoint invoked is %s (HTTP %s)" % (context.getPath(), context.getMethod()) 
-    if context.getResourceType() != "User":
-        return None
+        print "manageResourceOperation. SCIM endpoint invoked is %s (HTTP %s)" % (context.getPath(), context.getMethod()) 
+        if context.getResourceType() != "User":
+            return None
 
-    expected_user_type = self.getUserType(context.getRequestHeaders())
+        expected_user_type = self.getUserType(context.getRequestHeaders())
 
-    if expected_user_type != None and entity.getAttribute("jansUsrTyp") == expected_user_type:
-        return None
-    else:
-        return BaseScimWebService.getErrorResponse(403, None, "Attempt to handle a not allowed user type")
-```
+        if expected_user_type != None and entity.getAttribute("jansUsrTyp") == expected_user_type:
+            return None
+        else:
+            return BaseScimWebService.getErrorResponse(403, None, "Attempt to handle a not allowed user type")
 
-Note no usage of the payload took place. A case you may like to evaluate is where mistakenly using an update operation, the `userType` is set to an unexpected value.
+<br/>Note no usage of the payload took place. A case you may like to evaluate is where mistakenly using an update operation, the `userType` is set to an unexpected value.
 
 **Allow/Deny searches**
 
 This time instead of inspecting an entity, we ought to make a filter expression to restrict the search when the database is queried. For your reference, a valid filter expression is for instance `userType eq "Contractor"`.
 
-```
-def manageSearchOperation(self, context, searchRequest, configurationAttributes):
+    def manageSearchOperation(self, context, searchRequest, configurationAttributes):
 
-    print "manageSearchOperation. SCIM endpoint invoked is %s (HTTP %s)" % (context.getPath(), context.getMethod())
+        print "manageSearchOperation. SCIM endpoint invoked is %s (HTTP %s)" % (context.getPath(), context.getMethod())
 
-    resource_type = context.getResourceType()
-    print "manageSearchOperation. This is a search over %s resources" % resource_type
+        resource_type = context.getResourceType()
+        print "manageSearchOperation. This is a search over %s resources" % resource_type
 
-    if resource_type != "User":
-        return None
+        if resource_type != "User":
+            return None
 
-    expected_user_type = self.getUserType(context.getRequestHeaders())
+        expected_user_type = self.getUserType(context.getRequestHeaders())
 
-    if expected_user_type != None:
-        context.setFilterPrepend("userType eq \"%s\"" % expected_user_type)
-        return None
-    else:
-        return BaseScimWebService.getErrorResponse(403, None, "Attempt to handle a not allowed user type")
-```
+        if expected_user_type != None:
+            context.setFilterPrepend("userType eq \"%s\"" % expected_user_type)
+            return None
+        else:
+            return BaseScimWebService.getErrorResponse(403, None, "Attempt to handle a not allowed user type")
 
 The `manageSearchOperation` must return a `javax.ws.rs.core.Response`. A `None` value makes continue the operation processing normally.
 
@@ -313,133 +305,12 @@ There is an important exception to the above and is related to the `manage*` met
 The sample code snippet shows how to:
 
 1. Modify Search Results
-1. Segment the user base
-1. Allow/Deny resource operations
-1. Allow/Deny searches
+2. Segment the user base
+3. Allow/Deny resource operations
+4. Allow/Deny searches
 
-```
-# Copyright (c) 2022, Janssen Project
-#
-# Author: Gluu
-#    1. Modifying Search Results
-#    2. Segmenting the user base
-#    3. Allow/Deny resource operations
-#    4. Allow/Deny searches
-#
-from io.jans.model.custom.script.type.scim import ScimType
-from io.jans.scim.ws.rs.scim2 import BaseScimWebService
-
-import json
-
-class ScimEventHandler(ScimType):
-
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, configurationAttributes):
-        self.custom_header = configurationAttributes.get("custom_header").getValue2()
-        access_map_json = configurationAttributes.get("access_map").getValue2()    
-        self.access_map = json.loads(access_map_json)
-        print "Custom ScimEventHandler (init): Initialized successfully"
-        return True
-
-    def destroy(self, configurationAttributes):
-        print "Custom ScimEventHandler (destroy): Destroyed successfully"
-        return True   
-
-    def getApiVersion(self):
-        return 5
-
-    def createUser(self, user, configurationAttributes):
-        return True
-
-    def updateUser(self, user, configurationAttributes):
-        return True
-
-    def deleteUser(self, user, configurationAttributes):
-        return True
-
-    def createGroup(self, group, configurationAttributes):
-        return True
-
-    def updateGroup(self, group, configurationAttributes):
-        return True
-
-    def deleteGroup(self, group, configurationAttributes):
-        return True
-
-    def postCreateUser(self, user, configurationAttributes):
-        return True
-
-    def postUpdateUser(self, user, configurationAttributes):
-        return True
-
-    def postDeleteUser(self, user, configurationAttributes):
-        return True
-
-    def postUpdateGroup(self, group, configurationAttributes):
-        return True
-
-    def postCreateGroup(self, group, configurationAttributes):
-        return True
-
-    def postDeleteGroup(self, group, configurationAttributes):
-        return True
-
-    def getUser(self, user, configurationAttributes):
-        return True
-
-    def getGroup(self, group, configurationAttributes):
-        return True
-
-    def postSearchUsers(self, results, configurationAttributes):
-
-        print "%d entries returned of %d" % (results.getEntriesCount(), results.getTotalEntriesCount())
-        for user in results.getEntries():
-            print "Flushing addresses for user %s" % user.getUid() 
-            user.setAttribute("jansAddress", None)
-
-        return True
-
-    def postSearchGroups(self, results, configurationAttributes):
-        return True
-
-    def manageResourceOperation(self, context, entity, payload, configurationAttributes):
-        print "manageResourceOperation. SCIM endpoint invoked is %s (HTTP %s)" % (context.getPath(), context.getMethod()) 
-        if context.getResourceType() != "User":
-            return None
-
-        expected_user_type = self.getUserType(context.getRequestHeaders())
-
-        if expected_user_type != None and entity.getAttribute("jansUsrTyp") == expected_user_type:
-            return None
-        else:
-            return BaseScimWebService.getErrorResponse(403, None, "Attempt to handle a not allowed user type")
-
-    def manageSearchOperation(self, context, searchRequest, configurationAttributes):
-        print "manageSearchOperation. SCIM endpoint invoked is %s (HTTP %s)" % (context.getPath(), context.getMethod())
-
-        resource_type = context.getResourceType()
-        print "manageSearchOperation. This is a search over %s resources" % resource_type
-
-        if resource_type != "User":
-            return None
-
-        expected_user_type = self.getUserType(context.getRequestHeaders())
-
-        if expected_user_type != None:
-            context.setFilterPrepend("userType eq \"%s\"" % expected_user_type)
-            return None
-        else:
-            return BaseScimWebService.getErrorResponse(403, None, "Attempt to handle a not allowed user type")
-
-    # headers params is an instance of javax.ws.rs.core.MultivaluedMap<String, String>
-    def getUserType(self, headers):
-        secret = headers.getFirst(self.custom_header)
-        if secret in self.access_map:
-            return self.access_map[secret]
-        else:
-            return None
+```python
+--8<-- "script-catalog/scim/sample-script/custom_scim_handler.py"
 ```
 
 ## Script Type: Java
@@ -449,223 +320,10 @@ class ScimEventHandler(ScimType):
 The sample code snippet shows how to:
 
 1. Modify Search Results
-1. Segment the user base
-1. Allow/Deny resource operations
-1. Allow/Deny searches
+2. Segment the user base
+3. Allow/Deny resource operations
+4. Allow/Deny searches
 
-```
-/* Copyright (c) 2022, Janssen Project
-*
-* Author: Gluu
-*    1. Modifying Search Results
-*    2. Segmenting the user base
-*    3. Allow/Deny resource operations
-*    4. Allow/Deny searches
-*/
-
-
-import io.jans.model.custom.script.type.scim.ScimType;
-import io.jans.scim.ws.rs.scim2.BaseScimWebService;
-import io.jans.service.custom.script.CustomScriptManager;
-import io.jans.model.custom.script.model.CustomScript;
-import io.jans.model.SimpleCustomProperty;
-import io.jans.scim.model.scim.ScimCustomPerson;
-import io.jans.scim.model.GluuGroup;
-import io.jans.orm.model.PagedResult;
-import io.jans.scim.service.external.OperationContext;
-import io.jans.orm.model.base.Entry;
-import jakarta.ws.rs.core.Response;
-import io.jans.scim.model.scim2.SearchRequest;
-import jakarta.ws.rs.core.MultivaluedMap;
-
-import org.json.JSONObject;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class ScimEventHandler implements ScimType {
-
-    private static final Logger log = LoggerFactory.getLogger(ScimEventHandler.class);
-    private static final Logger scriptLogger = LoggerFactory.getLogger(CustomScriptManager.class);
-    private String custom_header;
-    private JSONObject access_map;
-
-    @Override
-    public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
-        custom_header = configurationAttributes.get("custom_header").getValue2();
-        String access_map_json = configurationAttributes.get("access_map").getValue2();    
-        access_map = new JSONObject(access_map_json);
-        log.info("Custom Java ScimEventHandler (init)");
-        scriptLogger.info("Custom Java ScimEventHandler (init): Initializing ...");
-        scriptLogger.info("Custom Java ScimEventHandler (init): Initialized successfully");        
-        return true;
-    }
-
-    @Override
-    public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
-        log.info("Custom Java ScimEventHandler (init)");
-        scriptLogger.info("Custom Java ScimEventHandler (init): Initializing ...");
-        scriptLogger.info("Custom Java ScimEventHandler (init): Initialized successfully");
-        return true;
-    }
-
-    @Override
-    public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
-        log.info("Custom Java ScimEventHandler (destroy)");
-        scriptLogger.info("Custom Java ScimEventHandler (destroy): Destroying ...");
-        scriptLogger.info("Custom Java ScimEventHandler (destroy): Destroyed successfully");
-        return true;
-    }
-
-    @Override
-    public int getApiVersion() {
-        return 5;
-    }
-
-    @Override
-    public boolean createUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean postCreateUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean updateUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean postUpdateUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean deleteUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean postDeleteUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean createGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean postCreateGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean updateGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean postUpdateGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean deleteGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean postDeleteGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean getUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean getGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public boolean postSearchUsers(Object results, Map<String, SimpleCustomProperty> configurationAttributes){
-        PagedResult res = (PagedResult) results;
-        scriptLogger.info("{} entries returned of {}", res.getEntriesCount(), res.getTotalEntriesCount());
-        for (Object entry : res.getEntries()) {   
-            ScimCustomPerson user = (ScimCustomPerson) entry;     
-            scriptLogger.info("Flushing addresses for user {}", user.getUid());
-            user.setAttribute("jansAddress", "");
-        }
-        return true;
-    }
-
-    @Override
-    public boolean postSearchGroups(Object results, Map<String, SimpleCustomProperty> configurationAttributes){
-        return true;
-    }
-
-    @Override
-    public Response manageResourceOperation(Object context, Object entity, Object payload, Map<String, SimpleCustomProperty> configurationAttributes){
-        OperationContext ctx = (OperationContext) context;
-        scriptLogger.info("manageResourceOperation. SCIM endpoint invoked is {} (HTTP {})", ctx.getPath(), ctx.getMethod());
-
-        String resource_type = ctx.getResourceType();
-        if(!resource_type.equals("User")){
-            return null;
-        }
-
-        String expected_user_type = this.getUserType(ctx.getRequestHeaders());
-        ScimCustomPerson ent = (ScimCustomPerson) entity;    
-        String jansUsrType = ent.getAttribute("jansUsrTyp");
-
-        if(expected_user_type != null && jansUsrType.equals(expected_user_type)){ 
-            return null;
-        }
-        else{
-            return new BaseScimWebService().getErrorResponse(403, null, "Attempt to handle a not allowed user type");
-        }        
-    }
-
-    @Override
-    public Response manageSearchOperation(Object context, Object searchRequest, Map<String, SimpleCustomProperty> configurationAttributes){
-        OperationContext ctx = (OperationContext) context;
-        scriptLogger.info("manageSearchOperation. SCIM endpoint invoked is {} (HTTP {})", ctx.getPath(), ctx.getMethod());
-
-        String resource_type = ctx.getResourceType();
-        scriptLogger.info("manageSearchOperation. This is a search over {} resources", resource_type);
-
-        if(!resource_type.equals("User")){
-            return null;
-        }
-
-        String expected_user_type = this.getUserType(ctx.getRequestHeaders());
-
-        if(expected_user_type != null){
-            scriptLogger.info("manageSearchOperation. Setting filter to userType eq \"{}\"", expected_user_type);
-            ctx.setFilterPrepend("userType eq \"" + expected_user_type + "\"");
-            return null;
-        }
-        else{
-            return new BaseScimWebService().getErrorResponse(403, null, "Attempt to handle a not allowed user type");
-        }
-    }
-
-    // headers params is an instance of javax.ws.rs.core.MultivaluedMap<String, String>
-    public String getUserType(MultivaluedMap<String, String> headers){
-        String secret = headers.getFirst(custom_header);
-        String[] keys = JSONObject.getNames(access_map);
-
-        for(int i = 0; i < keys.length; i++){
-            if(keys[i].equals(secret)){
-                return access_map.getString(keys[i]);
-            }
-        }        
-        return null;
-    }
-}
+```java
+--8<-- "script-catalog/scim/sample-script/custom_scim_handler.java"
 ```

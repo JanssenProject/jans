@@ -1,10 +1,9 @@
 # Gating Terraform with Cedarling-OPA
 
-Not sure which flow to use?
+!!! tip "Not sure which flow to use?"
+    See the [Terraform authorization overview](./terraform-authz-overview.md) for a side-by-side comparison of the unsigned and JWT flows before diving into implementation details.
 
-See the [Terraform authorization overview](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz-overview/index.md) for a side-by-side comparison of the unsigned and JWT flows before diving into implementation details.
-
-This guide walks through a concrete use case for the [Cedarling-OPA plugin](https://docs.jans.io/nightly/cedarling/integrations/cedarling-opa/index.md): enforcing role-based access control on Terraform operations before any infrastructure change is made.
+This guide walks through a concrete use case for the [Cedarling-OPA plugin](./cedarling-opa.md): enforcing role-based access control on Terraform operations before any infrastructure change is made.
 
 ## The Problem
 
@@ -20,16 +19,16 @@ Traditional solutions rely on cloud-provider IAM policies, custom CI guards, or 
 
 Two Terraform authorization demos are available. Use this table to decide which fits your situation before diving into the implementation details.
 
-|                              | **Unsigned (this guide)**                                   | **[JWT guide](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz-jwt/index.md)** |
-| ---------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **Identity source**          | Environment variables asserted by the caller                | Signed GitHub Actions OIDC token                                                                  |
-| **Signature validation**     | None — `CEDARLING_JWT_SIG_VALIDATION: "disabled"`           | Cryptographic — Cedarling fetches GitHub's JWKS and verifies every token                          |
-| **Trusted issuer config**    | Not required — no `trusted-issuers/` directory needed       | Required — `policy-store/trusted-issuers/github-actions.json` must declare the issuer endpoint    |
-| **Principal model**          | `Infra::User` with asserted `role` attribute                | `CI::GitHubWorkflow` with verified JWT claims (`repository`, `ref`, `environment`)                |
-| **Cedarling built-in**       | `authorize_unsigned`                                        | `authorize_multi_issuer`                                                                          |
-| **Secret management**        | Requires `TF_USER_ID` / `TF_USER_ROLES` set by the operator | No secrets — GitHub issues the OIDC token automatically                                           |
-| **Production approval gate** | Role-based policy only                                      | `environment` JWT claim proves GitHub Environment approval by a human reviewer                    |
-| **Best suited for**          | Local development, human operators, simple setups           | CI/CD pipelines (GitHub Actions), automated deployments requiring cryptographic identity          |
+| | **Unsigned (this guide)** | **[JWT guide](./terraform-authz-jwt.md)** |
+|---|---|---|
+| **Identity source** | Environment variables asserted by the caller | Signed GitHub Actions OIDC token |
+| **Signature validation** | None — `CEDARLING_JWT_SIG_VALIDATION: "disabled"` | Cryptographic — Cedarling fetches GitHub's JWKS and verifies every token |
+| **Trusted issuer config** | Not required — no `trusted-issuers/` directory needed | Required — `policy-store/trusted-issuers/github-actions.json` must declare the issuer endpoint |
+| **Principal model** | `Infra::User` with asserted `role` attribute | `CI::GitHubWorkflow` with verified JWT claims (`repository`, `ref`, `environment`) |
+| **Cedarling built-in** | `authorize_unsigned` | `authorize_multi_issuer` |
+| **Secret management** | Requires `TF_USER_ID` / `TF_USER_ROLES` set by the operator | No secrets — GitHub issues the OIDC token automatically |
+| **Production approval gate** | Role-based policy only | `environment` JWT claim proves GitHub Environment approval by a human reviewer |
+| **Best suited for** | Local development, human operators, simple setups | CI/CD pipelines (GitHub Actions), automated deployments requiring cryptographic identity |
 
 **Choose the unsigned flow** if you are running Terraform locally or in a simple script where the caller's identity is trusted by convention and you do not need cryptographic proof of origin.
 
@@ -40,14 +39,14 @@ Two Terraform authorization demos are available. Use this table to decide which 
 The demo uses three roles and three workspaces:
 
 | Role      | `terraform plan`  | `terraform apply` | `terraform destroy` |
-| --------- | ----------------- | ----------------- | ------------------- |
-| Developer | ✓                 | ✗                 | ✗                   |
-| Ops       | ✓ (non-prod only) | ✓ (non-prod only) | ✗                   |
-| Admin     | ✓                 | ✓                 | ✓                   |
+|-----------|:-----------------:|:-----------------:|:-------------------:|
+| Developer |         ✓         |         ✗         |          ✗          |
+| Ops       | ✓ (non-prod only) | ✓ (non-prod only) |          ✗          |
+| Admin     |         ✓         |         ✓         |          ✓          |
 
 Workspaces: `dev`, `staging`, `production`.
 
-```
+```mermaid
 sequenceDiagram
     participant Eng as Engineer / CI
     participant Wrapper as tf_authz.sh
@@ -76,7 +75,7 @@ sequenceDiagram
 
 The schema defines three entity types and three actions:
 
-```
+```cedar
 namespace Infra {
     // Role entity kept for schema validity; role membership is enforced via
     // principal.role.contains("RoleName") in Cedar policies.
@@ -107,8 +106,7 @@ The `role: Set<String>` attribute is the key: when the wrapper asserts `role: ["
 Three policy files cover all the rules.
 
 **Admin — unrestricted access:**
-
-```
+```cedar
 @id("admin-permit-all")
 permit (
     principal,
@@ -124,8 +122,7 @@ permit (
 ```
 
 **Ops — plan and apply, but not production:**
-
-```
+```cedar
 @id("ops-permit-plan-apply-non-prod")
 permit (
     principal,
@@ -141,8 +138,7 @@ permit (
 ```
 
 **Developer — plan only, any workspace:**
-
-```
+```cedar
 @id("developer-permit-plan")
 permit (
     principal,
@@ -159,7 +155,7 @@ Cedar's default-deny posture means any combination not covered by a `permit` is 
 
 The Rego policy is a thin adapter. It passes the entire `input` to Cedarling and exposes two rules for consumers:
 
-```
+```rego
 package infra.terraform
 
 default allow := false
@@ -182,7 +178,7 @@ The `cedarling.opa.authorize_unsigned` built-in is the right choice here because
 
 ## OPA Configuration
 
-```
+```json
 {
   "plugins": {
     "cedarling_opa": {
@@ -202,39 +198,39 @@ The `cedarling.opa.authorize_unsigned` built-in is the right choice here because
 }
 ```
 
-`CEDARLING_POLICY_STORE_LOCAL_FN` points to a directory containing `metadata.json`, `schema.cedarschema`, and a `policies/` subdirectory — the [directory-based policy store format](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#2-new-directory-based-format).
+`CEDARLING_POLICY_STORE_LOCAL_FN` points to a directory containing `metadata.json`, `schema.cedarschema`, and a `policies/` subdirectory — the [directory-based policy store format](../reference/cedarling-policy-store.md#2-new-directory-based-format).
 
 ### No trusted issuer file needed
 
-The JWT-based demo ([`terraform-authz-jwt.md`](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz-jwt/index.md)) requires a `policy-store/trusted-issuers/` directory so Cedarling can fetch and validate the signing keys for the incoming OIDC token. This unsigned demo does not need that directory because:
+The JWT-based demo ([`terraform-authz-jwt.md`](./terraform-authz-jwt.md)) requires a `policy-store/trusted-issuers/` directory so Cedarling can fetch and validate the signing keys for the incoming OIDC token. This unsigned demo does not need that directory because:
 
 - `CEDARLING_JWT_SIG_VALIDATION: "disabled"` — no signature is checked.
 - Identity is asserted directly in the `authorize_unsigned` payload (via the `principal` object in the OPA `input`) rather than carried inside a signed JWT.
 
-The policy-store directory for this demo therefore contains only `metadata.json`, `schema.cedarschema`, and `policies/`. If you later switch to signed tokens, add a `trusted-issuers/` subdirectory with one JSON file per issuer — see the [trusted issuer file format](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz-jwt/#trusted-issuer-file-format) in the JWT guide for the exact schema and field reference.
+The policy-store directory for this demo therefore contains only `metadata.json`, `schema.cedarschema`, and `policies/`. If you later switch to signed tokens, add a `trusted-issuers/` subdirectory with one JSON file per issuer — see the [trusted issuer file format](./terraform-authz-jwt.md#trusted-issuer-file-format) in the JWT guide for the exact schema and field reference.
 
 ## The Authorization Wrapper
 
 `tf_authz.sh` is a drop-in shim around the `terraform` binary. It:
 
 1. Maps the Terraform sub-command (`plan` / `apply` / `destroy`) to the corresponding Cedar action.
-1. Builds the `authorize_unsigned` payload from environment variables.
-1. POSTs to OPA and inspects the `allow` field.
-1. Either calls `terraform` or exits with a denial message.
+2. Builds the `authorize_unsigned` payload from environment variables.
+3. POSTs to OPA and inspects the `allow` field.
+4. Either calls `terraform` or exits with a denial message.
 
 ### Environment variables
 
-| Variable        | Required | Default                 | Description                                       |
-| --------------- | -------- | ----------------------- | ------------------------------------------------- |
-| `TF_WORKSPACE`  | yes      | `dev`                   | Target workspace (`dev`, `staging`, `production`) |
-| `TF_USER_ID`    | yes      | `$USER`                 | Operator identity (username or service account)   |
-| `TF_USER_ROLES` | yes      | `Developer`             | Comma-separated Cedar role names                  |
-| `OPA_URL`       | no       | `http://localhost:8181` | OPA server base URL                               |
-| `TERRAFORM_BIN` | no       | `terraform`             | Path to the terraform binary                      |
+| Variable        | Required | Default             | Description                                        |
+|-----------------|:--------:|---------------------|----------------------------------------------------|
+| `TF_WORKSPACE`  | yes      | `dev`               | Target workspace (`dev`, `staging`, `production`)  |
+| `TF_USER_ID`    | yes      | `$USER`             | Operator identity (username or service account)    |
+| `TF_USER_ROLES` | yes      | `Developer`         | Comma-separated Cedar role names                   |
+| `OPA_URL`       | no       | `http://localhost:8181` | OPA server base URL                            |
+| `TERRAFORM_BIN` | no       | `terraform`         | Path to the terraform binary                       |
 
 ### Usage
 
-```
+```bash
 export TF_WORKSPACE=staging
 export TF_USER_ID=alice
 export TF_USER_ROLES=Developer
@@ -259,7 +255,7 @@ The wrapper queries `/v1/data/infra/terraform` — the full package endpoint —
 
 The wrapper sends:
 
-```
+```bash
 curl -X POST http://localhost:8181/v1/data/infra/terraform \
     -H "Content-Type: application/json" \
     -d '{
@@ -288,7 +284,7 @@ curl -X POST http://localhost:8181/v1/data/infra/terraform \
 
 Response (denied — no matching Cedar policy):
 
-```
+```json
 {
   "result": {
     "allow": false,
@@ -305,7 +301,7 @@ Response (denied — no matching Cedar policy):
 
 Now with an Ops user applying to staging:
 
-```
+```bash
 -d '{
   "input": {
     "principal": {
@@ -324,7 +320,7 @@ Now with an Ops user applying to staging:
 
 Response (allowed — matched `ops-permit-plan-apply-non-prod`):
 
-```
+```json
 {
   "result": {
     "allow": true,
@@ -356,7 +352,7 @@ See the [demo README](https://github.com/JanssenProject/jans/tree/main/jans-ceda
 
 In a CI pipeline (GitHub Actions, GitLab CI, Jenkins), set the environment variables from your pipeline secrets and replace the `terraform` call with `./tf_authz.sh`:
 
-```
+```yaml
 - name: Terraform apply
   env:
     TF_WORKSPACE: ${{ vars.TF_WORKSPACE }}
@@ -366,17 +362,17 @@ In a CI pipeline (GitHub Actions, GitLab CI, Jenkins), set the environment varia
   run: ./tf_authz.sh apply -auto-approve
 ```
 
-For a more secure CI/CD integration that eliminates service-account secrets entirely, see the [JWT-based Terraform authorization demo](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz-jwt/index.md). That variant authenticates the pipeline with a signed GitHub Actions OIDC token, and Cedar policies check JWT claims such as `repository`, `ref`, and `environment` to gate access — including a production approval gate backed by GitHub Environments.
+For a more secure CI/CD integration that eliminates service-account secrets entirely, see the [JWT-based Terraform authorization demo](./terraform-authz-jwt.md). That variant authenticates the pipeline with a signed GitHub Actions OIDC token, and Cedar policies check JWT claims such as `repository`, `ref`, and `environment` to gate access — including a production approval gate backed by GitHub Environments.
 
 ### Using JWT tokens instead
 
 If your operators authenticate via an OIDC provider, switch from `cedarling.opa.authorize_unsigned` to `cedarling.opa.authorize_multi_issuer` and pass the access token in the payload. Update the Rego to match:
 
-```
+```rego
 result := cedarling.opa.authorize_multi_issuer(input)
 ```
 
-See the [JWT-based Terraform authorization guide](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz-jwt/index.md) for a complete working example with GitHub Actions OIDC, Cedar schemas, and a wrapper script. For the full list of bootstrap properties see the [Cedarling-OPA plugin reference](https://docs.jans.io/nightly/cedarling/integrations/cedarling-opa/index.md).
+See the [JWT-based Terraform authorization guide](./terraform-authz-jwt.md) for a complete working example with GitHub Actions OIDC, Cedar schemas, and a wrapper script. For the full list of bootstrap properties see the [Cedarling-OPA plugin reference](./cedarling-opa.md).
 
 ### Auditing decisions
 

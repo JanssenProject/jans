@@ -2,12 +2,11 @@
 
 ## Getting list of Jans services
 
-```
+```bash
 sudo systemctl list-units --all "jans*"
 ```
 
 Output should be like below:
-
 ```
 UNIT                    LOAD   ACTIVE SUB     DESCRIPTION               
 jans-auth.service       loaded active running Janssen OAauth service    
@@ -24,11 +23,12 @@ SUB    = The low-level unit activation state, values depend on unit type.
 
 ## Other Services
 
-There are more services other than Jans services like Apache. To get the status of those services make sure you use command like
+There are more services other than Jans services like  Apache. To get the status of those services make sure you use command like
 
-```
+```bash
 sudo systemctl list-units --all "apache2*"
 ```
+
 
 ## Commands (Ubuntu 20.04, RHEL 8, SUSE 15)
 
@@ -57,7 +57,6 @@ systemctl restart [service name]
 ```
 
 ### Reload
-
 This command is used for the `apache2` and `httpd` services.
 
 ```

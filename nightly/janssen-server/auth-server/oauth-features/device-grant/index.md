@@ -1,11 +1,11 @@
 # OAuth 2.0 Device Authorization Grant
 
-This OAuth 2.0 protocol extension enables OAuth clients to request user authorization from applications on devices (e.g. smart TVs, media consoles, printers) that are **input-constrained** or **browser-less** . The authorization flow defined by this [RFC 8628](https://tools.ietf.org/html/rfc8628), sometimes referred to as the "device flow", instructs the user to review the authorization request on a secondary device, such as a smartphone or a personal computer, which has the requisite input and browser capabilities to complete the user interaction.
+This OAuth 2.0 protocol extension enables OAuth clients to request user authorization from applications on devices (e.g. smart TVs, media consoles, printers) that  are **input-constrained** or **browser-less** . The authorization flow defined by this [RFC 8628](https://tools.ietf.org/html/rfc8628), sometimes referred to as the "device flow", instructs the user to review the authorization request on a secondary device, such as a smartphone or a personal computer, which has the requisite input and browser capabilities to complete the user interaction.
 
 ### Sequence Diagram
+![](https://github.com/JanssenProject/jans/raw/main/docs/assets/device_auth_flow.png)
 
 Paste the following source text of the sequence diagram on [sequencediagram.org](https://sequencediagram.org/)
-
 ```
 title Oauth2.0 Device Authorization flow
 
@@ -38,17 +38,26 @@ Third Party App->Device App: return Response
 
 1. First, the user requests authorization from the device:
 
-1. At the URL displayed on the screen, the user can input the displayed code in the device.
+![DeviceFlow1](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-1.png)
 
-1. After that, user could need to authenticate, then decide whether permissions will be granted.
+2. At the URL displayed on the screen, the user can input the displayed code in the device.
+
+![DeviceFlow2](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-2.png)
+
+3. After that, user could need to authenticate, then decide whether permissions will be granted.
 
 `acr` value can be specified in `deviceAuthzAcr` AS configuration property.
 
-1. Finally, the confirmation screen will be shown.
+![DeviceFlow3](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-3.png)
+
+4. Finally, the confirmation screen will be shown.
+
+![DeviceFlow4](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-4.png)
 
 #### ACR value during Device Authorization
 
-User is required to authenticate if not authenticated yet. By default `acr_values` is not set in authorization request, which means it relies on default AS handling. However it's possible explicitly set `acr` value during Device Authorization by setting `deviceAuthzAcr` AS configuration property.
+User is required to authenticate if not authenticated yet. By default `acr_values` is not set in authorization request, which means it relies on default AS handling.
+However it's possible explicitly set `acr` value during Device Authorization by setting `deviceAuthzAcr` AS configuration property.
 
 ## Request user and device codes
 
@@ -57,7 +66,7 @@ This first step, device sends an HTTP POST request to Jans authorization server,
 #### Parameters
 
 | Parameter | Description                                                                                                                                                                                                |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | client_id | **Required** The client ID for your application.                                                                                                                                                           |
 | scope     | **Required** A space separated list of scopes that identify the resources that the device could access on the user's behalf. These values inform the consent screen that Jans server displays to the user. |
 
@@ -74,10 +83,10 @@ client_id=123-123-123&scope=openid+profile+address+email+phone
 
 ## Device Request response
 
-In response, the Jans authorization server generates a unique device verification code and an end-user code that are valid for a limited time and includes them in the HTTP response body using the "application/json" format with a 200 (OK) status code. The response contains the following parameters:
+In response, the Jans authorization server generates a unique device verification code and an end-user code that are valid for a limited time and includes them in the HTTP response body using the "application/json" format with a 200 (OK) status code.  The response contains the following parameters:
 
 | Parameter                 | Description                                                                                                                                                                         |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | user_code                 | **Required** The end-user verification code                                                                                                                                         |
 | device_code               | **Required** The device verification code                                                                                                                                           |
 | verification_uri          | **Required** The end-user verification URI on the authorization server. This should be shown to the end-user because he should open this url in the rich user-agent.                |
@@ -110,8 +119,12 @@ Common flow, the device should display `verification_url` and `user_code` receiv
 Design device interface following these rules:
 
 1. `user_code` has the following format: XXXX-XXXX where Xs represent to any ASCII character, for example: *RTXD-HTLK*. The length of the `user_code` will be always the same, therefore it's highly recommended to show it as clear and big that the user can read it easly.
-1. `verification_url` should be displayed also in a way that the user can read it easily. The normal length should be around 40 characters, however it could depends also on the domain used for the server. Remember that the user will need to write the whole URL manually in the web browser, therefore it's recommended to use a short URL.
-1. `verification_url_complete` will be used for those cases where device can show QR (Quick Response) codes or NFC (Near Field Communication) to save the user from typing the whole URI. Interaction between device and Jans server will be the same, however user can process the authorization faster. For example:
+
+2. `verification_url` should be displayed also in a way that the user can read it easily. The normal length should be around 40 characters, however it could depends also on the domain used for the server. Remember that the user will need to write the whole URL manually in the web browser, therefore it's recommended to use a short URL.
+
+3. `verification_url_complete` will be used for those cases where device can show QR (Quick Response) codes or NFC (Near Field Communication) to save the user from typing the whole URI. Interaction between device and Jans server will be the same, however user can process the authorization faster. For example:
+
+
 
 ## User Login & Authorization
 
@@ -128,7 +141,7 @@ The URL of the endpoint to poll is `/jans-auth/restv1/token`. The polling reques
 #### Parameters
 
 | Parameter   | Description                                                                           |
-| ----------- | ------------------------------------------------------------------------------------- |
+|-------------|---------------------------------------------------------------------------------------|
 | client_id   | **Required** The client ID for your application.                                      |
 | grant_type  | **Required** Must be `urn:ietf:params:oauth:grant-type:device_code`.                  |
 | device_code | **Required** The device verification code which is returned by Jans server in Step 2. |
@@ -185,7 +198,8 @@ Server: Jetty(9.4.19.v20190610)
 }
 ```
 
-**Authorization pending** It means that the request hasn't been processed by the end-user yet, therefore the request is still in process.
+**Authorization pending**
+It means that the request hasn't been processed by the end-user yet, therefore the request is still in process.
 
 Example:
 
@@ -203,7 +217,8 @@ Server: Jetty(9.4.19.v20190610)
 }
 ```
 
-**Polling too frequently** If the device sends polling requests too frequently, then the server returns a `400` HTTP response status code. Then the device should increase the time interval between requests.
+**Polling too frequently**
+If the device sends polling requests too frequently, then the server returns a `400` HTTP response status code. Then the device should increase the time interval between requests.
 
 Example:
 
@@ -221,8 +236,8 @@ Server: Jetty(9.4.19.v20190610)
 }
 ```
 
-**Other errors** This token endpoint can return any error code already defined, for example whether client can't be authenticated or the grant type sent is invalid. Some of them could be: `invalid_client`, `invalid_grant`, `invalid_request` and others.
+**Other errors**
+This token endpoint can return any error code already defined, for example whether client can't be authenticated or the grant type sent is invalid. Some of them could be: `invalid_client`, `invalid_grant`, `invalid_request` and others.
 
 ### Customizing Device Grant page
-
-More about customising [this page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/device_authorization.xhtml) to include your organization's stylesheets, images and content in this [article](https://jans.io/docs/developer/customization/customize-web-pages.md)
+More about customising [this page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/device_authorization.xhtml)  to include your organization's stylesheets, images and content in this [article](https://jans.io/docs/developer/customization/customize-web-pages.md)

@@ -1,17 +1,16 @@
 # Social Login
 
-## Implementing Social logins
 
+## Implementing Social logins
 You can use a `PersonAuthenticationType` script to allow users to sign using credentials from popular **Social Identity providers** or **Inbound Identity Providers** like Facebook, Google and Apple. After users authenticate, we provision their Social Identity Provider credentials into the Jans-auth server. No additional username, password, credentials are needed for this user.
 
 1. Facebook
-1. [Google](https://docs.jans.io/nightly/script-catalog/person_authentication/google-external-authenticator/index.md)
-1. [Apple](https://docs.jans.io/nightly/script-catalog/person_authentication/apple-external-authenticator/index.md)
+2. [Google](../../script-catalog/person_authentication/google-external-authenticator/README.md)
+3. [Apple](../../script-catalog/person_authentication/apple-external-authenticator/README.md)
 
 Following is a high-level diagram depicting a typical flow - user authentication on a Social Identity Platform and subsequent user provisioning on Jans-Auth server.
 
-You can copy paste this sequence in <https://sequencediagram.org/>
-
+You can copy paste this sequence in [https://sequencediagram.org/](https://sequencediagram.org/)
 ```
 title Social login
 Jans AS<-User agent: 1. Invoke /authorize endpoint
@@ -32,6 +31,7 @@ end
 
 Jans AS->User agent: 10. write Jans session cookie
 ```
+![Social Sign-In](https://github.com/JanssenProject/jans/raw/main/docs/assets/SocialSignIn.png)
 
 ### User provisioning
 

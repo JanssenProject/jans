@@ -1,18 +1,17 @@
 # Tutorial: smart card authentication in Janssen
 
-With Casa's [certificate authentication plugin](https://docs.jans.io/nightly/casa/plugins/cert-authn/index.md) administrators can configure client certificate authentication so users can present digital certificates as a form of second-factor authentication. Some organizations opt to deploy certificate authentication through the use of smart cards - physical cards with embedded integrated circuits that act as security tokens. This practice is considered to offer a high level of security compared to other forms of multi-factor authentication. A well-known example of smart card usage is the U.S. Department of Defense (DoD).
+With Casa's [certificate authentication plugin](./cert-authn.md) administrators can configure client certificate authentication so users can present digital certificates as a form of second-factor authentication. Some organizations opt to deploy certificate authentication through the use of smart cards - physical cards with embedded integrated circuits that act as security tokens. This practice is considered to offer a high level of security compared to other forms of multi-factor authentication. A well-known example of smart card usage is the U.S. Department of Defense (DoD).
 
 In this document we present a basic example on how to use security keys from the [YubiKey 5 series](https://www.yubico.com/authentication-standards/smart-card/) for smart card authentication.
 
 ## Requisites
 
-- Certificate authentication [plugin](https://docs.jans.io/nightly/casa/plugins/cert-authn/index.md) installed, configured, and tested
+- Certificate authentication [plugin](./cert-authn.md) installed, configured, and tested
 - One or more security keys from the YubiKey 5 series
 - A machine with Microsoft Windows
 - Firefox browser (optional)
 
 **Notes**:
-
 - This document only provides steps for Microsoft Edge and Mozilla Firefox on Windows
 - It is assumed the certificates used for testing were already generated and are available as files (PEM/p12). Usage of Windows is intended only for client testing
 
@@ -39,11 +38,11 @@ When setting up the Casa plugin, admins (or users themselves) imported their cer
 
 1. As administrator, run the following commands:
 
-   ```
-   reg add "HKLM\SOFTWARE\Microsoft\Cryptography\Defaults\Provider\Microsoft Base Smart Card Crypto Provider" /v AllowPrivateExchangeKeyImport /t REG_DWORD /d 1
+    ```bash
+    reg add "HKLM\SOFTWARE\Microsoft\Cryptography\Defaults\Provider\Microsoft Base Smart Card Crypto Provider" /v AllowPrivateExchangeKeyImport /t REG_DWORD /d 1
 
-   reg add "HKLM\SOFTWARE\Microsoft\Cryptography\Defaults\Provider\Microsoft Base Smart Card Crypto Provider" /v AllowPrivateSignatureKeyImport /t REG_DWORD /d 1
-   ```
+    reg add "HKLM\SOFTWARE\Microsoft\Cryptography\Defaults\Provider\Microsoft Base Smart Card Crypto Provider" /v AllowPrivateSignatureKeyImport /t REG_DWORD /d 1
+    ```
 
 1. Insert the key
 
@@ -51,7 +50,7 @@ When setting up the Casa plugin, admins (or users themselves) imported their cer
 
 ### Test
 
-Using Microsoft Edge, follow steps similar to those when the plugin was formerly [tested](https://docs.jans.io/nightly/casa/plugins/cert-authn/#testing). Here, the browser dialog for picking a cert will be shown, and then a prompt will appear for entering the Yubikey PIN.
+Using Microsoft Edge, follow steps similar to those when the plugin was formerly [tested](./cert-authn.md#testing). Here, the browser dialog for picking a cert will be shown, and then a prompt will appear for entering the Yubikey PIN.
 
 ## Smart card authentication with Firefox
 
@@ -64,18 +63,22 @@ This is a [tool](https://developers.yubico.com/yubico-piv-tool/) that provides a
 When setting up the Casa plugin, admins (or users themselves) imported their certificates in the certificate manager of the web browser. Here, the certificate has to be imported into the Yubikey instead. Follow the steps below:
 
 1. In a command line window, run `c:\Program Files\Yubico\Yubico PIV Tool\bin\yubico-piv-tool -s9a -KPKCS12 -aimport-key -aimport-certificate -i C:\Path\to\user.p12`. Enter the Yubikey PIN when prompted. This will import the end-entity certificate into slot `9a` - more about slots [here](https://developers.yubico.com/PIV/Introduction/Certificate_slots.html)
+
 1. You can run `c:\Program Files\Yubico\Yubico PIV Tool\bin\yubico-piv-tool -astatus` to ensure the certificate was properly added
+
 1. Open Firefox settings. In the certificate manager, go to the "Authorities" tab and import the issuer certificate (of the end-entity cert)
 
 ### Load YKCS11 module
 
 1. As administrator, ensure the `bin` directory of the PIV tool is added to the `Path` environment variable. This path may look like `c:\Program Files\Yubico\Yubico PIV Tool\bin`
-1. Still in the Firefox settings, locate "Security devices" and click on "Load". Choose a name for the Yubikey PKCS#11 module and browse to the `bin` directory of the PIV tool. Finally select the file `libykcs11.dll`
+
+1. Still in the Firefox settings, locate "Security devices" and click on "Load". Choose a name for the Yubikey PKCS#11  module and browse to the `bin` directory of the PIV tool. Finally select the file `libykcs11.dll`
+
 1. Restart Firefox
 
 ### Test
 
-Using Firefox, follow steps similar to those when the plugin was formerly [tested](https://docs.jans.io/nightly/casa/plugins/cert-authn/#testing). Here, the browser dialog for picking a cert will be shown, and then a prompt will appear for entering the Yubikey PIN.
+Using Firefox, follow steps similar to those when the plugin was formerly [tested](./cert-authn.md#testing). Here, the browser dialog for picking a cert will be shown, and then a prompt will appear for entering the Yubikey PIN.
 
 ## Useful resources
 

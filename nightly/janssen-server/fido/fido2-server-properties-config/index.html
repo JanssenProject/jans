@@ -26,18 +26,23 @@
       
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="zensical-0.0.58">
     
     
       
-        <title>Properties - Janssen Documentation</title>
+        <title>FIDO2 Server Configuration - Janssen Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      <link rel="stylesheet" href="../../../assets/stylesheets/classic/main.38807bfb.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/classic/palette.c7ab7c71.min.css">
       
       
 
@@ -51,12 +56,10 @@
         
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
-    
-      <link rel="stylesheet" href="../../../css/timeago.css">
     
       <link rel="stylesheet" href="../../../css/tabs.css">
     
@@ -66,7 +69,7 @@
     
       <link rel="stylesheet" href="../../../stylesheets/navigation.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
     
       
 
@@ -87,7 +90,7 @@
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
     <div data-md-component="skip">
       
         
@@ -125,10 +128,10 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="Janssen Documentation">
 
     </a>
-    <label class="md-header__button md-icon" for="__drawer">
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
@@ -142,7 +145,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Properties
+              FIDO2 Server Configuration
             
           </span>
         </div>
@@ -192,64 +195,30 @@
     
       
       
-        <label class="md-header__button md-icon" for="__search">
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
-            
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
-          </a>
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-        <div class="md-search__suggest" data-md-component="search-suggest"></div>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
 </div>
       
     
-    
-      <div class="md-header__source">
+    <div class="md-header__source">
+      
         <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
   </div>
 </a>
-      </div>
-    
+      
+    </div>
   </nav>
   
     
@@ -266,6 +235,25 @@
   
   
     
+      
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       
   
@@ -275,13 +263,29 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item md-tabs__item--active">
         <a href="../../../getting-started/" class="md-tabs__link">
           
-  
-  
-    
   
   Janssen Server
 
@@ -300,13 +304,41 @@
   
   
     
+      
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../../agama/introduction/" class="md-tabs__link">
           
-  
-  
-    
   
   Agama
 
@@ -322,13 +354,31 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../../cedarling/" class="md-tabs__link">
           
-  
-  
-    
   
   Cedarling
 
@@ -368,7 +418,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="Janssen Documentation">
 
     </a>
     Janssen Documentation
@@ -378,7 +428,7 @@
       <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -439,8 +489,7 @@
   <span class="md-ellipsis">
     
   
-    Janssen Server
-  
+  Janssen Server
 
     
   </span>
@@ -455,8 +504,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Janssen Server
-  
+  Janssen Server
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
@@ -509,8 +557,7 @@
   <span class="md-ellipsis">
     
   
-    Get Started
-  
+  Get Started
 
     
   </span>
@@ -577,8 +624,7 @@
   <span class="md-ellipsis">
     
   
-    Architecture & Concepts
-  
+  Architecture &amp; Concepts
 
     
   </span>
@@ -648,8 +694,7 @@
   <span class="md-ellipsis">
     
   
-    Integrate & Authenticate
-  
+  Integrate & Authenticate
 
     
   </span>
@@ -670,8 +715,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Integrate & Authenticate
-  
+  Integrate & Authenticate
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
@@ -724,8 +768,7 @@
   <span class="md-ellipsis">
     
   
-    OAuth 2.0
-  
+  OAuth 2.0
 
     
   </span>
@@ -808,8 +851,7 @@
   <span class="md-ellipsis">
     
   
-    OpenID Connect
-  
+  OpenID Connect
 
     
   </span>
@@ -879,8 +921,7 @@
   <span class="md-ellipsis">
     
   
-    FIDO2 / Passkeys
-  
+  FIDO2 / Passkeys
 
     
   </span>
@@ -901,8 +942,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    FIDO2 / Passkeys
-  
+  FIDO2 / Passkeys
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
@@ -919,7 +959,9 @@
   
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
       
       
         
@@ -932,8 +974,7 @@
   <span class="md-ellipsis">
     
   
-    Properties
-  
+  Properties
 
     
   </span>
@@ -943,15 +984,14 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="./" class="md-nav__link md-nav__link--active">
+      <a href="././" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Properties
-  
+  Properties
 
     
   </span>
@@ -961,6 +1001,9 @@
       </a>
       
         
+
+
+  
 
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
@@ -978,20 +1021,37 @@
         <li class="md-nav__item">
   <a href="#fido2-server-configuration-parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         FIDO2 Server Configuration Parameters
-      
+      </span>
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="FIDO2 Server Configuration Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#client-ip-in-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Client IP in metrics
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#fido2-configuration-object-fido2configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        FIDO2 Configuration Object (fido2Configuration)
-      
+      <span class="md-typeset">
+        FIDO2 Configuration Object (<code>fido2Configuration</code>)
+      </span>
     </span>
   </a>
   
@@ -999,11 +1059,66 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#per-relying-party-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Per-relying-party policy
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advertised-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Advertised algorithms
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fully-specified-ecdsa-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Fully-specified ECDSA algorithms
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fully-specified-eddsa-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Fully-specified EdDSA algorithms
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-quantum-algorithms-ml-dsa" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Post-quantum algorithms (ML-DSA)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#cross-origin-ceremonies" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Cross-origin ceremonies
-      
+      </span>
     </span>
   </a>
   
@@ -1037,8 +1152,7 @@
   <span class="md-ellipsis">
     
   
-    Vendor Metadata
-  
+  Vendor Metadata
 
     
   </span>
@@ -1065,8 +1179,7 @@
   <span class="md-ellipsis">
     
   
-    Trust Diagnostics
-  
+  Trust Diagnostics
 
     
   </span>
@@ -1093,8 +1206,7 @@
   <span class="md-ellipsis">
     
   
-    Conditional UI and Fallback
-  
+  Conditional UI and Fallback
 
     
   </span>
@@ -1121,8 +1233,7 @@
   <span class="md-ellipsis">
     
   
-    Passkey Telemetry
-  
+  Passkey Telemetry
 
     
   </span>
@@ -1149,8 +1260,7 @@
   <span class="md-ellipsis">
     
   
-    Passkey Interception Script
-  
+  Passkey Interception Script
 
     
   </span>
@@ -1213,8 +1323,7 @@
   <span class="md-ellipsis">
     
   
-    SAML
-  
+  SAML
 
     
   </span>
@@ -1279,8 +1388,7 @@
   <span class="md-ellipsis">
     
   
-    UMA
-  
+  UMA
 
     
   </span>
@@ -1361,8 +1469,7 @@
   <span class="md-ellipsis">
     
   
-    Recipes & How-To
-  
+  Recipes & How-To
 
     
   </span>
@@ -1447,8 +1554,7 @@
   <span class="md-ellipsis">
     
   
-    Configure Identity
-  
+  Configure Identity
 
     
   </span>
@@ -1517,8 +1623,7 @@
   <span class="md-ellipsis">
     
   
-    Test & Debug
-  
+  Test &amp; Debug
 
     
   </span>
@@ -1589,8 +1694,7 @@
   <span class="md-ellipsis">
     
   
-    Deploy & Operate
-  
+  Deploy & Operate
 
     
   </span>
@@ -1655,8 +1759,7 @@
   <span class="md-ellipsis">
     
   
-    Product & Releases
-  
+  Product & Releases
 
     
   </span>
@@ -1742,8 +1845,7 @@
   <span class="md-ellipsis">
     
   
-    Agama
-  
+  Agama
 
     
   </span>
@@ -1811,8 +1913,7 @@
   <span class="md-ellipsis">
     
   
-    Cedarling
-  
+  Overview
 
     
   </span>
@@ -1840,8 +1941,12 @@
               
               <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
+                  
                   <div class="md-sidebar__inner">
                     
+
+
+  
 
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
@@ -1859,20 +1964,37 @@
         <li class="md-nav__item">
   <a href="#fido2-server-configuration-parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         FIDO2 Server Configuration Parameters
-      
+      </span>
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="FIDO2 Server Configuration Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#client-ip-in-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Client IP in metrics
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#fido2-configuration-object-fido2configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        FIDO2 Configuration Object (fido2Configuration)
-      
+      <span class="md-typeset">
+        FIDO2 Configuration Object (<code>fido2Configuration</code>)
+      </span>
     </span>
   </a>
   
@@ -1880,11 +2002,66 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#per-relying-party-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Per-relying-party policy
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advertised-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Advertised algorithms
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fully-specified-ecdsa-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Fully-specified ECDSA algorithms
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fully-specified-eddsa-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Fully-specified EdDSA algorithms
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-quantum-algorithms-ml-dsa" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Post-quantum algorithms (ML-DSA)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#cross-origin-ceremonies" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Cross-origin ceremonies
-      
+      </span>
     </span>
   </a>
   
@@ -1921,13 +2098,52 @@
     
     
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
   
   
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
     
     
       <li class="md-path__item">
         <a href="../../../getting-started/" class="md-path__link">
           
+  
   <span class="md-ellipsis">
     Janssen Server
   </span>
@@ -1946,9 +2162,31 @@
   
     
     
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
       <li class="md-path__item">
         <a href="../../auth-server/" class="md-path__link">
           
+  
   <span class="md-ellipsis">
     Integrate & Authenticate
   </span>
@@ -1964,9 +2202,31 @@
   
     
     
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
       <li class="md-path__item">
         <a href="../" class="md-path__link">
           
+  
   <span class="md-ellipsis">
     FIDO2 / Passkeys
   </span>
@@ -1985,26 +2245,6 @@
                 
   
                   
-
-  <nav class="md-tags" >
-    
-      
-      
-      
-      
-        <span class="md-tag">administration</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">fido2</span>
-      
-    
-  </nav>
-
-
   
   
 
@@ -2118,12 +2358,93 @@
 <td style="text-align: left;">Whether passkey operation durations are tracked for performance analytics.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>trustedProxyEnabled</code></td>
+<td style="text-align: left;"><code>true</code>, <code>false</code>, or unset</td>
+<td style="text-align: left;">Whether forwarded proxy headers may be trusted when recording the client IP on a metrics entry. Unset keeps the legacy behaviour of trusting them unconditionally; <code>false</code> never reads them; <code>true</code> trusts them only from the addresses in <code>trustedProxyIpRanges</code>. See <a href="#client-ip-in-metrics">Client IP in metrics</a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>trustedProxyIpRanges</code></td>
+<td style="text-align: left;"><code>["10.0.0.0/8", "192.168.1.0/24"]</code></td>
+<td style="text-align: left;">Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation. Only consulted when <code>trustedProxyEnabled</code> is <code>true</code>; an empty list trusts nothing.</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>fido2Configuration</code></td>
 <td style="text-align: left;">Object</td>
 <td style="text-align: left;">Nested object containing FIDO2 protocol-specific details (see structure below).</td>
 </tr>
 </tbody>
 </table>
+<h3 id="client-ip-in-metrics">Client IP in metrics<a class="headerlink" href="#client-ip-in-metrics" title="Permanent link">#</a></h3>
+<p>The <code>ipAddress</code> recorded on a passkey metrics entry is taken from forwarded proxy headers
+(<code>X-Forwarded-For</code> and several older equivalents) before falling back to the address the request actually
+came from. Those headers are set by whoever sends the request, so <code>trustedProxyEnabled</code> controls whether
+they are believed:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Value</th>
+<th style="text-align: left;">Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">unset (default)</td>
+<td style="text-align: left;">Headers are trusted unconditionally. Any caller able to reach a FIDO2 endpoint can choose the address recorded against its own ceremony.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>false</code></td>
+<td style="text-align: left;">Headers are ignored; the connecting address is recorded.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">Headers are read only when the connecting address falls inside <code>trustedProxyIpRanges</code>. An empty list trusts nothing.</td>
+</tr>
+</tbody>
+</table>
+<p>The default is unset so that upgrading changes nothing. <strong>Deployments that want the recorded address to be
+trustworthy must set this explicitly.</strong></p>
+<p>When trusted, <code>X-Forwarded-For</code> is read right to left: hops that are themselves listed as trusted proxies
+are skipped, and the first remaining address is recorded. Reading from the right matters because a client
+can prepend any value before the real proxy appends to the chain — so the leftmost entry is only used when
+no closer untrusted hop exists, such as a single-entry header from a trusted proxy.</p>
+<p><code>X-Forwarded-For</code> is the only header consulted in this mode. The older alternatives (<code>Proxy-Client-IP</code>,
+<code>WL-Proxy-Client-IP</code> and the <code>HTTP_*</code> variants) are ignored, because a reverse proxy overwrites
+<code>X-Forwarded-For</code> but passes other request headers through as the client sent them. Legacy mode still
+reads all of them. If nothing usable is found, the connecting address is recorded.</p>
+<p>Ranges accept IPv4 and IPv6 CIDR notation; a bare address is treated as a full-length mask. An
+IPv4-mapped IPv6 address such as <code>::ffff:10.1.2.3</code> matches an IPv4 range, since a dual-stack JVM may
+report the connecting address in that form.</p>
+<p>A range may also be <em>written</em> in that form. Its prefix is then read on whichever scale it can only
+mean, so an existing IPv4-scale range keeps working:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Prefix on a mapped range</th>
+<th style="text-align: left;">Read as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>0</code>–<code>32</code></td>
+<td style="text-align: left;">IPv4 scale, as written — <code>::ffff:10.0.0.0/8</code> selects <code>10.0.0.0/8</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>96</code>–<code>128</code></td>
+<td style="text-align: left;">IPv6 scale, less the 96 bits of the mapping — <code>::ffff:10.0.0.0/104</code> also selects <code>10.0.0.0/8</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>33</code>–<code>95</code></td>
+<td style="text-align: left;">Rejected and logged: the prefix covers part of the mapping itself, so it means nothing on either scale</td>
+</tr>
+</tbody>
+</table>
+<p>Both sides of a comparison must be IP literals — a hostname is rejected and logged rather than
+resolved, because this runs on the request path.</p>
+<blockquote>
+<p><strong>Note on a common topology.</strong> Where a reverse proxy runs on the same host, requests reach the FIDO2
+server from <code>127.0.0.1</code>, and so do any sent directly to it. Trusting loopback therefore does not, on its
+own, distinguish the proxy from a direct caller.</p>
+</blockquote>
 <hr />
 <h2 id="fido2-configuration-object-fido2configuration">FIDO2 Configuration Object (<code>fido2Configuration</code>)<a class="headerlink" href="#fido2-configuration-object-fido2configuration" title="Permanent link">#</a></h2>
 <p>This nested block defines WebAuthn and FIDO2 attestation and assertion policy behavior.</p>
@@ -2183,13 +2504,13 @@
 <td style="text-align: left;"><code>enabledFidoAlgorithms</code></td>
 <td style="text-align: left;">Array of Strings</td>
 <td style="text-align: left;"><code>["RS256", "ES256"]</code></td>
-<td style="text-align: left;">Enabled cryptographic signing algorithms allowed for credentials. Accepted names: <code>RS256</code>, <code>RS384</code>, <code>RS512</code>, <code>RS65535</code>, <code>PS256</code>, <code>PS384</code>, <code>PS512</code>, <code>ES256</code>, <code>ES384</code>, <code>ES512</code>, <code>EdDSA</code> — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises <code>RS256</code>, <code>ES256</code> and <code>EdDSA</code>. An unrecognised name is ignored.</td>
+<td style="text-align: left;">Enabled cryptographic signing algorithms allowed for credentials. Accepted names: <code>RS256</code>, <code>RS384</code>, <code>RS512</code>, <code>RS65535</code>, <code>PS256</code>, <code>PS384</code>, <code>PS512</code>, <code>ES256</code>, <code>ES384</code>, <code>ES512</code>, <code>ESP256</code>, <code>ESP384</code>, <code>EdDSA</code>, <code>Ed25519</code>, <code>Ed448</code>, <code>ML-DSA-44</code>, <code>ML-DSA-65</code>, <code>ML-DSA-87</code> — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises <code>RS256</code>, <code>ES256</code> and <code>EdDSA</code>. An unrecognised name is ignored. A recognised name the deployment cannot actually complete a registration with is logged at <code>ERROR</code> and left out of <code>pubKeyCredParams</code> — see <a href="#advertised-algorithms">Advertised algorithms</a>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>rp</code></td>
 <td style="text-align: left;">Array of Objects</td>
 <td style="text-align: left;"><code>[ { "id": "https://jans.io", "origins": ["jans.io"] } ]</code></td>
-<td style="text-align: left;">Relying Party (RP) configuration mapping expected IDs to valid origins.</td>
+<td style="text-align: left;">Relying Party (RP) configuration mapping expected IDs to valid origins. Each entry may also carry a <code>policy</code> object — see <a href="#per-relying-party-policy">Per-relying-party policy</a>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>metadataServers</code></td>
@@ -2233,15 +2554,110 @@
 <td style="text-align: left;"><code>"monitor"</code></td>
 <td style="text-align: left;">Options are: <code>disabled</code> (skip attestation checks), <code>monitor</code> (log/validate but allow credentials if attestation is absent/unknown), and <code>enforced</code> (fail credential creation if attestation check fails).</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>allowedTopOrigins</code></td>
+<td style="text-align: left;">Array of Strings</td>
+<td style="text-align: left;"><code>[]</code></td>
+<td style="text-align: left;">Full origins permitted to frame a cross-origin ceremony, each written as scheme, host and optional port (for example <code>https://portal.example.com</code>). Empty — the default — denies every framed ceremony. See <a href="#cross-origin-ceremonies">Cross-origin ceremonies</a>.</td>
+</tr>
 </tbody>
 </table>
+<h3 id="per-relying-party-policy">Per-relying-party policy<a class="headerlink" href="#per-relying-party-policy" title="Permanent link">#</a></h3>
+<p>An entry under <code>rp</code> may carry a <code>policy</code> object overriding the corresponding global setting for that
+relying party alone:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;high-assurance.example.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;origins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;https://high-assurance.example.com&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;attestationMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enforced&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Falls back to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>attestationMode</code></td>
+<td style="text-align: left;">the global <a href="#fido2-configuration-object-fido2configuration"><code>attestationMode</code></a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>An RP with no <code>policy</code>, or with the field unset, behaves exactly as it did before this existed</strong> — the
+global value applies. The same is true for a ceremony whose origin matches no configured RP. Nothing needs
+changing on upgrade.</p>
+<p>Only <code>attestationMode</code> is settable per RP today. Further fields are added alongside the change that
+enforces them, so that anything listed here is a policy actually in effect rather than a value that is
+merely stored.</p>
+<h3 id="advertised-algorithms">Advertised algorithms<a class="headerlink" href="#advertised-algorithms" title="Permanent link">#</a></h3>
+<p>The algorithms offered to the authenticator in <code>pubKeyCredParams</code> are not taken from <code>enabledFidoAlgorithms</code>
+directly. An algorithm is advertised only when this server can complete a registration with it end-to-end:
+decode the credential public key and verify a signature made with it, using the crypto provider the
+deployment is actually running. Anything else is dropped: a configured name that does not survive the
+check is logged at <code>ERROR</code>, and a default that does not survive it is logged at <code>WARN</code>.</p>
+<p>This matters most on the FIPS build, whose provider supports strictly fewer algorithms than the standard
+one. Deriving the advertised set from real capability means a FIPS deployment simply offers less, rather
+than offering an algorithm and then failing the ceremony once the authenticator picks it.</p>
+<p>If no configured algorithm survives the check, the server logs an error and falls back to whichever of the
+defaults it does support. In a deployment that supports none of them that fallback is itself empty, and
+<code>pubKeyCredParams</code> is sent empty — a state worth alerting on, since the log will already carry the reason.</p>
+<h3 id="fully-specified-ecdsa-algorithms">Fully-specified ECDSA algorithms<a class="headerlink" href="#fully-specified-ecdsa-algorithms" title="Permanent link">#</a></h3>
+<p><code>ESP256</code> and <code>ESP384</code> name their elliptic curve in the COSE code point itself rather than leaving it to the
+credential: <code>ESP256</code> is P-256 only and <code>ESP384</code> is P-384 only. A credential that pairs one of them with any
+other curve is rejected during registration. <code>ES256</code>, <code>ES384</code> and <code>ES512</code> are not fully specified and take
+whichever curve the key carries.</p>
+<h3 id="fully-specified-eddsa-algorithms">Fully-specified EdDSA algorithms<a class="headerlink" href="#fully-specified-eddsa-algorithms" title="Permanent link">#</a></h3>
+<p><code>EdDSA</code> is the original COSE code point and takes whichever Edwards curve the credential carries — both
+Ed25519 and Ed448 keys are accepted under it. <code>Ed25519</code> and <code>Ed448</code> are separate, fully-specified code
+points that name their curve: a credential pairing <code>Ed25519</code> with an Ed448 key, or the reverse, is rejected
+during registration.</p>
+<p>Existing credentials are unaffected — they were registered under <code>EdDSA</code>, whose behaviour is unchanged.</p>
+<h3 id="post-quantum-algorithms-ml-dsa">Post-quantum algorithms (ML-DSA)<a class="headerlink" href="#post-quantum-algorithms-ml-dsa" title="Permanent link">#</a></h3>
+<p><code>ML-DSA-44</code>, <code>ML-DSA-65</code> and <code>ML-DSA-87</code> are supported on the standard build. They are <strong>not</strong> available on
+the FIPS build, because no released <code>bc-fips</code> provider implements them yet.</p>
+<p>This needs no special handling from an administrator. Because the advertised set is derived from real
+provider capability (see <a href="#advertised-algorithms">Advertised algorithms</a>), a FIPS deployment that lists an
+ML-DSA name simply logs it at <code>ERROR</code> and leaves it out of <code>pubKeyCredParams</code> — it never offers an
+algorithm it would then fail to verify. The same configuration is therefore safe to share between the two
+build variants.</p>
+<p>Both the IANA spelling (<code>ML-DSA-44</code>) and the underscore form (<code>ML_DSA_44</code>) are accepted.</p>
 <h3 id="cross-origin-ceremonies">Cross-origin ceremonies<a class="headerlink" href="#cross-origin-ceremonies" title="Permanent link">#</a></h3>
-<p>Registration and authentication ceremonies performed inside a cross-origin iframe are rejected. As WebAuthn
-Level 3 requires, the server reads the <code>crossOrigin</code> member of <code>CollectedClientData</code>: an absent member is
-treated as <code>false</code>, a value of <code>true</code> fails the request with <code>cross_origin_not_allowed</code>, and both a
-non-boolean value and an explicit <code>null</code> fail with <code>invalid_request</code>.</p>
-<p>There is no configuration to permit a framed ceremony against a chosen set of framing origins yet, so a
-deployment that embeds the ceremony in a cross-origin iframe will stop working after this change.</p>
+<p>As WebAuthn Level 3 requires, the server reads the <code>crossOrigin</code> member of <code>CollectedClientData</code>. An absent
+member is treated as <code>false</code>; both a non-boolean value and an explicit <code>null</code> fail with <code>invalid_request</code>.</p>
+<p>When <code>crossOrigin</code> is <code>true</code>, the ceremony is allowed only if its <code>topOrigin</code> — the origin of the page that
+framed it — appears in <code>allowedTopOrigins</code>. The request fails with <code>cross_origin_not_allowed</code> when:</p>
+<ul>
+<li><code>allowedTopOrigins</code> is empty, which is the default and denies every framed ceremony</li>
+<li><code>topOrigin</code> is absent, <code>null</code>, not a string, or blank</li>
+<li><code>topOrigin</code> is not listed</li>
+</ul>
+<p>Entries are compared against the whole origin, ignoring case and surrounding whitespace. A different scheme
+or port is a different origin, so <code>https://portal.example.com</code> does not permit <code>http://portal.example.com</code>.</p>
+<p><code>allowedTopOrigins</code> is deliberately separate from the <code>origins</code> under <code>rp</code>. Those say which origin may
+<em>serve</em> a ceremony; this says which origin may <em>frame</em> one. Reusing the former would silently widen the
+framing policy of every existing deployment.</p>
+
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">fido2</span>
+      
+    
+  </nav>
+
 
 
 
@@ -2264,7 +2680,7 @@ deployment that embeds the ceremony in a cross-origin iframe will stop working a
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 7, 2026 17:06:08 UTC"><span class="timeago" datetime="2026-09-07T17:06:08+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 7, 2026 17:06:08 UTC">2026-09-07</span>
+    September 17, 2026
   </span>
 
     
@@ -2274,7 +2690,7 @@ deployment that embeds the ceremony in a cross-origin iframe will stop working a
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
+    July 23, 2026
   </span>
 
     
@@ -2327,7 +2743,7 @@ deployment that embeds the ceremony in a cross-origin iframe will stop working a
     
     
     <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
     </a>
   
     
@@ -2335,7 +2751,7 @@ deployment that embeds the ceremony in a cross-origin iframe will stop working a
     
     
     <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
     </a>
   
 </div>
@@ -2439,15 +2855,11 @@ deployment that embeds the ceremony in a cross-origin iframe will stop working a
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tracking","navigation.tabs","navigation.tabs.sticky","navigation.indexes","navigation.prune","navigation.path","navigation.top","navigation.instant","navigation.instant.progress","search.suggest","search.highlight","search.share","content.tabs.link","content.code.copy","content.code.select","content.code.annotate","toc.follow"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"stable","provider":"mike"}}</script>
     
     
 
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="../../../js/timeago.min.js"></script>
-      
-        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      <script src="../../../assets/javascripts/bundle.6970bfe9.min.js"></script>
       
         <script src="../../../javascripts/skeleton-loader.js"></script>
       

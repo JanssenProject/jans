@@ -26,18 +26,23 @@
       
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="zensical-0.0.58">
     
     
       
-        <title>Policy Store - Janssen Documentation</title>
+        <title>Cedarling Policy Store - Janssen Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      <link rel="stylesheet" href="../../../assets/stylesheets/classic/main.38807bfb.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/classic/palette.c7ab7c71.min.css">
       
       
 
@@ -51,12 +56,10 @@
         
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
-    
-      <link rel="stylesheet" href="../../../css/timeago.css">
     
       <link rel="stylesheet" href="../../../css/tabs.css">
     
@@ -66,7 +69,7 @@
     
       <link rel="stylesheet" href="../../../stylesheets/navigation.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
     
       
 
@@ -87,7 +90,7 @@
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
     <div data-md-component="skip">
       
         
@@ -125,10 +128,10 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="Janssen Documentation">
 
     </a>
-    <label class="md-header__button md-icon" for="__drawer">
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
@@ -142,7 +145,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Policy Store
+              Cedarling Policy Store
             
           </span>
         </div>
@@ -192,64 +195,30 @@
     
       
       
-        <label class="md-header__button md-icon" for="__search">
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
-            
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
-          </a>
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-        <div class="md-search__suggest" data-md-component="search-suggest"></div>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
 </div>
       
     
-    
-      <div class="md-header__source">
+    <div class="md-header__source">
+      
         <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
   </div>
 </a>
-      </div>
-    
+      
+    </div>
   </nav>
   
     
@@ -264,6 +233,25 @@
   
   
     
+      
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       
   
@@ -271,13 +259,29 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../../getting-started/" class="md-tabs__link">
           
-  
-  
-    
   
   Janssen Server
 
@@ -296,13 +300,41 @@
   
   
     
+      
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../../agama/introduction/" class="md-tabs__link">
           
-  
-  
-    
   
   Agama
 
@@ -320,13 +352,31 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item md-tabs__item--active">
         <a href="../../" class="md-tabs__link">
           
-  
-  
-    
   
   Cedarling
 
@@ -366,7 +416,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="Janssen Documentation">
 
     </a>
     Janssen Documentation
@@ -376,7 +426,7 @@
       <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -438,8 +488,7 @@
   <span class="md-ellipsis">
     
   
-    Janssen Server
-  
+  Janssen Server
 
     
   </span>
@@ -519,8 +568,7 @@
   <span class="md-ellipsis">
     
   
-    Agama
-  
+  Agama
 
     
   </span>
@@ -592,8 +640,7 @@
   <span class="md-ellipsis">
     
   
-    Cedarling
-  
+  Cedarling
 
     
   </span>
@@ -614,8 +661,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Cedarling
-  
+  Cedarling
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
@@ -636,8 +682,7 @@
   <span class="md-ellipsis">
     
   
-    Cedar Introduction
-  
+  Cedar Introduction
 
     
   </span>
@@ -664,8 +709,7 @@
   <span class="md-ellipsis">
     
   
-    Quick Start
-  
+  Quick Start
 
     
   </span>
@@ -730,8 +774,7 @@
   <span class="md-ellipsis">
     
   
-    Tutorials
-  
+  Tutorials
 
     
   </span>
@@ -804,8 +847,7 @@
   <span class="md-ellipsis">
     
   
-    Reference
-  
+  Reference
 
     
   </span>
@@ -820,8 +862,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Reference
-  
+  Reference
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
@@ -840,8 +881,7 @@
   <span class="md-ellipsis">
     
   
-    Authorization
-  
+  Authorization
 
     
   </span>
@@ -868,8 +908,7 @@
   <span class="md-ellipsis">
     
   
-    Multi-Issuer
-  
+  Multi-Issuer
 
     
   </span>
@@ -896,8 +935,7 @@
   <span class="md-ellipsis">
     
   
-    Interfaces
-  
+  Interfaces
 
     
   </span>
@@ -920,7 +958,9 @@
   
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
       
       
         
@@ -933,8 +973,7 @@
   <span class="md-ellipsis">
     
   
-    Policy Store
-  
+  Policy Store
 
     
   </span>
@@ -944,15 +983,14 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="./" class="md-nav__link md-nav__link--active">
+      <a href="././" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Policy Store
-  
+  Policy Store
 
     
   </span>
@@ -962,6 +1000,9 @@
       </a>
       
         
+
+
+  
 
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
@@ -979,9 +1020,9 @@
         <li class="md-nav__item">
   <a href="#policy-store-formats" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Policy Store Formats
-      
+      </span>
     </span>
   </a>
   
@@ -989,11 +1030,11 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-legacy-single-file-format-jsonyaml" class="md-nav__link">
+  <a href="#1-legacy-single-file-format-yaml-test-suites" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        1. Legacy Single-File Format (JSON/YAML)
-      
+      <span class="md-typeset">
+        1. Legacy Single-File Format (YAML Test Suites)
+      </span>
     </span>
   </a>
   
@@ -1002,9 +1043,9 @@
           <li class="md-nav__item">
   <a href="#2-new-directory-based-format" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2. New Directory-Based Format
-      
+      </span>
     </span>
   </a>
   
@@ -1014,9 +1055,9 @@
           <li class="md-nav__item">
   <a href="#metadatajson" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         metadata.json
-      
+      </span>
     </span>
   </a>
   
@@ -1025,9 +1066,9 @@
           <li class="md-nav__item">
   <a href="#policy-files" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Policy Files
-      
+      </span>
     </span>
   </a>
   
@@ -1037,9 +1078,9 @@
           <li class="md-nav__item">
   <a href="#multiple-policies-per-file" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Multiple policies per file
-      
+      </span>
     </span>
   </a>
   
@@ -1053,9 +1094,9 @@
           <li class="md-nav__item">
   <a href="#template-files" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Template Files
-      
+      </span>
     </span>
   </a>
   
@@ -1064,9 +1105,9 @@
           <li class="md-nav__item">
   <a href="#entity-files" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Entity Files
-      
+      </span>
     </span>
   </a>
   
@@ -1075,9 +1116,9 @@
           <li class="md-nav__item">
   <a href="#trusted-issuer-files" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Trusted Issuer Files
-      
+      </span>
     </span>
   </a>
   
@@ -1086,9 +1127,9 @@
           <li class="md-nav__item">
   <a href="#custom-issuer-files" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Custom Issuer Files
-      
+      </span>
     </span>
   </a>
   
@@ -1097,9 +1138,9 @@
           <li class="md-nav__item">
   <a href="#cedar-archive-cjar-format" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Cedar Archive (.cjar) Format
-      
+      </span>
     </span>
   </a>
   
@@ -1118,9 +1159,9 @@
         <li class="md-nav__item">
   <a href="#advanced-loading-from-bytes" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Advanced: Loading from Bytes
-      
+      </span>
     </span>
   </a>
   
@@ -1129,9 +1170,9 @@
         <li class="md-nav__item">
   <a href="#background-refresh" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Background refresh
-      
+      </span>
     </span>
   </a>
   
@@ -1141,9 +1182,9 @@
           <li class="md-nav__item">
   <a href="#per-request-consistency" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Per-request consistency
-      
+      </span>
     </span>
   </a>
   
@@ -1152,9 +1193,9 @@
           <li class="md-nav__item">
   <a href="#strategy-ladder" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Strategy ladder
-      
+      </span>
     </span>
   </a>
   
@@ -1163,9 +1204,9 @@
           <li class="md-nav__item">
   <a href="#failure-handling" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Failure handling
-      
+      </span>
     </span>
   </a>
   
@@ -1174,9 +1215,9 @@
           <li class="md-nav__item">
   <a href="#metrics" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Metrics
-      
+      </span>
     </span>
   </a>
   
@@ -1188,23 +1229,23 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#legacy-single-file-format-json" class="md-nav__link">
+  <a href="#legacy-single-file-format-yaml-test-suites" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Legacy Single-File Format (JSON)
-      
+      <span class="md-typeset">
+        Legacy Single-File Format (YAML Test Suites)
+      </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Legacy Single-File Format (JSON)">
+    <nav class="md-nav" aria-label="Legacy Single-File Format (YAML Test Suites)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#json-schema" class="md-nav__link">
+  <a href="#structure" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        JSON Schema
-      
+      <span class="md-typeset">
+        Structure
+      </span>
     </span>
   </a>
   
@@ -1213,9 +1254,9 @@
           <li class="md-nav__item">
   <a href="#schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        schema
-      
+      <span class="md-typeset">
+        <code>schema</code>
+      </span>
     </span>
   </a>
   
@@ -1229,9 +1270,9 @@
         <li class="md-nav__item">
   <a href="#default-entities" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Default Entities
-      
+      </span>
     </span>
   </a>
   
@@ -1241,9 +1282,9 @@
           <li class="md-nav__item">
   <a href="#entity-conflict-resolution" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Entity Conflict Resolution
-      
+      </span>
     </span>
   </a>
   
@@ -1257,9 +1298,9 @@
         <li class="md-nav__item">
   <a href="#cedar-policies-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Cedar Policies Schema
-      
+      </span>
     </span>
   </a>
   
@@ -1269,9 +1310,9 @@
           <li class="md-nav__item">
   <a href="#policy_content" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        policy_content
-      
+      <span class="md-typeset">
+        <code>policy_content</code>
+      </span>
     </span>
   </a>
   
@@ -1280,9 +1321,9 @@
           <li class="md-nav__item">
   <a href="#example-of-policies" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Example of policies
-      
+      <span class="md-typeset">
+        Example of <code>policies</code>
+      </span>
     </span>
   </a>
   
@@ -1296,9 +1337,9 @@
         <li class="md-nav__item">
   <a href="#trusted-issuers-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Trusted Issuers Schema
-      
+      </span>
     </span>
   </a>
   
@@ -1308,9 +1349,9 @@
           <li class="md-nav__item">
   <a href="#token-metadata-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Token Metadata Schema
-      
+      </span>
     </span>
   </a>
   
@@ -1322,11 +1363,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-policy-store" class="md-nav__link">
+  <a href="#example-policy-store-legacy-single-file-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Example Policy store
-      
+      <span class="md-typeset">
+        Example Policy Store (Legacy Single-File Structure)
+      </span>
     </span>
   </a>
   
@@ -1335,9 +1376,9 @@
         <li class="md-nav__item">
   <a href="#multi-issuer-token-entities" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Multi-Issuer Token Entities
-      
+      </span>
     </span>
   </a>
   
@@ -1347,9 +1388,9 @@
           <li class="md-nav__item">
   <a href="#token-entity-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Token Entity Structure
-      
+      </span>
     </span>
   </a>
   
@@ -1358,9 +1399,9 @@
           <li class="md-nav__item">
   <a href="#accessing-token-claims-in-policies" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Accessing Token Claims in Policies
-      
+      </span>
     </span>
   </a>
   
@@ -1369,9 +1410,9 @@
           <li class="md-nav__item">
   <a href="#token-collection-in-context" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Token Collection in Context
-      
+      </span>
     </span>
   </a>
   
@@ -1380,9 +1421,9 @@
           <li class="md-nav__item">
   <a href="#schema-requirements-for-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Schema Requirements for Multi-Issuer
-      
+      </span>
     </span>
   </a>
   
@@ -1392,9 +1433,9 @@
           <li class="md-nav__item">
   <a href="#1-token-entity-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         1. Token Entity Schema
-      
+      </span>
     </span>
   </a>
   
@@ -1403,9 +1444,9 @@
           <li class="md-nav__item">
   <a href="#2-custom-token-types" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2. Custom Token Types
-      
+      </span>
     </span>
   </a>
   
@@ -1414,9 +1455,9 @@
           <li class="md-nav__item">
   <a href="#3-context-type-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         3. Context Type Schema
-      
+      </span>
     </span>
   </a>
   
@@ -1425,9 +1466,9 @@
           <li class="md-nav__item">
   <a href="#key-requirements" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Key Requirements
-      
+      </span>
     </span>
   </a>
   
@@ -1436,9 +1477,9 @@
           <li class="md-nav__item">
   <a href="#why-these-changes-are-required" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Why These Changes Are Required
-      
+      </span>
     </span>
   </a>
   
@@ -1447,9 +1488,9 @@
           <li class="md-nav__item">
   <a href="#schema-update-checklist" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Schema Update Checklist
-      
+      </span>
     </span>
   </a>
   
@@ -1463,9 +1504,9 @@
           <li class="md-nav__item">
   <a href="#policy-examples-using-token-entities" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Policy Examples Using Token Entities
-      
+      </span>
     </span>
   </a>
   
@@ -1474,9 +1515,9 @@
           <li class="md-nav__item">
   <a href="#trusted-issuer-configuration-for-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Trusted Issuer Configuration for Multi-Issuer
-      
+      </span>
     </span>
   </a>
   
@@ -1490,9 +1531,9 @@
         <li class="md-nav__item">
   <a href="#policy-and-schema-authoring" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Policy and Schema Authoring
-      
+      </span>
     </span>
   </a>
   
@@ -1502,9 +1543,9 @@
           <li class="md-nav__item">
   <a href="#minimum-cedar-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Minimum Cedar Schema
-      
+      </span>
     </span>
   </a>
   
@@ -1518,9 +1559,9 @@
         <li class="md-nav__item">
   <a href="#note-on-test-fixtures" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Note on test fixtures
-      
+      </span>
     </span>
   </a>
   
@@ -1549,8 +1590,7 @@
   <span class="md-ellipsis">
     
   
-    Properties
-  
+  Properties
 
     
   </span>
@@ -1577,8 +1617,7 @@
   <span class="md-ellipsis">
     
   
-    JWT Validation
-  
+  JWT Validation
 
     
   </span>
@@ -1605,8 +1644,7 @@
   <span class="md-ellipsis">
     
   
-    Entities
-  
+  Entities
 
     
   </span>
@@ -1633,8 +1671,7 @@
   <span class="md-ellipsis">
     
   
-    Logs
-  
+  Logs
 
     
   </span>
@@ -1661,8 +1698,7 @@
   <span class="md-ellipsis">
     
   
-    Lock Server
-  
+  Lock Server
 
     
   </span>
@@ -1689,8 +1725,7 @@
   <span class="md-ellipsis">
     
   
-    Benchmarks
-  
+  Benchmarks
 
     
   </span>
@@ -1755,8 +1790,7 @@
   <span class="md-ellipsis">
     
   
-    Developer
-  
+  Developer
 
     
   </span>
@@ -1817,8 +1851,7 @@
   <span class="md-ellipsis">
     
   
-    Integrations
-  
+  Integrations
 
     
   </span>
@@ -1854,8 +1887,12 @@
               
               <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
+                  
                   <div class="md-sidebar__inner">
                     
+
+
+  
 
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
@@ -1873,9 +1910,9 @@
         <li class="md-nav__item">
   <a href="#policy-store-formats" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Policy Store Formats
-      
+      </span>
     </span>
   </a>
   
@@ -1883,11 +1920,11 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-legacy-single-file-format-jsonyaml" class="md-nav__link">
+  <a href="#1-legacy-single-file-format-yaml-test-suites" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        1. Legacy Single-File Format (JSON/YAML)
-      
+      <span class="md-typeset">
+        1. Legacy Single-File Format (YAML Test Suites)
+      </span>
     </span>
   </a>
   
@@ -1896,9 +1933,9 @@
           <li class="md-nav__item">
   <a href="#2-new-directory-based-format" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2. New Directory-Based Format
-      
+      </span>
     </span>
   </a>
   
@@ -1908,9 +1945,9 @@
           <li class="md-nav__item">
   <a href="#metadatajson" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         metadata.json
-      
+      </span>
     </span>
   </a>
   
@@ -1919,9 +1956,9 @@
           <li class="md-nav__item">
   <a href="#policy-files" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Policy Files
-      
+      </span>
     </span>
   </a>
   
@@ -1931,9 +1968,9 @@
           <li class="md-nav__item">
   <a href="#multiple-policies-per-file" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Multiple policies per file
-      
+      </span>
     </span>
   </a>
   
@@ -1947,9 +1984,9 @@
           <li class="md-nav__item">
   <a href="#template-files" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Template Files
-      
+      </span>
     </span>
   </a>
   
@@ -1958,9 +1995,9 @@
           <li class="md-nav__item">
   <a href="#entity-files" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Entity Files
-      
+      </span>
     </span>
   </a>
   
@@ -1969,9 +2006,9 @@
           <li class="md-nav__item">
   <a href="#trusted-issuer-files" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Trusted Issuer Files
-      
+      </span>
     </span>
   </a>
   
@@ -1980,9 +2017,9 @@
           <li class="md-nav__item">
   <a href="#custom-issuer-files" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Custom Issuer Files
-      
+      </span>
     </span>
   </a>
   
@@ -1991,9 +2028,9 @@
           <li class="md-nav__item">
   <a href="#cedar-archive-cjar-format" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Cedar Archive (.cjar) Format
-      
+      </span>
     </span>
   </a>
   
@@ -2012,9 +2049,9 @@
         <li class="md-nav__item">
   <a href="#advanced-loading-from-bytes" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Advanced: Loading from Bytes
-      
+      </span>
     </span>
   </a>
   
@@ -2023,9 +2060,9 @@
         <li class="md-nav__item">
   <a href="#background-refresh" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Background refresh
-      
+      </span>
     </span>
   </a>
   
@@ -2035,9 +2072,9 @@
           <li class="md-nav__item">
   <a href="#per-request-consistency" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Per-request consistency
-      
+      </span>
     </span>
   </a>
   
@@ -2046,9 +2083,9 @@
           <li class="md-nav__item">
   <a href="#strategy-ladder" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Strategy ladder
-      
+      </span>
     </span>
   </a>
   
@@ -2057,9 +2094,9 @@
           <li class="md-nav__item">
   <a href="#failure-handling" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Failure handling
-      
+      </span>
     </span>
   </a>
   
@@ -2068,9 +2105,9 @@
           <li class="md-nav__item">
   <a href="#metrics" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Metrics
-      
+      </span>
     </span>
   </a>
   
@@ -2082,23 +2119,23 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#legacy-single-file-format-json" class="md-nav__link">
+  <a href="#legacy-single-file-format-yaml-test-suites" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Legacy Single-File Format (JSON)
-      
+      <span class="md-typeset">
+        Legacy Single-File Format (YAML Test Suites)
+      </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Legacy Single-File Format (JSON)">
+    <nav class="md-nav" aria-label="Legacy Single-File Format (YAML Test Suites)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#json-schema" class="md-nav__link">
+  <a href="#structure" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        JSON Schema
-      
+      <span class="md-typeset">
+        Structure
+      </span>
     </span>
   </a>
   
@@ -2107,9 +2144,9 @@
           <li class="md-nav__item">
   <a href="#schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        schema
-      
+      <span class="md-typeset">
+        <code>schema</code>
+      </span>
     </span>
   </a>
   
@@ -2123,9 +2160,9 @@
         <li class="md-nav__item">
   <a href="#default-entities" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Default Entities
-      
+      </span>
     </span>
   </a>
   
@@ -2135,9 +2172,9 @@
           <li class="md-nav__item">
   <a href="#entity-conflict-resolution" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Entity Conflict Resolution
-      
+      </span>
     </span>
   </a>
   
@@ -2151,9 +2188,9 @@
         <li class="md-nav__item">
   <a href="#cedar-policies-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Cedar Policies Schema
-      
+      </span>
     </span>
   </a>
   
@@ -2163,9 +2200,9 @@
           <li class="md-nav__item">
   <a href="#policy_content" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        policy_content
-      
+      <span class="md-typeset">
+        <code>policy_content</code>
+      </span>
     </span>
   </a>
   
@@ -2174,9 +2211,9 @@
           <li class="md-nav__item">
   <a href="#example-of-policies" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Example of policies
-      
+      <span class="md-typeset">
+        Example of <code>policies</code>
+      </span>
     </span>
   </a>
   
@@ -2190,9 +2227,9 @@
         <li class="md-nav__item">
   <a href="#trusted-issuers-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Trusted Issuers Schema
-      
+      </span>
     </span>
   </a>
   
@@ -2202,9 +2239,9 @@
           <li class="md-nav__item">
   <a href="#token-metadata-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Token Metadata Schema
-      
+      </span>
     </span>
   </a>
   
@@ -2216,11 +2253,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-policy-store" class="md-nav__link">
+  <a href="#example-policy-store-legacy-single-file-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Example Policy store
-      
+      <span class="md-typeset">
+        Example Policy Store (Legacy Single-File Structure)
+      </span>
     </span>
   </a>
   
@@ -2229,9 +2266,9 @@
         <li class="md-nav__item">
   <a href="#multi-issuer-token-entities" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Multi-Issuer Token Entities
-      
+      </span>
     </span>
   </a>
   
@@ -2241,9 +2278,9 @@
           <li class="md-nav__item">
   <a href="#token-entity-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Token Entity Structure
-      
+      </span>
     </span>
   </a>
   
@@ -2252,9 +2289,9 @@
           <li class="md-nav__item">
   <a href="#accessing-token-claims-in-policies" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Accessing Token Claims in Policies
-      
+      </span>
     </span>
   </a>
   
@@ -2263,9 +2300,9 @@
           <li class="md-nav__item">
   <a href="#token-collection-in-context" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Token Collection in Context
-      
+      </span>
     </span>
   </a>
   
@@ -2274,9 +2311,9 @@
           <li class="md-nav__item">
   <a href="#schema-requirements-for-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Schema Requirements for Multi-Issuer
-      
+      </span>
     </span>
   </a>
   
@@ -2286,9 +2323,9 @@
           <li class="md-nav__item">
   <a href="#1-token-entity-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         1. Token Entity Schema
-      
+      </span>
     </span>
   </a>
   
@@ -2297,9 +2334,9 @@
           <li class="md-nav__item">
   <a href="#2-custom-token-types" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2. Custom Token Types
-      
+      </span>
     </span>
   </a>
   
@@ -2308,9 +2345,9 @@
           <li class="md-nav__item">
   <a href="#3-context-type-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         3. Context Type Schema
-      
+      </span>
     </span>
   </a>
   
@@ -2319,9 +2356,9 @@
           <li class="md-nav__item">
   <a href="#key-requirements" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Key Requirements
-      
+      </span>
     </span>
   </a>
   
@@ -2330,9 +2367,9 @@
           <li class="md-nav__item">
   <a href="#why-these-changes-are-required" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Why These Changes Are Required
-      
+      </span>
     </span>
   </a>
   
@@ -2341,9 +2378,9 @@
           <li class="md-nav__item">
   <a href="#schema-update-checklist" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Schema Update Checklist
-      
+      </span>
     </span>
   </a>
   
@@ -2357,9 +2394,9 @@
           <li class="md-nav__item">
   <a href="#policy-examples-using-token-entities" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Policy Examples Using Token Entities
-      
+      </span>
     </span>
   </a>
   
@@ -2368,9 +2405,9 @@
           <li class="md-nav__item">
   <a href="#trusted-issuer-configuration-for-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Trusted Issuer Configuration for Multi-Issuer
-      
+      </span>
     </span>
   </a>
   
@@ -2384,9 +2421,9 @@
         <li class="md-nav__item">
   <a href="#policy-and-schema-authoring" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Policy and Schema Authoring
-      
+      </span>
     </span>
   </a>
   
@@ -2396,9 +2433,9 @@
           <li class="md-nav__item">
   <a href="#minimum-cedar-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Minimum Cedar Schema
-      
+      </span>
     </span>
   </a>
   
@@ -2412,9 +2449,9 @@
         <li class="md-nav__item">
   <a href="#note-on-test-fixtures" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Note on test fixtures
-      
+      </span>
     </span>
   </a>
   
@@ -2445,9 +2482,31 @@
   
     
     
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
       <li class="md-path__item">
         <a href="../../" class="md-path__link">
           
+  
   <span class="md-ellipsis">
     Cedarling
   </span>
@@ -2463,9 +2522,35 @@
   
     
     
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
       <li class="md-path__item">
         <a href="../cedarling-authz/" class="md-path__link">
           
+  
   <span class="md-ellipsis">
     Reference
   </span>
@@ -2484,54 +2569,6 @@
                 
   
                   
-
-  <nav class="md-tags" >
-    
-      
-      
-      
-      
-        <span class="md-tag">Cedar</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">Cedarling</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">administration</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">authorization / authz</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">lock</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">policy store</span>
-      
-    
-  </nav>
-
-
   
   
 
@@ -2544,10 +2581,9 @@
 <li><strong>Trusted Issuers</strong>: Details about the trusted issuers (see <a href="#trusted-issuers-schema">below</a> for syntax).</li>
 <li><strong>Default Entities</strong>: Optional static entities that are loaded at startup and available for all policy evaluations (see <a href="#default-entities">below</a>).</li>
 </ol>
-<p>For a comprehensive JSON schema defining the structure of the policy store, see: <a href="https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json">policy_store_schema.json</a>. You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].</p>
-<p><strong>Note:</strong> The <code>cedarling_store.json</code> file is only needed if the bootstrap properties: <code>CEDARLING_LOCK</code> and <code>CEDARLING_POLICY_STORE_URI</code> are not set to a local location. If you're fetching the policies remotely, you don't need a <code>cedarling_store.json</code> file.</p>
+<p>For a JSON schema defining the legacy single-file policy store structure used in test fixtures, see: <a href="https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json">policy_store_schema.json</a>. For production environments, use the <a href="#2-new-directory-based-format">folder-based policy store format</a>.</p>
 <h2 id="policy-store-formats">Policy Store Formats<a class="headerlink" href="#policy-store-formats" title="Permanent link">#</a></h2>
-<p>Cedarling supports two policy store formats and automatically detects the correct format based on the file extension (for local files) or the response body content (for URIs):</p>
+<p>Cedarling supports the folder-based policy store format (as a directory or <code>.cjar</code> archive) and automatically detects the format based on the file extension (for local files) or response body content (for URIs):</p>
 <table>
 <thead>
 <tr>
@@ -2557,12 +2593,8 @@
 </thead>
 <tbody>
 <tr>
-<td><code>CEDARLING_POLICY_STORE_URI</code>, response body is a cjar or zip archive</td>
-<td>Cedar Archive from URL</td>
-</tr>
-<tr>
-<td><code>CEDARLING_POLICY_STORE_URI</code>, response body is JSON</td>
-<td>Legacy JSON from Lock Server</td>
+<td><code>CEDARLING_POLICY_STORE_URI</code></td>
+<td>Cedar Archive (<code>.cjar</code> or zip archive) from URL</td>
 </tr>
 <tr>
 <td><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> pointing to directory</td>
@@ -2573,17 +2605,17 @@
 <td>Cedar Archive file</td>
 </tr>
 <tr>
-<td><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> with <code>.json</code> extension</td>
-<td>JSON file</td>
-</tr>
-<tr>
 <td><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> with <code>.yaml</code>/<code>.yml</code> extension</td>
-<td>YAML file</td>
+<td>YAML file (supported for test suites)</td>
 </tr>
 </tbody>
 </table>
-<h3 id="1-legacy-single-file-format-jsonyaml">1. Legacy Single-File Format (JSON/YAML)<a class="headerlink" href="#1-legacy-single-file-format-jsonyaml" title="Permanent link">#</a></h3>
-<p>The original format stores all policies and schema in a single JSON or YAML file with Base64-encoded content. This is documented in detail in the sections below.</p>
+<div class="admonition warning">
+<p class="admonition-title">Legacy JSON Format Removed</p>
+<p>Support for converting legacy JSON policy stores (originally produced by Agama Lab or Lock Server) has been removed. Consumers must migrate to the folder-based policy store format (directory or <code>.cjar</code> archive). YAML remains supported exclusively for test suites.</p>
+</div>
+<h3 id="1-legacy-single-file-format-yaml-test-suites">1. Legacy Single-File Format (YAML Test Suites)<a class="headerlink" href="#1-legacy-single-file-format-yaml-test-suites" title="Permanent link">#</a></h3>
+<p>The legacy single-file format stores policies and schema in a single YAML file with Base64-encoded content, supported exclusively for test suites. This structure is documented in detail in the sections below.</p>
 <h3 id="2-new-directory-based-format">2. New Directory-Based Format<a class="headerlink" href="#2-new-directory-based-format" title="Permanent link">#</a></h3>
 <p>The new directory-based format uses human-readable Cedar files organized in a structured directory:</p>
 <div class="highlight"><pre><span></span><code>policy-store/
@@ -2745,10 +2777,10 @@ permit(
 </ul>
 <p>To register multiple issuers, add one file per issuer to the <code>trusted-issuers/</code> directory.</p>
 <blockquote>
-<p><strong>Note:</strong> The embedded <code>trusted_issuers</code> map shown in the <a href="#trusted-issuers-schema">Trusted Issuers Schema</a> section below (used inside a monolithic <code>cedarling_store.json</code> or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the <code>openid_configuration_endpoint</code> field name, with <code>configuration_endpoint</code> accepted as a backward-compatible alias.</p>
+<p><strong>Note:</strong> The embedded <code>trusted_issuers</code> map shown in the <a href="#trusted-issuers-schema">Trusted Issuers Schema</a> section below (used inside legacy single-file YAML test fixtures) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the <code>openid_configuration_endpoint</code> field name, with <code>configuration_endpoint</code> accepted as a backward-compatible alias.</p>
 </blockquote>
 <h4 id="custom-issuer-files">Custom Issuer Files<a class="headerlink" href="#custom-issuer-files" title="Permanent link">#</a></h4>
-<p>Custom (non-JWT) issuer configuration files in the <code>custom-issuers/</code> directory declare issuers whose tokens are validated by a registered <code>CustomTokenProcessor</code> instead of the JWT pipeline, see <a href="../cedarling-multi-issuer/#custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing</a>. <strong>Each file describes exactly one issuer</strong> as a JSON object:</p>
+<p>Custom (non-JWT) issuer configuration files in the <code>custom-issuers/</code> directory declare issuers whose tokens are validated by a registered <code>CustomTokenProcessor</code> instead of the JWT pipeline, see <a href=".././cedarling-multi-issuer/#custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing</a>. <strong>Each file describes exactly one issuer</strong> as a JSON object:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;tokens_mappings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;Custom::ApiKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -2788,20 +2820,20 @@ permit(
 <div class="highlight"><pre><span></span><code><span class="c1"># Create a .cjar archive from a policy store directory</span>
 <span class="nb">cd</span><span class="w"> </span>policy-store<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>zip<span class="w"> </span>-r<span class="w"> </span>../policy-store.cjar<span class="w"> </span>.
 </code></pre></div>
-<p><strong>Note:</strong> In WASM environments, only URL-based and inline string sources are available. Use <code>CEDARLING_POLICY_STORE_URI</code> with a <code>.cjar</code> URL or <code>init_from_archive_bytes()</code> for custom fetch scenarios.</p>
+<p><strong>Note:</strong> In WASM environments, only URL-based and inline string sources are available. Use <code>CEDARLING_POLICY_STORE_URI</code> with a <code>.cjar</code> URL or <code>initFromArchiveBytes()</code> for custom fetch scenarios.</p>
 <h2 id="advanced-loading-from-bytes">Advanced: Loading from Bytes<a class="headerlink" href="#advanced-loading-from-bytes" title="Permanent link">#</a></h2>
 <p>For scenarios requiring custom fetch logic (e.g., auth headers), archive bytes can be loaded directly:</p>
 <ul>
-<li><strong>WASM</strong>: Use <code>init_from_archive_bytes(config, bytes)</code> function</li>
+<li><strong>WASM</strong>: Use <code>initFromArchiveBytes(config, bytes)</code> function</li>
 <li><strong>Rust</strong>: Use <code>PolicyStoreSource::ArchiveBytes(Vec&lt;u8&gt;)</code> or <code>load_policy_store_archive_bytes()</code> function</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1">// WASM example with custom fetch</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Authorization</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Uint8Array</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">());</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init_from_archive_bytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">initFromArchiveBytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
 </code></pre></div>
 <h2 id="background-refresh">Background refresh<a class="headerlink" href="#background-refresh" title="Permanent link">#</a></h2>
-<p>For URL-based policy store sources (<code>CEDARLING_POLICY_STORE_URI</code> pointing at a Lock Server endpoint or a <code>.cjar</code>), Cedarling can periodically re-fetch the policy store and atomically swap the in-memory <code>Authz</code> instance so long-running processes see policy updates without restart. Refresh is <strong>opt-in</strong> via <a href="../cedarling-properties/#refreshing-the-policy-store"><code>CEDARLING_POLICY_STORE_REFRESH_INTERVAL</code></a> and is silently ignored for local sources.</p>
+<p>For URL-based policy store sources (<code>CEDARLING_POLICY_STORE_URI</code> pointing at a Lock Server endpoint or a <code>.cjar</code>), Cedarling can periodically re-fetch the policy store and atomically swap the in-memory <code>Authz</code> instance so long-running processes see policy updates without restart. Refresh is <strong>opt-in</strong> via <a href=".././cedarling-properties/#refreshing-the-policy-store"><code>CEDARLING_POLICY_STORE_REFRESH_INTERVAL</code></a> and is silently ignored for local sources.</p>
 <h3 id="per-request-consistency">Per-request consistency<a class="headerlink" href="#per-request-consistency" title="Permanent link">#</a></h3>
 <p>Every public Cedarling method snapshots the current <code>Authz</code> via <code>Arc&lt;ArcSwap&lt;Authz&gt;&gt;::load()</code> at entry and uses that snapshot for the duration of the call. A refresh that lands mid-request can never produce a partially-updated view — in-flight authorizations always finish against the pre-swap policy store. The post-swap store is visible to all <em>subsequent</em> calls.</p>
 <h3 id="strategy-ladder">Strategy ladder<a class="headerlink" href="#strategy-ladder" title="Permanent link">#</a></h3>
@@ -2912,10 +2944,13 @@ permit(
 </tr>
 </tbody>
 </table>
-<h2 id="legacy-single-file-format-json">Legacy Single-File Format (JSON)<a class="headerlink" href="#legacy-single-file-format-json" title="Permanent link">#</a></h2>
-<p>The following sections document the legacy single-file JSON format.</p>
-<h3 id="json-schema">JSON Schema<a class="headerlink" href="#json-schema" title="Permanent link">#</a></h3>
-<p>The JSON Schema accepted by Cedarling is defined as follows:</p>
+<h2 id="legacy-single-file-format-yaml-test-suites">Legacy Single-File Format (YAML Test Suites)<a class="headerlink" href="#legacy-single-file-format-yaml-test-suites" title="Permanent link">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">YAML Test Fixtures Only</p>
+<p>The legacy JSON format has been removed in favor of folder-based policy stores (<code>.cjar</code> archives or directories). The single-file schema below is supported exclusively via YAML for automated test suites.</p>
+</div>
+<h3 id="structure">Structure<a class="headerlink" href="#structure" title="Permanent link">#</a></h3>
+<p>The structure accepted for YAML test fixtures is defined as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;policy_stores&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -2936,7 +2971,7 @@ permit(
 <li><strong>policies</strong> : (<em>Object</em>) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: <a href="#cedar-policies-schema">policies schema</a>.</li>
 <li><strong>schema</strong> : (<em>String</em> | <em>Object</em>) Base64 encoded JSON Object. See <a href="#schema">schema</a> below.</li>
 <li><strong>trusted_issuers</strong> : (<em>Object of {unique_id =&gt; IdentitySource}(#trusted-issuer-schema)</em>) List of metadata for Identity Sources.</li>
-<li><strong>custom_issuers</strong> : (<em>Object of {issuer_name =&gt; CustomIssuer}</em>) Optional map of custom (non-JWT) issuers validated by a registered <code>CustomTokenProcessor</code>. See <a href="#custom-issuer-files">Custom Issuer Files</a> and <a href="../cedarling-multi-issuer/#custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing</a>.</li>
+<li><strong>custom_issuers</strong> : (<em>Object of {issuer_name =&gt; CustomIssuer}</em>) Optional map of custom (non-JWT) issuers validated by a registered <code>CustomTokenProcessor</code>. See <a href="#custom-issuer-files">Custom Issuer Files</a> and <a href=".././cedarling-multi-issuer/#custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing</a>.</li>
 <li><strong>default_entities</strong> : (<em>Object</em>) Optional map of entity IDs to encoded/default entity payloads. See <a href="#default-entities">Default Entities</a>.</li>
 </ul>
 <h3 id="schema"><code>schema</code><a class="headerlink" href="#schema" title="Permanent link">#</a></h3>
@@ -3088,7 +3123,7 @@ permit(
 <li><strong>name</strong> : (<em>String</em>) The name of the trusted issuer.</li>
 <li><strong>description</strong> : (<em>String</em>) A brief description of the trusted issuer, providing context for administrators.</li>
 <li><strong>openid_configuration_endpoint</strong> : (<em>String</em>) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at <code>/.well-known/openid-configuration</code>).</li>
-<li><strong>trusted_issuer_id</strong> : (<em>Object</em>, <em>optional</em>) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the <a href="../cedarling-entities/#trusted-issuer">Trusted Issuer</a> that Cedarling automatically creates at startup.</li>
+<li><strong>trusted_issuer_id</strong> : (<em>Object</em>, <em>optional</em>) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the <a href=".././cedarling-entities/#trusted-issuer">Trusted Issuer</a> that Cedarling automatically creates at startup.</li>
 <li><strong>token_metadata</strong> : (<em>Object</em>, <em>optional</em>) Tokens metadata in a map of <em>token name</em> -&gt; <em>token metadata</em>. See <a href="#token-metadata-schema">Token Metadata Schema</a>.</li>
 </ul>
 <h3 id="token-metadata-schema">Token Metadata Schema<a class="headerlink" href="#token-metadata-schema" title="Permanent link">#</a></h3>
@@ -3106,8 +3141,8 @@ permit(
 <li><code>"token_id"</code> (string, Default: <code>"jti"</code>): The JWT claim that will be used as the ID for the Token Entity.</li>
 <li><code>"required_claims"</code> (array[string], Default: <code>[]</code>): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519 Section 4.1</a> (e.g., <code>exp</code>, <code>nbf</code>), the claim will also be validated according to the standard.</li>
 </ul>
-<h2 id="example-policy-store">Example Policy store<a class="headerlink" href="#example-policy-store" title="Permanent link">#</a></h2>
-<p>Here is a non-normative example of a <code>cedarling_store.json</code> file:</p>
+<h2 id="example-policy-store-legacy-single-file-structure">Example Policy Store (Legacy Single-File Structure)<a class="headerlink" href="#example-policy-store-legacy-single-file-structure" title="Permanent link">#</a></h2>
+<p>Here is a non-normative example of the legacy single-file structure (supported in YAML test suites):</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -3541,6 +3576,54 @@ namespace MyApp {
 <p>The rationale is that yaml has excellent support for embedded, indented, multiline string values. That is far easier to read than base64 encoded json strings, and is beneficial for debugging and validation that test cases are correct.</p>
 
 
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedar</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedarling</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">authorization / authz</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">lock</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">policy store</span>
+      
+    
+  </nav>
+
+
+
 
 
 
@@ -3561,7 +3644,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 27, 2026 07:24:04 UTC"><span class="timeago" datetime="2026-08-27T07:24:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 27, 2026 07:24:04 UTC">2026-08-27</span>
+    September 18, 2026
   </span>
 
     
@@ -3571,7 +3654,7 @@ namespace MyApp {
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 8, 2024 06:55:54 UTC"><span class="timeago" datetime="2024-10-08T06:55:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 8, 2024 06:55:54 UTC">2024-10-08</span>
+    November 20, 2025
   </span>
 
     
@@ -3624,7 +3707,7 @@ namespace MyApp {
     
     
     <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
     </a>
   
     
@@ -3632,7 +3715,7 @@ namespace MyApp {
     
     
     <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
     </a>
   
 </div>
@@ -3736,15 +3819,11 @@ namespace MyApp {
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tracking","navigation.tabs","navigation.tabs.sticky","navigation.indexes","navigation.prune","navigation.path","navigation.top","navigation.instant","navigation.instant.progress","search.suggest","search.highlight","search.share","content.tabs.link","content.code.copy","content.code.select","content.code.annotate","toc.follow"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"stable","provider":"mike"}}</script>
     
     
 
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="../../../js/timeago.min.js"></script>
-      
-        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      <script src="../../../assets/javascripts/bundle.6970bfe9.min.js"></script>
       
         <script src="../../../javascripts/skeleton-loader.js"></script>
       

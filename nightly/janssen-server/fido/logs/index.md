@@ -2,10 +2,10 @@
 
 ## Log level and Logging Layout
 
-| Field named   | Example                      | Description                                   |
-| ------------- | ---------------------------- | --------------------------------------------- |
-| loggingLevel  | "INFO" or "TRACE" or "DEBUG" | Logging level for FIDO2 server                |
-| loggingLayout | "text" or "json"             | Contents of logs as plain text or json format |
+| Field named | Example | Description|
+|--|--|--|
+|loggingLevel | "INFO" or "TRACE" or "DEBUG" | Logging level for FIDO2 server|
+|loggingLayout |"text" or "json" |Contents of logs as plain text or json format|
 
 ## Configure logging
 
@@ -13,15 +13,11 @@
 
 Use the following command to obtain configuration parameters.
 
-Command
-
-```
+```bash title="Command"
 jans cli --operation-id get-properties-fido2
 ```
 
-Response
-
-```
+```json title="Response"
 {
    "issuer":"https://.jans.io",
    "baseEndpoint":"https://my-jans-server.jans.io/jans-fido2/restv1",
@@ -61,6 +57,7 @@ Response
       "authenticationHistoryExpiration":1296000
    }
 }
+
 ```
 
 Store this content in a file, say `/tmp/config_values.json`.
@@ -69,22 +66,23 @@ Store this content in a file, say `/tmp/config_values.json`.
 
 1. Create a JSON file say `/tmp/config_values.json` by editing the JSON from Point 1
 
-   - edit `loggingLevel` to `TRACE` or `DEBUG` or `INFO`
-   - edit `loggingLayout` to `text` or `json`
+      - edit `loggingLevel` to `TRACE` or `DEBUG` or `INFO`
+      
+      - edit `loggingLayout` to `text` or `json`
 
-1. Use the following command to update the logging level
+2. Use the following command to update the logging level
 
-   ```
-   jans cli \
-   --operation-id put-properties-fido2 \
-   --data /tmp/config_values.json
-   ```
+      ```bash
+      jans cli \
+      --operation-id put-properties-fido2 \
+      --data /tmp/config_values.json
+      ```
 
-1. Restart `jans-fido2`
+3. Restart `jans-fido2`
 
-   ```
-   systemctl restart fido2
-   ```
+      ```shell
+      systemctl restart fido2
+      ```
 
 ### Location of logs in FIDO2 server:
 

@@ -26,18 +26,23 @@
       
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="zensical-0.0.58">
     
     
       
-        <title>Javascript - Janssen Documentation</title>
+        <title>Getting Started with Cedarling in a JavaScript app - Janssen Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      <link rel="stylesheet" href="../../../assets/stylesheets/classic/main.38807bfb.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/classic/palette.c7ab7c71.min.css">
       
       
 
@@ -51,12 +56,10 @@
         
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
-    
-      <link rel="stylesheet" href="../../../css/timeago.css">
     
       <link rel="stylesheet" href="../../../css/tabs.css">
     
@@ -66,7 +69,7 @@
     
       <link rel="stylesheet" href="../../../stylesheets/navigation.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
     
       
 
@@ -87,7 +90,7 @@
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
     <div data-md-component="skip">
       
         
@@ -125,10 +128,10 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="Janssen Documentation">
 
     </a>
-    <label class="md-header__button md-icon" for="__drawer">
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
@@ -142,7 +145,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Javascript
+              Getting Started with Cedarling in a JavaScript app
             
           </span>
         </div>
@@ -192,64 +195,30 @@
     
       
       
-        <label class="md-header__button md-icon" for="__search">
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
-            
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
-          </a>
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-        <div class="md-search__suggest" data-md-component="search-suggest"></div>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
 </div>
       
     
-    
-      <div class="md-header__source">
+    <div class="md-header__source">
+      
         <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
   </div>
 </a>
-      </div>
-    
+      
+    </div>
   </nav>
   
     
@@ -264,6 +233,25 @@
   
   
     
+      
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       
   
@@ -271,13 +259,29 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../../getting-started/" class="md-tabs__link">
           
-  
-  
-    
   
   Janssen Server
 
@@ -296,13 +300,41 @@
   
   
     
+      
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../../agama/introduction/" class="md-tabs__link">
           
-  
-  
-    
   
   Agama
 
@@ -320,13 +352,31 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item md-tabs__item--active">
         <a href="../../" class="md-tabs__link">
           
-  
-  
-    
   
   Cedarling
 
@@ -366,7 +416,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="Janssen Documentation">
 
     </a>
     Janssen Documentation
@@ -376,7 +426,7 @@
       <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -438,8 +488,7 @@
   <span class="md-ellipsis">
     
   
-    Janssen Server
-  
+  Janssen Server
 
     
   </span>
@@ -519,8 +568,7 @@
   <span class="md-ellipsis">
     
   
-    Agama
-  
+  Agama
 
     
   </span>
@@ -592,8 +640,7 @@
   <span class="md-ellipsis">
     
   
-    Cedarling
-  
+  Cedarling
 
     
   </span>
@@ -614,8 +661,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Cedarling
-  
+  Cedarling
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
@@ -636,8 +682,7 @@
   <span class="md-ellipsis">
     
   
-    Cedar Introduction
-  
+  Cedar Introduction
 
     
   </span>
@@ -664,8 +709,7 @@
   <span class="md-ellipsis">
     
   
-    Quick Start
-  
+  Quick Start
 
     
   </span>
@@ -730,8 +774,7 @@
   <span class="md-ellipsis">
     
   
-    Tutorials
-  
+  Tutorials
 
     
   </span>
@@ -746,8 +789,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Tutorials
-  
+  Tutorials
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
@@ -766,8 +808,7 @@
   <span class="md-ellipsis">
     
   
-    Getting Started
-  
+  Getting Started
 
     
   </span>
@@ -794,8 +835,7 @@
   <span class="md-ellipsis">
     
   
-    C
-  
+  C
 
     
   </span>
@@ -818,7 +858,9 @@
   
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
       
       
         
@@ -831,8 +873,7 @@
   <span class="md-ellipsis">
     
   
-    Javascript
-  
+  Javascript
 
     
   </span>
@@ -842,15 +883,14 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="./" class="md-nav__link md-nav__link--active">
+      <a href="././" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Javascript
-  
+  Javascript
 
     
   </span>
@@ -860,6 +900,9 @@
       </a>
       
         
+
+
+  
 
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
@@ -877,9 +920,9 @@
         <li class="md-nav__item">
   <a href="#installation" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Installation
-      
+      </span>
     </span>
   </a>
   
@@ -889,9 +932,9 @@
           <li class="md-nav__item">
   <a href="#using-the-package-manager" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Using the package manager
-      
+      </span>
     </span>
   </a>
   
@@ -900,9 +943,9 @@
           <li class="md-nav__item">
   <a href="#build-from-source" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Build from Source
-      
+      </span>
     </span>
   </a>
   
@@ -912,9 +955,9 @@
           <li class="md-nav__item">
   <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Requirements
-      
+      </span>
     </span>
   </a>
   
@@ -923,9 +966,9 @@
           <li class="md-nav__item">
   <a href="#building" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Building
-      
+      </span>
     </span>
   </a>
   
@@ -944,9 +987,9 @@
         <li class="md-nav__item">
   <a href="#usage" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Usage
-      
+      </span>
     </span>
   </a>
   
@@ -956,9 +999,9 @@
           <li class="md-nav__item">
   <a href="#initialization" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Initialization
-      
+      </span>
     </span>
   </a>
   
@@ -967,20 +1010,48 @@
           <li class="md-nav__item">
   <a href="#policy-store-sources-wasm" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Policy Store Sources (WASM)
-      
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Store Sources (WASM)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#load-an-archive-from-a-url" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Load an archive from a URL
+      </span>
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
+  <a href="#load-archive-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Load archive bytes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#authorization" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Authorization
-      
+      </span>
     </span>
   </a>
   
@@ -990,9 +1061,9 @@
           <li class="md-nav__item">
   <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Token-Based Authorization (Multi-Issuer)
-      
+      </span>
     </span>
   </a>
   
@@ -1001,9 +1072,9 @@
           <li class="md-nav__item">
   <a href="#unsigned-authorization" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Unsigned Authorization
-      
+      </span>
     </span>
   </a>
   
@@ -1012,9 +1083,9 @@
           <li class="md-nav__item">
   <a href="#batch-authorization" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Batch Authorization
-      
+      </span>
     </span>
   </a>
   
@@ -1028,9 +1099,9 @@
           <li class="md-nav__item">
   <a href="#logging" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Logging
-      
+      </span>
     </span>
   </a>
   
@@ -1042,11 +1113,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#defined-api" class="md-nav__link">
+  <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Defined API
-      
+      <span class="md-typeset">
+        API reference
+      </span>
     </span>
   </a>
   
@@ -1055,9 +1126,9 @@
         <li class="md-nav__item">
   <a href="#see-also" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         See Also
-      
+      </span>
     </span>
   </a>
   
@@ -1086,8 +1157,7 @@
   <span class="md-ellipsis">
     
   
-    Python
-  
+  Python
 
     
   </span>
@@ -1114,8 +1184,7 @@
   <span class="md-ellipsis">
     
   
-    Rust
-  
+  Rust
 
     
   </span>
@@ -1142,8 +1211,7 @@
   <span class="md-ellipsis">
     
   
-    Golang
-  
+  Golang
 
     
   </span>
@@ -1170,8 +1238,7 @@
   <span class="md-ellipsis">
     
   
-    Java
-  
+  Java
 
     
   </span>
@@ -1198,8 +1265,7 @@
   <span class="md-ellipsis">
     
   
-    Kotlin
-  
+  Kotlin
 
     
   </span>
@@ -1226,8 +1292,7 @@
   <span class="md-ellipsis">
     
   
-    Swift
-  
+  Swift
 
     
   </span>
@@ -1302,8 +1367,7 @@
   <span class="md-ellipsis">
     
   
-    Reference
-  
+  Reference
 
     
   </span>
@@ -1366,8 +1430,7 @@
   <span class="md-ellipsis">
     
   
-    Developer
-  
+  Developer
 
     
   </span>
@@ -1428,8 +1491,7 @@
   <span class="md-ellipsis">
     
   
-    Integrations
-  
+  Integrations
 
     
   </span>
@@ -1465,8 +1527,12 @@
               
               <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
+                  
                   <div class="md-sidebar__inner">
                     
+
+
+  
 
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
@@ -1484,9 +1550,9 @@
         <li class="md-nav__item">
   <a href="#installation" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Installation
-      
+      </span>
     </span>
   </a>
   
@@ -1496,9 +1562,9 @@
           <li class="md-nav__item">
   <a href="#using-the-package-manager" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Using the package manager
-      
+      </span>
     </span>
   </a>
   
@@ -1507,9 +1573,9 @@
           <li class="md-nav__item">
   <a href="#build-from-source" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Build from Source
-      
+      </span>
     </span>
   </a>
   
@@ -1519,9 +1585,9 @@
           <li class="md-nav__item">
   <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Requirements
-      
+      </span>
     </span>
   </a>
   
@@ -1530,9 +1596,9 @@
           <li class="md-nav__item">
   <a href="#building" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Building
-      
+      </span>
     </span>
   </a>
   
@@ -1551,9 +1617,9 @@
         <li class="md-nav__item">
   <a href="#usage" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Usage
-      
+      </span>
     </span>
   </a>
   
@@ -1563,9 +1629,9 @@
           <li class="md-nav__item">
   <a href="#initialization" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Initialization
-      
+      </span>
     </span>
   </a>
   
@@ -1574,20 +1640,48 @@
           <li class="md-nav__item">
   <a href="#policy-store-sources-wasm" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Policy Store Sources (WASM)
-      
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Store Sources (WASM)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#load-an-archive-from-a-url" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Load an archive from a URL
+      </span>
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
+  <a href="#load-archive-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Load archive bytes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#authorization" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Authorization
-      
+      </span>
     </span>
   </a>
   
@@ -1597,9 +1691,9 @@
           <li class="md-nav__item">
   <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Token-Based Authorization (Multi-Issuer)
-      
+      </span>
     </span>
   </a>
   
@@ -1608,9 +1702,9 @@
           <li class="md-nav__item">
   <a href="#unsigned-authorization" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Unsigned Authorization
-      
+      </span>
     </span>
   </a>
   
@@ -1619,9 +1713,9 @@
           <li class="md-nav__item">
   <a href="#batch-authorization" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Batch Authorization
-      
+      </span>
     </span>
   </a>
   
@@ -1635,9 +1729,9 @@
           <li class="md-nav__item">
   <a href="#logging" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Logging
-      
+      </span>
     </span>
   </a>
   
@@ -1649,11 +1743,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#defined-api" class="md-nav__link">
+  <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Defined API
-      
+      <span class="md-typeset">
+        API reference
+      </span>
     </span>
   </a>
   
@@ -1662,9 +1756,9 @@
         <li class="md-nav__item">
   <a href="#see-also" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         See Also
-      
+      </span>
     </span>
   </a>
   
@@ -1695,9 +1789,31 @@
   
     
     
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
       <li class="md-path__item">
         <a href="../../" class="md-path__link">
           
+  
   <span class="md-ellipsis">
     Cedarling
   </span>
@@ -1713,9 +1829,33 @@
   
     
     
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
       <li class="md-path__item">
         <a href="../cedarling-getting-started/" class="md-path__link">
           
+  
   <span class="md-ellipsis">
     Tutorials
   </span>
@@ -1734,53 +1874,13 @@
                 
   
                   
-
-  <nav class="md-tags" >
-    
-      
-      
-      
-      
-        <span class="md-tag">WASM</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">browser app</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">cedarling</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">getting-started</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">javascript</span>
-      
-    
-  </nav>
-
-
   
   
 
 
 <h1 id="getting-started-with-cedarling-in-a-javascript-app">Getting Started with Cedarling in a JavaScript app<a class="headerlink" href="#getting-started-with-cedarling-in-a-javascript-app" title="Permanent link">#</a></h1>
-<p>This guide combines the JavaScript usage instructions with the WebAssembly (WASM) build and API reference for Cedarling.</p>
+<p>This guide explains how to install, build, and use the Cedarling WebAssembly
+(WASM) package from JavaScript.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
 <h3 id="using-the-package-manager">Using the package manager<a class="headerlink" href="#using-the-package-manager" title="Permanent link">#</a></h3>
 <p>You can easily install Cedarling using WASM.</p>
@@ -1806,28 +1906,28 @@ You can check your current version of Rust using the command below.</p>
 <p>Clone the Janssen server repository from the GitHub and change the directory to the <code>cedarling_wasm</code> directory:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/path/to/jans/jans-cedarling/bindings/cedarling_wasm
 </code></pre></div>
-<p>Build the WebAssembly package in release mode after you've reached the <code>cedarling_wasm</code> directory. <code>wasm-pack</code> automatically optimizes the WebAssembly binary file using <code>wasm-opt</code> for better performance.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wasm-pack<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--target<span class="w"> </span>web
+<p>Generate the web-target binding used as the JavaScript package's build input:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wasm-pack<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--locked<span class="w"> </span>--target<span class="w"> </span>web<span class="w"> </span>--scope<span class="w"> </span>janssenproject
 </code></pre></div>
-<p>To view the WebAssembly project in action, you can run a local server. One way to do this is by using the following command:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>http.server
+<p>This creates the intermediate <code>pkg/</code> directory. Assemble the publishable package
+from the handwritten source in <code>js/</code>:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>js
+npm<span class="w"> </span>ci<span class="w"> </span>--ignore-scripts
+npm<span class="w"> </span>run<span class="w"> </span>build
 </code></pre></div>
+<p>See the <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/js/docs/maintainer.md">JavaScript package maintainer guide</a>
+for the complete build and verification workflow.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <div class="admonition info">
 <p class="admonition-title">Sample Apps</p>
-<p>You can find usage examples at the following locations in the Janssen server
-repository:</p>
-<ul>
-<li>A <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/index.html">sample app</a> that demonstrates basic usage.</li>
-<li>A fully featured <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/cedarling_app.html">Cedarling browser</a> app where you can test and validate your configuration.</li>
-</ul>
+<p>See the <a href="https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_wasm/js/examples">maintained JavaScript examples</a>
+for Node.js ESM, Node.js CommonJS, React with Vite, webpack, and Cloudflare
+Workers integrations.</p>
 </div>
 <h3 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">#</a></h3>
-<p>Since Cedarling is a WASM module, you need to initialize it first.</p>
-<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
-
-<span class="c1">// initialize the WASM binary</span>
-<span class="k">await</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">();</span>
+<p>The package loads its bundled WASM module when <code>init()</code> creates a Cedarling
+instance.</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
 
 <span class="kd">let</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
 <span class="w">  </span><span class="s2">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
@@ -1839,29 +1939,33 @@ repository:</p>
 <span class="p">});</span>
 </code></pre></div>
 <h3 id="policy-store-sources-wasm">Policy Store Sources (WASM)<a class="headerlink" href="#policy-store-sources-wasm" title="Permanent link">#</a></h3>
-<p>In WASM environments, filesystem access is not available. Use one of these options:</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// Option 1: URL-based loading (simple)</span>
-<span class="kd">let</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
+<p>Choose the loading method that matches how your application obtains the policy
+archive.</p>
+<h4 id="load-an-archive-from-a-url">Load an archive from a URL<a class="headerlink" href="#load-an-archive-from-a-url" title="Permanent link">#</a></h4>
+<p>Pass the archive URL through <code>CEDARLING_POLICY_STORE_URI</code> when calling <code>init()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">CEDARLING_APPLICATION_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">CEDARLING_POLICY_STORE_URI</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/policy-store.cjar&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="c1">// ... other config</span>
 <span class="p">});</span>
+</code></pre></div>
+<h4 id="load-archive-bytes">Load archive bytes<a class="headerlink" href="#load-archive-bytes" title="Permanent link">#</a></h4>
+<p>Use <code>initFromArchiveBytes()</code> when the application fetches or otherwise obtains
+the archive itself:</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">initFromArchiveBytes</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
 
-<span class="c1">// Option 2: Inline JSON string</span>
-<span class="kd">let</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">CEDARLING_POLICY_STORE_LOCAL</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">policyStoreObject</span><span class="p">),</span>
-<span class="w">  </span><span class="c1">// ... other config</span>
-<span class="p">});</span>
-
-<span class="c1">// Option 3: Custom fetch with auth headers</span>
-<span class="k">import</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">init_from_archive_bytes</span><span class="p">,</span>
-<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;your-bearer-token&gt;&quot;</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">CEDARLING_APPLICATION_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="c1">// ... other configuration properties</span>
+<span class="p">};</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;https://example.com/policy-store.cjar&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Authorization</span><span class="o">:</span><span class="w"> </span><span class="sb">`Bearer </span><span class="si">${</span><span class="nx">token</span><span class="si">}</span><span class="sb">`</span><span class="w"> </span><span class="p">},</span>
 <span class="p">});</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Uint8Array</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">());</span>
-<span class="kd">let</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init_from_archive_bytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">initFromArchiveBytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
 </code></pre></div>
 <p>For the directory-based format, package your policy store as a <code>.cjar</code> file and host it:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>policy-store<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>zip<span class="w"> </span>-r<span class="w"> </span>../policy-store.cjar<span class="w"> </span>.
@@ -1874,7 +1978,7 @@ repository:</p>
 <li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.</li>
 </ul>
 <h4 id="token-based-authorization-multi-issuer">Token-Based Authorization (Multi-Issuer)<a class="headerlink" href="#token-based-authorization-multi-issuer" title="Permanent link">#</a></h4>
-<p>For token-based authorization, use <code>authorize_multi_issuer</code> which processes JWT tokens and maps them to Cedar entities based on the <code>token_metadata</code> configuration in your policy store.</p>
+<p>For token-based authorization, use <code>authorizeMultiIssuer</code> which processes JWT tokens and maps them to Cedar entities based on the <code>token_metadata</code> configuration in your policy store.</p>
 <p><strong>1. Prepare tokens</strong></p>
 <p>Tokens are provided as an array of <code>TokenInput</code> objects, each specifying a mapping name and the JWT payload:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
@@ -1917,7 +2021,7 @@ repository:</p>
 <span class="p">};</span>
 
 <span class="c1">// the request is passed as a JSON string</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_multi_issuer</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeMultiIssuer</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
 </code></pre></div>
 <p>See <a href="../../reference/cedarling-multi-issuer/">Multi-Issuer Authorization</a> for more details.</p>
 <h4 id="unsigned-authorization">Unsigned Authorization<a class="headerlink" href="#unsigned-authorization" title="Permanent link">#</a></h4>
@@ -1970,8 +2074,8 @@ repository:</p>
 <span class="p">};</span>
 </code></pre></div>
 <p><strong>6. Perform Authorization</strong></p>
-<p>Finally, call the <code>authorize_unsigned</code> function to check whether the principal is allowed to perform the specified action on the resource. The request is passed as a JSON string.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
+<p>Finally, call the <code>authorizeUnsigned</code> function to check whether the principal is allowed to perform the specified action on the resource. The request is passed as a JSON string.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeUnsigned</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
 </code></pre></div>
 <h4 id="batch-authorization">Batch Authorization<a class="headerlink" href="#batch-authorization" title="Permanent link">#</a></h4>
 <p>Each entry in <code>results</code> is a <code>BatchItemUnsignedResult</code> — <code>.is_ok</code> reports whether Cedar reached a decision; <code>.unwrap()</code> returns the <code>AuthorizeResult</code> on Ok, <code>.error</code> returns the <code>BatchItemError</code> on Err. Positional mapping to <code>items[i]</code> is preserved for both branches; the shared <code>batch_id</code> (UUIDv7) is stamped on every per-item decision-log entry.</p>
@@ -1983,7 +2087,7 @@ repository:</p>
 <span class="w">  </span><span class="p">],</span>
 <span class="p">};</span>
 
-<span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned_batch</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeUnsignedBatch</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
 
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;batch_id:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">batch_id</span><span class="p">);</span>
 <span class="nx">response</span><span class="p">.</span><span class="nx">results</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
@@ -1996,199 +2100,20 @@ repository:</p>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>For multi-issuer, swap <code>{ principal, items }</code> for <code>{ tokens, items }</code> and call <code>authorize_multi_issuer_batch</code>. <code>context</code> is optional on each item and defaults to <code>{}</code>. See <a href="../../reference/cedarling-authz/#batch-authorization">Batch Authorization</a> for the request / response shape, failure model, and <code>BatchItemError</code> variant list.</p>
+<p>For multi-issuer, swap <code>{ principal, items }</code> for <code>{ tokens, items }</code> and call <code>authorizeMultiIssuerBatch</code>. <code>context</code> is optional on each item and defaults to <code>{}</code>. See <a href="../../reference/cedarling-authz/#batch-authorization">Batch Authorization</a> for the request / response shape, failure model, and <code>BatchItemError</code> variant list.</p>
 <h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h3>
-<p>The logs could be retrieved using the <code>pop_logs</code> function.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">logs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">pop_logs</span><span class="p">();</span>
+<p>The logs could be retrieved using the <code>popLogs</code> function.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">logs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">popLogs</span><span class="p">();</span>
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">logs</span><span class="p">);</span>
 </code></pre></div>
-<h2 id="defined-api">Defined API<a class="headerlink" href="#defined-api" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>/**
- * Create a new instance of the Cedarling application.
- * This function can take as config parameter the eather `Map` other `Object`
- */
-export function init(config: any): Promise&lt;Cedarling&gt;;
-/**
- * A WASM wrapper for the Rust `cedarling::AuthorizeResult` struct.
- * Represents the result of an authorization request.
- */
-export class AuthorizeResult {
-
-  /**
-   * Convert `AuthorizeResult` to json string value
-   */
-  json_string(): string;
-  /**
-   * The Cedar response for this authorization call.
-   */
-  readonly response: AuthorizeResultResponse;
-  /**
-   * Result of authorization
-   * true means `ALLOW`
-   * false means `Deny`
-   *
-   * this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
-   */
-  decision: boolean;
-  /**
-   * Request ID of the authorization request
-   */
-  request_id: string;
-}
-/**
- * A WASM wrapper for the Rust `cedar_policy::Response` struct.
- * Represents the result of an authorization request.
- */
-export class AuthorizeResultResponse {
-
-  /**
-   * Authorization decision
-   */
-  readonly decision: boolean;
-  /**
-   * Diagnostics providing more information on how this decision was reached
-   */
-  readonly diagnostics: Diagnostics;
-}
-/**
- * The instance of the Cedarling application.
- */
-export class Cedarling {
-
-  /**
-   * Create a new instance of the Cedarling application.
-   * Assume that config is `Object`
-   */
-  static new(config: object): Promise&lt;Cedarling&gt;;
-  /**
-   * Create a new instance of the Cedarling application.
-   * Assume that config is `Map`
-   */
-  static new_from_map(config: Map&lt;any, any&gt;): Promise&lt;Cedarling&gt;;
-  /**
-   * Authorize request for an unsigned (optional) principal.
-   * makes authorization decision based on the [`RequestUnsigned`]
-   * The request is passed as a JSON string, e.g. `JSON.stringify(request)`.
-   */
-  authorize_unsigned(request: string): Promise&lt;AuthorizeResult&gt;;
-  /**
-   * Authorize request using multi-issuer tokens.
-   * makes authorization decision based on the [`AuthorizeMultiIssuerRequest`]
-   * The request is passed as a JSON string, e.g. `JSON.stringify(request)`.
-   */
-  authorize_multi_issuer(request: string): Promise&lt;AuthorizeResult&gt;;
-  /**
-   * Authorize a batch of unsigned requests.
-   * The request is passed as a JSON string matching `BatchAuthorizeUnsignedRequest`.
-   */
-  authorize_unsigned_batch(request: string): Promise&lt;BatchAuthorizeUnsignedResponse&gt;;
-  /**
-   * Authorize a batch of multi-issuer requests.
-   * The request is passed as a JSON string matching `BatchAuthorizeMultiIssuerRequest`.
-   */
-  authorize_multi_issuer_batch(request: string): Promise&lt;BatchAuthorizeMultiIssuerResponse&gt;;
-  /**
-   * Get logs and remove them from the storage.
-   * Returns `Array` of `Map`
-   */
-  pop_logs(): Array&lt;any&gt;;
-  /**
-   * Get specific log entry.
-   * Returns `Map` with values or `null`.
-   */
-  get_log_by_id(id: string): any;
-  /**
-   * Returns a list of all log ids.
-   * Returns `Array` of `String`
-   */
-  get_log_ids(): Array&lt;any&gt;;
-  /**
-   * Get logs by tag, like `log_kind` or `log level`.
-   * Tag can be `log_kind`, `log_level`.
-   */
-  get_logs_by_tag(tag: string): any[];
-  /**
-   * Get logs by request_id.
-   * Return log entries that match the given request_id.
-   */
-  get_logs_by_request_id(request_id: string): any[];
-  /**
-   * Get log by request_id and tag, like composite key `request_id` + `log_kind`.
-   * Tag can be `log_kind`, `log_level`.
-   * Return log entries that match the given request_id and tag.
-   */
-  get_logs_by_request_id_and_tag(request_id: string, tag: string): any[];
-}
-/**
- * Diagnostics
- * ===========
- *
- * Provides detailed information about how a policy decision was made, including policies that contributed to the decision and any errors encountered during evaluation.
- */
-export class Diagnostics {
-
-  /**
-   * `PolicyId`s of the policies that contributed to the decision.
-   * If no policies applied to the request, this set will be empty.
-   *
-   * The ids should be treated as unordered,
-   */
-  readonly reason: string[];
-  /**
-   * Errors that occurred during authorization. The errors should be
-   * treated as unordered, since policies may be evaluated in any order.
-   */
-  readonly errors: PolicyEvaluationError[];
-}
-export class JsJsonLogic {
-  apply(logic: any, data: any): any;
-}
-/**
- * PolicyEvaluationError
- * =====================
- *
- * Represents an error that occurred when evaluating a Cedar policy.
- */
-export class PolicyEvaluationError {
-
-  /**
-   * Id of the policy with an error
-   */
-  readonly id: string;
-  /**
-   * Underlying evaluation error string representation
-   */
-  readonly error: string;
-}
-
-export class BatchItemError {
-  readonly category: string;
-  readonly item_index: number;
-  readonly message: string;
-}
-
-export class BatchItemUnsignedResult {
-  readonly is_ok: boolean;
-  unwrap(): AuthorizeResult;
-  readonly error: BatchItemError;
-}
-
-export class BatchItemMultiIssuerResult {
-  readonly is_ok: boolean;
-  unwrap(): AuthorizeResult;
-  readonly error: BatchItemError;
-}
-
-export class BatchAuthorizeUnsignedResponse {
-  readonly batch_id: string;
-  readonly results: BatchItemUnsignedResult[];
-}
-
-export class BatchAuthorizeMultiIssuerResponse {
-  readonly batch_id: string;
-  readonly results: BatchItemMultiIssuerResult[];
-}
-</code></pre></div>
+<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">#</a></h2>
+<p><code>@janssenproject/cedarling_wasm</code> ships TypeScript declarations for every public
+export. The package exposes them through its public entry points, so editors and
+TypeScript resolve the authoritative API automatically after installation.</p>
+<p>See the Cedarling references for <a href="../../reference/cedarling-authz/">authorization</a>,
+<a href="../../reference/cedarling-properties/">bootstrap properties</a>,
+<a href="../../reference/cedarling-policy-store/">policy stores</a>, and
+<a href="../../reference/cedarling-logs/">logs</a>.</p>
 <hr />
 <h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">#</a></h2>
 <ul>
@@ -2196,6 +2121,47 @@ export class BatchAuthorizeMultiIssuerResponse {
 <li><a href="../../quick-start/cedarling-quick-start/#step-1-create-the-cedar-policy-and-schema">Cedarling Unsigned quickstart</a></li>
 <li><a href="../../developer/sidecar/cedarling-sidecar-tutorial/">Cedarling Sidecar Tutorial</a></li>
 </ul>
+
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">WASM</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">browser app</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">cedarling</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">getting-started</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">javascript</span>
+      
+    
+  </nav>
+
 
 
 
@@ -2218,7 +2184,7 @@ export class BatchAuthorizeMultiIssuerResponse {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 28, 2026 13:40:14 UTC"><span class="timeago" datetime="2026-07-28T13:40:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 28, 2026 13:40:14 UTC">2026-07-28</span>
+    September 18, 2026
   </span>
 
     
@@ -2228,7 +2194,7 @@ export class BatchAuthorizeMultiIssuerResponse {
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 21, 2022 18:21:27 UTC"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 21, 2022 18:21:27 UTC">2022-07-21</span>
+    November 20, 2025
   </span>
 
     
@@ -2281,7 +2247,7 @@ export class BatchAuthorizeMultiIssuerResponse {
     
     
     <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
     </a>
   
     
@@ -2289,7 +2255,7 @@ export class BatchAuthorizeMultiIssuerResponse {
     
     
     <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
     </a>
   
 </div>
@@ -2393,15 +2359,11 @@ export class BatchAuthorizeMultiIssuerResponse {
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tracking","navigation.tabs","navigation.tabs.sticky","navigation.indexes","navigation.prune","navigation.path","navigation.top","navigation.instant","navigation.instant.progress","search.suggest","search.highlight","search.share","content.tabs.link","content.code.copy","content.code.select","content.code.annotate","toc.follow"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"stable","provider":"mike"}}</script>
     
     
 
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="../../../js/timeago.min.js"></script>
-      
-        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      <script src="../../../assets/javascripts/bundle.6970bfe9.min.js"></script>
       
         <script src="../../../javascripts/skeleton-loader.js"></script>
       

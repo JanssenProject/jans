@@ -1,6 +1,7 @@
 # Audit Logs
 
-Audit logs are located in `jans-auth_audit.log` log file. All `jans-auth-server` log files are located in `/opt/jans/jetty/jans-auth/logs/`.
+Audit logs are located in `jans-auth_audit.log` log file.
+All `jans-auth-server` log files are located in `/opt/jans/jetty/jans-auth/logs/`.
 
 Audit is disabled by default on AS and can be enabled via `enabledOAuthAuditLogging` AS configuration property.
 
@@ -8,14 +9,13 @@ Audit logs are logged to file when enabled, however if JMS configuration is spec
 
 JMS Configuration must be set inside AS global configuration
 
-| Name            | Description        |
-| --------------- | ------------------ |
-| jmsBrokerURISet | JMS Broker URI Set |
-| jmsUserName     | JMS UserName       |
-| jmsPassword     | JMS Password.      |
+| Name            | Description         |
+|---------------- |---------------------|
+|jmsBrokerURISet  | JMS Broker URI Set  |
+|jmsUserName      | JMS UserName        |
+|jmsPassword      | JMS Password.       |
 
 Audit events:
-
 - CLIENT_REGISTRATION
 - CLIENT_UPDATE
 - CLIENT_READ
@@ -32,11 +32,13 @@ Audit events:
 - SESSION_DESTROYED
 - DEVICE_CODE_AUTHORIZATION
 - SSA_CREATE
-- SSA_READ
+- SSA_READ 
+
 
 # Enable/Disable Audit Logs on Jans TUI
+Using Jans TUI we can easily `Enable` or `Disable` Audit Logs. Go to `jans tui` select `Auth Server` tab then `Properties` tab. Now set the value of  `enabledOAuthAuditLogging` pressing Enter button on your keyboard. Save it and let's see below image
 
-Using Jans TUI we can easily `Enable` or `Disable` Audit Logs. Go to `jans tui` select `Auth Server` tab then `Properties` tab. Now set the value of `enabledOAuthAuditLogging` pressing Enter button on your keyboard. Save it and let's see below image
+![auditLogs](https://github.com/JanssenProject/jans/assets/43112579/2bf87258-083c-47f5-bce5-13285582ec4b)
 
 ## Have questions in the meantime?
 

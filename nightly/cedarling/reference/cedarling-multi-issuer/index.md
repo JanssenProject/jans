@@ -6,7 +6,7 @@ This guide provides a comprehensive overview of Cedarling's multi-issuer authori
 
 Multi-issuer authorization (`authorize_multi_issuer`) enables applications to make authorization decisions based on multiple JWT tokens from different identity providers in a single request. Unlike traditional authorization that creates User and Workload principals, multi-issuer authorization evaluates policies based purely on token entities themselves.
 
-A batch variant, `authorize_multi_issuer_batch`, validates the token set once and evaluates N `{resource, action, context}` items against that shared snapshot. Same token contract as documented on this page (validation, entity creation, `context.tokens` naming, failure handling); the batching mechanics — request/response shape, `batch_id` correlation, and the batch-level vs per-item failure split — are covered in [Batch Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/#batch-authorization).
+A batch variant, `authorize_multi_issuer_batch`, validates the token set once and evaluates N `{resource, action, context}` items against that shared snapshot. Same token contract as documented on this page (validation, entity creation, `context.tokens` naming, failure handling); the batching mechanics — request/response shape, `batch_id` correlation, and the batch-level vs per-item failure split — are covered in [Batch Authorization](./cedarling-authz.md#batch-authorization).
 
 ### Key Benefits
 
@@ -22,7 +22,7 @@ A batch variant, `authorize_multi_issuer_batch`, validates the token set once an
 
 A multi-issuer authorization request consists of:
 
-```
+```json
 {
   "tokens": [
     {
@@ -56,7 +56,7 @@ A multi-issuer authorization request consists of:
 
 ### 2. Token Processing Pipeline
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │ 1. Token Input                                          │
 │    Array of tokens with explicit type mappings         │
@@ -100,7 +100,7 @@ A multi-issuer authorization request consists of:
 
 Each validated token becomes a Cedar entity:
 
-```
+```cedar
 entity Token = {
   "token_type"?: String,        // e.g., "Jans::Access_Token"
   "jti"?: String,               // Token ID
@@ -112,7 +112,7 @@ entity Token = {
 
 **All JWT claims are stored as tags** and accessed using Cedar's tag operations:
 
-```
+```cedar
 context.tokens.acme_access_token.hasTag("scope")
 context.tokens.acme_access_token.getTag("scope").contains("read:profile")
 ```
@@ -126,23 +126,23 @@ Tokens are organized in the context using a deterministic naming algorithm:
 **Issuer Name Resolution**:
 
 1. Look up issuer in trusted issuer metadata
-1. Use the `name` field from configuration
-1. If no `name` field, extract hostname from JWT `iss` claim
-1. Convert to lowercase, replace special characters with underscores
+2. Use the `name` field from configuration
+3. If no `name` field, extract hostname from JWT `iss` claim
+4. Convert to lowercase, replace special characters with underscores
 
 **Token Type Resolution**:
 
 1. Extract from `mapping` field (e.g., "Jans::Access_Token")
-1. Split by namespace separator ("::"), and use the last segment.
-1. Convert to lowercase, preserve underscores
+2. Split by namespace separator ("::"), and use the last segment.
+3. Convert to lowercase, preserve underscores
 
 **Examples**:
 
-| JWT Issuer                     | Trusted Issuer Name | Token Mapping        | Result                 |
-| ------------------------------ | ------------------- | -------------------- | ---------------------- |
-| `https://idp.acme.com/auth`    | `"Acme"`            | `Jans::Access_Token` | `acme_access_token`    |
-| `https://accounts.google.com`  | `"Google"`          | `Jans::Id_Token`     | `google_id_token`      |
-| `https://idp.dolphin.sea/auth` | `"Dolphin"`         | `Acme::DolphinToken` | `dolphin_dolphintoken` |
+| JWT Issuer                     | Trusted Issuer Name | Token Mapping        | Result                       |
+| ------------------------------ | ------------------- | -------------------- | ---------------------------- |
+| `https://idp.acme.com/auth`    | `"Acme"`            | `Jans::Access_Token` | `acme_access_token`          |
+| `https://accounts.google.com`  | `"Google"`          | `Jans::Id_Token`     | `google_id_token`            |
+| `https://idp.dolphin.sea/auth` | `"Dolphin"`         | `Acme::DolphinToken` | `dolphin_dolphintoken`       |
 
 ## Use Cases
 
@@ -158,7 +158,7 @@ Tokens are organized in the context using a deterministic naming algorithm:
 
 **Implementation**:
 
-```
+```python
 # User presents tokens from their corporate IDP and the platform IDP
 tokens = [
     TokenInput(
@@ -183,7 +183,7 @@ result = cedarling.authorize_multi_issuer(request)
 
 **Policy**:
 
-```
+```cedar
 // Allow sharing if user has valid tokens from both IDPs
 permit(
   principal,
@@ -214,7 +214,7 @@ permit(
 
 **Implementation**:
 
-```
+```javascript
 // Gateway receives tokens from multiple services
 let tokens = [
   {
@@ -249,12 +249,12 @@ let request = {
 };
 
 // WASM binding: the request is passed as a JSON string
-let result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
+let result = await cedarling.authorizeMultiIssuer(JSON.stringify(request));
 ```
 
 **Policy**:
 
-```
+```cedar
 // Require tokens from all three services for payment processing
 permit(
   principal,
@@ -289,7 +289,7 @@ permit(
 
 **Implementation**:
 
-```
+```go
 tokens := []cedarling_go.TokenInput{
     {
         Mapping: "TradeAssociation::MemberToken",
@@ -321,7 +321,7 @@ result, err := instance.AuthorizeMultiIssuer(request)
 
 **Policy**:
 
-```
+```cedar
 permit(
   principal,
   action == TradeAssociation::Action::"Vote",
@@ -352,7 +352,7 @@ permit(
 
 **Implementation**:
 
-```
+```python
 tokens = [
     TokenInput(
         mapping="Healthcare::PatientConsent",
@@ -381,7 +381,7 @@ request = AuthorizeMultiIssuerRequest(
 
 **Policy**:
 
-```
+```cedar
 permit(
   principal,
   action == Healthcare::Action::"AccessMedicalRecord",
@@ -424,7 +424,7 @@ permit(
 
 **Implementation**:
 
-```
+```javascript
 let tokens = [
   {
     mapping: "Security::DeviceAttestation",
@@ -441,7 +441,7 @@ let tokens = [
 ];
 
 // WASM binding: the request is passed as a JSON string
-let result = await cedarling.authorize_multi_issuer(JSON.stringify({
+let result = await cedarling.authorizeMultiIssuer(JSON.stringify({
   tokens: tokens,
   action: 'Security::Action::"AccessClassified"',
   resource: {
@@ -461,7 +461,7 @@ let result = await cedarling.authorize_multi_issuer(JSON.stringify({
 
 **Policy**:
 
-```
+```cedar
 permit(
   principal,
   action == Security::Action::"AccessClassified",
@@ -497,7 +497,7 @@ permit(
 Multi-issuer authorization is not limited to JWTs. A **custom token processor** lets Rust consumers authorize on **non-JWT** credentials like opaque tokens, API keys, vendor-specific formats, or tokens whose validation uses cryptography Cedarling does not implement while reusing the same entity builder, `context.tokens.*` machinery, and policies as JWTs.
 
 > **Trust model:** the processor's output is **authoritative**. Cedarling performs no signature or issuer verification on a custom token, validating the payload is entirely the processor's responsibility. Treat a registered processor as fully trusted code. The one exception is expiration: if the processor reports one (via `expiration` or an `exp` claim), Cedarling rejects the token once that time has passed.
->
+
 > **Availability:** the processor is a Rust trait object registered on a live instance, so this feature is **Rust-native only** (native and the `blocking` client). It is not exposed through any of the bindings.
 
 ### How routing works
@@ -508,9 +508,9 @@ So clearing the processor does **not** fall back to the JWT pipeline. If a `mapp
 
 ### 1. Configure the custom issuer
 
-Add a `custom_issuers` map to the policy store, keyed by issuer name (mirrors `trusted_issuers`). For the directory format, use per-file `custom-issuers/*.json`, see [Custom Issuer Files](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#custom-issuer-files).
+Add a `custom_issuers` map to the policy store, keyed by issuer name (mirrors `trusted_issuers`). For the directory format, use per-file `custom-issuers/*.json`, see [Custom Issuer Files](./cedarling-policy-store.md#custom-issuer-files).
 
-```
+```json
 {
   "custom_issuers": {
     "CustomIssuerName": {
@@ -526,11 +526,11 @@ Add a `custom_issuers` map to the policy store, keyed by issuer name (mirrors `t
 }
 ```
 
-| Field                                    | Type                    | Description                                                                                                                                                                                                                                                   |
-| ---------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tokens_mappings`                        | map (required)          | Token types this issuer emits, keyed by Cedar entity type name. The key is matched against the request `mapping` to route a token to this issuer, so one issuer can emit several token types. Must declare at least one.                                      |
-| `tokens_mappings.<type>.required`        | bool (default `false`)  | When `true`, a processing failure (error, timeout, or missing required claim) fails the **whole** request. When `false`, the token is dropped and authorization continues without it. Set per token type, so one issuer can mix required and optional tokens. |
-| `tokens_mappings.<type>.required_claims` | string[] (default `[]`) | Claims that must be present in the processor output; a missing claim yields `MissingRequiredClaim`.                                                                                                                                                           |
+| Field | Type | Description |
+| ---------------------------------------- | ---------------------- | --- |
+| `tokens_mappings`                 | map (required)         | Token types this issuer emits, keyed by Cedar entity type name. The key is matched against the request `mapping` to route a token to this issuer, so one issuer can emit several token types. Must declare at least one. |
+| `tokens_mappings.<type>.required` | bool (default `false`) | When `true`, a processing failure (error, timeout, or missing required claim) fails the **whole** request. When `false`, the token is dropped and authorization continues without it. Set per token type, so one issuer can mix required and optional tokens. |
+| `tokens_mappings.<type>.required_claims` | string[] (default `[]`)| Claims that must be present in the processor output; a missing claim yields `MissingRequiredClaim`. |
 
 Each token type lands under its own `context.tokens.{issuer}_{token_type}` key, so the example above yields `customkeys_apikey` and `customkeys_sessionkey`.
 
@@ -540,7 +540,7 @@ An entity type name may be declared by only one custom issuer; support for sever
 
 Implement `CustomTokenProcessor::process`, which turns a raw payload into `ProcessedTokenClaims`. One processor handles all custom mappings and dispatches internally on `mapping`.
 
-```
+```rust
 use cedarling::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
 use async_trait::async_trait;
 use std::collections::HashMap;
@@ -565,30 +565,30 @@ impl CustomTokenProcessor for ApiKeyProcessor {
         claims.insert("sub".to_string(), serde_json::json!("api-key-user"));
         claims.insert("scope".to_string(), serde_json::json!("admin"));
 
-        let mut processed = ProcessedTokenClaims::new(claims, "api-key-1");
-        processed.cacheable = false; // re-validate on every request (revocation-sensitive)
-        Ok(processed)
+        // Re-validate on every request (revocation-sensitive).
+        Ok(ProcessedTokenClaims::new(claims, "api-key-1").with_cacheable(false))
     }
 }
 ```
 
 `ProcessedTokenClaims` fields:
 
-| Field        | Type                  | Description                                                                                                                                                                                          |
-| ------------ | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `claims`     | map                   | Claims for the token entity. Stored as **tags** (`Set<String>`), exactly like JWT claims.                                                                                                            |
-| `token_id`   | string                | Entity id of the resulting token entity supplied directly, **not** read from a claim.                                                                                                                |
-| `issuer_id`  | string? (`None`)      | Which custom issuer this token belongs to. `None` falls back to the sole issuer declaring the `mapping` (an explicit value is required when several issuers share one `mapping`).                    |
-| `expiration` | i64? (`None`)         | Optional expiration (unix seconds). The token is rejected once it passes, and the value bounds the token-cache TTL. Falls back to an `exp` claim when `None`; an explicit value wins over the claim. |
-| `cacheable`  | bool (default `true`) | Set `false` for revocation-sensitive tokens so every request re-runs `process`.                                                                                                                      |
+| Field | Type | Description |
+| --- | --- | --- |
+| `claims` | `HashMap<String, serde_json::Value>` | Claims for the token entity. Stored as **tags** (`Set<String>`), exactly like JWT claims. |
+| `token_id` | `String` | Entity id of the resulting token entity supplied directly, **not** read from a claim. |
+| `expiration` | `Option<i64>` (default `None`) | Optional expiration (unix seconds). The token is rejected once it passes, and the value bounds the token-cache TTL. Falls back to an `exp` claim when `None`; an explicit value wins over the claim. |
+| `cacheable` | `bool` (default `true`) | Set `false` for revocation-sensitive tokens so every request re-runs `process`. |
 
-`ProcessedTokenClaims::new(claims, token_id)` builds a cacheable result with no issuer hint or expiration.
+Cedarling resolves the issuer from `mapping`, which is declared by exactly one custom issuer.
+
+`ProcessedTokenClaims::new(claims, token_id)` builds a cacheable result with no expiration; chain `.with_cacheable(bool)` and `.with_expiration(i64)` to override either.
 
 ### 3. Register the processor
 
 Register (or clear) the processor on a live instance. It survives policy-store refreshes.
 
-```
+```rust
 use std::sync::Arc;
 
 cedarling.set_custom_token_processor(Some(Arc::new(ApiKeyProcessor)));
@@ -601,7 +601,7 @@ cedarling.set_custom_token_processor(None);
 
 A custom token becomes a Cedar entity at `context.tokens.{issuer}_{token_type}` issuer `CustomIssuerName` + mapping `Custom::ApiKey` → `customissuername_apikey`. Claims are tags; the token entity's `iss` attribute is the **sanitized issuer name as a plain string** (there is no `TrustedIssuer` entity for a custom issuer).
 
-```
+```cedar
 permit(
     principal,
     action == Custom::Action::"Read",
@@ -617,18 +617,18 @@ The matching schema types `customkeys_apikey` into `context.tokens` as `Custom::
 
 ### Failure handling and caching
 
-| Situation                                                                      | Behavior                                                           |
-| ------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
-| Processor returns `Ok`                                                         | Claims flow into `context.tokens.*`.                               |
-| Processor returns `Err`, token `required: true`                                | Whole request fails with the error.                                |
-| Processor returns `Err`, token `required: false`                               | Token dropped, authorization continues.                            |
-| `mapping` is custom but no processor registered                                | `NoProcessorRegistered` (fail-closed if `required`, else skipped). |
-| A `required_claims` entry is absent from the output                            | `MissingRequiredClaim`.                                            |
-| The reported expiration (`expiration`, else an `exp` claim) has already passed | `Expired`.                                                         |
-| The processor returns an `issuer_id` that does not declare the requested type  | `UnknownTokenType`.                                                |
-| `process` exceeds the configured timeout (> 0)                                 | `Timeout`.                                                         |
+| Situation | Behavior |
+| --- | --- |
+| Processor returns `Ok` | Claims flow into `context.tokens.*`. |
+| Processor returns `Err`, token `required: true` | Whole request fails with the error. |
+| Processor returns `Err`, token `required: false` | Token dropped, authorization continues. |
+| `mapping` is custom but no processor registered | `NoProcessorRegistered` (fail-closed if `required`, else skipped). |
+| A `required_claims` entry is absent from the output | `MissingRequiredClaim`. |
+| The reported expiration (`expiration`, else an `exp` claim) has already passed | `Expired`. |
+| No custom issuer declares the requested `mapping` | `UnknownMapping`. |
+| `process` exceeds the configured timeout (> 0) | `Timeout`. |
 
-Set `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS` to bound slow processors. `0` (the default) disables the timeout; see [Cedarling Properties](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/index.md). Keep `cacheable: true` (the default) to skip re-running `process` for an identical payload and use `false` for revocation-sensitive tokens.
+Set `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS` to bound slow processors. `0` (the default) disables the timeout; see [Cedarling Properties](./cedarling-properties.md). Keep `cacheable: true` (the default) to skip re-running `process` for an identical payload and use `false` for revocation-sensitive tokens.
 
 > A complete, runnable example can be found in [`cedarling/examples/custom_token_processor.rs`](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling/examples/custom_token_processor.rs).
 
@@ -646,7 +646,7 @@ Multi-issuer authorization creates token entities dynamically and places them in
 
 Token entities must have these required attributes:
 
-```
+```cedar
 // Jans namespace: shared infrastructure types used across namespaces.
 namespace Jans {
   type Url = {
@@ -681,7 +681,7 @@ namespace Acme {
 
 The Context type must include a `tokens` field:
 
-```
+```cedar
 type Context = {
   network?: String,
   // ... other context fields
@@ -717,7 +717,7 @@ Multi-issuer authorization runs Cedar's partial evaluator with **no principal** 
 
 Cedar's schema validator rejects an empty `principal` list (`for action '...', 'principal' is '[]', which is invalid`). To declare an action that runs without a principal, declare a placeholder entity type purely to satisfy the schema and reference it in `appliesTo`:
 
-```
+```cedar
 entity Any;
 
 action "ReadArtifact" appliesTo {
@@ -733,7 +733,7 @@ No instance of `Any` is ever constructed at runtime. `authorize_multi_issuer` in
 
 Policies for multi-issuer actions must use the unconstrained `permit(principal, ...)` head — do not add `principal == ...` or `principal is ...`, because no principal exists at evaluation time:
 
-```
+```cedar
 permit(
   principal,
   action == Action::"ReadArtifact",
@@ -749,7 +749,7 @@ If a policy does constrain the principal, Cedar's partial evaluator cannot fully
 
 Configure trusted issuers with the `name` field for predictable token naming:
 
-```
+```json
 {
   "trusted_issuers": {
     "acme_corp_issuer": {
@@ -795,7 +795,7 @@ Configure trusted issuers with the `name` field for predictable token naming:
 
 Each token type (Access_Token, Id_Token, custom tokens) must follow this structure:
 
-```
+```cedar
 // Jans namespace: shared infrastructure types used across namespaces.
 namespace Jans {
   type Url = {
@@ -874,13 +874,14 @@ namespace Acme {
     // Add other JWT claims as needed
   } tags Set<String>;
 };
+
 ```
 
 #### Custom Token Types
 
 For custom token types, follow the same pattern:
 
-```
+```cedar
 // Jans namespace: shared infrastructure types used across namespaces.
 namespace Jans {
   type Url = {
@@ -916,7 +917,7 @@ namespace Custom {
 
 Define the Context type to include the tokens field:
 
-```
+```cedar
 type Context = {
   // Standard context fields
   network?: String,
@@ -942,15 +943,15 @@ type TokensContext = {
 #### Key Schema Principles
 
 1. **Optional Attributes**: All token attributes must be optional (`?`) to support both standard and multi-issuer authorization
-1. **Tags Declaration**: All token entities must declare `tags Set<String>` for dynamic JWT claim storage
-1. **Context Integration**: The Context type must include an optional `tokens` field
-1. **Consistency**: Use the same attribute names across all token types (token_type, jti, issuer, exp, validated_at)
+2. **Tags Declaration**: All token entities must declare `tags Set<String>` for dynamic JWT claim storage
+3. **Context Integration**: The Context type must include an optional `tokens` field
+4. **Consistency**: Use the same attribute names across all token types (token_type, jti, issuer, exp, validated_at)
 
 ## Error Handling
 
 ### Token Validation Failures
 
-```
+```python
 # Individual token validation failures are handled gracefully
 tokens = [
     TokenInput(mapping="Jans::Access_Token", payload="valid_token"),
@@ -967,7 +968,7 @@ However, if every token is invalid, Cedarling will raise an error. **It is impor
 
 ### Non-Deterministic Tokens
 
-```
+```python
 # ERROR: Multiple tokens of same type from same issuer
 tokens = [
     TokenInput(mapping="Jans::Access_Token", payload="token1"),  # From Jans::Access_Token
@@ -981,7 +982,7 @@ tokens = [
 
 ### Trusted Issuer Validation
 
-```
+```python
 # Tokens from unknown issuers are rejected
 tokens = [
     TokenInput(
@@ -999,7 +1000,7 @@ tokens = [
 
 Configure clear, predictable issuer names in your policy store:
 
-```
+```json
 {
   "name": "AcmeCorp", // Good - clear and predictable
   "name": "Issuer1" // Bad - unclear what this represents
@@ -1010,15 +1011,15 @@ Configure clear, predictable issuer names in your policy store:
 
 Begin without Cedar schemas for rapid development:
 
-- All claims stored in tags as `Set<String>`
-- Flexible and forgiving during development
-- Add schemas later for production type safety
+- All claims stored in tags as `Set<String>`  
+- Flexible and forgiving during development  
+- Add schemas later for production type safety  
 
 ### 3. Implement Comprehensive Logging
 
 Monitor token validation and policy evaluation:
 
-```
+```python
 result = cedarling.authorize_multi_issuer(request)
 
 # Retrieve logs for debugging
@@ -1031,7 +1032,7 @@ for log in logs:
 
 Design policies to work with partial token sets:
 
-```
+```cedar
 // Allow if EITHER token is present
 permit(
   principal,
@@ -1051,7 +1052,7 @@ permit(
 
 Test policies with various token combinations:
 
-```
+```python
 # Test with all tokens
 all_tokens_result = cedarling.authorize_multi_issuer(all_tokens_request)
 
@@ -1064,9 +1065,9 @@ mixed_tokens_result = cedarling.authorize_multi_issuer(mixed_tokens_request)
 
 ## See Also
 
-- [Cedarling Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/index.md)
-- [Batch Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/#batch-authorization)
-- [Cedarling Interfaces](https://docs.jans.io/nightly/cedarling/reference/cedarling-interfaces/index.md)
-- [Policy Store Configuration](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/index.md)
-- [Python Examples](https://docs.jans.io/nightly/cedarling/tutorials/python/index.md)
-- [Go Examples](https://docs.jans.io/nightly/cedarling/tutorials/go/index.md)
+- [Cedarling Authorization](./cedarling-authz.md)
+- [Batch Authorization](./cedarling-authz.md#batch-authorization)
+- [Cedarling Interfaces](./cedarling-interfaces.md)
+- [Policy Store Configuration](./cedarling-policy-store.md)
+- [Python Examples](../tutorials/python.md)
+- [Go Examples](../tutorials/go.md)

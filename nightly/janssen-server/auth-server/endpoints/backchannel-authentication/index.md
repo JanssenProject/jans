@@ -1,15 +1,14 @@
 # Backchannel authentication Endpoint
 
 ## Backchannel authentication scripts
-
 Janssen server enables domains to render the username/pw login form, avoiding the redirect to the IDP-hosted login page. Many SSO solutions offer a proprietary endpoint to accomplish this. However, in Janssen server, this is accomplished with the OAuth/OpenID framework by using a combination of calling the /token endpoint using the OAuth password flow, and then redirecting to browser to the /authorization endpoint, but auto-submitting the form.
 
 This article describes how to process login via backchannel and when browser is processing authorization, AS will recognize automatically the authenticated user, write cookies and then establish the session.
 
 ## Design
+![image](https://user-images.githubusercontent.com/86965029/174393605-8bcc1033-9bc3-4254-ad49-23a255649f33.png)
 
 Source-code for sequence diagram
-
 ```
 Title password Grant with State
 
@@ -28,15 +27,12 @@ Browser->Website: redirect_uri
 ```
 
 ## Solution
-
 In order to process the whole authorization, idea is to use resource owner password credentials grant type in the first stage, over there process the authentication as we do today, but also write in cache a short-lived token to recognize such authenticated user, then return to the client such short-lived token. During authorization, browser should send that token as part of the custom params and in the AS we should verify if that user is already authenticated using the short-lived param in the cache, then AS will write cookies, create the session and return to the client information required for this.
 
 ## Jans App Configurations
-
 Above the **jans-auth** record of the **jansAppConf** table, enable a new attribute on the **jansConfDyn** field
 
 Example:
-
 ```
 "authorizationRequestCustomAllowedParameters": [
     {
@@ -45,50 +41,41 @@ Example:
     }
 ]
 ```
-
 **Sample CURL**
-
 1. Obtain access token
-
-```
-curl -u "put_client_id_here:put_config_api_client_secret_here" https://<your.jans.server>/jans-auth/restv1/token \
-   -d  "grant_type=client_credentials&scope=https://jans.io/oauth/jans-auth-server/config/properties.write"
-```
-
+   ```
+   curl -u "put_client_id_here:put_config_api_client_secret_here" https://<your.jans.server>/jans-auth/restv1/token \
+      -d  "grant_type=client_credentials&scope=https://jans.io/oauth/jans-auth-server/config/properties.write"
+   ```
 2. Apply patch
-
-```
-curl -X PATCH -k -H 'Content-Type: application/json-patch+json' \ 
-   -i 'jans-config-api/api/v1/jans-auth-server/config' \ 
-   -H "Authorization: Bearer put_access_token_here" --data '[
-      {
-       "op": "add",
-       "path": "authorizationRequestCustomAllowedParameters",
-       "value": [
-                    {
-                     "paramName": "bcAuthnToken",
-                     "returnInResponse": true
-                    }
-                ]
-       }
-      ]'
-```
+   ```
+   curl -X PATCH -k -H 'Content-Type: application/json-patch+json' \ 
+      -i 'jans-config-api/api/v1/jans-auth-server/config' \ 
+      -H "Authorization: Bearer put_access_token_here" --data '[
+         {
+          "op": "add",
+          "path": "authorizationRequestCustomAllowedParameters",
+          "value": [
+                       {
+                        "paramName": "bcAuthnToken",
+                        "returnInResponse": true
+                       }
+                   ]
+          }
+         ]'
+   ```
 
 ## Custom Script Registration
-
 In the table **jansCustomScr** enable 2 new scripts:
-
 1. Script type **resource_owner_password_credentials** displayName **ropc-backchannel** [ropc-backchannel-script.py] See script below.
-1. Script type **person_autentication** displayName **backchannel-authentication** [backchannel-authentication-script.py] See script below.
+2. Script type **person_autentication** displayName **backchannel-authentication** [backchannel-authentication-script.py] See script below.
 
 ## Client Configuration
-
 Associate script **person_authentication** on table **jansClnt**.
 
 Modify the **jansAttrs** field which contains a json and the **ropcScripts** field and add the **dn** from the **ropc script** record in the previous step
 
 Example:
-
 ```
 "ropcScripts": [
     "inum={SCRIPT_ID},ou=scripts,o=jans",
@@ -104,7 +91,6 @@ Firstly, the /token service is called to generate the `bcAuthnToken` (get it fro
 In this request example, the client's basic credential is being used in order to authenticate the client, however you could use your preferred authn mode.
 
 Request
-
 ```
 curl --location --request POST 'https://jans.localhost/jans-auth/restv1/token' \
 --header 'Authorization: Basic MzE3MGNiYzUtMDAxOC00OWVmLThiYTYtMjY4MGI2NjhiZjBjOmFmNzk1ZjI1LWQ1MjktNDVlYi1iMTJlLWNjM2ExNTY5OTU1Ng==' \
@@ -118,7 +104,6 @@ curl --location --request POST 'https://jans.localhost/jans-auth/restv1/token' \
 ```
 
 Response
-
 ```
 HTTP/1.1 200 OK
 Date: Wed, 29 Jun 2022 14:03:25 GMT
@@ -133,30 +118,25 @@ Pragma: no-cache
 Content-Length: 1109
 Keep-Alive: timeout=5, max=100
 Connection: Keep-Alive
-
+ 
 {"access_token":"7a024a59-e132-4c05-9126-f4f36b3d3677","refresh_token":"184c2b60-b5c7-4250-9850-97b0f531743c","scope":"openid","id_token":"eyJraWQiOiJmZGJhY2Q2Yi05YTY0LTQ2MWQtOWJlYy1jOTAyMjc5ZGI2ODZfc2lnX3JzMjU2IiwidHlwIjoiand0IiwiYWxnIjoiUlMyNTYifQ.eyJhdWQiOiIzMTcwY2JjNS0wMDE4LTQ5ZWYtOGJhNi0yNjgwYjY2OGJmMGMiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsInN1YiI6Il9Fa3p5aXlRdVBzUm1mYjh3WHlmTTB4U0xDckxwTDJGNnA3RWhEeWRBUHciLCJjb2RlIjoiNDY4MzQ2NjktOGQ1Yy00NmQxLTkwNWEtNmMzNDg3YzZlMDg3IiwiYW1yIjpbXSwiaXNzIjoiaHR0cHM6Ly9qYW5zLmxvY2FsaG9zdCIsImV4cCI6MTY1NjUxNTAwNiwiZ3JhbnQiOiJwYXNzd29yZCIsImlhdCI6MTY1NjUxMTQwNiwic2lkIjoiMTg0ZTllOTktNjFmNi00ZWNhLWE0ZmUtMTMwZmFmZDk1MjE1Iiwib3hPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIn0.hW0vReGYLzC2RyBHztSFbDYoaYHcCYxatX1lpzWqyW5U2S9eNp58mKKmvdZmMc229Sz5VxqfYflpWuI_6aXsLFR_KT9FY3exSRIRtPiD_fUETdhsVuKWavumVnjvwdAM6ytu5ORJx06DCxEgaG1uXmRiE9GoT8F1uqeo4NxURhVNXmMd2fiiUmgm1lt3-kNhlSg6vMDJS1Aq1idm-XhiSVy895BY-JdpLEGJEycPKr1lpsBTcmasbFNBJv6_orKWlvvgFCVxo7XmbH7Xnmqi6UUo30L6sULqmCsTLa6DaWYfGokHz_0xRflw_Ihv9wlVq8gSdOZGoMaVGzDdKlddZw","token_type":"Bearer","expires_in":299}
 ```
 
 ### Authorize request:
-
 Once you have gotten the **bcAuthnToken** from the previous /token call, you must call authorize attaching the **bcAuthnToken** as a parameter and in the **acr_values** param send the name of the **backchannel-authentication** registered in previous steps.
 
 This script will generate cookies and session associated with the browser if the `BcAuthToken` is valid.
 
 Example:
-
 ```
 https://jans.localhost/jans-auth/restv1/authorize?response_type=code&client_id=3170cbc5-0018-49ef-8ba6-2680b668bf0c&scope=openid+profile+address+email&redirect_uri=https://jans.localhost/jans-auth-rp/home.htm&state=2f78eaf1-d73e-49f2-8f50-e5faef80808a&nonce=92c3a631-db54-4ae9-bd53-caf92a4adbcf&prompt=&ui_locales=&claims_locales=&acr_values=backchannel-authentication&request_session_id=false&bcAuthnToken={your bcAuthnToken}
 ```
-
 This call will redirect to the **redirect_uri** that you sent as a parameter in the call and will receive a **code** as well, after that the process is more or less the same than the regular flow.
 
 ### Request /token:
-
 With the **code** obtained previously, you must call /token again, adding the parameter **code**
 
 Request:
-
 ```
 curl --location --request POST 'https://jans.localhost/jans-auth/restv1/token' \
 --header 'Authorization: Basic MzlhNjlmYzAtNzNmYy00MWJhLWFiMGYtNDJhNWFmYWI2MjllOmJmMDRlZTM4LTM0MTktNGEzNS05YTI5LTcyODlmY2JkNzc2Zg==' \
@@ -167,7 +147,6 @@ curl --location --request POST 'https://jans.localhost/jans-auth/restv1/token' \
 ```
 
 Response:
-
 ```
 HTTP/1.1 200 OK
 Date: Wed, 29 Jun 2022 15:20:50 GMT
@@ -184,14 +163,13 @@ Connection: Keep-Alive
 {"access_token":"896b04a2-fcbe-4466-89b9-184930b8675b","refresh_token":"843995ef-cd0e-4b2c-9b91-7c68081325ab","id_token":"eyJraWQiOiJmZGJhY2Q2Yi05YTY0LTQ2MWQtOWJlYy1jOTAyMjc5ZGI2ODZfc2lnX3JzMjU2IiwidHlwIjoiand0IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiMmx5OXh5emthMmc2T09HcVRPTmhqdyIsInN1YiI6Il9Fa3p5aXlRdVBzUm1mYjh3WHlmTTB4U0xDckxwTDJGNnA3RWhEeWRBUHciLCJjb2RlIjoiMjdiNjM0NTItMTE1My00ZDk5LTlkYzQtYzMyNGRmNjIwYWE0IiwiYW1yIjpbIjEwIl0sImlzcyI6Imh0dHBzOi8vamFucy5sb2NhbGhvc3QiLCJub25jZSI6IjkyYzNhNjMxLWRiNTQtNGFlOS1iZDUzLWNhZjkyYTRhZGJjZiIsInNpZCI6ImQzZDFlOWY2LWE1NTMtNDI2ZC04MWQ1LTE0YTFiZjg0MDJhNCIsIm94T3BlbklEQ29ubmVjdFZlcnNpb24iOiJvcGVuaWRjb25uZWN0LTEuMCIsImF1ZCI6IjMxNzBjYmM1LTAwMTgtNDllZi04YmE2LTI2ODBiNjY4YmYwYyIsImFjciI6InJvcGMtYmFja2NoYW5uZWwiLCJjX2hhc2giOiJzZVkxTldwNmN6ZGppUEdTWktqQlZRIiwiYXV0aF90aW1lIjoxNjU2NTE2MDM4LCJleHAiOjE2NTY1MTk2NTAsImdyYW50IjoiYXV0aG9yaXphdGlvbl9jb2RlIiwiaWF0IjoxNjU2NTE2MDUwfQ.giFYGuN-VUNSVMMT4bBkoGsZ-rKlByqe6qv24jzp7pk2eCY4FawiaLHJqH9MzBN7uEauRXYNR2pa_0oGoYnNNg4zbFiSARSKVsajcrPeDUgNs71MjMOYCH5dukXB7X5SEP3Drz5njxuXswI_EjM2Cd0OtJMoHQ0_IP_C3rzwmaQQsgWk81yAXl-eM4zABYV1e9OObGFqPtVjoHmpbFbg-teoRTr_LxYgKPwB1XnRqD4G9No7oV-9q1Bv1ED9AU6zxLWf9aGE2gQIC-jgkr7LZ5pB4zYgU_DwgmpaAuW_AT8ApfnQPqgNy7YouIPWZ8pyoncLjF0SdStVPEoreRx7GA","token_type":"Bearer","expires_in":299}
 ```
 
-With info, you could do whatever you want using browser session. NOTE: I added some custom params in case you need to validate something else, for instance browser IP.
+With info, you could do whatever you want using browser session.
+NOTE: I added some custom params in case you need to validate something else, for instance browser IP.
 
 ## Script templates
-
 These scripts are examples of how it worked, but you could customize them based on your needs, for instance browser validations.
 
 ### Backchannel authentication script
-
 ```
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity

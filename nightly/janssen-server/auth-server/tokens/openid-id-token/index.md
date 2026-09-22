@@ -1,15 +1,22 @@
 ## OpenID Connect ID Token
 
-Defined in [Section 2](https://openid.net/specs/openid-connect-core-1_0.html#IDToken) of `OpenID Connect Core 1.0`:
+Defined in [Section 2](https://openid.net/specs/openid-connect-core-1_0.html#IDToken)
+of `OpenID Connect Core 1.0`:
 
 > The primary extension that OpenID Connect makes to OAuth 2.0 to enable End-Users to be Authenticated is the ID Token data structure. The ID Token is a security token that contains Claims about the Authentication of an End-User by an Authorization Server when using a Client, and potentially other requested Claims. The ID Token is represented as a JSON Web Token (JWT) [JWT].
 
-The ID Token is similar to a [SAML 2.0](http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-tech-overview-2.0.html) Assertion, which must contain an Authentication statement, and may optionally contain an Attribute statement, defined in the spec as:
+The ID Token is similar to a
+[SAML 2.0](http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-tech-overview-2.0.html)
+Assertion, which must contain an Authentication statement, and may optionally
+contain an Attribute statement, defined in the spec as:
 
 > - Authentication statements: These are created by the party that successfully authenticated a user. At a minimum, they describe the particular means used to authenticate the user and the specific time at which the authentication took place.
+
 > - Attribute statements: These contain specific identifying attributes about the subject (for example, that user “John Doe” has “Gold” card status).
 
-The ID Token is a standard JWT, and can use signing and encryption depending on the configuration preferences of the client. A sample payload for a Jans Auth Server `id_token` is below:
+The ID Token is a standard JWT, and can use signing and encryption depending on
+the configuration preferences of the client. A sample payload for a Jans Auth
+Server `id_token` is below:
 
 ```
 {
@@ -26,15 +33,30 @@ The ID Token is a standard JWT, and can use signing and encryption depending on 
 }
 ```
 
-A great tool if you want to decode a JWT is Auth0's <https://jwt.io/>.
+A great tool if you want to decode a JWT is Auth0's [https://jwt.io/](https://jwt.io/).
 
-Notice that a basic ID Token, like the one above, contains details about the authentication event, not user claims. You can configure the client to "include claims in id_token", or you can set a Auth Server configuration property, `legacyIdTokenClaims` to `True` to set the behavior for all clients.
+Notice that a basic ID Token, like the one above, contains details about the
+authentication event, not user claims. You can configure the client to "include
+claims in id_token", or you can set a Auth Server configuration property,
+`legacyIdTokenClaims` to `True` to set the behavior for all clients.
 
-The `amr` (Authentication Method References) claim is normally derived from the authentication method (acr) used for the session. When authentication is performed through an [Agama](https://docs.jans.io/nightly/janssen-server/developer/agama/jans-agama-engine/index.md) flow, the flow itself can additionally report the authentication method(s) it enforced by including an `amr` entry in the `data` passed to `Finish`; this value is merged into the `amr` claim of the resulting `id_token`. See [Authentication and `Finish`](https://docs.jans.io/nightly/janssen-server/developer/agama/jans-agama-engine/#authentication-and-finish) for details.
+The `amr` (Authentication Method References) claim is normally derived from the
+authentication method (acr) used for the session. When authentication is performed
+through an [Agama](../../developer/agama/jans-agama-engine.md) flow, the flow itself
+can additionally report the authentication method(s) it enforced by including an
+`amr` entry in the `data` passed to `Finish`; this value is merged into the `amr`
+claim of the resulting `id_token`. See
+[Authentication and `Finish`](../../developer/agama/jans-agama-engine.md#authentication-and-finish)
+for details.
 
 ## Obtaining an ID Token
 
-The client may obtain an ID Token in the authorization response, from the token endpoint, or both. Note, if you intend to use the Code Flow, and you don't intend to validate the `c_hash` or `s_hash` values in the ID Token returned from the authorization endpoint, don't check `id_token` in the response_type for the authorization endpoint, as it will waste compute and storage generating a token you don't need.
+The client may obtain an ID Token in the authorization response, from the
+token endpoint, or both. Note, if you intend to use the Code Flow, and you
+don't intend to validate the `c_hash` or `s_hash` values in the ID Token
+returned from the authorization endpoint, don't check `id_token` in the
+response_type for the authorization endpoint, as it will waste compute and
+storage generating a token you don't need.
 
 ## Validating an ID Token
 
@@ -48,11 +70,16 @@ At a minimum, client developers should always validate the following:
 
 ## Using the ID Token as an access token for API's
 
-Don't do this. The ID Token is an identity assertion, not an access token. It may be passed in the payload to an API, but it should not be used in lieu of an OAuth access token! Fundamentally, the `id_token` details how a person was authenticated, not which API's a client is authorized to call. Also, OAuth access tokens are short lived, while the expiration of an identity assertion is much longer.
+Don't do this. The ID Token is an identity assertion, not an access token. It
+may be passed in the payload to an API, but it should not be used in lieu of
+an OAuth access token! Fundamentally, the `id_token` details how a person
+was authenticated, not which API's a client is authorized to call. Also,
+OAuth access tokens are short lived, while the expiration of an identity
+assertion is much longer.
 
 ## Customizing claims in an id_token
 
 The [UpdateTokenType](https://docs.jans.io/head/admin/developer/scripts/update-token/) can be used in the following scenarios:
 
 1. In addition to the default claims in an ID token (`iss`, `aud`, `exp` etc), additional custom claims can be added to an ID token.
-1. You can also change the default value of a claim
+2. You can also change the default value of a claim 

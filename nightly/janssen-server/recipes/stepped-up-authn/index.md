@@ -5,13 +5,13 @@
 While navigating through an application, a user is challenged to produce an additional authentication when a certain API (of higher criticality) accessed by the client, does not have the needed scope.
 
 Consider the following sequence of events :
-
 1. A user is logged in to an app using very basic authentication mechanism. Say login- password.
-1. The user navigates through the app.
-1. When the user attempts to access a critical resource, he is presented with another authentication step say otp.
-1. The user, after successful authentication, has the needed access token to access the critical resource.
+2. The user navigates through the app.
+3. When the user attempts to access a critical resource, he is presented with another authentication step say otp.
+4. The user, after successful authentication, has the needed access token to access the critical resource.
 
-```
+```mermaid
+
 sequenceDiagram
 
 title Stepped-up Authentication
@@ -35,13 +35,14 @@ Auth Server->>Auth Server:Validate OTP (Person authentication script)
 Note right of Auth Server: Modify scope of AT
 Auth Server->>Auth Server: Modify scope of AT to include OTP (Update token script)
 Auth Server->> Website: Return Access Token with scope containing OTP
+
 ```
 
 ## Implementation details
 
 This implementation has been broken down to 5 parts highlighted in different colours. The details contain sample code that can be used to be build the flow using `Person Authentication Scripts` and `Update Token Scripts`
+```mermaid
 
-```
 sequenceDiagram
 title Implementation Stepped-up authn in Janssen's Authentication server
 
@@ -90,19 +91,19 @@ rect rgb(255,255,186)
 Website->>API:  request some endpoint<br>(with new access_token)
 API->>API:  verify the acess_token. It should contain the necessary scope i.e otp
 end
+
 ```
 
 ### Step A: Ensure id_token has some info to identify the user:
 
 1. When the user logs in for the very first time and performs basic authentication, the Update Token script can be used to place a custom claim containing some user information like
-1. User permissions
-1. User personal information
-1. Internal user identifier.\
-   In this example, we store the encrypted inum of the user as a "custom claim" in the id_token.
-1. A good practice is to not put the primary key / user identifier in plain text
+- User permissions
+- User personal information 
+- Internal user identifier.  
+In this example, we store the encrypted inum of the user as a "custom claim" in the id_token. 
+2. A good practice is to not put the primary key / user identifier in plain text
 
 UpdateToken script:
-
 ```
    def modifyIdToken(self, jsonWebResponse, context):
         print "Update token script. Modify idToken: %s" % jsonWebResponse
@@ -112,46 +113,41 @@ UpdateToken script:
         user_name = session.getSessionAttributes().get("auth_user")                
         foundUser = userService.getUserByAttribute("uid", user_name)        
         userInum = foundUser.getAttribute("inum") 
-
+        
         encryptedInum = CdiUtil.bean(EncryptionService).encrypt(userInum)
         print encryptedInum 
-
+        
         #custom claim in id_token
         jsonWebResponse.getClaims().setClaim("someFancyName", encryptedInum)
-
+        
         return True
 ```
-
 ### Step B: Website (RP) extracts the user info from id_token:
-
 1. The Website (RP / client) should extract the user info from id_token and save it in the website's session.
-1. The website's session should not be confused with the Auth Server's session.
-1. The Auth Server sessions are state-less and any session related information that the website wishes to consume can only be that which can be extracted from an id_token.
+2. The website's session should not be confused with the Auth Server's session. 
+3. The Auth Server sessions are state-less and any session related information that the website wishes to consume can only be that which can be extracted from an id_token.
 
 ### Step C: Critical Resource accessed by user.
-
 1. Website detects critical resource, examines the Access token presented by the client.
-1. Redirects to RP for stepped-up authentication
+2. Redirects to RP for stepped-up authentication
 
 ### Step D: Stepped-up authentication
-
 1. Website calls /authorize endpoint with login_hint=encrypted_inum, which was previously extracted from id_token in Step B
 1. Use `login_hint`, `id_token_hint` or `request`-jwe to identify the user in Person Authentication script used to perform the additional authentication step.
 
 Stepped-up Authn Person Authentication script:
-
 ```
  def prepareForStep(self, configurationAttributes, requestParameters, step):
         print "OTP test. Prepare for steps %s" %step
         if (step ==1):
             try:
                 userService = CdiUtil.bean(UserService)
-
+                
                 encryptedInum  = ServerUtil.getFirstValue(requestParameters, "login_hint")
 
                 identity = CdiUtil.bean(Identity)
                 print encryptedInum  
-
+                
                 inum = CdiUtil.bean(EncryptionService).decrypt(encryptedInum)
                 foundUser = userService.getUserByInum(inum )
                 print  foundUser
@@ -166,9 +162,8 @@ Stepped-up Authn Person Authentication script:
         else:
             return False
 ```
-
 3. Validate user otp
-1. "enforce_scope=otp", add to session
+4. "enforce_scope=otp", add to session
 
 ```
 def authenticate(self, configurationAttributes, requestParameters, step):
@@ -195,28 +190,30 @@ def authenticate(self, configurationAttributes, requestParameters, step):
             print("Wrong otp")
             return errorMessage("Wrong otp entered")
             return False
+
 ```
 
-5: Update AT with relevant scope * Check the session variable "enforce_scope" and add the "scope" to the Access token. * You can also modify Access token header claims and regular claims using the `modifyAccessToken` in the Update Token Script. Update Token script:
-
+5: Update AT with relevant scope
+* Check the session variable "enforce_scope" and add the "scope" to the Access token. 
+* You can also modify Access token header claims and regular claims using the `modifyAccessToken` in the Update Token Script.
+Update Token script:
 ```
     def modifyAccessToken(self, accessToken, context):
 
         #read from session
-    sessionIdService = CdiUtil.bean(SessionIdService)
-    sessionId = sessionIdService.getSessionByDn(context.getGrant().getSessionDn()) # fetch from persistence
+	sessionIdService = CdiUtil.bean(SessionIdService)
+	sessionId = sessionIdService.getSessionByDn(context.getGrant().getSessionDn()) # fetch from persistence
 
         enforce_scope = sessionId.getSessionAttributes().get("enforce_scope ")
-    if enforce_scope not None:
+	if enforce_scope not None:
                context.overwriteAccessTokenScopes(accessToken, Sets.newHashSet("existingScope1", "existingScope2", "mynewscope"))
 
         context.getHeader().setClaim("custom_header_name", "custom_header_value")
         context.getClaims().setClaim("claim_name", "claimValue")
 ```
-
 ### Step E: Access the critical resource with new Access token:
+The access token contains needed scope because the scopes were updated in Step D,  point 5
 
-The access token contains needed scope because the scopes were updated in Step D, point 5
 
 ## Update token script
 
@@ -248,7 +245,7 @@ class UpdateToken(UpdateTokenType):
     def getApiVersion(self):
         return 11
 
-
+    
     def modifyIdToken(self, jsonWebResponse, context):
         print "Update token script. Modify idToken: %s" % jsonWebResponse
         sessionIdService = CdiUtil.bean(SessionIdService)
@@ -275,9 +272,9 @@ class UpdateToken(UpdateTokenType):
         enforce_scope = sessionId.getSessionAttributes().get("enforce_scope")
         if enforce_scope is not  None:
             context.overwriteAccessTokenScopes(accessToken, Sets.newHashSet("openid", "profile", "otp"))
-
+        
         return True
-
+            
     def modifyRefreshToken(self, refreshToken, context):
         return True
 
@@ -383,12 +380,12 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step ==1):
             try:
                 userService = CdiUtil.bean(UserService)
-
+                
                 encryptedInum  = ServerUtil.getFirstValue(requestParameters, "login_hint")
 
                 identity = CdiUtil.bean(Identity)
                 print encryptedInum  
-
+                
                 inum = CdiUtil.bean(EncryptionService).decrypt(encryptedInum)
                 foundUser = userService.getUserByInum(inum )
                 print  foundUser
@@ -427,4 +424,6 @@ class PersonAuthentication(PersonAuthenticationType):
     def logout(self, configurationAttributes, requestParameters):
         print"logout"
         return True
+
+    
 ```

@@ -1,29 +1,55 @@
 # Authorization Using Cedarling
 
-The **Policy Store** contains the Cedar Policies, Cedar Schema, and optionally, a list of the Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file or fetched via HTTPS. In enterprise deployments, the Cedarling can retrieve its Policy Store from a Jans Lock Server OAuth protected endpoint.
+The **Policy Store** contains the Cedar Policies, Cedar Schema, and optionally, a list of the
+Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file
+or fetched via HTTPS. In enterprise deployments, the Cedarling can retrieve its Policy Store from
+a Jans Lock Server OAuth protected endpoint.
 
-Developers need to define Cedar Schema that makes sense for their application. For example, a developer writing a customer support application might define an "Issue" Resource and Actions like "Reply" or "Close". Once the schema is defined, developers can author policies to model the fine grain access controls needed to implement the business rules of their application. The easiest way to define schema and policies is to use the [AgamaLab](https://cloud.gluu.org/agama-lab) Policy Designer. This is a free developer tool hosted by [Gluu](https://gluu.org).
+Developers need to define Cedar Schema that makes sense for their application. For example, a
+developer writing a customer support application might define an "Issue" Resource and Actions like
+"Reply" or "Close". Once the schema is defined, developers can author policies to model the fine
+grain access controls needed to implement the business rules of their application. The easiest way
+to define schema and policies is to use the [AgamaLab](https://cloud.gluu.org/agama-lab) Policy
+Designer. This is a free developer tool hosted by [Gluu](https://gluu.org).
 
-The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Principal entities are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are used by the Cedarling to create User, Workload, and Role entities based on token claims.
+![Diagram showing Cedarling authorization flow with JWTs, Resource, Action, and Context](../../assets/lock-cedarling-diagram-2.jpg)
 
-The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead of saying "User can perform action", we can say "Role can perform action"--a convenient way to implement RBAC. Developers can specify which JWT claim is used to map Cedar Roles. For example, one domain may use the `role` user claim of the OpenID Userinfo token; another domain may use the `memberOf` claim in the OIDC id_token.
+The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Principal entities
+are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are used by the Cedarling to create
+User, Workload, and Role entities based on token claims.
 
-Developers can also express a variety of policies beyond the limitations of RBAC by expressing ABAC conditions, or combining ABAC and RBAC conditions. For example, a policy like Admins can access a "private" Resource from the private network, during business hours. In this case "Admins" is the role, but the other conditions are ABAC. Policy evaluation is fast because Cedar uses the RBAC role to "slice" the data, minimizing the number of entries on which to evaluate the ABAC conditions.
+The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead
+of saying "User can perform action", we can say "Role can perform action"--a convenient way to
+implement RBAC. Developers can specify which JWT claim is used to map Cedar Roles. For example, one
+domain may use the `role` user claim of the OpenID Userinfo token; another domain may use the
+`memberOf` claim in the OIDC id_token.
 
-The OIDC `id_token` JWT represents a Person authentication event. The access token JWT represents a Workload authentication event. These tokens contain other interesting contextual data. The `id_token` tells you who authenticated, when they authenticated, how they authenticated, and optionally other claims like the User's roles. An OAuth access token can tell you information about the Workload that obtained the JWT, its extent of access as defined by the OAuth Authorization Server (*i.e.* the values of the `scope` claim), or other claims--domains frequently enhance the access token to contain business specific data needed for policy evaluation.
+Developers can also express a variety of policies beyond the limitations of RBAC by expressing ABAC
+conditions, or combining ABAC and RBAC conditions. For example, a policy like Admins can access a
+"private" Resource from the private network, during business hours. In this case "Admins" is the role,
+but the other conditions are ABAC. Policy evaluation is fast because Cedar uses the RBAC role to
+"slice" the data, minimizing the number of entries on which to evaluate the ABAC conditions.
+
+The OIDC `id_token` JWT represents a Person authentication event. The access token JWT represents a
+Workload authentication event. These tokens contain other interesting contextual data. The `id_token`
+tells you who authenticated, when they authenticated, how they authenticated, and optionally other
+claims like the User's roles. An OAuth access token can tell you information about the Workload that
+obtained the JWT, its extent of access as defined by the OAuth Authorization Server (_i.e._ the
+values of the `scope` claim), or other claims--domains frequently enhance the access token to
+contain business specific data needed for policy evaluation.
 
 ## Which authorization method should I use?
 
 Cedarling provides two authorization methods. Choose the one that fits your deployment:
 
-|                       | `authorize_multi_issuer`                                                                          | `authorize_unsigned`                                                                                |
-| --------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **When to use**       | You have JWT tokens from trusted IDPs and want Cedarling to validate them                         | Your application has already authenticated the principal and wants to pass raw entity data directly |
-| **JWT validation**    | Yes — signature and status validation; `exp`/`nbf` are validated when listed in `required_claims` | No — accepts raw entity data as-is                                                                  |
-| **Principal source**  | Derived from JWT token claims                                                                     | Supplied directly by the application                                                                |
-| **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways                                    | Custom auth flows, testing, service-to-service with upstream verification                           |
-| **Security model**    | Higher — Cedarling independently verifies token authenticity                                      | Lower — trusts the calling application                                                              |
-| **Recommended for**   | Most production deployments                                                                       | Prototyping, or when authentication is handled externally                                           |
+| | `authorize_multi_issuer` | `authorize_unsigned` |
+|---|---|---|
+| **When to use** | You have JWT tokens from trusted IDPs and want Cedarling to validate them | Your application has already authenticated the principal and wants to pass raw entity data directly |
+| **JWT validation** | Yes — signature and status validation; `exp`/`nbf` are validated when listed in `required_claims` | No — accepts raw entity data as-is |
+| **Principal source** | Derived from JWT token claims | Supplied directly by the application |
+| **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Custom auth flows, testing, service-to-service with upstream verification |
+| **Security model** | Higher — Cedarling independently verifies token authenticity | Lower — trusts the calling application |
+| **Recommended for** | Most production deployments | Prototyping, or when authentication is handled externally |
 
 ## Multi-Issuer Authorization (authorize_multi_issuer) — Recommended
 
@@ -33,37 +59,41 @@ This method does **not** use a principal entity — authorization decisions are 
 
 ### Key Features
 
-| Feature               | Description                                   |
-| --------------------- | --------------------------------------------- |
-| Token Sources         | Multiple issuers supported                    |
-| Token Types           | Flexible with explicit mapping                |
-| Context Structure     | Individual token entities in `context.tokens` |
-| Use Case              | Federation, API gateways, multi-issuer apps   |
-| Policy Context Access | `context.tokens.{issuer}_{token_type}`        |
+| Feature                | Description                                             |
+| ---------------------- | ------------------------------------------------------- |
+| Token Sources          | Multiple issuers supported                              |
+| Token Types            | Flexible with explicit mapping                          |
+| Context Structure      | Individual token entities in `context.tokens`           |
+| Use Case               | Federation, API gateways, multi-issuer apps             |
+| Policy Context Access  | `context.tokens.{issuer}_{token_type}`                  |
 
 ### How It Works
 
 1. **Token Input**: Developers provide an array of `TokenInput` objects, each containing:
-1. `mapping`: The Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
-1. `payload`: The JWT token string
-1. **Token Validation**: Each token is validated using the existing Cedarling JWT validation capabilities:
-1. Signature verification
-1. Expiration and time-based validation
-1. Status list validation (if configured)
-1. Only tokens from trusted issuers are processed
-1. **Entity Creation**: Each valid token becomes a Cedar entity with:
-1. Token metadata (type, jti, issuer, exp, validated_at)
-1. JWT claims stored as entity tags
-1. All claims stored as Sets of strings by default for consistency
-1. **Context Building**: Valid tokens are organized into a `tokens` collection with predictable naming:
-1. Field naming: `{issuer_name}_{token_type}`
-1. Example: `context.tokens.acme_access_token`, `context.tokens.google_id_token`
-1. Issuer name comes from trusted issuer metadata or JWT iss claim
-1. **Policy Evaluation**: Policies evaluate based on token entities in context without requiring a principal
+   - `mapping`: The Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
+   - `payload`: The JWT token string
+
+2. **Token Validation**: Each token is validated using the existing Cedarling JWT validation capabilities:
+   - Signature verification
+   - Expiration and time-based validation
+   - Status list validation (if configured)
+   - Only tokens from trusted issuers are processed
+
+3. **Entity Creation**: Each valid token becomes a Cedar entity with:
+   - Token metadata (type, jti, issuer, exp, validated_at)
+   - JWT claims stored as entity tags
+   - All claims stored as Sets of strings by default for consistency
+
+4. **Context Building**: Valid tokens are organized into a `tokens` collection with predictable naming:
+   - Field naming: `{issuer_name}_{token_type}`
+   - Example: `context.tokens.acme_access_token`, `context.tokens.google_id_token`
+   - Issuer name comes from trusted issuer metadata or JWT iss claim
+
+5. **Policy Evaluation**: Policies evaluate based on token entities in context without requiring a principal
 
 ### Example Usage
 
-```
+```js
 const bootstrap_config = {...};
 const cedarling = await init(bootstrap_config);
 
@@ -102,7 +132,7 @@ let request = {
 };
 
 // Execute authorization, the request is passed as a JSON string
-let result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
+let result = await cedarling.authorizeMultiIssuer(JSON.stringify(request));
 
 // Check result — single decision (no per-principal breakdown)
 if (result.decision) {
@@ -116,7 +146,7 @@ if (result.decision) {
 
 Policies for multi-issuer authorization reference tokens directly in the context:
 
-```
+```cedar
 // Policy checking token from specific issuer with claim
 permit(
   principal,
@@ -167,43 +197,43 @@ Both components are individually normalized, then joined with a single underscor
 **Step 1 — Issuer Name Resolution**:
 
 1. Look up the JWT's `iss` claim in the trusted issuer configuration from the policy store
-1. If a matching trusted issuer is found, use its `name` field (e.g., `"Acme"`)
-1. If no trusted issuer matches, extract the hostname from the `iss` URL:
-   - Strip the protocol (`https://`, `http://`)
-   - Take everything before the first `/`
-   - Strip port numbers (everything after `:`)
-   - Example: `https://unknown.issuer.com:8080/auth` → `unknown.issuer.com`
-1. **Sanitize**: replace all `.` (dots), (spaces), and `-` (hyphens) with `_`, then convert to **lowercase**
+2. If a matching trusted issuer is found, use its `name` field (e.g., `"Acme"`)
+3. If no trusted issuer matches, extract the hostname from the `iss` URL:
+    - Strip the protocol (`https://`, `http://`)
+    - Take everything before the first `/`
+    - Strip port numbers (everything after `:`)
+    - Example: `https://unknown.issuer.com:8080/auth` → `unknown.issuer.com`
+4. **Sanitize**: replace all `.` (dots), ` ` (spaces), and `-` (hyphens) with `_`, then convert to **lowercase**
 
 **Step 2 — Token Type Simplification**:
 
 1. Take the `mapping` field from the `TokenInput` (e.g., `"Jans::Access_Token"`)
-1. Split by the Cedar namespace separator `::` and take only the **last segment**
-1. Convert to **lowercase**
-1. Underscores within the token type name are preserved
+2. Split by the Cedar namespace separator `::` and take only the **last segment**
+3. Convert to **lowercase**
+4. Underscores within the token type name are preserved
 
 **Step 3 — Combine**:
 
 Join the sanitized issuer name and simplified token type with `_`:
 
-```
+```text
 {sanitized_issuer}_{simplified_token_type}
 ```
 
 **Examples**:
 
-| JWT `iss` claim                            | Trusted issuer `name` | Token `mapping`          | Resulting key                       |
-| ------------------------------------------ | --------------------- | ------------------------ | ----------------------------------- |
-| `https://idp.acme.com/auth`                | `"Acme"`              | `Jans::Access_Token`     | `acme_access_token`                 |
-| `https://idp.acme.com/auth`                | `"Acme"`              | `Jans::Id_Token`         | `acme_id_token`                     |
-| `https://idp.dolphin.sea/auth`             | `"Dolphin"`           | `Jans::Access_Token`     | `dolphin_access_token`              |
-| `https://idp.dolphin.sea/auth`             | `"Dolphin"`           | `Acme::DolphinToken`     | `dolphin_dolphintoken`              |
-| `https://unknown.issuer.com/auth`          | *(not configured)*    | `Custom::Employee_Token` | `unknown_issuer_com_employee_token` |
-| `https://login.microsoftonline.com/tenant` | `"Microsoft"`         | `Jans::Id_Token`         | `microsoft_id_token`                |
+| JWT `iss` claim | Trusted issuer `name` | Token `mapping` | Resulting key |
+|---|---|---|---|
+| `https://idp.acme.com/auth` | `"Acme"` | `Jans::Access_Token` | `acme_access_token` |
+| `https://idp.acme.com/auth` | `"Acme"` | `Jans::Id_Token` | `acme_id_token` |
+| `https://idp.dolphin.sea/auth` | `"Dolphin"` | `Jans::Access_Token` | `dolphin_access_token` |
+| `https://idp.dolphin.sea/auth` | `"Dolphin"` | `Acme::DolphinToken` | `dolphin_dolphintoken` |
+| `https://unknown.issuer.com/auth` | _(not configured)_ | `Custom::Employee_Token` | `unknown_issuer_com_employee_token` |
+| `https://login.microsoftonline.com/tenant` | `"Microsoft"` | `Jans::Id_Token` | `microsoft_id_token` |
 
 Tokens are then accessible in Cedar policies as `context.tokens.{key}`, e.g.:
 
-```
+```cedar
 context.tokens.acme_access_token.hasTag("scope")
 ```
 
@@ -224,10 +254,10 @@ context.tokens.acme_access_token.hasTag("scope")
 ### Use Cases
 
 1. **Federation Scenarios**: Applications accepting tokens from multiple identity providers
-1. **API Gateways**: Validating tokens from various upstream services in a single authorization check
-1. **Multi-Organization Access**: Requiring tokens from different organizations for collaborative workflows
-1. **Capability-Based Authorization**: Decisions based on capabilities asserted by different issuers rather than single user identity
-1. **Zero Trust Architectures**: Each token represents a verification from a different trust boundary
+2. **API Gateways**: Validating tokens from various upstream services in a single authorization check
+3. **Multi-Organization Access**: Requiring tokens from different organizations for collaborative workflows
+4. **Capability-Based Authorization**: Decisions based on capabilities asserted by different issuers rather than single user identity
+5. **Zero Trust Architectures**: Each token represents a verification from a different trust boundary
 
 ## Automatically Adding Entity References to the Context
 
@@ -249,8 +279,8 @@ All validated token entities are placed under the `context.tokens` namespace. Ea
 
 **Both methods** also include:
 
-- Any [default entities](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#default-entities) defined in the policy store
-- Any data pushed via the [Context Data API](https://docs.jans.io/nightly/cedarling/tutorials/cedarling-getting-started/#context-data-api) under `context.data`
+- Any [default entities](./cedarling-policy-store.md#default-entities) defined in the policy store
+- Any data pushed via the [Context Data API](../tutorials/cedarling-getting-started.md#context-data-api) under `context.data`
 
 **Entity merging automatically resolves conflicts**, ensuring that default entities take precedence over request entities when UIDs match.
 
@@ -258,7 +288,7 @@ All validated token entities are placed under the `context.tokens` namespace. Ea
 
 Below is an example policy schema that illustrates how entities are used:
 
-```
+```cedarschema
 // Jans namespace: shared infrastructure types used across namespaces.
 namespace Jans {
   type Url = {
@@ -357,7 +387,7 @@ Cross-namespace references use fully qualified names (e.g., `Jans::Url`, `Acme::
 
 With this schema, you only need to provide the fields that are not automatically included. For instance, to define the `time` in the context:
 
-```
+```js
 let context = {
   time: 1719266610,
 };
@@ -374,7 +404,7 @@ The `authorize_unsigned` method allows making authorization decisions without JW
 
 Example usage:
 
-```
+```js
 let input = {
   principal: {
     cedar_entity_mapping: {
@@ -401,14 +431,14 @@ let input = {
 };
 
 // the request is passed as a JSON string
-let result = await cedarling.authorize_unsigned(JSON.stringify(input));
+let result = await cedarling.authorizeUnsigned(JSON.stringify(input));
 ```
 
 The `principal` field uses `cedar_entity_mapping` to define its Cedar entity type and ID. All other fields become entity attributes.
 
 The result contains a single Cedar response:
 
-```
+```js
 {
   decision: true,           // Boolean decision (Allow = true, Deny = false)
   request_id: "...",        // Tracing ID
@@ -421,14 +451,14 @@ The result contains a single Cedar response:
 The `principal` field is optional. When omitted, Cedarling uses Cedar's partial evaluator to evaluate the request against all policies.
 
 - Policies whose scope and conditions do not depend on the principal can still resolve to `Allow` even without a principal.
-- Policies that do depend on the principal produce *residuals* — partially-evaluated expressions that cannot decide without the missing principal information.
+- Policies that do depend on the principal produce _residuals_ — partially-evaluated expressions that cannot decide without the missing principal information.
 - If any residual policy could otherwise permit the request, Cedarling **fails closed** and returns `Decision::Deny`. The IDs of the residual policies are surfaced in `diagnostics().reason()` so the caller can see which policies were blocked by the missing principal.
 
 This is useful for evaluating purely context- or resource-driven policies (for example, token-based decisions handed off by an upstream layer) without forcing the caller to synthesize a placeholder principal. The same partial-evaluation path is used internally by `authorize_multi_issuer`.
 
 Example without a principal:
 
-```
+```js
 let input = {
   // principal is omitted
   action: "Jans::Action::\"View\"",
@@ -447,12 +477,12 @@ let input = {
 };
 
 // the request is passed as a JSON string
-let result = await cedarling.authorize_unsigned(JSON.stringify(input));
+let result = await cedarling.authorizeUnsigned(JSON.stringify(input));
 ```
 
 In Rust, pass `principal: None`:
 
-```
+```rust
 let request = RequestUnsigned {
     principal: None,
     action: "Jans::Action::\"View\"".to_string(),
@@ -462,7 +492,7 @@ let request = RequestUnsigned {
 let result = cedarling.authorize_unsigned(request).await?;
 ```
 
-The corresponding schema action must declare a placeholder principal entity type in its `appliesTo` (Cedar rejects an empty `principal: []` list at schema parse time), and policies must not constrain the principal. See the [multi-issuer schema notes](https://docs.jans.io/nightly/cedarling/reference/cedarling-multi-issuer/#cedar-schema-for-multi-issuer-actions) for details — the same rules apply.
+The corresponding schema action must declare a placeholder principal entity type in its `appliesTo` (Cedar rejects an empty `principal: []` list at schema parse time), and policies must not constrain the principal. See the [multi-issuer schema notes](./cedarling-multi-issuer.md#cedar-schema-for-multi-issuer-actions) for details — the same rules apply.
 
 ## Batch Authorization
 
@@ -474,7 +504,7 @@ Use a batch when a caller needs to authorize a related set of requests as a unit
 
 Both variants share a common `BatchItem`:
 
-```
+```json
 {
   "resource": { "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": "doc-1" }, "org_id": "Acme" },
   "action": "Jans::Action::\"View\"",
@@ -486,19 +516,19 @@ Both variants share a common `BatchItem`:
 
 `BatchAuthorizeUnsignedRequest`:
 
-```
+```json
 { "principal": { /* EntityData or null */ }, "items": [ /* BatchItem, ... */ ] }
 ```
 
 `BatchAuthorizeMultiIssuerRequest`:
 
-```
+```json
 { "tokens": [ { "mapping": "Jans::Access_Token", "payload": "..." } ], "items": [ /* BatchItem, ... */ ] }
 ```
 
 ### Response Shape
 
-```
+```json
 {
   "batch_id": "01945...uuidv7...",
   "results": [
@@ -509,32 +539,32 @@ Both variants share a common `BatchItem`:
 }
 ```
 
-Each slot is `Ok(AuthorizeResult)` (Cedar reached a decision) or `Err(BatchItemError)` (item couldn't be built). `results[i]` corresponds to `items[i]` — including `Err` slots. `batch_id` (UUIDv7) is stamped on every per-item decision-log entry; retrieve them via `LogStorage::get_logs_by_request_id(batch_id.to_string())`. Each binding wraps the `Ok`/`Err` split in an idiomatic shape — see [per-binding tutorials](https://docs.jans.io/nightly/cedarling/reference/tutorials/index.md).
+Each slot is `Ok(AuthorizeResult)` (Cedar reached a decision) or `Err(BatchItemError)` (item couldn't be built). `results[i]` corresponds to `items[i]` — including `Err` slots. `batch_id` (UUIDv7) is stamped on every per-item decision-log entry; retrieve them via `LogStorage::get_logs_by_request_id(batch_id.to_string())`. Each binding wraps the `Ok`/`Err` split in an idiomatic shape — see [per-binding tutorials](../tutorials/).
 
 ### `BatchItemError` variants
 
-| Variant slug          | Meaning                                                                |
-| --------------------- | ---------------------------------------------------------------------- |
-| `action_parse`        | `action` didn't parse as a Cedar `EntityUid`.                          |
-| `resource_build`      | `resource` `EntityData` failed to build a Cedar entity.                |
-| `context_build`       | Per-item `context` couldn't be built.                                  |
-| `principal_build`     | Unsigned role-entity build failed.                                     |
-| `schema_validation`   | Assembled `Entities` failed schema validation.                         |
-| `multi_issuer_entity` | Multi-issuer resource entity build failed.                             |
-| `request_validation`  | Cedar rejected the assembled request against the schema's `appliesTo`. |
+| Variant slug | Meaning |
+|---|---|
+| `action_parse` | `action` didn't parse as a Cedar `EntityUid`. |
+| `resource_build` | `resource` `EntityData` failed to build a Cedar entity. |
+| `context_build` | Per-item `context` couldn't be built. |
+| `principal_build` | Unsigned role-entity build failed. |
+| `schema_validation` | Assembled `Entities` failed schema validation. |
+| `multi_issuer_entity` | Multi-issuer resource entity build failed. |
+| `request_validation` | Cedar rejected the assembled request against the schema's `appliesTo`. |
 
 Every variant carries a `message` (diagnostic, Cedar-authored — subject to change) and an `item_index` matching the failing item's position; result slots preserve positional correspondence with the items collection.
 
 ### Failure Model
 
-| Kind                                                                                                | Effect                                                                     |
-| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **Batch-level** (empty `items`, empty `tokens`, JWT / status-list refresh failure, principal parse) | Returns `Err` at the call level; no `batch_id` issued.                     |
-| **Per-item** (any variant above)                                                                    | Surfaces as `Err(BatchItemError)` at `results[i]`; other items unaffected. |
+| Kind | Effect |
+|---|---|
+| **Batch-level** (empty `items`, empty `tokens`, JWT / status-list refresh failure, principal parse) | Returns `Err` at the call level; no `batch_id` issued. |
+| **Per-item** (any variant above) | Surfaces as `Err(BatchItemError)` at `results[i]`; other items unaffected. |
 
 ### Example
 
-```
+```js
 // `request` is a JSON string matching the BatchAuthorizeUnsignedRequest schema
 const request = JSON.stringify({
   principal: { cedar_entity_mapping: { entity_type: "Jans::User", id: "1" } },
@@ -544,7 +574,7 @@ const request = JSON.stringify({
     context: {}
   }]
 });
-const response = await cedarling.authorize_unsigned_batch(request);
+const response = await cedarling.authorizeUnsignedBatch(request);
 console.log(response.batch_id);
 response.results.forEach((r, i) => {
   if (r.is_ok) {
@@ -574,7 +604,7 @@ Both return a list of `PolicyMetadata` objects containing the policy `id`, `anno
 
 **Important:** These methods perform scope-level filtering only (principal type, action, resource type). Policies with `when`/`unless` body conditions cannot be pre-evaluated without full context, so the returned set is a superset of truly applicable policies.
 
-See the [Interfaces](https://docs.jans.io/nightly/cedarling/reference/cedarling-interfaces/#policy-introspection) reference for full API details and examples.
+See the [Interfaces](./cedarling-interfaces.md#policy-introspection) reference for full API details and examples.
 
 ## Policy Annotation Lookup
 
@@ -586,4 +616,4 @@ After an authorization call, the policies that determined the decision are repor
 
 Unknown policy IDs are silently skipped. Resolve annotations promptly after the authorization call; a concurrent policy-store refresh may swap the store, dropping IDs that no longer resolve.
 
-See the [Interfaces](https://docs.jans.io/nightly/cedarling/reference/cedarling-interfaces/#annotation-lookup) reference for signatures and examples.
+See the [Interfaces](./cedarling-interfaces.md#annotation-lookup) reference for signatures and examples.

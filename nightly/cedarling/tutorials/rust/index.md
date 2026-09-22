@@ -1,28 +1,30 @@
 # Getting Started with Cedarling in a Rust app
 
+
 ## Installation
 
 ### Building from source
 
-To get started, clone the [Jans](https://github.com/JanssenProject/jans) repository. The source can be found in the \[`jans-cedarling/cedarling`\] directory.
+To get started, clone the [Jans](https://github.com/JanssenProject/jans) repository. The source can be found in the [`jans-cedarling/cedarling`] directory.
 
 #### Requirements
 
+
 If you haven't installed Rust yet, follow the official installation guide:
 
-```
+```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 After installation, restart your terminal or run:
 
-```
+```bash
 source $HOME/.cargo/env
 ```
 
 Verify the installation:
 
-```
+```bash
 rustc --version
 cargo --version
 ```
@@ -31,26 +33,26 @@ cargo --version
 
 **1. Clone the repository**
 
-```
+```bash
 git clone https://github.com/JanssenProject/jans.git
 cd jans/jans-cedarling
 ```
 
 **2. Build the library**
 
-```
+```bash
 cargo build --release
 ```
 
 **3. Run tests**
 
-```
+```bash
 cargo test --workspace
 ```
 
 **4. Generate documentation**
 
-```
+```bash
 cargo doc -p cedarling --no-deps --open
 ```
 
@@ -58,7 +60,7 @@ cargo doc -p cedarling --no-deps --open
 
 ### Initialization
 
-```
+```rs
 use cedarling::*;
 
 // Load the bootstrap properties from the environment variable, using default values
@@ -69,7 +71,7 @@ let bootstrap_config = BootstrapConfig.from_env();
 let cedarling = Cedarling::new(bootstrap_config)
 ```
 
-See the [bootstrap properties docs](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/index.md) for other config loading options.
+See the [bootstrap properties docs](../reference/cedarling-properties.md) for other config loading options.
 
 ### Policy Store Sources
 
@@ -91,7 +93,7 @@ Rust bindings support all policy store source types:
 
 For advanced use cases (embedded archives, custom fetch logic):
 
-```
+```rust
 use cedarling::*;
 
 // Option 1: Via PolicyStoreSource enum (recommended)
@@ -106,7 +108,7 @@ let loaded = load_policy_store_archive_bytes(archive_bytes)?;
 
 **Example programmatic configuration:**
 
-```
+```rust
 use cedarling::*;
 use std::path::PathBuf;
 
@@ -129,7 +131,7 @@ let config = BootstrapConfig::default()
     ));
 ```
 
-See [Policy Store Formats](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#policy-store-formats) for more details.
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for more details.
 
 ### Authorization
 
@@ -144,7 +146,7 @@ For token-based authorization, use `authorize_multi_issuer` which processes JWT 
 
 **1. Prepare tokens**
 
-```
+```rust
 use cedarling::TokenInput;
 
 let tokens = vec![
@@ -155,7 +157,7 @@ let tokens = vec![
 
 **2. Define the resource**
 
-```
+```rust
 use std::collections::HashMap;
 use serde_json::json;
 
@@ -174,13 +176,13 @@ let resource = EntityData {
 
 **3. Define the action**
 
-```
+```rust
 let action = r#"Jans::Action::"Read""#.to_string();
 ```
 
 **4. Define Context (optional)**
 
-```
+```rust
 use serde_json::json;
 
 let context = json!({});
@@ -188,7 +190,7 @@ let context = json!({});
 
 **5. Build and execute the request**
 
-```
+```rust
 use cedarling::AuthorizeMultiIssuerRequest;
 
 let request = AuthorizeMultiIssuerRequest {
@@ -206,7 +208,7 @@ match result.decision {
 }
 ```
 
-See [Multi-Issuer Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-multi-issuer/index.md) for more details.
+See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
 
 #### Unsigned Authorization
 
@@ -214,7 +216,7 @@ In unsigned authorization, you pass a Principal directly, without relying on tok
 
 **1. Define the Principal**
 
-```
+```rust
 use cedarling::*;
 use std::collections::HashMap;
 use serde_json::json;
@@ -232,9 +234,9 @@ let principal = Some(EntityData {
 
 **2. Define the Resource**
 
-This represents the *resource* that the action will be performed on, such as a protected API endpoint or file.
+This represents the _resource_ that the action will be performed on, such as a protected API endpoint or file.
 
-```
+```rust
 use std::collections::HashMap;
 use serde_json::json;
 
@@ -253,17 +255,17 @@ let resource = EntityData {
 
 **3. Define the Action**
 
-An *action* represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
+An _action_ represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
 
-```
+```rust
 let action = r#"Jans::Action::"Read""#.to_string();
 ```
 
 **4. Define the Context**
 
-The *context* represents additional data that may affect the authorization decision, such as time, location, or user-agent.
+The _context_ represents additional data that may affect the authorization decision, such as time, location, or user-agent.
 
-```
+```rust
 use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::json;
 
@@ -281,9 +283,9 @@ let context = json!({
 
 **5. Build the Request**
 
-Now you'll construct the ***request*** by including the *principal*, *action*, and *context*.
+Now you'll construct the **_request_** by including the _principal_, _action_, and _context_.
 
-```
+```rust
 use std::collections::HashMap;
 
 let request = RequestUnsigned {
@@ -298,7 +300,7 @@ let request = RequestUnsigned {
 
 Finally, call the `authorize_unsigned` function to check whether the principal is allowed to perform the specified action on the resource.
 
-```
+```rust
 let result = cedarling.authorize_unsigned(request).await?;
 
 match result.decision {
@@ -311,7 +313,7 @@ match result.decision {
 
 Each `results[i]` is a `Result<AuthorizeResult, BatchItemError>` — `Ok` when Cedar reached a decision, `Err` when the item couldn't be built. Positional mapping to `items[i]` is preserved for both branches; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry.
 
-```
+```rust
 use cedarling::{BatchAuthorizeUnsignedRequest, BatchItem};
 use serde_json::json;
 
@@ -342,30 +344,31 @@ for (i, r) in response.results.iter().enumerate() {
 }
 ```
 
-For multi-issuer, swap `BatchAuthorizeUnsignedRequest::new(Some(principal), items)` for `BatchAuthorizeMultiIssuerRequest::new(tokens, items)` and call `authorize_multi_issuer_batch`. See [Batch Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
+For multi-issuer, swap `BatchAuthorizeUnsignedRequest::new(Some(principal), items)` for `BatchAuthorizeMultiIssuerRequest::new(tokens, items)` and call `authorize_multi_issuer_batch`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
 ### Logging
 
 The logs could be retrieved using the `pop_logs` function.
 
-```
+```rust
 let logs = cedarling.pop_logs();
 println!("{:#?}", logs);
 ```
 
-For more detailed logging capabilities, see the [Cedarling Rust Developer Guide](https://docs.jans.io/nightly/cedarling/developer/cedarling-rust/index.md).
+For more detailed logging capabilities, see the [Cedarling Rust Developer Guide](../developer/cedarling-rust.md).
 
 ## Example
 
-Refer to [Cedarling Rust Developer Guide](https://docs.jans.io/nightly/cedarling/developer/cedarling-rust/#complete-example) for a complete code example.
+Refer to [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#complete-example)
+for a complete code example.
 
 ## Defined API
 
-Please refer to [Cedarling Rust Developer Guide](https://docs.jans.io/nightly/cedarling/developer/cedarling-rust/#api-reference).
+Please refer to [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#api-reference).
 
 ## See Also
 
-- [Cedarling Rust Developer Guide](https://docs.jans.io/nightly/cedarling/developer/cedarling-rust/index.md)
-- [Cedarling TBAC quickstart](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac)
-- [Cedarling Unsigned quickstart](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-application-asserted-identity)
-- [Cedarling Sidecar Tutorial](https://docs.jans.io/nightly/cedarling/developer/sidecar/cedarling-sidecar-tutorial/index.md)
+- [Cedarling Rust Developer Guide](../developer/cedarling-rust.md)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
+- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)

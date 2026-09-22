@@ -1,6 +1,6 @@
 ## bootstrap.json
 
-```
+```declarative
 {
 "CEDARLING_APPLICATION_NAME": "Cedarling-Test-In-Custom-Script",
 "CEDARLING_POLICY_STORE_LOCAL_FN": "./custom/static/update_token_script.cjar",
@@ -11,7 +11,7 @@
 
 ## sample_cedarling_update_token.java
 
-```
+```java
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.type.token.UpdateTokenType;

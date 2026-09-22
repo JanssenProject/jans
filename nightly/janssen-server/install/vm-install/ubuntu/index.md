@@ -1,207 +1,172 @@
 # Ubuntu Janssen Installation
 
-Before you install, check the [VM system requirements](https://docs.jans.io/nightly/janssen-server/install/vm-install/vm-requirements/index.md).
+Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Install the Package
 
 ### Ubuntu 24.04
 
-- Download the release package from the GitHub Janssen Project [Releases](https://github.com/JanssenProject/jans/releases/latest)
+- Download the release package from the GitHub Janssen Project
+[Releases](https://github.com/JanssenProject/jans/releases/latest)
 
-  Command
-
-  ```
-  wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu24.04_amd64.deb -P /tmp
-  ```
+    ```shell title="Command"
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
+    ```
 
 - Go to `/tmp` directory:
 
-  Command
-
-  ```
-  cd /tmp
-  ```
+    ```bash title="Command"
+    cd /tmp
+    ```
 
 - Verify the cryptographic signature using cosign (primary verification):
 
-  Note
+    !!! Note
+        Install the [cosign CLI](https://docs.sigstore.dev/cosign/system_config/installation/) if not already installed.
 
-  Install the [cosign CLI](https://docs.sigstore.dev/cosign/system_config/installation/) if not already installed.
+    - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
-  - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
+        ```bash title="Command"
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu24-replace-janssen-version-stable.bundle -P /tmp
+        ```
 
-    Command
+    - Verify the signature:
 
-    ```
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu24-0.0.0-nightly.bundle -P /tmp
-    ```
+        ```bash title="Command"
+        cosign verify-blob \
+          --bundle jans-ubuntu24-replace-janssen-version-stable.bundle \
+          --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
+          --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+          jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
+        ```
 
-  - Verify the signature:
+        Output similar to below confirms the package was signed by the Janssen CI pipeline:
 
-    Command
-
-    ```
-    cosign verify-blob \
-      --bundle jans-ubuntu24-0.0.0-nightly.bundle \
-      --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
-      --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-      jans_0.0.0-nightly.ubuntu24.04_amd64.deb
-    ```
-
-    Output similar to below confirms the package was signed by the Janssen CI pipeline:
-
-    Output
-
-    ```
-    Verified OK
-    ```
+        ```text title="Output"
+        Verified OK
+        ```
 
 - Optionally, verify integrity using the published checksum file (secondary check):
 
-  Command
+    ```bash title="Command"
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
+    ```
 
-  ```
-  echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum
-  ```
+    Output similar to below should confirm the integrity of the downloaded package.
 
-  Output similar to below should confirm the integrity of the downloaded package.
-
-  Output
-
-  ```
-  jans_0.0.0-nightly.ubuntu24.04_amd64.deb: OK
-  ```
+    ```text title="Output"
+    jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
+    ```
 
 - Install the package
 
-Command
-
-```
-sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
+```shell title="Command"
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 ```
 
 ### Ubuntu 22.04
 
-- Download the release package from the GitHub Janssen Project [Releases](https://github.com/JanssenProject/jans/releases/latest)
+- Download the release package from the GitHub Janssen Project
+[Releases](https://github.com/JanssenProject/jans/releases/latest)
 
-  Command
-
-  ```
-  wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu22.04_amd64.deb -P /tmp
-  ```
+    ```shell title="Command"
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
+    ```
 
 - Go to `/tmp` directory:
 
-  Command
-
-  ```
-  cd /tmp
-  ```
+    ```bash title="Command"
+    cd /tmp
+    ```
 
 - Verify the cryptographic signature using cosign (primary verification):
 
-  Note
+    !!! Note
+        Install the [cosign CLI](https://docs.sigstore.dev/cosign/system_config/installation/) if not already installed.
 
-  Install the [cosign CLI](https://docs.sigstore.dev/cosign/system_config/installation/) if not already installed.
+    - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
-  - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
+        ```bash title="Command"
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu22-replace-janssen-version-stable.bundle -P /tmp
+        ```
 
-    Command
+    - Verify the signature:
 
-    ```
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu22-0.0.0-nightly.bundle -P /tmp
-    ```
+        ```bash title="Command"
+        cosign verify-blob \
+          --bundle jans-ubuntu22-replace-janssen-version-stable.bundle \
+          --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
+          --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+          jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
+        ```
 
-  - Verify the signature:
+        Output similar to below confirms the package was signed by the Janssen CI pipeline:
 
-    Command
-
-    ```
-    cosign verify-blob \
-      --bundle jans-ubuntu22-0.0.0-nightly.bundle \
-      --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
-      --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-      jans_0.0.0-nightly.ubuntu22.04_amd64.deb
-    ```
-
-    Output similar to below confirms the package was signed by the Janssen CI pipeline:
-
-    Output
-
-    ```
-    Verified OK
-    ```
+        ```text title="Output"
+        Verified OK
+        ```
 
 - Optionally, verify integrity using the published checksum file (secondary check):
 
-  Command
+    ```bash title="Command"
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
+    ```
 
-  ```
-  echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum
-  ```
+    Output similar to below should confirm the integrity of the downloaded package.
 
-  Output similar to below should confirm the integrity of the downloaded package.
-
-  Output
-
-  ```
-  jans_0.0.0-nightly.ubuntu22.04_amd64.deb: OK
-  ```
+    ```text title="Output"
+    jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
+    ```
 
 - Install the package
 
-Command
-
-```
-sudo apt install  ./jans_0.0.0-nightly.ubuntu22.04_amd64.deb
+```shell title="Command"
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 ```
 
 Or,
 
-Command
-
-```
+```shell title="Command"
 dpkg -i jans_1.4.0-stable.ubuntu22.04_amd64.deb
 ```
 
 ### Ubuntu 20.04
 
-Ubuntu 20.04 is end-of-life and no longer supported
-
-Ubuntu 20.04 reached end-of-life in April 2025. Janssen packages and cosign-signed bundles are no longer published for this version. Please upgrade to [Ubuntu 22.04](#ubuntu-2204) or [Ubuntu 24.04](#ubuntu-2404).
+!!! warning "Ubuntu 20.04 is end-of-life and no longer supported"
+    Ubuntu 20.04 reached end-of-life in April 2025. Janssen packages and
+    cosign-signed bundles are no longer published for this version.
+    Please upgrade to [Ubuntu 22.04](#ubuntu-2204) or [Ubuntu 24.04](#ubuntu-2404).
 
 ## Run the setup script
 
 - Run the setup script in interactive mode:
 
-Command
-
-```
+```shell title="Command"
 sudo python3 /opt/jans/jans-setup/setup.py
 ```
 
-See more detailed [instructions](https://docs.jans.io/nightly/janssen-server/install/setup/index.md) on the setup script if you're confused how to answer any of the questions, for details about command line arguments, or you would prefer to use a properties file instead of interactive mode.
+See more detailed [instructions](../setup.md) on the setup script if you're
+confused how to answer any of the questions, for details about command line
+arguments, or you would prefer to use a properties file instead of
+interactive mode.
 
 ## Verify the Installation
 
-After the successful completion of setup process, [verify the system health](https://docs.jans.io/nightly/janssen-server/install/install-faq/#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
+After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
 ## Log in to Text User Interface (TUI)
 
 Begin configuration by accessing the TUI with the following command:
 
-Command
-
-```
+```shell title="Command"
 jans tui
 ```
 
-Full TUI documentation can be found [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md)
+Full TUI documentation can be found [here](../../config-guide/config-tools/jans-tui/README.md)
 
-If you have selected casa during installation you can access casa using url `https://<host>/jans-casa`
+If you have selected casa during installation you can access casa using url ```https://<host>/jans-casa```
 
 ## Let's Encrypt
-
 To enable communication with Janssen Server over tls (https) in production environment, Janssen Server needs details about CA certificate.
 
 To generate Let's Encrypt CA certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
@@ -210,26 +175,21 @@ To generate Let's Encrypt CA certificate follow this [let's encrypt](https://git
 
 Uninstall process involves two steps and removes all the Janssen Server components.
 
-Note
-
-For removal of the attached persistence store, please refer to [this note](https://docs.jans.io/nightly/janssen-server/install/install-faq/#does-the-janssen-server-uninstall-process-remove-the-data-store-as-well).
+!!! Note
+    For removal of the attached persistence store, please refer to [this note](../install-faq.md#does-the-janssen-server-uninstall-process-remove-the-data-store-as-well).
 
 1. Delete files installed by Janssen
 1. Remove and purge the `jans` package
 
 Use the command below to uninstall the Janssen server
 
-Command
-
-```
+```shell title="Command"
 sudo python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
 You'll see the following confirmation:
 
-Output
-
-```
+```text title="Output"
 This process is irreversible.
 You will lose all data related to Janssen Server.
 
@@ -263,17 +223,13 @@ Removing /etc/apache2/sites-available/https_jans.conf
 
 The command below removes and purges the `jans` package
 
-Command
-
-```
+```shell title="Command"
 apt-get --purge remove jans
 ```
 
 Which should result in the following:
 
-Output
-
-```
+```text title="Output"
 Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
@@ -287,6 +243,6 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~ubuntu20.04) ...
+Removing jans (replace-janssen-version~ubuntu20.04) ...
 Checking to make sure service is down...
 ```

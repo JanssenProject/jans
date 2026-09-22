@@ -29,58 +29,68 @@ The below are the steps required to setup client certificate authentication with
 
 ## Generate testing certificates
 
-Note
+!!! Note
+    This section assumes the usage of a *nix machine. Translate commands to your OS accordingly
 
-This section assumes the usage of a \*nix machine. Translate commands to your OS accordingly
-
-Note
-
-Downloads listed here will take up no more than 32MB of bandwidth
+!!! Note
+    Downloads listed here will take up no more than 32MB of bandwidth
 
 For this task, two approaches are covered here. You can choose any or even both for a more extensive testing:
 
 - Reusing already made testing certificates. These are PKI testing certificates published by the Computer Research Security Center of [NIST ITL](https://www.nist.gov/itl)
+
 - Creating a tiny CA through free, open-source tools provided by [Smallstep Labs](https://smallstep.com/). This approach is easy too - just need to run a few commands
 
 The steps given are supposed to be executed in a developer or administrative machine, not your Janssen server.
 
-Visit the PKI testing [site](https://csrc.nist.gov/projects/pki-testing) and download the test descriptions and test data of the Path Validation Testing Program. Extract the contents and in a new, separate directory, copy the following:
+=== "NIST PKI test certs"
 
-Signing certificates:
+    Visit the PKI testing [site](https://csrc.nist.gov/projects/pki-testing) and download the test descriptions and test data of the Path Validation Testing Program. Extract the contents and in a new, separate directory, copy the following:
 
-- GoodCACert.crt
-- TrustAnchorRootCertificate.crt
+    Signing certificates:
 
-End-entity certificates:
+    - GoodCACert.crt
+    - TrustAnchorRootCertificate.crt
 
-- ValidCertificatePathTest1EE.p12
-- InvalidEESignatureTest3EE.p12
-- ValidGeneralizedTimenotAfterDateTest8EE.p12
+    End-entity certificates:
 
-There are many end-entity certificates and they map to the tests described in the PDF file downloaded earlier. These three were just picked to exemplify configuration and testing of client certificate authentication in Jans.
+    - ValidCertificatePathTest1EE.p12
+    - InvalidEESignatureTest3EE.p12
+    - ValidGeneralizedTimenotAfterDateTest8EE.p12
 
-`crt` files are in DER (binary) format and they constitute the so called "certificate chain" or "certificate path". Here is how to generate the chain in PEM format:
+    There are many end-entity certificates and they map to the tests described in the PDF file downloaded earlier. These three were just picked to exemplify configuration and testing of client certificate authentication in Jans.
 
-```
-echo "-----BEGIN CERTIFICATE-----" > chain.pem
-base64 TrustAnchorRootCertificate.crt >> chain.pem
-echo "-----END CERTIFICATE-----" >> chain.pem
+    `crt` files are in DER (binary) format and they constitute the so called "certificate chain" or "certificate path". Here is how to generate the chain in PEM format:
 
-echo "-----BEGIN CERTIFICATE-----" >> chain.pem
-base64 GoodCACert.crt >> chain.pem
-echo "-----END CERTIFICATE-----" >> chain.pem
-```
+    ```bash
+    echo "-----BEGIN CERTIFICATE-----" > chain.pem
+    base64 TrustAnchorRootCertificate.crt >> chain.pem
+    echo "-----END CERTIFICATE-----" >> chain.pem
 
-In summary, the result is a file containing Base64-encoded certs of the root CA followed by the intermediate CA employed to sign the end-entity (user) certificates.
+    echo "-----BEGIN CERTIFICATE-----" >> chain.pem
+    base64 GoodCACert.crt >> chain.pem
+    echo "-----END CERTIFICATE-----" >> chain.pem
+    ```
 
-1. Download and install `step-ca` (a private online CA). Go to `https://github.com/smallstep/certificates/releases/latest` and pick the artifact that best matches your OS/platform
-1. Downlod and install `step-cli` (`step-ca` client). Go to `https://github.com/smallstep/cli/releases/latest` and pick the artifact that best matches your OS/platform
-1. Create a file containing the password to encrypt the CA keys, for instance `echo 'Admin1.' > capwd`
-1. Initialize a PKI without CA configuration: `step ca init --pki --name foobar --deployment-type standalone --password-file capwd`. After completion some feedback will be shown including the location of the root certificate and intermediate certificate. Keep those paths at hand
-1. Build the certificate chain file: `cat .step/certs/root_ca.crt .step/certs/intermediate_ca.crt > chain.pem`
-1. Create a private key and a certificate for `cn=Joe` (subject of the cert): `step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd --not-after=720h`. This command will create a certificate signed with the intermediate certificate
-1. Inspect the created cert: `step certificate inspect joe.crt`. Note the expiration is of 30 days and that "Client authentication" is explicitly part of the extended key usages
-1. Package Joe's certificate and key into a `p12` file: `step certificate p12 joe.p12 joe.crt joe.key`. You will be prompted two passwords: one for the `p12` file itself, and the password previously used to encrypt the private key of the user certificate
+    In summary, the result is a file containing Base64-encoded certs of the root CA followed by the intermediate CA employed to sign the end-entity (user) certificates.
+
+=== "Generating certs with Smallstep"
+
+    1. Download and install `step-ca` (a private online CA). Go to `https://github.com/smallstep/certificates/releases/latest` and pick the artifact that best matches your OS/platform
+
+    1. Downlod and install `step-cli` (`step-ca` client). Go to `https://github.com/smallstep/cli/releases/latest` and pick the artifact that best matches your OS/platform
+
+    1. Create a file containing the password to encrypt the CA keys, for instance `echo 'Admin1.' > capwd`
+
+    1. Initialize a PKI without CA configuration: `step ca init --pki --name foobar --deployment-type standalone --password-file capwd`. After completion some feedback will be shown including the location of the root certificate and intermediate certificate. Keep those paths at hand
+
+    1. Build the certificate chain file: `cat .step/certs/root_ca.crt .step/certs/intermediate_ca.crt > chain.pem`
+
+    1. Create a private key and a certificate for `cn=Joe` (subject of the cert): `step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd --not-after=720h`. This command will create a certificate signed with the intermediate certificate
+
+    1. Inspect the created cert: `step certificate inspect joe.crt`. Note the expiration is of 30 days and that "Client authentication" is explicitly part of the extended key usages
+
+    1. Package Joe's certificate and key into a `p12` file: `step certificate p12 joe.p12 joe.crt joe.key`. You will be prompted two passwords: one for the `p12` file itself, and the password previously used to encrypt the private key of the user certificate
 
 ### Import client certificates
 
@@ -92,28 +102,33 @@ If using the NIST PKI test certs, type **password**. Import all the `p12` files 
 
 For certificate authentication, the HTTP sever must configured so the `CertificateRequest` message is sent in the TLS handshake. This will make the client (web browser in this case) show a dialog for the user to pick one certificate from those already imported into the browser's certificate manager.
 
+![browser-dialog](../../assets/casa/plugins/cert-authn-browser_dialog.png)
+
 The instructions to setup this URL vary depending on the TLS version required and type of HTTP server. Here we provide guidance for Apache 2.4 with TLS 1.2 and 1.3. You can translate the Apache configuration directives directly to nginx. If you face issues or use a different server, please open a [discussion](https://github.com/JanssenProject/jans/discussions).
 
-Note
+!!! Note
+    The last available version of TLS is 1.3 and is highly recommended to use it.
 
-The last available version of TLS is 1.3 and is highly recommended to use it.
+=== "Apache 2.4 with TLS 1.3"
 
-This configuration requires creating a subdomain or opening a new port for serving HTTPs. There will be only one URL served in this case, e.g. `https://acme.co:444/`; all other content will respond with HTTP 404 (not found). Hitting this URL will bring up the native web browser dialog for selecting a user certificate.
+    This configuration requires creating a subdomain or opening a new port for serving HTTPs. There will be only one URL served in this case, e.g. `https://acme.co:444/`; all other content will respond with HTTP 404 (not found). Hitting this URL will bring up the native web browser dialog for selecting a user certificate.  
 
-The easiest way to set this up is adding a `VirtualHost` directive associated to a new port, for instance 444. This [snippet](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf) exemplifies a safe way to do so. Note you have to edit accordingly:
+    The easiest way to set this up is adding a `VirtualHost` directive associated to a new port, for instance 444. This [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf) exemplifies a safe way to do so. Note you have to edit accordingly:
 
-- The server name
-- The paths to the SSL certificate. This is the web serving certificate and is unrelated to the certificates used for authentication
+    - The server name
+    - The paths to the SSL certificate. This is the web serving certificate and is unrelated to the certificates used for authentication
 
-Transfer the edited file to `/etc/apache2/sites-enabled`. Note there is already a file named `https_jans.conf` with a `VirtualHost` for port 443 that you can use as a guide. Finally, add a `Listen 444` directive to file `/etc/apache2/ports.conf`.
+    Transfer the edited file to `/etc/apache2/sites-enabled`. Note there is already a file named `https_jans.conf` with a `VirtualHost` for port 443 that you can use as a guide. Finally, add a `Listen 444` directive to file `/etc/apache2/ports.conf`.
 
-This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
+=== "Apache 2.4 with TLS 1.2"
 
-In this case your cert pickup URL is `https://<your-host-name>/jans-casa/pl/cert-authn/index.zul`.
+    This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in  `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
+
+    In this case your cert pickup URL is `https://<your-host-name>/jans-casa/pl/cert-authn/index.zul`.
 
 ### Test
 
-Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL configured, e.g. `https://acme.co:444` (TLS 1.3) or `https://acme.co/jans-casa/pl/cert-authn/index.zul` (TLS 1.2). This will display a dialog like [this](https://docs.jans.io/nightly/assets/casa/plugins/cert-authn-browser_dialog.png) listing the certificates imported so far. Do not select anything and close the browser window.
+Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL configured, e.g. `https://acme.co:444` (TLS 1.3) or `https://acme.co/jans-casa/pl/cert-authn/index.zul` (TLS 1.2). This will display a dialog like [this](../../assets/casa/plugins/cert-authn-browser_dialog.png) listing the certificates imported so far. Do not select anything and close the browser window.
 
 ## Deploy and configure the Agama project
 
@@ -121,10 +136,11 @@ The `cert-authn` Agama project is a utility project that allows administrators d
 
 - Display a login page where users are shown the option to present a certificate
 
-  - If the certificate is not mapped to an existing account, a new identity is created with the attributes found in the cert (automatic user registration). Then access to the application is granted
-  - If the certificate is mapped to an existing account, access to the application is granted to such user
+    - If the certificate is not mapped to an existing account, a new identity is created with the attributes found in the cert (automatic user registration). Then access to the application is granted
 
-- Display a login page as the above including the configured identity providers, if any, in case the [accounts linking](https://docs.jans.io/nightly/casa/plugins/accts-linking/account-linking-index/index.md) plugin is installed
+    - If the certificate is mapped to an existing account, access to the application is granted to such user
+
+- Display a login page as the above including the configured identity providers, if any, in case the [accounts linking](./accts-linking/account-linking-index.md) plugin is installed  
 
 - Offer users the ability to enroll a certificate when they are already logged into Casa
 
@@ -132,19 +148,27 @@ The `cert-authn` Agama project is a utility project that allows administrators d
 
 Offering users the login page and the account onboarding regarded above is up to administrators (optional feature).
 
-Note
+!!! Note
+    Instructions provided here assume usage of TUI. Do the equivalent in admin-ui or other configuration mechanism
 
-Instructions provided here assume usage of TUI. Do the equivalent in admin-ui or other configuration mechanism
+1. Download the certificate authentication Agama project archive: `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip`
 
-1. Download the certificate authentication Agama project archive: `https://github.com/JanssenProject/jans/releases/download/nightly/cert-authn-agama-0.0.0-nightly-project.zip`
 1. Transfer the zip file to a location in the server and deploy it. For example, if using TUI, go to Agama menu -> "Upload project". Wait one minute
+
 1. Scroll through the list of projects until `cert-authn` is highlighted
+
 1. Open the configuration management dialog (press `c`) and choose to export the sample configuration to a file on disk
+
 1. Edit property `certPickupUrl` of flow `io.jans.casa.cert.promptAndValidate` accordingly. This is the URL that displays the browser dialog for choosing a certificate
+
 1. If you did not [generate testing certificates](#generate-testing-certificates), i.e. already own some certs, create a file named `chain.pem` by concatenating the contents in PEM format of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included
+
 1. Compute a one-liner JSON string for the contents of `certChainPEM` property, for example: `sed -i.bak ':a;N;$!ba;s/\n/\\n/g' chain.pem`
+
 1. Optional. If integration with accounts linking plugin is desired, set `useAcctLinking` to `true` for flow `io.jans.casa.cert.oneStepAuthn`
+
 1. Optional. Reference an attribute mapping for account onboarding in property `mappingClassField` of flow `io.jans.casa.cert.standaloneOneStepAuthn`. More details [here](#how-does-account-onboarding-work)
+
 1. Save the JSON file and open again the configuration management dialog for the cert-authn Agama project. Import the resulting file
 
 The next **optional** step is assigning an icon to certificate authentication for the Casa selector page:
@@ -155,19 +179,22 @@ The next **optional** step is assigning an icon to certificate authentication fo
 
 1. Edit the file: in the `selector` section under `io.jans.casa.authn.main`, add:
 
-   ```
-   "io.jans.casa.authn.cert": {
-      "icon": "<span class='fa-layers fa-fw f2 mr1 nl2'><i class='far fa-circle' data-fa-transform='shrink-4 up-3 right-4'></i><i class='far fa-circle' data-fa-transform='shrink-5 up-3 right-4'></i><i class='far fa-circle' data-fa-transform='shrink-6 up-3 right-4'></i><i class='fas fa-bookmark' data-fa-transform='rotate-30 shrink-9 down-4'></i><i class='fas fa-bookmark' data-fa-transform='rotate--30 shrink-9 down-4 right-8'></i></span>",
-      "textKey": "casa.selector.certauthn"
-   }
-   ```
+    ```json
+    "io.jans.casa.authn.cert": {
+       "icon": "<span class='fa-layers fa-fw f2 mr1 nl2'><i class='far fa-circle' data-fa-transform='shrink-4 up-3 right-4'></i><i class='far fa-circle' data-fa-transform='shrink-5 up-3 right-4'></i><i class='far fa-circle' data-fa-transform='shrink-6 up-3 right-4'></i><i class='fas fa-bookmark' data-fa-transform='rotate-30 shrink-9 down-4'></i><i class='fas fa-bookmark' data-fa-transform='rotate--30 shrink-9 down-4 right-8'></i></span>",
+       "textKey": "casa.selector.certauthn"
+    }
+    ```
 
 1. Save the file, and import it back as the configuration for project `casa`
 
+
 ## Install the cert-authn plugin
 
-1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/nightly/cert-authn-0.0.0-nightly-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
+1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
+
 1. Wait one minute. In the admin console, navigate to the "Authentication methods" page. A new "User certificates" widget will appear. Enable the authentication method, drag it to the location (priority) desired, and hit "Save"
+
 1. Navigate to Casa main dashboard. A new menu item will appear for the certificate enrollment
 
 ## Update the Casa ACR
@@ -176,25 +203,31 @@ This step is required only if account onboarding via certificate attributes is d
 
 Note these instructions apply for VM-based installations. On containers-based environments, please open a GitHub discussion or a support ticket.
 
-1. Download file `https://github.com/JanssenProject/jans/releases/download/nightly/jans-scim-model-0.0.0-nightly.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
+1. Download file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-scim-model-replace-janssen-version.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
+
 1. Edit the file `/etc/default/jans-casa`: locate a segment that reads `-Dacr=` and assign `agama_io.jans.casa.cert.oneStepAuthn` as new value. Save the change
+
 1. Restart `jans-casa` and `jans-auth` services
 
 ## Testing
 
-Warning
-
-The dialog for users to pick a certificate from the already imported certificates do not behave the same for all browsers. In some cases, a browser will "cache" the selection and remember the choice for the whole browsing session or even for several days. Sometimes, the user can choose for how long the selection is remembered. You can always clear the SSL cache to make the prompt appear again. Instructions to do so vary.
+!!! Warning
+    The dialog for users to pick a certificate from the already imported certificates do not behave the same for all browsers. In some cases, a browser will "cache" the selection and remember the choice for the whole browsing session or even for several days. Sometimes, the user can choose for how long the selection is remembered. You can always clear the SSL cache to make the prompt appear again. Instructions to do so vary.
 
 ### Enrollment
 
 Use one or more testing users in Jans. Assign (enroll) testing certificates as desired. Here's how to do it for a single account:
 
 1. Ensure you have [imported](#import-client-certificates) the user certificates in `p12` format into the certificate manager of the given browser
+
 1. Login as the user and click on "Manage certificates" on the main dashboard
+
 1. Read the hints given for an effective enrollment. Click on the "Proceed" button
+
 1. The browser will be redirected to the configured cert pickup URL and a native dialog will appear. From here, choose one of the available certificates
+
 1. A message will appear acknowledging the certificate was successfully linked to the account. Click on "Return"
+
 1. The browser will be taken to the listing of currently enrolled certificates. A new entry will appear associated to the certificate previously chosen
 
 Testing can be extended to the following scenarios:
@@ -211,9 +244,13 @@ Once testing users have certificates enrolled, add other credentials like OTP so
 Here are steps for testing authentication for a given user (happy path):
 
 1. If there is a Casa session open, log out and try to login again
+
 1. Supply username and password
+
 1. On the selection page click on "user certificates". If this option does not appear, ensure you have properly followed [these](#install-the-cert-authn-plugin) steps
+
 1. The browser will be redirected to the configured cert pickup URL. If no dialog appears, the browser is reusing a previous selection. Close the window and start again, or flush the SSL cache
+
 1. Select one of the already enrolled certificates. Authentication should succeed
 
 Testing can be extended to the following scenarios where authentication should fail:
@@ -228,14 +265,16 @@ Testing can be extended to the following scenarios where authentication should f
 Having followed [these](#update-the-casa-acr) steps, visit the Casa login page.
 
 1. Click on the "Smart card | User certificate" option
+
 1. The browser will be redirected to the configured cert pickup URL and a native dialog will appear. From here, choose one of the available certificates
+
 1. You will be authenticated as the user who previously enrolled that cert, otherwise a new account has been created for the user. Check the user profile data (TUI or admin-ui) and see how attributes have been populated for the account
 
 ## FAQ
 
 ### Is the plugin compatible with smart cards?
 
-Yes. There is a simple demonstrative [tutorial](https://docs.jans.io/nightly/casa/plugins/cert-authn-tutorial/index.md) available.
+Yes. There is a simple demonstrative [tutorial](./cert-authn-tutorial.md) available.
 
 ### How to customize the browser dialog for not remembering the user choice?
 
@@ -257,11 +296,11 @@ The plugin can be run in versions 1.1.5 to 1.15.0 with a subtle update in the ap
 
 - Edit `web.xml` by inserting the following inside the `web-app` tag:
 
-  ```
-  <session-config>
-      <tracking-mode>COOKIE</tracking-mode>
-  </session-config>
-  ```
+    ```xml
+    <session-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+    ```
 
 - Save the file and update the war file: `jar -uf jans-casa.war WEB-INF/web.xml`
 
@@ -285,14 +324,15 @@ If the process is not completed in this timeframe, it will fail and the log will
 
 ### How does account onboarding work?
 
-Registering an account based on the information found in a certificate is done via attribute mappings: Config property `mappingClassField` of flow `io.jans.casa.cert.standaloneOneStepAuthn` points to a Java method found in class `io.jans.casa.certauthn.AttributeMappings` of the cert-authn Agama project. Such method takes a `Map<String, String>` as input and returns a `Map<String, String>` as well.
+Registering an account based on the information found in a certificate is done via attribute mappings:
+Config property `mappingClassField` of flow `io.jans.casa.cert.standaloneOneStepAuthn` points to a Java method found in class `io.jans.casa.certauthn.AttributeMappings` of the cert-authn Agama project. Such method takes a `Map<String, String>` as input and returns a `Map<String, String>` as well.
 
 The input data contains the key/value pairs found in the subject of the certificate. As an example, if the cert was issued to `CN=Joe, O=foobar`, then the map will look like:
 
-| Attribute Name | Value  |
-| -------------- | ------ |
-| `cn`           | Joe    |
-| `o`            | foobar |
+|Attribute Name|Value|
+|-|-|
+|`cn`|Joe|
+|`o`|foobar|
 
 Note attribute names are lowercased. Additionally, if there is a Subject Alternative Name (SAN) consisting of an e-mail, the input map will contain such value under attribute name `mail`.
 

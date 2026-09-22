@@ -4,12 +4,14 @@ The **Jans-Auth** server allows you to modify the session flow through this scri
 
 ## Interface
 
-The Application Session script implement the [ApplicationSessionType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/session/ApplicationSessionType.java) interface. This extends methods form the base script type in addition to adding new methods:
+The Application Session script implement
+the [ApplicationSessionType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/session/ApplicationSessionType.java)
+interface. This extends methods form the base script type in addition to adding new methods:
 
 ### Inherited Methods
 
 | Method header                                                    | Method description                                                                                                                                                                                         |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|:-----------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `def init(self, customScript, configurationAttributes)`          | This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc                                                                    |
 | `def destroy(self, configurationAttributes)`                     | This method is called once to destroy events. It can be used to free resource and objects created in the `init()` method                                                                                   |
 | `def getApiVersion(self, configurationAttributes, customScript)` | The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10 |
@@ -17,7 +19,7 @@ The Application Session script implement the [ApplicationSessionType](https://gi
 ### New methods
 
 | Method header                                                             | Method description                                                           |
-| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+|:--------------------------------------------------------------------------|------------------------------------------------------------------------------|
 | `def startSession(self, httpRequest, sessionId, configurationAttributes)` | Called when a session is started.                                            |
 | `def endSession(self, httpRequest, sessionId, configurationAttributes)`   | Called when a session is ended.                                              |
 | `def onEvent(self, event)`                                                | Called when a specific session event occurs..                                |
@@ -25,19 +27,19 @@ The Application Session script implement the [ApplicationSessionType](https://gi
 
 All methods return `true`/`false`, the server issues an error if this response is `false`.
 
-If parameters is not present then error has to be created and `false` returned. If all is good script has to return `true`.
-
+If parameters is not present then error has to be created and `false` returned. If all is good script has to
+return `true`.
 ### Objects
 
 | Object name               | Object description                                                                                                                                                                                                               |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|:--------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `customScript`            | [io.jans.model.custom.script.model.CustomScript](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java)                                            |
 | `context`                 | [io.jans.as.server.service.external.context.ExternalScriptContext](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalScriptContext.java) |
 | `sessionId`               | [io.jans.as.common.model.session.SessionId](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/common/src/main/java/io/jans/as/common/model/session/SessionId.java)                                               |
 | `event`                   | [io.jans.as.server.service.external.session.SessionEvent](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/session/SessionEvent.java)                   |
 | `httpRequest`             | jakarta.servlet.http.HttpServletRequest                                                                                                                                                                                          |
 | `jsonArray`               | org.json.JSONArray                                                                                                                                                                                                               |
-| `configurationAttributes` | java.util.MapSimpleCustomProperty>                                                                                                                                                                                               |
+| `configurationAttributes` | java.util.Map<String, [SimpleCustomProperty](https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java)>                                                             |
 
 ## Common Use Cases
 
@@ -48,7 +50,7 @@ If parameters is not present then error has to be created and `false` returned. 
 
 ### Script type: Python
 
-```
+```python
 from io.jans.model.custom.script.type.session import ApplicationSessionType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.orm import PersistenceEntryManager
@@ -131,6 +133,7 @@ class ApplicationSession(ApplicationSessionType):
         print "Application session. isFirstSession: True"
         return True
 ```
+
 
 ## Sample Script
 

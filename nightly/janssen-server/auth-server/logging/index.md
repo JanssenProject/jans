@@ -2,11 +2,11 @@
 
 All `jans-auth-server` log files are located in `/opt/jans/jetty/jans-auth/logs/`.
 
-Use [log levels](https://docs.jans.io/nightly/janssen-server/auth-server/logging/log-levels/index.md) to control noise of logs in [standard logs](https://docs.jans.io/nightly/janssen-server/auth-server/logging/standard-logs/index.md).
+Use [log levels](log-levels.md) to control noise of logs in [standard logs](standard-logs.md).
 
 Following AS configuration properties can be used to customize AS logging:
 
-- `loggingLevel` - Specify the [log levels](https://docs.jans.io/nightly/janssen-server/auth-server/logging/log-levels/index.md) of loggers
+- `loggingLevel` - Specify the [log levels](log-levels.md) of loggers
 - `loggingLayout` - Logging layout used for Jans Authorization Server loggers
 - `httpLoggingEnabled` - Enable/disable request/response logging filter. Disabled by default.
 - `disableJdkLogger` - Choose whether to disable JDK loggers
@@ -14,11 +14,12 @@ Following AS configuration properties can be used to customize AS logging:
 - `externalLoggerConfiguration` - The path to the external log4j2 logging configuration
 - `httpLoggingExcludePaths` - This list details the base URIs for which the request/response logging filter will not record activity
 
-AS has pre-defined set of [standard logs](https://docs.jans.io/nightly/janssen-server/auth-server/logging/standard-logs/index.md) which can be overwritten by own [log4j2 xml](https://docs.jans.io/nightly/janssen-server/auth-server/logging/custom-logs/index.md).
+AS has pre-defined set of [standard logs](standard-logs.md) which can be overwritten by own [log4j2 xml](custom-logs.md).
 
 AS under the hood is using `log4j2` and `slf4j` thus please reference [log4j configuration](https://logging.apache.org/log4j/2.x/manual/configuration.html) for available logging options.
 
-AS support [audit logs](https://docs.jans.io/nightly/janssen-server/auth-server/logging/audit-logs/index.md).
+AS support [audit logs](audit-logs.md).
+
 
 ## Have questions in the meantime?
 

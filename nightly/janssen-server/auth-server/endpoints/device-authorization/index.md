@@ -1,16 +1,14 @@
 # Device Authorization Endpoint
 
 ### Device Authorization endpoint
-
 The URI to invoke the Device Authorization Endpoint in Janssen Auth Server can be found by checking the introspection_endpoint claim of the OpenID Connect configuration response, typically deployed at `https://<my.jans.server>/.well-known/openid-configuration`
 
 `"device_authorization_endpoint" : "https://<my.jans.server>/jans-auth/restv1/device_authorization"`
 
 ### Invoking the endpoint in Device Authorization Flow
+The Device Authorization Grant defined by [RFC 8628](https://tools.ietf.org/html/rfc8628) contains a call to the Device Authorization endpoint in Step 2 of the diagram below. The details of the entire flow can be found in this [article](../oauth-features/device-grant.md)
 
-The Device Authorization Grant defined by [RFC 8628](https://tools.ietf.org/html/rfc8628) contains a call to the Device Authorization endpoint in Step 2 of the diagram below. The details of the entire flow can be found in this [article](https://docs.jans.io/nightly/janssen-server/auth-server/oauth-features/device-grant/index.md)
-
-```
+```mermaid
 sequenceDiagram
 autonumber 1
     title Oauth2.0 Device Authorization flow
@@ -41,7 +39,6 @@ autonumber 1
 ```
 
 **Request:**
-
 ```
 POST /restv1/device_authorization HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
@@ -50,9 +47,7 @@ Authorization: Basic MTIzLTEyMy0xMjM6WkE1aWxpTFFDYUR4
 
 client_id=123-123-123&scope=openid+profile+address+email+phone
 ```
-
 **Response:**
-
 ```
 HTTP/1.1 200
 Content-Length: 307

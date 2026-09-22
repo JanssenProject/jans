@@ -1,28 +1,44 @@
 # Janssen Config-API Configuration
 
-The Janssen Server provides multiple configuration tools to perform these tasks.
+The Janssen Server provides multiple configuration tools to perform these
+tasks.
 
-Use the command line to perform actions from the terminal. Learn how to use Jans CLI [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-cli/index.md) or jump straight to the [Using Command Line](#using-command-line)
+=== "Use Command-line"
 
-Use a fully functional text-based user interface from the terminal. Learn how to use Jans Text-based UI (TUI) [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) or jump straight to the [Using Text-based UI](#using-text-based-ui)
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
 
-Use REST API for programmatic access or invoke via tools like CURL or Postman. Learn how to use Janssen Server Config API [here](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/config-api/index.md) or Jump straight to the [Using Configuration REST API](#using-configuration-rest-api)
+=== "Use Text-based UI"
 
-## Using Command Line
+    Use a fully functional text-based user interface from the terminal. 
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](../config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
 
-In the Janssen Server, you can deploy and customize the Config-API Configuration using the command line. To get the details of Janssen command line operations relevant to Aonfig-API Configuration, you can check the operations under `ConfigurationConfigApi` task using the command below:
+=== "Use REST API"
 
-Command
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](../config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
 
-```
+##  Using Command Line
+
+
+In the Janssen Server, you can deploy and customize the Config-API Configuration using the
+command line. To get the details of Janssen command line operations relevant to
+Aonfig-API Configuration, you can check the operations under `ConfigurationConfigApi` task using the
+command below:
+
+
+```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --info ConfigurationConfigApi
 ```
 
 It will show the details of the available operation-ids for Config-API.
 
-Sample Output
-
-```
+```text title="Sample Output"
 /opt/jans/jans-cli/config-cli.py --info ConfigurationConfigApi
 Operation ID: get-config-api-properties
   Description: Gets config-api configuration properties.
@@ -37,15 +53,13 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <sche
 
 To get the properties of Janssen Config-API Configuration, run the command below:
 
-Command
-
-```
+```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id=get-config-api-properties
 ```
 
 It will return the result as below:
 
-```
+```json title="Sample Output" linenums="1"
 {
   "serviceName": "jans-config-api",
   "configOauthEnabled": true,
@@ -219,41 +233,35 @@ It will return the result as below:
 To update the configuration follow the steps below.
 
 1. [Get the current configuration](#get-the-current-config-api-configuration) and store it into a file for getting property to configure
+2. Copy the property you want to modify, for example, let say we want to add attribute **** to **userMandatoryAttributes**,
+ so prepare a json patch file in such a way that get current values, add the desired attribute as follows in file `config-api-patch.json`:
+ ```json title="Sample Output" linenums="1"
+ [
+  {
+    "op": "replace",
+    "path": "/userMandatoryAttributes",
+    "value": [
+      "mail",
+      "displayName",
+      "status",
+      "userPassword",
+      "givenName",
+      "gender"
+    ]
+  }
+ ]
+ ```
+ See  [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902) for details.
+3. Execute the following command to apply this patch:
+ ```bash title="Command"
+  /opt/jans/jans-cli/config-cli.py --operation-id=patch-config-api-properties --data ./config-api-patch.json
+ ```
+ Upon successful execution of the update, the Janssen Server responds with updated configuration.
 
-1. Copy the property you want to modify, for example, let say we want to add attribute ***\* to* \*userMandatoryAttributes**, so prepare a json patch file in such a way that get current values, add the desired attribute as follows in file `config-api-patch.json`:
+As another example, let us disable file extension validation in asset management,
+so our `config-api--assetmgt-patch.json` will be as follows:
 
-   ```
-   [
-    {
-      "op": "replace",
-      "path": "/userMandatoryAttributes",
-      "value": [
-        "mail",
-        "displayName",
-        "status",
-        "userPassword",
-        "givenName",
-        "gender"
-      ]
-    }
-   ]
-   ```
-
-   See [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902) for details.
-
-1. Execute the following command to apply this patch:
-
-   Command
-
-   ```
-    /opt/jans/jans-cli/config-cli.py --operation-id=patch-config-api-properties --data ./config-api-patch.json
-   ```
-
-   Upon successful execution of the update, the Janssen Server responds with updated configuration.
-
-As another example, let us disable file extension validation in asset management, so our `config-api--assetmgt-patch.json` will be as follows:
-
-```
+```json title="Sample Output" linenums="1"
 [
   {
     "op": "replace",
@@ -263,20 +271,26 @@ As another example, let us disable file extension validation in asset management
 ]
 ```
 
-## Using Text-based UI
+##  Using Text-based UI
 
-In the Janssen Server, you can manage Config-API Configuration using the [Text-Based UI](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) also.
+In the Janssen Server, you can manage Config-API Configuration using
+the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
 
-Command
-
-```
+```bash title="Command"
 sudo /opt/jans/jans-cli/jans_cli_tui.py
 ```
 
-Navigate to `Config API` section where administrators can update Config-API configurations in six sub-tabs, namely **Main**, **Agama**, **Plugins**, **Asset Management**, **Audit Log Conf**, **Data Format Conversion**, and **Auidit Logs**
+Navigate to `Config API` section where administrators can update Config-API configurations
+in six sub-tabs, namely **Main**, **Agama**, **Plugins**, **Asset Management**, **Audit Log Conf**,
+**Data Format Conversion**, and **Auidit Logs**
+
+
+![image](../../../assets/tui-config-api-main.png)
 
 ## Using Configuration REST API
 
-Janssen Server Configuration REST API exposes relevant endpoints for managing and configuring the Config-API Configuration. Endpoint details are published in the [Swagger document](https://docs.jans.io/nightly/janssen-server/reference/openapi/index.md), see endpoint `/api/v1/api-config`.
+Janssen Server Configuration REST API exposes relevant endpoints for
+managing and configuring the Config-API Configuration. Endpoint details
+are published in the [Swagger document](./../../reference/openapi.md), see endpoint `/api/v1/api-config`.

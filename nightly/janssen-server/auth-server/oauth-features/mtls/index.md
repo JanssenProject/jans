@@ -2,11 +2,19 @@
 
 ## What Is mTLS?
 
-**mTLS** is a process that establishes an encrypted [TLS](https://wikipedia.org/wiki/Transport_Layer_Security) connection in which both parties use X.509 digital certificates to authenticate each other. **mTLS** can help mitigate the risk of moving services to the cloud and can help prevent malicious third parties from imitating genuine apps.
+**mTLS** is a process that establishes an encrypted [TLS](https://wikipedia.org/wiki/Transport_Layer_Security)
+connection in which both parties use X.509 digital certificates
+to authenticate each other. **mTLS** can help mitigate the risk of moving services to the cloud and can help prevent
+malicious third parties from imitating genuine apps.
+
 
 ## Where Is mTLS Useful?
 
-Mutual client certificate authentication can be used any time the server needs to ensure the authenticity and validity of either a specific user or a specific device. For example, a client certificate can be issued to a company-owned laptop to identify and authorize it on a corporate network. Alternatively, a client certificate could be issued to an employee and stored on a smart card, which then allows the employee to gain access to applications or restricted areas of a building.
+Mutual client certificate authentication can be used any time the server needs to ensure the authenticity and validity
+of either a specific user or a specific device. For example, a client certificate can be issued to a company-owned
+laptop to identify and authorize it on a corporate network. Alternatively, a client certificate could be issued to an
+employee and stored on a smart card, which then allows the employee to gain access to applications or restricted areas
+of a building.
 
 In practice, mTLS can identify and authorize the following:
 
@@ -15,19 +23,30 @@ In practice, mTLS can identify and authorize the following:
 - Content delivery network (CDNs) or cloud security services to back-end web servers.
 - Business-to-business (B2B) data exchanges that use APIs.
 - Internet of Things (IoT) sensors, such as remote traffic cameras.
-- Microservice architectures in which each microservice must ensure that each component it communicates with is valid and not tampered with.
+- Microservice architectures in which each microservice must ensure that each component it communicates with is valid
+  and not tampered with.
 
-> For SPIFFE-workload client certificates (X.509-SVIDs), see [SPIFFE-Based Client Authentication](https://docs.jans.io/nightly/janssen-server/auth-server/oauth-features/spiffe-client-auth/index.md), which builds on the `tls_client_auth` setup described below.
+![mtls1.png](../../../assets/mtls1.png)
+
+> For SPIFFE-workload client certificates (X.509-SVIDs), see
+> [SPIFFE-Based Client Authentication](./spiffe-client-auth.md), which builds on the `tls_client_auth`
+> setup described below.
 
 ## mTLS in Jans Auth
 
 **Jans Auth** supports **mTLS**, and to configure it we must take these considerations into account:
 
 - During DCR client registration, the `token_endpoint_auth_method` field can receive 2 new values:
-  1. `tls_client_auth`: indicates that client authentication to the authorization server will occur with mutual TLS utilizing the PKI method of associating a certificate to a client.
-  1. `self_signed_tls_client_auth`: Indicates that client authentication to the authorization server will occur using mutual TLS with the client utilizing a self-signed certificate.
-- There is new client property `tls_client_auth_subject_dn` used to compare Subject DN of the certificate with configured value of client entry when authentication method is set to `tls_client_auth` (saved in tls_client_auth_subject_dn or oxAttributes on persistence layer).
-- If MTLS Authentication is used then `access_token` automatically saves certificate `S256` hash of certificates which can be validated by RP. If `access_token` is JWT then `x5t#S256` claim is added to payload of the token. Otherwise, token can be introspected.
+    1. `tls_client_auth`: indicates that client authentication to the authorization server will occur with mutual TLS
+       utilizing the PKI method of associating a certificate to a client.
+    2. `self_signed_tls_client_auth`: Indicates that client authentication to the authorization server will occur using
+       mutual TLS with the client utilizing a self-signed certificate.
+- There is new client property `tls_client_auth_subject_dn` used to compare Subject DN of the certificate with
+  configured value of client entry when authentication method is set to `tls_client_auth` (saved in
+  tls_client_auth_subject_dn or oxAttributes on persistence layer).
+- If MTLS Authentication is used then `access_token` automatically saves certificate `S256` hash of certificates which
+  can be validated by RP. If `access_token` is JWT then `x5t#S256` claim is added to payload of the token. Otherwise,
+  token can be introspected.
 
 ```
 {
@@ -46,11 +65,12 @@ In practice, mTLS can identify and authorize the following:
 
 ## Configuring Apache for mTLS
 
-The information below belongs to `apache` and web client (usually web browser) mutual authentication setup method. This also includes basic checks to be performed for the setup.
+The information below belongs to `apache` and web client (usually web browser) mutual authentication setup method. This
+also includes basic checks to be performed for the setup.
 
 Is `mod_ssl` installed: Run below command to confirm if the ssl module is installed.
 
-```
+```bash
 apachectl -M | grep ssl
 ```
 
@@ -61,7 +81,8 @@ root@jans:~# apachectl -M | grep ssl
 ssl_module (shared)
 ```
 
-Usually third party or Certbot SSL certs are used for web server ssl connections. In that case no extra configuration is necessary. But if we want to use self-signed certs, then follow on.
+Usually third party or Certbot SSL certs are used for web server ssl connections. In that case no extra configuration is
+necessary. But if we want to use self-signed certs, then follow on.
 
 ## Self-Signed SSL Certs
 
@@ -73,13 +94,13 @@ Now, we're covering the case if you want to deploy your own CA Cert.
 
 #### 2. Create a new directory to generate certificates.
 
-```
+```bash
 mkdir /etc/certs/mtlscert
 ```
 
 Change to the directory created.
 
-```
+```bash
 cd /etc/certs/mtlscert
 ```
 
@@ -87,7 +108,7 @@ cd /etc/certs/mtlscert
 
 Run below command:
 
-```
+```bash
 openssl req -newkey rsa:2048 -nodes -keyform PEM -keyout example-ca.key -x509 -days 3650 -outform PEM -out example-ca.crt
 ```
 
@@ -127,7 +148,7 @@ example-ca.crt  example-ca.key
 
 Run below command:
 
-```
+```bash
 openssl genrsa -out example.key 2048
 ```
 
@@ -152,7 +173,7 @@ example-ca.crt  example-ca.key  example.key
 
 Run below command:
 
-```
+```bash
 openssl req -new -key example.key -out example.csr
 ```
 
@@ -192,7 +213,7 @@ example-ca.crt  example-ca.key  example.csr  example.key
 
 Run below command:
 
-```
+```bash
 openssl x509 -req -in example.csr -CA example-ca.crt -CAkey example-ca.key -set_serial 100 -days 365 -outform PEM -out example.crt
 ```
 
@@ -223,11 +244,13 @@ SSLCertificateKeyFile /etc/certs/mtlscert/example.key
 SSLCACertificateFile /etc/certs/mtlscert/example-ca.crt
 ```
 
-It is critical to configure certificates validation on Apache 2 correctly, since actual validation of the certificates is performed by Apache 2. After Apache certificate validation is configured correctly, make sure there is client certificate forward to `jans-auth` application. `jans-auth` (AS) expects certificate in one of the following headers (in order of priority):
+It is critical to configure certificates validation on Apache 2 correctly, since actual validation of the certificates
+is performed by Apache 2. After Apache certificate validation is configured correctly, make sure there is client
+certificate forward to `jans-auth` application. `jans-auth` (AS) expects certificate in one of the following headers (in order of priority):
 
 1. `X-Forwarded-Client-Cert` - Used by Envoy/Istio (URL-encoded PEM format with metadata)
-1. `X-Forwarded-Tls-Client-Cert` - Used by Traefik (raw base64 without PEM delimiters)
-1. `X-ClientCert` - Legacy header (raw PEM format)
+2. `X-Forwarded-Tls-Client-Cert` - Used by Traefik (raw base64 without PEM delimiters)
+3. `X-ClientCert` - Legacy header (raw PEM format)
 
 ```
 <LocationMatch /jans-auth>
@@ -242,13 +265,13 @@ It is critical to configure certificates validation on Apache 2 correctly, since
 
 Now we must restart the Apache2 server.
 
-```
+```bash
 service apache2 restart
 ```
 
 To check if SSL cert on apache works:
 
-```
+```bash
 openssl s_client -connect yourdomain.com:443
 ```
 
@@ -258,7 +281,7 @@ openssl s_client -connect yourdomain.com:443
 
 Run below command:
 
-```
+```bash
 openssl genrsa -out example-cli.key 2048
 ```
 
@@ -283,7 +306,7 @@ example-ca.crt  example-ca.key  example-cli.key  example.crt  example.csr  examp
 
 Run below command:
 
-```
+```bash
 openssl req -new -key example-cli.key -out example-cli.csr
 ```
 
@@ -323,7 +346,7 @@ example-ca.crt  example-ca.key  example-cli.csr  example-cli.key  example.crt  e
 
 Run below command:
 
-```
+```bash
 openssl x509 -req -in example-cli.csr -CA example-ca.crt -CAkey example-ca.key -set_serial 101 -days 365 -outform PEM -out example-cli.crt
 ```
 
@@ -349,7 +372,7 @@ Some browsers need client certs to be in the format `pkcs12`.
 
 Run below command:
 
-```
+```bash
 openssl pkcs12 -export -inkey example-cli.key -in example-cli.crt -out example-cli.p12
 ```
 
@@ -374,11 +397,11 @@ Traefik uses the `X-Forwarded-Tls-Client-Cert` header to forward client certific
 
 ### Header Format Comparison
 
-| Proxy       | Header Name                   | Format                                                 |
-| ----------- | ----------------------------- | ------------------------------------------------------ |
-| Envoy/Istio | `X-Forwarded-Client-Cert`     | `Hash=...;Cert="<URL_ENCODED_PEM>";Subject="...";URI=` |
-| Traefik     | `X-Forwarded-Tls-Client-Cert` | Raw base64 (no PEM delimiters)                         |
-| Apache      | `X-ClientCert`                | Raw PEM with BEGIN/END markers                         |
+| Proxy | Header Name | Format |
+|-------|-------------|--------|
+| Envoy/Istio | `X-Forwarded-Client-Cert` | `Hash=...;Cert="<URL_ENCODED_PEM>";Subject="...";URI=` |
+| Traefik | `X-Forwarded-Tls-Client-Cert` | Raw base64 (no PEM delimiters) |
+| Apache | `X-ClientCert` | Raw PEM with BEGIN/END markers |
 
 Jans Auth Server automatically detects and parses all three formats, checking them in the order listed above.
 
@@ -387,9 +410,9 @@ Jans Auth Server automatically detects and parses all three formats, checking th
 We are going to run an mTLS example where we will perform the following flow:
 
 1. Register new client.
-1. Call `authorize` endpoint.
-1. Call `token` endpoint.
-1. Call `introspection` endpoint.
+2. Call `authorize` endpoint.
+3. Call `token` endpoint.
+4. Call `introspection` endpoint.
 
 Previously we need to configure the client's certificate in the browser of your choice.
 
@@ -399,6 +422,8 @@ Previously we need to configure the client's certificate in the browser of your 
 - In the `Your Certificates` section, click on `Import` button.
 - Select the certificate `example-cli.p12` and enter the password you set when generating it.
 
+![mtls2.png](../../../assets/mtls2.png)
+
 ### Firefox Settings
 
 - In the search bar go to `about:preferences#privacy`.
@@ -406,11 +431,16 @@ Previously we need to configure the client's certificate in the browser of your 
 - In the `Your Certificates` section, click on `Import` button.
 - Select the certificate `example-cli.p12` and enter the password you set when generating it.
 
+![mtls3.png](../../../assets/mtls3.png)
+
+![mtls4.png](../../../assets/mtls4.png)
+
 ### Solving the `curl` problem
 
-If you have `openssl` version `3.x.x`, most likely when you are trying to consume the `/.well-known/openid-configuration` endpoint.
+If you have `openssl` version `3.x.x`, most likely when you are trying to consume
+the `/.well-known/openid-configuration` endpoint.
 
-```
+```bash
 curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWORD> --location 'https://<YOUR_DOMAIN>/.well-known/openid-configuration'
 ```
 
@@ -421,7 +451,8 @@ root@jans~# curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWOR
 curl: (58) could not parse PKCS12 file, check password, OpenSSL error error:0308010C:digital envelope routines::unsupported
 ```
 
-To fix this error, edit the file `/etc/ssl/openssl.cnf` and make sure that these lines are uncommented and if they are not, add them:
+To fix this error, edit the file `/etc/ssl/openssl.cnf` and make sure that these lines are uncommented and if they are
+not, add them:
 
 ```
 openssl_conf = openssl_init
@@ -440,7 +471,8 @@ activate = 1
 activate = 1
 ```
 
-Once this change is done, you should be able to consume the `/.well-known/openid-configuration` endpoint without any problems
+Once this change is done, you should be able to consume the `/.well-known/openid-configuration` endpoint without any
+problems
 
 ```
 root@jans~# curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWORD> --location 'https://<YOUR_DOMAIN>/.well-known/openid-configuration'
@@ -464,7 +496,7 @@ root@jans~# curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWOR
 
 Run below command:
 
-```
+```bash
 curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWORD> --location 'https://<YOUR_DOMAIN>/jans-auth/restv1/register' \
 --header 'Content-Type: application/json' \
 --data '{
@@ -505,7 +537,7 @@ curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWORD> --locatio
 
 Response:
 
-```
+```json
 {
   "allow_spontaneous_scopes": false,
   "jwks": {
@@ -569,7 +601,7 @@ Response:
 
 To get the fields from `jwks` you can use the following command:
 
-```
+```bash
 openssl x509 -in example-cli.p12 -pubkey -noout | pem-jwk | jq '{kid: "your-kid", kty: .kty , alg: "RS256" , use: "sig", e: .e, n: .n }'
 ```
 
@@ -609,11 +641,13 @@ URL parameters:
 
 The field we need to obtain is the `code`.
 
+![mtls5.png](../../../assets/mtls5.png)
+
 ### 3. Call `token` endpoint
 
 Previously we have obtained the `code` field, we will use this value to call the endpoint `token`.
 
-```
+```bash
 curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWORD> --location 'https://<YOUR_DOMAIN>/jans-auth/restv1/token' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
 --data-urlencode 'grant_type=authorization_code' \
@@ -625,7 +659,7 @@ curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWORD> --locatio
 
 Response:
 
-```
+```json
 {
   "access_token": "eyJraWQiOiJjb25uZWN0X2NmNjBiZWZmLTU1MzUtNDllNS04MWQ5LTM5ZDM4ZmNlMWNhMF9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJNSGdqa2hnTktmZWF4ZUVEY0wycEt5c1EwVUQ4RDk1QUd5NFBGXzI2cmlnIiwiY29kZSI6ImE0NWE5ODI5LTFkMDQtNGQxNS05NjllLWRiMjk3Mzk4ZTdjMyIsImlzcyI6Imh0dHBzOi8vbWlsdG9uLWNoLWhhcmR5LW1pdGUuZ2x1dS5pbmZvIiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImNsaWVudF9pZCI6IjVkODM1NDA3LTFlZjMtNDQxZC04YWU2LTZiYmRkNTcyNzZjYyIsImF1ZCI6IjVkODM1NDA3LTFlZjMtNDQxZC04YWU2LTZiYmRkNTcyNzZjYyIsImFjciI6ImJhc2ljIiwieDV0I1MyNTYiOiJPeHRJQXRBMEMwTkwteTR2UmZLeDd6TExFZXhfWG1DelduUWJ4ejZUem5ZIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTY5ODE5NDczNiwiZXhwIjoxNjk4Mjc4MDQzLCJpYXQiOjE2OTgxOTY4MzIsInVzZXJuYW1lIjoiRGVmYXVsdCBBZG1pbiBVc2VyIn0.JpK7JYy6Avui3LNbxTKBYJW9fqjEIqijCXPw9fvqEO1kqO7AUozOEof00hPKzJo1Dh7VgGpY89MiAduDUoU3QCemtFsNSd1DCyExl2s3w5OF2mUm6nMzjaS377ZQQ39DAq91OGFFq_ISt4JIhWRf7_xUEvlLRAttTqxE5qp1ZYvgAYu07jbVJX8WqJvxYz3rZ3J-4kq2FLREunRf5KxYaHO-oKzrmhRVPTc_cj1vqwSfu8vRjLmx4P-eN7SgVNa0XmZ8WClLnmchucGBH6rYq3bXZWsOKixwLhno_2vPe1MmbK3XnNNBu_fm_bL2N5kgAwr9b-upoBJc08IyCje1vA",
   "refresh_token": "1e58e2c9-4175-4b3f-8170-65544b1a7c48",
@@ -641,7 +675,7 @@ Once we have obtained the `access_token` in `jwt(json web token)` format, we wil
 
 Run below command:
 
-```
+```bash
 curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWORD> --location 'https://<YOUR_DOMAIN>/jans-auth/restv1/introspection' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
@@ -651,7 +685,7 @@ curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWORD> --locatio
 
 Response:
 
-```
+```json
 {
   "sub": "MHgjkhgNKfeaxeEDcL2pKysQ0UD8D95AGy4PF_26rig",
   "iss": "https://<YOUR_DOMAIN>",
@@ -675,4 +709,5 @@ Response:
 
 ## Specification document
 
-For more details of the specification, you can have a look at the following link [OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens](https://datatracker.ietf.org/doc/html/rfc8705)
+For more details of the specification, you can have a look at the following
+link [OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens](https://datatracker.ietf.org/doc/html/rfc8705)

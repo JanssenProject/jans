@@ -8,7 +8,7 @@ The application logs are located at `/opt/jans/jetty/jans-casa/logs`. By default
 
 ### How do I custom brand Casa?
 
-We have a dedicated page covering the topic of custom branding [here](https://docs.jans.io/nightly/casa/administration/custom-branding/index.md).
+We have a dedicated page covering the topic of custom branding [here](./custom-branding.md).
 
 ### What ports are used by the application?
 
@@ -22,12 +22,11 @@ If you've followed the steps as described above, next time he attempts to log in
 
 ### How to adjust the issuer for OTP tokens
 
-When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in flow `io.jans.casa.authn.otp` part of Casa Agama project - you can use [TUI](https://docs.jans.io/nightly/janssen-server/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen) for this purpose. For example, you might want to set the `issuer` property to `ACME Dev` on your dev server, and `ACME, Inc.` on your production server.
+When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in flow `io.jans.casa.authn.otp` part of Casa Agama project - you can use [TUI](../../janssen-server/config-guide/auth-server-config/agama-project-configuration.md#agama-project-configuration-screen) for this purpose. For example, you might want to set the `issuer` property to `ACME Dev` on your dev server, and `ACME, Inc.` on your production server.
 
 ## Errors shown in the UI
 
 ### A page with a "Service Temporarily Unavailable" message appears when accessing the application
-
 This is the 503 HTTP error. There is an Apache server in front of the application and this means the reverse proxy couldn't establish a communication internally with the app. This usually happens when Casa hasn't started completely, so it's usually a matter of waiting a few seconds.
 
 ### An "Unauthorized access" error is shown when accessing the application
@@ -44,7 +43,7 @@ Once fixed, please restart the application. You will have to see a "WEBAPP INITI
 
 ### Admin console is not shown
 
-If you have logged in using an administrative account and cannot find any admin features in the UI ensure you have gone through these [steps](https://docs.jans.io/nightly/casa/administration/quick-start/#finish-configuration).
+If you have logged in using an administrative account and cannot find any admin features in the UI ensure you have gone through these [steps](./quick-start.md#finish-configuration).
 
 ### A previously enabled method is not available anymore
 
@@ -60,7 +59,7 @@ For Time-based OTP, ensure the time of your server is correctly synchronized (us
 
 Big time differences can cause unsuccessful attempts to enroll TOTP credentials in Casa.
 
-For Event-based OTP (HOTP), ensure you are using a suitable value for `look ahead window` (we suggest at least 10). Check the configuration of flow `io.jans.casa.authn.otp` part of Casa Agama project - you can use [TUI](https://docs.jans.io/nightly/janssen-server/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen) for this purpose.
+For Event-based OTP (HOTP), ensure you are using a suitable value for `look ahead window` (we suggest at least 10). Check the configuration of flow `io.jans.casa.authn.otp` part of Casa Agama project - you can use [TUI](../../janssen-server/config-guide/auth-server-config/agama-project-configuration.md#agama-project-configuration-screen) for this purpose.
 
 ### The user interface is not showing any means to enroll credentials
 
@@ -70,7 +69,7 @@ In the administration console, ensure one or more authentication methods have be
 
 To turn 2FA on, the user has to have enrolled at least a certain number of credentials through the app. Only after this is met, he will be able to perform this action.
 
-In the administration console you can specify the minimum number of enrolled credentials needed to enable second factor authentication for users. Please check the [2FA Settings plugin](https://docs.jans.io/nightly/casa/plugins/2fa-settings/index.md) for more details.
+In the administration console you can specify the minimum number of enrolled credentials needed to enable second factor authentication for users. Please check the [2FA Settings plugin](../plugins/2fa-settings.md) for more details.
 
 ## My problem is not listed here
 

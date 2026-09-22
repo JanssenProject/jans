@@ -10,11 +10,9 @@ This section covers how to configure, protect, and monitor the Janssen Server SC
 
 ## Installation
 
-The API is available as a component of the Janssen Server. Upon [installation](https://docs.jans.io/nightly/janssen-server/install/vm-install/vm-requirements/index.md) you can select if you want SCIM included in your environment. To add SCIM post-install do the following:
+The API is available as a component of the Janssen Server. Upon [installation](../install/vm-install/vm-requirements.md) you can select if you want SCIM included in your environment. To add SCIM post-install do the following:
 
-Command
-
-```
+```bash title="Command"
 python3 /opt/jans/jans-setup/setup.py --install-scim
 ```
 
@@ -26,14 +24,14 @@ Throughout this document, you will notice endpoints are prefixed with path: `/ja
 
 Clearly, this API must not be anonymously accessed. However, the basic SCIM standard does not define a specific mechanism to prevent unauthorized requests to endpoints. There are just a few guidelines in section 2 of [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) concerned with authentication and authorization.
 
-- OAUTH, This is the default and recommended mechanism
-- BYPASS
+* OAUTH, This is the default and recommended mechanism
+* BYPASS
 
-To know more about OAuth protection mode please visit [here](https://docs.jans.io/nightly/janssen-server/scim/oauth-protection/index.md). The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. Depending on the operation, these tokens must have certain scopes for the operations to be authorized. We need a client to get Bearer token.
+To know more about OAuth protection mode please visit [here](./oauth-protection.md). The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. Depending on the operation, these tokens must have certain scopes for the operations to be authorized. We need a client to get Bearer token.
 
 ## API documentation at a glance
 
-[SCIM API](https://docs.jans.io/nightly/janssen-server/reference/openapi/index.md) doc page describes about our implementation of SCIM. The API has also been documented using OpenAPI (swagger) specification for the interested.
+[SCIM API](../../janssen-server/reference/openapi.md) doc page describes about our implementation of SCIM. The API has also been documented using OpenAPI (swagger) specification for the interested.
 
 ## Potential performance issues with Group endpoints
 
@@ -45,8 +43,8 @@ Another source of potential overhead stems from creation and modification of gro
 
 Currently there are two ways to lower the amount of database lookups required for SCIM group operations:
 
-- Explicitly excluding display names from responses
-- Pass the overhead bypass flag to skip members validations
+* Explicitly excluding display names from responses
+* Pass the overhead bypass flag to skip members validations
 
 The first approach consists of using the query parameter `excludedAttributes` (see [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644)) so that display names are neither retrieved from database nor sent in responses. A value like `members.display` does the job. Note the query parameter attributes can also be used for this purpose, for example with a value like `members.value` that will output only members' identifiers and ignore other non-required attributes.
 
@@ -54,8 +52,8 @@ This approach is particularly useful in search and retrievals when users' displa
 
 The second is a stronger approach that turns off validation of incoming members data: if the usage of a POST/PUT/PATCH operation implies adding members, their existence is not verified, they will simply get added. Here, the client application is responsible for sending accurate data. To use this approach add a query or header parameter named `Group-Overhead-Bypass` with any value. Note under this mode of operation:
 
-- Display names are never returned regardless of `attributes` or `excludedAttributes` parameters values
-- Remove/replace patch operations that involve display names in path filters are ignored, eg: `"path": "members[value eq \"2819c223\" or display eq \"Joe\"]"`
+* Display names are never returned regardless of `attributes` or `excludedAttributes` parameters values
+* Remove/replace patch operations that involve display names in path filters are ignored, eg: `"path": "members[value eq \"2819c223\" or display eq \"Joe\"]"`
 
 ## User Registration Process with SCIM
 
@@ -67,15 +65,16 @@ Here, you have some useful tips before you start:
 
 1. Choose a toolset you feel comfortable to work with. Keep in mind that you have to leverage the capabilities of your language/framework to issue complex HTTPS requests. Be sure that:
 
-   - You will be able to use at least the following verbs: GET, POST, PUT, and DELETE
-   - You can send headers in your requests as well as reading them from the service response
+      * You will be able to use at least the following verbs: GET, POST, PUT, and DELETE
 
-1. If not supported natively, choose a library to facilitate JSON content manipulation. As you have already noticed we have been dealing with JSON for requests as well as for responses. Experience shows that being able to map from objects (or data structures) of your language to Json and viceversa helps saving hours of coding.
+      * You can send headers in your requests as well as reading them from the service response
 
-1. Shape your data model early. List the attributes your application will operate upon and correlate with those found in the SCIM user schema. You can learn about the schema in [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644). At least, take a look at the JSON-formatted schema that your Jans Server shows: visit `https://<host-name>/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:User`
+2. If not supported natively, choose a library to facilitate JSON content manipulation. As you have already noticed we have been dealing with JSON for requests as well as for responses. Experience shows that being able to map from objects (or data structures) of your language to Json and viceversa helps saving hours of coding.
 
-1. You will have to manipulate database contents very often as you develop and run tests, thus, find a suitable tool for the task. In the case of LDAP, a TUI client is a good choice.
+3. Shape your data model early. List the attributes your application will operate upon and correlate with those found in the SCIM user schema. You can learn about the schema in [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644). At least, take a look at the JSON-formatted schema that your Jans Server shows: visit `https://<host-name>/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:User`
 
-1. Always check your [logs](https://docs.jans.io/nightly/janssen-server/scim/logs/index.md).
+4. You will have to manipulate database contents very often as you develop and run tests, thus, find a suitable tool for the task. In the case of LDAP, a TUI client is a good choice.
 
-1. In this user management guide with SCIM, we have already touched upon the fundamentals of SCIM in Jans Server and shown a good amount of sample requests for manipulation of user information. However, keep in mind the SCIM spec documents are definitely the key reference to build working request messages, specially [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643), and [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644).
+5. Always check your [logs](./logs.md).
+
+6. In this user management guide with SCIM, we have already touched upon the fundamentals of SCIM in Jans Server and shown a good amount of sample requests for manipulation of user information. However, keep in mind the SCIM spec documents are definitely the key reference to build working request messages, specially [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643), and [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644).
