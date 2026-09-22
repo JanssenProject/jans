@@ -151,14 +151,6 @@ from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
 
-if base.snap:
-    try:
-        open('/proc/mounts').close()
-    except:
-        print(
-            "Please execute the following command\n  sudo snap connect jans-server:mount-observe :mount-observe\nbefore running setup. Exiting ...")
-        sys.exit()
-
 if paths.IAMPACKAGED:
     Config.output_dir = os.path.join(__STATIC_SETUP_DIR__, 'output')
     if not os.path.exists(Config.output_dir):
@@ -362,10 +354,9 @@ def main():
                 jansInstaller.configureSystem()
                 jansInstaller.make_salt()
 
-                if not base.snap:
-                    jreInstaller.start_installation()
-                    jettyInstaller.start_installation()
-                    jythonInstaller.start_installation()
+                jreInstaller.start_installation()
+                jettyInstaller.start_installation()
+                jythonInstaller.start_installation()
 
                 jansInstaller.generate_smtp_config()
                 jansInstaller.copy_scripts()
@@ -373,9 +364,8 @@ def main():
                 jansInstaller.render_templates()
                 jansInstaller.render_configuration_template()
 
-                if not base.snap:
-                    jansInstaller.update_hostname()
-                    jansInstaller.set_ulimits()
+                jansInstaller.update_hostname()
+                jansInstaller.set_ulimits()
 
                 jansInstaller.copy_output()
                 jansInstaller.setup_init_scripts()

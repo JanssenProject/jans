@@ -1,0 +1,28 @@
+{
+  "name": "cedarling-wasm-examples",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/verify-examples.mjs",
+    "build:policy-archive": "node scripts/build-policy-archive.mjs",
+    "node:esm": "npm run build:policy-archive --silent && node node/esm.mjs",
+    "node:commonjs": "npm run build:policy-archive --silent && node node/commonjs.cjs",
+    "dev": "npm run build:policy-archive --silent && vite browser/react-vite",
+    "build:vite": "npm run build:policy-archive --silent && vite build browser/react-vite --outDir ../../.build/vite --emptyOutDir",
+    "build:webpack": "npm run build:policy-archive --silent && webpack --config browser/webpack/webpack.config.cjs",
+    "dev:webpack": "npm run build:webpack --silent && vite preview --outDir .build/webpack",
+    "dev:cloudflare": "npm run build:policy-archive --silent && wrangler dev --config edge/cloudflare/wrangler.jsonc"
+  },
+  "dependencies": {
+    "@janssenproject/cedarling_wasm": "0.0.468",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1",
+    "vite": "8.3.0",
+    "webpack": "5.110.3",
+    "webpack-cli": "7.2.3",
+    "wrangler": "4.131.1"
+  }
+}

@@ -62,15 +62,6 @@ pub struct ProcessedTokenClaims {
     pub claims: HashMap<String, Value>,
     /// The entity id for the resulting token entity.
     pub token_id: String,
-    /// Identifies which configured custom issuer this token belongs to. Resolved
-    /// against the custom-issuer index after processing. `None` falls back to the
-    /// issuer declared by the `mapping`'s custom metadata.
-    ///
-    /// TODO(#14747): `entity_type_name` is currently assumed unique across custom
-    /// issuers, which makes `mapping` sufficient to resolve the issuer and this hint
-    /// redundant. Keep it only if #14747 needs a runtime discriminator; otherwise
-    /// remove it.
-    pub issuer_id: Option<String>,
     /// Optional expiration (unix seconds). When set, the token is rejected once
     /// that time has passed and the value bounds the token-cache TTL, without the
     /// processor having to put an `exp` into [`claims`](Self::claims). Falls back to
@@ -80,21 +71,36 @@ pub struct ProcessedTokenClaims {
     /// attribute — so it satisfies a schema that declares `exp` required and is
     /// readable by a policy as `context.tokens.*.exp`, without a separate `exp` claim.
     pub expiration: Option<i64>,
-    /// Whether this validation result may be cached. Set to `false` for
-    /// revocation-sensitive tokens so every request re-runs `process`.
+    /// Whether this validation result may be cached. [`new`](Self::new) sets it to
+    /// `true`, so revocation-sensitive tokens must opt out explicitly via
+    /// [`with_cacheable(false)`](Self::with_cacheable) to make every request
+    /// re-run `process`.
     pub cacheable: bool,
 }
 
 impl ProcessedTokenClaims {
-    /// Build a cacheable result with no issuer hint or expiration.
+    /// Build a cacheable result with no expiration.
     pub fn new(claims: HashMap<String, Value>, token_id: impl Into<String>) -> Self {
         Self {
             claims,
             token_id: token_id.into(),
-            issuer_id: None,
             expiration: None,
             cacheable: true,
         }
+    }
+
+    /// Set whether this result may be cached. See [`cacheable`](Self::cacheable).
+    #[must_use]
+    pub fn with_cacheable(mut self, cacheable: bool) -> Self {
+        self.cacheable = cacheable;
+        self
+    }
+
+    /// Set the expiration (unix seconds). See [`expiration`](Self::expiration).
+    #[must_use]
+    pub fn with_expiration(mut self, exp: i64) -> Self {
+        self.expiration = Some(exp);
+        self
     }
 }
 
@@ -112,25 +118,9 @@ pub enum CustomTokenError {
     #[error("custom token processing timed out after {0:?}")]
     Timeout(Duration),
 
-    /// The processor returned an `issuer_id` (or the mapping resolved to one) that
-    /// is not registered as a custom issuer in the policy store.
-    #[error("custom issuer '{0}' not found among registered custom issuers")]
-    UnknownIssuer(String),
-
     /// No registered custom issuer declares the requested token type.
     #[error("no custom issuer declares token type '{0}'")]
     UnknownMapping(String),
-
-    /// The resolved custom issuer does not declare the requested token type. Only
-    /// reachable when a processor returns an `issuer_id` inconsistent with the
-    /// request's `mapping`.
-    #[error("custom issuer '{issuer}' does not declare token type '{mapping}'")]
-    UnknownTokenType {
-        /// Sanitized id of the resolved issuer.
-        issuer: String,
-        /// The requested Cedar entity type name.
-        mapping: String,
-    },
 
     /// The processor reported an expiration that has already passed, via
     /// [`ProcessedTokenClaims::expiration`] or an `exp` claim. Cedarling does not
@@ -176,13 +166,13 @@ pub(crate) struct ResolvedCustomIssuer {
 pub(crate) struct CustomIssuerIndex {
     /// sanitized issuer id -> resolved issuer
     by_id: HashMap<String, ResolvedCustomIssuer>,
-    /// `entity_type_name` (request mapping) -> sanitized issuer ids declaring it
+    /// `entity_type_name` (request mapping) -> sanitized issuer id declaring it.
     ///
-    /// TODO(#14747): `entity_type_name` is treated as globally unique across custom
-    /// issuers, so this is effectively a 1:1 map. The `Vec` only exists to carry the
-    /// not-yet-supported "several issuers declare the same mapping" case; collapse it
-    /// to a plain `String` once #14747 settles how such issuers are distinguished.
-    by_mapping: HashMap<String, Vec<String>>,
+    /// `build` rejects a second declarer of the same mapping via `DuplicateMapping`,
+    /// so at most one issuer can ever declare a given mapping: the type is a plain
+    /// `String` because this is exactly the invariant `HashMap<String, String>`
+    /// encodes.
+    by_mapping: HashMap<String, String>,
 }
 
 /// Errors from building a [`CustomIssuerIndex`] out of policy-store config.
@@ -227,7 +217,7 @@ impl CustomIssuerIndex {
         custom_issuers: &HashMap<String, CustomIssuerMetadata>,
     ) -> Result<Self, CustomIssuerIndexError> {
         let mut by_id = HashMap::with_capacity(custom_issuers.len());
-        let mut by_mapping: HashMap<String, Vec<String>> = HashMap::new();
+        let mut by_mapping: HashMap<String, String> = HashMap::new();
         let mut entity_keys: HashSet<String> = HashSet::new();
 
         for (name, meta) in custom_issuers {
@@ -252,9 +242,10 @@ impl CustomIssuerIndex {
                 if !entity_keys.insert(entity_key.clone()) {
                     return Err(CustomIssuerIndexError::DuplicateEntityKey(entity_key));
                 }
-                let declarers = by_mapping.entry(mapping.clone()).or_default();
-                declarers.push(issuer_id.clone());
-                if declarers.len() > 1 {
+                if by_mapping
+                    .insert(mapping.clone(), issuer_id.clone())
+                    .is_some()
+                {
                     return Err(CustomIssuerIndexError::DuplicateMapping(mapping.clone()));
                 }
             }
@@ -296,64 +287,41 @@ impl CustomIssuerIndex {
     /// decide fail-closed vs skip-and-continue on a processing error.
     ///
     /// The issuer is not yet known at call time (processing has not run, or has just
-    /// failed), so this is deliberately an OR across every issuer declaring the
-    /// mapping: fail-closed wins. Under the unique-`entity_type_name` assumption
-    /// there is only ever one such issuer anyway.
+    /// failed), so this resolves whatever sole issuer declares the mapping:
+    /// `build`'s `DuplicateMapping` check guarantees there is at most one.
     pub(crate) fn mapping_required(&self, mapping: &str) -> bool {
         self.by_mapping
             .get(mapping)
-            .into_iter()
-            .flatten()
-            .filter_map(|id| self.by_id.get(id))
-            .filter_map(|issuer| issuer.tokens_mappings.get(mapping))
-            .any(|token| token.required)
+            .and_then(|id| self.by_id.get(id))
+            .and_then(|issuer| issuer.tokens_mappings.get(mapping))
+            .is_some_and(|token| token.required)
     }
 
-    /// Resolve the custom issuer and the token metadata for a processed token.
-    /// Prefers an explicit `issuer_id` from the processor; otherwise falls back to
-    /// the sole issuer declaring `mapping`. Errors if unknown or ambiguous.
-    ///
-    /// TODO(#14747): with `entity_type_name` assumed unique, `mapping` alone always
-    /// resolves the issuer and the `issuer_id` hint is redundant — drop the parameter
-    /// (and `ProcessedTokenClaims::issuer_id`) unless #14747 keeps it as the runtime
-    /// discriminator.
+    /// Resolve the custom issuer and its token metadata for a processed token.
+    /// `mapping` identifies the sole issuer declaring it: `build` rejects a
+    /// duplicate declarer via `DuplicateMapping`, so the by-mapping index maps a
+    /// mapping to at most one issuer id. Errors with `UnknownMapping` when no
+    /// issuer declares the requested type.
     pub(crate) fn resolve(
         &self,
         mapping: &str,
-        issuer_id: Option<&str>,
     ) -> Result<(&ResolvedCustomIssuer, &CustomTokenMetadata), CustomTokenError> {
-        let issuer = if let Some(id) = issuer_id {
-            let sanitized = sanitize_issuer_name(id);
-            self.by_id
-                .get(&sanitized)
-                .ok_or_else(|| CustomTokenError::UnknownIssuer(id.to_string()))?
-        } else {
-            let ids = self
-                .by_mapping
-                .get(mapping)
-                .ok_or_else(|| CustomTokenError::UnknownMapping(mapping.to_string()))?;
-            match ids.as_slice() {
-                [only] => self
-                    .by_id
-                    .get(only)
-                    .ok_or_else(|| CustomTokenError::UnknownMapping(mapping.to_string()))?,
-                _ => {
-                    return Err(CustomTokenError::Processing(format!(
-                        "ambiguous mapping '{mapping}': multiple custom issuers declare it; \
-                         the processor must return an issuer_id"
-                    )));
-                },
-            }
-        };
+        let issuer_id = self
+            .by_mapping
+            .get(mapping)
+            .ok_or_else(|| CustomTokenError::UnknownMapping(mapping.to_string()))?;
+        let issuer = self
+            .by_id
+            .get(issuer_id)
+            .ok_or_else(|| CustomTokenError::UnknownMapping(mapping.to_string()))?;
 
-        // Also guards the explicit-`issuer_id` branch: a processor may not name an
-        // issuer that does not declare the requested type.
-        let token = issuer.tokens_mappings.get(mapping).ok_or_else(|| {
-            CustomTokenError::UnknownTokenType {
-                issuer: issuer.issuer_id.clone(),
-                mapping: mapping.to_string(),
-            }
-        })?;
+        // Defensive: the issuer declaring `mapping` also has it in its own
+        // `tokens_mappings` by construction; a miss here would indicate a
+        // structurally inconsistent index.
+        let token = issuer
+            .tokens_mappings
+            .get(mapping)
+            .ok_or_else(|| CustomTokenError::UnknownMapping(mapping.to_string()))?;
 
         Ok((issuer, token))
     }
@@ -516,26 +484,6 @@ mod tests {
     }
 
     #[test]
-    fn resolve_prefers_explicit_issuer_id() {
-        let mut issuers = HashMap::new();
-        issuers.insert("beta".to_string(), meta("M::T", false));
-        let index = CustomIssuerIndex::build(&issuers).expect("index should build");
-
-        let (issuer, _) = index
-            .resolve("M::T", Some("beta"))
-            .expect("an explicit issuer_id should resolve to that issuer");
-        assert_eq!(issuer.issuer_id, "beta");
-
-        let err = index
-            .resolve("M::T", Some("nope"))
-            .expect_err("an unknown issuer_id should fail to resolve");
-        assert!(
-            matches!(err, CustomTokenError::UnknownIssuer(ref id) if id == "nope"),
-            "an unknown issuer_id should surface as UnknownIssuer(nope), got {err:?}"
-        );
-    }
-
-    #[test]
     fn build_rejects_invalid_issuer_id() {
         let mut issuers = HashMap::new();
         issuers.insert("acme+corp".to_string(), meta("M::T", false));
@@ -596,26 +544,6 @@ mod tests {
     }
 
     #[test]
-    fn resolve_rejects_issuer_id_not_declaring_the_mapping() {
-        let mut issuers = HashMap::new();
-        issuers.insert("acme".to_string(), meta("Acme::CustomToken", false));
-        issuers.insert("beta".to_string(), meta("Beta::CustomToken", false));
-        let index = CustomIssuerIndex::build(&issuers).expect("index should build");
-
-        let err = index
-            .resolve("Acme::CustomToken", Some("beta"))
-            .expect_err("an issuer that does not declare the requested type should be rejected");
-        assert!(
-            matches!(
-                err,
-                CustomTokenError::UnknownTokenType { ref issuer, ref mapping }
-                    if issuer == "beta" && mapping == "Acme::CustomToken"
-            ),
-            "expected UnknownTokenType {{ issuer: beta, mapping: Acme::CustomToken }}, got {err:?}"
-        );
-    }
-
-    #[test]
     fn resolve_uses_sole_declarer_when_unambiguous() {
         let mut issuers = HashMap::new();
         issuers.insert(
@@ -625,8 +553,8 @@ mod tests {
         let index = CustomIssuerIndex::build(&issuers).expect("index should build");
 
         let (issuer, token) = index
-            .resolve("Acme::WhaleToken", None)
-            .expect("a mapping with a sole declarer should resolve without an issuer_id");
+            .resolve("Acme::WhaleToken")
+            .expect("a mapping with a sole declarer should resolve to that issuer");
         assert_eq!(
             issuer.issuer_id, "acme",
             "the sole declaring issuer should be resolved with its id sanitized"
@@ -638,11 +566,11 @@ mod tests {
 
         // Unknown mapping.
         let err = index
-            .resolve("Unknown::Type", None)
+            .resolve("Unknown::Type")
             .expect_err("an unknown mapping should fail to resolve");
         assert!(
             matches!(err, CustomTokenError::UnknownMapping(ref m) if m == "Unknown::Type"),
-            "an unknown mapping should surface as UnknownMapping(mapping), not UnknownIssuer, got {err:?}"
+            "an unknown mapping should surface as UnknownMapping(mapping), got {err:?}"
         );
     }
 }
