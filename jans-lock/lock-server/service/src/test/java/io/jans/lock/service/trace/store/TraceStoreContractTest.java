@@ -62,7 +62,7 @@ public abstract class TraceStoreContractTest {
 
 	// -- fixtures ---------------------------------------------------------------------------
 
-	private StoredTraceRecord newRecord(String producerId, String recordId, String execAuthority, String execId,
+	protected StoredTraceRecord newRecord(String producerId, String recordId, String execAuthority, String execId,
 			String chainProducerId, String chainInstanceId, String chainId, long seq, long receiptSeq,
 			List<String> capabilityIds, List<TokenRef> tokenRefs) {
 		RecordIdentity identity = new RecordIdentity(DOMAIN, producerId, recordId);
@@ -78,13 +78,13 @@ public abstract class TraceStoreContractTest {
 				tokenRefs, TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 3000L + receiptSeq);
 	}
 
-	private StoredTraceRecord newRecord(String producerId, String recordId, String execAuthority, String execId,
+	protected StoredTraceRecord newRecord(String producerId, String recordId, String execAuthority, String execId,
 			long seq, long receiptSeq) {
 		return newRecord(producerId, recordId, execAuthority, execId, producerId, "instance-1", "chain-1", seq,
 				receiptSeq, Collections.emptyList(), Collections.emptyList());
 	}
 
-	private ReceiptRow newReceiptRow(long seq, long receivedAtMs, String producerId, String recordId,
+	protected ReceiptRow newReceiptRow(long seq, long receivedAtMs, String producerId, String recordId,
 			TraceReceiptState state) {
 		return new ReceiptRow(DOMAIN, seq, receivedAtMs, producerId, recordId,
 				TraceKeys.recordKey(new RecordIdentity(DOMAIN, producerId, recordId)),
@@ -92,7 +92,7 @@ public abstract class TraceStoreContractTest {
 				"sha256:" + String.format("%064d", seq), state, "node-1");
 	}
 
-	private ProducerKey newProducerKey(String producerId, String kid) {
+	protected ProducerKey newProducerKey(String producerId, String kid) {
 		Map<String, String> jwk = new LinkedHashMap<>();
 		jwk.put("kty", "OKP");
 		jwk.put("crv", "Ed25519");
