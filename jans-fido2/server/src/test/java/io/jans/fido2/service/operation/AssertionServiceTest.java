@@ -9,6 +9,7 @@ import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.error.Fido2ErrorResponse;
 import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
@@ -75,6 +76,8 @@ class AssertionServiceTest {
     private DomainVerifier domainVerifier;
     @Mock
     private MetricService metricService;
+    @Mock
+    private LockAuditEventCollector lockAuditEventCollector;
     @Mock
     private ChallengeGenerator challengeGenerator;
     @Mock

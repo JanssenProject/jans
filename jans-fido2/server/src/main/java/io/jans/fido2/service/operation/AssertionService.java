@@ -8,7 +8,9 @@ package io.jans.fido2.service.operation;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,9 +34,11 @@ import io.jans.fido2.model.assertion.Response;
 import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.audit.LockAuditEvent;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.app.AbandonedCeremonyPolicy;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
@@ -109,6 +113,9 @@ public class AssertionService {
 
 	@Inject
 	private MetricService metricService;
+
+	@Inject
+	private LockAuditEventCollector lockAuditEventCollector;
 
 	// @Context is only honoured for JAX-RS components; this is a plain CDI bean,
 	// so the request has to come from the CDI built-in request-scoped bean instead.
@@ -476,8 +483,10 @@ public class AssertionService {
 		// Record metrics for successful authentication
 		recordAuthenticationSuccessMetrics(registrationData.getUsername(), httpRequest, startTime, authenticatorType);
 
+		lockAuditEventCollector.collect(buildAuthenticationAuditEvent(registrationData.getUsername(), registrationData, authenticatorType, null));
+
 		return assertionResultResponse;
-		
+
 		} catch (Exception e) {
 			// Give the ceremony a terminal status. Done before the metrics calls below because those
 			// are dispatched asynchronously, whereas this has to complete on the request thread.
@@ -489,9 +498,58 @@ public class AssertionService {
 			// Track fallback event for specific error types that might cause users to switch methods
 			recordFallbackForError(username, e);
 
+			lockAuditEventCollector.collect(buildAuthenticationAuditEvent(username, null, authenticatorType, e));
+
 			// Re-throw the original exception
 			throw e;
 		}
+	}
+
+	/**
+	 * Maps an authentication outcome onto the Lock Server audit-event wire shape. Package-visible so a
+	 * test can drive it directly without standing up {@code verify()}'s full dependency graph.
+	 * <p>
+	 * Mirrors {@code AttestationService#buildRegistrationAuditEvent}'s shape and the same privacy
+	 * decision: {@code registrationData} is only available on the success path (a failure can occur
+	 * before the credential lookup, e.g. an unresolved challenge), and on failure only the exception's
+	 * class name is recorded, never its message — several failure paths in this method embed the
+	 * challenge or credential/user identifiers directly in the message text.
+	 */
+	LockAuditEvent buildAuthenticationAuditEvent(String username, Fido2RegistrationData registrationData, String authenticatorType, Exception failure) {
+		LockAuditEvent event = new LockAuditEvent();
+		event.setEventTime(new Date());
+		event.setService("fido2");
+		event.setEventType("fido2_authentication");
+		event.setAction("authenticate");
+		event.setPrincipalId(username);
+
+		Map<String, String> context = new HashMap<>();
+		if (registrationData != null) {
+			if (registrationData.getRpId() != null) {
+				context.put("rpId", registrationData.getRpId());
+			}
+			if (registrationData.getOrigin() != null) {
+				context.put("origin", registrationData.getOrigin());
+			}
+			if (registrationData.getPublicKeyId() != null) {
+				context.put("credentialId", registrationData.getPublicKeyId());
+			}
+		}
+		if (authenticatorType != null) {
+			context.put("authenticatorAttachment", authenticatorType);
+		}
+
+		if (failure == null) {
+			event.setSeverityLevel("info");
+			event.setDecisionResult("ALLOW");
+		} else {
+			event.setSeverityLevel("warning");
+			event.setDecisionResult("DENY");
+			context.put("failureReason", failure.getClass().getSimpleName());
+		}
+		event.setContextInformation(context);
+
+		return event;
 	}
 
 	private int pendingCeremonyRetention() {
