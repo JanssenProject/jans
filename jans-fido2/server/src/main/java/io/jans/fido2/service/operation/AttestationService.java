@@ -28,6 +28,8 @@ import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.RpPolicyService;
 import io.jans.fido2.service.DataMapperService;
+import io.jans.fido2.model.audit.LockAuditEvent;
+import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
@@ -49,8 +51,11 @@ import org.slf4j.Logger;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -116,6 +121,9 @@ public class AttestationService {
 
 	@Inject
 	private io.jans.fido2.service.shared.MetricService metricService;
+
+	@Inject
+	private LockAuditEventCollector lockAuditEventCollector;
 
 	// @Context is only honoured for JAX-RS components; this is a plain CDI bean,
 	// so the request has to come from the CDI built-in request-scoped bean instead.
@@ -406,15 +414,70 @@ public class AttestationService {
 		// Record metrics for successful registration
 		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType);
 
+		lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, null));
+
 		return attestationResultResponse;
-		
+
 		} catch (Exception e) {
 			// Record metrics for failed registration
 			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
-			
+
+			lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, null, authenticatorType, e));
+
 			// Re-throw the original exception
 			throw e;
 		}
+	}
+
+	/**
+	 * Maps a registration outcome onto the Lock Server audit-event wire shape. Package-visible so a
+	 * test can drive it directly without standing up {@code verify()}'s full dependency graph.
+	 * <p>
+	 * {@code registrationData} is only available on the success path — a failure can occur before the
+	 * registration entry is even looked up, so the failure branch has nothing beyond
+	 * {@code username} (itself possibly still {@code null}) and the exception. Only the exception's
+	 * class name is recorded, not its message: several failure paths in this method embed identifying
+	 * detail (challenge, username) in the message text, and an audit trail is the wrong place to
+	 * duplicate that beyond what {@code principalId} already carries.
+	 */
+	LockAuditEvent buildRegistrationAuditEvent(String username, Fido2RegistrationData registrationData, String authenticatorType, Exception failure) {
+		LockAuditEvent event = new LockAuditEvent();
+		event.setEventTime(new Date());
+		event.setService("fido2");
+		event.setEventType("fido2_registration");
+		event.setAction("register");
+		event.setPrincipalId(username);
+
+		Map<String, String> context = new HashMap<>();
+		if (registrationData != null) {
+			if (registrationData.getRpId() != null) {
+				context.put("rpId", registrationData.getRpId());
+			}
+			if (registrationData.getOrigin() != null) {
+				context.put("origin", registrationData.getOrigin());
+			}
+			if (registrationData.getPublicKeyId() != null) {
+				context.put("credentialId", registrationData.getPublicKeyId());
+			}
+			if (registrationData.getAttestationType() != null) {
+				context.put("attestationType", registrationData.getAttestationType());
+			}
+		}
+		if (authenticatorType != null) {
+			context.put("authenticatorAttachment", authenticatorType);
+		}
+
+		if (failure == null) {
+			event.setSeverityLevel("info");
+			event.setDecisionResult("ALLOW");
+		} else {
+			event.setSeverityLevel("warning");
+			event.setDecisionResult("DENY");
+			context.put("failureReason", failure.getClass().getSimpleName());
+		}
+		event.setContextInformation(context);
+
+		return event;
 	}
 
 	private void prepareAuthenticatorSelection(PublicKeyCredentialCreationOptions credentialCreationOptions,
