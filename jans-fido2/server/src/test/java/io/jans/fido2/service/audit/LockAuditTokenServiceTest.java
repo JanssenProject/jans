@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.jans.as.client.TokenResponse;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -185,11 +186,12 @@ class LockAuditTokenServiceTest {
 	 * reachable without a live token endpoint, the same limitation as every test above it.
 	 */
 	@Test
+	@SuppressWarnings("unchecked")
 	void getAccessToken_ifCachedTokenIsUsable_reusesItWithoutTouchingConfigEncryptionOrLog() throws Exception {
 		LockAuditTokenService.CachedToken cached = new LockAuditTokenService.CachedToken("cached-token-xyz", Instant.now().plusSeconds(60));
 		Field cachedTokenField = LockAuditTokenService.class.getDeclaredField("cachedToken");
 		cachedTokenField.setAccessible(true);
-		cachedTokenField.set(lockAuditTokenService, cached);
+		((AtomicReference<LockAuditTokenService.CachedToken>) cachedTokenField.get(lockAuditTokenService)).set(cached);
 
 		String accessToken = lockAuditTokenService.getAccessToken();
 

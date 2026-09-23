@@ -8,6 +8,7 @@ package io.jans.fido2.service.audit;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -70,7 +71,14 @@ public class LockAuditTokenService {
 	private EncryptionService encryptionService;
 
 	private volatile String cachedTokenEndpoint;
-	private volatile CachedToken cachedToken;
+
+	/**
+	 * {@code AtomicReference} rather than a {@code volatile CachedToken} field — {@code volatile} only
+	 * guarantees visibility of the reference, and while {@link CachedToken} is itself immutable
+	 * (making a bare volatile field entirely sound here), static analysis has no way to verify that
+	 * for a user-defined type. This is the JDK type that says so directly.
+	 */
+	private final AtomicReference<CachedToken> cachedToken = new AtomicReference<>();
 
 	/**
 	 * @return a cached access token for {@link #LOCK_LOG_WRITE_SCOPE} if one is still usable, or a
@@ -82,7 +90,7 @@ public class LockAuditTokenService {
 	 *         issued a brand-new token — flagged in review on the PR that introduced this class.
 	 */
 	public String getAccessToken() {
-		CachedToken cached = this.cachedToken;
+		CachedToken cached = cachedToken.get();
 		if (cached != null && cached.isUsable()) {
 			return cached.accessToken;
 		}
@@ -95,7 +103,7 @@ public class LockAuditTokenService {
 	 * this one already refreshed it.
 	 */
 	private synchronized String requestNewToken() {
-		CachedToken cached = this.cachedToken;
+		CachedToken cached = cachedToken.get();
 		if (cached != null && cached.isUsable()) {
 			return cached.accessToken;
 		}
@@ -132,7 +140,7 @@ public class LockAuditTokenService {
 			return null;
 		}
 
-		this.cachedToken = cacheableToken(tokenResponse);
+		cachedToken.set(cacheableToken(tokenResponse));
 		return tokenResponse.getAccessToken();
 	}
 
