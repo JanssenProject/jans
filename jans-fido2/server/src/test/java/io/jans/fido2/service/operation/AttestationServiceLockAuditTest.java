@@ -65,6 +65,26 @@ class AttestationServiceLockAuditTest {
 	}
 
 	/**
+	 * A failure raised after {@code registrationData} is loaded (attestation verification, credential
+	 * ID checks, etc. all happen after the lookup) must not discard the rpId/origin context just
+	 * because the outcome is a failure — {@code verify()} passes whatever it actually has at the point
+	 * of failure, not unconditionally {@code null}.
+	 */
+	@Test
+	void buildRegistrationAuditEvent_onFailureAfterRegistrationDataLoaded_preservesRpIdAndOrigin() {
+		Fido2RegistrationData registrationData = new Fido2RegistrationData();
+		registrationData.setRpId("my.jans.server");
+		registrationData.setOrigin("https://my.jans.server");
+
+		LockAuditEvent event = attestationService.buildRegistrationAuditEvent("alice", registrationData, "platform",
+				new IllegalStateException("boom"));
+
+		assertEquals("DENY", event.getDecisionResult());
+		assertEquals("my.jans.server", event.getContextInformation().get("rpId"));
+		assertEquals("https://my.jans.server", event.getContextInformation().get("origin"));
+	}
+
+	/**
 	 * The audit trail must not duplicate identifying detail already carried in exception messages
 	 * elsewhere in this class (challenge, username) — only the exception's class name is recorded.
 	 */

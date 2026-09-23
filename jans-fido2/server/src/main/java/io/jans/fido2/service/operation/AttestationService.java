@@ -269,6 +269,9 @@ public class AttestationService {
 		long startTime = System.currentTimeMillis();
 		String username = null;
 		String authenticatorType = null;
+		// Declared outside the try so the failure path can report whichever registration it was
+		// working against. Stays null for failures raised before the challenge resolves to an entry.
+		Fido2RegistrationData registrationData = null;
 
 		try {
         // Apply external custom scripts
@@ -293,8 +296,8 @@ public class AttestationService {
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge)
 				.parallelStream().findAny().orElseThrow(() ->
 					errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE, String.format("Can't find associated attestation request by challenge '%s'", challenge)));
-		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
-		
+		registrationData = registrationEntry.getRegistrationData();
+
 		// Set username for metrics
 		username = registrationData.getUsername();
 
@@ -422,7 +425,7 @@ public class AttestationService {
 			// Record metrics for failed registration
 			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
 
-			lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, null, authenticatorType, e));
+			lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, e));
 
 			// Re-throw the original exception
 			throw e;
@@ -433,12 +436,15 @@ public class AttestationService {
 	 * Maps a registration outcome onto the Lock Server audit-event wire shape. Package-visible so a
 	 * test can drive it directly without standing up {@code verify()}'s full dependency graph.
 	 * <p>
-	 * {@code registrationData} is only available on the success path — a failure can occur before the
-	 * registration entry is even looked up, so the failure branch has nothing beyond
-	 * {@code username} (itself possibly still {@code null}) and the exception. Only the exception's
-	 * class name is recorded, not its message: several failure paths in this method embed identifying
-	 * detail (challenge, username) in the message text, and an audit trail is the wrong place to
-	 * duplicate that beyond what {@code principalId} already carries.
+	 * {@code registrationData} is {@code null} for a failure raised before the registration entry is
+	 * looked up (e.g. an invalid challenge) — those have nothing beyond {@code username} (itself
+	 * possibly still {@code null}) and the exception. A failure raised *after* the lookup carries the
+	 * same {@code registrationData} the eventual success path would have used, so its rpId/origin
+	 * context is preserved rather than discarded; {@code verify()} passes whatever it has at the point
+	 * of failure, not unconditionally {@code null}. Only the exception's class name is recorded, not
+	 * its message: several failure paths in this method embed identifying detail (challenge, username)
+	 * in the message text, and an audit trail is the wrong place to duplicate that beyond what
+	 * {@code principalId} already carries.
 	 */
 	LockAuditEvent buildRegistrationAuditEvent(String username, Fido2RegistrationData registrationData, String authenticatorType, Exception failure) {
 		LockAuditEvent event = new LockAuditEvent();

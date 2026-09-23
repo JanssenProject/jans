@@ -112,7 +112,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `lockAuditEndpoint` | String | `"https://lock.example.com/audit"` | Base URL of the Lock Server audit endpoint; `/log` and `/log/bulk` are derived from it. Required when `lockAuditEnabled` is `true`. |
 | `lockAuditClientId` | String | — | OAuth2 client ID used to obtain a token, via the client credentials grant, for the `https://jans.io/oauth/lock/log.write` scope. |
 | `lockAuditClientPassword` | String | — | OAuth2 client secret paired with `lockAuditClientId`. Encrypted at rest, same as other client secrets, and deliberately excluded from configuration logging. |
-| `lockAuditFlushInterval` | Integer | `20` | Interval in seconds between batched deliveries of buffered Lock Server audit events. Delivery is asynchronous and batched, never one HTTP call per ceremony. |
+| `lockAuditFlushInterval` | Integer | `20` | Interval in seconds between batched deliveries of buffered Lock Server audit events. Delivery is asynchronous and batched, never one HTTP call per ceremony. Read once at server startup — unlike `lockAuditEnabled`, `lockAuditEndpoint` and the credential properties, which are re-read on every flush, changing this value requires a server restart to take effect. |
 
 ### Lock Server audit delivery
 

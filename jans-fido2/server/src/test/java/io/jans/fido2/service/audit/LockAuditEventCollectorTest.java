@@ -125,6 +125,64 @@ class LockAuditEventCollectorTest {
 		verify(lockAuditClient, times(1)).postBatch(any());
 	}
 
+	/**
+	 * Under a sustained failure/probing load, delivery can lag behind collection long enough for the
+	 * buffer to hit its cap. Once full, {@code collect()} must drop the newest event and count it
+	 * rather than grow unboundedly — never throw, never block the caller.
+	 */
+	@Test
+	void collect_onceBufferIsFull_dropsAndCountsAdditionalEvents() {
+		for (int i = 0; i < LockAuditEventCollector.MAX_BUFFER_SIZE; i++) {
+			collector.collect(event("registration"));
+		}
+		assertEquals(0, collector.droppedEventCount());
+
+		collector.collect(event("registration"));
+		collector.collect(event("registration"));
+
+		assertEquals(2, collector.droppedEventCount());
+	}
+
+	/**
+	 * A single oversized delivery POST risks outright rejection by the Lock Server, losing the whole
+	 * drained batch at once. Draining more than {@code MAX_BATCH_SIZE} events must split delivery into
+	 * multiple bounded calls instead of one unbounded one.
+	 */
+	@Test
+	void processImpl_ifDrainedBatchExceedsChunkSize_deliversInBoundedChunks() {
+		int total = LockAuditEventCollector.MAX_BATCH_SIZE * 2 + 20;
+		for (int i = 0; i < total; i++) {
+			collector.collect(event("registration"));
+		}
+
+		collector.processImpl();
+
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<List<LockAuditEvent>> captor = ArgumentCaptor.forClass(List.class);
+		verify(lockAuditClient, times(3)).postBatch(captor.capture());
+		List<List<LockAuditEvent>> chunks = captor.getAllValues();
+		assertEquals(LockAuditEventCollector.MAX_BATCH_SIZE, chunks.get(0).size());
+		assertEquals(LockAuditEventCollector.MAX_BATCH_SIZE, chunks.get(1).size());
+		assertEquals(20, chunks.get(2).size());
+	}
+
+	/**
+	 * Chunks are delivered independently: one chunk being rejected must not prevent the remaining
+	 * chunks in the same drained batch from being attempted.
+	 */
+	@Test
+	void processImpl_ifOneChunkFails_stillAttemptsTheRemainingChunks() {
+		int total = LockAuditEventCollector.MAX_BATCH_SIZE + 10;
+		for (int i = 0; i < total; i++) {
+			collector.collect(event("registration"));
+		}
+		doThrow(new RuntimeException("lock unreachable")).doNothing().when(lockAuditClient).postBatch(any());
+
+		assertDoesNotThrow(() -> collector.processImpl());
+
+		verify(lockAuditClient, times(2)).postBatch(any());
+	}
+
 	private static LockAuditEvent event(String eventType) {
 		LockAuditEvent event = new LockAuditEvent();
 		event.setEventType(eventType);
