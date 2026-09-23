@@ -428,6 +428,7 @@ echo "::endgroup::"
 # the per-suite `mvn test` below resolves them from the local repo without rebuilding.
 mkdir -p test-reports aio-logs
 integration_timeouts=""
+integration_no_reports=""
 
 # ---------------------------------------------------------------------------
 # Run integration suites (against the AIO)
@@ -453,6 +454,10 @@ for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
       integration_timeouts="$integration_timeouts $dir" ;;
     *) echo "[warn] $dir reported failures" ;;
   esac
+  if [ "$rc" -eq 0 ] && [ -z "$(find "$dir" -path '*/target/surefire-reports/*.xml' -print -quit 2>/dev/null)" ]; then
+    echo "::error::$dir produced no test reports; its suites did not run"
+    integration_no_reports="$integration_no_reports $dir"
+  fi
   echo "----- tail $suitelog -----"; tail -n 25 "$suitelog" 2>/dev/null || true
   echo "::endgroup::"
 done
@@ -560,6 +565,10 @@ echo "::endgroup::"
 
 if [ -n "$integration_timeouts$unit_timeouts" ]; then
   echo "::error::incomplete results, suites timed out:$integration_timeouts$unit_timeouts"
+  exit 1
+fi
+if [ -n "$integration_no_reports" ]; then
+  echo "::error::suites produced no test reports:$integration_no_reports"
   exit 1
 fi
 echo "[info] run_aio_integration.sh complete"
