@@ -194,7 +194,7 @@ impl Cedarling {
         );
         let metrics = Arc::new(match metrics_mode {
             MetricsMode::Disabled => MetricsCollector::disabled(),
-            MetricsMode::Local | MetricsMode::LockTelemetry => MetricsCollector::new(0),
+            MetricsMode::Local | MetricsMode::LockTelemetry => MetricsCollector::new(),
         });
 
         let log = crate::log::init_logger(

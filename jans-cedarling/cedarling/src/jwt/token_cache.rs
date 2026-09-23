@@ -39,7 +39,7 @@ impl Default for TokenCache {
             100,
             true,
             Some(TEST_LOGGER.clone()),
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new()),
         )
     }
 }
@@ -321,7 +321,7 @@ mod tests {
     use std::collections::HashMap;
 
     fn token_cache(max_ttl: usize) -> TokenCache {
-        TokenCache::new(max_ttl, 100, true, None, Arc::new(MetricsCollector::new(0)))
+        TokenCache::new(max_ttl, 100, true, None, Arc::new(MetricsCollector::new()))
     }
 
     fn token(claims: HashMap<String, Value>) -> Arc<Token> {

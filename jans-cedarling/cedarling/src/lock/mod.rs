@@ -633,7 +633,7 @@ mod test {
         };
 
         // Test startup
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new());
         let logger = LockService::new(
             pdp_id,
             &config,
@@ -689,7 +689,7 @@ mod test {
         };
 
         // Test startup without SSA
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new());
         let logger = LockService::new(
             pdp_id,
             &config,
@@ -741,7 +741,7 @@ mod test {
         };
 
         // Test startup with invalid SSA should fail
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new());
         let result = LockService::new(
             pdp_id,
             &config,
@@ -802,7 +802,7 @@ mod test {
             ..Default::default()
         };
 
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new());
         let lock_svc = LockService::new(
             pdp_id,
             &config,
@@ -872,7 +872,7 @@ mod test {
             ..Default::default()
         };
 
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new());
         let _lock_svc = LockService::new(
             pdp_id,
             &config,
@@ -1107,7 +1107,7 @@ mod test {
             ..Default::default()
         };
 
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new());
         let _lock = LockService::new(
             pdp_id,
             &config,
@@ -1159,7 +1159,7 @@ mod test {
             ..Default::default()
         };
 
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new());
         let lock_service = LockService::new(
             pdp_id,
             &config,

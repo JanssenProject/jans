@@ -1051,7 +1051,7 @@ mod test {
             &JwtConfig::new_without_validation(),
             None,
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new()),
             HTTP_CLIENT.clone(),
         )
         .await
@@ -1449,7 +1449,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new()),
             HTTP_CLIENT.clone(),
         )
         .await
@@ -1489,7 +1489,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new()),
             HTTP_CLIENT.clone(),
         )
         .await
@@ -1519,7 +1519,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new()),
             HTTP_CLIENT.clone(),
         )
         .await
@@ -1588,7 +1588,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new()),
             HTTP_CLIENT.clone(),
         )
         .await
@@ -1657,7 +1657,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new()),
             HTTP_CLIENT.clone(),
         )
         .await
@@ -1703,7 +1703,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new()),
             HTTP_CLIENT.clone(),
         )
         .await
@@ -1749,7 +1749,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new()),
             HTTP_CLIENT.clone(),
         )
         .await
@@ -1844,7 +1844,7 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new()),
             HTTP_CLIENT.clone(),
         )
         .await
@@ -1907,7 +1907,7 @@ mod test {
             },
             Some(HashMap::from([("Jans".into(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new()),
             HTTP_CLIENT.clone(),
         )
         .await
