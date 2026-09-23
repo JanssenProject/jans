@@ -359,6 +359,38 @@ The Context Data API allows you to push external data into the Cedarling evaluat
   - `memory_alert_threshold`: Memory usage threshold percentage (from config)
   - `memory_alert_triggered`: Whether memory usage exceeds the alert threshold
 
+### Drain Metrics
+
+- `drain_metrics()`
+
+  Destructive read: returns a `MetricsSnapshot` with `policy_stats`,
+  `error_counters`, `operational_stats`, and the elapsed interval, then
+  resets the counters for the next interval.
+
+  Only available when `CEDARLING_METRICS_COLLECTION` is `enabled` at bootstrap
+  and no Lock telemetry ticker owns the collector. Returns a `LockTelemetry`
+  error whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+  server has no telemetry endpoint and metrics are not shipped anywhere: the
+  ticker is spawned based on the interval alone.
+
+  The interval is reported as each language's own duration type, so its name
+  and precision differ by binding:
+
+  | Binding | Field | Type |
+  |---------|-------|------|
+  | Rust | `interval` | `std::time::Duration` |
+  | Python | `interval` | `datetime.timedelta` |
+  | Kotlin | `interval` | `java.time.Duration` |
+  | Swift | `interval` | `TimeInterval` |
+  | Go | `Interval` | `time.Duration` |
+  | JavaScript / WASM | `interval_secs` | `Number`, fractional seconds |
+
+  Every binding reports the interval with sub-second precision. Serializing the
+  Rust snapshot yields fractional seconds under an `interval_secs` key.
+
+  The interval shipped to the Lock server is separate: the telemetry ticker
+  reports whole seconds, so sub-second precision is local to the binding.
+
 ### Schema Requirements
 
 To use the Context Data API, your Cedar schema must include a `data` field in the action's context. You must explicitly define the expected structure of the data — Cedar does not support arbitrary/untyped records.
