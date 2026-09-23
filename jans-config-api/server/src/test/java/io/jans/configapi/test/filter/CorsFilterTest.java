@@ -226,7 +226,8 @@ public class CorsFilterTest {
 
     @Test
     public void preflightOptions_disallowedOrigin_setsNoHeaders_doesNotChain() throws IOException, ServletException {
-        when(request.getMethod()).thenReturn("OPTIONS");
+        // Denied before the method is ever inspected, so this stub only states the scenario.
+        lenient().when(request.getMethod()).thenReturn("OPTIONS");
         when(request.getHeader(ORIGIN_HEADER)).thenReturn(DISALLOWED_ORIGIN);
         List<String> allowed = Arrays.asList(ALLOWED_ORIGIN);
         when(corsConfiguration.getAllowedOrigins()).thenReturn(allowed);
