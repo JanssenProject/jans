@@ -10,8 +10,9 @@
 use crate::{
     AuthorizeError, AuthorizeResult, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
     BatchAuthorizeUnsignedRequest, BatchItemError, BootstrapConfig, DataApi, DataEntry, DataError,
-    DataStoreStats, EntityData, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult,
-    PolicyId, PolicyMetadata, RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
+    DataStoreStats, EntityData, InitCedarlingError, LogStorage, MetricsError, MetricsSnapshot,
+    MultiIssuerAuthorizeResult, PolicyId, PolicyMetadata, RequestUnsigned, TokenInput,
+    TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::collections::HashMap;
@@ -178,6 +179,22 @@ impl Cedarling {
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub fn shut_down(&self) {
         self.runtime.block_on(self.instance.shut_down());
+    }
+
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval.
+    ///
+    /// Only available when `CEDARLING_METRICS_COLLECTION` is enabled at bootstrap
+    /// and no Lock telemetry ticker owns the collector. Returns
+    /// [`MetricsError::LockTelemetry`] whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has
+    /// no telemetry endpoint and metrics are not shipped anywhere.
+    ///
+    /// The returned `interval` is a [`std::time::Duration`] with sub-second
+    /// precision, and serializes as fractional seconds under the
+    /// `interval_secs` key.
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
+        self.instance.drain_metrics()
     }
 }
 

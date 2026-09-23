@@ -8,12 +8,13 @@ use cedarling::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest,
     BatchAuthorizeResponse as CedarBatchAuthorizeResponse, BatchAuthorizeUnsignedRequest,
     BatchItemError as CedarBatchItemError, BootstrapConfig, BootstrapConfigRaw, DataApi,
-    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage, PolicyId,
-    RequestUnsigned, TrustedIssuerLoadingInfo,
+    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage,
+    MetricsSnapshot as CedarMetricsSnapshot, PolicyId, RequestUnsigned, TrustedIssuerLoadingInfo,
 };
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
 use serde_wasm_bindgen::Error;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::Duration;
 use wasm_bindgen::prelude::*;
@@ -741,6 +742,28 @@ impl Cedarling {
             .map_err(Error::new)
     }
 
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval.
+    ///
+    /// Fails when `CEDARLING_METRICS_COLLECTION` is disabled or whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set (even if the Lock server
+    /// has no telemetry endpoint). `interval_secs` is fractional seconds,
+    /// so sub-second intervals are reported exactly.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const snapshot = cedarling.drainMetrics();
+    /// console.log(`Requests: ${snapshot.operational_stats.get("authz.requests_total")}`);
+    /// ```
+    #[wasm_bindgen(js_name = drainMetrics)]
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, Error> {
+        self.instance
+            .drain_metrics()
+            .map(Into::into)
+            .map_err(Error::new)
+    }
+
     /// Check whether a trusted issuer was loaded by issuer identifier.
     ///
     /// # Arguments
@@ -1357,6 +1380,78 @@ impl From<CedarDataStoreStats> for DataStoreStats {
             capacity_usage_percent: value.capacity_usage_percent,
             memory_alert_threshold: value.memory_alert_threshold,
             memory_alert_triggered: value.memory_alert_triggered,
+        }
+    }
+}
+
+/// A WASM wrapper for the Rust `cedarling::MetricsSnapshot` struct.
+/// Represents a snapshot of the collected telemetry metrics for the current
+/// interval. Destructive read: taking a snapshot resets the collected
+/// metrics, so use a single consumer.
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct MetricsSnapshot {
+    /// Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
+    #[wasm_bindgen(getter_with_clone)]
+    pub policy_stats: Map,
+    /// Classified error counters keyed by error metric key.
+    #[wasm_bindgen(getter_with_clone)]
+    pub error_counters: Map,
+    /// Operational counters and gauges (authorization, cache, JWT, data, lock).
+    #[wasm_bindgen(getter_with_clone)]
+    pub operational_stats: Map,
+    /// Duration of the snapshot interval in fractional seconds.
+    /// Exposed as `Number` (not `BigInt`) so plain JS arithmetic works.
+    pub interval_secs: f64,
+}
+
+#[wasm_bindgen]
+impl MetricsSnapshot {
+    /// Convert `MetricsSnapshot` to json string value.
+    ///
+    /// `policy_stats`, `error_counters` and `operational_stats` are converted
+    /// from `Map` to plain objects so `JSON.stringify` emits their entries.
+    #[wasm_bindgen(js_name = jsonString)]
+    pub fn json_string(&self) -> Result<String, Error> {
+        let obj = Object::new();
+        Reflect::set(
+            &obj,
+            &"policy_stats".into(),
+            &Object::from_entries(&self.policy_stats)?.into(),
+        )?;
+        Reflect::set(
+            &obj,
+            &"error_counters".into(),
+            &Object::from_entries(&self.error_counters)?.into(),
+        )?;
+        Reflect::set(
+            &obj,
+            &"operational_stats".into(),
+            &Object::from_entries(&self.operational_stats)?.into(),
+        )?;
+        Reflect::set(
+            &obj,
+            &"interval_secs".into(),
+            &JsValue::from_f64(self.interval_secs),
+        )?;
+        Ok(String::from(js_sys::JSON::stringify(&obj)?))
+    }
+}
+
+impl From<CedarMetricsSnapshot> for MetricsSnapshot {
+    fn from(value: CedarMetricsSnapshot) -> Self {
+        fn to_map(counters: HashMap<String, i64>) -> Map {
+            let map = Map::new();
+            for (key, counter) in counters {
+                map.set(&JsValue::from(key), &JsValue::from_f64(counter as f64));
+            }
+            map
+        }
+        Self {
+            policy_stats: to_map(value.policy_stats),
+            error_counters: to_map(value.error_counters),
+            operational_stats: to_map(value.operational_stats),
+            interval_secs: value.interval.as_secs_f64(),
         }
     }
 }

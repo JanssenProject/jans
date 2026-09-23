@@ -349,6 +349,24 @@ fmt.Printf("Total size: %d bytes\n", stats.TotalSizeBytes)
 fmt.Printf("Capacity usage: %.2f%%\n", stats.CapacityUsagePercent)
 ```
 
+#### Drain Metrics
+
+Destructive read: returns a metrics snapshot and resets the counters.
+
+```go
+snapshot, err := instance.DrainMetrics()
+if err != nil {
+    // Handle error: disabled collection or Lock telemetry owns the collector
+}
+fmt.Printf("Requests: %d\n", snapshot.OperationalStats["authz.requests_total"])
+fmt.Printf("Interval: %v\n", snapshot.Interval)
+```
+
+Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails whenever
+`CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has no
+telemetry endpoint. `Interval` is a `time.Duration` and crosses the binding as
+nanoseconds, so sub-second intervals are reported exactly.
+
 #### Using Data in Cedar Policies
 
 Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
