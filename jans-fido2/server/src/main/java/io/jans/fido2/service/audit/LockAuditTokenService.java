@@ -164,6 +164,11 @@ public class LockAuditTokenService {
 		boolean isUsable() {
 			return Instant.now().isBefore(expiresAt);
 		}
+
+		/** Package-visible so a test can assert the safety buffer was actually applied. */
+		Instant expiresAt() {
+			return expiresAt;
+		}
 	}
 
 	/**

@@ -16,6 +16,8 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 
+import java.lang.reflect.Field;
+import java.time.Duration;
 import java.time.Instant;
 
 import io.jans.as.client.TokenResponse;
@@ -23,9 +25,11 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.service.EncryptionService;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -115,6 +119,26 @@ class LockAuditTokenServiceTest {
 	}
 
 	/**
+	 * The previous test only proved a 300s-lifetime token is usable "now" — that assertion alone would
+	 * still pass if the 30-second safety-buffer subtraction were deleted entirely (a 300s-out expiry is
+	 * also "usable now"). This one pins that the buffer is actually subtracted from the cached expiry,
+	 * not just that the result happens to still be in the future.
+	 */
+	@Test
+	void cacheableToken_appliesTheSafetyBufferToTheCachedExpiry() {
+		TokenResponse tokenResponse = new TokenResponse();
+		tokenResponse.setAccessToken("token-abc");
+		tokenResponse.setExpiresIn(300);
+
+		LockAuditTokenService.CachedToken cached = LockAuditTokenService.cacheableToken(tokenResponse);
+
+		Instant expectedExpiry = Instant.now().plusSeconds(300 - 30);
+		long driftSeconds = Math.abs(Duration.between(expectedExpiry, cached.expiresAt()).getSeconds());
+		assertTrue(driftSeconds <= 2,
+				"expected expiresAt within 2s of now+270s (300s expiresIn minus the 30s buffer), was off by " + driftSeconds + "s");
+	}
+
+	/**
 	 * Some token endpoints omit {@code expires_in}. Without a trustworthy expiry, caching indefinitely
 	 * would risk serving a token past whatever lifetime the server actually gave it — safer to skip
 	 * the cache entirely for that response than to guess.
@@ -151,5 +175,25 @@ class LockAuditTokenServiceTest {
 		LockAuditTokenService.CachedToken cached = new LockAuditTokenService.CachedToken("token-abc", Instant.now().minusSeconds(1));
 
 		assertFalse(cached.isUsable());
+	}
+
+	/**
+	 * The caller-path proof that caching actually short-circuits {@code getAccessToken()}: with a
+	 * usable token already cached, no field on {@code fido2Configuration} is even read, so
+	 * {@code appConfiguration}/{@code encryptionService}/{@code log} see no interactions at all.
+	 * Reflection is the only way to seed the cache here — {@code requestNewToken()}'s own path is not
+	 * reachable without a live token endpoint, the same limitation as every test above it.
+	 */
+	@Test
+	void getAccessToken_ifCachedTokenIsUsable_reusesItWithoutTouchingConfigEncryptionOrLog() throws Exception {
+		LockAuditTokenService.CachedToken cached = new LockAuditTokenService.CachedToken("cached-token-xyz", Instant.now().plusSeconds(60));
+		Field cachedTokenField = LockAuditTokenService.class.getDeclaredField("cachedToken");
+		cachedTokenField.setAccessible(true);
+		cachedTokenField.set(lockAuditTokenService, cached);
+
+		String accessToken = lockAuditTokenService.getAccessToken();
+
+		assertEquals("cached-token-xyz", accessToken);
+		verifyNoInteractions(appConfiguration, encryptionService, log);
 	}
 }
