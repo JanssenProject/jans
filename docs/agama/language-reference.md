@@ -820,7 +820,7 @@ x."- wow!"
 ```
 
 </td>
-		<td>Access the value associated to the key named <code>-wow!</code></td>
+		<td>Access the value associated to the key named <code>- wow!</code></td>
 	</tr>
 	<tr>
 <td>

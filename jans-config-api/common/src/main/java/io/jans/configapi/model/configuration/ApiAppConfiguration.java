@@ -24,12 +24,24 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Protection mode for the Lock server (OAuth or Cedarling)")
     private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
 
-    @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `true`Default value `false`.")
+    @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `false`.")
     private boolean disableLoggerTimer;
+    
+    @Schema(description = "Flag to enable/disable User Role-Permission mapping check while authentication. Default value `true`.")
+    private boolean userRolePermissionValidationEnabled = true;
+    
+    @Schema(description = "Flag to enable/disable validating `User-inum` in Introspection response. Default value `true`.")
+    private boolean validateUserInumInIntrospectionFlag = true;
+        
+    @Schema(description = "Flag to enable/disable to get user-role in Introspection response. Default value `true`.")
+    private boolean fetchUserRoleInIntrospectionFlag = true;
 
+    @Schema(description = "Client IDs exempt from the User Role-Permission mapping check. Only honoured for tokens that carry no user, so a user token is always checked. Empty by default.")
+    private List<String> userRolePermissionExcludedClients;
+    
     @Schema(description = "Flag to enable/disable request audit. Default value `false`.")
     private boolean disableAuditLogger;
-
+ 
     @Schema(description = "Flag to enable/disable check if custom attribue is declared in schema. Default value `true`.")
     private boolean customAttributeValidationEnabled;
 
@@ -152,6 +164,38 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setDisableLoggerTimer(boolean disableLoggerTimer) {
         this.disableLoggerTimer = disableLoggerTimer;
+    }
+    
+    public boolean isUserRolePermissionValidationEnabled() {
+        return userRolePermissionValidationEnabled;
+    }
+
+    public void setUserRolePermissionValidationEnabled(boolean userRolePermissionValidationEnabled) {
+        this.userRolePermissionValidationEnabled = userRolePermissionValidationEnabled;
+    }
+    
+    public boolean isValidateUserInumInIntrospectionFlag() {
+        return validateUserInumInIntrospectionFlag;
+    }
+
+    public void setValidateUserInumInIntrospectionFlag(boolean validateUserInumInIntrospectionFlag) {
+        this.validateUserInumInIntrospectionFlag = validateUserInumInIntrospectionFlag;
+    }
+    
+    public boolean isFetchUserRoleInIntrospectionFlag() {
+        return fetchUserRoleInIntrospectionFlag;
+    }
+
+    public void setFetchUserRoleInIntrospectionFlag(boolean fetchUserRoleInIntrospectionFlag) {
+        this.fetchUserRoleInIntrospectionFlag = fetchUserRoleInIntrospectionFlag;
+    }
+
+    public List<String> getUserRolePermissionExcludedClients() {
+        return userRolePermissionExcludedClients;
+    }
+
+    public void setUserRolePermissionExcludedClients(List<String> userRolePermissionExcludedClients) {
+        this.userRolePermissionExcludedClients = userRolePermissionExcludedClients;
     }
 
     public boolean isDisableAuditLogger() {
@@ -417,6 +461,10 @@ public class ApiAppConfiguration implements Configuration {
     public String toString() {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
                 + " ,protectionMode=" + protectionMode + ", disableLoggerTimer=" + disableLoggerTimer
+                +" ,userRolePermissionValidationEnabled=" + userRolePermissionValidationEnabled
+                +" ,validateUserInumInIntrospectionFlag=" + validateUserInumInIntrospectionFlag
+                +" ,fetchUserRoleInIntrospectionFlag=" + fetchUserRoleInIntrospectionFlag
+                +" ,userRolePermissionExcludedClients=" + userRolePermissionExcludedClients
                 + ", disableAuditLogger=" + disableAuditLogger + ", customAttributeValidationEnabled="
                 + customAttributeValidationEnabled + ", acrValidationEnabled=" + acrValidationEnabled
                 + ", returnClientSecretInResponse=" + returnClientSecretInResponse

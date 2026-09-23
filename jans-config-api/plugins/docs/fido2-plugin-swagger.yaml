@@ -1658,6 +1658,12 @@ components:
           type: boolean
         fido2MetricsAggregationEnabled:
           type: boolean
+        trustedProxyEnabled:
+          type: boolean
+        trustedProxyIpRanges:
+          type: array
+          items:
+            type: string
         personCustomObjectClassList:
           type: array
           items:
@@ -1715,6 +1721,10 @@ components:
           type: boolean
         attestationMode:
           type: string
+        allowedTopOrigins:
+          type: array
+          items:
+            type: string
         rp:
           type: array
           items:
@@ -1735,6 +1745,23 @@ components:
           type: array
           items:
             type: string
+        policy:
+          $ref: "#/components/schemas/RequestedPartyPolicy"
+    RequestedPartyPolicy:
+      type: object
+      description: >-
+        Assurance policy for a single relying party, overriding the corresponding global setting. Every
+        field is optional; an omitted field falls back to the global value, so a relying party with no
+        policy behaves exactly as it did before per-RP policy existed.
+      properties:
+        attestationMode:
+          type: string
+          description: >-
+            Attestation mode for this relying party. Omitted falls back to the global attestationMode.
+          enum:
+            - disabled
+            - monitor
+            - enforced
     JsonNode:
       type: object
     Fido2MetricsAggregation:
@@ -1758,49 +1785,15 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
         metricsData:
           type: object
           additionalProperties:
             type: object
-        period:
-          type: string
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        registrationFailures:
-          type: integer
-          format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
         fallbackEvents:
           type: integer
           format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
-        registrationAvgDuration:
-          type: number
-          format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
+        period:
+          type: string
         deviceTypes:
           type: object
           additionalProperties:
@@ -1811,6 +1804,40 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        registrationAttempts:
+          type: integer
+          format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
+        authenticationFailures:
+          type: integer
+          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        authenticationSuccesses:
+          type: integer
+          format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

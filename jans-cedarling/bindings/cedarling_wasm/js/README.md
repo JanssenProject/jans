@@ -505,7 +505,7 @@ Bootstrap keys (`CEDARLING_*`), request JSON, result/data fields such as
 ## See Also
 
 - [JavaScript tutorial](https://docs.jans.io/stable/cedarling/tutorials/javascript/)
-- [Full API reference](https://docs.jans.io/stable/cedarling/tutorials/javascript/#defined-api)
+- [Full API reference](https://docs.jans.io/stable/cedarling/tutorials/javascript/#api-reference)
 - [Bootstrap-property reference](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/)
 - [Cedar Archive format](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#cedar-archive-cjar-format)
 - [Maintainer guide](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/js/docs/maintainer.md)

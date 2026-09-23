@@ -6,6 +6,7 @@ import (
         "strings"
         "time"
 
+        "github.com/hashicorp/go-cty/cty"
         "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
         "github.com/jans/terraform-provider-jans/jans"
 )
@@ -51,6 +52,119 @@ func fromSchemaResource(d *schema.ResourceData, entity any) error {
         }
 
         return decoder(getter, entity)
+}
+
+// configState describes whether an attribute is present in the practitioner's
+// configuration, which the raw config exposes even when the value is a zero value.
+type configState int
+
+const (
+        configUnavailable configState = iota
+        configNull
+        configSet
+)
+
+// attrConfigState reports whether key is declared in rawConfig. It returns
+// configUnavailable when the raw config cannot answer for the key, in which
+// case the caller has to fall back to the merged state.
+func attrConfigState(rawConfig cty.Value, key string) configState {
+
+        if rawConfig.IsNull() || !rawConfig.IsKnown() {
+                return configUnavailable
+        }
+
+        if !rawConfig.Type().IsObjectType() || !rawConfig.Type().HasAttribute(key) {
+                return configUnavailable
+        }
+
+        attr := rawConfig.GetAttr(key)
+        if !attr.IsKnown() {
+                return configUnavailable
+        }
+
+        if attr.IsNull() {
+                return configNull
+        }
+
+        return configSet
+}
+
+// mergeFromSchemaResource maps only the attributes that are declared in the
+// practitioner's configuration onto entity, leaving all other fields untouched.
+// Callers pass an entity populated from the server, so that attributes which
+// are not declared survive an update that replaces the whole configuration.
+func mergeFromSchemaResource(d *schema.ResourceData, entity any) error {
+
+        rawConfig := d.GetRawConfig()
+
+        getter := func(key string) (any, bool) {
+
+                switch attrConfigState(rawConfig, key) {
+                case configNull:
+                        return nil, false
+                case configSet:
+                        return pruneUndeclared(rawConfig.GetAttr(key), d.Get(key)), true
+                default:
+                        return d.GetOk(key)
+                }
+        }
+
+        return decoder(getter, entity)
+}
+
+// pruneUndeclared drops the attributes of a nested block that the practitioner
+// did not declare, so that decoding the block leaves those fields of the entity
+// at their current value instead of overwriting them with a zero value.
+func pruneUndeclared(cfg cty.Value, val any) any {
+
+        if cfg.IsNull() || !cfg.IsKnown() {
+                return val
+        }
+
+        switch typed := val.(type) {
+
+        case []any:
+                if !cfg.Type().IsListType() && !cfg.Type().IsTupleType() {
+                        return val
+                }
+
+                elements := cfg.AsValueSlice()
+                pruned := make([]any, len(typed))
+                for i, element := range typed {
+                        if i >= len(elements) {
+                                pruned[i] = element
+                                continue
+                        }
+                        pruned[i] = pruneUndeclared(elements[i], element)
+                }
+
+                return pruned
+
+        case map[string]any:
+                if !cfg.Type().IsObjectType() {
+                        return val
+                }
+
+                pruned := make(map[string]any, len(typed))
+                for key, value := range typed {
+                        if !cfg.Type().HasAttribute(key) {
+                                pruned[key] = value
+                                continue
+                        }
+
+                        attr := cfg.GetAttr(key)
+                        if attr.IsNull() {
+                                continue
+                        }
+
+                        pruned[key] = pruneUndeclared(attr, value)
+                }
+
+                return pruned
+
+        default:
+                return val
+        }
 }
 
 // patchFromResourceData creates a list of patch requests from the

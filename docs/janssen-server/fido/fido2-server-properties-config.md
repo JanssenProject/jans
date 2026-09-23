@@ -58,10 +58,26 @@ are skipped, and the first remaining address is recorded. Reading from the right
 can prepend any value before the real proxy appends to the chain — so the leftmost entry is only used when
 no closer untrusted hop exists, such as a single-entry header from a trusted proxy.
 
+`X-Forwarded-For` is the only header consulted in this mode. The older alternatives (`Proxy-Client-IP`,
+`WL-Proxy-Client-IP` and the `HTTP_*` variants) are ignored, because a reverse proxy overwrites
+`X-Forwarded-For` but passes other request headers through as the client sent them. Legacy mode still
+reads all of them. If nothing usable is found, the connecting address is recorded.
+
 Ranges accept IPv4 and IPv6 CIDR notation; a bare address is treated as a full-length mask. An
-IPv4-mapped IPv6 address such as `::ffff:10.1.2.3` matches an IPv4 range, since a dual-stack JVM may report
-the connecting address in that form. Both sides of a comparison must be IP literals — a hostname is
-rejected and logged rather than resolved, because this runs on the request path.
+IPv4-mapped IPv6 address such as `::ffff:10.1.2.3` matches an IPv4 range, since a dual-stack JVM may
+report the connecting address in that form.
+
+A range may also be *written* in that form. Its prefix is then read on whichever scale it can only
+mean, so an existing IPv4-scale range keeps working:
+
+| Prefix on a mapped range | Read as |
+| :--- | :--- |
+| `0`–`32` | IPv4 scale, as written — `::ffff:10.0.0.0/8` selects `10.0.0.0/8` |
+| `96`–`128` | IPv6 scale, less the 96 bits of the mapping — `::ffff:10.0.0.0/104` also selects `10.0.0.0/8` |
+| `33`–`95` | Rejected and logged: the prefix covers part of the mapping itself, so it means nothing on either scale |
+
+Both sides of a comparison must be IP literals — a hostname is rejected and logged rather than
+resolved, because this runs on the request path.
 
 > **Note on a common topology.** Where a reverse proxy runs on the same host, requests reach the FIDO2
 > server from `127.0.0.1`, and so do any sent directly to it. Trusting loopback therefore does not, on its
@@ -83,7 +99,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `metadataRefreshInterval` | Integer | `1296000` | Expiration time in seconds (e.g., 15 days) before checking and reloading the FIDO Alliance MDS TOC. |
 | <span id="servermetadatafolder">`serverMetadataFolder`</span> | String | `"/etc/jans/conf/fido2/server_metadata"` | Folder where local vendor metadata statement JSON files are placed manually. |
 | `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS384`, `RS512`, `RS65535`, `PS256`, `PS384`, `PS512`, `ES256`, `ES384`, `ES512`, `ESP256`, `ESP384`, `EdDSA`, `Ed25519`, `Ed448`, `ML-DSA-44`, `ML-DSA-65`, `ML-DSA-87` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. A recognised name the deployment cannot actually complete a registration with is logged at `ERROR` and left out of `pubKeyCredParams` — see [Advertised algorithms](#advertised-algorithms). |
-| `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. |
+| `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. Each entry may also carry a `policy` object — see [Per-relying-party policy](#per-relying-party-policy). |
 | `metadataServers` | Array of Objects | `[ { "url": "https://mds.fidoalliance.org/" } ]` | External FIDO Metadata Service endpoints to download statement catalogs. |
 | `disableMetadataService` | Boolean | `false` | If set to `true`, the FIDO2 server skips validating authenticators against the MDS3 service. |
 | `mdsDownloadStartupRetries` | Integer | `3` | Number of times the MDS TOC download is *retried* at server startup when the TOC blob is missing (a missing TOC prevents attestation validation). This is in addition to the initial attempt, so the default of `3` means up to 4 downloads. `0` disables retries. Retries stop early once the blob is present, and are skipped when the metadata server answers HTTP 429, since it has explicitly asked the server to back off. |
@@ -92,6 +108,52 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `enterpriseAttestation` | Boolean | `false` | Enables support for enterprise-specific hardware attestation profiles. |
 | `attestationMode` | String | `"monitor"` | Options are: `disabled` (skip attestation checks), `monitor` (log/validate but allow credentials if attestation is absent/unknown), and `enforced` (fail credential creation if attestation check fails). |
 | `allowedTopOrigins` | Array of Strings | `[]` | Full origins permitted to frame a cross-origin ceremony, each written as scheme, host and optional port (for example `https://portal.example.com`). Empty — the default — denies every framed ceremony. See [Cross-origin ceremonies](#cross-origin-ceremonies). |
+| `lockAuditEnabled` | Boolean | `false` | Enables delivery of passkey registration/authentication events to the Lock Server as audit evidence. See [Lock Server audit delivery](#lock-server-audit-delivery). |
+| `lockAuditEndpoint` | String | `"https://lock.example.com/audit"` | Base URL of the Lock Server audit endpoint; `/log` and `/log/bulk` are derived from it. Required when `lockAuditEnabled` is `true`. |
+| `lockAuditClientId` | String | — | OAuth2 client ID used to obtain a token, via the client credentials grant, for the `https://jans.io/oauth/lock/log.write` scope. |
+| `lockAuditClientPassword` | String | — | OAuth2 client secret paired with `lockAuditClientId`. Encrypted at rest, same as other client secrets, and deliberately excluded from configuration logging. |
+| `lockAuditFlushInterval` | Integer | `20` | Interval in seconds between batched deliveries of buffered Lock Server audit events. Delivery is asynchronous and batched, never one HTTP call per ceremony. |
+
+### Lock Server audit delivery
+
+When `lockAuditEnabled` is `true`, the server buffers passkey registration/authentication events and
+delivers them to the configured Lock Server's `/audit/log/bulk` endpoint on the `lockAuditFlushInterval`
+cadence, rather than one call per ceremony. A Lock Server that is unreachable, slow, or returns an error
+never affects the registration/authentication request itself — delivery is fire-and-forget, and a failed
+batch is dropped rather than retried inline.
+
+No signing, hashing, or chaining of the delivered events is performed; that is planned as later work, not
+part of this delivery path.
+
+!!! note
+    As of this release, the server only buffers and delivers events — nothing yet populates the buffer.
+    Registration and authentication ceremonies emitting into it is tracked separately and will be
+    reflected here once it lands, so `lockAuditEnabled: true` currently has no observable effect.
+
+### Per-relying-party policy
+
+An entry under `rp` may carry a `policy` object overriding the corresponding global setting for that
+relying party alone:
+
+```json
+{
+  "id": "high-assurance.example.com",
+  "origins": ["https://high-assurance.example.com"],
+  "policy": { "attestationMode": "enforced" }
+}
+```
+
+| Field | Falls back to |
+| :--- | :--- |
+| `attestationMode` | the global [`attestationMode`](#fido2-configuration-object-fido2configuration) |
+
+**An RP with no `policy`, or with the field unset, behaves exactly as it did before this existed** — the
+global value applies. The same is true for a ceremony whose origin matches no configured RP. Nothing needs
+changing on upgrade.
+
+Only `attestationMode` is settable per RP today. Further fields are added alongside the change that
+enforces them, so that anything listed here is a policy actually in effect rather than a value that is
+merely stored.
 
 ### Advertised algorithms
 

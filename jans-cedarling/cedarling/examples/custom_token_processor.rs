@@ -116,10 +116,8 @@ impl CustomTokenProcessor for ApiKeyProcessor {
         claims.insert("sub".to_string(), json!("api-key-user"));
         claims.insert("scope".to_string(), json!("admin"));
 
-        let mut processed = ProcessedTokenClaims::new(claims, "api-key-1");
         // Opt out of caching so a revoked key is re-checked on every request.
-        processed.cacheable = false;
-        Ok(processed)
+        Ok(ProcessedTokenClaims::new(claims, "api-key-1").with_cacheable(false))
     }
 }
 

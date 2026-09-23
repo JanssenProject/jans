@@ -10,8 +10,8 @@ use super::default_values::{
     default_enabled_feature_toggle, default_http_client_max_response_size_bytes,
     default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
     default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
-    default_status_list_refresh_interval_max, default_token_cache_capacity,
-    default_token_cache_max_ttl, default_true,
+    default_policy_store_max_file_size, default_status_list_refresh_interval_max,
+    default_token_cache_capacity, default_token_cache_max_ttl, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
@@ -517,6 +517,16 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_POLICY_STORE_REFRESH_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub policy_store_refresh_interval_secs: u64,
+
+    /// Maximum decompressed size, in bytes, of a single entry inside a `.cjar`
+    /// policy store archive. Bounds zip-bomb expansion. `0` disables the cap.
+    /// Default: 10 MB (`10485760`).
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_MAX_FILE_SIZE",
+        default = "default_policy_store_max_file_size",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub policy_store_max_file_size: u64,
 }
 
 impl Default for BootstrapConfigRaw {
@@ -564,6 +574,7 @@ fn get_cedarling_env_vars() -> HashMap<String, serde_json::Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
     use crate::jwt_config::{MIN_JWKS_REFRESH_SECS, MIN_STATUS_LIST_REFRESH_SECS};
     use std::{
         env,
@@ -845,6 +856,62 @@ mod tests {
                 );
             },
         );
+    }
+
+    #[test]
+    fn test_policy_store_max_file_size_and_http_cap_default_independently() {
+        with_env_vars(&[], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+            assert_eq!(
+                config.policy_store_max_file_size,
+                ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE,
+                "Policy store max file size should default to 10 MB"
+            );
+            assert_eq!(
+                config.http_client_max_response_size_bytes,
+                crate::HttpClientConfig::DEFAULT_MAX_RESPONSE_SIZE_BYTES,
+                "An unset HTTP cap must use its own default, not the archive cap"
+            );
+        });
+    }
+
+    #[test]
+    fn test_policy_store_max_file_size_from_env_var() {
+        with_env_vars(&[("CEDARLING_POLICY_STORE_MAX_FILE_SIZE", "2048")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+            assert_eq!(
+                config.policy_store_max_file_size, 2048,
+                "Policy store max file size should match environment value"
+            );
+        });
+    }
+
+    #[test]
+    fn test_policy_store_max_file_size_rejects_invalid_values() {
+        // `0` is the documented disable sentinel and stays valid; anything that
+        // isn't a non-negative integer must fail the bootstrap rather than
+        // silently fall back to the default cap.
+        with_env_vars(&[("CEDARLING_POLICY_STORE_MAX_FILE_SIZE", "0")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None)
+                .expect("0 is the disable sentinel and must be accepted");
+            assert_eq!(
+                config.policy_store_max_file_size, 0,
+                "0 must be preserved rather than replaced by the default"
+            );
+        });
+
+        for invalid in ["-1", "not-a-number"] {
+            with_env_vars(&[("CEDARLING_POLICY_STORE_MAX_FILE_SIZE", invalid)], || {
+                let err = BootstrapConfigRaw::from_raw_config_and_env(None)
+                    .expect_err("a non-u64 max file size must be rejected");
+                assert!(
+                    matches!(err, BootstrapConfigLoadingError::DecodingJSON(_)),
+                    "expected a decoding error for input {invalid:?}, got {err:?}"
+                );
+            });
+        }
     }
 
     #[test]

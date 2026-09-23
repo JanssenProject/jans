@@ -41,6 +41,9 @@ class U2FAttestationProcessorTest {
 	private U2FAttestationProcessor u2FAttestationProcessor;
 
 	@Mock
+	private io.jans.fido2.service.RpPolicyService rpPolicyService;
+
+	@Mock
 	private Logger log;
 
 	@Mock
@@ -100,8 +103,7 @@ class U2FAttestationProcessorTest {
 		when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
 		when(errorResponseFactory.badRequestException(any(), any()))
 				.thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-		when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-		when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
+		when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(AttestationMode.MONITOR.getValue());
 		WebApplicationException res = assertThrows(WebApplicationException.class, () -> u2FAttestationProcessor
 				.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
 		assertNotNull(res);
@@ -135,8 +137,7 @@ class U2FAttestationProcessorTest {
 		when(certificateService.getCertificates(anyList())).thenReturn(Collections.singletonList(publicCert1));
 		when(errorResponseFactory.badRequestException(any(), any()))
 				.thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-		when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-		when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
+		when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(AttestationMode.MONITOR.getValue());
 		WebApplicationException res = assertThrows(WebApplicationException.class, () -> u2FAttestationProcessor
 				.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
 		assertNotNull(res);
@@ -174,8 +175,7 @@ class U2FAttestationProcessorTest {
 		when(certificateService.getCertificates(anyList())).thenReturn(Collections.singletonList(attestationCert));
 		when(errorResponseFactory.badRequestException(any(), any()))
 				.thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-		when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-		when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
+		when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(AttestationMode.MONITOR.getValue());
 
 		WebApplicationException res = assertThrows(WebApplicationException.class, () -> u2FAttestationProcessor
 				.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
@@ -208,8 +208,7 @@ class U2FAttestationProcessorTest {
 		when(attStmt.get("ecdaaKeyId")).thenReturn(new TextNode("test-ecdaaKeyId"));
 		when(errorResponseFactory.badRequestException(any(), any()))
 				.thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-		when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-		when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
+		when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(AttestationMode.MONITOR.getValue());
 
 		WebApplicationException res = assertThrows(WebApplicationException.class, () -> u2FAttestationProcessor
 				.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
@@ -218,8 +217,7 @@ class U2FAttestationProcessorTest {
 		assertEquals(400, res.getResponse().getStatus());
 		assertEquals("test exception", res.getResponse().getEntity());
 
-		verify(appConfiguration).getFido2Configuration();
-		verify(fido2Configuration).getAttestationMode();
+		verify(rpPolicyService).resolveAttestationMode(org.mockito.ArgumentMatchers.any());
 		verify(commonVerifiers).verifyBase64String(any());
 		verify(commonVerifiers).verifyAAGUIDZeroed(authData);
 		verify(userVerificationVerifier).verifyUserPresent(authData);
@@ -245,12 +243,10 @@ class U2FAttestationProcessorTest {
 		when(attStmt.hasNonNull("ecdaaKeyId")).thenReturn(false);
 		PublicKey publicKey = mock(PublicKey.class);
 		when(coseService.getPublicKeyFromUncompressedECPoint(any())).thenReturn(publicKey);
-		when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-		when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
+		when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(AttestationMode.MONITOR.getValue());
 
 		u2FAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters);
-		verify(appConfiguration).getFido2Configuration();
-		verify(fido2Configuration).getAttestationMode();
+		verify(rpPolicyService).resolveAttestationMode(org.mockito.ArgumentMatchers.any());
 		verify(commonVerifiers).verifyBase64String(any());
 		verify(commonVerifiers).verifyAAGUIDZeroed(authData);
 		verify(userVerificationVerifier).verifyUserPresent(authData);
