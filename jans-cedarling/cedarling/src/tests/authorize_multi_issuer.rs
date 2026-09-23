@@ -333,6 +333,63 @@ async fn test_token_metadata_key_is_rejected_as_mapping() {
     );
 }
 
+/// An unknown mapping drops only that token, matching how every other invalid
+/// token behaves; the rest of the request still decides.
+#[tokio::test]
+async fn test_unknown_mapping_is_dropped_without_failing_the_request() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
+    let dolphin_token = generate_token_using_claims(json!({
+        "iss": "https://idp.dolphin.sea",
+        "sub": "dolphin_user_789",
+        "jti": "dolphin_custom_789",
+        "client_id": "dolphin_custom_client_789",
+        "aud": "dolphin_custom_audience",
+        "waiver": ["signed", "approved"],
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
+    }));
+    let stray_token = generate_token_using_claims(json!({
+        "iss": "https://idp.dolphin.sea",
+        "sub": "dolphin_user_789",
+        "jti": "dolphin_stray_790",
+        "client_id": "dolphin_custom_client_789",
+        "aud": "dolphin_custom_audience",
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
+    }));
+
+    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+        vec![
+            TokenInput::new("Dolphin::Dolphin_Token".to_string(), dolphin_token),
+            TokenInput::new("Nope::Token".to_string(), stray_token),
+        ],
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "MiamiAcquarium"
+                },
+                "name": "Miami Aquarium"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
+        "Acme::Action::\"SwimWithOrca\"".to_string(),
+        None,
+    );
+
+    let authz_result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("an unknown mapping must not fail the whole request");
+
+    assert!(
+        authz_result.decision,
+        "the valid token must still decide the request"
+    );
+}
+
 /// Test multiple tokens from different issuers authorization
 #[tokio::test]
 async fn test_multiple_tokens_from_different_issuers() {

@@ -888,6 +888,7 @@ fn warn_if_jwt_validation_disabled(jwt_config: &JwtConfig, logger: Option<&Logge
 mod test {
     use super::JwtService;
     use super::TrustedIssuerLoadingInfo;
+    use super::index_token_keys_by_entity_type;
     use super::test_utils::*;
     use super::{CustomIssuerIndex, CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
     use crate::JwtConfig;
@@ -895,6 +896,7 @@ mod test {
     use crate::authz::metrics::MetricsCollector;
     use crate::authz::request::TokenInput;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::common::policy_store::TrustedIssuer;
     use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata};
     use crate::http::HttpClient;
     use crate::http::HttpClientConfig;
@@ -907,6 +909,106 @@ mod test {
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::time::Duration;
     use tokio::test;
+    use url::Url;
+
+    /// Build a trusted issuer from `(token_key, entity_type_name)` pairs.
+    fn issuer_with_tokens(name: &str, tokens: &[(&str, &str)]) -> TrustedIssuer {
+        TrustedIssuer::new(
+            name.to_string(),
+            String::new(),
+            Url::parse(&format!(
+                "https://{name}.test/.well-known/openid-configuration"
+            ))
+            .expect("test oidc endpoint should parse"),
+            tokens
+                .iter()
+                .map(|(token_key, entity_type_name)| {
+                    (
+                        (*token_key).to_string(),
+                        TokenEntityMetadata::builder()
+                            .entity_type_name((*entity_type_name).to_string())
+                            .build(),
+                    )
+                })
+                .collect(),
+        )
+    }
+
+    /// Token keys repeat across issuers (every issuer has an `access_token`), so
+    /// each entity type must resolve to the key of its own issuer.
+    #[test]
+    async fn index_resolves_entity_types_across_issuers() {
+        let issuers = HashMap::from([
+            (
+                "jans".to_string(),
+                issuer_with_tokens(
+                    "jans",
+                    &[
+                        ("access_token", "Jans::Access_Token"),
+                        ("id_token", "Jans::Id_Token"),
+                    ],
+                ),
+            ),
+            (
+                "acme".to_string(),
+                issuer_with_tokens("acme", &[("access_token", "Acme::Access_Token")]),
+            ),
+            (
+                "dolphin".to_string(),
+                issuer_with_tokens("dolphin", &[("dolphin_token", "Dolphin::Dolphin_Token")]),
+            ),
+        ]);
+
+        let index = index_token_keys_by_entity_type(&issuers);
+
+        for (entity_type_name, expected_key) in [
+            ("Jans::Access_Token", "access_token"),
+            ("Jans::Id_Token", "id_token"),
+            ("Acme::Access_Token", "access_token"),
+            ("Dolphin::Dolphin_Token", "dolphin_token"),
+        ] {
+            assert_eq!(
+                index.get(entity_type_name).map(String::as_str),
+                Some(expected_key),
+                "{entity_type_name} must resolve to its own issuer's token key"
+            );
+        }
+
+        assert_eq!(
+            index.get("Nope::Token"),
+            None,
+            "an entity type no issuer declares must not resolve"
+        );
+        assert_eq!(
+            index.get("dolphin_token"),
+            None,
+            "a token key is not an entity type and must not resolve"
+        );
+    }
+
+    /// Production rejects duplicate entity types, but unvalidated configs can
+    /// still carry them, so the first issuer by id must win every run.
+    #[test]
+    async fn index_resolves_duplicate_entity_types_deterministically() {
+        let issuers = HashMap::from([
+            (
+                "zzz".to_string(),
+                issuer_with_tokens("zzz", &[("zzz_key", "Shared::Token")]),
+            ),
+            (
+                "aaa".to_string(),
+                issuer_with_tokens("aaa", &[("aaa_key", "Shared::Token")]),
+            ),
+        ]);
+
+        let index = index_token_keys_by_entity_type(&issuers);
+
+        assert_eq!(
+            index.get("Shared::Token").map(String::as_str),
+            Some("aaa_key"),
+            "the first issuer in sorted order must win, not whichever HashMap yields first"
+        );
+    }
 
     static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
         HttpClient::new(HttpClientConfig {
