@@ -28,7 +28,7 @@ struct GoMetricsSnapshot {
     policy_stats: HashMap<String, i64>,
     error_counters: HashMap<String, i64>,
     operational_stats: HashMap<String, i64>,
-    interval_nanos: u64,
+    interval_nanos: i64,
 }
 
 impl From<base::MetricsSnapshot> for GoMetricsSnapshot {
@@ -37,9 +37,10 @@ impl From<base::MetricsSnapshot> for GoMetricsSnapshot {
             policy_stats: snapshot.policy_stats,
             error_counters: snapshot.error_counters,
             operational_stats: snapshot.operational_stats,
-            // `u64` nanoseconds covers ~584 years; saturating keeps the
-            // conversion total rather than panicking on an absurd interval.
-            interval_nanos: u64::try_from(snapshot.interval.as_nanos()).unwrap_or(u64::MAX),
+            // `i64` nanoseconds matches `time.Duration` and covers ~292 years;
+            // saturating keeps the conversion total rather than panicking on
+            // an absurd interval or overflowing the Go type on unmarshal.
+            interval_nanos: i64::try_from(snapshot.interval.as_nanos()).unwrap_or(i64::MAX),
         }
     }
 }
