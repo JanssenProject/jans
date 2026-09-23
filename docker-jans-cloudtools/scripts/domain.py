@@ -1,6 +1,7 @@
 import logging.config
 
 import click
+from fqdn import FQDN
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -64,13 +65,27 @@ class Domain:
             self.modify_persistence_entries(table_name, old_fqdn, new_fqdn)
 
 
+class FQDNParamType(click.ParamType):
+    name = "fqdn"
+
+    def convert(self, value, param, ctx):
+        if value:
+            domain = FQDN(value)
+            if not domain.is_valid:
+                self.fail(f"{value} is not a valid FQDN.", param, ctx)
+        return value
+
+
+fqdn_param_type = FQDNParamType()
+
+
 @click.command
-@click.argument("new_fqdn")
+@click.argument("new_fqdn", type=fqdn_param_type)
 @click.option(
     "--old-fqdn",
     help="Old FQDN need to be changed from (if omitted, will use FQDN stored in config)",
     default="",
-    type=str,
+    type=fqdn_param_type,
 )
 def change_fqdn(new_fqdn, old_fqdn):
     """Change FQDN."""
