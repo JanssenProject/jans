@@ -443,7 +443,7 @@ for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
   want_module "$mod" || { echo "[info] skipping $dir ($mod not selected)"; continue; }
   echo "::group::test $dir"
   suitelog="aio-logs/test-$(printf '%s' "$dir" | tr / _).log"
-  rc=0
+  rc=0; timed_out=0
   timeout -k 30 2400 bash -c \
     "cd '$dir' && mvn -B -ntp -s '$MVN_SETTINGS' -Dcfg='$JANS_FQDN' -DfailIfNoTests=false $MVN_SKIPS test" \
     > "$suitelog" 2>&1 || rc=$?
@@ -451,10 +451,10 @@ for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
     0) ;;
     124 | 137)
       echo "::error::$dir timed out after 2400s; its results are incomplete"
-      integration_timeouts="$integration_timeouts $dir" ;;
+      integration_timeouts="$integration_timeouts $dir"; timed_out=1 ;;
     *) echo "[warn] $dir reported failures" ;;
   esac
-  if [ "$rc" -eq 0 ] && [ -z "$(find "$dir" -path '*/target/surefire-reports/*.xml' -print -quit 2>/dev/null)" ]; then
+  if [ "$timed_out" -eq 0 ] && [ -z "$(find "$dir" -path '*/target/surefire-reports/*.xml' -print -quit 2>/dev/null)" ]; then
     echo "::error::$dir produced no test reports; its suites did not run"
     integration_no_reports="$integration_no_reports $dir"
   fi
