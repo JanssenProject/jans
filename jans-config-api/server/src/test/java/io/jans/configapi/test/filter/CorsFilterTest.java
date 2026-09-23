@@ -216,7 +216,7 @@ public class CorsFilterTest {
         when(corsConfiguration.getAllowedOrigins()).thenReturn(allowed);
         when(corsConfiguration.isOriginAllowed(ALLOWED_ORIGIN)).thenReturn(true);
         lenient().when(corsConfiguration.isSupportsCredentials()).thenReturn(false);
-        when(corsConfiguration.getPreflightMaxAge()).thenReturn(3600);
+        when(corsConfiguration.getPreflightMaxAge()).thenReturn(3600L);
 
         corsFilter.doFilter(request, response, filterChain);
 
