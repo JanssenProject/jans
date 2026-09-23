@@ -188,7 +188,7 @@ public class ParRestWebService {
             parValidator.validateRequestObject(redirectUriResponse, par, client);
 
             parValidator.validatePkce(par.getAttributes().getCodeChallenge(), par.getAttributes().getCodeChallengeMethod(), state);
-            authorizeRestWebServiceValidator.validatePkce(par.getAttributes().getCodeChallenge(), redirectUriResponse, client);
+            authorizeRestWebServiceValidator.validatePkce(par.getAttributes().getCodeChallenge(), par.getAttributes().getCodeChallengeMethod(), redirectUriResponse, client);
 
             final ExecutionContext context = new ExecutionContext(httpRequest, httpResponse);
             context.setClient(client);
