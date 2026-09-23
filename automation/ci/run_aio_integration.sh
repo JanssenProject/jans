@@ -427,6 +427,7 @@ echo "::endgroup::"
 # Modules were already built + installed before the AIO image (see "build jans modules" above), so
 # the per-suite `mvn test` below resolves them from the local repo without rebuilding.
 mkdir -p test-reports aio-logs
+integration_timeouts=""
 
 # ---------------------------------------------------------------------------
 # Run integration suites (against the AIO)
@@ -441,9 +442,17 @@ for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
   want_module "$mod" || { echo "[info] skipping $dir ($mod not selected)"; continue; }
   echo "::group::test $dir"
   suitelog="aio-logs/test-$(printf '%s' "$dir" | tr / _).log"
+  rc=0
   timeout -k 30 2400 bash -c \
     "cd '$dir' && mvn -B -ntp -s '$MVN_SETTINGS' -Dcfg='$JANS_FQDN' -DfailIfNoTests=false $MVN_SKIPS test" \
-    > "$suitelog" 2>&1 || echo "[warn] $dir reported failures or timed out"
+    > "$suitelog" 2>&1 || rc=$?
+  case "$rc" in
+    0) ;;
+    124 | 137)
+      echo "::error::$dir timed out after 2400s; its results are incomplete"
+      integration_timeouts="$integration_timeouts $dir" ;;
+    *) echo "[warn] $dir reported failures" ;;
+  esac
   echo "----- tail $suitelog -----"; tail -n 25 "$suitelog" 2>/dev/null || true
   echo "::endgroup::"
 done
@@ -549,8 +558,8 @@ for s in jans-auth jans-config-api jans-scim jans-fido2 jans-casa; do
 done
 echo "::endgroup::"
 
-if [ -n "$unit_timeouts" ]; then
-  echo "::error::incomplete unit results, suites timed out:$unit_timeouts"
+if [ -n "$integration_timeouts$unit_timeouts" ]; then
+  echo "::error::incomplete results, suites timed out:$integration_timeouts$unit_timeouts"
   exit 1
 fi
 echo "[info] run_aio_integration.sh complete"
