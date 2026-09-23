@@ -364,7 +364,11 @@ for a complete code example.
 
 ## Defined API
 
-Please refer to [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#api-reference).
+The full API is auto-generated from the `cedarling` crate source on every
+release: [Cedarling Rust API documentation](https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html).
+
+For a narrative walkthrough of the core types, see the
+[Cedarling Rust Developer Guide](../developer/cedarling-rust.md#api-reference).
 
 ## See Also
 

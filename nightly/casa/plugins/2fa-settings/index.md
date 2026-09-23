@@ -46,7 +46,7 @@ A device/location is considered trustworthy when the user has presented a strong
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/strong-authn-settings-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/strong-authn-settings-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Log in to Casa using an administrator account
 
@@ -70,4 +70,4 @@ For regular users, proper details appear in the widget where 2FA is turned on.
 
 ## API
 
-Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
+Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
