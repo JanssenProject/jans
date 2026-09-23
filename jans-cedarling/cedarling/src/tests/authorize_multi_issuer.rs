@@ -258,7 +258,7 @@ async fn test_single_dolphin_custom_token_authorization() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![TokenInput::new(
-            "dolphin_token".to_string(),
+            "Dolphin::Dolphin_Token".to_string(),
             dolphin_custom_token,
         )],
         EntityData::from_json(
@@ -284,6 +284,52 @@ async fn test_single_dolphin_custom_token_authorization() {
     assert!(
         authz_result.decision,
         "Authorization should be ALLOW for dolphin custom token"
+    );
+}
+
+/// A token-metadata key is not a valid mapping; only the Cedar entity type is.
+/// Keys repeat across issuers, so accepting them would be ambiguous.
+#[tokio::test]
+async fn test_token_metadata_key_is_rejected_as_mapping() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
+    let dolphin_custom_token = generate_token_using_claims(json!({
+        "iss": "https://idp.dolphin.sea",
+        "sub": "dolphin_user_789",
+        "jti": "dolphin_custom_789",
+        "client_id": "dolphin_custom_client_789",
+        "aud": "dolphin_custom_audience",
+        "waiver": ["signed", "approved"],
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
+    }));
+
+    // `dolphin_token` is the token_metadata key; the mapping must be
+    // `Dolphin::Dolphin_Token`.
+    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+        vec![TokenInput::new(
+            "dolphin_token".to_string(),
+            dolphin_custom_token,
+        )],
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "MiamiAcquarium"
+                },
+                "name": "Miami Aquarium"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
+        "Acme::Action::\"SwimWithOrca\"".to_string(),
+        None,
+    );
+
+    let result = cedarling.authorize_multi_issuer(request).await;
+    assert!(
+        result.is_err(),
+        "A token_metadata key must not be accepted as a mapping"
     );
 }
 
@@ -723,7 +769,7 @@ async fn test_custom_dolphin_token_with_waiver() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![TokenInput::new(
-            "dolphin_token".to_string(),
+            "Dolphin::Dolphin_Token".to_string(),
             dolphin_custom_token,
         )],
         EntityData::from_json(
@@ -769,7 +815,7 @@ async fn test_custom_token_without_required_claim() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![TokenInput::new(
-            "dolphin_token".to_string(),
+            "Dolphin::Dolphin_Token".to_string(),
             dolphin_token_no_waiver,
         )],
         EntityData::from_json(
@@ -827,7 +873,7 @@ async fn test_multiple_custom_token_types_together() {
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![
             TokenInput::new("Acme::Access_Token".to_string(), acme_access_token),
-            TokenInput::new("dolphin_token".to_string(), dolphin_custom),
+            TokenInput::new("Dolphin::Dolphin_Token".to_string(), dolphin_custom),
         ],
         EntityData::from_json(
             &json!({
@@ -874,7 +920,7 @@ async fn test_custom_token_with_complex_nested_claims() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![TokenInput::new(
-            "dolphin_token".to_string(),
+            "Dolphin::Dolphin_Token".to_string(),
             custom_token_complex,
         )],
         EntityData::from_json(
@@ -934,7 +980,7 @@ async fn test_mix_of_standard_and_custom_tokens() {
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![
             TokenInput::new("Acme::Access_Token".to_string(), acme_standard),
-            TokenInput::new("dolphin_token".to_string(), dolphin_custom),
+            TokenInput::new("Dolphin::Dolphin_Token".to_string(), dolphin_custom),
         ],
         EntityData::from_json(
             &json!({
