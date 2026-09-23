@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.fido2.model.assertion.AssertionOptionsGenerate;
 import io.jans.fido2.model.assertion.AssertionResult;
+import io.jans.fido2.model.audit.LockAuditEvent;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.error.Fido2ErrorResponse;
 import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
@@ -28,6 +30,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -75,6 +78,8 @@ class AssertionServiceTest {
     private DomainVerifier domainVerifier;
     @Mock
     private MetricService metricService;
+    @Mock
+    private LockAuditEventCollector lockAuditEventCollector;
     @Mock
     private ChallengeGenerator challengeGenerator;
     @Mock
@@ -326,6 +331,14 @@ class AssertionServiceTest {
         assertEquals("INVALID_INPUT", authData.getErrorCategory());
         verify(entry).setExpiration(1296000);
         verify(authenticationPersistenceService).update(entry);
+
+        // A genuine, still-pending-at-the-time-of-failure ceremony must report DENY — the counterpart
+        // to verify_ifCeremonyAlreadyTerminal_collectsAnAllowLockAuditEventNotDeny below, which pins
+        // the opposite case.
+        ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
+        verify(lockAuditEventCollector).collect(captor.capture());
+        assertEquals("DENY", captor.getValue().getDecisionResult());
+        assertEquals("alice", captor.getValue().getPrincipalId());
     }
 
     /**
@@ -443,6 +456,38 @@ class AssertionServiceTest {
         verify(authenticationPersistenceService, never()).update(any());
         // Rejected before any verification work is attempted.
         verify(domainVerifier, never()).verifyDomain(any(), any());
+    }
+
+    /**
+     * The exact scenario CodeRabbit flagged: a ceremony already persisted as {@code authenticated}
+     * (same fixture as the test above) still throws on this call and re-throws to the caller, but the
+     * Lock audit event must report what was actually persisted — ALLOW — not DENY. Reuses the
+     * "already terminal" rejection path rather than driving the full happy path to prove the same
+     * decision logic {@code verify()}'s catch block applies regardless of *when* the ceremony became
+     * {@code authenticated}, not just when a post-commit external script causes it.
+     */
+    @Test
+    void verify_ifCeremonyAlreadyTerminal_collectsAnAllowLockAuditEventNotDeny() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        authData.setStatus(Fido2AuthenticationStatus.authenticated);
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+
+        stubCeremonyLookup(entry);
+        when(errorResponseFactory.invalidRequest(any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("no longer open").build()));
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+        }
+
+        ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
+        verify(lockAuditEventCollector).collect(captor.capture());
+        assertEquals("ALLOW", captor.getValue().getDecisionResult());
+        assertEquals("info", captor.getValue().getSeverityLevel());
     }
 
     /**

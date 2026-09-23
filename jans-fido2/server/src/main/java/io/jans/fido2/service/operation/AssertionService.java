@@ -8,7 +8,9 @@ package io.jans.fido2.service.operation;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,9 +34,11 @@ import io.jans.fido2.model.assertion.Response;
 import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.audit.LockAuditEvent;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.app.AbandonedCeremonyPolicy;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
@@ -109,6 +113,9 @@ public class AssertionService {
 
 	@Inject
 	private MetricService metricService;
+
+	@Inject
+	private LockAuditEventCollector lockAuditEventCollector;
 
 	// @Context is only honoured for JAX-RS components; this is a plain CDI bean,
 	// so the request has to come from the CDI built-in request-scoped bean instead.
@@ -337,6 +344,10 @@ public class AssertionService {
 		// null for failures raised before the challenge resolves to an entry, which is why
 		// markAssertionFailed tolerates a null entry.
 		Fido2AuthenticationEntry authenticationEntity = null;
+		// Declared outside the try for the same reason as registrationData in AttestationService: a
+		// failure raised after the credential lookup should still carry its rpId/credentialId into the
+		// audit event, not discard it just because the outcome was an exception.
+		Fido2RegistrationData registrationData = null;
 
 		try {
 		// Apply external custom scripts
@@ -400,7 +411,7 @@ public class AssertionService {
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService
 				.findByPublicKeyId(keyId, authenticationEntity.getRpId()).orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Couldn't find the key by PublicKeyId '%s'", keyId)));
-		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
+		registrationData = registrationEntry.getRegistrationData();
 		log.debug("Fido2RegistrationEntry {}", registrationEntry);
 		log.debug("registrationData {}", registrationData);
 
@@ -476,8 +487,11 @@ public class AssertionService {
 		// Record metrics for successful authentication
 		recordAuthenticationSuccessMetrics(registrationData.getUsername(), httpRequest, startTime, authenticatorType);
 
+		lockAuditEventCollector.collect(buildAuthenticationAuditEvent(registrationData.getUsername(), registrationData,
+				authenticationData.getOrigin(), authenticatorType, null));
+
 		return assertionResultResponse;
-		
+
 		} catch (Exception e) {
 			// Give the ceremony a terminal status. Done before the metrics calls below because those
 			// are dispatched asynchronously, whereas this has to complete on the request thread.
@@ -489,9 +503,77 @@ public class AssertionService {
 			// Track fallback event for specific error types that might cause users to switch methods
 			recordFallbackForError(username, e);
 
+			// A failure here can still mean the ceremony was already committed as `authenticated` (e.g.
+			// an external interception script throwing after the persistence update and session commit
+			// above) — markAssertionFailed() already refuses to overwrite a non-pending status for
+			// exactly this reason, so the audit event must agree with what was actually persisted rather
+			// than reporting a DENY that never happened.
+			boolean committedAsAuthenticated = authenticationEntity != null
+					&& authenticationEntity.getAuthenticationData().getStatus() == Fido2AuthenticationStatus.authenticated;
+			String origin = authenticationEntity != null ? authenticationEntity.getAuthenticationData().getOrigin() : null;
+			Exception auditFailure = committedAsAuthenticated ? null : e;
+			lockAuditEventCollector.collect(buildAuthenticationAuditEvent(username, registrationData, origin, authenticatorType, auditFailure));
+
 			// Re-throw the original exception
 			throw e;
 		}
+	}
+
+	/**
+	 * Maps an authentication outcome onto the Lock Server audit-event wire shape. Package-visible so a
+	 * test can drive it directly without standing up {@code verify()}'s full dependency graph.
+	 * <p>
+	 * Mirrors {@code AttestationService#buildRegistrationAuditEvent}'s shape and privacy decision
+	 * (only the exception's class name is recorded, never its message). Two differences from that
+	 * method, both learned from review on the registration side:
+	 * <ul>
+	 * <li>{@code origin} is its own parameter rather than read off {@code registrationData}. A
+	 * credential can be registered at one permitted origin of an RP and used from a different
+	 * permitted origin later — {@code registrationData.getOrigin()} describes where it was
+	 * <em>registered</em>, not where <em>this</em> assertion actually happened, so the caller passes
+	 * the origin verified for the current ceremony ({@code authenticationData.getOrigin()}).</li>
+	 * <li>{@code failure} being {@code null} covers both a genuine success and a failure raised after
+	 * the ceremony was already committed as {@code authenticated} — both are represented as ALLOW,
+	 * since both are what actually happened; see the "committedAsAuthenticated" branch in
+	 * {@code verify()}'s catch block.</li>
+	 * </ul>
+	 */
+	LockAuditEvent buildAuthenticationAuditEvent(String username, Fido2RegistrationData registrationData, String origin,
+			String authenticatorType, Exception failure) {
+		LockAuditEvent event = new LockAuditEvent();
+		event.setEventTime(new Date());
+		event.setService("fido2");
+		event.setEventType("fido2_authentication");
+		event.setAction("authenticate");
+		event.setPrincipalId(username);
+
+		Map<String, String> context = new HashMap<>();
+		if (registrationData != null) {
+			if (registrationData.getRpId() != null) {
+				context.put("rpId", registrationData.getRpId());
+			}
+			if (registrationData.getPublicKeyId() != null) {
+				context.put("credentialId", registrationData.getPublicKeyId());
+			}
+		}
+		if (origin != null) {
+			context.put("origin", origin);
+		}
+		if (authenticatorType != null) {
+			context.put("authenticatorAttachment", authenticatorType);
+		}
+
+		if (failure == null) {
+			event.setSeverityLevel("info");
+			event.setDecisionResult("ALLOW");
+		} else {
+			event.setSeverityLevel("warning");
+			event.setDecisionResult("DENY");
+			context.put("failureReason", failure.getClass().getSimpleName());
+		}
+		event.setContextInformation(context);
+
+		return event;
 	}
 
 	private int pendingCeremonyRetention() {
