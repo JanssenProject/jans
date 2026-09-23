@@ -388,6 +388,18 @@ async fn test_unknown_mapping_is_dropped_without_failing_the_request() {
         authz_result.decision,
         "the valid token must still decide the request"
     );
+
+    // Metrics are disabled without Lock telemetry, so assert the reason via logs.
+    let logs = cedarling.pop_logs();
+    let dropped_as_unknown_mapping = logs.iter().any(|log| {
+        log.get("msg").and_then(|m| m.as_str()).is_some_and(|m| {
+            m.contains("Nope::Token") && m.contains("no trusted issuer declares a token")
+        })
+    });
+    assert!(
+        dropped_as_unknown_mapping,
+        "the dropped token must be reported as an unknown mapping"
+    );
 }
 
 /// Test multiple tokens from different issuers authorization
