@@ -1,10 +1,12 @@
-package io.jans.configapi.filters;
 /*
  * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
 
+package io.jans.configapi.test.filter;
+
+import io.jans.configapi.filters.CorsFilter;
 import io.jans.configapi.model.configuration.CorsConfiguration;
 
 import java.util.Arrays;
@@ -16,17 +18,16 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -41,8 +42,8 @@ import static org.mockito.Mockito.*;
  *  - Access-Control-Allow-Credentials is only ever sent alongside a validated, non-wildcard origin
  *  - an origin that fails the allow-list check gets no CORS headers at all
  */
-@ExtendWith(MockitoExtension.class)
-class CorsFilterTest {
+@Listeners(MockitoTestNGListener.class)
+public class CorsFilterTest {
 
     private static final String ORIGIN_HEADER = "Origin";
     private static final String ALLOWED_ORIGIN = "https://admin.example.org";
@@ -65,8 +66,8 @@ class CorsFilterTest {
 
     private CorsFilter corsFilter;
 
-    @BeforeEach
-    void setUp() throws Exception {
+    @BeforeMethod
+    public void setUp() throws Exception {
         corsFilter = new CorsFilter();
         inject(corsFilter, "log", logger);
         inject(corsFilter, "corsConfiguration", corsConfiguration);
@@ -85,7 +86,7 @@ class CorsFilterTest {
     // --- Explicit allow-list is mandatory -----------------------------------------------------
 
     @Test
-    void nullAllowList_setsNoAccessControlAllowOriginHeader() throws IOException, ServletException {
+    public void nullAllowList_setsNoAccessControlAllowOriginHeader() throws IOException, ServletException {
         when(corsConfiguration.getAllowedOrigins()).thenReturn(null);
 
         corsFilter.doFilter(request, response, filterChain);
@@ -96,7 +97,7 @@ class CorsFilterTest {
     }
 
     @Test
-    void emptyAllowList_setsNoAccessControlAllowOriginHeader() throws IOException, ServletException {
+    public void emptyAllowList_setsNoAccessControlAllowOriginHeader() throws IOException, ServletException {
         when(corsConfiguration.getAllowedOrigins()).thenReturn(Collections.emptyList());
 
         corsFilter.doFilter(request, response, filterChain);
@@ -108,7 +109,7 @@ class CorsFilterTest {
     // --- Wildcard and credentials are mutually exclusive --------------------------------------
 
     @Test
-    void wildcardConfigured_setsWildcardOrigin_neverSetsCredentials() throws IOException, ServletException {
+    public void wildcardConfigured_setsWildcardOrigin_neverSetsCredentials() throws IOException, ServletException {
         List<String> allowed = Arrays.asList("*");
         when(corsConfiguration.getAllowedOrigins()).thenReturn(allowed);
         // Even if the server-wide flag is on, wildcard responses must never carry credentials.
@@ -123,7 +124,7 @@ class CorsFilterTest {
     // --- Matched origin: echoed verbatim, credentials gated correctly --------------------------
 
     @Test
-    void allowedOriginWithCredentialsSupport_echoesOriginAndSetsCredentialsTrue()
+    public void allowedOriginWithCredentialsSupport_echoesOriginAndSetsCredentialsTrue()
             throws IOException, ServletException {
         List<String> allowed = Arrays.asList(ALLOWED_ORIGIN);
         when(corsConfiguration.getAllowedOrigins()).thenReturn(allowed);
@@ -137,7 +138,7 @@ class CorsFilterTest {
     }
 
     @Test
-    void allowedOriginWithoutCredentialsSupport_echoesOriginOnly() throws IOException, ServletException {
+    public void allowedOriginWithoutCredentialsSupport_echoesOriginOnly() throws IOException, ServletException {
         List<String> allowed = Arrays.asList(ALLOWED_ORIGIN);
         when(corsConfiguration.getAllowedOrigins()).thenReturn(allowed);
         when(corsConfiguration.isOriginAllowed(ALLOWED_ORIGIN)).thenReturn(true);
@@ -152,7 +153,7 @@ class CorsFilterTest {
     // --- Unmatched origin: no CORS headers at all ----------------------------------------------
 
     @Test
-    void disallowedOrigin_setsNoCorsHeaders_evenWhenCredentialsSupportEnabled()
+    public void disallowedOrigin_setsNoCorsHeaders_evenWhenCredentialsSupportEnabled()
             throws IOException, ServletException {
         when(request.getHeader(ORIGIN_HEADER)).thenReturn(DISALLOWED_ORIGIN);
         List<String> allowed = Arrays.asList(ALLOWED_ORIGIN);
@@ -172,7 +173,7 @@ class CorsFilterTest {
     // --- Disabled / blank-origin short-circuits --------------------------------------------------
 
     @Test
-    void corsDisabled_skipsProcessing_stillChains() throws IOException, ServletException {
+    public void corsDisabled_skipsProcessing_stillChains() throws IOException, ServletException {
         when(corsConfiguration.isEnabled()).thenReturn(false);
 
         corsFilter.doFilter(request, response, filterChain);
@@ -182,7 +183,7 @@ class CorsFilterTest {
     }
 
     @Test
-    void blankOrigin_skipsProcessing_stillChains() throws IOException, ServletException {
+    public void blankOrigin_skipsProcessing_stillChains() throws IOException, ServletException {
         when(request.getHeader(ORIGIN_HEADER)).thenReturn(null);
 
         corsFilter.doFilter(request, response, filterChain);
@@ -194,7 +195,7 @@ class CorsFilterTest {
     // --- Vary header --------------------------------------------------------------------------
 
     @Test
-    void allowedOrigin_setsVaryOriginHeader() throws IOException, ServletException {
+    public void allowedOrigin_setsVaryOriginHeader() throws IOException, ServletException {
         List<String> allowed = Arrays.asList(ALLOWED_ORIGIN);
         when(corsConfiguration.getAllowedOrigins()).thenReturn(allowed);
         when(corsConfiguration.isOriginAllowed(ALLOWED_ORIGIN)).thenReturn(true);
@@ -208,14 +209,14 @@ class CorsFilterTest {
     // --- Preflight (OPTIONS) ---------------------------------------------------------------------
 
     @Test
-    void preflightOptions_allowedOrigin_setsMaxAge_doesNotChainFurther() throws IOException, ServletException {
+    public void preflightOptions_allowedOrigin_setsMaxAge_doesNotChainFurther() throws IOException, ServletException {
         when(request.getMethod()).thenReturn("OPTIONS");
         when(request.getHeader(CorsFilter.ACCESS_CONTROL_REQUEST_METHOD)).thenReturn("POST");
         List<String> allowed = Arrays.asList(ALLOWED_ORIGIN);
         when(corsConfiguration.getAllowedOrigins()).thenReturn(allowed);
         when(corsConfiguration.isOriginAllowed(ALLOWED_ORIGIN)).thenReturn(true);
         lenient().when(corsConfiguration.isSupportsCredentials()).thenReturn(false);
-        when(corsConfiguration.getPreflightMaxAge()).thenReturn(3600);
+        when(corsConfiguration.getPreflightMaxAge()).thenReturn(3600L);
 
         corsFilter.doFilter(request, response, filterChain);
 
@@ -224,8 +225,9 @@ class CorsFilterTest {
     }
 
     @Test
-    void preflightOptions_disallowedOrigin_setsNoHeaders_doesNotChain() throws IOException, ServletException {
-        when(request.getMethod()).thenReturn("OPTIONS");
+    public void preflightOptions_disallowedOrigin_setsNoHeaders_doesNotChain() throws IOException, ServletException {
+        // Denied before the method is ever inspected, so this stub only states the scenario.
+        lenient().when(request.getMethod()).thenReturn("OPTIONS");
         when(request.getHeader(ORIGIN_HEADER)).thenReturn(DISALLOWED_ORIGIN);
         List<String> allowed = Arrays.asList(ALLOWED_ORIGIN);
         when(corsConfiguration.getAllowedOrigins()).thenReturn(allowed);

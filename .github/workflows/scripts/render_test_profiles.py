@@ -44,7 +44,7 @@ def _env(name, required=True, default=None):
 def _read_config_api_scopes():
     """The full config-api scope list is large + static; read it from the default profile."""
     path = REPO / "jans-config-api" / "profiles" / "default" / "config-api-test.properties"
-    for line in path.read_text().splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         if line.startswith("test.scopes="):
             return line.split("=", 1)[1]
     sys.exit("render_test_profiles: could not find test.scopes in the default config-api profile")
@@ -75,6 +75,8 @@ def build_ctx():
         "rdbm_user": _env("RDBM_USER"),
         "rdbm_password_enc": _env("RDBM_PASSWORD_ENC"),
         "config_api_scopes_list": _read_config_api_scopes(),
+        "certFolder": "conf",
+        "jansOptPythonFolder": "/opt/jans/python",
     }
 
     for inum_var, inum in FIXED_CLIENT_INUMS.items():
@@ -85,9 +87,53 @@ def build_ctx():
     return ctx
 
 
+def _orm_sql_properties(ctx):
+    """conf/jans-sql.properties for the ORM tests.
+
+    The committed template is a mako one jans-linux-setup renders, so build the equivalent here.
+    Connection settings mirror the auth-server SQL block: the suites reach the DB over the port
+    the demo stack publishes on the host, without the deployment's TLS trust store.
+    """
+    props = (
+        "db.schema.name=%(rdbm_schema_name)s\n"
+        "connection.uri=jdbc:%(rdbm_name_str)s://%(hostname)s:%(rdbm_port)s/%(rdbm_db)s\n"
+        "auth.userName=%(rdbm_user)s\n"
+        "auth.userPassword=%(rdbm_password_enc)s\n"
+        "password.encryption.method=SSHA-256\n"
+        "connection.pool.max-total=20\n"
+        "connection.pool.max-idle=10\n"
+        "connection.pool.min-idle=5\n"
+        "connection.pool.create-max-wait-time-millis=20000\n"
+        "connection.pool.max-wait-time-millis=20000\n"
+        "connection.pool.min-evictable-idle-time-millis=1800000\n"
+        "binaryAttributes=objectGUID\n"
+        "certificateAttributes=userCertificate\n"
+    ) % ctx
+    if ctx["rdbm_name_str"] == "mysql":
+        props += ("connection.driver-property.serverTimezone=%(server_time_zone)s\n"
+                  "mysql.simple-json=true\n") % ctx
+    else:
+        props += "db.disable.time-zone=true\n"
+    return props
+
+
+def _render_orm_profile(ctx):
+    """jans-orm/integration-test/profiles/<fqdn>/conf/: persistence config, backend, salt.
+
+    The module skips every DB test unless conf/jans.properties exists under the selected profile,
+    so rendering this is what puts the ORM persistence suites in the run.
+    """
+    conf = Path("jans-orm/integration-test/profiles") / ctx["hostname"] / "conf"
+    orm_templates = TEST_TEMPLATES / "jans-orm" / "conf"
+    _write(REPO / conf / "jans.properties",
+           (orm_templates / "jans.properties").read_text(encoding="utf-8") % ctx)
+    _write(REPO / conf / "salt", (orm_templates / "salt").read_text(encoding="utf-8") % ctx)
+    _write(REPO / conf / "jans-sql.properties", _orm_sql_properties(ctx))
+
+
 def _write(path: Path, content: str):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content)
+    path.write_text(content, encoding="utf-8")
     print(f"rendered {path.relative_to(REPO)}")
 
 
@@ -111,12 +157,12 @@ def render():
          TEST_TEMPLATES / "jans-config-api" / "client" / "config-api-test.properties"),
     ]
     for prof_root, dest, template in templated:
-        _write(REPO / prof_root / fqdn / dest, template.read_text() % ctx)
+        _write(REPO / prof_root / fqdn / dest, template.read_text(encoding="utf-8") % ctx)
 
     # config-jans-auth-test.properties (SQL variant): the server-side tests connect
     # directly to persistence, so build the base + the rendered SQL-connection block.
     sql_block = (TEST_TEMPLATES / "jans-auth" / "server"
-                 / "config-jans-auth-test-sql.properties.nrnd").read_text() % ctx
+                 / "config-jans-auth-test-sql.properties.nrnd").read_text(encoding="utf-8") % ctx
     base = (
         "server.name=%(hostname)s\n"
         "config.oxauth.issuer=https://%(hostname)s\n"
@@ -144,6 +190,8 @@ def render():
     # tests also need the sample flows + an agama client deployed to the AS to pass (pending).
     _write(REPO / "jans-auth-server/agama/engine/profiles" / fqdn / "config-agama-test.properties",
            f"server=https://{fqdn}\nclientId={FIXED_CLIENT_INUMS['jans_auth_test_client_2_inum']}\n")
+
+    _render_orm_profile(ctx)
 
     # client keystores are copied verbatim from the committed default profiles
     for prof_root in ("jans-auth-server/client/profiles", "jans-auth-server/server/profiles"):
