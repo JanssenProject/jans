@@ -299,20 +299,20 @@ print(f"Capacity usage: {stats.capacity_usage_percent}%")
 ### Drain Metrics
 
 Destructive read: returns a `MetricsSnapshot` (`policy_stats`,
-`error_counters`, `operational_stats`, `interval_secs`) and resets the
+`error_counters`, `operational_stats`, `interval`) and resets the
 counters.
 
 ```python
 snapshot = instance.drain_metrics()
 print(f"Requests: {snapshot.operational_stats.get('authz.requests_total')}")
-print(f"Interval: {snapshot.interval_secs}s")
+print(f"Interval: {snapshot.interval}")
 ```
 
 Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails when the Lock
 telemetry ticker owns the collector i.e. whenever
 `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has no
-telemetry endpoint. `interval_secs` has 1-second precision, so a drain more
-often than once per second reports `0`.
+telemetry endpoint. `interval` is a `datetime.timedelta` with sub-second
+precision.
 
 ### Error Handling
 

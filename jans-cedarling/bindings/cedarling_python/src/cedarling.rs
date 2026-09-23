@@ -177,8 +177,8 @@ use std::time::Duration;
 ///     Lock telemetry ticker owns the collector. Raises `ValueError` when
 ///     Lock telemetry owns the collector, i.e. whenever
 ///     `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
-///     server has no telemetry endpoint. `interval_secs` has 1-second
-///     precision, so a drain more often than once per second reports `0`.
+///     server has no telemetry endpoint. `interval` is a
+///     `datetime.timedelta` with sub-second precision.
 ///
 ///     :returns: A MetricsSnapshot object
 ///     :raises ValueError: If metrics collection is disabled or owned by lock telemetry.
@@ -536,8 +536,8 @@ impl Cedarling {
     /// Lock telemetry ticker owns the collector (raises `ValueError` when
     /// Lock telemetry owns the collector, i.e. whenever
     /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
-    /// server has no telemetry endpoint). `interval_secs` has 1-second
-    /// precision, so a drain more often than once per second reports `0`.
+    /// server has no telemetry endpoint). `interval` is a
+    /// `datetime.timedelta` with sub-second precision.
     fn drain_metrics(&self) -> PyResult<MetricsSnapshot> {
         self.inner
             .drain_metrics()
@@ -592,10 +592,8 @@ impl Cedarling {
 ///     Classified error counters keyed by error metric key
 /// operational_stats : dict
 ///     Operational counters and gauges (authorization, cache, JWT, data, lock)
-/// interval_secs : int
-///     Duration of the snapshot interval in seconds, 1-second precision
-///     (truncated). A drain more often than once per second reports `0`.
-///     Kept for Lock proto compat (`audit.proto` `TelemetryEntry` field 8).
+/// interval : datetime.timedelta
+///     Duration of the snapshot interval with sub-second precision.
 #[derive(Debug, Clone)]
 #[pyclass(get_all, from_py_object)]
 pub struct MetricsSnapshot {
@@ -605,8 +603,8 @@ pub struct MetricsSnapshot {
     error_counters: HashMap<String, i64>,
     /// Operational counters and gauges.
     operational_stats: HashMap<String, i64>,
-    /// Duration of the snapshot interval in seconds, 1-second precision.
-    interval_secs: i64,
+    /// Duration of the snapshot interval with sub-second precision.
+    interval: Duration,
 }
 
 impl From<cedarling::MetricsSnapshot> for MetricsSnapshot {
@@ -615,7 +613,7 @@ impl From<cedarling::MetricsSnapshot> for MetricsSnapshot {
             policy_stats: value.policy_stats,
             error_counters: value.error_counters,
             operational_stats: value.operational_stats,
-            interval_secs: value.interval_secs,
+            interval: value.interval,
         }
     }
 }

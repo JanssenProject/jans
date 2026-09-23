@@ -392,8 +392,8 @@ Methods
     Lock telemetry ticker owns the collector. Raises `ValueError` when
     Lock telemetry owns the collector, i.e. whenever
     `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
-    server has no telemetry endpoint. `interval_secs` has 1-second
-    precision, so a drain more often than once per second reports `0`.
+    server has no telemetry endpoint. `interval` is a
+    `datetime.timedelta` with sub-second precision.
 
     :returns: A MetricsSnapshot object
     :raises ValueError: If metrics collection is disabled or owned by lock telemetry.
@@ -515,10 +515,8 @@ error_counters : dict
     Classified error counters keyed by error metric key
 operational_stats : dict
     Operational counters and gauges (authorization, cache, JWT, data, lock)
-interval_secs : int
-    Duration of the snapshot interval in seconds, 1-second precision
-    (truncated). A drain more often than once per second reports `0`.
-    Kept for Lock proto compat (`audit.proto` `TelemetryEntry` field 8).
+interval : datetime.timedelta
+    Duration of the snapshot interval with sub-second precision.
 ---
 
 MultiIssuerAuthorizeResult

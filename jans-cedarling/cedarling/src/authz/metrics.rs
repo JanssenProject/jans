@@ -21,6 +21,7 @@ use std::{
         Mutex, RwLock,
         atomic::{AtomicI64, Ordering},
     },
+    time::Duration,
 };
 
 use crate::{
@@ -111,6 +112,29 @@ pub(crate) struct PolicyStatsSnapshot {
     deny_count: i64,
 }
 
+/// Serde helper keeping the snapshot `interval` wire-compatible as integer seconds.
+///
+/// The JSON / Lock server shape stays `interval_secs: <u64>` while Rust uses
+/// [`std::time::Duration`] internally, so the field rename does not break
+/// existing consumers.
+pub(crate) mod duration_secs {
+    use serde::Serializer;
+    use std::time::Duration;
+
+    pub(crate) fn serialize<S>(duration: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_u64(duration.as_secs())
+    }
+
+    /// Saturating conversion for the Lock `MetricsLogEntry` (`i64`) and language
+    /// bindings that still expose whole seconds.
+    pub(crate) fn saturating_as_i64(duration: Duration) -> i64 {
+        i64::try_from(duration.as_secs()).unwrap_or(i64::MAX)
+    }
+}
+
 /// Telemetry snapshot containing the three metric maps and interval duration.
 ///
 /// Destructive read: produced by [`MetricsCollector::snapshot_and_reset`],
@@ -125,12 +149,12 @@ pub struct MetricsSnapshot {
     pub error_counters: HashMap<String, i64>,
     /// Operational counters and gauges (authorization, cache, JWT, data, lock).
     pub operational_stats: HashMap<String, i64>,
-    /// Duration of the snapshot interval in seconds, 1-second precision
-    /// (truncated). A drain more often than once per second reports `0`.
-    /// Kept as `i64` for Lock proto compat (`audit.proto` `TelemetryEntry`
-    /// field 8); add a separate `interval_ms` field if sub-second precision
-    /// is needed.
-    pub interval_secs: i64,
+    /// Duration of the snapshot interval with sub-second precision.
+    /// Serialized as `interval_secs` whole seconds for Lock proto compat
+    /// (`audit.proto` `TelemetryEntry` field 8); a drain more often than
+    /// once per second serializes as `0`.
+    #[serde(rename = "interval_secs", serialize_with = "duration_secs::serialize")]
+    pub interval: Duration,
 }
 
 /// Error returned by [`crate::Cedarling::drain_metrics`] when
@@ -926,7 +950,10 @@ impl MetricsCollector {
             std::mem::replace(&mut *guard, Box::new(IntervalState::new(now)))
         };
 
-        let interval_secs = now.signed_duration_since(old.start).num_seconds();
+        let interval = now
+            .signed_duration_since(old.start)
+            .to_std()
+            .unwrap_or(Duration::ZERO);
 
         let policy_stats = {
             let map = old
@@ -958,7 +985,7 @@ impl MetricsCollector {
             policy_stats,
             error_counters,
             operational_stats: ops,
-            interval_secs,
+            interval,
         }
     }
 }
@@ -1662,6 +1689,31 @@ mod tests {
             resolve_metrics_mode(false, false),
             MetricsMode::Disabled,
             "local collection off must disable snapshots"
+        );
+    }
+
+    #[test]
+    fn snapshot_interval_serializes_as_secs() {
+        let snap = MetricsSnapshot {
+            policy_stats: HashMap::new(),
+            error_counters: HashMap::new(),
+            operational_stats: HashMap::new(),
+            interval: Duration::new(61, 500_000_000),
+        };
+        let json = serde_json::to_value(&snap).expect("snapshot must serialize");
+        assert_eq!(
+            json.get("interval_secs"),
+            Some(&serde_json::json!(61)),
+            "Duration must serialize as whole seconds under the interval_secs key for Lock compat, got {json}"
+        );
+        assert!(
+            json.get("interval").is_none(),
+            "renamed field must not leak an interval key, got {json}"
+        );
+        assert_eq!(
+            duration_secs::saturating_as_i64(snap.interval),
+            61,
+            "proto conversion must truncate sub-second part"
         );
     }
 }

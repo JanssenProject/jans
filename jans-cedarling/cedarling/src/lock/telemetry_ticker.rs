@@ -66,7 +66,9 @@ impl TelemetryTicker {
             policy_stats: snapshot.policy_stats,
             error_counters: snapshot.error_counters,
             operational_stats: snapshot.operational_stats,
-            interval_secs: snapshot.interval_secs,
+            interval_secs: crate::authz::metrics::duration_secs::saturating_as_i64(
+                snapshot.interval,
+            ),
         };
 
         logger.log_any(entry);

@@ -1452,7 +1452,7 @@ impl From<CedarMetricsSnapshot> for MetricsSnapshot {
             policy_stats: to_map(value.policy_stats),
             error_counters: to_map(value.error_counters),
             operational_stats: to_map(value.operational_stats),
-            interval_secs: value.interval_secs as f64,
+            interval_secs: value.interval.as_secs_f64(),
         }
     }
 }

@@ -5,6 +5,7 @@
 
 """Tests for the local metrics snapshot API (`drain_metrics`)."""
 
+from datetime import timedelta
 from cedarling_python import Cedarling, EntityData, RequestUnsigned
 from config import load_bootstrap_config, TEST_FILES_PATH
 from os.path import join
@@ -52,9 +53,9 @@ def test_drain_metrics_collects_and_resets():
         "operational stats must include the policy count gauge, got: "
         f"{snapshot.operational_stats}"
     )
-    assert snapshot.interval_secs >= 0, (
-        "interval_secs must be a non-negative elapsed duration, got: "
-        f"{snapshot.interval_secs}"
+    assert snapshot.interval >= timedelta(0), (
+        "interval must be a non-negative elapsed duration, got: "
+        f"{snapshot.interval}"
     )
 
     request = RequestUnsigned(

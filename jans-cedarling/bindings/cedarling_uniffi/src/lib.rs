@@ -203,8 +203,8 @@ pub struct MetricsSnapshot {
     pub error_counters: HashMap<String, i64>,
     /// Operational counters and gauges (authorization, cache, JWT, data, lock).
     pub operational_stats: HashMap<String, i64>,
-    /// Duration of the snapshot interval in seconds.
-    pub interval_secs: i64,
+    /// Duration of the snapshot interval with sub-second precision.
+    pub interval: Duration,
 }
 
 impl From<CoreMetricsSnapshot> for MetricsSnapshot {
@@ -213,7 +213,7 @@ impl From<CoreMetricsSnapshot> for MetricsSnapshot {
             policy_stats: snap.policy_stats,
             error_counters: snap.error_counters,
             operational_stats: snap.operational_stats,
-            interval_secs: snap.interval_secs,
+            interval: snap.interval,
         }
     }
 }
@@ -758,8 +758,9 @@ impl Cedarling {
     }
 
     /// Destructive read: returns the telemetry metrics snapshot and resets
-    /// the counters for the next interval. `interval_secs` has 1-second precision,
-    /// so a drain more often than once per second reports `0`.
+    /// the counters for the next interval. `interval` is a Duration with
+    /// sub-second precision (Python `timedelta`, Kotlin `java.time.Duration`,
+    /// Swift `TimeInterval` seconds).
     #[uniffi::method]
     pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
         self.inner

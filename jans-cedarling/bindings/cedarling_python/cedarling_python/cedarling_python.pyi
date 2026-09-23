@@ -4,6 +4,7 @@
 # Copyright (c) 2024, Gluu, Inc.
 
 from typing import Optional, List, final, Dict, Any
+from datetime import timedelta
 from enum import Enum
 
 @final
@@ -502,8 +503,8 @@ class Cedarling:
         Lock telemetry ticker owns the collector. Raises `ValueError` when
         Lock telemetry owns the collector, i.e. whenever
         `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
-        server has no telemetry endpoint. `interval_secs` has 1-second
-        precision, so a drain more often than once per second reports `0`.
+        server has no telemetry endpoint. `interval` is a
+        `datetime.timedelta` with sub-second precision.
 
         Raises:
             ValueError: If metrics collection is disabled or owned by lock
@@ -823,13 +824,13 @@ class MetricsSnapshot:
         policy_stats: Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
         error_counters: Classified error counters keyed by error metric key.
         operational_stats: Operational counters and gauges (authorization, cache, JWT, data, lock).
-        interval_secs: Duration of the snapshot interval in seconds, 1-second precision (truncated). A drain more often than once per second reports `0`. Kept for Lock proto compat (`audit.proto` `TelemetryEntry` field 8).
+        interval: Duration of the snapshot interval with sub-second precision.
     """
 
     policy_stats: dict[str, int]
     error_counters: dict[str, int]
     operational_stats: dict[str, int]
-    interval_secs: int
+    interval: timedelta
 
 class CedarType(Enum):
     """

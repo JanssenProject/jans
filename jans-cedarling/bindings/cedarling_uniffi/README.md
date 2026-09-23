@@ -545,7 +545,7 @@ print("Capacity usage: \(stats.capacityUsagePercent)%")
 ### Drain Metrics
 
 Destructive read: returns a `MetricsSnapshot` (`policyStats`,
-`errorCounters`, `operationalStats`, `intervalSecs`) and resets the
+`errorCounters`, `operationalStats`, `interval`) and resets the
 counters.
 
 **Kotlin:**
@@ -553,7 +553,7 @@ counters.
 ```kotlin
 val snapshot = cedarling.drainMetrics()
 println("Requests: ${snapshot.operationalStats["authz.requests_total"]}")
-println("Interval: ${snapshot.intervalSecs}s")
+println("Interval: ${snapshot.interval}")
 ```
 
 **Swift:**
@@ -561,13 +561,14 @@ println("Interval: ${snapshot.intervalSecs}s")
 ```swift
 let snapshot = try cedarling.drainMetrics()
 print("Requests: \(snapshot.operationalStats["authz.requests_total"] ?? 0)")
-print("Interval: \(snapshot.intervalSecs)s")
+print("Interval: \(snapshot.interval)s")
 ```
 
 Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails with `LockTelemetry`
 whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server
-has no telemetry endpoint. `intervalSecs` has 1-second precision, so a drain
-more often than once per second reports `0`.
+has no telemetry endpoint. `interval` is a Duration with sub-second
+precision (Kotlin `java.time.Duration`, Swift `TimeInterval` seconds,
+Python `datetime.timedelta`).
 
 ### Error Handling
 
