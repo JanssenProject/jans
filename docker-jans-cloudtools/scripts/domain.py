@@ -1,124 +1,86 @@
-import json
 import logging.config
 
 import click
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import doc_id_from_dn
+from jans.pycloudlib.persistence.sql import SqlClient
 
 from settings import LOGGING_CONFIG
-from persistence import SqlPersistence
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("cloudtools")
 
 
+def replace_fqdn_substr(val, old_fqdn, new_fqdn):
+    if isinstance(val, (str, bytes)):
+        return val.replace(old_fqdn, new_fqdn)
+
+    if isinstance(val, list):
+        return [replace_fqdn_substr(item, old_fqdn, new_fqdn) for item in val]
+
+    if isinstance(val, dict):
+        return {k: replace_fqdn_substr(v, old_fqdn, new_fqdn) for k, v in val.items()}
+
+    # unsupported type will be returned as-is
+    return val
+
+
 class Domain:
     def __init__(self, manager):
         self.manager = manager
-        self.persistence = SqlPersistence(self.manager)
+        self.persistence = SqlClient(self.manager)
 
-    def modify_auth_config(self, old_fqdn, new_fqdn):
-        logger.info("Updating jans-auth configuration in persistence")
-        entry = self.persistence.get_config(doc_id_from_dn("ou=jans-auth,ou=configuration,o=jans"))
-        if not entry:
-            return {}
+    def modify_persistence_entries(self, table_name, old_fqdn, new_fqdn):
+        logger.info("Checking entries in %s table", table_name)
 
-        conf = json.loads(entry["jansConfDyn"])
-        for k, v in conf.items():
-            if all([k.endswith("Endpoint"), isinstance(v, (str, bytes)) and old_fqdn in v]):
-                new_value = v.replace(old_fqdn, new_fqdn)
-                logger.info("Changing %s: %s => %s", k, v, new_value)
+        for entry in self.persistence.search(table_name):
+            # flag to determine whether entry need to be updated in persistence
+            should_update = False
 
-            elif k == "ssaConfiguration" and "ssaEndpoint" in v:
-                new_value = v["ssaEndpoint"].replace(old_fqdn, new_fqdn)
-                logger.info("Changing %s.ssaEndpoint: %s => %s", k, v["ssaEndpoint"], new_value)
+            for col_name, col_val in entry.items():
+                new_val = replace_fqdn_substr(col_val, old_fqdn, new_fqdn)
 
-            elif k in (
-                "issuer",
-                "jwksUri",
-                "archivedJwksUri",
-                "opPolicyUri",
-                "opTosUri",
-                "jansId",
-                "backchannelRedirectUri",
-            ):
-                new_value = v.replace(old_fqdn, new_fqdn)
-                logger.info("Changing %s: %s => %s", k, v, new_value)
-        return False
+                # likely no changes at all
+                if entry[col_name] == new_val:
+                    continue
 
-    def modify_casa_config(self, old_fqdn, new_fqdn):
-        logger.info("Updating casa configuration in persistence")
-        entry = self.persistence.get_config(doc_id_from_dn("ou=casa,ou=configuration,o=jans"))
-        if not entry:
-            return {}
+                logger.info("Updating %s.%s (doc_id=%s)", table_name, col_name, entry["doc_id"])
+                # mark entry for updates
+                should_update = True
+                entry[col_name] = new_val
 
-        conf = json.loads(entry["jansConfApp"])
-        for k, v in conf.items():
-            if k == "oidc_config":
-                for oidc_k in (
-                    "op_host",
-                    "authz_redirect_uri",
-                    "post_logout_uri",
-                    "frontchannel_logout_uri",
-                ):
-                    new_value = v[oidc_k].replace(old_fqdn, new_fqdn)
-                    logger.info("Changing %s.%s: %s => %s", k, oidc_k, v[oidc_k], new_value)
-        return False
+            if should_update is False:
+                continue
 
-    def modify_config_api_config(self, old_fqdn, new_fqdn):
-        logger.info("Updating jans-config-api configuration in persistence")
-        entry = self.persistence.get_config(doc_id_from_dn("ou=jans-config-api,ou=configuration,o=jans"))
-        if not entry:
-            return {}
+            if "jansRevision" in entry:
+                entry["jansRevision"] = int(entry["jansRevision"] or 0) + 1
+            self.persistence.update(table_name, entry["doc_id"], entry)
 
-        conf = json.loads(entry["jansConfDyn"])
-        for k, v in conf.items():
-            if all([k.endswith("Url"), isinstance(v, (str, bytes)) and old_fqdn in v]):
-                new_value = v.replace(old_fqdn, new_fqdn)
-                logger.info("Changing %s: %s => %s", k, v, new_value)
-            elif k == "apiApprovedIssuer":
-                for idx, issuer in enumerate(v):
-                    if old_fqdn in issuer:
-                        new_value = issuer.replace(old_fqdn, new_fqdn)
-                        logger.info("Changing %s.[%s]: %s => %s", k, idx, v[idx], new_value)
-        return False
-
-    def modify_fido2_config(self, old_fqdn, new_fqdn):
-        logger.info("Updating jans-fido2 configuration in persistence")
-        entry = self.persistence.get_config(doc_id_from_dn("ou=jans-fido2,ou=configuration,o=jans"))
-        if not entry:
-            return {}
-
-        conf = json.loads(entry["jansConfDyn"])
-        for k, v in conf.items():
-            if k in ("issuer", "baseEndpoint"):
-                new_value = v.replace(old_fqdn, new_fqdn)
-                logger.info("Changing %s: %s => %s", k, v, new_value)
-            elif k == "fido2Configuration" and "rp" in v:
-                for rp in v["rp"]:
-                    logger.info("id => %s, origin => %s", rp["id"], rp["origins"])
-        return False
-
-    def change_fqdn(self, new_fqdn):
-        old_fqdn = self.manager.config.get("hostname")
-
+    def change_fqdn(self, old_fqdn, new_fqdn):
         logger.info("Detected old FQDN from existing config: %s", old_fqdn)
         logger.info("Changing FQDN from %s to %s", old_fqdn, new_fqdn)
 
-        # self.modify_auth_config(old_fqdn, new_fqdn)
-        # self.modify_casa_config(old_fqdn, new_fqdn)
-        # self.modify_config_api_config(old_fqdn, new_fqdn)
-        self.modify_fido2_config(old_fqdn, new_fqdn)
+        for table_name in ["jansAppConf", "jansCustomScr", "jansClnt"]:
+            self.modify_persistence_entries(table_name, old_fqdn, new_fqdn)
 
 
 @click.command
-@click.argument("fqdn")
-def change_fqdn(fqdn):
+@click.argument("new_fqdn")
+@click.option(
+    "--old-fqdn",
+    help="Old FQDN need to be changed from (if omitted, will use FQDN stored in config)",
+    default="",
+    type=str,
+)
+def change_fqdn(new_fqdn, old_fqdn):
     """Change FQDN."""
     manager = get_manager()
+    old_fqdn = old_fqdn or manager.config.get("hostname")
+
     domain = Domain(manager)
-    domain.change_fqdn(fqdn)
+    domain.change_fqdn(old_fqdn, new_fqdn)
+
+    # @TODO: update configmaps and/or secrets
 
 
 if __name__ == "__main__":
