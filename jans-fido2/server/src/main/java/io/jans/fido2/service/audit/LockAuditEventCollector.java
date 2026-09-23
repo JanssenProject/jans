@@ -8,11 +8,14 @@ package io.jans.fido2.service.audit;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
+
+import com.google.common.collect.Lists;
 
 import io.jans.fido2.model.audit.LockAuditEvent;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -43,6 +46,30 @@ public class LockAuditEventCollector {
 
 	private static final int DEFAULT_FLUSH_INTERVAL = 20;
 
+	/**
+	 * ponytail: a hardcoded ceiling, not a config property — raise it (or make it configurable) if a
+	 * real deployment's sustained failure rate needs more headroom than this. Bounds how long a Lock
+	 * Server outage can keep growing the buffer: delivery (discovery + token grant + POST, each with
+	 * a 5s/10s timeout) can take up to ~45s, during which the scheduler skips later flushes while
+	 * collect() keeps accepting — including a DENY event per rejected/unauthenticated request, so an
+	 * unbounded queue is a real memory-growth path under load, not just a theoretical one.
+	 */
+	static final int MAX_BUFFER_SIZE = 1000;
+
+	/**
+	 * ponytail: hardcoded, not configurable — raise it if the Lock Server's actual payload-size limit
+	 * turns out to tolerate more. Caps each delivery POST so a large drained batch can't produce one
+	 * oversized payload that gets the whole batch rejected; multiple smaller POSTs fail independently.
+	 */
+	static final int MAX_BATCH_SIZE = 50;
+
+	/**
+	 * Every full-buffer drop is counted, but only every Nth one is logged — under sustained overload
+	 * every collect() call would otherwise log at WARN on the request thread, turning a Lock Server
+	 * outage into a logging-volume problem of its own.
+	 */
+	static final int DROP_LOG_EVERY_N = 100;
+
 	@Inject
 	private Logger log;
 
@@ -53,22 +80,38 @@ public class LockAuditEventCollector {
 	private LockAuditClient lockAuditClient;
 
 	@Inject
+	private LockAuditTokenService lockAuditTokenService;
+
+	@Inject
 	private Event<TimerEvent> timerEvent;
 
-	private final Queue<LockAuditEvent> buffer = new ConcurrentLinkedQueue<>();
+	private final BlockingQueue<LockAuditEvent> buffer = new LinkedBlockingQueue<>(MAX_BUFFER_SIZE);
+	private final AtomicLong droppedEventCount = new AtomicLong();
 
 	private AtomicBoolean isActive;
 
 	/**
 	 * Buffers {@code event} for the next flush. A no-op, not an error, when delivery is disabled —
 	 * otherwise a deployment that never enabled this feature would grow the buffer unboundedly with
-	 * events nothing will ever drain.
+	 * events nothing will ever drain. Also a no-op, logged rather than thrown, once the buffer is at
+	 * {@link #MAX_BUFFER_SIZE} — dropping the newest event is preferable to unbounded growth, and this
+	 * must never make the caller's registration/authentication request fail or block.
 	 */
 	public void collect(LockAuditEvent event) {
 		if (event == null || !isEnabled()) {
 			return;
 		}
-		buffer.add(event);
+		if (!buffer.offer(event)) {
+			long dropped = droppedEventCount.incrementAndGet();
+			if (dropped == 1 || dropped % DROP_LOG_EVERY_N == 0) {
+				log.warn("Lock audit buffer full ({} events), dropping events (total dropped: {})", MAX_BUFFER_SIZE, dropped);
+			}
+		}
+	}
+
+	/** Package-visible for tests; not exposed further since nothing else reads it yet. */
+	long droppedEventCount() {
+		return droppedEventCount.get();
 	}
 
 	public void initTimer() {
@@ -103,13 +146,15 @@ public class LockAuditEventCollector {
 	}
 
 	/**
-	 * Drains the buffer and delivers it as one batch. Package-visible so a test can drive one pass
+	 * Drains the buffer and delivers it in {@link #MAX_BATCH_SIZE}-sized chunks, all under a single
+	 * access token obtained once for the whole drain. Package-visible so a test can drive one pass
 	 * without standing up the timer.
 	 * <p>
 	 * Always drains, even when disabled: a config toggle raced against an in-flight collect() must
-	 * not leave events sitting in the buffer forever. Delivery failure is caught here, not left to
-	 * the caller, since the caller is a scheduled event with nothing sensible to do with a thrown
-	 * exception.
+	 * not leave events sitting in the buffer forever. Each chunk's delivery failure is caught
+	 * independently, not left to the caller (a scheduled event with nothing sensible to do with a
+	 * thrown exception) — and independently of the other chunks, so one oversized or rejected chunk
+	 * does not stop the rest of the drained batch from being attempted.
 	 */
 	void processImpl() {
 		List<LockAuditEvent> batch = drain();
@@ -122,19 +167,26 @@ public class LockAuditEventCollector {
 			return;
 		}
 
-		try {
-			lockAuditClient.postBatch(batch);
-		} catch (Exception e) {
-			log.warn("Failed to deliver {} Lock audit event(s), dropping batch", batch.size(), e);
+		// Obtained once per drain, not once per chunk: a full 1000-event drain split into 20 chunks of
+		// 50 previously meant 20 client-credentials grants against the auth server for one flush.
+		String accessToken = lockAuditTokenService.getAccessToken();
+		if (accessToken == null) {
+			log.warn("Failed to obtain a Lock audit access token, dropping {} buffered event(s)", batch.size());
+			return;
+		}
+
+		for (List<LockAuditEvent> chunk : Lists.partition(batch, MAX_BATCH_SIZE)) {
+			try {
+				lockAuditClient.postBatch(chunk, accessToken);
+			} catch (Exception e) {
+				log.warn("Failed to deliver {} Lock audit event(s), dropping chunk", chunk.size(), e);
+			}
 		}
 	}
 
 	private List<LockAuditEvent> drain() {
 		List<LockAuditEvent> batch = new ArrayList<>();
-		LockAuditEvent event;
-		while ((event = buffer.poll()) != null) {
-			batch.add(event);
-		}
+		buffer.drainTo(batch);
 		return batch;
 	}
 

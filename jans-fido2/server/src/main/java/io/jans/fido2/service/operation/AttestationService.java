@@ -28,6 +28,8 @@ import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.RpPolicyService;
 import io.jans.fido2.service.DataMapperService;
+import io.jans.fido2.model.audit.LockAuditEvent;
+import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
@@ -49,8 +51,11 @@ import org.slf4j.Logger;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -116,6 +121,9 @@ public class AttestationService {
 
 	@Inject
 	private io.jans.fido2.service.shared.MetricService metricService;
+
+	@Inject
+	private LockAuditEventCollector lockAuditEventCollector;
 
 	// @Context is only honoured for JAX-RS components; this is a plain CDI bean,
 	// so the request has to come from the CDI built-in request-scoped bean instead.
@@ -261,6 +269,9 @@ public class AttestationService {
 		long startTime = System.currentTimeMillis();
 		String username = null;
 		String authenticatorType = null;
+		// Declared outside the try so the failure path can report whichever registration it was
+		// working against. Stays null for failures raised before the challenge resolves to an entry.
+		Fido2RegistrationData registrationData = null;
 
 		try {
         // Apply external custom scripts
@@ -285,8 +296,8 @@ public class AttestationService {
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge)
 				.parallelStream().findAny().orElseThrow(() ->
 					errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE, String.format("Can't find associated attestation request by challenge '%s'", challenge)));
-		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
-		
+		registrationData = registrationEntry.getRegistrationData();
+
 		// Set username for metrics
 		username = registrationData.getUsername();
 
@@ -406,15 +417,82 @@ public class AttestationService {
 		// Record metrics for successful registration
 		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType);
 
+		lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, null));
+
 		return attestationResultResponse;
-		
+
 		} catch (Exception e) {
 			// Record metrics for failed registration
 			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
-			
+
+			// A failure here can still mean the registration was already committed as `registered`
+			// (e.g. an external interception script throwing after persistence, at line ~409 above,
+			// which runs after the persistence update at line ~386) — an audit DENY must not
+			// contradict what was actually persisted, so the event reports what happened, not what
+			// this catch block assumes happened.
+			boolean committedAsRegistered = registrationData != null
+					&& registrationData.getStatus() == Fido2RegistrationStatus.registered;
+			Exception auditFailure = committedAsRegistered ? null : e;
+			lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, auditFailure));
+
 			// Re-throw the original exception
 			throw e;
 		}
+	}
+
+	/**
+	 * Maps a registration outcome onto the Lock Server audit-event wire shape. Package-visible so a
+	 * test can drive it directly without standing up {@code verify()}'s full dependency graph.
+	 * <p>
+	 * {@code registrationData} is {@code null} for a failure raised before the registration entry is
+	 * looked up (e.g. an invalid challenge) — those have nothing beyond {@code username} (itself
+	 * possibly still {@code null}) and the exception. A failure raised *after* the lookup carries the
+	 * same {@code registrationData} the eventual success path would have used, so its rpId/origin
+	 * context is preserved rather than discarded. {@code failure} is {@code null} both for a genuine
+	 * success and for the "already committed as registered" case above — both are represented as
+	 * ALLOW, since both are what actually happened. Only the exception's class name is recorded, not
+	 * its message: several failure paths in this method embed identifying detail (challenge, username)
+	 * in the message text, and an audit trail is the wrong place to duplicate that beyond what
+	 * {@code principalId} already carries.
+	 */
+	LockAuditEvent buildRegistrationAuditEvent(String username, Fido2RegistrationData registrationData, String authenticatorType, Exception failure) {
+		LockAuditEvent event = new LockAuditEvent();
+		event.setEventTime(new Date());
+		event.setService("fido2");
+		event.setEventType("fido2_registration");
+		event.setAction("register");
+		event.setPrincipalId(username);
+
+		Map<String, String> context = new HashMap<>();
+		if (registrationData != null) {
+			if (registrationData.getRpId() != null) {
+				context.put("rpId", registrationData.getRpId());
+			}
+			if (registrationData.getOrigin() != null) {
+				context.put("origin", registrationData.getOrigin());
+			}
+			if (registrationData.getPublicKeyId() != null) {
+				context.put("credentialId", registrationData.getPublicKeyId());
+			}
+			if (registrationData.getAttestationType() != null) {
+				context.put("attestationType", registrationData.getAttestationType());
+			}
+		}
+		if (authenticatorType != null) {
+			context.put("authenticatorAttachment", authenticatorType);
+		}
+
+		if (failure == null) {
+			event.setSeverityLevel("info");
+			event.setDecisionResult("ALLOW");
+		} else {
+			event.setSeverityLevel("warning");
+			event.setDecisionResult("DENY");
+			context.put("failureReason", failure.getClass().getSimpleName());
+		}
+		event.setContextInformation(context);
+
+		return event;
 	}
 
 	private void prepareAuthenticatorSelection(PublicKeyCredentialCreationOptions credentialCreationOptions,
