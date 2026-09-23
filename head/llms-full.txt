@@ -50779,83 +50779,291 @@ If you have content you'd like to contribute to this page, you can get started w
 
 # Jans CLI/TUI User Management
 
+Janssen Server provides command-line, text-based, and REST API interfaces for user management.
 
-In this document we will cover managing people in the Jans Server's Jans CLI and Jans TUI.
+=== "Use Command-line"
 
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](../config-guide/config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
 
-## Manage data in Jans TUI
+=== "Use Text-based UI"
 
-We can easily add a user using Jans TUI. To do that, run the TUI using `jans tui` for example, and click on the `Users` tab.
+    Use a fully functional text-based user interface from the terminal. 
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](../config-guide/config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
 
-![user-tab](https://github.com/JanssenProject/jans/assets/43112579/d94916ff-82c6-4d64-bd3a-9b13f3a5038d)
+=== "Use REST API"
 
-Let's see at a glance user attributes.
-
-|Attributes|
-|---|
-|Username|
-|Password |
-|First Name|
-|Middle Name|
-|Last Name|
-|Display Name|
-|Email |
-|Active|
-|Nickname|
-|CIBA Device Registration Token|
-|CIBA User code|
-|Locale|
-|Website URL|
-|IMAP Data|
-|jansAdminUIRole|
-|Enrollment code|
-|User Permission|
-|Preferred Language|
-|Profile URL|
-|Secret Question|
-|Email Verified|
-|Birthdate|
-|Time zone info|
-|Phone Number verified|
-|Preferred Username|
-|TransientId|
-|PersistentId|
-|Country|
-|Secret Answer|
-|OpenID Connect JSON formatted address|
-|User certificate|
-|Organization|
-|Picture URL|
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](../config-guide/config-tools/config-api/README.md) or jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
 
 
-Let's add an user by selecting `Add Users` tab. Initially we can provide bellow attributes value,
+## Using Command Line
 
-![add-user](https://github.com/JanssenProject/jans/assets/43112579/9f124b19-de4c-401f-9d7b-ac4b32c78163)
+The Jans CLI provides command-line operations for creating, updating, and deleting users and managing user attributes. 
 
- We can add extra claims simple by slecting `Add Claim`
+### Create a User
 
-![add-claim](https://github.com/JanssenProject/jans/assets/43112579/97673b9e-4f45-4af3-869a-dfb86a8e972f)
+The `post-user` operation creates a new user in Janssen Server. User information can be provided either in a JSON file or directly as JSON data.
 
-Finally `save` and exit. We will get an unique `inum`
+#### Using a JSON File
+
+1. Create a JSON file containing the user attributes.
+   ```json
+   {
+     "userId": "testcliuser",
+     "mail": "user@example.com",
+     "userPassword": "<your-password>",
+     "status": "active",
+     "displayName": "Test User",
+     "givenName": "Test"
+   }
+   ```
+
+2. Run the `post-user` operation and provide the path to the JSON file:
+   ```bash
+   jans cli --operation-id post-user --data /path/to/user.json 
+   ```
+
+3. A successful request returns the details of the newly created user, including its assigned `inum`.
 
 
-## Change User Password
-No chance to recover user password, but you can change.
-To change password of a user navigate/or search user and press key **p** when the target user is higlighted.
-In the figure below, passowrd of user **sakamura** is being changed.
+#### Using JSON Data
 
-![Change User Password](../../assets/tui-user-change-password.png)
+You can also provide the user attributes directly with the `--data` option:
 
-Once you write new password (it will be displayed while you type), go to button `< Save >` and press Enter.
+```bash
+jans cli --operation-id post-user \
+  --data '{
+    "userId": "testcliuser",
+    "givenName": "Test",
+    "displayName": "Test User",
+    "mail": "user@example.com",
+    "userPassword": "your-password",
+    "status": "active"
+  }'
+```
 
-## Manage User FIDO Devices
-To view and manage users registered FIDO devices, first navigate/or search user and press key **f** on the keyboard.
-If user has any registered FIDO device, a popup will appears as in image below:
+A successful request returns the details of the newly created user.
 
-![User FIDO Devices](../../assets/tui-ser-fido-device-list.png)
+!!! note
 
-You can veiw details of a device by pressing Enter. To delete a device press key **d**, you will be
-prompted for confirmation.
+    If a required attribute is missing, the server returns an error `USER_CREATION_ERROR` identifying the missing attributes.
+
+    For example:
+
+    ```text
+    {
+        "code": "400",
+        "message": "USER_CREATION_ERROR",
+        "description": "Attributes Missing in request are {displayName,givenName}."
+    }
+    ```
+
+### Update a User
+
+The `put-user` operation updates an existing user in Janssen Server. User information can be provided either in a JSON file or directly as JSON data.
+
+To update a user, include the user's `inum` and `baseDn` along with the user attributes.
+
+#### Using a JSON File
+
+1. Create a JSON file containing the user's information:
+   ```json
+   {
+     "userId": "testcliuser",
+     "givenName": "Updated",
+     "displayName": "Updated Test User",
+     "mail": "user@example.com",
+     "status": "active",
+     "inum": "<user-inum>",
+     "baseDn": "<user-base-dn>"
+   }
+   ```
+
+2. Run the `put-user` operation and provide the path to the JSON file:
+   ```bash
+   jans cli --operation-id put-user --data /path/to/user.json
+   ```
+
+3. A successful request returns the updated user information, including the `updatedAt` timestamp.
+
+#### Using JSON Data
+
+You can also provide the user information directly with the `--data` option:
+
+```bash
+jans cli --operation-id put-user \
+  --data '{
+    "userId": "testcliuser",
+    "givenName": "Updated",
+    "displayName": "Updated Test User",
+    "mail": "user@example.com",
+    "status": "active",
+    "inum": "<user-inum>",
+    "baseDn": "<user-base-dn>"
+  }'
+```
+
+A successful request returns the updated user information.
+
+!!! note
+
+    The `inum` and `baseDn` values must correspond to the existing user you want to update.
+
+
+### Add a Claim
+
+The `put-user` operation adds a claim to an existing user in Janssen Server. The claim is specified through the `customAttributes` field. The user's information, including `inum` and `baseDn`, must also be provided.
+
+#### Using a JSON File
+
+1. Create a JSON file containing the user's information and the claim:
+   ```json
+   {
+     "userId": "testcliuser",
+     "givenName": "Updated",
+     "displayName": "Updated Test User",
+     "mail": "cli-test-user@example.com",
+     "status": "active",
+     "inum": "<user-inum>",
+     "baseDn": "<user-base-dn>",
+     "customAttributes": [
+       {
+         "name": "phoneNumberVerified",
+         "multiValued": false,
+         "values": [true]
+       }
+     ]
+   }
+   ```
+   The `customAttributes` field specifies the user attributes to add or update. The `name` specifies the claim name, `multiValued` specifies whether the claim can have multiple values, and `values` contains the claim value.
+
+2. Run the `put-user` operation and provide the path to the JSON file:
+   ```bash
+   jans cli --operation-id put-user --data /path/to/user.json
+   ```
+
+3. A successful request returns the updated user information.
+
+
+#### Using JSON Data
+
+You can also provide the user information and claim directly with the `--data` option:
+
+```bash
+jans cli --operation-id put-user \
+  --data '{
+    "userId": "testcliuser",
+    "givenName": "Update given name",
+    "displayName": "Updated display name",
+    "mail": "cli-test-user@example.com",
+    "status": "active",
+    "inum": "<user-inum>",
+    "baseDn": "<user-base-dn>",
+    "customAttributes": [
+      {
+        "name": "phoneNumberVerified",
+        "multiValued": false,
+        "values": [true]
+      }
+    ]
+  }'
+```
+
+A successful request returns the updated user information with the added claim.
+
+!!! note
+
+    The `inum` and `baseDn` values must correspond to the existing user. The `customAttributes` field specifies the claim to add.
+
+
+### Change Password
+
+The `patch-user-by-inum` operation changes the password of an existing user in Janssen Server. The user is identified by `inum`, and the new password is provided through the `customAttributes` field.
+
+The password can be provided either in a JSON file or directly as JSON data.
+
+#### Using a JSON File
+
+1. Create a JSON file containing the new password:
+   ```json
+   {
+     "jsonPatchString": "",
+     "customAttributes": [
+       {
+         "name": "userPassword",
+         "multiValued": false,
+         "value": "your-new-password"
+       }
+     ]
+   }
+   ```
+
+2. Run the `patch-user-by-inum` operation and provide the user's `inum` and the path to the JSON file:
+   ```bash
+   jans cli --operation-id patch-user-by-inum --url-suffix "inum:<user-inum>" --data /path/to/user.json
+   ```
+
+3. A successful request returns the updated user information, including the `updatedAt` timestamp.
+
+
+#### Using JSON Data
+
+You can also provide the new password directly with the `--data` option:
+
+```bash
+jans cli --operation-id patch-user-by-inum \
+  --url-suffix "inum:<user-inum>" \
+  --data '{
+    "jsonPatchString": "",
+    "customAttributes": [
+      {
+        "name": "userPassword",
+        "multiValued": false,
+        "value": "your-new-password"
+      }
+    ]
+  }'
+```
+
+A successful request returns the updated user information.
+
+!!! note
+
+    The `<user-inum>` value must correspond to the existing user whose password you want to change.
+
+
+### Delete User
+
+The `delete-user` operation deletes an existing user from Janssen Server. The user is identified by their `inum`.
+
+1. Run the `delete-user` operation and provide the user's `inum`:
+   ```bash
+   jans cli --operation-id delete-user --url-suffix "inum:<user-inum>"
+   ```  
+
+2. A successful request returns:
+
+   ```text
+   Object was successfully deleted.
+   ```
+
+
+
+## Using Text-based UI
+
+Jans TUI provides user-management operations from the terminal. For instructions on adding, updating, deleting, and managing users with Jans TUI, see [Using Text-based UI](../config-guide/scim-config/user-config.md#using-text-based-ui).
+
+
+## Using Configuration REST API
+
+Janssen Server Configuration REST API exposes relevant endpoints for managing and configuring the user. Endpoint details are published in the [Swagger
+document](./../reference/openapi.md).
 
 # SCIM User Management
 
