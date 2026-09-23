@@ -2,10 +2,20 @@ package io.jans.configapi.model.configuration;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.Optional;
+import java.util.regex.Pattern;
+
 import jakarta.servlet.*;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CorsConfiguration implements Serializable {
+    
+    private static final Pattern COMMA_SEPARATED_SPLIT_REGEX = Pattern.compile("\\s*,\\s*");
+    /** Literal wildcard token that may appear in the configured allow list. */
+    private static final String WILDCARD = "*";
+    private static final Logger log = LoggerFactory.getLogger(CorsConfiguration.class);
 
     /**
      * 
@@ -57,10 +67,10 @@ public class CorsConfiguration implements Serializable {
     private boolean enabled;
 
     public CorsConfiguration() {
-        this.allowedOrigins = new HashSet<String>();
-        this.allowedHttpMethods = new HashSet<String>();
-        this.allowedHttpHeaders = new HashSet<String>();
-        this.exposedHeaders = new HashSet<String>();
+        this.allowedOrigins = new HashSet<>();
+        this.allowedHttpMethods = new HashSet<>();
+        this.allowedHttpHeaders = new HashSet<>();
+        this.exposedHeaders = new HashSet<>();
     }
 
     public Collection<String> getAllowedOrigins() {
@@ -131,18 +141,41 @@ public class CorsConfiguration implements Serializable {
      * @param decorateRequest     "true" if request needs to enhanced
      * @throws ServletException
      */
-    public void parseAndStore(final String corsEnabled, final String allowedOrigins, final String allowedHttpMethods,
+    public void parseAndStore(final String corsEnabled, final String strAllowedOrigins, final String allowedHttpMethods,
             final String allowedHttpHeaders, final String exposedHeaders, final String supportsCredentials,
             final String preflightMaxAge, final String decorateRequest) throws ServletException {
 
         this.enabled = Boolean.parseBoolean(corsEnabled);
-
-        if (allowedOrigins != null) {
-            if (!allowedOrigins.trim().equals("*")) {
-                Set<String> setAllowedOrigins = parseStringToSet(allowedOrigins);
-                this.allowedOrigins.clear();
-                this.allowedOrigins.addAll(setAllowedOrigins);
+        
+        // validate allowedOrigins
+        Set<String> parsedAllowedOrigins = new LinkedHashSet<>();
+        if (StringUtils.isNotBlank(strAllowedOrigins)) {
+            for (String origin : COMMA_SEPARATED_SPLIT_REGEX.split(strAllowedOrigins.trim())) {
+                if (StringUtils.isNotBlank(origin)) {
+                    parsedAllowedOrigins.add(origin.trim());
+                }
             }
+        }
+
+        // Security requirement: "*" may only appear as the sole entry. A mixed list
+        // such
+        // as "https://allowed.example,*" would make CorsFilter treat the configuration
+        // as
+        // wildcard and skip isOriginAllowed(origin) entirely - silently widening the
+        // allow list to every origin. Reject that configuration outright rather than
+        // silently dropping the wildcard or the explicit entries.
+        if (parsedAllowedOrigins.contains(WILDCARD) && parsedAllowedOrigins.size() > 1) {
+            log.error(
+                    "CorsConfiguration::parseAndStore() - invalid strAllowedOrigins '{}': '*' cannot be combined with explicit origins",
+                    strAllowedOrigins);
+            throw new ServletException(
+                    "Invalid CORS configuration: allowedOrigins cannot mix the wildcard '*' with explicit origins. "
+                            + "Configure '*' alone to allow any origin, or remove it and list only the explicit origins to allow.");
+        }
+
+        if (parsedAllowedOrigins != null && !parsedAllowedOrigins.isEmpty()) {
+                this.allowedOrigins.clear();
+                this.allowedOrigins.addAll(parsedAllowedOrigins);
         }
 
         if (allowedHttpMethods != null) {
@@ -153,7 +186,7 @@ public class CorsConfiguration implements Serializable {
 
         if (allowedHttpHeaders != null) {
             Set<String> setAllowedHttpHeaders = parseStringToSet(allowedHttpHeaders);
-            Set<String> lowerCaseHeaders = new HashSet<String>();
+            Set<String> lowerCaseHeaders = new HashSet<>();
             for (String header : setAllowedHttpHeaders) {
                 String lowerCase = header.toLowerCase();
                 lowerCaseHeaders.add(lowerCase);
@@ -206,7 +239,7 @@ public class CorsConfiguration implements Serializable {
             splits = new String[] {};
         }
 
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         if (splits.length > 0) {
             for (String split : splits) {
                 set.add(split.trim());
@@ -227,7 +260,7 @@ public class CorsConfiguration implements Serializable {
     }
 
     public boolean isAnyOriginAllowed() {
-        if (allowedOrigins != null && allowedOrigins.size() == 0) {
+        if (allowedOrigins != null && allowedOrigins.isEmpty()) {
             return true;
         }
         return false;
