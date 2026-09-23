@@ -3,6 +3,7 @@ package cedarling_go
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // Represents a cedarling principal or resource entity
@@ -364,5 +365,7 @@ type MetricsSnapshot struct {
 	PolicyStats      map[string]int64 `json:"policy_stats"`
 	ErrorCounters    map[string]int64 `json:"error_counters"`
 	OperationalStats map[string]int64 `json:"operational_stats"`
-	IntervalSecs     int64            `json:"interval_secs"`
+	// Interval elapsed since the previous drain. Crosses the binding as
+	// whole nanoseconds, which is exactly how time.Duration is represented.
+	Interval time.Duration `json:"interval_nanos"`
 }

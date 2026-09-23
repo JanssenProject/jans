@@ -358,12 +358,14 @@ snapshot, err := instance.DrainMetrics()
 if err != nil {
     // Handle error: disabled collection or Lock telemetry owns the collector
 }
+fmt.Printf("Requests: %d\n", snapshot.OperationalStats["authz.requests_total"])
+fmt.Printf("Interval: %v\n", snapshot.Interval)
 ```
 
 Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails whenever
 `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has no
-telemetry endpoint. `interval_secs` has 1-second precision, so a drain more
-often than once per second reports `0`.
+telemetry endpoint. `Interval` is a `time.Duration` and crosses the binding as
+nanoseconds, so sub-second intervals are reported exactly.
 
 #### Using Data in Cedar Policies
 

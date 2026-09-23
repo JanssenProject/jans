@@ -112,13 +112,18 @@ pub(crate) struct PolicyStatsSnapshot {
     deny_count: i64,
 }
 
-/// Serde helper keeping [`MetricsSnapshot::interval`] on the wire as whole
-/// seconds under the `interval_secs` key.
+/// Serde helper writing [`MetricsSnapshot::interval`] as fractional seconds
+/// under the `interval_secs` key.
 ///
-/// The only consumer of this `Serialize` impl is the Go binding, which bridges
-/// results as JSON. The Lock server is *not* a consumer: the telemetry ticker
-/// maps the snapshot into its own `MetricsLogEntry` by hand, so the proto shape
-/// is fixed by that struct rather than by this impl.
+/// `Duration`'s own `Serialize` emits a `{ secs, nanos }` object, which is a
+/// poor public JSON shape, and whole seconds would silently report `0` for any
+/// interval shorter than a second. Float seconds keep the field a single
+/// number without discarding the sub-second part.
+///
+/// Bindings are free to pick their own wire shape: the Go bridge sends whole
+/// nanoseconds so the value lands in a `time.Duration`, and the Lock server
+/// gets whole seconds from the telemetry ticker's own `MetricsLogEntry`.
+/// Neither goes through this impl.
 mod interval_serde {
     use serde::Serializer;
     use std::time::Duration;
@@ -127,7 +132,7 @@ mod interval_serde {
     where
         S: Serializer,
     {
-        serializer.serialize_u64(duration.as_secs())
+        serializer.serialize_f64(duration.as_secs_f64())
     }
 }
 
@@ -144,8 +149,7 @@ pub struct MetricsSnapshot {
     /// Operational counters and gauges (authorization, cache, JWT, data, lock).
     pub operational_stats: HashMap<String, i64>,
     /// Duration of the snapshot interval with sub-second precision.
-    /// Serialized as `interval_secs` whole seconds, so a drain more often than
-    /// once per second serializes as `0`.
+    /// Serialized as `interval_secs`, fractional seconds.
     #[serde(rename = "interval_secs", serialize_with = "interval_serde::serialize")]
     pub interval: Duration,
 }
@@ -1707,7 +1711,7 @@ mod tests {
     }
 
     #[test]
-    fn snapshot_interval_serializes_as_secs() {
+    fn snapshot_interval_serializes_as_fractional_secs() {
         let snap = MetricsSnapshot {
             policy_stats: HashMap::new(),
             error_counters: HashMap::new(),
@@ -1717,8 +1721,8 @@ mod tests {
         let json = serde_json::to_value(&snap).expect("snapshot must serialize");
         assert_eq!(
             json.get("interval_secs"),
-            Some(&serde_json::json!(61)),
-            "Duration must serialize as whole seconds under the interval_secs key for Lock compat, got {json}"
+            Some(&serde_json::json!(61.5)),
+            "Duration must serialize as fractional seconds under the interval_secs key, keeping the sub-second part, got {json}"
         );
         assert!(
             json.get("interval").is_none(),

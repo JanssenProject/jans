@@ -190,10 +190,9 @@ impl Cedarling {
     /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has
     /// no telemetry endpoint and metrics are not shipped anywhere.
     ///
-    /// The returned `interval` is a [`std::time::Duration`] with
-    /// sub-second precision; it serializes as whole seconds (`interval_secs`)
-    /// for Lock compat, so a drain more often than once per second
-    /// serializes as `0`.
+    /// The returned `interval` is a [`std::time::Duration`] with sub-second
+    /// precision, and serializes as fractional seconds under the
+    /// `interval_secs` key.
     pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
         self.instance.drain_metrics()
     }

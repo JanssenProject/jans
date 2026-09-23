@@ -747,8 +747,8 @@ impl Cedarling {
     ///
     /// Fails when `CEDARLING_METRICS_COLLECTION` is disabled or whenever
     /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set (even if the Lock server
-    /// has no telemetry endpoint). `interval_secs` has 1-second precision,
-    /// so a drain more often than once per second reports `0`.
+    /// has no telemetry endpoint). `interval_secs` is fractional seconds,
+    /// so sub-second intervals are reported exactly.
     ///
     /// # Example
     ///
@@ -1400,9 +1400,8 @@ pub struct MetricsSnapshot {
     /// Operational counters and gauges (authorization, cache, JWT, data, lock).
     #[wasm_bindgen(getter_with_clone)]
     pub operational_stats: Map,
-    /// Duration of the snapshot interval in seconds, 1-second precision.
+    /// Duration of the snapshot interval in fractional seconds.
     /// Exposed as `Number` (not `BigInt`) so plain JS arithmetic works.
-    /// A drain more often than once per second reports `0`.
     pub interval_secs: f64,
 }
 

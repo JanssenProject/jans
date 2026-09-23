@@ -17,6 +17,33 @@ use cedarling::{
 mod cedarling_interface;
 use cedarling_interface::{Result, ResultInstance};
 
+/// Wire shape of [`base::MetricsSnapshot`] for the Go binding.
+///
+/// The core type serializes its interval as fractional seconds, but Go models
+/// a duration as `time.Duration` — an `int64` count of nanoseconds — so the
+/// bridge sends whole nanoseconds and the Go struct receives them directly,
+/// without a float conversion at every call site.
+#[derive(serde::Serialize)]
+struct GoMetricsSnapshot {
+    policy_stats: HashMap<String, i64>,
+    error_counters: HashMap<String, i64>,
+    operational_stats: HashMap<String, i64>,
+    interval_nanos: u64,
+}
+
+impl From<base::MetricsSnapshot> for GoMetricsSnapshot {
+    fn from(snapshot: base::MetricsSnapshot) -> Self {
+        Self {
+            policy_stats: snapshot.policy_stats,
+            error_counters: snapshot.error_counters,
+            operational_stats: snapshot.operational_stats,
+            // `u64` nanoseconds covers ~584 years; saturating keeps the
+            // conversion total rather than panicking on an absurd interval.
+            interval_nanos: u64::try_from(snapshot.interval.as_nanos()).unwrap_or(u64::MAX),
+        }
+    }
+}
+
 static BINDINGS_RUNTIME: LazyLock<BindingsRuntime> = LazyLock::new(|| {
     let rt = Runtime::new().expect("Failed to create Tokio runtime");
     BindingsRuntime {
@@ -296,7 +323,7 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
     fn drain_metrics(instance_id: usize) -> Result {
         let instance = get_instance!(instance_id);
         match instance.drain_metrics() {
-            Ok(snapshot) => Result::success(snapshot),
+            Ok(snapshot) => Result::success(GoMetricsSnapshot::from(snapshot)),
             Err(e) => Result::error(e),
         }
     }

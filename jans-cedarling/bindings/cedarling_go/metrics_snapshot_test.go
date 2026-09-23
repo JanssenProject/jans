@@ -8,6 +8,7 @@ package cedarling_go
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 // loadMetricsConfig loads the bootstrap config with metrics collection toggled
@@ -113,5 +114,17 @@ func TestDrainMetricsEnabledCollectsAndResets(t *testing.T) {
 	}
 	if got, ok := third.OperationalStats["authz.requests_total"]; !ok || got != 0 {
 		t.Errorf("Expected authz.requests_total reset to 0, got %d (present: %v)", got, ok)
+	}
+
+	// The interval crosses the binding as nanoseconds, so back-to-back drains
+	// must report a positive sub-second duration rather than truncating to 0.
+	if third.Interval <= 0 {
+		t.Errorf("Expected a positive interval between drains, got %v", third.Interval)
+	}
+	if third.Interval >= time.Second {
+		t.Errorf(
+			"Expected the interval between back-to-back drains to stay under a second, got %v",
+			third.Interval,
+		)
 	}
 }

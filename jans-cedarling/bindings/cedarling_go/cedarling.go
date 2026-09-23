@@ -327,8 +327,9 @@ func (c *Cedarling) GetStatsCtx() (DataStoreStats, error) {
 	return stats, nil
 }
 
-// DrainMetrics captures a local snapshot of the telemetry metrics
-// and resets the counters for the next interval.
+// DrainMetrics is a destructive read: it returns the telemetry metrics
+// and resets the counters for the next interval, so there should be a
+// single consumer.
 // Returns an error when metrics collection is disabled, or
 // when the collector is owned by the Lock telemetry ticker.
 func (c *Cedarling) DrainMetrics() (MetricsSnapshot, error) {

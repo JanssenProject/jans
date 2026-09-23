@@ -286,10 +286,9 @@ impl Cedarling {
     /// no telemetry endpoint and metrics are not shipped anywhere: the ticker
     /// is spawned based on the interval alone.
     ///
-    /// The returned `interval` is a [`std::time::Duration`] with
-    /// sub-second precision; it serializes as whole seconds (`interval_secs`)
-    /// for Lock compat, so a drain more often than once per second
-    /// serializes as `0`.
+    /// The returned `interval` is a [`std::time::Duration`] with sub-second
+    /// precision, and serializes as fractional seconds under the
+    /// `interval_secs` key.
     pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
         match self.metrics.mode() {
             MetricsMode::Local => Ok(self.metrics.snapshot_and_reset()),

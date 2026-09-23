@@ -374,8 +374,8 @@ try {
 Requires `CEDARLING_METRICS_COLLECTION: "enabled"`. Fails whenever
 `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has no
 telemetry endpoint. `interval_secs` is a plain `Number` (not `BigInt`), so
-`snapshot.interval_secs + 1` works. It has 1-second precision, so a drain more
-often than once per second reports `0`. Use `snapshot.jsonString()` for a
+`snapshot.interval_secs + 1` works. It carries fractional seconds, so
+sub-second intervals are reported exactly. Use `snapshot.jsonString()` for a
 JSON-serializable form with plain objects.
 
 ### Trusted Issuer Readiness

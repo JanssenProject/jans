@@ -373,8 +373,8 @@ The Context Data API allows you to push external data into the Cedarling evaluat
 - `drain_metrics()`
 
   Destructive read: returns a `MetricsSnapshot` with `policy_stats`,
-  `error_counters`, `operational_stats`, and `interval_secs`, then resets
-  the counters for the next interval.
+  `error_counters`, `operational_stats`, and the elapsed interval, then
+  resets the counters for the next interval.
 
   Only available when `CEDARLING_METRICS_COLLECTION` is `enabled` at bootstrap
   and no Lock telemetry ticker owns the collector. Returns a `LockTelemetry`
@@ -382,10 +382,26 @@ The Context Data API allows you to push external data into the Cedarling evaluat
   server has no telemetry endpoint and metrics are not shipped anywhere: the
   ticker is spawned based on the interval alone.
 
-  `interval_secs` has 1-second precision (truncated), so a drain more often
-  than once per second reports `0`. It is kept as `int64` for Lock proto
-  compatibility (`TelemetryEntry` field 8 in `audit.proto`); a separate `interval_ms`
-  field would be needed for sub-second precision.
+  The interval is reported as each language's own duration type, so its name
+  and precision differ by binding:
+
+  | Binding | Field | Type |
+  |---------|-------|------|
+  | Rust | `interval` | `std::time::Duration` |
+  | Python | `interval` | `datetime.timedelta` |
+  | Kotlin | `interval` | `java.time.Duration` |
+  | Swift | `interval` | `TimeInterval` |
+  | Go | `Interval` | `time.Duration` |
+  | JavaScript / WASM | `interval_secs` | `Number`, fractional seconds |
+
+  Every binding reports the interval with sub-second precision. Serializing the
+  Rust snapshot yields fractional seconds under an `interval_secs` key.
+
+  The interval shipped to the Lock server is separate from all of these: the
+  telemetry ticker maps the snapshot into its own entry, whose `interval_secs`
+  is an `int64` of whole seconds fixed by the Lock proto (`TelemetryEntry`
+  field 8 in `audit.proto`). Sub-second precision toward Lock would require a
+  new proto field.
 
 ### Schema Requirements
 
