@@ -44,7 +44,7 @@ def _env(name, required=True, default=None):
 def _read_config_api_scopes():
     """The full config-api scope list is large + static; read it from the default profile."""
     path = REPO / "jans-config-api" / "profiles" / "default" / "config-api-test.properties"
-    for line in path.read_text().splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         if line.startswith("test.scopes="):
             return line.split("=", 1)[1]
     sys.exit("render_test_profiles: could not find test.scopes in the default config-api profile")
@@ -125,14 +125,15 @@ def _render_orm_profile(ctx):
     """
     conf = Path("jans-orm/integration-test/profiles") / ctx["hostname"] / "conf"
     orm_templates = TEST_TEMPLATES / "jans-orm" / "conf"
-    _write(REPO / conf / "jans.properties", (orm_templates / "jans.properties").read_text() % ctx)
-    _write(REPO / conf / "salt", (orm_templates / "salt").read_text() % ctx)
+    _write(REPO / conf / "jans.properties",
+           (orm_templates / "jans.properties").read_text(encoding="utf-8") % ctx)
+    _write(REPO / conf / "salt", (orm_templates / "salt").read_text(encoding="utf-8") % ctx)
     _write(REPO / conf / "jans-sql.properties", _orm_sql_properties(ctx))
 
 
 def _write(path: Path, content: str):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content)
+    path.write_text(content, encoding="utf-8")
     print(f"rendered {path.relative_to(REPO)}")
 
 
@@ -156,12 +157,12 @@ def render():
          TEST_TEMPLATES / "jans-config-api" / "client" / "config-api-test.properties"),
     ]
     for prof_root, dest, template in templated:
-        _write(REPO / prof_root / fqdn / dest, template.read_text() % ctx)
+        _write(REPO / prof_root / fqdn / dest, template.read_text(encoding="utf-8") % ctx)
 
     # config-jans-auth-test.properties (SQL variant): the server-side tests connect
     # directly to persistence, so build the base + the rendered SQL-connection block.
     sql_block = (TEST_TEMPLATES / "jans-auth" / "server"
-                 / "config-jans-auth-test-sql.properties.nrnd").read_text() % ctx
+                 / "config-jans-auth-test-sql.properties.nrnd").read_text(encoding="utf-8") % ctx
     base = (
         "server.name=%(hostname)s\n"
         "config.oxauth.issuer=https://%(hostname)s\n"
