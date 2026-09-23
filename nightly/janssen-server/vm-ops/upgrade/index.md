@@ -10,11 +10,11 @@ This guide shows how to upgrade a Janssen VM deployment.
     Custom scripts are considered external configuration and are not updated automatically during an upgrade.
     Please review and adapt your custom scripts to work with the newer version of the Janssen Server.
 
-Let's assume we are upgrading Jans VM installation from `current version` to `vreplace-janssen-version`
+Let's assume we are upgrading Jans VM installation from `current version` to `nightly`
 
 1. Keep the old VM installation running.
 
-2. [Install](../install/vm-install/README.md) on a separate VM the target new Jans installation, i.e. `vreplace-janssen-version`.
+2. [Install](../install/vm-install/README.md) on a separate VM the target new Jans installation, i.e. `nightly`.
 
     You can install with a test client. For example:
 
@@ -22,11 +22,11 @@ Let's assume we are upgrading Jans VM installation from `current version` to `vr
 
     This `client-id` and `client-pw` will then be used to import Terraform configurations
 
-3. Use our Terraform [docs](../terraform/README.md) on the new installation, i.e. `vreplace-janssen-version` to:
+3. Use our Terraform [docs](../terraform/README.md) on the new installation, i.e. `nightly` to:
     - import all the global configurations from the new installation using `terraform import`
     - define all the custom IDP configurations and apply them using `terraform apply`
 
-4. At this point there should be two versions up, `old version` and `vreplace-janssen-version`.
+4. At this point there should be two versions up, `old version` and `nightly`.
 
 5. Traffic should be switched gradually from the old setup to the new setup.
    Once confidence is gained, drain the old VM.
