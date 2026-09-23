@@ -112,26 +112,22 @@ pub(crate) struct PolicyStatsSnapshot {
     deny_count: i64,
 }
 
-/// Serde helper keeping the snapshot `interval` wire-compatible as integer seconds.
+/// Serde helper keeping [`MetricsSnapshot::interval`] on the wire as whole
+/// seconds under the `interval_secs` key.
 ///
-/// The JSON / Lock server shape stays `interval_secs: <u64>` while Rust uses
-/// [`std::time::Duration`] internally, so the field rename does not break
-/// existing consumers.
-pub(crate) mod duration_secs {
+/// The only consumer of this `Serialize` impl is the Go binding, which bridges
+/// results as JSON. The Lock server is *not* a consumer: the telemetry ticker
+/// maps the snapshot into its own `MetricsLogEntry` by hand, so the proto shape
+/// is fixed by that struct rather than by this impl.
+mod interval_serde {
     use serde::Serializer;
     use std::time::Duration;
 
-    pub(crate) fn serialize<S>(duration: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    pub(super) fn serialize<S>(duration: &Duration, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         serializer.serialize_u64(duration.as_secs())
-    }
-
-    /// Saturating conversion for the Lock `MetricsLogEntry` (`i64`) and language
-    /// bindings that still expose whole seconds.
-    pub(crate) fn saturating_as_i64(duration: Duration) -> i64 {
-        i64::try_from(duration.as_secs()).unwrap_or(i64::MAX)
     }
 }
 
@@ -139,8 +135,6 @@ pub(crate) mod duration_secs {
 ///
 /// Destructive read: produced by [`MetricsCollector::snapshot_and_reset`],
 /// which returns the counters and resets them.
-///
-/// Produced by [`MetricsCollector::snapshot_and_reset`].
 #[derive(Debug, Clone, Serialize)]
 pub struct MetricsSnapshot {
     /// Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
@@ -150,11 +144,18 @@ pub struct MetricsSnapshot {
     /// Operational counters and gauges (authorization, cache, JWT, data, lock).
     pub operational_stats: HashMap<String, i64>,
     /// Duration of the snapshot interval with sub-second precision.
-    /// Serialized as `interval_secs` whole seconds for Lock proto compat
-    /// (`audit.proto` `TelemetryEntry` field 8); a drain more often than
+    /// Serialized as `interval_secs` whole seconds, so a drain more often than
     /// once per second serializes as `0`.
-    #[serde(rename = "interval_secs", serialize_with = "duration_secs::serialize")]
+    #[serde(rename = "interval_secs", serialize_with = "interval_serde::serialize")]
     pub interval: Duration,
+}
+
+impl MetricsSnapshot {
+    /// [`Self::interval`] as whole seconds, saturating, for the Lock proto
+    /// `TelemetryEntry` field 8 (`audit.proto`), which is an `int64`.
+    pub(crate) fn interval_secs_i64(&self) -> i64 {
+        i64::try_from(self.interval.as_secs()).unwrap_or(i64::MAX)
+    }
 }
 
 /// Error returned by [`crate::Cedarling::drain_metrics`] when
@@ -1711,7 +1712,7 @@ mod tests {
             "renamed field must not leak an interval key, got {json}"
         );
         assert_eq!(
-            duration_secs::saturating_as_i64(snap.interval),
+            snap.interval_secs_i64(),
             61,
             "proto conversion must truncate sub-second part"
         );

@@ -61,14 +61,13 @@ impl TelemetryTicker {
         };
 
         let snapshot = self.metrics.snapshot_and_reset();
+        let interval_secs = snapshot.interval_secs_i64();
         let entry = MetricsLogEntry {
             base: BaseLogEntry::new_metric_opt_request_id(None),
             policy_stats: snapshot.policy_stats,
             error_counters: snapshot.error_counters,
             operational_stats: snapshot.operational_stats,
-            interval_secs: crate::authz::metrics::duration_secs::saturating_as_i64(
-                snapshot.interval,
-            ),
+            interval_secs,
         };
 
         logger.log_any(entry);
