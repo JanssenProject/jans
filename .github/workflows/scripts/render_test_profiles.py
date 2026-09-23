@@ -75,7 +75,6 @@ def build_ctx():
         "rdbm_user": _env("RDBM_USER"),
         "rdbm_password_enc": _env("RDBM_PASSWORD_ENC"),
         "config_api_scopes_list": _read_config_api_scopes(),
-        # conf/jans.properties placeholders; the ORM tests only touch the DB, so both are inert.
         "certFolder": "conf",
         "jansOptPythonFolder": "/opt/jans/python",
     }

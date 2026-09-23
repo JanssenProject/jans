@@ -434,8 +434,6 @@ mkdir -p test-reports aio-logs
 echo "::group::run integration suites"
 # HTTP suites vs the live AIO; per-suite output -> aio-logs/ (the run log is too large to fetch).
 # auth-client is the slowest (HtmlUnit browser flows), hence the generous timeout.
-# jans-orm/integration-test talks to the DB directly (no HTTP), but it still needs the loaded
-# schema + test data, so it runs here rather than with the in-process unit suites.
 for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
              jans-fido2:jans-fido2/client jans-orm:jans-orm/integration-test \
              jans-auth-server:jans-auth-server/client; do
@@ -471,8 +469,6 @@ note_unit() {
     echo "[warn/skip] $2 units"
   fi
 }
-# integration-test ran above against the live DB; re-running it here under -Dcfg=default would
-# overwrite those reports with skipped ones.
 want_module jans-orm && { timeout -k 30 600 mvn $OPTS -pl '!integration-test' -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || note_unit $? jans-orm; }
 want_module jans-core && { timeout -k 30 600 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || note_unit $? jans-core; }
 want_module jans-auth-server && { timeout -k 30 600 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || note_unit $? jans-auth-server; }
