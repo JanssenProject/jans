@@ -115,15 +115,16 @@ pub(crate) struct PolicyStatsSnapshot {
 /// Serde helper writing [`MetricsSnapshot::interval`] as fractional seconds
 /// under the `interval_secs` key.
 ///
-/// `Duration`'s own `Serialize` emits a `{ secs, nanos }` object, which is a
-/// poor public JSON shape, and whole seconds would silently report `0` for any
-/// interval shorter than a second. Float seconds keep the field a single
-/// number without discarding the sub-second part.
+/// This is the canonical JSON shape for the public Rust API. `Duration`'s own
+/// `Serialize` emits a `{ secs, nanos }` object, which is a poor public JSON
+/// shape, and whole seconds would silently report `0` for any interval shorter
+/// than a second. Float seconds keep the field a single number without
+/// discarding the sub-second part.
 ///
-/// Bindings are free to pick their own wire shape: the Go bridge sends whole
-/// nanoseconds so the value lands in a `time.Duration`, and the Lock server
-/// gets whole seconds from the telemetry ticker's own `MetricsLogEntry`.
-/// Neither goes through this impl.
+/// Language bindings that expose a native duration type set it directly rather
+/// than reading this key (Go sends whole nanoseconds, Python and the rest
+/// convert to their own type), and the Lock telemetry ticker builds its own
+/// `MetricsLogEntry`. This impl is what Rust consumers get.
 mod interval_serde {
     use serde::Serializer;
     use std::time::Duration;
