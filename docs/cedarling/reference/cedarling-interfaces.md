@@ -397,11 +397,8 @@ The Context Data API allows you to push external data into the Cedarling evaluat
   Every binding reports the interval with sub-second precision. Serializing the
   Rust snapshot yields fractional seconds under an `interval_secs` key.
 
-  The interval shipped to the Lock server is separate from all of these: the
-  telemetry ticker maps the snapshot into its own entry, whose `interval_secs`
-  is an `int64` of whole seconds fixed by the Lock proto (`TelemetryEntry`
-  field 8 in `audit.proto`). Sub-second precision toward Lock would require a
-  new proto field.
+  The interval shipped to the Lock server is separate: the telemetry ticker
+  reports whole seconds, so sub-second precision is local to the binding.
 
 ### Schema Requirements
 
