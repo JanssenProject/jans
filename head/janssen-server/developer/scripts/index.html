@@ -3633,15 +3633,15 @@ overridden to implement your business case.</p>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/id_generator/id-generator/">ID Generator</a></td>
-<td></td>
+<td>Allows administrators to implement custom rules for generating unique identifiers for new person, client, and other entries.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/update_token/update-token/">Update Token</a></td>
 <td>Enables transformation of claims and values in id_token, Access token and Refresh tokens; allows the setting of token lifetime; allows the addition or removal of scopes to / from tokens; allows the addition of audit logs each time a token is created.</td>
 </tr>
 <tr>
-<td>Session Management</td>
-<td></td>
+<td><a href="../../auth-server/session-management/">Session Management</a></td>
+<td>Allows custom actions to be performed when an application session is created or an end-session event occurs.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/token_exchange/token-exchange/">Token Exchange</a></td>
@@ -3649,7 +3649,7 @@ overridden to implement your business case.</p>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/scim/scim/">SCIM</a></td>
-<td></td>
+<td>Allows customization of SCIM operations, including modifying resources and responses, triggering actions, and implementing fine-grained access to resources.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/introspection/">Introspection</a></td>
@@ -3657,19 +3657,19 @@ overridden to implement your business case.</p>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/post_authn/post-authentication/">Post Authentication</a></td>
-<td></td>
+<td>Allows forcing re-authentication or re-authorization during an authorization request, including for pre-authorized clients or clients with persisted authorizations.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/client_authn/client-authn/">Client Authentication</a></td>
-<td></td>
+<td>Customizes client authentication and supports authentication methods beyond the built-in methods.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/authorization_challenge/authorization-challenge/">Authorization Challenge</a></td>
-<td></td>
+<td>Customizes the Authorization Challenge Endpoint to implement authentication and multi-step authorization flows.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/authz_detail/authz-detail/">Authorization Detail</a></td>
-<td></td>
+<td>Validates and customizes the representation of individual authorization details in an <code>authorization_details</code> request.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/access_evaluation/access-evaluation/">Access Evaluation</a></td>
@@ -3681,23 +3681,23 @@ overridden to implement your business case.</p>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/select_account/select-account/">Select Account</a></td>
-<td></td>
+<td>Customizes account selection behavior, including the selection page, session display, and whether a session can be selected.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/resource_owner_password_credentials/ropc/">Resource Owner Password Credentials</a></td>
-<td></td>
+<td>Customizes the Resource Owner Password Credentials Grant authentication flow, including modifying the authentication result or implementing custom authentication.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/uma_rpt_policy/uma-rpt/">UMA 2 RPT Authorization Policies</a></td>
-<td></td>
+<td>Applies custom policies to UMA scopes to grant or deny access requests.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/uma_claims_gathering/uma-claims-web/">UMA 2 Claims-Gathering</a></td>
-<td></td>
+<td>Collects claims through a multi-step web flow for UMA authorization requests.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/uma_rpt_claims/uma-claims-jwt/">UMA RPT Claims</a></td>
-<td></td>
+<td>Customizes the claims in a UMA RPT by modifying its JSON representation.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/fido2_extension/fido2-extension/">Fido2 Extension</a></td>
@@ -3725,51 +3725,51 @@ overridden to implement your business case.</p>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/ciba/ciba/">CIBA - End User notification</a></td>
-<td></td>
+<td>Customizes how users are notified of CIBA authentication requests through their Authentication Device.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/config_api/config-api/">Configuration API</a></td>
-<td></td>
+<td>Adds custom authorization and response-processing logic to Configuration API requests.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/idp/idp-extension/">IDP</a></td>
-<td></td>
+<td>Translates and updates user attributes during external identity-provider authentication.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/end_session/end-session/">End Session</a></td>
-<td></td>
+<td>Customizes the HTML response for OpenID Connect Frontchannel Logout.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/persistence_extension/persistence/">Persistence Extension</a></td>
-<td></td>
+<td>Extends persistence behavior by initializing and releasing services and customizing password hashing and comparison.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/revoke_token/revoke-token/">Revoke Token</a></td>
-<td></td>
+<td>Customizes token revocation by determining whether a token should be revoked or revocation should be skipped.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/application_session/application-session/">Application Session</a></td>
-<td></td>
+<td>Allows customization of application session events, including session start, session end, and active session responses.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/spontaneous_scope/spontaneous-scope/">Spontaneous Scope</a></td>
-<td></td>
+<td>Allows customization of spontaneous scope handling during authorization requests.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/create_user/create-user/">Create User</a></td>
-<td></td>
+<td>Customizes the user registration process initiated with the <code>prompt=create</code> authorization request.</td>
 </tr>
 <tr>
-<td>SSA Response Modification</td>
-<td></td>
+<td><a href="../../../script-catalog/ssa/ssa-modify-response/">SSA Response Modification</a></td>
+<td>Customizes responses and data for SSA creation, retrieval, and revocation operations.</td>
 </tr>
 <tr>
 <td><a href="../../../script-catalog/health_check/health-check/">Health Check</a></td>
-<td></td>
+<td>Customizes the response returned by the Health Check Endpoint.</td>
 </tr>
 <tr>
 <td>Lock Extension</td>
-<td></td>
+<td>Allows customization of data and policy operations before they are added or removed.</td>
 </tr>
 </tbody>
 </table>
@@ -4228,7 +4228,7 @@ E.g:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 14, 2026
+    September 23, 2026
   </span>
 
     
