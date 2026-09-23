@@ -1,10 +1,10 @@
 # Loops
 
-Agama provides two mechanisms to write loops: [`Repeat`](https://docs.jans.io/stable/agama/language-reference/#repeat) and [`Iterate Over`](https://docs.jans.io/stable/agama/language-reference#iterate-over). This page will cover `Repeat` only. Readers are encouraged to write some code using `Iterate Over`.
+Agama provides two mechanisms to write loops: [`Repeat`](../../../../../agama/language-reference.md#repeat) and [`Iterate Over`](../../../../../agama/language-reference.md#iterate-over). This page will cover `Repeat` only. Readers are encouraged to write some code using `Iterate Over`.
 
 ## A number guess game
     
-In this example a simple "number guess" game is tackled. In flow [`com.acme.basic.numberguess`](./project/code/com.acme.basic.numberguess.flow), a random integer between zero and five is generated, and then the user is given up to three chances to guess the number. A dissection of the code follows.
+In this example a simple "number guess" game is tackled. In flow [`com.acme.basic.numberguess`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.numberguess.flow), a random integer between zero and five is generated, and then the user is given up to three chances to guess the number. A dissection of the code follows.
 
 These lines generate the random number and convert it to string:
 
@@ -26,7 +26,7 @@ Repeat 3 times max
 
 `data` contains info to be passed to the guessing page. `Repeat` is followed by how many times the indented block of code will be executed. Note loops can terminate earlier - this will  be seen in the second example.
 
-Next the [guessing](./project/web/guess/number_guess.ftlh) page is presented to the user. It looks like this:
+Next the [guessing](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/web/guess/number_guess.ftlh) page is presented to the user. It looks like this:
 
 ```html
 <!doctype html>
@@ -56,7 +56,7 @@ When obj.guess is strRand
     Finish true
 ```
 
-`obj.guess` has the value the user entered and is compared to match with `strRand`. When they are equal a [congratulations](./project/web/guess/congrats.ftlh) page is shown, and then the flow finish successfully. If that is not the case, the below is executed before the loop starts again:
+`obj.guess` has the value the user entered and is compared to match with `strRand`. When they are equal a [congratulations](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/web/guess/congrats.ftlh) page is shown, and then the flow finish successfully. If that is not the case, the below is executed before the loop starts again:
 
 ```
 data.failed = true
@@ -73,7 +73,7 @@ Once three failed attempts occur, the next line executed is `Finish false` termi
 
 [Earlier](../conditionals-matching/README.md#example-the-unforgiving-club), an example regarded the procedure for admission to a peculiar club. Once accepted, the new member fills a form for referring friends so they can get invitations to join too.
 
-The rules are simple: at minimum one and at maximum three referrals can be supplied. This behavior is implemented in flow [`com.acme.basic.referrals`](./project/code/com.acme.basic.referrals.flow). A dissection of the code follows.
+The rules are simple: at minimum one and at maximum three referrals can be supplied. This behavior is implemented in flow [`com.acme.basic.referrals`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.referrals.flow). A dissection of the code follows.
 
 Before entering the loop, a couple of initialization statements:
 
@@ -94,7 +94,7 @@ Repeat 3 times max
     Quit When name is null
 ```
 
-The [page](./project/web/referrals/referred.ftlh) to enter a referral will be displayed at most three times. It has two sections:
+The [page](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/web/referrals/referred.ftlh) to enter a referral will be displayed at most three times. It has two sections:
 
 - The top section is shown only after a first referral has been added. It displays a link that submits an empty form that the flow will interpret as no more contacts will be submitted
 - The lower section is always shown and has a form with fields for entering name and e-mail
@@ -123,7 +123,7 @@ RRF "thanks.ftlh" pageData
 Finish true
 ```
 
-`pageData` is overwritten with a map containing the elicited data and then passed to ["thank you"](./project/web/referrals/thanks.ftlh) template in `RRF`. This page displays a summary of the contacts supplied: a comma-separated list of their names.
+`pageData` is overwritten with a map containing the elicited data and then passed to ["thank you"](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/web/referrals/thanks.ftlh) template in `RRF`. This page displays a summary of the contacts supplied: a comma-separated list of their names.
 
 ## On flow interruption
 

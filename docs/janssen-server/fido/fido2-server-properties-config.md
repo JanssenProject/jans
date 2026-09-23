@@ -108,6 +108,27 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `enterpriseAttestation` | Boolean | `false` | Enables support for enterprise-specific hardware attestation profiles. |
 | `attestationMode` | String | `"monitor"` | Options are: `disabled` (skip attestation checks), `monitor` (log/validate but allow credentials if attestation is absent/unknown), and `enforced` (fail credential creation if attestation check fails). |
 | `allowedTopOrigins` | Array of Strings | `[]` | Full origins permitted to frame a cross-origin ceremony, each written as scheme, host and optional port (for example `https://portal.example.com`). Empty — the default — denies every framed ceremony. See [Cross-origin ceremonies](#cross-origin-ceremonies). |
+| `lockAuditEnabled` | Boolean | `false` | Enables delivery of passkey registration/authentication events to the Lock Server as audit evidence. See [Lock Server audit delivery](#lock-server-audit-delivery). |
+| `lockAuditEndpoint` | String | `"https://lock.example.com/audit"` | Base URL of the Lock Server audit endpoint; `/log` and `/log/bulk` are derived from it. Required when `lockAuditEnabled` is `true`. |
+| `lockAuditClientId` | String | — | OAuth2 client ID used to obtain a token, via the client credentials grant, for the `https://jans.io/oauth/lock/log.write` scope. |
+| `lockAuditClientPassword` | String | — | OAuth2 client secret paired with `lockAuditClientId`. Encrypted at rest, same as other client secrets, and deliberately excluded from configuration logging. |
+| `lockAuditFlushInterval` | Integer | `20` | Interval in seconds between batched deliveries of buffered Lock Server audit events. Delivery is asynchronous and batched, never one HTTP call per ceremony. |
+
+### Lock Server audit delivery
+
+When `lockAuditEnabled` is `true`, the server buffers passkey registration/authentication events and
+delivers them to the configured Lock Server's `/audit/log/bulk` endpoint on the `lockAuditFlushInterval`
+cadence, rather than one call per ceremony. A Lock Server that is unreachable, slow, or returns an error
+never affects the registration/authentication request itself — delivery is fire-and-forget, and a failed
+batch is dropped rather than retried inline.
+
+No signing, hashing, or chaining of the delivered events is performed; that is planned as later work, not
+part of this delivery path.
+
+!!! note
+    As of this release, the server only buffers and delivers events — nothing yet populates the buffer.
+    Registration and authentication ceremonies emitting into it is tracked separately and will be
+    reflected here once it lands, so `lockAuditEnabled: true` currently has no observable effect.
 
 ### Per-relying-party policy
 

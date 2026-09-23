@@ -122,6 +122,10 @@ public class AuthUtil {
     public boolean isValidateUserInumInIntrospectionFlag() {
         return this.configurationFactory.getApiAppConfiguration().isValidateUserInumInIntrospectionFlag();
     }
+
+    public List<String> getUserRolePermissionExcludedClients() {
+        return this.configurationFactory.getApiAppConfiguration().getUserRolePermissionExcludedClients();
+    }
     
     public boolean isFetchUserRoleInIntrospectionFlag() {
         return this.configurationFactory.getApiAppConfiguration().isFetchUserRoleInIntrospectionFlag();
@@ -776,7 +780,11 @@ public class AuthUtil {
         if (jsonNode == null || StringUtils.isBlank(key)) {
             return keyValue;
         }
-        return jsonNode.get(key).asText();
+        JsonNode keyNode = jsonNode.get(key);
+        if (keyNode == null || keyNode.isNull()) {
+            return keyValue;
+        }
+        return keyNode.asText();
     }
 
 }

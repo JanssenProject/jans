@@ -525,7 +525,7 @@ impl JwtService {
             return Ok(None);
         };
 
-        if let Ok((issuer, _)) = custom_issuers.resolve(&ctx.token.mapping, None) {
+        if let Ok((issuer, _)) = custom_issuers.resolve(&ctx.token.mapping) {
             let combination = (
                 SmolStr::from(issuer.issuer_id.as_str()),
                 SmolStr::from(ctx.token.mapping.as_str()),
@@ -736,8 +736,7 @@ impl JwtService {
                 return Err(CustomTokenError::EmptyTokenId(input.mapping.clone()).into());
             }
 
-            let (issuer, token_meta) =
-                custom_issuers.resolve(&input.mapping, processed.issuer_id.as_deref())?;
+            let (issuer, token_meta) = custom_issuers.resolve(&input.mapping)?;
             for required in &token_meta.required_claims {
                 if !processed.claims.contains_key(required) {
                     return Err(CustomTokenError::MissingRequiredClaim(required.clone()).into());
@@ -1059,7 +1058,6 @@ mod test {
                     Ok(ProcessedTokenClaims {
                         claims,
                         token_id: format!("cid-{mapping}"),
-                        issuer_id: None,
                         expiration: None,
                         cacheable: *cacheable,
                     })
