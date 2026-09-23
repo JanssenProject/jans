@@ -156,9 +156,6 @@ pub struct Cedarling {
     /// Owned locally when [`MetricsMode::Local`]; otherwise held only so the
     /// injected callers can record into it.
     metrics: Arc<MetricsCollector>,
-    /// Resolved at bootstrap from `lock_config` telemetry and
-    /// `Cedarling`'s own metrics mode.
-    metrics_mode: MetricsMode,
     /// Held purely for its `Drop` side effect: dropping the last `Arc` closes
     /// the worker's `oneshot` shutdown channel so the background refresh loop
     /// exits when [`Cedarling`] goes away. The leading `_` tells the compiler
@@ -192,10 +189,7 @@ impl Cedarling {
             telemetry_active,
             config.authorization_config.metrics_collection,
         );
-        let metrics = Arc::new(match metrics_mode {
-            MetricsMode::Disabled => MetricsCollector::disabled(),
-            MetricsMode::Local | MetricsMode::LockTelemetry => MetricsCollector::new(),
-        });
+        let metrics = Arc::new(MetricsCollector::new(metrics_mode));
 
         let log = crate::log::init_logger(
             &config.log_config,
@@ -278,7 +272,6 @@ impl Cedarling {
             custom_token_processor: Arc::new(arc_swap::ArcSwapOption::const_empty()),
             data,
             metrics,
-            metrics_mode,
             _refresh_handle: refresh_handle,
         })
     }
@@ -298,7 +291,7 @@ impl Cedarling {
     /// for Lock compat, so a drain more often than once per second
     /// serializes as `0`.
     pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
-        match self.metrics_mode {
+        match self.metrics.mode() {
             MetricsMode::Local => Ok(self.metrics.snapshot_and_reset()),
             MetricsMode::Disabled => Err(MetricsError::Disabled),
             MetricsMode::LockTelemetry => Err(MetricsError::LockTelemetry),

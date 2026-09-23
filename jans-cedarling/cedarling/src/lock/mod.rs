@@ -576,6 +576,7 @@ pub enum InitLockServiceError {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::authz::metrics::MetricsMode;
     use crate::{
         LogLevel,
         lock::{register_client::DCR_SCOPE, transport::test_utils::sample_log_item},
@@ -633,7 +634,7 @@ mod test {
         };
 
         // Test startup
-        let metrics = Arc::new(MetricsCollector::new());
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Local));
         let logger = LockService::new(
             pdp_id,
             &config,
@@ -689,7 +690,7 @@ mod test {
         };
 
         // Test startup without SSA
-        let metrics = Arc::new(MetricsCollector::new());
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Local));
         let logger = LockService::new(
             pdp_id,
             &config,
@@ -741,7 +742,7 @@ mod test {
         };
 
         // Test startup with invalid SSA should fail
-        let metrics = Arc::new(MetricsCollector::new());
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Local));
         let result = LockService::new(
             pdp_id,
             &config,
@@ -802,7 +803,7 @@ mod test {
             ..Default::default()
         };
 
-        let metrics = Arc::new(MetricsCollector::new());
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Local));
         let lock_svc = LockService::new(
             pdp_id,
             &config,
@@ -872,7 +873,7 @@ mod test {
             ..Default::default()
         };
 
-        let metrics = Arc::new(MetricsCollector::new());
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Local));
         let _lock_svc = LockService::new(
             pdp_id,
             &config,
@@ -1107,7 +1108,7 @@ mod test {
             ..Default::default()
         };
 
-        let metrics = Arc::new(MetricsCollector::new());
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Local));
         let _lock = LockService::new(
             pdp_id,
             &config,
@@ -1159,7 +1160,7 @@ mod test {
             ..Default::default()
         };
 
-        let metrics = Arc::new(MetricsCollector::new());
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Local));
         let lock_service = LockService::new(
             pdp_id,
             &config,

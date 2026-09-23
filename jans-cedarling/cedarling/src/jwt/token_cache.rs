@@ -33,13 +33,14 @@ impl Default for TokenCache {
     fn default() -> Self {
         // default parameters, is used only for testing
 
+        use crate::authz::metrics::MetricsMode;
         use crate::log::TEST_LOGGER;
         Self::new(
             60 * 5,
             100,
             true,
             Some(TEST_LOGGER.clone()),
-            Arc::new(MetricsCollector::new()),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
         )
     }
 }
@@ -316,12 +317,19 @@ impl IndexKey {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::authz::metrics::MetricsMode;
     use crate::jwt::token::TokenClaims;
     use serde_json::{Value, json};
     use std::collections::HashMap;
 
     fn token_cache(max_ttl: usize) -> TokenCache {
-        TokenCache::new(max_ttl, 100, true, None, Arc::new(MetricsCollector::new()))
+        TokenCache::new(
+            max_ttl,
+            100,
+            true,
+            None,
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+        )
     }
 
     fn token(claims: HashMap<String, Value>) -> Arc<Token> {

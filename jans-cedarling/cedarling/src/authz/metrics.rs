@@ -189,6 +189,15 @@ pub(crate) enum MetricsMode {
     LockTelemetry,
 }
 
+impl MetricsMode {
+    /// Whether the collector records at all. [`MetricsMode::LockTelemetry`]
+    /// collects like [`MetricsMode::Local`]; the two differ only in who is
+    /// allowed to drain.
+    pub(crate) fn collects(self) -> bool {
+        !matches!(self, Self::Disabled)
+    }
+}
+
 /// Resolve the collector mode from the lock-telemetry and local-collection flags.
 ///
 /// Lock telemetry always takes precedence: when it is active, the ticker owns
@@ -600,7 +609,9 @@ impl PolicyStoreRefreshMetrics {
 /// every counter is reset by construction.
 #[derive(Debug)]
 pub(crate) struct MetricsCollector {
-    enabled: bool,
+    /// Resolved once at bootstrap. Decides both whether `record_*` does
+    /// anything and who may drain, so the two can never disagree.
+    mode: MetricsMode,
     /// State that persists across intervals
     init_time: DateTime<Utc>,
     policy_count: AtomicI64,
@@ -617,10 +628,10 @@ impl MetricsCollector {
     /// The `instance.policy_count` gauge starts at zero; callers publish the
     /// real count with [`Self::set_policy_count`] once the policy store is
     /// loaded, and again after every refresh.
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(mode: MetricsMode) -> Self {
         let now = Utc::now();
         Self {
-            enabled: true,
+            mode,
             init_time: now,
             policy_count: AtomicI64::new(0),
             interval: RwLock::new(Box::new(IntervalState::new(now))),
@@ -628,25 +639,22 @@ impl MetricsCollector {
         }
     }
 
-    pub(crate) fn disabled() -> Self {
-        Self {
-            enabled: false,
-            init_time: Utc::now(),
-            policy_count: AtomicI64::new(0),
-            interval: RwLock::new(Box::new(IntervalState::new(Utc::now()))),
-            refresh: PolicyStoreRefreshMetrics::default(),
-        }
+    /// The mode this collector was built with, used by
+    /// [`crate::Cedarling::drain_metrics`] to decide whether a local drain is
+    /// allowed and which error to return when it is not.
+    pub(crate) fn mode(&self) -> MetricsMode {
+        self.mode
     }
 
     /// Records a refresh-worker tick outcome. Always runs regardless of
-    /// `enabled`, since refresh state should be observable even if telemetry
+    /// the collector mode, since refresh state should be observable even if telemetry
     /// emission to Lock is disabled.
     pub(crate) fn record_policy_store_refresh(&self, outcome: RefreshOutcome) {
         self.refresh.record(outcome);
     }
 
     /// Records the current strategy and cumulative transition counts after a
-    /// refresh tick. Always runs regardless of `enabled` for the same reason as
+    /// refresh tick. Always runs regardless of the collector mode for the same reason as
     /// [`Self::record_policy_store_refresh`].
     pub(crate) fn record_policy_store_refresh_strategy(
         &self,
@@ -673,7 +681,7 @@ impl MetricsCollector {
         is_unsigned: bool,
         evaluated_policies: impl Iterator<Item = (&'a str, Decision)>,
     ) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -748,7 +756,7 @@ impl MetricsCollector {
     /// flow-specific pair (`authz.batch_unsigned{,_items}` or
     /// `authz.batch_multi_issuer{,_items}`).
     pub(crate) fn record_batch(&self, item_count: usize, is_unsigned: bool) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -777,7 +785,7 @@ impl MetricsCollector {
 
     /// Increments `authz.errors_total` counter.
     pub(crate) fn record_authz_error(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -790,7 +798,7 @@ impl MetricsCollector {
 
     /// Increments a classified error counter using a typed error that implements [`ErrorMetricKey`]
     pub(crate) fn record_error(&self, err: &impl ErrorMetricKey) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
         self.increment_error(err.metric_key());
@@ -798,7 +806,7 @@ impl MetricsCollector {
 
     /// Increments a classified error counter by raw key string.
     pub(crate) fn increment_error(&self, key: &str) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -811,7 +819,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_cache_hit(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -823,7 +831,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_cache_miss(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -835,7 +843,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_cache_eviction(&self, count: usize) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -847,7 +855,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_jwt_validation(&self, success: bool) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -867,7 +875,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_custom_token(&self, success: bool, elapsed_us: i64) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -891,7 +899,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_data_push(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -903,7 +911,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_data_get(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -915,7 +923,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_data_remove(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -927,7 +935,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn set_policy_count(&self, count: usize) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -1023,7 +1031,7 @@ mod tests {
 
     #[test]
     fn record_evaluation_increments_authz_counters() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
 
         collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
         collector.record_evaluation(200, Decision::Deny, true, std::iter::empty());
@@ -1060,7 +1068,7 @@ mod tests {
 
     #[test]
     fn record_custom_token_tracks_totals_and_latency() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
 
         collector.record_custom_token(true, 120);
         collector.record_custom_token(true, 240);
@@ -1079,7 +1087,7 @@ mod tests {
 
     #[test]
     fn record_evaluation_updates_policy_stats() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
 
         collector.record_evaluation(
             50,
@@ -1122,7 +1130,7 @@ mod tests {
     fn record_error_aggregates_by_metric_key() {
         use crate::authz::MultiIssuerValidationError;
 
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
 
         collector.record_error(&TestError("jwt.decode_failed"));
         collector.record_error(&TestError("jwt.decode_failed"));
@@ -1157,7 +1165,7 @@ mod tests {
 
     #[test]
     fn snapshot_and_reset_zeros_counters_preserves_gauges() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.set_policy_count(10);
         collector.record_evaluation(500, Decision::Allow, false, std::iter::empty());
         collector.record_cache_hit();
@@ -1206,7 +1214,7 @@ mod tests {
         // reflect the new value on subsequent snapshots. Without this the
         // gauge would stay pinned at the bootstrap value indefinitely while
         // authorization decisions used the new set.
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.set_policy_count(5);
         let snap_initial = collector.snapshot_and_reset();
         assert_eq!(
@@ -1310,7 +1318,7 @@ mod tests {
 
     #[test]
     fn record_evaluation_clears_eval_times_after_snapshot() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
         collector.record_evaluation(200, Decision::Allow, false, std::iter::empty());
 
@@ -1331,7 +1339,7 @@ mod tests {
 
     #[test]
     fn record_cache_operations() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_cache_hit();
         collector.record_cache_hit();
         collector.record_cache_miss();
@@ -1357,7 +1365,7 @@ mod tests {
 
     #[test]
     fn record_jwt_validations() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_jwt_validation(true);
         collector.record_jwt_validation(true);
         collector.record_jwt_validation(false);
@@ -1382,7 +1390,7 @@ mod tests {
 
     #[test]
     fn record_data_operations() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_data_push();
         collector.record_data_get();
         collector.record_data_get();
@@ -1408,7 +1416,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_keys_omitted_when_zero() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         let snap = collector.snapshot_and_reset();
         for key in snap.operational_stats.keys() {
             assert!(
@@ -1420,7 +1428,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_keys_emitted_after_tick() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::Success);
         collector.record_policy_store_refresh(RefreshOutcome::Success);
         collector.record_policy_store_refresh(RefreshOutcome::NotModified);
@@ -1450,7 +1458,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_strategy_keys_track_transitions() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh_strategy(RefreshStrategy::HeadThenGet, 1, 0, 0, 0);
         let snap = collector.snapshot_and_reset();
         assert_eq!(
@@ -1473,7 +1481,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_consecutive_failures_resets_on_success() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::HttpError);
         collector.record_policy_store_refresh(RefreshOutcome::HttpError);
         collector.record_policy_store_refresh(RefreshOutcome::HttpError);
@@ -1496,7 +1504,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_consecutive_failures_increments_only_on_errors() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::NotModified);
         collector.record_policy_store_refresh(RefreshOutcome::NotModified);
         let snap = collector.snapshot_and_reset();
@@ -1510,7 +1518,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_error_outcomes_distinguishable() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::HttpError);
         collector.record_policy_store_refresh(RefreshOutcome::HttpError);
         collector.record_policy_store_refresh(RefreshOutcome::NetworkError);
@@ -1548,7 +1556,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_rebuild_error_bumps_consecutive_failures() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::RebuildError);
         collector.record_policy_store_refresh(RefreshOutcome::RebuildError);
         let snap = collector.snapshot_and_reset();
@@ -1562,7 +1570,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_decode_error_distinct_from_network_error() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::DecodeError);
         collector.record_policy_store_refresh(RefreshOutcome::DecodeError);
         collector.record_policy_store_refresh(RefreshOutcome::NetworkError);
@@ -1592,7 +1600,7 @@ mod tests {
         // Per-outcome counters are *cumulative* (not interval-scoped) so they
         // must not zero on snapshot.
 
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::Success);
         collector.record_policy_store_refresh(RefreshOutcome::Success);
         let _ = collector.snapshot_and_reset();
@@ -1607,7 +1615,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_strategy_current_overwrites_on_each_call() {
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh_strategy(RefreshStrategy::Conditional, 0, 0, 0, 0);
         collector.record_policy_store_refresh_strategy(RefreshStrategy::HeadThenGet, 5, 1, 0, 2);
         let snap = collector.snapshot_and_reset();
@@ -1630,7 +1638,7 @@ mod tests {
         // but a worker that has actively reported "current = Conditional (1)"
         // MUST be visible — distinguishing "not running" from "running and
         // healthy" is the whole point of the sparse encoding.
-        let collector = MetricsCollector::new();
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh_strategy(RefreshStrategy::Conditional, 0, 0, 0, 0);
         let snap = collector.snapshot_and_reset();
         assert_eq!(
@@ -1642,7 +1650,7 @@ mod tests {
 
     #[test]
     fn disabled_collector_noops() {
-        let collector = MetricsCollector::disabled();
+        let collector = MetricsCollector::new(MetricsMode::Disabled);
 
         collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
         collector.record_authz_error();
