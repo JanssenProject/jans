@@ -200,6 +200,22 @@
 			<artifactId>testng</artifactId>
 		    <scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.surefire</groupId>
+			<artifactId>surefire-testng</artifactId>
+			<version>${surefire-plugin.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Others -->
 		<dependency>
