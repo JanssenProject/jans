@@ -75,6 +75,9 @@ def build_ctx():
         "rdbm_user": _env("RDBM_USER"),
         "rdbm_password_enc": _env("RDBM_PASSWORD_ENC"),
         "config_api_scopes_list": _read_config_api_scopes(),
+        # conf/jans.properties placeholders; the ORM tests only touch the DB, so both are inert.
+        "certFolder": "conf",
+        "jansOptPythonFolder": "/opt/jans/python",
     }
 
     for inum_var, inum in FIXED_CLIENT_INUMS.items():
@@ -83,6 +86,49 @@ def build_ctx():
         ctx[f"{prefix}_pw"] = f"{inum}-{host_label}"
 
     return ctx
+
+
+def _orm_sql_properties(ctx):
+    """conf/jans-sql.properties for the ORM tests.
+
+    The committed template is a mako one jans-linux-setup renders, so build the equivalent here.
+    Connection settings mirror the auth-server SQL block: the suites reach the DB over the port
+    the demo stack publishes on the host, without the deployment's TLS trust store.
+    """
+    props = (
+        "db.schema.name=%(rdbm_schema_name)s\n"
+        "connection.uri=jdbc:%(rdbm_name_str)s://%(hostname)s:%(rdbm_port)s/%(rdbm_db)s\n"
+        "auth.userName=%(rdbm_user)s\n"
+        "auth.userPassword=%(rdbm_password_enc)s\n"
+        "password.encryption.method=SSHA-256\n"
+        "connection.pool.max-total=20\n"
+        "connection.pool.max-idle=10\n"
+        "connection.pool.min-idle=5\n"
+        "connection.pool.create-max-wait-time-millis=20000\n"
+        "connection.pool.max-wait-time-millis=20000\n"
+        "connection.pool.min-evictable-idle-time-millis=1800000\n"
+        "binaryAttributes=objectGUID\n"
+        "certificateAttributes=userCertificate\n"
+    ) % ctx
+    if ctx["rdbm_name_str"] == "mysql":
+        props += ("connection.driver-property.serverTimezone=%(server_time_zone)s\n"
+                  "mysql.simple-json=true\n") % ctx
+    else:
+        props += "db.disable.time-zone=true\n"
+    return props
+
+
+def _render_orm_profile(ctx):
+    """jans-orm/integration-test/profiles/<fqdn>/conf/: persistence config, backend, salt.
+
+    The module skips every DB test unless conf/jans.properties exists under the selected profile,
+    so rendering this is what puts the ORM persistence suites in the run.
+    """
+    conf = Path("jans-orm/integration-test/profiles") / ctx["hostname"] / "conf"
+    orm_templates = TEST_TEMPLATES / "jans-orm" / "conf"
+    _write(REPO / conf / "jans.properties", (orm_templates / "jans.properties").read_text() % ctx)
+    _write(REPO / conf / "salt", (orm_templates / "salt").read_text() % ctx)
+    _write(REPO / conf / "jans-sql.properties", _orm_sql_properties(ctx))
 
 
 def _write(path: Path, content: str):
@@ -144,6 +190,8 @@ def render():
     # tests also need the sample flows + an agama client deployed to the AS to pass (pending).
     _write(REPO / "jans-auth-server/agama/engine/profiles" / fqdn / "config-agama-test.properties",
            f"server=https://{fqdn}\nclientId={FIXED_CLIENT_INUMS['jans_auth_test_client_2_inum']}\n")
+
+    _render_orm_profile(ctx)
 
     # client keystores are copied verbatim from the committed default profiles
     for prof_root in ("jans-auth-server/client/profiles", "jans-auth-server/server/profiles"):

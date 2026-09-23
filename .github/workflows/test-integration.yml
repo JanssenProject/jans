@@ -57,7 +57,7 @@ on:
         type: boolean
         default: false
       jans_orm:
-        description: "jans-orm"
+        description: "jans-orm (units + persistence integration tests)"
         type: boolean
         default: false
       agama:
@@ -86,6 +86,7 @@ on:
       - "jans-scim/**"
       - "jans-config-api/**"
       - "jans-fido2/**"
+      - "jans-orm/**"
 
 permissions:
   contents: read
