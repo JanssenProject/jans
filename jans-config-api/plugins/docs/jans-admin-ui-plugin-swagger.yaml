@@ -1225,13 +1225,11 @@ paths:
                 $ref: "#/components/schemas/GenericResponse"
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-      - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
+        - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
   /admin-ui/license/ssa:
     post:
       tags:
@@ -1303,13 +1301,11 @@ paths:
                 $ref: "#/components/schemas/GenericResponse"
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-      - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
+        - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
   /admin-ui/webhook:
     get:
       tags:
