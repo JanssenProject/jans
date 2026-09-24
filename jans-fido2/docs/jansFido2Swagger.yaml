@@ -114,6 +114,8 @@ paths:
                   type: string
                 session_id:
                   type: string
+                telemetry:
+                  $ref: '#/components/schemas/NativeClientTelemetry'
       responses:
         200:
           description: OK
@@ -202,6 +204,8 @@ paths:
                     signature:
                       type: string
                       description: To verify signature.
+                telemetry:
+                  $ref: '#/components/schemas/NativeClientTelemetry'
       responses:
         200:
           description: OK
@@ -290,6 +294,8 @@ paths:
                        - none
                    requireResidentKey:
                      type: boolean
+                telemetry:
+                  $ref: '#/components/schemas/NativeClientTelemetry'
       responses:
         200:
           description: OK
@@ -438,7 +444,9 @@ paths:
                       type: array
                       items:
                         type: string
-      responses:        
+                telemetry:
+                  $ref: '#/components/schemas/NativeClientTelemetry'
+      responses:
         200:
           description: OK
           content:
@@ -1190,6 +1198,49 @@ components:
           type: string
         details:
           type: string
+    NativeClientTelemetry:
+      type: object
+      description: >-
+        Optional context a native app/SDK may attach to an attestation or assertion start/finish
+        call (#14607). Every field is optional; omitting the whole object, or any field in it,
+        does not change server behavior.
+      properties:
+        client_correlation_id:
+          type: string
+          description: Caller-supplied ID for correlating a start call with its matching finish call.
+        platform:
+          type: string
+          example: android
+          description: 'android or ios. Not a fixed enum — an unrecognized value is still accepted.'
+        native_api:
+          type: string
+          example: credential-manager
+          description: 'credential-manager, asauthorization, legacy-fido2, or webview.'
+        os_version:
+          type: string
+        play_services_version:
+          type: string
+        device_manufacturer:
+          type: string
+        device_model:
+          type: string
+        credential_provider:
+          type: string
+          example: google-password-manager
+        is_device_secure:
+          type: boolean
+        flow_context:
+          type: string
+          example: native
+          description: 'native, webview, or system-browser.'
+        app_version:
+          type: string
+        distribution_channel:
+          type: string
+          example: play-store
+        last_client_error_code:
+          type: string
+          description: The last client-side error code observed, e.g. GetCredentialCancellationException.
     # FIDO2 Metrics API schemas
     MetricsEntry:
       type: object
