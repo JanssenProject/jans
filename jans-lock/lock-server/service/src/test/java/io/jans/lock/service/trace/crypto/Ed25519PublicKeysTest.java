@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.lock.service.trace.error.TraceCryptoException;
+
 class Ed25519PublicKeysTest {
 
 	/** RFC 8037 Appendix A.1 public key (same key as RFC 8032 §7.1 TEST 1). */

@@ -17,6 +17,7 @@ import java.security.Signature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.jans.lock.service.trace.error.TraceCryptoException;
 import io.jans.util.security.SecurityProviderUtility;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;

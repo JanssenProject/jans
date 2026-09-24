@@ -4,7 +4,9 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.crypto;
+package io.jans.lock.service.trace.error;
+
+import io.jans.lock.service.trace.crypto.Ed25519Verifier;
 
 /**
  * Thrown by the TRACE crypto layer when a key cannot be built from a JWK or when the security

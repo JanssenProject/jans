@@ -13,6 +13,7 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 
+import io.jans.lock.service.trace.error.TraceCryptoException;
 import jakarta.enterprise.context.ApplicationScoped;
 
 /**

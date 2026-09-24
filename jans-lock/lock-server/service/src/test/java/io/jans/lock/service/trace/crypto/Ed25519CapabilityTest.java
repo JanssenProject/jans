@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import io.jans.lock.service.trace.error.TraceCryptoException;
 import io.jans.util.security.SecurityProviderUtility;
 
 class Ed25519CapabilityTest {

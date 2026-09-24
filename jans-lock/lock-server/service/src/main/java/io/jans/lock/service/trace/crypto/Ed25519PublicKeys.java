@@ -16,6 +16,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.jans.lock.service.trace.error.TraceCryptoException;
 import io.jans.util.security.SecurityProviderUtility;
 
 /**
