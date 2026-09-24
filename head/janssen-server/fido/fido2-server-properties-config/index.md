@@ -125,10 +125,13 @@ events, with `decisionResult` of `ALLOW` or `DENY`, `principalId` set to the use
 success. A failed registration records only the exception's class name, never its message, since some
 registration failure messages embed the username or challenge.
 
-!!! note
-    Passkey **authentication** outcomes do not populate the buffer yet — that is tracked separately and
-    will be reflected here once it lands. Until then, `lockAuditEnabled: true` only surfaces
-    registration events.
+Passkey **authentication** outcomes (both successful and failed) are recorded as `fido2_authentication`
+events, with `decisionResult` of `ALLOW` or `DENY`, `principalId` set to the username where known, and
+`contextInformation` carrying the relying party ID, credential ID, and the origin the ceremony actually
+happened at — which is not necessarily the origin the credential was originally registered at, since a
+credential registered at one permitted origin of an RP can be used from a different permitted origin
+later. A failed authentication records only the exception's class name, never its message, since some
+authentication failure messages embed the username or challenge.
 
 ### Per-relying-party policy
 

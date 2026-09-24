@@ -2627,12 +2627,13 @@ events, with <code>decisionResult</code> of <code>ALLOW</code> or <code>DENY</co
 <code>contextInformation</code> carrying the relying party ID, origin, credential ID and attestation type on
 success. A failed registration records only the exception's class name, never its message, since some
 registration failure messages embed the username or challenge.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Passkey <strong>authentication</strong> outcomes do not populate the buffer yet — that is tracked separately and
-will be reflected here once it lands. Until then, <code>lockAuditEnabled: true</code> only surfaces
-registration events.</p>
-</div>
+<p>Passkey <strong>authentication</strong> outcomes (both successful and failed) are recorded as <code>fido2_authentication</code>
+events, with <code>decisionResult</code> of <code>ALLOW</code> or <code>DENY</code>, <code>principalId</code> set to the username where known, and
+<code>contextInformation</code> carrying the relying party ID, credential ID, and the origin the ceremony actually
+happened at — which is not necessarily the origin the credential was originally registered at, since a
+credential registered at one permitted origin of an RP can be used from a different permitted origin
+later. A failed authentication records only the exception's class name, never its message, since some
+authentication failure messages embed the username or challenge.</p>
 <h3 id="per-relying-party-policy">Per-relying-party policy<a class="headerlink" href="#per-relying-party-policy" title="Permanent link">#</a></h3>
 <p>An entry under <code>rp</code> may carry a <code>policy</code> object overriding the corresponding global setting for that
 relying party alone:</p>
