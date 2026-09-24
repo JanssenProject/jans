@@ -272,6 +272,11 @@ public class AttestationService {
 		// Declared outside the try so the failure path can report whichever registration it was
 		// working against. Stays null for failures raised before the challenge resolves to an entry.
 		Fido2RegistrationData registrationData = null;
+		// registrationData.setStatus(registered) is set well before registrationPersistenceService
+		// .update() actually persists it — anything thrown in between would let the catch block treat
+		// an unpersisted in-memory status as proof of persistence. This flag is set only once update()
+		// itself has returned, so it — not the in-memory status — is what the audit outcome trusts.
+		boolean persistedAsRegistered = false;
 
 		try {
         // Apply external custom scripts
@@ -387,6 +392,7 @@ public class AttestationService {
         
 
 		registrationPersistenceService.update(registrationEntry);
+		persistedAsRegistered = true;
 
 		// If sessionStateId is not empty update session
         if (StringHelper.isNotEmpty(sessionStateId)) {
@@ -429,10 +435,11 @@ public class AttestationService {
 			// (e.g. an external interception script throwing after persistence, at line ~409 above,
 			// which runs after the persistence update at line ~386) — an audit DENY must not
 			// contradict what was actually persisted, so the event reports what happened, not what
-			// this catch block assumes happened.
-			boolean committedAsRegistered = registrationData != null
-					&& registrationData.getStatus() == Fido2RegistrationStatus.registered;
-			Exception auditFailure = committedAsRegistered ? null : e;
+			// this catch block assumes happened. Trusts persistedAsRegistered, not the in-memory
+			// registrationData.getStatus(), since that field is set well before the persistence call
+			// actually runs and would otherwise assume persistence succeeded just because a later step
+			// happened to set it in memory first.
+			Exception auditFailure = persistedAsRegistered ? null : e;
 			lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, auditFailure));
 
 			// Re-throw the original exception
