@@ -57,7 +57,7 @@ on:
         type: boolean
         default: false
       jans_orm:
-        description: "jans-orm"
+        description: "jans-orm (units + persistence integration tests)"
         type: boolean
         default: false
       agama:
@@ -82,10 +82,12 @@ on:
       - ".github/workflows/test-integration.yml"
       - ".github/workflows/scripts/render_test_profiles.py"
       - "automation/ci/run_aio_integration.sh"
+      - "jans-linux-setup/jans_setup/templates/test/**"
       - "jans-auth-server/**"
       - "jans-scim/**"
       - "jans-config-api/**"
       - "jans-fido2/**"
+      - "jans-orm/**"
 
 permissions:
   contents: read

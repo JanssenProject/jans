@@ -357,6 +357,27 @@ try {
 The optional TTL is a `bigint` number of seconds; omitting it uses the configured
 default. Retrieval returns `null` when a value is absent or expired.
 
+### Metrics Snapshot
+
+Destructive read: returns a metrics snapshot and resets the counters.
+
+```ts
+try {
+  const snapshot = cedarling.drainMetrics();
+  console.log(snapshot.operational_stats.get("authz.requests_total"));
+  console.log(snapshot.interval_secs);
+} catch (error) {
+  console.error("Metrics snapshot failed", error);
+}
+```
+
+Requires `CEDARLING_METRICS_COLLECTION: "enabled"`. Fails whenever
+`CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has no
+telemetry endpoint. `interval_secs` is a plain `Number` (not `BigInt`), so
+`snapshot.interval_secs + 1` works. It carries fractional seconds, so
+sub-second intervals are reported exactly. Use `snapshot.jsonString()` for a
+JSON-serializable form with plain objects.
+
 ### Trusted Issuer Readiness
 
 Before token-based authorization, inspect which configured issuers loaded and

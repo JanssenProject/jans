@@ -3,6 +3,7 @@ package cedarling_go
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // Represents a cedarling principal or resource entity
@@ -356,4 +357,15 @@ type DataStoreStats struct {
 	CapacityUsagePercent float64 `json:"capacity_usage_percent"`
 	MemoryAlertThreshold float64 `json:"memory_alert_threshold"`
 	MemoryAlertTriggered bool    `json:"memory_alert_triggered"`
+}
+
+// MetricsSnapshot represents the telemetry metrics snapshot for the current interval.
+// Local snapshots are only available when CEDARLING_METRICS_COLLECTION is enabled.
+type MetricsSnapshot struct {
+	PolicyStats      map[string]int64 `json:"policy_stats"`
+	ErrorCounters    map[string]int64 `json:"error_counters"`
+	OperationalStats map[string]int64 `json:"operational_stats"`
+	// Interval elapsed since the previous drain. Crosses the binding as
+	// whole nanoseconds, which is exactly how time.Duration is represented.
+	Interval time.Duration `json:"interval_nanos"`
 }

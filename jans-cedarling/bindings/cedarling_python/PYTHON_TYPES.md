@@ -87,11 +87,12 @@ req = BatchAuthorizeMultiIssuerRequest(
 ```
 ---
 
-BatchAuthorizeMultiIssuerResponse
-=================================
+# BatchAuthorizeMultiIssuerResponse
+Multi-issuer analog of `BatchAuthorizeUnsignedResponse`.
 
-Multi-issuer analog of `BatchAuthorizeUnsignedResponse`. Each entry in
-`results` is a `BatchItemMultiIssuerResult`.
+Attributes:
+    batch_id (str): The shared UUIDv7 identifier for this batch evaluation.
+    results (List[BatchItemMultiIssuerResult]): The evaluation results, in input order.
 ---
 
 BatchAuthorizeUnsignedRequest
@@ -116,15 +117,18 @@ req = BatchAuthorizeUnsignedRequest(
 ```
 ---
 
-BatchAuthorizeUnsignedResponse
-==============================
+# BatchAuthorizeUnsignedResponse
+A Python wrapper for `cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
 
-A Python wrapper for
-`cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
 Carries a shared `batch_id` (UUIDv7) alongside per-item results. Each entry
 in `results` is a `BatchItemUnsignedResult` — an `AuthorizeResult` when
-Cedar reached a decision, or a `BatchItemError` when the item failed to
-build. `results[i]` corresponds to the `items[i]` supplied to the request.
+Cedar reached a decision, or a `BatchItemError` when the item failed during
+per-item preparation or request validation. `results[i]` corresponds to the
+`items[i]` supplied to the request.
+
+Attributes:
+    batch_id (str): The shared UUIDv7 identifier for this batch evaluation.
+    results (List[BatchItemUnsignedResult]): The evaluation results, in input order.
 ---
 
 BatchItem
@@ -161,7 +165,7 @@ Attributes
 :param item_index: Position of the failing item in the original `items` list.  
 :type item_index: int  
 :param message: Human-readable diagnostic. Safe to log.  
-:type message: str  
+:type message: str
 ---
 
 # BatchItemMultiIssuerResult
@@ -378,6 +382,21 @@ Methods
 
     :returns: A DataStoreStats object
     :raises DataErrorCtx: If the operation fails
+
+.. method:: drain_metrics(self) -> MetricsSnapshot
+
+    Destructive read: returns the telemetry metrics snapshot and resets
+    the counters for the next interval.
+
+    Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+    Lock telemetry ticker owns the collector. Raises `ValueError` when
+    Lock telemetry owns the collector, i.e. whenever
+    `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+    server has no telemetry endpoint. `interval` is a
+    `datetime.timedelta` with sub-second precision.
+
+    :returns: A MetricsSnapshot object
+    :raises ValueError: If metrics collection is disabled or owned by lock telemetry.
 ---
 
 DataEntry
@@ -478,6 +497,26 @@ Methods
 .. method:: from_dict(cls, value: dict) -> EntityData
     Initialize a new EntityData from a dictionary.
     The dictionary should contain a `cedar_entity_mapping` field with `entity_type` and `id` subfields.
+---
+
+MetricsSnapshot
+================
+
+Destructive read: telemetry metrics snapshot with per-policy stats, error
+counters, and operational counters for the current interval. Draining
+resets the counters, so use a single consumer.
+
+Attributes
+----------
+policy_stats : dict
+    Per-policy evaluation counts (`policy_id`, `policy_id.allow`,
+    `policy_id.deny`)
+error_counters : dict
+    Classified error counters keyed by error metric key
+operational_stats : dict
+    Operational counters and gauges (authorization, cache, JWT, data, lock)
+interval : datetime.timedelta
+    Duration of the snapshot interval with sub-second precision.
 ---
 
 MultiIssuerAuthorizeResult
