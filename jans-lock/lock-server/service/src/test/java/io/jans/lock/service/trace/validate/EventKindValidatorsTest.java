@@ -29,11 +29,11 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.parse.CommonAssertionValidator;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 import io.jans.lock.service.trace.parse.TraceAssertionParser;
-import io.jans.lock.service.trace.parse.TraceValidationException;
 
 /**
  * Tests for the {@code EventKindValidator} implementations and {@link EventKindValidatorRegistry}

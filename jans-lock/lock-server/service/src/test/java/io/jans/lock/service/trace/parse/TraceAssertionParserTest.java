@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.service.trace.error.TraceValidationException;
 
 /**
  * Tests for {@link TraceAssertionParser}: bounded reading, strict UTF-8 decoding, and the JSON

@@ -19,9 +19,9 @@ import org.junit.jupiter.api.Test;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.TraceConflictException;
+import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainRegistration;
-import io.jans.lock.service.trace.parse.TraceValidationException;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 
 /**

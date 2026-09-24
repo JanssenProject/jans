@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.service.trace.error.TraceValidationException;
 
 /**
  * Tests for {@link CommonAssertionValidator}: design §7.1 common-field validation. Each rule gets

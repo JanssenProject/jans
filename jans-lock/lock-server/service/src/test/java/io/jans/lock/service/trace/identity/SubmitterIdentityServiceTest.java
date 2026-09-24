@@ -24,7 +24,7 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
 import io.jans.lock.model.error.TraceErrorResponseType;
-import io.jans.lock.service.trace.parse.TraceValidationException;
+import io.jans.lock.service.trace.error.TraceValidationException;
 import jakarta.ws.rs.core.HttpHeaders;
 
 /**

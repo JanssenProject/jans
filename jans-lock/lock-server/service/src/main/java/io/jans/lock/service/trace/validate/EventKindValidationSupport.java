@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.lock.service.trace.TraceConstants;
+import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.TokenRef;
-import io.jans.lock.service.trace.parse.TraceValidationException;
 
 /**
  * Field-level checks shared by more than one {@link EventKindValidator}: the {@code {capability_id,

@@ -28,7 +28,7 @@ public interface EventKindValidator {
 	/**
 	 * @param assertion the common-field-validated assertion; must not be mutated
 	 * @param out the correlation-inputs builder to populate with this kind's extracted values
-	 * @throws io.jans.lock.service.trace.parse.TraceValidationException on any §7.2/§7.3 violation
+	 * @throws io.jans.lock.service.trace.error.TraceValidationException on any §7.2/§7.3 violation
 	 */
 	void validate(ParsedAssertion assertion, CorrelationInputs.Builder out);
 

@@ -9,7 +9,6 @@ package io.jans.lock.service.trace.error;
 import io.jans.lock.model.error.CommonErrorResponseType;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.TraceErrorResponseType;
-import io.jans.lock.service.trace.parse.TraceValidationException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 

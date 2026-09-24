@@ -12,9 +12,9 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.lock.service.trace.TraceConstants;
+import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
-import io.jans.lock.service.trace.parse.TraceValidationException;
 
 /**
  * Validates {@code AUTHORIZATION_DECISION} records (design §7.2): a PDP decision, requiring a

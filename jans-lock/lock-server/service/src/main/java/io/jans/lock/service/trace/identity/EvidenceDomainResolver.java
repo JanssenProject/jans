@@ -18,7 +18,7 @@ import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceClientDomainBinding;
 import io.jans.lock.model.trace.config.TraceConfiguration;
-import io.jans.lock.service.trace.parse.TraceValidationException;
+import io.jans.lock.service.trace.error.TraceValidationException;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

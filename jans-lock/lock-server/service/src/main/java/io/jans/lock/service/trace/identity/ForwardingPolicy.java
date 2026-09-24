@@ -9,7 +9,7 @@ package io.jans.lock.service.trace.identity;
 import java.util.List;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
-import io.jans.lock.service.trace.parse.TraceValidationException;
+import io.jans.lock.service.trace.error.TraceValidationException;
 
 /**
  * Enforces design decision D-3: a client may submit a record only if its binding's

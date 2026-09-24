@@ -4,9 +4,11 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.parse;
+package io.jans.lock.service.trace.error;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
+import io.jans.lock.service.trace.parse.CommonAssertionValidator;
+import io.jans.lock.service.trace.parse.TraceAssertionParser;
 
 /**
  * Thrown by {@link TraceAssertionParser} and {@link CommonAssertionValidator} when an incoming

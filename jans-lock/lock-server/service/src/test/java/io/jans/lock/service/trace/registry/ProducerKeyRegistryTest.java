@@ -27,8 +27,8 @@ import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceCryptoException;
+import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.ProducerKey;
-import io.jans.lock.service.trace.parse.TraceValidationException;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 
 /**
