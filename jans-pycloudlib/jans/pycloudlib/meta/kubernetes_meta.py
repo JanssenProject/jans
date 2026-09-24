@@ -79,11 +79,7 @@ class KubernetesMeta(BaseMeta):
         try:
             pods: list[V1Pod] = self.client.list_namespaced_pod(namespace, label_selector=label, field_selector=field_selector).items
             # Filter terminating and unready pods from the Running-phase result.
-            pods = [
-                p for p in pods 
-                if not p.metadata.deletion_timestamp 
-                and any(c.type == "Ready" and c.status == "True" for c in (p.status.conditions or []))
-            ]
+            pods = [p for p in pods if not p.metadata.deletion_timestamp and any(c.type == "Ready" and c.status == "True" for c in (p.status.conditions or []))]
         except AttributeError:
             # client is not set due to missing k8s config
             pods = []
