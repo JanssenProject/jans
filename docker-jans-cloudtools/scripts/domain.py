@@ -27,9 +27,10 @@ def replace_fqdn_substr(val, old_fqdn, new_fqdn):
 
 
 class Domain:
-    def __init__(self, manager):
+    def __init__(self, manager, **kwargs):
         self.manager = manager
         self.persistence = SqlClient(self.manager)
+        self.dry_run = kwargs.get("dry_run") or False
 
     def modify_persistence_entries(self, table_name, old_fqdn, new_fqdn):
         logger.info("Checking entries in %s table", table_name)
@@ -55,10 +56,12 @@ class Domain:
 
             if "jansRevision" in entry:
                 entry["jansRevision"] = int(entry["jansRevision"] or 0) + 1
-            self.persistence.update(table_name, entry["doc_id"], entry)
+
+            if not self.dry_run:
+                self.persistence.update(table_name, entry["doc_id"], entry)
 
     def change_fqdn(self, old_fqdn, new_fqdn):
-        logger.info("Detected old FQDN from existing config: %s", old_fqdn)
+        logger.warning("The dry run mode is selected; changes will not be persisted")
         logger.info("Changing FQDN from %s to %s", old_fqdn, new_fqdn)
 
         for table_name in ["jansAppConf", "jansCustomScr", "jansClnt"]:
@@ -80,17 +83,21 @@ fqdn_param_type = FQDNParamType()
 
 
 @click.command
-@click.argument("new_fqdn", type=fqdn_param_type)
+@click.argument("new_fqdn", type=fqdn_param_type, help="New FQDN to change to")
 @click.option(
     "--old-fqdn",
-    help="Old FQDN need to be changed from (if omitted, will use FQDN stored in config)",
+    help="Old FQDN to change from (if omitted, will use FQDN stored in configmap)",
     default="",
     type=fqdn_param_type,
 )
-def change_fqdn(new_fqdn, old_fqdn):
+@click.option("--dry-run", help="Simulate the operation without persisting changes", is_flag=True)
+def change_fqdn(new_fqdn, old_fqdn, dry_run):
     """Change FQDN."""
     manager = get_manager()
-    old_fqdn = old_fqdn or manager.config.get("hostname")
+
+    if not old_fqdn:
+        old_fqdn = manager.config.get("hostname")
+        logger.info("Detected empty value for --old-fqdn option; the value is now taken from existing configmap: %s", old_fqdn)
 
     domain = Domain(manager)
     domain.change_fqdn(old_fqdn, new_fqdn)
