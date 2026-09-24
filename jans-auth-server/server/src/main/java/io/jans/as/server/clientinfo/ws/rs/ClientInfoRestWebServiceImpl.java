@@ -63,8 +63,8 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
     private TokenService tokenService;
 
     @Override
-    public Response requestClientInfoGet(String accessToken, String authorization, SecurityContext securityContext) {
-        return requestClientInfo(accessToken, authorization, securityContext);
+    public Response requestClientInfoGet(String authorization, SecurityContext securityContext) {
+        return requestClientInfo(null, authorization, securityContext);
     }
 
     @Override
