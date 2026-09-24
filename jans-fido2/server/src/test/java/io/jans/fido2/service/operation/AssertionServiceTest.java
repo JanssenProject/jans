@@ -8,6 +8,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.error.Fido2ErrorResponse;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
@@ -357,7 +358,7 @@ class AssertionServiceTest {
 
         assertEquals("Couldn't find the key by PublicKeyId", authData.getErrorReason());
         verify(metricService).recordPasskeyAuthenticationFailure(any(), any(), anyLong(),
-                eq("Couldn't find the key by PublicKeyId"), any());
+                eq("Couldn't find the key by PublicKeyId"), any(), any());
     }
 
     /**
@@ -384,7 +385,7 @@ class AssertionServiceTest {
         }
 
         assertEquals("Unknown error", authData.getErrorReason());
-        verify(metricService).recordPasskeyAuthenticationFailure(any(), any(), anyLong(), eq("Unknown error"), any());
+        verify(metricService).recordPasskeyAuthenticationFailure(any(), any(), anyLong(), eq("Unknown error"), any(), any());
     }
 
     /**
@@ -411,7 +412,42 @@ class AssertionServiceTest {
             assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResultWithChallenge()));
         }
 
-        verify(metricService).recordPasskeyAuthenticationFailure(eq("alice"), any(), anyLong(), any(), any());
+        verify(metricService).recordPasskeyAuthenticationFailure(eq("alice"), any(), anyLong(), any(), any(), any());
+    }
+
+    /**
+     * The telemetry a client attaches to the assertion result must reach the failure metric call —
+     * proves the DTO-to-MetricService wiring specifically (#14607's second sub-issue), not just
+     * MetricService's own internal handling of a telemetry object once it has one, which is covered
+     * separately in MetricServiceTest.
+     */
+    @Test
+    void verify_ifRejectedWithTelemetryOnResult_passesItToTheFailureMetric() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+
+        stubCeremonyLookup(entry);
+        stubHistoryExpiration(1296000);
+
+        NativeClientTelemetry telemetry = new NativeClientTelemetry();
+        telemetry.setClientCorrelationId("corr-999");
+        AssertionResult assertionResult = mock(AssertionResult.class);
+        io.jans.fido2.model.assertion.Response response = mock(io.jans.fido2.model.assertion.Response.class);
+        when(assertionResult.getResponse()).thenReturn(response);
+        when(assertionResult.getTelemetry()).thenReturn(telemetry);
+
+        doThrow(new WebApplicationException(Response.status(400).entity("boom").build()))
+                .when(domainVerifier).verifyDomain(any(), any());
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResult));
+        }
+
+        verify(metricService).recordPasskeyAuthenticationFailure(eq("alice"), any(), anyLong(), any(), any(), eq(telemetry));
     }
 
     /**
@@ -653,7 +689,7 @@ class AssertionServiceTest {
         }
 
         // Null username is correct here: no user is known, which is what makes it usernameless.
-        verify(metricService).recordPasskeyAuthenticationAttempt(eq(null), any(), anyLong());
+        verify(metricService).recordPasskeyAuthenticationAttempt(eq(null), any(), anyLong(), any());
     }
 
     /**

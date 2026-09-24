@@ -22,6 +22,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.fido2.service.trust.AttestationTrustDiagnostics;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
@@ -238,7 +239,8 @@ public class AttestationService {
 
 		// Record metrics for registration attempt
 		try {
-			metricService.recordPasskeyRegistrationAttempt(attestationOptions.getUsername(), httpRequest, startTime);
+			metricService.recordPasskeyRegistrationAttempt(attestationOptions.getUsername(), httpRequest, startTime,
+					attestationOptions.getTelemetry());
 		} catch (Exception e) {
 			log.debug("Failed to record registration attempt metrics", e);
 		}
@@ -404,13 +406,13 @@ public class AttestationService {
 		authenticatorType = registrationData.getAuthentictatorAttachment();
 		
 		// Record metrics for successful registration
-		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType);
+		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType, attestationResult.getTelemetry());
 
 		return attestationResultResponse;
 		
 		} catch (Exception e) {
 			// Record metrics for failed registration
-			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
+			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType, attestationResult.getTelemetry());
 			
 			// Re-throw the original exception
 			throw e;
@@ -667,20 +669,21 @@ public class AttestationService {
 	/**
 	 * Record registration success metrics
 	 */
-	private void recordRegistrationSuccessMetrics(String username, HttpServletRequest httpRequest, 
-												  long startTime, String authenticatorType) {
+	private void recordRegistrationSuccessMetrics(String username, HttpServletRequest httpRequest,
+												  long startTime, String authenticatorType, NativeClientTelemetry telemetry) {
 		try {
-			metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType);
+			metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType, telemetry);
 		} catch (Exception e) {
 			log.debug("Failed to record registration success metrics", e);
 		}
 	}
-	
+
 	/**
 	 * Record registration failure metrics
 	 */
 	private void recordRegistrationFailureMetrics(String username, HttpServletRequest httpRequest,
-												  long startTime, Exception error, String authenticatorType) {
+												  long startTime, Exception error, String authenticatorType,
+												  NativeClientTelemetry telemetry) {
 		try {
 			String message = error.getMessage() != null ? error.getMessage() : "Unknown error";
 
@@ -698,7 +701,7 @@ public class AttestationService {
 			}
 
 			metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason,
-					authenticatorType, aaguid);
+					authenticatorType, aaguid, telemetry);
 		} catch (Exception metricsException) {
 			log.debug("Failed to record registration failure metrics", metricsException);
 		}

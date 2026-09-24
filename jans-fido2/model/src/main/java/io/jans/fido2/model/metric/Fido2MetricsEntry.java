@@ -99,6 +99,16 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
     private String sessionId;
 
     /**
+     * Caller-supplied correlation ID (#14607), sibling to {@link #sessionId} rather than folded
+     * into it: this one is optional and client-supplied, {@code sessionId} is server-derived and
+     * present whenever a session exists. Kept as its own top-level, indexed attribute — not buried
+     * inside {@link #nativeClientTelemetry}'s JSON blob — so a start call and its matching finish
+     * call are actually queryable/joinable on this value.
+     */
+    @AttributeName(name = "jansFido2MetricsClientCorrelationId")
+    private String clientCorrelationId;
+
+    /**
      * Additional data stored as JSON for flexibility
      * 
      * Note: 'transient' prevents Java serialization, while '@JsonObject' enables ORM JSON persistence.
@@ -270,6 +280,14 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getClientCorrelationId() {
+        return clientCorrelationId;
+    }
+
+    public void setClientCorrelationId(String clientCorrelationId) {
+        this.clientCorrelationId = clientCorrelationId;
     }
 
     public Map<String, Object> getAdditionalData() {

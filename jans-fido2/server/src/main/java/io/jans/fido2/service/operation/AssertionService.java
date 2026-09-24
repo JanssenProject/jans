@@ -33,6 +33,7 @@ import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.app.AbandonedCeremonyPolicy;
@@ -235,7 +236,7 @@ public class AssertionService {
 
 		// Record metrics for authentication attempt
 		try {
-			metricService.recordPasskeyAuthenticationAttempt(username, httpRequest, startTime);
+			metricService.recordPasskeyAuthenticationAttempt(username, httpRequest, startTime, assertionOptions.getTelemetry());
 		} catch (Exception e) {
 			log.debug("Failed to record authentication attempt metrics", e);
 		}
@@ -316,7 +317,10 @@ public class AssertionService {
 		// deployments that use conditional UI. The username is deliberately null — no user is known at
 		// this point, which is the defining property of a usernameless ceremony.
 		try {
-			metricService.recordPasskeyAuthenticationAttempt(null, httpRequest, startTime);
+			// AssertionOptionsGenerate (the conditional-UI/discoverable-credential request) carries no
+			// telemetry field — only AssertionOptions does (#14607's scope) — so this attempt is
+			// recorded without it, not silently dropped.
+			metricService.recordPasskeyAuthenticationAttempt(null, httpRequest, startTime, null);
 		} catch (Exception e) {
 			log.debug("Failed to record authentication attempt metrics", e);
 		}
@@ -474,7 +478,7 @@ public class AssertionService {
 				externalFido2InterceptionContext);
 
 		// Record metrics for successful authentication
-		recordAuthenticationSuccessMetrics(registrationData.getUsername(), httpRequest, startTime, authenticatorType);
+		recordAuthenticationSuccessMetrics(registrationData.getUsername(), httpRequest, startTime, authenticatorType, assertionResult.getTelemetry());
 
 		return assertionResultResponse;
 		
@@ -484,7 +488,7 @@ public class AssertionService {
 			markAssertionFailed(authenticationEntity, e);
 
 			// Record metrics for failed authentication
-			recordAuthenticationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
+			recordAuthenticationFailureMetrics(username, httpRequest, startTime, e, authenticatorType, assertionResult.getTelemetry());
 
 			// Track fallback event for specific error types that might cause users to switch methods
 			recordFallbackForError(username, e);
@@ -625,22 +629,23 @@ public class AssertionService {
 	/**
 	 * Record authentication success metrics
 	 */
-	private void recordAuthenticationSuccessMetrics(String username, HttpServletRequest httpRequest, 
-													long startTime, String authenticatorType) {
+	private void recordAuthenticationSuccessMetrics(String username, HttpServletRequest httpRequest,
+													long startTime, String authenticatorType, NativeClientTelemetry telemetry) {
 		try {
-			metricService.recordPasskeyAuthenticationSuccess(username, httpRequest, startTime, authenticatorType);
+			metricService.recordPasskeyAuthenticationSuccess(username, httpRequest, startTime, authenticatorType, telemetry);
 		} catch (Exception e) {
 			log.debug("Failed to record authentication success metrics", e);
 		}
 	}
-	
+
 	/**
 	 * Record authentication failure metrics
 	 */
-	private void recordAuthenticationFailureMetrics(String username, HttpServletRequest httpRequest, 
-													long startTime, Exception error, String authenticatorType) {
+	private void recordAuthenticationFailureMetrics(String username, HttpServletRequest httpRequest,
+													long startTime, Exception error, String authenticatorType,
+													NativeClientTelemetry telemetry) {
 		try {
-			metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, resolveErrorReason(error), authenticatorType);
+			metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, resolveErrorReason(error), authenticatorType, telemetry);
 		} catch (Exception metricsException) {
 			log.debug("Failed to record authentication failure metrics", metricsException);
 		}
