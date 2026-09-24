@@ -25,8 +25,8 @@ public class Months {
     }
 
     public static boolean isValid(String months, String startMonth, String endMonth) {
-        boolean hasMonths = StringUtils.isNotBlank(months);
-        boolean hasRange = StringUtils.isNotBlank(startMonth) && StringUtils.isNotBlank(endMonth);
+        boolean hasMonths = months!=null && months.trim().length()>0;
+        boolean hasRange = (startMonth!=null && startMonth.trim().length()>0) && (endMonth!=null && endMonth.trim().length()>0);
         if (hasMonths && hasRange) { // if both are present then invalid
             return false;
         }

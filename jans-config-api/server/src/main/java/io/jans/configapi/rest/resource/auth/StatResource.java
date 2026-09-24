@@ -22,6 +22,8 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
@@ -71,13 +73,26 @@ public class StatResource extends ConfigBaseResource {
             @Parameter(description = "Start-Month for which the stat report is to be fetched") @QueryParam(value = "start_month") String startMonth,
             @Parameter(description = "End-Month for which the stat report is to be fetched") @QueryParam(value = "end_month") String endMonth,
             @Parameter(description = "Report format") @QueryParam(value = "format") String format) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Statistics search param - month:{}, startMonth:{}, endMonth:{}, format:{}",
+                    escapeLog(month), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
+        }
+
         if (StringUtils.isBlank(format)) {
             format = "";
         }
-        String url = getIssuer() + this.statUrl;
-        JsonNode jsonNode = this.authService.getStat(url, authorization, month, startMonth, endMonth, format);
-        logger.trace("StatResource::getUserStatistics() - jsonNode:{} ", jsonNode);
-        return Response.ok(jsonNode.get("response")).build();
+        try {
+            String url = getIssuer() + this.statUrl;
+            JsonNode jsonNode = this.authService.getStat(url, authorization, month, startMonth, endMonth, format);
+            logger.trace("StatResource::getUserStatistics() - jsonNode:{} ", jsonNode);
+            return Response.ok(jsonNode.get("response")).build();
+        } catch (Exception ex) {
+            logger.error(" Error while fetching stats for month:{}, startMonth:{}, endMonth:{}, format:{} is {}", month,
+                    startMonth, endMonth, format, ex);
+            throwInternalServerException(ex);
+        }
+        return Response.ok().build();
     }
 
     private String getIssuer() {
