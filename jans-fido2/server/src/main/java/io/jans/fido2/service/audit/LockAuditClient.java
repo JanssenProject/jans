@@ -42,9 +42,6 @@ public class LockAuditClient {
 	private AppConfiguration appConfiguration;
 
 	@Inject
-	private LockAuditTokenService lockAuditTokenService;
-
-	@Inject
 	private DataMapperService dataMapperService;
 
 	private static final int CONNECT_TIMEOUT_SECONDS = 5;
@@ -55,20 +52,23 @@ public class LockAuditClient {
 			.readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
 	/**
-	 * @throws Fido2RuntimeException on any failure to obtain a token, serialize, or deliver the
-	 *         batch. The caller ({@link LockAuditEventCollector}) is responsible for catching this
-	 *         and dropping the batch rather than retrying inline or propagating it further.
+	 * @param accessToken a token already obtained by the caller — {@link LockAuditEventCollector}
+	 *        fetches one once per drain and reuses it across every chunk of that flush, rather than
+	 *        this method obtaining a fresh one per call (a drain split into N chunks previously meant
+	 *        N client-credentials grants against the auth server for a single flush).
+	 * @throws Fido2RuntimeException on any failure to validate the endpoint, serialize, or deliver
+	 *         the batch. The caller is responsible for catching this and dropping the chunk rather
+	 *         than retrying inline or propagating it further.
 	 */
-	public void postBatch(List<LockAuditEvent> events) {
+	public void postBatch(List<LockAuditEvent> events, String accessToken) {
 		String endpoint = appConfiguration.getFido2Configuration().getLockAuditEndpoint();
 		if (StringHelper.isEmpty(endpoint)) {
 			throw new Fido2RuntimeException("lockAuditEndpoint is not configured");
 		}
 		LockAuditUrlValidator.requireSecure(endpoint, "lockAuditEndpoint");
 
-		String accessToken = lockAuditTokenService.getAccessToken();
 		if (accessToken == null) {
-			throw new Fido2RuntimeException("Unable to obtain a Lock audit access token");
+			throw new Fido2RuntimeException("No Lock audit access token available");
 		}
 
 		String payload;

@@ -6,7 +6,8 @@
 
 use cedarling::{
     self as core, BootstrapConfig, BootstrapConfigRaw, DataApi, DataEntry as CoreDataEntry,
-    DataStoreStats as CoreDataStoreStats, LogStorage, PolicyStoreSource, TrustedIssuerLoadingInfo,
+    DataStoreStats as CoreDataStoreStats, LogStorage, MetricsError as CoreMetricsError,
+    MetricsSnapshot as CoreMetricsSnapshot, PolicyStoreSource, TrustedIssuerLoadingInfo,
 };
 use std::sync::Arc;
 mod result;
@@ -95,6 +96,31 @@ pub enum DataError {
     SerializationError(String),
 }
 
+/// Error returned by [`Cedarling::drain_metrics`](crate::Cedarling::drain_metrics)
+/// when a local metrics snapshot is not available.
+#[derive(Debug, thiserror::Error, uniffi::Error)]
+pub enum MetricsError {
+    /// Local metrics collection is disabled. Enable it by setting
+    /// `CEDARLING_METRICS_COLLECTION=enabled`.
+    #[error("metrics collection is disabled")]
+    NotEnabled,
+    /// The metrics collector is owned by the Lock telemetry ticker; enabling
+    /// `CEDARLING_METRICS_COLLECTION` will not help. Returned whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server
+    /// has no telemetry endpoint and metrics are not shipped anywhere.
+    #[error("metrics collection is owned by the lock telemetry ticker")]
+    LockTelemetry,
+}
+
+impl From<CoreMetricsError> for MetricsError {
+    fn from(err: CoreMetricsError) -> Self {
+        match err {
+            CoreMetricsError::Disabled => MetricsError::NotEnabled,
+            CoreMetricsError::LockTelemetry => MetricsError::LockTelemetry,
+        }
+    }
+}
+
 #[derive(Debug, Clone, uniffi::Object)]
 pub struct EntityData {
     inner: core::EntityData,
@@ -166,6 +192,30 @@ pub struct DataStoreStats {
     pub memory_alert_threshold: f64,
     /// Whether memory usage exceeds the alert threshold
     pub memory_alert_triggered: bool,
+}
+
+/// Telemetry metrics snapshot for the current interval.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct MetricsSnapshot {
+    /// Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
+    pub policy_stats: HashMap<String, i64>,
+    /// Classified error counters keyed by error metric key.
+    pub error_counters: HashMap<String, i64>,
+    /// Operational counters and gauges (authorization, cache, JWT, data, lock).
+    pub operational_stats: HashMap<String, i64>,
+    /// Duration of the snapshot interval with sub-second precision.
+    pub interval: Duration,
+}
+
+impl From<CoreMetricsSnapshot> for MetricsSnapshot {
+    fn from(snap: CoreMetricsSnapshot) -> Self {
+        Self {
+            policy_stats: snap.policy_stats,
+            error_counters: snap.error_counters,
+            operational_stats: snap.operational_stats,
+            interval: snap.interval,
+        }
+    }
 }
 
 impl TryFrom<CoreDataEntry> for DataEntry {
@@ -705,6 +755,18 @@ impl Cedarling {
             .get_stats_ctx()
             .map(Into::into)
             .map_err(|e: core::DataError| DataError::from(e))
+    }
+
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval. `interval` is a Duration with
+    /// sub-second precision (Python `timedelta`, Kotlin `java.time.Duration`,
+    /// Swift `TimeInterval` seconds).
+    #[uniffi::method]
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
+        self.inner
+            .drain_metrics()
+            .map(Into::into)
+            .map_err(|e: CoreMetricsError| MetricsError::from(e))
     }
 
     #[uniffi::method]
