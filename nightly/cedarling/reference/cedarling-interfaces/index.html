@@ -1247,6 +1247,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#drain-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Drain Metrics
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-requirements" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1936,6 +1947,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#drain-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Drain Metrics
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-requirements" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2468,6 +2490,65 @@ These are described below.</p>
   - <code>capacity_usage_percent</code>: Percentage of capacity used (0.0-100.0)
   - <code>memory_alert_threshold</code>: Memory usage threshold percentage (from config)
   - <code>memory_alert_triggered</code>: Whether memory usage exceeds the alert threshold</p>
+<h3 id="drain-metrics">Drain Metrics<a class="headerlink" href="#drain-metrics" title="Permanent link">#</a></h3>
+<ul>
+<li><code>drain_metrics()</code></li>
+</ul>
+<p>Destructive read: returns a <code>MetricsSnapshot</code> with <code>policy_stats</code>,
+  <code>error_counters</code>, <code>operational_stats</code>, and the elapsed interval, then
+  resets the counters for the next interval.</p>
+<p>Only available when <code>CEDARLING_METRICS_COLLECTION</code> is <code>enabled</code> at bootstrap
+  and no Lock telemetry ticker owns the collector. Returns a <code>LockTelemetry</code>
+  error whenever <code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code> is set, even if the Lock
+  server has no telemetry endpoint and metrics are not shipped anywhere: the
+  ticker is spawned based on the interval alone.</p>
+<p>The interval is reported as each language's own duration type, so its name
+  and precision differ by binding:</p>
+<table>
+<thead>
+<tr>
+<th>Binding</th>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rust</td>
+<td><code>interval</code></td>
+<td><code>std::time::Duration</code></td>
+</tr>
+<tr>
+<td>Python</td>
+<td><code>interval</code></td>
+<td><code>datetime.timedelta</code></td>
+</tr>
+<tr>
+<td>Kotlin</td>
+<td><code>interval</code></td>
+<td><code>java.time.Duration</code></td>
+</tr>
+<tr>
+<td>Swift</td>
+<td><code>interval</code></td>
+<td><code>TimeInterval</code></td>
+</tr>
+<tr>
+<td>Go</td>
+<td><code>Interval</code></td>
+<td><code>time.Duration</code></td>
+</tr>
+<tr>
+<td>JavaScript / WASM</td>
+<td><code>interval_secs</code></td>
+<td><code>Number</code>, fractional seconds</td>
+</tr>
+</tbody>
+</table>
+<p>Every binding reports the interval with sub-second precision. Serializing the
+  Rust snapshot yields fractional seconds under an <code>interval_secs</code> key.</p>
+<p>The interval shipped to the Lock server is separate: the telemetry ticker
+  reports whole seconds, so sub-second precision is local to the binding.</p>
 <h3 id="schema-requirements">Schema Requirements<a class="headerlink" href="#schema-requirements" title="Permanent link">#</a></h3>
 <p>To use the Context Data API, your Cedar schema must include a <code>data</code> field in the action's context. You must explicitly define the expected structure of the data — Cedar does not support arbitrary/untyped records.</p>
 <div class="highlight"><pre><span></span><code>namespace MyApp {
@@ -2619,7 +2700,7 @@ These are described below.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 18, 2026
+    September 23, 2026
   </span>
 
     
