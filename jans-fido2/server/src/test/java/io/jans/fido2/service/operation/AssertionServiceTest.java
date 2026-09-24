@@ -228,7 +228,10 @@ class AssertionServiceTest {
         io.jans.fido2.model.assertion.Response response = mock(io.jans.fido2.model.assertion.Response.class);
         when(assertionResult.getResponse()).thenReturn(response);
         when(commonVerifiers.verifyNullOrEmptyString(any())).thenReturn("keyId");
-        when(commonVerifiers.verifyClientJSON(any())).thenReturn(mapper.createObjectNode());
+        // verifyClientJSON() guarantees an "origin" field in real code (it throws otherwise) — the
+        // stub must honor that contract so the ceremony can reach domain verification, exactly as it
+        // would in production.
+        when(commonVerifiers.verifyClientJSON(any())).thenReturn(mapper.createObjectNode().put("origin", "https://rp.example.com"));
         when(commonVerifiers.getChallenge(any())).thenReturn("clientChallenge");
 
         Fido2AuthenticationData authData = new Fido2AuthenticationData();
@@ -268,13 +271,19 @@ class AssertionServiceTest {
         when(assertionResult.getResponse()).thenReturn(response);
         when(response.getUserHandle()).thenReturn("different-handle");
         when(commonVerifiers.verifyNullOrEmptyString(any())).thenReturn("keyId");
-        when(commonVerifiers.verifyClientJSON(any())).thenReturn(mapper.createObjectNode());
+        // verifyClientJSON() guarantees an "origin" field in real code (it throws otherwise) — the
+        // stub must honor that contract so the ceremony can reach domain verification, exactly as it
+        // would in production.
+        when(commonVerifiers.verifyClientJSON(any())).thenReturn(mapper.createObjectNode().put("origin", "https://rp.example.com"));
         when(commonVerifiers.getChallenge(any())).thenReturn("clientChallenge");
 
         Fido2AuthenticationData authData = new Fido2AuthenticationData();
         authData.setChallenge("clientChallenge");
         authData.setUsername("alice");
         authData.setStatus(Fido2AuthenticationStatus.pending);
+        // Deliberately different from the clientData origin stubbed above — this is the stale RP
+        // hostname captured at options-generation time, which the audit event must NOT report.
+        authData.setOrigin("stale-rp-hostname");
         Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
         when(entry.getAuthenticationData()).thenReturn(authData);
         when(entry.getRpId()).thenReturn("rp");
@@ -297,6 +306,14 @@ class AssertionServiceTest {
                     () -> assertionService.verify(assertionResult));
             assertEquals(400, ex.getResponse().getStatus());
         }
+
+        // The ceremony failed after domain verification succeeded, so the audit event must carry the
+        // origin actually verified from clientData ("https://rp.example.com") — never the stale RP
+        // hostname on Fido2AuthenticationData ("stale-rp-hostname"), which verifyDomain() only ever
+        // compares against and never overwrites.
+        ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
+        verify(lockAuditEventCollector).collect(captor.capture());
+        assertEquals("https://rp.example.com", captor.getValue().getContextInformation().get("origin"));
     }
 
     /**

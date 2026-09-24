@@ -348,6 +348,12 @@ public class AssertionService {
 		// failure raised after the credential lookup should still carry its rpId/credentialId into the
 		// audit event, not discard it just because the outcome was an exception.
 		Fido2RegistrationData registrationData = null;
+		// The audit event must record the origin actually verified for this ceremony (the raw
+		// clientData origin, scheme/port and all), not authenticationData.getOrigin() — that field
+		// holds the RP hostname captured at options-generation time, which verifyDomain() only ever
+		// compares against, never overwrites. Stays null until domain verification actually succeeds,
+		// so a domain-mismatch failure never reports an origin as if it had been accepted.
+		String clientOrigin = null;
 
 		try {
 		// Apply external custom scripts
@@ -406,6 +412,7 @@ public class AssertionService {
 		log.debug("Fido2AuthenticationData: {}", authenticationData);
 		// Verify domain
 		domainVerifier.verifyDomain(authenticationData.getOrigin(), clientJsonNode);
+		clientOrigin = clientJsonNode.get("origin").asText();
 
 		// Find registered public key
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService
@@ -488,7 +495,7 @@ public class AssertionService {
 		recordAuthenticationSuccessMetrics(registrationData.getUsername(), httpRequest, startTime, authenticatorType);
 
 		lockAuditEventCollector.collect(buildAuthenticationAuditEvent(registrationData.getUsername(), registrationData,
-				authenticationData.getOrigin(), authenticatorType, null));
+				clientOrigin, authenticatorType, null));
 
 		return assertionResultResponse;
 
@@ -510,9 +517,8 @@ public class AssertionService {
 			// than reporting a DENY that never happened.
 			boolean committedAsAuthenticated = authenticationEntity != null
 					&& authenticationEntity.getAuthenticationData().getStatus() == Fido2AuthenticationStatus.authenticated;
-			String origin = authenticationEntity != null ? authenticationEntity.getAuthenticationData().getOrigin() : null;
 			Exception auditFailure = committedAsAuthenticated ? null : e;
-			lockAuditEventCollector.collect(buildAuthenticationAuditEvent(username, registrationData, origin, authenticatorType, auditFailure));
+			lockAuditEventCollector.collect(buildAuthenticationAuditEvent(username, registrationData, clientOrigin, authenticatorType, auditFailure));
 
 			// Re-throw the original exception
 			throw e;
@@ -530,8 +536,13 @@ public class AssertionService {
 	 * <li>{@code origin} is its own parameter rather than read off {@code registrationData}. A
 	 * credential can be registered at one permitted origin of an RP and used from a different
 	 * permitted origin later — {@code registrationData.getOrigin()} describes where it was
-	 * <em>registered</em>, not where <em>this</em> assertion actually happened, so the caller passes
-	 * the origin verified for the current ceremony ({@code authenticationData.getOrigin()}).</li>
+	 * <em>registered</em>, not where <em>this</em> assertion actually happened. It is also not
+	 * {@code authenticationData.getOrigin()}, which only ever holds the RP hostname captured at
+	 * options-generation time and is never replaced by {@code domainVerifier.verifyDomain()} — that
+	 * method compares the raw clientData origin's host against it but discards the rest (scheme,
+	 * port). The caller instead passes the raw clientData {@code origin} field itself, captured right
+	 * after domain verification succeeds, so it is {@code null} for any failure raised before that
+	 * point rather than misreporting a domain that was never actually accepted.</li>
 	 * <li>{@code failure} being {@code null} covers both a genuine success and a failure raised after
 	 * the ceremony was already committed as {@code authenticated} — both are represented as ALLOW,
 	 * since both are what actually happened; see the "committedAsAuthenticated" branch in
