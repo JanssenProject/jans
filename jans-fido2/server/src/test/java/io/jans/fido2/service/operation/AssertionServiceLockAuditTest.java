@@ -9,7 +9,6 @@ package io.jans.fido2.service.operation;
 import org.junit.jupiter.api.Test;
 
 import io.jans.fido2.model.audit.LockAuditEvent;
-import io.jans.orm.model.fido2.Fido2RegistrationData;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * dependency graph (authentication persistence, assertion verification, external scripts, ...), none
  * of which this mapping touches.
  * <p>
- * {@code verify()}'s own decisions about which {@code origin} and {@code failure} values to pass —
- * including the "already committed as authenticated" case where a post-persistence exception must
- * still map to ALLOW, not DENY — are not covered here, since they live in {@code verify()} itself,
- * which has no full unit test in this codebase for its happy path (see
- * {@code AssertionServiceTest#verify_ifCeremonyAlreadyTerminal_collectsAnAllowLockAuditEventNotDeny}
+ * {@code verify()}'s own decisions about which {@code rpId}/{@code credentialId}/{@code origin}/
+ * {@code failure} values to pass — including the "persisted as authenticated by this invocation" case
+ * where a post-persistence exception must still map to ALLOW, not DENY — are not covered here, since
+ * they live in {@code verify()} itself, which has no full unit test in this codebase for its happy
+ * path (see {@code AssertionServiceTest#verify_ifCeremonyAlreadyTerminal_collectsADenyLockAuditEvent}
  * for that specific branch). This file only proves the mapper does the right thing with whatever it
  * is given.
  */
@@ -34,12 +33,8 @@ class AssertionServiceLockAuditTest {
 	private final AssertionService assertionService = new AssertionService();
 
 	@Test
-	void buildAuthenticationAuditEvent_onSuccess_carriesRegistrationDataAndAllows() {
-		Fido2RegistrationData registrationData = new Fido2RegistrationData();
-		registrationData.setRpId("my.jans.server");
-		registrationData.setPublicKeyId("cred-123");
-
-		LockAuditEvent event = assertionService.buildAuthenticationAuditEvent("alice", registrationData,
+	void buildAuthenticationAuditEvent_onSuccess_carriesRpIdAndCredentialIdAndAllows() {
+		LockAuditEvent event = assertionService.buildAuthenticationAuditEvent("alice", "my.jans.server", "cred-123",
 				"https://my.jans.server", "platform", null);
 
 		assertEquals("fido2", event.getService());
@@ -57,30 +52,13 @@ class AssertionServiceLockAuditTest {
 	}
 
 	/**
-	 * A credential can be registered at one permitted origin of an RP and used from a different
-	 * permitted origin later, so the recorded origin must come from the {@code origin} parameter
-	 * (the current ceremony), never from {@code registrationData} (where it was originally
-	 * registered) even when both are supplied.
+	 * A failure can occur before the registration lookup that would otherwise supply rpId/credentialId
+	 * even runs (e.g. the challenge itself does not resolve to an entry), so this must not throw or
+	 * silently swallow the event just because those values are {@code null}.
 	 */
 	@Test
-	void buildAuthenticationAuditEvent_originDiffersFromRegistrationOrigin_recordsTheCeremonyOrigin() {
-		Fido2RegistrationData registrationData = new Fido2RegistrationData();
-		registrationData.setRpId("my.jans.server");
-		registrationData.setOrigin("https://original.my.jans.server");
-
-		LockAuditEvent event = assertionService.buildAuthenticationAuditEvent("alice", registrationData,
-				"https://second.my.jans.server", "platform", null);
-
-		assertEquals("https://second.my.jans.server", event.getContextInformation().get("origin"));
-	}
-
-	/**
-	 * A failure can occur before the registration entry is even looked up, so this must not throw or
-	 * silently swallow the event just because {@code registrationData} is {@code null}.
-	 */
-	@Test
-	void buildAuthenticationAuditEvent_onFailureBeforeRegistrationDataExists_stillProducesADenyEvent() {
-		LockAuditEvent event = assertionService.buildAuthenticationAuditEvent(null, null, null, null,
+	void buildAuthenticationAuditEvent_onFailureBeforeIdentifiersExist_stillProducesADenyEvent() {
+		LockAuditEvent event = assertionService.buildAuthenticationAuditEvent(null, null, null, null, null,
 				new IllegalStateException("boom"));
 
 		assertEquals("warning", event.getSeverityLevel());
@@ -90,21 +68,35 @@ class AssertionServiceLockAuditTest {
 	}
 
 	/**
-	 * A failure raised after {@code registrationData} is loaded (assertion verification, signature
-	 * checks, etc. all happen after the lookup) must not discard the rpId/origin context just because
-	 * the outcome is a failure — {@code verify()} passes whatever it actually has at the point of
-	 * failure, not unconditionally {@code null}.
+	 * rpId and credentialId are sourced independently of any registration lookup (the resolved
+	 * ceremony entry and the client-asserted key ID respectively), so a failure raised when that
+	 * lookup itself is what failed (e.g. {@code findByPublicKeyId} throwing) must still carry both —
+	 * this is the CodeRabbit-flagged gap: previously these identifiers were read off the
+	 * {@code Fido2RegistrationData} the failed lookup would have produced, so a DENY event for that
+	 * exact failure silently lost both of them.
 	 */
 	@Test
-	void buildAuthenticationAuditEvent_onFailureAfterRegistrationDataLoaded_preservesRpIdAndOrigin() {
-		Fido2RegistrationData registrationData = new Fido2RegistrationData();
-		registrationData.setRpId("my.jans.server");
-
-		LockAuditEvent event = assertionService.buildAuthenticationAuditEvent("alice", registrationData,
-				"https://my.jans.server", "platform", new IllegalStateException("boom"));
+	void buildAuthenticationAuditEvent_onFailureFromLookupItself_stillCarriesRpIdAndCredentialId() {
+		LockAuditEvent event = assertionService.buildAuthenticationAuditEvent("alice", "my.jans.server", "cred-123",
+				null, "platform", new IllegalStateException("boom"));
 
 		assertEquals("DENY", event.getDecisionResult());
 		assertEquals("my.jans.server", event.getContextInformation().get("rpId"));
+		assertEquals("cred-123", event.getContextInformation().get("credentialId"));
+	}
+
+	/**
+	 * A failure raised after domain verification succeeds (assertion verification, signature checks,
+	 * etc. all happen after that point) must not discard the origin context just because the outcome
+	 * is a failure — {@code verify()} passes whatever it actually has at the point of failure, not
+	 * unconditionally {@code null}.
+	 */
+	@Test
+	void buildAuthenticationAuditEvent_onFailureAfterOriginVerified_preservesOrigin() {
+		LockAuditEvent event = assertionService.buildAuthenticationAuditEvent("alice", "my.jans.server", "cred-123",
+				"https://my.jans.server", "platform", new IllegalStateException("boom"));
+
+		assertEquals("DENY", event.getDecisionResult());
 		assertEquals("https://my.jans.server", event.getContextInformation().get("origin"));
 	}
 
@@ -114,7 +106,7 @@ class AssertionServiceLockAuditTest {
 	 */
 	@Test
 	void buildAuthenticationAuditEvent_onFailure_neverIncludesTheExceptionMessage() {
-		LockAuditEvent event = assertionService.buildAuthenticationAuditEvent("alice", null, null, null,
+		LockAuditEvent event = assertionService.buildAuthenticationAuditEvent("alice", null, null, null, null,
 				new IllegalStateException("Challenge in clientData does not match 'abc123'"));
 
 		assertEquals("IllegalStateException", event.getContextInformation().get("failureReason"));

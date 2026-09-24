@@ -9,6 +9,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.error.Fido2ErrorResponse;
+import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.external.ExternalFido2Service;
@@ -16,6 +17,7 @@ import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.fido2.service.shared.MetricService;
 import io.jans.fido2.service.util.CommonUtilService;
+import io.jans.fido2.service.verifier.AssertionVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
@@ -76,6 +78,8 @@ class AssertionServiceTest {
     private ErrorResponseFactory errorResponseFactory;
     @Mock
     private DomainVerifier domainVerifier;
+    @Mock
+    private AssertionVerifier assertionVerifier;
     @Mock
     private MetricService metricService;
     @Mock
@@ -350,8 +354,8 @@ class AssertionServiceTest {
         verify(authenticationPersistenceService).update(entry);
 
         // A genuine, still-pending-at-the-time-of-failure ceremony must report DENY — the counterpart
-        // to verify_ifCeremonyAlreadyTerminal_collectsAnAllowLockAuditEventNotDeny below, which pins
-        // the opposite case.
+        // to verify_ifExternalScriptThrowsAfterPersistenceSucceeds_collectsAnAllowLockAuditEventNotDeny
+        // below, which pins the opposite case.
         ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
         verify(lockAuditEventCollector).collect(captor.capture());
         assertEquals("DENY", captor.getValue().getDecisionResult());
@@ -476,15 +480,16 @@ class AssertionServiceTest {
     }
 
     /**
-     * The exact scenario CodeRabbit flagged: a ceremony already persisted as {@code authenticated}
-     * (same fixture as the test above) still throws on this call and re-throws to the caller, but the
-     * Lock audit event must report what was actually persisted — ALLOW — not DENY. Reuses the
-     * "already terminal" rejection path rather than driving the full happy path to prove the same
-     * decision logic {@code verify()}'s catch block applies regardless of *when* the ceremony became
-     * {@code authenticated}, not just when a post-commit external script causes it.
+     * The exact scenario CodeRabbit flagged: a replay against a ceremony already persisted as
+     * {@code authenticated} by an EARLIER call (same fixture as the test above) is rejected by
+     * {@code verifyCeremonyIsStillOpen()} — but {@code authenticationData.getStatus()} is still
+     * {@code authenticated} from that earlier call, left over on the entity. Before this fix, the
+     * catch block trusted that in-memory status alone and reported ALLOW for THIS rejected request,
+     * even though nothing about it ever succeeded. It must report DENY: this invocation never called
+     * {@code authenticationPersistenceService.update()} itself.
      */
     @Test
-    void verify_ifCeremonyAlreadyTerminal_collectsAnAllowLockAuditEventNotDeny() {
+    void verify_ifCeremonyAlreadyTerminal_collectsADenyLockAuditEvent() {
         Fido2AuthenticationData authData = pendingCeremony("alice");
         authData.setStatus(Fido2AuthenticationStatus.authenticated);
         Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
@@ -501,10 +506,90 @@ class AssertionServiceTest {
             assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResultWithChallenge()));
         }
 
+        verify(authenticationPersistenceService, never()).update(any());
+
+        ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
+        verify(lockAuditEventCollector).collect(captor.capture());
+        assertEquals("DENY", captor.getValue().getDecisionResult());
+        assertEquals("warning", captor.getValue().getSeverityLevel());
+    }
+
+    /**
+     * The counterpart to the case above: once THIS invocation's own
+     * {@code authenticationPersistenceService.update()} call has actually returned, a later failure
+     * (here, the external interception script, which runs after persistence in the real method) must
+     * still report ALLOW, since the authentication really was persisted by this request — unlike the
+     * replay case above, where persistence was never reached at all.
+     */
+    @Test
+    void verify_ifExternalScriptThrowsAfterPersistenceSucceeds_collectsAnAllowLockAuditEventNotDeny() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+
+        stubCeremonyLookup(entry);
+        // verifyNullOrEmptyString/verifyClientJSON/getChallenge/findByChallenge come from
+        // stubCeremonyLookup above; this layers the "origin" field the plain stub lacks, needed once
+        // the ceremony proceeds past domain verification.
+        when(commonVerifiers.verifyClientJSON(any()))
+                .thenReturn(mapper.createObjectNode().put("origin", "https://rp.example.com"));
+        stubHistoryExpiration(1296000);
+
+        Fido2RegistrationData registrationData = new Fido2RegistrationData();
+        registrationData.setUsername("alice");
+        Fido2RegistrationEntry registrationEntry = mock(Fido2RegistrationEntry.class);
+        when(registrationEntry.getRegistrationData()).thenReturn(registrationData);
+        when(registrationPersistenceService.findByPublicKeyId(any(), any())).thenReturn(Optional.of(registrationEntry));
+
+        // Fails after authenticationPersistenceService.update() has already returned successfully.
+        doThrow(new RuntimeException("interception script failed")).when(externalFido2InterceptionService)
+                .verifyAssertionFinish(any(), any());
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            assertThrows(RuntimeException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+        }
+
+        verify(authenticationPersistenceService).update(entry);
+
         ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
         verify(lockAuditEventCollector).collect(captor.capture());
         assertEquals("ALLOW", captor.getValue().getDecisionResult());
         assertEquals("info", captor.getValue().getSeverityLevel());
+    }
+
+    /**
+     * The other CodeRabbit-flagged gap: when {@code findByPublicKeyId} itself fails (unknown
+     * credential), {@code registrationData} never gets resolved. Before this fix, rpId and
+     * credentialId were read off that (never-resolved) registrationData, so the DENY event silently
+     * lost both — even though both were already known before the lookup ever ran: rpId from the
+     * resolved ceremony entry, credentialId from the client-asserted keyId.
+     */
+    @Test
+    void verify_ifFindByPublicKeyIdFails_stillCollectsRpIdAndCredentialIdInDenyEvent() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+
+        stubCeremonyLookup(entry);
+        when(commonVerifiers.verifyClientJSON(any()))
+                .thenReturn(mapper.createObjectNode().put("origin", "https://rp.example.com"));
+        when(registrationPersistenceService.findByPublicKeyId(any(), any())).thenReturn(Optional.empty());
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            assertThrows(Fido2RuntimeException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+        }
+
+        ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
+        verify(lockAuditEventCollector).collect(captor.capture());
+        assertEquals("DENY", captor.getValue().getDecisionResult());
+        assertEquals("rp", captor.getValue().getContextInformation().get("rpId"));
+        assertEquals("keyId", captor.getValue().getContextInformation().get("credentialId"));
     }
 
     /**

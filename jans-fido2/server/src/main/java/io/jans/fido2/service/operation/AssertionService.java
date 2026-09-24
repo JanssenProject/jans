@@ -354,6 +354,16 @@ public class AssertionService {
 		// compares against, never overwrites. Stays null until domain verification actually succeeds,
 		// so a domain-mismatch failure never reports an origin as if it had been accepted.
 		String clientOrigin = null;
+		// Declared outside the try so a DENY event raised after this resolves (e.g. the registration
+		// lookup below fails) still carries the credential ID the client actually asserted, instead of
+		// silently dropping it just because registrationData never got resolved.
+		String keyId = null;
+		// authenticationData.getStatus() alone is not proof that THIS invocation persisted it: a replay
+		// of an already-authenticated ceremony is rejected by verifyCeremonyIsStillOpen() below while
+		// the entity's status is still `authenticated` from the ORIGINAL call, which would otherwise
+		// report ALLOW for a request that was actually denied. Set only once
+		// authenticationPersistenceService.update() below has itself returned.
+		boolean persistedAsAuthenticated = false;
 
 		try {
 		// Apply external custom scripts
@@ -367,7 +377,7 @@ public class AssertionService {
 		commonVerifiers.verifyAssertionType(assertionResult.getType());
 		String rawId = commonVerifiers.verifyNullOrEmptyString(assertionResult.getRawId());
 
-		String keyId = commonVerifiers.verifyNullOrEmptyString(assertionResult.getId());
+		keyId = commonVerifiers.verifyNullOrEmptyString(assertionResult.getId());
 
 		// FIDO2 conformance: rawId and id must reference the same credential.
 		if (!rawId.equals(keyId)) {
@@ -415,9 +425,10 @@ public class AssertionService {
 		clientOrigin = clientJsonNode.get("origin").asText();
 
 		// Find registered public key
+		final String resolvedKeyId = keyId;
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService
 				.findByPublicKeyId(keyId, authenticationEntity.getRpId()).orElseThrow(() -> new Fido2RuntimeException(
-						String.format("Couldn't find the key by PublicKeyId '%s'", keyId)));
+						String.format("Couldn't find the key by PublicKeyId '%s'", resolvedKeyId)));
 		registrationData = registrationEntry.getRegistrationData();
 		log.debug("Fido2RegistrationEntry {}", registrationEntry);
 		log.debug("registrationData {}", registrationData);
@@ -456,6 +467,7 @@ public class AssertionService {
 		authenticationEntity.setExpiration(authenticationHistoryExpiration);
 
 		authenticationPersistenceService.update(authenticationEntity);
+		persistedAsAuthenticated = true;
 
 		// Store actual counter value in separate attribute. Note: Fido2 not update
 		// initial value in Fido2RegistrationData to minimize DB updates
@@ -494,8 +506,8 @@ public class AssertionService {
 		// Record metrics for successful authentication
 		recordAuthenticationSuccessMetrics(registrationData.getUsername(), httpRequest, startTime, authenticatorType);
 
-		lockAuditEventCollector.collect(buildAuthenticationAuditEvent(registrationData.getUsername(), registrationData,
-				clientOrigin, authenticatorType, null));
+		lockAuditEventCollector.collect(buildAuthenticationAuditEvent(registrationData.getUsername(),
+				authenticationEntity.getRpId(), keyId, clientOrigin, authenticatorType, null));
 
 		return assertionResultResponse;
 
@@ -510,15 +522,18 @@ public class AssertionService {
 			// Track fallback event for specific error types that might cause users to switch methods
 			recordFallbackForError(username, e);
 
-			// A failure here can still mean the ceremony was already committed as `authenticated` (e.g.
-			// an external interception script throwing after the persistence update and session commit
-			// above) — markAssertionFailed() already refuses to overwrite a non-pending status for
-			// exactly this reason, so the audit event must agree with what was actually persisted rather
-			// than reporting a DENY that never happened.
-			boolean committedAsAuthenticated = authenticationEntity != null
-					&& authenticationEntity.getAuthenticationData().getStatus() == Fido2AuthenticationStatus.authenticated;
-			Exception auditFailure = committedAsAuthenticated ? null : e;
-			lockAuditEventCollector.collect(buildAuthenticationAuditEvent(username, registrationData, clientOrigin, authenticatorType, auditFailure));
+			// A failure here can still mean the ceremony was already committed as `authenticated` by
+			// THIS invocation (e.g. an external interception script throwing after the persistence
+			// update and session commit above) — markAssertionFailed() already refuses to overwrite a
+			// non-pending status for exactly this reason, so the audit event must agree with what was
+			// actually persisted rather than reporting a DENY that never happened. Trusts
+			// persistedAsAuthenticated, not authenticationData.getStatus(), since a rejected replay of
+			// an already-authenticated ceremony (verifyCeremonyIsStillOpen() above) would otherwise see
+			// that same `authenticated` status — left over from the ORIGINAL call — and misreport ALLOW
+			// for a request that was actually denied.
+			String rpId = authenticationEntity != null ? authenticationEntity.getRpId() : null;
+			Exception auditFailure = persistedAsAuthenticated ? null : e;
+			lockAuditEventCollector.collect(buildAuthenticationAuditEvent(username, rpId, keyId, clientOrigin, authenticatorType, auditFailure));
 
 			// Re-throw the original exception
 			throw e;
@@ -530,9 +545,15 @@ public class AssertionService {
 	 * test can drive it directly without standing up {@code verify()}'s full dependency graph.
 	 * <p>
 	 * Mirrors {@code AttestationService#buildRegistrationAuditEvent}'s shape and privacy decision
-	 * (only the exception's class name is recorded, never its message). Two differences from that
-	 * method, both learned from review on the registration side:
+	 * (only the exception's class name is recorded, never its message), with differences learned from
+	 * review on both sides:
 	 * <ul>
+	 * <li>{@code rpId} and {@code credentialId} are their own parameters rather than read off a
+	 * {@code Fido2RegistrationData}. That lookup can itself fail (wrong/unknown credential), and both
+	 * values are already known before it even runs — {@code rpId} from the resolved
+	 * {@code authenticationEntity}, {@code credentialId} from the client-asserted {@code keyId} — so a
+	 * DENY event for that failure still carries them instead of losing them just because the lookup
+	 * that would have produced a {@code Fido2RegistrationData} never succeeded.</li>
 	 * <li>{@code origin} is its own parameter rather than read off {@code registrationData}. A
 	 * credential can be registered at one permitted origin of an RP and used from a different
 	 * permitted origin later — {@code registrationData.getOrigin()} describes where it was
@@ -544,12 +565,15 @@ public class AssertionService {
 	 * after domain verification succeeds, so it is {@code null} for any failure raised before that
 	 * point rather than misreporting a domain that was never actually accepted.</li>
 	 * <li>{@code failure} being {@code null} covers both a genuine success and a failure raised after
-	 * the ceremony was already committed as {@code authenticated} — both are represented as ALLOW,
-	 * since both are what actually happened; see the "committedAsAuthenticated" branch in
-	 * {@code verify()}'s catch block.</li>
+	 * the ceremony was already persisted as {@code authenticated} by <em>this</em> invocation — both
+	 * are represented as ALLOW, since both are what actually happened; see the
+	 * "persistedAsAuthenticated" flag in {@code verify()}'s catch block, which is deliberately not
+	 * derived from {@code authenticationData.getStatus()} alone (a rejected replay of an
+	 * already-authenticated ceremony would otherwise misreport ALLOW for a request that was actually
+	 * denied).</li>
 	 * </ul>
 	 */
-	LockAuditEvent buildAuthenticationAuditEvent(String username, Fido2RegistrationData registrationData, String origin,
+	LockAuditEvent buildAuthenticationAuditEvent(String username, String rpId, String credentialId, String origin,
 			String authenticatorType, Exception failure) {
 		LockAuditEvent event = new LockAuditEvent();
 		event.setEventTime(new Date());
@@ -559,13 +583,11 @@ public class AssertionService {
 		event.setPrincipalId(username);
 
 		Map<String, String> context = new HashMap<>();
-		if (registrationData != null) {
-			if (registrationData.getRpId() != null) {
-				context.put("rpId", registrationData.getRpId());
-			}
-			if (registrationData.getPublicKeyId() != null) {
-				context.put("credentialId", registrationData.getPublicKeyId());
-			}
+		if (rpId != null) {
+			context.put("rpId", rpId);
+		}
+		if (credentialId != null) {
+			context.put("credentialId", credentialId);
 		}
 		if (origin != null) {
 			context.put("origin", origin);
