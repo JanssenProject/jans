@@ -1301,6 +1301,15 @@ components:
         sessionId:
           type: string
           description: Session identifier linking this operation to a user session.
+        clientCorrelationId:
+          type: string
+          description: >-
+            Optional client_correlation_id (#14607) from the telemetry object attached to the
+            request, if any. Sibling to sessionId, not derived from it — caller-supplied, and
+            absent unless the client sent one. Join two entries sharing this value to correlate a
+            ceremony's start and finish.
+        nativeClientTelemetry:
+          $ref: '#/components/schemas/NativeClientTelemetry'
         applicationType:
           type: string
           description: Application or relying party identifier (when multiple apps share the FIDO2 server).
