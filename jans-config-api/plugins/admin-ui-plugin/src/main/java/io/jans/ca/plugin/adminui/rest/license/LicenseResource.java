@@ -123,10 +123,9 @@ public class LicenseResource {
      */
     @Operation(summary = "Retrieve license from SCAN", description = "Retrieve license from SCAN", operationId = "retrieve-license", tags = {
             "Admin UI - License"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
@@ -134,14 +133,23 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(RETRIEVE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveLicense() {
         GenericResponse licenseResponse = null;
         try {
-            log.info("Retrieve license from SCAN.");
+            log.info("Retrieve license from Agama Lab.");
             licenseResponse = licenseDetailsService.retrieveLicense();
             log.info("Retrieve license from SCAN result (true/false): {}", licenseResponse.isSuccess());
+            if(!licenseResponse.isSuccess() || licenseResponse.getResponseCode() != 200) {
+                return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
+            }
+            log.info("Activate the license received from Agama Lab.");
+            LicenseRequest licenseRequest = new LicenseRequest();
+            licenseRequest.setLicenseKey(licenseResponse.getResponseObject().get("licenseKey").toString());
+            licenseResponse = null;
+            licenseResponse = licenseDetailsService.activateLicense(licenseRequest);
+            log.info("License activated (true/false): {}", licenseResponse.isSuccess());
             return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription(), e);
@@ -158,10 +166,9 @@ public class LicenseResource {
      */
     @Operation(summary = "Generate trial license", description = "Generate trial license", operationId = "get-trial-license", tags = {
             "Admin UI - License"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
@@ -169,7 +176,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(TRIAL)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response trial() {
         GenericResponse licenseResponse = null;
@@ -177,43 +184,18 @@ public class LicenseResource {
             log.info("Generate trial license.");
             licenseResponse = licenseDetailsService.generateTrialLicense();
             log.info("Generate trial license (true/false): {}", licenseResponse.isSuccess());
-            return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
-        } catch (Exception e) {
-            log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
-            return Response.serverError().entity(licenseResponse).build();
-        }
-    }
-
-    /**
-     * Activate the admin UI license using the provided license key.
-     *
-     * @param licenseRequest request containing the license key and any related metadata
-     * @return a JAX-RS Response whose entity is a GenericResponse describing whether activation succeeded and carrying the appropriate response code
-     */
-    @Operation(summary = "Activate license using license-key", description = "Activate license using license-key", operationId = "activate-adminui-license", tags = {
-            "Admin UI - License"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
-    @RequestBody(description = "LicenseRequest object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseRequest.class)))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
-    @POST
-    @Path(ACTIVATE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response activate(@Valid @NotNull LicenseRequest licenseRequest) {
-        GenericResponse licenseResponse = null;
-        try {
-            log.info("Trying to activate license using license-key.");
+            if(!licenseResponse.isSuccess() || licenseResponse.getResponseCode() != 200) {
+                return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
+            }
+            log.info("Activate the trial license from Agama Lab.");
+            LicenseRequest licenseRequest = new LicenseRequest();
+            licenseRequest.setLicenseKey(licenseResponse.getResponseObject().get("license-key").toString());
+            licenseResponse = null;
             licenseResponse = licenseDetailsService.activateLicense(licenseRequest);
             log.info("License activated (true/false): {}", licenseResponse.isSuccess());
             return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
         } catch (Exception e) {
-            log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
+            log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return Response.serverError().entity(licenseResponse).build();
         }
     }
