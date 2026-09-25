@@ -1,0 +1,6 @@
+Flow flow
+    Basepath ""
+
+x = 1E-05
+
+//Failure reason: numbers are base 10 only; exponential notation is not allowed
