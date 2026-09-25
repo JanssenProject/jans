@@ -1,0 +1,404 @@
+# Copyright 2026 Janssen Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+openapi: 3.1.0
+
+info:
+  title: Trust Activation API
+  description: |
+    Machine-to-machine API for activating Shibboleth IDP trust relationships (the `activation` bounded
+    context). Consumed by worker processes that announce liveness, claim activation work, renew their
+    lease and report results. Coordination conflicts are resolved by the domain's fences (work-item
+    episode id and lease ownership), not by HTTP preconditions.
+
+    The endpoint surface, protocol and decisions are specified in
+    `docs/activation_api_design_spec.md`; endpoints are added here one at a time, following the same
+    per-endpoint TDD workflow as the config API.
+  version: 1.0.0
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+
+servers:
+  - url: /v1/trust/activation
+    description: Base path for the trust activation (worker) API.
+
+security:
+  - workerAuth: []
+
+tags:
+  - name: workers
+    description: Worker registration and liveness.
+  - name: work-items
+    description: Claiming, renewing and reporting activation work.
+
+# Endpoints (see docs/activation_api_design_spec.md §6) are added here incrementally. The claim-next
+# and worker endpoints depend on two domain additions (P1 claim-next query, P2 worker registry) that
+# are designed first.
+paths:
+
+  /workers:
+    post:
+      tags: [workers]
+      operationId: registerActivationWorker
+      summary: Register (announce) a worker
+      description: |
+        Registers or renews a worker's presence so it may claim work. Idempotent — re-announcing an
+        existing worker refreshes its liveness. `origin` is the worker's identity ("instance@host").
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterWorkerRequest'
+      responses:
+        '200':
+          description: The registered worker.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerView'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /workers/{worker}/heartbeat:
+    post:
+      tags: [workers]
+      operationId: heartbeatActivationWorker
+      summary: Renew a worker's liveness
+      description: |
+        Refreshes a registered worker's liveness so it stays eligible to claim and hold work,
+        independent of any lease. `worker` is the worker's identity ("instance@host"), URL-encoded.
+      parameters:
+        - $ref: '#/components/parameters/WorkerOrigin'
+      responses:
+        '200':
+          description: The worker with its refreshed liveness.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerView'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /work-items/claim-next:
+    post:
+      tags: [work-items]
+      operationId: claimNextActivationWorkItem
+      summary: Claim the next available work item
+      description: |
+        Atomically finds and claims the oldest available (`PENDING`) work item of the requested `type`
+        for the calling worker, granting it a lease. `origin` is the worker's identity ("instance@host");
+        it must be a registered, live worker. Returns the claimed item, or `204` when nothing is
+        claimable.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimNextRequest'
+      responses:
+        '200':
+          description: The claimed work item (now ASSIGNED, with a lease).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemView'
+        '204':
+          description: No work of the requested type is currently available to claim.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /work-items/{id}:
+    get:
+      tags: [work-items]
+      operationId: getActivationWorkItem
+      summary: Get a work item
+      description: |
+        Returns a unit of activation work by id — its type, trust relationship reference, state and
+        lease expiry.
+      parameters:
+        - $ref: '#/components/parameters/WorkItemId'
+      responses:
+        '200':
+          description: The requested work item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /work-items/{id}/report:
+    post:
+      tags: [work-items]
+      operationId: reportActivationResult
+      summary: Report an activation result
+      description: |
+        Reports the outcome of processing a work item. The body carries the worker's `origin` (its
+        identity), which the server fences against the trust relationship's current work item and the
+        current lease holder. A `NO_DATA` status leaves the item ASSIGNED; any other status completes it.
+      parameters:
+        - $ref: '#/components/parameters/WorkItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationDiagnosticsRequest'
+      responses:
+        '200':
+          description: The updated work item (COMPLETED, or unchanged ASSIGNED for NO_DATA).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemView'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /work-items/{id}/heartbeat:
+    post:
+      tags: [work-items]
+      operationId: renewActivationLease
+      summary: Renew a work item's lease
+      description: |
+        Renews the lease on an assigned work item, keeping it held by the calling worker. The body
+        carries the worker's `origin` (its identity), which the server fences against the current lease
+        holder — only the holder may renew.
+      parameters:
+        - $ref: '#/components/parameters/WorkItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewLeaseRequest'
+      responses:
+        '200':
+          description: The work item with its renewed lease.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemView'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+components:
+
+  securitySchemes:
+    workerAuth:
+      type: http
+      scheme: bearer
+      description: Worker access token obtained out-of-band (bearer; worker audience/scope, distinct from the config user token).
+
+  parameters:
+    WorkItemId:
+      name: id
+      in: path
+      required: true
+      description: Identifier of the work item.
+      schema:
+        type: string
+        format: uuid
+    WorkerOrigin:
+      name: worker
+      in: path
+      required: true
+      description: Worker identity ("instance@host"), URL-encoded.
+      schema:
+        type: string
+      examples:
+        default:
+          value: worker-1@host
+
+  responses:
+
+    BadRequest:
+      description: The request is malformed or fails a validation rule.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '../components/common.yaml#/components/schemas/Problem'
+
+    Unauthorized:
+      description: Missing or invalid worker token.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '../components/common.yaml#/components/schemas/Problem'
+
+    NotFound:
+      description: No worker or work item exists with the given identifier.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '../components/common.yaml#/components/schemas/Problem'
+
+    Conflict:
+      description: The operation conflicts with the current coordination state (lease, episode or work-item transition).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '../components/common.yaml#/components/schemas/Problem'
+
+  schemas:
+
+    WorkItemView:
+      type: object
+      description: A unit of activation work.
+      required: [id, type, trust_relationship_ref, state]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/WorkItemType'
+        trust_relationship_ref:
+          type: string
+          format: uuid
+        state:
+          $ref: '#/components/schemas/WorkItemState'
+        lease_expires_at:
+          type: string
+          format: date-time
+          description: When the current lease expires; absent when the item is not leased.
+
+    WorkItemType:
+      type: string
+      enum: [PROCESS_AGGREGATE_METADATA, PROCESS_INDIVIDUAL_METADATA]
+
+    WorkItemState:
+      type: string
+      enum: [PENDING, ASSIGNED, COMPLETED, CANCELLED]
+
+    ActivationDiagnosticsRequest:
+      type: object
+      description: |
+        A worker's report of an activation outcome. `origin` is the worker's identity ("instance@host")
+        — the fence the server checks against the work item's lease holder.
+      additionalProperties: false
+      required: [origin, status, started_at, completed_at]
+      properties:
+        origin:
+          type: string
+          examples: ["worker-1@host"]
+        status:
+          $ref: '#/components/schemas/ActivationStatus'
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        log_entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivationLogEntry'
+
+    ActivationLogEntry:
+      type: object
+      additionalProperties: false
+      required: [timestamp, level, message]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        level:
+          $ref: '#/components/schemas/LogLevel'
+        message:
+          type: string
+
+    ActivationStatus:
+      type: string
+      enum: [NO_DATA, SUCCEEDED, FAILED]
+
+    LogLevel:
+      type: string
+      enum: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+
+    RenewLeaseRequest:
+      type: object
+      description: Renews a lease; carries the calling worker's identity as the lease-holder fence.
+      additionalProperties: false
+      required: [origin]
+      properties:
+        origin:
+          type: string
+          description: Worker identity, "instance@host".
+          examples: ["worker-1@host"]
+
+    ClaimNextRequest:
+      type: object
+      description: Selects work to claim by the calling worker's identity and the kind of work.
+      additionalProperties: false
+      required: [origin, type]
+      properties:
+        origin:
+          type: string
+          description: Worker identity, "instance@host".
+          examples: ["worker-1@host"]
+        type:
+          $ref: '#/components/schemas/WorkItemType'
+
+    RegisterWorkerRequest:
+      type: object
+      description: Announces a worker by its identity.
+      additionalProperties: false
+      required: [origin]
+      properties:
+        origin:
+          type: string
+          description: Worker identity, "instance@host".
+          examples: ["worker-1@host"]
+
+    WorkerView:
+      type: object
+      description: A registered worker and its liveness timestamps.
+      required: [origin, registered_at, last_heartbeat_at]
+      properties:
+        origin:
+          type: string
+          examples: ["worker-1@host"]
+        registered_at:
+          type: string
+          format: date-time
+        last_heartbeat_at:
+          type: string
+          format: date-time
