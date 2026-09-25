@@ -57,23 +57,6 @@ impl IssuerIndex {
         index.get(iss).map(|config| config.policy.clone())
     }
 
-    /// Find the token metadata key for a given entity type name
-    /// e.g., "`Dolphin::Access_Token`" -> "`access_token`"
-    pub(super) fn find_token_metadata_key(&self, entity_type_name: &str) -> Option<String> {
-        // Look through all trusted issuers to find the matching entity type name
-
-        // TODO: Optimize this lookup to have O(1) complexity, to have index structure
-        let index = self.iss_index.read().expect(MUTEX_POISONED_ERR);
-        for issuer_config in index.values() {
-            for (token_key, token_metadata) in &issuer_config.policy.token_metadata {
-                if token_metadata.entity_type_name == entity_type_name {
-                    return Some(token_key.clone());
-                }
-            }
-        }
-        None
-    }
-
     /// Get the number of issuer configurations in the index
     pub(super) fn len(&self) -> usize {
         let index = self.iss_index.read().expect(MUTEX_POISONED_ERR);

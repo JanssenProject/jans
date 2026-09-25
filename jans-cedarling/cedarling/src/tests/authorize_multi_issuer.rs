@@ -258,7 +258,7 @@ async fn test_single_dolphin_custom_token_authorization() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![TokenInput::new(
-            "dolphin_token".to_string(),
+            "Dolphin::Dolphin_Token".to_string(),
             dolphin_custom_token,
         )],
         EntityData::from_json(
@@ -284,6 +284,75 @@ async fn test_single_dolphin_custom_token_authorization() {
     assert!(
         authz_result.decision,
         "Authorization should be ALLOW for dolphin custom token"
+    );
+}
+
+/// An unknown mapping drops only that token, matching how every other invalid
+/// token behaves; the rest of the request still decides.
+#[tokio::test]
+async fn test_unknown_mapping_is_dropped_without_failing_the_request() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
+    let dolphin_token = generate_token_using_claims(json!({
+        "iss": "https://idp.dolphin.sea",
+        "sub": "dolphin_user_789",
+        "jti": "dolphin_custom_789",
+        "client_id": "dolphin_custom_client_789",
+        "aud": "dolphin_custom_audience",
+        "waiver": ["signed", "approved"],
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
+    }));
+    let stray_token = generate_token_using_claims(json!({
+        "iss": "https://idp.dolphin.sea",
+        "sub": "dolphin_user_789",
+        "jti": "dolphin_stray_790",
+        "client_id": "dolphin_custom_client_789",
+        "aud": "dolphin_custom_audience",
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
+    }));
+
+    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+        vec![
+            TokenInput::new("Dolphin::Dolphin_Token".to_string(), dolphin_token),
+            TokenInput::new("Nope::Token".to_string(), stray_token),
+        ],
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "MiamiAcquarium"
+                },
+                "name": "Miami Aquarium"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
+        "Acme::Action::\"SwimWithOrca\"".to_string(),
+        None,
+    );
+
+    let authz_result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("an unknown mapping must not fail the whole request");
+
+    assert!(
+        authz_result.decision,
+        "the valid token must still decide the request"
+    );
+
+    // Metrics are disabled without Lock telemetry, so assert the reason via logs.
+    let logs = cedarling.pop_logs();
+    let dropped_as_unknown_mapping = logs.iter().any(|log| {
+        log.get("msg").and_then(|m| m.as_str()).is_some_and(|m| {
+            m.contains("Nope::Token") && m.contains("no trusted issuer declares a token")
+        })
+    });
+    assert!(
+        dropped_as_unknown_mapping,
+        "the dropped token must be reported as an unknown mapping"
     );
 }
 
@@ -723,7 +792,7 @@ async fn test_custom_dolphin_token_with_waiver() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![TokenInput::new(
-            "dolphin_token".to_string(),
+            "Dolphin::Dolphin_Token".to_string(),
             dolphin_custom_token,
         )],
         EntityData::from_json(
@@ -769,7 +838,7 @@ async fn test_custom_token_without_required_claim() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![TokenInput::new(
-            "dolphin_token".to_string(),
+            "Dolphin::Dolphin_Token".to_string(),
             dolphin_token_no_waiver,
         )],
         EntityData::from_json(
@@ -827,7 +896,7 @@ async fn test_multiple_custom_token_types_together() {
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![
             TokenInput::new("Acme::Access_Token".to_string(), acme_access_token),
-            TokenInput::new("dolphin_token".to_string(), dolphin_custom),
+            TokenInput::new("Dolphin::Dolphin_Token".to_string(), dolphin_custom),
         ],
         EntityData::from_json(
             &json!({
@@ -874,7 +943,7 @@ async fn test_custom_token_with_complex_nested_claims() {
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![TokenInput::new(
-            "dolphin_token".to_string(),
+            "Dolphin::Dolphin_Token".to_string(),
             custom_token_complex,
         )],
         EntityData::from_json(
@@ -934,7 +1003,7 @@ async fn test_mix_of_standard_and_custom_tokens() {
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![
             TokenInput::new("Acme::Access_Token".to_string(), acme_standard),
-            TokenInput::new("dolphin_token".to_string(), dolphin_custom),
+            TokenInput::new("Dolphin::Dolphin_Token".to_string(), dolphin_custom),
         ],
         EntityData::from_json(
             &json!({
