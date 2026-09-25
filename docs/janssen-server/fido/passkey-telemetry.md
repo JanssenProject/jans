@@ -173,6 +173,29 @@ Beyond the outcome itself, each raw entry records where the operation came from:
     strips any client-supplied value; otherwise the recorded address can be spoofed by the
     caller.
 
+### Internal diagnostic codes
+
+For some failure causes, `errorReason` carries an internal `JFS_*` code instead of a free-text
+message — deliberately recorded so the same cause is always spelled the same way, rather than
+however a particular exception happened to word it. `errorCategory` is set to a matching category
+name in the same cases, so these failures can be counted by cause on the
+`analytics/errors`/`analytics/attestation-rejections` endpoints without falling into the catch-all
+`OTHER` bucket.
+
+- **Attestation-trust codes** (`errorCategory: "ATTESTATION_TRUST"`) — an unknown AAGUID, an
+  authenticator blocked by an MDS status report, an untrusted root certificate, and similar
+  registration-time trust failures. See [Trust Diagnostics](trust-diagnostics.md) for the full list
+  and what to check for each.
+- **`JFS_RPID_HASH_MISMATCH`** (`errorCategory: "NATIVE_FAILURE"`) — the RP ID hash the authenticator
+  signed over does not match the RP ID the server expected, on either a registration or an
+  authentication ceremony. Not exclusive to native clients in principle, but in practice a hallmark
+  of a misconfigured Android asset-link or iOS AASA association presenting the wrong RP ID to the
+  authenticator. The first of a growing set of native-failure diagnostic codes tracked in
+  [issue #14608](https://github.com/JanssenProject/jans/issues/14608).
+
+A code never reaches the client: `ErrorResponseFactory`/`Fido2ErrorResponse` still return the
+unchanged `{status: "failed", errorMessage: "…"}` envelope — the code is metrics/log detail only.
+
 ### Aggregation schedule and retention
 
 A scheduler computes aggregations on a cadence
