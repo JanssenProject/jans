@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory;
 import io.jans.lock.model.config.BaseDnConfiguration;
 import io.jans.lock.model.config.StaticConfiguration;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
+import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.ProducerKey;
-import io.jans.lock.service.trace.store.DuplicateEntryException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 

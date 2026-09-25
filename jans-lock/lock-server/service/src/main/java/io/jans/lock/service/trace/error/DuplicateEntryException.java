@@ -4,7 +4,9 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.store;
+package io.jans.lock.service.trace.error;
+
+import io.jans.lock.service.trace.store.TraceStore;
 
 /**
  * Thrown by a {@link TraceStore} insert operation when the composite key already exists (design

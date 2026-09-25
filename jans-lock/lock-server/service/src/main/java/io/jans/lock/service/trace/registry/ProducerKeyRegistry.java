@@ -18,11 +18,11 @@ import org.slf4j.Logger;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
+import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.ProducerKey;
-import io.jans.lock.service.trace.store.DuplicateEntryException;
 import io.jans.lock.service.trace.store.TraceStore;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

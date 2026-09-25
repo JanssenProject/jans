@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import io.jans.lock.model.trace.entity.TraceReceiptState;
+import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
