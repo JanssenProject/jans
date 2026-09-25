@@ -18,27 +18,22 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 
-import io.jans.as.client.service.IntrospectionService;
-import io.jans.as.model.common.IntrospectionResponse;
-import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtClaims;
-import io.jans.as.model.jwt.JwtHeader;
+import io.grpc.Context;
 import io.jans.lock.model.error.TraceErrorResponseType;
+import io.jans.lock.service.security.AuthenticatedClient;
+import io.jans.lock.service.security.AuthenticatedClientContext;
 import io.jans.lock.service.trace.error.TraceValidationException;
-import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Tests for {@link SubmitterIdentityService}: JWT claim resolution, opaque-token introspection,
- * and that every failure mode maps to {@code client_not_bound} (403), never a 500 (design decision
- * D-2, task 11 acceptance criteria).
+ * Tests for {@link SubmitterIdentityService}: it reads the {@link AuthenticatedClient} the
+ * protection filter recorded and maps every gap to {@code client_not_bound} (403), never a 500
+ * (design decision D-2).
  */
 class SubmitterIdentityServiceTest {
 
 	@Mock
-	private IntrospectionService introspectionService;
-
-	@Mock
-	private HttpHeaders httpHeaders;
+	private HttpServletRequest request;
 
 	private SubmitterIdentityService service;
 
@@ -46,127 +41,91 @@ class SubmitterIdentityServiceTest {
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
 
-		IntrospectionClientProvider provider = new IntrospectionClientProvider();
-		provider.setIntrospectionService(introspectionService);
-
 		service = new SubmitterIdentityService();
 		service.setLog(LoggerFactory.getLogger(SubmitterIdentityService.class));
-		service.setIntrospectionClientProvider(provider);
 	}
 
-	/** Builds an unsigned ("alg: NONE" shaped) JWT string carrying only the given claims. */
-	private static String jwtWithClaims(String clientId, String azp) throws Exception {
-		JwtHeader header = new JwtHeader();
-		JwtClaims claims = new JwtClaims();
-		if (clientId != null) {
-			claims.setClaim("client_id", clientId);
-		}
-		if (azp != null) {
-			claims.setClaim(JwtClaimName.AUTHORIZED_PARTY, azp);
-		}
-		return header.toBase64JsonObject() + "." + claims.toBase64JsonObject();
+	private void recorded(AuthenticatedClient client) {
+		when(request.getAttribute(AuthenticatedClientContext.REQUEST_ATTRIBUTE)).thenReturn(client);
 	}
 
 	@Test
-	void testResolve_JwtWithClientIdClaim_Resolved() throws Exception {
-		String token = jwtWithClaims("2200.aaaa", null);
-		when(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + token);
+	void testResolve_JwtClientRecorded_Resolved() {
+		recorded(new AuthenticatedClient("2200.aaaa", true));
 
-		SubmitterIdentity identity = service.resolve(httpHeaders);
+		SubmitterIdentity identity = service.resolve(request);
 
 		assertEquals("2200.aaaa", identity.getClientId());
 		assertTrue(identity.isFromJwt());
 	}
 
 	@Test
-	void testResolve_JwtWithOnlyAzpClaim_Resolved() throws Exception {
-		String token = jwtWithClaims(null, "2200.bbbb");
-		when(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION)).thenReturn("bearer " + token);
+	void testResolve_IntrospectedClientRecorded_Resolved() {
+		recorded(new AuthenticatedClient("2200.cccc", false));
 
-		SubmitterIdentity identity = service.resolve(httpHeaders);
-
-		assertEquals("2200.bbbb", identity.getClientId());
-		assertTrue(identity.isFromJwt());
-	}
-
-	@Test
-	void testResolve_JwtWithNeitherClaim_Rejected() throws Exception {
-		String token = jwtWithClaims(null, null);
-		when(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + token);
-
-		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> service.resolve(httpHeaders));
-
-		assertEquals(TraceErrorResponseType.CLIENT_NOT_BOUND, ex.getErrorId());
-		assertEquals(SubmitterIdentityService.REASON_NO_CLIENT_CLAIM, ex.getReason());
-	}
-
-	@Test
-	void testResolve_NoAuthorizationHeader_Rejected() {
-		when(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION)).thenReturn(null);
-
-		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> service.resolve(httpHeaders));
-
-		assertEquals(TraceErrorResponseType.CLIENT_NOT_BOUND, ex.getErrorId());
-		assertEquals(SubmitterIdentityService.REASON_NO_BEARER, ex.getReason());
-	}
-
-	@Test
-	void testResolve_NonBearerScheme_Rejected() {
-		when(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION)).thenReturn("Basic dXNlcjpwYXNz");
-
-		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> service.resolve(httpHeaders));
-
-		assertEquals(TraceErrorResponseType.CLIENT_NOT_BOUND, ex.getErrorId());
-		assertEquals(SubmitterIdentityService.REASON_NO_BEARER, ex.getReason());
-	}
-
-	@Test
-	void testResolve_OpaqueTokenActiveWithClientId_Resolved() {
-		when(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer opaque-abc123");
-		IntrospectionResponse response = new IntrospectionResponse(true);
-		response.setClientId("2200.cccc");
-		when(introspectionService.introspectToken("Bearer opaque-abc123", "opaque-abc123")).thenReturn(response);
-
-		SubmitterIdentity identity = service.resolve(httpHeaders);
+		SubmitterIdentity identity = service.resolve(request);
 
 		assertEquals("2200.cccc", identity.getClientId());
 		assertFalse(identity.isFromJwt());
 	}
 
 	@Test
-	void testResolve_OpaqueTokenInactive_Rejected() {
-		when(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer opaque-abc123");
-		IntrospectionResponse response = new IntrospectionResponse(false);
-		when(introspectionService.introspectToken("Bearer opaque-abc123", "opaque-abc123")).thenReturn(response);
+	void testResolve_NothingRecorded_Rejected() {
+		recorded(null);
 
-		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> service.resolve(httpHeaders));
+		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> service.resolve(request));
 
 		assertEquals(TraceErrorResponseType.CLIENT_NOT_BOUND, ex.getErrorId());
-		assertEquals(SubmitterIdentityService.REASON_INTROSPECTION_INACTIVE, ex.getReason());
+		assertEquals(SubmitterIdentityService.REASON_NO_AUTHENTICATED_CLIENT, ex.getReason());
 	}
 
 	@Test
-	void testResolve_OpaqueTokenActiveWithoutClientId_Rejected() {
-		when(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer opaque-abc123");
-		IntrospectionResponse response = new IntrospectionResponse(true);
-		when(introspectionService.introspectToken("Bearer opaque-abc123", "opaque-abc123")).thenReturn(response);
-
-		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> service.resolve(httpHeaders));
+	void testResolve_NullRequestAndNoGrpcContext_Rejected() {
+		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> service.resolve(null));
 
 		assertEquals(TraceErrorResponseType.CLIENT_NOT_BOUND, ex.getErrorId());
-		assertEquals(SubmitterIdentityService.REASON_INTROSPECTION_INACTIVE, ex.getReason());
+		assertEquals(SubmitterIdentityService.REASON_NO_AUTHENTICATED_CLIENT, ex.getReason());
 	}
 
 	@Test
-	void testResolve_IntrospectionThrows_RejectedNotServerError() {
-		when(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer opaque-abc123");
-		when(introspectionService.introspectToken("Bearer opaque-abc123", "opaque-abc123"))
-				.thenThrow(new RuntimeException("introspection endpoint unreachable"));
+	void testResolve_ForeignAttributeType_Rejected() {
+		when(request.getAttribute(AuthenticatedClientContext.REQUEST_ATTRIBUTE)).thenReturn("not-a-client");
 
-		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> service.resolve(httpHeaders));
+		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> service.resolve(request));
+
+		assertEquals(SubmitterIdentityService.REASON_NO_AUTHENTICATED_CLIENT, ex.getReason());
+	}
+
+	@Test
+	void testResolve_JwtWithoutClientClaims_Rejected() {
+		recorded(new AuthenticatedClient(null, true));
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> service.resolve(request));
 
 		assertEquals(TraceErrorResponseType.CLIENT_NOT_BOUND, ex.getErrorId());
-		assertEquals(SubmitterIdentityService.REASON_INTROSPECTION_ERROR, ex.getReason());
+		assertEquals(SubmitterIdentityService.REASON_NO_CLIENT_CLAIM, ex.getReason());
+	}
+
+	@Test
+	void testResolve_IntrospectionWithoutClientId_Rejected() {
+		recorded(new AuthenticatedClient(" ", false));
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> service.resolve(request));
+
+		assertEquals(TraceErrorResponseType.CLIENT_NOT_BOUND, ex.getErrorId());
+		assertEquals(SubmitterIdentityService.REASON_NO_CLIENT_ID, ex.getReason());
+	}
+
+	@Test
+	void testResolve_GrpcContextFallback_Resolved() throws Exception {
+		recorded(null);
+		Context context = AuthenticatedClientContext.withClient(Context.current(),
+				new AuthenticatedClient("2200.grpc", true));
+
+		SubmitterIdentity identity = context.call(() -> service.resolve(request));
+
+		assertEquals("2200.grpc", identity.getClientId());
+		assertTrue(identity.isFromJwt());
 	}
 
 }

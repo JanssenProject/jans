@@ -291,7 +291,7 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 	}
 
 	private TraceRequestContext resolveContext() {
-		SubmitterIdentity identity = submitterIdentityService.resolve(getHttpHeaders());
+		SubmitterIdentity identity = submitterIdentityService.resolve(getHttpRequest());
 		return evidenceDomainResolver.resolve(identity);
 	}
 

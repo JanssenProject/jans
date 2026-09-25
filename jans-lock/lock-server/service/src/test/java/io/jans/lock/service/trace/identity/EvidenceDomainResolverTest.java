@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.slf4j.LoggerFactory;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
@@ -48,7 +47,6 @@ class EvidenceDomainResolverTest {
 		when(appConfiguration.getTraceConfiguration()).thenReturn(traceConfiguration);
 
 		resolver = new EvidenceDomainResolver();
-		resolver.setLog(LoggerFactory.getLogger(EvidenceDomainResolver.class));
 		resolver.setAppConfiguration(appConfiguration);
 		resolver.setNodeId(NODE_ID);
 	}

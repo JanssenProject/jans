@@ -6,19 +6,17 @@
 
 package io.jans.lock.service.trace.identity;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceClientDomainBinding;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.trace.error.TraceValidationException;
+import io.jans.net.InetAddressUtility;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -43,26 +41,20 @@ public class EvidenceDomainResolver {
 	/** Used only when no explicit binding matches; D-1 fixes this to {@code ["*"]}. */
 	private static final List<String> WILDCARD_PRODUCERS = java.util.Collections.singletonList("*");
 
-	/**
-	 * Neither {@code StatService.getNodeId()} (rotates monthly and lives one layer below a
-	 * general-purpose "this Lock node" identifier -- see task 11's report) nor
-	 * {@code MetricService.getNodeIdentifier()} (lives in the {@code server} module, which
-	 * {@code service} must not depend on) is reusable here, so this falls back to the local host
-	 * name per task 11's own fallback recipe.
-	 */
-	private static final String FALLBACK_NODE_ID = "unknown-lock-node";
-
-	@Inject
-	private Logger log;
-
 	@Inject
 	private AppConfiguration appConfiguration;
 
 	private String nodeId;
 
+	/**
+	 * Node id = MAC address of the primary interface, or a per-process random UUID when the MAC
+	 * cannot be read -- the same basis {@code StatService} uses, minus its monthly suffix. Either
+	 * form (17 or 36 chars) fits {@code jansTraceNodeId VARCHAR(64)}. Host names were deliberately
+	 * not used: they are not stable across container restarts and may exceed the column.
+	 */
 	@PostConstruct
 	private void init() {
-		nodeId = resolveNodeId();
+		nodeId = InetAddressUtility.getMACAddressOrRandomUUID();
 	}
 
 	/**
@@ -111,20 +103,6 @@ public class EvidenceDomainResolver {
 		return null;
 	}
 
-	private String resolveNodeId() {
-		try {
-			String hostName = InetAddress.getLocalHost().getHostName();
-			if (StringUtils.isNotBlank(hostName)) {
-				return hostName;
-			}
-		} catch (UnknownHostException | SecurityException e) {
-			// SecurityException: a SecurityManager may deny hostname resolution; fall back either way.
-			log.debug("Unable to determine local host name for the TRACE node id: {}", e.getMessage());
-		}
-
-		return FALLBACK_NODE_ID;
-	}
-
 	/**
 	 * Test seam: bypasses CDI injection of {@link AppConfiguration}.
 	 */
@@ -133,18 +111,10 @@ public class EvidenceDomainResolver {
 	}
 
 	/**
-	 * Test seam: bypasses {@link #resolveNodeId()} (host-name lookup) so tests get a deterministic
-	 * node id.
+	 * Test seam: bypasses the {@link #init()} node-id lookup so tests get a deterministic node id.
 	 */
 	void setNodeId(String nodeId) {
 		this.nodeId = nodeId;
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link Logger}.
-	 */
-	void setLog(Logger log) {
-		this.log = log;
 	}
 
 }
