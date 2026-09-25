@@ -23,8 +23,7 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         self.install_var = 'installNode'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
-        if not base.snap:
-            self.register_progess()
+        self.register_progess()
 
         self.node_user_home = '/home/node'
 
@@ -35,9 +34,9 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         if not node_archieve_list:
             self.logIt("Can't find node archive", True, True)
 
-        if not base.snap:
-            self.createUser('node', self.node_user_home)
-            self.addUserToGroup('jans', 'node')
+
+        self.createUser('node', self.node_user_home)
+        self.addUserToGroup('jans', 'node')
 
         node_archive = max(node_archieve_list)
 

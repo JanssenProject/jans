@@ -4,6 +4,7 @@
 # Copyright (c) 2024, Gluu, Inc.
 
 from typing import Optional, List, final, Dict, Any
+from datetime import timedelta
 from enum import Enum
 
 @final
@@ -493,6 +494,24 @@ class Cedarling:
         """
         ...
 
+    def drain_metrics(self) -> "MetricsSnapshot":
+        """
+        Destructive read: return the telemetry metrics snapshot and reset
+        the counters for the next interval.
+
+        Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+        Lock telemetry ticker owns the collector. Raises `ValueError` when
+        Lock telemetry owns the collector, i.e. whenever
+        `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+        server has no telemetry endpoint. `interval` is a
+        `datetime.timedelta` with sub-second precision.
+
+        Raises:
+            ValueError: If metrics collection is disabled or owned by lock
+                telemetry.
+        """
+        ...
+
     def is_trusted_issuer_loaded_by_name(self, issuer_id: str) -> bool:
         """
         Check whether a trusted issuer was loaded by issuer identifier.
@@ -793,6 +812,25 @@ class DataStoreStats:
     capacity_usage_percent: float
     memory_alert_threshold: float
     memory_alert_triggered: bool
+
+@final
+class MetricsSnapshot:
+    """
+    Destructive read: telemetry metrics snapshot with per-policy stats,
+    error counters, and operational counters for the current interval.
+    Draining resets the counters, so use a single consumer.
+
+    Attributes:
+        policy_stats: Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
+        error_counters: Classified error counters keyed by error metric key.
+        operational_stats: Operational counters and gauges (authorization, cache, JWT, data, lock).
+        interval: Duration of the snapshot interval with sub-second precision.
+    """
+
+    policy_stats: dict[str, int]
+    error_counters: dict[str, int]
+    operational_stats: dict[str, int]
+    interval: timedelta
 
 class CedarType(Enum):
     """

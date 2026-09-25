@@ -116,10 +116,8 @@ impl CustomTokenProcessor for ApiKeyProcessor {
         claims.insert("sub".to_string(), json!("api-key-user"));
         claims.insert("scope".to_string(), json!("admin"));
 
-        let mut processed = ProcessedTokenClaims::new(claims, "api-key-1");
         // Opt out of caching so a revoked key is re-checked on every request.
-        processed.cacheable = false;
-        Ok(processed)
+        Ok(ProcessedTokenClaims::new(claims, "api-key-1").with_cacheable(false))
     }
 }
 
@@ -150,6 +148,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             strict_schema_validation: true,
             // Bound the processor call at 500ms; 0 disables the timeout.
             custom_token_processor_timeout_millis: 500,
+            ..Default::default()
         },
         lock_config: None,
         max_default_entities: None,

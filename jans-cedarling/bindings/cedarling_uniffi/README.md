@@ -322,7 +322,7 @@ Regenerate Kotlin/Swift bindings from the library (`uniffi-bindgen generate …`
 
 - **`load_from_json`** — Policy store location comes from the JSON (`CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_URI`, or `CEDARLING_POLICY_STORE_LOCAL` for inline YAML; inline JSON is rejected), same as core Cedarling bootstrap rules.
 - **`load_from_file`** — Load bootstrap from a path, then resolve the policy store from fields in that file.
-- **`load_from_json_with_archive_bytes`** — Pass the bootstrap JSON as a string **and** the raw bytes of a `.cjar` archive. Fields `CEDARLING_POLICY_STORE_URI`, `CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_LOCAL`, and `CEDARLING_POLICY_STORE_CJAR_URL` in the JSON are **ignored**; the archive is the only policy source. This mirrors the WASM helper `init_from_archive_bytes` and fits **Android `assets/`**, where you open files with `AssetManager` (no ordinary filesystem path for native code), or any host that already has the archive in memory.
+- **`load_from_json_with_archive_bytes`** — Pass the bootstrap JSON as a string **and** the raw bytes of a `.cjar` archive. Fields `CEDARLING_POLICY_STORE_URI`, `CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_LOCAL`, and `CEDARLING_POLICY_STORE_CJAR_URL` in the JSON are **ignored**; the archive is the only policy source. This mirrors the WASM helper `initFromArchiveBytes` and fits **Android `assets/`**, where you open files with `AssetManager` (no ordinary filesystem path for native code), or any host that already has the archive in memory.
 
 **Kotlin (Android assets):**
 
@@ -541,6 +541,34 @@ print("Entries: \(stats.entryCount)/\(stats.maxEntries)")
 print("Total size: \(stats.totalSizeBytes) bytes")
 print("Capacity usage: \(stats.capacityUsagePercent)%")
 ```
+
+### Drain Metrics
+
+Destructive read: returns a `MetricsSnapshot` (`policyStats`,
+`errorCounters`, `operationalStats`, `interval`) and resets the
+counters.
+
+**Kotlin:**
+
+```kotlin
+val snapshot = cedarling.drainMetrics()
+println("Requests: ${snapshot.operationalStats["authz.requests_total"]}")
+println("Interval: ${snapshot.interval}")
+```
+
+**Swift:**
+
+```swift
+let snapshot = try cedarling.drainMetrics()
+print("Requests: \(snapshot.operationalStats["authz.requests_total"] ?? 0)")
+print("Interval: \(snapshot.interval)s")
+```
+
+Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails with `LockTelemetry`
+whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server
+has no telemetry endpoint. `interval` is a Duration with sub-second
+precision (Kotlin `java.time.Duration`, Swift `TimeInterval` seconds,
+Python `datetime.timedelta`).
 
 ### Error Handling
 

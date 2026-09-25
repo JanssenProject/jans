@@ -40,10 +40,7 @@ class BaseInstaller:
             self.dbUtils.bind()
 
         self.check_for_download()
-
-        if not base.snap:
-            self.create_user()
-
+        self.create_user()
         self.create_folders()
 
         self.install()
@@ -158,17 +155,8 @@ class BaseInstaller:
         services = self.get_systemd_service_list(service)
 
         for service in services:
-
-            if base.snap:
-                service = os.environ['SNAP_NAME'] + '.' + service
-
             try:
-                if base.snap:
-                    cmd_list = [base.snapctl, operation, service]
-                    if operation == 'start':
-                        cmd_list.insert(-1, '--enable')
-                    self.run(cmd_list, None, None, True)
-                elif base.systemctl:
+                if base.systemctl:
                     local_script = os.path.join(Config.jansOptFolder, 'scripts', service)
                     if os.path.exists(local_script):
                         self.run([local_script, operation], useWait=True)
@@ -182,8 +170,7 @@ class BaseInstaller:
                 self.logIt("Error running operation {} for service {}".format(operation, service), True)
 
     def enable(self, service=None):
-        if not base.snap:
-            self.run_service_command('enable', service)
+        self.run_service_command('enable', service)
 
     def stop(self, service=None):
         self.run_service_command('stop', service)
@@ -196,13 +183,12 @@ class BaseInstaller:
         self.start(service)
 
     def reload_daemon(self, service=None):
-        if not base.snap:
-            if not service:
-                service = self.service_name
-            if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
-                self.run([base.service_path, 'daemon-reload'])
-            elif base.os_name == 'ubuntu16':
-                self.run([paths.cmd_update_rc, service, 'defaults'])
+        if not service:
+            service = self.service_name
+        if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
+            self.run([base.service_path, 'daemon-reload'])
+        elif base.os_name == 'ubuntu16':
+            self.run([paths.cmd_update_rc, service, 'defaults'])
 
     def pre_install(self):
         """Installer may require some settings before installation"""
