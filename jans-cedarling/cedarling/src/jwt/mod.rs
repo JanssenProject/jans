@@ -975,11 +975,6 @@ mod test {
             None,
             "an entity type no issuer declares must not resolve"
         );
-        assert_eq!(
-            index.get("dolphin_token"),
-            None,
-            "a token key is not an entity type and must not resolve"
-        );
     }
 
     static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {

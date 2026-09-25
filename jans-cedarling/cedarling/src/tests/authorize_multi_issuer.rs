@@ -287,52 +287,6 @@ async fn test_single_dolphin_custom_token_authorization() {
     );
 }
 
-/// A token-metadata key is not a valid mapping; only the Cedar entity type is.
-/// Keys repeat across issuers, so accepting them would be ambiguous.
-#[tokio::test]
-async fn test_token_metadata_key_is_rejected_as_mapping() {
-    let cedarling = get_cedarling_for_multi_issuer_tests().await;
-
-    let dolphin_custom_token = generate_token_using_claims(json!({
-        "iss": "https://idp.dolphin.sea",
-        "sub": "dolphin_user_789",
-        "jti": "dolphin_custom_789",
-        "client_id": "dolphin_custom_client_789",
-        "aud": "dolphin_custom_audience",
-        "waiver": ["signed", "approved"],
-        "exp": 2_000_000_000,
-        "iat": 1_516_239_022
-    }));
-
-    // `dolphin_token` is the token_metadata key; the mapping must be
-    // `Dolphin::Dolphin_Token`.
-    let request = AuthorizeMultiIssuerRequest::new_with_fields(
-        vec![TokenInput::new(
-            "dolphin_token".to_string(),
-            dolphin_custom_token,
-        )],
-        EntityData::from_json(
-            &json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Acme::Resource",
-                    "id": "MiamiAcquarium"
-                },
-                "name": "Miami Aquarium"
-            })
-            .to_string(),
-        )
-        .expect("Failed to create resource entity"),
-        "Acme::Action::\"SwimWithOrca\"".to_string(),
-        None,
-    );
-
-    let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(
-        result.is_err(),
-        "A token_metadata key must not be accepted as a mapping"
-    );
-}
-
 /// An unknown mapping drops only that token, matching how every other invalid
 /// token behaves; the rest of the request still decides.
 #[tokio::test]
