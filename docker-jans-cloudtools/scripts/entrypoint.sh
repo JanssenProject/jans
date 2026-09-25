@@ -25,6 +25,15 @@ run_certmanager() {
     exec python3 "$basedir/certmanager.py" "$@"
 }
 
+# ======
+# domain
+# ======
+
+run_change_fqdn() {
+    shift
+    exec python3 "$basedir/domain.py" "$@"
+}
+
 # ==============
 # misc. commands
 # ==============
@@ -36,6 +45,7 @@ Usage: cloudtools [OPTIONS] COMMAND [ARGS]...
 Commands:
   certmanager   Manage cert and crypto keys
   cleanup       Cleanup expired entries in persistence
+  change-fqdn   Change FQDN
 EOF
 }
 
@@ -51,6 +61,9 @@ case $top_cmd in
         ;;
     "cleanup")
         run_cleanup "$@"
+        ;;
+    "change-fqdn")
+        run_change_fqdn "$@"
         ;;
     *)
         show_help

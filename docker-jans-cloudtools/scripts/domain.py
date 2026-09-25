@@ -1,0 +1,109 @@
+import logging.config
+
+import click
+from fqdn import FQDN
+
+from jans.pycloudlib import get_manager
+from jans.pycloudlib.persistence.sql import SqlClient
+
+from settings import LOGGING_CONFIG
+
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger("cloudtools")
+
+
+def replace_fqdn_substr(val, old_fqdn, new_fqdn):
+    if isinstance(val, (str, bytes)):
+        return val.replace(old_fqdn, new_fqdn)
+
+    if isinstance(val, list):
+        return [replace_fqdn_substr(item, old_fqdn, new_fqdn) for item in val]
+
+    if isinstance(val, dict):
+        return {k: replace_fqdn_substr(v, old_fqdn, new_fqdn) for k, v in val.items()}
+
+    # unsupported type will be returned as-is
+    return val
+
+
+class Domain:
+    def __init__(self, manager, **kwargs):
+        self.manager = manager
+        self.persistence = SqlClient(self.manager)
+        self.dry_run = kwargs.get("dry_run") or False
+
+    def modify_persistence_entries(self, table_name, old_fqdn, new_fqdn):
+        logger.info("Checking entries in %s table", table_name)
+
+        for entry in self.persistence.search(table_name):
+            # flag to determine whether entry need to be updated in persistence
+            should_update = False
+
+            for col_name, col_val in entry.items():
+                new_val = replace_fqdn_substr(col_val, old_fqdn, new_fqdn)
+
+                # likely no changes at all
+                if entry[col_name] == new_val:
+                    continue
+
+                logger.info("Updating %s.%s (doc_id=%s)", table_name, col_name, entry["doc_id"])
+                # mark entry for updates
+                should_update = True
+                entry[col_name] = new_val
+
+            if should_update is False:
+                continue
+
+            if "jansRevision" in entry:
+                entry["jansRevision"] = int(entry["jansRevision"] or 0) + 1
+
+            if not self.dry_run:
+                self.persistence.update(table_name, entry["doc_id"], entry)
+
+    def change_fqdn(self, old_fqdn, new_fqdn):
+        logger.warning("The dry run mode is selected; changes will not be persisted")
+        logger.info("Changing FQDN from %s to %s", old_fqdn, new_fqdn)
+
+        for table_name in ["jansAppConf", "jansCustomScr", "jansClnt"]:
+            self.modify_persistence_entries(table_name, old_fqdn, new_fqdn)
+
+
+class FQDNParamType(click.ParamType):
+    name = "fqdn"
+
+    def convert(self, value, param, ctx):
+        if value:
+            domain = FQDN(value)
+            if not domain.is_valid:
+                self.fail(f"{value} is not a valid FQDN.", param, ctx)
+        return value
+
+
+fqdn_param_type = FQDNParamType()
+
+
+@click.command
+@click.argument("new_fqdn", type=fqdn_param_type, help="New FQDN to change to")
+@click.option(
+    "--old-fqdn",
+    help="Old FQDN to change from (if omitted, will use FQDN stored in configmap)",
+    default="",
+    type=fqdn_param_type,
+)
+@click.option("--dry-run", help="Simulate the operation without persisting changes", is_flag=True)
+def change_fqdn(new_fqdn, old_fqdn, dry_run):
+    """Change FQDN."""
+    manager = get_manager()
+
+    if not old_fqdn:
+        old_fqdn = manager.config.get("hostname")
+        logger.info("Detected empty value for --old-fqdn option; the value is now taken from existing configmap: %s", old_fqdn)
+
+    domain = Domain(manager)
+    domain.change_fqdn(old_fqdn, new_fqdn)
+
+    # @TODO: update configmaps and/or secrets
+
+
+if __name__ == "__main__":
+    change_fqdn(prog_name="change-fqdn")
