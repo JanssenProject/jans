@@ -23,9 +23,11 @@ import com.google.common.base.Strings;
 
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
+import io.jans.fido2.exception.Fido2NativeFailureException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.exception.Fido2TrustException;
 import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
@@ -91,7 +93,10 @@ public class CommonVerifiers {
         }
         if (!Arrays.equals(retrievedRpIdHash, calculatedRpIdHash)) {
             log.warn("hash from domain doesn't match hash from assertion HEX");
-            throw new Fido2RuntimeException("Hashes don't match");
+            // Often a native-app misconfiguration (wrong Android asset-link / iOS AASA association
+            // presenting the wrong RP ID to the authenticator) — see issue #14608. Tagged so metrics
+            // can count it by cause instead of a free-text message.
+            throw new Fido2NativeFailureException(NativeFailureDiagnostic.JFS_RPID_HASH_MISMATCH, "Hashes don't match");
         }
     }
 

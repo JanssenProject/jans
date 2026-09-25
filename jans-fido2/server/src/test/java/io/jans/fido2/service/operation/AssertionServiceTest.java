@@ -9,7 +9,9 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.error.Fido2ErrorResponse;
+import io.jans.fido2.exception.Fido2NativeFailureException;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.external.ExternalFido2Service;
@@ -558,6 +560,44 @@ class AssertionServiceTest {
         verify(lockAuditEventCollector).collect(captor.capture());
         assertEquals("ALLOW", captor.getValue().getDecisionResult());
         assertEquals("info", captor.getValue().getSeverityLevel());
+    }
+
+    /**
+     * An RP ID hash mismatch (#14608) — a common symptom of a misconfigured native asset-link/AASA
+     * association — must be recorded under its diagnostic code, not the raw "Hashes don't match"
+     * message, so authentication failures can be counted by cause. Same fixture as the ALLOW test
+     * above, but {@code assertionVerifier} fails before persistence instead of the interception
+     * script failing after it.
+     */
+    @Test
+    void verify_ifRpIdHashMismatch_recordsTheNativeFailureDiagnosticCode() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+
+        stubCeremonyLookup(entry);
+        when(commonVerifiers.verifyClientJSON(any()))
+                .thenReturn(mapper.createObjectNode().put("origin", "https://rp.example.com"));
+        stubHistoryExpiration(1296000);
+
+        Fido2RegistrationData registrationData = new Fido2RegistrationData();
+        registrationData.setUsername("alice");
+        Fido2RegistrationEntry registrationEntry = mock(Fido2RegistrationEntry.class);
+        when(registrationEntry.getRegistrationData()).thenReturn(registrationData);
+        when(registrationPersistenceService.findByPublicKeyId(any(), any())).thenReturn(Optional.of(registrationEntry));
+
+        doThrow(new Fido2NativeFailureException(NativeFailureDiagnostic.JFS_RPID_HASH_MISMATCH, "Hashes don't match"))
+                .when(assertionVerifier).verifyAuthenticatorAssertionResponse(any(), any(), any());
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            assertThrows(Fido2NativeFailureException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+        }
+
+        verify(metricService).recordPasskeyAuthenticationFailure(eq("alice"), any(), anyLong(),
+                eq("JFS_RPID_HASH_MISMATCH"), any());
     }
 
     /**

@@ -36,6 +36,7 @@ import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.audit.LockAuditEvent;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.service.trust.NativeFailureDiagnostics;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
@@ -766,6 +767,16 @@ public class AssertionService {
 	 * cannot describe the same failure differently.
 	 */
 	private static String resolveErrorReason(Exception error) {
+		// A native-failure rejection is recorded under its diagnostic code instead of the raw
+		// message, so failures can be counted by cause rather than by wording — mirrors how
+		// AttestationService.recordRegistrationFailureMetrics() treats a trust rejection. The
+		// original message stays in the log (verifyRpIdHash() logs it before throwing), so the
+		// substitution loses no detail.
+		String nativeFailureCode = NativeFailureDiagnostics.resolveCode(error);
+		if (nativeFailureCode != null) {
+			return nativeFailureCode;
+		}
+
 		String reason = extractFido2ErrorMessage(error);
 		if (reason == null) {
 			reason = error.getMessage();
