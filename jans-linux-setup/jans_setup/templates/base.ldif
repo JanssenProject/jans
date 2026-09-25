@@ -211,3 +211,28 @@ dn: ou=telemetry,ou=lock,o=jans
 objectClass: top
 objectClass: organizationalUnit
 ou: telemetry
+
+dn: ou=trace,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: trace
+
+dn: ou=records,ou=trace,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: records
+
+dn: ou=receipts,ou=trace,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: receipts
+
+dn: ou=chains,ou=trace,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: chains
+
+dn: ou=keys,ou=trace,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: keys

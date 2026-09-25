@@ -1,0 +1,57 @@
+{
+  "producer": "cedarling-fleet-1/1.0.0",
+  "kid": "cedarling-fleet-1-2026-01",
+  "record_id": "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41",
+  "trace": {
+    "eat_profile": "tag:jans.io,2026:trace-v1",
+    "event_kind": "AUTHORIZATION_DECISION",
+    "signed_at": 1700000000,
+    "trace_execution_id": "exec-01JABCXYZQK8P5N9F2C7R3T4V6",
+    "execution_authority": "spiffe://example.org/agent/planner",
+    "subject": {
+      "workload_id": "spiffe://example.org/agent/planner",
+      "workload_instance_id": "04bbe9ef-a853-417c-a2b8-5328b62936e2"
+    },
+    "event": {
+      "outcome": "ALLOW",
+      "capability_ids": [
+        {
+          "capability_id": "invoke:payment-authorization",
+          "outcome": "ALLOW"
+        }
+      ],
+      "tokens": [
+        {
+          "issuer": "https://accounts.example.org",
+          "token_type": "access_token",
+          "jti": "9c9f2e77-9a3e-4b62-9a2a-2f6e6e2a9f3e"
+        }
+      ]
+    },
+    "policy": {
+      "policy_store_id": "https://example.org/policy-stores/payments",
+      "policy_store_version": "1.2.3",
+      "policy_language": "cedar",
+      "policy_language_version": "4.4.0",
+      "bundle_hash": "sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf7"
+    },
+    "runtime": {
+      "pdp_id": "cedarling-001"
+    }
+  },
+  "producer_chain": {
+    "producer_id": "cedarling-fleet-1/1.0.0",
+    "producer_instance_id": "cedarling-001",
+    "producer_chain_id": "chain-01JABC9Z0K",
+    "sequence_number": 4821,
+    "prev_record_hash": "sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf7"
+  },
+  "parent_record_ids": [
+    {
+      "producer_id": "jans-auth-server/1.0.0",
+      "record_id": "R-token-issued-001",
+      "relationship_type": "issued_token"
+    }
+  ],
+  "signature": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0-Pw"
+}

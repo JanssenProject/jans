@@ -868,5 +868,165 @@
     "mysql": {
       "type": "TEXT"
     }
+  },
+  "jansTraceProducerId": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceExecId": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceExecAuthority": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceProducerInstanceId": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceProducerChainId": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceKid": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceRecordId": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTracePrevRecordHash": {
+    "mysql": {
+      "size": 80,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 80,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceContentDigest": {
+    "mysql": {
+      "size": 80,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 80,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTracePrevReceiptHash": {
+    "mysql": {
+      "size": 80,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 80,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceReceiptHash": {
+    "mysql": {
+      "size": 80,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 80,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceReceiptState": {
+    "mysql": {
+      "size": 16,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 16,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceSignedAt": {
+    "mysql": {
+      "type": "BIGINT"
+    },
+    "pgsql": {
+      "type": "BIGINT"
+    }
+  },
+  "jansTraceSeqNum": {
+    "mysql": {
+      "type": "BIGINT"
+    },
+    "pgsql": {
+      "type": "BIGINT"
+    }
+  },
+  "jansTraceReceiptSeq": {
+    "mysql": {
+      "type": "BIGINT"
+    },
+    "pgsql": {
+      "type": "BIGINT"
+    }
+  },
+  "jansTraceReceivedAtMs": {
+    "mysql": {
+      "type": "BIGINT"
+    },
+    "pgsql": {
+      "type": "BIGINT"
+    }
+  },
+  "jansTraceAssertion": {
+    "mysql": {
+      "type": "MEDIUMTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    }
   }
 }

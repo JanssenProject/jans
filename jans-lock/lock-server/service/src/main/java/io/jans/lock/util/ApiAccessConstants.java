@@ -23,7 +23,11 @@ public class ApiAccessConstants {
     public static final String LOCK_TELEMETRY_WRITE_ACCESS = "https://jans.io/oauth/lock/telemetry.write";
     
     public static final String LOCK_STAT_READ_ACCESS = "https://jans.io/oauth/lock/stat.readonly";
-    
+
+    public static final String LOCK_TRACE_WRITE_ACCESS = "https://jans.io/oauth/lock/trace.write";
+    public static final String LOCK_TRACE_READ_ACCESS = "https://jans.io/oauth/lock/trace.readonly";
+    public static final String LOCK_TRACE_ADMIN_ACCESS = "https://jans.io/oauth/lock/trace.admin";
+
     public static final String URI_PATH = "{uri}";
     public static final String URI = "uri";
 

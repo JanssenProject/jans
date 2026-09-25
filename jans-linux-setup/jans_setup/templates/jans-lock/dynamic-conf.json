@@ -32,5 +32,21 @@
 	"errorReasonEnabled": false,
 	"grpcConfiguration": {
 		"serverMode": "bridge"
+	},
+	"traceConfiguration": {
+		"enabled": true,
+		"defaultEvidenceDomainId": "default",
+		"clientDomainBindings": [
+			{"clientId": "%(lock_client_id)s", "evidenceDomainId": "default", "allowedProducerIds": ["*"]}
+		],
+		"latenessThresholdSeconds": 300,
+		"maxRequestBytes": 262144,
+		"maxJsonDepth": 32,
+		"maxStringLength": 8192,
+		"maxArrayLength": 256,
+		"maxObjectMembers": 256,
+		"receiptAllocationRetryLimit": 8,
+		"receiptRepairIntervalSeconds": 300,
+		"pendingReceiptTimeoutSeconds": 120
 	}
 }

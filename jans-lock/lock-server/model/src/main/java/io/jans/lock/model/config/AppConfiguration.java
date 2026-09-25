@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.core.cedarling.model.CedarlingConfiguration;
 import io.jans.doc.annotation.DocProperty;
 import io.jans.lock.model.config.grpc.GrpcConfiguration;
+import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.model.conf.Configuration;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.enterprise.inject.Vetoed;
@@ -53,6 +54,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "gRPC server configuration")
     @Schema(description = "gRPC server configuration")
     private GrpcConfiguration grpcConfiguration;
+
+    @DocProperty(description = "TRACE evidence ingestion configuration")
+    @Schema(description = "TRACE evidence ingestion configuration")
+    private TraceConfiguration traceConfiguration;
 
     @DocProperty(description = "Active stat enabled")
     @Schema(description = "Active stat enabled")
@@ -195,6 +200,23 @@ public class AppConfiguration implements Configuration {
 
 	public void setGrpcConfiguration(GrpcConfiguration grpcConfiguration) {
 		this.grpcConfiguration = grpcConfiguration;
+	}
+
+	/**
+	 * Returns the TRACE evidence ingestion configuration, never {@code null} even when the
+	 * persisted configuration predates the TRACE feature.
+	 *
+	 * @return the TraceConfiguration instance for this application
+	 */
+	public TraceConfiguration getTraceConfiguration() {
+		if (traceConfiguration == null) {
+			traceConfiguration = new TraceConfiguration();
+		}
+		return traceConfiguration;
+	}
+
+	public void setTraceConfiguration(TraceConfiguration traceConfiguration) {
+		this.traceConfiguration = traceConfiguration;
 	}
 
 	public boolean isStatEnabled() {
@@ -364,7 +386,8 @@ public class AppConfiguration implements Configuration {
 				+ metricReporterInterval + ", metricReporterKeepDataDays=" + metricReporterKeepDataDays
 				+ ", metricReporterEnabled=" + metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval
 				+ ", messageConsumerType=" + messageConsumerType + ", errorReasonEnabled=" + errorReasonEnabled
-				+ ", cleanServiceBatchChunkSize=" + cleanServiceBatchChunkSize + "]";
+				+ ", cleanServiceBatchChunkSize=" + cleanServiceBatchChunkSize + ", traceConfiguration="
+				+ traceConfiguration + "]";
 	}
 
 }

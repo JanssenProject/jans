@@ -4799,6 +4799,412 @@
       "substr": "caseExactSubStringsMatch",
       "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin":"Jans created attribute"
+    },
+{
+      "desc": "TRACE evidence domain identifier",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceDomainId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer identifier",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceProducerId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record identifier",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceRecordId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record event kind",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTraceEventKind"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record signed-at time, epoch seconds",
+      "equality": "integerMatch",
+      "names": [
+        "jansTraceSignedAt"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record execution key",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceExecKey"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE execution identifier",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceExecId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE execution authority",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceExecAuthority"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer chain key",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceChainKey"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer chain position key",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceChainPosKey"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer chain sequence number",
+      "equality": "integerMatch",
+      "names": [
+        "jansTraceSeqNum"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer chain previous record hash",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTracePrevRecordHash"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE capability keys referenced by the record",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceCapKeys"
+      ],
+      "oid": "jansAttr",
+      "multivalued": true,
+      "rdbm_json_column": true,
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE token keys referenced by the record",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceTokenKeys"
+      ],
+      "oid": "jansAttr",
+      "multivalued": true,
+      "rdbm_json_column": true,
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE assertion body text exactly as received",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTraceAssertion"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE assertion content digest",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceContentDigest"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE signature verification outcome",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTraceVerification"
+      ],
+      "oid": "jansAttr",
+      "rdbm_json_column": true,
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE receipt-chain sequence number",
+      "equality": "integerMatch",
+      "names": [
+        "jansTraceReceiptSeq"
+      ],
+      "oid": "jansAttr",
+      "ordering": "integerOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE receipt received-at time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansTraceReceivedAt"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE receipt received-at time, epoch milliseconds",
+      "equality": "integerMatch",
+      "names": [
+        "jansTraceReceivedAtMs"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE receipt-chain previous receipt hash",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTracePrevReceiptHash"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE receipt-chain receipt hash",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceReceiptHash"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record coverage-gap flag",
+      "equality": "booleanMatch",
+      "names": [
+        "jansTraceCoverageGap"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record chain-link-failure flag",
+      "equality": "booleanMatch",
+      "names": [
+        "jansTraceChainLinkFailure"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record equivocation flag",
+      "equality": "booleanMatch",
+      "names": [
+        "jansTraceEquivocation"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record late-arrival flag",
+      "equality": "booleanMatch",
+      "names": [
+        "jansTraceLate"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE Lock node identifier that ingested the record or receipt",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceNodeId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record key referenced by a receipt",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceRecordKey"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE receipt allocation state (PENDING|COMMITTED|VOID)",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTraceReceiptState"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer instance identifier",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceProducerInstanceId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer-local chain identifier",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceProducerChainId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE OAuth client that registered the key or chain",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceRegisteredBy"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer key identifier (kid)",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceKid"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer Ed25519 public key JWK",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTracePublicKeyJwk"
+      ],
+      "oid": "jansAttr",
+      "rdbm_json_column": true,
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer key validity start time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansTraceValidFrom"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer key validity end time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansTraceValidUntil"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE producer key revocation time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansTraceRevokedAt"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
     }
   ],
   "objectClasses": [
@@ -6495,6 +6901,130 @@
       ],
       "names": [
         "jansFido2UserMetrics"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+{
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansId",
+        "jansTraceDomainId",
+        "jansTraceProducerId",
+        "jansTraceRecordId",
+        "jansTraceEventKind",
+        "jansTraceSignedAt",
+        "jansTraceExecKey",
+        "jansTraceExecId",
+        "jansTraceExecAuthority",
+        "jansTraceChainKey",
+        "jansTraceChainPosKey",
+        "jansTraceSeqNum",
+        "jansTracePrevRecordHash",
+        "jansTraceCapKeys",
+        "jansTraceTokenKeys",
+        "jansTraceAssertion",
+        "jansTraceContentDigest",
+        "jansTraceVerification",
+        "jansTraceReceiptSeq",
+        "jansTraceReceivedAt",
+        "jansTraceReceivedAtMs",
+        "jansTracePrevReceiptHash",
+        "jansTraceReceiptHash",
+        "jansTraceCoverageGap",
+        "jansTraceChainLinkFailure",
+        "jansTraceEquivocation",
+        "jansTraceLate",
+        "jansTraceNodeId",
+        "creationDate"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansTraceRecord"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansId",
+        "jansTraceDomainId",
+        "jansTraceReceiptSeq",
+        "jansTraceReceivedAt",
+        "jansTraceReceivedAtMs",
+        "jansTraceProducerId",
+        "jansTraceRecordId",
+        "jansTraceRecordKey",
+        "jansTraceContentDigest",
+        "jansTracePrevReceiptHash",
+        "jansTraceReceiptHash",
+        "jansTraceReceiptState",
+        "jansTraceNodeId",
+        "creationDate"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansTraceReceipt"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansId",
+        "jansTraceDomainId",
+        "jansTraceProducerId",
+        "jansTraceProducerInstanceId",
+        "jansTraceProducerChainId",
+        "jansTraceRegisteredBy",
+        "creationDate"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansTraceChain"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansId",
+        "jansTraceDomainId",
+        "jansTraceProducerId",
+        "jansTraceKid",
+        "jansTracePublicKeyJwk",
+        "jansTraceValidFrom",
+        "jansTraceValidUntil",
+        "jansTraceRevokedAt",
+        "jansTraceRegisteredBy",
+        "creationDate"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansTraceProducerKey"
       ],
       "oid": "jansObjClass",
       "sup": [
