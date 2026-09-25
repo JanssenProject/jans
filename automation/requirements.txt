@@ -7,4 +7,4 @@ websockets>=10.0 # not directly required, pinned by Snyk to avoid a vulnerabilit
 requests>=2.33.0 # not directly required, pinned by Snyk to avoid a vulnerability (GHSA-gc5v-m9x4-r6x2)
 idna>=3.15 # not directly required, pinned to avoid a vulnerability (GHSA-65pc-fj4g-8rjx)
 urllib3>=2.7.0 # not directly required, pinned by Snyk to avoid a vulnerability (GHSA-mf9v-mfxr-j63j, GHSA-qccp-gfcp-xxvc)
-zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
+zipp>=4.1.0 # not directly required, pinned by Snyk to avoid a vulnerability
