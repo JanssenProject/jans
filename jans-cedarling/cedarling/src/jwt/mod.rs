@@ -139,25 +139,16 @@ pub(crate) fn parse_numeric_date(value: &serde_json::Value) -> Option<i64> {
 }
 
 /// Entity type -> token key index, built from the full config so it doesn't depend on
-/// async loading. Sorted so duplicates in an unvalidated config resolve deterministically.
+/// async loading. `validate_trusted_issuers_config` rejects duplicate entity types before
+/// `JwtService` is built, so every entity type maps to exactly one token key.
 fn index_token_keys_by_entity_type(
     trusted_issuers: &HashMap<String, TrustedIssuer>,
 ) -> HashMap<String, String> {
-    let mut issuers: Vec<_> = trusted_issuers.iter().collect();
-    issuers.sort_unstable_by(|a, b| a.0.cmp(b.0));
-
-    let mut index = HashMap::new();
-    for (_, issuer) in issuers {
-        let mut tokens: Vec<_> = issuer.token_metadata.iter().collect();
-        tokens.sort_unstable_by(|a, b| a.0.cmp(b.0));
-
-        for (token_key, metadata) in tokens {
-            index
-                .entry(metadata.entity_type_name.clone())
-                .or_insert_with(|| token_key.clone());
-        }
-    }
-    index
+    trusted_issuers
+        .values()
+        .flat_map(|issuer| &issuer.token_metadata)
+        .map(|(token_key, metadata)| (metadata.entity_type_name.clone(), token_key.clone()))
+        .collect()
 }
 
 /// Handles JWT validation
@@ -988,30 +979,6 @@ mod test {
             index.get("dolphin_token"),
             None,
             "a token key is not an entity type and must not resolve"
-        );
-    }
-
-    /// Production rejects duplicate entity types, but unvalidated configs can
-    /// still carry them, so the first issuer by id must win every run.
-    #[test]
-    async fn index_resolves_duplicate_entity_types_deterministically() {
-        let issuers = HashMap::from([
-            (
-                "zzz".to_string(),
-                issuer_with_tokens("zzz", &[("zzz_key", "Shared::Token")]),
-            ),
-            (
-                "aaa".to_string(),
-                issuer_with_tokens("aaa", &[("aaa_key", "Shared::Token")]),
-            ),
-        ]);
-
-        let index = index_token_keys_by_entity_type(&issuers);
-
-        assert_eq!(
-            index.get("Shared::Token").map(String::as_str),
-            Some("aaa_key"),
-            "the first issuer in sorted order must win, not whichever HashMap yields first"
         );
     }
 
