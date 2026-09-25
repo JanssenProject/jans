@@ -1,6 +1,6 @@
 mcp>=1.28.1
 ollama>=0.5.12
-python-dotenv>=1.2.2
+python-dotenv>=1.2.3
 
 # not directly required; pulled in by mcp. 0.0.31 clears the multipart DoS,
 # arbitrary-file-write and parameter-smuggling advisories (GHSA-59g5-xgcq-4qw3,
