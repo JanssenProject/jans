@@ -48,6 +48,9 @@ public class AppConfiguration implements Configuration {
     public static final int DEFAULT_USER_INFO_LIFETIME = 3600;
     public static final int DEFAULT_ID_JAG_LIFETIME = 300;
 
+    // OAuth 2.1 caps the authorization code lifetime at a short duration to limit the exposure window of a leaked code.
+    public static final int MAX_AUTHORIZATION_CODE_LIFETIME = 600; // 10 min
+
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
 
@@ -174,8 +177,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value true encrypts request object", defaultValue = "false")
     private Boolean requireRequestObjectEncryption = false;
 
-    @DocProperty(description = "Boolean value true check for Proof Key for Code Exchange (PKCE)", defaultValue = "false")
-    private Boolean requirePkce = false;
+    @DocProperty(description = "Boolean value true check for Proof Key for Code Exchange (PKCE). Required unconditionally for the authorization code grant per OAuth 2.1.", defaultValue = "true")
+    private Boolean requirePkce = true;
 
     @DocProperty(description = "Boolean value true allow all value for revoke endpoint", defaultValue = "false")
     private Boolean allowAllValueForRevokeEndpoint = false;
@@ -1048,8 +1051,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Maximum TTL in minutes for persisted CIMD client metadata (upper bound, even if HTTP Cache-Control specifies longer)", defaultValue = "1440")
     private Integer cimdMaxTtlMinutes = 1440;
 
-    @DocProperty(description = "Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.", defaultValue = "false")
-    private Boolean authorizationResponseIssParameterSupported = false;
+    @DocProperty(description = "Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: true.", defaultValue = "true")
+    private Boolean authorizationResponseIssParameterSupported = true;
 
     // SPIFFE-based client authentication (draft-ietf-oauth-spiffe-client-auth) Configuration
     @DocProperty(description = "Admin-configured, out-of-band trust anchor mapping (trust domain -> SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied `spiffe_bundle_endpoint` is never trusted as a trust anchor source; only trust domains listed here are honored.")
@@ -2591,6 +2594,9 @@ public class AppConfiguration implements Configuration {
     }
 
     public int getAuthorizationCodeLifetime() {
+        if (authorizationCodeLifetime <= 0 || authorizationCodeLifetime > MAX_AUTHORIZATION_CODE_LIFETIME) {
+            return MAX_AUTHORIZATION_CODE_LIFETIME;
+        }
         return authorizationCodeLifetime;
     }
 
