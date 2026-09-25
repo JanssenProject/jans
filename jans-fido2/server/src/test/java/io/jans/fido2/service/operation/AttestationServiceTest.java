@@ -23,10 +23,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.fido2.model.attestation.AttestationResult;
 import io.jans.fido2.model.attestation.Response;
+import io.jans.fido2.exception.Fido2NativeFailureException;
 import io.jans.fido2.model.audit.LockAuditEvent;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.external.ExternalFido2Service;
@@ -45,6 +47,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -179,5 +183,27 @@ class AttestationServiceTest {
 		ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
 		verify(lockAuditEventCollector).collect(captor.capture());
 		assertEquals("ALLOW", captor.getValue().getDecisionResult());
+	}
+
+	/**
+	 * An RP ID hash mismatch (#14608) — a common symptom of a misconfigured native asset-link/AASA
+	 * association — must be recorded under its diagnostic code, not the raw "Hashes don't match"
+	 * message, so registration failures can be counted by cause.
+	 */
+	@Test
+	void verify_ifRpIdHashMismatch_recordsTheNativeFailureDiagnosticCode() {
+		stubHappyPathThroughStatusSet();
+		when(attestationVerifier.verifyAuthenticatorAttestationResponse(any(), any()))
+				.thenThrow(new Fido2NativeFailureException(NativeFailureDiagnostic.JFS_RPID_HASH_MISMATCH,
+						"Hashes don't match"));
+
+		try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+			mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+			assertThrows(Fido2NativeFailureException.class, () -> attestationService.verify(attestationResult()));
+		}
+
+		verify(metricService).recordPasskeyRegistrationFailure(eq("alice"), any(), anyLong(),
+				eq("JFS_RPID_HASH_MISMATCH"), any(), any());
 	}
 }

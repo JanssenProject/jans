@@ -23,6 +23,7 @@ import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.trust.AttestationTrustDiagnostics;
+import io.jans.fido2.service.trust.NativeFailureDiagnostics;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.CoseService;
@@ -769,9 +770,10 @@ public class AttestationService {
 		try {
 			String message = error.getMessage() != null ? error.getMessage() : "Unknown error";
 
-			// A trust or metadata rejection is recorded under its diagnostic code instead of the raw
-			// message, so rejections can be counted by cause rather than by wording. Every other failure
-			// keeps its message untouched, and nothing here changes the response the client receives.
+			// A trust, metadata or native-failure rejection is recorded under its diagnostic code
+			// instead of the raw message, so rejections can be counted by cause rather than by wording.
+			// Every other failure keeps its message untouched, and nothing here changes the response
+			// the client receives.
 			String diagnosticCode = AttestationTrustDiagnostics.resolveCode(error);
 			String errorReason = message;
 			String aaguid = null;
@@ -780,6 +782,12 @@ public class AttestationService {
 				aaguid = AttestationTrustDiagnostics.resolveAaguid(error);
 				// The original message stays in the log, so the substitution loses no detail.
 				log.debug("Attestation rejected for aaguid {} with diagnostic {}: {}", aaguid, diagnosticCode, message);
+			} else {
+				String nativeFailureCode = NativeFailureDiagnostics.resolveCode(error);
+				if (nativeFailureCode != null) {
+					errorReason = nativeFailureCode;
+					log.debug("Attestation rejected with native-failure diagnostic {}: {}", nativeFailureCode, message);
+				}
 			}
 
 			metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason,

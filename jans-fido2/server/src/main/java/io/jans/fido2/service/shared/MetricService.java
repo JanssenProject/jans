@@ -17,6 +17,7 @@ import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricType;
 import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
 import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
 import io.jans.model.ApplicationType;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -384,11 +385,13 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
         if (event.errorReason != null) {
             metricsData.setErrorReason(event.errorReason);
-            // A trust diagnostic code is not an inferred category — it is the value the attestation path
-            // deliberately recorded, and the attestation-rejections endpoint selects on it. Gating it on
-            // fido2ErrorCategorization would leave that endpoint silently empty whenever this unrelated
-            // toggle is off, so only the keyword-based bucketing stays behind the flag.
+            // A trust or native-failure diagnostic code is not an inferred category — it is the value
+            // the verify() path deliberately recorded, and the attestation-rejections endpoint selects
+            // on it. Gating it on fido2ErrorCategorization would leave that endpoint silently empty
+            // whenever this unrelated toggle is off, so only the keyword-based bucketing stays behind
+            // the flag.
             if (AttestationTrustDiagnostic.isDiagnosticCode(event.errorReason)
+                    || NativeFailureDiagnostic.isDiagnosticCode(event.errorReason)
                     || appConfiguration.isFido2ErrorCategorization()) {
                 metricsData.setErrorCategory(categorizeError(event.errorReason));
             }
@@ -662,6 +665,9 @@ public class MetricService extends io.jans.service.metric.MetricService {
         // to contain a keyword — JFS_MDS_METADATA_EXPIRED reads as "expired" and would land in TIMEOUT.
         if (AttestationTrustDiagnostic.isDiagnosticCode(errorReason)) {
             return AttestationTrustDiagnostic.CATEGORY;
+        }
+        if (NativeFailureDiagnostic.isDiagnosticCode(errorReason)) {
+            return NativeFailureDiagnostic.CATEGORY;
         }
 
         String lowerError = errorReason.toLowerCase();
