@@ -15696,13 +15696,13 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
@@ -17658,14 +17658,14 @@ components:
             Default value `true`.
         userRolePermissionExcludedClients:
           type: array
-          description: Client IDs exempt from the User Role-Permission mapping check.
-            Only honoured for tokens that carry no user, so a user token is always
-            checked. Empty by default.
+          description: "Client IDs exempt from the User Role-Permission mapping check.\
+            \ Only honoured for tokens that carry no user, so a user token is always\
+            \ checked. Empty by default."
           items:
             type: string
-            description: Client IDs exempt from the User Role-Permission mapping check.
-              Only honoured for tokens that carry no user, so a user token is always
-              checked. Empty by default.
+            description: "Client IDs exempt from the User Role-Permission mapping\
+              \ check. Only honoured for tokens that carry no user, so a user token\
+              \ is always checked. Empty by default."
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
