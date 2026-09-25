@@ -2610,7 +2610,7 @@ own, distinguish the proxy from a direct caller.</p>
 <td style="text-align: left;"><code>lockAuditFlushInterval</code></td>
 <td style="text-align: left;">Integer</td>
 <td style="text-align: left;"><code>20</code></td>
-<td style="text-align: left;">Interval in seconds between batched deliveries of buffered Lock Server audit events. Delivery is asynchronous and batched, never one HTTP call per ceremony.</td>
+<td style="text-align: left;">Interval in seconds between batched deliveries of buffered Lock Server audit events. Delivery is asynchronous and batched, never one HTTP call per ceremony. Read once at server startup — unlike <code>lockAuditEnabled</code>, <code>lockAuditEndpoint</code> and the credential properties, which are re-read on every flush, changing this value requires a server restart to take effect.</td>
 </tr>
 </tbody>
 </table>
@@ -2622,12 +2622,18 @@ never affects the registration/authentication request itself — delivery is fir
 batch is dropped rather than retried inline.</p>
 <p>No signing, hashing, or chaining of the delivered events is performed; that is planned as later work, not
 part of this delivery path.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>As of this release, the server only buffers and delivers events — nothing yet populates the buffer.
-Registration and authentication ceremonies emitting into it is tracked separately and will be
-reflected here once it lands, so <code>lockAuditEnabled: true</code> currently has no observable effect.</p>
-</div>
+<p>Passkey <strong>registration</strong> outcomes (both successful and failed) are recorded as <code>fido2_registration</code>
+events, with <code>decisionResult</code> of <code>ALLOW</code> or <code>DENY</code>, <code>principalId</code> set to the username where known, and
+<code>contextInformation</code> carrying the relying party ID, origin, credential ID and attestation type on
+success. A failed registration records only the exception's class name, never its message, since some
+registration failure messages embed the username or challenge.</p>
+<p>Passkey <strong>authentication</strong> outcomes (both successful and failed) are recorded as <code>fido2_authentication</code>
+events, with <code>decisionResult</code> of <code>ALLOW</code> or <code>DENY</code>, <code>principalId</code> set to the username where known, and
+<code>contextInformation</code> carrying the relying party ID, credential ID, and the origin the ceremony actually
+happened at — which is not necessarily the origin the credential was originally registered at, since a
+credential registered at one permitted origin of an RP can be used from a different permitted origin
+later. A failed authentication records only the exception's class name, never its message, since some
+authentication failure messages embed the username or challenge.</p>
 <h3 id="per-relying-party-policy">Per-relying-party policy<a class="headerlink" href="#per-relying-party-policy" title="Permanent link">#</a></h3>
 <p>An entry under <code>rp</code> may carry a <code>policy</code> object overriding the corresponding global setting for that
 relying party alone:</p>
@@ -2746,7 +2752,7 @@ framing policy of every existing deployment.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 22, 2026
+    September 24, 2026
   </span>
 
     

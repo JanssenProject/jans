@@ -50,7 +50,7 @@ configuration JSON response, which you can find at `.well-known/openid-configura
 in your specific deployment. Typically, it is
 `https://{hostname}/jans-auth/restv1/register`
 
-The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation,
+The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation,
 which aligns with the requirements of OpenID Connect dynamic client
 registration. Also, check the
 [Registration Endpoint documentation](../endpoints/client-registration.md) for
