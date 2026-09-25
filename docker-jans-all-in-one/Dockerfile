@@ -47,12 +47,13 @@ FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.18@sha256:307b95033a52c3ebcebcb883048f6ffd6c6019cf7cda06fad8febb9d1caf39a3
+FROM bellsoft/liberica-openjdk-alpine:17.0.20@sha256:1aa69057bcd3eafa77738ec58ba8b969fd621212e3f280d3774e64409bf6333d
 
 # hadolint ignore=DL3018
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache tini bash curl openssl python3 py3-cryptography py3-psycopg2 py3-grpcio nginx \
+    && apk add --no-cache tini bash curl openssl python3 py3-cryptography py3-psycopg2 nginx \
+    && apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/community py3-grpcio abseil-cpp-cord \
     && apk add --no-cache --virtual .build-deps git wget
 
 # ===========
@@ -81,7 +82,7 @@ WORKDIR /
 # default pip timeout
 ARG PIP_TIMEOUT=15
 COPY app/requirements.txt /app/requirements.txt
-RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
+RUN mv /usr/lib/python3.14/EXTERNALLY-MANAGED /usr/lib/python3.14/EXTERNALLY-MANAGED.disabled \
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
     && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
