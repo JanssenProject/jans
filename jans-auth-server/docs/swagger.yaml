@@ -877,13 +877,11 @@ paths:
       description: The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.
       operationId: get_clientinfo
       parameters:
-        - name: access_token
-          in: query
-          schema:
-            type: string
-            description: Client-specific access token.
         - name: Authorization
           in: header
+          required: true
+          description: 'Bearer access token, e.g. "Authorization: Bearer <access_token>". Sending the access token as a
+            query parameter is not supported.'
           schema:
             type: string
       responses:
@@ -4348,14 +4346,11 @@ paths:
       description: Returns Claims about the authenticated End-User.
       operationId: get-userinfo
       parameters:
-        - name: access_token
-          in: query
-          required: true
-          description: OAuth 2.0 Access Token.
-          schema:
-            type: string
         - name: Authorization
           in: header
+          required: true
+          description: 'Bearer access token, e.g. "Authorization: Bearer <access_token>". Sending the access token as a
+            query parameter is not supported.'
           schema:
             type: string
       responses:
