@@ -4022,6 +4022,16 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "FIDO2 Metrics Native Client Telemetry",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsNativeTelemetry"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "FIDO2 Metrics Error Reason",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -6413,6 +6423,7 @@
         "jansFido2MetricsDuration",
         "jansFido2MetricsAuthenticatorType",
         "jansFido2MetricsDeviceInfo",
+        "jansFido2MetricsNativeTelemetry",
         "jansFido2MetricsErrorReason",
         "jansFido2MetricsErrorCategory",
         "jansFido2MetricsFallbackMethod",

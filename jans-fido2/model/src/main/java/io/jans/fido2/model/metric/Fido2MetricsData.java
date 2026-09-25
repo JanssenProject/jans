@@ -9,6 +9,8 @@ package io.jans.fido2.model.metric;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -40,6 +42,10 @@ public class Fido2MetricsData implements Serializable {
 
     @JsonProperty("device_info")
     private DeviceInfo deviceInfo;
+
+    // Optional native-client context (#14607) — absence must not change behavior.
+    @JsonProperty("native_client_telemetry")
+    private NativeClientTelemetry nativeClientTelemetry;
 
     @JsonProperty("authenticator_type")
     private String authenticatorType; // PLATFORM, CROSS_PLATFORM, SECURITY_KEY
@@ -145,6 +151,14 @@ public class Fido2MetricsData implements Serializable {
 
     public void setDeviceInfo(DeviceInfo deviceInfo) {
         this.deviceInfo = deviceInfo;
+    }
+
+    public NativeClientTelemetry getNativeClientTelemetry() {
+        return nativeClientTelemetry;
+    }
+
+    public void setNativeClientTelemetry(NativeClientTelemetry nativeClientTelemetry) {
+        this.nativeClientTelemetry = nativeClientTelemetry;
     }
 
     public String getAuthenticatorType() {

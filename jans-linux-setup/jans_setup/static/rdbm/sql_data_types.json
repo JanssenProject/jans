@@ -836,6 +836,11 @@
       "type": "TEXT"
     }
   },
+  "jansFido2MetricsNativeTelemetry": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
   "jansFido2MetricsAdditionalData": {
     "mysql": {
       "type": "TEXT"

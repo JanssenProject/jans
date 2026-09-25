@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,6 +22,9 @@ public class AttestationOptions {
     private Long timeout;
     @JsonProperty(value = "session_id")
     private String sessionId;
+    // Optional native-client context (#14607) — absence must not change behavior.
+    @JsonProperty("telemetry")
+    private NativeClientTelemetry telemetry;
 
     public String getUsername() {
         return username;
@@ -94,6 +98,14 @@ public class AttestationOptions {
         this.sessionId = sessionId;
     }
 
+    public NativeClientTelemetry getTelemetry() {
+        return telemetry;
+    }
+
+    public void setTelemetry(NativeClientTelemetry telemetry) {
+        this.telemetry = telemetry;
+    }
+
     @Override
     public String toString() {
         return "AttestationOptions{" +
@@ -104,6 +116,7 @@ public class AttestationOptions {
                 ", extensions=" + extensions +
                 ", authenticatorSelection=" + authenticatorSelection +
                 ", timeout=" + timeout +
+                ", telemetry=" + telemetry +
                 '}';
     }
 

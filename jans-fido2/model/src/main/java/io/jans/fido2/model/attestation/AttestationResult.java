@@ -5,6 +5,8 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AttestationResult {
 	private String id;
@@ -13,6 +15,9 @@ public class AttestationResult {
 	private Response response;
 	private Map<String, Object> clientExtensionResults;
 	private String authentictatorAttachment;
+	// Optional native-client context (#14607) — absence must not change behavior.
+	@JsonProperty("telemetry")
+	private NativeClientTelemetry telemetry;
 
 	public String getId() {
 		return id;
@@ -62,11 +67,19 @@ public class AttestationResult {
 		this.rawId = rawId;
 	}
 
+	public NativeClientTelemetry getTelemetry() {
+		return telemetry;
+	}
+
+	public void setTelemetry(NativeClientTelemetry telemetry) {
+		this.telemetry = telemetry;
+	}
+
 	@Override
 	public String toString() {
 		return "AttestationResult [id=" + id + ", type=" + type + ", rawId=" + rawId + ", response=" + response
 				+ ", clientExtensionResults=" + clientExtensionResults + ", authentictatorAttachment="
-				+ authentictatorAttachment + "]";
+				+ authentictatorAttachment + ", telemetry=" + telemetry + "]";
 	}
 
 }
