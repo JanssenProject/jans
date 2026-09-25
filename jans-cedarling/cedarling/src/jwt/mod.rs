@@ -117,6 +117,12 @@ use validation::{
     ValidatedJwt, ValidatorInfo, validate_required_claims,
 };
 
+/// A JWT whose mapping no trusted issuer declares. Never returned to the caller: the
+/// token is dropped and this only feeds the log and metrics.
+#[derive(Debug, thiserror::Error)]
+#[error("no trusted issuer declares a token for the mapping '{0}'")]
+pub(crate) struct UnknownTokenMapping(String);
+
 #[allow(clippy::cast_possible_truncation)]
 pub(crate) fn parse_numeric_date(value: &serde_json::Value) -> Option<i64> {
     if let Some(i) = value.as_i64() {
@@ -615,8 +621,14 @@ impl JwtService {
         ctx: &mut TokenCallCtx<'_>,
     ) -> Result<Option<Arc<Token>>, MultiIssuerValidationError> {
         let Some(token_key) = self.token_keys_by_entity_type.get(&ctx.token.mapping) else {
-            let err = ValidateJwtError::UnknownTokenMapping(ctx.token.mapping.clone());
-            self.record_failed_jwt(ctx.index, &err);
+            let err = UnknownTokenMapping(ctx.token.mapping.clone());
+            self.metrics.record_error(&err);
+            if let Some(logger) = &self.logger {
+                logger.log_any(JwtLogEntry::new(
+                    format!("Token dropped at index {}: {err}", ctx.index),
+                    Some(LogLevel::WARN),
+                ));
+            }
             return Ok(None);
         };
         let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(token_key));
@@ -675,23 +687,17 @@ impl JwtService {
                 }
             },
             Err(err) => {
-                self.record_failed_jwt(ctx.index, &err);
+                self.metrics.record_jwt_validation(false);
+                if let Some(logger) = &self.logger {
+                    logger.log_any(JwtLogEntry::new(
+                        format!("Token validation failed at index {}: {err}", ctx.index),
+                        Some(LogLevel::WARN),
+                    ));
+                }
+                self.metrics.record_error(&err);
                 Ok(None)
             },
         }
-    }
-
-    /// Record and log a JWT that failed validation. The caller skips the token
-    /// rather than failing the whole request.
-    fn record_failed_jwt(&self, index: usize, err: &ValidateJwtError) {
-        self.metrics.record_jwt_validation(false);
-        if let Some(logger) = &self.logger {
-            logger.log_any(JwtLogEntry::new(
-                format!("Token validation failed at index {index}: {err}"),
-                Some(LogLevel::WARN),
-            ));
-        }
-        self.metrics.record_error(err);
     }
 
     /// Process a single custom (non-JWT) token via the registered processor.

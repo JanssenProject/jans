@@ -389,8 +389,6 @@ impl TryFrom<DecodedJwt> for ValidatedJwt {
 
 #[derive(Debug, thiserror::Error)]
 pub enum ValidateJwtError {
-    #[error("no trusted issuer declares a token for the mapping '{0}'")]
-    UnknownTokenMapping(String),
     #[error("failed to decode the JWT: {0}")]
     DecodeJwt(#[from] DecodeJwtError),
     #[error("failed to validate the JWT since no key was available")]
