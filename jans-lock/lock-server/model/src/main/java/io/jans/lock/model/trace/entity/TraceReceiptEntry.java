@@ -165,6 +165,21 @@ public class TraceReceiptEntry extends BaseEntry implements Serializable {
         this.receiptState = receiptState;
     }
 
+    /**
+     * Not persisted (no {@code @AttributeName}); {@link #getReceiptState()} parsed as a
+     * {@link TraceReceiptState}, or {@code null} if not set.
+     */
+    public TraceReceiptState getReceiptStateEnum() {
+        return receiptState == null ? null : TraceReceiptState.valueOf(receiptState);
+    }
+
+    /**
+     * Not persisted; sets {@link #getReceiptState()} from a {@link TraceReceiptState}.
+     */
+    public void setReceiptStateEnum(TraceReceiptState state) {
+        this.receiptState = state == null ? null : state.name();
+    }
+
     public String getNodeId() {
         return nodeId;
     }

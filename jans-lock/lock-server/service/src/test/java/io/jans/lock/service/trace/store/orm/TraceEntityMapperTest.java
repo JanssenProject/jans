@@ -12,26 +12,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import io.jans.lock.model.trace.entity.TraceChainEntry;
-import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
-import io.jans.lock.model.trace.entity.TraceReceiptEntry;
-import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.model.trace.entity.TraceRecordEntry;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
-import io.jans.lock.service.trace.model.ChainRegistration;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
-import io.jans.lock.service.trace.model.ProducerKey;
 import io.jans.lock.service.trace.model.ReceiptEntry;
-import io.jans.lock.service.trace.model.ReceiptRow;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -41,8 +32,10 @@ import io.jans.lock.service.trace.store.TraceKeys;
 /**
  * Tests for {@link TraceEntityMapper}: the record round trip (including the assertion re-parse that
  * recovers {@code producer_instance_id}/{@code producer_chain_id}, capability ids and token
- * references — see task 13's design decision on entity-to-record mapping), the null-Boolean-flag
- * convention, and the chain/receipt/producer-key mappings.
+ * references — see task 13's design decision on entity-to-record mapping) and the
+ * null-Boolean-flag convention. Receipts, chains and producer keys need no mapper test: since the
+ * collapse of their store value types onto the jans-orm entities, {@code TraceStore} exposes those
+ * entities directly and there is no conversion left to test here.
  *
  * @author Yuriy Movchan
  */
@@ -130,63 +123,6 @@ class TraceEntityMapperTest {
 		assertFalse(roundTripped.getFlags().isChainLinkFailure());
 		assertFalse(roundTripped.getFlags().isEquivocation());
 		assertFalse(roundTripped.getFlags().isLate());
-	}
-
-	@Test
-	void testChainRegistration_roundTrip() {
-		ChainIdentity identity = new ChainIdentity(DOMAIN, "producer-1", "instance-1", "chain-1");
-		ChainRegistration registration = new ChainRegistration(identity, 12345L, "client-1");
-
-		TraceChainEntry entity = TraceEntityMapper.toEntity(registration, "jansId=x,ou=chains,ou=trace,ou=lock,o=jans");
-		ChainRegistration roundTripped = TraceEntityMapper.toChainRegistration(entity);
-
-		assertEquals(registration.getChainIdentity(), roundTripped.getChainIdentity());
-		assertEquals(registration.getRegisteredAtMs(), roundTripped.getRegisteredAtMs());
-		assertEquals(registration.getRegisteredBy(), roundTripped.getRegisteredBy());
-	}
-
-	@Test
-	void testProducerKey_roundTrip() {
-		Map<String, String> jwk = new LinkedHashMap<>();
-		jwk.put("kty", "OKP");
-		jwk.put("crv", "Ed25519");
-		jwk.put("x", "abc");
-		ProducerKey key = new ProducerKey(DOMAIN, "producer-1", "kid-1", jwk, 100L, 200L, 150L, "client-1", 50L);
-
-		TraceProducerKeyEntry entity = TraceEntityMapper.toEntity(key, "jansId=x,ou=keys,ou=trace,ou=lock,o=jans");
-		ProducerKey roundTripped = TraceEntityMapper.toProducerKey(entity);
-
-		assertEquals(key.getDomainId(), roundTripped.getDomainId());
-		assertEquals(key.getProducerId(), roundTripped.getProducerId());
-		assertEquals(key.getKid(), roundTripped.getKid());
-		assertEquals(key.getPublicKeyJwk(), roundTripped.getPublicKeyJwk());
-		assertEquals(key.getValidFromMs(), roundTripped.getValidFromMs());
-		assertEquals(key.getValidUntilMs(), roundTripped.getValidUntilMs());
-		assertEquals(key.getRevokedAtMs(), roundTripped.getRevokedAtMs());
-		assertEquals(key.getRegisteredBy(), roundTripped.getRegisteredBy());
-		assertEquals(key.getCreatedAtMs(), roundTripped.getCreatedAtMs());
-	}
-
-	@Test
-	void testReceiptRow_roundTrip() {
-		ReceiptRow row = new ReceiptRow(DOMAIN, 5L, 6000L, "producer-1", "record-1",
-				TraceKeys.recordKey(new RecordIdentity(DOMAIN, "producer-1", "record-1")), "sha256:" + "3".repeat(64),
-				TraceConstants.ZERO_HASH, "sha256:" + "4".repeat(64), TraceReceiptState.COMMITTED, "node-1");
-
-		TraceReceiptEntry entity = TraceEntityMapper.toEntity(row, "jansId=x,ou=receipts,ou=trace,ou=lock,o=jans");
-		ReceiptRow roundTripped = TraceEntityMapper.toReceiptRow(entity);
-
-		assertEquals(row.getDomainId(), roundTripped.getDomainId());
-		assertEquals(row.getReceiptSequence(), roundTripped.getReceiptSequence());
-		assertEquals(row.getReceivedAtMs(), roundTripped.getReceivedAtMs());
-		assertEquals(row.getProducerId(), roundTripped.getProducerId());
-		assertEquals(row.getRecordId(), roundTripped.getRecordId());
-		assertEquals(row.getRecordKey(), roundTripped.getRecordKey());
-		assertEquals(row.getContentDigest(), roundTripped.getContentDigest());
-		assertEquals(row.getPrevReceiptHash(), roundTripped.getPrevReceiptHash());
-		assertEquals(row.getReceiptHash(), roundTripped.getReceiptHash());
-		assertEquals(row.getState(), roundTripped.getState());
-		assertEquals(row.getNodeId(), roundTripped.getNodeId());
 	}
 
 }

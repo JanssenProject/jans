@@ -6,17 +6,18 @@
 
 package io.jans.lock.service.trace.registry;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
+import io.jans.lock.model.trace.entity.TraceChainEntry;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.ChainIdentity;
-import io.jans.lock.service.trace.model.ChainRegistration;
 import io.jans.lock.service.trace.store.TraceStore;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -60,7 +61,7 @@ public class ProducerChainRegistry {
 	 * @throws TraceValidationException {@code chain_not_registered} when {@code id} has not been
 	 *                                  pre-registered (design decision D-5)
 	 */
-	public ChainRegistration requireRegistered(ChainIdentity id) {
+	public TraceChainEntry requireRegistered(ChainIdentity id) {
 		return traceStore.findChain(id)
 				.orElseThrow(() -> new TraceValidationException(TraceErrorResponseType.CHAIN_NOT_REGISTERED,
 						REASON_NOT_REGISTERED));
@@ -96,13 +97,19 @@ public class ProducerChainRegistry {
 	 * @throws TraceConflictException   {@code chain_already_exists} when {@code id} is already
 	 *                                  registered
 	 */
-	public ChainRegistration register(ChainIdentity id, String registeredBy, long nowMs) {
+	public TraceChainEntry register(ChainIdentity id, String registeredBy, long nowMs) {
 		requireIdentifier(id.getProducerId(), REASON_EMPTY_PRODUCER_ID, REASON_LENGTH_PRODUCER_ID);
 		requireIdentifier(id.getProducerInstanceId(), REASON_EMPTY_PRODUCER_INSTANCE_ID,
 				REASON_LENGTH_PRODUCER_INSTANCE_ID);
 		requireIdentifier(id.getProducerChainId(), REASON_EMPTY_PRODUCER_CHAIN_ID, REASON_LENGTH_PRODUCER_CHAIN_ID);
 
-		ChainRegistration registration = new ChainRegistration(id, nowMs, registeredBy);
+		TraceChainEntry registration = new TraceChainEntry();
+		registration.setDomainId(id.getDomainId());
+		registration.setProducerId(id.getProducerId());
+		registration.setProducerInstanceId(id.getProducerInstanceId());
+		registration.setProducerChainId(id.getProducerChainId());
+		registration.setRegisteredBy(registeredBy);
+		registration.setCreationDate(new Date(nowMs));
 		try {
 			traceStore.insertChain(registration);
 		} catch (DuplicateEntryException ex) {
@@ -115,7 +122,7 @@ public class ProducerChainRegistry {
 	 * @param producerIdOrNull restricts the result to one producer, or {@code null} for all
 	 *                          producers in the domain
 	 */
-	public List<ChainRegistration> list(String domainId, String producerIdOrNull) {
+	public List<TraceChainEntry> list(String domainId, String producerIdOrNull) {
 		return traceStore.findChains(domainId, producerIdOrNull);
 	}
 

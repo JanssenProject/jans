@@ -10,29 +10,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.lock.model.trace.entity.TraceChainEntry;
-import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
-import io.jans.lock.model.trace.entity.TraceReceiptEntry;
-import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.model.trace.entity.TraceRecordEntry;
 import io.jans.lock.model.trace.entity.TraceVerification;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
-import io.jans.lock.service.trace.model.ChainRegistration;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
-import io.jans.lock.service.trace.model.ProducerKey;
 import io.jans.lock.service.trace.model.ReceiptEntry;
-import io.jans.lock.service.trace.model.ReceiptRow;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -40,8 +31,15 @@ import io.jans.lock.service.trace.model.VerificationResult;
 import io.jans.lock.service.trace.store.TraceKeys;
 
 /**
- * Pure mapping between the task 12 store value types and the task 03 ORM entities, in both
- * directions (design decisions D-6, D-7).
+ * Pure mapping between the task 12 {@link StoredTraceRecord} value type and the task 03
+ * {@link TraceRecordEntry} ORM entity, in both directions (design decisions D-6, D-7).
+ *
+ * <p>Receipts, chain registrations and producer keys need no such mapping: {@code TraceStore}
+ * exposes their jans-orm entities ({@code TraceReceiptEntry}, {@code TraceChainEntry},
+ * {@code TraceProducerKeyEntry}) directly, unlike {@code StoredTraceRecord} — the two shapes
+ * differ enough (structured identities vs. flat hashed keys, defensive copies on read) that a
+ * dedicated value type still earns its keep for records (deviation from task 12's original
+ * value-type-for-every-row design, approved 2026; see the TRACE MVP task notes).
  *
  * <p>{@code TraceRecordEntry} (T-1) only carries <em>hashed</em> keys for the producer chain
  * identity, capability ids and token references ({@code jansTraceChainKey}, {@code jansTraceCapKeys},
@@ -205,94 +203,10 @@ final class TraceEntityMapper {
 		return Collections.unmodifiableList(result);
 	}
 
-	// -- receipts -----------------------------------------------------------------------------
-
-	static TraceReceiptEntry toEntity(ReceiptRow row, String dn) {
-		TraceReceiptEntry entity = new TraceReceiptEntry();
-		entity.setDn(dn);
-		entity.setId(TraceKeys.receiptKey(row.getDomainId(), row.getReceiptSequence()));
-		entity.setDomainId(row.getDomainId());
-		entity.setReceiptSeq(row.getReceiptSequence());
-		entity.setReceivedAt(new Date(row.getReceivedAtMs()));
-		entity.setReceivedAtMs(row.getReceivedAtMs());
-		entity.setProducerId(row.getProducerId());
-		entity.setRecordId(row.getRecordId());
-		entity.setRecordKey(row.getRecordKey());
-		entity.setContentDigest(row.getContentDigest());
-		entity.setPrevReceiptHash(row.getPrevReceiptHash());
-		entity.setReceiptHash(row.getReceiptHash());
-		entity.setReceiptState(row.getState().name());
-		entity.setNodeId(row.getNodeId());
-		entity.setCreationDate(new Date(row.getReceivedAtMs()));
-		return entity;
-	}
-
-	static ReceiptRow toReceiptRow(TraceReceiptEntry entity) {
-		return new ReceiptRow(entity.getDomainId(), nvl(entity.getReceiptSeq()), nvl(entity.getReceivedAtMs()),
-				entity.getProducerId(), entity.getRecordId(), entity.getRecordKey(), entity.getContentDigest(),
-				entity.getPrevReceiptHash(), entity.getReceiptHash(), TraceReceiptState.valueOf(entity.getReceiptState()),
-				entity.getNodeId());
-	}
-
-	// -- chains -------------------------------------------------------------------------------
-
-	static TraceChainEntry toEntity(ChainRegistration registration, String dn) {
-		ChainIdentity identity = registration.getChainIdentity();
-		TraceChainEntry entity = new TraceChainEntry();
-		entity.setDn(dn);
-		entity.setId(TraceKeys.chainKey(identity));
-		entity.setDomainId(identity.getDomainId());
-		entity.setProducerId(identity.getProducerId());
-		entity.setProducerInstanceId(identity.getProducerInstanceId());
-		entity.setProducerChainId(identity.getProducerChainId());
-		entity.setRegisteredBy(registration.getRegisteredBy());
-		entity.setCreationDate(new Date(registration.getRegisteredAtMs()));
-		return entity;
-	}
-
-	static ChainRegistration toChainRegistration(TraceChainEntry entity) {
-		ChainIdentity identity = new ChainIdentity(entity.getDomainId(), entity.getProducerId(),
-				entity.getProducerInstanceId(), entity.getProducerChainId());
-		long registeredAtMs = entity.getCreationDate() == null ? 0L : entity.getCreationDate().getTime();
-		return new ChainRegistration(identity, registeredAtMs, entity.getRegisteredBy());
-	}
-
-	// -- producer keys --------------------------------------------------------------------------
-
-	static TraceProducerKeyEntry toEntity(ProducerKey key, String dn) {
-		TraceProducerKeyEntry entity = new TraceProducerKeyEntry();
-		entity.setDn(dn);
-		entity.setId(TraceKeys.producerKeyKey(key.getDomainId(), key.getProducerId(), key.getKid()));
-		entity.setDomainId(key.getDomainId());
-		entity.setProducerId(key.getProducerId());
-		entity.setKid(key.getKid());
-		entity.setPublicKeyJwk(new LinkedHashMap<>(key.getPublicKeyJwk()));
-		entity.setValidFrom(new Date(key.getValidFromMs()));
-		entity.setValidUntil(key.getValidUntilMs() == null ? null : new Date(key.getValidUntilMs()));
-		entity.setRevokedAt(key.getRevokedAtMs() == null ? null : new Date(key.getRevokedAtMs()));
-		entity.setRegisteredBy(key.getRegisteredBy());
-		entity.setCreationDate(new Date(key.getCreatedAtMs()));
-		return entity;
-	}
-
-	static ProducerKey toProducerKey(TraceProducerKeyEntry entity) {
-		Map<String, String> jwk = entity.getPublicKeyJwk() == null ? Collections.emptyMap()
-				: new LinkedHashMap<>(entity.getPublicKeyJwk());
-		Long validUntilMs = entity.getValidUntil() == null ? null : entity.getValidUntil().getTime();
-		Long revokedAtMs = entity.getRevokedAt() == null ? null : entity.getRevokedAt().getTime();
-		long createdAtMs = entity.getCreationDate() == null ? 0L : entity.getCreationDate().getTime();
-		return new ProducerKey(entity.getDomainId(), entity.getProducerId(), entity.getKid(), jwk,
-				nvl(entity.getValidFrom()), validUntilMs, revokedAtMs, entity.getRegisteredBy(), createdAtMs);
-	}
-
 	// -- null-safety helpers --------------------------------------------------------------------
 
 	private static long nvl(Long value) {
 		return value == null ? 0L : value;
-	}
-
-	private static long nvl(Date value) {
-		return value == null ? 0L : value.getTime();
 	}
 
 	private static boolean nvl(Boolean value) {

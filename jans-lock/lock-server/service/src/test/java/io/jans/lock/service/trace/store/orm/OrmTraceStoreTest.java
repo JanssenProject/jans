@@ -8,10 +8,6 @@ package io.jans.lock.service.trace.store.orm;
 
 import java.util.List;
 
-import org.slf4j.LoggerFactory;
-
-import io.jans.lock.model.config.BaseDnConfiguration;
-import io.jans.lock.model.config.StaticConfiguration;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
@@ -24,7 +20,6 @@ import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.model.VerificationResult;
 import io.jans.lock.service.trace.store.TraceStore;
 import io.jans.lock.service.trace.store.TraceStoreContractTest;
-import io.jans.orm.PersistenceEntryManager;
 
 /**
  * Runs the shared {@link TraceStoreContractTest} suite against {@link OrmTraceStore}, backed by
@@ -43,19 +38,7 @@ class OrmTraceStoreTest extends TraceStoreContractTest {
 
 	@Override
 	protected TraceStore createStore() {
-		PersistenceEntryManager persistenceEntryManager = FakeEntryManagerBehavior.create();
-
-		BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
-		baseDnConfiguration.setTrace("ou=trace,ou=lock,o=jans");
-		StaticConfiguration staticConfiguration = new StaticConfiguration();
-		staticConfiguration.setBaseDn(baseDnConfiguration);
-
-		OrmTraceStore ormStore = new OrmTraceStore();
-		ormStore.setLog(LoggerFactory.getLogger(OrmTraceStore.class));
-		ormStore.setPersistenceEntryManager(persistenceEntryManager);
-		ormStore.setStaticConfiguration(staticConfiguration);
-		ormStore.init();
-		return ormStore;
+		return OrmTraceStores.create(FakeEntryManagerBehavior.create());
 	}
 
 	@Override

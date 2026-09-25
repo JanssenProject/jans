@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.KeyPair;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +25,11 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
+import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
-import io.jans.lock.service.trace.model.ProducerKey;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 
 /**
@@ -71,7 +72,7 @@ class ProducerKeyRegistryTest {
 
 	@Test
 	void testRegister_NewKey_Succeeds() {
-		ProducerKey key = registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L);
+		TraceProducerKeyEntry key = registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L);
 
 		assertEquals(DOMAIN, key.getDomainId());
 		assertEquals(PRODUCER, key.getProducerId());
@@ -153,7 +154,7 @@ class ProducerKeyRegistryTest {
 
 	@Test
 	void testRevoke_UnknownKey_ReturnsEmpty() {
-		Optional<ProducerKey> result = registry.revoke(DOMAIN, PRODUCER, KID, 5000L);
+		Optional<TraceProducerKeyEntry> result = registry.revoke(DOMAIN, PRODUCER, KID, 5000L);
 
 		assertFalse(result.isPresent());
 	}
@@ -162,7 +163,7 @@ class ProducerKeyRegistryTest {
 	void testRevoke_KnownKey_SetsRevokedAt() {
 		registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L);
 
-		Optional<ProducerKey> result = registry.revoke(DOMAIN, PRODUCER, KID, 5000L);
+		Optional<TraceProducerKeyEntry> result = registry.revoke(DOMAIN, PRODUCER, KID, 5000L);
 
 		assertTrue(result.isPresent());
 		assertEquals(Long.valueOf(5000L), result.get().getRevokedAtMs());
@@ -173,7 +174,7 @@ class ProducerKeyRegistryTest {
 		registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L);
 		registry.revoke(DOMAIN, PRODUCER, KID, 5000L);
 
-		Optional<ProducerKey> result = registry.revoke(DOMAIN, PRODUCER, KID, 9000L);
+		Optional<TraceProducerKeyEntry> result = registry.revoke(DOMAIN, PRODUCER, KID, 9000L);
 
 		assertTrue(result.isPresent());
 		assertEquals(Long.valueOf(5000L), result.get().getRevokedAtMs());
@@ -269,7 +270,14 @@ class ProducerKeyRegistryTest {
 		badJwk.put("kty", "OKP");
 		badJwk.put("crv", "Ed25519");
 		badJwk.put("x", "not-valid-base64url!!");
-		ProducerKey key = new ProducerKey(DOMAIN, PRODUCER, KID, badJwk, 1000L, null, null, REGISTERED_BY, 1000L);
+		TraceProducerKeyEntry key = new TraceProducerKeyEntry();
+		key.setDomainId(DOMAIN);
+		key.setProducerId(PRODUCER);
+		key.setKid(KID);
+		key.setPublicKeyJwk(badJwk);
+		key.setValidFrom(new Date(1000L));
+		key.setRegisteredBy(REGISTERED_BY);
+		key.setCreationDate(new Date(1000L));
 		store.insertProducerKey(key);
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
@@ -286,10 +294,10 @@ class ProducerKeyRegistryTest {
 		registry.register(DOMAIN, PRODUCER, "kid-a", jwk, 1000L, null, REGISTERED_BY, 1000L);
 		registry.register(DOMAIN, "other-producer/2.0.0", "kid-b", jwk, 1000L, null, REGISTERED_BY, 1000L);
 
-		List<ProducerKey> filtered = registry.list(DOMAIN, PRODUCER);
+		List<TraceProducerKeyEntry> filtered = registry.list(DOMAIN, PRODUCER);
 
 		assertEquals(Collections.singletonList("kid-a"),
-				filtered.stream().map(ProducerKey::getKid).collect(java.util.stream.Collectors.toList()));
+				filtered.stream().map(TraceProducerKeyEntry::getKid).collect(java.util.stream.Collectors.toList()));
 	}
 
 	private static String repeat(char c, int count) {

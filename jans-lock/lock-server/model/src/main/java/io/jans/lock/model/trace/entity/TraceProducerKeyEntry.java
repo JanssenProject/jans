@@ -140,6 +140,42 @@ public class TraceProducerKeyEntry extends BaseEntry implements Serializable {
         this.creationDate = creationDate;
     }
 
+    // -- millisecond convenience accessors ---------------------------------------------------
+    //
+    // Not persisted (no @AttributeName; jans-orm's BasicPropertyAnnotationResolver scans
+    // declared *fields*, never getters, so these are invisible to persistence). They exist so
+    // callers that reason about validity windows in epoch milliseconds (design decision D-4:
+    // ProducerKeyRegistry.resolveForVerification) don't have to convert java.util.Date at every
+    // call site.
+
+    /**
+     * @return {@link #getValidFrom()} in epoch milliseconds, or {@code 0} if not set
+     */
+    public long getValidFromMs() {
+        return validFrom == null ? 0L : validFrom.getTime();
+    }
+
+    /**
+     * @return {@link #getValidUntil()} in epoch milliseconds, or {@code null} for no expiry
+     */
+    public Long getValidUntilMs() {
+        return validUntil == null ? null : validUntil.getTime();
+    }
+
+    /**
+     * @return {@link #getRevokedAt()} in epoch milliseconds, or {@code null} if not revoked
+     */
+    public Long getRevokedAtMs() {
+        return revokedAt == null ? null : revokedAt.getTime();
+    }
+
+    /**
+     * @return {@link #getCreationDate()} in epoch milliseconds, or {@code 0} if not set
+     */
+    public long getCreatedAtMs() {
+        return creationDate == null ? 0L : creationDate.getTime();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

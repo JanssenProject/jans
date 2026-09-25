@@ -28,12 +28,9 @@ import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
-import io.jans.lock.service.trace.model.ChainRegistration;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
-import io.jans.lock.service.trace.model.ProducerKey;
 import io.jans.lock.service.trace.model.ReceiptHead;
-import io.jans.lock.service.trace.model.ReceiptRow;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -88,27 +85,6 @@ public class OrmTraceStore implements TraceStore {
 		BaseDnConfiguration baseDnConfiguration = staticConfiguration.getBaseDn();
 		String trace = baseDnConfiguration == null ? null : baseDnConfiguration.getTrace();
 		log.debug("TRACE ORM store resolved base DN: {}", trace);
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link Logger}.
-	 */
-	void setLog(Logger log) {
-		this.log = log;
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link PersistenceEntryManager}.
-	 */
-	void setPersistenceEntryManager(PersistenceEntryManager persistenceEntryManager) {
-		this.persistenceEntryManager = persistenceEntryManager;
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link StaticConfiguration}.
-	 */
-	void setStaticConfiguration(StaticConfiguration staticConfiguration) {
-		this.staticConfiguration = staticConfiguration;
 	}
 
 	private String baseDn() {
@@ -288,10 +264,11 @@ public class OrmTraceStore implements TraceStore {
 	// -- receipts -------------------------------------------------------------------------------
 
 	@Override
-	public void insertReceipt(ReceiptRow row) throws DuplicateEntryException, TraceStorageException {
-		String key = TraceKeys.receiptKey(row.getDomainId(), row.getReceiptSequence());
+	public void insertReceipt(TraceReceiptEntry entity) throws DuplicateEntryException, TraceStorageException {
+		String key = TraceKeys.receiptKey(entity.getDomainId(), entity.getReceiptSeq());
 		String dn = TraceKeys.receiptDn(baseDn(), key);
-		TraceReceiptEntry entity = TraceEntityMapper.toEntity(row, dn);
+		entity.setId(key);
+		entity.setDn(dn);
 		duplicateSafeInsert(dn, TraceReceiptEntry.class, entity, key);
 	}
 
@@ -334,15 +311,14 @@ public class OrmTraceStore implements TraceStore {
 	}
 
 	@Override
-	public Optional<ReceiptRow> findReceipt(String domainId, long receiptSequence) {
+	public Optional<TraceReceiptEntry> findReceipt(String domainId, long receiptSequence) {
 		String key = TraceKeys.receiptKey(domainId, receiptSequence);
 		String dn = TraceKeys.receiptDn(baseDn(), key);
 		if (!persistenceEntryManager.contains(dn, TraceReceiptEntry.class)) {
 			return Optional.empty();
 		}
 		try {
-			TraceReceiptEntry entity = persistenceEntryManager.find(dn, TraceReceiptEntry.class, null);
-			return Optional.of(TraceEntityMapper.toReceiptRow(entity));
+			return Optional.of(persistenceEntryManager.find(dn, TraceReceiptEntry.class, null));
 		} catch (EntryPersistenceException e) {
 			log.debug("TRACE receipt {} disappeared before read", key);
 			return Optional.empty();
@@ -350,30 +326,27 @@ public class OrmTraceStore implements TraceStore {
 	}
 
 	@Override
-	public List<ReceiptRow> findPendingReceiptsOlderThan(long cutoffMs, int limit) {
+	public List<TraceReceiptEntry> findPendingReceiptsOlderThan(long cutoffMs, int limit) {
 		if (limit <= 0) {
 			return Collections.emptyList();
 		}
 		Filter filter = Filter.createANDFilter(
 				Filter.createEqualityFilter(ATTR_RECEIPT_STATE, TraceReceiptState.PENDING.name()),
 				Filter.createLessOrEqualFilter(ATTR_RECEIVED_AT_MS, cutoffMs));
-		List<TraceReceiptEntry> entities = persistenceEntryManager.findEntries(receiptsBase(), TraceReceiptEntry.class,
-				filter, limit);
-		return entities.stream().map(TraceEntityMapper::toReceiptRow).collect(Collectors.toList());
+		return persistenceEntryManager.findEntries(receiptsBase(), TraceReceiptEntry.class, filter, limit);
 	}
 
 	// -- registries -----------------------------------------------------------------------------
 
 	@Override
-	public Optional<ChainRegistration> findChain(ChainIdentity id) {
+	public Optional<TraceChainEntry> findChain(ChainIdentity id) {
 		String key = TraceKeys.chainKey(id);
 		String dn = TraceKeys.chainDn(baseDn(), key);
 		if (!persistenceEntryManager.contains(dn, TraceChainEntry.class)) {
 			return Optional.empty();
 		}
 		try {
-			TraceChainEntry entity = persistenceEntryManager.find(dn, TraceChainEntry.class, null);
-			return Optional.of(TraceEntityMapper.toChainRegistration(entity));
+			return Optional.of(persistenceEntryManager.find(dn, TraceChainEntry.class, null));
 		} catch (EntryPersistenceException e) {
 			log.debug("TRACE chain {} disappeared before read", key);
 			return Optional.empty();
@@ -381,33 +354,33 @@ public class OrmTraceStore implements TraceStore {
 	}
 
 	@Override
-	public void insertChain(ChainRegistration registration) throws DuplicateEntryException, TraceStorageException {
-		String key = TraceKeys.chainKey(registration.getChainIdentity());
+	public void insertChain(TraceChainEntry entity) throws DuplicateEntryException, TraceStorageException {
+		ChainIdentity identity = new ChainIdentity(entity.getDomainId(), entity.getProducerId(),
+				entity.getProducerInstanceId(), entity.getProducerChainId());
+		String key = TraceKeys.chainKey(identity);
 		String dn = TraceKeys.chainDn(baseDn(), key);
-		TraceChainEntry entity = TraceEntityMapper.toEntity(registration, dn);
+		entity.setId(key);
+		entity.setDn(dn);
 		duplicateSafeInsert(dn, TraceChainEntry.class, entity, key);
 	}
 
 	@Override
-	public List<ChainRegistration> findChains(String domainId, String producerIdOrNull) {
+	public List<TraceChainEntry> findChains(String domainId, String producerIdOrNull) {
 		Filter filter = producerIdOrNull == null ? Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId)
 				: Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
 						Filter.createEqualityFilter(ATTR_PRODUCER_ID, producerIdOrNull));
-		List<TraceChainEntry> entities = persistenceEntryManager.findEntries(chainsBase(), TraceChainEntry.class,
-				filter);
-		return entities.stream().map(TraceEntityMapper::toChainRegistration).collect(Collectors.toList());
+		return persistenceEntryManager.findEntries(chainsBase(), TraceChainEntry.class, filter);
 	}
 
 	@Override
-	public Optional<ProducerKey> findProducerKey(String domainId, String producerId, String kid) {
+	public Optional<TraceProducerKeyEntry> findProducerKey(String domainId, String producerId, String kid) {
 		String key = TraceKeys.producerKeyKey(domainId, producerId, kid);
 		String dn = TraceKeys.producerKeyDn(baseDn(), key);
 		if (!persistenceEntryManager.contains(dn, TraceProducerKeyEntry.class)) {
 			return Optional.empty();
 		}
 		try {
-			TraceProducerKeyEntry entity = persistenceEntryManager.find(dn, TraceProducerKeyEntry.class, null);
-			return Optional.of(TraceEntityMapper.toProducerKey(entity));
+			return Optional.of(persistenceEntryManager.find(dn, TraceProducerKeyEntry.class, null));
 		} catch (EntryPersistenceException e) {
 			log.debug("TRACE producer key {} disappeared before read", key);
 			return Optional.empty();
@@ -415,11 +388,12 @@ public class OrmTraceStore implements TraceStore {
 	}
 
 	@Override
-	public void insertProducerKey(ProducerKey key) throws DuplicateEntryException, TraceStorageException {
-		String mapKey = TraceKeys.producerKeyKey(key.getDomainId(), key.getProducerId(), key.getKid());
-		String dn = TraceKeys.producerKeyDn(baseDn(), mapKey);
-		TraceProducerKeyEntry entity = TraceEntityMapper.toEntity(key, dn);
-		duplicateSafeInsert(dn, TraceProducerKeyEntry.class, entity, mapKey);
+	public void insertProducerKey(TraceProducerKeyEntry entity) throws DuplicateEntryException, TraceStorageException {
+		String key = TraceKeys.producerKeyKey(entity.getDomainId(), entity.getProducerId(), entity.getKid());
+		String dn = TraceKeys.producerKeyDn(baseDn(), key);
+		entity.setId(key);
+		entity.setDn(dn);
+		duplicateSafeInsert(dn, TraceProducerKeyEntry.class, entity, key);
 	}
 
 	@Override
@@ -451,13 +425,11 @@ public class OrmTraceStore implements TraceStore {
 	}
 
 	@Override
-	public List<ProducerKey> findProducerKeys(String domainId, String producerIdOrNull) {
+	public List<TraceProducerKeyEntry> findProducerKeys(String domainId, String producerIdOrNull) {
 		Filter filter = producerIdOrNull == null ? Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId)
 				: Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
 						Filter.createEqualityFilter(ATTR_PRODUCER_ID, producerIdOrNull));
-		List<TraceProducerKeyEntry> entities = persistenceEntryManager.findEntries(keysBase(),
-				TraceProducerKeyEntry.class, filter);
-		return entities.stream().map(TraceEntityMapper::toProducerKey).collect(Collectors.toList());
+		return persistenceEntryManager.findEntries(keysBase(), TraceProducerKeyEntry.class, filter);
 	}
 
 }

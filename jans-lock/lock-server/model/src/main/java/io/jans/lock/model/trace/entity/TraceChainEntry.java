@@ -104,6 +104,15 @@ public class TraceChainEntry extends BaseEntry implements Serializable {
         this.creationDate = creationDate;
     }
 
+    /**
+     * Not persisted (no {@code @AttributeName}); {@link #getCreationDate()} in epoch
+     * milliseconds, or {@code 0} if not set. Chains are create-only, so this is also the
+     * registration time.
+     */
+    public long getRegisteredAtMs() {
+        return creationDate == null ? 0L : creationDate.getTime();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

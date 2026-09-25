@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,17 +22,17 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.jans.lock.model.trace.entity.TraceChainEntry;
+import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
+import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
-import io.jans.lock.service.trace.model.ChainRegistration;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
-import io.jans.lock.service.trace.model.ProducerKey;
 import io.jans.lock.service.trace.model.ReceiptHead;
-import io.jans.lock.service.trace.model.ReceiptRow;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -85,20 +86,51 @@ public abstract class TraceStoreContractTest {
 				receiptSeq, Collections.emptyList(), Collections.emptyList());
 	}
 
-	protected ReceiptRow newReceiptRow(long seq, long receivedAtMs, String producerId, String recordId,
+	protected TraceReceiptEntry newReceiptRow(long seq, long receivedAtMs, String producerId, String recordId,
 			TraceReceiptState state) {
-		return new ReceiptRow(DOMAIN, seq, receivedAtMs, producerId, recordId,
-				TraceKeys.recordKey(new RecordIdentity(DOMAIN, producerId, recordId)),
-				"sha256:" + String.format("%064d", seq), TraceConstants.ZERO_HASH,
-				"sha256:" + String.format("%064d", seq), state, "node-1");
+		TraceReceiptEntry entity = new TraceReceiptEntry();
+		entity.setDomainId(DOMAIN);
+		entity.setReceiptSeq(seq);
+		entity.setReceivedAt(new Date(receivedAtMs));
+		entity.setReceivedAtMs(receivedAtMs);
+		entity.setProducerId(producerId);
+		entity.setRecordId(recordId);
+		entity.setRecordKey(TraceKeys.recordKey(new RecordIdentity(DOMAIN, producerId, recordId)));
+		entity.setContentDigest("sha256:" + String.format("%064d", seq));
+		entity.setPrevReceiptHash(TraceConstants.ZERO_HASH);
+		entity.setReceiptHash("sha256:" + String.format("%064d", seq));
+		entity.setReceiptStateEnum(state);
+		entity.setNodeId("node-1");
+		entity.setCreationDate(new Date(receivedAtMs));
+		return entity;
 	}
 
-	protected ProducerKey newProducerKey(String producerId, String kid) {
+	protected TraceProducerKeyEntry newProducerKey(String producerId, String kid) {
 		Map<String, String> jwk = new LinkedHashMap<>();
 		jwk.put("kty", "OKP");
 		jwk.put("crv", "Ed25519");
 		jwk.put("x", "abc");
-		return new ProducerKey(DOMAIN, producerId, kid, jwk, 100L, null, null, "client-1", 100L);
+		TraceProducerKeyEntry entity = new TraceProducerKeyEntry();
+		entity.setDomainId(DOMAIN);
+		entity.setProducerId(producerId);
+		entity.setKid(kid);
+		entity.setPublicKeyJwk(jwk);
+		entity.setValidFrom(new Date(100L));
+		entity.setRegisteredBy("client-1");
+		entity.setCreationDate(new Date(100L));
+		return entity;
+	}
+
+	protected TraceChainEntry newChainRegistration(ChainIdentity chainIdentity, long registeredAtMs,
+			String registeredBy) {
+		TraceChainEntry entity = new TraceChainEntry();
+		entity.setDomainId(chainIdentity.getDomainId());
+		entity.setProducerId(chainIdentity.getProducerId());
+		entity.setProducerInstanceId(chainIdentity.getProducerInstanceId());
+		entity.setProducerChainId(chainIdentity.getProducerChainId());
+		entity.setRegisteredBy(registeredBy);
+		entity.setCreationDate(new Date(registeredAtMs));
+		return entity;
 	}
 
 	// -- records: insert / duplicate / find --------------------------------------------------
@@ -291,7 +323,7 @@ public abstract class TraceStoreContractTest {
 	void testInsertReceipt_duplicateSequence_throwsDuplicateEntryException() throws Exception {
 		store.insertReceipt(newReceiptRow(1L, 1000L, "producer-1", "record-1", TraceReceiptState.PENDING));
 
-		ReceiptRow conflicting = newReceiptRow(1L, 2000L, "producer-2", "record-2", TraceReceiptState.PENDING);
+		TraceReceiptEntry conflicting = newReceiptRow(1L, 2000L, "producer-2", "record-2", TraceReceiptState.PENDING);
 		assertThrows(DuplicateEntryException.class, () -> store.insertReceipt(conflicting));
 	}
 
@@ -302,9 +334,9 @@ public abstract class TraceStoreContractTest {
 		boolean updated = store.updateReceiptState(DOMAIN, 1L, TraceReceiptState.COMMITTED);
 
 		assertTrue(updated);
-		Optional<ReceiptRow> found = store.findReceipt(DOMAIN, 1L);
+		Optional<TraceReceiptEntry> found = store.findReceipt(DOMAIN, 1L);
 		assertTrue(found.isPresent());
-		assertEquals(TraceReceiptState.COMMITTED, found.get().getState());
+		assertEquals(TraceReceiptState.COMMITTED, found.get().getReceiptStateEnum());
 	}
 
 	@Test
@@ -341,10 +373,10 @@ public abstract class TraceStoreContractTest {
 		store.insertReceipt(newReceiptRow(2L, 5000L, "producer-1", "record-2", TraceReceiptState.PENDING));
 		store.insertReceipt(newReceiptRow(3L, 1000L, "producer-1", "record-3", TraceReceiptState.COMMITTED));
 
-		List<ReceiptRow> pending = store.findPendingReceiptsOlderThan(2000L, 100);
+		List<TraceReceiptEntry> pending = store.findPendingReceiptsOlderThan(2000L, 100);
 
 		assertEquals(1, pending.size());
-		assertEquals(1L, pending.get(0).getReceiptSequence());
+		assertEquals(1L, pending.get(0).getReceiptSeq());
 	}
 
 	@Test
@@ -353,7 +385,7 @@ public abstract class TraceStoreContractTest {
 			store.insertReceipt(newReceiptRow(seq, 1000L, "producer-1", "record-" + seq, TraceReceiptState.PENDING));
 		}
 
-		List<ReceiptRow> pending = store.findPendingReceiptsOlderThan(5000L, 2);
+		List<TraceReceiptEntry> pending = store.findPendingReceiptsOlderThan(5000L, 2);
 
 		assertEquals(2, pending.size());
 	}
@@ -363,9 +395,9 @@ public abstract class TraceStoreContractTest {
 	@Test
 	void testInsertChain_thenFindChain_found() throws Exception {
 		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "producer-1", "instance-1", "chain-1");
-		store.insertChain(new ChainRegistration(chainIdentity, 1000L, "client-1"));
+		store.insertChain(newChainRegistration(chainIdentity, 1000L, "client-1"));
 
-		Optional<ChainRegistration> found = store.findChain(chainIdentity);
+		Optional<TraceChainEntry> found = store.findChain(chainIdentity);
 
 		assertTrue(found.isPresent());
 		assertEquals("client-1", found.get().getRegisteredBy());
@@ -374,17 +406,17 @@ public abstract class TraceStoreContractTest {
 	@Test
 	void testInsertChain_duplicate_throwsDuplicateEntryException() throws Exception {
 		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "producer-1", "instance-1", "chain-1");
-		store.insertChain(new ChainRegistration(chainIdentity, 1000L, "client-1"));
+		store.insertChain(newChainRegistration(chainIdentity, 1000L, "client-1"));
 
-		ChainRegistration conflicting = new ChainRegistration(chainIdentity, 2000L, "client-2");
+		TraceChainEntry conflicting = newChainRegistration(chainIdentity, 2000L, "client-2");
 		assertThrows(DuplicateEntryException.class, () -> store.insertChain(conflicting));
 	}
 
 	@Test
 	void testFindChains_filtersByProducerWhenGiven() throws Exception {
-		store.insertChain(new ChainRegistration(new ChainIdentity(DOMAIN, "producer-1", "instance-1", "chain-1"), 1000L,
+		store.insertChain(newChainRegistration(new ChainIdentity(DOMAIN, "producer-1", "instance-1", "chain-1"), 1000L,
 				"client-1"));
-		store.insertChain(new ChainRegistration(new ChainIdentity(DOMAIN, "producer-2", "instance-1", "chain-2"), 1000L,
+		store.insertChain(newChainRegistration(new ChainIdentity(DOMAIN, "producer-2", "instance-1", "chain-2"), 1000L,
 				"client-1"));
 
 		assertEquals(2, store.findChains(DOMAIN, null).size());
@@ -397,7 +429,7 @@ public abstract class TraceStoreContractTest {
 	void testInsertProducerKey_thenFindProducerKey_found() throws Exception {
 		store.insertProducerKey(newProducerKey("producer-1", "kid-1"));
 
-		Optional<ProducerKey> found = store.findProducerKey(DOMAIN, "producer-1", "kid-1");
+		Optional<TraceProducerKeyEntry> found = store.findProducerKey(DOMAIN, "producer-1", "kid-1");
 
 		assertTrue(found.isPresent());
 		assertEquals("kid-1", found.get().getKid());
@@ -420,7 +452,7 @@ public abstract class TraceStoreContractTest {
 
 		assertTrue(first);
 		assertTrue(second);
-		Optional<ProducerKey> found = store.findProducerKey(DOMAIN, "producer-1", "kid-1");
+		Optional<TraceProducerKeyEntry> found = store.findProducerKey(DOMAIN, "producer-1", "kid-1");
 		assertTrue(found.isPresent());
 		assertEquals(Long.valueOf(5000L), found.get().getRevokedAtMs());
 	}

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,8 @@ import io.jans.lock.model.trace.api.ProducerKeyRegistrationRequest;
 import io.jans.lock.model.trace.api.ProducerKeyResponse;
 import io.jans.lock.model.trace.api.ProducerKeyRevokeRequest;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.model.trace.entity.TraceChainEntry;
+import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceValidationException;
@@ -53,8 +56,6 @@ import io.jans.lock.service.trace.identity.SubmitterIdentity;
 import io.jans.lock.service.trace.identity.SubmitterIdentityService;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.model.ChainIdentity;
-import io.jans.lock.service.trace.model.ChainRegistration;
-import io.jans.lock.service.trace.model.ProducerKey;
 import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.registry.ProducerKeyRegistry;
 import io.jans.lock.util.ApiAccessConstants;
@@ -146,9 +147,34 @@ class TraceAdminRestWebServiceImplTest {
 		return jwk;
 	}
 
-	private static ProducerKey producerKey() {
-		return new ProducerKey(DOMAIN, "cedarling-fleet-1/1.0.0", "kid-1", jwk(), 1000L, null, null, CLIENT_ID,
-				1000L);
+	private static TraceProducerKeyEntry producerKey() {
+		TraceProducerKeyEntry key = new TraceProducerKeyEntry();
+		key.setDomainId(DOMAIN);
+		key.setProducerId("cedarling-fleet-1/1.0.0");
+		key.setKid("kid-1");
+		key.setPublicKeyJwk(jwk());
+		key.setValidFrom(new Date(1000L));
+		key.setRegisteredBy(CLIENT_ID);
+		key.setCreationDate(new Date(1000L));
+		return key;
+	}
+
+	private static TraceProducerKeyEntry producerKeyRevokedAt(long revokedAtMs) {
+		TraceProducerKeyEntry key = producerKey();
+		key.setRevokedAt(new Date(revokedAtMs));
+		return key;
+	}
+
+	private static TraceChainEntry newChainEntity(ChainIdentity chainIdentity, long registeredAtMs,
+			String registeredBy) {
+		TraceChainEntry entity = new TraceChainEntry();
+		entity.setDomainId(chainIdentity.getDomainId());
+		entity.setProducerId(chainIdentity.getProducerId());
+		entity.setProducerInstanceId(chainIdentity.getProducerInstanceId());
+		entity.setProducerChainId(chainIdentity.getProducerChainId());
+		entity.setRegisteredBy(registeredBy);
+		entity.setCreationDate(new Date(registeredAtMs));
+		return entity;
 	}
 
 	// -- registerProducerKey -----------------------------------------------------------------------
@@ -266,7 +292,7 @@ class TraceAdminRestWebServiceImplTest {
 		request.setKid("kid-1");
 
 		when(producerKeyRegistry.revoke(DOMAIN, "cedarling-fleet-1/1.0.0", "kid-1", 5000L))
-				.thenReturn(Optional.of(producerKey().withRevokedAt(5000L)));
+				.thenReturn(Optional.of(producerKeyRevokedAt(5000L)));
 
 		Response response = impl.revokeProducerKey(request);
 
@@ -312,7 +338,7 @@ class TraceAdminRestWebServiceImplTest {
 		request.setProducerChainId("chain-1");
 
 		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "cedarling-fleet-1/1.0.0", "instance-1", "chain-1");
-		ChainRegistration registration = new ChainRegistration(chainIdentity, 5000L, CLIENT_ID);
+		TraceChainEntry registration = newChainEntity(chainIdentity, 5000L, CLIENT_ID);
 		when(producerChainRegistry.register(chainIdentity, CLIENT_ID, 5000L)).thenReturn(registration);
 
 		Response response = impl.registerProducerChain(request);
@@ -344,7 +370,7 @@ class TraceAdminRestWebServiceImplTest {
 	@Test
 	void testListProducerChains_HappyPath_Returns200() {
 		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "cedarling-fleet-1/1.0.0", "instance-1", "chain-1");
-		ChainRegistration registration = new ChainRegistration(chainIdentity, 5000L, CLIENT_ID);
+		TraceChainEntry registration = newChainEntity(chainIdentity, 5000L, CLIENT_ID);
 		when(producerChainRegistry.list(DOMAIN, null)).thenReturn(List.of(registration));
 
 		Response response = impl.listProducerChains(null);

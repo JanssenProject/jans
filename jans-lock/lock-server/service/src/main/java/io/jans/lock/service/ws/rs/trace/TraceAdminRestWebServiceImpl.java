@@ -31,6 +31,8 @@ import io.jans.lock.model.trace.api.ProducerKeyListResponse;
 import io.jans.lock.model.trace.api.ProducerKeyRegistrationRequest;
 import io.jans.lock.model.trace.api.ProducerKeyResponse;
 import io.jans.lock.model.trace.api.ProducerKeyRevokeRequest;
+import io.jans.lock.model.trace.entity.TraceChainEntry;
+import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.trace.error.TraceErrors;
 import io.jans.lock.service.trace.error.TraceValidationException;
@@ -39,8 +41,6 @@ import io.jans.lock.service.trace.identity.SubmitterIdentity;
 import io.jans.lock.service.trace.identity.SubmitterIdentityService;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.model.ChainIdentity;
-import io.jans.lock.service.trace.model.ChainRegistration;
-import io.jans.lock.service.trace.model.ProducerKey;
 import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.registry.ProducerKeyRegistry;
 import io.jans.lock.service.ws.rs.base.BaseResource;
@@ -164,7 +164,7 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 			long validFromMs = parseRequiredTimestamp(request.getValidFrom());
 			Long validUntilMs = parseOptionalTimestamp(request.getValidUntil());
 
-			ProducerKey key = producerKeyRegistry.register(context.getEvidenceDomainId(), request.getProducerId(),
+			TraceProducerKeyEntry key = producerKeyRegistry.register(context.getEvidenceDomainId(), request.getProducerId(),
 					request.getKid(), request.getPublicKeyJwk(), validFromMs, validUntilMs, context.getClientId(),
 					context.getReceivedAtMs());
 
@@ -188,7 +188,7 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 			checkEnabled();
 			TraceRequestContext context = resolveContext();
 
-			List<ProducerKey> keys = producerKeyRegistry.list(context.getEvidenceDomainId(), producerId);
+			List<TraceProducerKeyEntry> keys = producerKeyRegistry.list(context.getEvidenceDomainId(), producerId);
 
 			ProducerKeyListResponse body = new ProducerKeyListResponse();
 			body.setKeys(keys.stream().map(this::toResponse).collect(Collectors.toList()));
@@ -215,9 +215,9 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 			requireNonBlank(request.getProducerId(), "producer_id");
 			requireNonBlank(request.getKid(), "kid");
 
-			Optional<ProducerKey> revoked = producerKeyRegistry.revoke(context.getEvidenceDomainId(),
+			Optional<TraceProducerKeyEntry> revoked = producerKeyRegistry.revoke(context.getEvidenceDomainId(),
 					request.getProducerId(), request.getKid(), context.getReceivedAtMs());
-			ProducerKey key = revoked.orElseThrow(() -> new TraceValidationException(
+			TraceProducerKeyEntry key = revoked.orElseThrow(() -> new TraceValidationException(
 					TraceErrorResponseType.RECORD_NOT_FOUND, "key_not_registered"));
 
 			response = Response.ok(toResponse(key)).cacheControl(ServerUtil.cacheControl(true)).build();
@@ -245,7 +245,7 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 					Objects.toString(request.getProducerInstanceId(), ""),
 					Objects.toString(request.getProducerChainId(), ""));
 
-			ChainRegistration registration = producerChainRegistry.register(chainIdentity, context.getClientId(),
+			TraceChainEntry registration = producerChainRegistry.register(chainIdentity, context.getClientId(),
 					context.getReceivedAtMs());
 
 			response = Response.status(Response.Status.CREATED).cacheControl(ServerUtil.cacheControl(true))
@@ -268,7 +268,7 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 			checkEnabled();
 			TraceRequestContext context = resolveContext();
 
-			List<ChainRegistration> chains = producerChainRegistry.list(context.getEvidenceDomainId(), producerId);
+			List<TraceChainEntry> chains = producerChainRegistry.list(context.getEvidenceDomainId(), producerId);
 
 			ProducerChainListResponse body = new ProducerChainListResponse();
 			body.setChains(chains.stream().map(this::toResponse).collect(Collectors.toList()));
@@ -340,7 +340,7 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 
 	// -- DTO mapping ------------------------------------------------------------------------------
 
-	private ProducerKeyResponse toResponse(ProducerKey key) {
+	private ProducerKeyResponse toResponse(TraceProducerKeyEntry key) {
 		ProducerKeyResponse response = new ProducerKeyResponse();
 		response.setEvidenceDomainId(key.getDomainId());
 		response.setProducerId(key.getProducerId());
@@ -354,14 +354,12 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 		return response;
 	}
 
-	private ProducerChainResponse toResponse(ChainRegistration registration) {
-		ChainIdentity identity = registration.getChainIdentity();
-
+	private ProducerChainResponse toResponse(TraceChainEntry registration) {
 		ProducerChainResponse response = new ProducerChainResponse();
-		response.setEvidenceDomainId(identity.getDomainId());
-		response.setProducerId(identity.getProducerId());
-		response.setProducerInstanceId(identity.getProducerInstanceId());
-		response.setProducerChainId(identity.getProducerChainId());
+		response.setEvidenceDomainId(registration.getDomainId());
+		response.setProducerId(registration.getProducerId());
+		response.setProducerInstanceId(registration.getProducerInstanceId());
+		response.setProducerChainId(registration.getProducerChainId());
 		response.setRegisteredBy(registration.getRegisteredBy());
 		response.setCreatedAt(formatInstant(registration.getRegisteredAtMs()));
 		return response;

@@ -7,6 +7,7 @@
 package io.jans.lock.service.trace.registry;
 
 import java.security.PublicKey;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,12 +18,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
+import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
-import io.jans.lock.service.trace.model.ProducerKey;
 import io.jans.lock.service.trace.store.TraceStore;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -90,7 +91,7 @@ public class ProducerKeyRegistry {
 	 *                                  key is outside its validity window
 	 */
 	public ResolvedKey resolveForVerification(String domainId, String producerId, String kid, long nowMs) {
-		ProducerKey key = traceStore.findProducerKey(domainId, producerId, kid)
+		TraceProducerKeyEntry key = traceStore.findProducerKey(domainId, producerId, kid)
 				.orElseThrow(() -> new TraceValidationException(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY,
 						REASON_KEY_NOT_REGISTERED));
 
@@ -131,7 +132,7 @@ public class ProducerKeyRegistry {
 	 * @throws TraceConflictException   {@code key_already_exists} when this
 	 *                                  {@code (domainId, producerId, kid)} is already registered
 	 */
-	public ProducerKey register(String domainId, String producerId, String kid, Map<String, String> jwk,
+	public TraceProducerKeyEntry register(String domainId, String producerId, String kid, Map<String, String> jwk,
 			long validFromMs, Long validUntilMs, String registeredBy, long nowMs) {
 		Ed25519PublicKeys.fromJwk(jwk);
 
@@ -148,8 +149,15 @@ public class ProducerKeyRegistry {
 			throw new TraceValidationException(TraceErrorResponseType.INVALID_KEY, REASON_KID_LENGTH);
 		}
 
-		ProducerKey key = new ProducerKey(domainId, producerId, kid, jwk, validFromMs, validUntilMs, null,
-				registeredBy, nowMs);
+		TraceProducerKeyEntry key = new TraceProducerKeyEntry();
+		key.setDomainId(domainId);
+		key.setProducerId(producerId);
+		key.setKid(kid);
+		key.setPublicKeyJwk(jwk);
+		key.setValidFrom(new Date(validFromMs));
+		key.setValidUntil(validUntilMs == null ? null : new Date(validUntilMs));
+		key.setRegisteredBy(registeredBy);
+		key.setCreationDate(new Date(nowMs));
 		try {
 			traceStore.insertProducerKey(key);
 		} catch (DuplicateEntryException ex) {
@@ -164,7 +172,7 @@ public class ProducerKeyRegistry {
 	 *
 	 * @return the key after revocation, or {@link Optional#empty()} if no such key is registered
 	 */
-	public Optional<ProducerKey> revoke(String domainId, String producerId, String kid, long nowMs) {
+	public Optional<TraceProducerKeyEntry> revoke(String domainId, String producerId, String kid, long nowMs) {
 		boolean found = traceStore.revokeProducerKey(domainId, producerId, kid, nowMs);
 		if (!found) {
 			return Optional.empty();
@@ -176,7 +184,7 @@ public class ProducerKeyRegistry {
 	 * @param producerIdOrNull restricts the result to one producer, or {@code null} for all
 	 *                          producers in the domain
 	 */
-	public List<ProducerKey> list(String domainId, String producerIdOrNull) {
+	public List<TraceProducerKeyEntry> list(String domainId, String producerIdOrNull) {
 		return traceStore.findProducerKeys(domainId, producerIdOrNull);
 	}
 
@@ -200,16 +208,16 @@ public class ProducerKeyRegistry {
 	 */
 	public static final class ResolvedKey {
 
-		private final ProducerKey key;
+		private final TraceProducerKeyEntry key;
 
 		private final PublicKey publicKey;
 
-		ResolvedKey(ProducerKey key, PublicKey publicKey) {
+		ResolvedKey(TraceProducerKeyEntry key, PublicKey publicKey) {
 			this.key = Objects.requireNonNull(key, "key");
 			this.publicKey = Objects.requireNonNull(publicKey, "publicKey");
 		}
 
-		public ProducerKey getKey() {
+		public TraceProducerKeyEntry getKey() {
 			return key;
 		}
 

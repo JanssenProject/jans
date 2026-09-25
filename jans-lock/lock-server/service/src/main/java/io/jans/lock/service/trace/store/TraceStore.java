@@ -9,17 +9,17 @@ package io.jans.lock.service.trace.store;
 import java.util.List;
 import java.util.Optional;
 
+import io.jans.lock.model.trace.entity.TraceChainEntry;
+import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
+import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
-import io.jans.lock.service.trace.model.ChainRegistration;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
-import io.jans.lock.service.trace.model.ProducerKey;
 import io.jans.lock.service.trace.model.ReceiptHead;
-import io.jans.lock.service.trace.model.ReceiptRow;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -94,12 +94,18 @@ public interface TraceStore {
 	// -- receipts -------------------------------------------------------------------------------
 
 	/**
+	 * Inserts a receipt-chain position allocation claim. The caller sets only the business fields
+	 * ({@code domainId}, {@code receiptSeq}, {@code receivedAt(Ms)}, {@code producerId},
+	 * {@code recordId}, {@code recordKey}, {@code contentDigest}, {@code prevReceiptHash},
+	 * {@code receiptHash}, {@code receiptState}, {@code nodeId}); the store computes and sets
+	 * {@code id}/{@code dn} from the D-6 key function.
+	 *
 	 * @throws DuplicateEntryException if a receipt already exists at this
 	 *                                  {@code (domainId, receiptSequence)} (design decision D-8
 	 *                                  step 4 — another node claimed the sequence)
 	 * @throws TraceStorageException   on any other persistence failure
 	 */
-	void insertReceipt(ReceiptRow row) throws DuplicateEntryException, TraceStorageException;
+	void insertReceipt(TraceReceiptEntry row) throws DuplicateEntryException, TraceStorageException;
 
 	/**
 	 * @return {@code true} if a matching receipt was found and updated, {@code false} otherwise
@@ -114,43 +120,53 @@ public interface TraceStore {
 	 */
 	Optional<ReceiptHead> findReceiptHead(String domainId);
 
-	Optional<ReceiptRow> findReceipt(String domainId, long receiptSequence);
+	Optional<TraceReceiptEntry> findReceipt(String domainId, long receiptSequence);
 
 	/**
 	 * @return {@code PENDING} receipts received before {@code cutoffMs}, across every domain,
 	 *         limited to {@code limit} rows — feeds {@code TraceReceiptRepairTimer} (task 18)
 	 */
-	List<ReceiptRow> findPendingReceiptsOlderThan(long cutoffMs, int limit);
+	List<TraceReceiptEntry> findPendingReceiptsOlderThan(long cutoffMs, int limit);
 
 	// -- registries -----------------------------------------------------------------------------
 
-	Optional<ChainRegistration> findChain(ChainIdentity id);
+	Optional<TraceChainEntry> findChain(ChainIdentity id);
 
 	/**
+	 * Registers a producer chain. The caller sets only the business fields ({@code domainId},
+	 * {@code producerId}, {@code producerInstanceId}, {@code producerChainId},
+	 * {@code registeredBy}, {@code creationDate}); the store computes and sets {@code id}/
+	 * {@code dn} from the D-6 key function.
+	 *
 	 * @throws DuplicateEntryException if this chain is already registered (admin:
 	 *                                  {@code chain_already_exists})
 	 * @throws TraceStorageException   on any other persistence failure
 	 */
-	void insertChain(ChainRegistration registration) throws DuplicateEntryException, TraceStorageException;
+	void insertChain(TraceChainEntry registration) throws DuplicateEntryException, TraceStorageException;
 
 	/**
 	 * @param producerIdOrNull restricts the result to one producer, or {@code null} for all
 	 *                          producers in the domain
 	 */
-	List<ChainRegistration> findChains(String domainId, String producerIdOrNull);
+	List<TraceChainEntry> findChains(String domainId, String producerIdOrNull);
 
-	Optional<ProducerKey> findProducerKey(String domainId, String producerId, String kid);
+	Optional<TraceProducerKeyEntry> findProducerKey(String domainId, String producerId, String kid);
 
 	/**
+	 * Registers a producer key. The caller sets only the business fields ({@code domainId},
+	 * {@code producerId}, {@code kid}, {@code publicKeyJwk}, {@code validFrom}, {@code validUntil},
+	 * {@code registeredBy}, {@code creationDate}); the store computes and sets {@code id}/
+	 * {@code dn} from the D-6 key function.
+	 *
 	 * @throws DuplicateEntryException if this {@code (domainId, producerId, kid)} is already
 	 *                                  registered (admin: {@code key_already_exists})
 	 * @throws TraceStorageException   on any other persistence failure
 	 */
-	void insertProducerKey(ProducerKey key) throws DuplicateEntryException, TraceStorageException;
+	void insertProducerKey(TraceProducerKeyEntry key) throws DuplicateEntryException, TraceStorageException;
 
 	/**
 	 * Idempotent: revoking an already-revoked key succeeds without changing its
-	 * {@code revokedAtMs}.
+	 * {@code revokedAt}.
 	 *
 	 * @return {@code true} if a matching key was found (whether or not it was already revoked),
 	 *         {@code false} if no such key exists
@@ -163,6 +179,6 @@ public interface TraceStore {
 	 * @param producerIdOrNull restricts the result to one producer, or {@code null} for all
 	 *                          producers in the domain
 	 */
-	List<ProducerKey> findProducerKeys(String domainId, String producerIdOrNull);
+	List<TraceProducerKeyEntry> findProducerKeys(String domainId, String producerIdOrNull);
 
 }

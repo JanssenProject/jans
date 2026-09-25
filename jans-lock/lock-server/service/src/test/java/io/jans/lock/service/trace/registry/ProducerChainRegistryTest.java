@@ -17,11 +17,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
+import io.jans.lock.model.trace.entity.TraceChainEntry;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.ChainIdentity;
-import io.jans.lock.service.trace.model.ChainRegistration;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 
 /**
@@ -69,18 +69,18 @@ class ProducerChainRegistryTest {
 	void testRequireRegistered_Registered_ReturnsRegistration() {
 		registry.register(chainIdentity(), REGISTERED_BY, 1000L);
 
-		ChainRegistration found = registry.requireRegistered(chainIdentity());
+		TraceChainEntry found = registry.requireRegistered(chainIdentity());
 
-		assertEquals(chainIdentity(), found.getChainIdentity());
+		assertEquals(chainIdentity(), toChainIdentity(found));
 	}
 
 	// -- register ---------------------------------------------------------------------------------
 
 	@Test
 	void testRegister_NewChain_Succeeds() {
-		ChainRegistration registration = registry.register(chainIdentity(), REGISTERED_BY, 1000L);
+		TraceChainEntry registration = registry.register(chainIdentity(), REGISTERED_BY, 1000L);
 
-		assertEquals(chainIdentity(), registration.getChainIdentity());
+		assertEquals(chainIdentity(), toChainIdentity(registration));
 		assertEquals(1000L, registration.getRegisteredAtMs());
 		assertEquals(REGISTERED_BY, registration.getRegisteredBy());
 	}
@@ -152,10 +152,15 @@ class ProducerChainRegistryTest {
 		registry.register(chainIdentity(), REGISTERED_BY, 1000L);
 		registry.register(new ChainIdentity(DOMAIN, "other-producer/2.0.0", INSTANCE, CHAIN), REGISTERED_BY, 1000L);
 
-		List<ChainRegistration> filtered = registry.list(DOMAIN, PRODUCER);
+		List<TraceChainEntry> filtered = registry.list(DOMAIN, PRODUCER);
 
 		assertEquals(1, filtered.size());
-		assertTrue(filtered.get(0).getChainIdentity().getProducerId().equals(PRODUCER));
+		assertTrue(filtered.get(0).getProducerId().equals(PRODUCER));
+	}
+
+	private static ChainIdentity toChainIdentity(TraceChainEntry entity) {
+		return new ChainIdentity(entity.getDomainId(), entity.getProducerId(), entity.getProducerInstanceId(),
+				entity.getProducerChainId());
 	}
 
 	private static String repeat(char c, int count) {

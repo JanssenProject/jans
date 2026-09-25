@@ -15,6 +15,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -22,14 +23,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.slf4j.LoggerFactory;
 
-import io.jans.lock.model.config.BaseDnConfiguration;
-import io.jans.lock.model.config.StaticConfiguration;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceStorageException;
-import io.jans.lock.service.trace.model.ProducerKey;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 
@@ -55,24 +52,23 @@ class OrmTraceStoreDuplicateDetectionTest {
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
-
-		BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
-		baseDnConfiguration.setTrace("ou=trace,ou=lock,o=jans");
-		StaticConfiguration staticConfiguration = new StaticConfiguration();
-		staticConfiguration.setBaseDn(baseDnConfiguration);
-
-		store = new OrmTraceStore();
-		store.setLog(LoggerFactory.getLogger(OrmTraceStore.class));
-		store.setPersistenceEntryManager(persistenceEntryManager);
-		store.setStaticConfiguration(staticConfiguration);
+		store = OrmTraceStores.create(persistenceEntryManager);
 	}
 
-	private static ProducerKey newProducerKey() {
+	private static TraceProducerKeyEntry newProducerKey() {
 		Map<String, String> jwk = new LinkedHashMap<>();
 		jwk.put("kty", "OKP");
 		jwk.put("crv", "Ed25519");
 		jwk.put("x", "abc");
-		return new ProducerKey(DOMAIN, "producer-1", "kid-1", jwk, 100L, null, null, "client-1", 100L);
+		TraceProducerKeyEntry key = new TraceProducerKeyEntry();
+		key.setDomainId(DOMAIN);
+		key.setProducerId("producer-1");
+		key.setKid("kid-1");
+		key.setPublicKeyJwk(jwk);
+		key.setValidFrom(new Date(100L));
+		key.setRegisteredBy("client-1");
+		key.setCreationDate(new Date(100L));
+		return key;
 	}
 
 	@Test

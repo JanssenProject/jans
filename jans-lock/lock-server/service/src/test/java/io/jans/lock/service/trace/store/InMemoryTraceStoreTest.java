@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -20,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
@@ -29,7 +31,6 @@ import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.ReceiptEntry;
-import io.jans.lock.service.trace.model.ReceiptRow;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.VerificationResult;
@@ -80,9 +81,7 @@ class InMemoryTraceStoreTest extends TraceStoreContractTest {
 		InMemoryTraceStore inMemoryStore = (InMemoryTraceStore) store;
 		inMemoryStore.failNextInsertReceipt();
 
-		ReceiptRow row = new ReceiptRow(DOMAIN, 1L, 1000L, "producer-1", "record-1", "rec-key",
-				"sha256:" + String.format("%064d", 1), TraceConstants.ZERO_HASH,
-				"sha256:" + String.format("%064d", 1), TraceReceiptState.PENDING, "node-1");
+		TraceReceiptEntry row = newReceiptEntry(1L);
 
 		assertThrows(TraceStorageException.class, () -> inMemoryStore.insertReceipt(row));
 		assertFalse(inMemoryStore.findReceipt(DOMAIN, 1L).isPresent());
@@ -94,19 +93,34 @@ class InMemoryTraceStoreTest extends TraceStoreContractTest {
 	@Test
 	void testFailNextUpdateReceiptState_throwsOnce_thenSucceeds() throws Exception {
 		InMemoryTraceStore inMemoryStore = (InMemoryTraceStore) store;
-		ReceiptRow row = new ReceiptRow(DOMAIN, 1L, 1000L, "producer-1", "record-1", "rec-key",
-				"sha256:" + String.format("%064d", 1), TraceConstants.ZERO_HASH,
-				"sha256:" + String.format("%064d", 1), TraceReceiptState.PENDING, "node-1");
+		TraceReceiptEntry row = newReceiptEntry(1L);
 		inMemoryStore.insertReceipt(row);
 
 		inMemoryStore.failNextUpdateReceiptState();
 		assertThrows(TraceStorageException.class,
 				() -> inMemoryStore.updateReceiptState(DOMAIN, 1L, TraceReceiptState.COMMITTED));
-		assertEquals(TraceReceiptState.PENDING, inMemoryStore.findReceipt(DOMAIN, 1L).get().getState());
+		assertEquals(TraceReceiptState.PENDING, inMemoryStore.findReceipt(DOMAIN, 1L).get().getReceiptStateEnum());
 
 		boolean updated = inMemoryStore.updateReceiptState(DOMAIN, 1L, TraceReceiptState.COMMITTED);
 		assertTrue(updated);
-		assertEquals(TraceReceiptState.COMMITTED, inMemoryStore.findReceipt(DOMAIN, 1L).get().getState());
+		assertEquals(TraceReceiptState.COMMITTED, inMemoryStore.findReceipt(DOMAIN, 1L).get().getReceiptStateEnum());
+	}
+
+	private static TraceReceiptEntry newReceiptEntry(long seq) {
+		TraceReceiptEntry entity = new TraceReceiptEntry();
+		entity.setDomainId(DOMAIN);
+		entity.setReceiptSeq(seq);
+		entity.setReceivedAt(new Date(1000L));
+		entity.setReceivedAtMs(1000L);
+		entity.setProducerId("producer-1");
+		entity.setRecordId("record-1");
+		entity.setRecordKey("rec-key");
+		entity.setContentDigest("sha256:" + String.format("%064d", 1));
+		entity.setPrevReceiptHash(TraceConstants.ZERO_HASH);
+		entity.setReceiptHash("sha256:" + String.format("%064d", 1));
+		entity.setReceiptStateEnum(TraceReceiptState.PENDING);
+		entity.setNodeId("node-1");
+		return entity;
 	}
 
 	@Test

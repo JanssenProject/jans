@@ -9,8 +9,11 @@ package io.jans.lock.service.trace.store;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,17 +22,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import io.jans.lock.model.trace.entity.TraceChainEntry;
+import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
+import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
-import io.jans.lock.service.trace.model.ChainRegistration;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
-import io.jans.lock.service.trace.model.ProducerKey;
 import io.jans.lock.service.trace.model.ReceiptHead;
-import io.jans.lock.service.trace.model.ReceiptRow;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -40,10 +43,11 @@ import io.jans.lock.service.trace.model.TokenRef;
  * keyed by the {@link TraceKeys} outputs, so the same collision-freedom guarantees apply as to a
  * real backend.
  *
- * <p>Every stored value is either inherently immutable ({@code String}/{@code long}/enum) or, for
- * {@link StoredTraceRecord} and {@link ProducerKey} (which carry the mutable
- * {@link IngestionFlags} or a {@code Map}), defensively copied on the way in and out, so a caller
- * can never mutate what the store holds (design rule 4: immutability of evidence).
+ * <p>Every stored value is either inherently immutable ({@code String}/{@code long}/enum) or,
+ * for {@link StoredTraceRecord} and the mutable jans-orm entities ({@link TraceReceiptEntry},
+ * {@link TraceChainEntry}, {@link TraceProducerKeyEntry} — which carry a {@code Map} or plain
+ * setters), defensively copied on the way in and out, so a caller can never mutate what the store
+ * holds (design rule 4: immutability of evidence).
  *
  * <p>Test hooks: {@link #failNextInsertRecord()}, {@link #failNextInsertReceipt()},
  * {@link #failNextUpdateReceiptState()} make the next matching call throw
@@ -58,11 +62,11 @@ public class InMemoryTraceStore implements TraceStore {
 
 	private final ConcurrentHashMap<String, StoredTraceRecord> recordsByKey = new ConcurrentHashMap<>();
 
-	private final ConcurrentHashMap<String, ReceiptRow> receiptsByKey = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, TraceReceiptEntry> receiptsByKey = new ConcurrentHashMap<>();
 
-	private final ConcurrentHashMap<String, ChainRegistration> chainsByKey = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, TraceChainEntry> chainsByKey = new ConcurrentHashMap<>();
 
-	private final ConcurrentHashMap<String, ProducerKey> producerKeysByKey = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, TraceProducerKeyEntry> producerKeysByKey = new ConcurrentHashMap<>();
 
 	private final AtomicBoolean failNextInsertRecord = new AtomicBoolean(false);
 
@@ -81,7 +85,7 @@ public class InMemoryTraceStore implements TraceStore {
 		failNextInsertRecord.set(true);
 	}
 
-	/** The next {@link #insertReceipt(ReceiptRow)} call throws {@link TraceStorageException}. */
+	/** The next {@link #insertReceipt(TraceReceiptEntry)} call throws {@link TraceStorageException}. */
 	public void failNextInsertReceipt() {
 		failNextInsertReceipt.set(true);
 	}
@@ -232,12 +236,13 @@ public class InMemoryTraceStore implements TraceStore {
 	// -- receipts -------------------------------------------------------------------------------
 
 	@Override
-	public void insertReceipt(ReceiptRow row) throws DuplicateEntryException, TraceStorageException {
+	public void insertReceipt(TraceReceiptEntry row) throws DuplicateEntryException, TraceStorageException {
 		if (failNextInsertReceipt.getAndSet(false)) {
 			throw new TraceStorageException("test_fail_next_insert_receipt", "Forced test failure");
 		}
-		String key = TraceKeys.receiptKey(row.getDomainId(), row.getReceiptSequence());
-		ReceiptRow existing = receiptsByKey.putIfAbsent(key, row);
+		String key = TraceKeys.receiptKey(row.getDomainId(), row.getReceiptSeq());
+		row.setId(key);
+		TraceReceiptEntry existing = receiptsByKey.putIfAbsent(key, copyOf(row));
 		if (existing != null) {
 			throw new DuplicateEntryException(key);
 		}
@@ -250,9 +255,10 @@ public class InMemoryTraceStore implements TraceStore {
 			throw new TraceStorageException("test_fail_next_update_receipt_state", "Forced test failure");
 		}
 		String key = TraceKeys.receiptKey(domainId, receiptSequence);
-		ReceiptRow[] holder = new ReceiptRow[1];
+		TraceReceiptEntry[] holder = new TraceReceiptEntry[1];
 		receiptsByKey.computeIfPresent(key, (k, existing) -> {
-			ReceiptRow replacement = existing.withState(state);
+			TraceReceiptEntry replacement = copyOf(existing);
+			replacement.setReceiptStateEnum(state);
 			holder[0] = replacement;
 			return replacement;
 		});
@@ -262,57 +268,62 @@ public class InMemoryTraceStore implements TraceStore {
 	@Override
 	public Optional<ReceiptHead> findReceiptHead(String domainId) {
 		return receiptsByKey.values().stream().filter(r -> r.getDomainId().equals(domainId))
-				.max(Comparator.comparingLong(ReceiptRow::getReceiptSequence))
-				.map(r -> new ReceiptHead(r.getReceiptSequence(), r.getReceiptHash()));
+				.max(Comparator.comparingLong(TraceReceiptEntry::getReceiptSeq))
+				.map(r -> new ReceiptHead(r.getReceiptSeq(), r.getReceiptHash()));
 	}
 
 	@Override
-	public Optional<ReceiptRow> findReceipt(String domainId, long receiptSequence) {
-		return Optional.ofNullable(receiptsByKey.get(TraceKeys.receiptKey(domainId, receiptSequence)));
+	public Optional<TraceReceiptEntry> findReceipt(String domainId, long receiptSequence) {
+		return Optional.ofNullable(receiptsByKey.get(TraceKeys.receiptKey(domainId, receiptSequence)))
+				.map(InMemoryTraceStore::copyOf);
 	}
 
 	@Override
-	public List<ReceiptRow> findPendingReceiptsOlderThan(long cutoffMs, int limit) {
+	public List<TraceReceiptEntry> findPendingReceiptsOlderThan(long cutoffMs, int limit) {
 		return receiptsByKey.values().stream()
-				.filter(r -> r.getState() == TraceReceiptState.PENDING && r.getReceivedAtMs() < cutoffMs)
-				.sorted(Comparator.comparingLong(ReceiptRow::getReceivedAtMs)).limit(Math.max(0, limit))
-				.collect(Collectors.toList());
+				.filter(r -> r.getReceiptStateEnum() == TraceReceiptState.PENDING && r.getReceivedAtMs() < cutoffMs)
+				.sorted(Comparator.comparingLong(TraceReceiptEntry::getReceivedAtMs)).limit(Math.max(0, limit))
+				.map(InMemoryTraceStore::copyOf).collect(Collectors.toList());
 	}
 
 	// -- registries -----------------------------------------------------------------------------
 
 	@Override
-	public Optional<ChainRegistration> findChain(ChainIdentity id) {
-		return Optional.ofNullable(chainsByKey.get(TraceKeys.chainKey(id)));
+	public Optional<TraceChainEntry> findChain(ChainIdentity id) {
+		return Optional.ofNullable(chainsByKey.get(TraceKeys.chainKey(id))).map(InMemoryTraceStore::copyOf);
 	}
 
 	@Override
-	public void insertChain(ChainRegistration registration) throws DuplicateEntryException, TraceStorageException {
-		String key = TraceKeys.chainKey(registration.getChainIdentity());
-		ChainRegistration existing = chainsByKey.putIfAbsent(key, registration);
+	public void insertChain(TraceChainEntry registration) throws DuplicateEntryException, TraceStorageException {
+		ChainIdentity identity = new ChainIdentity(registration.getDomainId(), registration.getProducerId(),
+				registration.getProducerInstanceId(), registration.getProducerChainId());
+		String key = TraceKeys.chainKey(identity);
+		registration.setId(key);
+		TraceChainEntry existing = chainsByKey.putIfAbsent(key, copyOf(registration));
 		if (existing != null) {
 			throw new DuplicateEntryException(key);
 		}
 	}
 
 	@Override
-	public List<ChainRegistration> findChains(String domainId, String producerIdOrNull) {
+	public List<TraceChainEntry> findChains(String domainId, String producerIdOrNull) {
 		return chainsByKey.values().stream()
-				.filter(c -> c.getChainIdentity().getDomainId().equals(domainId) && (producerIdOrNull == null
-						|| c.getChainIdentity().getProducerId().equals(producerIdOrNull)))
-				.collect(Collectors.toList());
+				.filter(c -> c.getDomainId().equals(domainId)
+						&& (producerIdOrNull == null || c.getProducerId().equals(producerIdOrNull)))
+				.map(InMemoryTraceStore::copyOf).collect(Collectors.toList());
 	}
 
 	@Override
-	public Optional<ProducerKey> findProducerKey(String domainId, String producerId, String kid) {
-		ProducerKey found = producerKeysByKey.get(TraceKeys.producerKeyKey(domainId, producerId, kid));
-		return Optional.ofNullable(found);
+	public Optional<TraceProducerKeyEntry> findProducerKey(String domainId, String producerId, String kid) {
+		TraceProducerKeyEntry found = producerKeysByKey.get(TraceKeys.producerKeyKey(domainId, producerId, kid));
+		return Optional.ofNullable(found).map(InMemoryTraceStore::copyOf);
 	}
 
 	@Override
-	public void insertProducerKey(ProducerKey key) throws DuplicateEntryException, TraceStorageException {
+	public void insertProducerKey(TraceProducerKeyEntry key) throws DuplicateEntryException, TraceStorageException {
 		String mapKey = TraceKeys.producerKeyKey(key.getDomainId(), key.getProducerId(), key.getKid());
-		ProducerKey existing = producerKeysByKey.putIfAbsent(mapKey, key);
+		key.setId(mapKey);
+		TraceProducerKeyEntry existing = producerKeysByKey.putIfAbsent(mapKey, copyOf(key));
 		if (existing != null) {
 			throw new DuplicateEntryException(mapKey);
 		}
@@ -322,11 +333,13 @@ public class InMemoryTraceStore implements TraceStore {
 	public boolean revokeProducerKey(String domainId, String producerId, String kid, long revokedAtMs)
 			throws TraceStorageException {
 		String key = TraceKeys.producerKeyKey(domainId, producerId, kid);
-		ProducerKey[] holder = new ProducerKey[1];
+		TraceProducerKeyEntry[] holder = new TraceProducerKeyEntry[1];
 		producerKeysByKey.computeIfPresent(key, (k, existing) -> {
-			// Idempotent: an already-revoked key keeps its original revokedAtMs.
-			ProducerKey replacement = existing.getRevokedAtMs() != null ? existing
-					: existing.withRevokedAt(revokedAtMs);
+			// Idempotent: an already-revoked key keeps its original revokedAt.
+			TraceProducerKeyEntry replacement = copyOf(existing);
+			if (replacement.getRevokedAt() == null) {
+				replacement.setRevokedAt(new Date(revokedAtMs));
+			}
 			holder[0] = replacement;
 			return replacement;
 		});
@@ -334,11 +347,63 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
-	public List<ProducerKey> findProducerKeys(String domainId, String producerIdOrNull) {
+	public List<TraceProducerKeyEntry> findProducerKeys(String domainId, String producerIdOrNull) {
 		return producerKeysByKey.values().stream()
 				.filter(k -> k.getDomainId().equals(domainId)
 						&& (producerIdOrNull == null || k.getProducerId().equals(producerIdOrNull)))
-				.collect(Collectors.toList());
+				.map(InMemoryTraceStore::copyOf).collect(Collectors.toList());
+	}
+
+	// -- defensive copy helpers (design rule 4: immutability of evidence) -----------------------
+
+	private static TraceReceiptEntry copyOf(TraceReceiptEntry source) {
+		TraceReceiptEntry copy = new TraceReceiptEntry();
+		copy.setDn(source.getDn());
+		copy.setId(source.getId());
+		copy.setDomainId(source.getDomainId());
+		copy.setReceiptSeq(source.getReceiptSeq());
+		copy.setReceivedAt(source.getReceivedAt());
+		copy.setReceivedAtMs(source.getReceivedAtMs());
+		copy.setProducerId(source.getProducerId());
+		copy.setRecordId(source.getRecordId());
+		copy.setRecordKey(source.getRecordKey());
+		copy.setContentDigest(source.getContentDigest());
+		copy.setPrevReceiptHash(source.getPrevReceiptHash());
+		copy.setReceiptHash(source.getReceiptHash());
+		copy.setReceiptState(source.getReceiptState());
+		copy.setNodeId(source.getNodeId());
+		copy.setCreationDate(source.getCreationDate());
+		return copy;
+	}
+
+	private static TraceChainEntry copyOf(TraceChainEntry source) {
+		TraceChainEntry copy = new TraceChainEntry();
+		copy.setDn(source.getDn());
+		copy.setId(source.getId());
+		copy.setDomainId(source.getDomainId());
+		copy.setProducerId(source.getProducerId());
+		copy.setProducerInstanceId(source.getProducerInstanceId());
+		copy.setProducerChainId(source.getProducerChainId());
+		copy.setRegisteredBy(source.getRegisteredBy());
+		copy.setCreationDate(source.getCreationDate());
+		return copy;
+	}
+
+	private static TraceProducerKeyEntry copyOf(TraceProducerKeyEntry source) {
+		TraceProducerKeyEntry copy = new TraceProducerKeyEntry();
+		copy.setDn(source.getDn());
+		copy.setId(source.getId());
+		copy.setDomainId(source.getDomainId());
+		copy.setProducerId(source.getProducerId());
+		copy.setKid(source.getKid());
+		Map<String, String> jwk = source.getPublicKeyJwk();
+		copy.setPublicKeyJwk(jwk == null ? null : new LinkedHashMap<>(jwk));
+		copy.setValidFrom(source.getValidFrom());
+		copy.setValidUntil(source.getValidUntil());
+		copy.setRevokedAt(source.getRevokedAt());
+		copy.setRegisteredBy(source.getRegisteredBy());
+		copy.setCreationDate(source.getCreationDate());
+		return copy;
 	}
 
 }
