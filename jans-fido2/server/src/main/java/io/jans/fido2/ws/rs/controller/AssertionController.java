@@ -12,6 +12,7 @@ import io.jans.fido2.model.assertion.*;
 import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.error.Fido2RPError;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.operation.AssertionService;
 import jakarta.validation.constraints.NotNull;
@@ -20,6 +21,7 @@ import io.jans.fido2.service.verifier.CommonVerifiers;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
@@ -108,6 +110,15 @@ public class AssertionController {
             // Both already carry (or are mapped to) the FIDO2 failure envelope; let them propagate
             // to their ExceptionMappers instead of masking them as a generic 500.
             throw e;
+        } catch (Fido2RuntimeException ex) {
+            Fido2RPError formatted = ex.getFormattedMessage();
+            log.error("Fido2 runtime error - status: {}, errorMessage: {}",
+                    formatted.getStatus(), formatted.getErrorMessage(), ex);
+            throw new WebApplicationException(Response
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(formatted)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build());
         } catch (Exception e) {
             log.error("Unknown Error: {}", e.getMessage(), e);
             throw errorResponseFactory.unknownError(e.getMessage());
