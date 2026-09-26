@@ -15694,19 +15694,19 @@ components:
           type: string
         selected:
           type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
         whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanEdit:
-          type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -16680,6 +16680,8 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16689,8 +16691,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17658,14 +17658,14 @@ components:
             Default value `true`.
         userRolePermissionExcludedClients:
           type: array
-          description: Client IDs exempt from the User Role-Permission mapping check.
-            Only honoured for tokens that carry no user, so a user token is always
-            checked. Empty by default.
+          description: "Client IDs exempt from the User Role-Permission mapping check.\
+            \ Only honoured for tokens that carry no user, so a user token is always\
+            \ checked. Empty by default."
           items:
             type: string
-            description: Client IDs exempt from the User Role-Permission mapping check.
-              Only honoured for tokens that carry no user, so a user token is always
-              checked. Empty by default.
+            description: "Client IDs exempt from the User Role-Permission mapping\
+              \ check. Only honoured for tokens that carry no user, so a user token\
+              \ is always checked. Empty by default."
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
@@ -18708,9 +18708,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object
