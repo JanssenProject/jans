@@ -37,7 +37,7 @@ Rotating Certificates and Keys in Kubernetes setup
           restartPolicy: Never
           containers:
             - name: web-key-rotation
-              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
+              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm # This may be differnet in Helm
@@ -89,7 +89,7 @@ Rotating Certificates and Keys in Kubernetes setup
                   path: web_https.key                              
           containers:
             - name: load-web-key-rotation
-              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
+              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm  #This may be differnet in Helm
@@ -139,7 +139,7 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
             spec:
               containers:
                 - name: auth-key-rotation
-                  image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
+                  image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
                   resources:
                     requests:
                       memory: "300Mi"
