@@ -173,6 +173,24 @@ Beyond the outcome itself, each raw entry records where the operation came from:
     strips any client-supplied value; otherwise the recorded address can be spoofed by the
     caller.
 
+### Native-client telemetry (optional)
+
+A native app/SDK (iOS, Android) may attach an optional `telemetry` object to any attestation or
+assertion start/finish request, carrying context no `User-Agent` string can — Play Services
+version, OEM Credential Manager behavior, the last client-side error code, and more. See the
+`NativeClientTelemetry` schema in the
+[OpenAPI (Swagger) specification](#api-reference) for the full field list.
+
+The field is entirely optional: a request that omits it behaves exactly as before, and an
+unrecognized value in an enum-shaped field (`platform`, `native_api`, `flow_context`) is accepted
+rather than rejecting the request.
+
+!!! note "Not yet reflected in stored metrics"
+    As of this release, a submitted `telemetry` object is accepted and parsed but **not yet
+    persisted** onto metrics entries or correlated via `client_correlation_id` — that wiring is
+    tracked separately. Submitting it today has no observable effect beyond successful
+    deserialization.
+
 ### Aggregation schedule and retention
 
 A scheduler computes aggregations on a cadence

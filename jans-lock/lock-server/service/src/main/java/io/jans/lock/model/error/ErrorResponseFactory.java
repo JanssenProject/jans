@@ -91,6 +91,14 @@ public class ErrorResponseFactory implements Configuration {
         throw createWebApplicationException(INTERNAL_SERVER_ERROR, CommonErrorResponseType.UNKNOWN_ERROR, reason);
     }
 
+    public WebApplicationException traceException(TraceErrorResponseType type, String reason) {
+        return traceException(type, reason, null);
+    }
+
+    public WebApplicationException traceException(TraceErrorResponseType type, String reason, Throwable e) {
+        return createWebApplicationException(type.httpStatus(), type, reason, e);
+    }
+
     private String errorAsJson(IErrorType type, String reason) {
         final DefaultErrorResponse error = getErrorResponse(type);
         error.setReason(BooleanUtils.isTrue(appConfiguration.getErrorReasonEnabled()) ? reason : "");
@@ -106,6 +114,8 @@ public class ErrorResponseFactory implements Configuration {
                 list = messages.getCommon();
             } else if (type instanceof StatErrorResponseType) {
                 list = messages.getStat();
+            } else if (type instanceof TraceErrorResponseType) {
+                list = messages.getTrace();
             }
             if (list != null) {
                 final ErrorMessage m = getError(list, type);
@@ -114,6 +124,10 @@ public class ErrorResponseFactory implements Configuration {
                         .orElse(m.getDescription());
                 response.setErrorDescription(description);
                 response.setErrorUri(m.getUri());
+            } else if (type instanceof TraceErrorResponseType) {
+                // Older deployments may not have a "trace" section in the persisted errors
+                // configuration yet; fall back to the enum id instead of leaving the description unset.
+                response.setErrorDescription(type.getParameter());
             }
         }
 
