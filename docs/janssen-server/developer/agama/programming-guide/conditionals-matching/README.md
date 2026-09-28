@@ -1,6 +1,6 @@
 # Conditionals and matching
 
-This page illustrates the usage of [`When`/`Otherwise`](https://docs.jans.io/stable/agama/language-reference/#conditionals-and-branching) in Agama. They are equivalent to `if`/`else` in other programming languages.
+This page illustrates the usage of [`When`/`Otherwise`](../../../../../agama/language-reference.md#conditionals-and-branching) in Agama. They are equivalent to `if`/`else` in other programming languages.
 
 ## When and how
 
@@ -63,7 +63,7 @@ Otherwise
 
 ### Application template
 
-Template [`application.ftlh`](./project/web/application.ftlh) has a form to capture name and e-mail. It also generates checkboxes dynamically for the interests which are passed in the *map* parameter `RRF` receives. This is done as follows:
+Template [`application.ftlh`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/application.ftlh) has a form to capture name and e-mail. It also generates checkboxes dynamically for the interests which are passed in the *map* parameter `RRF` receives. This is done as follows:
 
 ```
 <#list interests as val>            
@@ -98,7 +98,7 @@ In case the list length length is not four, the flow finishes successfully; no U
 
 ### Rejection template
 
-Template [`rejected.ftlh`](./project/web/rejected.ftlh) is self-explanatory. It just shows a message upfront and an "OK" button to proceed. The message displayed is whatever was passed to `RRF` (key `msg`).  
+Template [`rejected.ftlh`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/rejected.ftlh) is self-explanatory. It just shows a message upfront and an "OK" button to proceed. The message displayed is whatever was passed to `RRF` (key `msg`).  
 
 ### Flow analysis
 
@@ -122,7 +122,7 @@ When list is null or list.length is 4
 Finish true
 ```
 
-Here [`rejected2.ftlh`](./project/web/rejected2.ftlh) is a pure HTML page with a static message.
+Here [`rejected2.ftlh`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/rejected2.ftlh) is a pure HTML page with a static message.
 
 ## FAQ
 
@@ -140,4 +140,4 @@ No.
 
 ### Is there a `switch` equivalent?
 
-Yes. This is done via [`Match`](https://docs.jans.io/stable/agama/language-reference/#advanced-matching).
+Yes. This is done via [`Match`](../../../../../agama/language-reference.md#advanced-matching).

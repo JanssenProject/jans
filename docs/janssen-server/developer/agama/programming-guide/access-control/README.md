@@ -18,7 +18,7 @@ The project consists of three flows:
 
 ### User validation
 
-Flow [`com.acme.workaday.userValidation`](./project/code/com.acme.workaday.userValidation.flow) uses a hardcoded *map* of known users. They are stored in variable `people` as seen in the code. This was done so for the sake of simplicity and to keep the project as small as possible.
+Flow [`com.acme.workaday.userValidation`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.userValidation.flow) uses a hardcoded *map* of known users. They are stored in variable `people` as seen in the code. This was done so for the sake of simplicity and to keep the project as small as possible.
 
 The user is given three attempts to enter a known username. Note the assignment in the `Repeat` loop:
 
@@ -29,13 +29,13 @@ iterations = Repeat 3 times max
 
 This is Agama-valid: it helps developers count how many complete iterations were made once looping is done. If the loop is aborted earlier (by means of `Quit When`), such particular iteration does not count. 
 
-User input is gathered by rendering template [`username.ftlh`](./project/web/username.ftlh). This resembles the template used in the [number guess game](../loops/README.md#a-number-guess-game). In the flow, the username is stored in variable `userId`, and the lookup in the `people` *map* is done this way:
+User input is gathered by rendering template [`username.ftlh`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/access-control/project/web/username.ftlh). This resembles the template used in the [number guess game](../loops/README.md#a-number-guess-game). In the flow, the username is stored in variable `userId`, and the lookup in the `people` *map* is done this way:
 
 ```
 userData = people.$userId
 ```
 
-This [notation](https://docs.jans.io/stable/agama/language-reference/#maps-and-dot-notation) allows access the value associated to a key in a *map* where the key is only known at runtime, i.e., is variable. Hence, `userData` will be a *map* with keys `givenName` and `phone` for the user in question, or `null` if the lookup fails.
+This [notation](../../../../../agama/language-reference.md#maps-and-dot-notation) allows access the value associated to a key in a *map* where the key is only known at runtime, i.e., is variable. Hence, `userData` will be a *map* with keys `givenName` and `phone` for the user in question, or `null` if the lookup fails.
 
 Note the loop is aborted when the lookup is successful. The conditional
 
@@ -54,7 +54,7 @@ where `userId` has the username in question.
 
 ### SMS challenge
 
-In [`com.acme.workaday.userauthn`](./project/code/com.acme.workaday.userauthn.flow), flow [`com.acme.workaday.smsChallenge`](./project/code/com.acme.workaday.smsChallenge.flow) is only triggered if the username validation was successful.
+In [`com.acme.workaday.userauthn`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.userauthn.flow), flow [`com.acme.workaday.smsChallenge`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.smsChallenge.flow) is only triggered if the username validation was successful.
 
 The challenge flow starts by generating a semi-random *string* containing six characters drawn from lowercase letters (a-z) and digits (0-9). Java developers will find the computation there odd but it is terse: just three lines. A proper computation would require onboarding external code however the project needs to be as compact as possible.
 
@@ -68,7 +68,7 @@ It conveys the idea of how a real SMS delivery functionality would be called. In
 
 The configuration required to send SMS is passed as parameter as well as the target mobile phone number. The name of the person and the random code would be used to format a good message.
 
-A loop similar to that of the [number guess flow](../loops/project/code/com.acme.basic.numberguess.flow) is next. There, the flow is finished in case the user entered the right code. In case the maximum number of attempts is reached, the flow is finished passing the below:
+A loop similar to that of the [number guess flow](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.numberguess.flow) is next. There, the flow is finished in case the user entered the right code. In case the maximum number of attempts is reached, the flow is finished passing the below:
 
 ```
 obj = { success: false, error: "The number of allowed attempts has been exceeded" }
@@ -78,7 +78,7 @@ This is a common way to end flows that fail. The error message may be of use by 
 
 ### Main flow
 
-There is no much to comment here besides the ways in which flow [`com.acme.workaday.userauthn`](./project/code/com.acme.workaday.userauthn.flow) can finish. If user validation failed, this flows finishes with failure too. If the user does not pass the SMS challenge, the flow finishes with
+There is no much to comment here besides the ways in which flow [`com.acme.workaday.userauthn`](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.userauthn.flow) can finish. If user validation failed, this flows finishes with failure too. If the user does not pass the SMS challenge, the flow finishes with
 
 ```
 When obj.success is false
@@ -93,7 +93,7 @@ If the user passes the SMS challenge, the flow finishes with `userData.userId` w
 { success: true, data: { userId: userData.userId } }
 ```
 
-This is a common way to end flows that succeed in the context of authentication flows. Here, a reference to the user that should be authenticated is [passed](https://docs.jans.io/stable/agama/language-reference/#flow-finish). If this flow is tested in Janssen Server, access would be granted as long as the `userId` is known by the server. For example, if `jsmith` is an existing, active user in Jans, then he would be successfully authenticated.
+This is a common way to end flows that succeed in the context of authentication flows. Here, a reference to the user that should be authenticated is [passed](../../../../../agama/language-reference.md#flow-finish). If this flow is tested in Janssen Server, access would be granted as long as the `userId` is known by the server. For example, if `jsmith` is an existing, active user in Jans, then he would be successfully authenticated.
 
 ## Abuse and control
 
@@ -105,7 +105,7 @@ Regarding `com.acme.workaday.smsChallenge`, the situation is not better. This is
 
 Attention need to be paid to the kind of functionalities flows expose. Sometimes this can be mitigated following a stricter flow design philosophy, however, this is not always doable, and there has to be a way to block certain flows to be launched directly.
 
-[`project.json`](https://docs.jans.io/stable/agama/language-reference/#metadata) metadata descriptor allows developers  control these situations. Via `noDirectLaunch` property, it can be explicitly set what cannot be launched freely. Try editing this project's [descriptor](./project/project.json) with the following:
+[`project.json`](../../../../../agama/language-reference.md#metadata) metadata descriptor allows developers  control these situations. Via `noDirectLaunch` property, it can be explicitly set what cannot be launched freely. Try editing this project's [descriptor](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/access-control/project/project.json) with the following:
 
 ```json
 {

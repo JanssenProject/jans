@@ -32,7 +32,7 @@ This programming guide consists of a series of examples. Each of them is located
 
 It is recommended to follow examples in the order listed below. The concepts introduced in one example may be required to understand subsequent examples. Note the level of difficulty gradually increases from one to the next. 
 
-Ensure you have downloaded or (git) cloned the contents of this repository before starting.
+Ensure to make a shallow clone (git) of the contents of this repository before starting.
 
 - [Agama basics and Hello world](./basics-hello-world/README.md)
 - [Collecting user input](./user-input/README.md)

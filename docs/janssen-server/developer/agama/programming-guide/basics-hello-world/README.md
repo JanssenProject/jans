@@ -8,7 +8,7 @@ Before addressing the examples, a preliminary understanding of how a project is 
 
 - `web`: It holds web assets like UI templates, stylesheets, images, localization strings, etc.
 
-In-depth details about the anatomy of a project can be found in the official documentation page: ["The .gama file format"](https://docs.jans.io/stable/agama/gama-format/).
+In-depth details about the anatomy of a project can be found in the official documentation page: ["The .gama file format"](../../../../../agama/gama-format.md).
 
 Every flow must be identified by a "qualified" name: a sufficiently expressive name to give an idea of what the flow is about. By convention, qualified names adhere to a reverse Internet domain name notation. As an example, if a flow asks the user about their food preferences, a qualified name could be `com.acme.FoodSurvey`. Thus, the corresponding physical file should be `com.acme.FoodSurvey.flow`.
 
@@ -33,7 +33,7 @@ Flow com.acme.basic.helloworld
     Basepath ""
 ```
 
-Flows start with the `Flow` keyword followed by the qualified name of the flow. For more information on this topic check the [Header basics](https://docs.jans.io/stable/agama/language-reference/#header-basics) section of the language reference.
+Flows start with the `Flow` keyword followed by the qualified name of the flow. For more information on this topic check the [Header basics](../../../../../agama/language-reference.md#header-basics) section of the language reference.
 
 The statements following the header contain the actual flow implementation. In this case, a web page with a salutation will be shown. This is how it is done: 
 
@@ -100,4 +100,4 @@ Here's how this project is laid out in the filesystem:
      \─── salutation.ftlh
 ```
 
-This effectively reflects the contents of the [project](./project) directory.
+This effectively reflects the contents of the [project](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/basics-hello-world/project) directory.

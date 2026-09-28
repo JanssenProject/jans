@@ -141,7 +141,7 @@ let request = {
 };
 
 // Execute authorization, the request is passed as a JSON string
-let result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
+let result = await cedarling.authorizeMultiIssuer(JSON.stringify(request));
 
 // Check result — single decision (no per-principal breakdown)
 if (result.decision) {
@@ -440,7 +440,7 @@ let input = {
 };
 
 // the request is passed as a JSON string
-let result = await cedarling.authorize_unsigned(JSON.stringify(input));
+let result = await cedarling.authorizeUnsigned(JSON.stringify(input));
 ```
 
 The `principal` field uses `cedar_entity_mapping` to define its Cedar entity type and ID. All other fields become entity attributes.
@@ -486,7 +486,7 @@ let input = {
 };
 
 // the request is passed as a JSON string
-let result = await cedarling.authorize_unsigned(JSON.stringify(input));
+let result = await cedarling.authorizeUnsigned(JSON.stringify(input));
 ```
 
 In Rust, pass `principal: None`:
@@ -583,7 +583,7 @@ const request = JSON.stringify({
     context: {}
   }]
 });
-const response = await cedarling.authorize_unsigned_batch(request);
+const response = await cedarling.authorizeUnsignedBatch(request);
 console.log(response.batch_id);
 response.results.forEach((r, i) => {
   if (r.is_ok) {

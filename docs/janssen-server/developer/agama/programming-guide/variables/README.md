@@ -6,7 +6,7 @@ Handling values and variables is key to grasp any language. The flows shown in t
 
 ## Literals
 
-Flow `com.acme.basic.literals` contains examples of literal values in Agama. Visit [Literals](https://docs.jans.io/stable/agama/language-reference/#literals) in the language reference for a deeper insight.
+Flow `com.acme.basic.literals` contains examples of literal values in Agama. Visit [Literals](../../../../../agama/language-reference.md#literals) in the language reference for a deeper insight.
 
 ```
 Flow com.acme.basic.literals
@@ -68,7 +68,7 @@ Here, `brand` and `model` from `car` variable are shown. The `overhaulsIn` list 
 
 ## Variables
 
-Flow `com.acme.basic.variables` contains examples of variables manipulation in Agama. In the language reference visit [Accessing and mutating data in variables](https://docs.jans.io/stable/agama/language-reference/#accessing-and-mutating-data-in-variables) and [Advanced cases in variable manipulation](https://docs.jans.io/stable/agama/language-reference/#advanced-and-special-cases-in-variable-manipulation)  for a deeper insight.
+Flow `com.acme.basic.variables` contains examples of variables manipulation in Agama. In the language reference visit [Accessing and mutating data in variables](../../../../../agama/language-reference.md#accessing-and-mutating-data-in-variables) and [Advanced cases in variable manipulation](../../../../../agama/language-reference.md#advanced-and-special-cases-in-variable-manipulation)  for a deeper insight.
 
 ```
 Flow com.acme.basic.variables
@@ -114,4 +114,4 @@ Finish it
 
 As in the former example, `brand` and `model` from `car` are shown. Here, "None yet" will be displayed in the "Overhauls" section.
 
-Note this flow terminates a bit differently compared to others; it supplies a *map* variable. So far all examples have used the "shortcut" notation for [`Finish`](https://docs.jans.io/stable/agama/language-reference/#flow-finish). Here an "expanded" form is employed. This is often used when extra information needs to be passed in the `Finish` statement, however in this case, it has the same effect of doing `Finish true`.
+Note this flow terminates a bit differently compared to others; it supplies a *map* variable. So far all examples have used the "shortcut" notation for [`Finish`](../../../../../agama/language-reference.md#flow-finish). Here an "expanded" form is employed. This is often used when extra information needs to be passed in the `Finish` statement, however in this case, it has the same effect of doing `Finish true`.
