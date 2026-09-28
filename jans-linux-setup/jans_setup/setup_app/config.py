@@ -87,9 +87,6 @@ class Config:
         if not self.output_dir:
             self.output_dir = os.path.join(install_dir, 'output')
 
-        if base.snap:
-            self.jetty_user = 'root'
-
         self.default_store_type = 'PKCS12'
 
         #create dummy progress bar that logs to file in case not defined

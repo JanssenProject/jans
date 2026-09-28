@@ -301,7 +301,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: npm
-        cache-dependency-path: jans-cedarling/bindings/cedarling_wasm/js/package-lock.json
+        cache-dependency-path: |
+          jans-cedarling/bindings/cedarling_wasm/js/package-lock.json
+          jans-cedarling/bindings/cedarling_wasm/js/examples/package-lock.json
     - name: Install npm used for Cedarling WebAssembly package publication
       if: matrix.publication
       run: npm install --global npm@12.0.2
@@ -324,6 +326,14 @@ jobs:
         output="${RUNNER_TEMP}/cedarling-wasm-publish"
         node scripts/stage-packages.mjs --version 0.0.0-ci --publishable --output "${output}"
         npm publish "${output}/janssenproject-cedarling_wasm-0.0.0-ci.tgz" --dry-run --access=public --tag ci
+    - name: Install Cedarling WebAssembly JavaScript example dependencies
+      if: matrix.node-version == '22.x'
+      working-directory: jans-cedarling/bindings/cedarling_wasm/js/examples
+      run: npm ci --ignore-scripts
+    - name: Run Cedarling WebAssembly JavaScript examples
+      if: matrix.node-version == '22.x'
+      working-directory: jans-cedarling/bindings/cedarling_wasm/js/examples
+      run: npm run check
   python_tests:
     runs-on: ubuntu-latest
     strategy:

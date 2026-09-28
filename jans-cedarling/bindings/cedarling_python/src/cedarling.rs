@@ -167,6 +167,21 @@ use std::time::Duration;
 ///
 ///     :returns: A DataStoreStats object
 ///     :raises DataErrorCtx: If the operation fails
+///
+/// .. method:: drain_metrics(self) -> MetricsSnapshot
+///
+///     Destructive read: returns the telemetry metrics snapshot and resets
+///     the counters for the next interval.
+///
+///     Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+///     Lock telemetry ticker owns the collector. Raises `ValueError` when
+///     Lock telemetry owns the collector, i.e. whenever
+///     `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+///     server has no telemetry endpoint. `interval` is a
+///     `datetime.timedelta` with sub-second precision.
+///
+///     :returns: A MetricsSnapshot object
+///     :raises ValueError: If metrics collection is disabled or owned by lock telemetry.
 #[derive(Clone)]
 #[pyclass(from_py_object)]
 pub struct Cedarling {
@@ -514,6 +529,22 @@ impl Cedarling {
             .map_err(data_error_to_py)
     }
 
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval.
+    ///
+    /// Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+    /// Lock telemetry ticker owns the collector (raises `ValueError` when
+    /// Lock telemetry owns the collector, i.e. whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+    /// server has no telemetry endpoint). `interval` is a
+    /// `datetime.timedelta` with sub-second precision.
+    fn drain_metrics(&self) -> PyResult<MetricsSnapshot> {
+        self.inner
+            .drain_metrics()
+            .map(|snapshot| snapshot.into())
+            .map_err(|e| PyValueError::new_err(e.to_string()))
+    }
+
     /// Returns true if trusted issuer with the given policy-store id is loaded.
     fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
         self.inner.is_trusted_issuer_loaded_by_name(issuer_id)
@@ -542,6 +573,48 @@ impl Cedarling {
     /// Returns ids of trusted issuers that failed to load.
     fn failed_trusted_issuer_ids(&self) -> Vec<String> {
         self.inner.failed_trusted_issuer_ids().into_iter().collect()
+    }
+}
+
+/// MetricsSnapshot
+/// ================
+///
+/// Destructive read: telemetry metrics snapshot with per-policy stats, error
+/// counters, and operational counters for the current interval. Draining
+/// resets the counters, so use a single consumer.
+///
+/// Attributes
+/// ----------
+/// policy_stats : dict
+///     Per-policy evaluation counts (`policy_id`, `policy_id.allow`,
+///     `policy_id.deny`)
+/// error_counters : dict
+///     Classified error counters keyed by error metric key
+/// operational_stats : dict
+///     Operational counters and gauges (authorization, cache, JWT, data, lock)
+/// interval : datetime.timedelta
+///     Duration of the snapshot interval with sub-second precision.
+#[derive(Debug, Clone)]
+#[pyclass(get_all, from_py_object)]
+pub struct MetricsSnapshot {
+    /// Per-policy evaluation counts.
+    policy_stats: HashMap<String, i64>,
+    /// Classified error counters.
+    error_counters: HashMap<String, i64>,
+    /// Operational counters and gauges.
+    operational_stats: HashMap<String, i64>,
+    /// Duration of the snapshot interval with sub-second precision.
+    interval: Duration,
+}
+
+impl From<cedarling::MetricsSnapshot> for MetricsSnapshot {
+    fn from(value: cedarling::MetricsSnapshot) -> Self {
+        Self {
+            policy_stats: value.policy_stats,
+            error_counters: value.error_counters,
+            operational_stats: value.operational_stats,
+            interval: value.interval,
+        }
     }
 }
 

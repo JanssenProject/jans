@@ -6,6 +6,7 @@
   "userRolePermissionValidationEnabled": true,
   "validateUserInumInIntrospectionFlag": true,
   "fetchUserRoleInIntrospectionFlag": true,
+  "userRolePermissionExcludedClients": [],
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
   "acrValidationEnabled": true,

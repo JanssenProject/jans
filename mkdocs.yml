@@ -634,6 +634,7 @@ nav:
       - Tutorial: cedarling/developer/sidecar/cedarling-sidecar-tutorial.md
     - Interface Reference:
       - Rust: https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
+      - JavaScript/WASM: https://janssenproject.github.io/developer-docs/cedarling/cedarling_wasm/index.html
       - Python: https://janssenproject.github.io/developer-docs/cedarling-python/cedarling_python.html
   - Integrations:
     - KrakenD: cedarling/integrations/cedarling-krakend.md

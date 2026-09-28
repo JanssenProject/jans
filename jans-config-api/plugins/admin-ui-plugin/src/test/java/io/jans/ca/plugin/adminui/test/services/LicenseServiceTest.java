@@ -122,6 +122,7 @@ public class LicenseServiceTest {
         lenient().when(licenseConfiguration.getLicenseValidUpto()).thenReturn(LocalDate.now().plusDays(30).toString());
         lenient().when(licenseConfiguration.getLicenseDetailsLastUpdatedOn()).thenReturn(LocalDate.now().minusDays(5).toString());
         lenient().when(licenseConfiguration.getIntervalForSyncLicenseDetailsInDays()).thenReturn(10L);
+        lenient().when(licenseConfiguration.getLicenseMAUThreshold()).thenReturn(500L);
 
         // Call the method under test
         GenericResponse response = licenseDetailsService.checkLicense();

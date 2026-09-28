@@ -283,8 +283,8 @@ fn create_jwt_trusted_issuer_json_with_id(
     oidc_endpoint: &str,
     token_metadata: &str,
 ) -> String {
-    let token_metadata: serde_json::Value = serde_json::from_str(token_metadata)
-        .expect("token_metadata must be valid JSON");
+    let token_metadata: serde_json::Value =
+        serde_json::from_str(token_metadata).expect("token_metadata must be valid JSON");
     let value = json!({
         "id": issuer_id,
         "name": "Jans",
@@ -1222,8 +1222,53 @@ async fn test_cjar_url_handles_http_error() {
 ///
 /// This tests the `load_policy_store_archive_bytes` function which is the
 /// underlying mechanism used by `CjarUrl` and is WASM-compatible.
+/// `CEDARLING_POLICY_STORE_MAX_FILE_SIZE` must reach the archive loader, not
+/// just the `ArchiveVfs::from_buffer` call site. A store that loads fine at the
+/// default cap must be rejected once the configured cap drops below it.
+#[test]
+async fn test_configured_max_file_size_reaches_archive_loader() {
+    let archive_bytes = create_authz_policy_store_builder()
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let http_client = crate::http::HttpClient::new(crate::HttpClientConfig::default())
+        .expect("Should create HttpClient");
+
+    crate::init::policy_store::load_policy_store(
+        &crate::PolicyStoreConfig {
+            source: PolicyStoreSource::ArchiveBytes(archive_bytes.clone()),
+            ..Default::default()
+        },
+        &http_client,
+        true,
+    )
+    .await
+    .expect("The archive must load at the default 10 MB cap");
+
+    // `LoadedPolicyStore` isn't `Debug`, so match rather than `expect_err`.
+    let result = crate::init::policy_store::load_policy_store(
+        &crate::PolicyStoreConfig {
+            source: PolicyStoreSource::ArchiveBytes(archive_bytes),
+            max_file_size: 16,
+            ..Default::default()
+        },
+        &http_client,
+        true,
+    )
+    .await;
+
+    match result {
+        Ok(_) => panic!("The same archive must be rejected once the cap drops to 16 bytes"),
+        Err(err) => assert!(
+            err.to_string().contains("maximum decompressed entry size"),
+            "error should name the entry-size cap, got: {err}"
+        ),
+    }
+}
+
 #[test]
 async fn test_load_policy_store_archive_bytes_directly() {
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
     use crate::common::policy_store::loader::load_policy_store_archive_bytes;
 
     // Build archive bytes
@@ -1233,7 +1278,7 @@ async fn test_load_policy_store_archive_bytes_directly() {
         .expect("Failed to build test archive");
 
     // Load directly using the bytes loader
-    let loaded = load_policy_store_archive_bytes(&archive_bytes, true)
+    let loaded = load_policy_store_archive_bytes(&archive_bytes, true, ArchiveLimits::default())
         .expect("Should load policy store from bytes");
 
     // Verify the loaded policy store
@@ -1266,11 +1311,12 @@ async fn test_load_policy_store_archive_bytes_directly() {
 /// Test that invalid archive bytes are rejected.
 #[test]
 async fn test_load_policy_store_archive_bytes_invalid() {
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
     use crate::common::policy_store::loader::load_policy_store_archive_bytes;
 
     // Try to load invalid bytes
     let invalid_bytes = vec![0x00, 0x01, 0x02, 0x03];
-    let err = load_policy_store_archive_bytes(&invalid_bytes, true)
+    let err = load_policy_store_archive_bytes(&invalid_bytes, true, ArchiveLimits::default())
         .expect_err("Should fail to load invalid archive bytes");
 
     // Verify the error is an Archive error (invalid zip format)
