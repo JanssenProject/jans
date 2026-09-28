@@ -521,7 +521,8 @@ public class AssertionService {
 			markAssertionFailed(authenticationEntity, e);
 
 			// Record metrics for failed authentication
-			recordAuthenticationFailureMetrics(username, httpRequest, startTime, e, authenticatorType, assertionResult.getTelemetry());
+			recordAuthenticationFailureMetrics(username, httpRequest, startTime, e, authenticatorType,
+					assertionResult != null ? assertionResult.getTelemetry() : null);
 
 			// Track fallback event for specific error types that might cause users to switch methods
 			recordFallbackForError(username, e);

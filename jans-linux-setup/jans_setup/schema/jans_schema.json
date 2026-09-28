@@ -4103,7 +4103,7 @@
     },
     {
       "desc": "FIDO2 Metrics Client Correlation ID",
-      "equality": "caseIgnoreMatch",
+      "equality": "caseExactMatch",
       "names": [
         "jansFido2MetricsClientCorrelationId"
       ],

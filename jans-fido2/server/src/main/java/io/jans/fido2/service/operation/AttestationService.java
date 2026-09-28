@@ -431,7 +431,8 @@ public class AttestationService {
 
 		} catch (Exception e) {
 			// Record metrics for failed registration
-			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType, attestationResult.getTelemetry());
+			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType,
+					attestationResult != null ? attestationResult.getTelemetry() : null);
 
 			// A failure here can still mean the registration was already committed as `registered`
 			// (e.g. an external interception script throwing after persistence, at line ~409 above,
