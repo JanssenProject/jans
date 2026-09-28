@@ -329,6 +329,11 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         }
     }
 
+    fn policy_store_id(instance_id: usize) -> String {
+        let instance = get_instance_or_return!(instance_id);
+        instance.policy_store_id().unwrap_or_default()
+    }
+
     fn is_trusted_issuer_loaded_by_name(instance_id: usize, issuer_id: String) -> bool {
         let instance = get_instance_or_return!(instance_id);
         instance.is_trusted_issuer_loaded_by_name(&issuer_id)

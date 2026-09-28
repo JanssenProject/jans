@@ -368,6 +368,14 @@ func (c *Cedarling) TotalIssuers() uint {
 	return internal.CallTotalIssuers(c.instance_id)
 }
 
+// PolicyStoreID returns the ID of the currently published policy store.
+// The bool is false when the store carries no ID. The value is opaque and
+// can change after a background refresh.
+func (c *Cedarling) PolicyStoreID() (string, bool) {
+	id := internal.CallPolicyStoreId(c.instance_id)
+	return id, id != ""
+}
+
 // LoadedTrustedIssuersCount returns how many trusted issuers loaded successfully.
 func (c *Cedarling) LoadedTrustedIssuersCount() uint {
 	return internal.CallLoadedTrustedIssuersCount(c.instance_id)
