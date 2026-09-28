@@ -35,7 +35,7 @@
 	},
 	"traceConfiguration": {
 		"enabled": true,
-		"defaultEvidenceDomainId": "default",
+		"defaultEvidenceDomainId": "",
 		"clientDomainBindings": [
 			{"clientId": "%(lock_client_id)s", "evidenceDomainId": "default", "allowedProducerIds": ["*"]}
 		],
