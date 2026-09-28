@@ -6,7 +6,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.service.AuthorizeService;
-import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.ClientIdMetadataService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalConsentGatheringService;
 import io.jans.jsf2.service.FacesService;
@@ -69,7 +69,7 @@ public class ConsentGathererServiceTest {
     private AuthorizeService authorizeService;
 
     @Mock
-    private ClientService clientService;
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Mock
     private SessionIdService sessionIdService;
