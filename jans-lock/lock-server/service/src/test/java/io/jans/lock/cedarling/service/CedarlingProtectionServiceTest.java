@@ -437,6 +437,33 @@ class CedarlingProtectionServiceTest {
         }
 
         @Test
+        @DisplayName("valid JWT + Cedarling grants → authorize() reports the client from claims")
+        void validJwtAndCedarlingGrants_authorizeReportsClient() throws Exception {
+            try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class);
+                 MockedConstruction<AuthCryptoProvider> cryptoMock = mockConstruction(
+                         AuthCryptoProvider.class,
+                         (mock, ctx) -> when(
+                                 mock.verifySignature(any(), any(), any(), any(), any(), any()))
+                                 .thenReturn(true))) {
+
+                Jwt jwt = buildMockJwt(TEST_ISSUER, futureEpoch(), SignatureAlgorithm.RS256);
+                lenient().when(jwt.getClaims().getClaimAsString("client_id")).thenReturn("2200.cedar");
+                jwtStatic.when(() -> Jwt.parse(anyString())).thenReturn(jwt);
+                when(mapper.readValue(any(URL.class), eq(Map.class))).thenReturn(Map.of());
+                when(authorizationService.authorize(anyMap(), anyString(), anyMap(), anyMap()))
+                        .thenReturn(true);
+
+                io.jans.lock.service.security.AuthorizationOutcome outcome = service.authorize(
+                        "Bearer " + DUMMY_JWT,
+                        mockResourceInfo(SecuredResource.class, "securedMethod"));
+
+                assertTrue(outcome.isAllowed());
+                assertEquals("2200.cedar", outcome.getClient().getClientId());
+                assertTrue(outcome.getClient().isFromJwt());
+            }
+        }
+
+        @Test
         @DisplayName("valid JWT + Cedarling denies access → 403")
         void validJwtAndCedarlingDenies_returns403() throws Exception {
             try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class);

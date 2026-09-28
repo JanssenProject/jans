@@ -48,6 +48,10 @@ public class ErrorMessages implements Configuration {
     @XmlElement(name = "error")
     private List<ErrorMessage> stat;
 
+    @XmlElementWrapper(name = "trace")
+    @XmlElement(name = "error")
+    private List<ErrorMessage> trace;
+
     public List<ErrorMessage> getCommon() {
         return common;
     }
@@ -62,6 +66,14 @@ public class ErrorMessages implements Configuration {
 
 	public void setStat(List<ErrorMessage> stat) {
 		this.stat = stat;
+	}
+
+	public List<ErrorMessage> getTrace() {
+		return trace;
+	}
+
+	public void setTrace(List<ErrorMessage> trace) {
+		this.trace = trace;
 	}
 
 }
