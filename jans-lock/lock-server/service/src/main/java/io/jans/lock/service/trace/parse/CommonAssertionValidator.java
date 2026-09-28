@@ -40,10 +40,6 @@ public class CommonAssertionValidator {
 
 	private static final int EXPECTED_SIGNATURE_BYTES = 64;
 
-	/** {@code name/semver}, design D-6/§7.1: producer id up to 128 chars, then a semver. */
-	private static final Pattern PRODUCER_PATTERN = Pattern
-			.compile("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}/[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$");
-
 	/** RFC 4122 textual UUID form, any version/variant. */
 	private static final Pattern UUID_PATTERN = Pattern.compile(
 			"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
@@ -123,7 +119,7 @@ public class CommonAssertionValidator {
 					"prev_record_hash_format");
 		}
 
-		if (!PRODUCER_PATTERN.matcher(producer).matches()) {
+		if (!TraceConstants.PRODUCER_PATTERN.matcher(producer).matches()) {
 			throw new TraceValidationException(TraceValidationException.ERROR_PRODUCER_MISMATCH, "producer_format");
 		}
 		if (!producer.equals(producerChainProducerId)) {

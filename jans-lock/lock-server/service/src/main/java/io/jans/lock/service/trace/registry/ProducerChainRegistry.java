@@ -41,6 +41,8 @@ public class ProducerChainRegistry {
 
 	static final String REASON_LENGTH_PRODUCER_ID = "length:producer_id";
 
+	static final String REASON_FORMAT_PRODUCER_ID = "format:producer_id";
+
 	static final String REASON_EMPTY_PRODUCER_INSTANCE_ID = "empty:producer_instance_id";
 
 	static final String REASON_LENGTH_PRODUCER_INSTANCE_ID = "length:producer_instance_id";
@@ -93,12 +95,18 @@ public class ProducerChainRegistry {
 	 *
 	 * @throws TraceValidationException {@code invalid_request} when {@code producerId},
 	 *                                  {@code producerInstanceId} or {@code producerChainId} is
-	 *                                  empty or longer than 255 characters
+	 *                                  empty or longer than 255 characters, or when
+	 *                                  {@code producerId} does not match the {@code name/semver}
+	 *                                  format ({@link TraceConstants#PRODUCER_PATTERN}) that a signed
+	 *                                  assertion must carry
 	 * @throws TraceConflictException   {@code chain_already_exists} when {@code id} is already
 	 *                                  registered
 	 */
 	public TraceChainEntry register(ChainIdentity id, String registeredBy, long nowMs) {
 		requireIdentifier(id.getProducerId(), REASON_EMPTY_PRODUCER_ID, REASON_LENGTH_PRODUCER_ID);
+		if (!TraceConstants.PRODUCER_PATTERN.matcher(id.getProducerId()).matches()) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_FORMAT_PRODUCER_ID);
+		}
 		requireIdentifier(id.getProducerInstanceId(), REASON_EMPTY_PRODUCER_INSTANCE_ID,
 				REASON_LENGTH_PRODUCER_INSTANCE_ID);
 		requireIdentifier(id.getProducerChainId(), REASON_EMPTY_PRODUCER_CHAIN_ID, REASON_LENGTH_PRODUCER_CHAIN_ID);

@@ -106,6 +106,17 @@ class ProducerChainRegistryTest {
 	}
 
 	@Test
+	void testRegister_ProducerIdNotNameSemver_InvalidRequest() {
+		ChainIdentity id = new ChainIdentity(DOMAIN, "not-a-producer", INSTANCE, CHAIN);
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> registry.register(id, REGISTERED_BY, 1000L));
+
+		assertEquals(TraceErrorResponseType.INVALID_REQUEST, ex.getErrorId());
+		assertEquals(ProducerChainRegistry.REASON_FORMAT_PRODUCER_ID, ex.getReason());
+	}
+
+	@Test
 	void testRegister_ProducerChainIdTooLong_InvalidRequest() {
 		ChainIdentity id = new ChainIdentity(DOMAIN, PRODUCER, INSTANCE, repeat('c', 256));
 

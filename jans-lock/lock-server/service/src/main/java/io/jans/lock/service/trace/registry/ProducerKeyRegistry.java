@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
+import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceConflictException;
@@ -65,13 +65,6 @@ public class ProducerKeyRegistry {
 	static final String REASON_DUPLICATE_KEY = "duplicate_key";
 
 	private static final int MAX_KID_LENGTH = 255;
-
-	/**
-	 * {@code name/semver}, identical to task 08's {@code CommonAssertionValidator.PRODUCER_PATTERN}:
-	 * producer id up to 128 chars, then a semver.
-	 */
-	private static final Pattern PRODUCER_PATTERN = Pattern
-			.compile("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}/[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$");
 
 	@Inject
 	private Logger log;
@@ -139,7 +132,7 @@ public class ProducerKeyRegistry {
 		if (validUntilMs != null && validUntilMs <= validFromMs) {
 			throw new TraceValidationException(TraceErrorResponseType.INVALID_KEY, REASON_VALIDITY_WINDOW);
 		}
-		if (!PRODUCER_PATTERN.matcher(Objects.toString(producerId, "")).matches()) {
+		if (!TraceConstants.PRODUCER_PATTERN.matcher(Objects.toString(producerId, "")).matches()) {
 			throw new TraceValidationException(TraceErrorResponseType.INVALID_KEY, REASON_PRODUCER_ID_FORMAT);
 		}
 		if (StringUtils.isEmpty(kid)) {

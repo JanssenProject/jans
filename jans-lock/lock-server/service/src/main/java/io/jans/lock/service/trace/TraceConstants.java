@@ -35,6 +35,14 @@ public final class TraceConstants {
 	/** Matches the full {@code sha256:<64 lowercase hex>} hash format used throughout TRACE. */
 	public static final Pattern HASH_PATTERN = Pattern.compile("^" + Pattern.quote(HASH_PREFIX) + "[0-9a-f]{64}$");
 
+	/**
+	 * Producer id format {@code name/semver} (design D-6/§7.1): a name of up to 128 characters,
+	 * then a semver. Shared by assertion validation and by producer-key and producer-chain
+	 * registration, so a registered producer id can always appear in a signed assertion.
+	 */
+	public static final Pattern PRODUCER_PATTERN = Pattern
+			.compile("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}/[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$");
+
 	/** {@code trace.event_kind}: an authorization decision by a PDP such as Cedarling. */
 	public static final String EVENT_KIND_AUTHORIZATION_DECISION = "AUTHORIZATION_DECISION";
 
