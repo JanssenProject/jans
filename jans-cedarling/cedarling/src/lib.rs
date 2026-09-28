@@ -946,8 +946,7 @@ impl Cedarling {
                 };
 
                 // Metadata Level
-                // For directory/archive, the loader already ran MetadataValidator.
-                // For legacy YAML/JSON stores, we run validate_legacy_metadata.
+                // Every loader attaches metadata; Agama YAML versions are checked at load.
                 let metadata_res = match &loaded.store.metadata {
                     Some(metadata) => {
                         use crate::common::policy_store::validator::MetadataValidator;
@@ -963,20 +962,8 @@ impl Cedarling {
                             },
                         }
                     },
-                    None => {
-                        match crate::common::policy_store::validator::validate_legacy_metadata(
-                            &loaded.store.store,
-                        ) {
-                            Ok(()) => LevelResult::Ok,
-                            Err(e) => LevelResult::Failed {
-                                errors: vec![Diagnostic {
-                                    file: "<inline>".into(),
-                                    line: None,
-                                    column: None,
-                                    message: e.to_string(),
-                                }],
-                            },
-                        }
+                    None => LevelResult::Skipped {
+                        reason: "no metadata present".into(),
                     },
                 };
 

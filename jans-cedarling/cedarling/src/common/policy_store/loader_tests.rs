@@ -872,7 +872,7 @@ fn test_load_custom_issuers_end_to_end() {
 
     // Manager half: convert wires it into PolicyStore.custom_issuers.
     // strict=false so the assertion does not depend on a schema being present.
-    let store = PolicyStoreManager::convert_to_legacy(loaded_directory, false)
+    let store = PolicyStoreManager::into_policy_store(loaded_directory, false)
         .expect("conversion should succeed");
     let acme = store
         .custom_issuers
@@ -948,8 +948,8 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
         "ArchiveVfs: should discover 1 custom issuer file"
     );
 
-    let store = PolicyStoreManager::convert_to_legacy(loaded_directory, false)
-        .expect("convert_to_legacy should succeed");
+    let store = PolicyStoreManager::into_policy_store(loaded_directory, false)
+        .expect("into_policy_store should succeed");
     let acme = store
         .custom_issuers
         .get("acme")
@@ -970,8 +970,8 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
         "archive_bytes path: should discover 1 custom issuer file"
     );
 
-    let store2 = PolicyStoreManager::convert_to_legacy(loaded2, false)
-        .expect("convert_to_legacy (archive_bytes) should succeed");
+    let store2 = PolicyStoreManager::into_policy_store(loaded2, false)
+        .expect("into_policy_store (archive_bytes) should succeed");
     assert!(
         store2.custom_issuers.contains_key("acme"),
         "acme issuer must survive round-trip through archive_bytes loader"
@@ -994,7 +994,7 @@ fn test_load_custom_issuers_archive_vfs_duplicate_id_errors() {
     let loaded = load_policy_store_archive_bytes(&archive_bytes, true, ArchiveLimits::default())
         .expect("load should succeed — dedup is detected at convert time");
 
-    let err = PolicyStoreManager::convert_to_legacy(loaded, false)
+    let err = PolicyStoreManager::into_policy_store(loaded, false)
         .expect_err("duplicate custom issuer ID should fail conversion");
     assert!(
         matches!(&err, ConversionError::IssuerConversion(msg) if msg.contains("Duplicate custom issuer ID")),
@@ -1043,7 +1043,7 @@ fn test_load_custom_issuers_duplicate_id_errors() {
         .load_directory(dir.to_str().unwrap(), true)
         .expect("directory load should succeed");
 
-    let err = PolicyStoreManager::convert_to_legacy(loaded_directory, false)
+    let err = PolicyStoreManager::into_policy_store(loaded_directory, false)
         .expect_err("duplicate custom issuer id should fail conversion");
     assert!(
         matches!(&err, ConversionError::IssuerConversion(msg) if msg.contains("Duplicate custom issuer ID")),
@@ -2276,8 +2276,8 @@ fn test_load_schema_from_schemas_dir_shared_namespace_full_pipeline() {
         .load_directory(".", true)
         .expect("Should load directory with shared namespace schemas");
 
-    let policy_store = PolicyStoreManager::convert_to_legacy(result, false)
-        .expect("convert_to_legacy should succeed with shared namespaces across files");
+    let policy_store = PolicyStoreManager::into_policy_store(result, false)
+        .expect("into_policy_store should succeed with shared namespaces across files");
 
     let cedar_schema = policy_store
         .schema
@@ -2351,8 +2351,8 @@ fn test_archive_shared_namespace_full_pipeline() {
         .load_directory(".", true)
         .expect("Should load archive with shared namespace schemas");
 
-    let policy_store = PolicyStoreManager::convert_to_legacy(result, false)
-        .expect("convert_to_legacy should succeed for archive with shared namespaces");
+    let policy_store = PolicyStoreManager::into_policy_store(result, false)
+        .expect("into_policy_store should succeed for archive with shared namespaces");
 
     let cedar_schema = policy_store
         .schema

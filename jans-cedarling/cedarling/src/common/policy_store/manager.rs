@@ -3,20 +3,19 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Policy Store Manager - Converts new format to legacy format.
-//!
-//! This module provides the conversion layer between `LoadedPolicyStore` (new directory/archive format)
-//! and `PolicyStore` (legacy format used by the rest of Cedarling).
+//! Policy Store Manager - converts a loaded directory/archive store into the
+//! runtime [`PolicyStore`].
 //!
 //! # Architecture
 //!
 //! ```text
-//! LoadedPolicyStore (new)          PolicyStore (legacy)
-//! ├── metadata                  →  name, version, description, cedar_version
+//! LoadedPolicyStore (on-disk)      PolicyStore (runtime)
+//! ├── metadata                  →  version
 //! ├── schema (raw string)       →  schema: CedarSchema
 //! ├── policies: Vec<PolicyFile> →  policies: PoliciesContainer
 //! ├── trusted_issuers           →  trusted_issuers: HashMap<String, TrustedIssuer>
-//! └── entities                  →  default_entities: HashMap<String, Value>
+//! ├── custom_issuers            →  custom_issuers: HashMap<String, CustomIssuerMetadata>
+//! └── entities                  →  default_entities: DefaultEntitiesWithWarns
 //! ```
 
 use super::custom_issuer_parser::CustomIssuerParser;
@@ -61,18 +60,16 @@ pub enum ConversionError {
     PolicySetCreation(String),
 }
 
-/// Policy Store Manager handles conversion between new and legacy formats.
+/// Policy Store Manager converts loaded stores into the runtime [`PolicyStore`].
 pub(crate) struct PolicyStoreManager;
 
 impl PolicyStoreManager {
-    /// Convert a `LoadedPolicyStore` (new format) to `PolicyStore` (legacy format).
-    ///
-    /// This is the main entry point for converting policy stores loaded from
-    /// directory or archive format into the legacy format used by the rest of Cedarling.
+    /// Convert a `LoadedPolicyStore` read from a directory or archive into the
+    /// runtime `PolicyStore` used by the rest of Cedarling.
     ///
     /// When `strict_schema_validation` is `true`, a missing schema causes an error.
     /// When `false`, missing schema is allowed (schemaless mode).
-    pub(crate) fn convert_to_legacy(
+    pub(crate) fn into_policy_store(
         loaded: LoadedPolicyStore,
         strict_schema_validation: bool,
     ) -> Result<PolicyStore, ConversionError> {
@@ -225,7 +222,7 @@ impl PolicyStoreManager {
             PolicyParser::create_policy_set(parsed_policies.clone(), parsed_templates.clone())
                 .map_err(|e| ConversionError::PolicySetCreation(e.to_string()))?;
 
-        // Build raw_policy_info for descriptions (policies only, templates don't have descriptions in legacy format)
+        // Build raw_policy_info for descriptions (policies only, templates carry no descriptions)
         let raw_policy_info = parsed_policies
             .into_iter()
             .map(|p| (p.id.to_string(), format!("Policy from {}", p.filename)))
@@ -601,7 +598,7 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_to_legacy_without_schema_strict_true_errors() {
+    fn test_into_policy_store_without_schema_strict_true_errors() {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
             schema: None,
@@ -616,7 +613,7 @@ mod tests {
             custom_issuers: vec![],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
+        let result = PolicyStoreManager::into_policy_store(loaded, true);
         let err = result.expect_err(
             "Expected error when strict_schema_validation is true but schema is missing",
         );
@@ -627,7 +624,7 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_to_legacy_without_schema_strict_false_succeeds() {
+    fn test_into_policy_store_without_schema_strict_false_succeeds() {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
             schema: None,
@@ -642,7 +639,7 @@ mod tests {
             custom_issuers: vec![],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded, false);
+        let result = PolicyStoreManager::into_policy_store(loaded, false);
         let store = result
             .expect("Should succeed when strict_schema_validation is false even without schema");
         assert!(
@@ -652,7 +649,7 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_to_legacy_with_schema_strict_false_succeeds() {
+    fn test_into_policy_store_with_schema_strict_false_succeeds() {
         let schema = parse_schema(
             r#"
         namespace TestApp {
@@ -678,7 +675,7 @@ mod tests {
             custom_issuers: vec![],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded, false);
+        let result = PolicyStoreManager::into_policy_store(loaded, false);
         let store =
             result.expect("Should succeed with schema even when strict_schema_validation is false");
         assert!(
@@ -688,7 +685,7 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_to_legacy_minimal() {
+    fn test_into_policy_store_minimal() {
         let schema = parse_schema(
             r#"
         namespace TestApp {
@@ -714,7 +711,7 @@ mod tests {
             custom_issuers: vec![],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
+        let result = PolicyStoreManager::into_policy_store(loaded, true);
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
@@ -725,7 +722,7 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_to_legacy_full() {
+    fn test_into_policy_store_full() {
         let schema = parse_schema(
             r#"
         namespace TestApp {
@@ -770,7 +767,7 @@ mod tests {
             custom_issuers: vec![],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
+        let result = PolicyStoreManager::into_policy_store(loaded, true);
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();

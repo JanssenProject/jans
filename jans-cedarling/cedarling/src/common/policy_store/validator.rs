@@ -217,17 +217,6 @@ impl PolicyStoreMetadata {
     }
 }
 
-/// Run metadata sanity checks on a legacy YAML/JSON policy store.
-#[cfg(feature = "tools")]
-pub(crate) fn validate_legacy_metadata(
-    store: &crate::common::policy_store::PolicyStore,
-) -> Result<(), ValidationError> {
-    if let Some(version) = &store.version {
-        MetadataValidator::validate_cedar_version(version)?;
-    }
-    Ok(())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
