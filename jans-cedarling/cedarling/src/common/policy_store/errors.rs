@@ -317,6 +317,27 @@ pub enum ValidationError {
         searched_file: String,
         searched_dir: String,
     },
+
+    /// `policy_store_spec_version` is not a non-negative integer.
+    #[error(
+        "Invalid metadata in file metadata.json: policy_store_spec_version must be a \
+         non-negative integer, got {value}"
+    )]
+    InvalidSpecVersion { value: String },
+
+    /// The store declares a spec version newer than this Cedarling supports.
+    #[error(
+        "Unsupported policy store: policy_store_spec_version {found} is newer than the latest \
+         version this Cedarling supports ({max}); upgrade Cedarling"
+    )]
+    SpecVersionTooNew { found: u32, max: u32 },
+
+    /// The store declares a spec version this Cedarling no longer reads.
+    #[error(
+        "Unsupported policy store: policy_store_spec_version {found} is no longer supported; \
+         the oldest supported version is {min}"
+    )]
+    SpecVersionTooOld { found: u32, min: u32 },
 }
 
 /// Errors related to archive (.cjar) handling.

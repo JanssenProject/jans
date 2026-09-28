@@ -262,13 +262,18 @@ mod input_validation {
 
         let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".", true);
+        let loaded_directory = loader
+            .load_directory(".", true)
+            .expect("metadata content is validated after loading");
+        let result = super::super::formats::parse_policy_store(loaded_directory, true);
 
         let err = result.expect_err("Expected error for invalid Cedar syntax");
         assert!(
             matches!(
                 &err,
-                PolicyStoreError::Validation(ValidationError::InvalidPolicyStoreId { .. })
+                super::super::formats::ParseStoreError::Validation(
+                    ValidationError::InvalidPolicyStoreId { .. }
+                )
             ),
             "Expected InvalidPolicyStoreId validation error for invalid Cedar syntax fixture, got: {err:?}"
         );

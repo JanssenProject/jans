@@ -9,8 +9,8 @@ use std::{fs, io};
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::archive_handler::ArchiveLimits;
 use crate::common::policy_store::errors::{PolicyStoreError, ValidationError};
+use crate::common::policy_store::formats::{self, ParseStoreError};
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
-use crate::common::policy_store::manager::PolicyStoreManager;
 use crate::common::policy_store::validator::MetadataValidator;
 use crate::common::policy_store::{ConversionError, PolicyStore, PolicyStoreWithID};
 use crate::http::cache_headers::CacheHeadersState;
@@ -95,6 +95,8 @@ fn extract_first_policy_store(
                 id: k.to_owned(),
                 store,
                 metadata: Some(metadata),
+                spec_version: None,
+                warnings: Vec::new(),
             }
         })
         .next();
@@ -284,22 +286,15 @@ pub(crate) async fn parse_cjar_bytes(
     .await
 }
 
-/// Converts a loaded directory/archive store into a [`PolicyStoreWithID`].
+/// Converts a loaded directory/archive store into a [`PolicyStoreWithID`],
+/// dispatching on its `policy_store_spec_version`.
 ///
 /// Synchronous so WASM (no `spawn_blocking`) can call it inline.
 fn convert_to_policy_store(
     loaded: crate::common::policy_store::loader::LoadedPolicyStore,
     strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    let id = loaded.metadata.policy_store.id.clone();
-    let metadata = loaded.metadata.clone();
-    let store = PolicyStoreManager::into_policy_store(loaded, strict_schema_validation)?;
-
-    Ok(PolicyStoreWithID {
-        id,
-        store,
-        metadata: Some(metadata),
-    })
+    formats::parse_policy_store(loaded, strict_schema_validation).map_err(Into::into)
 }
 
 /// Runs [`convert_to_policy_store`] on a blocking thread on native, since schema
@@ -473,6 +468,15 @@ fn load_policy_store_from_archive_bytes(
         .map_err(|e| map_policy_store_err(e, true))?;
 
     convert_to_policy_store(loaded, strict_schema_validation)
+}
+
+impl From<ParseStoreError> for PolicyStoreLoadError {
+    fn from(e: ParseStoreError) -> Self {
+        match e {
+            ParseStoreError::Validation(e) => Self::Validation(e),
+            ParseStoreError::Conversion(e) => Self::Conversion(e),
+        }
+    }
 }
 
 fn map_policy_store_err(e: PolicyStoreError, is_archive: bool) -> PolicyStoreLoadError {
