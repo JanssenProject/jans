@@ -1,5 +1,4 @@
 import logging.config
-from contextlib import contextmanager
 from dataclasses import dataclass
 
 import click
@@ -42,14 +41,6 @@ class Domain:
         self.manager = manager
         self.persistence = SqlClient(self.manager)
         self.dry_run = kwargs.get("dry_run") or False
-
-    @contextmanager
-    def wrapped_ops(self):
-        ops = DomainOps()
-        try:
-            yield ops
-        finally:
-            ops = None
 
     def modify_persistence_entries(self, table_name, old_fqdn, new_fqdn, ops):
         logger.info("Checking entries in %s table", table_name)
@@ -96,13 +87,14 @@ class Domain:
                 logger.info("FQDN has been changed from %s to %s. Please rotate certificate(s) to avoid SSL issue.", old_fqdn, new_fqdn)
 
     def change_fqdn(self, old_fqdn, new_fqdn):
-        with self.wrapped_ops() as ops:
-            logger.info("Changing FQDN from %s to %s", old_fqdn, new_fqdn)
+        logger.info("Changing FQDN from %s to %s", old_fqdn, new_fqdn)
 
-            for table_name in ["jansAppConf", "jansCustomScr", "jansClnt"]:
-                self.modify_persistence_entries(table_name, old_fqdn, new_fqdn, ops)
+        ops = DomainOps()
 
-            self.modify_configmap(old_fqdn, new_fqdn, ops)
+        for table_name in ["jansAppConf", "jansCustomScr", "jansClnt"]:
+            self.modify_persistence_entries(table_name, old_fqdn, new_fqdn, ops)
+
+        self.modify_configmap(old_fqdn, new_fqdn, ops)
 
 
 class FQDNParamType(click.ParamType):
