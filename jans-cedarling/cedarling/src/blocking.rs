@@ -196,6 +196,16 @@ impl Cedarling {
     pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
         self.instance.drain_metrics()
     }
+
+    /// Returns the ID of the currently published policy store, if it carries one.
+    ///
+    /// `None` when the store carries no ID. The value is an opaque,
+    /// source-dependent string: do not parse it or assume hex. It may change
+    /// after a background refresh.
+    #[must_use]
+    pub fn policy_store_id(&self) -> Option<String> {
+        self.instance.policy_store_id()
+    }
 }
 
 impl LogStorage for Cedarling {

@@ -297,6 +297,16 @@ impl Cedarling {
         }
     }
 
+    /// Returns the ID of the currently published policy store, if it carries one.
+    ///
+    /// `None` when the store carries no ID. The value is an opaque,
+    /// source-dependent string: do not parse it or assume hex. It may change
+    /// after a background refresh.
+    #[must_use]
+    pub fn policy_store_id(&self) -> Option<String> {
+        self.authz.load().policy_store_id()
+    }
+
     // The following public methods retain async signatures for API compatibility
     // to avoid breaking changes. They use #[allow(unknown_lints, clippy::unused_async, clippy::unused_async_trait_impl)] since
     // they no longer await internally. Future maintainers can safely remove
