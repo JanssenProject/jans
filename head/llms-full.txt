@@ -31438,25 +31438,6 @@ Reserve a static public IP with your cloud provider before installation. Add thi
 
 ### Gateway API Configuration
 
-!!! warning "Gateway API configuration changes"
-    In previous version, Gateway API is configured via `global.gatewayApi` and `gatewayApi`.
-    As of current version, they are replaced by `global.gateway-api` and `gateway-api` respectively.
-
-    Attribute changes:
-
-    | Legacy                            | New                                   |
-    | --------------------------------- | ------------------------------------- |
-    | `global.gatewayApi.enabled`       | `global.gateway-api.enabled`          |
-    | `gatewayApi.gatewayClassName`     | `gateway-api.gateway.className`       |
-    | `gatewayApi.name`                 | `gateway-api.gateway.name`            |
-    | `gatewayApi.httpPort`             | `gateway-api.gateway.httpPort`        |
-    | `gatewayApi.httpsPort`            | `gateway-api.gateway.httpsPort`       |
-    | `gatewayApi.tlsSecretName`        | `gateway-api.gateway.tlsSecretName`   |
-    | `gatewayApi.gatewayLabels`        | `gateway-api.gateway.labels`          |
-    | `gatewayApi.gatewayAnnotations`   | `gateway-api.gateway.annotations`     |
-    | `gatewayApi.routeLabels`          | `gateway-api.routes.labels`           |
-    | `gatewayApi.routeAnnotations`     | `gateway-api.routes.annotations`      |
-
 Add this to your `override.yaml`:
 
 ```yaml
@@ -31492,6 +31473,9 @@ helm repo add stable https://charts.helm.sh/stable
 helm repo update
 helm install nginx ingress-nginx/ingress-nginx
 ```
+
+!!! note "External Proxies and Health Checks"
+    If you are placing an external Load Balancer or reverse proxy in front of the NGINX controller, be aware that the default NGINX health check endpoint is /healthz. You will need to either configure your external proxy's health probe to point to /healthz, or update the NGINX service annotations to match your proxy's default path.
 
 ### Get the Load Balancer Address
 
