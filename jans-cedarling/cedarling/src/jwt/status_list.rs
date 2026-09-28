@@ -41,9 +41,9 @@ impl StatusList {
     pub(super) fn parse(encoded: &str, bits: u8) -> Result<Self, ParseStatusListError> {
         let compressed = BASE64_URL_SAFE_NO_PAD.decode(encoded)?;
         let decoder = ZlibDecoder::new(compressed.as_slice());
-        
+
         let mut bounded_decoder = decoder.take(Self::MAX_DECOMPRESSED_SIZE);
-        
+
         let mut list = Vec::new();
         bounded_decoder.read_to_end(&mut list)?;
 
