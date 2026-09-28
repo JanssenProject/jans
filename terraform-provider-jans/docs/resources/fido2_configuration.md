@@ -29,8 +29,6 @@ resource "jans_fido2_configuration" "global" {
     "jansPerson",
   ]
   use_local_cache                 = true
-  super_gluu_enabled              = true
-  old_u2f_migration_enabled       = true
 
   fido2_configuration {
     authentication_history_expiration = 1296000
@@ -63,20 +61,26 @@ resource "jans_fido2_configuration" "global" {
 - `base_endpoint` (String) The base URL for Fido2 endpoints. Example: https://server.example.com/fido2/restv1
 - `clean_service_batch_chunk_size` (Number) Each clean up iteration fetches chunk of expired data per base dn and removes it.
 - `clean_service_interval` (Number) Time interval for the clean up service in seconds.
+- `disable_external_logger_configuration` (Boolean) Choose whether to disable the external log4j2 configuration override.
 - `disable_jdk_logger` (Boolean) Boolean value specifying whether to enable JDK Loggers.
 - `external_logger_configuration` (String) Path to external Fido2 logging configuration.
 - `fido2_configuration` (Block List, Max: 1) Fido2Configuration. (see [below for nested schema](#nestedblock--fido2_configuration))
+- `fido2_device_info_collection` (Boolean) Boolean value specifying whether to collect device information in FIDO2 metrics.
+- `fido2_error_categorization` (Boolean) Boolean value specifying whether to categorize errors in FIDO2 metrics.
+- `fido2_metrics_aggregation_enabled` (Boolean) Boolean value specifying whether FIDO2 metrics aggregation is enabled.
+- `fido2_metrics_enabled` (Boolean) Boolean value specifying whether FIDO2 passkey metrics collection is enabled.
+- `fido2_metrics_retention_days` (Number) Number of days to keep FIDO2 passkey metrics data.
+- `fido2_performance_metrics` (Boolean) Boolean value specifying whether to collect detailed performance metrics for FIDO2 operations.
 - `issuer` (String) URL using the https scheme for Issuer identifier. Example: https://server.example.com/
 - `logging_layout` (String) Logging layout used for Fido2.
 - `logging_level` (String) Logging level for Fido2 logger.
 - `metric_reporter_enabled` (Boolean) Boolean value specifying whether to enable Metric Reporter.
 - `metric_reporter_interval` (Number) The interval for metric reporter in seconds.
 - `metric_reporter_keep_data_days` (Number) The days to keep report data.
-- `old_u2f_migration_enabled` (Boolean) Boolean value to indicate if U2F migration is to be enabled.
 - `person_custom_object_class_list` (List of String) Custom object class list for dynamic person enrolment.
-- `super_gluu_enabled` (Boolean) Boolean value to indicate if SuperGluu is to be enabled.
+- `trusted_proxy_enabled` (Boolean) Whether proxy headers may be trusted when recording the client IP in metrics. True trusts them only from the source addresses listed in trusted_proxy_ip_ranges.
+- `trusted_proxy_ip_ranges` (List of String) Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation. Only consulted when trusted_proxy_enabled is true; an empty list trusts nothing.
 - `use_local_cache` (Boolean) Boolean value to indicate if Local Cache is to be used.
-- `user_info_lifetime` (Number) User info lifetime.
 
 ### Read-Only
 
@@ -87,10 +91,21 @@ resource "jans_fido2_configuration" "global" {
 
 Optional:
 
+- `abandoned_request_expiration` (Number) Expiration time in seconds for abandoned assertion ceremonies.
+- `abandoned_request_sweep_interval` (Number) Interval in seconds between sweeps for lapsed assertion ceremonies. Must stay below unfinished_request_expiration.
+- `allowed_top_origins` (List of String) Full origins permitted to frame a cross-origin ceremony. An empty list denies every framed ceremony.
+- `attestation_mode` (String) Whether MDS validation should be omitted during attestation. Possible values are disabled, monitor and enforced.
 - `authentication_history_expiration` (Number) Expiration time in seconds for approved authentication requests.
 - `authenticator_certs_folder` (String) Authenticators certificates fodler.
+- `disable_metadata_service` (Boolean) Boolean value indicating whether the MDS download should be omitted.
+- `enterprise_attestation` (Boolean) Whether authenticators have been enabled for use in a specific protected environment.
+- `hints` (List of String) Hints to the relying party. Possible values are security-key, client-device and hybrid.
 - `mds_certs_folder` (String) MDS TOC root certificates folder.
+- `mds_download_startup_retries` (Number) Number of times the MDS TOC download is retried at server startup when the TOC blob is missing.
+- `mds_download_startup_retry_interval` (Number) Delay in seconds between MDS TOC download retries at server startup.
 - `mds_tocs_folder` (String) MDS TOC files folder.
+- `metadata_servers` (Block List) Sources of URLs with external metadata. (see [below for nested schema](#nestedblock--fido2_configuration--metadata_servers))
+- `record_abandoned_assertions` (Boolean) Whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled.
 - `requested_credential_types` (List of String) List of Requested Credential Types.
 - `requested_parties` (Block List) Authenticators metadata in json format. (see [below for nested schema](#nestedblock--fido2_configuration--requested_parties))
 - `server_metadata_folder` (String) Authenticators metadata in json format.
@@ -104,3 +119,21 @@ Optional:
 
 - `domains` (List of String) Requested Party domains.
 - `name` (String) Name of the requested party.
+- `policy` (Block List, Max: 1) Per-relying-party assurance policy. Omitted falls back to the global configuration. (see [below for nested schema](#nestedblock--fido2_configuration--requested_parties--policy))
+
+
+<a id="nestedblock--fido2_configuration--requested_parties--policy"></a>
+### Nested Schema for `fido2_configuration.requested_parties.policy`
+
+Optional:
+
+- `attestation_mode` (String) Attestation mode for this relying party. Possible values are disabled, monitor and enforced.
+
+
+<a id="nestedblock--fido2_configuration--metadata_servers"></a>
+### Nested Schema for `fido2_configuration.metadata_servers`
+
+Optional:
+
+- `root_cert` (String) Root certificate of the metadata server.
+- `url` (String) URL of the metadata server.

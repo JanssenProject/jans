@@ -5,9 +5,19 @@ import (
         "fmt"
 )
 
+type RequestedPartyPolicy struct {
+        AttestationMode string `schema:"attestation_mode" json:"attestationMode,omitempty"`
+}
+
 type RequestedParties struct {
-        Id      string   `schema:"name" json:"name"`
-        Origins []string `schema:"domains" json:"domains"`
+        Id      string                `schema:"name" json:"id"`
+        Origins []string              `schema:"domains" json:"origins"`
+        Policy  *RequestedPartyPolicy `schema:"policy" json:"policy,omitempty"`
+}
+
+type MetadataServer struct {
+        Url      string `schema:"url" json:"url"`
+        RootCert string `schema:"root_cert" json:"rootCert"`
 }
 
 // Fido2Configuration represents the Fido2 configuration properties
@@ -21,26 +31,45 @@ type Fido2Configuration struct {
         AuthenticationHistoryExpiration int                `schema:"authentication_history_expiration" json:"authenticationHistoryExpiration"`
         DebugUserAutoEnrollment         bool               `schema:"user_auto_enrollment" json:"userAutoEnrollment"`
         EnabledFidoAlgorithms           []string           `schema:"requested_credential_types" json:"enabledFidoAlgorithms"`
+        RecordAbandonedAssertions       bool               `schema:"record_abandoned_assertions" json:"recordAbandonedAssertions"`
+        AbandonedRequestExpiration      int                `schema:"abandoned_request_expiration" json:"abandonedRequestExpiration"`
+        AbandonedRequestSweepInterval   int                `schema:"abandoned_request_sweep_interval" json:"abandonedRequestSweepInterval"`
+        MetadataServers                 []MetadataServer   `schema:"metadata_servers" json:"metadataServers"`
+        DisableMetadataService          bool               `schema:"disable_metadata_service" json:"disableMetadataService"`
+        MdsDownloadStartupRetries       int                `schema:"mds_download_startup_retries" json:"mdsDownloadStartupRetries"`
+        MdsDownloadStartupRetryInterval int                `schema:"mds_download_startup_retry_interval" json:"mdsDownloadStartupRetryInterval"`
+        Hints                           []string           `schema:"hints" json:"hints"`
+        EnterpriseAttestation           bool               `schema:"enterprise_attestation" json:"enterpriseAttestation"`
+        AttestationMode                 string             `schema:"attestation_mode" json:"attestationMode"`
+        AllowedTopOrigins               []string           `schema:"allowed_top_origins" json:"allowedTopOrigins"`
 }
 
 // JansFido2DynConfiguration defines the Fido2 dynamic configuration
 // of the Janssen server.
 type JansFido2DynConfiguration struct {
-        Issuer                      string             `schema:"issuer" json:"issuer,omitempty"`
-        BaseEndpoint                string             `schema:"base_endpoint" json:"baseEndpoint,omitempty"`
-        CleanServiceInterval        int                `schema:"clean_service_interval" json:"cleanServiceInterval,omitempty"`
-        CleanServiceBatchChunkSize  int                `schema:"clean_service_batch_chunk_size" json:"cleanServiceBatchChunkSize,omitempty"`
-        UserInfoLifetime            int                `schema:"user_info_lifetime" json:"userInfoLifetime,omitempty"`
-        UseLocalCache               bool               `schema:"use_local_cache" json:"useLocalCache,omitempty"`
-        DisableJdkLogger            bool               `schema:"disable_jdk_logger" json:"disableJdkLogger,omitempty"`
-        LoggingLevel                string             `schema:"logging_level" json:"loggingLevel,omitempty"`
-        LoggingLayout               string             `schema:"logging_layout" json:"loggingLayout,omitempty"`
-        ExternalLoggerConfiguration string             `schema:"external_logger_configuration" json:"externalLoggerConfiguration,omitempty"`
-        MetricReporterEnabled       bool               `schema:"metric_reporter_enabled" json:"metricReporterEnabled,omitempty"`
-        MetricReporterInterval      int                `schema:"metric_reporter_interval" json:"metricReporterInterval,omitempty"`
-        MetricReporterKeepDataDays  int                `schema:"metric_reporter_keep_data_days" json:"metricReporterKeepDataDays,omitempty"`
-        PersonCustomObjectClassList []string           `schema:"person_custom_object_class_list" json:"personCustomObjectClassList,omitempty"`
-        Fido2Configuration          Fido2Configuration `schema:"fido2_configuration" json:"fido2Configuration,omitempty"`
+        Issuer                             string             `schema:"issuer" json:"issuer,omitempty"`
+        BaseEndpoint                       string             `schema:"base_endpoint" json:"baseEndpoint,omitempty"`
+        CleanServiceInterval               int                `schema:"clean_service_interval" json:"cleanServiceInterval,omitempty"`
+        CleanServiceBatchChunkSize         int                `schema:"clean_service_batch_chunk_size" json:"cleanServiceBatchChunkSize,omitempty"`
+        UseLocalCache                      bool               `schema:"use_local_cache" json:"useLocalCache,omitempty"`
+        DisableJdkLogger                   bool               `schema:"disable_jdk_logger" json:"disableJdkLogger,omitempty"`
+        DisableExternalLoggerConfiguration bool               `schema:"disable_external_logger_configuration" json:"disableExternalLoggerConfiguration,omitempty"`
+        LoggingLevel                       string             `schema:"logging_level" json:"loggingLevel,omitempty"`
+        LoggingLayout                      string             `schema:"logging_layout" json:"loggingLayout,omitempty"`
+        ExternalLoggerConfiguration        string             `schema:"external_logger_configuration" json:"externalLoggerConfiguration,omitempty"`
+        MetricReporterEnabled              bool               `schema:"metric_reporter_enabled" json:"metricReporterEnabled,omitempty"`
+        MetricReporterInterval             int                `schema:"metric_reporter_interval" json:"metricReporterInterval,omitempty"`
+        MetricReporterKeepDataDays         int                `schema:"metric_reporter_keep_data_days" json:"metricReporterKeepDataDays,omitempty"`
+        Fido2MetricsEnabled                bool               `schema:"fido2_metrics_enabled" json:"fido2MetricsEnabled,omitempty"`
+        Fido2MetricsRetentionDays          int                `schema:"fido2_metrics_retention_days" json:"fido2MetricsRetentionDays,omitempty"`
+        Fido2DeviceInfoCollection          bool               `schema:"fido2_device_info_collection" json:"fido2DeviceInfoCollection,omitempty"`
+        Fido2ErrorCategorization           bool               `schema:"fido2_error_categorization" json:"fido2ErrorCategorization,omitempty"`
+        Fido2PerformanceMetrics            bool               `schema:"fido2_performance_metrics" json:"fido2PerformanceMetrics,omitempty"`
+        Fido2MetricsAggregationEnabled     bool               `schema:"fido2_metrics_aggregation_enabled" json:"fido2MetricsAggregationEnabled,omitempty"`
+        TrustedProxyEnabled                bool               `schema:"trusted_proxy_enabled" json:"trustedProxyEnabled,omitempty"`
+        TrustedProxyIpRanges               []string           `schema:"trusted_proxy_ip_ranges" json:"trustedProxyIpRanges,omitempty"`
+        PersonCustomObjectClassList        []string           `schema:"person_custom_object_class_list" json:"personCustomObjectClassList,omitempty"`
+        Fido2Configuration                 Fido2Configuration `schema:"fido2_configuration" json:"fido2Configuration,omitempty"`
 }
 
 // GetFido2Configuration returns the current Fido2 configuration.

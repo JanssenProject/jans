@@ -200,6 +200,12 @@
 			<artifactId>testng</artifactId>
 		    <scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-testng</artifactId>
+			<version>0.5.2</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Others -->
 		<dependency>

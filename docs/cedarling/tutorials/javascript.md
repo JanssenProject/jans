@@ -131,14 +131,14 @@ the archive itself:
 ```javascript
 import { initFromArchiveBytes } from "@janssenproject/cedarling_wasm";
 
-const token = "<your-bearer-token>";
+const bearer = "<your-bearer-token>";
 const config = {
   CEDARLING_APPLICATION_NAME: "My App",
   // ... other configuration properties
 };
 
 const response = await fetch("https://example.com/policy-store.cjar", {
-  headers: { Authorization: `Bearer ${token}` },
+  headers: { Authorization: `Bearer ${bearer}` },
 });
 const bytes = new Uint8Array(await response.arrayBuffer());
 const cedarling = await initFromArchiveBytes(config, bytes);
@@ -347,9 +347,12 @@ console.log(logs);
 
 ## API reference
 
-`@janssenproject/cedarling_wasm` ships TypeScript declarations for every public
-export. The package exposes them through its public entry points, so editors and
-TypeScript resolve the authoritative API automatically after installation.
+The full WASM API is auto-generated from the `cedarling_wasm` source on every
+release: [Cedarling WASM API documentation](https://janssenproject.github.io/developer-docs/cedarling/cedarling_wasm/index.html).
+
+`@janssenproject/cedarling_wasm` also ships TypeScript declarations for every
+public export, so editors and TypeScript resolve the same API automatically
+after installation.
 
 See the Cedarling references for [authorization](../reference/cedarling-authz.md),
 [bootstrap properties](../reference/cedarling-properties.md),
