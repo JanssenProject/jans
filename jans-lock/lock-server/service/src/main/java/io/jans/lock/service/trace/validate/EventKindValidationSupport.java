@@ -243,7 +243,7 @@ final class EventKindValidationSupport {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "invalid:" + path);
 		}
 		String scheme = uri.getScheme();
-		if (!uri.isAbsolute() || scheme == null) {
+		if (!uri.isAbsolute() || scheme == null || uri.isOpaque() || uri.getHost() == null) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "invalid:" + path);
 		}
 		if ("https".equalsIgnoreCase(scheme)) {
