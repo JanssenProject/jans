@@ -45,9 +45,12 @@ final class EventKindValidationSupport {
 	/** {@code ^[A-Za-z0-9_-]{16,128}$} — the generic opaque-fingerprint form (design §7.3). */
 	private static final Pattern FINGERPRINT_PATTERN = Pattern.compile("^[A-Za-z0-9_-]{16,128}$");
 
-	/** Compact JWS/JWT shape: three dot-separated base64url segments (design §7.3). */
+	/**
+	 * Compact JWS (3 segments) or compact JWE (5 segments; the encrypted-key segment may be empty).
+	 */
 	private static final Pattern COMPACT_JWS_PATTERN = Pattern
-			.compile("^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$");
+			.compile("^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+					+ "|^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$");
 
 	private static final int MIN_RAW_TOKEN_MATERIAL_LENGTH = 20;
 
