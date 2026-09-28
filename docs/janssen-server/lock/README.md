@@ -79,6 +79,9 @@ All Lock Server endpoints are protected using OAuth 2.0 with specific scopes:
 - `https://jans.io/oauth/lock/log.write` - Audit log submission
 - `https://jans.io/oauth/lock/health.write` - Health status reporting
 - `https://jans.io/oauth/lock/telemetry.write` - Telemetry data submission
+- `https://jans.io/oauth/lock/trace.write` - TRACE evidence record submission
+- `https://jans.io/oauth/lock/trace.readonly` - TRACE record and execution retrieval
+- `https://jans.io/oauth/lock/trace.admin` - TRACE producer key and chain management
 
 ### Authorization Flow
 

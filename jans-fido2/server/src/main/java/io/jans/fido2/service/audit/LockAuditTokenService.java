@@ -6,7 +6,9 @@
 
 package io.jans.fido2.service.audit;
 
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -40,6 +42,12 @@ public class LockAuditTokenService {
 	private static final int READ_TIMEOUT_SECONDS = 10;
 
 	/**
+	 * Refresh this long before actual expiry, so a token that passes this check does not expire
+	 * mid-flight between here and the delivery POST it is about to authorize.
+	 */
+	private static final long EXPIRY_SAFETY_BUFFER_SECONDS = 30;
+
+	/**
 	 * {@link TokenClient} / {@link OpenIdConfigurationClient} (both {@code BaseClient} subclasses in
 	 * the shared jans-auth-client module) build their RESTEasy client with no connect/read timeout
 	 * unless given an executor — see {@code BaseClient#initClient()}. BaseClient is consumed by many
@@ -65,11 +73,41 @@ public class LockAuditTokenService {
 	private volatile String cachedTokenEndpoint;
 
 	/**
-	 * @return a fresh access token for {@link #LOCK_LOG_WRITE_SCOPE}, or {@code null} if the token
-	 *         could not be obtained (missing/invalid config, or the token endpoint rejected the
-	 *         request). Never throws — the caller treats a {@code null} token as a delivery failure.
+	 * {@code AtomicReference} rather than a {@code volatile CachedToken} field — {@code volatile} only
+	 * guarantees visibility of the reference, and while {@link CachedToken} is itself immutable
+	 * (making a bare volatile field entirely sound here), static analysis has no way to verify that
+	 * for a user-defined type. This is the JDK type that says so directly.
+	 */
+	private final AtomicReference<CachedToken> cachedToken = new AtomicReference<>();
+
+	/**
+	 * @return a cached access token for {@link #LOCK_LOG_WRITE_SCOPE} if one is still usable, or a
+	 *         freshly-issued one otherwise, or {@code null} if a token could not be obtained
+	 *         (missing/invalid config, or the token endpoint rejected the request). Never throws —
+	 *         the caller treats a {@code null} token as a delivery failure.
+	 *         <p>
+	 *         Without this cache, every flush (every {@code lockAuditFlushInterval}, ~20s by default)
+	 *         issued a brand-new token — flagged in review on the PR that introduced this class.
 	 */
 	public String getAccessToken() {
+		CachedToken cached = cachedToken.get();
+		if (cached != null && cached.isUsable()) {
+			return cached.accessToken;
+		}
+		return requestNewToken();
+	}
+
+	/**
+	 * {@code synchronized} so two flushes racing a simultaneous expiry issue at most one new token
+	 * rather than one each; re-checks the cache after acquiring the lock in case the request ahead of
+	 * this one already refreshed it.
+	 */
+	private synchronized String requestNewToken() {
+		CachedToken cached = cachedToken.get();
+		if (cached != null && cached.isUsable()) {
+			return cached.accessToken;
+		}
+
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 		String clientId = fido2Configuration.getLockAuditClientId();
 		String clientSecret = fido2Configuration.getLockAuditClientPassword();
@@ -102,7 +140,43 @@ public class LockAuditTokenService {
 			return null;
 		}
 
+		cachedToken.set(cacheableToken(tokenResponse));
 		return tokenResponse.getAccessToken();
+	}
+
+	/**
+	 * @return a {@link CachedToken} if {@code tokenResponse} carries an {@code expires_in} the cache
+	 *         can trust, or {@code null} to skip caching entirely when it does not — serving a token
+	 *         past an expiry we never actually confirmed is worse than re-issuing one every call.
+	 *         Package-visible so a test can drive it directly without a live token endpoint.
+	 */
+	static CachedToken cacheableToken(TokenResponse tokenResponse) {
+		Integer expiresIn = tokenResponse.getExpiresIn();
+		if (expiresIn == null || expiresIn <= EXPIRY_SAFETY_BUFFER_SECONDS) {
+			return null;
+		}
+		Instant expiresAt = Instant.now().plusSeconds(expiresIn - EXPIRY_SAFETY_BUFFER_SECONDS);
+		return new CachedToken(tokenResponse.getAccessToken(), expiresAt);
+	}
+
+	/** Package-visible (class and constructor) for the same reason as {@link #cacheableToken}. */
+	static final class CachedToken {
+		private final String accessToken;
+		private final Instant expiresAt;
+
+		CachedToken(String accessToken, Instant expiresAt) {
+			this.accessToken = accessToken;
+			this.expiresAt = expiresAt;
+		}
+
+		boolean isUsable() {
+			return Instant.now().isBefore(expiresAt);
+		}
+
+		/** Package-visible so a test can assert the safety buffer was actually applied. */
+		Instant expiresAt() {
+			return expiresAt;
+		}
 	}
 
 	/**

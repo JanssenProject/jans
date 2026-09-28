@@ -62,8 +62,11 @@ public class RedirectionUriService {
     @Inject
     private SectorIdentifierUriService sectorIdentifierUriService;
 
+    @Inject
+    private ClientIdMetadataService clientIdMetadataService;
+
     public String validateRedirectionUri(String clientIdentifier, String redirectionUri) {
-        Client client = clientService.getClient(clientIdentifier);
+        Client client = clientIdMetadataService.resolveClient(clientIdentifier);
         if (client == null) {
             return null;
         }
@@ -177,7 +180,7 @@ public class RedirectionUriService {
 
         boolean isBlank = Util.isNullOrEmpty(postLogoutRedirectUri);
 
-        Client client = clientService.getClient(clientId);
+        Client client = clientIdMetadataService.resolveClient(clientId);
 
         if (client != null) {
             String[] postLogoutRedirectUris = client.getPostLogoutRedirectUris();

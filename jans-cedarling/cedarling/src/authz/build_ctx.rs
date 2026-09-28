@@ -360,7 +360,8 @@ mod test {
             .to_json_value()
             .expect("context should serialize to json");
         test_utils::assert_eq!(
-            ctx_json, request_ctx,
+            ctx_json,
+            request_ctx,
             "context should equal request context unchanged"
         );
     }

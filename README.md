@@ -7,7 +7,7 @@
 
 Janssen is a self-funded project chartered directly under the Linux Foundation
 to foster the development of enterprise digital identity and access management
-infrastructure. As the lead Contributors, the [Gluu team](https://gluu.org) drives the
+infrastructure. As the lead Contributors, the [Gluu](https://gluu.org) team drives the
 priorities on a day-to-day basis, governed and guided by the Janssen community
 Technical Steering Committee.
 
