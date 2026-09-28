@@ -12,6 +12,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authzdetails.AuthzDetails;
+import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
@@ -363,8 +364,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         // The authorization server MAY issue a new refresh token, in which case
         // the client MUST discard the old refresh token and replace it with the new refresh token.
+        // OAuth 2.1: refresh tokens issued to public clients are not sender-constrained here, so they
+        // MUST be rotated on every use regardless of the 'skipRefreshTokenDuringRefreshing' AS setting.
+        final boolean isPublicClient = client.hasAuthenticationMethod(AuthenticationMethod.NONE);
         RefreshToken reToken = null;
-        if (isFalse(appConfiguration.getSkipRefreshTokenDuringRefreshing())) {
+        if (isPublicClient || isFalse(appConfiguration.getSkipRefreshTokenDuringRefreshing())) {
             if (isTrue(appConfiguration.getRefreshTokenExtendLifetimeOnRotation())) {
                 reToken = tokenCreatorService.createRefreshToken(executionContext, scope); // extend lifetime
             } else {
