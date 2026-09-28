@@ -117,6 +117,12 @@ use validation::{
     ValidatedJwt, ValidatorInfo, validate_required_claims,
 };
 
+/// A JWT whose mapping no trusted issuer declares. Never returned to the caller: the
+/// token is dropped and this only feeds the log and metrics.
+#[derive(Debug, thiserror::Error)]
+#[error("no trusted issuer declares a token for the mapping '{0}'")]
+pub(crate) struct UnknownTokenMapping(String);
+
 #[allow(clippy::cast_possible_truncation)]
 pub(crate) fn parse_numeric_date(value: &serde_json::Value) -> Option<i64> {
     if let Some(i) = value.as_i64() {
@@ -130,6 +136,19 @@ pub(crate) fn parse_numeric_date(value: &serde_json::Value) -> Option<i64> {
         .and_then(|s| s.trim().parse::<f64>().ok())
         .filter(|f| f.is_finite())
         .map(|f| f.floor() as i64)
+}
+
+/// Entity type -> token key index, built from the full config so it doesn't depend on
+/// async loading. `validate_trusted_issuers_config` rejects duplicate entity types before
+/// `JwtService` is built, so every entity type maps to exactly one token key.
+fn index_token_keys_by_entity_type(
+    trusted_issuers: &HashMap<String, TrustedIssuer>,
+) -> HashMap<String, String> {
+    trusted_issuers
+        .values()
+        .flat_map(|issuer| &issuer.token_metadata)
+        .map(|(token_key, metadata)| (metadata.entity_type_name.clone(), token_key.clone()))
+        .collect()
 }
 
 /// Handles JWT validation
@@ -146,6 +165,9 @@ pub(crate) struct JwtService {
     /// Cancellation token to stop all background JWKS refresh tasks on drop
     jwks_cancel_token: CancellationToken,
     metrics: Arc<MetricsCollector>,
+    /// Reverse lookup from a token's Cedar entity type name to its
+    /// `token_metadata` key, e.g. `Dolphin::Access_Token` -> `access_token`.
+    token_keys_by_entity_type: HashMap<String, String>,
 }
 
 struct IssuerConfig {
@@ -210,6 +232,7 @@ impl JwtService {
         );
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
+        let token_keys_by_entity_type = index_token_keys_by_entity_type(&trusted_issuers);
         let loading_state = Arc::new(TrustedIssuerLoadingState::new(trusted_issuers.len()));
 
         let jwks_refresh_notifiers = Arc::new(Mutex::new(HashMap::new()));
@@ -259,6 +282,7 @@ impl JwtService {
             jwks_refresh_notifiers,
             jwks_cancel_token,
             metrics,
+            token_keys_by_entity_type,
         })
     }
 
@@ -587,10 +611,18 @@ impl JwtService {
         &self,
         ctx: &mut TokenCallCtx<'_>,
     ) -> Result<Option<Arc<Token>>, MultiIssuerValidationError> {
-        // Find the corresponding token metadata key for the entity type name
-        let token_type = self.find_token_metadata_key(&ctx.token.mapping);
-
-        let token_kind = TokenKind::AuthorizeMultiIssuer(token_type);
+        let Some(token_key) = self.token_keys_by_entity_type.get(&ctx.token.mapping) else {
+            let err = UnknownTokenMapping(ctx.token.mapping.clone());
+            self.metrics.record_error(&err);
+            if let Some(logger) = &self.logger {
+                logger.log_any(JwtLogEntry::new(
+                    format!("Token dropped at index {}: {err}", ctx.index),
+                    Some(LogLevel::WARN),
+                ));
+            }
+            return Ok(None);
+        };
+        let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(token_key));
 
         if let Some(cedar_token) = self.token_cache.find(&token_kind, &ctx.token.payload) {
             return Ok(Some(cedar_token));
@@ -790,20 +822,6 @@ impl JwtService {
             ));
         }
     }
-
-    /// Find the token metadata key for a given entity type name
-    /// e.g., "`Dolphin::Access_Token`" -> "`access_token`"
-    fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a str) -> Cow<'a, str> {
-        if let Some(token_key) = self
-            .issuer_configs
-            .find_token_metadata_key(entity_type_name)
-        {
-            return Cow::Owned(token_key);
-        }
-
-        // If not found, return the original mapping (fallback)
-        Cow::Borrowed(entity_type_name)
-    }
 }
 
 impl Drop for JwtService {
@@ -866,6 +884,7 @@ fn warn_if_jwt_validation_disabled(jwt_config: &JwtConfig, logger: Option<&Logge
 mod test {
     use super::JwtService;
     use super::TrustedIssuerLoadingInfo;
+    use super::index_token_keys_by_entity_type;
     use super::test_utils::*;
     use super::{CustomIssuerIndex, CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
     use crate::JwtConfig;
@@ -873,6 +892,7 @@ mod test {
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
     use crate::authz::request::TokenInput;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::common::policy_store::TrustedIssuer;
     use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata};
     use crate::http::HttpClient;
     use crate::http::HttpClientConfig;
@@ -885,6 +905,77 @@ mod test {
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::time::Duration;
     use tokio::test;
+    use url::Url;
+
+    /// Build a trusted issuer from `(token_key, entity_type_name)` pairs.
+    fn issuer_with_tokens(name: &str, tokens: &[(&str, &str)]) -> TrustedIssuer {
+        TrustedIssuer::new(
+            name.to_string(),
+            String::new(),
+            Url::parse(&format!(
+                "https://{name}.test/.well-known/openid-configuration"
+            ))
+            .expect("test oidc endpoint should parse"),
+            tokens
+                .iter()
+                .map(|(token_key, entity_type_name)| {
+                    (
+                        (*token_key).to_string(),
+                        TokenEntityMetadata::builder()
+                            .entity_type_name((*entity_type_name).to_string())
+                            .build(),
+                    )
+                })
+                .collect(),
+        )
+    }
+
+    /// Token keys repeat across issuers (every issuer has an `access_token`), so
+    /// each entity type must resolve to the key of its own issuer.
+    #[test]
+    async fn index_resolves_entity_types_across_issuers() {
+        let issuers = HashMap::from([
+            (
+                "jans".to_string(),
+                issuer_with_tokens(
+                    "jans",
+                    &[
+                        ("access_token", "Jans::Access_Token"),
+                        ("id_token", "Jans::Id_Token"),
+                    ],
+                ),
+            ),
+            (
+                "acme".to_string(),
+                issuer_with_tokens("acme", &[("access_token", "Acme::Access_Token")]),
+            ),
+            (
+                "dolphin".to_string(),
+                issuer_with_tokens("dolphin", &[("dolphin_token", "Dolphin::Dolphin_Token")]),
+            ),
+        ]);
+
+        let index = index_token_keys_by_entity_type(&issuers);
+
+        for (entity_type_name, expected_key) in [
+            ("Jans::Access_Token", "access_token"),
+            ("Jans::Id_Token", "id_token"),
+            ("Acme::Access_Token", "access_token"),
+            ("Dolphin::Dolphin_Token", "dolphin_token"),
+        ] {
+            assert_eq!(
+                index.get(entity_type_name).map(String::as_str),
+                Some(expected_key),
+                "{entity_type_name} must resolve to its own issuer's token key"
+            );
+        }
+
+        assert_eq!(
+            index.get("Nope::Token"),
+            None,
+            "an entity type no issuer declares must not resolve"
+        );
+    }
 
     static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
         HttpClient::new(HttpClientConfig {
