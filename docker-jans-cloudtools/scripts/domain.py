@@ -139,8 +139,9 @@ def change_fqdn(new_fqdn, old_fqdn, dry_run):
     if dry_run:
         logger.warning("The dry run mode is enabled; changes will not be persisted!")
 
-    domain = Domain(manager, dry_run=dry_run)
-    domain.change_fqdn(old_fqdn, new_fqdn)
+    with manager.create_lock("change-fqdn"):
+        domain = Domain(manager, dry_run=dry_run)
+        domain.change_fqdn(old_fqdn, new_fqdn)
 
 
 if __name__ == "__main__":
