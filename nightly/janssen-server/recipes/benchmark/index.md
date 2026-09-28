@@ -77,13 +77,13 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
 
 3. Make sure [helm](https://helm.sh/docs/intro/install/) is installed.
 
-4. Prepare your [override.yaml](../install/helm-install/README.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `0.0.0-nightly_dev` which are the bleeding edge images for release `0.0.0-nightly`. Stable images such as `0.0.0-nightly-1` should be used.
+4. Prepare your [override.yaml](../install/helm-install/README.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `replace-janssen-version_dev` which are the bleeding edge images for release `replace-janssen-version`. Stable images such as `replace-janssen-version-1` should be used.
    
    ```yaml
    config:
       image:
         repository: ghcr.io/janssenproject/jans/configurator
-        tag: 0.0.0-nightly_dev 
+        tag: replace-janssen-version_dev 
       countryCode: US
       email: support@gluu.org
       orgName: Gluu
@@ -127,17 +127,17 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/auth-server
-       tag: 0.0.0-nightly_dev
+       tag: replace-janssen-version_dev
    config-api:
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/config-api
-       tag: 0.0.0-nightly_dev
+       tag: replace-janssen-version_dev
    persistence:
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/persistence-loader
-       tag: 0.0.0-nightly_dev 
+       tag: replace-janssen-version_dev 
    nginx-ingress:
      ingress:
        path: /
@@ -171,7 +171,7 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     mkdir -p add_users && cd add_users
     ```
 
-2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
+2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
 
 3.  Open the file and modify the required parameters. Note that the following environments can be used as configmaps data to configure the pod.
 
@@ -265,7 +265,7 @@ Create the client needed to run the test by executing the following. Make sure t
     }
     EOF
     ```
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder. You may run the soak auth code test by copying the [soak_test_auth_code.yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml) instead. 
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder. You may run the soak auth code test by copying the [soak_test_auth_code.yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml) instead. 
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
@@ -357,7 +357,7 @@ Create the client needed to run the test by executing the following. Make sure t
     EOF
     ```
 
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
@@ -445,7 +445,7 @@ Create the client needed to run the test by executing the following. Make sure t
     EOF
     ```
 
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
 
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
