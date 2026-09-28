@@ -32,6 +32,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.service.trace.canon.JcsCanonicalizer;
+import io.jans.lock.service.trace.canon.JcsException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -74,6 +76,12 @@ public class TraceAssertionParser {
 		}
 		walk(root, config.getMaxArrayLength(), config.getMaxObjectMembers());
 
+		try {
+			JcsCanonicalizer.canonicalize(root);
+		} catch (JcsException ex) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_REQUEST, "not_canonicalizable",
+					ex);
+		}
 		return new ParsedAssertion(rawText, (ObjectNode) root);
 	}
 
