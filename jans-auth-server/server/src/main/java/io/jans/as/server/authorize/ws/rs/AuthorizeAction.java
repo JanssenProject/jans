@@ -1106,7 +1106,13 @@ public class AuthorizeAction {
             return UNKNOWN;
         }
 
-        final Client client = clientIdMetadataService.resolveClient(clientId);
+        Client client;
+        try {
+            client = clientIdMetadataService.resolveClient(clientId);
+        } catch (WebApplicationException e) {
+            log.debug("Failed to resolve client_id '{}' for display name.", clientId, e);
+            return UNKNOWN;
+        }
         return getCheckedClientDisplayName(client);
     }
 
