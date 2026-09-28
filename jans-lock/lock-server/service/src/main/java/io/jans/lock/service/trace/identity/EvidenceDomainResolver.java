@@ -103,18 +103,4 @@ public class EvidenceDomainResolver {
 		return null;
 	}
 
-	/**
-	 * Test seam: bypasses CDI injection of {@link AppConfiguration}.
-	 */
-	void setAppConfiguration(AppConfiguration appConfiguration) {
-		this.appConfiguration = appConfiguration;
-	}
-
-	/**
-	 * Test seam: bypasses the {@link #init()} node-id lookup so tests get a deterministic node id.
-	 */
-	void setNodeId(String nodeId) {
-		this.nodeId = nodeId;
-	}
-
 }

@@ -51,12 +51,7 @@ public class CommonAssertionValidator {
 	@Inject
 	private AppConfiguration appConfiguration;
 
-	/** Test seam: {@link Instant#now(Clock)} is used to evaluate {@code signed_at_in_future}. */
 	private Clock clock = Clock.systemUTC();
-
-	void setClock(Clock clock) {
-		this.clock = clock;
-	}
 
 	/**
 	 * @throws TraceValidationException on any §7.1 violation; see the class javadoc of

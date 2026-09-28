@@ -73,11 +73,4 @@ public class SubmitterIdentityService {
 		return identity;
 	}
 
-	/**
-	 * Test seam: bypasses CDI injection of {@link Logger}.
-	 */
-	void setLog(Logger log) {
-		this.log = log;
-	}
-
 }

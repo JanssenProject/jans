@@ -22,13 +22,14 @@ import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.ChainIdentity;
+import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 
 /**
  * Tests for {@link ProducerChainRegistry}: pre-registration lookup, the design decision D-5
  * genesis-hash matrix, and create-only chain registration.
  */
-class ProducerChainRegistryTest {
+class ProducerChainRegistryTest extends BaseLockServiceTest {
 
 	private static final String DOMAIN = "domain-1";
 
@@ -48,7 +49,7 @@ class ProducerChainRegistryTest {
 	void setUp() {
 		store = new InMemoryTraceStore();
 		registry = new ProducerChainRegistry();
-		registry.setTraceStore(store);
+		setField(registry, "traceStore", store);
 	}
 
 	private static ChainIdentity chainIdentity() {

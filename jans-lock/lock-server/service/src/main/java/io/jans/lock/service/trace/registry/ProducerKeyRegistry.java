@@ -182,20 +182,6 @@ public class ProducerKeyRegistry {
 	}
 
 	/**
-	 * Test seam: bypasses CDI injection of {@link TraceStore}.
-	 */
-	void setTraceStore(TraceStore traceStore) {
-		this.traceStore = traceStore;
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link Logger}.
-	 */
-	void setLog(Logger log) {
-		this.log = log;
-	}
-
-	/**
 	 * A producer key together with the {@link PublicKey} built from its stored JWK, returned by
 	 * {@link #resolveForVerification} so callers never re-parse the JWK.
 	 */

@@ -143,11 +143,4 @@ public class ProducerChainRegistry {
 		}
 	}
 
-	/**
-	 * Test seam: bypasses CDI injection of {@link TraceStore}.
-	 */
-	void setTraceStore(TraceStore traceStore) {
-		this.traceStore = traceStore;
-	}
-
 }

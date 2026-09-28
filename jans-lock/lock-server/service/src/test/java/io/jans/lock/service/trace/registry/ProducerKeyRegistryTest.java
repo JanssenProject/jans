@@ -30,13 +30,14 @@ import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
+import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 
 /**
  * Tests for {@link ProducerKeyRegistry}: the design decision D-4 validity matrix, create-only
  * registration, idempotent revocation and the "stored key unusable" data-error path.
  */
-class ProducerKeyRegistryTest {
+class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	private static final String DOMAIN = "domain-1";
 
@@ -61,8 +62,8 @@ class ProducerKeyRegistryTest {
 	void setUp() {
 		store = new InMemoryTraceStore();
 		registry = new ProducerKeyRegistry();
-		registry.setTraceStore(store);
-		registry.setLog(LoggerFactory.getLogger(ProducerKeyRegistry.class));
+		setField(registry, "traceStore", store);
+		setField(registry, "log", LoggerFactory.getLogger(ProducerKeyRegistry.class));
 
 		KeyPair keyPair = Ed25519TestKeys.generateKeyPair();
 		jwk = Ed25519TestKeys.toJwk(keyPair.getPublic());

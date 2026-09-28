@@ -94,62 +94,6 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 	@Inject
 	private ApplicationAuditLogger applicationAuditLogger;
 
-	/**
-	 * Test seam: bypasses CDI injection of {@link Logger}.
-	 */
-	void setLog(Logger log) {
-		this.log = log;
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link AppConfiguration}.
-	 */
-	void setAppConfiguration(AppConfiguration appConfiguration) {
-		this.appConfiguration = appConfiguration;
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link ErrorResponseFactory}.
-	 */
-	void setErrorResponseFactory(ErrorResponseFactory errorResponseFactory) {
-		this.errorResponseFactory = errorResponseFactory;
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link SubmitterIdentityService}.
-	 */
-	void setSubmitterIdentityService(SubmitterIdentityService submitterIdentityService) {
-		this.submitterIdentityService = submitterIdentityService;
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link EvidenceDomainResolver}.
-	 */
-	void setEvidenceDomainResolver(EvidenceDomainResolver evidenceDomainResolver) {
-		this.evidenceDomainResolver = evidenceDomainResolver;
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link ProducerKeyRegistry}.
-	 */
-	void setProducerKeyRegistry(ProducerKeyRegistry producerKeyRegistry) {
-		this.producerKeyRegistry = producerKeyRegistry;
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link ProducerChainRegistry}.
-	 */
-	void setProducerChainRegistry(ProducerChainRegistry producerChainRegistry) {
-		this.producerChainRegistry = producerChainRegistry;
-	}
-
-	/**
-	 * Test seam: bypasses CDI injection of {@link ApplicationAuditLogger}.
-	 */
-	void setApplicationAuditLogger(ApplicationAuditLogger applicationAuditLogger) {
-		this.applicationAuditLogger = applicationAuditLogger;
-	}
-
 	@Override
 	public Response registerProducerKey(ProducerKeyRegistrationRequest request) {
 		AuditLogEntry auditLogEntry = newAuditLogEntry(AuditActionType.TRACE_ADMIN_KEY_WRITE);

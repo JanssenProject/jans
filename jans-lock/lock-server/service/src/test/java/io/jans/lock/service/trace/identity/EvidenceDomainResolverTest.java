@@ -22,13 +22,14 @@ import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceClientDomainBinding;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.error.TraceValidationException;
 
 /**
  * Tests for {@link EvidenceDomainResolver}: binding precedence, the default-domain fallback, and
  * the fail-closed domain-id format check (design decision D-1, task 11 acceptance criteria).
  */
-class EvidenceDomainResolverTest {
+class EvidenceDomainResolverTest extends BaseLockServiceTest {
 
 	private static final String NODE_ID = "test-node-1";
 
@@ -47,8 +48,8 @@ class EvidenceDomainResolverTest {
 		when(appConfiguration.getTraceConfiguration()).thenReturn(traceConfiguration);
 
 		resolver = new EvidenceDomainResolver();
-		resolver.setAppConfiguration(appConfiguration);
-		resolver.setNodeId(NODE_ID);
+		setField(resolver, "appConfiguration", appConfiguration);
+		setField(resolver, "nodeId", NODE_ID);
 	}
 
 	private static TraceClientDomainBinding binding(String clientId, String domainId, String... producers) {

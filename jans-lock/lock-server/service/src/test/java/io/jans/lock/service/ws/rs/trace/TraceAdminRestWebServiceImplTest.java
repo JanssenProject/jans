@@ -56,6 +56,7 @@ import io.jans.lock.service.trace.identity.SubmitterIdentity;
 import io.jans.lock.service.trace.identity.SubmitterIdentityService;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.model.ChainIdentity;
+import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.registry.ProducerKeyRegistry;
 import io.jans.lock.util.ApiAccessConstants;
@@ -69,7 +70,7 @@ import jakarta.ws.rs.core.Response;
  * criteria), and a fixture check that every {@link TraceAdminRestWebService} method carries both
  * protection annotations with matching {@code id}/{@code path} (task 15's "Tests" section).
  */
-class TraceAdminRestWebServiceImplTest {
+class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 
 	private static final String DOMAIN = "domain-1";
 
@@ -105,14 +106,14 @@ class TraceAdminRestWebServiceImplTest {
 		MockitoAnnotations.openMocks(this);
 
 		impl = new TraceAdminRestWebServiceImpl();
-		impl.setLog(LoggerFactory.getLogger(TraceAdminRestWebServiceImpl.class));
-		impl.setAppConfiguration(appConfiguration);
-		impl.setErrorResponseFactory(errorResponseFactory);
-		impl.setSubmitterIdentityService(submitterIdentityService);
-		impl.setEvidenceDomainResolver(evidenceDomainResolver);
-		impl.setProducerKeyRegistry(producerKeyRegistry);
-		impl.setProducerChainRegistry(producerChainRegistry);
-		impl.setApplicationAuditLogger(applicationAuditLogger);
+		setField(impl, "log", LoggerFactory.getLogger(TraceAdminRestWebServiceImpl.class));
+		setField(impl, "appConfiguration", appConfiguration);
+		setField(impl, "errorResponseFactory", errorResponseFactory);
+		setField(impl, "submitterIdentityService", submitterIdentityService);
+		setField(impl, "evidenceDomainResolver", evidenceDomainResolver);
+		setField(impl, "producerKeyRegistry", producerKeyRegistry);
+		setField(impl, "producerChainRegistry", producerChainRegistry);
+		setField(impl, "applicationAuditLogger", applicationAuditLogger);
 
 		traceConfiguration = new TraceConfiguration();
 		traceConfiguration.setEnabled(true);
