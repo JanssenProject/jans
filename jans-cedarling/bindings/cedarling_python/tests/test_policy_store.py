@@ -99,6 +99,17 @@ def test_trusted_issuer_loading_info_defaults():
         assert instance.is_trusted_issuer_loaded_by_name(issuer_id) is True
 
 
+def test_policy_store_id_legacy():
+    import yaml
+    policy_store_location = join(TEST_FILES_PATH, "policy-store_ok.yaml")
+    config = load_bootstrap_config(policy_store_location)
+    instance = Cedarling(config)
+    with open(policy_store_location, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    expected = next(iter(data["policy_stores"]))
+    assert instance.policy_store_id() == expected
+
+
 def test_legacy_json_policy_store_rejected():
     with pytest.raises(ValueError, match="Legacy JSON policy store format is no longer supported"):
         load_bootstrap_config(join(TEST_FILES_PATH, "policy-store_generated.json"))
