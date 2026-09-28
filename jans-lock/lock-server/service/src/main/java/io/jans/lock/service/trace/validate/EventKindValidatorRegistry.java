@@ -29,18 +29,17 @@ public class EventKindValidatorRegistry {
 
 	private final Map<String, EventKindValidator> validatorsByKind;
 
-	public EventKindValidatorRegistry() {
-		this(Arrays.asList(new AuthorizationDecisionValidator(), new CapabilityInvokedValidator(),
-				new RuntimeEffectValidator()));
-	}
-
-	/** Test seam: inject a custom set of validators instead of the MVP catalog. */
-	EventKindValidatorRegistry(List<EventKindValidator> validators) {
+	protected EventKindValidatorRegistry(List<EventKindValidator> validators) {
 		Map<String, EventKindValidator> byKind = new LinkedHashMap<>();
 		for (EventKindValidator validator : validators) {
 			byKind.put(validator.kind(), validator);
 		}
 		this.validatorsByKind = Collections.unmodifiableMap(byKind);
+	}
+
+	public EventKindValidatorRegistry() {
+		this(Arrays.asList(new AuthorizationDecisionValidator(), new CapabilityInvokedValidator(),
+				new RuntimeEffectValidator()));
 	}
 
 	/**

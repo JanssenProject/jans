@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jans.lock.model.config.BaseDnConfiguration;
 import io.jans.lock.model.config.StaticConfiguration;
+import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.orm.PersistenceEntryManager;
 
 /**
@@ -21,7 +22,7 @@ import io.jans.orm.PersistenceEntryManager;
  *
  * @author Yuriy Movchan
  */
-final class OrmTraceStores {
+final class OrmTraceStores extends BaseLockServiceTest {
 
 	static final String BASE_DN = "ou=trace,ou=lock,o=jans";
 
@@ -40,16 +41,6 @@ final class OrmTraceStores {
 		setField(store, "staticConfiguration", staticConfiguration);
 		store.init();
 		return store;
-	}
-
-	private static void setField(Object target, String fieldName, Object value) {
-		try {
-			Field field = target.getClass().getDeclaredField(fieldName);
-			field.setAccessible(true);
-			field.set(target, value);
-		} catch (ReflectiveOperationException ex) {
-			throw new IllegalStateException(ex);
-		}
 	}
 
 }

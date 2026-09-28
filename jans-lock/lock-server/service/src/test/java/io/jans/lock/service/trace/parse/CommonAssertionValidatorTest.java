@@ -36,13 +36,14 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.trace.error.TraceValidationException;
+import io.jans.lock.service.BaseLockServiceTest;
 
 /**
  * Tests for {@link CommonAssertionValidator}: design §7.1 common-field validation. Each rule gets
  * a negative test producing the specified error id and reason, plus a positive test that the
  * design §7 example validates cleanly.
  */
-class CommonAssertionValidatorTest {
+class CommonAssertionValidatorTest extends BaseLockServiceTest {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -275,7 +276,7 @@ class CommonAssertionValidatorTest {
 	@Test
 	void testValidate_signedAtAtLatenessBoundary_accepted() throws IOException {
 		Instant now = Instant.parse("2026-06-11T00:00:00Z");
-		validator.setClock(Clock.fixed(now, ZoneOffset.UTC));
+		setField(validator, "clock", Clock.fixed(now, ZoneOffset.UTC));
 		ObjectNode root = loadFixture();
 		long boundary = now.getEpochSecond() + traceConfiguration.getLatenessThresholdSeconds();
 		set(root, MAPPER.getNodeFactory().numberNode(boundary), "trace", "signed_at");
@@ -286,7 +287,7 @@ class CommonAssertionValidatorTest {
 	@Test
 	void testValidate_signedAtPastLatenessBoundary_throwsSignedAtInFuture() throws IOException {
 		Instant now = Instant.parse("2026-06-11T00:00:00Z");
-		validator.setClock(Clock.fixed(now, ZoneOffset.UTC));
+		setField(validator, "clock", Clock.fixed(now, ZoneOffset.UTC));
 		ObjectNode root = loadFixture();
 		long pastBoundary = now.getEpochSecond() + traceConfiguration.getLatenessThresholdSeconds() + 1;
 		set(root, MAPPER.getNodeFactory().numberNode(pastBoundary), "trace", "signed_at");

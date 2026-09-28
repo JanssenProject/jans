@@ -31,6 +31,7 @@ import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.TokenRef;
+import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.parse.CommonAssertionValidator;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 import io.jans.lock.service.trace.parse.TraceAssertionParser;
@@ -43,7 +44,7 @@ import io.jans.lock.service.trace.parse.TraceAssertionParser;
  * — {@link ParsedAssertion}'s typed setters are package-private to {@code parse}, so a real
  * assertion for this package's tests can only come from that pipeline.
  */
-class EventKindValidatorsTest {
+class EventKindValidatorsTest extends BaseLockServiceTest {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -69,16 +70,6 @@ class EventKindValidatorsTest {
 		setField(commonValidator, "appConfiguration", appConfiguration);
 
 		registry = new EventKindValidatorRegistry();
-	}
-
-	private static void setField(Object target, String fieldName, Object value) {
-		try {
-			java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
-			field.setAccessible(true);
-			field.set(target, value);
-		} catch (ReflectiveOperationException ex) {
-			throw new RuntimeException(ex);
-		}
 	}
 
 	private static ObjectNode loadFixture(String name) throws IOException {

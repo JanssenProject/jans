@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import io.grpc.Context;
 import io.jans.lock.model.error.TraceErrorResponseType;
+import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.security.AuthenticatedClient;
 import io.jans.lock.service.security.AuthenticatedClientContext;
 import io.jans.lock.service.trace.error.TraceValidationException;
@@ -30,7 +31,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * protection filter recorded and maps every gap to {@code client_not_bound} (403), never a 500
  * (design decision D-2).
  */
-class SubmitterIdentityServiceTest {
+class SubmitterIdentityServiceTest extends BaseLockServiceTest {
 
 	@Mock
 	private HttpServletRequest request;
@@ -42,7 +43,7 @@ class SubmitterIdentityServiceTest {
 		MockitoAnnotations.openMocks(this);
 
 		service = new SubmitterIdentityService();
-		service.setLog(LoggerFactory.getLogger(SubmitterIdentityService.class));
+		setField(service, "log", LoggerFactory.getLogger(SubmitterIdentityService.class));
 	}
 
 	private void recorded(AuthenticatedClient client) {
