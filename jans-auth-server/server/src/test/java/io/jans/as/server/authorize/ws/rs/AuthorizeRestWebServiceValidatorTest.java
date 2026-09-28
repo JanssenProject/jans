@@ -271,14 +271,12 @@ public class AuthorizeRestWebServiceValidatorTest {
         Client cimdClient = new Client();
         cimdClient.setClientId(cimdClientId);
 
-        when(clientIdMetadataService.isCimdClientId(cimdClientId)).thenReturn(true);
-        when(clientIdMetadataService.getClient(cimdClientId)).thenReturn(cimdClient);
+        when(clientIdMetadataService.resolveClient(cimdClientId)).thenReturn(cimdClient);
 
         Client result = authorizeRestWebServiceValidator.validateClient(cimdClientId, "state", false);
 
         assertEquals(cimdClientId, result.getClientId());
-        verify(clientIdMetadataService).isCimdClientId(cimdClientId);
-        verify(clientIdMetadataService).getClient(cimdClientId);
+        verify(clientIdMetadataService).resolveClient(cimdClientId);
         verify(clientService, never()).getClient(anyString());
     }
 
@@ -288,15 +286,13 @@ public class AuthorizeRestWebServiceValidatorTest {
         Client dbClient = new Client();
         dbClient.setClientId(clientId);
 
-        when(clientIdMetadataService.isCimdClientId(clientId)).thenReturn(false);
-        when(clientService.getClient(clientId)).thenReturn(dbClient);
+        when(clientIdMetadataService.resolveClient(clientId)).thenReturn(dbClient);
 
         Client result = authorizeRestWebServiceValidator.validateClient(clientId, "state", false);
 
         assertEquals(clientId, result.getClientId());
-        verify(clientIdMetadataService).isCimdClientId(clientId);
-        verify(clientIdMetadataService, never()).getClient(anyString());
-        verify(clientService).getClient(clientId);
+        verify(clientIdMetadataService).resolveClient(clientId);
+        verify(clientService, never()).getClient(anyString());
     }
 
     @Test(expectedExceptions = WebApplicationException.class)
