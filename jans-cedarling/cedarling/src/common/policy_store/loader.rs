@@ -22,9 +22,9 @@ use std::path::Path;
 
 use super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::errors::{PolicyStoreError, ValidationError};
+use super::formats::v1;
 use super::metadata::PolicyStoreMetadata;
 use super::schema_parser::{ParsedSchema, SchemaFile};
-use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
 
 /// Load a policy store from a directory path.
@@ -314,7 +314,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         })?;
 
         // Parse and validate metadata
-        MetadataValidator::parse_and_validate(&content).map_err(PolicyStoreError::Validation)
+        v1::metadata::parse(&content).map_err(PolicyStoreError::Validation)
     }
 
     /// Resolve where the schema lives (or that it's absent), without any I/O

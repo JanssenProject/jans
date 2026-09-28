@@ -10,7 +10,7 @@
 use super::super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::super::entity_parser::EntityParser;
 use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
-use super::super::issuer_parser::IssuerParser;
+use super::super::formats::v1::trusted_issuer::IssuerParser;
 use super::super::manager::{ConversionError, PolicyStoreManager};
 use super::super::vfs_adapter::{DirEntry, MemoryVfs, PhysicalVfs, VfsFileSystem};
 use super::*;

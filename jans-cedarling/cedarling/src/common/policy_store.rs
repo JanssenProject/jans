@@ -14,10 +14,9 @@ pub(crate) mod token_entity_metadata;
 use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
 
 pub(crate) mod archive_handler;
-pub(crate) mod custom_issuer_parser;
 pub(crate) mod entity_parser;
 pub(crate) mod errors;
-pub(crate) mod issuer_parser;
+pub(crate) mod formats;
 pub(crate) mod legacy_store;
 pub(crate) mod loader;
 pub(crate) mod manager;

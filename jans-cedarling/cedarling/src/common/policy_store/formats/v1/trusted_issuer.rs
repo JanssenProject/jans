@@ -8,15 +8,48 @@
 //! This module provides functionality to parse and validate trusted issuer configuration files,
 //! ensuring they conform to the required schema with proper token metadata and required fields.
 
-use super::errors::{PolicyStoreError, TrustedIssuerErrorType};
-use super::{TokenEntityMetadata, TrustedIssuer};
+use crate::common::policy_store::errors::{PolicyStoreError, TrustedIssuerErrorType};
+use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
+use serde::Deserialize;
 use serde_json::Value as JsonValue;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use url::Url;
+
+/// A `token_metadata` entry. Unknown keys are ignored, as they always were in v1.
+#[derive(Debug, PartialEq, Deserialize)]
+struct TokenMetadataDoc {
+    #[serde(default = "default_trusted")]
+    trusted: bool,
+    entity_type_name: String,
+    #[serde(default = "default_token_id")]
+    token_id: String,
+    #[serde(default)]
+    required_claims: HashSet<String>,
+}
+
+fn default_trusted() -> bool {
+    true
+}
+
+// Frozen v1 default; independent of the runtime `DEFAULT_TKN_ID`.
+fn default_token_id() -> String {
+    "jti".to_string()
+}
+
+impl From<TokenMetadataDoc> for TokenEntityMetadata {
+    fn from(doc: TokenMetadataDoc) -> Self {
+        TokenEntityMetadata::builder()
+            .trusted(doc.trusted)
+            .entity_type_name(doc.entity_type_name)
+            .token_id(doc.token_id)
+            .required_claims(doc.required_claims)
+            .build()
+    }
+}
 
 /// A parsed trusted issuer configuration with metadata.
 #[derive(Debug, Clone)]
-pub(super) struct ParsedIssuer {
+pub(crate) struct ParsedIssuer {
     /// The issuer name (used as key/id)
     pub id: String,
     /// The trusted issuer configuration
@@ -26,13 +59,13 @@ pub(super) struct ParsedIssuer {
 }
 
 /// Issuer parser for loading and validating trusted issuer configurations.
-pub(super) struct IssuerParser;
+pub(crate) struct IssuerParser;
 
 impl IssuerParser {
     /// Parse a trusted issuer configuration from JSON content.
     ///
     /// Validates the required fields and token metadata structure.
-    pub(super) fn parse_issuer(
+    pub(crate) fn parse_issuer(
         content: &str,
         filename: &str,
     ) -> Result<Vec<ParsedIssuer>, PolicyStoreError> {
@@ -109,12 +142,12 @@ impl IssuerParser {
             HashMap::new()
         };
 
-        let issuer = TrustedIssuer {
-            name: name.to_string(),
-            description: description.to_string(),
+        let issuer = TrustedIssuer::new(
+            name.to_string(),
+            description.to_string(),
             oidc_endpoint,
             token_metadata,
-        };
+        );
 
         Ok(vec![ParsedIssuer {
             id: issuer_id,
@@ -155,17 +188,15 @@ impl IssuerParser {
                 });
             }
 
-            // Deserialize the TokenEntityMetadata
-            let metadata: TokenEntityMetadata =
-                serde_json::from_value(token_config).map_err(|e| {
-                    PolicyStoreError::TrustedIssuerError {
-                        file: filename.to_string(),
-                        err: TrustedIssuerErrorType::MissingRequiredField {
-                            issuer_id: issuer_id.to_string(),
-                            field: format!("token_metadata.{token_type}: {e}"),
-                        },
-                    }
-                })?;
+            let metadata: TokenMetadataDoc = serde_json::from_value(token_config).map_err(|e| {
+                PolicyStoreError::TrustedIssuerError {
+                    file: filename.to_string(),
+                    err: TrustedIssuerErrorType::MissingRequiredField {
+                        issuer_id: issuer_id.to_string(),
+                        field: format!("token_metadata.{token_type}: {e}"),
+                    },
+                }
+            })?;
 
             // Validate required field: entity_type_name
             if metadata.entity_type_name.is_empty() {
@@ -178,14 +209,14 @@ impl IssuerParser {
                 });
             }
 
-            token_metadata.insert(token_type, metadata);
+            token_metadata.insert(token_type, metadata.into());
         }
 
         Ok(token_metadata)
     }
 
     /// Validate a collection of parsed issuers for conflicts and completeness.
-    pub(super) fn validate_issuers(issuers: &[ParsedIssuer]) -> Result<(), Vec<String>> {
+    pub(crate) fn validate_issuers(issuers: &[ParsedIssuer]) -> Result<(), Vec<String>> {
         let mut errors = Vec::new();
         let mut seen_ids = HashMap::with_capacity(issuers.len());
 
@@ -216,7 +247,7 @@ impl IssuerParser {
     }
 
     /// Create a consolidated map of all issuers.
-    pub(super) fn create_issuer_map(issuers: Vec<ParsedIssuer>) -> HashMap<String, TrustedIssuer> {
+    pub(crate) fn create_issuer_map(issuers: Vec<ParsedIssuer>) -> HashMap<String, TrustedIssuer> {
         let mut issuer_map = HashMap::with_capacity(issuers.len());
 
         for parsed in issuers {
@@ -236,6 +267,81 @@ impl IssuerParser {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Minimal `token_metadata` entries fall back to the v1 defaults, and
+    /// unknown keys such as `user_id` / `role_mapping` are ignored.
+    #[test]
+    fn token_metadata_doc_from_json() {
+        let expected = TokenMetadataDoc {
+            trusted: true,
+            entity_type_name: "Jans::Access_token".into(),
+            token_id: "jti".into(),
+            required_claims: HashSet::new(),
+        };
+
+        let parsed = serde_json::from_value::<TokenMetadataDoc>(serde_json::json!({
+            "entity_type_name": "Jans::Access_token",
+        }))
+        .expect("minimal JSON token metadata should parse");
+        assert_eq!(parsed, expected, "minimal JSON should use v1 defaults");
+
+        let parsed = serde_json::from_value::<TokenMetadataDoc>(serde_json::json!({
+            "entity_type_name": "Jans::Access_token",
+            "user_id": "sub",
+            "role_mapping": "",
+        }))
+        .expect("JSON token metadata with unknown keys should parse");
+        assert_eq!(parsed, expected, "unknown JSON keys should be ignored");
+    }
+
+    #[test]
+    fn token_metadata_doc_from_yaml() {
+        let expected = TokenMetadataDoc {
+            trusted: true,
+            entity_type_name: "Jans::Access_token".into(),
+            token_id: "jti".into(),
+            required_claims: HashSet::new(),
+        };
+
+        let parsed = serde_yaml_ng::from_str::<TokenMetadataDoc>(
+            "
+            entity_type_name: Jans::Access_token
+        ",
+        )
+        .expect("minimal YAML token metadata should parse");
+        assert_eq!(parsed, expected, "minimal YAML should use v1 defaults");
+
+        let parsed = serde_yaml_ng::from_str::<TokenMetadataDoc>(
+            "
+            user_id: 'sub'
+            role_mapping: ''
+            entity_type_name: Jans::Access_token
+        ",
+        )
+        .expect("YAML token metadata with unknown keys should parse");
+        assert_eq!(parsed, expected, "unknown YAML keys should be ignored");
+    }
+
+    #[test]
+    fn token_metadata_doc_converts_to_runtime() {
+        let doc = TokenMetadataDoc {
+            trusted: false,
+            entity_type_name: "Jans::Id_token".into(),
+            token_id: "sid".into(),
+            required_claims: HashSet::from(["iss".to_string()]),
+        };
+
+        assert_eq!(
+            TokenEntityMetadata::from(doc),
+            TokenEntityMetadata::builder()
+                .trusted(false)
+                .entity_type_name("Jans::Id_token".into())
+                .token_id("sid".into())
+                .required_claims(HashSet::from(["iss".to_string()]))
+                .build(),
+            "every TokenMetadataDoc field should map onto the runtime type"
+        );
+    }
 
     #[test]
     fn test_parse_issuer_with_id() {

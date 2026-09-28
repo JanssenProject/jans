@@ -21,7 +21,7 @@ use zip::{CompressionMethod, ZipWriter};
 use super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::entity_parser::{EntityParser, ParsedEntity};
 use super::errors::{ArchiveError, PolicyStoreError, ValidationError};
-use super::issuer_parser::IssuerParser;
+use super::formats::v1::trusted_issuer::IssuerParser;
 use super::loader::DefaultPolicyStoreLoader;
 use super::test_utils::{
     PolicyStoreTestBuilder, create_corrupted_archive, create_deep_nested_archive,

@@ -18,9 +18,9 @@
 //! └── entities                  →  default_entities: DefaultEntitiesWithWarns
 //! ```
 
-use super::custom_issuer_parser::CustomIssuerParser;
 use super::entity_parser::EntityParser;
-use super::issuer_parser::IssuerParser;
+use super::formats::v1::custom_issuer::CustomIssuerParser;
+use super::formats::v1::trusted_issuer::IssuerParser;
 use super::loader::LoadedPolicyStore;
 use super::log_entry::PolicyStoreLogEntry;
 use super::policy_parser::PolicyParser;
