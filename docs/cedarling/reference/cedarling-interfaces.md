@@ -400,6 +400,20 @@ The Context Data API allows you to push external data into the Cedarling evaluat
   The interval shipped to the Lock server is separate: the telemetry ticker
   reports whole seconds, so sub-second precision is local to the binding.
 
+### Policy Store ID
+
+- `policy_store_id()`
+
+  Returns the ID of the currently published policy store, or none when the
+  store carries no ID. The value is an opaque string and must not be parsed.
+
+  - Rust async `Cedarling::policy_store_id() -> Option<String>`
+  - Rust blocking `Cedarling::policy_store_id() -> Option<String>`
+  - UniFFI (Kotlin/Swift/Java) `policyStoreId()` returning an optional string
+  - WASM `policyStoreId(): string | undefined`
+  - Python `policy_store_id() -> Optional[str]`
+  - Go `PolicyStoreID() (string, bool)`
+
 ### Schema Requirements
 
 To use the Context Data API, your Cedar schema must include a `data` field in the action's context. You must explicitly define the expected structure of the data — Cedar does not support arbitrary/untyped records.
