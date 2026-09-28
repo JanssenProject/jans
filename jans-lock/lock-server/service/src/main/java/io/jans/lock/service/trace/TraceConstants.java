@@ -37,11 +37,14 @@ public final class TraceConstants {
 
 	/**
 	 * Producer id format {@code name/semver} (design D-6/§7.1): a name of up to 128 characters,
-	 * then a semver. Shared by assertion validation and by producer-key and producer-chain
-	 * registration, so a registered producer id can always appear in a signed assertion.
+	 * then a SemVer 2.0.0 version: {@code major.minor.patch}, an optional {@code -prerelease} and an
+	 * optional {@code +build} suffix, each a dot-separated list of {@code [0-9A-Za-z-]} identifiers,
+	 * in that order (so {@code name/1.0.0-alpha+001} is valid). Shared by assertion validation and
+	 * by producer-key and producer-chain registration, so a registered producer id can always
+	 * appear in a signed assertion.
 	 */
-	public static final Pattern PRODUCER_PATTERN = Pattern
-			.compile("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}/[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$");
+	public static final Pattern PRODUCER_PATTERN = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}"
+			+ "/[0-9]+\\.[0-9]+\\.[0-9]+" + "(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?" + "(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$");
 
 	/** {@code trace.event_kind}: an authorization decision by a PDP such as Cedarling. */
 	public static final String EVENT_KIND_AUTHORIZATION_DECISION = "AUTHORIZATION_DECISION";
