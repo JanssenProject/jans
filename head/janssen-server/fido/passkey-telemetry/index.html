@@ -1183,6 +1183,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#native-client-telemetry-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Native-client telemetry (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#aggregation-schedule-and-retention" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2090,6 +2101,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#native-client-telemetry-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Native-client telemetry (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#aggregation-schedule-and-retention" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2632,6 +2654,22 @@ your deployment terminates TLS at a proxy, make sure it sets <code>X-Forwarded-F
 strips any client-supplied value; otherwise the recorded address can be spoofed by the
 caller.</p>
 </div>
+<h3 id="native-client-telemetry-optional">Native-client telemetry (optional)<a class="headerlink" href="#native-client-telemetry-optional" title="Permanent link">#</a></h3>
+<p>A native app/SDK (iOS, Android) may attach an optional <code>telemetry</code> object to any attestation or
+assertion start/finish request, carrying context no <code>User-Agent</code> string can — Play Services
+version, OEM Credential Manager behavior, the last client-side error code, and more. See the
+<code>NativeClientTelemetry</code> schema in the
+<a href="#api-reference">OpenAPI (Swagger) specification</a> for the full field list.</p>
+<p>The field is entirely optional: a request that omits it behaves exactly as before, and an
+unrecognized value in an enum-shaped field (<code>platform</code>, <code>native_api</code>, <code>flow_context</code>) is accepted
+rather than rejecting the request.</p>
+<div class="admonition note">
+<p class="admonition-title">Not yet reflected in stored metrics</p>
+<p>As of this release, a submitted <code>telemetry</code> object is accepted and parsed but <strong>not yet
+persisted</strong> onto metrics entries or correlated via <code>client_correlation_id</code> — that wiring is
+tracked separately. Submitting it today has no observable effect beyond successful
+deserialization.</p>
+</div>
 <h3 id="aggregation-schedule-and-retention">Aggregation schedule and retention<a class="headerlink" href="#aggregation-schedule-and-retention" title="Permanent link">#</a></h3>
 <p>A scheduler computes aggregations on a cadence
 (hourly aggregations shortly after each hour, then daily/weekly/monthly). Entries older than
@@ -3072,7 +3110,7 @@ ran:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    August 31, 2026
+    September 28, 2026
   </span>
 
     
