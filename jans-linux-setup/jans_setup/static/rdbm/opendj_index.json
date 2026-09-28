@@ -380,5 +380,26 @@
         "type": "integer",
         "index": ["ordering"],
         "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceReceiptState",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceProducerId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceReceivedAtMs",
+        "type": "integer",
+        "index": ["ordering"],
+        "backend": ["userRoot"]
     }
 ]

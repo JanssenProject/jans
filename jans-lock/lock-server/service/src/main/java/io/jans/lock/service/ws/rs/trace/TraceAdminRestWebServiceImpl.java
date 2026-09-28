@@ -204,7 +204,7 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 
 	@Override
 	public Response revokeProducerKey(ProducerKeyRevokeRequest request) {
-		AuditLogEntry auditLogEntry = newAuditLogEntry(AuditActionType.TRACE_ADMIN_KEY_WRITE);
+		AuditLogEntry auditLogEntry = newAuditLogEntry(AuditActionType.TRACE_ADMIN_KEY_REVOKE);
 
 		Response response = null;
 		try {
