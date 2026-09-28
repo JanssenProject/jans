@@ -59,8 +59,9 @@ public final class AuthorizationDecisionValidator implements EventKindValidator 
 				"trace.policy.policy_language_version", null);
 		String bundleHash = EventKindValidationSupport.requireNonEmptyString(policy, "bundle_hash",
 				"trace.policy.bundle_hash", null);
-		if (!TraceConstants.HASH_PATTERN.matcher(bundleHash).matches()
-				&& !GENERIC_DIGEST_PATTERN.matcher(bundleHash).matches()) {
+		boolean valid = bundleHash.startsWith("sha256:") ? TraceConstants.HASH_PATTERN.matcher(bundleHash).matches()
+				: GENERIC_DIGEST_PATTERN.matcher(bundleHash).matches();
+		if (!valid) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
 					"invalid:trace.policy.bundle_hash");
 		}

@@ -380,6 +380,17 @@ public abstract class TraceStoreContractTest {
 	}
 
 	@Test
+	void testFindPendingReceiptsOlderThan_receivedExactlyAtCutoff_excluded() throws Exception {
+		store.insertReceipt(newReceiptRow(1L, 1999L, "producer-1", "record-1", TraceReceiptState.PENDING));
+		store.insertReceipt(newReceiptRow(2L, 2000L, "producer-1", "record-2", TraceReceiptState.PENDING));
+
+		List<TraceReceiptEntry> pending = store.findPendingReceiptsOlderThan(2000L, 100);
+
+		assertEquals(1, pending.size());
+		assertEquals(1L, pending.get(0).getReceiptSeq());
+	}
+
+	@Test
 	void testFindPendingReceiptsOlderThan_respectsLimit() throws Exception {
 		for (long seq = 1; seq <= 5; seq++) {
 			store.insertReceipt(newReceiptRow(seq, 1000L, "producer-1", "record-" + seq, TraceReceiptState.PENDING));
@@ -388,6 +399,20 @@ public abstract class TraceStoreContractTest {
 		List<TraceReceiptEntry> pending = store.findPendingReceiptsOlderThan(5000L, 2);
 
 		assertEquals(2, pending.size());
+	}
+
+	@Test
+	void testFindPendingReceiptsOlderThan_oldestFirstBeforeLimit() throws Exception {
+		store.insertReceipt(newReceiptRow(1L, 3000L, "producer-1", "record-1", TraceReceiptState.PENDING));
+		store.insertReceipt(newReceiptRow(2L, 1000L, "producer-1", "record-2", TraceReceiptState.PENDING));
+		store.insertReceipt(newReceiptRow(3L, 4000L, "producer-1", "record-3", TraceReceiptState.PENDING));
+		store.insertReceipt(newReceiptRow(4L, 2000L, "producer-1", "record-4", TraceReceiptState.PENDING));
+
+		List<TraceReceiptEntry> pending = store.findPendingReceiptsOlderThan(5000L, 2);
+
+		assertEquals(2, pending.size());
+		assertEquals(2L, pending.get(0).getReceiptSeq());
+		assertEquals(4L, pending.get(1).getReceiptSeq());
 	}
 
 	// -- registries: chains CRUD ------------------------------------------------------------------

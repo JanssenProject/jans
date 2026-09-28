@@ -123,8 +123,10 @@ public interface TraceStore {
 	Optional<TraceReceiptEntry> findReceipt(String domainId, long receiptSequence);
 
 	/**
-	 * @return {@code PENDING} receipts received before {@code cutoffMs}, across every domain,
-	 *         limited to {@code limit} rows — feeds {@code TraceReceiptRepairTimer} (task 18)
+	 * @return {@code PENDING} receipts received strictly before {@code cutoffMs} (a receipt
+	 *         received exactly at {@code cutoffMs} is excluded), across every domain, oldest
+	 *         first by {@code receivedAtMs}, limited to {@code limit} rows — feeds
+	 *         {@code TraceReceiptRepairTimer} (task 18)
 	 */
 	List<TraceReceiptEntry> findPendingReceiptsOlderThan(long cutoffMs, int limit);
 

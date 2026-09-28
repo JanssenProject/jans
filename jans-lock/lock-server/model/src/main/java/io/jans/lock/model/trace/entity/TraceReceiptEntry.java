@@ -19,9 +19,13 @@ import io.jans.orm.model.base.BaseEntry;
  * A receipt-chain position allocation claim (design §9, TRACE MVP design decisions T-2, D-8).
  * Only {@link #getReceiptState()} may change after creation, via {@code merge}.
  *
+ * <p>{@code sortByName} (not {@code sortBy}) so that SQL/Couchbase/Spanner order by
+ * {@code jansTraceReceivedAtMs} inside the query, before the limit, while the LDAP backend skips
+ * its in-memory default sort, which cannot handle a {@code Long} property.
+ *
  * @author Yuriy Movchan
  */
-@DataEntry
+@DataEntry(sortByName = "jansTraceReceivedAtMs")
 @ObjectClass(value = "jansTraceReceipt")
 public class TraceReceiptEntry extends BaseEntry implements Serializable {
 

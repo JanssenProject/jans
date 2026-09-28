@@ -330,9 +330,12 @@ public class OrmTraceStore implements TraceStore {
 		if (limit <= 0) {
 			return Collections.emptyList();
 		}
+		// jans-orm has no strict less-than filter; milliseconds are integral, so "< cutoffMs" is
+		// "<= cutoffMs - 1". Oldest-first ordering before the limit comes from the entity's
+		// @DataEntry(sortByName) default sort.
 		Filter filter = Filter.createANDFilter(
 				Filter.createEqualityFilter(ATTR_RECEIPT_STATE, TraceReceiptState.PENDING.name()),
-				Filter.createLessOrEqualFilter(ATTR_RECEIVED_AT_MS, cutoffMs));
+				Filter.createLessOrEqualFilter(ATTR_RECEIVED_AT_MS, cutoffMs - 1));
 		return persistenceEntryManager.findEntries(receiptsBase(), TraceReceiptEntry.class, filter, limit);
 	}
 

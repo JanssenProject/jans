@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.mockito.invocation.InvocationOnMock;
 
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -40,7 +42,8 @@ import io.jans.orm.search.filter.Filter;
  * {@code findEntries}, {@code findPagedEntries} and {@code countEntries} — evaluating
  * {@code AND}/{@code OR}/{@code EQUALITY} (including the {@code multiValued()} marker used for
  * {@code jansTraceCapKeys}/{@code jansTraceTokenKeys}) and {@code LESS_OR_EQUAL} filters by
- * reflecting on each entity's {@code @AttributeName} fields.
+ * reflecting on each entity's {@code @AttributeName} fields, and applying the entity's
+ * {@code @DataEntry} default sort before any {@code limit}, as the SQL backend does.
  *
  * <p>Not a general-purpose ORM fake: it only supports the filter shapes and method overloads
  * {@code OrmTraceStore} actually issues.
@@ -120,23 +123,42 @@ final class FakeEntryManagerBehavior {
 				.thenAnswer(inv -> matchAll(inv, -1).size());
 	}
 
+	/**
+	 * Like {@code SqlEntryManager.findEntriesImpl}: the entity's {@code @DataEntry} default sort
+	 * ({@code sortByName}, falling back to {@code sortBy}) is applied inside the query, i.e.
+	 * before {@code limit} truncates the result.
+	 */
 	private List<Object> matchAll(InvocationOnMock inv, int limit) {
 		String baseDn = inv.getArgument(0);
 		Class<?> entryClass = inv.getArgument(1);
 		Filter filter = inv.getArgument(2);
-		List<Object> result = new ArrayList<>();
+		List<Object> matched = new ArrayList<>();
 		for (Map.Entry<String, Object> entry : storeFor(entryClass).entrySet()) {
-			if (!underBase(entry.getKey(), baseDn)) {
-				continue;
-			}
-			if (matches(filter, entry.getValue())) {
-				result.add(entry.getValue());
-				if (limit > 0 && result.size() >= limit) {
-					break;
-				}
+			if (underBase(entry.getKey(), baseDn) && matches(filter, entry.getValue())) {
+				matched.add(entry.getValue());
 			}
 		}
-		return result;
+		matched.sort(defaultSortComparator(entryClass));
+		if (limit > 0 && matched.size() > limit) {
+			return new ArrayList<>(matched.subList(0, limit));
+		}
+		return matched;
+	}
+
+	private static Comparator<Object> defaultSortComparator(Class<?> entryClass) {
+		Comparator<Object> comparator = (a, b) -> 0;
+		for (String attributeName : defaultSortAttributes(entryClass)) {
+			comparator = comparator.thenComparing((a, b) -> compare(attrValue(a, attributeName), attrValue(b, attributeName)));
+		}
+		return comparator;
+	}
+
+	private static String[] defaultSortAttributes(Class<?> entryClass) {
+		DataEntry dataEntry = entryClass.getAnnotation(DataEntry.class);
+		if (dataEntry == null) {
+			return new String[0];
+		}
+		return dataEntry.sortByName().length > 0 ? dataEntry.sortByName() : dataEntry.sortBy();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -155,10 +177,12 @@ final class FakeEntryManagerBehavior {
 				matched.add(entry.getValue());
 			}
 		}
-		matched.sort((a, b) -> {
+		// SQL puts the requested sort first and the entity default sort after it.
+		Comparator<Object> requested = (a, b) -> {
 			int cmp = compare(attrValue(a, sortBy), attrValue(b, sortBy));
 			return sortOrder == SortOrder.DESCENDING ? -cmp : cmp;
-		});
+		};
+		matched.sort(requested.thenComparing(defaultSortComparator(entryClass)));
 
 		int total = matched.size();
 		int from = Math.min(Math.max(start, 0), total);
