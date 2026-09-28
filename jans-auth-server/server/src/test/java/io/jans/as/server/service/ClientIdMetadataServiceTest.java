@@ -84,6 +84,55 @@ public class ClientIdMetadataServiceTest {
         lenient().when(externalDynamicClientRegistrationService.executeExternalCreateClientMethods(any(), any(), any())).thenReturn(true);
     }
 
+    // ==================== resolveClient Tests ====================
+
+    @Test
+    public void resolveClient_withCimdClientId_shouldDelegateToGetClient() {
+        String cimdClientId = "https://example.com/client";
+        Client cimdClient = new Client();
+        cimdClient.setClientId(cimdClientId);
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        doReturn(cimdClient).when(clientIdMetadataService).getClient(cimdClientId);
+
+        Client result = clientIdMetadataService.resolveClient(cimdClientId);
+
+        assertEquals(cimdClient, result);
+        verify(clientIdMetadataService).getClient(cimdClientId);
+        verify(clientService, never()).getClient(anyString());
+    }
+
+    @Test
+    public void resolveClient_withTraditionalClientId_shouldDelegateToClientService() {
+        String clientId = "traditional-client-123";
+        Client dbClient = new Client();
+        dbClient.setClientId(clientId);
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        when(clientService.getClient(clientId)).thenReturn(dbClient);
+
+        Client result = clientIdMetadataService.resolveClient(clientId);
+
+        assertEquals(dbClient, result);
+        verify(clientService).getClient(clientId);
+        verify(clientIdMetadataService, never()).getClient(anyString());
+    }
+
+    @Test
+    public void resolveClient_withCimdFeatureDisabled_shouldDelegateToClientService() {
+        String cimdClientId = "https://example.com/client";
+        Client dbClient = new Client();
+        dbClient.setClientId(cimdClientId);
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(false);
+        when(clientService.getClient(cimdClientId)).thenReturn(dbClient);
+
+        Client result = clientIdMetadataService.resolveClient(cimdClientId);
+
+        assertEquals(dbClient, result);
+        verify(clientIdMetadataService, never()).getClient(anyString());
+    }
+
     // ==================== isCimdClientId Tests ====================
 
     @Test
