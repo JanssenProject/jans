@@ -1,4 +1,6 @@
 import logging.config
+from contextlib import contextmanager
+from dataclasses import dataclass
 
 import click
 from fqdn import FQDN
@@ -26,13 +28,30 @@ def replace_fqdn_substr(val, old_fqdn, new_fqdn):
     return val
 
 
+@dataclass
+class DomainOps:
+    # flag to mark whether there is any changes in persistence
+    changes_available: bool = False
+
+    # flag to mark whether changes are sucessfully persisted
+    changes_persisted: bool = False
+
+
 class Domain:
     def __init__(self, manager, **kwargs):
         self.manager = manager
         self.persistence = SqlClient(self.manager)
         self.dry_run = kwargs.get("dry_run") or False
 
-    def modify_persistence_entries(self, table_name, old_fqdn, new_fqdn):
+    @contextmanager
+    def wrapped_ops(self):
+        ops = DomainOps()
+        try:
+            yield ops
+        finally:
+            ops = None
+
+    def modify_persistence_entries(self, table_name, old_fqdn, new_fqdn, ops):
         logger.info("Checking entries in %s table", table_name)
 
         for entry in self.persistence.search(table_name):
@@ -47,25 +66,43 @@ class Domain:
                     continue
 
                 logger.info("Updating %s.%s (doc_id=%s)", table_name, col_name, entry["doc_id"])
+
+                # mark changes is available
+                ops.changes_available = True
+
                 # mark entry for updates
                 should_update = True
                 entry[col_name] = new_val
 
-            if should_update is False:
-                continue
+            if should_update and not self.dry_run:
+                if "jansRevision" in entry:
+                    entry["jansRevision"] = int(entry["jansRevision"] or 0) + 1
 
-            if "jansRevision" in entry:
-                entry["jansRevision"] = int(entry["jansRevision"] or 0) + 1
+                if updated := self.persistence.update(table_name, entry["doc_id"], entry):
+                    # mark changes are persisted only if update succeed
+                    ops.changes_persisted = updated
 
-            if not self.dry_run:
-                self.persistence.update(table_name, entry["doc_id"], entry)
+    def modify_configmap(self, old_fqdn, new_fqdn, ops):
+        if ops.changes_available:
+            logger.info("Checking configmap")
+
+        if all([
+            ops.changes_persisted,
+            not self.dry_run,
+            new_fqdn != self.manager.config.get("hostname"),
+        ]):
+            logger.info("Updating FQDN in configmap (key=hostname, value=%s)", new_fqdn)
+            if self.manager.config.set("hostname", new_fqdn):
+                logger.info("FQDN has been changed from %s to %s. Please rotate certificate(s) to avoid SSL issue.", old_fqdn, new_fqdn)
 
     def change_fqdn(self, old_fqdn, new_fqdn):
-        logger.warning("The dry run mode is selected; changes will not be persisted")
-        logger.info("Changing FQDN from %s to %s", old_fqdn, new_fqdn)
+        with self.wrapped_ops() as ops:
+            logger.info("Changing FQDN from %s to %s", old_fqdn, new_fqdn)
 
-        for table_name in ["jansAppConf", "jansCustomScr", "jansClnt"]:
-            self.modify_persistence_entries(table_name, old_fqdn, new_fqdn)
+            for table_name in ["jansAppConf", "jansCustomScr", "jansClnt"]:
+                self.modify_persistence_entries(table_name, old_fqdn, new_fqdn, ops)
+
+            self.modify_configmap(old_fqdn, new_fqdn, ops)
 
 
 class FQDNParamType(click.ParamType):
@@ -97,12 +134,13 @@ def change_fqdn(new_fqdn, old_fqdn, dry_run):
 
     if not old_fqdn:
         old_fqdn = manager.config.get("hostname")
-        logger.info("Detected empty value for --old-fqdn option; the value is now taken from existing configmap: %s", old_fqdn)
+        logger.warning("Detected empty value for old FQDN; the value is now taken from existing configmap: %s", old_fqdn)
 
-    domain = Domain(manager)
+    if dry_run:
+        logger.warning("The dry run mode is enabled; changes will not be persisted!")
+
+    domain = Domain(manager, dry_run=dry_run)
     domain.change_fqdn(old_fqdn, new_fqdn)
-
-    # @TODO: update configmaps and/or secrets
 
 
 if __name__ == "__main__":
