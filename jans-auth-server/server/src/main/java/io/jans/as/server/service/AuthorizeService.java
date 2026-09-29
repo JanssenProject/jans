@@ -72,6 +72,9 @@ public class AuthorizeService {
     private ClientService clientService;
 
     @Inject
+    private ClientIdMetadataService clientIdMetadataService;
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
@@ -160,7 +163,7 @@ public class AuthorizeService {
             }
 
             String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
-            final Client client = clientService.getClient(clientId);
+            final Client client = clientIdMetadataService.resolveClient(clientId);
             if (client == null) {
                 log.debug("Permission denied. Failed to find client by id: {}", clientId);
                 permissionDenied(session);
@@ -270,7 +273,7 @@ public class AuthorizeService {
 
             if (responseMode == ResponseMode.JWT) {
                 String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
-                Client client = clientService.getClient(clientId);
+                Client client = clientIdMetadataService.resolveClient(clientId);
                 facesService.redirectToExternalURL(createJarmRedirectUri(redirectUri, client));
             } else
                 facesService.redirectToExternalURL(redirectUri.toString());

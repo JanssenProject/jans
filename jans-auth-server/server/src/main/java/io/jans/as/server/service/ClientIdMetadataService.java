@@ -37,7 +37,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -114,6 +116,36 @@ public class ClientIdMetadataService {
             return getClient(clientId);
         }
         return clientService.getClient(clientId);
+    }
+
+    /**
+     * Batch variant of {@link #resolveClient(String)}, mirroring {@link ClientService#getClient(Collection, boolean)}.
+     * When {@code silent} is true, a failure to resolve any single client_id (including a CIMD fetch/validation
+     * failure) is skipped rather than propagated, so one bad entry doesn't fail the whole batch.
+     *
+     * @param clientIds the client_ids to resolve, either traditional inums or CIMD URLs
+     * @param silent    when true, per-entry resolution failures are swallowed instead of thrown
+     * @return the resolved clients (entries that failed to resolve are simply omitted)
+     */
+    public Set<Client> resolveClients(Collection<String> clientIds, boolean silent) {
+        Set<Client> result = new HashSet<>();
+        if (clientIds == null) {
+            return result;
+        }
+        for (String clientId : clientIds) {
+            try {
+                Client client = resolveClient(clientId);
+                if (client != null) {
+                    result.add(client);
+                }
+            } catch (RuntimeException e) {
+                if (!silent) {
+                    throw e;
+                }
+                log.debug("Failed to resolve client_id '{}' in batch (silent).", clientId, e);
+            }
+        }
+        return result;
     }
 
     /**

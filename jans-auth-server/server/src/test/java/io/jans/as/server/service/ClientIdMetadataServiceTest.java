@@ -31,6 +31,7 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -131,6 +132,62 @@ public class ClientIdMetadataServiceTest {
 
         assertEquals(dbClient, result);
         verify(clientIdMetadataService, never()).getClient(anyString());
+    }
+
+    @Test
+    public void resolveClients_withMixOfCimdAndTraditionalIds_shouldResolveBoth() {
+        String cimdClientId = "https://example.com/client";
+        Client cimdClient = new Client();
+        cimdClient.setClientId(cimdClientId);
+        cimdClient.setDn("inum=" + ClientIdMetadataService.computeId(cimdClientId) + ",ou=clients,o=jans");
+
+        String traditionalClientId = "traditional-client-123";
+        Client dbClient = new Client();
+        dbClient.setClientId(traditionalClientId);
+        dbClient.setDn("inum=" + traditionalClientId + ",ou=clients,o=jans");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        doReturn(cimdClient).when(clientIdMetadataService).getClient(cimdClientId);
+        when(clientService.getClient(traditionalClientId)).thenReturn(dbClient);
+
+        Set<Client> result = clientIdMetadataService.resolveClients(Arrays.asList(cimdClientId, traditionalClientId), true);
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(cimdClient));
+        assertTrue(result.contains(dbClient));
+    }
+
+    @Test
+    public void resolveClients_whenNullCollection_shouldReturnEmptySet() {
+        Set<Client> result = clientIdMetadataService.resolveClients(null, true);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void resolveClients_whenSilentAndOneEntryFailsToResolve_shouldSkipItAndKeepOthers() {
+        String failingClientId = "https://example.com/failing-client";
+        String okClientId = "traditional-client-123";
+        Client dbClient = new Client();
+        dbClient.setClientId(okClientId);
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        doThrow(new WebApplicationException(400)).when(clientIdMetadataService).getClient(failingClientId);
+        when(clientService.getClient(okClientId)).thenReturn(dbClient);
+
+        Set<Client> result = clientIdMetadataService.resolveClients(Arrays.asList(failingClientId, okClientId), true);
+
+        assertEquals(1, result.size());
+        assertTrue(result.contains(dbClient));
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void resolveClients_whenNotSilentAndEntryFailsToResolve_shouldThrow() {
+        String failingClientId = "https://example.com/failing-client";
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        doThrow(new WebApplicationException(400)).when(clientIdMetadataService).getClient(failingClientId);
+
+        clientIdMetadataService.resolveClients(Arrays.asList(failingClientId), false);
     }
 
     // ==================== isCimdClientId Tests ====================

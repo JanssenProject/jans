@@ -2,6 +2,7 @@ package io.jans.as.server.session.ws.rs;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdAccessMap;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -24,10 +25,18 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertNotNull;
 
 /**
@@ -72,7 +81,7 @@ public class EndSessionRestWebServiceImplTest {
     private CookieService cookieService;
 
     @Mock
-    private ClientService clientService;
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Mock
     private GrantService grantService;
@@ -193,5 +202,34 @@ public class EndSessionRestWebServiceImplTest {
 
         final Jwt jwt = endSessionRestWebService.validateIdTokenHint(DUMMY_JWT, sidSession, "", "http://postlogout.com", "");
         assertNotNull(jwt);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void getSsoClients_whenCimdClientInPermissionGrantedMap_shouldResolveViaClientIdMetadataService() throws Exception {
+        String cimdClientId = "https://rp.example.org/client-metadata.json";
+
+        Client cimdClient = new Client();
+        cimdClient.setClientId(cimdClientId);
+        when(clientIdMetadataService.resolveClients(anySet(), eq(true))).thenReturn(Collections.singleton(cimdClient));
+
+        Map<String, Boolean> granted = new HashMap<>();
+        granted.put(cimdClientId, true);
+        SessionId sessionId = new SessionId();
+        sessionId.setPermissionGrantedMap(new SessionIdAccessMap(granted));
+
+        Pair<SessionId, AuthorizationGrant> pair = new Pair<>(sessionId, null);
+
+        Set<Client> result = invokeGetSsoClients(pair);
+
+        assertTrue(result.contains(cimdClient));
+        verify(clientIdMetadataService).resolveClients(granted.keySet(), true);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Set<Client> invokeGetSsoClients(Pair<SessionId, AuthorizationGrant> pair) throws Exception {
+        Method method = EndSessionRestWebServiceImpl.class.getDeclaredMethod("getSsoClients", Pair.class);
+        method.setAccessible(true);
+        return (Set<Client>) method.invoke(endSessionRestWebService, pair);
     }
 }

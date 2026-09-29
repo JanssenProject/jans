@@ -95,7 +95,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private CookieService cookieService;
 
     @Inject
-    private ClientService clientService;
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Inject
     private GrantService grantService;
@@ -566,7 +566,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         final Set<Client> clients = sessionId.getPermissionGrantedMap() != null ?
-                clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true) :
+                clientIdMetadataService.resolveClients(sessionId.getPermissionGrantedMap().getClientIds(true), true) :
                 Sets.newHashSet();
         if (authorizationGrant != null) {
             clients.add(authorizationGrant.getClient());
