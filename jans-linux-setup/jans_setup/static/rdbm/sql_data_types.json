@@ -841,6 +841,12 @@
       "type": "TEXT"
     }
   },
+  "jansFido2MetricsClientCorrelationId": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
   "jansFido2MetricsAdditionalData": {
     "mysql": {
       "type": "TEXT"
