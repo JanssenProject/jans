@@ -15,14 +15,17 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.auth.Authenticator;
+import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.security.Identity;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
+import io.jans.service.cdi.util.CdiUtil;
 import jakarta.faces.context.ExternalContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
@@ -153,10 +156,25 @@ public class AuthorizeServiceTest {
 
         Client client = new Client();
         client.setClientId(cimdClientId);
+        client.getAttributes().setAuthorizationSignedResponseAlg("RS256");
 
-        authorizeService.permissionDenied(session, client);
+        ConfigurationFactory configurationFactory = mock(ConfigurationFactory.class);
+        when(configurationFactory.getAppConfiguration()).thenReturn(appConfiguration);
+
+        try (MockedStatic<CdiUtil> cdiUtil = mockStatic(CdiUtil.class)) {
+            cdiUtil.when(() -> CdiUtil.bean(ConfigurationFactory.class)).thenReturn(configurationFactory);
+
+            authorizeService.permissionDenied(session, client);
+        }
 
         verify(clientIdMetadataService, never()).resolveClient(anyString());
+        verify(facesService, never()).redirect(anyString());
+
+        ArgumentCaptor<String> redirectCaptor = ArgumentCaptor.forClass(String.class);
+        verify(facesService).redirectToExternalURL(redirectCaptor.capture());
+        String redirectUrl = redirectCaptor.getValue();
+        assertTrue(redirectUrl.startsWith("https://rp.example.org/cb"), "Expected redirect to target the client's redirect_uri but was: " + redirectUrl);
+        assertTrue(redirectUrl.contains("response="), "Expected redirect to contain a signed JARM 'response' parameter but was: " + redirectUrl);
     }
 
     @Test
@@ -167,11 +185,26 @@ public class AuthorizeServiceTest {
 
         Client client = new Client();
         client.setClientId(cimdClientId);
+        client.getAttributes().setAuthorizationSignedResponseAlg("RS256");
         when(clientIdMetadataService.resolveClient(cimdClientId)).thenReturn(client);
 
-        authorizeService.permissionDenied(session, null);
+        ConfigurationFactory configurationFactory = mock(ConfigurationFactory.class);
+        when(configurationFactory.getAppConfiguration()).thenReturn(appConfiguration);
+
+        try (MockedStatic<CdiUtil> cdiUtil = mockStatic(CdiUtil.class)) {
+            cdiUtil.when(() -> CdiUtil.bean(ConfigurationFactory.class)).thenReturn(configurationFactory);
+
+            authorizeService.permissionDenied(session, null);
+        }
 
         verify(clientIdMetadataService).resolveClient(cimdClientId);
+        verify(facesService, never()).redirect(anyString());
+
+        ArgumentCaptor<String> redirectCaptor = ArgumentCaptor.forClass(String.class);
+        verify(facesService).redirectToExternalURL(redirectCaptor.capture());
+        String redirectUrl = redirectCaptor.getValue();
+        assertTrue(redirectUrl.startsWith("https://rp.example.org/cb"), "Expected redirect to target the client's redirect_uri but was: " + redirectUrl);
+        assertTrue(redirectUrl.contains("response="), "Expected redirect to contain a signed JARM 'response' parameter but was: " + redirectUrl);
     }
 
     @Test
