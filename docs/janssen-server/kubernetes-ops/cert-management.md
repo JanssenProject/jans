@@ -119,6 +119,9 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
 
 ### Optional: update TLS secret
 
+!!! Warning
+    Apply the TLS secret update only if steps from [Rotate](#rotate) or [Load from existing source](#load-from-existing-source) section are successfully completed.
+
 Ingress or Gateway API controllers may use TLS secret named `tls-certificate` in release namespace. The TLS secret need to be updated to reflect the changes.
 
 1.  Extract TLS cert and key from Janssen:
