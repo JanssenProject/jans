@@ -1,5 +1,6 @@
 package io.jans.casa.plugins.authnmethod.service;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,8 +15,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.casa.core.model.Fido2RegistrationEntry;
 import io.jans.casa.core.pojo.FidoDevice;
 import io.jans.casa.misc.Utils;
-import io.jans.casa.rest.RSUtils;
+import io.jans.casa.misc.WebUtils;
 import io.jans.fido2.client.AttestationService;
+import io.jans.fido2.client.Fido2ClientFactory;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.orm.search.filter.Filter;
@@ -34,7 +36,10 @@ public class Fido2Service extends BaseService {
     
     private String appId;
 
-    private AttestationService attestationService;
+    // The full metadata JSON, not just the extracted attestation base_path: building an
+    // AttestationService per call (below) needs it to pass the end user's IP/user agent through,
+    // which varies per request and so cannot be baked into a single field built once here.
+    private String metadataConfiguration;
 
     private static final String FIDO2_OU = "fido2_register";
 
@@ -50,16 +55,21 @@ public class Fido2Service extends BaseService {
         String tmp = issuerUrl + "/.well-known/fido2-configuration";
         try {
             appId = new URL(issuerUrl).getHost();
-        
-            logger.info("Retrieving contents of URL {}", tmp);
-            String attestationURL = mapper.readTree(new URL(tmp)).get("attestation").get("base_path").asText();
 
-            logger.info("Base path is {}", attestationURL);
-            attestationService = RSUtils.getClient().target(attestationURL).proxy(AttestationService.class);
+            logger.info("Retrieving contents of URL {}", tmp);
+            try (Response response = Fido2ClientFactory.instance()
+                    .createMetaDataConfigurationService(tmp).getMetadataConfiguration()) {
+                metadataConfiguration = response.readEntity(String.class);
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
 
+    }
+
+    private AttestationService attestationService() throws IOException {
+        return Fido2ClientFactory.instance().createAttestationService(
+                metadataConfiguration, WebUtils.getRemoteIP(), WebUtils.getRequestHeader("User-Agent"));
     }
 
     public int getDevicesTotal(String userId, String appId, boolean active) {
@@ -184,7 +194,7 @@ public class Fido2Service extends BaseService {
         authenticatorSelection.setRequireResidentKey(false);
         attestationOptions.setAuthenticatorSelection(authenticatorSelection);
 
-        try (Response response = attestationService.register(attestationOptions)) {
+        try (Response response = attestationService().register(attestationOptions)) {
             String content = response.readEntity(String.class);
             int status = response.getStatus();
 
@@ -200,7 +210,7 @@ public class Fido2Service extends BaseService {
 
     public boolean verifyRegistration(String tokenResponse) throws Exception {
         JsonNode jsonObj=mapper.readTree(tokenResponse);
-    	try (Response response = attestationService.verify(mapper.convertValue(jsonObj, io.jans.fido2.model.attestation.AttestationResult.class))) {
+    	try (Response response = attestationService().verify(mapper.convertValue(jsonObj, io.jans.fido2.model.attestation.AttestationResult.class))) {
             int status = response.getStatus();
             logger.debug("Status of attestation: {}", status);
             boolean verified = status == Response.Status.OK.getStatusCode();
