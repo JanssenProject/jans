@@ -104,9 +104,6 @@ public class AuthorizeAction {
     private Logger log;
 
     @Inject
-    private ClientService clientService;
-
-    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
@@ -193,6 +190,9 @@ public class AuthorizeAction {
     @Inject
     private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
 
+    @Inject
+    private ClientIdMetadataService clientIdMetadataService;
+
     // OAuth 2.0 request parameters
     private String scope;
     private String responseType;
@@ -278,7 +278,7 @@ public class AuthorizeAction {
 
         Client client = null;
         try {
-            client = clientService.getClient(clientId);
+            client = clientIdMetadataService.resolveClient(clientId);
         } catch (EntryPersistenceException ex) {
             log.debug("Permission denied. Failed to find client by inum '{}' in DB.", clientId, ex);
             permissionDenied();
@@ -628,8 +628,8 @@ public class AuthorizeAction {
             return null;
         }
         try {
-            return clientService.getClient(clientId);
-        } catch (EntryPersistenceException e) {
+            return clientIdMetadataService.resolveClient(clientId);
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
         }
@@ -1106,7 +1106,13 @@ public class AuthorizeAction {
             return UNKNOWN;
         }
 
-        final Client client = clientService.getClient(clientId);
+        Client client;
+        try {
+            client = clientIdMetadataService.resolveClient(clientId);
+        } catch (WebApplicationException e) {
+            log.debug("Failed to resolve client_id '{}' for display name.", clientId, e);
+            return UNKNOWN;
+        }
         return getCheckedClientDisplayName(client);
     }
 

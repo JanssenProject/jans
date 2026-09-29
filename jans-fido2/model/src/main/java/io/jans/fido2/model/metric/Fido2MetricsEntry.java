@@ -9,6 +9,7 @@ package io.jans.fido2.model.metric;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
@@ -65,6 +66,16 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
     @AttributeName(name = "jansFido2MetricsDeviceInfo")
     @JsonObject
     private DeviceInfo deviceInfo;
+
+    /**
+     * Optional native-client context (#14607) — absence must not change behavior. Persisted as JSON,
+     * same pattern as {@link #deviceInfo}, rather than the {@link #additionalData} bag: the shape is
+     * fixed and documented (see {@link NativeClientTelemetry}), so a typed nested object gives schema
+     * clarity without a new LDAP attribute per field.
+     */
+    @AttributeName(name = "jansFido2MetricsNativeTelemetry")
+    @JsonObject
+    private NativeClientTelemetry nativeClientTelemetry;
 
     @AttributeName(name = "jansFido2MetricsErrorReason")
     private String errorReason;
@@ -195,6 +206,14 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
 
     public void setDeviceInfo(DeviceInfo deviceInfo) {
         this.deviceInfo = deviceInfo;
+    }
+
+    public NativeClientTelemetry getNativeClientTelemetry() {
+        return nativeClientTelemetry;
+    }
+
+    public void setNativeClientTelemetry(NativeClientTelemetry nativeClientTelemetry) {
+        this.nativeClientTelemetry = nativeClientTelemetry;
     }
 
     public String getErrorReason() {
