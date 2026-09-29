@@ -124,6 +124,7 @@ Ingress or Gateway API controllers may use TLS secret named `tls-certificate` in
 1.  Extract TLS cert and key from Janssen:
 
     ```bash
+    umask 077
     kubectl -n <jans-namespace> get secret cn --template={{.data.ssl_cert}} | base64 -d > tls.crt
     kubectl -n <jans-namespace> get secret cn --template={{.data.ssl_key}} | base64 -d > tls.key
     ```
