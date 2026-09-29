@@ -64,7 +64,10 @@ class Domain:
                 if "jansRevision" in entry:
                     entry["jansRevision"] = int(entry["jansRevision"] or 0) + 1
 
-                self.persistence.update(table_name, entry["doc_id"], entry)
+                if not self.persistence.update(table_name, entry["doc_id"], entry):
+                    raise RuntimeError(
+                        f"FQDN update failed for {table_name}: doc_id={entry['doc_id']}"
+                    )
 
     def modify_configmap(self, old_fqdn: str, new_fqdn: str) -> None:
         logger.info("Checking configmap")
