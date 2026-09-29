@@ -156,14 +156,17 @@ Beyond the outcome itself, each raw entry records where the operation came from:
 | `userAgent` | The `User-Agent` request header, up to 512 characters. |
 | `deviceInfo` | Browser, OS and device type parsed from the user agent, plus a copy of the user agent itself. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
 | `sessionId` | The `session_id` cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither. |
+| `clientCorrelationId` | The optional `client_correlation_id` a native client attached via the `telemetry` request field — see [Native-client telemetry](#native-client-telemetry-optional) below. Sibling to `sessionId`, not derived from it: caller-supplied and absent unless the client sends one. |
+| `nativeClientTelemetry` | The full optional `telemetry` object a native client attached, stored as-is — see below. |
 | `metricType` | The metric name of the event, e.g. `fido2_registration_success`. |
 | `nodeId` | Identifier of the cluster node that served the request. |
 
 !!! note "Oversized values are shortened, not dropped"
-    Free-form fields — `userAgent`, `sessionId`, `username`, `errorReason` and
-    `fallbackReason` — are shortened to the width of their database column before being
-    stored, so a single unusually long value cannot fail the write and lose the whole
-    entry. Real-world values fit comfortably; when a value is actually shortened the FIDO2
+    Free-form fields — `userAgent`, `sessionId`, `clientCorrelationId`, `username`, `errorReason`,
+    `fallbackReason`, and each individual member of `nativeClientTelemetry` — are shortened to the
+    width of their database column (or, for `nativeClientTelemetry`'s members, a 128-character
+    policy cap) before being stored, so a single unusually long value cannot fail the write and lose
+    the whole entry. Real-world values fit comfortably; when a value is actually shortened the FIDO2
     server logs one `WARN` naming the field and its original length. The value itself is
     never logged, since these fields are personal data.
 
@@ -185,11 +188,18 @@ The field is entirely optional: a request that omits it behaves exactly as befor
 unrecognized value in an enum-shaped field (`platform`, `native_api`, `flow_context`) is accepted
 rather than rejecting the request.
 
-!!! note "Not yet reflected in stored metrics"
-    As of this release, a submitted `telemetry` object is accepted and parsed but **not yet
-    persisted** onto metrics entries or correlated via `client_correlation_id` — that wiring is
-    tracked separately. Submitting it today has no observable effect beyond successful
-    deserialization.
+A submitted `telemetry` object is persisted on the raw entry it was attached to — both the full
+object (`nativeClientTelemetry`) and, separately, its `client_correlation_id`. `client_correlation_id`
+is deliberately promoted to its own top-level, independently queryable field rather than left buried
+inside the `nativeClientTelemetry` blob: it is what lets a start (`options`) call and its matching
+finish (`result`) call be correlated with each other, the way `sessionId` correlates every entry
+within one browser session. Query `entries` (or `entries/operation/{operationType}`) for two rows
+sharing the same `clientCorrelationId` to join a ceremony's own start and finish.
+
+!!! note "Correlation is opt-in and client-driven"
+    The server never generates a `client_correlation_id` itself — it only stores whatever the client
+    sends. A client that never adopts the `telemetry` field, or sends it without
+    `client_correlation_id`, gets no correlation and no change in behavior; this is purely additive.
 
 ### Aggregation schedule and retention
 
