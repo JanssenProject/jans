@@ -169,7 +169,7 @@ async fn test_validate_schemaless() {
     let schemaless_store = r#"
 cedar_version: "4.0.0"
 policy_stores:
-  a1b2c3d4e5f6a7b8:
+  test_store:
     name: Test Store
     cedar_version: "4.0.0"
     policies: {}

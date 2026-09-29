@@ -981,38 +981,48 @@ impl Cedarling {
                 };
 
                 // Metadata Level
-                // For directory/archive, the loader already ran MetadataValidator.
-                // For legacy YAML/JSON stores, we run validate_legacy_metadata.
-                let metadata_res = match &loaded.store.metadata {
-                    Some(metadata) => {
-                        use crate::common::policy_store::validator::MetadataValidator;
-                        match MetadataValidator::validate(metadata) {
-                            Ok(()) => LevelResult::Ok,
-                            Err(e) => LevelResult::Failed {
-                                errors: vec![Diagnostic {
-                                    file: "<metadata>".into(),
-                                    line: None,
-                                    column: None,
-                                    message: e.to_string(),
-                                }],
-                            },
-                        }
-                    },
-                    None => {
-                        match crate::common::policy_store::validator::validate_legacy_metadata(
-                            &loaded.store.store,
-                        ) {
-                            Ok(()) => LevelResult::Ok,
-                            Err(e) => LevelResult::Failed {
-                                errors: vec![Diagnostic {
-                                    file: "<inline>".into(),
-                                    line: None,
-                                    column: None,
-                                    message: e.to_string(),
-                                }],
-                            },
-                        }
-                    },
+                // Legacy YAML sources synthesize `metadata: Some(..)` with the
+                // user-chosen `policy_stores` key as `id`, so matching on
+                // `Option` cannot distinguish strict vs legacy. Branch on
+                // `config.source` instead; every other source keeps strict
+                // `MetadataValidator` checks.
+                let metadata_res = if matches!(
+                    &config.source,
+                    PolicyStoreSource::Yaml(_) | PolicyStoreSource::FileYaml(_)
+                ) {
+                    match crate::common::policy_store::validator::validate_legacy_metadata(
+                        &loaded.store.store,
+                    ) {
+                        Ok(()) => LevelResult::Ok,
+                        Err(e) => LevelResult::Failed {
+                            errors: vec![Diagnostic {
+                                file: "<inline>".into(),
+                                line: None,
+                                column: None,
+                                message: e.to_string(),
+                            }],
+                        },
+                    }
+                } else {
+                    match &loaded.store.metadata {
+                        Some(metadata) => {
+                            use crate::common::policy_store::validator::MetadataValidator;
+                            match MetadataValidator::validate(metadata) {
+                                Ok(()) => LevelResult::Ok,
+                                Err(e) => LevelResult::Failed {
+                                    errors: vec![Diagnostic {
+                                        file: "<metadata>".into(),
+                                        line: None,
+                                        column: None,
+                                        message: e.to_string(),
+                                    }],
+                                },
+                            }
+                        },
+                        None => LevelResult::Skipped {
+                            reason: "no metadata present".into(),
+                        },
+                    }
                 };
 
                 Ok(ValidationReport {
