@@ -16,6 +16,7 @@ Changing FQDN in Kubernetes setup
 !!! Warning
     This feature is experimental and in alpha state, mostly used for development and testing.
 
+## Mandatory steps
 
 1.  Create a file named `change-fqdn.yaml` with the following contents :
 
@@ -50,14 +51,18 @@ Changing FQDN in Kubernetes setup
     kubectl apply -f change-fqdn.yaml -n <jans-namespace>
     ```
 
-    !!! Warning
-        Do not execute next steps if dry-run mode is enabled.
+3.  Wait for the `job/change-fqdn` become completed and no failure before proceeding to additional steps.
 
-3.  Replace the certificate using `certmanager`, see [Certificate Management](../kubernetes-ops/cert-management/#web-ingress) for further instructions.
+## Additional steps
 
-4.  Modify the customized `values.yaml` and change all of the occurences of old FQDN with the new one.
+!!! Warning
+    Do not execute the following steps if dry-run mode is enabled.
 
-5.  Upgrade the setup, for example:
+1.  Replace the certificate using `certmanager`, see [Certificate Management](../kubernetes-ops/cert-management/#web-ingress) for further instructions.
+
+2.  Modify the customized `values.yaml` and change all of the occurences of old FQDN with the new one.
+
+3.  Upgrade the setup, for example:
 
     ```bash
     helm upgrade <helm-release-name> janssen-auth-server/janssen --version <helm-chart-version> -f values.yaml -n <jans-namespace>
