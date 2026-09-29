@@ -45,9 +45,6 @@ public class RedirectionUriService {
     private static final Logger log = LoggerFactory.getLogger(RedirectionUriService.class);
 
     @Inject
-    private ClientService clientService;
-
-    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
@@ -205,7 +202,7 @@ public class RedirectionUriService {
         }
 
         final Set<Client> clientsByDns = sessionId.getPermissionGrantedMap() != null
-                ? clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true)
+                ? clientIdMetadataService.resolveClientsForLogout(sessionId.getPermissionGrantedMap().getClientIds(true))
                 : Sets.newHashSet();
 
         log.trace("Validating post logout redirect URI: postLogoutRedirectUri = {}", postLogoutRedirectUri);
