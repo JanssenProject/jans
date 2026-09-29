@@ -10,7 +10,10 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
+import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.auth.Authenticator;
 import io.jans.as.server.security.Identity;
 import io.jans.jsf2.message.FacesMessages;
@@ -87,6 +90,15 @@ public class AuthorizeServiceTest {
     @Mock
     private HttpServletRequest httpServletRequest;
 
+    @Mock
+    private ErrorResponseFactory errorResponseFactory;
+
+    @Mock
+    private WebKeysConfiguration webKeysConfiguration;
+
+    @Mock
+    private AbstractCryptoProvider cryptoProvider;
+
     @Test
     public void permissionGranted_whenCimdClient_shouldResolveViaClientIdMetadataService() throws Exception {
         String cimdClientId = "https://rp.example.org/client-metadata.json";
@@ -131,6 +143,62 @@ public class AuthorizeServiceTest {
 
         verify(authorizeService).permissionDenied(session);
         verify(facesService, never()).redirectToExternalURL(anyString());
+    }
+
+    @Test
+    public void permissionDenied_whenResponseModeJwtAndClientAlreadyResolved_shouldNotReResolveClient() {
+        String cimdClientId = "https://rp.example.org/client-metadata.json";
+        SessionId session = newJarmSessionWithClientId(cimdClientId);
+        when(requestParameterService.getAllowedParameters(anyMap())).thenReturn(new HashMap<>());
+
+        Client client = new Client();
+        client.setClientId(cimdClientId);
+
+        authorizeService.permissionDenied(session, client);
+
+        verify(clientIdMetadataService, never()).resolveClient(anyString());
+    }
+
+    @Test
+    public void permissionDenied_whenResponseModeJwtAndNoClientProvided_shouldFallBackToResolveClient() {
+        String cimdClientId = "https://rp.example.org/client-metadata.json";
+        SessionId session = newJarmSessionWithClientId(cimdClientId);
+        when(requestParameterService.getAllowedParameters(anyMap())).thenReturn(new HashMap<>());
+
+        Client client = new Client();
+        client.setClientId(cimdClientId);
+        when(clientIdMetadataService.resolveClient(cimdClientId)).thenReturn(client);
+
+        authorizeService.permissionDenied(session, null);
+
+        verify(clientIdMetadataService).resolveClient(cimdClientId);
+    }
+
+    @Test
+    public void permissionDenied_whenResponseModeJwtAndClientCannotBeResolved_shouldFallBackToPlainRedirect() {
+        String cimdClientId = "https://rp.example.org/client-metadata.json";
+        SessionId session = newJarmSessionWithClientId(cimdClientId);
+        when(requestParameterService.getAllowedParameters(anyMap())).thenReturn(new HashMap<>());
+
+        when(clientIdMetadataService.resolveClient(cimdClientId)).thenReturn(null);
+
+        authorizeService.permissionDenied(session, null);
+
+        verify(clientIdMetadataService).resolveClient(cimdClientId);
+        verify(facesService).redirectToExternalURL(anyString());
+        verify(facesService, never()).redirect(anyString());
+    }
+
+    private static SessionId newJarmSessionWithClientId(String clientId) {
+        SessionId session = new SessionId();
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put(AuthorizeRequestParam.CLIENT_ID, clientId);
+        attributes.put(AuthorizeRequestParam.REDIRECT_URI, "https://rp.example.org/cb");
+        attributes.put(AuthorizeRequestParam.STATE, "state123");
+        attributes.put(AuthorizeRequestParam.RESPONSE_MODE, "jwt");
+        attributes.put(AuthorizeRequestParam.RESPONSE_TYPE, "code");
+        session.setSessionAttributes(attributes);
+        return session;
     }
 
     private static SessionId newSessionWithClientId(String clientId) {

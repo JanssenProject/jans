@@ -212,6 +212,17 @@ public class AuthorizeService {
     }
 
     public void permissionDenied(final SessionId session) {
+        permissionDenied(session, null);
+    }
+
+    /**
+     * @param resolvedClient the client already resolved by the caller for this authorization decision, if any.
+     *                       Reusing it avoids a second, independent client_id resolution (a second live CIMD
+     *                       fetch attempt for a URL-based client_id) purely to build the JARM (response_mode=jwt)
+     *                       access_denied response. Pass null when no such client is available (a fresh
+     *                       resolution is then attempted as before).
+     */
+    public void permissionDenied(final SessionId session, final Client resolvedClient) {
         try {
             log.trace("permissionDenied");
             invalidateSessionCookiesIfNeeded();
@@ -272,9 +283,17 @@ public class AuthorizeService {
             }
 
             if (responseMode == ResponseMode.JWT) {
-                String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
-                Client client = clientIdMetadataService.resolveClient(clientId);
-                facesService.redirectToExternalURL(createJarmRedirectUri(redirectUri, client));
+                Client client = resolvedClient;
+                if (client == null) {
+                    String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
+                    client = clientIdMetadataService.resolveClient(clientId);
+                }
+                if (client != null) {
+                    facesService.redirectToExternalURL(createJarmRedirectUri(redirectUri, client));
+                } else {
+                    log.error("Unable to resolve client for JARM (response_mode=jwt) access_denied response. Falling back to a plain (non-JWT) redirect so the RP still receives the denial.");
+                    facesService.redirectToExternalURL(redirectUri.toString());
+                }
             } else
                 facesService.redirectToExternalURL(redirectUri.toString());
 
