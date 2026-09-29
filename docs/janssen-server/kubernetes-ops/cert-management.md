@@ -40,7 +40,7 @@ Rotating Certificates and Keys in Kubernetes setup
       template:
         metadata:
           annotations:
-            sidecar.istio.io/inject: "false"                  
+            sidecar.istio.io/inject: "false"
         spec:
           restartPolicy: Never
           containers:
@@ -48,14 +48,14 @@ Rotating Certificates and Keys in Kubernetes setup
               image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
-                  name: janssen-config-cm # This may be differnet in Helm
+                  name: janssen-config-cm # This may be different in Helm
               args: ["certmanager", "patch", "web", "--opts", "valid-to:365"]
     ```
 
-2.  Apply job        
+2.  Apply job
     ```bash
     kubectl apply -f web-key-rotation.yaml -n <jans-namespace>
-    ```            
+    ```
 
 ### Load from existing source
 
@@ -63,13 +63,13 @@ Rotating Certificates and Keys in Kubernetes setup
     This will load `web_https.crt` and `web_https.key` from `/etc/certs`.
 
 1. Create a secret with `web_https.crt` and `web_https.key`. Note that this may already exist in your deployment.
-            
+
     ```bash
     kubectl create secret generic web-cert-key --from-file=web_https.crt --from-file=web_https.key -n <jans-namespace>
     ```
 
 2.  Create a file named `load-web-key-rotation.yaml` with the following contents :
-                               
+
     ```yaml
     apiVersion: batch/v1
     kind: Job
@@ -79,7 +79,7 @@ Rotating Certificates and Keys in Kubernetes setup
       template:
         metadata:
           annotations:
-            sidecar.istio.io/inject: "false"                  
+            sidecar.istio.io/inject: "false"
         spec:
           restartPolicy: Never
           volumes:
@@ -94,13 +94,13 @@ Rotating Certificates and Keys in Kubernetes setup
               secretName: web-cert-key
               items:
                 - key: web_https.key
-                  path: web_https.key                              
+                  path: web_https.key
           containers:
             - name: load-web-key-rotation
               image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
-                  name: janssen-config-cm  #This may be differnet in Helm
+                  name: janssen-config-cm  #This may be different in Helm
               volumeMounts:
                 - name: web-cert
                   mountPath: /etc/certs/web_https.crt
@@ -116,6 +116,29 @@ Rotating Certificates and Keys in Kubernetes setup
 ```bash
 kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
 ```
+
+### Optional: update TLS secret
+
+Ingress or Gateway API controllers may use TLS secret named `tls-certificate` in release namespace. The TLS secret need to be updated to reflect the changes.
+
+1.  Extract TLS cert and key from Janssen:
+
+    ```bash
+    kubectl -n <jans-namespace> get secret cn --template={{.data.ssl_cert}} | base64 -d > tls.crt
+    kubectl -n <jans-namespace> get secret cn --template={{.data.ssl_key}} | base64 -d > tls.key
+    ```
+
+1.  Update the TLS secret:
+
+    ```bash
+    kubectl -n <jans-namespace> create secret tls tls-certificate --cert=tls.crt --key=tls.key --dry-run=client -o yaml | kubectl apply -f -
+    ```
+
+1.  Rollout restart (or re-deploy) the Ingress/Gateway API controller, for example:
+
+    ```bash
+    kubectl -n <jans-namespace> rollout restart deployment jans-gateway-nginx
+    ```
 
 ## Auth-server
 
@@ -168,4 +191,3 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
     ```bash
     kubectl apply -f auth-key-rotation.yaml -n <jans-namespace>
     ```
-
