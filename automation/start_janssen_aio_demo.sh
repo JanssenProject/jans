@@ -45,8 +45,8 @@ prepare_certs() {
         old_fqdn="$(extract_fqdn)"
 
         # compare FQDNs; if user-defined FQDN is different with the one from existing cert file, probably
-        # cert and key are stale and need to re-generate new ones
-        # a typical scenario is after changing the FDQN using cloudtools image
+        # cert and key are stale and need to re-generate new ones; a typical scenario is after changing
+        # the FQDN using cloudtools change-fqdn command
         if [[ "$old_fqdn" != "$fqdn" ]]; then
             for old_file in ca.key ca.crt web_https.key web_https.crt web_https.csr web_https.v3.ext; do
                 rm -f "${demo_templates_dir}/${old_file}"
