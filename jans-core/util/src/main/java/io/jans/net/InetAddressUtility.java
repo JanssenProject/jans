@@ -10,6 +10,11 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,7 +52,93 @@ public final class InetAddressUtility {
     private static String MAC_ADDRESS;
     private static boolean MAC_ADDRESS_SET = false;
 
+    private static volatile String NODE_IDENTIFIER;
+
     private InetAddressUtility() { }
+
+    /**
+     * Stable identifier of this JVM's host: the MAC address of the interface bound to the local
+     * host address (see {@link #getMACAddressOrNull()}); failing that, the MAC of the first
+     * (by name) non-loopback, non-virtual, up interface that has one; failing that, a random UUID
+     * that is stable only for the lifetime of the process. Computed once and cached. Never returns
+     * {@code null} or an empty string; the result is at most 36 characters.
+     *
+     * <p>The second tier matters on Debian/Ubuntu-style hosts where the host name resolves to
+     * {@code 127.0.1.1}: {@link NetworkInterface#getByInetAddress} returns {@code null} there, so
+     * {@link #getMACAddressOrNull()} alone yields {@code null} even when a real NIC exists.
+     */
+    public static String getMACAddressOrRandomUUID() {
+        String result = NODE_IDENTIFIER;
+        if (result == null) {
+            synchronized (InetAddressUtility.class) {
+                result = NODE_IDENTIFIER;
+                if (result == null) {
+                    result = getMACAddressOrRandomUUIDImpl();
+                    NODE_IDENTIFIER = result;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static String getMACAddressOrRandomUUIDImpl() {
+        try {
+            String mac = getMACAddressOrNull();
+            if (mac != null && !mac.isEmpty()) {
+                return mac;
+            }
+        } catch (Exception e) {
+            // Any lookup failure (including SecurityException) falls through to the next tier
+        }
+
+        try {
+            String mac = getFirstPhysicalMACAddressOrNull();
+            if (mac != null && !mac.isEmpty()) {
+                return mac;
+            }
+        } catch (Exception e) {
+            // Same: fall through to the UUID branch
+        }
+
+        return UUID.randomUUID().toString();
+    }
+
+    /**
+     * MAC of the first non-loopback, non-virtual, up interface that has a hardware address,
+     * choosing by interface name so the result does not depend on enumeration order.
+     */
+    private static String getFirstPhysicalMACAddressOrNull() throws SocketException {
+        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+        if (interfaces == null) {
+            return null;
+        }
+
+        List<NetworkInterface> candidates = new ArrayList<NetworkInterface>();
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface network = interfaces.nextElement();
+            if (network.isLoopback() || network.isVirtual() || !network.isUp()) {
+                continue;
+            }
+            if (network.getHardwareAddress() != null) {
+                candidates.add(network);
+            }
+        }
+        if (candidates.isEmpty()) {
+            return null;
+        }
+
+        candidates.sort(Comparator.comparing(NetworkInterface::getName));
+        return formatMAC(candidates.get(0).getHardwareAddress());
+    }
+
+    private static String formatMAC(byte[] mac) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mac.length; i++) {
+            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+        }
+        return sb.toString();
+    }
 
     /**
      * Determine if the given string is a valid IPv4 or IPv6 address

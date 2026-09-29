@@ -204,6 +204,6 @@ class AttestationServiceTest {
 		}
 
 		verify(metricService).recordPasskeyRegistrationFailure(eq("alice"), any(), anyLong(),
-				eq("JFS_RPID_HASH_MISMATCH"), any(), any());
+				eq("JFS_RPID_HASH_MISMATCH"), any(), any(), any());
 	}
 }

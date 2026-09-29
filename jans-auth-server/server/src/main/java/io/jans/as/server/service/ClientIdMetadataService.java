@@ -97,6 +97,26 @@ public class ClientIdMetadataService {
     // ==================== Public API ====================
 
     /**
+     * Resolve a client by client_id, transparently handling both traditional (inum-based)
+     * and CIMD (URL-based) client identifiers.
+     * <p>
+     * Callers that previously looked up clients via {@code ClientService#getClient(String)}
+     * directly must use this method instead wherever the client_id may originate from an
+     * authorization request, so that CIMD clients (persisted under {@code cimd-<sha256(url)>})
+     * are resolved correctly rather than looked up by the literal URL.
+     *
+     * @param clientId the client_id, either a traditional inum or a CIMD URL
+     * @return the resolved Client, or null if not found
+     */
+    public Client resolveClient(String clientId) {
+        if (isCimdClientId(clientId)) {
+            log.debug("Processing CIMD client_id: {}", clientId);
+            return getClient(clientId);
+        }
+        return clientService.getClient(clientId);
+    }
+
+    /**
      * Check if client_id is a CIMD URL candidate.
      *
      * @param clientId the client_id to check

@@ -862,6 +862,27 @@
       "tag": "lock_telemetry"
     },
     {
+      "permission": "https://jans.io/oauth/lock/trace.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "lock_trace"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/trace.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "lock_trace"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/trace.admin",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "lock_trace"
+    },
+    {
       "permission": "https://jans.io/oauth/config/token.readonly",
       "description": "",
       "defaultPermissionInToken": false,
@@ -1134,6 +1155,9 @@
         "https://jans.io/oauth/lock/log.write",
         "https://jans.io/oauth/lock/telemetry.readonly",
         "https://jans.io/oauth/lock/telemetry.write",
+        "https://jans.io/oauth/lock/trace.write",
+        "https://jans.io/oauth/lock/trace.readonly",
+        "https://jans.io/oauth/lock/trace.admin",
         "https://jans.io/oauth/config/token.readonly",
         "https://jans.io/oauth/config/token.write",
         "https://jans.io/oauth/config/token.delete",

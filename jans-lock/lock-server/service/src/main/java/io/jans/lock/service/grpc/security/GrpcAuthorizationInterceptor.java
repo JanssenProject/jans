@@ -23,16 +23,18 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import io.jans.core.cedarling.model.AuditActionType;
 import io.jans.core.cedarling.model.AuditLogEntry;
-import io.jans.core.cedarling.service.CedarlingProtection;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.LockProtectionMode;
+import io.jans.lock.service.CedarlingProtectionService;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.openid.OpenIdProtection;
+import io.jans.lock.service.security.AuthenticatedClientContext;
+import io.jans.lock.service.security.AuthenticatingProtection;
+import io.jans.lock.service.security.AuthorizationOutcome;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebService;
 import io.jans.lock.util.HeaderUtils;
 import io.jans.lock.util.ServerUtil;
 import io.jans.service.security.api.ProtectedApi;
-import io.jans.service.security.protect.BaseAuthorizationProtection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ResourceInfo;
@@ -56,8 +58,9 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
     @Inject
     private OpenIdProtection openIdProtectionService;
 
+    /** Lock's concrete service, injected by its own type so {@code authorize(...)} is reachable. */
     @Inject
-    private CedarlingProtection cedarlingProtectionService;
+    private CedarlingProtectionService cedarlingProtectionService;
 
     @Inject
     private ApplicationAuditLogger applicationAuditLogger;
@@ -71,7 +74,7 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
         String methodName = call.getMethodDescriptor().getFullMethodName();
         log.debug("gRPC call to '{}' intercepted", methodName);
         
-        BaseAuthorizationProtection authorizationProtection = null;
+        AuthenticatingProtection authorizationProtection = null;
         if (LockProtectionMode.OAUTH.equals(appConfiguration.getProtectionMode())) {
             log.debug("OAuth protection is enabled");
             
@@ -97,14 +100,15 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
             Context context = ServerUtil.setClientContextIpAddress(clientIp);
 
             // Process authorization
-            Response authorizationResponse = authorizationProtection.processAuthorization(HeaderUtils.findAndExtractBearerToken(headers), resourceInfo);
-            boolean success = authorizationResponse == null;
+            AuthorizationOutcome outcome = authorizationProtection.authorize(HeaderUtils.findAndExtractBearerToken(headers), resourceInfo);
+            boolean success = outcome.isAllowed();
 
             // Audit logging
             AuditLogEntry auditLogEntry = new AuditLogEntry(clientIp, AuditActionType.GRPC_AUTHZ_FILTER);
             applicationAuditLogger.log(auditLogEntry, success);
 
             if (!success) {
+                Response authorizationResponse = outcome.getErrorResponse();
                 log.warn("Authorization failed for gRPC call '{}': {}", methodName, authorizationResponse.getEntity());
                 
                 // Map HTTP status to gRPC status
@@ -115,6 +119,9 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
             }
 
             log.debug("Authorization passed for gRPC call '{}'", methodName);
+
+            // Carry the authenticated client alongside the client IP for downstream services
+            context = AuthenticatedClientContext.withClient(context, outcome.getClient());
 
             return Contexts.interceptCall(context, call, headers, next);
         } catch (Exception e) {
