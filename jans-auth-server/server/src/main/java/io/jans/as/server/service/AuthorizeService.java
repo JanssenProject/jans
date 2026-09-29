@@ -292,7 +292,8 @@ public class AuthorizeService {
                     facesService.redirectToExternalURL(createJarmRedirectUri(redirectUri, client));
                 } else {
                     log.error("Unable to resolve client for JARM (response_mode=jwt) access_denied response. Falling back to a plain (non-JWT) redirect so the RP still receives the denial.");
-                    redirectUri.setResponseMode(responseType.contains(ResponseType.TOKEN) ? ResponseMode.FRAGMENT : ResponseMode.QUERY);
+                    boolean useFragment = responseType.contains(ResponseType.TOKEN) || responseType.contains(ResponseType.ID_TOKEN);
+                    redirectUri.setResponseMode(useFragment ? ResponseMode.FRAGMENT : ResponseMode.QUERY);
                     facesService.redirectToExternalURL(redirectUri.toString());
                 }
             } else
