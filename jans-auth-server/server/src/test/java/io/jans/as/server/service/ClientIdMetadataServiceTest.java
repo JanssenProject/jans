@@ -261,6 +261,27 @@ public class ClientIdMetadataServiceTest {
     }
 
     @Test
+    public void resolveClientForLogout_withUrlShapedTraditionalClientIdAndFeatureDisabled_shouldFallBackToLiteralLookup() {
+        String clientId = "https://example.com/legacy-client";
+        String id = ClientIdMetadataService.computeId(clientId);
+        String dn = "inum=" + id + ",ou=clients,o=jans";
+
+        Client traditionalClient = new Client();
+        traditionalClient.setClientId(clientId);
+
+        lenient().when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(false);
+        when(clientService.buildClientDn(id)).thenReturn(dn);
+        when(clientService.getClientByDn(dn)).thenReturn(null); // never onboarded via CIMD
+        when(clientService.getClient(clientId)).thenReturn(traditionalClient);
+
+        Client result = clientIdMetadataService.resolveClientForLogout(clientId);
+
+        assertEquals(traditionalClient, result);
+        verify(clientIdMetadataService, never()).doFetch(anyString());
+        verify(clientIdMetadataService, never()).getClient(clientId);
+    }
+
+    @Test
     public void resolveClientForLogout_withTraditionalClientId_shouldDelegateToClientService() {
         String clientId = "traditional-client-123";
         Client dbClient = new Client();

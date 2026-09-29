@@ -130,6 +130,10 @@ public class ClientIdMetadataService {
      * (unlike {@link #isCimdClientId(String)}), so a client onboarded while CIMD was enabled is still
      * looked up by its persisted CIMD record rather than by the literal URL, which would never match.
      * This never triggers a live fetch, so no network access is re-enabled by disabling the feature.
+     * If no persisted CIMD record exists for a URL-shaped client_id (e.g. it was never onboarded via
+     * CIMD, or a traditional client happens to have been registered with a URL-shaped client_id), this
+     * falls back to an exact literal lookup via {@link ClientService#getClient(String)} so that case is
+     * still resolved; that fallback never fetches a CIMD document either.
      *
      * @param clientId the client_id, either a traditional inum or a CIMD URL
      * @return the resolved Client, or null if not found / never successfully onboarded
@@ -145,8 +149,8 @@ public class ClientIdMetadataService {
             existing.setClientId(clientId);
             return existing;
         }
-        log.debug("No persisted CIMD client found for logout notification: {}", clientId);
-        return null;
+        log.debug("No persisted CIMD client found for logout notification: {}, falling back to literal client_id lookup", clientId);
+        return clientService.getClient(clientId);
     }
 
     /**
