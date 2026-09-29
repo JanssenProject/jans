@@ -11,7 +11,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
-import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.ClientIdMetadataService;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -44,7 +44,7 @@ public class ConsentGatheringSessionService {
     private CookieService cookieService;
 
     @Inject
-    private ClientService clientService;
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -259,7 +259,7 @@ public class ConsentGatheringSessionService {
     public Client getClient(SessionId session) {
         String clientId = getClientId(session);
         if (StringUtils.isNotBlank(clientId)) {
-            return clientService.getClient(clientId);
+            return clientIdMetadataService.resolveClient(clientId);
         }
         log.trace("client_id is not in session.");
         return null;

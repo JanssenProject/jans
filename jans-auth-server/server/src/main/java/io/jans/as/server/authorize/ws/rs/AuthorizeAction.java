@@ -311,7 +311,7 @@ public class AuthorizeAction {
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, session != null ? session.getSessionAttributes().get(SESSION_USER_CODE) : null, (HttpServletRequest) externalContext.getRequest());
         } catch (WebApplicationException e) {
             log.error(e.getMessage(), e);
-            permissionDenied();
+            permissionDenied(client);
             return;
         }
 
@@ -323,7 +323,7 @@ public class AuthorizeAction {
                 session = handleAcrChange(session, prompts);
             } else {
                 log.error("ACR is changed, please provide a supported and enabled acr value");
-                permissionDenied();
+                permissionDenied(client);
                 return;
             }
         }
@@ -348,7 +348,7 @@ public class AuthorizeAction {
 
                 if (customScriptConfiguration == null) {
                     log.error("Failed to get CustomScriptConfiguration. auth_step: {}, acr_values: {}", 1, this.acrValues);
-                    permissionDenied();
+                    permissionDenied(client);
                     return;
                 }
 
@@ -501,7 +501,7 @@ public class AuthorizeAction {
             boolean result = consentGatherer.configure(session.getUserDn(), clientId, state, acrValuesList);
             if (!result) {
                 log.error("Failed to initialize external consent-gathering flow.");
-                permissionDenied();
+                permissionDenied(client);
                 return;
             }
         }
@@ -1016,6 +1016,16 @@ public class AuthorizeAction {
     public void permissionDenied() {
         final SessionId session = getSession();
         authorizeService.permissionDenied(session);
+    }
+
+    /**
+     * Same as {@link #permissionDenied()} but reuses a client already resolved earlier in the same
+     * authorization decision, avoiding a redundant (and, for a CIMD client_id, network-dependent) second
+     * resolution purely to build a JARM (response_mode=jwt) denial response.
+     */
+    private void permissionDenied(Client client) {
+        final SessionId session = getSession();
+        authorizeService.permissionDenied(session, client);
     }
 
     public void invalidRequest() {
