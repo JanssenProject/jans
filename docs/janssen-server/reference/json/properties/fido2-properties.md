@@ -12,7 +12,9 @@ tags:
 |-----|-----|-----|
 | abandonedRequestExpiration | Expiration time in seconds for abandoned assertion ceremonies. Kept much shorter than authenticationHistoryExpiration because conditional-UI ceremonies start on nearly every login page load, making abandonment the highest-volume outcome | [Details](#abandonedrequestexpiration) |
 | abandonedRequestSweepInterval | Interval in seconds between sweeps for lapsed assertion ceremonies. Must stay below unfinishedRequestExpiration so a ceremony cannot lapse and be deleted between two sweeps | [Details](#abandonedrequestsweepinterval) |
+| allowedTopOrigins | Full origins (scheme, host and optional port) permitted to frame a cross-origin ceremony; empty denies every framed ceremony | [Details](#allowedtoporigins) |
 | attestationMode | String value indicating whether MDS validation should be omitted during attestation | [Details](#attestationmode) |
+| attestationMode | Attestation mode for this relying party - disabled, monitor or enforced. Unset falls back to the global attestationMode. | [Details](#attestationmode) |
 | authenticationHistoryExpiration | Expiration time in seconds for approved authentication requests | [Details](#authenticationhistoryexpiration) |
 | authenticatorCertsFolder | Authenticators certificates folder | [Details](#authenticatorcertsfolder) |
 | baseEndpoint | The base URL for Fido2 endpoints | [Details](#baseendpoint) |
@@ -32,6 +34,11 @@ tags:
 | fido2PerformanceMetrics | Boolean value specifying whether to collect detailed performance metrics for FIDO2 operations | [Details](#fido2performancemetrics) |
 | hints | Hints to the RP - security-key, client-device, hybrid | [Details](#hints) |
 | issuer | URL using the https scheme for Issuer identifier | [Details](#issuer) |
+| lockAuditClientId | OAuth2 client ID used to obtain a token (scope https://jans.io/oauth/lock/log.write) for posting Lock Server audit events | [Details](#lockauditclientid) |
+| lockAuditClientPassword | OAuth2 client secret (encrypted), paired with lockAuditClientId | [Details](#lockauditclientpassword) |
+| lockAuditEnabled | Boolean value indicating whether passkey registration and authentication events are delivered to the Lock Server as audit evidence | [Details](#lockauditenabled) |
+| lockAuditEndpoint | Base URL of the Lock Server audit endpoint (e.g. https://lock.example.com/audit); /log and /log/bulk are derived from it | [Details](#lockauditendpoint) |
+| lockAuditFlushInterval | Interval in seconds between batched deliveries of buffered Lock Server audit events. Read once at server startup; changing it requires a restart to take effect | [Details](#lockauditflushinterval) |
 | loggingLayout | Logging layout used for Fido2 | [Details](#logginglayout) |
 | loggingLevel | Logging level for Fido2 logger | [Details](#logginglevel) |
 | mdsCertsFolder | MDS TOC root certificates folder | [Details](#mdscertsfolder) |
@@ -46,6 +53,8 @@ tags:
 | recordAbandonedAssertions | Boolean value indicating whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled | [Details](#recordabandonedassertions) |
 | requestedParties | Authenticators metadata in json format | [Details](#requestedparties) |
 | serverMetadataFolder | Authenticators metadata in json format | [Details](#servermetadatafolder) |
+| trustedProxyEnabled | Whether proxy headers may be trusted when recording the client IP in metrics. Unset preserves the legacy behaviour of trusting them unconditionally. False never reads them. True trusts them only from the source addresses listed in trustedProxyIpRanges. | [Details](#trustedproxyenabled) |
+| trustedProxyIpRanges | Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation (for example ["10.0.0.0/8", "192.168.1.0/24"]). Only consulted when trustedProxyEnabled is true; an empty list trusts nothing. | [Details](#trustedproxyipranges) |
 | unfinishedRequestExpiration | Expiration time in seconds for pending enrollment/authentication requests | [Details](#unfinishedrequestexpiration) |
 | useLocalCache | Boolean value to indicate if Local Cache is to be used | [Details](#uselocalcache) |
 | userAutoEnrollment | Allow to enroll users on enrollment/authentication requests | [Details](#userautoenrollment) |
@@ -69,6 +78,15 @@ tags:
 - Default value: 30
 
 
+## allowedTopOrigins
+
+- Description: Full origins (scheme, host and optional port) permitted to frame a cross-origin ceremony; empty denies every framed ceremony
+
+- Required: No
+
+- Default value: None
+
+
 ## attestationMode
 
 - Description: String value indicating whether MDS validation should be omitted during attestation
@@ -76,6 +94,15 @@ tags:
 - Required: No
 
 - Default value: monitor
+
+
+## attestationMode
+
+- Description: Attestation mode for this relying party - disabled, monitor or enforced. Unset falls back to the global attestationMode.
+
+- Required: No
+
+- Default value: None
 
 
 ## authenticationHistoryExpiration
@@ -249,6 +276,51 @@ tags:
 - Default value: None
 
 
+## lockAuditClientId
+
+- Description: OAuth2 client ID used to obtain a token (scope https://jans.io/oauth/lock/log.write) for posting Lock Server audit events
+
+- Required: No
+
+- Default value: None
+
+
+## lockAuditClientPassword
+
+- Description: OAuth2 client secret (encrypted), paired with lockAuditClientId
+
+- Required: No
+
+- Default value: None
+
+
+## lockAuditEnabled
+
+- Description: Boolean value indicating whether passkey registration and authentication events are delivered to the Lock Server as audit evidence
+
+- Required: No
+
+- Default value: false
+
+
+## lockAuditEndpoint
+
+- Description: Base URL of the Lock Server audit endpoint (e.g. https://lock.example.com/audit); /log and /log/bulk are derived from it
+
+- Required: No
+
+- Default value: None
+
+
+## lockAuditFlushInterval
+
+- Description: Interval in seconds between batched deliveries of buffered Lock Server audit events. Read once at server startup; changing it requires a restart to take effect
+
+- Required: No
+
+- Default value: 20
+
+
 ## loggingLayout
 
 - Description: Logging layout used for Fido2
@@ -369,6 +441,24 @@ tags:
 ## serverMetadataFolder
 
 - Description: Authenticators metadata in json format
+
+- Required: No
+
+- Default value: None
+
+
+## trustedProxyEnabled
+
+- Description: Whether proxy headers may be trusted when recording the client IP in metrics. Unset preserves the legacy behaviour of trusting them unconditionally. False never reads them. True trusts them only from the source addresses listed in trustedProxyIpRanges.
+
+- Required: No
+
+- Default value: None
+
+
+## trustedProxyIpRanges
+
+- Description: Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation (for example ["10.0.0.0/8", "192.168.1.0/24"]). Only consulted when trustedProxyEnabled is true; an empty list trusts nothing.
 
 - Required: No
 
