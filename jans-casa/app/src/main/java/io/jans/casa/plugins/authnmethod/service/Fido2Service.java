@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.casa.core.model.Fido2RegistrationEntry;
 import io.jans.casa.core.pojo.FidoDevice;
 import io.jans.casa.misc.Utils;
-import io.jans.casa.misc.WebUtils;
 import io.jans.fido2.client.AttestationService;
 import io.jans.fido2.client.Fido2ClientFactory;
 import io.jans.fido2.model.attestation.AttestationOptions;
@@ -77,10 +76,14 @@ public class Fido2Service extends BaseService {
 
     }
 
-    private AttestationService attestationService() throws IOException {
-        return Fido2ClientFactory.instance().createAttestationService(
-                metadataConfiguration, WebUtils.getServletRequest().getRemoteAddr(),
-                WebUtils.getRequestHeader("User-Agent"));
+    /**
+     * Callers must resolve the end-user context themselves rather than this method reaching for it:
+     * {@code io.jans.casa.misc.WebUtils#getServletRequest()} only works inside a live ZK execution
+     * ({@code Executions.getCurrent()}), but {@code doRegister}/{@code verifyRegistration} are also
+     * called from plain JAX-RS resources (e.g. PasskeysEnrollingWS) that have no ZK execution at all.
+     */
+    private AttestationService attestationService(String forwardedFor, String userAgent) throws IOException {
+        return Fido2ClientFactory.instance().createAttestationService(metadataConfiguration, forwardedFor, userAgent);
     }
 
     public int getDevicesTotal(String userId, String appId, boolean active) {
@@ -191,21 +194,21 @@ public class Fido2Service extends BaseService {
 
     }
 
-    public String doRegister(String userName, String displayName) throws Exception {
+    public String doRegister(String userName, String displayName, String forwardedFor, String userAgent) throws Exception {
         AttestationOptions attestationOptions = new AttestationOptions();
         attestationOptions.setUsername(userName);
         attestationOptions.setDisplayName(displayName);
-        
+
         // Set authenticatorSelection to allow users to choose authenticator type
         // This prevents forcing platform authenticators and shows "Select another device" option
-        io.jans.fido2.model.attestation.AuthenticatorSelection authenticatorSelection = 
+        io.jans.fido2.model.attestation.AuthenticatorSelection authenticatorSelection =
             new io.jans.fido2.model.attestation.AuthenticatorSelection();
         // Don't set authenticatorAttachment - leave it null to allow user choice
         authenticatorSelection.setUserVerification(io.jans.orm.model.fido2.UserVerification.preferred);
         authenticatorSelection.setRequireResidentKey(false);
         attestationOptions.setAuthenticatorSelection(authenticatorSelection);
 
-        try (Response response = attestationService().register(attestationOptions)) {
+        try (Response response = attestationService(forwardedFor, userAgent).register(attestationOptions)) {
             String content = response.readEntity(String.class);
             int status = response.getStatus();
 
@@ -219,9 +222,9 @@ public class Fido2Service extends BaseService {
 
     }
 
-    public boolean verifyRegistration(String tokenResponse) throws Exception {
+    public boolean verifyRegistration(String tokenResponse, String forwardedFor, String userAgent) throws Exception {
         JsonNode jsonObj=mapper.readTree(tokenResponse);
-    	try (Response response = attestationService().verify(mapper.convertValue(jsonObj, io.jans.fido2.model.attestation.AttestationResult.class))) {
+    	try (Response response = attestationService(forwardedFor, userAgent).verify(mapper.convertValue(jsonObj, io.jans.fido2.model.attestation.AttestationResult.class))) {
             int status = response.getStatus();
             logger.debug("Status of attestation: {}", status);
             boolean verified = status == Response.Status.OK.getStatusCode();
