@@ -82,8 +82,6 @@ class UpdateToken(UpdateTokenType):
             self.validateExpiration(jwtClaims)
             userInum = self.validateUserInum(jwtClaims)
 
-            context.getClaims().setClaim("userInum", userInum)
-
             jansAdminUIRoleClaim = jwtClaims.getClaim("jansAdminUIRole")
             if jansAdminUIRoleClaim is None:
                 print "Exception occured. The `jansAdminUIRole` claim is missing in user-info JWT."

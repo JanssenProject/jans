@@ -80,6 +80,11 @@ public class Fido2MetricsData implements Serializable {
     @JsonProperty("session_id")
     private String sessionId;
 
+    // Caller-supplied correlation ID (#14607), sibling to sessionId rather than folded into it —
+    // see Fido2MetricsEntry.clientCorrelationId for why.
+    @JsonProperty("client_correlation_id")
+    private String clientCorrelationId;
+
     @JsonProperty("ip_address")
     private String ipAddress;
 
@@ -247,6 +252,14 @@ public class Fido2MetricsData implements Serializable {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getClientCorrelationId() {
+        return clientCorrelationId;
+    }
+
+    public void setClientCorrelationId(String clientCorrelationId) {
+        this.clientCorrelationId = clientCorrelationId;
     }
 
     public String getIpAddress() {
