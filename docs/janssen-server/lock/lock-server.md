@@ -253,6 +253,30 @@ lock.server.log.config.file=/opt/jans/lock-server/logs/lock_server_config.log
 lock.server.log.jwt.status.file=/opt/jans/lock-server/logs/lock_server_jwt_status.log
 ```
 
+### TRACE Configuration
+
+The `traceConfiguration` block of the Lock Server dynamic configuration (`jansConfDyn`) controls
+the TRACE evidence-ingestion feature: which OAuth clients may submit or read evidence for which
+evidence domain, lateness policy, and request limits enforced before any cryptographic
+verification.
+
+| Property | Type | Default | Meaning |
+|---|---|---|---|
+| `enabled` | boolean | `true` | When `false`, every TRACE endpoint returns a structured `invalid_request` error and the receipt repair timer does not run. |
+| `defaultEvidenceDomainId` | string | `null` | Evidence domain used for a submitting/reading client that has no explicit entry in `clientDomainBindings`. |
+| `clientDomainBindings` | array | `[]` | List of `{ clientId, evidenceDomainId, allowedProducerIds[] }` bindings. A client without a binding and without `defaultEvidenceDomainId` set is rejected with `client_not_bound`. `allowedProducerIds` may contain `"*"` to allow any producer. |
+| `latenessThresholdSeconds` | integer | `300` | Seconds after `signed_at` a record may still be accepted before it is flagged `late_flag: true`. |
+| `maxRequestBytes` | integer | `262144` | Maximum accepted TRACE request body size, in bytes. |
+| `maxJsonDepth` | integer | `32` | Maximum accepted JSON nesting depth of a TRACE assertion. |
+| `maxStringLength` | integer | `8192` | Maximum accepted JSON string length (UTF-16 units) in a TRACE assertion. |
+| `maxArrayLength` | integer | `256` | Maximum accepted JSON array length in a TRACE assertion. |
+| `maxObjectMembers` | integer | `256` | Maximum accepted JSON object member count in a TRACE assertion. |
+| `receiptAllocationRetryLimit` | integer | `8` | Maximum retries when allocating the next receipt-chain sequence number under multi-node contention. |
+| `receiptRepairIntervalSeconds` | integer | `300` | Interval between runs of the receipt repair timer, which settles stale `PENDING` receipts. |
+| `pendingReceiptTimeoutSeconds` | integer | `120` | Seconds a `PENDING` receipt may remain unresolved before the repair timer marks it `COMMITTED` or `VOID`. |
+
+Every numeric limit above falls back to its default when configured with a value `<= 0`.
+
 ### Policy Store Sources
 
 The Lock Server supports multiple policy store sources:
@@ -443,6 +467,9 @@ The Lock Server uses OAuth 2.0 scopes to control access to different endpoints:
 | `https://jans.io/oauth/lock/log.write` | `/audit/logs` | Submit authorization decision logs |
 | `https://jans.io/oauth/lock/health.write` | `/audit/health` | Submit health status information |
 | `https://jans.io/oauth/lock/telemetry.write` | `/audit/telemetry` | Submit telemetry and metrics data |
+| `https://jans.io/oauth/lock/trace.write` | `/audit/trace` | Submit TRACE evidence records |
+| `https://jans.io/oauth/lock/trace.readonly` | `/audit/trace/records/*`, `/audit/trace/executions/*` | Read TRACE records and executions |
+| `https://jans.io/oauth/lock/trace.admin` | `/audit/trace/admin/*` | Manage TRACE producer keys and chains |
 
 ## Logging and Monitoring
 

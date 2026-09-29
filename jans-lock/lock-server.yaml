@@ -17,6 +17,8 @@ tags:
 - name: Lock - Audit Health
 - name: Lock - Audit Log
 - name: Lock - Audit Telemetry
+- name: Lock - Audit Trace
+- name: Lock - Audit Trace Admin
 paths:
   /api/v1/configuration:
     get:
@@ -495,6 +497,217 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/stat.readonly
+  /api/v1/audit/trace/admin/producer-chains:
+    get:
+      tags:
+      - Lock - Audit Trace Admin
+      summary: List producer chains
+      description: List registered producer chains in the caller's evidence domain
+      operationId: listProducerChains
+      parameters:
+      - name: producer_id
+        in: query
+        description: Restrict the result to one producer id
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProducerChainListResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.admin
+    post:
+      tags:
+      - Lock - Audit Trace Admin
+      summary: Register a producer chain
+      description: Pre-register a producer chain
+      operationId: registerProducerChain
+      requestBody:
+        description: Producer chain registration request
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProducerChainRegistrationRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProducerChainResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.admin
+  /api/v1/audit/trace/admin/producer-keys:
+    get:
+      tags:
+      - Lock - Audit Trace Admin
+      summary: List producer keys
+      description: List registered producer keys in the caller's evidence domain
+      operationId: listProducerKeys
+      parameters:
+      - name: producer_id
+        in: query
+        description: Restrict the result to one producer id
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProducerKeyListResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.admin
+    post:
+      tags:
+      - Lock - Audit Trace Admin
+      summary: Register a producer key
+      description: Register a producer's Ed25519 verification key
+      operationId: registerProducerKey
+      requestBody:
+        description: Producer key registration request
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProducerKeyRegistrationRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProducerKeyResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.admin
+  /api/v1/audit/trace/admin/producer-keys/revoke:
+    post:
+      tags:
+      - Lock - Audit Trace Admin
+      summary: Revoke a producer key
+      description: Revoke a registered producer key (idempotent)
+      operationId: revokeProducerKey
+      requestBody:
+        description: Producer key revocation request
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProducerKeyRevokeRequest"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProducerKeyResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.admin
 components:
   schemas:
     LockApiError:
@@ -696,6 +909,158 @@ components:
             additionalProperties:
               type: integer
               format: int64
+    ProducerChainListResponse:
+      type: object
+      properties:
+        chains:
+          type: array
+          description: Registered producer chains in the caller's evidence domain
+          items:
+            $ref: "#/components/schemas/ProducerChainResponse"
+      description: Producer chain list response
+    ProducerChainResponse:
+      type: object
+      properties:
+        evidence_domain_id:
+          type: string
+          description: Evidence domain the chain is registered in
+          example: default
+        producer_id:
+          type: string
+          description: "Producer id, name/semver"
+          example: cedarling-fleet-1/1.0.0
+        producer_instance_id:
+          type: string
+          description: Producer instance id
+          example: instance-1
+        producer_chain_id:
+          type: string
+          description: Producer chain id
+          example: chain-1
+        registered_by:
+          type: string
+          description: Client id that registered the chain
+          example: 2200.abcd
+        created_at:
+          type: string
+          description: RFC 3339 timestamp the chain was registered
+          example: 2026-01-01T00:00:00Z
+      description: Registered producer chain
+    ProducerKeyListResponse:
+      type: object
+      properties:
+        keys:
+          type: array
+          description: Registered producer keys in the caller's evidence domain
+          items:
+            $ref: "#/components/schemas/ProducerKeyResponse"
+      description: Producer key list response
+    ProducerKeyResponse:
+      type: object
+      properties:
+        evidence_domain_id:
+          type: string
+          description: Evidence domain the key is registered in
+          example: default
+        producer_id:
+          type: string
+          description: "Producer id, name/semver"
+          example: cedarling-fleet-1/1.0.0
+        kid:
+          type: string
+          description: Key id
+          example: 2026-01-key-1
+        public_key_jwk:
+          type: object
+          additionalProperties:
+            type: string
+            description: RFC 8037 OKP Ed25519 JWK (kty/crv/x only)
+            example: "{\"kty\":\"OKP\",\"crv\":\"Ed25519\",\"x\":\"...\"}"
+          description: RFC 8037 OKP Ed25519 JWK (kty/crv/x only)
+          example:
+            kty: OKP
+            crv: Ed25519
+            x: '...'
+        valid_from:
+          type: string
+          description: RFC 3339 timestamp the key becomes valid
+          example: 2026-01-01T00:00:00Z
+        valid_until:
+          type: string
+          description: "RFC 3339 timestamp the key expires, or null for no expiry"
+          example: 2027-01-01T00:00:00Z
+        revoked_at:
+          type: string
+          description: "RFC 3339 timestamp the key was revoked, or null if active"
+          example: 2026-06-01T00:00:00Z
+        registered_by:
+          type: string
+          description: Client id that registered the key
+          example: 2200.abcd
+        created_at:
+          type: string
+          description: RFC 3339 timestamp the key was registered
+          example: 2026-01-01T00:00:00Z
+      description: Registered producer key
+    ProducerChainRegistrationRequest:
+      type: object
+      properties:
+        producer_id:
+          type: string
+          description: "Producer id, name/semver"
+          example: cedarling-fleet-1/1.0.0
+        producer_instance_id:
+          type: string
+          description: Producer instance id
+          example: instance-1
+        producer_chain_id:
+          type: string
+          description: Producer chain id
+          example: chain-1
+      description: Producer chain registration request
+    ProducerKeyRegistrationRequest:
+      type: object
+      properties:
+        producer_id:
+          type: string
+          description: "Producer id, name/semver"
+          example: cedarling-fleet-1/1.0.0
+        kid:
+          type: string
+          description: Key id
+          example: 2026-01-key-1
+        public_key_jwk:
+          type: object
+          additionalProperties:
+            type: string
+            description: RFC 8037 OKP Ed25519 JWK
+            example: "{\"kty\":\"OKP\",\"crv\":\"Ed25519\",\"x\":\"...\"}"
+          description: RFC 8037 OKP Ed25519 JWK
+          example:
+            kty: OKP
+            crv: Ed25519
+            x: '...'
+        valid_from:
+          type: string
+          description: RFC 3339 timestamp the key becomes valid
+          example: 2026-01-01T00:00:00Z
+        valid_until:
+          type: string
+          description: "RFC 3339 timestamp the key expires, or null for no expiry"
+          example: 2027-01-01T00:00:00Z
+      description: Producer key registration request
+    ProducerKeyRevokeRequest:
+      type: object
+      properties:
+        producer_id:
+          type: string
+          description: "Producer id, name/semver"
+          example: cedarling-fleet-1/1.0.0
+        kid:
+          type: string
+          description: Key id
+          example: 2026-01-key-1
+      description: Producer key revocation request
   securitySchemes:
     oauth2:
       type: oauth2
@@ -708,3 +1073,9 @@ components:
             https://jans.io/oauth/lock/log.write: Write audit log entries
             https://jans.io/oauth/lock/telemetry.write: Write telemetry health entries
             https://jans.io/oauth/lock/stat.readonly: View stat related information
+            https://jans.io/oauth/lock/trace.write: Permission to submit TRACE evidence
+              records
+            https://jans.io/oauth/lock/trace.readonly: Permission to read TRACE records
+              and executions
+            https://jans.io/oauth/lock/trace.admin: Permission to manage TRACE producer
+              keys and chains
