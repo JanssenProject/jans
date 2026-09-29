@@ -212,14 +212,20 @@ public class AuthorizeServiceTest {
         String cimdClientId = "https://rp.example.org/client-metadata.json";
         SessionId session = newJarmSessionWithClientId(cimdClientId);
         when(requestParameterService.getAllowedParameters(anyMap())).thenReturn(new HashMap<>());
+        when(errorResponseFactory.getErrorAsQueryString(any(), anyString())).thenReturn("error=access_denied&state=state123");
 
         when(clientIdMetadataService.resolveClient(cimdClientId)).thenReturn(null);
 
         authorizeService.permissionDenied(session, null);
 
         verify(clientIdMetadataService).resolveClient(cimdClientId);
-        verify(facesService).redirectToExternalURL(anyString());
         verify(facesService, never()).redirect(anyString());
+
+        ArgumentCaptor<String> redirectCaptor = ArgumentCaptor.forClass(String.class);
+        verify(facesService).redirectToExternalURL(redirectCaptor.capture());
+        String redirectUrl = redirectCaptor.getValue();
+        assertTrue(redirectUrl.contains("error=access_denied"), "Expected redirect to preserve error=access_denied but was: " + redirectUrl);
+        assertTrue(redirectUrl.contains("state=state123"), "Expected redirect to preserve state but was: " + redirectUrl);
     }
 
     private static SessionId newJarmSessionWithClientId(String clientId) {
