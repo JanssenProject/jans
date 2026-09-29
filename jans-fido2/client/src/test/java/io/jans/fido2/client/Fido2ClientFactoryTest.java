@@ -7,6 +7,7 @@
 package io.jans.fido2.client;
 
 import com.sun.net.httpserver.HttpServer;
+import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import jakarta.ws.rs.core.Response;
 import org.testng.annotations.AfterMethod;
@@ -18,7 +19,9 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertThrows;
 
 /**
  * Confirms {@link Fido2ClientFactory}'s optional forwarded-context overloads actually stamp
@@ -38,7 +41,7 @@ public class Fido2ClientFactoryTest {
         capturedUserAgent = new AtomicReference<>();
 
         server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
-        server.createContext("/restv1/attestation/options", exchange -> {
+        com.sun.net.httpserver.HttpHandler capture = exchange -> {
             capturedForwardedFor.set(exchange.getRequestHeaders().getFirst("X-Forwarded-For"));
             capturedUserAgent.set(exchange.getRequestHeaders().getFirst("User-Agent"));
             exchange.getRequestBody().readAllBytes();
@@ -47,11 +50,14 @@ public class Fido2ClientFactoryTest {
             exchange.sendResponseHeaders(200, body.length);
             exchange.getResponseBody().write(body);
             exchange.close();
-        });
+        };
+        server.createContext("/restv1/attestation/options", capture);
+        server.createContext("/restv1/assertion/options", capture);
         server.start();
 
-        String basePath = "http://localhost:" + server.getAddress().getPort() + "/restv1/attestation";
-        metadata = "{\"attestation\":{\"base_path\":\"" + basePath + "\"}}";
+        String base = "http://localhost:" + server.getAddress().getPort();
+        metadata = "{\"attestation\":{\"base_path\":\"" + base + "/restv1/attestation\"},"
+                + "\"assertion\":{\"base_path\":\"" + base + "/restv1/assertion\"}}";
     }
 
     @AfterMethod
@@ -81,5 +87,40 @@ public class Fido2ClientFactoryTest {
 
         assertEquals(capturedForwardedFor.get(), "203.0.113.7");
         assertEquals(capturedUserAgent.get(), "TestAgent/1.0");
+    }
+
+    @Test
+    public void forwardedOverloadStampsClientContextOnEveryRequest_forAssertionService() throws IOException {
+        AssertionService service = Fido2ClientFactory.instance()
+                .createAssertionService(metadata, "203.0.113.7", "TestAgent/1.0");
+
+        try (Response response = service.authenticate(new AssertionOptions())) {
+            assertEquals(response.getStatus(), 200);
+        }
+
+        assertEquals(capturedForwardedFor.get(), "203.0.113.7");
+        assertEquals(capturedUserAgent.get(), "TestAgent/1.0");
+    }
+
+    @Test
+    public void forwardedOverloadWithOnlyOneValue_sendsOnlyThatHeader() throws IOException {
+        AssertionService service = Fido2ClientFactory.instance()
+                .createAssertionService(metadata, "203.0.113.9", null);
+
+        try (Response response = service.authenticate(new AssertionOptions())) {
+            assertEquals(response.getStatus(), 200);
+        }
+
+        assertEquals(capturedForwardedFor.get(), "203.0.113.9");
+        assertNotEquals(capturedUserAgent.get(), "TestAgent/1.0",
+                "a null userAgent argument must not be forwarded as a custom value");
+    }
+
+    @Test
+    public void forwardedOverloadOverPlainHttpNonLoopback_isRejected() {
+        String insecureMetadata = "{\"attestation\":{\"base_path\":\"http://example.com/restv1/attestation\"}}";
+
+        assertThrows(IllegalArgumentException.class, () -> Fido2ClientFactory.instance()
+                .createAttestationService(insecureMetadata, "203.0.113.7", null));
     }
 }
