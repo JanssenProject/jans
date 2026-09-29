@@ -190,6 +190,99 @@ public class ClientIdMetadataServiceTest {
         clientIdMetadataService.resolveClients(Arrays.asList(failingClientId), false);
     }
 
+    // ==================== resolveClientForLogout / resolveClientsForLogout Tests ====================
+
+    @Test
+    public void resolveClientForLogout_withExpiredCimdClient_shouldReturnPersistedClientWithoutRefetching() {
+        String url = "https://example.com/client";
+        String id = ClientIdMetadataService.computeId(url);
+        String dn = "inum=" + id + ",ou=clients,o=jans";
+
+        ClientAttributes attrs = new ClientAttributes();
+        attrs.setCimdClient(true);
+        attrs.setCimdOriginalClientId(url);
+        attrs.setCimdExpiresAt(System.currentTimeMillis() - 60_000); // expired
+
+        Client persistedClient = new Client();
+        persistedClient.setClientId(id);
+        persistedClient.setAttributes(attrs);
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        when(clientService.buildClientDn(id)).thenReturn(dn);
+        when(clientService.getClientByDn(dn)).thenReturn(persistedClient);
+
+        Client result = clientIdMetadataService.resolveClientForLogout(url);
+
+        assertNotNull(result);
+        assertEquals(url, result.getClientId());
+        verify(clientIdMetadataService, never()).doFetch(anyString());
+    }
+
+    @Test
+    public void resolveClientForLogout_whenCimdClientNeverPersisted_shouldReturnNull() {
+        String url = "https://example.com/never-onboarded";
+        String id = ClientIdMetadataService.computeId(url);
+        String dn = "inum=" + id + ",ou=clients,o=jans";
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        when(clientService.buildClientDn(id)).thenReturn(dn);
+        when(clientService.getClientByDn(dn)).thenReturn(null);
+
+        Client result = clientIdMetadataService.resolveClientForLogout(url);
+
+        assertNull(result);
+        verify(clientIdMetadataService, never()).doFetch(anyString());
+    }
+
+    @Test
+    public void resolveClientForLogout_withTraditionalClientId_shouldDelegateToClientService() {
+        String clientId = "traditional-client-123";
+        Client dbClient = new Client();
+        dbClient.setClientId(clientId);
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        when(clientService.getClient(clientId)).thenReturn(dbClient);
+
+        Client result = clientIdMetadataService.resolveClientForLogout(clientId);
+
+        assertEquals(dbClient, result);
+    }
+
+    @Test
+    public void resolveClientsForLogout_whenOneEntryNeverOnboarded_shouldSkipItAndKeepOthers() {
+        String expiredButOnboardedUrl = "https://example.com/client";
+        String expiredId = ClientIdMetadataService.computeId(expiredButOnboardedUrl);
+        String expiredDn = "inum=" + expiredId + ",ou=clients,o=jans";
+
+        ClientAttributes attrs = new ClientAttributes();
+        attrs.setCimdClient(true);
+        attrs.setCimdExpiresAt(System.currentTimeMillis() - 60_000);
+        Client persistedClient = new Client();
+        persistedClient.setClientId(expiredId);
+        persistedClient.setAttributes(attrs);
+
+        String neverOnboardedUrl = "https://example.com/never-onboarded";
+        String neverOnboardedId = ClientIdMetadataService.computeId(neverOnboardedUrl);
+        String neverOnboardedDn = "inum=" + neverOnboardedId + ",ou=clients,o=jans";
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        when(clientService.buildClientDn(expiredId)).thenReturn(expiredDn);
+        when(clientService.getClientByDn(expiredDn)).thenReturn(persistedClient);
+        when(clientService.buildClientDn(neverOnboardedId)).thenReturn(neverOnboardedDn);
+        when(clientService.getClientByDn(neverOnboardedDn)).thenReturn(null);
+
+        Set<Client> result = clientIdMetadataService.resolveClientsForLogout(Arrays.asList(expiredButOnboardedUrl, neverOnboardedUrl));
+
+        assertEquals(1, result.size());
+        assertEquals(expiredButOnboardedUrl, result.iterator().next().getClientId());
+    }
+
+    @Test
+    public void resolveClientsForLogout_whenNullCollection_shouldReturnEmptySet() {
+        Set<Client> result = clientIdMetadataService.resolveClientsForLogout(null);
+        assertTrue(result.isEmpty());
+    }
+
     // ==================== isCimdClientId Tests ====================
 
     @Test

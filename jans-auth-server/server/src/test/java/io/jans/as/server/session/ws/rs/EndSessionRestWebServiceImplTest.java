@@ -211,7 +211,7 @@ public class EndSessionRestWebServiceImplTest {
 
         Client cimdClient = new Client();
         cimdClient.setClientId(cimdClientId);
-        when(clientIdMetadataService.resolveClients(anySet(), eq(true))).thenReturn(Collections.singleton(cimdClient));
+        when(clientIdMetadataService.resolveClientsForLogout(anySet())).thenReturn(Collections.singleton(cimdClient));
 
         Map<String, Boolean> granted = new HashMap<>();
         granted.put(cimdClientId, true);
@@ -223,7 +223,7 @@ public class EndSessionRestWebServiceImplTest {
         Set<Client> result = invokeGetSsoClients(pair);
 
         assertTrue(result.contains(cimdClient));
-        verify(clientIdMetadataService).resolveClients(granted.keySet(), true);
+        verify(clientIdMetadataService).resolveClientsForLogout(granted.keySet());
     }
 
     @SuppressWarnings("unchecked")

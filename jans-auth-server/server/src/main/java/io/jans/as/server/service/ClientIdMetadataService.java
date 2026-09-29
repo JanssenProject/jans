@@ -119,6 +119,58 @@ public class ClientIdMetadataService {
     }
 
     /**
+     * Best-effort client resolution for logout-notification purposes (Single Logout front/back-channel).
+     * Unlike {@link #resolveClient(String)}, a CIMD client is never re-fetched over the network here, even
+     * if its TTL has expired: we return whatever was last successfully persisted, or null if it was never
+     * successfully onboarded at all. Notifying an RP of logout doesn't require fresh metadata the way an
+     * authorization decision does, so a transient re-fetch failure (network hiccup, metadata host down)
+     * must not silently drop an already-known CIMD client from the Single Logout audience.
+     *
+     * @param clientId the client_id, either a traditional inum or a CIMD URL
+     * @return the resolved Client, or null if not found / never successfully onboarded
+     */
+    public Client resolveClientForLogout(String clientId) {
+        if (!isCimdClientId(clientId)) {
+            return clientService.getClient(clientId);
+        }
+        String id = computeId(clientId);
+        String dn = clientService.buildClientDn(id);
+        Client existing = clientService.getClientByDn(dn);
+        if (existing != null && existing.getAttributes() != null && existing.getAttributes().isCimdClient()) {
+            existing.setClientId(clientId);
+            return existing;
+        }
+        log.debug("No persisted CIMD client found for logout notification: {}", clientId);
+        return null;
+    }
+
+    /**
+     * Batch variant of {@link #resolveClientForLogout(String)}. Never triggers a live CIMD fetch, so
+     * per-entry failures are limited to unexpected persistence errors; those are logged and skipped so one
+     * bad entry doesn't drop the rest of the Single Logout audience.
+     *
+     * @param clientIds the client_ids to resolve, either traditional inums or CIMD URLs
+     * @return the resolved clients (entries that failed to resolve are simply omitted)
+     */
+    public Set<Client> resolveClientsForLogout(Collection<String> clientIds) {
+        Set<Client> result = new HashSet<>();
+        if (clientIds == null) {
+            return result;
+        }
+        for (String clientId : clientIds) {
+            try {
+                Client client = resolveClientForLogout(clientId);
+                if (client != null) {
+                    result.add(client);
+                }
+            } catch (RuntimeException e) {
+                log.debug("Failed to resolve client_id '{}' for logout notification (best-effort, skipping).", clientId, e);
+            }
+        }
+        return result;
+    }
+
+    /**
      * Batch variant of {@link #resolveClient(String)}, mirroring {@link ClientService#getClient(Collection, boolean)}.
      * When {@code silent} is true, a failure to resolve any single client_id (including a CIMD fetch/validation
      * failure) is skipped rather than propagated, so one bad entry doesn't fail the whole batch.

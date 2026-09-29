@@ -566,7 +566,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         final Set<Client> clients = sessionId.getPermissionGrantedMap() != null ?
-                clientIdMetadataService.resolveClients(sessionId.getPermissionGrantedMap().getClientIds(true), true) :
+                clientIdMetadataService.resolveClientsForLogout(sessionId.getPermissionGrantedMap().getClientIds(true)) :
                 Sets.newHashSet();
         if (authorizationGrant != null) {
             clients.add(authorizationGrant.getClient());
