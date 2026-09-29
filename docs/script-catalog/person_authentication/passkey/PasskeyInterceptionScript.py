@@ -336,16 +336,15 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getForwardedContext(self):
-        # The Auth Server relay behaves like a proxy: pass through whatever X-Forwarded-For it
-        # itself received from an upstream proxy, or fall back to its own perceived remote address
-        # when there is none, and pass the browser's real User-Agent straight through.
+        # Forwards the Auth Server's own directly-observed remote address, never the caller-supplied
+        # X-Forwarded-For header: nothing here establishes that this request came through a trusted
+        # reverse proxy rather than being sent straight at the Auth Server, so trusting that header
+        # would let an external caller spoof the address FIDO2 records. The browser's real
+        # User-Agent is passed straight through, since it carries no equivalent trust question.
         httpRequest = ServerUtil.getRequestOrNull()
         if httpRequest == None:
             return (None, None)
-        forwardedFor = httpRequest.getHeader("X-Forwarded-For")
-        if forwardedFor == None:
-            forwardedFor = httpRequest.getRemoteAddr()
-        return (forwardedFor, httpRequest.getHeader("User-Agent"))
+        return (httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"))
 
     def getCookieValue(self):
     # sample allow list -  [{ id: ...., type: 'public-key', transports: ['usb', 'ble', 'nfc']}]

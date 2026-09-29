@@ -51,7 +51,7 @@ public class FidoValidator {
         HttpServletRequest httpRequest = CdiUtil.bean(HttpServletRequest.class);
         //Using assertionService as a private class field gives serialization trouble...
         AssertionService assertionService = Fido2ClientFactory.instance().createAssertionService(
-                metadataConfiguration, currentForwardedFor(httpRequest), httpRequest.getHeader("User-Agent"));
+                metadataConfiguration, httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"));
         AssertionOptions options = new AssertionOptions();
         options.setUsername(uid);
         
@@ -76,7 +76,7 @@ public class FidoValidator {
         logger.debug("Verifying fido token response : "+tokenResponse);
         HttpServletRequest httpRequest = CdiUtil.bean(HttpServletRequest.class);
         AssertionService assertionService = Fido2ClientFactory.instance().createAssertionService(
-                metadataConfiguration, currentForwardedFor(httpRequest), httpRequest.getHeader("User-Agent"));
+                metadataConfiguration, httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"));
 
         AssertionResult assertionResult = mapper.readValue(tokenResponse, AssertionResult.class);
         try (Response response = assertionService.verify(assertionResult)) {
@@ -90,17 +90,6 @@ public class FidoValidator {
             }
         }
 
-    }
-
-    /**
-     * The end user's real address as seen by the Auth Server relay: what it received on
-     * X-Forwarded-For (an upstream proxy's view), or its own perceived remote address when there is
-     * no upstream proxy — the same "relay behaves like a proxy" chain-append semantics fido2's own
-     * X-Forwarded-For handling already expects.
-     */
-    private static String currentForwardedFor(HttpServletRequest httpRequest) {
-        String forwardedFor = httpRequest.getHeader("X-Forwarded-For");
-        return forwardedFor != null ? forwardedFor : httpRequest.getRemoteAddr();
     }
 
 }

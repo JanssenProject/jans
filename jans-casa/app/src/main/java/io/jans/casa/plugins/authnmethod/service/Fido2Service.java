@@ -59,7 +59,17 @@ public class Fido2Service extends BaseService {
             logger.info("Retrieving contents of URL {}", tmp);
             try (Response response = Fido2ClientFactory.instance()
                     .createMetaDataConfigurationService(tmp).getMetadataConfiguration()) {
-                metadataConfiguration = response.readEntity(String.class);
+                String content = response.readEntity(String.class);
+                if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+                    metadataConfiguration = content;
+                } else {
+                    // Keep whatever metadata already worked rather than replacing it with an error
+                    // body: doRegister()/verifyRegistration() would otherwise build an
+                    // AttestationService from unparseable JSON and fail every call until the next
+                    // successful reload.
+                    logger.error("Problem retrieving fido metadata (code: {}); response was: {}",
+                            response.getStatus(), content);
+                }
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -69,7 +79,8 @@ public class Fido2Service extends BaseService {
 
     private AttestationService attestationService() throws IOException {
         return Fido2ClientFactory.instance().createAttestationService(
-                metadataConfiguration, WebUtils.getRemoteIP(), WebUtils.getRequestHeader("User-Agent"));
+                metadataConfiguration, WebUtils.getServletRequest().getRemoteAddr(),
+                WebUtils.getRequestHeader("User-Agent"));
     }
 
     public int getDevicesTotal(String userId, String appId, boolean active) {
