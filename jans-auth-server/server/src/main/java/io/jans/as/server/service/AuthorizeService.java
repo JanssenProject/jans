@@ -283,28 +283,36 @@ public class AuthorizeService {
             }
 
             if (responseMode == ResponseMode.JWT) {
-                Client client = resolvedClient;
-                if (client == null) {
-                    String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
-                    client = clientIdMetadataService.resolveClient(clientId);
-                }
-                if (client != null) {
-                    facesService.redirectToExternalURL(createJarmRedirectUri(redirectUri, client));
-                } else {
-                    log.error("Unable to resolve client for JARM (response_mode=jwt) access_denied response. Falling back to a plain (non-JWT) redirect so the RP still receives the denial.");
-                    boolean useFragment = responseType.contains(ResponseType.TOKEN) || responseType.contains(ResponseType.ID_TOKEN);
-                    redirectUri.setResponseMode(useFragment ? ResponseMode.FRAGMENT : ResponseMode.QUERY);
-                    facesService.redirectToExternalURL(redirectUri.toString());
-                }
-            } else
+                denyWithJarmResponse(session, resolvedClient, redirectUri);
+            } else {
                 facesService.redirectToExternalURL(redirectUri.toString());
+            }
 
         } catch (Exception e) {
             log.error("Unable to perform permission deny", e);
             showErrorPage("login.failedToDeny");
         }
     }
-    
+
+    /**
+     * Builds and redirects a JARM (response_mode=jwt) access_denied response. response_mode=jwt requires
+     * every response to be a signed JWT, so when no client can be resolved to sign it, the denial fails
+     * instead of falling back to a plain (non-JWT) redirect that an RP expecting JARM wouldn't accept anyway.
+     */
+    private void denyWithJarmResponse(SessionId session, Client resolvedClient, RedirectUri redirectUri) {
+        Client client = resolvedClient;
+        if (client == null) {
+            String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
+            client = clientIdMetadataService.resolveClient(clientId);
+        }
+        if (client != null) {
+            facesService.redirectToExternalURL(createJarmRedirectUri(redirectUri, client));
+        } else {
+            log.error("Unable to resolve client for JARM (response_mode=jwt) access_denied response. Failing instead of sending a non-JWT redirect.");
+            showErrorPage("login.failedToDeny");
+        }
+    }
+
     private String createJarmRedirectUri(RedirectUri redirectUri, Client client) {
 		String jarmRedirectUri = redirectUri.toString();
 		SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm

@@ -207,7 +207,6 @@ public class ClientIdMetadataServiceTest {
         persistedClient.setClientId(id);
         persistedClient.setAttributes(attrs);
 
-        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
         when(clientService.buildClientDn(id)).thenReturn(dn);
         when(clientService.getClientByDn(dn)).thenReturn(persistedClient);
 
@@ -219,12 +218,39 @@ public class ClientIdMetadataServiceTest {
     }
 
     @Test
+    public void resolveClientForLogout_withPersistedCimdClientButFeatureDisabled_shouldStillResolveFromPersistedRecord() {
+        String url = "https://example.com/client";
+        String id = ClientIdMetadataService.computeId(url);
+        String dn = "inum=" + id + ",ou=clients,o=jans";
+
+        ClientAttributes attrs = new ClientAttributes();
+        attrs.setCimdClient(true);
+        attrs.setCimdOriginalClientId(url);
+        attrs.setCimdExpiresAt(System.currentTimeMillis() + 60_000);
+
+        Client persistedClient = new Client();
+        persistedClient.setClientId(id);
+        persistedClient.setAttributes(attrs);
+
+        lenient().when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(false);
+        when(clientService.buildClientDn(id)).thenReturn(dn);
+        when(clientService.getClientByDn(dn)).thenReturn(persistedClient);
+
+        Client result = clientIdMetadataService.resolveClientForLogout(url);
+
+        assertNotNull(result);
+        assertEquals(url, result.getClientId());
+        verify(clientIdMetadataService, never()).doFetch(anyString());
+        verify(clientService, never()).getClient(url);
+        verify(appConfiguration, never()).isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT);
+    }
+
+    @Test
     public void resolveClientForLogout_whenCimdClientNeverPersisted_shouldReturnNull() {
         String url = "https://example.com/never-onboarded";
         String id = ClientIdMetadataService.computeId(url);
         String dn = "inum=" + id + ",ou=clients,o=jans";
 
-        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
         when(clientService.buildClientDn(id)).thenReturn(dn);
         when(clientService.getClientByDn(dn)).thenReturn(null);
 
@@ -240,7 +266,6 @@ public class ClientIdMetadataServiceTest {
         Client dbClient = new Client();
         dbClient.setClientId(clientId);
 
-        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
         when(clientService.getClient(clientId)).thenReturn(dbClient);
 
         Client result = clientIdMetadataService.resolveClientForLogout(clientId);
@@ -265,7 +290,6 @@ public class ClientIdMetadataServiceTest {
         String neverOnboardedId = ClientIdMetadataService.computeId(neverOnboardedUrl);
         String neverOnboardedDn = "inum=" + neverOnboardedId + ",ou=clients,o=jans";
 
-        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
         when(clientService.buildClientDn(expiredId)).thenReturn(expiredDn);
         when(clientService.getClientByDn(expiredDn)).thenReturn(persistedClient);
         when(clientService.buildClientDn(neverOnboardedId)).thenReturn(neverOnboardedDn);

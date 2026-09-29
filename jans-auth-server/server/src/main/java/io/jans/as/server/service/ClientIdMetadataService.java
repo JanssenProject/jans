@@ -125,12 +125,17 @@ public class ClientIdMetadataService {
      * successfully onboarded at all. Notifying an RP of logout doesn't require fresh metadata the way an
      * authorization decision does, so a transient re-fetch failure (network hiccup, metadata host down)
      * must not silently drop an already-known CIMD client from the Single Logout audience.
+     * <p>
+     * URL-shaped client_ids are recognized here even when the CIMD feature flag is currently disabled
+     * (unlike {@link #isCimdClientId(String)}), so a client onboarded while CIMD was enabled is still
+     * looked up by its persisted CIMD record rather than by the literal URL, which would never match.
+     * This never triggers a live fetch, so no network access is re-enabled by disabling the feature.
      *
      * @param clientId the client_id, either a traditional inum or a CIMD URL
      * @return the resolved Client, or null if not found / never successfully onboarded
      */
     public Client resolveClientForLogout(String clientId) {
-        if (!isCimdClientId(clientId)) {
+        if (!isCimdUrlShape(clientId)) {
             return clientService.getClient(clientId);
         }
         String id = computeId(clientId);
@@ -207,11 +212,23 @@ public class ClientIdMetadataService {
      * @return true if CIMD feature is enabled and client_id is a valid URL with allowed scheme
      */
     public boolean isCimdClientId(String clientId) {
-        if (StringUtils.isBlank(clientId)) {
+        if (!isFeatureEnabled()) {
             return false;
         }
+        return isCimdUrlShape(clientId);
+    }
 
-        if (!isFeatureEnabled()) {
+    /**
+     * Structural check for whether client_id is a CIMD URL candidate, independent of whether the CIMD
+     * feature flag is currently enabled. Used for logout resolution, where an already-persisted CIMD
+     * client must still be found by its computed id even if CIMD has since been disabled; new CIMD
+     * onboarding (a live fetch) is gated separately by {@link #isCimdClientId(String)}.
+     *
+     * @param clientId the client_id to check
+     * @return true if client_id is a valid URL with an allowed scheme
+     */
+    boolean isCimdUrlShape(String clientId) {
+        if (StringUtils.isBlank(clientId)) {
             return false;
         }
 

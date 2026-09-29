@@ -20,6 +20,7 @@ import io.jans.as.server.security.Identity;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.service.cdi.util.CdiUtil;
+import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.mockito.ArgumentCaptor;
@@ -208,61 +209,29 @@ public class AuthorizeServiceTest {
     }
 
     @Test
-    public void permissionDenied_whenResponseModeJwtAndClientCannotBeResolved_shouldFallBackToPlainRedirect() {
+    public void permissionDenied_whenResponseModeJwtAndClientCannotBeResolved_shouldFailWithoutPlainRedirect() {
         String cimdClientId = "https://rp.example.org/client-metadata.json";
         SessionId session = newJarmSessionWithClientId(cimdClientId);
         when(requestParameterService.getAllowedParameters(anyMap())).thenReturn(new HashMap<>());
-        when(errorResponseFactory.getErrorAsQueryString(any(), anyString())).thenReturn("error=access_denied&state=state123");
 
         when(clientIdMetadataService.resolveClient(cimdClientId)).thenReturn(null);
 
         authorizeService.permissionDenied(session, null);
 
         verify(clientIdMetadataService).resolveClient(cimdClientId);
-        verify(facesService, never()).redirect(anyString());
-
-        ArgumentCaptor<String> redirectCaptor = ArgumentCaptor.forClass(String.class);
-        verify(facesService).redirectToExternalURL(redirectCaptor.capture());
-        String redirectUrl = redirectCaptor.getValue();
-        assertTrue(redirectUrl.contains("error=access_denied"), "Expected redirect to preserve error=access_denied but was: " + redirectUrl);
-        assertTrue(redirectUrl.contains("state=state123"), "Expected redirect to preserve state but was: " + redirectUrl);
-    }
-
-    @Test
-    public void permissionDenied_whenResponseModeJwtAndClientCannotBeResolvedForCodeIdTokenFlow_shouldFallBackToFragmentRedirect() {
-        String cimdClientId = "https://rp.example.org/client-metadata.json";
-        SessionId session = newJarmSessionWithClientId(cimdClientId, "code id_token");
-        when(requestParameterService.getAllowedParameters(anyMap())).thenReturn(new HashMap<>());
-        when(errorResponseFactory.getErrorAsQueryString(any(), anyString())).thenReturn("error=access_denied&state=state123");
-
-        when(clientIdMetadataService.resolveClient(cimdClientId)).thenReturn(null);
-
-        authorizeService.permissionDenied(session, null);
-
-        verify(clientIdMetadataService).resolveClient(cimdClientId);
-        verify(facesService, never()).redirect(anyString());
-
-        ArgumentCaptor<String> redirectCaptor = ArgumentCaptor.forClass(String.class);
-        verify(facesService).redirectToExternalURL(redirectCaptor.capture());
-        String redirectUrl = redirectCaptor.getValue();
-        assertTrue(redirectUrl.contains("#"), "Expected redirect to use fragment encoding for a code id_token request but was: " + redirectUrl);
-        assertFalse(redirectUrl.contains("?"), "Expected redirect to not use query encoding for a code id_token request but was: " + redirectUrl);
-        assertTrue(redirectUrl.contains("error=access_denied"), "Expected redirect to preserve error=access_denied but was: " + redirectUrl);
-        assertTrue(redirectUrl.contains("state=state123"), "Expected redirect to preserve state but was: " + redirectUrl);
+        verify(facesService, never()).redirectToExternalURL(anyString());
+        verify(facesService).redirect("/error.xhtml");
+        verify(facesMessages).add(FacesMessage.SEVERITY_ERROR, "login.failedToDeny");
     }
 
     private static SessionId newJarmSessionWithClientId(String clientId) {
-        return newJarmSessionWithClientId(clientId, "code");
-    }
-
-    private static SessionId newJarmSessionWithClientId(String clientId, String responseType) {
         SessionId session = new SessionId();
         Map<String, String> attributes = new HashMap<>();
         attributes.put(AuthorizeRequestParam.CLIENT_ID, clientId);
         attributes.put(AuthorizeRequestParam.REDIRECT_URI, "https://rp.example.org/cb");
         attributes.put(AuthorizeRequestParam.STATE, "state123");
         attributes.put(AuthorizeRequestParam.RESPONSE_MODE, "jwt");
-        attributes.put(AuthorizeRequestParam.RESPONSE_TYPE, responseType);
+        attributes.put(AuthorizeRequestParam.RESPONSE_TYPE, "code");
         session.setSessionAttributes(attributes);
         return session;
     }
