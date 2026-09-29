@@ -100,14 +100,10 @@ def test_trusted_issuer_loading_info_defaults():
 
 
 def test_policy_store_id_legacy():
-    import yaml
     policy_store_location = join(TEST_FILES_PATH, "policy-store_ok.yaml")
     config = load_bootstrap_config(policy_store_location)
     instance = Cedarling(config)
-    with open(policy_store_location, encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-    expected = next(iter(data["policy_stores"]))
-    assert instance.policy_store_id() == expected
+    assert instance.policy_store_id() == "a1bf93115de86de760ee0bea1d529b521489e5a11747"
 
 
 def test_legacy_json_policy_store_rejected():
