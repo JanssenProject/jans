@@ -134,6 +134,12 @@ Ingress or Gateway API controllers may use TLS secret named `tls-certificate` in
     kubectl -n <jans-namespace> create secret tls tls-certificate --cert=tls.crt --key=tls.key --dry-run=client -o yaml | kubectl apply -f -
     ```
 
+1.  Remove temporary files:
+
+    ```bash
+    rm -f tls.crt tls.key
+    ```
+
 1.  Rollout restart (or re-deploy) the Ingress/Gateway API controller, for example:
 
     ```bash
