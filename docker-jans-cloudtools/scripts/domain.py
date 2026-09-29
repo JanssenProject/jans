@@ -1,4 +1,5 @@
 import logging.config
+import re
 from dataclasses import dataclass
 
 import click
@@ -14,8 +15,15 @@ logger = logging.getLogger("cloudtools")
 
 
 def replace_fqdn_substr(val, old_fqdn, new_fqdn):
-    if isinstance(val, (str, bytes)):
-        return val.replace(old_fqdn, new_fqdn)
+    if isinstance(val, str):
+        pattern = rf"(?<![\w.-]){re.escape(old_fqdn)}(?![\w.-])"
+        return re.sub(pattern, new_fqdn, val)
+
+    if isinstance(val, bytes):
+        old_fqdn = old_fqdn.encode()
+        new_fqdn = new_fqdn.encode()
+        pattern = rb"(?<![\w.-])" + re.escape(old_fqdn) + rb"(?![\w.-])"
+        return re.sub(pattern, new_fqdn, val)
 
     if isinstance(val, list):
         return [replace_fqdn_substr(item, old_fqdn, new_fqdn) for item in val]
