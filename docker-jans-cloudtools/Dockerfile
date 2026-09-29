@@ -26,7 +26,7 @@ RUN wget -nv ${CN_SOURCE_URL} -P /app/javalibs/
 # Assets sync
 # ===========
 
-ARG JANS_SOURCE_VERSION=23caab68389e7eef630fd93938a1175303b3017f
+ARG JANS_SOURCE_VERSION=ffc51a67dc3d72c7cc26ea31fb401d287d672e9c
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 
 # note that as we're pulling from a monorepo (with multiple project in it)

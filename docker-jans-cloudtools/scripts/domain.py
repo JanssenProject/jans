@@ -42,7 +42,7 @@ class Domain:
         self.persistence = SqlClient(self.manager)
         self.dry_run = kwargs.get("dry_run") or False
 
-    def modify_persistence_entries(self, table_name, old_fqdn, new_fqdn, ops):
+    def modify_persistence_entries(self, table_name: str, old_fqdn: str, new_fqdn: str, ops: DomainOps) -> None:
         logger.info("Checking entries in %s table", table_name)
 
         for entry in self.persistence.search(table_name):
@@ -73,18 +73,15 @@ class Domain:
                     # mark changes are persisted only if update succeed
                     ops.changes_persisted = updated
 
-    def modify_configmap(self, old_fqdn, new_fqdn, ops):
+    def modify_configmap(self, old_fqdn: str, new_fqdn: str, ops: DomainOps) -> None:
         if ops.changes_available:
             logger.info("Checking configmap")
 
-        if all([
-            ops.changes_persisted,
-            not self.dry_run,
-            new_fqdn != self.manager.config.get("hostname"),
-        ]):
+        if all([ops.changes_persisted, not self.dry_run, new_fqdn != old_fqdn]):
             logger.info("Updating FQDN in configmap (key=hostname, value=%s)", new_fqdn)
+
             if self.manager.config.set("hostname", new_fqdn):
-                logger.info("FQDN has been changed from %s to %s. Please rotate certificate(s) to avoid SSL issue.", old_fqdn, new_fqdn)
+                logger.info("FQDN has been changed from %s to %s, please replace certificate(s) to avoid SSL issue", old_fqdn, new_fqdn)
 
     def change_fqdn(self, old_fqdn, new_fqdn):
         logger.info("Changing FQDN from %s to %s", old_fqdn, new_fqdn)
