@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.node.*;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
+import io.jans.fido2.exception.Fido2NativeFailureException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.exception.Fido2TrustException;
 import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationOptions;
@@ -104,6 +106,23 @@ class CommonVerifiersTest {
         assertEquals("Hashes don't match", ex.getMessage());
         verify(log, times(2)).debug(anyString(), anyString());
         verify(log).warn("hash from domain doesn't match hash from assertion HEX");
+    }
+
+    /**
+     * A mismatch is tagged with a diagnostic code (#14608) so metrics can count it by cause instead
+     * of the free-text message — a common symptom of a misconfigured native asset-link/AASA
+     * association presenting the wrong RP ID.
+     */
+    @Test
+    void verifyRpIdHash_retrieveRpIdHashAndCalculatedRpIdHashNotEqual_carriesNativeFailureDiagnostic() {
+        AuthData authData = new AuthData();
+        authData.setRpIdHash("TEST-rpIdHash".getBytes());
+        String domain = "https://test.domain";
+
+        Fido2NativeFailureException ex = assertThrows(Fido2NativeFailureException.class,
+                () -> commonVerifiers.verifyRpIdHash(authData, domain));
+
+        assertEquals(NativeFailureDiagnostic.JFS_RPID_HASH_MISMATCH, ex.getDiagnostic());
     }
 
     @Test

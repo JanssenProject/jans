@@ -12,6 +12,7 @@ import java.util.List;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsData;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.fido2.service.metric.Fido2MetricsService;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
@@ -374,6 +375,17 @@ class MetricServiceTest {
 
         // Then
         assertEquals("203.0.113.7", captureStoredMetrics().getIpAddress());
+    }
+
+    /**
+     * A native-failure diagnostic code (#14608) is recognised as its own category, distinct from
+     * attestation-trust codes and from the keyword-based bucketing applied to free-text messages —
+     * checked before the keyword matching, since "JFS_RPID_HASH_MISMATCH" contains no bucketable
+     * keyword and would otherwise fall through to OTHER.
+     */
+    @Test
+    void testCategorizeErrorRecognisesNativeFailureDiagnosticCode() {
+        assertEquals(NativeFailureDiagnostic.CATEGORY, metricService.categorizeError("JFS_RPID_HASH_MISMATCH"));
     }
 
     /**
