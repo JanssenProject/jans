@@ -65,5 +65,8 @@ Changing FQDN in Kubernetes setup
 3.  Upgrade the setup, for example:
 
     ```bash
-    helm upgrade <helm-release-name> janssen-auth-server/janssen --version <helm-chart-version> -f values.yaml -n <jans-namespace>
+    helm upgrade <helm-release-name> janssen-auth-server/janssen \
+      --version <helm-chart-version> \
+      -f values.yaml \
+      -n <jans-namespace>
     ```
