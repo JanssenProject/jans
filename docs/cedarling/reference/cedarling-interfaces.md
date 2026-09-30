@@ -400,22 +400,6 @@ The Context Data API allows you to push external data into the Cedarling evaluat
   The interval shipped to the Lock server is separate: the telemetry ticker
   reports whole seconds, so sub-second precision is local to the binding.
 
-### Policy Store ID
-
-- `policy_store_id()`
-
-  Returns the ID of the currently published policy store, or none when the
-  store carries no ID. The value is an opaque string and must not be parsed.
-
-  - Rust async `Cedarling::policy_store_id() -> Option<String>`
-  - Rust blocking `Cedarling::policy_store_id() -> Option<String>`
-  - UniFFI (Kotlin/Swift/Java) `policyStoreId()` returning an optional string
-  - WASM `policyStoreId(): string | undefined`
-  - Python `policy_store_id() -> Optional[str]`
-  - Go `PolicyStoreID() (string, bool)`
-  - C `cedarling_get_policy_store_id(instance_id, &out_id)`; `out_id` is
-    `NULL` on success when unset, free with `cedarling_free_string`
-
 ### Schema Requirements
 
 To use the Context Data API, your Cedar schema must include a `data` field in the action's context. You must explicitly define the expected structure of the data — Cedar does not support arbitrary/untyped records.
@@ -479,6 +463,18 @@ permit(
 ```
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data without requiring policy changes.
+
+## Policy Store ID
+
+- `policy_store_id()`
+
+  Returns the ID of the currently published policy store, or none when the
+  store carries no ID. The value is an opaque string and must not be parsed.
+
+  The method name follows each binding's conventions (`policyStoreId` in
+  Kotlin/Swift/Java/JavaScript, `PolicyStoreID` in Go,
+  `cedarling_get_policy_store_id` in C); the return is empty or absent when
+  unset.
 
 ## Trusted Issuer Loading Info
 
