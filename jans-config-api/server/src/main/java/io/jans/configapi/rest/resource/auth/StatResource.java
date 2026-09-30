@@ -107,15 +107,18 @@ public class StatResource extends ConfigBaseResource {
             return Response.ok(jsonNode.get("response")).build();
         } catch (WebApplicationException wex) {
             sb.append(" ApplicationException while fetching stats is - ").append("wex.getResponse().getStatus():{")
-                    .append(wex.getResponse().getStatus()).append(" }, wex.getResponse().getEntity():{").append(wex.getResponse().getEntity())
-                    .append(" }, is:{")
+                    .append(wex.getResponse().getStatus()).append(" }, wex.getResponse().getEntity():{")
+                    .append(wex.getResponse().getEntity()).append(" }, is:{")
                     .append(AuthUtil.getStackTraceAsString(wex)).append("}");
 
             log.error(sb.toString(), wex.getMessage(), wex.fillInStackTrace());
+            if (wex.getResponse().getStatus() >= 500) {
+                throwInternalServerException(wex);
+            }
             throwBadRequestException(wex.getMessage());
         } catch (Exception ex) {
             sb.append(" Exception while fetching stats is - ").append(", is:{")
-            .append(AuthUtil.getStackTraceAsString(ex)).append("}");
+                    .append(AuthUtil.getStackTraceAsString(ex)).append("}");
 
             log.error(sb.toString());
             throwInternalServerException(ex);
