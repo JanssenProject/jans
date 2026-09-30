@@ -413,6 +413,8 @@ The Context Data API allows you to push external data into the Cedarling evaluat
   - WASM `policyStoreId(): string | undefined`
   - Python `policy_store_id() -> Optional[str]`
   - Go `PolicyStoreID() (string, bool)`
+  - C `cedarling_get_policy_store_id(instance_id, &out_id)`; `out_id` is
+    `NULL` on success when unset, free with `cedarling_free_string`
 
 ### Schema Requirements
 
