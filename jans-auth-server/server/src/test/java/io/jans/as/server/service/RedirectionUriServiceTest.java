@@ -152,6 +152,21 @@ public class RedirectionUriServiceTest {
     }
 
     @Test
+    public void isUriEqual_loopbackWithDifferentPort_shouldReturnTrue() {
+        assertTrue(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/cb", new String[]{"http://127.0.0.1:4000/cb"}));
+    }
+
+    @Test
+    public void isUriEqual_loopbackWithDifferentPortAndPath_shouldReturnFalse() {
+        assertFalse(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/other", new String[]{"http://127.0.0.1:4000/cb"}));
+    }
+
+    @Test
+    public void isUriEqual_nonLoopbackWithDifferentPort_shouldReturnFalse() {
+        assertFalse(RedirectionUriService.isUriEqual("https://client.example.com:5000/cb", new String[]{"https://client.example.com:4000/cb"}));
+    }
+
+    @Test
     public void getSectorRedirectUris_whenAllowed_shouldInvokeFetch() {
         when(sectorIdentifierUriService.isAllowedSectorIdentifierUri(anyString())).thenReturn(true);
         when(localResponseCache.getSectorRedirectUris(anyString())).thenReturn(null);

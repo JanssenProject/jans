@@ -29,6 +29,8 @@ import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,7 +155,10 @@ public class RedirectionUriService {
     }
 
     public static boolean isUriEqual(String redirectionUri, String[] redirectUris) {
-        final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
+        // RFC 8252 7.3: for loopback interface redirect URIs the AS MUST allow the port to vary from
+        // what was registered, since native apps typically obtain an ephemeral port at request time.
+        final boolean redirectionUriIsLoopback = isLoopbackRedirectUri(redirectionUri);
+        final String redirectUriWithoutParams = uriWithoutParams(redirectionUriIsLoopback ? stripPort(redirectionUri) : redirectionUri);
 
         for (String uri : redirectUris) {
             log.debug("Comparing {} == {}", uri, redirectionUri);
@@ -161,15 +166,45 @@ public class RedirectionUriService {
                 return true;
             }
 
-            String uriWithoutParams = uriWithoutParams(uri);
-            final Map<String, String> params = getParams(uri);
+            final boolean ignorePort = redirectionUriIsLoopback && isLoopbackRedirectUri(uri);
+            final String registeredUri = ignorePort ? stripPort(uri) : uri;
+
+            String uriWithoutParams = uriWithoutParams(registeredUri);
+            final Map<String, String> params = getParams(registeredUri);
 
             if ((uriWithoutParams.equals(redirectUriWithoutParams) && params.size() == 0 && getParams(redirectionUri).size() == 0) ||
-                    uriWithoutParams.equals(redirectUriWithoutParams) && params.size() > 0 && compareParams(redirectionUri, uri)) {
+                    uriWithoutParams.equals(redirectUriWithoutParams) && params.size() > 0 && compareParams(redirectionUri, registeredUri)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean isLoopbackRedirectUri(String uri) {
+        if (StringUtils.isBlank(uri)) {
+            return false;
+        }
+        try {
+            final URI parsed = new URI(uri);
+            final String host = parsed.getHost();
+            return "http".equalsIgnoreCase(parsed.getScheme())
+                    && ("127.0.0.1".equals(host) || "::1".equals(host) || "[::1]".equals(host));
+        } catch (URISyntaxException e) {
+            return false;
+        }
+    }
+
+    private static String stripPort(String uri) {
+        try {
+            final URI parsed = new URI(uri);
+            if (parsed.getPort() == -1) {
+                return uri;
+            }
+            return new URI(parsed.getScheme(), parsed.getUserInfo(), parsed.getHost(), -1,
+                    parsed.getPath(), parsed.getQuery(), parsed.getFragment()).toString();
+        } catch (URISyntaxException e) {
+            return uri;
+        }
     }
 
 
