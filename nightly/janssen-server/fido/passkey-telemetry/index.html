@@ -1183,6 +1183,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#native-client-telemetry-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Native-client telemetry (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#aggregation-schedule-and-retention" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2090,6 +2101,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#native-client-telemetry-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Native-client telemetry (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#aggregation-schedule-and-retention" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2607,6 +2629,14 @@ in practice means a protocol-level problem rather than a user who could not veri
 <td>The <code>session_id</code> cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither.</td>
 </tr>
 <tr>
+<td><code>clientCorrelationId</code></td>
+<td>The optional <code>client_correlation_id</code> a native client attached via the <code>telemetry</code> request field — see <a href="#native-client-telemetry-optional">Native-client telemetry</a> below. Sibling to <code>sessionId</code>, not derived from it: caller-supplied and absent unless the client sends one.</td>
+</tr>
+<tr>
+<td><code>nativeClientTelemetry</code></td>
+<td>The full optional <code>telemetry</code> object a native client attached, stored as-is — see below.</td>
+</tr>
+<tr>
 <td><code>metricType</code></td>
 <td>The metric name of the event, e.g. <code>fido2_registration_success</code>.</td>
 </tr>
@@ -2618,10 +2648,11 @@ in practice means a protocol-level problem rather than a user who could not veri
 </table>
 <div class="admonition note">
 <p class="admonition-title">Oversized values are shortened, not dropped</p>
-<p>Free-form fields — <code>userAgent</code>, <code>sessionId</code>, <code>username</code>, <code>errorReason</code> and
-<code>fallbackReason</code> — are shortened to the width of their database column before being
-stored, so a single unusually long value cannot fail the write and lose the whole
-entry. Real-world values fit comfortably; when a value is actually shortened the FIDO2
+<p>Free-form fields — <code>userAgent</code>, <code>sessionId</code>, <code>clientCorrelationId</code>, <code>username</code>, <code>errorReason</code>,
+<code>fallbackReason</code>, and each individual member of <code>nativeClientTelemetry</code> — are shortened to the
+width of their database column (or, for <code>nativeClientTelemetry</code>'s members, a 128-character
+policy cap) before being stored, so a single unusually long value cannot fail the write and lose
+the whole entry. Real-world values fit comfortably; when a value is actually shortened the FIDO2
 server logs one <code>WARN</code> naming the field and its original length. The value itself is
 never logged, since these fields are personal data.</p>
 </div>
@@ -2631,6 +2662,28 @@ never logged, since these fields are personal data.</p>
 your deployment terminates TLS at a proxy, make sure it sets <code>X-Forwarded-For</code> and
 strips any client-supplied value; otherwise the recorded address can be spoofed by the
 caller.</p>
+</div>
+<h3 id="native-client-telemetry-optional">Native-client telemetry (optional)<a class="headerlink" href="#native-client-telemetry-optional" title="Permanent link">#</a></h3>
+<p>A native app/SDK (iOS, Android) may attach an optional <code>telemetry</code> object to any attestation or
+assertion start/finish request, carrying context no <code>User-Agent</code> string can — Play Services
+version, OEM Credential Manager behavior, the last client-side error code, and more. See the
+<code>NativeClientTelemetry</code> schema in the
+<a href="#api-reference">OpenAPI (Swagger) specification</a> for the full field list.</p>
+<p>The field is entirely optional: a request that omits it behaves exactly as before, and an
+unrecognized value in an enum-shaped field (<code>platform</code>, <code>native_api</code>, <code>flow_context</code>) is accepted
+rather than rejecting the request.</p>
+<p>A submitted <code>telemetry</code> object is persisted on the raw entry it was attached to — both the full
+object (<code>nativeClientTelemetry</code>) and, separately, its <code>client_correlation_id</code>. <code>client_correlation_id</code>
+is deliberately promoted to its own top-level, independently queryable field rather than left buried
+inside the <code>nativeClientTelemetry</code> blob: it is what lets a start (<code>options</code>) call and its matching
+finish (<code>result</code>) call be correlated with each other, the way <code>sessionId</code> correlates every entry
+within one browser session. Query <code>entries</code> (or <code>entries/operation/{operationType}</code>) for two rows
+sharing the same <code>clientCorrelationId</code> to join a ceremony's own start and finish.</p>
+<div class="admonition note">
+<p class="admonition-title">Correlation is opt-in and client-driven</p>
+<p>The server never generates a <code>client_correlation_id</code> itself — it only stores whatever the client
+sends. A client that never adopts the <code>telemetry</code> field, or sends it without
+<code>client_correlation_id</code>, gets no correlation and no change in behavior; this is purely additive.</p>
 </div>
 <h3 id="aggregation-schedule-and-retention">Aggregation schedule and retention<a class="headerlink" href="#aggregation-schedule-and-retention" title="Permanent link">#</a></h3>
 <p>A scheduler computes aggregations on a cadence
@@ -2759,7 +2812,7 @@ database or configuration problem (check the FIDO2 server logs).</p>
 aggregations, analytics, and utility (<code>config</code>, <code>health</code>). For the complete list of paths,
 parameters, and response schemas, use the Swagger spec:</p>
 <ul>
-<li><strong><a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml">FIDO2 Metrics API — OpenAPI/Swagger</a></strong></li>
+<li><strong><a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml">FIDO2 Metrics API — OpenAPI/Swagger</a></strong></li>
 </ul>
 <table>
 <thead>
@@ -3072,7 +3125,7 @@ ran:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    August 31, 2026
+    September 29, 2026
   </span>
 
     

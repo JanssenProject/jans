@@ -1682,6 +1682,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#trace-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        TRACE Configuration
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#policy-store-sources" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2685,6 +2696,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#trace-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        TRACE Configuration
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#policy-store-sources" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -3630,6 +3652,96 @@ tar<span class="w"> </span>-xzf<span class="w"> </span>lock-server.tar.gz
 <span class="na">lock.server.log.config.file</span><span class="o">=</span><span class="s">/opt/jans/lock-server/logs/lock_server_config.log</span>
 <span class="na">lock.server.log.jwt.status.file</span><span class="o">=</span><span class="s">/opt/jans/lock-server/logs/lock_server_jwt_status.log</span>
 </code></pre></div>
+<h3 id="trace-configuration">TRACE Configuration<a class="headerlink" href="#trace-configuration" title="Permanent link">#</a></h3>
+<p>The <code>traceConfiguration</code> block of the Lock Server dynamic configuration (<code>jansConfDyn</code>) controls
+the TRACE evidence-ingestion feature: which OAuth clients may submit or read evidence for which
+evidence domain, lateness policy, and request limits enforced before any cryptographic
+verification.</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>When <code>false</code>, every TRACE endpoint returns a structured <code>invalid_request</code> error and the receipt repair timer does not run.</td>
+</tr>
+<tr>
+<td><code>defaultEvidenceDomainId</code></td>
+<td>string</td>
+<td><code>null</code></td>
+<td>Evidence domain used for a submitting/reading client that has no explicit entry in <code>clientDomainBindings</code>.</td>
+</tr>
+<tr>
+<td><code>clientDomainBindings</code></td>
+<td>array</td>
+<td><code>[]</code></td>
+<td>List of <code>{ clientId, evidenceDomainId, allowedProducerIds[] }</code> bindings. A client without a binding and without <code>defaultEvidenceDomainId</code> set is rejected with <code>client_not_bound</code>. <code>allowedProducerIds</code> may contain <code>"*"</code> to allow any producer.</td>
+</tr>
+<tr>
+<td><code>latenessThresholdSeconds</code></td>
+<td>integer</td>
+<td><code>300</code></td>
+<td>Seconds after <code>signed_at</code> a record may still be accepted before it is flagged <code>late_flag: true</code>.</td>
+</tr>
+<tr>
+<td><code>maxRequestBytes</code></td>
+<td>integer</td>
+<td><code>262144</code></td>
+<td>Maximum accepted TRACE request body size, in bytes.</td>
+</tr>
+<tr>
+<td><code>maxJsonDepth</code></td>
+<td>integer</td>
+<td><code>32</code></td>
+<td>Maximum accepted JSON nesting depth of a TRACE assertion.</td>
+</tr>
+<tr>
+<td><code>maxStringLength</code></td>
+<td>integer</td>
+<td><code>8192</code></td>
+<td>Maximum accepted JSON string length (UTF-16 units) in a TRACE assertion.</td>
+</tr>
+<tr>
+<td><code>maxArrayLength</code></td>
+<td>integer</td>
+<td><code>256</code></td>
+<td>Maximum accepted JSON array length in a TRACE assertion.</td>
+</tr>
+<tr>
+<td><code>maxObjectMembers</code></td>
+<td>integer</td>
+<td><code>256</code></td>
+<td>Maximum accepted JSON object member count in a TRACE assertion.</td>
+</tr>
+<tr>
+<td><code>receiptAllocationRetryLimit</code></td>
+<td>integer</td>
+<td><code>8</code></td>
+<td>Maximum retries when allocating the next receipt-chain sequence number under multi-node contention.</td>
+</tr>
+<tr>
+<td><code>receiptRepairIntervalSeconds</code></td>
+<td>integer</td>
+<td><code>300</code></td>
+<td>Interval between runs of the receipt repair timer, which settles stale <code>PENDING</code> receipts.</td>
+</tr>
+<tr>
+<td><code>pendingReceiptTimeoutSeconds</code></td>
+<td>integer</td>
+<td><code>120</code></td>
+<td>Seconds a <code>PENDING</code> receipt may remain unresolved before the repair timer marks it <code>COMMITTED</code> or <code>VOID</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Every numeric limit above falls back to its default when configured with a value <code>&lt;= 0</code>.</p>
 <h3 id="policy-store-sources">Policy Store Sources<a class="headerlink" href="#policy-store-sources" title="Permanent link">#</a></h3>
 <p>The Lock Server supports multiple policy store sources:</p>
 <h4 id="github-repository">GitHub Repository<a class="headerlink" href="#github-repository" title="Permanent link">#</a></h4>
@@ -3804,6 +3916,21 @@ tar<span class="w"> </span>-xzf<span class="w"> </span>lock-server.tar.gz
 <td><code>https://jans.io/oauth/lock/telemetry.write</code></td>
 <td><code>/audit/telemetry</code></td>
 <td>Submit telemetry and metrics data</td>
+</tr>
+<tr>
+<td><code>https://jans.io/oauth/lock/trace.write</code></td>
+<td><code>/audit/trace</code></td>
+<td>Submit TRACE evidence records</td>
+</tr>
+<tr>
+<td><code>https://jans.io/oauth/lock/trace.readonly</code></td>
+<td><code>/audit/trace/records/*</code>, <code>/audit/trace/executions/*</code></td>
+<td>Read TRACE records and executions</td>
+</tr>
+<tr>
+<td><code>https://jans.io/oauth/lock/trace.admin</code></td>
+<td><code>/audit/trace/admin/*</code></td>
+<td>Manage TRACE producer keys and chains</td>
 </tr>
 </tbody>
 </table>
@@ -4102,7 +4229,7 @@ tail<span class="w"> </span>-f<span class="w"> </span>/opt/jans/lock-server/logs
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 17, 2025
+    September 28, 2026
   </span>
 
     
