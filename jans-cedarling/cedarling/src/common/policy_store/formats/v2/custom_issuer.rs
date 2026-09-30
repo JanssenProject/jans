@@ -5,37 +5,72 @@
 
 //! Custom (non-JWT) issuer configuration parsing for the directory/archive format.
 //!
-//! Mirrors [`issuer_parser`](super::issuer_parser) but for custom issuers: one
-//! JSON file per issuer under `custom-issuers/`, deserialized into
-//! [`CustomIssuerMetadata`]. The map key (issuer name, later sanitized into the
+//! Mirrors [`trusted_issuer`](super::trusted_issuer) but for custom issuers: one
+//! JSON file per issuer under `custom-issuers/`, converted into
+//! [`CustomIssuerMetadata`] by [`CustomIssuerParser::create_map`]. The map key (issuer name, later sanitized into the
 //! `context.tokens.{issuer}_{type}` id) is taken from an explicit `id` field or,
 //! failing that, the filename with its `.json` suffix stripped.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
-use super::CustomIssuerMetadata;
+use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata};
+use serde::Deserialize;
 use serde_json::Value as JsonValue;
+
+/// A custom issuer file body; unknown fields fail the load.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct CustomIssuerDoc {
+    pub(crate) tokens_mappings: HashMap<String, CustomTokenDoc>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct CustomTokenDoc {
+    #[serde(default)]
+    pub(crate) required: bool,
+    #[serde(default)]
+    pub(crate) required_claims: HashSet<String>,
+}
+
+impl From<CustomIssuerDoc> for CustomIssuerMetadata {
+    fn from(doc: CustomIssuerDoc) -> Self {
+        Self {
+            tokens_mappings: doc
+                .tokens_mappings
+                .into_iter()
+                .map(|(mapping, token)| {
+                    let token = CustomTokenMetadata {
+                        required: token.required,
+                        required_claims: token.required_claims,
+                    };
+                    (mapping, token)
+                })
+                .collect(),
+        }
+    }
+}
 
 /// A parsed custom issuer configuration with its resolved id and source filename.
 #[derive(Debug, Clone)]
-pub(super) struct ParsedCustomIssuer {
+pub(crate) struct ParsedCustomIssuer {
     /// The issuer name/id (map key; sanitized downstream).
     pub id: String,
     /// The custom issuer configuration.
-    pub meta: CustomIssuerMetadata,
+    pub meta: CustomIssuerDoc,
     /// Source filename.
     pub filename: String,
 }
 
 /// Parser for custom issuer configuration files.
-pub(super) struct CustomIssuerParser;
+pub(crate) struct CustomIssuerParser;
 
 impl CustomIssuerParser {
     /// Parse a single custom issuer configuration from JSON content.
     ///
     /// Errors are returned as strings; the caller wraps them in
-    /// [`ConversionError`](super::manager::ConversionError).
-    pub(super) fn parse(content: &str, filename: &str) -> Result<ParsedCustomIssuer, String> {
+    /// [`ConversionError`](crate::common::policy_store::manager::ConversionError).
+    pub(crate) fn parse(content: &str, filename: &str) -> Result<ParsedCustomIssuer, String> {
         let json: JsonValue = serde_json::from_str(content)
             .map_err(|e| format!("invalid JSON in '{filename}': {e}"))?;
 
@@ -56,11 +91,11 @@ impl CustomIssuerParser {
         );
 
         // Drop the out-of-band `id` (consumed above) before deserializing:
-        // `CustomIssuerMetadata` denies unknown fields so a misspelled enforcement
+        // `CustomIssuerDoc` denies unknown fields so a misspelled enforcement
         // knob fails the load, and `id` is the one legitimately-extra key.
         let mut body = obj.clone();
         body.remove("id");
-        let meta: CustomIssuerMetadata = serde_json::from_value(JsonValue::Object(body))
+        let meta: CustomIssuerDoc = serde_json::from_value(JsonValue::Object(body))
             .map_err(|e| format!("invalid custom issuer '{id}' in '{filename}': {e}"))?;
 
         if meta.tokens_mappings.is_empty() {
@@ -82,7 +117,7 @@ impl CustomIssuerParser {
     }
 
     /// Reject duplicate issuer ids across files.
-    pub(super) fn validate(issuers: &[ParsedCustomIssuer]) -> Result<(), Vec<String>> {
+    pub(crate) fn validate(issuers: &[ParsedCustomIssuer]) -> Result<(), Vec<String>> {
         let mut errors = Vec::new();
         let mut seen: HashMap<&str, &str> = HashMap::with_capacity(issuers.len());
 
@@ -106,13 +141,13 @@ impl CustomIssuerParser {
 
     /// Consolidate parsed issuers into a map keyed by id (first occurrence wins;
     /// duplicates are expected to be caught by [`validate`](Self::validate)).
-    pub(super) fn create_map(
+    pub(crate) fn create_map(
         issuers: Vec<ParsedCustomIssuer>,
     ) -> HashMap<String, CustomIssuerMetadata> {
         let mut map = HashMap::with_capacity(issuers.len());
         for parsed in issuers {
             if let std::collections::hash_map::Entry::Vacant(e) = map.entry(parsed.id.clone()) {
-                e.insert(parsed.meta);
+                e.insert(parsed.meta.into());
             }
         }
         map

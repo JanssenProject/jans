@@ -10,8 +10,9 @@
 use super::super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::super::entity_parser::EntityParser;
 use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
-use super::super::issuer_parser::IssuerParser;
-use super::super::manager::{ConversionError, PolicyStoreManager};
+use super::super::formats::v1::trusted_issuer::IssuerParser;
+use super::super::formats::{self, ParseStoreError};
+use super::super::manager::ConversionError;
 use super::super::vfs_adapter::{DirEntry, MemoryVfs, PhysicalVfs, VfsFileSystem};
 use super::*;
 use std::fmt::Write as FmtWrite;
@@ -268,10 +269,11 @@ fn test_load_directory_success() {
         .expect("Expected directory load to succeed");
 
     // Verify loaded data
-    assert_eq!(loaded_directory.metadata.cedar_version, "4.4.0");
+    let metadata = raw_metadata(&loaded_directory);
+    assert_eq!(metadata["cedar_version"], "4.4.0", "cedar_version mismatch");
     assert_eq!(
-        loaded_directory.metadata.policy_store.name,
-        "Test Policy Store"
+        metadata["policy_store"]["name"], "Test Policy Store",
+        "policy store name mismatch"
     );
     assert!(
         loaded_directory.schema.is_some(),
@@ -830,8 +832,13 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     assert!(ids.contains(&"jans_server".to_string()));
     assert!(ids.contains(&"google_oauth".to_string()));
 
-    // Create issuer map
-    let issuer_map = IssuerParser::create_issuer_map(all_issuers);
+    // Build the runtime store and check the issuer map
+    let store = formats::parse_policy_store(loaded_directory, false)
+        .expect("store with two issuers should parse");
+    let issuer_map = store
+        .trusted_issuers
+        .as_ref()
+        .expect("trusted issuers should be present");
     assert_eq!(issuer_map.len(), 2, "Map should have 2 issuers");
 }
 
@@ -872,8 +879,8 @@ fn test_load_custom_issuers_end_to_end() {
 
     // Manager half: convert wires it into PolicyStore.custom_issuers.
     // strict=false so the assertion does not depend on a schema being present.
-    let store = PolicyStoreManager::convert_to_legacy(loaded_directory, false)
-        .expect("conversion should succeed");
+    let store =
+        formats::parse_policy_store(loaded_directory, false).expect("conversion should succeed");
     let acme = store
         .custom_issuers
         .get("acme")
@@ -948,8 +955,8 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
         "ArchiveVfs: should discover 1 custom issuer file"
     );
 
-    let store = PolicyStoreManager::convert_to_legacy(loaded_directory, false)
-        .expect("convert_to_legacy should succeed");
+    let store = formats::parse_policy_store(loaded_directory, false)
+        .expect("parse_policy_store should succeed");
     let acme = store
         .custom_issuers
         .get("acme")
@@ -970,8 +977,8 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
         "archive_bytes path: should discover 1 custom issuer file"
     );
 
-    let store2 = PolicyStoreManager::convert_to_legacy(loaded2, false)
-        .expect("convert_to_legacy (archive_bytes) should succeed");
+    let store2 = formats::parse_policy_store(loaded2, false)
+        .expect("parse_policy_store (archive_bytes) should succeed");
     assert!(
         store2.custom_issuers.contains_key("acme"),
         "acme issuer must survive round-trip through archive_bytes loader"
@@ -994,10 +1001,10 @@ fn test_load_custom_issuers_archive_vfs_duplicate_id_errors() {
     let loaded = load_policy_store_archive_bytes(&archive_bytes, true, ArchiveLimits::default())
         .expect("load should succeed — dedup is detected at convert time");
 
-    let err = PolicyStoreManager::convert_to_legacy(loaded, false)
+    let err = formats::parse_policy_store(loaded, false)
         .expect_err("duplicate custom issuer ID should fail conversion");
     assert!(
-        matches!(&err, ConversionError::IssuerConversion(msg) if msg.contains("Duplicate custom issuer ID")),
+        matches!(&err, ParseStoreError::Conversion(ConversionError::IssuerConversion(msg)) if msg.contains("Duplicate custom issuer ID")),
         "got: {err:?}"
     );
 }
@@ -1043,12 +1050,17 @@ fn test_load_custom_issuers_duplicate_id_errors() {
         .load_directory(dir.to_str().unwrap(), true)
         .expect("directory load should succeed");
 
-    let err = PolicyStoreManager::convert_to_legacy(loaded_directory, false)
+    let err = formats::parse_policy_store(loaded_directory, false)
         .expect_err("duplicate custom issuer id should fail conversion");
     assert!(
-        matches!(&err, ConversionError::IssuerConversion(msg) if msg.contains("Duplicate custom issuer ID")),
+        matches!(&err, ParseStoreError::Conversion(ConversionError::IssuerConversion(msg)) if msg.contains("Duplicate custom issuer ID")),
         "got: {err:?}"
     );
+}
+
+/// The raw `metadata.json` the loader read, as JSON.
+fn raw_metadata(loaded: &LoadedPolicyStore) -> serde_json::Value {
+    serde_json::from_str(&loaded.metadata_json).expect("metadata.json should be valid JSON")
 }
 
 #[test]
@@ -1201,28 +1213,17 @@ action "read" appliesTo {
         .load_directory("/", true)
         .expect("Expected in-memory directory load to succeed");
 
-    // Parse issuers
-    let mut all_issuers = Vec::new();
-
-    for issuer_file in &loaded_directory.trusted_issuers {
-        let parsed_issuers = IssuerParser::parse_issuer(&issuer_file.content, &issuer_file.name)
-            .expect("Should parse issuers");
-        all_issuers.extend(parsed_issuers);
-    }
-
-    // Detect duplicates
-    let validation = IssuerParser::validate_issuers(&all_issuers);
-    let errors = validation.expect_err("Should detect duplicate issuer IDs");
-    assert_eq!(errors.len(), 1, "Should have 1 duplicate error");
+    // Duplicates are rejected when the store is converted
+    let err = formats::parse_policy_store(loaded_directory, false)
+        .expect_err("Should detect duplicate issuer IDs");
     assert!(
-        errors[0].contains("issuer1"),
-        "Error should mention the duplicate issuer ID 'issuer1', got: {}",
-        errors[0]
-    );
-    assert!(
-        errors[0].contains("file1.json") || errors[0].contains("file2.json"),
-        "Error should mention the source file, got: {}",
-        errors[0]
+        matches!(
+            &err,
+            ParseStoreError::Conversion(ConversionError::IssuerConversion(msg))
+                if msg.contains("issuer1")
+                    && (msg.contains("file1.json") || msg.contains("file2.json"))
+        ),
+        "Error should mention the duplicate issuer ID 'issuer1' and its file, got: {err:?}"
     );
 }
 
@@ -1334,7 +1335,10 @@ fn test_complete_policy_store_with_issuers() {
         .expect("Expected directory load to succeed");
 
     // Verify all components are loaded
-    assert_eq!(loaded_directory.metadata.name(), "Test Policy Store");
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["name"],
+        "Test Policy Store"
+    );
     assert!(
         loaded_directory.schema.is_some(),
         "expected loaded_directory.schema to be Some but was None"
@@ -1348,6 +1352,7 @@ fn test_complete_policy_store_with_issuers() {
     // Schema — already parsed by the loader
     let parsed_schema = loaded_directory
         .schema
+        .as_ref()
         .expect("Schema should be loaded for test policy store");
 
     // Policies
@@ -1377,12 +1382,19 @@ fn test_complete_policy_store_with_issuers() {
             .expect("Should parse issuers");
         all_issuers.extend(parsed_issuers);
     }
-    let issuer_map = IssuerParser::create_issuer_map(all_issuers);
+    assert_eq!(all_issuers.len(), 1, "Should parse one issuer");
 
     // Verify everything works together
     assert!(!policy_set.is_empty());
     assert_eq!(entity_store.iter().count(), 1);
     assert!(!format!("{:?}", parsed_schema.get_schema()).is_empty());
+
+    let store =
+        formats::parse_policy_store(loaded_directory, false).expect("complete store should parse");
+    let issuer_map = store
+        .trusted_issuers
+        .as_ref()
+        .expect("trusted issuers should be present");
     assert_eq!(issuer_map.len(), 1);
     assert!(issuer_map.contains_key("main_issuer"));
 }
@@ -1456,8 +1468,14 @@ fn test_archive_vfs_end_to_end_from_file() {
         .expect("Should load policy store from archive");
 
     // Step 4: Verify all components loaded correctly
-    assert_eq!(loaded_directory.metadata.name(), "Archive Test Store");
-    assert_eq!(loaded_directory.metadata.policy_store.id, "abcdef123456");
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["name"],
+        "Archive Test Store"
+    );
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["id"],
+        "abcdef123456"
+    );
     assert!(
         loaded_directory.schema.is_some(),
         "expected loaded_directory.schema to be Some but was None"
@@ -1497,8 +1515,14 @@ fn test_archive_vfs_end_to_end_from_bytes() {
         .expect("Should load policy store from archive bytes");
 
     // Verify loaded correctly
-    assert_eq!(loaded_directory.metadata.name(), "WASM Archive Store");
-    assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba654321");
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["name"],
+        "WASM Archive Store"
+    );
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["id"],
+        "fedcba654321"
+    );
     assert!(
         loaded_directory.schema.is_some(),
         "expected loaded_directory.schema to be Some but was None"
@@ -1630,8 +1654,14 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
         .expect("Should load directory from archive");
 
     // Verify results are identical regardless of VFS implementation
-    assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba987654");
-    assert_eq!(loaded_directory.metadata.name(), "Equivalence Test");
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["id"],
+        "fedcba987654"
+    );
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["name"],
+        "Equivalence Test"
+    );
     assert_eq!(loaded_directory.policies.len(), 1);
     let parsed_schema = loaded_directory
         .schema
@@ -2276,8 +2306,8 @@ fn test_load_schema_from_schemas_dir_shared_namespace_full_pipeline() {
         .load_directory(".", true)
         .expect("Should load directory with shared namespace schemas");
 
-    let policy_store = PolicyStoreManager::convert_to_legacy(result, false)
-        .expect("convert_to_legacy should succeed with shared namespaces across files");
+    let policy_store = formats::parse_policy_store(result, false)
+        .expect("parse_policy_store should succeed with shared namespaces across files");
 
     let cedar_schema = policy_store
         .schema
@@ -2351,8 +2381,8 @@ fn test_archive_shared_namespace_full_pipeline() {
         .load_directory(".", true)
         .expect("Should load archive with shared namespace schemas");
 
-    let policy_store = PolicyStoreManager::convert_to_legacy(result, false)
-        .expect("convert_to_legacy should succeed for archive with shared namespaces");
+    let policy_store = formats::parse_policy_store(result, false)
+        .expect("parse_policy_store should succeed for archive with shared namespaces");
 
     let cedar_schema = policy_store
         .schema

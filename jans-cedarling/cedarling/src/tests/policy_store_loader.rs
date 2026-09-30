@@ -1282,12 +1282,14 @@ async fn test_load_policy_store_archive_bytes_directly() {
         .expect("Should load policy store from bytes");
 
     // Verify the loaded policy store
+    let metadata: serde_json::Value =
+        serde_json::from_str(&loaded.metadata_json).expect("metadata.json should be valid JSON");
     assert_eq!(
-        loaded.metadata.policy_store.id, "a1b2c3d4e5f6a7b8",
+        metadata["policy_store"]["id"], "a1b2c3d4e5f6a7b8",
         "Policy store ID should match"
     );
     assert_eq!(
-        loaded.metadata.policy_store.name, "Integration Test Policy Store",
+        metadata["policy_store"]["name"], "Integration Test Policy Store",
         "Policy store name should match"
     );
     assert!(

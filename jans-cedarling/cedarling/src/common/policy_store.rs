@@ -14,14 +14,14 @@ pub(crate) mod token_entity_metadata;
 use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
 
 pub(crate) mod archive_handler;
-pub(crate) mod custom_issuer_parser;
 pub(crate) mod entity_parser;
 pub(crate) mod errors;
-pub(crate) mod issuer_parser;
+pub(crate) mod formats;
 pub(crate) mod legacy_store;
 pub(crate) mod loader;
 pub(crate) mod manager;
 pub(crate) mod metadata;
+pub(crate) mod migration;
 pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;
 #[cfg(feature = "tools")]
@@ -171,6 +171,21 @@ pub(crate) struct PolicyStoreWithID {
     /// Optional metadata from new format policy stores.
     /// Contains `cedar_version`, `policy_store` info (name, version, description, etc.)
     pub(crate) metadata: Option<metadata::PolicyStoreMetadata>,
+    /// Spec version the store was read as (`None` for Agama YAML).
+    #[cfg_attr(
+        not(test),
+        expect(dead_code, reason = "read by the refresh warning dedup (plan step 5)")
+    )]
+    pub(crate) spec_version: Option<u32>,
+    /// Non-fatal findings from parsing, for the caller to log.
+    #[cfg_attr(
+        not(test),
+        expect(
+            dead_code,
+            reason = "logged at bootstrap and on refresh (plan steps 4-5)"
+        )
+    )]
+    pub(crate) warnings: Vec<formats::PolicyStoreWarning>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
