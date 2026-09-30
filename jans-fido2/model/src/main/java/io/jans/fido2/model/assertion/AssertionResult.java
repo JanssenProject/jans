@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.jans.fido2.model.common.PublicKeyCredentialType;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AssertionResult  {
@@ -15,6 +17,9 @@ public class AssertionResult  {
     private Response response;
     private HashMap<String, String> clientExtensionResults;
     private String[] transports;
+    // Optional native-client context (#14607) — absence must not change behavior.
+    @JsonProperty("telemetry")
+    private NativeClientTelemetry telemetry;
     
     public AssertionResult() {
     }
@@ -72,11 +77,19 @@ public class AssertionResult  {
 		this.transports = transports;
 	}
 
+	public NativeClientTelemetry getTelemetry() {
+		return telemetry;
+	}
+
+	public void setTelemetry(NativeClientTelemetry telemetry) {
+		this.telemetry = telemetry;
+	}
+
 	@Override
 	public String toString() {
 		return "AssertionResult [id=" + id + ", type=" + type + ", rawId=" + rawId + ", response=" + response
 				+ ", clientExtensionResults=" + clientExtensionResults + ", transports=" + Arrays.toString(transports)
-				+ "]";
+				+ ", telemetry=" + telemetry + "]";
 	}
 
 }

@@ -26,13 +26,15 @@ import io.jans.fido2.service.DataMapperService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * Covers the two review-fixed guard rails: the bulk endpoint path derivation, and rejecting a
- * non-https {@code lockAuditEndpoint} before any network call is made (CWE-319).
+ * Covers the review-fixed guard rails: the bulk endpoint path derivation, rejecting a non-https
+ * {@code lockAuditEndpoint} before any network call is made (CWE-319), and rejecting a missing
+ * access token. {@link LockAuditClient} no longer obtains its own token — {@link LockAuditEventCollector}
+ * fetches one once per drain and passes it in, so a null token here means the caller failed to get
+ * one, not that this class should fetch a fresh one.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -45,8 +47,6 @@ class LockAuditClientTest {
 	private Logger log;
 	@Mock
 	private AppConfiguration appConfiguration;
-	@Mock
-	private LockAuditTokenService lockAuditTokenService;
 	@Mock
 	private DataMapperService dataMapperService;
 
@@ -70,11 +70,22 @@ class LockAuditClientTest {
 	}
 
 	@Test
-	void postBatch_ifEndpointIsPlainHttp_throwsWithoutContactingTokenService() {
+	void postBatch_ifEndpointIsPlainHttp_throwsWithoutSerializingThePayload() {
 		fido2Configuration.setLockAuditEndpoint("http://lock.example.com/audit");
 
-		assertThrows(Fido2RuntimeException.class, () -> lockAuditClient.postBatch(Collections.emptyList()));
+		assertThrows(Fido2RuntimeException.class,
+				() -> lockAuditClient.postBatch(Collections.emptyList(), "token-abc"));
 
-		verify(lockAuditTokenService, never()).getAccessToken();
+		verifyNoInteractions(dataMapperService);
+	}
+
+	@Test
+	void postBatch_ifAccessTokenIsNull_throwsWithoutSerializingThePayload() {
+		fido2Configuration.setLockAuditEndpoint("https://lock.example.com/audit");
+
+		assertThrows(Fido2RuntimeException.class,
+				() -> lockAuditClient.postBatch(Collections.emptyList(), null));
+
+		verifyNoInteractions(dataMapperService);
 	}
 }

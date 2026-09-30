@@ -75,7 +75,7 @@ public class Fido2Configuration {
 	private String lockAuditClientId;
 	@DocProperty(description = "OAuth2 client secret (encrypted), paired with lockAuditClientId")
 	private String lockAuditClientPassword;
-	@DocProperty(description = "Interval in seconds between batched deliveries of buffered Lock Server audit events", defaultValue = "20")
+	@DocProperty(description = "Interval in seconds between batched deliveries of buffered Lock Server audit events. Read once at server startup; changing it requires a restart to take effect", defaultValue = "20")
 	private int lockAuditFlushInterval = 20;
 
 	public boolean isRecordAbandonedAssertions() {
