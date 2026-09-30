@@ -106,14 +106,14 @@ public class StatResource extends ConfigBaseResource {
             log.debug("StatResource::getUserStatistics() - jsonNode:{} ", jsonNode);
             return Response.ok(jsonNode.get("response")).build();
         } catch (WebApplicationException wex) {
-            sb.append(" ApplicationException while fetching stats is - ").append("wex.getResponse().getStatus():{}")
-                    .append(wex.getResponse().getStatus()).append(wex.getResponse().getEntity()).append(", is:{")
+            sb.append(" ApplicationException while fetching stats is - ").append("wex.getResponse().getStatus():{")
+                    .append(wex.getResponse().getStatus()).append(" }, wex.getResponse().getEntity():{").append(wex.getResponse().getEntity())
+                    .append(" }, is:{")
                     .append(AuthUtil.getStackTraceAsString(wex)).append("}");
 
-            log.error(sb.toString());
-            throw new WebApplicationException(sb.toString(), wex.getResponse().getStatus());
+            log.error(sb.toString(), wex.getMessage(), wex.fillInStackTrace());
+            throwBadRequestException(wex.getMessage());
         } catch (Exception ex) {
-            ex.printStackTrace();
             sb.append(" Exception while fetching stats is - ").append(", is:{")
             .append(AuthUtil.getStackTraceAsString(ex)).append("}");
 
