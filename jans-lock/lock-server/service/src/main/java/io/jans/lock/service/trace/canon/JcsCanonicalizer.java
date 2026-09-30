@@ -41,9 +41,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * number handling):
  * <ul>
  * <li>Integral nodes ({@code IntNode}, {@code ShortNode}, {@code LongNode}, {@code BigIntegerNode})
- * must survive both IEEE-754 conversion and ECMAScript serialization without changing value.
- * Other integers are rejected rather than silently rounded. Retained integers use ECMAScript
- * number formatting, including exponent form at 1e21.</li>
+ * use ECMAScript number formatting. Integers whose formatted decimal value changes are rejected;
+ * stable integers retain the same canonical bytes when reparsed. Exponent form starts at 1e21.</li>
  * <li>{@code DoubleNode} and {@code FloatNode} use the ES6 algorithm on their double value.</li>
  * <li>{@code DecimalNode} (only produced when {@code USE_BIG_DECIMAL_FOR_FLOATS} is enabled) is
  * converted with {@link BigDecimal#doubleValue()} first. This is lossy for values with more than
@@ -239,8 +238,8 @@ public final class JcsCanonicalizer {
 
 	private static void serializeInteger(BigInteger integer, StringBuilder out) {
 		double value = integer.doubleValue();
-		if (!Double.isFinite(value) || !new BigDecimal(value).toBigIntegerExact().equals(integer)) {
-			throw new JcsException("Integer changes under IEEE-754 conversion");
+		if (!Double.isFinite(value)) {
+			throw new JcsException("Integer outside IEEE-754 range");
 		}
 		String formatted = formatDouble(value);
 		if (!new BigDecimal(formatted).toBigIntegerExact().equals(integer)) {
