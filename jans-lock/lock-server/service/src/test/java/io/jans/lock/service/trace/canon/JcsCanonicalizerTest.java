@@ -115,6 +115,7 @@ class JcsCanonicalizerTest {
 			"1e+21, 1e+21",
 			"1E21, 1e+21",
 			"1e20, 100000000000000000000",
+			"123456789012345680000, 123456789012345680000",
 			"123456789012345680000.0, 123456789012345680000",
 			"1e-7, 1e-7",
 			"1.5e-10, 1.5e-10",
@@ -145,11 +146,18 @@ class JcsCanonicalizerTest {
 	}
 
 	@Test
+	void testCanonicalize_numbers_integerWireFormStableOnReparse() throws IOException {
+		for (String input : new String[] { "123456789012345680000.0", "295147905179352830000" }) {
+			String canonical = JcsCanonicalizer.canonicalize(MAPPER.readTree(input));
+			assertEquals(canonical, JcsCanonicalizer.canonicalize(MAPPER.readTree(canonical)));
+		}
+	}
+
+	@Test
 	void testCanonicalize_numbers_unrepresentableIntegersRejected() throws IOException {
 		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(MAPPER.readTree("9007199254740993")));
 		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(MAPPER.readTree("-9007199254740993")));
 		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(MAPPER.readTree("9223372036854775807")));
-		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(MAPPER.readTree("123456789012345680000")));
 		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(
 				JsonNodeFactory.instance.numberNode(new BigInteger("9223372036854775808"))));
 		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(
