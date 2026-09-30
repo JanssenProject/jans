@@ -58,9 +58,9 @@ Changing FQDN in Kubernetes setup
 !!! Warning
     Do not execute the following steps if dry-run mode is enabled.
 
-1.  Replace the certificate using `certmanager`, see [Certificate Management](../kubernetes-ops/cert-management/#web-ingress) for further instructions.
+1.  Replace the certificate using `certmanager`, see [Certificate Management](cert-management.md#web-ingress) for further instructions.
 
-2.  Modify the customized `values.yaml` and change all of the occurences of old FQDN with the new one.
+2.  Modify the customized `values.yaml` and change all of the occurrences of old FQDN with the new one.
 
 3.  Upgrade the setup, for example:
 

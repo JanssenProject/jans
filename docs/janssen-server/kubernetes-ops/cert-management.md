@@ -124,13 +124,17 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
 
 Ingress or Gateway API controllers may use TLS secret named `tls-certificate` in release namespace. The TLS secret need to be updated to reflect the changes.
 
-1.  Extract TLS cert and key from Janssen:
+1.  Extract TLS cert and key from Janssen, for example:
 
     ```bash
     umask 077
-    kubectl -n <jans-namespace> get secret cn --template={{.data.ssl_cert}} | base64 -d > tls.crt
-    kubectl -n <jans-namespace> get secret cn --template={{.data.ssl_key}} | base64 -d > tls.key
+    kubectl -n <jans-namespace> get secret cn --template='{{.data.ssl_cert}}' | base64 -d > tls.crt
+    kubectl -n <jans-namespace> get secret cn --template='{{.data.ssl_key}}' | base64 -d > tls.key
     ```
+
+    !!! Note
+        The example above only shows how to get TLS cert and key stored in kubernetes secret backend.
+        Refer to [External Secrets/Configmaps](external-secrets-configmaps/#retrieve-secrets) if using other backends.
 
 1.  Update the TLS secret:
 
