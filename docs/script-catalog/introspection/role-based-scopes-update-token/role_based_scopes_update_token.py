@@ -78,7 +78,7 @@ class UpdateToken(UpdateTokenType):
             self.validateSignature(userInfoJwt)
 
             jwtClaims = userInfoJwt.getClaims()
-            self.validateAudience(jwtClaims, adminUIConfig)
+            self.validateAudience(context, jwtClaims, adminUIConfig)
             self.validateExpiration(jwtClaims)
             userInum = self.validateUserInum(jwtClaims)
 
@@ -121,21 +121,56 @@ class UpdateToken(UpdateTokenType):
             print "Exception occured. The User-Info JWT is not valid"
             raise BadRequestException("The User-Info JWT is not valid")
 
-    def validateAudience(self, jwtClaims, adminUIConfig):
+
+
+    def validateAudience(self, context, jwtClaims, adminUIConfig):
         aud = jwtClaims.getClaim("aud")
+
         if aud is None:
-            print "Exception occured. The User-Info JWT does not contain the required aud claim"
-            raise BadRequestException("The User-Info JWT does not contain the required aud claim")
+            print "Exception occurred. The User-Info JWT does not contain the required aud claim"
+            raise BadRequestException(
+                "The User-Info JWT does not contain the required aud claim"
+            )
 
-        clientId = adminUIConfig.getMainSettings().getOidcConfig().getAuiWebClient().getClientId()
-        if clientId is None:
-            print "Exception occured. The AUI web client id is not configured"
-            raise BadRequestException("The AUI web client id is not configured")
+        clientId = None
 
+        mainSettings = adminUIConfig.getMainSettings()
+        if mainSettings is not None:
+            oidcConfig = mainSettings.getOidcConfig()
+            if oidcConfig is not None:
+                auiWebClient = oidcConfig.getAuiWebClient()
+                if auiWebClient is not None:
+                    # The Client ID of the Admin UI Authentication client is used
+                    # to validate the audience (aud) claim in the User-Info JWT.
+                    clientId = auiWebClient.getClientId()
+
+        # The client ID is taken from the client that generated the token.
+        # This works when the application uses the same client for both
+        # authentication and accessing the Config API (e.g. TUI).
+        contextClientId = context.getClient().getClientId()
+
+        # The JWT 'aud' claim can be either a single string or a list of strings.
         audiences = [aud] if isinstance(aud, String) else aud
-        if clientId not in audiences:
-            print "Exception occured. The User-Info JWT aud {} does not match AUI web client id {}".format(audiences, clientId)
-            raise BadRequestException("The User-Info JWT audience does not match the client")
+
+        # Add only configured client IDs.
+        expectedAudiences = []
+
+        if clientId is not None:
+            expectedAudiences.append(clientId)
+
+        if contextClientId is not None:
+            expectedAudiences.append(contextClientId)
+
+        # Validation succeeds if at least one expected audience
+        # is present in the JWT 'aud' claim.
+        if not any(expectedAudience in audiences for expectedAudience in expectedAudiences):
+            print "Exception occurred. The User-Info JWT aud {} does not match any expected client ID {}".format(
+                audiences, expectedAudiences
+            )
+            raise BadRequestException(
+                "The User-Info JWT audience does not match the client"
+            )
+
 
     def validateExpiration(self, jwtClaims):
         exp = jwtClaims.getClaimAsLong("exp")
