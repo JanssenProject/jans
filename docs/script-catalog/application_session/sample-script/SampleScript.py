@@ -6,7 +6,7 @@
 
 from io.jans.model.custom.script.type.session import ApplicationSessionType
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.persist import PersistenceEntryManager
+from io.jans.orm import PersistenceEntryManager
 from io.jans.as.model.config import StaticConfiguration
 from io.jans.as.model.ldap import TokenEntity
 from jakarta.faces.application import FacesMessage

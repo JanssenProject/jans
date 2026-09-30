@@ -33,6 +33,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.jans.as.model.util.StringUtils.toList;
 
@@ -49,6 +50,13 @@ public class CookieService {
     private static final String UMA_SESSION_ID_COOKIE_NAME = "uma_session_id";
     public static final String CONSENT_SESSION_ID_COOKIE_NAME = "consent_session_id";
     private static final String CURRENT_SESSIONS_COOKIE_NAME = "current_sessions";
+    private static final String SAME_SITE_NONE = "None";
+    private static final String SAME_SITE_LAX = "Lax";
+    private static final String SAME_SITE_STRICT = "Strict";
+
+    // CookieService is @RequestScoped (a new instance per request), so this has to be static
+    // to actually dedupe log spam across requests, not just within a single instance.
+    private static final Set<String> LOGGED_INVALID_SAME_SITE_VALUES = ConcurrentHashMap.newKeySet();
 
     @Inject
     private Logger log;
@@ -312,6 +320,7 @@ public class CookieService {
                 header += "Domain=" + appConfiguration.getCookieDomain() + ";";
             }
         }
+        header = appendSameSite(header);
         httpResponse.addHeader("Set-Cookie", header);
     }
 
@@ -327,9 +336,56 @@ public class CookieService {
             }
         }
 
+        // SameSite is applied before the external cookie script, same as every other
+        // attribute set above (Path/Secure/HttpOnly/Expires/Domain): modifyCookieHeader()
+        // is an intentional full-override hook, so a script can already replace or strip
+        // any of them. Applying SameSite after the hook instead would single it out from
+        // that contract and would double it up for a script that already appends its own.
+        header = appendSameSite(header);
         header = externalCookieService.modifyCookieHeader(cookieName, header);
 
         httpResponse.addHeader("Set-Cookie", header);
+    }
+
+    /**
+     * Appends the configured SameSite attribute to a Set-Cookie header.
+     * <p>
+     * Defaults to "None" (no change from pre-SameSite behavior) because setting
+     * "Lax" breaks silent/iframe-based authentication (prompt=none) and cross-site
+     * POST to the authorization endpoint for RPs hosted on a different site than the
+     * OP, and "Strict" additionally breaks normal top-level cross-site SSO redirects.
+     * See {@link AppConfiguration#getCookieSameSite()}.
+     */
+    private String appendSameSite(String header) {
+        return header + "; SameSite=" + resolveSameSite();
+    }
+
+    /**
+     * Validates the configured SameSite value case-insensitively against None/Lax/Strict
+     * and returns the canonical spelling. Falls back to "None" for blank or unrecognized
+     * values instead of throwing, since this runs on every cookie write - a config typo
+     * must not turn into an outage for every request. An unrecognized value is logged
+     * only once per distinct value (not once per request) to avoid log spam for as long
+     * as the misconfiguration persists.
+     */
+    private String resolveSameSite() {
+        String sameSite = appConfiguration.getCookieSameSite();
+        if (StringUtils.isBlank(sameSite)) {
+            return SAME_SITE_NONE;
+        }
+        if (SAME_SITE_NONE.equalsIgnoreCase(sameSite)) {
+            return SAME_SITE_NONE;
+        }
+        if (SAME_SITE_LAX.equalsIgnoreCase(sameSite)) {
+            return SAME_SITE_LAX;
+        }
+        if (SAME_SITE_STRICT.equalsIgnoreCase(sameSite)) {
+            return SAME_SITE_STRICT;
+        }
+        if (LOGGED_INVALID_SAME_SITE_VALUES.add(sameSite)) {
+            log.error("Invalid cookieSameSite configuration value: '{}'. Expected None, Lax or Strict. Falling back to None.", sameSite);
+        }
+        return SAME_SITE_NONE;
     }
 
     public void removeSessionIdCookie(HttpServletResponse httpResponse) {

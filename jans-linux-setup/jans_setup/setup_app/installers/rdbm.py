@@ -131,11 +131,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
                 result, conn = self.dbUtils.sqlconnection(log=False)
                 user_passwd_str = f"-u root -p'{Config.mysql_root_password}' " if base.os_type == 'suse' else ''
+                user_allowed_host = '%' if base.argsp.t else Config.rdbm_host
                 if not result:
                     sql_cmd_list = [
                         f"CREATE DATABASE {Config.rdbm_db}",
-                        f"CREATE USER '{Config.rdbm_user}'@'{Config.rdbm_host}' IDENTIFIED BY '{Config.rdbm_password}'",
-                        f"GRANT ALL PRIVILEGES ON {Config.rdbm_db}.* TO '{Config.rdbm_user}'@'{Config.rdbm_host}'",
+                        f"CREATE USER '{Config.rdbm_user}'@'{user_allowed_host}' IDENTIFIED BY '{Config.rdbm_password}'",
+                        f"GRANT ALL PRIVILEGES ON {Config.rdbm_db}.* TO '{Config.rdbm_user}'@'{user_allowed_host}'",
                         ]
                     for cmd in sql_cmd_list:
                         self.run(f'mysql {user_passwd_str}-e "{cmd}"', shell=True)

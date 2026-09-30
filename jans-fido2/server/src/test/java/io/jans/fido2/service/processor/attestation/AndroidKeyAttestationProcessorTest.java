@@ -67,6 +67,9 @@ class AndroidKeyAttestationProcessorTest {
     private AndroidKeyAttestationProcessor processor;
 
     @Mock
+    private io.jans.fido2.service.RpPolicyService rpPolicyService;
+
+    @Mock
     private Logger log;
     @Mock
     private AppConfiguration appConfiguration;
@@ -172,7 +175,7 @@ class AndroidKeyAttestationProcessorTest {
         // Attestation enforcement disabled → skip the metadata chain step.
         Fido2Configuration fido2Config = mock(Fido2Configuration.class);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Config);
-        when(fido2Config.getAttestationMode()).thenReturn("disabled");
+        when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn("disabled");
         when(authData.getCredId()).thenReturn("cred-id".getBytes());
         when(base64Service.urlEncodeToString(any())).thenReturn("encoded");
 

@@ -101,16 +101,7 @@ public class AuthorizeRestWebServiceValidator {
         }
 
         try {
-            final Client client;
-
-            // Check if client_id is a CIMD URL (Client ID Metadata Document)
-            if (clientIdMetadataService.isCimdClientId(clientId)) {
-                log.debug("Processing CIMD client_id: {}", clientId);
-                client = clientIdMetadataService.getClient(clientId);
-            } else {
-                // Traditional client lookup from database
-                client = clientService.getClient(clientId);
-            }
+            final Client client = clientIdMetadataService.resolveClient(clientId);
 
             if (client == null) {
                 log.debug("Unable to find client by id {}.", clientId);

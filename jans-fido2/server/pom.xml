@@ -147,6 +147,11 @@
             <artifactId>jans-core-timer-weld</artifactId>
         </dependency>
         <dependency>
+            <!-- OAuth2 client-credentials token acquisition for Lock Server audit delivery, same as jans-lock itself uses -->
+            <groupId>io.jans</groupId>
+            <artifactId>jans-auth-client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-core-exception-extension-cdi</artifactId>
         </dependency>

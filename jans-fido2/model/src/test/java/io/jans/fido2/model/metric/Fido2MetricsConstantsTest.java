@@ -135,6 +135,8 @@ class Fido2MetricsConstantsTest {
         assertEquals(128, Fido2MetricsConstants.MAX_LENGTH_USER_ID);
         assertEquals(128, Fido2MetricsConstants.MAX_LENGTH_SESSION_ID);
         assertEquals(128, Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD);
+        assertEquals(128, Fido2MetricsConstants.MAX_LENGTH_CLIENT_CORRELATION_ID);
+        assertEquals(128, Fido2MetricsConstants.MAX_LENGTH_NATIVE_TELEMETRY_FIELD);
     }
 
     /**

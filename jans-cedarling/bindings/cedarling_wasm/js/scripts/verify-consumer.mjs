@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 import { build } from "esbuild";
-import { parse as parseYaml } from "yaml";
+import { createPolicyArchive } from "./policy-archive.mjs";
 
 const execute = promisify((await import("node:child_process")).execFile);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -80,37 +80,11 @@ async function artifact(directory) {
 }
 
 async function policyArchive(directory, name) {
-  const fixture = parseYaml(
-    await readFile(
-      join(root, "tests/fixtures", `${name}-policy-store.yml`),
-      "utf8",
-    ),
-  );
-  const [[storeId, store]] = Object.entries(fixture.policy_stores);
-  const source = join(directory, name);
-  const archive = join(directory, `${name}.cjar`);
-  const files = {
-    "metadata.json": JSON.stringify({
-      cedar_version: fixture.cedar_version,
-      policy_store: { id: storeId, name: store.name, version: "1.0.0" },
-    }),
-    "schema.cedarschema": store.schema.body,
-  };
-  for (const [id, policy] of Object.entries(store.policies)) {
-    files[`policies/${id}.cedar`] = policy.policy_content.body;
-  }
-  for (const [id, issuer] of Object.entries(store.trusted_issuers ?? {})) {
-    files[`trusted-issuers/${id}.json`] = JSON.stringify(issuer);
-  }
-  for (const [file, contents] of Object.entries(files)) {
-    const path = join(source, file);
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, contents);
-  }
-  await execute("zip", ["-q", "-X", archive, ...Object.keys(files)], {
-    cwd: source,
-  }).catch(output);
-  return archive;
+  return createPolicyArchive(
+    join(root, "tests/fixtures", `${name}-policy-store.yml`),
+    directory,
+    name,
+  ).catch(output);
 }
 
 async function verifyEdgeConsumer(consumer, installedRoot) {

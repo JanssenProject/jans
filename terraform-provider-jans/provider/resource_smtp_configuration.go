@@ -120,12 +120,16 @@ func resourceSmtpConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 
 	c := meta.(*jans.Client)
 
-	var smtpConfig jans.SMTPConfiguration
-	if err := fromSchemaResource(d, &smtpConfig); err != nil {
+	smtpConfig, err := c.GetSMTPConfiguration(ctx)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if _, err := c.UpdateSMTPConfiguration(ctx, &smtpConfig); err != nil {
+	if err := mergeFromSchemaResource(d, smtpConfig); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if _, err := c.UpdateSMTPConfiguration(ctx, smtpConfig); err != nil {
 		return diag.FromErr(err)
 	}
 

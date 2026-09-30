@@ -4,16 +4,23 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.fido2.model.assertion.AssertionOptionsGenerate;
 import io.jans.fido2.model.assertion.AssertionResult;
+import io.jans.fido2.model.audit.LockAuditEvent;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.error.Fido2ErrorResponse;
+import io.jans.fido2.exception.Fido2NativeFailureException;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
+import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.fido2.service.shared.MetricService;
 import io.jans.fido2.service.util.CommonUtilService;
+import io.jans.fido2.service.verifier.AssertionVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
@@ -28,6 +35,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -74,7 +82,11 @@ class AssertionServiceTest {
     @Mock
     private DomainVerifier domainVerifier;
     @Mock
+    private AssertionVerifier assertionVerifier;
+    @Mock
     private MetricService metricService;
+    @Mock
+    private LockAuditEventCollector lockAuditEventCollector;
     @Mock
     private ChallengeGenerator challengeGenerator;
     @Mock
@@ -223,7 +235,10 @@ class AssertionServiceTest {
         io.jans.fido2.model.assertion.Response response = mock(io.jans.fido2.model.assertion.Response.class);
         when(assertionResult.getResponse()).thenReturn(response);
         when(commonVerifiers.verifyNullOrEmptyString(any())).thenReturn("keyId");
-        when(commonVerifiers.verifyClientJSON(any())).thenReturn(mapper.createObjectNode());
+        // verifyClientJSON() guarantees an "origin" field in real code (it throws otherwise) — the
+        // stub must honor that contract so the ceremony can reach domain verification, exactly as it
+        // would in production.
+        when(commonVerifiers.verifyClientJSON(any())).thenReturn(mapper.createObjectNode().put("origin", "https://rp.example.com"));
         when(commonVerifiers.getChallenge(any())).thenReturn("clientChallenge");
 
         Fido2AuthenticationData authData = new Fido2AuthenticationData();
@@ -263,13 +278,19 @@ class AssertionServiceTest {
         when(assertionResult.getResponse()).thenReturn(response);
         when(response.getUserHandle()).thenReturn("different-handle");
         when(commonVerifiers.verifyNullOrEmptyString(any())).thenReturn("keyId");
-        when(commonVerifiers.verifyClientJSON(any())).thenReturn(mapper.createObjectNode());
+        // verifyClientJSON() guarantees an "origin" field in real code (it throws otherwise) — the
+        // stub must honor that contract so the ceremony can reach domain verification, exactly as it
+        // would in production.
+        when(commonVerifiers.verifyClientJSON(any())).thenReturn(mapper.createObjectNode().put("origin", "https://rp.example.com"));
         when(commonVerifiers.getChallenge(any())).thenReturn("clientChallenge");
 
         Fido2AuthenticationData authData = new Fido2AuthenticationData();
         authData.setChallenge("clientChallenge");
         authData.setUsername("alice");
         authData.setStatus(Fido2AuthenticationStatus.pending);
+        // Deliberately different from the clientData origin stubbed above — this is the stale RP
+        // hostname captured at options-generation time, which the audit event must NOT report.
+        authData.setOrigin("stale-rp-hostname");
         Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
         when(entry.getAuthenticationData()).thenReturn(authData);
         when(entry.getRpId()).thenReturn("rp");
@@ -292,6 +313,14 @@ class AssertionServiceTest {
                     () -> assertionService.verify(assertionResult));
             assertEquals(400, ex.getResponse().getStatus());
         }
+
+        // The ceremony failed after domain verification succeeded, so the audit event must carry the
+        // origin actually verified from clientData ("https://rp.example.com") — never the stale RP
+        // hostname on Fido2AuthenticationData ("stale-rp-hostname"), which verifyDomain() only ever
+        // compares against and never overwrites.
+        ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
+        verify(lockAuditEventCollector).collect(captor.capture());
+        assertEquals("https://rp.example.com", captor.getValue().getContextInformation().get("origin"));
     }
 
     /**
@@ -326,6 +355,14 @@ class AssertionServiceTest {
         assertEquals("INVALID_INPUT", authData.getErrorCategory());
         verify(entry).setExpiration(1296000);
         verify(authenticationPersistenceService).update(entry);
+
+        // A genuine, still-pending-at-the-time-of-failure ceremony must report DENY — the counterpart
+        // to verify_ifExternalScriptThrowsAfterPersistenceSucceeds_collectsAnAllowLockAuditEventNotDeny
+        // below, which pins the opposite case.
+        ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
+        verify(lockAuditEventCollector).collect(captor.capture());
+        assertEquals("DENY", captor.getValue().getDecisionResult());
+        assertEquals("alice", captor.getValue().getPrincipalId());
     }
 
     /**
@@ -357,7 +394,7 @@ class AssertionServiceTest {
 
         assertEquals("Couldn't find the key by PublicKeyId", authData.getErrorReason());
         verify(metricService).recordPasskeyAuthenticationFailure(any(), any(), anyLong(),
-                eq("Couldn't find the key by PublicKeyId"), any());
+                eq("Couldn't find the key by PublicKeyId"), any(), any());
     }
 
     /**
@@ -384,7 +421,7 @@ class AssertionServiceTest {
         }
 
         assertEquals("Unknown error", authData.getErrorReason());
-        verify(metricService).recordPasskeyAuthenticationFailure(any(), any(), anyLong(), eq("Unknown error"), any());
+        verify(metricService).recordPasskeyAuthenticationFailure(any(), any(), anyLong(), eq("Unknown error"), any(), any());
     }
 
     /**
@@ -411,7 +448,42 @@ class AssertionServiceTest {
             assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResultWithChallenge()));
         }
 
-        verify(metricService).recordPasskeyAuthenticationFailure(eq("alice"), any(), anyLong(), any(), any());
+        verify(metricService).recordPasskeyAuthenticationFailure(eq("alice"), any(), anyLong(), any(), any(), any());
+    }
+
+    /**
+     * The telemetry a client attaches to the assertion result must reach the failure metric call —
+     * proves the DTO-to-MetricService wiring specifically (#14607's second sub-issue), not just
+     * MetricService's own internal handling of a telemetry object once it has one, which is covered
+     * separately in MetricServiceTest.
+     */
+    @Test
+    void verify_ifRejectedWithTelemetryOnResult_passesItToTheFailureMetric() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+
+        stubCeremonyLookup(entry);
+        stubHistoryExpiration(1296000);
+
+        NativeClientTelemetry telemetry = new NativeClientTelemetry();
+        telemetry.setClientCorrelationId("corr-999");
+        AssertionResult assertionResult = mock(AssertionResult.class);
+        io.jans.fido2.model.assertion.Response response = mock(io.jans.fido2.model.assertion.Response.class);
+        when(assertionResult.getResponse()).thenReturn(response);
+        when(assertionResult.getTelemetry()).thenReturn(telemetry);
+
+        doThrow(new WebApplicationException(Response.status(400).entity("boom").build()))
+                .when(domainVerifier).verifyDomain(any(), any());
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResult));
+        }
+
+        verify(metricService).recordPasskeyAuthenticationFailure(eq("alice"), any(), anyLong(), any(), any(), eq(telemetry));
     }
 
     /**
@@ -443,6 +515,157 @@ class AssertionServiceTest {
         verify(authenticationPersistenceService, never()).update(any());
         // Rejected before any verification work is attempted.
         verify(domainVerifier, never()).verifyDomain(any(), any());
+    }
+
+    /**
+     * The exact scenario CodeRabbit flagged: a replay against a ceremony already persisted as
+     * {@code authenticated} by an EARLIER call (same fixture as the test above) is rejected by
+     * {@code verifyCeremonyIsStillOpen()} — but {@code authenticationData.getStatus()} is still
+     * {@code authenticated} from that earlier call, left over on the entity. Before this fix, the
+     * catch block trusted that in-memory status alone and reported ALLOW for THIS rejected request,
+     * even though nothing about it ever succeeded. It must report DENY: this invocation never called
+     * {@code authenticationPersistenceService.update()} itself.
+     */
+    @Test
+    void verify_ifCeremonyAlreadyTerminal_collectsADenyLockAuditEvent() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        authData.setStatus(Fido2AuthenticationStatus.authenticated);
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+
+        stubCeremonyLookup(entry);
+        when(errorResponseFactory.invalidRequest(any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("no longer open").build()));
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+        }
+
+        verify(authenticationPersistenceService, never()).update(any());
+
+        ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
+        verify(lockAuditEventCollector).collect(captor.capture());
+        assertEquals("DENY", captor.getValue().getDecisionResult());
+        assertEquals("warning", captor.getValue().getSeverityLevel());
+    }
+
+    /**
+     * The counterpart to the case above: once THIS invocation's own
+     * {@code authenticationPersistenceService.update()} call has actually returned, a later failure
+     * (here, the external interception script, which runs after persistence in the real method) must
+     * still report ALLOW, since the authentication really was persisted by this request — unlike the
+     * replay case above, where persistence was never reached at all.
+     */
+    @Test
+    void verify_ifExternalScriptThrowsAfterPersistenceSucceeds_collectsAnAllowLockAuditEventNotDeny() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+
+        stubCeremonyLookup(entry);
+        // verifyNullOrEmptyString/verifyClientJSON/getChallenge/findByChallenge come from
+        // stubCeremonyLookup above; this layers the "origin" field the plain stub lacks, needed once
+        // the ceremony proceeds past domain verification.
+        when(commonVerifiers.verifyClientJSON(any()))
+                .thenReturn(mapper.createObjectNode().put("origin", "https://rp.example.com"));
+        stubHistoryExpiration(1296000);
+
+        Fido2RegistrationData registrationData = new Fido2RegistrationData();
+        registrationData.setUsername("alice");
+        Fido2RegistrationEntry registrationEntry = mock(Fido2RegistrationEntry.class);
+        when(registrationEntry.getRegistrationData()).thenReturn(registrationData);
+        when(registrationPersistenceService.findByPublicKeyId(any(), any())).thenReturn(Optional.of(registrationEntry));
+
+        // Fails after authenticationPersistenceService.update() has already returned successfully.
+        doThrow(new RuntimeException("interception script failed")).when(externalFido2InterceptionService)
+                .verifyAssertionFinish(any(), any());
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            assertThrows(RuntimeException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+        }
+
+        verify(authenticationPersistenceService).update(entry);
+
+        ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
+        verify(lockAuditEventCollector).collect(captor.capture());
+        assertEquals("ALLOW", captor.getValue().getDecisionResult());
+        assertEquals("info", captor.getValue().getSeverityLevel());
+    }
+
+    /**
+     * An RP ID hash mismatch (#14608) — a common symptom of a misconfigured native asset-link/AASA
+     * association — must be recorded under its diagnostic code, not the raw "Hashes don't match"
+     * message, so authentication failures can be counted by cause. Same fixture as the ALLOW test
+     * above, but {@code assertionVerifier} fails before persistence instead of the interception
+     * script failing after it.
+     */
+    @Test
+    void verify_ifRpIdHashMismatch_recordsTheNativeFailureDiagnosticCode() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+
+        stubCeremonyLookup(entry);
+        when(commonVerifiers.verifyClientJSON(any()))
+                .thenReturn(mapper.createObjectNode().put("origin", "https://rp.example.com"));
+        stubHistoryExpiration(1296000);
+
+        Fido2RegistrationData registrationData = new Fido2RegistrationData();
+        registrationData.setUsername("alice");
+        Fido2RegistrationEntry registrationEntry = mock(Fido2RegistrationEntry.class);
+        when(registrationEntry.getRegistrationData()).thenReturn(registrationData);
+        when(registrationPersistenceService.findByPublicKeyId(any(), any())).thenReturn(Optional.of(registrationEntry));
+
+        doThrow(new Fido2NativeFailureException(NativeFailureDiagnostic.JFS_RPID_HASH_MISMATCH, "Hashes don't match"))
+                .when(assertionVerifier).verifyAuthenticatorAssertionResponse(any(), any(), any());
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            assertThrows(Fido2NativeFailureException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+        }
+
+        verify(metricService).recordPasskeyAuthenticationFailure(eq("alice"), any(), anyLong(),
+                eq("JFS_RPID_HASH_MISMATCH"), any(), any());
+    }
+
+    /**
+     * The other CodeRabbit-flagged gap: when {@code findByPublicKeyId} itself fails (unknown
+     * credential), {@code registrationData} never gets resolved. Before this fix, rpId and
+     * credentialId were read off that (never-resolved) registrationData, so the DENY event silently
+     * lost both — even though both were already known before the lookup ever ran: rpId from the
+     * resolved ceremony entry, credentialId from the client-asserted keyId.
+     */
+    @Test
+    void verify_ifFindByPublicKeyIdFails_stillCollectsRpIdAndCredentialIdInDenyEvent() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+
+        stubCeremonyLookup(entry);
+        when(commonVerifiers.verifyClientJSON(any()))
+                .thenReturn(mapper.createObjectNode().put("origin", "https://rp.example.com"));
+        when(registrationPersistenceService.findByPublicKeyId(any(), any())).thenReturn(Optional.empty());
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            assertThrows(Fido2RuntimeException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+        }
+
+        ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
+        verify(lockAuditEventCollector).collect(captor.capture());
+        assertEquals("DENY", captor.getValue().getDecisionResult());
+        assertEquals("rp", captor.getValue().getContextInformation().get("rpId"));
+        assertEquals("keyId", captor.getValue().getContextInformation().get("credentialId"));
     }
 
     /**
@@ -653,7 +876,7 @@ class AssertionServiceTest {
         }
 
         // Null username is correct here: no user is known, which is what makes it usernameless.
-        verify(metricService).recordPasskeyAuthenticationAttempt(eq(null), any(), anyLong());
+        verify(metricService).recordPasskeyAuthenticationAttempt(eq(null), any(), anyLong(), any());
     }
 
     /**

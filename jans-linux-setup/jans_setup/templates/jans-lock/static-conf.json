@@ -7,6 +7,7 @@
         "tokens":"ou=tokens,o=jans",
         "sessions":"ou=sessions,o=jans",
         "metric":"ou=statistic,o=metric",
-        "stat": "ou=lock,ou=stat,o=jans"
+        "stat": "ou=lock,ou=stat,o=jans",
+        "trace": "ou=trace,ou=lock,o=jans"
     }
 }

@@ -85,7 +85,9 @@ pub(crate) async fn build_authz(
             .collect();
         for mapping in custom_issuer_index.mappings() {
             if jwt_token_types.contains(mapping) {
-                return Err(BuildAuthzError::CustomMappingShadowsJwt(mapping.to_string()));
+                return Err(BuildAuthzError::CustomMappingShadowsJwt(
+                    mapping.to_string(),
+                ));
             }
         }
     }
