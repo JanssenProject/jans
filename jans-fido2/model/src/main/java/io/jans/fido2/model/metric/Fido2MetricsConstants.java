@@ -167,6 +167,7 @@ public final class Fido2MetricsConstants {
     public static final int MAX_LENGTH_USER_AGENT = 512;
     public static final int MAX_LENGTH_FALLBACK_REASON = 512;
     public static final int MAX_LENGTH_ERROR_REASON = 1024;
+    public static final int MAX_LENGTH_CLIENT_CORRELATION_ID = 128;
 
     /**
      * Applied to the individual members of the serialized deviceInfo blob. That
@@ -174,4 +175,10 @@ public final class Fido2MetricsConstants {
      * from bloating the row rather than a schema limit.
      */
     public static final int MAX_LENGTH_DEVICE_INFO_FIELD = 128;
+
+    /**
+     * Applied to the individual members of the serialized nativeClientTelemetry blob (#14607),
+     * same policy as {@link #MAX_LENGTH_DEVICE_INFO_FIELD}.
+     */
+    public static final int MAX_LENGTH_NATIVE_TELEMETRY_FIELD = 128;
 }

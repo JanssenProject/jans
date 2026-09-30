@@ -156,14 +156,17 @@ Beyond the outcome itself, each raw entry records where the operation came from:
 | `userAgent` | The `User-Agent` request header, up to 512 characters. |
 | `deviceInfo` | Browser, OS and device type parsed from the user agent, plus a copy of the user agent itself. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
 | `sessionId` | The `session_id` cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither. |
+| `clientCorrelationId` | The optional `client_correlation_id` a native client attached via the `telemetry` request field — see [Native-client telemetry](#native-client-telemetry-optional) below. Sibling to `sessionId`, not derived from it: caller-supplied and absent unless the client sends one. |
+| `nativeClientTelemetry` | The full optional `telemetry` object a native client attached, stored as-is — see below. |
 | `metricType` | The metric name of the event, e.g. `fido2_registration_success`. |
 | `nodeId` | Identifier of the cluster node that served the request. |
 
 !!! note "Oversized values are shortened, not dropped"
-    Free-form fields — `userAgent`, `sessionId`, `username`, `errorReason` and
-    `fallbackReason` — are shortened to the width of their database column before being
-    stored, so a single unusually long value cannot fail the write and lose the whole
-    entry. Real-world values fit comfortably; when a value is actually shortened the FIDO2
+    Free-form fields — `userAgent`, `sessionId`, `clientCorrelationId`, `username`, `errorReason`,
+    `fallbackReason`, and each individual member of `nativeClientTelemetry` — are shortened to the
+    width of their database column (or, for `nativeClientTelemetry`'s members, a 128-character
+    policy cap) before being stored, so a single unusually long value cannot fail the write and lose
+    the whole entry. Real-world values fit comfortably; when a value is actually shortened the FIDO2
     server logs one `WARN` naming the field and its original length. The value itself is
     never logged, since these fields are personal data.
 
@@ -172,6 +175,54 @@ Beyond the outcome itself, each raw entry records where the operation came from:
     your deployment terminates TLS at a proxy, make sure it sets `X-Forwarded-For` and
     strips any client-supplied value; otherwise the recorded address can be spoofed by the
     caller.
+
+### Internal diagnostic codes
+
+For some failure causes, `errorReason` carries an internal `JFS_*` code instead of a free-text
+message — deliberately recorded so the same cause is always spelled the same way, rather than
+however a particular exception happened to word it. `errorCategory` is set to a matching category
+name in the same cases, so these failures can be counted by cause on `analytics/errors` without
+falling into the catch-all `OTHER` bucket.
+
+- **Attestation-trust codes** (`errorCategory: "ATTESTATION_TRUST"`) — an unknown AAGUID, an
+  authenticator blocked by an MDS status report, an untrusted root certificate, and similar
+  registration-time trust failures. Also broken out on `analytics/attestation-rejections`, which
+  filters to this category. See [Trust Diagnostics](trust-diagnostics.md) for the full list and what
+  to check for each.
+- **`JFS_RPID_HASH_MISMATCH`** (`errorCategory: "NATIVE_FAILURE"`) — the RP ID hash the authenticator
+  signed over does not match the RP ID the server expected, on either a registration or an
+  authentication ceremony. Not exclusive to native clients in principle, but in practice a hallmark
+  of a misconfigured Android asset-link or iOS AASA association presenting the wrong RP ID to the
+  authenticator. The first of a growing set of native-failure diagnostic codes tracked in
+  [issue #14608](https://github.com/JanssenProject/jans/issues/14608).
+
+A code never reaches the client: `ErrorResponseFactory`/`Fido2ErrorResponse` still return the
+unchanged `{status: "failed", errorMessage: "…"}` envelope — the code is metrics/log detail only.
+
+### Native-client telemetry (optional)
+
+A native app/SDK (iOS, Android) may attach an optional `telemetry` object to any attestation or
+assertion start/finish request, carrying context no `User-Agent` string can — Play Services
+version, OEM Credential Manager behavior, the last client-side error code, and more. See the
+`NativeClientTelemetry` schema in the
+[OpenAPI (Swagger) specification](#api-reference) for the full field list.
+
+The field is entirely optional: a request that omits it behaves exactly as before, and an
+unrecognized value in an enum-shaped field (`platform`, `native_api`, `flow_context`) is accepted
+rather than rejecting the request.
+
+A submitted `telemetry` object is persisted on the raw entry it was attached to — both the full
+object (`nativeClientTelemetry`) and, separately, its `client_correlation_id`. `client_correlation_id`
+is deliberately promoted to its own top-level, independently queryable field rather than left buried
+inside the `nativeClientTelemetry` blob: it is what lets a start (`options`) call and its matching
+finish (`result`) call be correlated with each other, the way `sessionId` correlates every entry
+within one browser session. Query `entries` (or `entries/operation/{operationType}`) for two rows
+sharing the same `clientCorrelationId` to join a ceremony's own start and finish.
+
+!!! note "Correlation is opt-in and client-driven"
+    The server never generates a `client_correlation_id` itself — it only stores whatever the client
+    sends. A client that never adopts the `telemetry` field, or sends it without
+    `client_correlation_id`, gets no correlation and no change in behavior; this is purely additive.
 
 ### Aggregation schedule and retention
 
