@@ -63,12 +63,16 @@ public class Fido2Service extends BaseService {
             try (Response response = Fido2ClientFactory.instance()
                     .createMetaDataConfigurationService(tmp).getMetadataConfiguration()) {
                 String content = response.readEntity(String.class);
-                if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+                // A 200 alone isn't enough: an HTTP success carrying a malformed body, or one
+                // missing attestation.base_path, would otherwise replace the last-working metadata
+                // and only surface as a failure later, in createAttestationService(), when it's too
+                // late to fall back to the previous value.
+                if (response.getStatus() == Response.Status.OK.getStatusCode() && hasAttestationBasePath(content)) {
                     metadataConfiguration = content;
                 } else {
-                    // Keep whatever metadata already worked rather than replacing it with an error
-                    // body: doRegister()/verifyRegistration() would otherwise build an
-                    // AttestationService from unparseable JSON and fail every call until the next
+                    // Keep whatever metadata already worked rather than replacing it with an
+                    // unusable one: doRegister()/verifyRegistration() would otherwise build an
+                    // AttestationService from bad JSON and fail every call until the next
                     // successful reload.
                     logger.error("Problem retrieving fido metadata (code: {}); response was: {}",
                             response.getStatus(), content);
@@ -86,6 +90,20 @@ public class Fido2Service extends BaseService {
      * ({@code Executions.getCurrent()}), but {@code doRegister}/{@code verifyRegistration} are also
      * called from plain JAX-RS resources (e.g. PasskeysEnrollingWS) that have no ZK execution at all.
      */
+    /**
+     * Mirrors exactly what {@link Fido2ClientFactory#createAttestationService} itself needs out of
+     * the metadata JSON, so a reload only ever publishes a value that later call is actually able to
+     * use — checked here rather than left to fail when doRegister()/verifyRegistration() next run.
+     */
+    private boolean hasAttestationBasePath(String content) {
+        try {
+            JsonNode basePath = mapper.readTree(content).path("attestation").path("base_path");
+            return basePath.isTextual() && !basePath.asText().isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private AttestationService attestationService(String forwardedFor, String userAgent) throws IOException {
         return Fido2ClientFactory.instance().createAttestationService(metadataConfiguration, forwardedFor, userAgent);
     }

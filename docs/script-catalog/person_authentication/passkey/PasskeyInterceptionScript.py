@@ -98,8 +98,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if auth_method == 'authenticate':
                     print "Fido2. Authenticate step 2. Call Fido2 in order to finish authentication flow"
-                    forwardedFor, userAgent = self.getForwardedContext()
-                    assertionService = Fido2ClientFactory.instance().createAssertionService(self.getMetaDataConfiguration(), forwardedFor, userAgent)
+                    assertionService = self.createAssertionServiceWithContext(self.getMetaDataConfiguration())
                     assertionResult = mapper.readValue(token_response, AssertionResult)
                     assertionStatus = assertionService.verify(assertionResult)
                     authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
@@ -150,8 +149,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if auth_method == 'authenticate':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish authentication flow"
-                forwardedFor, userAgent = self.getForwardedContext()
-                assertionService = Fido2ClientFactory.instance().createAssertionService(self.getMetaDataConfiguration(), forwardedFor, userAgent)
+                assertionService = self.createAssertionServiceWithContext(self.getMetaDataConfiguration())
                 assertionResult = mapper.readValue(token_response, AssertionResult)
 
                 assertionStatus = assertionService.verify(assertionResult)
@@ -164,8 +162,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return True
             elif auth_method == 'enroll':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish registration flow"
-                forwardedFor, userAgent = self.getForwardedContext()
-                attestationService = Fido2ClientFactory.instance().createAttestationService(self.getMetaDataConfiguration(), forwardedFor, userAgent)
+                attestationService = self.createAttestationServiceWithContext(self.getMetaDataConfiguration())
                 attestationResult = mapper.readValue(token_response, AttestationResult)
                 attestationStatus = attestationService.verify(attestationResult)
 
@@ -194,8 +191,7 @@ class PersonAuthentication(PersonAuthenticationType):
         facesContext = CdiUtil.bean(FacesContext)
         domain = facesContext.getExternalContext().getRequest().getServerName()
         print ("domain %s : " % domain)
-        forwardedFor, userAgent = self.getForwardedContext()
-        assertionService = Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration, forwardedFor, userAgent)
+        assertionService = self.createAssertionServiceWithContext(metaDataConfiguration)
         allowList = self.getCookieValue();
         if step == 1:
             try:
@@ -248,7 +244,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start attestation flow"
 
                 try:
-                    attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration, forwardedFor, userAgent)
+                    attestationService = self.createAttestationServiceWithContext(metaDataConfiguration)
 
                     attestationRequest = AttestationOptions()
                     attestationRequest.setUsername(userName)
@@ -345,6 +341,28 @@ class PersonAuthentication(PersonAuthenticationType):
         if httpRequest == None:
             return (None, None)
         return (httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"))
+
+    def createAssertionServiceWithContext(self, metaDataConfiguration):
+        # fido2_server_uri is operator-configured and documented as https, but nothing enforces
+        # that. Fido2ClientFactory rejects forwarding end-user context to a non-loopback http://
+        # endpoint (CWE-319) - if that's ever this deployment's actual configuration, fall back to
+        # the plain overload rather than let an uncaught IllegalArgumentException break passkey
+        # authentication outright; this is purely additive, not the change that matters here.
+        forwardedFor, userAgent = self.getForwardedContext()
+        try:
+            return Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration, forwardedFor, userAgent)
+        except java.lang.IllegalArgumentException, ex:
+            print "Fido2. fido2_server_uri is not https; end-user context will not be forwarded. %s" % ex.getMessage()
+            return Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration)
+
+    def createAttestationServiceWithContext(self, metaDataConfiguration):
+        # See createAssertionServiceWithContext above for why this falls back instead of raising.
+        forwardedFor, userAgent = self.getForwardedContext()
+        try:
+            return Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration, forwardedFor, userAgent)
+        except java.lang.IllegalArgumentException, ex:
+            print "Fido2. fido2_server_uri is not https; end-user context will not be forwarded. %s" % ex.getMessage()
+            return Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration)
 
     def getCookieValue(self):
     # sample allow list -  [{ id: ...., type: 'public-key', transports: ['usb', 'ble', 'nfc']}]
