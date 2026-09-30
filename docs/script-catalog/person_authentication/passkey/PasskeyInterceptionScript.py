@@ -98,7 +98,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if auth_method == 'authenticate':
                     print "Fido2. Authenticate step 2. Call Fido2 in order to finish authentication flow"
-                    assertionService = Fido2ClientFactory.instance().createAssertionService(self.getMetaDataConfiguration())
+                    forwardedFor, userAgent = self.getForwardedContext()
+                    assertionService = Fido2ClientFactory.instance().createAssertionService(self.getMetaDataConfiguration(), forwardedFor, userAgent)
                     assertionResult = mapper.readValue(token_response, AssertionResult)
                     assertionStatus = assertionService.verify(assertionResult)
                     authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
@@ -149,7 +150,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if auth_method == 'authenticate':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish authentication flow"
-                assertionService = Fido2ClientFactory.instance().createAssertionService(self.getMetaDataConfiguration())
+                forwardedFor, userAgent = self.getForwardedContext()
+                assertionService = Fido2ClientFactory.instance().createAssertionService(self.getMetaDataConfiguration(), forwardedFor, userAgent)
                 assertionResult = mapper.readValue(token_response, AssertionResult)
 
                 assertionStatus = assertionService.verify(assertionResult)
@@ -162,7 +164,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 return True
             elif auth_method == 'enroll':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish registration flow"
-                attestationService = Fido2ClientFactory.instance().createAttestationService(self.getMetaDataConfiguration())
+                forwardedFor, userAgent = self.getForwardedContext()
+                attestationService = Fido2ClientFactory.instance().createAttestationService(self.getMetaDataConfiguration(), forwardedFor, userAgent)
                 attestationResult = mapper.readValue(token_response, AttestationResult)
                 attestationStatus = attestationService.verify(attestationResult)
 
@@ -191,7 +194,8 @@ class PersonAuthentication(PersonAuthenticationType):
         facesContext = CdiUtil.bean(FacesContext)
         domain = facesContext.getExternalContext().getRequest().getServerName()
         print ("domain %s : " % domain)
-        assertionService = Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration)
+        forwardedFor, userAgent = self.getForwardedContext()
+        assertionService = Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration, forwardedFor, userAgent)
         allowList = self.getCookieValue();
         if step == 1:
             try:
@@ -244,8 +248,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start attestation flow"
 
                 try:
-                    attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration)
-                    
+                    attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration, forwardedFor, userAgent)
+
                     attestationRequest = AttestationOptions()
                     attestationRequest.setUsername(userName)
                     attestationRequest.setOrigin(domain)
@@ -330,6 +334,17 @@ class PersonAuthentication(PersonAuthenticationType):
         finally:
             self.metaDataLoaderLock.unlock()
 
+
+    def getForwardedContext(self):
+        # Forwards the Auth Server's own directly-observed remote address, never the caller-supplied
+        # X-Forwarded-For header: nothing here establishes that this request came through a trusted
+        # reverse proxy rather than being sent straight at the Auth Server, so trusting that header
+        # would let an external caller spoof the address FIDO2 records. The browser's real
+        # User-Agent is passed straight through, since it carries no equivalent trust question.
+        httpRequest = ServerUtil.getRequestOrNull()
+        if httpRequest == None:
+            return (None, None)
+        return (httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"))
 
     def getCookieValue(self):
     # sample allow list -  [{ id: ...., type: 'public-key', transports: ['usb', 'ble', 'nfc']}]
