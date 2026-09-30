@@ -176,6 +176,25 @@ Beyond the outcome itself, each raw entry records where the operation came from:
     strips any client-supplied value; otherwise the recorded address can be spoofed by the
     caller.
 
+!!! note "The browser never calls FIDO2 directly"
+    A passkey ceremony's actual HTTP client is the Authorization Server (via an Agama flow or the
+    person-authentication interception script) or Casa — the browser talks to one of those, and
+    they relay attestation/assertion calls to FIDO2 over a plain service-to-service connection.
+    Without anything forwarding the browser's own connection details on that hop, `ipAddress`
+    records the relay's own address on every entry, `userAgent` records the relay's HTTP client
+    library (e.g. `Apache-HttpClient/4.5.14`), and `deviceInfo`'s parsed fields fall back to
+    `UNKNOWN` accordingly, since there's no real browser user agent to parse.
+
+    Both relays forward the end user's real `X-Forwarded-For` and `User-Agent` on their call to
+    FIDO2, so this is fixed as long as FIDO2 is configured to trust them: add the Authorization
+    Server's and Casa's own addresses to `trustedProxyIpRanges` (see
+    [Client IP in metrics](fido2-server-properties-config.md#client-ip-in-metrics)) if
+    `trustedProxyEnabled` is `true`. If `trustedProxyEnabled` is left unset, the forwarded value is
+    already honored with no configuration — that default trusts `X-Forwarded-For` from *any*
+    caller, not only the two relays, which is the same pre-existing exposure the setting itself
+    warns about. `userAgent` carries no equivalent trust setting: whatever the relay sends is
+    recorded as-is, the same as it always was for a direct caller.
+
 ### Native-client telemetry (optional)
 
 A native app/SDK (iOS, Android) may attach an optional `telemetry` object to any attestation or
