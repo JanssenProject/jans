@@ -14,15 +14,16 @@ logger = logging.getLogger("cloudtools")
 
 
 def replace_fqdn_substr(val, old_fqdn, new_fqdn):
+    # note that FQDN is not case-sensitive
     if isinstance(val, str):
         pattern = rf"(?<![\w.-]){re.escape(old_fqdn)}(?![\w.-])"
-        return re.sub(pattern, new_fqdn, val)
+        return re.sub(pattern, new_fqdn, val, flags=re.IGNORECASE)
 
     if isinstance(val, bytes):
         old_fqdn = old_fqdn.encode()
         new_fqdn = new_fqdn.encode()
         pattern = rb"(?<![\w.-])" + re.escape(old_fqdn) + rb"(?![\w.-])"
-        return re.sub(pattern, new_fqdn, val)
+        return re.sub(pattern, new_fqdn, val, flags=re.IGNORECASE)
 
     if isinstance(val, list):
         return [replace_fqdn_substr(item, old_fqdn, new_fqdn) for item in val]
@@ -46,6 +47,7 @@ class Domain:
         for entry in self.persistence.search(table_name):
             # flag to determine whether entry need to be updated in persistence
             should_update = False
+            mod_entry = {}
 
             for col_name, col_val in entry.items():
                 new_val = replace_fqdn_substr(col_val, old_fqdn, new_fqdn)
@@ -58,13 +60,13 @@ class Domain:
 
                 # mark entry for updates
                 should_update = True
-                entry[col_name] = new_val
+                mod_entry[col_name] = new_val
 
             if should_update and not self.dry_run:
                 if "jansRevision" in entry:
-                    entry["jansRevision"] = int(entry["jansRevision"] or 0) + 1
+                    mod_entry["jansRevision"] = int(entry["jansRevision"] or 0) + 1
 
-                if not self.persistence.update(table_name, entry["doc_id"], entry):
+                if not self.persistence.update(table_name, entry["doc_id"], mod_entry):
                     raise RuntimeError(
                         f"FQDN update failed for {table_name}: doc_id={entry['doc_id']}"
                     )
@@ -77,6 +79,8 @@ class Domain:
 
             if self.manager.config.set("hostname", new_fqdn):
                 logger.info("FQDN has been changed from %s to %s, please replace TLS certificate to avoid SSL issue", old_fqdn, new_fqdn)
+            else:
+                raise RuntimeError("Unable to change FQDN in configmap")
 
     def change_fqdn(self, old_fqdn, new_fqdn):
         logger.info("Changing FQDN from %s to %s", old_fqdn, new_fqdn)
@@ -114,12 +118,20 @@ def change_fqdn(new_fqdn, old_fqdn, dry_run):
     """Change FQDN."""
     manager = get_manager()
 
+    # validate old FQDN
     if not old_fqdn:
-        old_fqdn = manager.config.get("hostname")
-        logger.warning("Detected empty value for old FQDN; the value is now taken from existing configmap: %s", old_fqdn)
+        logger.warning("Detected empty value for old FQDN via --old-fqdn option; trying to get the value from existing configmap")
+        old_fqdn = manager.config.get("hostname") or ""
+
+        if not old_fqdn:
+            raise RuntimeError(f"Got empty FQDN from existing configmap (key=hostname, value={old_fqdn}); process is aborted")
+
+    # old_fqdn shouldn't match new_fqdn
+    if old_fqdn == new_fqdn:
+        raise RuntimeError(f"The old FQDN equals the new FQDN (old={old_fqdn}, new={new_fqdn}); process is aborted")
 
     if dry_run:
-        logger.warning("The dry run mode is enabled; changes will not be persisted!")
+        logger.warning("The dry run mode is enabled --dry-run option; changes will not be persisted!")
 
     with manager.create_lock("change-fqdn"):
         domain = Domain(manager, dry_run=dry_run)
