@@ -769,6 +769,15 @@ impl Cedarling {
             .map_err(|e: CoreMetricsError| MetricsError::from(e))
     }
 
+    /// Returns the ID of the currently published policy store, if it carries one.
+    ///
+    /// `None` when the store carries no ID. The value is an opaque,
+    /// source-dependent string; it may change after a background refresh.
+    #[uniffi::method]
+    pub fn policy_store_id(&self) -> Option<String> {
+        self.inner.policy_store_id()
+    }
+
     #[uniffi::method]
     pub fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
         self.inner.is_trusted_issuer_loaded_by_name(issuer_id)

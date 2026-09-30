@@ -1324,6 +1324,24 @@ async fn test_trusted_issuer_loading_info_defaults() {
     }
 }
 
+#[wasm_bindgen_test]
+async fn test_policy_store_id_defaults() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    assert_eq!(
+        instance.policy_store_id(),
+        Some("gICAgcHJpbmNpcGFsIGlz".to_string()),
+        "legacy store should report policy_stores map key"
+    );
+}
+
 /// Test that function `spawn_task` works as expected
 #[wasm_bindgen_test]
 async fn test_spawn_task() {
