@@ -403,6 +403,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         TokenEntity lockedRefreshToken = lockAndRemoveRefreshToken(refreshToken);
         if (lockedRefreshToken == null) {
             log.trace("Failed to lock refresh token {}", refreshToken);
+            removeOrphanedRefreshToken(reToken);
             return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Failed to lock refresh token."), auditLog);
         }
 
@@ -419,6 +420,20 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 scope,
                 idToken, checkedAuthzDetails);
         return response(Response.ok().entity(entity), auditLog);
+    }
+
+    private void removeOrphanedRefreshToken(RefreshToken replacement) {
+        if (replacement == null) {
+            return;
+        }
+        try {
+            final TokenEntity entity = grantService.getGrantByCode(replacement.getCode());
+            if (entity != null) {
+                grantService.remove(entity);
+            }
+        } catch (Exception e) {
+            log.error("Failed to remove orphaned replacement refresh token.", e);
+        }
     }
 
     private TokenEntity lockAndRemoveRefreshToken(String refreshTokenCode) {

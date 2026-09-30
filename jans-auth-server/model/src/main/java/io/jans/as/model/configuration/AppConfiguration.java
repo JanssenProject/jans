@@ -1214,7 +1214,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getRequirePkce() {
-        if (requirePkce == null) requirePkce = false;
+        if (requirePkce == null) requirePkce = true;
         return requirePkce;
     }
 
@@ -4069,7 +4069,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getAuthorizationResponseIssParameterSupported() {
-        if (authorizationResponseIssParameterSupported == null) authorizationResponseIssParameterSupported = false;
+        if (authorizationResponseIssParameterSupported == null) authorizationResponseIssParameterSupported = true;
         return authorizationResponseIssParameterSupported;
     }
 

@@ -119,7 +119,7 @@ public class RedirectionUriService {
                 if (redirectUris != null) {
                     log.trace("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
                             client.getClientId(), redirectionUri, redirectUris.length);
-                    if (isUriEqual(redirectionUri, redirectUris)) {
+                    if (isUriEqual(redirectionUri, redirectUris, true)) {
                         log.trace("Redirect URI 'equals' found, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
 
                         return redirectionUri;
@@ -155,9 +155,16 @@ public class RedirectionUriService {
     }
 
     public static boolean isUriEqual(String redirectionUri, String[] redirectUris) {
-        // RFC 8252 7.3: for loopback interface redirect URIs the AS MUST allow the port to vary from
-        // what was registered, since native apps typically obtain an ephemeral port at request time.
-        final boolean redirectionUriIsLoopback = isLoopbackRedirectUri(redirectionUri);
+        return isUriEqual(redirectionUri, redirectUris, false);
+    }
+
+    /**
+     * @param allowLoopbackPortVariance RFC 8252 7.3: for authorization redirect URIs on the loopback interface the AS MUST
+     *                                  allow the port to vary from what was registered, since native apps typically obtain
+     *                                  an ephemeral port at request time. Must be false for other comparisons (e.g. post logout).
+     */
+    public static boolean isUriEqual(String redirectionUri, String[] redirectUris, boolean allowLoopbackPortVariance) {
+        final boolean redirectionUriIsLoopback = allowLoopbackPortVariance && isLoopbackRedirectUri(redirectionUri);
         final String redirectUriWithoutParams = uriWithoutParams(redirectionUriIsLoopback ? stripPort(redirectionUri) : redirectionUri);
 
         for (String uri : redirectUris) {
@@ -200,8 +207,22 @@ public class RedirectionUriService {
             if (parsed.getPort() == -1) {
                 return uri;
             }
-            return new URI(parsed.getScheme(), parsed.getUserInfo(), parsed.getHost(), -1,
-                    parsed.getPath(), parsed.getQuery(), parsed.getFragment()).toString();
+            // rebuild from raw components so escaped characters are not decoded
+            final StringBuilder sb = new StringBuilder(parsed.getScheme()).append("://");
+            if (parsed.getRawUserInfo() != null) {
+                sb.append(parsed.getRawUserInfo()).append('@');
+            }
+            sb.append(parsed.getHost());
+            if (parsed.getRawPath() != null) {
+                sb.append(parsed.getRawPath());
+            }
+            if (parsed.getRawQuery() != null) {
+                sb.append('?').append(parsed.getRawQuery());
+            }
+            if (parsed.getRawFragment() != null) {
+                sb.append('#').append(parsed.getRawFragment());
+            }
+            return sb.toString();
         } catch (URISyntaxException e) {
             return uri;
         }

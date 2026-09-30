@@ -153,17 +153,27 @@ public class RedirectionUriServiceTest {
 
     @Test
     public void isUriEqual_loopbackWithDifferentPort_shouldReturnTrue() {
-        assertTrue(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/cb", new String[]{"http://127.0.0.1:4000/cb"}));
+        assertTrue(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/cb", new String[]{"http://127.0.0.1:4000/cb"}, true));
     }
 
     @Test
     public void isUriEqual_loopbackWithDifferentPortAndPath_shouldReturnFalse() {
-        assertFalse(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/other", new String[]{"http://127.0.0.1:4000/cb"}));
+        assertFalse(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/other", new String[]{"http://127.0.0.1:4000/cb"}, true));
     }
 
     @Test
     public void isUriEqual_nonLoopbackWithDifferentPort_shouldReturnFalse() {
         assertFalse(RedirectionUriService.isUriEqual("https://client.example.com:5000/cb", new String[]{"https://client.example.com:4000/cb"}));
+    }
+
+    @Test
+    public void isUriEqual_loopbackWithDifferentPortWithoutVariance_shouldReturnFalse() {
+        assertFalse(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/cb", new String[]{"http://127.0.0.1:4000/cb"}));
+    }
+
+    @Test
+    public void isUriEqual_loopbackWithEncodedSlashInRegisteredPath_shouldReturnFalse() {
+        assertFalse(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/cb/extra", new String[]{"http://127.0.0.1:4000/cb%2Fextra"}, true));
     }
 
     @Test
