@@ -115,7 +115,6 @@ class JcsCanonicalizerTest {
 			"1e+21, 1e+21",
 			"1E21, 1e+21",
 			"1e20, 100000000000000000000",
-			"123456789012345680000, 123456789012345680000",
 			"123456789012345680000.0, 123456789012345680000",
 			"1e-7, 1e-7",
 			"1.5e-10, 1.5e-10",
@@ -123,9 +122,9 @@ class JcsCanonicalizerTest {
 			"0.0000001, 1e-7",
 			"5e-324, 5e-324",
 			"1.7976931348623157e308, 1.7976931348623157e+308",
-			"9007199254740993, 9007199254740993",
-			"-9007199254740993, -9007199254740993",
-			"9223372036854775807, 9223372036854775807",
+			"9007199254740992, 9007199254740992",
+			"9007199254740994, 9007199254740994",
+			"1000000000000000000000, 1e+21",
 			"9007199254740993.0, 9007199254740992",
 			"0.30000000000000004, 0.30000000000000004",
 			"0.1, 0.1",
@@ -146,11 +145,17 @@ class JcsCanonicalizerTest {
 	}
 
 	@Test
-	void testCanonicalize_numbers_bigIntegerBeyondSafeRangeKeepsExactDigits() {
-		BigInteger huge = new BigInteger("123456789012345678901234567890");
-
-		assertEquals("123456789012345678901234567890",
-				JcsCanonicalizer.canonicalize(JsonNodeFactory.instance.numberNode(huge)));
+	void testCanonicalize_numbers_unrepresentableIntegersRejected() throws IOException {
+		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(MAPPER.readTree("9007199254740993")));
+		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(MAPPER.readTree("-9007199254740993")));
+		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(MAPPER.readTree("9223372036854775807")));
+		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(MAPPER.readTree("123456789012345680000")));
+		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(
+				JsonNodeFactory.instance.numberNode(new BigInteger("9223372036854775808"))));
+		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(
+				JsonNodeFactory.instance.numberNode(new BigInteger("123456789012345678901234567890"))));
+		assertThrows(JcsException.class, () -> JcsCanonicalizer.canonicalize(
+				JsonNodeFactory.instance.numberNode(BigInteger.TEN.pow(400))));
 	}
 
 	@Test
