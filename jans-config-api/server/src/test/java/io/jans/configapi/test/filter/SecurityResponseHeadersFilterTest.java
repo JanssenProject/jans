@@ -30,17 +30,12 @@ import java.net.URI;
  * needs no running server, no network, and no test.properties - just the
  * filter class itself plus TestNG + Mockito on the test classpath.
  *
- * Suggested location:
- *   jans-config-api/server/src/test/java/io/jans/configapi/filters/SecurityResponseHeadersFilterTest.java
  *
  * Suggested test-scope dependency (if not already present in the module's
  * pom.xml):
  *   org.mockito:mockito-core
  *
- * NOTE: written by hand against the filter source; I don't have network or a
- * Maven repo in this environment to actually compile/run it, so please build
- * it once before trusting it, in case a Mockito/Jakarta API detail
- * (e.g. exact MultivaluedMap import) differs on your classpath version.
+ * 
  */
 public class SecurityResponseHeadersFilterTest {
 

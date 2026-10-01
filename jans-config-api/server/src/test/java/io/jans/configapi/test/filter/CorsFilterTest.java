@@ -24,6 +24,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -66,11 +67,12 @@ public class CorsFilterTest {
     @Mock
     private FilterChain filterChain;
 
+    private AutoCloseable autoCloseable;
     private CorsFilter corsFilter;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        MockitoAnnotations.openMocks(this);
+        autoCloseable =  MockitoAnnotations.openMocks(this);
 
         corsFilter = new CorsFilter();
         inject(corsFilter, "log", logger);
@@ -79,6 +81,11 @@ public class CorsFilterTest {
         lenient().when(corsConfiguration.isEnabled()).thenReturn(true);
         lenient().when(request.getHeader(ORIGIN_HEADER)).thenReturn(ALLOWED_ORIGIN);
         lenient().when(request.getMethod()).thenReturn("GET");
+    }
+    
+    @AfterMethod
+    public void tearDown() throws Exception {
+        autoCloseable.close();
     }
 
     private static void inject(Object target, String fieldName, Object value) throws Exception {
