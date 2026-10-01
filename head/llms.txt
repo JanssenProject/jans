@@ -205,6 +205,7 @@ Janssen Project is a Linux Foundation-hosted platform for building identity and 
 - [Kubernetes Operations](https://docs.jans.io/head/janssen-server/kubernetes-ops/index.md)
 - [Backup and Restore](https://docs.jans.io/head/janssen-server/kubernetes-ops/backup-restore/index.md)
 - [Certificate Management](https://docs.jans.io/head/janssen-server/kubernetes-ops/cert-management/index.md)
+- [Change FQDN](https://docs.jans.io/head/janssen-server/kubernetes-ops/change-fqdn/index.md)
 - [Custom Attributes](https://docs.jans.io/head/janssen-server/kubernetes-ops/custom-attributes/index.md)
 - [Customization](https://docs.jans.io/head/janssen-server/kubernetes-ops/customization/index.md)
 - [External Secrets/Configmaps](https://docs.jans.io/head/janssen-server/kubernetes-ops/external-secrets-configmaps/index.md)

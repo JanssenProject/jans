@@ -33522,6 +33522,7 @@ This Operation guide helps you learn about the common operations for Janssen on 
 - [Custom Attributes](custom-attributes.md)
 - [Shibboleth IDP](../shibboleth-idp/helm-deployment.md)
 - [Memory Dump](memory-dump.md)
+- [Change FQDN](change-fqdn.md)
 
 The Jans Server should be backed up frequently, **we recommend once daily**.
 
@@ -33619,7 +33620,7 @@ Rotating Certificates and Keys in Kubernetes setup
       template:
         metadata:
           annotations:
-            sidecar.istio.io/inject: "false"                  
+            sidecar.istio.io/inject: "false"
         spec:
           restartPolicy: Never
           containers:
@@ -33627,14 +33628,14 @@ Rotating Certificates and Keys in Kubernetes setup
               image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
-                  name: janssen-config-cm # This may be differnet in Helm
+                  name: janssen-config-cm # This may be different in Helm
               args: ["certmanager", "patch", "web", "--opts", "valid-to:365"]
     ```
 
-2.  Apply job        
+2.  Apply job
     ```bash
     kubectl apply -f web-key-rotation.yaml -n <jans-namespace>
-    ```            
+    ```
 
 ### Load from existing source
 
@@ -33642,13 +33643,13 @@ Rotating Certificates and Keys in Kubernetes setup
     This will load `web_https.crt` and `web_https.key` from `/etc/certs`.
 
 1. Create a secret with `web_https.crt` and `web_https.key`. Note that this may already exist in your deployment.
-            
+
     ```bash
     kubectl create secret generic web-cert-key --from-file=web_https.crt --from-file=web_https.key -n <jans-namespace>
     ```
 
 2.  Create a file named `load-web-key-rotation.yaml` with the following contents :
-                               
+
     ```yaml
     apiVersion: batch/v1
     kind: Job
@@ -33658,7 +33659,7 @@ Rotating Certificates and Keys in Kubernetes setup
       template:
         metadata:
           annotations:
-            sidecar.istio.io/inject: "false"                  
+            sidecar.istio.io/inject: "false"
         spec:
           restartPolicy: Never
           volumes:
@@ -33673,13 +33674,13 @@ Rotating Certificates and Keys in Kubernetes setup
               secretName: web-cert-key
               items:
                 - key: web_https.key
-                  path: web_https.key                              
+                  path: web_https.key
           containers:
             - name: load-web-key-rotation
               image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
-                  name: janssen-config-cm  #This may be differnet in Helm
+                  name: janssen-config-cm  #This may be different in Helm
               volumeMounts:
                 - name: web-cert
                   mountPath: /etc/certs/web_https.crt
@@ -33695,6 +33696,43 @@ Rotating Certificates and Keys in Kubernetes setup
 ```bash
 kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
 ```
+
+### Optional: update TLS secret
+
+!!! Warning
+    Apply the TLS secret update only if steps from [Rotate](#rotate) or [Load from existing source](#load-from-existing-source) section are successfully completed.
+
+Ingress or Gateway API controllers may use TLS secret named `tls-certificate` in release namespace. The TLS secret need to be updated to reflect the changes.
+
+1.  Extract TLS cert and key from Janssen, for example:
+
+    ```bash
+    umask 077
+    kubectl -n <jans-namespace> get secret cn --template='{{.data.ssl_cert}}' | base64 -d > tls.crt
+    kubectl -n <jans-namespace> get secret cn --template='{{.data.ssl_key}}' | base64 -d > tls.key
+    ```
+
+    !!! Note
+        The example above only shows how to get TLS cert and key stored in kubernetes secret backend.
+        Refer to [External Secrets/Configmaps](external-secrets-configmaps/#retrieve-secrets) if using other backends.
+
+1.  Update the TLS secret:
+
+    ```bash
+    kubectl -n <jans-namespace> create secret tls tls-certificate --cert=tls.crt --key=tls.key --dry-run=client -o yaml | kubectl apply -f -
+    ```
+
+1.  Remove temporary files:
+
+    ```bash
+    rm -f tls.crt tls.key
+    ```
+
+1.  Rollout restart (or re-deploy) the Ingress/Gateway API controller, for example:
+
+    ```bash
+    kubectl -n <jans-namespace> rollout restart deployment jans-gateway-nginx
+    ```
 
 ## Auth-server
 
@@ -33747,6 +33785,95 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
     ```bash
     kubectl apply -f auth-key-rotation.yaml -n <jans-namespace>
     ```
+
+# Changing FQDN (Fully Qualified Domain Name)
+
+
+Changing FQDN in Kubernetes setup
+
+!!! Note
+    `janssen-config-cm` in all examples refer to jans installation configuration parameters where `janssen` is the `helm-release-name`.
+
+!!! Warning
+    This feature is experimental and in alpha state, mostly used for development and testing.
+
+## Mandatory steps
+
+1.  Create a file named `change-fqdn.yaml` with the following contents :
+
+    ```yaml
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: change-fqdn
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: change-fqdn
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
+              envFrom:
+              - configMapRef:
+                  name: janssen-config-cm # This may be different in Helm
+              args: ["change-fqdn", "new-demoexample.jans.io", "--old-fqdn", "demoexample.jans.io"]
+    ```
+
+    The `change-fqdn` command supports options (passed into `args`) to change the behavior of the running process:
+
+    1. `--old-fqdn`: The old FQDN that need to changed (If omitted or empty, the value will be taken from existing configmaps).
+    2. `--dry-run`: Simulate the process without persisting the changes (disabled by default).
+
+2.  Apply job:
+    ```bash
+    kubectl apply -f change-fqdn.yaml -n <jans-namespace>
+    ```
+
+3.  Wait for the `job/change-fqdn` become completed and no failure before proceeding to additional steps.
+
+## Additional steps
+
+!!! Warning
+    Do not execute the following steps if dry-run mode is enabled.
+
+1.  Replace the certificate using `certmanager`, see [Certificate Management](cert-management.md#web-ingress) for further instructions.
+
+2.  Modify the customized `values.yaml` and change all of the occurrences of old FQDN with the new one.
+
+3.  Upgrade the setup, for example:
+
+    ```bash
+    helm upgrade <helm-release-name> janssen-auth-server/janssen \
+      --version <helm-chart-version> \
+      -f values.yaml \
+      -n <jans-namespace>
+    ```
+
+## Terraform users
+
+If the deployment is managed with the [Janssen Terraform provider](../terraform/README.md), the configuration and state still hold the old FQDN after `change-fqdn` runs. A later `terraform apply` sends the old values back (e.g. `issuer` and `base_endpoint` in `jans_app_configuration`, `redirect_uris` in `jans_oidc_client`) and undoes the change.
+
+!!! Warning
+    Do not run `terraform apply` between the `change-fqdn` job and the steps below.
+
+1.  Point the provider at the new FQDN, either `url` in the `provider "jans"` block or the `JANS_URL` environment variable.
+
+2.  Replace the old FQDN with the new one in all `.tf` and `.tfvars` files, for example:
+
+    ```bash
+    grep -rlF demoexample.jans.io --include='*.tf' --include='*.tfvars' . | xargs sed -i 's/demoexample\.jans\.io/new-demoexample.jans.io/g'
+    ```
+
+3.  Sync the state with the values already on the server:
+
+    ```bash
+    terraform apply -refresh-only
+    ```
+
+4.  Run `terraform plan`. It should report no changes. If it still shows the old FQDN, fix the configuration files, not the server.
 
 # Custom Attributes
 
