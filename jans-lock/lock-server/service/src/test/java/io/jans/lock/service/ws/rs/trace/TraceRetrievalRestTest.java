@@ -39,6 +39,7 @@ import io.jans.lock.service.trace.identity.EvidenceDomainResolver;
 import io.jans.lock.service.trace.identity.SubmitterIdentity;
 import io.jans.lock.service.trace.identity.SubmitterIdentityService;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
+import io.jans.lock.service.trace.retrieve.TraceRetrievalService;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
 import jakarta.servlet.http.HttpServletRequest;
@@ -86,6 +87,8 @@ class TraceRetrievalRestTest extends BaseLockServiceTest {
 		MockitoAnnotations.openMocks(this);
 
 		traceStore = new InMemoryTraceStore();
+		TraceRetrievalService retrievalService = new TraceRetrievalService();
+		setField(retrievalService, "traceStore", traceStore);
 
 		impl = new TraceRestWebServiceImpl();
 		setField(impl, "log", LoggerFactory.getLogger(TraceRestWebServiceImpl.class));
@@ -93,7 +96,7 @@ class TraceRetrievalRestTest extends BaseLockServiceTest {
 		setField(impl, "errorResponseFactory", errorResponseFactory);
 		setField(impl, "submitterIdentityService", submitterIdentityService);
 		setField(impl, "evidenceDomainResolver", evidenceDomainResolver);
-		setField(impl, "traceStore", traceStore);
+		setField(impl, "retrievalService", retrievalService);
 		setField(impl, "applicationAuditLogger", applicationAuditLogger);
 
 		traceConfiguration = new TraceConfiguration();
