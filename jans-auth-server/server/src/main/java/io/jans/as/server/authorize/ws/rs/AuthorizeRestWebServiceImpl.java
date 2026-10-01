@@ -527,6 +527,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         runCiba(authzRequest, client);
         processDeviceAuthorization(deviceAuthzUserCode, user);
+        if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
+            deviceAuthorizationService.removeUserCodeFromSession(sessionIdService.getSessionId(authzRequest.getHttpRequest()));
+        }
 
         return builder;
     }
