@@ -364,7 +364,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         validateRequestJwt(authzRequest, isPar, client);
 
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
-        authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getCodeChallengeMethod(), authzRequest.getRedirectUriResponse(), client);
+        validatePkceIfNeeded(authzRequest, client, deviceAuthzUserCode);
 
         dpopService.validateDpopThumprintIsPresent(authzRequest.getDpopJkt(), authzRequest.getState());
 
@@ -816,6 +816,17 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             log.debug("validateMaxAge - redirect to authorization page, request {}", authzRequest);
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
+    }
+
+    /**
+     * Device flow: user approves on the authorization page and no authorization code is issued (the device
+     * redeems device_code at the token endpoint), so there is no code_challenge to validate in that case.
+     */
+    void validatePkceIfNeeded(AuthzRequest authzRequest, Client client, String deviceAuthzUserCode) {
+        if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
+            return;
+        }
+        authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getCodeChallengeMethod(), authzRequest.getRedirectUriResponse(), client);
     }
 
     public void checkOfflineAccessScopes(List<ResponseType> responseTypes, List<Prompt> prompts, Client client, Set<String> scopes) {
