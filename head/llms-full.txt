@@ -55949,6 +55949,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## API Reference
 
+The full API is auto-generated from the `cedarling` crate source on every
+release: [Cedarling Rust API documentation](https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html).
+The sections below are a narrative overview of the most-used types and methods.
+
 ### Core Types
 
 - `Cedarling`
