@@ -19,6 +19,7 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.json.JSONObject;
@@ -506,7 +507,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 .claimsPresence(JwtClaimName.EMAIL)
                 .check();
 
-        // 5. Request user info (URL_QUERY_PARAMETER)
+        // 5. Request user info (URL_QUERY_PARAMETER) - rejected, OAuth 2.1 forbids access_token in query
         UserInfoRequest userInfoRequest3 = new UserInfoRequest(accessToken);
         userInfoRequest3.setAuthorizationMethod(AuthorizationMethod.URL_QUERY_PARAMETER);
         UserInfoClient userInfoClient3 = new UserInfoClient(userInfoEndpoint);
@@ -514,10 +515,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response4 = userInfoClient3.exec();
 
         showClient(userInfoClient3);
-        AssertBuilder.userInfoResponse(response4)
-                .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.EMAIL)
-                .check();
+        assertEquals(response4.getStatus(), 400, "Unexpected response code: " + response4.getEntity());
+        assertEquals(response4.getErrorType(), UserInfoErrorResponseType.INVALID_REQUEST);
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
