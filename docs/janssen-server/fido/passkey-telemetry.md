@@ -187,12 +187,20 @@ Beyond the outcome itself, each raw entry records where the operation came from:
 
     Both relays therefore pass what they observed on the browser's request to FIDO2: the
     connecting address (the servlet request's `getRemoteAddr()`), sent as `X-Forwarded-For`, and the
-    browser's `User-Agent`. They do not read or relay an `X-Forwarded-For` header the browser or an
-    upstream proxy supplied. In the Janssen container images, Jetty's `forwarded` module is enabled,
-    so when Apache or nginx fronts the Authorization Server or Casa and sets `X-Forwarded-For`, that
-    connecting address already resolves to the real browser IP. If a different proxy sits in front
-    of a relay and Jetty is not set up to trust it, the address FIDO2 records is that proxy's, not
-    the browser's — `trustedProxyIpRanges` cannot recover an address the relay never forwarded.
+    browser's `User-Agent`. They never copy a raw `X-Forwarded-For` header from the incoming request.
+    Jetty may, however, derive `getRemoteAddr()` from such a header: in the Janssen container images
+    its `forwarded` module is enabled, so when Apache or nginx fronts the Authorization Server or
+    Casa and sets `X-Forwarded-For`, the connecting address already resolves to the real browser IP.
+    If a different proxy sits in front of a relay and Jetty is not set up to trust it, the address
+    FIDO2 records is that proxy's, not the browser's — `trustedProxyIpRanges` cannot recover an
+    address the relay never forwarded.
+
+    Forwarding requires the FIDO2 endpoint to be `https://` (plain `http://` is only accepted for a
+    loopback host), because the end user's address and user agent are not sent in clear text. For a
+    non-loopback `http://` endpoint the person-authentication interception script logs a warning and
+    calls FIDO2 without the context, so the entry records the relay as described above. Casa's
+    passkey enrollment and the Agama `FidoValidator` do not fall back: the call fails before it is
+    sent, so use an `https://` FIDO2 endpoint with them.
 
     On the FIDO2 side, if `trustedProxyEnabled` is `true`, add the Authorization Server's and Casa's
     own addresses to `trustedProxyIpRanges` (see
