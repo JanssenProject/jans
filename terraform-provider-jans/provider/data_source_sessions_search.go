@@ -81,6 +81,7 @@ func dataSourceSessionsSearch() *schema.Resource {
 						"device_secrets": {
 							Type:        schema.TypeList,
 							Computed:    true,
+							Sensitive:   true,
 							Description: "List of device secrets",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,

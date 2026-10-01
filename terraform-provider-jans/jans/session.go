@@ -1,110 +1,111 @@
 package jans
 
 import (
-        "context"
+	"context"
+	"encoding/json"
+	"net/url"
 )
 
 // SessionId represents a user session in Janssen
 type SessionId struct {
-        Dn                       string                 `json:"dn,omitempty"`
-        Id                       string                 `json:"id,omitempty"`
-        Sid                      string                 `json:"sid,omitempty"`
-        CreationDate             string                 `json:"creationDate,omitempty"`
-        State                    string                 `json:"state,omitempty"`
-        SessionState             string                 `json:"sessionState,omitempty"`
-        UserDn                   string                 `json:"userDn,omitempty"`
-        AuthenticationTime       string                 `json:"authenticationTime,omitempty"`
-        LastUsedAt               string                 `json:"lastUsedAt,omitempty"`
-        PermissionGranted        bool                   `json:"permissionGranted,omitempty"`
-        PermissionGrantedMap     map[string]bool        `json:"permissionGrantedMap,omitempty"`
-        InvolvedClientsIds       []string               `json:"involvedClientsIds,omitempty"`
-        SessionAttributes        map[string]string      `json:"sessionAttributes,omitempty"`
-        DeviceSecrets            []string               `json:"deviceSecrets,omitempty"`
-        JansId                   string                 `json:"jansId,omitempty"`
+	Dn                   string            `json:"dn,omitempty"`
+	Id                   string            `json:"id,omitempty"`
+	Sid                  string            `json:"sid,omitempty"`
+	CreationDate         string            `json:"creationDate,omitempty"`
+	State                string            `json:"state,omitempty"`
+	SessionState         string            `json:"sessionState,omitempty"`
+	UserDn               string            `json:"userDn,omitempty"`
+	AuthenticationTime   string            `json:"authenticationTime,omitempty"`
+	LastUsedAt           string            `json:"lastUsedAt,omitempty"`
+	PermissionGranted    bool              `json:"permissionGranted,omitempty"`
+	PermissionGrantedMap map[string]bool   `json:"permissionGrantedMap,omitempty"`
+	InvolvedClientsIds   []string          `json:"involvedClientsIds,omitempty"`
+	SessionAttributes    map[string]string `json:"sessionAttributes,omitempty"`
+	DeviceSecrets        []string          `json:"deviceSecrets,omitempty"`
+	JansId               string            `json:"jansId,omitempty"`
 }
 
 // SessionPagedResult represents a paged result of sessions
 type SessionPagedResult struct {
-        Start             int         `json:"start,omitempty"`
-        TotalEntriesCount int         `json:"totalEntriesCount,omitempty"`
-        EntriesCount      int         `json:"entriesCount,omitempty"`
-        Entries           []SessionId `json:"entries,omitempty"`
+	Start             int         `json:"start,omitempty"`
+	TotalEntriesCount int         `json:"totalEntriesCount,omitempty"`
+	EntriesCount      int         `json:"entriesCount,omitempty"`
+	Entries           []SessionId `json:"entries,omitempty"`
 }
 
 // GetSessions returns all active sessions from the Janssen server
 func (c *Client) GetSessions(ctx context.Context) ([]SessionId, error) {
-        scope := "https://jans.io/oauth/jans-auth-server/session.readonly"
-        token, err := c.ensureToken(ctx, scope)
-        if err != nil {
-                return nil, err
-        }
+	scope := "https://jans.io/oauth/jans-auth-server/session.readonly"
+	token, err := c.ensureToken(ctx, scope)
+	if err != nil {
+		return nil, err
+	}
 
-        var result SessionPagedResult
-        err = c.get(ctx, "/jans-config-api/api/v1/jans-auth-server/session", token, scope, &result)
-        if err != nil {
-                return nil, err
-        }
+	var result SessionPagedResult
+	err = c.get(ctx, "/jans-config-api/api/v1/jans-auth-server/session", token, scope, &result)
+	if err != nil {
+		return nil, err
+	}
 
-        return result.Entries, nil
+	return result.Entries, nil
 }
 
 // GetSession returns a specific session by session ID
 func (c *Client) GetSession(ctx context.Context, sid string) (*SessionId, error) {
-        scope := "https://jans.io/oauth/jans-auth-server/session.readonly"
-        token, err := c.ensureToken(ctx, scope)
-        if err != nil {
-                return nil, err
-        }
+	scope := "https://jans.io/oauth/jans-auth-server/session.readonly"
+	token, err := c.ensureToken(ctx, scope)
+	if err != nil {
+		return nil, err
+	}
 
-        var session SessionId
-        err = c.get(ctx, "/jans-config-api/api/v1/jans-auth-server/session/sid/"+sid, token, scope, &session)
-        if err != nil {
-                return nil, err
-        }
+	var session SessionId
+	err = c.get(ctx, "/jans-config-api/api/v1/jans-auth-server/session/sid/"+url.PathEscape(sid), token, scope, &session)
+	if err != nil {
+		return nil, err
+	}
 
-        return &session, nil
+	return &session, nil
 }
 
 // RevokeUserSessions revokes all sessions for a specific user by userDn
 func (c *Client) RevokeUserSessions(ctx context.Context, userDn string) error {
-        // Session revocation requires both scopes
-        // revoke_session is a feature flag, not a grantable scope; use the endpoint's
-        // super-scope session.admin, which the config-api accepts as a full override.
-        scope := "https://jans.io/oauth/jans-auth-server/session.admin"
-        token, err := c.ensureToken(ctx, scope)
-        if err != nil {
-                return err
-        }
+	// Session revocation requires both scopes
+	// revoke_session is a feature flag, not a grantable scope; use the endpoint's
+	// super-scope session.admin, which the config-api accepts as a full override.
+	scope := "https://jans.io/oauth/jans-auth-server/session.admin"
+	token, err := c.ensureToken(ctx, scope)
+	if err != nil {
+		return err
+	}
 
-        return c.delete(ctx, "/jans-config-api/api/v1/jans-auth-server/session/user/"+userDn, token, scope)
+	return c.delete(ctx, "/jans-config-api/api/v1/jans-auth-server/session/user/"+url.PathEscape(userDn), token, scope)
 }
 
 // SearchSessions returns sessions matching the server-side search endpoint.
 func (c *Client) SearchSessions(ctx context.Context) ([]SessionId, error) {
-        scope := "https://jans.io/oauth/jans-auth-server/session.readonly"
-        token, err := c.ensureToken(ctx, scope)
-        if err != nil {
-                return nil, err
-        }
-
-        var result SessionPagedResult
-        err = c.get(ctx, "/jans-config-api/api/v1/jans-auth-server/session/search", token, scope, &result)
-        if err != nil {
-                return nil, err
-        }
-
-        return result.Entries, nil
+	scope := "https://jans.io/oauth/jans-auth-server/session.readonly"
+	raw, err := c.getAllPaginated(ctx, "/jans-config-api/api/v1/jans-auth-server/session/search", scope, 100)
+	if err != nil {
+		return nil, err
+	}
+	ret := make([]SessionId, 0, len(raw))
+	for _, r := range raw {
+		var se SessionId
+		if err := json.Unmarshal(r, &se); err != nil {
+			return nil, err
+		}
+		ret = append(ret, se)
+	}
+	return ret, nil
 }
-
-// DeleteSessionBySid revokes a single session identified by its session id.
 func (c *Client) DeleteSessionBySid(ctx context.Context, sid string) error {
-        // session.admin is the super-scope the endpoint accepts as a full
-        // override for the revoke_session feature flag, matching RevokeUserSessions.
-        scope := "https://jans.io/oauth/jans-auth-server/session.admin"
-        token, err := c.ensureToken(ctx, scope)
-        if err != nil {
-                return err
-        }
+	// session.admin is the super-scope the endpoint accepts as a full
+	// override for the revoke_session feature flag, matching RevokeUserSessions.
+	scope := "https://jans.io/oauth/jans-auth-server/session.admin"
+	token, err := c.ensureToken(ctx, scope)
+	if err != nil {
+		return err
+	}
 
-        return c.delete(ctx, "/jans-config-api/api/v1/jans-auth-server/session/sid/"+sid, token, scope)
+	return c.delete(ctx, "/jans-config-api/api/v1/jans-auth-server/session/sid/"+url.PathEscape(sid), token, scope)
 }

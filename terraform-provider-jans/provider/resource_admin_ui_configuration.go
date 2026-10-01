@@ -87,6 +87,7 @@ func resourceAdminUIConfiguration() *schema.Resource {
 			"additional_parameters": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Description: "Additional authentication parameters.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

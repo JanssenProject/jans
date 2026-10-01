@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -92,6 +93,10 @@ func resourceAdminUIPolicyStoreCreate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 	tflog.Debug(ctx, "New AdminUI policy store created", map[string]interface{}{"inum": store.Inum})
+
+	if store.Inum == "" {
+		return diag.FromErr(fmt.Errorf("policy store created but server returned no inum; cannot track resource"))
+	}
 
 	d.SetId(store.Inum)
 

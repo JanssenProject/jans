@@ -72,7 +72,7 @@ func (c *Client) CreateAdminUIPolicyStore(ctx context.Context, store *AdminUIPol
 		return fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.post(ctx, "/jans-config-api/admin-ui/security/policyStore", token, scope, store, nil); err != nil {
+	if err := c.post(ctx, "/jans-config-api/admin-ui/security/policyStore", token, scope, store, store); err != nil {
 		return fmt.Errorf("post request failed: %w", err)
 	}
 

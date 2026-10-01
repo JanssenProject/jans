@@ -24,8 +24,8 @@ type AdminUIConfiguration struct {
 	FrontChannelLogoutUrl string         `schema:"front_channel_logout_url" json:"frontChannelLogoutUrl,omitempty"`
 	PostLogoutRedirectUri string         `schema:"post_logout_redirect_uri" json:"postLogoutRedirectUri,omitempty"`
 	EndSessionEndpoint    string         `schema:"end_session_endpoint" json:"endSessionEndpoint,omitempty"`
-	SessionTimeoutInMins  int            `schema:"session_timeout_in_mins" json:"sessionTimeoutInMins,omitempty"`
-	AllowSmtpKeystoreEdit bool           `schema:"allow_smtp_keystore_edit" json:"allowSmtpKeystoreEdit,omitempty"`
+	SessionTimeoutInMins  int            `schema:"session_timeout_in_mins" json:"sessionTimeoutInMins"`
+	AllowSmtpKeystoreEdit bool           `schema:"allow_smtp_keystore_edit" json:"allowSmtpKeystoreEdit"`
 	AdditionalParameters  []KeyValuePair `schema:"additional_parameters" json:"additionalParameters,omitempty"`
 	CedarlingLogType      string         `schema:"cedarling_log_type" json:"cedarlingLogType,omitempty"`
 }
