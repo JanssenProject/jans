@@ -66,7 +66,7 @@ public class DisplaysLogoInLoginPage extends BaseTest {
                 redirectUri, null);
         authorizationRequest.setState(state);
 
-        String authorizationRequestUrl = getAuthorizationEndpoint() + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(getAuthorizationEndpoint(), authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(getAuthorizationEndpoint());
         authorizeClient.setRequest(authorizationRequest);

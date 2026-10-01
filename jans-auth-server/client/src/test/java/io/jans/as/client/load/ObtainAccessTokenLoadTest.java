@@ -86,7 +86,7 @@ public class ObtainAccessTokenLoadTest extends BaseTest {
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        final AuthorizationResponse response1 = authorizeClient.exec();
+        final AuthorizationResponse response1 = execAuthorize(authorizeClient);
 
         ClientUtils.showClient(authorizeClient);
 
@@ -98,6 +98,7 @@ public class ObtainAccessTokenLoadTest extends BaseTest {
         // 2. Request access token using the authorization code.
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUris);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
