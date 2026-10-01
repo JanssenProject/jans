@@ -30,6 +30,10 @@ provider "jans" {
   client_id     = "1800.3d29d884-e56b-47ac-83ab-b37942b83a89"
   client_secret = var.client_secret
 }
+variable "client_secret" {
+  type      = string
+  sensitive = true
+}
 ```
 
 Make sure that the client you authenticate with has the full list of scopes

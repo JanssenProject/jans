@@ -3,7 +3,7 @@
 page_title: "jans_session_revocation Resource - jans"
 subcategory: ""
 description: |-
-  Resource for revoking all user sessions. This is a command-style resource that revokes sessions on create/update.
+  Resource for revoking user sessions, either all sessions for a user (by user DN) or a single session (by sid). This is a command-style resource that revokes sessions on create/update.
   This resource revokes sessions either for a specific user identified by their DN (Distinguished Name),
   or a single session identified by its session id (sid). Exactly one of user_dn or sid must be set.
   Use this for security operations such as forcing user logout, responding to security incidents, or
@@ -41,8 +41,7 @@ description: |-
   }
   
   OAuth Scopes Required
-  revoke_sessionhttps://jans.io/oauth/jans-auth-server/session.delete
-  Note: Both scopes must be granted to the OAuth client for this resource to work.
+  https://jans.io/oauth/jans-auth-server/session.admin
   Known Issues
   None currently known. The resource correctly handles both successful revocations and 404 responses
   for non-existent users.
@@ -50,7 +49,7 @@ description: |-
 
 # jans_session_revocation (Resource)
 
-Resource for revoking all user sessions. This is a command-style resource that revokes sessions on create/update.
+Resource for revoking user sessions, either all sessions for a user (by user DN) or a single session (by sid). This is a command-style resource that revokes sessions on create/update.
 
 This resource revokes sessions either for a specific user identified by their DN (Distinguished Name),
 or a single session identified by its session id (sid). Exactly one of user_dn or sid must be set.
@@ -93,10 +92,7 @@ resource "jans_session_revocation" "on_deactivation" {
 
 ## OAuth Scopes Required
 
-- `revoke_session`
-- `https://jans.io/oauth/jans-auth-server/session.delete`
-
-Note: Both scopes must be granted to the OAuth client for this resource to work.
+- `https://jans.io/oauth/jans-auth-server/session.admin`
 
 ## Known Issues
 

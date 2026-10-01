@@ -21,3 +21,7 @@ resource "jans_custom_user" "test" {
     ignore_changes = [ user_password ]
   }
 }
+variable "user_password" {
+  type      = string
+  sensitive = true
+}

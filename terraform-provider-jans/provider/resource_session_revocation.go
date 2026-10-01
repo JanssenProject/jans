@@ -12,7 +12,7 @@ import (
 
 func resourceSessionRevocation() *schema.Resource {
 	return &schema.Resource{
-		Description: `Resource for revoking all user sessions. This is a command-style resource that revokes sessions on create/update.
+		Description: `Resource for revoking user sessions, either all sessions for a user (by user DN) or a single session (by sid). This is a command-style resource that revokes sessions on create/update.
 
 This resource revokes sessions either for a specific user identified by their DN (Distinguished Name),
 or a single session identified by its session id (sid). Exactly one of user_dn or sid must be set.
@@ -55,10 +55,7 @@ resource "jans_session_revocation" "on_deactivation" {
 
 ## OAuth Scopes Required
 
-- ` + "`revoke_session`" + `
-- ` + "`https://jans.io/oauth/jans-auth-server/session.delete`" + `
-
-Note: Both scopes must be granted to the OAuth client for this resource to work.
+- ` + "`https://jans.io/oauth/jans-auth-server/session.admin`" + `
 
 ## Known Issues
 
