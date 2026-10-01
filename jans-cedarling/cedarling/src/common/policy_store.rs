@@ -178,13 +178,6 @@ pub(crate) struct PolicyStoreWithID {
     )]
     pub(crate) spec_version: Option<u32>,
     /// Non-fatal findings from parsing, for the caller to log.
-    #[cfg_attr(
-        not(test),
-        expect(
-            dead_code,
-            reason = "logged at bootstrap and on refresh (plan steps 4-5)"
-        )
-    )]
     pub(crate) warnings: Vec<formats::PolicyStoreWarning>,
 }
 
