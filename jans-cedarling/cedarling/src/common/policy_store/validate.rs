@@ -16,6 +16,9 @@ pub struct ValidationReport {
     pub schema: LevelResult,
     /// The result of metadata validation.
     pub metadata: LevelResult,
+    /// Non-fatal findings, such as an outdated `policy_store_spec_version`.
+    /// They do not affect [`is_ok`](Self::is_ok).
+    pub warnings: Vec<Diagnostic>,
 }
 
 impl ValidationReport {

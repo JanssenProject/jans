@@ -918,6 +918,7 @@ impl Cedarling {
                                 reason: "metadata check failed".into(),
                             },
                             metadata: LevelResult::Failed { errors: vec![diag] },
+                            warnings: Vec::new(),
                         })
                     },
                     _ if is_parse => {
@@ -935,6 +936,7 @@ impl Cedarling {
                             metadata: LevelResult::Skipped {
                                 reason: "parse failed".into(),
                             },
+                            warnings: Vec::new(),
                         })
                     },
                     _ => Err(ValidateInfraError::Io(std::io::Error::other(err_str))),
@@ -992,10 +994,23 @@ impl Cedarling {
                     },
                 };
 
+                let warnings = loaded
+                    .store
+                    .warnings
+                    .iter()
+                    .map(|warning| Diagnostic {
+                        file: "metadata.json".into(),
+                        line: None,
+                        column: None,
+                        message: warning.to_string(),
+                    })
+                    .collect();
+
                 Ok(ValidationReport {
                     parse: LevelResult::Ok,
                     schema: schema_res,
                     metadata: metadata_res,
+                    warnings,
                 })
             },
         }
