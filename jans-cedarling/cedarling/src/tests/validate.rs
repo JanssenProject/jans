@@ -199,3 +199,82 @@ policy_stores:
         "Expected metadata level to pass or skip: {report:?}"
     );
 }
+
+fn archive_source(spec_version: Option<u32>) -> crate::PolicyStoreConfig {
+    let mut builder = crate::common::policy_store::test_utils::fixtures::minimal_valid();
+    if let Some(version) = spec_version {
+        builder = builder.with_spec_version(version);
+    }
+    crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::ArchiveBytes(
+            builder.build_archive().expect("should build archive"),
+        ),
+        ..Default::default()
+    }
+}
+
+#[tokio::test]
+async fn test_validate_reports_outdated_spec_version_as_warning() {
+    let http_client_config = crate::http::HttpClientConfig::default();
+
+    let report = Cedarling::validate_policy_store(&archive_source(Some(1)), &http_client_config)
+        .await
+        .expect("infra layer ok");
+
+    assert!(
+        report.is_ok(),
+        "an outdated but supported version should not fail validation: {report:?}"
+    );
+    assert_eq!(
+        report.warnings.len(),
+        1,
+        "an outdated version should produce one warning: {report:?}"
+    );
+    assert!(
+        report.warnings[0]
+            .message
+            .contains("policy_store_spec_version is 1"),
+        "the warning should name the declared version, got: {}",
+        report.warnings[0].message
+    );
+}
+
+#[tokio::test]
+async fn test_validate_current_spec_version_has_no_warnings() {
+    let http_client_config = crate::http::HttpClientConfig::default();
+
+    let report = Cedarling::validate_policy_store(&archive_source(Some(2)), &http_client_config)
+        .await
+        .expect("infra layer ok");
+
+    assert!(
+        report.is_ok(),
+        "a current store should validate: {report:?}"
+    );
+    assert!(
+        report.warnings.is_empty(),
+        "a current store should have no warnings: {report:?}"
+    );
+}
+
+#[tokio::test]
+async fn test_validate_unsupported_spec_version_fails_metadata() {
+    let http_client_config = crate::http::HttpClientConfig::default();
+
+    let report = Cedarling::validate_policy_store(&archive_source(Some(99)), &http_client_config)
+        .await
+        .expect("infra layer ok");
+
+    assert!(
+        !report.is_ok(),
+        "an unsupported version must fail validation: {report:?}"
+    );
+    assert!(
+        matches!(
+            &report.metadata,
+            LevelResult::Failed { errors }
+                if errors.iter().any(|e| e.message.contains("policy_store_spec_version 99"))
+        ),
+        "the metadata level should fail naming the unsupported version: {report:?}"
+    );
+}

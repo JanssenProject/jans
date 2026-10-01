@@ -36,6 +36,7 @@ use zip::read::ZipArchive;
 
 use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
 
+use crate::log::interface::LogStorage;
 use crate::tests::utils::cedarling_util::{get_cedarling_with_callback, get_config};
 use crate::tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request};
 use crate::{
@@ -1492,4 +1493,57 @@ async fn test_archive_without_schema_strict_false_succeeds() {
         .await
         .expect("authorization should succeed without schema");
     assert!(result.decision, "allow-all should permit");
+}
+
+// ============================================================================
+// Policy Store Spec Version Warnings
+// ============================================================================
+
+/// Messages of WARN logs about an outdated policy store format.
+fn spec_version_warnings(logs: &[serde_json::Value]) -> Vec<String> {
+    logs.iter()
+        .filter(|log| log["level"] == "WARN")
+        .filter_map(|log| log["msg"].as_str())
+        .filter(|msg| msg.contains("policy store format is outdated"))
+        .map(str::to_string)
+        .collect()
+}
+
+#[test]
+async fn test_missing_spec_version_is_logged_once_at_startup() {
+    let archive_bytes = create_authz_policy_store_builder()
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let cedarling =
+        get_cedarling_with_callback(PolicyStoreSource::ArchiveBytes(archive_bytes), |_| {}).await;
+
+    let warnings = spec_version_warnings(&cedarling.pop_logs());
+    assert_eq!(
+        warnings.len(),
+        1,
+        "a store without policy_store_spec_version should log exactly one WARN, got: {warnings:?}"
+    );
+    assert!(
+        warnings[0].contains("no policy_store_spec_version"),
+        "the warning should say the field is missing, got: {}",
+        warnings[0]
+    );
+}
+
+#[test]
+async fn test_current_spec_version_logs_no_warning() {
+    let archive_bytes = create_authz_policy_store_builder()
+        .with_spec_version(2)
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let cedarling =
+        get_cedarling_with_callback(PolicyStoreSource::ArchiveBytes(archive_bytes), |_| {}).await;
+
+    let warnings = spec_version_warnings(&cedarling.pop_logs());
+    assert!(
+        warnings.is_empty(),
+        "a current-version store should not log a format warning, got: {warnings:?}"
+    );
 }
