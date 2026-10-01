@@ -91,7 +91,7 @@ public class TokenBindingHttpTest extends BaseTest {
         authorizeClient.setRequest(authorizationRequest);
         authorizeClient.getHeaders().put("Sec-Token-Binding", ENCODED_TOKEN_BINDING_MESSAGE);
 
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
         showClient(authorizeClient);
 
         AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();

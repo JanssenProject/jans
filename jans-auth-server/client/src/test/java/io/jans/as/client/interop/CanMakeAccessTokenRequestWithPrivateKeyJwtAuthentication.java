@@ -82,6 +82,7 @@ public class CanMakeAccessTokenRequestWithPrivateKeyJwtAuthentication extends Ba
         tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
