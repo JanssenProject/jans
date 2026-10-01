@@ -523,6 +523,7 @@ nav:
       - TUI for K8s: janssen-server/kubernetes-ops/tui-k8s.md
       - Custom Attributes: janssen-server/kubernetes-ops/custom-attributes.md
       - Memory Dump: janssen-server/kubernetes-ops/memory-dump.md
+      - Change FQDN: janssen-server/kubernetes-ops/change-fqdn.md
     - VM Operations:
       - VM Operations: janssen-server/vm-ops/README.md
       - Upgrade: janssen-server/vm-ops/upgrade.md

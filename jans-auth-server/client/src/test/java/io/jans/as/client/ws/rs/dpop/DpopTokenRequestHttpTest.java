@@ -614,6 +614,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
     private TokenResponse requestAccessToken(String redirectUri, String authorizationCode, DPoP dpop) {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.NONE);
         tokenRequest.setDpop(dpop);

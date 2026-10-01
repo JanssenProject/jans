@@ -125,7 +125,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         if (expectedResponseTypes.size() == 0) {
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
             authorizeClient.setRequest(authorizationRequest);
-            AuthorizationResponse authorizationResponse = authorizeClient.exec();
+            AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
             showClient(authorizeClient);
             assertEquals(authorizationResponse.getStatus(), 302);
@@ -190,6 +190,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
             // 5. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
