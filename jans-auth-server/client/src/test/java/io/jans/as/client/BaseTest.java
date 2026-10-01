@@ -1461,7 +1461,7 @@ public abstract class BaseTest {
         List<String> softwareRolesAux = Collections.singletonList("password");
         List<String> grantTypesAux = Collections.singletonList("client_credentials");
         return createSsa(accessToken, orgIdAux, expirationAux, descriptionAux, softwareIdAux, softwareRolesAux,
-                grantTypesAux, oneTimeUse, Boolean.TRUE, 86400);
+                grantTypesAux, oneTimeUse, !Boolean.TRUE.equals(oneTimeUse), 86400); // server rejects one_time_use + rotate_ssa
     }
 
     public SsaCreateResponse createSsa(String accessToken, String orgId, Long expiration, String description,
