@@ -35,14 +35,48 @@ resource "jans_message" "minimal" {
 
 ### Required
 
-- `key` (String) Message key.
-- `value` (String) Message value.
-
-### Optional
-
-- `application` (String) Message application.
-- `language` (String) Message language.
+- `message_provider_type` (String) Message provider type.
+- `postgres_configuration` (Block List, Min: 1, Max: 1) Postgres configuration. (see [below for nested schema](#nestedblock--postgres_configuration))
+- `redis_configuration` (Block List, Min: 1, Max: 1) Postgres configuration. (see [below for nested schema](#nestedblock--redis_configuration))
 
 ### Read-Only
 
-- `id` (String) Message ID.
+- `id` (String) The ID of this resource.
+
+<a id="nestedblock--postgres_configuration"></a>
+### Nested Schema for `postgres_configuration`
+
+Optional:
+
+- `auth_user_name` (String) Username for authenticating.
+- `auth_user_password` (String) Password for authenticating.
+- `connection_pool_max_idle` (Number) Maximum number of idle connections.
+- `connection_pool_max_total` (Number) Maximum number of connections.
+- `connection_pool_min_idle` (Number) Minimum number of idle connections.
+- `connection_uri` (String) Connection URI of the database.
+- `db_schema_name` (String) Name of the database schema.
+- `driver_class_name` (String) Driver class name.
+- `message_sleep_thread_millis` (Number) Time to sleep for a message.
+- `message_wait_millis` (Number) Time to wait for a message.
+
+
+<a id="nestedblock--redis_configuration"></a>
+### Nested Schema for `redis_configuration`
+
+Optional:
+
+- `connection_timeout` (Number) Connection timeout.
+- `default_put_expiration` (Number) Default put expiration.
+- `max_idle_connections` (Number) Maximum number of idle connections.
+- `max_retry_attempts` (Number) Maximum number of retry attempts.
+- `max_total_connections` (Number) Maximum number of connections.
+- `password` (String) Password for authenticating.
+- `redis_provider_type` (String) Redis provider type.
+- `sentinel_master_group_name` (String) Sentinel master group name.
+- `servers` (String) Redis servers.
+- `so_timeout` (Number) SO timeout.
+- `ssl_key_store_file_path` (String) SSL key store file path.
+- `ssl_key_store_password` (String) SSL key store password.
+- `ssl_trust_store_file_path` (String) SSL trust store file path.
+- `ssl_trust_store_password` (String) SSL trust store password.
+- `use_ssl` (Boolean) Whether to use SSL.
