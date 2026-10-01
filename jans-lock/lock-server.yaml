@@ -708,6 +708,192 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/trace.admin
+  /api/v1/audit/trace/executions/{trace_execution_id}:
+    get:
+      tags:
+      - Lock - Audit Trace
+      summary: Retrieve one TRACE execution
+      description: "All direct records of an execution, ordered by receipt sequence\
+        \ (design §11.3)"
+      operationId: getExecution
+      parameters:
+      - name: trace_execution_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: execution_authority
+        in: query
+        description: Disambiguate a bare trace_execution_id used by more than one
+          authority
+        schema:
+          type: string
+      - name: start
+        in: query
+        description: Paging offset
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: count
+        in: query
+        description: "Paging size, 1-1000"
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceExecutionResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.readonly
+  /api/v1/audit/trace/records/{record_id}:
+    get:
+      tags:
+      - Lock - Audit Trace
+      summary: Retrieve one TRACE record
+      description: Domain-scoped retrieval of a stored envelope by record identity
+        (design §11.2)
+      operationId: getRecord
+      parameters:
+      - name: record_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: producer_id
+        in: query
+        description: Disambiguate a bare record_id used by more than one producer
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceRecordResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.readonly
+  /api/v1/audit/trace:
+    post:
+      tags:
+      - Lock - Audit Trace
+      summary: Submit a TRACE evidence record
+      description: Verify and ingest a single signed TRACE assertion (design §7)
+      operationId: submitRecord
+      requestBody:
+        description: TRACE assertion (design §7)
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceAcceptanceResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.write
 components:
   schemas:
     LockApiError:
@@ -1061,6 +1247,177 @@ components:
           description: Key id
           example: 2026-01-key-1
       description: Producer key revocation request
+    JsonNode:
+      type: object
+      description: "The complete producer-signed assertion, as received (design §\
+        7)"
+    TraceExecutionResponse:
+      type: object
+      properties:
+        execution_authority:
+          type: string
+          description: The execution's authority
+          example: spiffe://example.org/agent/planner
+        trace_execution_id:
+          type: string
+          description: Execution id
+          example: exec-01J...
+        ordering:
+          type: string
+          description: "Fixed: records are ordered by receipt_sequence"
+          example: receipt_sequence
+        completeness:
+          type: string
+          description: "Fixed: Lock never asserts completeness of an execution's records"
+          example: not_assessed
+        records:
+          type: array
+          description: "The execution's direct records, ordered by receipt_sequence"
+          items:
+            $ref: "#/components/schemas/TraceRecordResponse"
+      description: "Direct TRACE records of one execution, ordered by receipt sequence"
+    TraceIngestionResponse:
+      type: object
+      properties:
+        receipt_sequence:
+          type: integer
+          description: Position in the domain's receipt chain
+          format: int64
+          example: 108422
+        received_at:
+          type: string
+          description: RFC 3339 UTC timestamp Lock received the record
+          example: 2026-06-11T00:41:02.123Z
+        prev_receipt_hash:
+          type: string
+          description: sha256:<hex> hash of the previous receipt in the domain's chain
+        receipt_hash:
+          type: string
+          description: sha256:<hex> hash of this receipt
+        coverage_gap_flag:
+          type: boolean
+          description: True when this record's predecessor in its producer chain is
+            missing
+        chain_link_failure_flag:
+          type: boolean
+          description: True when this record's prev_record_hash does not match its
+            predecessor
+        equivocation_flag:
+          type: boolean
+          description: True when another record already occupies this producer-chain
+            position
+        late_flag:
+          type: boolean
+          description: True when the record arrived after the configured lateness
+            threshold
+      description: Receipt-chain position and ingestion flags for a TRACE record
+    TraceRecordResponse:
+      type: object
+      properties:
+        producer_id:
+          type: string
+          description: "Producer id, name/semver"
+          example: cedarling-fleet-1/1.0.0
+        record_id:
+          type: string
+          description: Signed record id
+          example: 9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41
+        assertion:
+          $ref: "#/components/schemas/JsonNode"
+        content_digest:
+          type: string
+          description: sha256:<hex> digest of the full signed assertion
+          example: sha256:abc123...
+        verification:
+          $ref: "#/components/schemas/TraceVerificationResponse"
+        ingestion:
+          $ref: "#/components/schemas/TraceIngestionResponse"
+      description: A single TRACE record envelope
+    TraceVerificationResponse:
+      type: object
+      properties:
+        signature_valid:
+          type: boolean
+          description: True when the Ed25519 signature verified against the registered
+            key
+        key_id:
+          type: string
+          description: kid of the key the record was verified against
+          example: key-1
+        verified_at:
+          type: string
+          description: RFC 3339 UTC timestamp verification was performed at
+          example: 2026-06-11T00:41:02Z
+        algorithm:
+          type: string
+          description: Signature algorithm
+          example: Ed25519
+      description: Signature verification outcome for a TRACE record
+    TraceErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: TRACE error id (design decision D-10)
+          example: invalid_assertion
+        error_description:
+          type: string
+          description: Human-readable error description
+        reason:
+          type: string
+          description: "Machine-readable detail, present only when error reporting\
+            \ is enabled"
+          example: missing:trace.signed_at
+      description: Structured TRACE error response
+    TraceAcceptanceResponse:
+      type: object
+      properties:
+        accepted:
+          type: boolean
+          description: Always true; rejections are reported as structured errors instead
+          example: true
+        producer_id:
+          type: string
+          description: "Producer id, name/semver"
+          example: cedarling-fleet-1/1.0.0
+        record_id:
+          type: string
+          description: Signed record id
+          example: 9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41
+        content_digest:
+          type: string
+          description: sha256:<hex> digest of the full signed assertion
+          example: sha256:abc123...
+        receipt_sequence:
+          type: integer
+          description: Position in the domain's receipt chain
+          format: int64
+          example: 108422
+        received_at:
+          type: string
+          description: RFC 3339 UTC timestamp Lock received the record
+          example: 2026-06-11T00:41:02.123Z
+        idempotent_replay:
+          type: boolean
+          description: True when this identity already existed with the same content
+            digest
+        coverage_gap_flag:
+          type: boolean
+          description: True when this record's predecessor in its producer chain is
+            missing
+        chain_link_failure_flag:
+          type: boolean
+          description: True when this record's prev_record_hash does not match its
+            predecessor
+        equivocation_flag:
+          type: boolean
+          description: True when another record already occupies this producer-chain
+            position
+        late_flag:
+          type: boolean
+          description: True when the record arrived after the configured lateness
+            threshold
+      description: TRACE record acceptance response
   securitySchemes:
     oauth2:
       type: oauth2

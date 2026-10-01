@@ -26,6 +26,7 @@ import io.jans.lock.service.ws.rs.audit.AuditRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.policy.PolicyRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.stat.StatRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.trace.TraceAdminRestWebServiceImpl;
+import io.jans.lock.service.ws.rs.trace.TraceRestWebServiceImpl;
 import io.jans.lock.util.ApiAccessConstants;
 import io.jans.lock.util.Constants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -86,6 +87,7 @@ public class ResteasyInitializer extends Application {
 		classes.add(AuditRestWebServiceImpl.class);
 		classes.add(PolicyRestWebServiceImpl.class);
 		classes.add(StatRestWebServiceImpl.class);
+		classes.add(TraceRestWebServiceImpl.class);
 		classes.add(TraceAdminRestWebServiceImpl.class);
 
 		classes.add(CedarlingAuthorizationProcessingFilter.class);
