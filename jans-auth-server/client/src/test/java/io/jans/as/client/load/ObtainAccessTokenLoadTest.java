@@ -98,6 +98,7 @@ public class ObtainAccessTokenLoadTest extends BaseTest {
         // 2. Request access token using the authorization code.
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUris);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);

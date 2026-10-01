@@ -139,6 +139,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -216,6 +217,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -294,6 +296,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -379,6 +382,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -458,6 +462,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -535,6 +540,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -613,6 +619,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -698,6 +705,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -780,6 +788,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -862,6 +871,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -945,6 +955,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1028,6 +1039,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1113,6 +1125,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1199,6 +1212,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1285,6 +1299,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1371,6 +1386,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1457,6 +1473,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1543,6 +1560,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1629,6 +1647,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1715,6 +1734,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1801,6 +1821,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1885,6 +1906,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1968,6 +1990,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2051,6 +2074,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2134,6 +2158,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2217,6 +2242,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2300,6 +2326,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2383,6 +2410,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2466,6 +2494,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2549,6 +2578,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2628,6 +2658,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2705,6 +2736,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2790,6 +2822,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2878,6 +2911,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -2954,6 +2988,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -3032,6 +3067,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -3111,6 +3147,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -3194,6 +3231,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3275,6 +3313,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3356,6 +3395,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3437,6 +3477,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3518,6 +3559,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3599,6 +3641,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3680,6 +3723,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3761,6 +3805,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3842,6 +3887,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3927,6 +3973,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4012,6 +4059,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4097,6 +4145,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4183,6 +4232,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4269,6 +4319,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4355,6 +4406,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4441,6 +4493,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4527,6 +4580,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4613,6 +4667,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4699,6 +4754,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4785,6 +4841,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4871,6 +4928,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4957,6 +5015,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5043,6 +5102,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5129,6 +5189,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5215,6 +5276,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5301,6 +5363,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5387,6 +5450,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5473,6 +5537,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5559,6 +5624,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5645,6 +5711,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5731,6 +5798,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5817,6 +5885,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5903,6 +5972,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5989,6 +6059,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6075,6 +6146,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6161,6 +6233,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6247,6 +6320,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6333,6 +6407,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6419,6 +6494,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6505,6 +6581,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6591,6 +6668,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6677,6 +6755,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6763,6 +6842,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6849,6 +6929,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6935,6 +7016,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7021,6 +7103,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7107,6 +7190,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7193,6 +7277,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7279,6 +7364,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7365,6 +7451,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7451,6 +7538,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7537,6 +7625,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7623,6 +7712,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7708,6 +7798,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7794,6 +7885,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7880,6 +7972,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7966,6 +8059,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8052,6 +8146,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8138,6 +8233,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8224,6 +8320,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8310,6 +8407,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8396,6 +8494,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8482,6 +8581,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 

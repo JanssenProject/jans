@@ -62,7 +62,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String code = "INVALID_AUTHORIZATION_CODE";
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        TokenResponse response = tokenClient.execAuthorizationCode(code, redirectUri, clientId, clientSecret);
+        TokenResponse response = tokenClient.execAuthorizationCode(code, redirectUri, clientId, clientSecret, codeVerifier(code));
 
         showClient(tokenClient);
         assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getStatus());

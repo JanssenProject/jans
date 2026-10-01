@@ -115,6 +115,7 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         tokenRequest.addCustomParameter("myCustomAttr1", customAttrValue1);

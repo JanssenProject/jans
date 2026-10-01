@@ -17,6 +17,7 @@ import io.jans.as.client.par.ParRequest;
 import io.jans.as.client.ssa.create.SsaCreateClient;
 import io.jans.as.client.ssa.create.SsaCreateResponse;
 import io.jans.as.client.ws.rs.Tester;
+import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
@@ -76,6 +77,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map.Entry;
 
 import static org.testng.Assert.*;
@@ -114,6 +116,10 @@ public abstract class BaseTest {
     protected PrivateKey privateKey;
 
     protected Map<String, String> allTestKeys = Maps.newHashMap();
+
+    // OAuth 2.1 requires PKCE, so flows that don't manage it themselves get an S256 challenge attached
+    private static final Map<String, String> PKCE_VERIFIER_BY_CHALLENGE = new ConcurrentHashMap<>();
+    private static final Map<String, String> PKCE_VERIFIER_BY_CODE = new ConcurrentHashMap<>();
 
     // Form Interaction
     protected String loginFormUsername;
@@ -570,7 +576,7 @@ public abstract class BaseTest {
 
     protected AuthorizeClient processAuthentication(WebDriver currentDriver, String authorizeUrl,
                                                     AuthorizationRequest authorizationRequest, String userId, String userSecret) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -663,13 +669,25 @@ public abstract class BaseTest {
                 .ignoring(NoSuchElementException.class);
 
         try {
-            WebElement loginButton = wait.until(d -> d.findElement(By.id(id)));
+            WebElement loginButton = wait.until(d -> {
+                failIfLeftAuthorizationServer(d, id);
+                return d.findElement(By.id(id));
+            });
             return loginButton;
         } catch (TimeoutException e) {
             System.out.println("PAGE URL: " + currentDriver.getCurrentUrl());
             System.out.println("PAGE SOURCE: ");
             System.out.println(currentDriver.getPageSource());
             throw e;
+        }
+    }
+
+    // Login/consent pages live under /jans-auth/; once redirected elsewhere (e.g. an error to redirect_uri)
+    // the element never appears, so fail now instead of burning the whole wait timeout.
+    private static void failIfLeftAuthorizationServer(WebDriver currentDriver, String id) {
+        final String url = currentDriver.getCurrentUrl();
+        if (url != null && (url.contains("error=") || !url.contains("/jans-auth/"))) {
+            fail("Element '" + id + "' not available, redirected to: " + url);
         }
     }
 
@@ -757,13 +775,14 @@ public abstract class BaseTest {
             authorizeClient.setResponse(authorizationResponse);
             showClientUserAgent(authorizeClient);
         }
+        rememberCodeVerifier(authorizationRequest, authorizationResponse);
 
         return authorizationResponse;
     }
 
     public AuthorizationResponse authenticateResourceOwnerAndDenyAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -814,13 +833,14 @@ public abstract class BaseTest {
         authorizationResponse.setSessionId(sessionId);
         authorizeClient.setResponse(authorizationResponse);
         showClientUserAgent(authorizeClient);
+        rememberCodeVerifier(authorizationRequest, authorizationResponse);
 
         return authorizationResponse;
     }
 
     public AuthorizationResponse authorizationRequestAndGrantAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -860,13 +880,14 @@ public abstract class BaseTest {
         }
         authorizeClient.setResponse(authorizationResponse);
         showClientUserAgent(authorizeClient);
+        rememberCodeVerifier(authorizationRequest, authorizationResponse);
 
         return authorizationResponse;
     }
 
     public AuthorizationResponse authorizationRequestAndDenyAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -899,6 +920,7 @@ public abstract class BaseTest {
         }
         authorizeClient.setResponse(authorizationResponse);
         showClientUserAgent(authorizeClient);
+        rememberCodeVerifier(authorizationRequest, authorizationResponse);
 
         return authorizationResponse;
     }
@@ -909,7 +931,7 @@ public abstract class BaseTest {
      */
     public AuthorizationResponse authenticateResourceOwner(
             String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret, boolean cleanupCookies) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -959,6 +981,7 @@ public abstract class BaseTest {
         }
         authorizeClient.setResponse(authorizationResponse);
         showClientUserAgent(authorizeClient);
+        rememberCodeVerifier(authorizationRequest, authorizationResponse);
 
         return authorizationResponse;
     }
@@ -968,7 +991,7 @@ public abstract class BaseTest {
      */
     public String waitForResourceOwnerAndGrantLoginForm(
             String authorizeUrl, AuthorizationRequest authorizationRequest, boolean cleanupCookies) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -1120,6 +1143,38 @@ public abstract class BaseTest {
         System.out.println("#######################################################");
         System.out.println(testTitle);
         System.out.println("#######################################################");
+    }
+
+    protected String authorizationRequestUrl(String authorizeUrl, AuthorizationRequest authorizationRequest) {
+        // PAR carries its own code_challenge; the authorize request only references it via request_uri
+        if (StringUtils.isBlank(authorizationRequest.getCodeChallenge()) && StringUtils.isBlank(authorizationRequest.getRequestUri())) {
+            CodeVerifier verifier = authorizationRequest.generateAndSetCodeChallengeWithMethod();
+            PKCE_VERIFIER_BY_CHALLENGE.put(authorizationRequest.getCodeChallenge(), verifier.getCodeVerifier());
+        }
+        return authorizeUrl + "?" + authorizationRequest.getQueryString();
+    }
+
+    private static void rememberCodeVerifier(AuthorizationRequest authorizationRequest, AuthorizationResponse authorizationResponse) {
+        if (authorizationRequest.getCodeChallenge() == null || authorizationResponse.getCode() == null) {
+            return;
+        }
+        String verifier = PKCE_VERIFIER_BY_CHALLENGE.get(authorizationRequest.getCodeChallenge());
+        if (verifier != null) {
+            PKCE_VERIFIER_BY_CODE.put(authorizationResponse.getCode(), verifier);
+        }
+    }
+
+    public static String codeVerifier(String code) {
+        return code != null ? PKCE_VERIFIER_BY_CODE.get(code) : null;
+    }
+
+    public static void applyCodeVerifier(TokenRequest tokenRequest) {
+        if (StringUtils.isBlank(tokenRequest.getCodeVerifier())) {
+            String verifier = codeVerifier(tokenRequest.getCode());
+            if (verifier != null) {
+                tokenRequest.setCodeVerifier(verifier);
+            }
+        }
     }
 
     protected void navigateToAuhorizationUrl(WebDriver driver, String authorizationRequestUrl) {

@@ -80,6 +80,7 @@ public class SupportPromptValueNone extends BaseTest {
             // 3. Get Access Token
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
@@ -121,6 +122,7 @@ public class SupportPromptValueNone extends BaseTest {
             // 5. Get Access Token
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
