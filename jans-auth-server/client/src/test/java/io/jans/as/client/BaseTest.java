@@ -593,7 +593,7 @@ public abstract class BaseTest {
                 return null;
             }
 
-            WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
+            WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton, authorizationRequest.getRedirectUri());
 
             // login.xhtml's document.ready handler clears both credential fields (remember-me logic).
             // Wait until it has fired, otherwise it races with sendKeys below and the form is posted
@@ -662,7 +662,7 @@ public abstract class BaseTest {
         }
     }
 
-    private WebElement waitForRequredElementLoad(WebDriver currentDriver, String id) {
+    private WebElement waitForRequredElementLoad(WebDriver currentDriver, String id, String redirectUri) {
         Wait<WebDriver> wait = new FluentWait<>(currentDriver)
                 .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
                 .pollingEvery(Duration.ofMillis(500))
@@ -670,7 +670,7 @@ public abstract class BaseTest {
 
         try {
             WebElement loginButton = wait.until(d -> {
-                failIfLeftAuthorizationServer(d, id);
+                failIfRedirected(d, id, redirectUri);
                 return d.findElement(By.id(id));
             });
             return loginButton;
@@ -682,11 +682,11 @@ public abstract class BaseTest {
         }
     }
 
-    // Login/consent pages live under /jans-auth/; once redirected elsewhere (e.g. an error to redirect_uri)
-    // the element never appears, so fail now instead of burning the whole wait timeout.
-    private static void failIfLeftAuthorizationServer(WebDriver currentDriver, String id) {
+    // Once the browser is back at redirect_uri (e.g. with an error) the element never appears,
+    // so fail now instead of burning the whole wait timeout.
+    private static void failIfRedirected(WebDriver currentDriver, String id, String redirectUri) {
         final String url = currentDriver.getCurrentUrl();
-        if (url != null && (url.contains("error=") || !url.contains("/jans-auth/"))) {
+        if (StringUtils.isNotBlank(redirectUri) && url != null && url.startsWith(redirectUri)) {
             fail("Element '" + id + "' not available, redirected to: " + url);
         }
     }
@@ -694,7 +694,7 @@ public abstract class BaseTest {
     protected String acceptAuthorization(WebDriver currentDriver, String redirectUri) {
         String authorizationResponseStr = currentDriver.getCurrentUrl();
 
-        if ((authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) && !authorizationResponseStr.contains("user_code")) {
+        if ((authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) && !authorizationResponseStr.contains("user_code")) { // # gitleaks:allow
             return authorizationResponseStr;
         }
 
@@ -706,7 +706,7 @@ public abstract class BaseTest {
                 return null;
             }
 
-            WebElement allowButton = waitForRequredElementLoad(currentDriver, authorizeFormAllowButton);
+            WebElement allowButton = waitForRequredElementLoad(currentDriver, authorizeFormAllowButton, redirectUri);
 
             // We have to use JavaScript because target is link with onclick
             JavascriptExecutor jse = (JavascriptExecutor) currentDriver;

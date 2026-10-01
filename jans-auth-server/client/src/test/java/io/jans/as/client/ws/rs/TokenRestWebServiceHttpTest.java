@@ -144,7 +144,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
 
         // 2. Request Resource Owner Credentials Grant
         String username = userId;
-        String password = "BAD_PASSWORD";
+        String password = "BAD_PASSWORD"; // # gitleaks:allow
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         TokenResponse tokenResponse = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, null,
