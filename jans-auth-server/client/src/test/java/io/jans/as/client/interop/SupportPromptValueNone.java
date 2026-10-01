@@ -113,7 +113,7 @@ public class SupportPromptValueNone extends BaseTest {
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
             authorizeClient.setRequest(authorizationRequest);
 
-            AuthorizationResponse authorizationResponse = authorizeClient.exec();
+            AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
             AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 

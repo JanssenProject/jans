@@ -214,7 +214,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse response = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getStatus());
@@ -273,7 +273,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse response = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getStatus());
@@ -299,7 +299,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
 
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(authorizationResponse.getStatus(), 401, "Unexpected response code: " + authorizationResponse.getStatus());
@@ -356,7 +356,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
 
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(authorizationResponse.getStatus(), 400, "Unexpected response code: " + authorizationResponse.getStatus());
@@ -486,7 +486,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse response = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getStatus());
@@ -547,7 +547,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse response = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
@@ -1343,7 +1343,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse response = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
@@ -1400,7 +1400,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse response = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
@@ -1732,7 +1732,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse response = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
@@ -1809,7 +1809,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
@@ -1850,7 +1850,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(authorizationResponse.getStatus(), 400, "Unexpected response code: " + authorizationResponse.getStatus());
@@ -1942,7 +1942,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
-        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec();
+        AuthorizationResponse authorizationResponse2 = execAuthorize(authorizeClient2);
 
         showClient(authorizeClient2);
         assertEquals(authorizationResponse2.getStatus(), 302, "Unexpected response code: " + authorizationResponse2.getStatus());
@@ -2057,7 +2057,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
-        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec();
+        AuthorizationResponse authorizationResponse2 = execAuthorize(authorizeClient2);
 
         showClient(authorizeClient2);
         assertEquals(authorizationResponse2.getStatus(), 302, "Unexpected response code: " + authorizationResponse2.getStatus());
@@ -2143,7 +2143,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse response = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());

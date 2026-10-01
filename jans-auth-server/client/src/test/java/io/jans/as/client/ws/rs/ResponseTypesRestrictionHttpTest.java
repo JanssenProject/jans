@@ -190,7 +190,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertTrue(authorizationResponse.getStatus() == 302
@@ -366,7 +366,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertTrue(authorizationResponse.getStatus() == 302
@@ -520,7 +520,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertTrue(authorizationResponse.getStatus() == 302

@@ -125,7 +125,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         if (expectedResponseTypes.size() == 0) {
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
             authorizeClient.setRequest(authorizationRequest);
-            AuthorizationResponse authorizationResponse = authorizeClient.exec();
+            AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
             showClient(authorizeClient);
             assertEquals(authorizationResponse.getStatus(), 302);

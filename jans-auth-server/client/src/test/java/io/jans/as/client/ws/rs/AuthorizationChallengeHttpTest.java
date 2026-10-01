@@ -64,7 +64,7 @@ public class AuthorizationChallengeHttpTest extends BaseTest {
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationChallengeEndpoint);
         authorizeClient.setRequest(authorizationRequest);
 
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
         showClient(authorizeClient);
         assertNotNull(authorizationResponse);
 
@@ -164,7 +164,7 @@ public class AuthorizationChallengeHttpTest extends BaseTest {
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationChallengeEndpoint);
         authorizeClient.setRequest(authorizationRequest);
 
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
         showClient(authorizeClient);
         assertNotNull(authorizationResponse);
         assertNull(authorizationResponse.getCode());

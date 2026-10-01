@@ -86,7 +86,7 @@ public class ObtainAccessTokenLoadTest extends BaseTest {
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        final AuthorizationResponse response1 = authorizeClient.exec();
+        final AuthorizationResponse response1 = execAuthorize(authorizeClient);
 
         ClientUtils.showClient(authorizeClient);
 

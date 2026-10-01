@@ -127,7 +127,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
-        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec();
+        AuthorizationResponse authorizationResponse2 = execAuthorize(authorizeClient2);
 
         showClient(authorizeClient2);
         assertEquals(authorizationResponse2.getStatus(), 302, "Unexpected response code: " + authorizationResponse2.getStatus());
@@ -261,7 +261,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
-        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec();
+        AuthorizationResponse authorizationResponse2 = execAuthorize(authorizeClient2);
 
         showClient(authorizeClient2);
         assertEquals(authorizationResponse2.getStatus(), 302, "Unexpected response code: " + authorizationResponse2.getStatus());
@@ -310,7 +310,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient3 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient3.setRequest(authorizationRequest3);
-        AuthorizationResponse authorizationResponse3 = authorizeClient3.exec();
+        AuthorizationResponse authorizationResponse3 = execAuthorize(authorizeClient3);
 
         showClient(authorizeClient3);
         assertEquals(authorizationResponse3.getStatus(), 302, "Unexpected response code: " + authorizationResponse3.getStatus());

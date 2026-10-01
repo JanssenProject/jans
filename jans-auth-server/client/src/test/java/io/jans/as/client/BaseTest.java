@@ -1146,12 +1146,23 @@ public abstract class BaseTest {
     }
 
     protected String authorizationRequestUrl(String authorizeUrl, AuthorizationRequest authorizationRequest) {
+        ensurePkce(authorizationRequest);
+        return authorizeUrl + "?" + authorizationRequest.getQueryString();
+    }
+
+    protected AuthorizationResponse execAuthorize(AuthorizeClient authorizeClient) {
+        ensurePkce(authorizeClient.getRequest());
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        rememberCodeVerifier(authorizeClient.getRequest(), authorizationResponse);
+        return authorizationResponse;
+    }
+
+    private static void ensurePkce(AuthorizationRequest authorizationRequest) {
         // PAR carries its own code_challenge; the authorize request only references it via request_uri
         if (StringUtils.isBlank(authorizationRequest.getCodeChallenge()) && StringUtils.isBlank(authorizationRequest.getRequestUri())) {
             CodeVerifier verifier = authorizationRequest.generateAndSetCodeChallengeWithMethod();
             PKCE_VERIFIER_BY_CHALLENGE.put(authorizationRequest.getCodeChallenge(), verifier.getCodeVerifier());
         }
-        return authorizeUrl + "?" + authorizationRequest.getQueryString();
     }
 
     private static void rememberCodeVerifier(AuthorizationRequest authorizationRequest, AuthorizationResponse authorizationResponse) {
