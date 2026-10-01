@@ -267,7 +267,7 @@ type AppConfiguration struct {
 	JansOpenIDConnectVersion                                  string                                `schema:"jans_open_id_connect_version" json:"jansOpenIdConnectVersion"`
 	JansID                                                    string                                `schema:"jans_id" json:"jansId"`
 	TrustedClientEnabled                                      bool                                  `schema:"trusted_client_enabled" json:"trustedClientEnabled"`
-	SkipAuthorizationForOpenIDScopeAndPairwiseID              bool                                  `schema:"skip_authorization_for_open_id_scope_and_pairwise_id" json:"skipAuthorizationForOpenIDScopeAndPairwiseID"`
+	SkipAuthorizationForOpenIDScopeAndPairwiseID              bool                                  `schema:"skip_authorization_for_open_id_scope_and_pairwise_id" json:"skipAuthorizationForOpenIdScopeAndPairwiseId"`
 	DynamicRegistrationExpirationTime                         int                                   `schema:"dynamic_registration_expiration_time" json:"dynamicRegistrationExpirationTime"`
 	DynamicRegistrationCustomAttributes                       []string                              `schema:"dynamic_registration_custom_attributes" json:"dynamicRegistrationCustomAttributes"`
 	DynamicRegistrationDefaultCustomAttributes                map[string]string                     `schema:"dynamic_registration_default_custom_attributes" json:"dynamicRegistrationDefaultCustomAttributes"`
@@ -379,7 +379,7 @@ type AppConfiguration struct {
 	DcrForbidExpirationTimeInRequest                          bool                                  `schema:"dcr_forbid_expiration_time_in_request" json:"dcrForbidExpirationTimeInRequest"`
 	DcrSignatureValidationEnabled                             bool                                  `schema:"dcr_signature_validation_enabled" json:"dcrSignatureValidationEnabled"`
 	DcrSignatureValidationSharedSecret                        string                                `schema:"dcr_signature_validation_shared_secret" json:"dcrSignatureValidationSharedSecret"`
-	DcrSignatureValidationSoftwareStatementJwksUriClaim       string                                `schema:"dcr_signature_validation_software_statement_jwks_uri_claim" json:"dcrSignatureValidationSoftwareStatementJwksUriClaim"`
+	DcrSignatureValidationSoftwareStatementJwksUriClaim       string                                `schema:"dcr_signature_validation_software_statement_jwks_uri_claim" json:"dcrSignatureValidationSoftwareStatementJwksURIClaim"`
 	DcrSignatureValidationSoftwareStatementJwksClaim          string                                `schema:"dcr_signature_validation_software_statement_jwks_claim" json:"dcrSignatureValidationSoftwareStatementJwksClaim"`
 	DcrSignatureValidationJwks                                string                                `schema:"dcr_signature_validation_jwks" json:"dcrSignatureValidationJwks"`
 	DcrSignatureValidationJwksUri                             string                                `schema:"dcr_signature_validation_jwks_uri" json:"dcrSignatureValidationJwksUri"`

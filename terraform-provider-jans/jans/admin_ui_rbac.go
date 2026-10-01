@@ -221,7 +221,7 @@ func (c *Client) DeleteAdminUIPermission(ctx context.Context, permissionID strin
                 return fmt.Errorf("failed to get token: %w", err)
         }
 
-        if err := c.deleteEntity(ctx, "/jans-config-api/admin-ui/adminUIPermissions/"+permissionID, token, scope, permission); err != nil {
+        if err := c.deleteEntity(ctx, "/jans-config-api/admin-ui/adminUIPermissions", token, scope, permission); err != nil {
                 return fmt.Errorf("delete request failed: %w", err)
         }
 

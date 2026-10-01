@@ -26,7 +26,7 @@ type Fido2Configuration struct {
         MdsCertsFolder                  string             `schema:"mds_certs_folder" json:"mdsCertsFolder"`
         MdsTocsFolder                   string             `schema:"mds_tocs_folder" json:"mdsTocsFolder"`
         ServerMetadataFolder            string             `schema:"server_metadata_folder" json:"serverMetadataFolder"`
-        RequestedParties                []RequestedParties `schema:"requested_parties" json:"requestedParties"`
+        RequestedParties                []RequestedParties `schema:"requested_parties" json:"rp"`
         UnfinishedRequestExpiration     int                `schema:"unfinished_request_expiration" json:"unfinishedRequestExpiration"`
         AuthenticationHistoryExpiration int                `schema:"authentication_history_expiration" json:"authenticationHistoryExpiration"`
         DebugUserAutoEnrollment         bool               `schema:"user_auto_enrollment" json:"userAutoEnrollment"`
