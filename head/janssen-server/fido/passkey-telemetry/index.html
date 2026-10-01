@@ -2685,6 +2685,39 @@ your deployment terminates TLS at a proxy, make sure it sets <code>X-Forwarded-F
 strips any client-supplied value; otherwise the recorded address can be spoofed by the
 caller.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">The browser never calls FIDO2 directly</p>
+<p>A passkey ceremony's actual HTTP client is the Authorization Server (via an Agama flow or the
+person-authentication interception script) or Casa — the browser talks to one of those, and
+they relay attestation/assertion calls to FIDO2 over a plain service-to-service connection.
+Without anything forwarding the browser's own connection details on that hop, <code>ipAddress</code>
+records the relay's own address on every entry, <code>userAgent</code> records the relay's HTTP client
+library (e.g. <code>Apache-HttpClient/4.5.14</code>), and <code>deviceInfo</code>'s parsed fields fall back to
+<code>UNKNOWN</code> accordingly, since there's no real browser user agent to parse.</p>
+<p>Both relays therefore pass what they observed on the browser's request to FIDO2: the
+connecting address (the servlet request's <code>getRemoteAddr()</code>), sent as <code>X-Forwarded-For</code>, and the
+browser's <code>User-Agent</code>. They never copy a raw <code>X-Forwarded-For</code> header from the incoming request.
+Jetty may, however, derive <code>getRemoteAddr()</code> from such a header: in the Janssen container images
+its <code>forwarded</code> module is enabled, so when Apache or nginx fronts the Authorization Server or
+Casa and sets <code>X-Forwarded-For</code>, the connecting address already resolves to the real browser IP.
+If a different proxy sits in front of a relay and Jetty is not set up to trust it, the address
+FIDO2 records is that proxy's, not the browser's — <code>trustedProxyIpRanges</code> cannot recover an
+address the relay never forwarded.</p>
+<p>Forwarding requires the FIDO2 endpoint to be <code>https://</code> (plain <code>http://</code> is only accepted for a
+loopback host), because the end user's address and user agent are not sent in clear text. For a
+non-loopback <code>http://</code> endpoint the person-authentication interception script logs a warning and
+calls FIDO2 without the context, so the entry records the relay as described above. Casa's
+passkey enrollment and the Agama <code>FidoValidator</code> do not fall back: the call fails before it is
+sent, so use an <code>https://</code> FIDO2 endpoint with them.</p>
+<p>On the FIDO2 side, if <code>trustedProxyEnabled</code> is <code>true</code>, add the Authorization Server's and Casa's
+own addresses to <code>trustedProxyIpRanges</code> (see
+<a href="../fido2-server-properties-config/#client-ip-in-metrics">Client IP in metrics</a>) so the forwarded
+value is honored. If <code>trustedProxyEnabled</code> is left unset, it is already honored with no
+configuration — that default trusts <code>X-Forwarded-For</code> from <em>any</em> caller, not only the two
+relays, which is the same pre-existing exposure the setting itself warns about. <code>userAgent</code>
+carries no equivalent trust setting: whatever the relay sends is recorded as-is, the same as
+it always was for a direct caller.</p>
+</div>
 <h3 id="internal-diagnostic-codes">Internal diagnostic codes<a class="headerlink" href="#internal-diagnostic-codes" title="Permanent link">#</a></h3>
 <p>For some failure causes, <code>errorReason</code> carries an internal <code>JFS_*</code> code instead of a free-text
 message — deliberately recorded so the same cause is always spelled the same way, rather than
@@ -3168,7 +3201,7 @@ ran:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 30, 2026
+    October 01, 2026
   </span>
 
     
