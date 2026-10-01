@@ -180,7 +180,7 @@ class Plugin(DialogUtils):
                         self.app.getTitledCheckBox(
                             _("Enable User Role Permission Validation"),
                             name='userRolePermissionValidationEnabled',
-                            checked=self.data.get('userRolePermissionValidationEnabled'),
+                            checked=self.data.get('userRolePermissionValidationEnabled', True),
                             jans_help=self.app.get_help_from_schema(self.schema, 'userRolePermissionValidationEnabled'),
                             style=cli_style.check_box,
                             widget_style=cli_style.black_bg_widget
@@ -189,7 +189,7 @@ class Plugin(DialogUtils):
                         self.app.getTitledCheckBox(
                             _("Validate User Inum in Introspection"),
                             name='validateUserInumInIntrospectionFlag',
-                            checked=self.data.get('validateUserInumInIntrospectionFlag'),
+                            checked=self.data.get('validateUserInumInIntrospectionFlag', True),
                             jans_help=self.app.get_help_from_schema(self.schema, 'validateUserInumInIntrospectionFlag'),
                             style=cli_style.check_box,
                             widget_style=cli_style.black_bg_widget
@@ -198,7 +198,7 @@ class Plugin(DialogUtils):
                         self.app.getTitledCheckBox(
                             _("Fetch User Role in Introspection"),
                             name='fetchUserRoleInIntrospectionFlag',
-                            checked=self.data.get('fetchUserRoleInIntrospectionFlag'),
+                            checked=self.data.get('fetchUserRoleInIntrospectionFlag', True),
                             jans_help=self.app.get_help_from_schema(self.schema, 'fetchUserRoleInIntrospectionFlag'),
                             style=cli_style.check_box,
                             widget_style=cli_style.black_bg_widget
