@@ -20,8 +20,7 @@ import org.testng.annotations.Test;
 
 public class AcrsResourceTest extends ConfigServerBaseTest {
 
-    private String defaultAcr;
-
+    
     @Parameters({ "test.issuer", "acrsUrl" })
     @Test
     public void getDefaultAuthenticationMethod(final String issuer, final String acrsUrl) {
@@ -31,7 +30,7 @@ public class AcrsResourceTest extends ConfigServerBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         Response response = request.get();
         log.info("response:{}", response);
-        defaultAcr = response.readEntity(String.class);
+        String defaultAcr = response.readEntity(String.class);
         log.info("Response for getDefaultAuthenticationMethod -  defaultAcr:{}, response.getStatus():{}", defaultAcr,
                 response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
@@ -47,7 +46,7 @@ public class AcrsResourceTest extends ConfigServerBaseTest {
 
         Response response = request.get();
         log.info("response:{}", response);
-        defaultAcr = response.readEntity(String.class);
+        String defaultAcr = response.readEntity(String.class);
         response.close();
         
         request = getResteasyService().getClientBuilder(issuer + acrsUrl);
