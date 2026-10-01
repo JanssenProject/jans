@@ -523,6 +523,7 @@ nav:
       - TUI for K8s: janssen-server/kubernetes-ops/tui-k8s.md
       - Custom Attributes: janssen-server/kubernetes-ops/custom-attributes.md
       - Memory Dump: janssen-server/kubernetes-ops/memory-dump.md
+      - Change FQDN: janssen-server/kubernetes-ops/change-fqdn.md
     - VM Operations:
       - VM Operations: janssen-server/vm-ops/README.md
       - Upgrade: janssen-server/vm-ops/upgrade.md
@@ -634,6 +635,7 @@ nav:
       - Tutorial: cedarling/developer/sidecar/cedarling-sidecar-tutorial.md
     - Interface Reference:
       - Rust: https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
+      - JavaScript/WASM: https://janssenproject.github.io/developer-docs/cedarling/cedarling_wasm/index.html
       - Python: https://janssenproject.github.io/developer-docs/cedarling-python/cedarling_python.html
   - Integrations:
     - KrakenD: cedarling/integrations/cedarling-krakend.md

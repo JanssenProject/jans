@@ -21,12 +21,14 @@ import io.jans.service.cache.CacheProvider;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -52,6 +54,9 @@ public class PasskeysEnrollingWS {
     @Inject
     private PersistenceService persistenceService;
 
+    @Context
+    private HttpServletRequest httpRequest;
+
     private ObjectMapper mapper;
 
     @GET
@@ -72,7 +77,8 @@ public class PasskeysEnrollingWS {
                 try {
                     String userName = person.getUid();
                     request = fido2Service.doRegister(userName,
-                                Optional.ofNullable(person.getGivenName()).orElse(userName));
+                                Optional.ofNullable(person.getGivenName()).orElse(userName),
+                                httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"));
                     result = RegisterMessageCode.SUCCESS;
                     cacheProvider.put(EXPIRATION, USERS_PENDING_REG_PREFIX + userId, "");
                 } catch (Exception e) {
@@ -102,7 +108,8 @@ public class PasskeysEnrollingWS {
                 result = RegistrationCode.UNKNOWN_USER_ID;
             } else {
                 try {
-                    if (fido2Service.verifyRegistration(body)) {
+                    if (fido2Service.verifyRegistration(body, httpRequest.getRemoteAddr(),
+                            httpRequest.getHeader("User-Agent"))) {
                         newDevice = fido2Service.getLatestPasskey(userId, System.currentTimeMillis());
 
                         if (newDevice == null){

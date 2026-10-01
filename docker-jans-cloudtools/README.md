@@ -76,6 +76,7 @@ Usage: cloudtools [OPTIONS] COMMAND [ARGS]...
 Commands:
   certmanager   Manage cert and crypto keys
   cleanup       Cleanup expired entries in persistence
+  change-fqdn   Change FQDN
 ```
 
 ### certmanager
@@ -176,6 +177,21 @@ Example:
 
 ```
 cloudtools cleanup --limit 500
+```
+
+#### change-fqdn
+
+Change FQDN.
+
+Options:
+
+- `--old-fqdn`: The old FQDN need to be changed (if omitted or empty, the value is taken from existing configmap)
+- `--dry-run`: Simulate the process without persisting the changes 
+
+Example:
+
+```
+cloudtools change-fqdn new-demoexample.jans.io --old-fqdn=demoexample.jans.io
 ```
 
 ### Kubernetes CronJob Example

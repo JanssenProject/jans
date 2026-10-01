@@ -62,7 +62,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String code = "INVALID_AUTHORIZATION_CODE";
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        TokenResponse response = tokenClient.execAuthorizationCode(code, redirectUri, clientId, clientSecret);
+        TokenResponse response = tokenClient.execAuthorizationCode(code, redirectUri, clientId, clientSecret, codeVerifier(code));
 
         showClient(tokenClient);
         assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getStatus());
@@ -144,7 +144,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
 
         // 2. Request Resource Owner Credentials Grant
         String username = userId;
-        String password = "BAD_PASSWORD";
+        String password = "BAD_PASSWORD"; // # gitleaks:allow
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         TokenResponse tokenResponse = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, null,

@@ -296,6 +296,24 @@ print(f"Total size: {stats.total_size_bytes} bytes")
 print(f"Capacity usage: {stats.capacity_usage_percent}%")
 ```
 
+### Drain Metrics
+
+Destructive read: returns a `MetricsSnapshot` (`policy_stats`,
+`error_counters`, `operational_stats`, `interval`) and resets the
+counters.
+
+```python
+snapshot = instance.drain_metrics()
+print(f"Requests: {snapshot.operational_stats.get('authz.requests_total')}")
+print(f"Interval: {snapshot.interval}")
+```
+
+Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails when the Lock
+telemetry ticker owns the collector i.e. whenever
+`CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has no
+telemetry endpoint. `interval` is a `datetime.timedelta` with sub-second
+precision.
+
 ### Error Handling
 
 The Context Data API methods raise specific exceptions for different error conditions:

@@ -4,5 +4,10 @@
 
     <parameter name="file" value="target/test-classes/testng.properties" />
 
+    <test name="Fido2ClientFactory">
+        <classes>
+            <class name="io.jans.fido2.client.Fido2ClientFactoryTest" />
+        </classes>
+    </test>
 
 </suite>

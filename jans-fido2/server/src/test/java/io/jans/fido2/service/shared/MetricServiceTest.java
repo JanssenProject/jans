@@ -12,6 +12,8 @@ import java.util.List;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsData;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.fido2.service.metric.Fido2MetricsService;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
 import jakarta.enterprise.inject.Instance;
@@ -88,7 +90,7 @@ class MetricServiceTest {
 
         // When & Then - should not throw exception and complete successfully
         assertDoesNotThrow(() -> 
-            metricService.recordPasskeyRegistrationAttempt(username, httpRequest, startTime)
+            metricService.recordPasskeyRegistrationAttempt(username, httpRequest, startTime, null)
         );
     }
 
@@ -100,8 +102,8 @@ class MetricServiceTest {
         long startTime = System.currentTimeMillis();
 
         // When & Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> 
-            metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType)
+        assertDoesNotThrow(() ->
+            metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType, null)
         );
     }
 
@@ -114,8 +116,8 @@ class MetricServiceTest {
         long startTime = System.currentTimeMillis();
 
         // When & Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> 
-            metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason, authenticatorType)
+        assertDoesNotThrow(() ->
+            metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason, authenticatorType, null)
         );
     }
 
@@ -126,8 +128,8 @@ class MetricServiceTest {
         long startTime = System.currentTimeMillis();
 
         // When & Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> 
-            metricService.recordPasskeyAuthenticationAttempt(username, httpRequest, startTime)
+        assertDoesNotThrow(() ->
+            metricService.recordPasskeyAuthenticationAttempt(username, httpRequest, startTime, null)
         );
     }
 
@@ -139,8 +141,8 @@ class MetricServiceTest {
         long startTime = System.currentTimeMillis();
 
         // When & Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> 
-            metricService.recordPasskeyAuthenticationSuccess(username, httpRequest, startTime, authenticatorType)
+        assertDoesNotThrow(() ->
+            metricService.recordPasskeyAuthenticationSuccess(username, httpRequest, startTime, authenticatorType, null)
         );
     }
 
@@ -153,8 +155,8 @@ class MetricServiceTest {
         long startTime = System.currentTimeMillis();
 
         // When & Then - should not throw exception and complete successfully
-        assertDoesNotThrow(() -> 
-            metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, errorReason, authenticatorType)
+        assertDoesNotThrow(() ->
+            metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, errorReason, authenticatorType, null)
         );
     }
 
@@ -179,7 +181,7 @@ class MetricServiceTest {
         long startTime = System.currentTimeMillis();
 
         // When
-        metricService.recordPasskeyRegistrationAttempt(username, httpRequest, startTime);
+        metricService.recordPasskeyRegistrationAttempt(username, httpRequest, startTime, null);
 
         // Then - should complete without any metrics processing
         assertDoesNotThrow(() -> {
@@ -211,7 +213,7 @@ class MetricServiceTest {
         Thread callingThread = Thread.currentThread();
 
         // When
-        metricService.recordPasskeyRegistrationAttempt("testuser", httpRequest, System.currentTimeMillis());
+        metricService.recordPasskeyRegistrationAttempt("testuser", httpRequest, System.currentTimeMillis(), null);
 
         // Then - both reads already happened, on this thread and not on the async pool
         assertSame(callingThread, remoteAddrThread.get(),
@@ -231,7 +233,7 @@ class MetricServiceTest {
 
         // When & Then
         assertDoesNotThrow(() ->
-            metricService.recordPasskeyRegistrationAttempt("testuser", httpRequest, System.currentTimeMillis())
+            metricService.recordPasskeyRegistrationAttempt("testuser", httpRequest, System.currentTimeMillis(), null)
         );
     }
 
@@ -271,7 +273,7 @@ class MetricServiceTest {
 
         // When
         metricService.recordPasskeyRegistrationSuccess("testuser", httpRequest,
-                System.currentTimeMillis(), "platform");
+                System.currentTimeMillis(), "platform", null);
 
         // Then
         Fido2MetricsData stored = captureStoredMetrics();
@@ -317,7 +319,7 @@ class MetricServiceTest {
 
         // When
         metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
-                System.currentTimeMillis(), "platform");
+                System.currentTimeMillis(), "platform", null);
 
         // Then
         assertEquals("cookie-session-id", captureStoredMetrics().getSessionId());
@@ -337,7 +339,7 @@ class MetricServiceTest {
 
         // When
         metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
-                System.currentTimeMillis(), "platform");
+                System.currentTimeMillis(), "platform", null);
 
         // Then
         assertEquals("servlet-session-id", captureStoredMetrics().getSessionId());
@@ -351,7 +353,7 @@ class MetricServiceTest {
 
         // When
         metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
-                System.currentTimeMillis(), "platform");
+                System.currentTimeMillis(), "platform", null);
 
         // Then
         assertNull(captureStoredMetrics().getSessionId());
@@ -369,10 +371,80 @@ class MetricServiceTest {
 
         // When
         metricService.recordPasskeyRegistrationSuccess("testuser", httpRequest,
-                System.currentTimeMillis(), "platform");
+                System.currentTimeMillis(), "platform", null);
 
         // Then
         assertEquals("203.0.113.7", captureStoredMetrics().getIpAddress());
+    }
+
+    /**
+     * A native-failure diagnostic code (#14608) is recognised as its own category, distinct from
+     * attestation-trust codes and from the keyword-based bucketing applied to free-text messages —
+     * checked before the keyword matching, since "JFS_RPID_HASH_MISMATCH" contains no bucketable
+     * keyword and would otherwise fall through to OTHER.
+     */
+    @Test
+    void testCategorizeErrorRecognisesNativeFailureDiagnosticCode() {
+        assertEquals(NativeFailureDiagnostic.CATEGORY, metricService.categorizeError("JFS_RPID_HASH_MISMATCH"));
+    }
+
+    /**
+     * Native-client telemetry (#14607) round-trips through to the persisted metrics data, and
+     * client_correlation_id is promoted to its own top-level field, not left buried in the blob -
+     * see Fido2MetricsEntry.clientCorrelationId for why: it needs to be independently queryable to
+     * actually correlate a start call with its matching finish call, the same way sessionId is.
+     */
+    @Test
+    void testNativeClientTelemetryIsPersistedOnRegistrationSuccess() {
+        NativeClientTelemetry telemetry = new NativeClientTelemetry();
+        telemetry.setClientCorrelationId("corr-123");
+        telemetry.setPlatform("android");
+
+        // When
+        metricService.recordPasskeyRegistrationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform", telemetry);
+
+        // Then
+        Fido2MetricsData stored = captureStoredMetrics();
+        assertEquals(telemetry, stored.getNativeClientTelemetry());
+        assertEquals("corr-123", stored.getClientCorrelationId());
+    }
+
+    /**
+     * The same wiring applies to a failure event, not only the success path - and to the
+     * authentication ceremony, not only registration.
+     */
+    @Test
+    void testNativeClientTelemetryIsPersistedOnAuthenticationFailure() {
+        NativeClientTelemetry telemetry = new NativeClientTelemetry();
+        telemetry.setClientCorrelationId("corr-456");
+        telemetry.setLastClientErrorCode("GetCredentialCancellationException");
+
+        // When
+        metricService.recordPasskeyAuthenticationFailure("testuser", httpRequest,
+                System.currentTimeMillis(), "boom", "platform", telemetry);
+
+        // Then
+        Fido2MetricsData stored = captureStoredMetrics();
+        assertEquals(telemetry, stored.getNativeClientTelemetry());
+        assertEquals("corr-456", stored.getClientCorrelationId());
+    }
+
+    /**
+     * "Optional - absence must not change behavior" (#14607's own requirement): no telemetry
+     * object on the call means neither the blob nor the promoted correlation ID field is
+     * populated - this is what proves a client that never adopts the field sees no difference.
+     */
+    @Test
+    void testAbsentTelemetryLeavesNativeClientTelemetryAndCorrelationIdNull() {
+        // When
+        metricService.recordPasskeyRegistrationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform", null);
+
+        // Then
+        Fido2MetricsData stored = captureStoredMetrics();
+        assertNull(stored.getNativeClientTelemetry());
+        assertNull(stored.getClientCorrelationId());
     }
 
     /**
@@ -388,7 +460,7 @@ class MetricServiceTest {
     void testNullRequestIsTolerated() {
         // When & Then - fallback callers have no request at all
         assertDoesNotThrow(() ->
-            metricService.recordPasskeyAuthenticationAttempt("testuser", null, System.currentTimeMillis())
+            metricService.recordPasskeyAuthenticationAttempt("testuser", null, System.currentTimeMillis(), null)
         );
     }
 

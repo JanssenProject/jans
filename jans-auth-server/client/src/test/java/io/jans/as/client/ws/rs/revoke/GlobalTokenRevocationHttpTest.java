@@ -70,6 +70,7 @@ public class GlobalTokenRevocationHttpTest extends BaseTest {
         // 4. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationResponse.getCode());
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(registerResponse.getClientId());
         tokenRequest.setAuthPassword(registerResponse.getClientSecret());

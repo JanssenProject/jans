@@ -327,6 +327,32 @@ func (c *Cedarling) GetStatsCtx() (DataStoreStats, error) {
 	return stats, nil
 }
 
+// DrainMetrics is a destructive read: it returns the telemetry metrics
+// and resets the counters for the next interval, so there should be a
+// single consumer.
+// Returns an error when metrics collection is disabled, or
+// when the collector is owned by the Lock telemetry ticker.
+func (c *Cedarling) DrainMetrics() (MetricsSnapshot, error) {
+	result := internal.CallDrainMetrics(c.instance_id)
+	err := result.Error()
+	if err != nil {
+		return MetricsSnapshot{}, err
+	}
+
+	jsonValue := result.JsonValue()
+	if jsonValue == "" || jsonValue == "null" {
+		return MetricsSnapshot{}, nil
+	}
+
+	var snapshot MetricsSnapshot
+	err = json.Unmarshal(unsafeBytes(jsonValue), &snapshot)
+	if err != nil {
+		return MetricsSnapshot{}, err
+	}
+
+	return snapshot, nil
+}
+
 // IsTrustedIssuerLoadedByName returns true if the trusted issuer with the given id finished loading successfully.
 func (c *Cedarling) IsTrustedIssuerLoadedByName(issuerID string) bool {
 	return internal.CallIsTrustedIssuerLoadedByName(c.instance_id, issuerID)
@@ -340,6 +366,14 @@ func (c *Cedarling) IsTrustedIssuerLoadedByIss(issClaim string) bool {
 // TotalIssuers returns the number of trusted issuers configured in the policy store.
 func (c *Cedarling) TotalIssuers() uint {
 	return internal.CallTotalIssuers(c.instance_id)
+}
+
+// PolicyStoreID returns the ID of the currently published policy store.
+// The bool is false when the store carries no ID. The value is opaque and
+// can change after a background refresh.
+func (c *Cedarling) PolicyStoreID() (string, bool) {
+	id := internal.CallPolicyStoreId(c.instance_id)
+	return id, id != ""
 }
 
 // LoadedTrustedIssuersCount returns how many trusted issuers loaded successfully.
