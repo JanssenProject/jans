@@ -101,6 +101,13 @@ type TrustedIssuerConfig struct {
 	AutomaticallyGrantedScopes []string `schema:"automatically_granted_scopes" json:"automatically_granted_scopes"`
 }
 
+// SpiffeTrustDomainConfiguration represents a single SPIFFE trust domain bundle source.
+type SpiffeTrustDomainConfiguration struct {
+	TrustDomain                  string `schema:"trust_domain" json:"trustDomain"`
+	BundleEndpointUrl            string `schema:"bundle_endpoint_url" json:"bundleEndpointUrl"`
+	BundleCacheLifetimeInMinutes int    `schema:"bundle_cache_lifetime_in_minutes" json:"bundleCacheLifetimeInMinutes"`
+}
+
 type LockMessageConfig struct {
 	EnableIDTokenMessages  bool   `schema:"enable_id_token_messages" json:"enableIDTokenMessages"`
 	IDTokenMessagesChannel string `schema:"id_token_messages_channel" json:"idTokenMessagesChannel"`
@@ -466,6 +473,16 @@ type AppConfiguration struct {
 	LogoutStatusJwtSigningAlgValuesSupported                  []string                              `schema:"logout_status_jwt_signing_alg_values_supported" json:"logoutStatusJwtSigningAlgValuesSupported"`
 	RunAllUpdateTokenScripts                                  bool                                  `schema:"run_all_update_token_scripts" json:"runAllUpdateTokenScripts"`
 	SessionIdUserClaimsInAttributes                           []string                              `schema:"session_id_user_claims_in_attributes" json:"sessionIdUserClaimsInAttributes"`
+	CookieSameSite                                            string                                `schema:"cookie_same_site" json:"cookieSameSite"`
+	DisableExternalLoggerConfiguration                        bool                                  `schema:"disable_external_logger_configuration" json:"disableExternalLoggerConfiguration"`
+	IdJagLifetime                                             int                                   `schema:"id_jag_lifetime" json:"idJagLifetime"`
+	IdJagIssueRefreshToken                                    bool                                  `schema:"id_jag_issue_refresh_token" json:"idJagIssueRefreshToken"`
+	AuthorizationResponseIssParameterSupported                bool                                  `schema:"authorization_response_iss_parameter_supported" json:"authorizationResponseIssParameterSupported"`
+	SpiffeBundleMaxResponseSize                               int                                   `schema:"spiffe_bundle_max_response_size" json:"spiffeBundleMaxResponseSize"`
+	SpiffeBundleConnectTimeoutMs                              int                                   `schema:"spiffe_bundle_connect_timeout_ms" json:"spiffeBundleConnectTimeoutMs"`
+	SpiffeBundleReadTimeoutMs                                 int                                   `schema:"spiffe_bundle_read_timeout_ms" json:"spiffeBundleReadTimeoutMs"`
+	SpiffeTrustDomains                                        []SpiffeTrustDomainConfiguration      `schema:"spiffe_trust_domains" json:"spiffeTrustDomains"`
+	IdJagTrustedIdpIssuers                                    []TrustedIssuerConfig                 `schema:"id_jag_trusted_idp_issuers" json:"idJagTrustedIdpIssuers"`
 }
 
 // GetAppConfiguration returns all Janssen authorization server configuration

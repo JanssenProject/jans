@@ -306,6 +306,32 @@ func resourceFido2Configuration() *schema.Resource {
                                                                 Type: schema.TypeString,
                                                         },
                                                 },
+                                                "lock_audit_enabled": {
+                                                        Type:        schema.TypeBool,
+                                                        Optional:    true,
+                                                        Description: "Boolean value specifying whether Lock audit event forwarding is enabled.",
+                                                },
+                                                "lock_audit_endpoint": {
+                                                        Type:        schema.TypeString,
+                                                        Optional:    true,
+                                                        Description: "Endpoint URL that Lock audit events are forwarded to.",
+                                                },
+                                                "lock_audit_client_id": {
+                                                        Type:        schema.TypeString,
+                                                        Optional:    true,
+                                                        Description: "Client id used to authenticate when forwarding Lock audit events.",
+                                                },
+                                                "lock_audit_client_password": {
+                                                        Type:        schema.TypeString,
+                                                        Optional:    true,
+                                                        Sensitive:   true,
+                                                        Description: "Client password used to authenticate when forwarding Lock audit events.",
+                                                },
+                                                "lock_audit_flush_interval": {
+                                                        Type:        schema.TypeInt,
+                                                        Optional:    true,
+                                                        Description: "Interval in seconds between Lock audit event flushes.",
+                                                },
                                         },
                                 },
                         },

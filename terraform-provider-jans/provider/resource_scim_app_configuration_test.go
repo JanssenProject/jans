@@ -18,22 +18,24 @@ func TestResourceScimAppConfiguration_Mapping(t *testing.T) {
 	data := schema.Data(nil)
 
 	cfg := jans.ScimAppConfigurations{
-		MaxCount:                   200,
-		DisableJdkLogger:           true,
-		UseLocalCache:              true,
-		BaseDN:                     "o=jans",
-		ApplicationUrl:             "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
-		BaseEndpoint:               "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info/jans-scim/restv1",
-		PersonCustomObjectClass:    "jansCustomPerson",
-		OxAuthIssuer:               "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
-		UserExtensionSchemaURI:     "urn:ietf:params:scim:schemas:extension:gluu:2.0:User",
-		LoggingLevel:               "INFO",
-		LoggingLayout:              "text",
-		MetricReporterInterval:     300,
-		MetricReporterKeepDataDays: 15,
-		MetricReporterEnabled:      true,
-		BulkMaxOperations:          30,
-		BulkMaxPayloadSize:         3072000,
+		MaxCount:                           200,
+		DisableJdkLogger:                   true,
+		UseLocalCache:                      true,
+		BaseDN:                             "o=jans",
+		ApplicationUrl:                     "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
+		BaseEndpoint:                       "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info/jans-scim/restv1",
+		PersonCustomObjectClass:            "jansCustomPerson",
+		OxAuthIssuer:                       "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
+		UserExtensionSchemaURI:             "urn:ietf:params:scim:schemas:extension:gluu:2.0:User",
+		LoggingLevel:                       "INFO",
+		LoggingLayout:                      "text",
+		MetricReporterInterval:             300,
+		MetricReporterKeepDataDays:         15,
+		MetricReporterEnabled:              true,
+		BulkMaxOperations:                  30,
+		BulkMaxPayloadSize:                 3072000,
+		DisableExternalLoggerConfiguration: true,
+		SkipDefinedPasswordValidation:      true,
 	}
 
 	if err := toSchemaResource(data, cfg); err != nil {
@@ -47,8 +49,8 @@ func TestResourceScimAppConfiguration_Mapping(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(patches) != 16 {
-		t.Errorf("Got %d patches, expected 16", len(patches))
+	if len(patches) != 18 {
+		t.Errorf("Got %d patches, expected 18", len(patches))
 	}
 
 	if err := fromSchemaResource(data, &newCfg); err != nil {

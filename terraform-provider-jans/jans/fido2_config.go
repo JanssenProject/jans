@@ -42,6 +42,11 @@ type Fido2Configuration struct {
         EnterpriseAttestation           bool               `schema:"enterprise_attestation" json:"enterpriseAttestation"`
         AttestationMode                 string             `schema:"attestation_mode" json:"attestationMode"`
         AllowedTopOrigins               []string           `schema:"allowed_top_origins" json:"allowedTopOrigins"`
+        LockAuditEnabled                bool               `schema:"lock_audit_enabled" json:"lockAuditEnabled"`
+        LockAuditEndpoint               string             `schema:"lock_audit_endpoint" json:"lockAuditEndpoint"`
+        LockAuditClientId               string             `schema:"lock_audit_client_id" json:"lockAuditClientId"`
+        LockAuditClientPassword         string             `schema:"lock_audit_client_password" json:"lockAuditClientPassword"`
+        LockAuditFlushInterval          int                `schema:"lock_audit_flush_interval" json:"lockAuditFlushInterval"`
 }
 
 // JansFido2DynConfiguration defines the Fido2 dynamic configuration

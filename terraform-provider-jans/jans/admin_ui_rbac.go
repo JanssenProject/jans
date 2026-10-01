@@ -12,9 +12,11 @@ type AdminUIRole struct {
 }
 
 type AdminUIPermission struct {
-        Permission               string `schema:"permission" json:"permission,omitempty"`
-        Description              string `schema:"description" json:"description,omitempty"`
-        DefaultPermissionInToken bool   `schema:"default_permission_in_token" json:"defaultPermissionInToken,omitempty"`
+        Permission                   string `schema:"permission" json:"permission,omitempty"`
+        Description                  string `schema:"description" json:"description,omitempty"`
+        DefaultPermissionInToken     bool   `schema:"default_permission_in_token" json:"defaultPermissionInToken,omitempty"`
+        Tag                          string `schema:"tag" json:"tag,omitempty"`
+        EssentialPermissionInAdminUI bool   `schema:"essential_permission_in_admin_ui" json:"essentialPermissionInAdminUI,omitempty"`
 }
 
 type AdminUIRolePermissionMapping struct {
