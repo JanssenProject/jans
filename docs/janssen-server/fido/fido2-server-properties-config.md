@@ -83,6 +83,14 @@ resolved, because this runs on the request path.
 > server from `127.0.0.1`, and so do any sent directly to it. Trusting loopback therefore does not, on its
 > own, distinguish the proxy from a direct caller.
 
+> **The Authorization Server and Casa are callers too.** Neither is a browser-facing reverse proxy,
+> but both relay passkey ceremonies to FIDO2 and send the connecting address they observed on the
+> browser's request (`getRemoteAddr()`, not a browser-supplied header) as `X-Forwarded-For` on that
+> call — see [Request context on raw entries](passkey-telemetry.md#request-context-on-raw-entries).
+> If `trustedProxyEnabled` is `true`, their addresses need to be in `trustedProxyIpRanges` as well,
+> the same as any other trusted hop, or their forwarded value is ignored in favor of the connecting
+> address.
+
 ---
 
 ## FIDO2 Configuration Object (`fido2Configuration`)
