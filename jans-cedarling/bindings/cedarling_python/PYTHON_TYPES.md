@@ -397,6 +397,12 @@ Methods
 
     :returns: A MetricsSnapshot object
     :raises ValueError: If metrics collection is disabled or owned by lock telemetry.
+
+.. method:: policy_store_id(self) -> str | None
+
+    Returns the ID of the currently published policy store, if it carries one.
+
+    :returns: The store ID, or None when the store carries no ID.
 ---
 
 DataEntry

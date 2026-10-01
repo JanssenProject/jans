@@ -67,6 +67,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -162,6 +163,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -255,6 +257,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         // 4. Request access token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -318,6 +321,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         // 4. Request access token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -398,6 +402,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -508,7 +513,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         // 5. Request access token using the authorization code.
         TokenClient tokenClient1 = new TokenClient(tokenEndpoint);
         TokenResponse response2 = tokenClient1.execAuthorizationCode(authorizationCode, redirectUri,
-                clientId, clientSecret);
+                clientId, clientSecret, codeVerifier(authorizationCode));
 
         showClient(tokenClient1);
         AssertBuilder.tokenResponse(response2)
@@ -521,7 +526,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         // 6. Request access token using the same authorization code one more time. This call must fail.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
         TokenResponse response4 = tokenClient2.execAuthorizationCode(authorizationCode, redirectUri,
-                clientId, clientSecret);
+                clientId, clientSecret, codeVerifier(authorizationCode));
 
         showClient(tokenClient2);
         assertEquals(response4.getStatus(), 400, "Unexpected response code: " + response4.getStatus());
@@ -587,6 +592,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -675,6 +681,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);

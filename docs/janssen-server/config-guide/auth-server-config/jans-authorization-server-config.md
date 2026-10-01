@@ -69,7 +69,7 @@ It returns all the information of the Jans Authorization server.
   "requirePar": false,
   "deviceAuthzEndpoint": "https://example.jans.io/jans-auth/restv1/device_authorization",
   "requireRequestObjectEncryption": false,
-  "requirePkce": false,
+  "requirePkce": true,
   "allowAllValueForRevokeEndpoint": false,
   "sectorIdentifierCacheLifetimeInMinutes": 1440,
   "umaConfigurationEndpoint": "https://example.jans.io/jans-auth/restv1/uma2-configuration",
@@ -131,14 +131,12 @@ It returns all the information of the Jans Authorization server.
   ],
   "grantTypesSupported": [
     "urn:ietf:params:oauth:grant-type:uma-ticket",
-    "implicit",
     "urn:ietf:params:oauth:grant-type:token-exchange",
     "urn:ietf:params:oauth:grant-type:device_code",
     "urn:ietf:params:oauth:grant-type:jwt-bearer",
     "client_credentials",
     "refresh_token",
     "authorization_code",
-    "password",
     "tx_token"
   ],
   "subjectTypesSupported": [
