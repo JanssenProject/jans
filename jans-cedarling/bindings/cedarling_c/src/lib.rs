@@ -1005,6 +1005,45 @@ pub unsafe extern "C" fn cedarling_total_issuers(instance_id: u64, out_count: *m
     })
 }
 
+/// Write the ID of the currently published policy store into `*out_id`.
+///
+/// On success `*out_id` is either an owned string or null when the store carries
+/// no ID. The value is opaque and source-dependent, and may change after a
+/// background refresh. On error `*out_id` is set to null.
+///
+/// # Safety
+///
+/// - `out_id` must point to writable `char*` storage.
+/// - A non-null `*out_id` must be freed once with [`cedarling_free_string`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn cedarling_get_policy_store_id(
+    instance_id: u64,
+    out_id: *mut *mut c_char,
+) -> c_int {
+    ffi_guard_int!({
+        clear_last_error();
+        if out_id.is_null() {
+            set_last_error("null out_id pointer");
+            return CedarlingErrorCode::InvalidArgument as c_int;
+        }
+        unsafe { *out_id = ptr::null_mut() };
+        match policy_store_id(instance_id) {
+            Ok(None) => CedarlingErrorCode::Success as c_int,
+            Ok(Some(id)) => match std::ffi::CString::new(id) {
+                Ok(c_id) => unsafe {
+                    *out_id = c_id.into_raw();
+                    CedarlingErrorCode::Success as c_int
+                },
+                Err(_) => {
+                    set_last_error("policy store ID contains an interior NUL byte");
+                    CedarlingErrorCode::Internal as c_int
+                },
+            },
+            Err(code) => code as c_int,
+        }
+    })
+}
+
 /// Write the number of successfully loaded trusted issuers into `*out_count`.
 ///
 /// # Safety

@@ -464,6 +464,18 @@ permit(
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data without requiring policy changes.
 
+## Policy Store ID
+
+- `policy_store_id()`
+
+  Returns the ID of the currently published policy store, or none when the
+  store carries no ID. The value is an opaque string and must not be parsed.
+
+  The method name follows each binding's conventions (`policyStoreId` in
+  Kotlin/Swift/Java/JavaScript, `PolicyStoreID` in Go,
+  `cedarling_get_policy_store_id` in C); the return is empty or absent when
+  unset.
+
 ## Trusted Issuer Loading Info
 
 The `TrustedIssuerLoadingInfo` trait provides information about the loading status of trusted issuers. This is useful for health checks, diagnostics, and verifying that Cedarling has successfully loaded the expected issuers before processing authorization requests.
