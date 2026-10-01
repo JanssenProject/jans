@@ -32,11 +32,17 @@ public class BaseLockClientTest {
 
 	private static final String SENTINEL = "CHANGE_ME";
 
+	private static final String UNFILTERED_PREFIX = "${";
+
 	private static final Properties PROPERTIES = load();
 
 	private static Properties load() {
 		Properties properties = new Properties();
 		try (InputStream is = BaseLockClientTest.class.getResourceAsStream("/lock-client-test.properties")) {
+			if (is == null) {
+				throw new IllegalStateException("lock-client-test.properties not found on test classpath; "
+						+ "ensure Maven resource filtering ran (check target/test-classes/)");
+			}
 			properties.load(is);
 		} catch (IOException ex) {
 			throw new UncheckedIOException(ex);
@@ -44,8 +50,17 @@ public class BaseLockClientTest {
 		return properties;
 	}
 
+	private static String getProperty(String key, String defaultValue) {
+		String value = PROPERTIES.getProperty(key, defaultValue);
+		// If Maven filtering did not run, placeholders stay as literal ${...} text; treat as unset.
+		if (value != null && value.startsWith(UNFILTERED_PREFIX)) {
+			return defaultValue;
+		}
+		return value;
+	}
+
 	protected static String serverName() {
-		return PROPERTIES.getProperty("testServerName", SENTINEL).trim();
+		return getProperty("testServerName", SENTINEL).trim();
 	}
 
 	protected static boolean hasServer() {
@@ -58,11 +73,11 @@ public class BaseLockClientTest {
 	}
 
 	protected static String traceClientId() {
-		return PROPERTIES.getProperty("traceClientId", "").trim();
+		return getProperty("traceClientId", "").trim();
 	}
 
 	protected static String traceClientSecret() {
-		return PROPERTIES.getProperty("traceClientSecret", "").trim();
+		return getProperty("traceClientSecret", "").trim();
 	}
 
 	/**

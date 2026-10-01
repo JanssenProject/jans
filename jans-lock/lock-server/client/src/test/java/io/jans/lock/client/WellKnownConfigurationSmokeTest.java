@@ -14,15 +14,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.time.Duration;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +41,7 @@ class WellKnownConfigurationSmokeTest extends BaseLockClientTest {
 	@BeforeEach
 	void setUp() {
 		assumeTrue(hasServer(), "No real profile selected (-Dcfg=<profile>); skipping, see profiles/default/README.md");
-		client = HttpClient.newBuilder().sslContext(trustAllSslContext()).connectTimeout(Duration.ofSeconds(10)).build();
+		client = newInsecureHttpClient();
 	}
 
 	@Test
@@ -63,38 +55,6 @@ class WellKnownConfigurationSmokeTest extends BaseLockClientTest {
 		JsonNode body = MAPPER.readTree(response.body());
 		assertEquals("1.0", body.get("version").asText());
 		assertTrue(body.get("issuer").asText().contains(serverName()));
-	}
-
-	/**
-	 * The dev stand's TLS certificate is self-signed (see {@code VM-DEV-PROMPT.md}); this trusts any
-	 * certificate for this HTTP client instance only, exactly like {@code curl -k} in the project's
-	 * other manual scripts. Never use this pattern outside a test.
-	 */
-	private static SSLContext trustAllSslContext() {
-		TrustManager trustAll = new X509TrustManager() {
-
-			@Override
-			public void checkClientTrusted(X509Certificate[] chain, String authType) {
-				// test-only: accept any certificate chain
-			}
-
-			@Override
-			public void checkServerTrusted(X509Certificate[] chain, String authType) {
-				// test-only: accept any certificate chain
-			}
-
-			@Override
-			public X509Certificate[] getAcceptedIssuers() {
-				return new X509Certificate[0];
-			}
-		};
-		try {
-			SSLContext sslContext = SSLContext.getInstance("TLS");
-			sslContext.init(null, new TrustManager[] { trustAll }, new SecureRandom());
-			return sslContext;
-		} catch (NoSuchAlgorithmException | KeyManagementException ex) {
-			throw new IllegalStateException(ex);
-		}
 	}
 
 }
