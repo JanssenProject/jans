@@ -70,3 +70,26 @@ Changing FQDN in Kubernetes setup
       -f values.yaml \
       -n <jans-namespace>
     ```
+
+## Terraform users
+
+If the deployment is managed with the [Janssen Terraform provider](../terraform/README.md), the configuration and state still hold the old FQDN after `change-fqdn` runs. A later `terraform apply` sends the old values back (e.g. `issuer` and `base_endpoint` in `jans_app_configuration`, `redirect_uris` in `jans_oidc_client`) and undoes the change.
+
+!!! Warning
+    Do not run `terraform apply` between the `change-fqdn` job and the steps below.
+
+1.  Point the provider at the new FQDN, either `url` in the `provider "jans"` block or the `JANS_URL` environment variable.
+
+2.  Replace the old FQDN with the new one in all `.tf` and `.tfvars` files, for example:
+
+    ```bash
+    grep -rlF demoexample.jans.io --include='*.tf' --include='*.tfvars' . | xargs sed -i 's/demoexample\.jans\.io/new-demoexample.jans.io/g'
+    ```
+
+3.  Sync the state with the values already on the server:
+
+    ```bash
+    terraform apply -refresh-only
+    ```
+
+4.  Run `terraform plan`. It should report no changes. If it still shows the old FQDN, fix the configuration files, not the server.
