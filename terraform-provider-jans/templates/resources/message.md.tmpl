@@ -7,26 +7,25 @@ description: |-
 
 # {{.Name}} ({{.Type}})
 
-Resource for managing messages in the Janssen Server. Messages are used for
-internationalization and localization of user-facing text.
+Resource for managing the Janssen message (pub/sub) provider configuration,
+i.e. which backend (POSTGRES or REDIS) the server uses to publish messages.
 
 ## Example Usage
 
 ```terraform
 resource "jans_message" "example" {
-  key         = "login.welcome"
-  value       = "Welcome to the login page"
-  language    = "en"
-  application = "auth-server"
-}
-```
+  message_provider_type = "REDIS"
 
-### Minimal Example
+  postgres_configuration {
+    connection_uri = "jdbc:postgresql://localhost:5432/jans"
+    db_schema_name = "public"
+    auth_user_name = "jans"
+  }
 
-```terraform
-resource "jans_message" "minimal" {
-  key   = "error.invalid_credentials"
-  value = "Invalid username or password"
+  redis_configuration {
+    redis_provider_type = "STANDALONE"
+    servers             = "localhost:6379"
+  }
 }
 ```
 
