@@ -45,8 +45,16 @@ public class AcrsResourceTest extends ConfigServerBaseTest {
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
+      
+        Response response = request.get();
+        log.info("response:{}", response);
+        defaultAcr = response.readEntity(String.class);
+        
+        request = getResteasyService().getClientBuilder(issuer + acrsUrl);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         log.info("Update defaultAcr:{}", defaultAcr);
-        Response response = request.put(Entity.entity(defaultAcr, MediaType.APPLICATION_JSON));
+        response = request.put(Entity.entity(defaultAcr, MediaType.APPLICATION_JSON));
         log.info("Response for getApiConfigtion -  response:{}, response.getStatus():{}", response,
                 response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());

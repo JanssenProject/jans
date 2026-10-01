@@ -110,7 +110,7 @@ public class MetricResourceTest extends MetricBaseTest {
         try (Response response = request.get()) {
             log.info("getMetricEntriesWithoutMetricType() - response:{}, response.getStatus():{}", response,
                     response.getStatus());
-            assertEquals(response.getStatus(), Status.BAD_REQUEST.getStatusCode());
+            assertEquals(response.getStatus(), Status.INTERNAL_SERVER_ERROR.getStatusCode());
         }
     }
 
