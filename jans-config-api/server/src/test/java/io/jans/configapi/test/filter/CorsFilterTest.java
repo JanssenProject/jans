@@ -1,5 +1,5 @@
 
-package io.jans.configapi.filters;
+package io.jans.configapi.test.filter;
 
 /*
  * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.

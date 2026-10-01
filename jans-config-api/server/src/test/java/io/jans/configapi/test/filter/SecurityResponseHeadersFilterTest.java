@@ -1,4 +1,4 @@
-package io.jans.configapi.filters;
+package io.jans.configapi.test.filter;
 /*
  * Janssen Project software is available under the MIT License (2008).
  * See http://opensource.org/licenses/MIT for full text.
@@ -21,7 +21,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.net.URI;
 
 /**
  * Unit test for SecurityResponseHeadersFilter.
