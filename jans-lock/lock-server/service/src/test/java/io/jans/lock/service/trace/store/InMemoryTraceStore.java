@@ -78,6 +78,10 @@ public class InMemoryTraceStore implements TraceStore {
 
 	private volatile long insertRecordBarrierTimeoutMs;
 
+	private volatile CountDownLatch insertReceiptBarrier;
+
+	private volatile long insertReceiptBarrierTimeoutMs;
+
 	// -- test hooks ---------------------------------------------------------------------------
 
 	/** The next {@link #insertRecord(StoredTraceRecord)} call throws {@link TraceStorageException}. */
@@ -106,6 +110,17 @@ public class InMemoryTraceStore implements TraceStore {
 	public void setInsertRecordBarrier(CountDownLatch latch, long timeout, TimeUnit unit) {
 		this.insertRecordBarrier = latch;
 		this.insertRecordBarrierTimeoutMs = latch == null ? 0 : unit.toMillis(timeout);
+	}
+
+	/**
+	 * Installs a barrier that {@link #insertReceipt(TraceReceiptEntry)} counts down and then waits
+	 * on (bounded by {@code timeout}) immediately before it becomes visible in the store, so a test
+	 * can line up two concurrent receipt-sequence claims (task 18 acceptance criteria). Pass
+	 * {@code null} to remove the barrier.
+	 */
+	public void setInsertReceiptBarrier(CountDownLatch latch, long timeout, TimeUnit unit) {
+		this.insertReceiptBarrier = latch;
+		this.insertReceiptBarrierTimeoutMs = latch == null ? 0 : unit.toMillis(timeout);
 	}
 
 	/**
@@ -149,6 +164,25 @@ public class InMemoryTraceStore implements TraceStore {
 		if (!reachedZero) {
 			throw new TraceStorageException("insert_record_barrier_timeout",
 					"Timed out waiting for the insertRecord barrier latch to reach zero");
+		}
+	}
+
+	private void awaitInsertReceiptBarrier() {
+		CountDownLatch latch = this.insertReceiptBarrier;
+		if (latch == null) {
+			return;
+		}
+		latch.countDown();
+		boolean reachedZero;
+		try {
+			reachedZero = latch.await(insertReceiptBarrierTimeoutMs, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new TraceStorageException("insert_receipt_barrier_interrupted", "Interrupted awaiting barrier", e);
+		}
+		if (!reachedZero) {
+			throw new TraceStorageException("insert_receipt_barrier_timeout",
+					"Timed out waiting for the insertReceipt barrier latch to reach zero");
 		}
 	}
 
@@ -240,6 +274,8 @@ public class InMemoryTraceStore implements TraceStore {
 		if (failNextInsertReceipt.getAndSet(false)) {
 			throw new TraceStorageException("test_fail_next_insert_receipt", "Forced test failure");
 		}
+		awaitInsertReceiptBarrier();
+
 		String key = TraceKeys.receiptKey(row.getDomainId(), row.getReceiptSeq());
 		row.setId(key);
 		TraceReceiptEntry existing = receiptsByKey.putIfAbsent(key, copyOf(row));
