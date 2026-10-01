@@ -3,6 +3,7 @@ package jans
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 // ClientAuth mirrors the config-api ClientAuth model: a map keyed by a client
@@ -35,7 +36,7 @@ func (c *Client) DeleteClientAuthorization(ctx context.Context, userId, clientId
 		return fmt.Errorf("failed to get token: %w", err)
 	}
 
-	path := fmt.Sprintf("/jans-config-api/api/v1/clients/authorizations/%s/%s/%s", userId, clientId, username)
+	path := fmt.Sprintf("/jans-config-api/api/v1/clients/authorizations/%s/%s/%s", url.PathEscape(userId), url.PathEscape(clientId), url.PathEscape(username))
 
 	if err := c.delete(ctx, path, token, scope); err != nil {
 		return fmt.Errorf("delete client authorization: %w", err)
