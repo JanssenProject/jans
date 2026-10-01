@@ -117,7 +117,6 @@ public abstract class BaseTest {
 
     protected Map<String, String> allTestKeys = Maps.newHashMap();
 
-    // OAuth 2.1 requires PKCE, so flows that don't manage it themselves get an S256 challenge attached
     private static final Map<String, String> PKCE_VERIFIER_BY_CHALLENGE = new ConcurrentHashMap<>();
     private static final Map<String, String> PKCE_VERIFIER_BY_CODE = new ConcurrentHashMap<>();
 
@@ -682,8 +681,6 @@ public abstract class BaseTest {
         }
     }
 
-    // Once the browser is back at redirect_uri (e.g. with an error) the element never appears,
-    // so fail now instead of burning the whole wait timeout.
     private static void failIfRedirected(WebDriver currentDriver, String id, String redirectUri) {
         final String url = currentDriver.getCurrentUrl();
         if (StringUtils.isNotBlank(redirectUri) && url != null && url.startsWith(redirectUri)) {
@@ -1158,7 +1155,6 @@ public abstract class BaseTest {
     }
 
     private static void ensurePkce(AuthorizationRequest authorizationRequest) {
-        // PAR carries its own code_challenge; the authorize request only references it via request_uri
         if (StringUtils.isBlank(authorizationRequest.getCodeChallenge()) && StringUtils.isBlank(authorizationRequest.getRequestUri())) {
             CodeVerifier verifier = authorizationRequest.generateAndSetCodeChallengeWithMethod();
             PKCE_VERIFIER_BY_CHALLENGE.put(authorizationRequest.getCodeChallenge(), verifier.getCodeVerifier());
@@ -1461,7 +1457,7 @@ public abstract class BaseTest {
         List<String> softwareRolesAux = Collections.singletonList("password");
         List<String> grantTypesAux = Collections.singletonList("client_credentials");
         return createSsa(accessToken, orgIdAux, expirationAux, descriptionAux, softwareIdAux, softwareRolesAux,
-                grantTypesAux, oneTimeUse, !Boolean.TRUE.equals(oneTimeUse), 86400); // server rejects one_time_use + rotate_ssa
+                grantTypesAux, oneTimeUse, !Boolean.TRUE.equals(oneTimeUse), 86400);
     }
 
     public SsaCreateResponse createSsa(String accessToken, String orgId, Long expiration, String description,

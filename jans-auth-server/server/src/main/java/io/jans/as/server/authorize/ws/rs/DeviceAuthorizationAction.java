@@ -270,7 +270,6 @@ public class DeviceAuthorizationAction implements Serializable {
                 authRequest.addResponseParameter(ACR_VALUES, acr);
             }
 
-            // PKCE is required; the device gets tokens via device_code, so the verifier is intentionally discarded
             CodeVerifier codeVerifier = new CodeVerifier(CodeVerifier.CodeChallengeMethod.S256);
             authRequest.addResponseParameter(CODE_CHALLENGE, codeVerifier.getCodeChallenge());
             authRequest.addResponseParameter(CODE_CHALLENGE_METHOD, codeVerifier.getTransformationType().getPkceString());

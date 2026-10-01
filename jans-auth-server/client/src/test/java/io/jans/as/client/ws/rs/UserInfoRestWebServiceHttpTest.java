@@ -507,7 +507,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 .claimsPresence(JwtClaimName.EMAIL)
                 .check();
 
-        // 5. Request user info (URL_QUERY_PARAMETER) - rejected, OAuth 2.1 forbids access_token in query
+        // 5. Request user info (URL_QUERY_PARAMETER)
         UserInfoRequest userInfoRequest3 = new UserInfoRequest(accessToken);
         userInfoRequest3.setAuthorizationMethod(AuthorizationMethod.URL_QUERY_PARAMETER);
         UserInfoClient userInfoClient3 = new UserInfoClient(userInfoEndpoint);
