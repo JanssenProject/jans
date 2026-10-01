@@ -34,3 +34,25 @@ func (c *Client) GetPlugins(ctx context.Context) ([]PluginConf, error) {
 
         return ret, nil
 }
+
+// GetPlugin reports whether the named plugin is deployed on the server. The
+// endpoint returns a bare boolean rather than a plugin entity.
+func (c *Client) GetPlugin(ctx context.Context, name string) (bool, error) {
+
+        if name == "" {
+                return false, fmt.Errorf("name is empty")
+        }
+
+        scope := "https://jans.io/oauth/config/plugin.readonly"
+        token, err := c.ensureToken(ctx, scope)
+        if err != nil {
+                return false, fmt.Errorf("failed to get token: %w", err)
+        }
+
+        var deployed bool
+        if err := c.get(ctx, "/jans-config-api/api/v1/plugin/"+name, token, scope, &deployed); err != nil {
+                return false, fmt.Errorf("get request failed: %w", err)
+        }
+
+        return deployed, nil
+}

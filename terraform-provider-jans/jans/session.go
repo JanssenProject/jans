@@ -78,3 +78,33 @@ func (c *Client) RevokeUserSessions(ctx context.Context, userDn string) error {
 
         return c.delete(ctx, "/jans-config-api/api/v1/jans-auth-server/session/user/"+userDn, token, scope)
 }
+
+// SearchSessions returns sessions matching the server-side search endpoint.
+func (c *Client) SearchSessions(ctx context.Context) ([]SessionId, error) {
+        scope := "https://jans.io/oauth/jans-auth-server/session.readonly"
+        token, err := c.ensureToken(ctx, scope)
+        if err != nil {
+                return nil, err
+        }
+
+        var result SessionPagedResult
+        err = c.get(ctx, "/jans-config-api/api/v1/jans-auth-server/session/search", token, scope, &result)
+        if err != nil {
+                return nil, err
+        }
+
+        return result.Entries, nil
+}
+
+// DeleteSessionBySid revokes a single session identified by its session id.
+func (c *Client) DeleteSessionBySid(ctx context.Context, sid string) error {
+        // session.admin is the super-scope the endpoint accepts as a full
+        // override for the revoke_session feature flag, matching RevokeUserSessions.
+        scope := "https://jans.io/oauth/jans-auth-server/session.admin"
+        token, err := c.ensureToken(ctx, scope)
+        if err != nil {
+                return err
+        }
+
+        return c.delete(ctx, "/jans-config-api/api/v1/jans-auth-server/session/sid/"+sid, token, scope)
+}

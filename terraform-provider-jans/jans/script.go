@@ -181,3 +181,51 @@ func (c *Client) GetScriptTypes(ctx context.Context) ([]string, error) {
 
         return ret, nil
 }
+
+// GetScriptByName returns a custom script by its name.
+func (c *Client) GetScriptByName(ctx context.Context, name string) (*Script, error) {
+
+        if name == "" {
+                return nil, fmt.Errorf("name is empty")
+        }
+
+        scope := "https://jans.io/oauth/config/scripts.readonly"
+        token, err := c.ensureToken(ctx, scope)
+        if err != nil {
+                return nil, fmt.Errorf("failed to get token: %w", err)
+        }
+
+        ret := &Script{}
+
+        if err := c.get(ctx, "/jans-config-api/api/v1/config/scripts/name/"+name, token, scope, ret); err != nil {
+                return nil, fmt.Errorf("get request failed: %w", err)
+        }
+
+        return ret, nil
+}
+
+// GetScriptsByType returns all custom scripts of the given type.
+func (c *Client) GetScriptsByType(ctx context.Context, scriptType string) ([]Script, error) {
+
+        if scriptType == "" {
+                return nil, fmt.Errorf("script type is empty")
+        }
+
+        scope := "https://jans.io/oauth/config/scripts.readonly"
+        token, err := c.ensureToken(ctx, scope)
+        if err != nil {
+                return nil, fmt.Errorf("failed to get token: %w", err)
+        }
+
+        type response struct {
+                Scripts []Script `json:"entries"`
+        }
+
+        ret := response{}
+
+        if err := c.get(ctx, "/jans-config-api/api/v1/config/scripts/type/"+scriptType, token, scope, &ret); err != nil {
+                return nil, fmt.Errorf("get request failed: %w", err)
+        }
+
+        return ret.Scripts, nil
+}

@@ -153,3 +153,87 @@ func (c *Client) GetJansAsset(ctx context.Context, inum string) (*Document, erro
 
         return ret, nil
 }
+
+// GetJansAssets returns all assets stored on the server.
+func (c *Client) GetJansAssets(ctx context.Context) ([]Document, error) {
+        scope := "https://jans.io/oauth/config/asset.readonly"
+        token, err := c.ensureToken(ctx, scope)
+        if err != nil {
+                return nil, fmt.Errorf("failed to get token: %w", err)
+        }
+
+        var result PagedResult[Document]
+        if err := c.get(ctx, "/jans-config-api/api/v1/jans-assets", token, scope, &result); err != nil {
+                return nil, fmt.Errorf("get request failed: %w", err)
+        }
+
+        return result.Entries, nil
+}
+
+// GetJansAssetByName returns the assets matching the given name.
+func (c *Client) GetJansAssetByName(ctx context.Context, name string) ([]Document, error) {
+        if name == "" {
+                return nil, fmt.Errorf("name is empty")
+        }
+
+        scope := "https://jans.io/oauth/config/asset.readonly"
+        token, err := c.ensureToken(ctx, scope)
+        if err != nil {
+                return nil, fmt.Errorf("failed to get token: %w", err)
+        }
+
+        var result PagedResult[Document]
+        if err := c.get(ctx, "/jans-config-api/api/v1/jans-assets/name/"+name, token, scope, &result); err != nil {
+                return nil, fmt.Errorf("get request failed: %w", err)
+        }
+
+        return result.Entries, nil
+}
+
+// GetJansAssetDirMapping returns the valid asset type to server directory mappings.
+func (c *Client) GetJansAssetDirMapping(ctx context.Context) ([]AssetDirMapping, error) {
+        scope := "https://jans.io/oauth/config/asset.readonly"
+        token, err := c.ensureToken(ctx, scope)
+        if err != nil {
+                return nil, fmt.Errorf("failed to get token: %w", err)
+        }
+
+        ret := []AssetDirMapping{}
+        if err := c.get(ctx, "/jans-config-api/api/v1/jans-assets/asset-dir-mapping", token, scope, &ret); err != nil {
+                return nil, fmt.Errorf("get request failed: %w", err)
+        }
+
+        return ret, nil
+}
+
+// GetJansAssetServices returns the asset services configured on the server.
+func (c *Client) GetJansAssetServices(ctx context.Context) ([]string, error) {
+        scope := "https://jans.io/oauth/config/asset.readonly"
+        token, err := c.ensureToken(ctx, scope)
+        if err != nil {
+                return nil, fmt.Errorf("failed to get token: %w", err)
+        }
+
+        ret := []string{}
+        if err := c.get(ctx, "/jans-config-api/api/v1/jans-assets/services", token, scope, &ret); err != nil {
+                return nil, fmt.Errorf("get request failed: %w", err)
+        }
+
+        return ret, nil
+}
+
+// GetJansAssetTypes returns the valid asset types.
+func (c *Client) GetJansAssetTypes(ctx context.Context) ([]string, error) {
+        scope := "https://jans.io/oauth/config/asset.readonly"
+        token, err := c.ensureToken(ctx, scope)
+        if err != nil {
+                return nil, fmt.Errorf("failed to get token: %w", err)
+        }
+
+        ret := []string{}
+        if err := c.get(ctx, "/jans-config-api/api/v1/jans-assets/asset-type", token, scope, &ret); err != nil {
+                return nil, fmt.Errorf("get request failed: %w", err)
+        }
+
+        return ret, nil
+}
