@@ -19,6 +19,13 @@
 	</prerequisites>
 
 	<build>
+		<!-- Test profile: properties in profiles/${cfg}/config-jans-lock-test-data.properties are
+		     substituted into the filtered testResources below (same mechanism as jans-auth-server/client;
+		     see profiles/default/README.md). Select another profile with -Dcfg=<profile name>. -->
+		<filters>
+			<filter>${basedir}/profiles/${cfg}/config-jans-lock-test-data.properties</filter>
+		</filters>
+
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -141,6 +148,26 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Declared explicitly (unlike service, which gets a same-version engine transitively via
+		     mockito-junit-jupiter): without it, the parent pluginManagement's surefire <dependencies>
+		     pins junit-jupiter-engine to a hardcoded 5.9.2 while the BOM manages junit-jupiter-api to
+		     a newer version, and the resulting version skew makes the JUnit Platform fail to discover
+		     tests ("TestEngine with ID 'junit-jupiter' failed to discover tests") with no visible cause. -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
