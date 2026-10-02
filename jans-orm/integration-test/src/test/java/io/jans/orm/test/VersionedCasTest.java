@@ -26,11 +26,12 @@ import io.jans.orm.exception.VersionMismatchException;
 import io.jans.orm.test.model.VersionedTestEntry;
 
 /**
- * SQL backend CAS (`@Version` / `updateWithVersion`) acceptance tests -- task 04.
+ * CAS (`@Version` / `updateWithVersion`) acceptance tests for every backend that implements
+ * {@code mergeWithVersion} -- SQL (task 04), LDAP (task 05).
  *
- * <p>Requires task 03's {@code jansVersion} column on the table backing
- * {@code jansTestVersioned} to already exist in whatever DB the active profile points at
- * (see {@code VersionedTestEntry}); this test's own code is not what provisions it.</p>
+ * <p>Requires task 03's {@code jansVersion} attribute/column already provisioned for
+ * {@code jansTestVersioned} wherever the active profile points (SQL table column or LDAP schema;
+ * see {@code VersionedTestEntry}) -- this test's own code is not what provisions it.</p>
  *
  * @author Yuriy Movchan Date: 10/02/2026
  */
@@ -40,8 +41,10 @@ public class VersionedCasTest extends BaseOrmTest {
 
 	@BeforeClass
 	public void checkPersistenceType() {
-		// Parent class @BeforeClass runs first, so entryManager is already initialized
-		requirePersistenceType(SQL);
+		// Parent class @BeforeClass runs first, so entryManager is already initialized.
+		// Backend-agnostic by design (task 09 will fold this into the shared cross-backend suite) --
+		// SQL (task 04) and LDAP (task 05) both implement mergeWithVersion; Couchbase/Spanner don't yet.
+		requirePersistenceType(SQL, LDAP);
 	}
 
 	@AfterClass(alwaysRun = true)
