@@ -60,6 +60,21 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	Void merge(Object entry);
 
+	/**
+	 * Conditionally updates {@code entry}, succeeding only if the entry's currently stored
+	 * {@code @Version} value still equals the value held on {@code entry} at call time. On success,
+	 * increments the stored version and writes the same new value back onto {@code entry}.
+	 *
+	 * @throws io.jans.orm.exception.MappingException if entry's class has more than one
+	 *         {@code @Version} field, or that field's current value on {@code entry} is null
+	 * @throws io.jans.orm.exception.VersionMismatchException if the stored version no longer matches
+	 *         (another writer updated first, or the entry no longer exists)
+	 * @throws io.jans.orm.exception.UnsupportedOperationException if the active persistence backend
+	 *         does not implement versioned updates, or {@code entry}'s class has zero
+	 *         {@code @Version} fields
+	 */
+	Void updateWithVersion(Object entry);
+
 	@Deprecated
 	boolean contains(Object entity);
 
