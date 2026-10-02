@@ -827,7 +827,7 @@ func TestClient_DeleteAdminUIPermission(t *testing.T) {
         for _, tt := range tests {
                 t.Run(tt.name, func(t *testing.T) {
                         server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-                                expectedPath := "/jans-config-api/admin-ui/adminUIPermissions/" + tt.permissionID
+                                expectedPath := "/jans-config-api/admin-ui/adminUIPermissions"
                                 if r.URL.Path != expectedPath {
                                         t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
                                 }
@@ -857,7 +857,7 @@ func TestClient_DeleteAdminUIPermission(t *testing.T) {
         // Negative path: server error
         t.Run("server error (500)", func(t *testing.T) {
                 server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-                        expectedPath := "/jans-config-api/admin-ui/adminUIPermissions/test-permission"
+                        expectedPath := "/jans-config-api/admin-ui/adminUIPermissions"
                         if r.URL.Path != expectedPath {
                                 t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
                         }
@@ -882,7 +882,7 @@ func TestClient_DeleteAdminUIPermission(t *testing.T) {
         // Negative path: not found (404)
         t.Run("permission not found (404)", func(t *testing.T) {
                 server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
-                        expectedPath := "/jans-config-api/admin-ui/adminUIPermissions/nonexistent"
+                        expectedPath := "/jans-config-api/admin-ui/adminUIPermissions"
                         if r.URL.Path != expectedPath {
                                 t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
                         }
