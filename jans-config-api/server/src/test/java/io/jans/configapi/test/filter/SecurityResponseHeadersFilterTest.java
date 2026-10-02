@@ -7,6 +7,8 @@ package io.jans.configapi.test.filter;
 
 
 
+import io.jans.configapi.filters.SecurityResponseHeadersFilter;
+
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.core.MultivaluedHashMap;
