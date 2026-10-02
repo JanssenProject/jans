@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  * must also carry {@link AttributeName} for its column/attribute name. Exactly one
  * {@code @Version} field is allowed per entity class.
  *
- * @author Yuriy Movchan Date: 10.02.2026
+ * @author Yuriy Movchan
  */
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)

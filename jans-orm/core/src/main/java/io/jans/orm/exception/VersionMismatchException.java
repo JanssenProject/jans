@@ -10,7 +10,7 @@ package io.jans.orm.exception;
  * An exception is a result of a failed optimistic-concurrency check: the entry's stored
  * {@code @Version} value no longer matched the expected value at update time.
  *
- * @author Yuriy Movchan Date: 10.02.2026
+ * @author Yuriy Movchan
  */
 public class VersionMismatchException extends BasePersistenceException {
 

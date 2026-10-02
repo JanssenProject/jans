@@ -230,50 +230,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
         // Update entry
         try {
-            List<AttributeDataModification> modifications = new ArrayList<AttributeDataModification>(attributeDataModifications.size());
-            for (AttributeDataModification attributeDataModification : attributeDataModifications) {
-                AttributeData attribute = attributeDataModification.getAttribute();
-                AttributeData oldAttribute = attributeDataModification.getOldAttribute();
-
-                String attributeName = null;
-                Object[] attributeValues = null;
-                Boolean multiValued = null;
-                Boolean jsonValue = null;
-                Boolean binaryValue = null;
-                if (attribute != null) {
-                    attributeName = attribute.getName();
-                    attributeValues = attribute.getValues();
-                    multiValued = attribute.getMultiValued();
-                    jsonValue = attribute.getJsonValue();
-                    binaryValue = attribute.getBinaryValue();
-                }
-
-                String oldAttributeName = null;
-                Object[] oldAttributeValues = null;
-                if (oldAttribute != null) {
-                    oldAttributeName = oldAttribute.getName();
-                    oldAttributeValues = oldAttribute.getValues();
-                }
-                
-                AttributeDataModification modification = null;
-                AttributeModificationType modificationType = attributeDataModification.getModificationType();
-				if ((AttributeModificationType.ADD == modificationType) ||
-                	(AttributeModificationType.FORCE_UPDATE == modificationType)) {
-                    modification = createModification(attribute, modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
-                } else {
-                    if ((AttributeModificationType.REMOVE == modificationType)) {
-                		// REMOVE for already empty table cells not reaches this method. For entities with
-                		// forceUpdate DB state is unknown, hence REMOVE should set null to table cell
-                		modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, binaryValue, oldAttributeValues);
-                    } else if ((AttributeModificationType.REPLACE == modificationType)) {
-                        modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
-                    }
-                }
-
-                if (modification != null) {
-                    modifications.add(modification);
-                }
-            }
+            List<AttributeDataModification> modifications = buildSqlModifications(baseObjectClass, attributeDataModifications);
 
             if (modifications.size() > 0) {
                 boolean result = getOperationService().updateEntry(toSQLKey(dn).getKey(), baseObjectClass, modifications);
@@ -284,6 +241,74 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to update entry: '%s'", dn), ex);
         }
+    }
+
+    @Override
+    protected boolean mergeWithVersion(String dn, String[] objectClasses, List<AttributeDataModification> attributeDataModifications,
+            Integer expiration, String versionAttributeName, Object expectedVersionValue, Object newVersionValue) {
+    	String baseObjectClass = getBaseObjectClassForDataOperation(objectClasses);
+
+        try {
+            List<AttributeDataModification> modifications = buildSqlModifications(baseObjectClass, attributeDataModifications);
+            String internalVersionAttributeName = toInternalAttribute(baseObjectClass, versionAttributeName);
+
+            // Unlike merge(), this call must never be skipped for an empty diff (D-8) -- the version
+            // bump (and therefore the CAS check) always has to reach the database.
+            return getOperationService().updateEntryWithVersion(toSQLKey(dn).getKey(), baseObjectClass, modifications,
+                    internalVersionAttributeName, expectedVersionValue);
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to update entry: '%s'", dn), ex);
+        }
+    }
+
+    private List<AttributeDataModification> buildSqlModifications(String baseObjectClass,
+            List<AttributeDataModification> attributeDataModifications) {
+        List<AttributeDataModification> modifications = new ArrayList<AttributeDataModification>(attributeDataModifications.size());
+        for (AttributeDataModification attributeDataModification : attributeDataModifications) {
+            AttributeData attribute = attributeDataModification.getAttribute();
+            AttributeData oldAttribute = attributeDataModification.getOldAttribute();
+
+            String attributeName = null;
+            Object[] attributeValues = null;
+            Boolean multiValued = null;
+            Boolean jsonValue = null;
+            Boolean binaryValue = null;
+            if (attribute != null) {
+                attributeName = attribute.getName();
+                attributeValues = attribute.getValues();
+                multiValued = attribute.getMultiValued();
+                jsonValue = attribute.getJsonValue();
+                binaryValue = attribute.getBinaryValue();
+            }
+
+            String oldAttributeName = null;
+            Object[] oldAttributeValues = null;
+            if (oldAttribute != null) {
+                oldAttributeName = oldAttribute.getName();
+                oldAttributeValues = oldAttribute.getValues();
+            }
+
+            AttributeDataModification modification = null;
+            AttributeModificationType modificationType = attributeDataModification.getModificationType();
+			if ((AttributeModificationType.ADD == modificationType) ||
+            	(AttributeModificationType.FORCE_UPDATE == modificationType)) {
+                modification = createModification(attribute, modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
+            } else {
+                if ((AttributeModificationType.REMOVE == modificationType)) {
+            		// REMOVE for already empty table cells not reaches this method. For entities with
+            		// forceUpdate DB state is unknown, hence REMOVE should set null to table cell
+            		modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, binaryValue, oldAttributeValues);
+                } else if ((AttributeModificationType.REPLACE == modificationType)) {
+                    modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
+                }
+            }
+
+            if (modification != null) {
+                modifications.add(modification);
+            }
+        }
+
+        return modifications;
     }
 
     @Override
