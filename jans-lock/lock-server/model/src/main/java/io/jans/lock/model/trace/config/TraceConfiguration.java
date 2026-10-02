@@ -32,6 +32,7 @@ public class TraceConfiguration {
     public static final int DEFAULT_RECEIPT_ALLOCATION_RETRY_LIMIT = 8;
     public static final int DEFAULT_RECEIPT_REPAIR_INTERVAL_SECONDS = 300;
     public static final int DEFAULT_PENDING_RECEIPT_TIMEOUT_SECONDS = 120;
+    public static final int DEFAULT_MAX_BULK_RECORDS = 100;
 
     @DocProperty(description = "Enable TRACE evidence ingestion endpoints", defaultValue = "true")
     @Schema(description = "Enable TRACE evidence ingestion endpoints")
@@ -80,6 +81,10 @@ public class TraceConfiguration {
     @DocProperty(description = "Seconds a PENDING receipt may stay unresolved before the repair timer settles it", defaultValue = "120")
     @Schema(description = "Seconds a PENDING receipt may stay unresolved before the repair timer settles it")
     private int pendingReceiptTimeoutSeconds = DEFAULT_PENDING_RECEIPT_TIMEOUT_SECONDS;
+
+    @DocProperty(description = "Maximum number of assertions accepted in one POST /audit/trace/bulk request", defaultValue = "100")
+    @Schema(description = "Maximum number of assertions accepted in one POST /audit/trace/bulk request")
+    private int maxBulkRecords = DEFAULT_MAX_BULK_RECORDS;
 
     public boolean isEnabled() {
         return enabled;
@@ -179,6 +184,14 @@ public class TraceConfiguration {
         this.pendingReceiptTimeoutSeconds = pendingReceiptTimeoutSeconds;
     }
 
+    public int getMaxBulkRecords() {
+        return maxBulkRecords > 0 ? maxBulkRecords : DEFAULT_MAX_BULK_RECORDS;
+    }
+
+    public void setMaxBulkRecords(int maxBulkRecords) {
+        this.maxBulkRecords = maxBulkRecords;
+    }
+
     @Override
     public String toString() {
         return "TraceConfiguration [enabled=" + enabled + ", defaultEvidenceDomainId=" + defaultEvidenceDomainId
@@ -188,7 +201,8 @@ public class TraceConfiguration {
                 + getMaxArrayLength() + ", maxObjectMembers=" + getMaxObjectMembers()
                 + ", receiptAllocationRetryLimit=" + getReceiptAllocationRetryLimit()
                 + ", receiptRepairIntervalSeconds=" + getReceiptRepairIntervalSeconds()
-                + ", pendingReceiptTimeoutSeconds=" + getPendingReceiptTimeoutSeconds() + "]";
+                + ", pendingReceiptTimeoutSeconds=" + getPendingReceiptTimeoutSeconds() + ", maxBulkRecords="
+                + getMaxBulkRecords() + "]";
     }
 
 }

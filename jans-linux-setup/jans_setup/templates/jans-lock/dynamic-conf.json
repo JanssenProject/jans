@@ -47,6 +47,7 @@
 		"maxObjectMembers": 256,
 		"receiptAllocationRetryLimit": 8,
 		"receiptRepairIntervalSeconds": 300,
-		"pendingReceiptTimeoutSeconds": 120
+		"pendingReceiptTimeoutSeconds": 120,
+		"maxBulkRecords": 100
 	}
 }

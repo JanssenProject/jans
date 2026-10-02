@@ -47,7 +47,8 @@ public class TraceConfigurationTest {
                 + "  \"maxObjectMembers\": 8,"
                 + "  \"receiptAllocationRetryLimit\": 3,"
                 + "  \"receiptRepairIntervalSeconds\": 60,"
-                + "  \"pendingReceiptTimeoutSeconds\": 30"
+                + "  \"pendingReceiptTimeoutSeconds\": 30,"
+                + "  \"maxBulkRecords\": 10"
                 + "}"
                 + "}";
 
@@ -73,6 +74,7 @@ public class TraceConfigurationTest {
         assertEquals(3, traceConfiguration.getReceiptAllocationRetryLimit());
         assertEquals(60, traceConfiguration.getReceiptRepairIntervalSeconds());
         assertEquals(30, traceConfiguration.getPendingReceiptTimeoutSeconds());
+        assertEquals(10, traceConfiguration.getMaxBulkRecords());
     }
 
     @Test
@@ -94,6 +96,7 @@ public class TraceConfigurationTest {
         assertEquals(TraceConfiguration.DEFAULT_RECEIPT_ALLOCATION_RETRY_LIMIT, traceConfiguration.getReceiptAllocationRetryLimit());
         assertEquals(TraceConfiguration.DEFAULT_RECEIPT_REPAIR_INTERVAL_SECONDS, traceConfiguration.getReceiptRepairIntervalSeconds());
         assertEquals(TraceConfiguration.DEFAULT_PENDING_RECEIPT_TIMEOUT_SECONDS, traceConfiguration.getPendingReceiptTimeoutSeconds());
+        assertEquals(TraceConfiguration.DEFAULT_MAX_BULK_RECORDS, traceConfiguration.getMaxBulkRecords());
     }
 
     @Test
@@ -109,6 +112,7 @@ public class TraceConfigurationTest {
         traceConfiguration.setReceiptAllocationRetryLimit(0);
         traceConfiguration.setReceiptRepairIntervalSeconds(-1);
         traceConfiguration.setPendingReceiptTimeoutSeconds(0);
+        traceConfiguration.setMaxBulkRecords(-1);
 
         assertEquals(TraceConfiguration.DEFAULT_LATENESS_THRESHOLD_SECONDS, traceConfiguration.getLatenessThresholdSeconds());
         assertEquals(TraceConfiguration.DEFAULT_MAX_REQUEST_BYTES, traceConfiguration.getMaxRequestBytes());
@@ -119,6 +123,7 @@ public class TraceConfigurationTest {
         assertEquals(TraceConfiguration.DEFAULT_RECEIPT_ALLOCATION_RETRY_LIMIT, traceConfiguration.getReceiptAllocationRetryLimit());
         assertEquals(TraceConfiguration.DEFAULT_RECEIPT_REPAIR_INTERVAL_SECONDS, traceConfiguration.getReceiptRepairIntervalSeconds());
         assertEquals(TraceConfiguration.DEFAULT_PENDING_RECEIPT_TIMEOUT_SECONDS, traceConfiguration.getPendingReceiptTimeoutSeconds());
+        assertEquals(TraceConfiguration.DEFAULT_MAX_BULK_RECORDS, traceConfiguration.getMaxBulkRecords());
     }
 
 }

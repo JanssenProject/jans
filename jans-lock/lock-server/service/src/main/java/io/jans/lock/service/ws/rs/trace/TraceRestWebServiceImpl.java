@@ -6,28 +6,46 @@
 
 package io.jans.lock.service.ws.rs.trace;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jans.as.model.error.DefaultErrorResponse;
 import io.jans.core.cedarling.model.AuditActionType;
 import io.jans.core.cedarling.model.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.api.TraceAcceptanceResponse;
+import io.jans.lock.model.trace.api.TraceBulkIngestionResponse;
+import io.jans.lock.model.trace.api.TraceBulkResultEntry;
+import io.jans.lock.model.trace.api.TraceErrorResponse;
 import io.jans.lock.model.trace.api.TraceExecutionResponse;
 import io.jans.lock.model.trace.api.TraceIngestionResponse;
 import io.jans.lock.model.trace.api.TraceRecordResponse;
 import io.jans.lock.model.trace.api.TraceVerificationResponse;
+import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.trace.error.TraceErrors;
 import io.jans.lock.service.trace.error.TraceStorageException;
@@ -68,6 +86,22 @@ import jakarta.ws.rs.core.SecurityContext;
 public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWebService {
 
 	private static final String REASON_TRACE_DISABLED = "trace_disabled";
+
+	private static final String REASON_NOT_ARRAY = "not_array";
+
+	private static final String REASON_EMPTY_BULK_RECORDS = "empty_bulk_records";
+
+	private static final String REASON_MAX_BULK_RECORDS_EXCEEDED = "max_bulk_records_exceeded";
+
+	private static final String REASON_BULK_BODY_TOO_LARGE = "bulk_body_too_large";
+
+	private static final String REASON_UNREADABLE_BODY = "unreadable_body";
+
+	private static final String REASON_MALFORMED_UTF8 = "malformed_utf8";
+
+	private static final String REASON_MALFORMED_JSON = "malformed_json";
+
+	private static final String REASON_TRAILING_CONTENT = "trailing_content";
 
 	private static final int MAX_RECORD_ID_LENGTH = 128;
 
@@ -120,6 +154,40 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 			response = Response.status(Response.Status.ACCEPTED)
 					.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate())
 					.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE).entity(toResponse(result)).build();
+			return response;
+		} catch (RuntimeException ex) {
+			throw TraceErrors.toWebApplicationException(ex, errorResponseFactory);
+		} finally {
+			applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
+		}
+	}
+
+	@Override
+	public Response submitBulkRecords(InputStream body, HttpServletRequest request, SecurityContext sec) {
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(), AuditActionType.TRACE_BULK_WRITE);
+
+		Response response = null;
+		try {
+			log.debug("Submitting TRACE bulk records");
+			checkEnabled();
+
+			TraceConfiguration config = appConfiguration.getTraceConfiguration();
+			SubmitterIdentity identity = submitterIdentityService.resolve(getHttpRequest());
+			TraceRequestContext context = evidenceDomainResolver.resolve(identity);
+
+			List<String> elements = splitBulkElements(body, config);
+
+			List<TraceBulkResultEntry> results = new ArrayList<>(elements.size());
+			for (int index = 0; index < elements.size(); index++) {
+				results.add(ingestOne(index, elements.get(index), context));
+			}
+
+			TraceBulkIngestionResponse dto = new TraceBulkIngestionResponse();
+			dto.setResults(results);
+
+			response = Response.status(Response.Status.ACCEPTED)
+					.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate())
+					.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE).entity(dto).build();
 			return response;
 		} catch (RuntimeException ex) {
 			throw TraceErrors.toWebApplicationException(ex, errorResponseFactory);
@@ -213,6 +281,112 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 	private String getClientIpAddress() {
 		HttpServletRequest request = getHttpRequest();
 		return request == null ? null : InetAddressUtility.getIpAddress(request);
+	}
+
+	// -- bulk ingestion (design decision D-16) -----------------------------------------------------
+
+	/**
+	 * Verifies and ingests one array element, never throwing: a failure of {@code ingestionService}
+	 * becomes a per-item {@code error} entry instead of aborting the batch (D-16 continue-on-error).
+	 *
+	 * @param elementRaw the element's exact source text, sliced by {@link #splitBulkElements}; fed
+	 *                   to the same ingestion pipeline a standalone submission would use, so
+	 *                   raw-evidence immutability and the D-13 digest/signature hold per item
+	 */
+	private TraceBulkResultEntry ingestOne(int index, String elementRaw, TraceRequestContext context) {
+		TraceBulkResultEntry entry = new TraceBulkResultEntry();
+		entry.setIndex(index);
+		try {
+			InputStream slice = new ByteArrayInputStream(elementRaw.getBytes(StandardCharsets.UTF_8));
+			AcceptanceResult result = ingestionService.ingest(slice, context);
+			entry.setAccepted(true);
+			entry.setRecord(toResponse(result));
+		} catch (RuntimeException ex) {
+			entry.setAccepted(false);
+			entry.setError(toErrorDto(ex));
+		}
+		return entry;
+	}
+
+	private TraceErrorResponse toErrorDto(RuntimeException ex) {
+		TraceErrors.Classification classification = TraceErrors.classify(ex);
+		DefaultErrorResponse built = errorResponseFactory.buildErrorResponse(classification.getType(),
+				classification.getReason());
+
+		TraceErrorResponse dto = new TraceErrorResponse();
+		dto.setError(built.getErrorCode());
+		dto.setErrorDescription(built.getErrorDescription());
+		dto.setReason(built.getReason());
+		return dto;
+	}
+
+	/**
+	 * Splits a {@code POST /audit/trace/bulk} body into the exact source text of each top-level
+	 * array element (design decision D-16), so every element can be re-fed verbatim to the
+	 * single-record pipeline. Whole-request failures only: not an array, wrong element count, body
+	 * too large, malformed JSON/UTF-8 &mdash; a structurally invalid individual element (e.g. not a
+	 * JSON object) is left for {@link #ingestOne} to report as that item's own error.
+	 */
+	private List<String> splitBulkElements(InputStream body, TraceConfiguration config) {
+		long maxBulkBytes = (long) config.getMaxRequestBytes() * config.getMaxBulkRecords();
+		String rawText = readBoundedUtf8(body, maxBulkBytes);
+
+		JsonFactory factory = new JsonFactory();
+		try (JsonParser parser = factory.createParser(rawText)) {
+			if (parser.nextToken() != JsonToken.START_ARRAY) {
+				throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_NOT_ARRAY);
+			}
+
+			List<String> elements = new ArrayList<>();
+			JsonToken token;
+			while ((token = parser.nextToken()) != null && token != JsonToken.END_ARRAY) {
+				long startOffset = parser.getTokenLocation().getCharOffset();
+				parser.skipChildren();
+				long endOffset = parser.getCurrentLocation().getCharOffset();
+				elements.add(rawText.substring((int) startOffset, (int) endOffset));
+
+				if (elements.size() > config.getMaxBulkRecords()) {
+					throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST,
+							REASON_MAX_BULK_RECORDS_EXCEEDED);
+				}
+			}
+			if (token == null) {
+				throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_MALFORMED_JSON);
+			}
+			if (elements.isEmpty()) {
+				throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_EMPTY_BULK_RECORDS);
+			}
+			if (parser.nextToken() != null) {
+				throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_TRAILING_CONTENT);
+			}
+			return elements;
+		} catch (IOException ex) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_MALFORMED_JSON, ex);
+		}
+	}
+
+	private String readBoundedUtf8(InputStream body, long maxBytes) {
+		@SuppressWarnings("deprecation")
+		BoundedInputStream bounded = new BoundedInputStream(body, maxBytes + 1);
+		byte[] bytes;
+		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream((int) Math.min(maxBytes + 1, 1 << 16));
+			IOUtils.copy(bounded, out);
+			bytes = out.toByteArray();
+		} catch (IOException ex) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_UNREADABLE_BODY, ex);
+		}
+		if (bytes.length > maxBytes) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_BULK_BODY_TOO_LARGE);
+		}
+
+		CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
+				.onUnmappableCharacter(CodingErrorAction.REPORT);
+		try {
+			return decoder.decode(ByteBuffer.wrap(bytes)).toString();
+		} catch (CharacterCodingException ex) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_MALFORMED_UTF8, ex);
+		}
 	}
 
 	// -- DTO mapping ------------------------------------------------------------------------------

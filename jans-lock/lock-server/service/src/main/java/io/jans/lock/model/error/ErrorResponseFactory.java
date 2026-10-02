@@ -100,9 +100,19 @@ public class ErrorResponseFactory implements Configuration {
     }
 
     private String errorAsJson(IErrorType type, String reason) {
+        return buildErrorResponse(type, reason).toJSonString();
+    }
+
+    /**
+     * Builds the structured error body for {@code type}/{@code reason} without wrapping it in a
+     * {@link WebApplicationException}, for callers that embed it inside a larger response (e.g. a
+     * bulk endpoint's per-item result) instead of throwing it. Applies the same
+     * {@code errorReasonEnabled} gating and persisted-message lookup as every other error path.
+     */
+    public DefaultErrorResponse buildErrorResponse(IErrorType type, String reason) {
         final DefaultErrorResponse error = getErrorResponse(type);
         error.setReason(BooleanUtils.isTrue(appConfiguration.getErrorReasonEnabled()) ? reason : "");
-        return error.toJSonString();
+        return error;
     }
 
     private DefaultErrorResponse getErrorResponse(IErrorType type) {

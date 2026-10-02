@@ -10,6 +10,7 @@ import java.io.InputStream;
 
 import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.trace.api.TraceAcceptanceResponse;
+import io.jans.lock.model.trace.api.TraceBulkIngestionResponse;
 import io.jans.lock.model.trace.api.TraceErrorResponse;
 import io.jans.lock.model.trace.api.TraceExecutionResponse;
 import io.jans.lock.model.trace.api.TraceRecordResponse;
@@ -17,6 +18,7 @@ import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -38,9 +40,10 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
 /**
- * REST API for TRACE single-record ingestion (design §11.1, TRACE MVP task 20). Requires the
- * {@code trace.write} scope; the evidence domain is derived from the authenticated client's
- * binding (design decision D-1), never from the request body.
+ * REST API for TRACE record ingestion and retrieval (design §11.1-§11.3, TRACE MVP tasks 20, 21,
+ * and bulk ingestion decision D-16). Write endpoints require the {@code trace.write} scope, read
+ * endpoints the {@code trace.readonly} scope; the evidence domain is always derived from the
+ * authenticated client's binding (design decision D-1), never from the request body.
  *
  * <p>Not exposed over gRPC (design decision D-15): no {@code grpcMethodName} is set.
  *
@@ -66,6 +69,24 @@ public interface TraceRestWebService {
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS })
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_write", path = "/audit/trace")
 	Response submitRecord(InputStream body, @Context HttpServletRequest request, @Context SecurityContext sec);
+
+	@Operation(summary = "Submit a batch of TRACE evidence records", description = "Verify and ingest a JSON array of signed TRACE assertions, continuing past per-item failures (design decision D-16)", tags = {
+			"Lock - Audit Trace" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+					ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS }))
+	@RequestBody(description = "JSON array of TRACE assertions (design §7 shape, each)", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(type = "object"))))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "202", description = "Accepted (per-item outcomes in the body)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceBulkIngestionResponse.class))),
+			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = "Unauthorized"),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))), })
+	@POST
+	@Path("/bulk")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS })
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_bulk_write", path = "/audit/trace/bulk")
+	Response submitBulkRecords(InputStream body, @Context HttpServletRequest request, @Context SecurityContext sec);
 
 	@Operation(summary = "Retrieve one TRACE record", description = "Domain-scoped retrieval of a stored envelope by record identity (design §11.2)", tags = {
 			"Lock - Audit Trace" }, security = @SecurityRequirement(name = "oauth2", scopes = {

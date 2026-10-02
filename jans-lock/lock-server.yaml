@@ -845,6 +845,52 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/trace.readonly
+  /api/v1/audit/trace/bulk:
+    post:
+      tags:
+      - Lock - Audit Trace
+      summary: Submit a batch of TRACE evidence records
+      description: "Verify and ingest a JSON array of signed TRACE assertions, continuing\
+        \ past per-item failures (design decision D-16)"
+      operationId: submitBulkRecords
+      requestBody:
+        description: "JSON array of TRACE assertions (design §7 shape, each)"
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+      responses:
+        "202":
+          description: Accepted (per-item outcomes in the body)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceBulkIngestionResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.write
   /api/v1/audit/trace:
     post:
       tags:
@@ -1418,6 +1464,31 @@ components:
           description: True when the record arrived after the configured lateness
             threshold
       description: TRACE record acceptance response
+    TraceBulkIngestionResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          description: "One entry per submitted array element, in request order"
+          items:
+            $ref: "#/components/schemas/TraceBulkResultEntry"
+      description: TRACE bulk ingestion response
+    TraceBulkResultEntry:
+      type: object
+      properties:
+        index:
+          type: integer
+          description: Position of this assertion in the submitted array
+          format: int32
+          example: 0
+        accepted:
+          type: boolean
+          description: True when this item was verified and ingested
+        record:
+          $ref: "#/components/schemas/TraceAcceptanceResponse"
+        error:
+          $ref: "#/components/schemas/TraceErrorResponse"
+      description: One item's outcome within a TRACE bulk ingestion response
   securitySchemes:
     oauth2:
       type: oauth2

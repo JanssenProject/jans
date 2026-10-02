@@ -75,6 +75,7 @@ def _transform_lock_dynamic_config(conf, manager):
             "receiptAllocationRetryLimit": 8,
             "receiptRepairIntervalSeconds": 300,
             "pendingReceiptTimeoutSeconds": 120,
+            "maxBulkRecords": 100,
         }),
     ]:
         if missing_key not in conf:
