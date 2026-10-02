@@ -387,6 +387,19 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	}
 
 	@Test
+	void testSubmitBulkRecords_BodyExceedsMaxBulkRequestBytes_Returns400BeforeAnyIngest() {
+		traceConfiguration.setMaxBulkRequestBytes(16);
+
+		WebApplicationException ex = assertThrows(WebApplicationException.class,
+				() -> impl.submitBulkRecords(body("[{\"a\":\"this element alone is already longer than 16 bytes\"}]"),
+						httpServletRequest, null));
+
+		assertEquals(400, ex.getResponse().getStatus());
+		verify(ingestionService, never()).ingest(any(), any());
+		verify(applicationAuditLogger).log(any(), eq(false));
+	}
+
+	@Test
 	void testSubmitBulkRecords_ClientNotBound_Returns403() {
 		when(evidenceDomainResolver.resolve(any()))
 				.thenThrow(new TraceValidationException(TraceErrorResponseType.CLIENT_NOT_BOUND, "no_domain_binding"));

@@ -274,7 +274,8 @@ verification.
 | `receiptAllocationRetryLimit` | integer | `8` | Maximum retries when allocating the next receipt-chain sequence number under multi-node contention. |
 | `receiptRepairIntervalSeconds` | integer | `300` | Interval between runs of the receipt repair timer, which settles stale `PENDING` receipts. |
 | `pendingReceiptTimeoutSeconds` | integer | `120` | Seconds a `PENDING` receipt may remain unresolved before the repair timer marks it `COMMITTED` or `VOID`. |
-| `maxBulkRecords` | integer | `100` | Maximum number of assertions accepted in one `POST /audit/trace/bulk` request. The batch's total body-size bound is `maxRequestBytes × maxBulkRecords`. |
+| `maxBulkRecords` | integer | `100` | Maximum number of assertions accepted in one `POST /audit/trace/bulk` request. |
+| `maxBulkRequestBytes` | integer | `4194304` | Maximum total body size, in bytes, buffered for one `POST /audit/trace/bulk` request. Independent of `maxRequestBytes`/`maxBulkRecords`, and always clamped to 16777216 regardless of configuration. |
 
 Every numeric limit above falls back to its default when configured with a value `<= 0`.
 
