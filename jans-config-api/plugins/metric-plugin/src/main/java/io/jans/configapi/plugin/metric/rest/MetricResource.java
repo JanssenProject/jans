@@ -160,22 +160,30 @@ public class MetricResource extends BaseResource {
         Date end = metricUtil.parseDateParam(endDate, "end_date");
         metricUtil.validateRange(start, end);
 
-        PagedResult<MetricDataEntry> pagedResult;
+        PagedResult<MetricDataEntry> pagedResult = null;
         try {
             pagedResult = metricDataService.findEntries(appType, metricType, subType, start, end, sortBy,
                     SortOrder.getByValue(metricUtil.normalizeSortOrder(sortOrder)), startIndex, validatedLimit,
                     metricUtil.getRecordMaxCount());
+        } catch (WebApplicationException wex) {
+
+            logger.error(wex.getMessage(), wex.fillInStackTrace());
+            if (wex.getResponse().getStatus() >= 500) {
+                throwInternalServerException(wex);
+            }
+            throwBadRequestException(wex.getMessage());
         } catch (Exception ex) {
             logger.error("Error while getting metric entries", ex);
             throwInternalServerException(ex);
             return null;
         }
-
         MetricEntryPagedResult result = new MetricEntryPagedResult();
-        result.setStart(pagedResult.getStart());
-        result.setEntriesCount(pagedResult.getEntriesCount());
-        result.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
-        result.setEntries(pagedResult.getEntries());
+        if (pagedResult != null) {
+            result.setStart(pagedResult.getStart());
+            result.setEntriesCount(pagedResult.getEntriesCount());
+            result.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
+            result.setEntries(pagedResult.getEntries());
+        }
         return Response.ok(result).build();
     }
 

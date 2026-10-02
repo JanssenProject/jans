@@ -1,14 +1,17 @@
+
+package io.jans.configapi.test.filter;
+
 /*
  * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.test.filter;
 
-import io.jans.configapi.filters.CorsFilter;
 import io.jans.configapi.model.configuration.CorsConfiguration;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -19,22 +22,23 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
- * Test client for CorsFilter. Exercises the filter directly (mocked servlet
- * request/response + mocked CorsConfiguration) rather than over the wire,
- * so each policy decision can be pinned down deterministically:
+ * TestNG test client for CorsFilter. Exercises the filter directly (mocked
+ * servlet request/response + mocked CorsConfiguration) rather than over the
+ * wire, so each policy decision can be pinned down deterministically:
  *
  *  - explicit allow-list is mandatory (null/empty list => deny, never allow-all)
  *  - a matched origin is echoed back verbatim (not "*", not an unvalidated reflection)
@@ -42,7 +46,6 @@ import static org.mockito.Mockito.*;
  *  - Access-Control-Allow-Credentials is only ever sent alongside a validated, non-wildcard origin
  *  - an origin that fails the allow-list check gets no CORS headers at all
  */
-@Listeners(MockitoTestNGListener.class)
 public class CorsFilterTest {
 
     private static final String ORIGIN_HEADER = "Origin";
@@ -64,10 +67,13 @@ public class CorsFilterTest {
     @Mock
     private FilterChain filterChain;
 
+    private AutoCloseable autoCloseable;
     private CorsFilter corsFilter;
 
     @BeforeMethod
     public void setUp() throws Exception {
+        autoCloseable =  MockitoAnnotations.openMocks(this);
+
         corsFilter = new CorsFilter();
         inject(corsFilter, "log", logger);
         inject(corsFilter, "corsConfiguration", corsConfiguration);
@@ -75,6 +81,11 @@ public class CorsFilterTest {
         lenient().when(corsConfiguration.isEnabled()).thenReturn(true);
         lenient().when(request.getHeader(ORIGIN_HEADER)).thenReturn(ALLOWED_ORIGIN);
         lenient().when(request.getMethod()).thenReturn("GET");
+    }
+    
+    @AfterMethod
+    public void tearDown() throws Exception {
+        autoCloseable.close();
     }
 
     private static void inject(Object target, String fieldName, Object value) throws Exception {
@@ -225,9 +236,8 @@ public class CorsFilterTest {
     }
 
     @Test
-    public void preflightOptions_disallowedOrigin_setsNoHeaders_doesNotChain() throws IOException, ServletException {
-        // Denied before the method is ever inspected, so this stub only states the scenario.
-        lenient().when(request.getMethod()).thenReturn("OPTIONS");
+    public void preflightOptions_disallowedOrigin_setsNoHeaders_doesChainThrough() throws IOException, ServletException {
+        when(request.getMethod()).thenReturn("OPTIONS");
         when(request.getHeader(ORIGIN_HEADER)).thenReturn(DISALLOWED_ORIGIN);
         List<String> allowed = Arrays.asList(ALLOWED_ORIGIN);
         when(corsConfiguration.getAllowedOrigins()).thenReturn(allowed);
