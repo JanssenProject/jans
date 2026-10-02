@@ -9,7 +9,7 @@
 
     <!-- Class SampleCredentialVM is this view's handler, aka vm -->
     
-    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.sample.vm.SampleCredentialVM')"
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.sampleauthn.vm.SampleCredentialVM')"
            self="@define(maincontent)">
 
         <z:include src="/back-home.zul" />        
