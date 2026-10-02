@@ -139,11 +139,11 @@ sequenceDiagram
     Agent->>Verifier: evidence (optional, delegated appraisal)
     Verifier-->>Agent: attestation result JWT
     Agent->>AS: POST /attestation { challenge_id, evidence, evidence_format, attested_key }
-    Note over AS: core: nonce single-use, key binding;<br/>script: signature chain, measurement policy
+    Note over AS: core: nonce single-use, key binding<br/>script: signature chain, measurement policy
     AS-->>Lock: ATTESTATION_APPRAISED
     AS-->>Agent: { attestation_id, status: affirming, attestation_result }
     Agent->>AS: DCR /register { jwks: key, access_token_type: JWT-SVID, attestation: attestation_id }
-    Note over AS: bind client_id ↔ jkt ↔ attestation_id<br/>assign spiffe://td/agent/<client_id>
+    Note over AS: bind client_id ↔ jkt ↔ attestation_id<br/>assign spiffe://td/agent/#lt;client_id#gt;
     AS-->>Lock: AUTHORIZATION_DECISION (register-client)
     AS-->>Agent: client_id
 
@@ -159,15 +159,15 @@ sequenceDiagram
 
     Note over TEE,AS: ④ ISSUE — every few minutes
     Agent->>TEE: sign DPoP proof (+ private_key_jwt)
-    Agent->>AS: POST /token grant=jwt-bearer assertion=ID-JAG (or client_credentials)<br/>DPoP proof · resource=<PEP>
-    Note over AS: DPoP key = enrolled key;<br/>affirming assessment younger than max age<br/>else 400 attestation_required { nonce }
+    Agent->>AS: POST /token grant=jwt-bearer assertion=ID-JAG (or client_credentials)<br/>DPoP proof · resource=#lt;PEP#gt;
+    Note over AS: DPoP key = enrolled key<br/>affirming assessment younger than max age<br/>else 400 attestation_required { nonce }
     AS-->>Lock: AUTHORIZATION_DECISION (issue-jwt-svid)
     AS-->>Agent: JWT-SVID { sub: spiffe id, aud, exp +10m, cnf.jkt, txn, attestation, act }
 
     Note over TEE,PEP: ⑤ PRESENT & VERIFY — per request
     Agent->>TEE: fresh DPoP proof for the PEP
     Agent->>PEP: request + JWT-SVID + DPoP proof
-    Note over PEP: local: signature via bundle, sub, aud, exp;<br/>DPoP key ↔ cnf.jkt; PDP decision; copy txn
+    Note over PEP: local: signature via bundle, sub, aud, exp<br/>DPoP key ↔ cnf.jkt · PDP decision · copy txn
     PEP-->>Lock: CAPABILITY_INVOKED / RUNTIME_EFFECT
     PEP-->>Agent: 200
 ```
@@ -333,11 +333,11 @@ sequenceDiagram
         Verifier-->>Agent: attestation result JWT
     end
     Agent->>AS: POST /attestation { challenge_id, evidence, evidence_format, attested_key, client_id? }
-    Note over AS: core: challenge valid, single-use;<br/>attested_key thumbprint == challenge jkt;<br/>client_id owns the key
+    Note over AS: core: challenge valid, single-use<br/>attested_key thumbprint == challenge jkt<br/>client_id owns the key
     AS->>Script: verifyEvidence(context)
     Note over Script: platform-specific: verifier signature,<br/>nonce echoed, key bound, measurement allowed
     Script-->>AS: status · platform · measurement · policy_version
-    Note over AS: persist assessment; sign attestation result JWT
+    Note over AS: persist assessment · sign attestation result JWT
     AS-->>Lock: ATTESTATION_APPRAISED (outbox)
     AS-->>Agent: 200 { attestation_id, status, attestation_result, … }
 ```
