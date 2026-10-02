@@ -132,14 +132,16 @@ sequenceDiagram
     participant PEP as PEP / Relying Party
 
     Note over TEE,AS: ① ATTEST + ENROLL — once per deployment
-    Agent->>TEE: generate non-exportable keypair
-    Agent->>AS: POST /attestation/challenge { attested_key }
+    Agent->>TEE: generate non-exportable keypair K (private half never leaves)
+    Agent->>AS: POST /attestation/challenge { attested_key: K.public }
     AS-->>Agent: { challenge_id, nonce }
-    Agent->>TEE: evidence over (nonce, public key)
-    Agent->>Verifier: evidence (optional, delegated appraisal)
+    Agent->>TEE: produce evidence binding nonce + K.public
+    Note over TEE: TEE / TPM CREATES raw evidence<br/>(quote / report, signed by vendor-rooted platform key)
+    Agent->>Verifier: raw evidence (optional, delegated appraisal)
     Verifier-->>Agent: attestation result JWT
-    Agent->>AS: POST /attestation { challenge_id, evidence, evidence_format, attested_key }
-    Note over AS: core: nonce single-use, key binding<br/>script: signature chain, measurement policy
+    Note over Verifier: platform verifier CREATES attestation result<br/>(its signed appraisal of the raw evidence · echoes nonce + K.public)
+    Agent->>AS: POST /attestation { challenge_id, evidence, evidence_format, attested_key: K.public }
+    Note over AS: evidence = result JWT (delegated formats) or raw evidence (in-process formats)<br/>core: nonce single-use, attested key == K == challenge key<br/>script: verifier signature chain, measurement policy
     AS-->>Lock: ATTESTATION_APPRAISED
     AS-->>Agent: { attestation_id, status: affirming, attestation_result }
     Agent->>AS: DCR /register { jwks: key, access_token_type: JWT-SVID, attestation: attestation_id }
@@ -177,6 +179,14 @@ ever assigned. Steps 15 to 16 run on the bundle's refresh cadence, never per tok
 put a human at the root of the execution. Everything after is steady state: every token is
 short-lived, pinned to the hardware key via `cnf`, stamped with the assessment it was issued
 under, and recorded.
+
+Reading the arrows: a **solid** arrow is a request the sender initiates and waits for; a
+**dashed** arrow is either the reply to the solid arrow above it, or a one-way notification the
+sender does not wait for (the records jans and the PEP send to jans-lock go through an outbox,
+section 11.3). `K` is the agent's single hardware keypair: its private half signs the DPoP proofs
+and the `private_key_jwt` client assertion, its public half (`K.public`) is the `attested_key` in
+the challenge, the key in the registration `jwks`, and the thumbprint in the SVID's `cnf.jkt`.
+There is exactly one key per agent; attestation, enrollment and issuance all talk about it.
 
 ## 6. Verification: how and where
 
@@ -323,16 +333,19 @@ sequenceDiagram
     participant Verifier as Platform verifier
     participant Lock as jans-lock
 
-    Agent->>AS: POST /attestation/challenge { attested_key, client_id?, purpose }
+    Agent->>AS: POST /attestation/challenge { attested_key: K.public, client_id?, purpose }
     AS->>Script: createChallenge(context) — optional hook
     AS-->>Agent: 200 { challenge_id, nonce, expires_in }
-    Agent->>TEE: evidence over (nonce, public key)
-    TEE-->>Agent: EAT / quote
-    opt delegated appraisal
-        Agent->>Verifier: evidence
+    Agent->>TEE: produce evidence binding nonce + K.public
+    Note over TEE: CREATES raw evidence: TPM quote / SEV-SNP report / TDX quote<br/>nonce in report data · K.public certified by the platform key
+    TEE-->>Agent: raw evidence (EAT / quote)
+    opt delegated appraisal (formats azure-maa+jwt, intel-ta+jwt)
+        Agent->>Verifier: raw evidence
+        Note over Verifier: CREATES attestation result JWT:<br/>appraises raw evidence against vendor roots,<br/>echoes nonce + K.public, signs with its own key
         Verifier-->>Agent: attestation result JWT
     end
-    Agent->>AS: POST /attestation { challenge_id, evidence, evidence_format, attested_key, client_id? }
+    Agent->>AS: POST /attestation { challenge_id, evidence, evidence_format, attested_key: K.public, client_id? }
+    Note over AS: evidence = attestation result JWT (delegated)<br/>or raw evidence (eat+jwt, tpm2-quote+json)
     Note over AS: core: challenge valid, single-use<br/>attested_key thumbprint == challenge jkt<br/>client_id owns the key
     AS->>Script: verifyEvidence(context)
     Note over Script: platform-specific: verifier signature,<br/>nonce echoed, key bound, measurement allowed
@@ -344,6 +357,28 @@ sequenceDiagram
 
 The script never sees the nonce lifecycle, the key-binding check or persistence; those are core
 and identical for every platform.
+
+Reading the arrows: **solid** = a request the sender waits for; **dashed** = the reply to it, or a
+one-way notification (the TRACE record to jans-lock is queued, not awaited). The `opt` box is
+taken only for delegated evidence formats.
+
+#### Who creates what: the RATS roles in this flow
+
+RFC 9334 names three roles. Mapping them makes clear what the `evidence` parameter carries and who
+signed it.
+
+| RATS role | Played by | Creates | Signed with |
+|-----------|-----------|---------|-------------|
+| **Attester** | The hardware (TPM / TEE firmware / CPU) on the agent's host, driven by the agent process | **Raw evidence**: TPM 2.0 quote over PCRs with `qualifyingData = nonce` plus a certification of `K.public`; SEV-SNP attestation report with `REPORT_DATA = SHA-256(nonce ‖ thumbprint(K.public))`; TDX quote with the same in `REPORTDATA` | A platform key rooted in the vendor: TPM attestation key under the manufacturer EK CA, AMD VCEK / VLEK, Intel PCK |
+| **Verifier** (delegated formats) | Azure Attestation, Intel Trust Authority | **Attestation result**: a JWT stating "I verified this raw evidence against the vendor roots; the platform measured X; the report carried nonce N and key K.public" | The verifier's own published JWKS |
+| **Verifier** (in-process formats) | jans-auth-server's attestation script | The same appraisal, done locally over the raw evidence (`eat+jwt`, later `tpm2-quote+json`) | n/a; the verdict is signed by jans below |
+| **Relying Party** | jans-auth-server core (`AttestationService`, then DCR and `/token`) | **Assessment** and the **attestation result token** (section 9.6): "I accept this verdict for key K until `expires_at`" | jans's OIDC signing key |
+
+So the request parameter named `evidence` carries, in RATS terms, *Evidence* for in-process
+formats and *Attestation Results* for delegated formats. The name is kept for compatibility with
+the shipped DCR `evidence` parameter; `evidence_format` says which it is. The agent never creates
+evidence itself: it only asks the hardware for it, optionally forwards it to a platform verifier,
+and relays the output. The agent's only cryptographic contribution to attestation is owning `K`.
 
 #### Why two requests: challenge first, evidence second
 
@@ -850,8 +885,11 @@ flowchart LR
     E1 & E2 & E3 & E4 & E5 & E6 & E7 --> L
 ```
 
-Solid arrows: the per-producer hash chain Lock verifies. Dotted arrows: `parent_record_ids`
-cross-references. Everything sharing one `trace_execution_id` (= `txn`) is one execution.
+Reading the diagram: **solid** arrows are the per-producer hash chain (`prev_record_hash`) that
+Lock verifies and that cannot be reordered or have records removed without detection; **dashed**
+arrows are `parent_record_ids` cross-references between producers, which Lock stores and shows but
+which carry no ordering guarantee of their own. Everything sharing one `trace_execution_id`
+(= `txn`) is one execution.
 
 ### 11.2 Records emitted
 
@@ -1005,6 +1043,11 @@ flowchart LR
 
     classDef new stroke:#0f766e,stroke-width:2.5px;
 ```
+
+Reading the diagram: boxes with the thick outline are new in this plan; **solid** arrows are
+request paths inside the server or calls the agent, human and verifiers make to it; **dashed**
+arrows are out-of-band or optional: the agent's call to a platform verifier (not jans's business)
+and a relying party's optional online check at introspection.
 
 Deliberately absent: a CA or X.509-SVID issuance; the SPIFFE Workload API (agents are ordinary
 OAuth clients over HTTPS); in-process parsing of SEV-SNP / TDX quotes; any dependency on agentrust
