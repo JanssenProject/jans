@@ -100,7 +100,7 @@ named-user ceremonies still marked `pending` past `unfinishedRequestExpiration`.
 retained for `abandonedRequestExpiration`, deliberately much shorter than
 `authenticationHistoryExpiration`. Set `recordAbandonedAssertions` to `false` to disable the sweep.
 
-#### Usernameless ceremonies are not counted as abandonment
+#### Usernameless ceremonies
 
 A login page offering usernameless (conditional-UI) sign-in starts a ceremony on every page load,
 before it knows who is signing in. If the user then identifies themselves, a second, named ceremony
@@ -121,7 +121,7 @@ observed to have lapsed. In multi-node deployments the sweep is not coordinated 
 `abandonmentRate` is approximate — an exact count is available by querying `jansStatus = 'abandoned'`
 directly within the retention window.
 
-### An unknown rate is `null`, not zero
+### Unknown rates
 
 A rate here is a ratio against the `ATTEMPT` count. A range can hold terminal entries whose
 `ATTEMPT` falls outside it, or predate attempt tracking entirely, and then a rate has no
@@ -135,7 +135,7 @@ computed as normal. `successRate` and `failureRate` are reported as observed and
 rescaled, so in a range whose completions outnumber its recorded starts they can sum above 1.0 —
 the `rateNote` says so. Render an unknown rate as unknown; it must not look like a zero.
 
-### A failed fingerprint is never a `FAILURE`
+### Failed biometric attempts
 
 With platform authenticators such as Touch ID, Face ID or Windows Hello, user verification
 happens **inside the authenticator**. A wrong fingerprint causes the operating system to retry
@@ -165,7 +165,7 @@ Beyond the outcome itself, each raw entry records where the operation came from:
 | `metricType` | The metric name of the event, e.g. `fido2_registration_success`. |
 | `nodeId` | Identifier of the cluster node that served the request. |
 
-#### Oversized values are shortened, not dropped
+#### Oversized values
 
 Free-form fields — `userAgent`, `sessionId`, `clientCorrelationId`, `username`, `errorReason`,
 `fallbackReason`, and each individual member of `nativeClientTelemetry` — are shortened to the
@@ -323,7 +323,7 @@ properties file is read once when the scheduler class loads, so changes require 
 Because it ships inside the WAR, these values are not reachable through the Config API and there is
 currently no supported way to retune the schedule from dynamic configuration.
 
-### Not the `metricReporter*` properties
+### Legacy metric reporter properties
 
 The `metricReporterEnabled` / `metricReporterInterval` / `metricReporterKeepDataDays`
 properties belong to the legacy jans-core metric reporter and are **separate** from the
