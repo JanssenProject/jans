@@ -8,6 +8,7 @@ package io.jans.configapi.test.filter;
  */
 
 
+import io.jans.configapi.filters.CorsFilter;
 import io.jans.configapi.model.configuration.CorsConfiguration;
 
 import java.io.IOException;
