@@ -47,8 +47,8 @@ trust stops there; the chain makes explicit what each party vouches for.
 
 | # | Link | Who | What happens | Artifact |
 |---|------|-----|--------------|----------|
-| 1 | ROOT | TPM / TEE hardware | Non-exportable keypair; vendor-signed evidence over it (or a platform verifier's signed result) | EAT evidence / attestation result JWT |
-| 2 | ATTEST | `/attestation` + script | Single-use challenge; evidence appraised against measurement policy; **assessment stored with a validity window**; verdict signed by jans | `attestation_id`, attestation result JWT |
+| 1 | ROOT | TPM / TEE hardware | Non-exportable keypair; vendor-signed raw evidence over it | Raw evidence (quote / report) |
+| 2 | ATTEST | `/attestation` + script | Single-use challenge; **jans** sends the raw evidence to the platform verifier and receives its `AttestationResultJWT`; measurement policy applied; **assessment stored with a validity window**; verdict signed by jans | `attestation_id`, `AttestationResultJWT` (verifier's), `AttestationAssessmentJWT` (jans's) |
 | 3 | ENROLL | DCR `/register` | Registration accepted only with a fresh `affirming` assessment for the registered key; `client_id` ↔ `jkt` ↔ `attestation_id` persisted; SPIFFE ID assigned | `spiffe://td/agent/<client_id>` |
 | 4 | DELEGATE | Token exchange (ID-JAG) | Human's ID token exchanged for an ID-JAG naming the agent; execution id `txn` minted | ID-JAG with `txn` |
 | 5 | ISSUE | `/token` + DPoP | `client_credentials` or JWT bearer with ID-JAG; DPoP key must equal the enrolled key **and** have an assessment younger than the maximum age; else `attestation_required` | JWT-SVID with `cnf.jkt`, `txn`, `attestation` |
@@ -139,13 +139,14 @@ sequenceDiagram
     Agent->>TEE: produce evidence binding nonce + K.public
     Note over TEE: TEE / TPM CREATES raw evidence<br/>(quote / report, signed by vendor-rooted platform key)
     TEE-->>Agent: raw evidence
-    Agent->>Verifier: raw evidence (optional, delegated appraisal)
-    Verifier-->>Agent: attestation result JWT
-    Note over Verifier: platform verifier CREATES attestation result<br/>(its signed appraisal of the raw evidence · echoes nonce + K.public)
-    Agent->>AS: POST /attestation { challenge_id, evidence, evidence_format, attested_key: K.public }
-    Note over AS: evidence = result JWT (delegated formats) or raw evidence (in-process formats)<br/>core: nonce single-use, attested key == K == challenge key<br/>script: verifier signature chain, measurement policy
+    Agent->>AS: POST /attestation { challenge_id, evidence: raw evidence, evidence_format, attested_key: K.public }
+    Note over AS: core: nonce single-use, attested key == K == challenge key<br/>then attestation script runs
+    AS->>Verifier: raw evidence (script calls the verifier · agent never does)
+    Verifier-->>AS: AttestationResultJWT
+    Note over Verifier: platform verifier CREATES AttestationResultJWT<br/>(its signed appraisal of the raw evidence · echoes nonce + K.public)
+    Note over AS: script: AttestationResultJWT signature + issuer trusted,<br/>nonce echoed, key bound, measurement policy<br/>core: persist assessment · sign AttestationAssessmentJWT
     AS-->>Lock: ATTESTATION_APPRAISED
-    AS-->>Agent: { attestation_id, status: affirming, attestation_result }
+    AS-->>Agent: { attestation_id, status: affirming, attestation_assessment }
     Agent->>AS: DCR /register { jwks: key, access_token_type: JWT-SVID, attestation: attestation_id }
     Note over AS: bind client_id ↔ jkt ↔ attestation_id<br/>assign spiffe://td/agent/#lt;client_id#gt;
     AS-->>Lock: AUTHORIZATION_DECISION (register-client)
@@ -343,29 +344,48 @@ sequenceDiagram
     AS-->>Agent: 200 { challenge_id, nonce, expires_in }
     Agent->>TEE: produce evidence binding nonce + K.public
     Note over TEE: CREATES raw evidence: TPM quote / SEV-SNP report / TDX quote<br/>nonce in report data · K.public certified by the platform key
-    TEE-->>Agent: raw evidence (EAT / quote)
-    opt delegated appraisal (formats azure-maa+jwt, intel-ta+jwt)
-        Agent->>Verifier: raw evidence
-        Note over Verifier: CREATES attestation result JWT:<br/>appraises raw evidence against vendor roots,<br/>echoes nonce + K.public, signs with its own key
-        Verifier-->>Agent: attestation result JWT
-    end
-    Agent->>AS: POST /attestation { challenge_id, evidence, evidence_format, attested_key: K.public, client_id? }
-    Note over AS: evidence = attestation result JWT (delegated)<br/>or raw evidence (eat+jwt, tpm2-quote+json)
-    Note over AS: core: challenge valid, single-use<br/>attested_key thumbprint == challenge jkt<br/>client_id owns the key
+    TEE-->>Agent: raw evidence
+    Agent->>AS: POST /attestation { challenge_id, evidence: raw evidence, evidence_format, attested_key: K.public, client_id? }
+    Note over AS: core: challenge valid, single-use<br/>attested_key thumbprint == challenge jkt<br/>client_id owns the key · evidence size and format
     AS->>Script: verifyEvidence(context)
-    Note over Script: platform-specific: verifier signature,<br/>nonce echoed, key bound, measurement allowed
-    Script-->>AS: status · platform · measurement · policy_version
-    Note over AS: persist assessment · sign attestation result JWT
+    alt verifier_kind = azure-maa or intel-ta (delegated appraisal)
+        Script->>Verifier: raw evidence (+ nonce, K.public as runtime data)
+        Note over Verifier: CREATES AttestationResultJWT:<br/>appraises raw evidence against vendor roots,<br/>echoes nonce + K.public, signs with its own key
+        Verifier-->>Script: AttestationResultJWT
+        Note over Script: AttestationResultJWT signature via trusted JWKS,<br/>issuer allowed, nonce echoed, key bound,<br/>measurement allowed, debug disabled
+    else verifier_kind = local (in-process appraisal)
+        Note over Script: appraise raw evidence itself<br/>(eat+jwt signed by a trusted attester key · later tpm2-quote+json)
+    end
+    Script-->>AS: status · platform · measurement · policy_version · AttestationResultJWT
+    Note over AS: post-checks: attested key == challenge key, nonce verified<br/>persist assessment (incl. AttestationResultJWT) · sign AttestationAssessmentJWT
     AS-->>Lock: ATTESTATION_APPRAISED (outbox)
-    AS-->>Agent: 200 { attestation_id, status, attestation_result, … }
+    AS-->>Agent: 200 { attestation_id, status, attestation_assessment, … }
 ```
 
 The script never sees the nonce lifecycle, the key-binding check or persistence; those are core
 and identical for every platform.
 
 Reading the arrows: **solid** = a request the sender waits for; **dashed** = the reply to it, or a
-one-way notification (the TRACE record to jans-lock is queued, not awaited). The `opt` box is
-taken only for delegated evidence formats.
+one-way notification (the TRACE record to jans-lock is queued, not awaited). The `alt` box shows
+the two appraisal backends a script can implement; which one runs is script configuration
+(`verifier_kind`), not something the agent chooses.
+
+**The agent never talks to the platform verifier.** Only jans-auth-server does, from inside the
+attestation script, during `POST /attestation`. The agent's job ends at "ask the hardware for raw
+evidence over the nonce and hand it to jans". Reasons:
+
+- *Trust anchors stay server-side.* Which verifier is trusted, under which issuer and JWKS, with
+  which API credentials, is jans configuration. An agent that could pick the verifier could pick a
+  verifier it controls.
+- *The verifier's answer is bound to the request jans made.* jans supplies the nonce and
+  `K.public` as runtime data when it calls the verifier, so the `AttestationResultJWT` it gets back
+  is about exactly the challenge it issued; there is no window in which an agent can swap results.
+- *One credential set.* Intel Trust Authority needs an API key; Azure Attestation may need a
+  tenant-specific endpoint. Those live in the script configuration, never on agent hosts.
+- *Complete evidence trail.* jans sees, stores (digest and, by default, the full
+  `AttestationResultJWT`) and records both the raw evidence and the verifier's appraisal, so an
+  auditor can re-verify the verifier's signature later.
+- *Simpler agents.* An agent needs one HTTP client and one hardware API, regardless of platform.
 
 #### Who creates what: the RATS roles in this flow
 
@@ -375,15 +395,17 @@ signed it.
 | RATS role | Played by | Creates | Signed with |
 |-----------|-----------|---------|-------------|
 | **Attester** | The hardware (TPM / TEE firmware / CPU) on the agent's host, driven by the agent process | **Raw evidence**: TPM 2.0 quote over PCRs with `qualifyingData = nonce` plus a certification of `K.public`; SEV-SNP attestation report with `REPORT_DATA = SHA-256(nonce ‖ thumbprint(K.public))`; TDX quote with the same in `REPORTDATA` | A platform key rooted in the vendor: TPM attestation key under the manufacturer EK CA, AMD VCEK / VLEK, Intel PCK |
-| **Verifier** (delegated formats) | Azure Attestation, Intel Trust Authority | **Attestation result**: a JWT stating "I verified this raw evidence against the vendor roots; the platform measured X; the report carried nonce N and key K.public" | The verifier's own published JWKS |
-| **Verifier** (in-process formats) | jans-auth-server's attestation script | The same appraisal, done locally over the raw evidence (`eat+jwt`, later `tpm2-quote+json`) | n/a; the verdict is signed by jans below |
-| **Relying Party** | jans-auth-server core (`AttestationService`, then DCR and `/token`) | **Assessment** and the **attestation result token** (section 9.6): "I accept this verdict for key K until `expires_at`" | jans's OIDC signing key |
+| **Verifier** (delegated, `verifier_kind=azure-maa` / `intel-ta`) | Azure Attestation or Intel Trust Authority, **called by jans-auth-server's attestation script** | **`AttestationResultJWT`**: a JWT stating "I verified this raw evidence against the vendor roots; the platform measured X; the report carried nonce N and key K.public" | The verifier's own published JWKS |
+| **Verifier** (in-process, `verifier_kind=local`) | jans-auth-server's attestation script | The same appraisal, done locally over the raw evidence (`eat+jwt` signed by a trusted attester key; later `tpm2-quote+json`) | n/a; the verdict is signed by jans below |
+| **Relying Party** | jans-auth-server core (`AttestationService`, then DCR and `/token`) | **Assessment** and the **`AttestationAssessmentJWT`** (section 9.6): "I accept this verdict for key K until `expires_at`" | jans's OIDC signing key |
 
-So the request parameter named `evidence` carries, in RATS terms, *Evidence* for in-process
-formats and *Attestation Results* for delegated formats. The name is kept for compatibility with
-the shipped DCR `evidence` parameter; `evidence_format` says which it is. The agent never creates
-evidence itself: it only asks the hardware for it, optionally forwards it to a platform verifier,
-and relays the output. The agent's only cryptographic contribution to attestation is owning `K`.
+So the request parameter named `evidence` always carries RATS *Evidence* (raw, hardware-signed);
+the name matches the shipped DCR `evidence` parameter. *Attestation Results* exist in two layers
+and are named to keep them apart: the platform verifier's **`AttestationResultJWT`** (obtained and
+validated by jans, stored with the assessment, never seen by the agent unless jans chooses to echo
+it) and jans's own **`AttestationAssessmentJWT`** (returned to the agent, presentable at DCR and
+`/token`). The agent never creates evidence or results: it asks the hardware for raw evidence and
+relays it. The agent's only cryptographic contribution to attestation is owning `K`.
 
 #### Why two requests: challenge first, evidence second
 
@@ -394,7 +416,7 @@ ever. The only way to get that property is for the verifier to pick an unpredict
 it to the attester, and require the hardware to sign over it. The hardware does exactly this:
 a TPM quote takes `qualifyingData`, an SEV-SNP report takes 64 bytes of `REPORT_DATA`, a TDX
 quote takes `REPORTDATA`, and Azure Attestation / Intel Trust Authority both echo a caller-supplied
-nonce into their result JWT. In every case the nonce has to exist before the evidence can be
+nonce into their `AttestationResultJWT`. In every case the nonce has to exist before the evidence can be
 generated, so one HTTP request cannot carry both.
 
 What each request does:
@@ -404,7 +426,8 @@ What each request does:
 | Who speaks | Agent asks, jans answers | Agent presents, jans judges |
 | Input | The public key that will be attested, optionally `client_id` and `purpose` | The challenge id, the evidence, its format, the same public key |
 | jans does | Generates ≥ 128 random bits, stores `{ nonce, jkt, client_id, purpose, expires_at }` under `challenge_id`, returns nonce + accepted formats | Consumes the challenge (single use), checks the key matches the challenge, runs the script, checks the script's answer, persists the assessment, signs the result token, emits the TRACE record |
-| Agent does next | Asks its hardware to produce evidence with the nonce in the report data (and, for delegated formats, sends that evidence to the platform verifier) | Uses `attestation_id` / `attestation_result` at DCR or `/token` |
+| Agent does next | Asks its hardware to produce raw evidence with the nonce in the report data | Uses `attestation_id` / `attestation_assessment` at DCR or `/token` |
+| jans does behind the scenes | nothing external | For delegated backends the script calls the platform verifier with the raw evidence and validates the returned `AttestationResultJWT` |
 | Binds | nonce ↔ key ↔ (client) ↔ purpose | evidence ↔ nonce ↔ key, plus the verdict |
 
 Why the challenge is bound to the key and not only random: the evidence proves "this platform
@@ -461,7 +484,7 @@ Response `200`:
   "challenge_id": "c0a8d4…",
   "nonce": "qH3kZ9…",
   "expires_in": 300,
-  "evidence_formats_supported": ["azure-maa+jwt", "intel-ta+jwt", "eat+jwt", "tpm2-quote+json"]
+  "evidence_formats_supported": ["sev-snp-report+json", "tdx-quote+json", "tpm2-quote+json", "eat+jwt"]
 }
 ```
 
@@ -477,8 +500,8 @@ Errors (`400`): `invalid_request` (malformed key), `invalid_client` (unknown `cl
 ```json
 {
   "challenge_id": "c0a8d4…",
-  "evidence": "eyJhbGciOiJSUzI1NiIs…",
-  "evidence_format": "azure-maa+jwt",
+  "evidence": { "report": "<base64url SEV-SNP report>", "vcek_chain": "<base64url PEM chain>", "runtime_data": "<base64url nonce ‖ K.public>" },
+  "evidence_format": "sev-snp-report+json",
   "attested_key": { "kty": "EC", "crv": "P-256", "x": "…", "y": "…" },
   "client_id": "3f9c…"
 }
@@ -487,8 +510,8 @@ Errors (`400`): `invalid_request` (malformed key), `invalid_client` (unknown `cl
 | Field | Required | Meaning |
 |-------|----------|---------|
 | `challenge_id` | yes | From `/attestation/challenge`; consumed on use |
-| `evidence` | yes | Opaque to core: compact JWT for `*+jwt`, base64url CBOR for `eat+cwt`, JSON document for `tpm2-quote+json`. Max `attestationMaxEvidenceBytes` |
-| `evidence_format` | yes | Selects the script branch; must be in `attestationEvidenceFormatsSupported` |
+| `evidence` | yes | **Raw evidence from the hardware**, opaque to core: JSON document for `sev-snp-report+json`, `tdx-quote+json`, `tpm2-quote+json` (report / quote, signature, certificate chain, runtime data as base64url members), compact JWT for `eat+jwt`, base64url CBOR for `eat+cwt`. Never a verifier result: the agent does not talk to verifiers. Max `attestationMaxEvidenceBytes` |
+| `evidence_format` | yes | Names the hardware evidence type; must be in `attestationEvidenceFormatsSupported`. Which appraisal backend handles it (Azure Attestation, Intel Trust Authority, in-process) is script configuration, not a request choice |
 | `attested_key` | yes | Must thumbprint to the challenge `jkt` |
 | `client_id` | conditional | Must equal the challenge's `client_id` when one was given |
 
@@ -511,8 +534,9 @@ Response `200` (also for negative verdicts; the verdict is the payload):
   "appraised_at": 1790000000,
   "expires_at": 1790000900,
   "verifier": "https://sharedeus.eus.attest.azure.net",
+  "verifier_result_digest": "sha256:…",
   "reasons": [],
-  "attestation_result": "eyJhbGciOiJFUzI1NiIsImtpZCI6Ij…",
+  "attestation_assessment": "eyJhbGciOiJFUzI1NiIsImtpZCI6Ij…",
   "trace_record_id": "rec_01J…"
 }
 ```
@@ -526,14 +550,19 @@ Response `200` (also for negative verdicts; the verdict is the payload):
 | `measurement` | `sha256:…` / `sha384:…` (TPM PCR composite, TDX MRTD, SEV launch measurement) |
 | `policy_version` | Identifier of the measurement / platform policy the script applied |
 | `appraised_at`, `expires_at` | Validity window; length `attestationAssessmentLifetimeSeconds` unless the script shortens it |
-| `verifier` | URI of the party that appraised raw evidence: the platform verifier for delegated formats, this issuer for in-process formats |
-| `reasons` | Stable codes for `warning` / `contraindicated`: `measurement_not_allowed`, `evidence_expired`, `nonce_mismatch`, `key_mismatch`, `untrusted_verifier`, `debug_enabled`, … |
-| `attestation_result` | The verdict as a JWT signed by this server (9.6) |
+| `verifier` | URI of the party that appraised the raw evidence: the platform verifier the script called, or this issuer for in-process appraisal |
+| `verifier_result_digest` | SHA-256 of the `AttestationResultJWT` the script received (absent for in-process appraisal). The JWT itself is stored with the assessment (`attestationStoreVerifierResult`, default `true`) and is not returned to the agent unless `attestationEchoVerifierResult=true` |
+| `reasons` | Stable codes for `warning` / `contraindicated` / `none`: `measurement_not_allowed`, `evidence_expired`, `nonce_mismatch`, `key_mismatch`, `untrusted_verifier`, `debug_enabled`, `verifier_unavailable`, … |
+| `attestation_assessment` | The verdict as the `AttestationAssessmentJWT` signed by this server (9.6) |
 | `trace_record_id` | `record_id` of the `ATTESTATION_APPRAISED` TRACE record when emission is enabled |
 
 Errors (`400`): `invalid_challenge` (unknown / expired / used; body carries a fresh `challenge_id`
 + `nonce` for a one-round-trip retry), `invalid_request`, `unsupported_evidence_format`,
-`evidence_too_large`. `500` is never used for a negative verdict.
+`evidence_too_large`. `503 verifier_unavailable` when the script could not reach the platform
+verifier (timeout, 5xx, TLS failure): no verdict about the hardware is implied, the challenge is
+**not** consumed so the agent can retry with the same evidence, and an `ATTESTATION_APPRAISED`
+record with `status=none`, reason `verifier_unavailable` is still emitted. `500` is never used for
+a negative verdict.
 
 ### 9.4 The interception script: `attestation`
 
@@ -561,24 +590,35 @@ public interface AttestationType extends BaseExternalType {
 `appConfiguration`, `script` (`configurationAttributes`), `challenge` (nonce, `jkt`, `client_id`,
 `purpose`), `client` (nullable), `evidenceFormat`, `evidenceRaw`, `evidenceJwt` (parsed for
 `*+jwt`), `evidenceJson`, and a mutable `AttestationResult` (`status`, `attestedJwk`,
-`nonceVerified`, `platform`, `measurement`, `policyVersion`, `verifier`, `reasons`,
-`lifetimeSeconds`, `claims` copied into the result token). Helpers:
-`verifyJwtAgainstJwks(jwt, jwksUri)`, `thumbprint(jwk)`, `cacheGet` / `cachePut`.
+`nonceVerified`, `platform`, `measurement`, `policyVersion`, `verifier`, `verifierResultJwt`,
+`reasons`, `lifetimeSeconds`, `claims` copied into the `AttestationAssessmentJWT`). Helpers:
+`callVerifier(url, body, headers, timeoutMs)` (outbound HTTPS with the server's trust store, size
+and time bounded, no redirects; throws `VerifierUnavailableException`, which core maps to `503
+verifier_unavailable`), `verifyJwtAgainstJwks(jwt, jwksUri)`, `thumbprint(jwk)`, `cacheGet` /
+`cachePut`. The script is the **only** place in jans-auth-server that talks to a platform
+verifier; core never does, and the agent never does.
 
 Reference script `docs/script-catalog/attestation/AgentAttestation.py` (+ `.md`):
 
 | Attribute | Purpose |
 |-----------|---------|
-| `formats` | Comma list handled, e.g. `azure-maa+jwt,eat+jwt` |
-| `trusted_verifier_jwks_uri` | JWKS of the verifier whose result JWTs are accepted (Azure Attestation `…/certs`, Intel TA JWKS, test JWKS in CI) |
-| `trusted_verifier_issuers` | Allowed `iss` values |
-| `nonce_claim_path`, `attested_key_claim_path`, `measurement_claim_path`, `platform_claim_path` | Dotted claim paths; verifiers differ (Azure: `x-ms-runtime.keys`, `x-ms-sevsnpvm-launchmeasurement`; Intel TA: `tdx_mrtd`, `nonce`) |
+| `formats` | Comma list of `evidence_format` values handled, e.g. `sev-snp-report+json,tdx-quote+json` |
+| `verifier_kind` | `azure-maa`, `intel-ta` or `local`. Selects how `verifyEvidence` appraises: call Azure Attestation, call Intel Trust Authority, or verify in-process |
+| `verifier_url` | Attestation endpoint of the platform verifier (e.g. `https://<tenant>.attest.azure.net/attest/SevSnpVm?api-version=…`, `https://api.trustauthority.intel.com/appraisal/v1/attest`) |
+| `verifier_api_key` | Credential for verifiers that need one (Intel TA). Stored as an encrypted script property; never logged, never returned, redacted in TRACE records |
+| `verifier_timeout_ms` | Outbound call timeout; default `5000` |
+| `trusted_verifier_jwks_uri` | JWKS used to validate the returned `AttestationResultJWT` (Azure Attestation `…/certs`, Intel TA JWKS). For `verifier_kind=local` with `eat+jwt`: the trusted attester key set (the test JWKS in CI) |
+| `trusted_verifier_issuers` | Allowed `iss` values in the `AttestationResultJWT` |
+| `nonce_claim_path`, `attested_key_claim_path`, `measurement_claim_path`, `platform_claim_path` | Dotted claim paths in the `AttestationResultJWT`; verifiers differ (Azure: `x-ms-runtime.keys`, `x-ms-sevsnpvm-launchmeasurement`; Intel TA: `tdx_mrtd`, `nonce`) |
 | `allowed_measurements` | Allowlist; empty means "record, do not enforce" → `warning`, never `affirming` |
 | `policy_version` | Echoed into the result; bump when the allowlist changes |
 | `require_debug_disabled` | SEV-SNP `debug` flag, TDX `debug` attribute |
 
-Delegate, don't parse: v1 verifies a platform verifier's signed *result*. In-process TPM 2.0 quote
-verification (`tpm2-quote+json`) is a second script, after v1.
+Delegate, don't parse: v1 ships `verifier_kind=azure-maa` and `intel-ta`, which forward the raw
+evidence and verify the returned `AttestationResultJWT`, plus `verifier_kind=local` for `eat+jwt`
+(used in CI). In-process TPM 2.0 quote verification (`tpm2-quote+json` under `local`) is a second
+script, after v1. In all cases the script runs inside jans-auth-server during `POST /attestation`;
+the agent is never on the path to the verifier.
 
 ### 9.5 Where the gate is enforced
 
@@ -589,7 +629,7 @@ request carries `attestation` or `evidence`. Two equivalent paths end in
 
 - *Two-step (preferred).* Agent calls `/attestation/challenge` + `/attestation`, then registers
   with new `RegisterRequestParam.ATTESTATION` (`attestation`: an `attestation_id` or the
-  `attestation_result` JWT). `RegisterValidator.validateAttestation()` (next to
+  `AttestationAssessmentJWT`). `RegisterValidator.validateAttestation()` (next to
   `validateEvidence()`) requires `status=affirming`, `expires_at` in the future, `purpose=enroll`,
   and `attested_jkt` equal to the thumbprint of one key in `jwks` / `jwks_uri`.
 - *One-step (existing `evidence`).* First request without evidence gets `400 stale_evidence` with
@@ -606,9 +646,17 @@ the gate and can read `context.getAttestationAssessment()`. `updateClient` re-ru
 
 **At `/token`** (section 10.4).
 
-### 9.6 Attestation result token
+### 9.6 `AttestationAssessmentJWT`: jans's signed verdict
 
-JWT signed with the server's OIDC signing key, `typ: "attestation-result+jwt"`:
+Two signed objects exist in this design and must not be confused:
+
+| Name | Issuer | Says | Lives |
+|------|--------|------|-------|
+| `AttestationResultJWT` | Platform verifier (Azure Attestation, Intel Trust Authority) | "This raw evidence is genuine; the platform measured X; report data carried N and K.public" | Obtained and validated by the jans script; stored with the assessment; digest in the response and in TRACE; not given to the agent by default |
+| `AttestationAssessmentJWT` | jans-auth-server | "I appraised key K under policy P at time T with verdict S; valid until `exp`" | Returned to the agent as `attestation_assessment`; presented at DCR / `/token`; verifiable by anyone with `/jwks` |
+
+The `AttestationAssessmentJWT` is signed with the server's OIDC signing key,
+`typ: "attestation-assessment+jwt"`:
 
 ```json
 {
@@ -622,6 +670,7 @@ JWT signed with the server's OIDC signing key, `typ: "attestation-result+jwt"`:
   "measurement": "sha384:c9e4…",
   "policy_version": "agent-tpm-policy-2026-09",
   "verifier": "https://sharedeus.eus.attest.azure.net",
+  "verifier_result_digest": "sha256:…",
   "client_id": "3f9c…",
   "nonce": "qH3kZ9…",
   "evidence_digest": "sha256:…"
@@ -643,7 +692,7 @@ three of its values; the fourth exists in the vocabulary and is listed for compl
 | `affirming` | Evidence verified **and** every policy check passed: trusted verifier signature, nonce echoed, attested key equals the challenge key, measurement in `allowed_measurements`, debug disabled | All checks green | Accepted | Yes |
 | `warning` | Evidence verified and key-bound, but policy could not be fully applied or a non-fatal condition exists: `allowed_measurements` empty (no measurement policy configured), measurement allowed but `firmware_version` below a recommended level, verifier result close to its own expiry | Script reports a soft finding | Rejected by default; accepted when `attestationAcceptWarning=true` (demo and staging). Introspection and the SVID `attestation` claim show `warning`, so a relying party can still apply its own stricter rule | Yes |
 | `contraindicated` | Evidence rejected: untrusted or invalid signature, expired, nonce missing or wrong, attested key differs from the challenge key, measurement not allowed, debug enabled | Any hard failure, including the core post-checks (`key_mismatch`, `nonce_mismatch`) that override the script | Rejected, always | Yes |
-| `none` | The verifier made no appraisal (for example it only relayed evidence) | Not produced by jans; a script returning no status is treated as `contraindicated` with reason `no_verdict` | Rejected | Yes |
+| `none` | No appraisal happened: the platform verifier could not be reached (`verifier_unavailable`), or the script returned no status (`no_verdict`) | Infrastructure failure, not a judgement about the hardware; the HTTP response is `503 verifier_unavailable` and the challenge is kept for a retry | Rejected | Yes (so outages are visible in the evidence trail) |
 
 `reasons` carries the stable codes behind a `warning` or `contraindicated`, so an operator can tell
 "wrong policy" from "wrong hardware" from "replay" without reading logs.
@@ -673,9 +722,10 @@ explicitly allowed); everything else is a refusal with the `reasons` list in the
 
 New entity `AttestationAssessment` (`ou=attestations`, `jansAttest`): `attestationId` (primary),
 `jkt` (indexed), `clientId` (indexed, nullable until enrollment), `status`, `platform`,
-`measurement`, `policyVersion`, `verifier`, `evidenceFormat`, `evidenceDigest`, raw evidence only
-when `attestationStoreEvidence=true`, `appraisedAt`, `expiresAt` (ORM TTL attribute, as tokens),
-`traceRecordId`, `reasons`. Schema in `jans-linux-setup`, ORM entries for all backends. Lookups:
+`measurement`, `policyVersion`, `verifier`, `verifierResultJwt` (the `AttestationResultJWT`,
+stored when `attestationStoreVerifierResult=true`, default), `verifierResultDigest`,
+`evidenceFormat`, `evidenceDigest`, raw evidence only when `attestationStoreEvidence=true`,
+`appraisedAt`, `expiresAt` (ORM TTL attribute, as tokens), `traceRecordId`, `reasons`. Schema in `jans-linux-setup`, ORM entries for all backends. Lookups:
 `latestAffirming(clientId, jkt)`, `byId`.
 
 ### 9.8 Configuration and discovery
@@ -687,9 +737,11 @@ when `attestationStoreEvidence=true`, `appraisedAt`, `expiresAt` (ORM TTL attrib
 | `attestationMaxAgeForIssuanceSeconds` | 300 | Oldest `appraised_at` accepted at `/token`; a client attribute `attestationMaxAgeSeconds` may lower it |
 | `attestationRequireFreshPerIssuance` | `false` | Every issuance consumes an assessment |
 | `attestationAcceptWarning` | `false` | Accept `warning` verdicts |
-| `attestationEvidenceFormatsSupported` | `["azure-maa+jwt","intel-ta+jwt","eat+jwt"]` | Advertised and enforced |
+| `attestationEvidenceFormatsSupported` | `["sev-snp-report+json","tdx-quote+json","tpm2-quote+json","eat+jwt"]` | Advertised and enforced |
 | `attestationMaxEvidenceBytes` | 65536 | |
 | `attestationStoreEvidence` | `false` | Keep raw evidence |
+| `attestationStoreVerifierResult` | `true` | Keep the `AttestationResultJWT` with the assessment |
+| `attestationEchoVerifierResult` | `false` | Also return the `AttestationResultJWT` to the agent |
 | `attestationScriptName` | — | Pin one script |
 
 Discovery members (gated on the flag): `attestation_endpoint`, `attestation_challenge_endpoint`,
@@ -771,7 +823,7 @@ in one of three ways, in order of preference:
 
 1. Re-attest out of band (`/attestation/challenge` with `client_id`, `purpose=issue`, then
    `/attestation`), retry `/token`; the assessment is found by `(client_id, jkt)`.
-2. Inline `attestation=<attestation_id | attestation_result JWT>` on the token request; verified
+2. Inline `attestation=<attestation_id | AttestationAssessmentJWT>` on the token request; verified
    exactly as at DCR, and `attested_jkt` must equal the DPoP proof key.
 3. Attest-and-issue in one call: `evidence`, `evidence_format` and the `challenge_id` from the
    error on the token request; core runs `AttestationService.verify()` inline. This keeps the
@@ -900,7 +952,7 @@ which carry no ordering guarantee of their own. Everything sharing one `trace_ex
 
 | Event | `event_kind` | When | `capability_ids` | `tokens[]` | `subject` |
 |-------|--------------|------|------------------|------------|-----------|
-| Attestation appraised | `ATTESTATION_APPRAISED` (new kind in Lock, section 12; fallback: `AUTHORIZATION_DECISION` with `urn:jans:capability:attest-key`) | every verdict | none | none | `hardware { jkt, attestation_id, platform, measurement, policy_version, status, verifier }` |
+| Attestation appraised | `ATTESTATION_APPRAISED` (new kind in Lock, section 12; fallback: `AUTHORIZATION_DECISION` with `urn:jans:capability:attest-key`) | every verdict, including `none` | none | none | `hardware { jkt, attestation_id, platform, measurement, policy_version, status, verifier, verifier_result_digest, evidence_digest }` |
 | Client enrolled | `AUTHORIZATION_DECISION` | DCR accepted / rejected for an attested client | `urn:jans:capability:register-client` | none | `agent { spiffe_id, client_id }`, `hardware` |
 | Human delegated | `AUTHORIZATION_DECISION` | ID-JAG issued | `urn:jans:capability:issue-id-jag` | `id-jag` (`jti`), `id_token` (`fingerprint`) | `principal { iss, sub, acr, auth_time }`, `agent { client_id }` |
 | SVID issued | `AUTHORIZATION_DECISION` | SVID issued or refused | `urn:jans:capability:issue-jwt-svid` | `jwt-svid` (`jti`), `id-jag` when present | `agent`, `principal`, `hardware` |
@@ -1012,7 +1064,7 @@ flowchart LR
     subgraph AS["jans-auth-server"]
         CH["/attestation/challenge"]:::new
         AT["/attestation"]:::new
-        ASVC["AttestationService<br/>nonce · key binding · store · result JWT"]:::new
+        ASVC["AttestationService<br/>nonce · key binding · store · AttestationAssessmentJWT"]:::new
         ASCR["attestation script<br/>ExternalAttestationService"]:::new
         ASTORE["AttestationAssessment store"]:::new
         DCR["DCR /register<br/>access_token_type · validateAttestation"]:::new
@@ -1032,9 +1084,9 @@ flowchart LR
     SPIRE["SPIRE / any JWT verifier"]
     PEP["PEP → governed capability"]
 
-    AGENT -- "1 challenge · 2 evidence" --> CH & AT
-    AGENT -. "evidence" .-> VER
+    AGENT -- "1 challenge · 2 raw evidence" --> CH & AT
     AT --> ASVC --> ASCR
+    ASCR -- "raw evidence → AttestationResultJWT" --> VER
     ASVC --> ASTORE
     AGENT -- "3 register" --> DCR --> ASVC
     HUMAN -- "4 ID token → ID-JAG" --> IDJ
@@ -1050,9 +1102,9 @@ flowchart LR
 ```
 
 Reading the diagram: boxes with the thick outline are new in this plan; **solid** arrows are
-request paths inside the server or calls the agent, human and verifiers make to it; **dashed**
-arrows are out-of-band or optional: the agent's call to a platform verifier (not jans's business)
-and a relying party's optional online check at introspection.
+request paths inside the server, calls the agent and human make to it, and the one outbound call
+jans makes (the attestation script to the platform verifier); the **dashed** arrow is a relying
+party's optional online check at introspection. The agent has no edge to the platform verifier.
 
 Deliberately absent: a CA or X.509-SVID issuance; the SPIFFE Workload API (agents are ordinary
 OAuth clients over HTTPS); in-process parsing of SEV-SNP / TDX quotes; any dependency on agentrust
@@ -1076,7 +1128,7 @@ Each PR updates `jans-auth-server/docs/swagger.yaml` and the docs it touches in 
 |---|----|-------|
 | 1 | `access_token_type` | Section 7: enum, `RegisterRequestParam`, `ClientAttributes.accessTokenType`, resolver, validator (without the attestation row), swagger deprecation of `access_token_as_jwt`, `RegisterRequest` client support |
 | 2 | Bundle endpoint | Section 8: `SPIFFE_SVID_ISSUANCE` flag, `SpiffeOwnBundleService`, endpoint, discovery member, trust-domain pinning, config properties, swagger path + `SpiffeBundle` schema |
-| 3 | Attestation endpoint | Section 9: `ATTESTATION` flag, `/attestation/challenge`, `/attestation`, `AttestationService`, entity + schema, result JWT, script type + `ExternalAttestationService`, reference script, discovery members, swagger |
+| 3 | Attestation endpoint | Section 9: `ATTESTATION` flag, `/attestation/challenge`, `/attestation`, `AttestationService`, entity + schema, `AttestationAssessmentJWT`, verifier HTTP client, script type + `ExternalAttestationService`, reference script, discovery members, swagger |
 | 4 | DCR gate | Section 9.5: `attestation` parameter, `validateAttestation()`, `stale_evidence` + `challenge_id`, one-step `evidence` routing, `ClientAttributes.attestation`, `updateClient` re-gate, attestation row in the `JWT-SVID` validator, swagger client-metadata schemas |
 | 5 | Issuance | Section 10: `validateJwtSvidRequest`, `invalid_target`, key rule, freshness rule + `attestation_required`, inline `attestation` / `evidence` / `challenge_id` parameters, `JwtSvidBuilder`, lifetime, introspection, `txn` in ID-JAG, `TokenRequest` client support (`setResource`, `setAttestation`), swagger token endpoint |
 | 6 | TRACE emission | Section 11: producer key, chain state, outbox, emitter, four record builders, configuration, setup step |
@@ -1085,7 +1137,8 @@ Each PR updates `jans-auth-server/docs/swagger.yaml` and the docs it touches in 
 ### Hardware platform for the demo
 
 Pick one and document its exact guarantee. Recommendation: **Azure confidential VM (AMD SEV-SNP
-with vTPM)** with **Azure Attestation** as verifier. The verifier returns a signed JWT (one script
+with vTPM)** with **Azure Attestation** as verifier, called by the attestation script
+(`verifier_kind=azure-maa`). The verifier returns an `AttestationResultJWT` (one script
 branch, no quote parsing); the result covers the SEV-SNP launch measurement and the vTPM-held key
 (`x-ms-runtime.keys`), so `platform=azure-cvm-sev-snp`; the agent key is generated in the vTPM and
 is non-exportable. What it proves: the key is in a vTPM inside a VM whose launch measurement
@@ -1111,9 +1164,10 @@ above helpers, no section-divider comments. Third parties never appear in unit t
 | `SpiffeTrustDomainServiceTest` | pin on first start; adopt another node's value; invalid domain → `ERROR`, no exception |
 | `SpiffeIdUtilTest` (extend) | `buildAgentSpiffeId`; trust domain with `/` rejected |
 | `AttestationServiceTest` | challenge TTL and single use; `key_mismatch`; `nonce_mismatch`; `client_id` ↔ key ownership; `warning` only with the flag; `latestAffirming` picks newest unexpired |
-| `AttestationResultTokenServiceTest` | claims, `typ`, verification path |
-| `AttestationRestWebServiceImplTest` | flag disabled; `invalid_challenge` carries a fresh challenge; no `500` for a verdict |
-| `ExternalAttestationServiceTest` | selection by `evidence_format`; `false` → rejected; result copied |
+| `AttestationAssessmentJwtServiceTest` | claims, `typ`, `verifier_result_digest`, verification path |
+| `AttestationRestWebServiceImplTest` | flag disabled; `invalid_challenge` carries a fresh challenge; no `500` for a verdict; `503 verifier_unavailable` keeps the challenge |
+| `ExternalAttestationServiceTest` | selection by `evidence_format`; `false` → rejected; result copied; `VerifierUnavailableException` → `status=none` |
+| `VerifierHttpClientTest` | `callVerifier`: timeout, size bound, no redirects, server trust store, API key header never logged |
 | `RegisterValidatorTest` (extend) | `validateAttestation` by id / JWT; expired; wrong purpose; key not in `jwks`; `stale_evidence` has `challenge_id` |
 | `TokenRestWebServiceValidatorTest` (extend) | grant type; flag; `invalid_target`; freshness rule none / stale / fresh; inline paths; `attestation_required` body |
 | `DpopServiceTest` (extend) | `validateDpopKeyIsRegistered`: match, mismatch, no JWKS, `jwks_uri` |
@@ -1128,8 +1182,9 @@ above helpers, no section-divider comments. Third parties never appear in unit t
 Integration tests (`jans-auth-server/client`, disabled by default in `testng.xml` like the SPIFFE
 client-auth suite, enabled in the CI profile that provisions the prerequisites): the hardware is
 the static test keystore already used by the DPoP tests (public keys hosted at `clientJwksUri`);
-the verifier is the same reference script configured with `trusted_verifier_jwks_uri =
-clientJwksUri`, the test signing the attestation result itself; SPIRE is replaced by a
+the platform verifier is replaced by the same reference script in `verifier_kind=local` with
+`formats=eat+jwt` and `trusted_verifier_jwks_uri = clientJwksUri`, the test signing the EAT JWT
+itself (it plays the attester; no outbound call is made); SPIRE is replaced by a
 **self-federation round trip** (`spiffeTrustDomains` lists the server's own trust domain and
 bundle URL, so an SVID issued to agent A is accepted by the shipped inbound validator as a
 `jwt-spiffe` `client_assertion` for client B); the SPIFFE-native relying party is the test itself
@@ -1148,7 +1203,7 @@ Nothing in the suite calls a host the project does not control.
 | Evidence replayed from an earlier session | Challenge is single-use and bound to `jkt`; `nonce_mismatch` → `contraindicated`; the negative appraisal is itself recorded |
 | Evidence about a different key than the DPoP / registration key | `attested_jkt` compared to the challenge `jkt` and to the registered keys in core; `key_mismatch`; the script cannot override |
 | Platform drifts after enrollment | Re-attestation yields `contraindicated`; once the last affirming assessment ages past the maximum, issuance stops with `attestation_required`; outstanding SVIDs die within the TTL; introspection shows the stale `attestation` |
-| Platform verifier unreachable | Agent cannot obtain a result; existing assessments stay valid until `expires_at`; issuance continues inside the window, then stops. Lengthening the window is visible as a new `bundle_hash` |
+| Platform verifier unreachable from jans | `/attestation` returns `503 verifier_unavailable`, keeps the challenge for a retry, and records `status=none`; existing assessments stay valid until `expires_at`, so issuance continues inside the window, then stops with `attestation_required`. Lengthening the window is visible as a new `bundle_hash`. The agent never needed network access to the verifier, so nothing changes on the agent side |
 | Agent decommissioned or compromised | Admin disables the client: issuance stops; tokens die within the TTL; introspection reports `active: false` |
 | Bundle endpoint unreachable | Verifiers keep their cached bundle (SPIRE natively; jans's own `SpiffeBundleService` serves stale with negative cache). Degrades only after cached keys rotate out |
 | Signing key rotated | Bundle serves old + new for an overlap window and bumps `spiffe_sequence`; only an emergency rotation that drops the old key immediately invalidates in-flight tokens, by design |
@@ -1157,7 +1212,7 @@ Nothing in the suite calls a host the project does not control.
 | TRACE producer key compromised | Revoke via Lock's admin API; later records rejected; rotate the alias |
 | Attestation script accepts everything | Core still enforces nonce, key binding, challenge lifecycle and `status` semantics; a script cannot mint `affirming` for a key the evidence does not name |
 | ID-JAG stolen | Audience- and client-bound, short-lived (existing); the SVID carries `act` and the records show which agent used it |
-| Auditor doubts jans itself | Every claim is a signed record in a hash chain with Lock receipts; the appraisal is traceable to the platform verifier's own signature (`verifier`, `evidence_digest`), and with `attestationStoreEvidence=true` the raw evidence can be re-verified |
+| Auditor doubts jans itself | Every claim is a signed record in a hash chain with Lock receipts; the appraisal is traceable to the platform verifier's own signature (the stored `AttestationResultJWT`, its digest in the record), and with `attestationStoreEvidence=true` the raw evidence can be re-submitted to the verifier independently |
 
 ## 16. Specs to follow
 
@@ -1189,7 +1244,12 @@ Nothing in the suite calls a host the project does not control.
   schema change.
 - **Attestation is an endpoint + script**, not a DCR script alone; DCR and `/token` call the same
   service.
-- **Delegate, don't parse**: v1 verifies a platform verifier's signed result; TPM quotes later.
+- **Delegate, don't parse**: v1 forwards raw evidence to a platform verifier and validates its
+  `AttestationResultJWT`; TPM quotes in-process later.
+- **Only jans talks to the platform verifier**, from the attestation script during
+  `POST /attestation`. The agent sends raw hardware evidence to jans and nothing anywhere else.
+- **Two result objects, two names**: `AttestationResultJWT` (verifier's) and
+  `AttestationAssessmentJWT` (jans's, response field `attestation_assessment`).
 - **Trust domain is pinned** on first start and never derived again.
 - **Update-token script may add but not remove** the SVID's identity, binding and correlation
   claims.
@@ -1226,8 +1286,9 @@ Nothing in the suite calls a host the project does not control.
   mTLS-between-agents requirement.
 - **The SPIFFE Workload API.** Agents fetch tokens over HTTPS from `/token`; we do not replace
   SPIRE Agent.
-- **A jans-hosted verifier for raw SEV-SNP / TDX / Nitro evidence.** The script verifies a
-  platform verifier's result; TPM 2.0 quotes are the one in-process exception, after v1.
+- **A jans-hosted verifier for raw SEV-SNP / TDX / Nitro evidence.** The script forwards raw
+  evidence to a platform verifier and validates its `AttestationResultJWT`; TPM 2.0 quotes are
+  the one in-process exception, after v1.
 - **Coupling to agentrust-io.** We target the IETF standards it profiles (EAT / RATS) and jans-lock's
   TRACE profile; the agentrust record is an export (11.4). An agent manifest could later be one
   accepted *input* at enrollment, never a protocol dependency.
