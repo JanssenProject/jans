@@ -11,6 +11,7 @@ import io.jans.fido2.model.metric.Fido2MetricsAggregation;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
@@ -1041,6 +1042,9 @@ public class Fido2MetricsService {
         // Device info - only set if available and non-empty
         setDeviceInfo(entry, metricsData, truncation);
 
+        // Native-client telemetry (#14607) - only set if available
+        setNativeClientTelemetry(entry, metricsData, truncation);
+
         if (truncation.hasTruncations()) {
             log.warn("FIDO2 metrics entry {} had oversized field(s) shortened to fit the schema: {}",
                     entry.getId(), truncation.describe());
@@ -1104,6 +1108,11 @@ public class Fido2MetricsService {
         setIfNotEmpty(metricsData.getSessionId(), "sessionId",
                 Fido2MetricsConstants.MAX_LENGTH_SESSION_ID, truncation, entry::setSessionId);
 
+        // Caller-supplied correlation ID (#14607), sibling to sessionId - kept as its own top-level
+        // field rather than left buried inside the nativeClientTelemetry blob, so it stays queryable.
+        setIfNotEmpty(metricsData.getClientCorrelationId(), "clientCorrelationId",
+                Fido2MetricsConstants.MAX_LENGTH_CLIENT_CORRELATION_ID, truncation, entry::setClientCorrelationId);
+
         // Cluster info
         setIfNotEmpty(metricsData.getNodeId(), "nodeId",
                 Fido2MetricsConstants.MAX_LENGTH_NODE_ID, truncation, entry::setNodeId);
@@ -1163,6 +1172,70 @@ public class Fido2MetricsService {
             MetricsFieldTruncation truncation, java.util.function.Consumer<String> setter) {
         if (value != null && !value.trim().isEmpty()) {
             setter.accept(truncation.apply(fieldName, value, maxLength));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Set native-client telemetry (#14607) if available. {@code NativeClientTelemetry} is the same
+     * class on both {@code Fido2MetricsData} (transient) and {@code Fido2MetricsEntry} (persisted) -
+     * unlike deviceInfo, which has two separate classes - so this builds a fresh, truncated copy
+     * rather than mutating the caller's instance.
+     */
+    private void setNativeClientTelemetry(Fido2MetricsEntry entry, Fido2MetricsData metricsData,
+            MetricsFieldTruncation truncation) {
+        NativeClientTelemetry source = metricsData.getNativeClientTelemetry();
+        if (source == null) {
+            return;
+        }
+
+        NativeClientTelemetry telemetry = new NativeClientTelemetry();
+        boolean hasTelemetry = false;
+
+        hasTelemetry |= setTelemetryField(source.getClientCorrelationId(), "telemetry.clientCorrelationId",
+                truncation, telemetry::setClientCorrelationId);
+        hasTelemetry |= setTelemetryField(source.getPlatform(), "telemetry.platform",
+                truncation, telemetry::setPlatform);
+        hasTelemetry |= setTelemetryField(source.getNativeApi(), "telemetry.nativeApi",
+                truncation, telemetry::setNativeApi);
+        hasTelemetry |= setTelemetryField(source.getOsVersion(), "telemetry.osVersion",
+                truncation, telemetry::setOsVersion);
+        hasTelemetry |= setTelemetryField(source.getPlayServicesVersion(), "telemetry.playServicesVersion",
+                truncation, telemetry::setPlayServicesVersion);
+        hasTelemetry |= setTelemetryField(source.getDeviceManufacturer(), "telemetry.deviceManufacturer",
+                truncation, telemetry::setDeviceManufacturer);
+        hasTelemetry |= setTelemetryField(source.getDeviceModel(), "telemetry.deviceModel",
+                truncation, telemetry::setDeviceModel);
+        hasTelemetry |= setTelemetryField(source.getCredentialProvider(), "telemetry.credentialProvider",
+                truncation, telemetry::setCredentialProvider);
+        hasTelemetry |= setTelemetryField(source.getFlowContext(), "telemetry.flowContext",
+                truncation, telemetry::setFlowContext);
+        hasTelemetry |= setTelemetryField(source.getAppVersion(), "telemetry.appVersion",
+                truncation, telemetry::setAppVersion);
+        hasTelemetry |= setTelemetryField(source.getDistributionChannel(), "telemetry.distributionChannel",
+                truncation, telemetry::setDistributionChannel);
+        hasTelemetry |= setTelemetryField(source.getLastClientErrorCode(), "telemetry.lastClientErrorCode",
+                truncation, telemetry::setLastClientErrorCode);
+
+        if (source.getDeviceSecure() != null) {
+            telemetry.setDeviceSecure(source.getDeviceSecure());
+            hasTelemetry = true;
+        }
+
+        if (hasTelemetry) {
+            entry.setNativeClientTelemetry(telemetry);
+        }
+    }
+
+    /**
+     * Set a telemetry field if value is not null and not empty, shortened to the policy cap
+     * @return true if field was set, false otherwise
+     */
+    private boolean setTelemetryField(String value, String fieldName,
+            MetricsFieldTruncation truncation, java.util.function.Consumer<String> setter) {
+        if (value != null && !value.trim().isEmpty()) {
+            setter.accept(truncation.apply(fieldName, value, Fido2MetricsConstants.MAX_LENGTH_NATIVE_TELEMETRY_FIELD));
             return true;
         }
         return false;

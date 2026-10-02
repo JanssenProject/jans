@@ -162,7 +162,7 @@ mod tests {
         with_env_vars(
             &[
                 ("CEDARLING_JWT_SIG_VALIDATION", "disabled"),
-                ("CEDARLING_POLICY_STORE_LOCAL", "tests/test_store.yaml"),
+                ("CEDARLING_POLICY_STORE_LOCAL_FN", "tests/test_store.yaml"),
             ],
             || {
                 let mut args = dummy_args();

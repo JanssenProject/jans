@@ -12,10 +12,10 @@ name: "Test: Terraform Provider"
 
 on:
   push:
+    # No tag trigger: the release image does not exist yet at tag-push time.
+    # build-docker-images.yml dispatches this workflow at the tag once it does.
     branches:
       - main
-    tags:
-      - "v*"
     paths:
       - "terraform-provider-jans/**"
       - ".github/workflows/test-terraform-provider.yml"

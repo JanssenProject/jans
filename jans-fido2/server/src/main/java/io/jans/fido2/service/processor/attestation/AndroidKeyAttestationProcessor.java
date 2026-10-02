@@ -105,6 +105,9 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
     private Logger log;
 
     @Inject
+    private io.jans.fido2.service.RpPolicyService rpPolicyService;
+
+    @Inject
     private Base64Service base64Service;
 
     @Override
@@ -147,8 +150,8 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
 
         // 5. Chain to a trusted root (from metadata) when attestation is enforced.
         if (!AttestationMode.DISABLED.getValue()
-                .equalsIgnoreCase(appConfiguration.getFido2Configuration().getAttestationMode())) {
-            X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, certificates);
+                .equalsIgnoreCase(rpPolicyService.resolveAttestationMode(registration.getRpId()))) {
+            X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, certificates, registration.getRpId());
             if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
                 throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_KEY_ERROR,
                         "No trusted root certificates in metadata for the android-key authenticator");

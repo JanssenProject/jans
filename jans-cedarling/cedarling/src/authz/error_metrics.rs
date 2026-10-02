@@ -7,7 +7,7 @@ use crate::{
     AuthorizeError, DataError,
     authz::{BatchValidationError, BuildContextError, MultiIssuerValidationError},
     entity_builder::{BuildUnsignedEntityError, MultiIssuerEntityError},
-    jwt::{CustomTokenError, TrustedIssuerError, ValidateJwtError},
+    jwt::{CustomTokenError, TrustedIssuerError, UnknownTokenMapping, ValidateJwtError},
 };
 
 /// Trait for error types that map to a telemetry metric key.
@@ -29,11 +29,7 @@ impl ErrorMetricKey for MultiIssuerValidationError {
             Self::CustomToken(e) => match e {
                 CustomTokenError::Processing(_) => "multi_issuer.custom_token_processing",
                 CustomTokenError::Timeout(_) => "multi_issuer.custom_token_timeout",
-                CustomTokenError::UnknownIssuer(_) => "multi_issuer.custom_token_unknown_issuer",
                 CustomTokenError::UnknownMapping(_) => "multi_issuer.custom_token_unknown_mapping",
-                CustomTokenError::UnknownTokenType { .. } => {
-                    "multi_issuer.custom_token_unknown_token_type"
-                },
                 CustomTokenError::Expired { .. } => "multi_issuer.custom_token_expired",
                 CustomTokenError::EmptyTokenId(_) => "multi_issuer.custom_token_empty_token_id",
                 CustomTokenError::MissingRequiredClaim(_) => {
@@ -93,6 +89,12 @@ impl ErrorMetricKey for BuildUnsignedEntityError {
 impl ErrorMetricKey for MultiIssuerEntityError {
     fn metric_key(&self) -> &'static str {
         "authz.entity_build"
+    }
+}
+
+impl ErrorMetricKey for UnknownTokenMapping {
+    fn metric_key(&self) -> &'static str {
+        "jwt.unknown_token_mapping"
     }
 }
 

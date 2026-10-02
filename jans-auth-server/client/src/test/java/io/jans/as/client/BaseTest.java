@@ -17,6 +17,7 @@ import io.jans.as.client.par.ParRequest;
 import io.jans.as.client.ssa.create.SsaCreateClient;
 import io.jans.as.client.ssa.create.SsaCreateResponse;
 import io.jans.as.client.ws.rs.Tester;
+import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
@@ -76,6 +77,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map.Entry;
 
 import static org.testng.Assert.*;
@@ -114,6 +116,9 @@ public abstract class BaseTest {
     protected PrivateKey privateKey;
 
     protected Map<String, String> allTestKeys = Maps.newHashMap();
+
+    private static final Map<String, String> PKCE_VERIFIER_BY_CHALLENGE = new ConcurrentHashMap<>();
+    private static final Map<String, String> PKCE_VERIFIER_BY_CODE = new ConcurrentHashMap<>();
 
     // Form Interaction
     protected String loginFormUsername;
@@ -570,7 +575,7 @@ public abstract class BaseTest {
 
     protected AuthorizeClient processAuthentication(WebDriver currentDriver, String authorizeUrl,
                                                     AuthorizationRequest authorizationRequest, String userId, String userSecret) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -587,7 +592,7 @@ public abstract class BaseTest {
                 return null;
             }
 
-            WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
+            WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton, authorizationRequest.getRedirectUri());
 
             // login.xhtml's document.ready handler clears both credential fields (remember-me logic).
             // Wait until it has fired, otherwise it races with sendKeys below and the form is posted
@@ -656,14 +661,17 @@ public abstract class BaseTest {
         }
     }
 
-    private WebElement waitForRequredElementLoad(WebDriver currentDriver, String id) {
+    private WebElement waitForRequredElementLoad(WebDriver currentDriver, String id, String redirectUri) {
         Wait<WebDriver> wait = new FluentWait<>(currentDriver)
                 .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
                 .pollingEvery(Duration.ofMillis(500))
                 .ignoring(NoSuchElementException.class);
 
         try {
-            WebElement loginButton = wait.until(d -> d.findElement(By.id(id)));
+            WebElement loginButton = wait.until(d -> {
+                failIfRedirected(d, id, redirectUri);
+                return d.findElement(By.id(id));
+            });
             return loginButton;
         } catch (TimeoutException e) {
             System.out.println("PAGE URL: " + currentDriver.getCurrentUrl());
@@ -673,10 +681,17 @@ public abstract class BaseTest {
         }
     }
 
+    private static void failIfRedirected(WebDriver currentDriver, String id, String redirectUri) {
+        final String url = currentDriver.getCurrentUrl();
+        if (StringUtils.isNotBlank(redirectUri) && url != null && url.startsWith(redirectUri)) {
+            fail("Element '" + id + "' not available, redirected to: " + url);
+        }
+    }
+
     protected String acceptAuthorization(WebDriver currentDriver, String redirectUri) {
         String authorizationResponseStr = currentDriver.getCurrentUrl();
 
-        if ((authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) && !authorizationResponseStr.contains("user_code")) {
+        if ((authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) && !authorizationResponseStr.contains("user_code")) { // # gitleaks:allow
             return authorizationResponseStr;
         }
 
@@ -688,7 +703,7 @@ public abstract class BaseTest {
                 return null;
             }
 
-            WebElement allowButton = waitForRequredElementLoad(currentDriver, authorizeFormAllowButton);
+            WebElement allowButton = waitForRequredElementLoad(currentDriver, authorizeFormAllowButton, redirectUri);
 
             // We have to use JavaScript because target is link with onclick
             JavascriptExecutor jse = (JavascriptExecutor) currentDriver;
@@ -757,13 +772,14 @@ public abstract class BaseTest {
             authorizeClient.setResponse(authorizationResponse);
             showClientUserAgent(authorizeClient);
         }
+        rememberCodeVerifier(authorizationRequest, authorizationResponse);
 
         return authorizationResponse;
     }
 
     public AuthorizationResponse authenticateResourceOwnerAndDenyAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -814,13 +830,14 @@ public abstract class BaseTest {
         authorizationResponse.setSessionId(sessionId);
         authorizeClient.setResponse(authorizationResponse);
         showClientUserAgent(authorizeClient);
+        rememberCodeVerifier(authorizationRequest, authorizationResponse);
 
         return authorizationResponse;
     }
 
     public AuthorizationResponse authorizationRequestAndGrantAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -860,13 +877,14 @@ public abstract class BaseTest {
         }
         authorizeClient.setResponse(authorizationResponse);
         showClientUserAgent(authorizeClient);
+        rememberCodeVerifier(authorizationRequest, authorizationResponse);
 
         return authorizationResponse;
     }
 
     public AuthorizationResponse authorizationRequestAndDenyAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -899,6 +917,7 @@ public abstract class BaseTest {
         }
         authorizeClient.setResponse(authorizationResponse);
         showClientUserAgent(authorizeClient);
+        rememberCodeVerifier(authorizationRequest, authorizationResponse);
 
         return authorizationResponse;
     }
@@ -909,7 +928,7 @@ public abstract class BaseTest {
      */
     public AuthorizationResponse authenticateResourceOwner(
             String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret, boolean cleanupCookies) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -959,6 +978,7 @@ public abstract class BaseTest {
         }
         authorizeClient.setResponse(authorizationResponse);
         showClientUserAgent(authorizeClient);
+        rememberCodeVerifier(authorizationRequest, authorizationResponse);
 
         return authorizationResponse;
     }
@@ -968,7 +988,7 @@ public abstract class BaseTest {
      */
     public String waitForResourceOwnerAndGrantLoginForm(
             String authorizeUrl, AuthorizationRequest authorizationRequest, boolean cleanupCookies) {
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizeUrl, authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
         authorizeClient.setRequest(authorizationRequest);
@@ -1120,6 +1140,48 @@ public abstract class BaseTest {
         System.out.println("#######################################################");
         System.out.println(testTitle);
         System.out.println("#######################################################");
+    }
+
+    protected String authorizationRequestUrl(String authorizeUrl, AuthorizationRequest authorizationRequest) {
+        ensurePkce(authorizationRequest);
+        return authorizeUrl + "?" + authorizationRequest.getQueryString();
+    }
+
+    protected AuthorizationResponse execAuthorize(AuthorizeClient authorizeClient) {
+        ensurePkce(authorizeClient.getRequest());
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        rememberCodeVerifier(authorizeClient.getRequest(), authorizationResponse);
+        return authorizationResponse;
+    }
+
+    private static void ensurePkce(AuthorizationRequest authorizationRequest) {
+        if (StringUtils.isBlank(authorizationRequest.getCodeChallenge()) && StringUtils.isBlank(authorizationRequest.getRequestUri())) {
+            CodeVerifier verifier = authorizationRequest.generateAndSetCodeChallengeWithMethod();
+            PKCE_VERIFIER_BY_CHALLENGE.put(authorizationRequest.getCodeChallenge(), verifier.getCodeVerifier());
+        }
+    }
+
+    private static void rememberCodeVerifier(AuthorizationRequest authorizationRequest, AuthorizationResponse authorizationResponse) {
+        if (authorizationRequest.getCodeChallenge() == null || authorizationResponse.getCode() == null) {
+            return;
+        }
+        String verifier = PKCE_VERIFIER_BY_CHALLENGE.get(authorizationRequest.getCodeChallenge());
+        if (verifier != null) {
+            PKCE_VERIFIER_BY_CODE.put(authorizationResponse.getCode(), verifier);
+        }
+    }
+
+    public static String codeVerifier(String code) {
+        return code != null ? PKCE_VERIFIER_BY_CODE.get(code) : null;
+    }
+
+    public static void applyCodeVerifier(TokenRequest tokenRequest) {
+        if (StringUtils.isBlank(tokenRequest.getCodeVerifier())) {
+            String verifier = codeVerifier(tokenRequest.getCode());
+            if (verifier != null) {
+                tokenRequest.setCodeVerifier(verifier);
+            }
+        }
     }
 
     protected void navigateToAuhorizationUrl(WebDriver driver, String authorizationRequestUrl) {
@@ -1395,7 +1457,7 @@ public abstract class BaseTest {
         List<String> softwareRolesAux = Collections.singletonList("password");
         List<String> grantTypesAux = Collections.singletonList("client_credentials");
         return createSsa(accessToken, orgIdAux, expirationAux, descriptionAux, softwareIdAux, softwareRolesAux,
-                grantTypesAux, oneTimeUse, Boolean.TRUE, 86400);
+                grantTypesAux, oneTimeUse, !Boolean.TRUE.equals(oneTimeUse), 86400);
     }
 
     public SsaCreateResponse createSsa(String accessToken, String orgId, Long expiration, String description,

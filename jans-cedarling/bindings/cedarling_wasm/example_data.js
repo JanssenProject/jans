@@ -13,10 +13,10 @@
  *   const cedarling = await init(config);
  *
  * Option 3: Custom fetch with auth headers
- *   Use init_from_archive_bytes() for advanced scenarios:
+ *   Use initFromArchiveBytes() for advanced scenarios:
  *   const response = await fetch(url, { headers: { Authorization: '...' } });
  *   const bytes = new Uint8Array(await response.arrayBuffer());
- *   const cedarling = await init_from_archive_bytes(config, bytes);
+ *   const cedarling = await initFromArchiveBytes(config, bytes);
  *
  * NOT SUPPORTED IN WASM:
  *   - CEDARLING_POLICY_STORE_LOCAL_FN (requires filesystem)
@@ -24,9 +24,9 @@
  */
 const BOOTSTRAP_CONFIG = {
   CEDARLING_APPLICATION_NAME: "My App",
-  // Policy store URL - can be JSON, YAML, or .cjar archive
+  // Policy store URL - must be a .cjar archive
   CEDARLING_POLICY_STORE_URI:
-    "https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/bindings/cedarling_python/example_files/policy-store.json",
+    "https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/test_files/policy-store.cjar",
   CEDARLING_LOG_TYPE: "memory",
   CEDARLING_LOG_LEVEL: "DEBUG",
   CEDARLING_LOG_TTL: 120,

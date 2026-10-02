@@ -202,6 +202,14 @@ else
     }
   done
   [ "$img_rc" -eq 0 ] || exit 1
+  # The images pin jans-linux-setup at JANS_SOURCE_VERSION, so this checkout's schema must be
+  # overlaid or the loader creates the tables from the pinned one.
+  for svc in persistence-loader config-api auth-server scim fido2; do
+    docker build -q -t "local/$svc:ci" -f - jans-linux-setup/jans_setup/schema >/dev/null <<EOF
+FROM local/$svc:ci
+COPY jans_schema.json custom_schema.json /app/schema/
+EOF
+  done
   docker build -t local/aio:ci \
     --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
     --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
@@ -222,6 +230,7 @@ ENV CN_AIO_NGINX_PROXY_BUFFER_SIZE=16k
 ENV CN_AIO_NGINX_PROXY_BUFFERS="8 16k"
 ENV CN_AIO_NGINX_PROXY_BUSY_BUFFERS_SIZE=32k
 ENV CN_AIO_NGINX_LARGE_CLIENT_HEADER_BUFFERS="4 16k"
+ENV CN_JETTY_REQUEST_HEADER_SIZE=16384
 ENV CN_PERSISTENCE_LOAD_TEST_DATA=true
 ENV CN_SCIM_ENABLED=true
 ENV CN_CONFIG_API_TEST_CLIENT_ID=${CN_CONFIG_API_TEST_CLIENT_ID}
@@ -244,7 +253,7 @@ export MYSQL_MEM_LIMIT="${MYSQL_MEM_LIMIT:-3G}"
 # Run the demo in the background and relax its mode-600 TLS certs as they appear, so the
 # in-container configurator (uid 1000) reads ca.key/web_https.key on its FIRST run. A restart
 # instead would re-run key-gen against a half-initialised keystore and corrupt jansConfWebKeys.
-bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "$JANS_PERSISTENCE" "" 127.0.0.1 &
+bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "$JANS_PERSISTENCE" "" 127.0.0.1 "${JANS_CI_CD_RUN:-}" &
 demo_pid=$!
 for _ in $(seq 1 120); do
   [ -d automation/jans-aio-demo/templates ] && chmod -R a+rX automation/jans-aio-demo/templates 2>/dev/null || true
@@ -419,6 +428,8 @@ echo "::endgroup::"
 # Modules were already built + installed before the AIO image (see "build jans modules" above), so
 # the per-suite `mvn test` below resolves them from the local repo without rebuilding.
 mkdir -p test-reports aio-logs
+integration_timeouts=""
+integration_no_reports=""
 
 # ---------------------------------------------------------------------------
 # Run integration suites (against the AIO)
@@ -427,14 +438,27 @@ echo "::group::run integration suites"
 # HTTP suites vs the live AIO; per-suite output -> aio-logs/ (the run log is too large to fetch).
 # auth-client is the slowest (HtmlUnit browser flows), hence the generous timeout.
 for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
-             jans-fido2:jans-fido2/client jans-auth-server:jans-auth-server/client; do
+             jans-fido2:jans-fido2/client jans-orm:jans-orm/integration-test \
+             jans-auth-server:jans-auth-server/client; do
   mod="${entry%%:*}"; dir="${entry#*:}"
   want_module "$mod" || { echo "[info] skipping $dir ($mod not selected)"; continue; }
   echo "::group::test $dir"
   suitelog="aio-logs/test-$(printf '%s' "$dir" | tr / _).log"
+  rc=0; timed_out=0
   timeout -k 30 2400 bash -c \
     "cd '$dir' && mvn -B -ntp -s '$MVN_SETTINGS' -Dcfg='$JANS_FQDN' -DfailIfNoTests=false $MVN_SKIPS test" \
-    > "$suitelog" 2>&1 || echo "[warn] $dir reported failures or timed out"
+    > "$suitelog" 2>&1 || rc=$?
+  case "$rc" in
+    0) ;;
+    124 | 137)
+      echo "::error::$dir timed out after 2400s; its results are incomplete"
+      integration_timeouts="$integration_timeouts $dir"; timed_out=1 ;;
+    *) echo "[warn] $dir reported failures" ;;
+  esac
+  if [ "$timed_out" -eq 0 ] && [ -z "$(find "$dir" -path '*/target/surefire-reports/*.xml' -print -quit 2>/dev/null)" ]; then
+    echo "::error::$dir produced no test reports; its suites did not run"
+    integration_no_reports="$integration_no_reports $dir"
+  fi
   echo "----- tail $suitelog -----"; tail -n 25 "$suitelog" 2>/dev/null || true
   echo "::endgroup::"
 done
@@ -460,7 +484,7 @@ note_unit() {
     echo "[warn/skip] $2 units"
   fi
 }
-want_module jans-orm && { timeout -k 30 600 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || note_unit $? jans-orm; }
+want_module jans-orm && { timeout -k 30 600 mvn $OPTS -pl '!integration-test' -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || note_unit $? jans-orm; }
 want_module jans-core && { timeout -k 30 600 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || note_unit $? jans-core; }
 want_module jans-auth-server && { timeout -k 30 600 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || note_unit $? jans-auth-server; }
 want_module agama && { timeout -k 30 600 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || note_unit $? agama; }
@@ -514,6 +538,11 @@ find jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2 \
      agama jans-cedarling/bindings/cedarling-java jans-lock/lock-server \
   -path '*/target/surefire-reports/*.xml' 2>/dev/null | while read -r f; do
   mod=$(printf '%s' "$f" | sed -E 's#/target/surefire-reports/.*##; s#[/ ]+#_#g')
+  # TEST-TestSuite.xml repeats the per-class reports; the JUnit reporter counts both.
+  if [ "$(basename "$f")" = "TEST-TestSuite.xml" ] && [ -n "$(find "$(dirname "$f")" \
+       -maxdepth 1 -name 'TEST-*.xml' ! -name 'TEST-TestSuite.xml' -print -quit)" ]; then
+    continue
+  fi
   cp "$f" "test-reports/${mod}-$(basename "$f")" 2>/dev/null || true
 done
 echo "collected $(find test-reports -name '*.xml' 2>/dev/null | wc -l) report files"
@@ -535,8 +564,12 @@ for s in jans-auth jans-config-api jans-scim jans-fido2 jans-casa; do
 done
 echo "::endgroup::"
 
-if [ -n "$unit_timeouts" ]; then
-  echo "::error::incomplete unit results, suites timed out:$unit_timeouts"
+if [ -n "$integration_timeouts$unit_timeouts" ]; then
+  echo "::error::incomplete results, suites timed out:$integration_timeouts$unit_timeouts"
+  exit 1
+fi
+if [ -n "$integration_no_reports" ]; then
+  echo "::error::suites produced no test reports:$integration_no_reports"
   exit 1
 fi
 echo "[info] run_aio_integration.sh complete"

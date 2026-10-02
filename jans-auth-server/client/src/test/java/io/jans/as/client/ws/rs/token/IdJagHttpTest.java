@@ -112,6 +112,7 @@ public class IdJagHttpTest extends BaseTest {
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);

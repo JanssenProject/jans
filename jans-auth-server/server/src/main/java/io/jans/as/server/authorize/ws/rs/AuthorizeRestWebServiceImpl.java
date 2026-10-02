@@ -364,7 +364,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         validateRequestJwt(authzRequest, isPar, client);
 
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
-        authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getRedirectUriResponse(), client);
+        authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getCodeChallengeMethod(), authzRequest.getRedirectUriResponse(), client);
 
         dpopService.validateDpopThumprintIsPresent(authzRequest.getDpopJkt(), authzRequest.getState());
 

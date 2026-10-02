@@ -1,6 +1,8 @@
 module github.com/jans/terraform-provider-jans
 
-go 1.25.0
+go 1.26.0
+
+toolchain go1.26.8
 
 require github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.0
 
@@ -20,11 +22,11 @@ require (
 	// This repo does NOT import the openpgp sub-package anywhere — only safe sub-packages
 	// are used transitively (via github.com/ProtonMail/go-crypto which uses go-crypto/openpgp,
 	// NOT golang.org/x/crypto/openpgp).
-	golang.org/x/crypto v0.53.0 // indirect
-	golang.org/x/mod v0.37.0 // indirect
-	golang.org/x/sync v0.21.0 // indirect
-	golang.org/x/tools v0.47.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478 // indirect
+	golang.org/x/crypto v0.56.0 // indirect
+	golang.org/x/mod v0.40.0 // indirect
+	golang.org/x/sync v0.22.0 // indirect
+	golang.org/x/tools v0.49.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
 )
 
 require (
@@ -56,10 +58,10 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/zclconf/go-cty v1.17.0 // indirect
-	golang.org/x/net v0.56.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/text v0.39.0 // indirect
+	golang.org/x/net v0.58.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/text v0.41.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/grpc v1.82.1 // indirect
+	google.golang.org/grpc v1.83.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )

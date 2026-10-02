@@ -293,9 +293,9 @@ impl CustomTokenProcessor for CountingProcessor {
         let mut claims = HashMap::new();
         claims.insert("sub".to_string(), json!("api-key-user"));
         claims.insert("scope".to_string(), json!("admin"));
-        let mut processed = ProcessedTokenClaims::new(claims, "api-key-1");
-        processed.cacheable = self.cacheable;
-        Ok(processed)
+        let token_claims =
+            ProcessedTokenClaims::new(claims, "api-key-1").with_cacheable(self.cacheable);
+        Ok(token_claims)
     }
 }
 

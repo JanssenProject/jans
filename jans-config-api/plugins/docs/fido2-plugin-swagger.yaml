@@ -1658,6 +1658,12 @@ components:
           type: boolean
         fido2MetricsAggregationEnabled:
           type: boolean
+        trustedProxyEnabled:
+          type: boolean
+        trustedProxyIpRanges:
+          type: array
+          items:
+            type: string
         personCustomObjectClassList:
           type: array
           items:
@@ -1715,6 +1721,21 @@ components:
           type: boolean
         attestationMode:
           type: string
+        allowedTopOrigins:
+          type: array
+          items:
+            type: string
+        lockAuditEnabled:
+          type: boolean
+        lockAuditEndpoint:
+          type: string
+        lockAuditClientId:
+          type: string
+        lockAuditClientPassword:
+          type: string
+        lockAuditFlushInterval:
+          type: integer
+          format: int32
         rp:
           type: array
           items:
@@ -1735,6 +1756,13 @@ components:
           type: array
           items:
             type: string
+        policy:
+          $ref: "#/components/schemas/RequestedPartyPolicy"
+    RequestedPartyPolicy:
+      type: object
+      properties:
+        attestationMode:
+          type: string
     JsonNode:
       type: object
     Fido2MetricsAggregation:

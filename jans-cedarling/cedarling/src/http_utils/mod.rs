@@ -119,9 +119,14 @@ pub enum HttpRequestReasonError {
     InvalidUtf8(#[source] std::string::FromUtf8Error),
     #[error("failed to read response body bytes: {0}")]
     DecodeResponseBytes(#[source] reqwest::Error),
+    // Names the property so an operator can tell which knob to raise, whichever
+    // endpoint (JWKS, status list, policy store, ...) tripped it.
+    // `read_so_far` is the declared `Content-Length` on the fast path and the
+    // bytes received so far when streaming, so the message covers both.
     #[error(
         "response body exceeds the configured limit of {limit} bytes \
-         (read {read_so_far} bytes before stopping)"
+         ({read_so_far} bytes declared or received); raise \
+         CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES to allow larger responses"
     )]
     ResponseTooLarge { limit: u64, read_so_far: u64 },
 }
@@ -395,6 +400,11 @@ mod tests {
                 HttpRequestReasonError::ResponseTooLarge { limit: 1024, .. }
             ),
             "body over the 1024-byte cap must surface as ResponseTooLarge {{ limit: 1024, .. }}, got {err:?}",
+        );
+        assert!(
+            err.to_string()
+                .contains("CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES"),
+            "the error must name the property that controls the cap, got: {err}"
         );
     }
 

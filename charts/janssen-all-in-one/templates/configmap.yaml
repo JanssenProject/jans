@@ -79,7 +79,6 @@ data:
   CN_CACHE_TYPE: {{ .Values.configmap.cnCacheType | quote }}
   CN_DOCUMENT_STORE_TYPE: {{ .Values.cnDocumentStoreType | quote }}
   DOMAIN: {{ .Values.fqdn | quote }}
-  CN_AUTH_SERVER_BACKEND: {{ cat ( index .Values "auth-server" "authServerServiceName" ) ":8080" | quote | nospace }}
   CN_AUTH_APP_LOGGERS: {{ index .Values "auth-server" "appLoggers"
   | toJson
   | replace "authLogTarget" "auth_log_target"

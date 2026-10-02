@@ -14,6 +14,7 @@ import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseRSAAlgorithm;
 import io.jans.fido2.ctap.CoseEdDSAAlgorithm;
+import io.jans.fido2.ctap.CoseMLDSAAlgorithm;
 import io.jans.fido2.model.attestation.*;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.common.*;
@@ -21,10 +22,16 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.fido2.service.trust.AttestationTrustDiagnostics;
+import io.jans.fido2.service.trust.NativeFailureDiagnostics;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.CoseService;
+import io.jans.fido2.service.RpPolicyService;
 import io.jans.fido2.service.DataMapperService;
+import io.jans.fido2.model.audit.LockAuditEvent;
+import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
@@ -33,6 +40,7 @@ import io.jans.fido2.service.util.CommonUtilService;
 import io.jans.fido2.service.verifier.AttestationVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
+import io.jans.fido2.service.verifier.SignatureVerifier;
 import io.jans.orm.model.fido2.*;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
@@ -45,8 +53,11 @@ import org.slf4j.Logger;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -90,6 +101,15 @@ public class AttestationService {
 	private DataMapperService dataMapperService;
 
 	@Inject
+	private CoseService coseService;
+
+	@Inject
+	private RpPolicyService rpPolicyService;
+
+	@Inject
+	private SignatureVerifier signatureVerifier;
+
+	@Inject
 	private Base64Service base64Service;
 
     @Inject
@@ -103,6 +123,9 @@ public class AttestationService {
 
 	@Inject
 	private io.jans.fido2.service.shared.MetricService metricService;
+
+	@Inject
+	private LockAuditEventCollector lockAuditEventCollector;
 
 	// @Context is only honoured for JAX-RS components; this is a plain CDI bean,
 	// so the request has to come from the CDI built-in request-scoped bean instead.
@@ -178,7 +201,7 @@ public class AttestationService {
 		// authenticatorSelection may also be set in attestation options, especially for platform authenticators
 		prepareAuthenticatorSelection( credentialCreationOptions,attestationOptions) ;
 		
-		prepareAttestation(credentialCreationOptions);
+		prepareAttestation(credentialCreationOptions, origin);
 		
 		
 		// Copy extensions
@@ -225,7 +248,8 @@ public class AttestationService {
 
 		// Record metrics for registration attempt
 		try {
-			metricService.recordPasskeyRegistrationAttempt(attestationOptions.getUsername(), httpRequest, startTime);
+			metricService.recordPasskeyRegistrationAttempt(attestationOptions.getUsername(), httpRequest, startTime,
+					attestationOptions.getTelemetry());
 		} catch (Exception e) {
 			log.debug("Failed to record registration attempt metrics", e);
 		}
@@ -248,6 +272,14 @@ public class AttestationService {
 		long startTime = System.currentTimeMillis();
 		String username = null;
 		String authenticatorType = null;
+		// Declared outside the try so the failure path can report whichever registration it was
+		// working against. Stays null for failures raised before the challenge resolves to an entry.
+		Fido2RegistrationData registrationData = null;
+		// registrationData.setStatus(registered) is set well before registrationPersistenceService
+		// .update() actually persists it — anything thrown in between would let the catch block treat
+		// an unpersisted in-memory status as proof of persistence. This flag is set only once update()
+		// itself has returned, so it — not the in-memory status — is what the audit outcome trusts.
+		boolean persistedAsRegistered = false;
 
 		try {
         // Apply external custom scripts
@@ -272,8 +304,8 @@ public class AttestationService {
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge)
 				.parallelStream().findAny().orElseThrow(() ->
 					errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE, String.format("Can't find associated attestation request by challenge '%s'", challenge)));
-		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
-		
+		registrationData = registrationEntry.getRegistrationData();
+
 		// Set username for metrics
 		username = registrationData.getUsername();
 
@@ -363,6 +395,7 @@ public class AttestationService {
         
 
 		registrationPersistenceService.update(registrationEntry);
+		persistedAsRegistered = true;
 
 		// If sessionStateId is not empty update session
         if (StringHelper.isNotEmpty(sessionStateId)) {
@@ -391,17 +424,86 @@ public class AttestationService {
 		authenticatorType = registrationData.getAuthentictatorAttachment();
 		
 		// Record metrics for successful registration
-		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType);
+		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType, attestationResult.getTelemetry());
+
+		lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, null));
 
 		return attestationResultResponse;
-		
+
 		} catch (Exception e) {
 			// Record metrics for failed registration
-			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
-			
+			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType,
+					attestationResult != null ? attestationResult.getTelemetry() : null);
+
+			// A failure here can still mean the registration was already committed as `registered`
+			// (e.g. an external interception script throwing after persistence, at line ~409 above,
+			// which runs after the persistence update at line ~386) — an audit DENY must not
+			// contradict what was actually persisted, so the event reports what happened, not what
+			// this catch block assumes happened. Trusts persistedAsRegistered, not the in-memory
+			// registrationData.getStatus(), since that field is set well before the persistence call
+			// actually runs and would otherwise assume persistence succeeded just because a later step
+			// happened to set it in memory first.
+			Exception auditFailure = persistedAsRegistered ? null : e;
+			lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, auditFailure));
+
 			// Re-throw the original exception
 			throw e;
 		}
+	}
+
+	/**
+	 * Maps a registration outcome onto the Lock Server audit-event wire shape. Package-visible so a
+	 * test can drive it directly without standing up {@code verify()}'s full dependency graph.
+	 * <p>
+	 * {@code registrationData} is {@code null} for a failure raised before the registration entry is
+	 * looked up (e.g. an invalid challenge) — those have nothing beyond {@code username} (itself
+	 * possibly still {@code null}) and the exception. A failure raised *after* the lookup carries the
+	 * same {@code registrationData} the eventual success path would have used, so its rpId/origin
+	 * context is preserved rather than discarded. {@code failure} is {@code null} both for a genuine
+	 * success and for the "already committed as registered" case above — both are represented as
+	 * ALLOW, since both are what actually happened. Only the exception's class name is recorded, not
+	 * its message: several failure paths in this method embed identifying detail (challenge, username)
+	 * in the message text, and an audit trail is the wrong place to duplicate that beyond what
+	 * {@code principalId} already carries.
+	 */
+	LockAuditEvent buildRegistrationAuditEvent(String username, Fido2RegistrationData registrationData, String authenticatorType, Exception failure) {
+		LockAuditEvent event = new LockAuditEvent();
+		event.setEventTime(new Date());
+		event.setService("fido2");
+		event.setEventType("fido2_registration");
+		event.setAction("register");
+		event.setPrincipalId(username);
+
+		Map<String, String> context = new HashMap<>();
+		if (registrationData != null) {
+			if (registrationData.getRpId() != null) {
+				context.put("rpId", registrationData.getRpId());
+			}
+			if (registrationData.getOrigin() != null) {
+				context.put("origin", registrationData.getOrigin());
+			}
+			if (registrationData.getPublicKeyId() != null) {
+				context.put("credentialId", registrationData.getPublicKeyId());
+			}
+			if (registrationData.getAttestationType() != null) {
+				context.put("attestationType", registrationData.getAttestationType());
+			}
+		}
+		if (authenticatorType != null) {
+			context.put("authenticatorAttachment", authenticatorType);
+		}
+
+		if (failure == null) {
+			event.setSeverityLevel("info");
+			event.setDecisionResult("ALLOW");
+		} else {
+			event.setSeverityLevel("warning");
+			event.setDecisionResult("DENY");
+			context.put("failureReason", failure.getClass().getSimpleName());
+		}
+		event.setContextInformation(context);
+
+		return event;
 	}
 
 	private void prepareAuthenticatorSelection(PublicKeyCredentialCreationOptions credentialCreationOptions,
@@ -459,7 +561,7 @@ public class AttestationService {
 
 	}
 
-	private void prepareAttestation(PublicKeyCredentialCreationOptions credentialCreationOptions) {
+	private void prepareAttestation(PublicKeyCredentialCreationOptions credentialCreationOptions, String origin) {
 		
 		List<String> hints = appConfiguration.getFido2Configuration().getHints();
 		
@@ -474,7 +576,8 @@ public class AttestationService {
 				{
 					credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
 				}
-				else if(appConfiguration.getFido2Configuration().getAttestationMode().equals(AttestationMode.DISABLED.getValue()))
+				else if (AttestationMode.DISABLED.getValue()
+						.equals(rpPolicyService.resolveAttestationMode(origin)))
 				{
 					credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
 				}
@@ -497,22 +600,55 @@ public class AttestationService {
 	}
 	
 	
-	private Set<PublicKeyCredentialParameters> preparePublicKeyCredentialSelection() {
+	private static final int[] DEFAULT_ADVERTISED_ALGORITHMS = { CoseRSAAlgorithm.RS256.getNumericValue(),
+			CoseEC2Algorithm.ES256.getNumericValue(), CoseEdDSAAlgorithm.EdDSA.getNumericValue() };
+
+	// Package-private so the advertised-set derivation can be tested without standing up options().
+	Set<PublicKeyCredentialParameters> preparePublicKeyCredentialSelection() {
 		List<String> enabledFidoAlgorithms = appConfiguration.getFido2Configuration().getEnabledFidoAlgorithms();
 
 		Set<PublicKeyCredentialParameters> credentialParametersSets = new HashSet<>();
 		if ((enabledFidoAlgorithms == null) || enabledFidoAlgorithms.isEmpty()) {
-			// Add default requested credential types: RS256, ES256, EdDSA
-			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseRSAAlgorithm.RS256.getNumericValue()));
-			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEC2Algorithm.ES256.getNumericValue()));
-			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEdDSAAlgorithm.EdDSA.getNumericValue()));
+			addDefaultAlgorithms(credentialParametersSets);
 		} else {
 			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveRsaNumericValue);
 			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveEc2NumericValue);
 			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveEdDsaNumericValue);
+			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveMlDsaNumericValue);
+
+			if (credentialParametersSets.isEmpty()) {
+				// Advertising nothing lets the client fall back to its own defaults, which is a worse
+				// failure than ignoring the configuration, so say so loudly and advertise the defaults.
+				log.error("None of the configured enabledFidoAlgorithms {} can be completed by this server; "
+						+ "advertising the default algorithms instead", enabledFidoAlgorithms);
+				addDefaultAlgorithms(credentialParametersSets);
+			}
 		}
 
 		return credentialParametersSets;
+	}
+
+	private void addDefaultAlgorithms(Set<PublicKeyCredentialParameters> credentialParametersSets) {
+		// Default requested credential types: RS256, ES256, EdDSA
+		for (int algorithm : DEFAULT_ADVERTISED_ALGORITHMS) {
+			if (isFullySupported(algorithm)) {
+				credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(algorithm));
+			} else {
+				log.warn("Default algorithm {} is not supported by this deployment and will not be advertised",
+						algorithm);
+			}
+		}
+	}
+
+	/**
+	 * An algorithm is advertisable only when this server can complete a registration with it end to end:
+	 * decode the credential public key and verify a signature made with it. Deriving the advertised set
+	 * this way rather than from a literal list is what stops us offering an algorithm in
+	 * pubKeyCredParams that fails later in the ceremony - including on the FIPS build, whose provider
+	 * supports strictly less than the standard one.
+	 */
+	private boolean isFullySupported(int algorithm) {
+		return coseService.isDecodable(algorithm) && signatureVerifier.isSupported(algorithm);
 	}
 
 	/**
@@ -526,16 +662,23 @@ public class AttestationService {
 
 	/**
 	 * Add the credential parameter for the first enabled algorithm name that resolves to a known
-	 * numeric COSE value via the given resolver.
+	 * numeric COSE value via the given resolver and that this server can actually complete a
+	 * registration with. Names that resolve but are not supported are logged and skipped.
 	 */
 	private void addFirstSupportedAlgorithm(Set<PublicKeyCredentialParameters> credentialParametersSets,
 			List<String> enabledFidoAlgorithms, AlgorithmNumericResolver numericValueResolver) {
 		for (String enabledFidoAlgorithm : enabledFidoAlgorithms) {
 			Integer numericValue = numericValueResolver.resolve(enabledFidoAlgorithm);
-			if (numericValue != null) {
-				credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(numericValue));
-				break;
+			if (numericValue == null) {
+				continue;
 			}
+			if (!isFullySupported(numericValue)) {
+				log.error("Configured algorithm {} is not supported by this server and will not be advertised",
+						enabledFidoAlgorithm);
+				continue;
+			}
+			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(numericValue));
+			break;
 		}
 	}
 
@@ -553,6 +696,12 @@ public class AttestationService {
 		} catch (IllegalArgumentException ex) {
 			return null;
 		}
+	}
+
+	private static Integer resolveMlDsaNumericValue(String enabledFidoAlgorithm) {
+		CoseMLDSAAlgorithm algorithm = CoseMLDSAAlgorithm.fromName(enabledFidoAlgorithm);
+
+		return (algorithm == null) ? null : algorithm.getNumericValue();
 	}
 
 	private static Integer resolveEdDsaNumericValue(String enabledFidoAlgorithm) {
@@ -607,26 +756,28 @@ public class AttestationService {
 	/**
 	 * Record registration success metrics
 	 */
-	private void recordRegistrationSuccessMetrics(String username, HttpServletRequest httpRequest, 
-												  long startTime, String authenticatorType) {
+	private void recordRegistrationSuccessMetrics(String username, HttpServletRequest httpRequest,
+												  long startTime, String authenticatorType, NativeClientTelemetry telemetry) {
 		try {
-			metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType);
+			metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType, telemetry);
 		} catch (Exception e) {
 			log.debug("Failed to record registration success metrics", e);
 		}
 	}
-	
+
 	/**
 	 * Record registration failure metrics
 	 */
 	private void recordRegistrationFailureMetrics(String username, HttpServletRequest httpRequest,
-												  long startTime, Exception error, String authenticatorType) {
+												  long startTime, Exception error, String authenticatorType,
+												  NativeClientTelemetry telemetry) {
 		try {
 			String message = error.getMessage() != null ? error.getMessage() : "Unknown error";
 
-			// A trust or metadata rejection is recorded under its diagnostic code instead of the raw
-			// message, so rejections can be counted by cause rather than by wording. Every other failure
-			// keeps its message untouched, and nothing here changes the response the client receives.
+			// A trust, metadata or native-failure rejection is recorded under its diagnostic code
+			// instead of the raw message, so rejections can be counted by cause rather than by wording.
+			// Every other failure keeps its message untouched, and nothing here changes the response
+			// the client receives.
 			String diagnosticCode = AttestationTrustDiagnostics.resolveCode(error);
 			String errorReason = message;
 			String aaguid = null;
@@ -635,10 +786,16 @@ public class AttestationService {
 				aaguid = AttestationTrustDiagnostics.resolveAaguid(error);
 				// The original message stays in the log, so the substitution loses no detail.
 				log.debug("Attestation rejected for aaguid {} with diagnostic {}: {}", aaguid, diagnosticCode, message);
+			} else {
+				String nativeFailureCode = NativeFailureDiagnostics.resolveCode(error);
+				if (nativeFailureCode != null) {
+					errorReason = nativeFailureCode;
+					log.debug("Attestation rejected with native-failure diagnostic {}: {}", nativeFailureCode, message);
+				}
 			}
 
 			metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason,
-					authenticatorType, aaguid);
+					authenticatorType, aaguid, telemetry);
 		} catch (Exception metricsException) {
 			log.debug("Failed to record registration failure metrics", metricsException);
 		}

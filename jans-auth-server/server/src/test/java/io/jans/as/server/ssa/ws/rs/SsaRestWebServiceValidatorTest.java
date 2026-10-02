@@ -348,4 +348,51 @@ public class SsaRestWebServiceValidatorTest {
         verify(log).warn(eq("SSA Metadata validation: 'lifetime' cannot be 0 or negative"));
         verify(errorResponseFactory).createWebApplicationException(eq(Response.Status.BAD_REQUEST), eq(SsaErrorResponseType.INVALID_SSA_METADATA), eq("Invalid SSA Metadata"));
     }
+
+    @Test
+    void validateSsaCreateRequest_ifOneTimeUseAndRotateSsaAreFalse_success() {
+        SsaCreateRequest ssaCreateRequest = new SsaCreateRequest();
+        ssaCreateRequest.setLifetime(86400);
+        ssaCreateRequest.setOneTimeUse(false);
+        ssaCreateRequest.setRotateSsa(false);
+
+        ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest);
+        verifyNoInteractions(log, errorResponseFactory);
+    }
+
+    @Test
+    void validateSsaCreateRequest_ifOneTimeUseTrueAndRotateSsaFalse_success() {
+        SsaCreateRequest ssaCreateRequest = new SsaCreateRequest();
+        ssaCreateRequest.setLifetime(86400);
+        ssaCreateRequest.setOneTimeUse(true);
+        ssaCreateRequest.setRotateSsa(false);
+
+        ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest);
+        verifyNoInteractions(log, errorResponseFactory);
+    }
+
+    @Test
+    void validateSsaCreateRequest_ifOneTimeUseFalseAndRotateSsaTrue_success() {
+        SsaCreateRequest ssaCreateRequest = new SsaCreateRequest();
+        ssaCreateRequest.setLifetime(86400);
+        ssaCreateRequest.setOneTimeUse(false);
+        ssaCreateRequest.setRotateSsa(true);
+
+        ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest);
+        verifyNoInteractions(log, errorResponseFactory);
+    }
+
+    @Test
+    void validateSsaCreateRequest_ifOneTimeUseAndRotateSsaAreTrue_webApplicationException() {
+        SsaCreateRequest ssaCreateRequest = new SsaCreateRequest();
+        ssaCreateRequest.setLifetime(86400);
+        ssaCreateRequest.setOneTimeUse(true);
+        ssaCreateRequest.setRotateSsa(true);
+        WebApplicationException webApplicationException = new WebApplicationException("Test exception");
+        when(errorResponseFactory.createBadRequestException(any(), anyString())).thenThrow(webApplicationException);
+
+        WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest));
+        assertNotNull(ex);
+        verify(errorResponseFactory).createBadRequestException(eq(SsaErrorResponseType.INVALID_SSA_METADATA), eq("Invalid SSA Metadata: 'one_time_use' and 'rotate_ssa' cannot both be true"));
+    }
 }

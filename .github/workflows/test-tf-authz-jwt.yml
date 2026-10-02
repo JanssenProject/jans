@@ -44,7 +44,7 @@ on:
       - '.github/workflows/scripts/authz_assert.sh'
       - '.github/workflows/scripts/authz_make_jwt.sh'
   workflow_run:
-    workflows: ["Build Docker Images"]
+    workflows: ["Build: Docker Images"]
     types: [completed]
 
 permissions: {}

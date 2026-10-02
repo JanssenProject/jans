@@ -208,14 +208,16 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
             "full batch call, not per-item latency.\n\n"
         )
 
-    # Relative view: within each scenario, the fastest binding is 1.00x; the bar
-    # length is scaled so the slowest binding in that row fills the width. This
-    # compares speed across bindings without implying batch/non-batch rows are
-    # comparable to each other.
-    out.append("### Relative speed per scenario (x, lower = faster)\n\n")
+    # Relative view: within each scenario the Rust core is the baseline (1.00x)
+    # and every binding is shown as its mean over Rust's, so the table reads as
+    # "overhead versus the native Rust engine". Rows where Rust is unavailable
+    # fall back to the fastest binding as baseline. The bar length is scaled so
+    # the slowest binding in that row fills the width.
+    out.append("### Relative speed per scenario (x vs Rust, lower = faster)\n\n")
     out.append(
-        "_Ratios are computed from full-precision `mean_ns`, so they may not "
-        "match dividing the rounded µs values shown above._\n\n"
+        "_Ratios use each binding's full-precision `mean_ns` over Rust's, so "
+        "they may not match dividing the rounded µs values shown above. Rows "
+        "where Rust is unavailable use the fastest binding as the baseline._\n\n"
     )
     out.append("| Scenario | " + " | ".join(bindings) + " |\n")
     out.append("|----------|" + "|".join(["----------:"] * len(bindings)) + "|\n")
@@ -229,8 +231,9 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
             and r.get("mean_ns") is not None
             and float(r["mean_ns"]) > 0
         }
-        fastest = min(means.values()) if means else None
-        slowest_ratio = (max(means.values()) / fastest) if means else 1.0
+        # Prefer Rust as the baseline; fall back to the fastest if Rust is absent.
+        baseline = means.get("rust") or (min(means.values()) if means else None)
+        max_ratio = (max(means.values()) / baseline) if means else 1.0
         cells: list[str] = []
         for b in bindings:
             if b not in means:
@@ -239,8 +242,8 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
                     "_skipped_" if r is not None and r.get("status") == "skipped" else "—"
                 )
                 continue
-            ratio = means[b] / fastest
-            blocks = 1 if slowest_ratio <= 1 else max(1, round(ratio / slowest_ratio * bar_width))
+            ratio = means[b] / baseline
+            blocks = 1 if max_ratio <= 0 else max(1, round(ratio / max_ratio * bar_width))
             cells.append(f"{ratio:.2f}x {'█' * blocks}")
         out.append(f"| {s} | " + " | ".join(cells) + " |\n")
     out.append("\n")

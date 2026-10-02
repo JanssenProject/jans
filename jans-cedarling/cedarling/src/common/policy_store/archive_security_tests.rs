@@ -18,7 +18,7 @@ use std::io::{Cursor, Write};
 use zip::write::{ExtendedFileOptions, FileOptions};
 use zip::{CompressionMethod, ZipWriter};
 
-use super::archive_handler::ArchiveVfs;
+use super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::entity_parser::{EntityParser, ParsedEntity};
 use super::errors::{ArchiveError, PolicyStoreError, ValidationError};
 use super::issuer_parser::IssuerParser;
@@ -39,7 +39,7 @@ mod path_traversal {
     #[test]
     fn test_rejects_parent_directory_traversal_in_archive() {
         let archive = create_path_traversal_archive();
-        let result = ArchiveVfs::from_buffer(archive);
+        let result = ArchiveVfs::from_buffer(archive, ArchiveLimits::default());
 
         let err = result.expect_err("Expected PathTraversal error");
         assert!(
@@ -60,7 +60,7 @@ mod path_traversal {
         zip.write_all(b"root:x:0:0").unwrap();
 
         let archive = zip.finish().unwrap().into_inner();
-        let result = ArchiveVfs::from_buffer(archive);
+        let result = ArchiveVfs::from_buffer(archive, ArchiveLimits::default());
 
         let err = result.expect_err("archive with path traversal should be rejected");
         assert!(
@@ -93,7 +93,7 @@ mod path_traversal {
         }
 
         let archive = zip.finish().unwrap().into_inner();
-        let result = ArchiveVfs::from_buffer(archive);
+        let result = ArchiveVfs::from_buffer(archive, ArchiveLimits::default());
 
         // Should reject due to path traversal
         let err = result.expect_err("Expected PathTraversal error for double-dot sequences");
@@ -117,7 +117,7 @@ mod path_traversal {
         zip.write_all(b"content").unwrap();
 
         let archive = zip.finish().unwrap().into_inner();
-        let result = ArchiveVfs::from_buffer(archive);
+        let result = ArchiveVfs::from_buffer(archive, ArchiveLimits::default());
 
         // Should reject archives containing Windows-style path traversal
         let err = result.expect_err("expected PathTraversal error for Windows path separators");
@@ -138,7 +138,7 @@ mod malicious_archives {
     #[test]
     fn test_rejects_corrupted_zip() {
         let archive = create_corrupted_archive();
-        let result = ArchiveVfs::from_buffer(archive);
+        let result = ArchiveVfs::from_buffer(archive, ArchiveLimits::default());
 
         let err = result.expect_err("Expected InvalidZipFormat error");
         assert!(
@@ -150,7 +150,7 @@ mod malicious_archives {
     #[test]
     fn test_rejects_non_zip_file() {
         let not_a_zip = b"This is definitely not a ZIP file".to_vec();
-        let result = ArchiveVfs::from_buffer(not_a_zip);
+        let result = ArchiveVfs::from_buffer(not_a_zip, ArchiveLimits::default());
 
         let err = result.expect_err("Expected InvalidZipFormat error");
         assert!(
@@ -162,7 +162,7 @@ mod malicious_archives {
     #[test]
     fn test_rejects_empty_file() {
         let empty: Vec<u8> = Vec::new();
-        let result = ArchiveVfs::from_buffer(empty);
+        let result = ArchiveVfs::from_buffer(empty, ArchiveLimits::default());
         let err = result.expect_err("empty buffer should not be a valid archive");
         assert!(
             matches!(err, ArchiveError::InvalidZipFormat { .. }),
@@ -178,7 +178,7 @@ mod malicious_archives {
         let archive = zip.finish().unwrap().into_inner();
 
         // Empty ZIP should be valid but have no files
-        let result = ArchiveVfs::from_buffer(archive);
+        let result = ArchiveVfs::from_buffer(archive, ArchiveLimits::default());
         let vfs = result.expect("Empty ZIP archive should be accepted by ArchiveVfs");
         assert!(!vfs.exists("metadata.json"));
     }
@@ -186,7 +186,7 @@ mod malicious_archives {
     #[test]
     fn test_deeply_nested_paths() {
         let archive = create_deep_nested_archive(100);
-        let vfs = ArchiveVfs::from_buffer(archive)
+        let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default())
             .expect("ArchiveVfs should handle deeply nested paths without error");
 
         // Verify VFS is usable for a deeply nested archive
@@ -220,7 +220,7 @@ mod malicious_archives {
         zip.write_all(b"{}").unwrap();
 
         let archive = zip.finish().unwrap().into_inner();
-        let vfs = ArchiveVfs::from_buffer(archive)
+        let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default())
             .expect("ArchiveVfs should handle archives with very long filenames");
 
         // If accepted, verify VFS is functional
@@ -241,7 +241,7 @@ mod input_validation {
         let builder = fixtures::invalid_metadata_json();
         let archive = builder.build_archive().unwrap();
 
-        let vfs = ArchiveVfs::from_buffer(archive).unwrap();
+        let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let result = loader.load_directory(".", true);
 
@@ -260,7 +260,7 @@ mod input_validation {
         let builder = fixtures::invalid_policy_syntax();
         let archive = builder.build_archive().unwrap();
 
-        let vfs = ArchiveVfs::from_buffer(archive).unwrap();
+        let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let result = loader.load_directory(".", true);
 
@@ -279,7 +279,7 @@ mod input_validation {
         let builder = fixtures::minimal_valid().with_entity("invalid", "{ not valid json }");
 
         let archive = builder.build_archive().unwrap();
-        let vfs = ArchiveVfs::from_buffer(archive).unwrap();
+        let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let loaded_directory = loader
             .load_directory(".", true)
@@ -303,7 +303,7 @@ mod input_validation {
         let builder = fixtures::invalid_trusted_issuer();
         let archive = builder.build_archive().unwrap();
 
-        let vfs = ArchiveVfs::from_buffer(archive).unwrap();
+        let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let loaded_directory = loader
             .load_directory(".", true)
@@ -327,7 +327,7 @@ mod input_validation {
         let builder = fixtures::duplicate_entity_uids();
         let archive = builder.build_archive().unwrap();
 
-        let vfs = ArchiveVfs::from_buffer(archive).unwrap();
+        let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let loaded_directory = loader
             .load_directory(".", true)
@@ -381,7 +381,7 @@ mod input_validation {
             .unwrap();
 
         let archive = zip.finish().unwrap().into_inner();
-        let result = ArchiveVfs::from_buffer(archive);
+        let result = ArchiveVfs::from_buffer(archive, ArchiveLimits::default());
 
         // Should handle unicode gracefully
         result.expect("ArchiveVfs should handle unicode filenames without error");
@@ -396,7 +396,7 @@ permit(principal, action, resource);"#,
         );
 
         let archive = builder.build_archive().unwrap();
-        let vfs = ArchiveVfs::from_buffer(archive).unwrap();
+        let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
 
         // Cedar allows special characters in @id() annotations within the policy content.
@@ -433,7 +433,7 @@ mod resource_exhaustion {
         }
 
         let archive = builder.build_archive().unwrap();
-        let vfs = ArchiveVfs::from_buffer(archive).unwrap();
+        let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let result = loader.load_directory(".", true);
 
@@ -458,7 +458,7 @@ when {{ {large_condition} }};"#
             PolicyStoreTestBuilder::new("abc123def456").with_policy("large-policy", &policy);
 
         let archive = builder.build_archive().unwrap();
-        let vfs = ArchiveVfs::from_buffer(archive).unwrap();
+        let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
 
         // Large policies should be handled gracefully
@@ -492,7 +492,7 @@ when {{ {large_condition} }};"#
             .with_entity("deep_roles", serde_json::to_string(&entities).unwrap());
 
         let archive = builder.build_archive().unwrap();
-        let vfs = ArchiveVfs::from_buffer(archive).unwrap();
+        let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let result = loader.load_directory(".", true);
 
@@ -520,7 +520,7 @@ mod file_extension_validation {
         let wrong_ext = temp_dir.path().join("store.zip");
         std::fs::write(&wrong_ext, &archive_bytes).unwrap();
 
-        let result = ArchiveVfs::from_file(&wrong_ext);
+        let result = ArchiveVfs::from_file(&wrong_ext, ArchiveLimits::default());
         let err = result.expect_err("Expected InvalidExtension error");
         assert!(
             matches!(err, ArchiveError::InvalidExtension { .. }),
@@ -540,7 +540,7 @@ mod file_extension_validation {
         let correct_ext = temp_dir.path().join("store.cjar");
         std::fs::write(&correct_ext, &archive_bytes).unwrap();
 
-        let result = ArchiveVfs::from_file(&correct_ext);
+        let result = ArchiveVfs::from_file(&correct_ext, ArchiveLimits::default());
         result.expect("ArchiveVfs should accept .cjar extension");
     }
 }

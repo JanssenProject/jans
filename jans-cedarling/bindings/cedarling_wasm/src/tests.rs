@@ -7,7 +7,6 @@
 #![allow(dead_code)]
 
 use crate::*;
-use cedarling::bindings::serde_yaml_ng;
 use cedarling::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest,
     BatchItem, EntityData, RequestUnsigned, TokenInput,
@@ -20,21 +19,13 @@ use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
-// Reuse json policy store file from python example.
-// Because for `BootstrapConfigRaw` we need to use JSON
+// Policy store YAML for WASM tests
 static POLICY_STORE_RAW_YAML: &str =
-    include_str!("../../../bindings/cedarling_python/example_files/policy-store.json");
+    include_str!("../test_files/policy-store.yaml");
 
 // Multi-issuer policy store for multi-issuer tests
 static MULTI_ISSUER_POLICY_STORE_YAML: &str =
     include_str!("../../../test_files/policy-store-multi-issuer-test.yaml");
-
-// Convert YAML policy store to JSON string for CEDARLING_POLICY_STORE_LOCAL
-static MULTI_ISSUER_POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
-    let yaml_value: serde_yaml_ng::Value = serde_yaml_ng::from_str(MULTI_ISSUER_POLICY_STORE_YAML)
-        .expect("Multi-issuer policy store YAML should be valid");
-    serde_json::to_string(&yaml_value).expect("Multi-issuer policy store should convert to JSON")
-});
 
 static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
     json!({
@@ -51,7 +42,7 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
 static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
     json!({
         "CEDARLING_APPLICATION_NAME": "My App",
-        "CEDARLING_POLICY_STORE_LOCAL": MULTI_ISSUER_POLICY_STORE_JSON.as_str(),
+        "CEDARLING_POLICY_STORE_LOCAL": MULTI_ISSUER_POLICY_STORE_YAML,
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
@@ -66,16 +57,10 @@ static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::ne
 static NO_ISSUERS_POLICY_STORE_YAML: &str =
     include_str!("../../../test_files/policy-store_no_trusted_issuers.yaml");
 
-static NO_ISSUERS_POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
-    let yaml_value: serde_yaml_ng::Value = serde_yaml_ng::from_str(NO_ISSUERS_POLICY_STORE_YAML)
-        .expect("no-issuers policy store YAML should be valid");
-    serde_json::to_string(&yaml_value).expect("no-issuers policy store should convert to JSON")
-});
-
 static NO_ISSUERS_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
     json!({
         "CEDARLING_APPLICATION_NAME": "My App",
-        "CEDARLING_POLICY_STORE_LOCAL": NO_ISSUERS_POLICY_STORE_JSON.as_str(),
+        "CEDARLING_POLICY_STORE_LOCAL": NO_ISSUERS_POLICY_STORE_YAML,
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
@@ -1339,6 +1324,24 @@ async fn test_trusted_issuer_loading_info_defaults() {
     }
 }
 
+#[wasm_bindgen_test]
+async fn test_policy_store_id_defaults() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    assert_eq!(
+        instance.policy_store_id(),
+        Some("gICAgcHJpbmNpcGFsIGlz".to_string()),
+        "legacy store should report policy_stores map key"
+    );
+}
+
 /// Test that function `spawn_task` works as expected
 #[wasm_bindgen_test]
 async fn test_spawn_task() {
@@ -1579,4 +1582,166 @@ async fn test_authorize_multi_issuer_batch_ordered() {
         "item 2 must allow"
     );
     assert!(!response.batch_id().is_empty(), "batch_id must be set");
+}
+
+/// `drain_metrics` must fail when `CEDARLING_METRICS_COLLECTION` is disabled.
+#[wasm_bindgen_test]
+async fn test_drain_metrics_disabled_returns_error() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized");
+
+    let err = instance
+        .drain_metrics()
+        .expect_err("drain_metrics must fail when metrics collection is disabled");
+    assert!(
+        err.to_string().contains("metrics collection is disabled"),
+        "error message must mention disabled collection, got: {err}"
+    );
+}
+
+/// `drain_metrics` must return a snapshot when `CEDARLING_METRICS_COLLECTION`
+/// is enabled, count a subsequent authorization, and reset on the next drain.
+#[wasm_bindgen_test]
+async fn test_drain_metrics_local_mode_snapshot_and_reset() {
+    let mut bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    bootstrap_config_json["CEDARLING_METRICS_COLLECTION"] = json!("enabled");
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized");
+
+    let snapshot = instance
+        .drain_metrics()
+        .expect("drain_metrics should succeed when metrics collection is enabled");
+    assert!(
+        snapshot
+            .operational_stats
+            .has(&"instance.policy_count".into()),
+        "operational stats must include the policy count gauge"
+    );
+
+    let request = RequestUnsigned {
+        principal: Some(
+            EntityData::deserialize(json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::User",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+                },
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            }))
+            .expect("principal EntityData should be deserialized correctly"),
+        ),
+        context: json!({
+            "current_time": 1735349685,
+            "device_health": ["Healthy"],
+            "fraud_indicators": ["Allowed"],
+            "geolocation": ["America"],
+            "network": "127.0.0.1",
+            "network_type": "Local",
+            "operating_system": "Linux",
+            "user_agent": "Linux"
+        }),
+        action: "Jans::Action::\"Read\"".to_string(),
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Application",
+                "id": "some_id"
+            },
+            "app_id": "application_id",
+            "name": "Some Application",
+            "url": {
+                "host": "jans.test",
+                "path": "/protected-endpoint",
+                "protocol": "http"
+            }
+        }))
+        .expect("resource EntityData should be deserialized correctly"),
+    };
+    let request_str =
+        serde_json::to_string(&request).expect("RequestUnsigned should serialize to JSON");
+    let result = instance
+        .authorize_unsigned(&request_str)
+        .await
+        .expect("authorize_unsigned request should be executed");
+    assert!(result.decision, "decision should be allowed");
+
+    let snapshot_after = instance
+        .drain_metrics()
+        .expect("drain_metrics should succeed after authorization");
+    assert_eq!(
+        snapshot_after
+            .operational_stats
+            .get(&"authz.requests_total".into())
+            .as_f64(),
+        Some(1.0),
+        "the authorized request must be counted in the drained interval"
+    );
+
+    let snapshot_reset = instance
+        .drain_metrics()
+        .expect("drain_metrics should succeed after reset");
+    assert_eq!(
+        snapshot_reset
+            .operational_stats
+            .get(&"authz.requests_total".into())
+            .as_f64(),
+        Some(0.0),
+        "counters must reset to a fresh zeroed window after a snapshot"
+    );
+}
+
+/// `MetricsSnapshot::json_string` must emit the three metric maps as plain
+/// objects plus a numeric `interval_secs`.
+#[wasm_bindgen_test]
+async fn test_metrics_snapshot_json_string() {
+    let mut bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    bootstrap_config_json["CEDARLING_METRICS_COLLECTION"] = json!("enabled");
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized");
+
+    let snapshot = instance
+        .drain_metrics()
+        .expect("drain_metrics should succeed when metrics collection is enabled");
+    assert!(
+        snapshot.interval_secs >= 0.0,
+        "interval_secs must be a non-negative duration, got: {}",
+        snapshot.interval_secs
+    );
+
+    let json = snapshot.json_string().expect("json_string should succeed");
+    let parsed: serde_json::Value =
+        serde_json::from_str(&json).expect("json_string output should be valid JSON");
+    assert!(
+        parsed.get("policy_stats").is_some(),
+        "json must contain policy_stats, got: {json}"
+    );
+    assert!(
+        parsed.get("error_counters").is_some(),
+        "json must contain error_counters, got: {json}"
+    );
+    assert!(
+        parsed.get("operational_stats").is_some(),
+        "json must contain operational_stats, got: {json}"
+    );
+    assert!(
+        parsed.get("interval_secs").is_some(),
+        "json must contain interval_secs, got: {json}"
+    );
 }

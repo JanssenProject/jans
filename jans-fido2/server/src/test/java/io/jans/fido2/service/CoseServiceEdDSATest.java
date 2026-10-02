@@ -42,7 +42,7 @@ class CoseServiceEdDSATest {
     private static final int COSE_KTY_OKP = 1;
     private static final int COSE_ALG_EDDSA = -8;
     private static final int COSE_CURVE_ED25519 = 6;
-    private static final int COSE_CURVE_ED448 = 7;
+    private static final int COSE_CURVE_X25519 = 4;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -139,9 +139,13 @@ class CoseServiceEdDSATest {
         assertTrue(ex.getMessage().contains("-999"));
     }
 
+    /**
+     * Ed448 is a decodable OKP curve now, so this asserts the unsupported-curve path with a curve that is
+     * genuinely not a signature curve: COSE curve 4 is X25519, key agreement rather than signing.
+     */
     @Test
-    void createUncompressedPointFromCOSEPublicKey_withEd448Curve_throwsUnsupportedCurve() throws Exception {
-        ObjectNode coseKeyNode = coseKey(COSE_KTY_OKP, COSE_ALG_EDDSA, COSE_CURVE_ED448,
+    void createUncompressedPointFromCOSEPublicKey_withNonSignatureCurve_throwsUnsupportedCurve() throws Exception {
+        ObjectNode coseKeyNode = coseKey(COSE_KTY_OKP, COSE_ALG_EDDSA, COSE_CURVE_X25519,
                 rawKeyOf(generateEd25519KeyPair().getPublic()));
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class,

@@ -36,6 +36,10 @@ import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -45,6 +49,7 @@ import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseEdDSAAlgorithm;
+import io.jans.fido2.ctap.CoseMLDSAAlgorithm;
 import io.jans.fido2.ctap.CoseKeyType;
 import io.jans.fido2.ctap.CoseRSAAlgorithm;
 import io.jans.fido2.exception.Fido2RuntimeException;
@@ -79,11 +84,72 @@ public class CoseService {
 
     private static final int COSE_CURVE_ED25519 = 6;
 
+    private static final int COSE_CURVE_ED448 = 7;
+
     private static final int ED25519_RAW_KEY_LENGTH = 32;
+
+    private static final int ED448_RAW_KEY_LENGTH = 57;
+
+    // The RSA and EC2 algorithms SignatureVerifier can verify. An algorithm belongs here only if the
+    // verifier implements it, so the decoder never claims more than the verifier can honour.
+    private static final Set<CoseRSAAlgorithm> DECODABLE_RSA_ALGORITHMS = EnumSet.of(CoseRSAAlgorithm.RS256,
+            CoseRSAAlgorithm.RS384, CoseRSAAlgorithm.RS512, CoseRSAAlgorithm.RS65535, CoseRSAAlgorithm.PS256,
+            CoseRSAAlgorithm.PS384, CoseRSAAlgorithm.PS512);
+
+    private static final Set<CoseEC2Algorithm> DECODABLE_EC2_ALGORITHMS = EnumSet.of(CoseEC2Algorithm.ES256,
+            CoseEC2Algorithm.ES384, CoseEC2Algorithm.ES512, CoseEC2Algorithm.ESP256, CoseEC2Algorithm.ESP384);
+
+    // The fully-specified algorithms name their curve in the code point itself, so the curve carried in
+    // the key is not free to disagree. ES256/ES384/ES512 are not fully specified and are absent here.
+    private static final Map<CoseEC2Algorithm, Integer> REQUIRED_EC2_CURVES = new EnumMap<>(CoseEC2Algorithm.class);
+
+    static {
+        REQUIRED_EC2_CURVES.put(CoseEC2Algorithm.ESP256, COSE_CURVE_P256);
+        REQUIRED_EC2_CURVES.put(CoseEC2Algorithm.ESP384, COSE_CURVE_P384);
+    }
+
+    // DER prefixes of a SubjectPublicKeyInfo wrapping a raw ML-DSA key, one per parameter set. The OIDs
+    // are 2.16.840.1.101.3.4.3.17/18/19; each prefix was read off a provider-generated key rather than
+    // hand-assembled, since the length fields differ per parameter set.
+    private static final Map<CoseMLDSAAlgorithm, byte[]> MLDSA_SPKI_PREFIXES = new EnumMap<>(
+            CoseMLDSAAlgorithm.class);
+
+    private static final Map<CoseMLDSAAlgorithm, Integer> MLDSA_RAW_KEY_LENGTHS = new EnumMap<>(
+            CoseMLDSAAlgorithm.class);
+
+    static {
+        MLDSA_SPKI_PREFIXES.put(CoseMLDSAAlgorithm.ML_DSA_44,
+                new byte[] { 0x30, (byte) 0x82, 0x05, 0x32, 0x30, 0x0b, 0x06, 0x09, 0x60, (byte) 0x86, 0x48, 0x01,
+                        0x65, 0x03, 0x04, 0x03, 0x11, 0x03, (byte) 0x82, 0x05, 0x21, 0x00 });
+        MLDSA_SPKI_PREFIXES.put(CoseMLDSAAlgorithm.ML_DSA_65,
+                new byte[] { 0x30, (byte) 0x82, 0x07, (byte) 0xb2, 0x30, 0x0b, 0x06, 0x09, 0x60, (byte) 0x86, 0x48,
+                        0x01, 0x65, 0x03, 0x04, 0x03, 0x12, 0x03, (byte) 0x82, 0x07, (byte) 0xa1, 0x00 });
+        MLDSA_SPKI_PREFIXES.put(CoseMLDSAAlgorithm.ML_DSA_87,
+                new byte[] { 0x30, (byte) 0x82, 0x0a, 0x32, 0x30, 0x0b, 0x06, 0x09, 0x60, (byte) 0x86, 0x48, 0x01,
+                        0x65, 0x03, 0x04, 0x03, 0x13, 0x03, (byte) 0x82, 0x0a, 0x21, 0x00 });
+
+        MLDSA_RAW_KEY_LENGTHS.put(CoseMLDSAAlgorithm.ML_DSA_44, 1312);
+        MLDSA_RAW_KEY_LENGTHS.put(CoseMLDSAAlgorithm.ML_DSA_65, 1952);
+        MLDSA_RAW_KEY_LENGTHS.put(CoseMLDSAAlgorithm.ML_DSA_87, 2592);
+    }
 
     // DER prefix of a SubjectPublicKeyInfo wrapping a 32-byte Ed25519 key (RFC 8410, OID 1.3.101.112)
     private static final byte[] ED25519_SPKI_PREFIX = new byte[] { 0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65,
             0x70, 0x03, 0x21, 0x00 };
+
+    // DER prefix of a SubjectPublicKeyInfo wrapping a 57-byte Ed448 key (RFC 8410, OID 1.3.101.113)
+    private static final byte[] ED448_SPKI_PREFIX = new byte[] { 0x30, 0x43, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65,
+            0x71, 0x03, 0x3a, 0x00 };
+
+    // The fully-specified EdDSA algorithms name their curve in the code point itself, so the curve carried
+    // in the key is not free to disagree. EdDSA (-8) is not fully specified and is absent here.
+    private static final Map<CoseEdDSAAlgorithm, Integer> REQUIRED_OKP_CURVES = new EnumMap<>(
+            CoseEdDSAAlgorithm.class);
+
+    static {
+        REQUIRED_OKP_CURVES.put(CoseEdDSAAlgorithm.Ed25519, COSE_CURVE_ED25519);
+        REQUIRED_OKP_CURVES.put(CoseEdDSAAlgorithm.Ed448, COSE_CURVE_ED448);
+    }
 
     @Inject
     private Logger log;
@@ -111,6 +177,55 @@ public class CoseService {
         return uncompressedECPointNode.get("-1").asInt();
     }
 
+    /**
+     * Whether this service can build a public key for the given COSE algorithm code point. The
+     * advertised algorithm set is filtered through this, so we never offer an algorithm in
+     * pubKeyCredParams whose credentials we would then fail to decode.
+     */
+    public boolean isDecodable(int algorithm) {
+        CoseRSAAlgorithm coseRSAAlgorithm = CoseRSAAlgorithm.fromNumericValue(algorithm);
+        if (coseRSAAlgorithm != null) {
+            return DECODABLE_RSA_ALGORITHMS.contains(coseRSAAlgorithm);
+        }
+
+        CoseEC2Algorithm coseEC2Algorithm = CoseEC2Algorithm.fromNumericValue(algorithm);
+        if (coseEC2Algorithm != null) {
+            return DECODABLE_EC2_ALGORITHMS.contains(coseEC2Algorithm);
+        }
+
+        if (CoseEdDSAAlgorithm.fromNumericValue(algorithm) != null) {
+            return true;
+        }
+
+        CoseMLDSAAlgorithm coseMLDSAAlgorithm = CoseMLDSAAlgorithm.fromNumericValue(algorithm);
+        if (coseMLDSAAlgorithm != null) {
+            return providerCanBuildKey(coseMLDSAAlgorithm.getAlgorithmName());
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether the running provider can build a key for this algorithm. Knowing the code point is not the
+     * same as being able to decode it: ML-DSA is absent from the FIPS provider entirely, so the answer has
+     * to come from the provider rather than from the fact that the constant exists. The RSA, EC2 and OKP
+     * families are answered from their sets instead, because every primitive they need is present in both
+     * providers this project ships.
+     */
+    // Package-private so the provider lookup can be tested directly. Asserting it through isDecodable is
+    // vacuous wherever the provider happens to support ML-DSA, which is every environment the suite runs in.
+    boolean providerCanBuildKey(String algorithmName) {
+        try {
+            KeyFactory.getInstance(algorithmName, SecurityProviderUtility.getBCProvider());
+
+            return true;
+        } catch (NoSuchAlgorithmException e) {
+            log.debug("Provider cannot build {} keys, so it will not be advertised", algorithmName);
+
+            return false;
+        }
+    }
+
     public PublicKey createUncompressedPointFromCOSEPublicKey(JsonNode uncompressedECPointNode) {
         int keyToUse = uncompressedECPointNode.get("1").asInt();
         int algorithmToUse = uncompressedECPointNode.get("3").asInt();
@@ -128,26 +243,31 @@ public class CoseService {
                 throw new Fido2RuntimeException(
                         "Don't know what to do with this key " + keyType + " and algorithm " + algorithmToUse);
             }
-            switch (coseRSAAlgorithm) {
-            case RS65535:
-            case RS256: {
-                byte[] rsaKeyN = base64Service.decode(uncompressedECPointNode.get("-1").asText());
-                byte[] rsaKeyE = base64Service.decode(uncompressedECPointNode.get("-2").asText());
-                return convertUncompressedPointToRSAKey(rsaKeyN, rsaKeyE);
+            if (!DECODABLE_RSA_ALGORITHMS.contains(coseRSAAlgorithm)) {
+                throw new Fido2RuntimeException(
+                        "Don't know what to do with this key " + keyType + " and algorithm " + coseRSAAlgorithm);
             }
-            default: {
-                throw new Fido2RuntimeException("Don't know what to do with this key" + keyType);
-            }
-            }
+
+            byte[] rsaKeyN = base64Service.decode(uncompressedECPointNode.get("-1").asText());
+            byte[] rsaKeyE = base64Service.decode(uncompressedECPointNode.get("-2").asText());
+            return convertUncompressedPointToRSAKey(rsaKeyN, rsaKeyE);
         }
         case EC2: {
             CoseEC2Algorithm coseEC2Algorithm = CoseEC2Algorithm.fromNumericValue(algorithmToUse);
-            if (coseEC2Algorithm != CoseEC2Algorithm.ES256) {
+            if (!DECODABLE_EC2_ALGORITHMS.contains(coseEC2Algorithm)) {
                 throw new Fido2RuntimeException(
                         "Don't know what to do with this key" + keyType + " and algorithm " + coseEC2Algorithm);
             }
 
             int curve = uncompressedECPointNode.get("-1").asInt();
+            Integer requiredCurve = REQUIRED_EC2_CURVES.get(coseEC2Algorithm);
+            if ((requiredCurve != null) && (requiredCurve.intValue() != curve)) {
+                // Without this the verifier would hash with the algorithm's digest over a key on some
+                // other curve, which is exactly what naming the curve in the code point rules out.
+                throw new Fido2RuntimeException(coseEC2Algorithm + " requires COSE curve " + requiredCurve
+                        + " but the key carries curve " + curve);
+            }
+
             byte[] x = base64Service.decode(uncompressedECPointNode.get("-2").asText());
             byte[] y = base64Service.decode(uncompressedECPointNode.get("-3").asText());
             byte[] buffer = ByteBuffer.allocate(1 + x.length + y.length).put(UNCOMPRESSED_POINT_INDICATOR).put(x)
@@ -169,11 +289,59 @@ public class CoseService {
                 throw new Fido2RuntimeException("Missing OKP public key label -2");
             }
             int curve = curveNode.asInt();
+            Integer requiredCurve = REQUIRED_OKP_CURVES.get(coseEdDSAAlgorithm);
+            if ((requiredCurve != null) && (requiredCurve.intValue() != curve)) {
+                throw new Fido2RuntimeException(coseEdDSAAlgorithm + " requires COSE curve " + requiredCurve
+                        + " but the key carries curve " + curve);
+            }
+
             byte[] rawKey = base64Service.decode(rawKeyNode.asText());
             return convertRawKeyToEdDSAKey(curve, rawKey);
         }
+        case AKP: {
+            CoseMLDSAAlgorithm coseMLDSAAlgorithm = CoseMLDSAAlgorithm.fromNumericValue(algorithmToUse);
+            if (coseMLDSAAlgorithm == null) {
+                throw new Fido2RuntimeException(
+                        "Don't know what to do with this key " + keyType + " and algorithm " + algorithmToUse);
+            }
+            // AKP carries the whole public key in one parameter, so there is nothing to reassemble - the
+            // label is "pub" (-1) rather than the coordinate pairs the EC2 and OKP branches read.
+            JsonNode publicKeyNode = uncompressedECPointNode.get("-1");
+            if (publicKeyNode == null) {
+                throw new Fido2RuntimeException("Missing AKP public key label -1");
+            }
+
+            return convertRawKeyToMLDSAKey(coseMLDSAAlgorithm, base64Service.decode(publicKeyNode.asText()));
+        }
         default:
             throw new Fido2RuntimeException("Don't know what to do with this key" + keyType);
+        }
+    }
+
+    /**
+     * Rebuilds an ML-DSA public key from the raw COSE AKP parameter, by wrapping it in the
+     * SubjectPublicKeyInfo structure {@link KeyFactory} expects. The key is produced with the same provider
+     * SignatureVerifier uses, so a deployment whose provider lacks ML-DSA fails here rather than later - and
+     * because the advertised set is derived from that same capability, such a deployment never offers it.
+     */
+    public PublicKey convertRawKeyToMLDSAKey(CoseMLDSAAlgorithm algorithm, byte[] rawKey) {
+        int expectedLength = MLDSA_RAW_KEY_LENGTHS.get(algorithm);
+        if ((rawKey == null) || (rawKey.length != expectedLength)) {
+            throw new Fido2RuntimeException("Invalid " + algorithm.getAlgorithmName() + " public key length "
+                    + ((rawKey == null) ? 0 : rawKey.length));
+        }
+
+        byte[] spkiPrefix = MLDSA_SPKI_PREFIXES.get(algorithm);
+        byte[] encodedKey = ByteBuffer.allocate(spkiPrefix.length + rawKey.length).put(spkiPrefix).put(rawKey)
+                .array();
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance(algorithm.getAlgorithmName(),
+                    SecurityProviderUtility.getBCProvider());
+
+            return keyFactory.generatePublic(new X509EncodedKeySpec(encodedKey));
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            log.error("Failed to build {} public key ", algorithm.getAlgorithmName(), e);
+            throw new Fido2RuntimeException(e.getMessage());
         }
     }
 
@@ -191,26 +359,38 @@ public class CoseService {
     }
 
     /**
-     * Rebuilds an Ed25519 public key from the raw COSE OKP parameters, by wrapping the 32-byte key in the
+     * Rebuilds an Edwards-curve public key from the raw COSE OKP parameters, by wrapping the raw key in the
      * SubjectPublicKeyInfo structure {@link KeyFactory} expects. The key is produced with the same provider
      * SignatureVerifier uses, so it stays valid on the FIPS build variant.
      */
     public PublicKey convertRawKeyToEdDSAKey(int curve, byte[] rawKey) {
-        if (curve != COSE_CURVE_ED25519) {
+        String algorithmName;
+        byte[] spkiPrefix;
+        int expectedLength;
+        if (curve == COSE_CURVE_ED25519) {
+            algorithmName = "Ed25519";
+            spkiPrefix = ED25519_SPKI_PREFIX;
+            expectedLength = ED25519_RAW_KEY_LENGTH;
+        } else if (curve == COSE_CURVE_ED448) {
+            algorithmName = "Ed448";
+            spkiPrefix = ED448_SPKI_PREFIX;
+            expectedLength = ED448_RAW_KEY_LENGTH;
+        } else {
             throw new Fido2RuntimeException("Unsupported OKP curve " + curve);
         }
-        if ((rawKey == null) || (rawKey.length != ED25519_RAW_KEY_LENGTH)) {
+
+        if ((rawKey == null) || (rawKey.length != expectedLength)) {
             throw new Fido2RuntimeException(
-                    "Invalid Ed25519 public key length " + ((rawKey == null) ? 0 : rawKey.length));
+                    "Invalid " + algorithmName + " public key length " + ((rawKey == null) ? 0 : rawKey.length));
         }
 
-        byte[] encodedKey = ByteBuffer.allocate(ED25519_SPKI_PREFIX.length + rawKey.length).put(ED25519_SPKI_PREFIX)
-                .put(rawKey).array();
+        byte[] encodedKey = ByteBuffer.allocate(spkiPrefix.length + rawKey.length).put(spkiPrefix).put(rawKey)
+                .array();
         try {
-            KeyFactory keyFactory = KeyFactory.getInstance("Ed25519", SecurityProviderUtility.getBCProvider());
+            KeyFactory keyFactory = KeyFactory.getInstance(algorithmName, SecurityProviderUtility.getBCProvider());
             return keyFactory.generatePublic(new X509EncodedKeySpec(encodedKey));
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            log.error("Failed to build Ed25519 public key ", e);
+            log.error("Failed to build {} public key ", algorithmName, e);
             throw new Fido2RuntimeException(e.getMessage());
         }
     }

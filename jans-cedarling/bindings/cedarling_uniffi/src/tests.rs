@@ -7,6 +7,7 @@ use crate::result::{BatchItemMultiIssuerOutcome, BatchItemUnsignedOutcome};
 use crate::BatchItem;
 use crate::Cedarling;
 use crate::CedarlingError;
+use crate::MetricsError;
 use crate::TokenInput;
 use crate::{EntityData, JsonValue};
 use serde_json::json;
@@ -91,6 +92,49 @@ fn test_load_from_json_with_archive_bytes_rejects_invalid() {
         "invalid archive bytes should yield InitializationFailed, is_ok={}",
         result.is_ok()
     );
+}
+
+#[test]
+fn test_load_from_json_with_archive_bytes_ignores_policy_store_cjar_url() {
+    let mut config: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
+            .expect("bootstrap.json should be readable"),
+    )
+    .expect("bootstrap.json should be valid JSON");
+
+    config["CEDARLING_POLICY_STORE_CJAR_URL"] =
+        serde_json::Value::String("https://example.com/store.cjar".to_string());
+
+    let archive_bytes = std::fs::read(
+        "../../bindings/cedarling_uniffi/androidApp/app/src/main/assets/MyStore.cjar",
+    )
+    .expect("MyStore.cjar should be readable");
+
+    let result = Cedarling::load_from_json_with_archive_bytes(
+        config.to_string(),
+        &archive_bytes,
+    );
+    result.expect(
+        "initialization should succeed using archive bytes, ignoring policy_store_cjar_url",
+    );
+
+    let invalid_result = Cedarling::load_from_json_with_archive_bytes(
+        config.to_string(),
+        &[0x00, 0x01, 0x02, 0x03],
+    );
+    match invalid_result {
+        Err(CedarlingError::InitializationFailed { error_msg }) => {
+            assert!(
+                error_msg.contains("archive") || error_msg.contains("ZIP"),
+                "expected archive error message, got: {error_msg}"
+            );
+            assert!(
+                !error_msg.contains("Conflicting policy stores"),
+                "error must not be ConflictingPolicyStores: {error_msg}"
+            );
+        },
+        Ok(_) => panic!("invalid archive bytes should fail initialization"),
+    }
 }
 
 #[test]
@@ -449,6 +493,16 @@ fn test_trusted_issuer_loading_info_defaults() {
     }
 }
 
+#[test]
+fn test_policy_store_id_legacy() {
+    let cedarling = create_test_cedarling();
+    assert_eq!(
+        cedarling.policy_store_id(),
+        Some("a1bf93115de86de760ee0bea1d529b521489e5a11747".to_string()),
+        "legacy store should report policy_stores map key"
+    );
+}
+
 fn batch_resource(id: &str) -> Arc<EntityData> {
     Arc::new(
         EntityData::from_json(
@@ -742,4 +796,95 @@ fn test_authorize_multi_issuer_batch_bad_action_surfaces_error_at_that_item() {
         other => panic!("item 1 must be Failed(action_parse), got: {other:?}"),
     }
     assert!(!response.batch_id.is_empty(), "batch_id must be populated");
+}
+
+/// Builds a bootstrap config string with `CEDARLING_METRICS_COLLECTION` set to
+/// `value` (e.g. "enabled" / "disabled").
+fn metrics_config(value: &str) -> String {
+    let raw = std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
+        .expect("bootstrap.json should be readable");
+    let mut config: serde_json::Value =
+        serde_json::from_str(&raw).expect("bootstrap.json should be valid JSON");
+    config["CEDARLING_METRICS_COLLECTION"] = json!(value);
+    config.to_string()
+}
+
+#[test]
+fn test_drain_metrics_disabled_returns_not_enabled() {
+    let cedarling = Cedarling::load_from_json(metrics_config("disabled"))
+        .expect("Cedarling should initialize with metrics disabled");
+
+    let result = cedarling.drain_metrics();
+    assert!(
+        matches!(result, Err(MetricsError::NotEnabled)),
+        "drain_metrics must fail with NotEnabled when metrics collection is disabled"
+    );
+}
+
+#[test]
+fn test_drain_metrics_local_mode_snapshot_and_reset() {
+    let cedarling = Cedarling::load_from_json(metrics_config("enabled"))
+        .expect("Cedarling should initialize with metrics enabled");
+
+    let resource = Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "some_id"
+                },
+                "app_id": "admin_ui_id",
+                "name": "My App",
+                "permission": "view_clients",
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            })
+            .to_string(),
+        )
+        .expect("EntityData should be correctly parsed"),
+    );
+    let principal = Some(Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+                },
+                "is_ok": true
+            })
+            .to_string(),
+        )
+        .expect("EntityData should be correctly parsed"),
+    ));
+
+    let result = cedarling
+        .authorize_unsigned(
+            principal,
+            r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
+            resource,
+            JsonValue {
+                value: "{}".to_string(),
+            },
+        )
+        .expect("authz should be executed successfully");
+    assert!(result.decision, "authz result should be ALLOW: {result:?}");
+
+    let snapshot_after = cedarling
+        .drain_metrics()
+        .expect("drain_metrics should succeed after authorization");
+    assert_eq!(
+        snapshot_after.operational_stats.get("authz.requests_total"),
+        Some(&1),
+        "the authorized request must be counted in the drained interval, got: {:?}",
+        snapshot_after.operational_stats
+    );
+
+    let snapshot_reset = cedarling
+        .drain_metrics()
+        .expect("drain_metrics should succeed on a fresh interval");
+    assert_eq!(
+        snapshot_reset.operational_stats.get("authz.requests_total"),
+        Some(&0),
+        "counters must reset to a fresh zeroed window after a snapshot, got: {:?}",
+        snapshot_reset.operational_stats
+    );
 }
