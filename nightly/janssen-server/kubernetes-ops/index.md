@@ -23,3 +23,4 @@ This Operation guide helps you learn about the common operations for Janssen on 
 - [Custom Attributes](custom-attributes.md)
 - [Shibboleth IDP](../shibboleth-idp/helm-deployment.md)
 - [Memory Dump](memory-dump.md)
+- [Change FQDN](change-fqdn.md)
