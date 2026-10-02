@@ -185,4 +185,16 @@ public class DeviceAuthorizationService implements Serializable {
         }
         return null;
     }
+
+    /**
+     * Removes user_code from the session once the device flow reached a terminal state (approved or denied),
+     * so that it can't be reused by later, unrelated authorization requests of the same session.
+     *
+     * @param sessionId session holding the user_code, may be null.
+     */
+    public void removeUserCodeFromSession(SessionId sessionId) {
+        if (sessionId != null && sessionId.getSessionAttributes().remove(SESSION_USER_CODE) != null) {
+            sessionIdService.updateSessionId(sessionId);
+        }
+    }
 }
