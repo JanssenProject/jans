@@ -554,14 +554,18 @@ async fn perform_bootstrap_load(
         body_hash,
         validators,
     } = loaded;
+    let spec_version = policy_store.spec_version;
+    let warnings = policy_store.warnings.clone();
     Ok((
         ServiceConfig {
             policy_store,
             http_client,
         },
         RefreshWorkerSeed {
-            initial_body_hash: body_hash,
-            initial_validators: validators,
+            body_hash,
+            validators,
+            spec_version,
+            warnings,
         },
     ))
 }
@@ -612,8 +616,10 @@ fn maybe_spawn_refresh_worker(
         authz_swap,
         metrics,
         log,
-        initial_body_hash: seed.initial_body_hash,
-        initial_validators: seed.initial_validators,
+        initial_body_hash: seed.body_hash,
+        initial_validators: seed.validators,
+        initial_spec_version: seed.spec_version,
+        initial_warnings: seed.warnings,
         strict_schema_validation: config.authorization_config.strict_schema_validation,
         archive_limits: config.policy_store_config.archive_limits(),
     };

@@ -21,6 +21,7 @@ use arc_swap::ArcSwap;
 use chrono::{DateTime, Utc};
 use futures::channel::oneshot;
 use futures::future::{Either, select};
+use std::collections::HashSet;
 use std::hash::Hasher;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -33,6 +34,7 @@ use crate::authz::Authz;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
 use crate::common::policy_store::archive_handler::ArchiveLimits;
+use crate::common::policy_store::formats::PolicyStoreWarning;
 use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::context_data_api::DataStore;
 use crate::http::cache_headers::CacheHeadersState;
@@ -269,6 +271,37 @@ fn issuers_unchanged(
 
 pub(crate) type RebuildError = BuildAuthzError;
 
+/// Remembers which policy-store format warnings have already been logged, so a
+/// periodic refresh landing on the same store does not repeat them every tick.
+#[derive(Default)]
+struct WarningDedup {
+    logged: HashSet<PolicyStoreWarning>,
+    last_spec_version: Option<u32>,
+}
+
+impl WarningDedup {
+    /// Records a freshly parsed store and returns the warnings to log now.
+    ///
+    /// A store on a newer format version starts the set over, so the operator
+    /// sees the state of the new format; otherwise each distinct warning is
+    /// logged once.
+    fn take_new(
+        &mut self,
+        spec_version: Option<u32>,
+        warnings: &[PolicyStoreWarning],
+    ) -> Vec<PolicyStoreWarning> {
+        if spec_version > self.last_spec_version {
+            self.logged.clear();
+        }
+        self.last_spec_version = spec_version;
+        warnings
+            .iter()
+            .filter(|warning| self.logged.insert(**warning))
+            .copied()
+            .collect()
+    }
+}
+
 /// Mutable per-source state — what we learned from the previous response.
 #[derive(Default)]
 struct RefreshState {
@@ -276,6 +309,7 @@ struct RefreshState {
     last_body_hash: Option<u64>,
     consecutive_failures: u32,
     strategy: StrategyState,
+    warnings: WarningDedup,
 }
 
 impl RefreshState {
@@ -403,14 +437,17 @@ impl Drop for PolicyStoreRefreshHandle {
     }
 }
 
-/// Snapshot of the bootstrap-load result that the refresh worker uses to
-/// short-circuit its very first periodic tick. Carried as a small named
-/// struct rather than two loose parameters so the spawn-site signature
-/// stays under the clippy `too_many_arguments` threshold without needing
-/// a `#[allow]` attribute.
+/// Snapshot of the bootstrap-load result that the refresh worker starts from:
+/// `body_hash` and `validators` let the very first periodic tick short-circuit,
+/// while `spec_version` and `warnings` seed the dedup set so bootstrap's format
+/// warnings are not logged a second time. Carried as a small named struct
+/// rather than loose parameters so the spawn-site signature stays under the
+/// clippy `too_many_arguments` threshold without needing a `#[allow]` attribute.
 pub(crate) struct RefreshWorkerSeed {
-    pub initial_body_hash: Option<u64>,
-    pub initial_validators: CacheHeadersState,
+    pub body_hash: Option<u64>,
+    pub validators: CacheHeadersState,
+    pub spec_version: Option<u32>,
+    pub warnings: Vec<PolicyStoreWarning>,
 }
 
 /// Read-only worker context — handles and config that don't change between
@@ -437,6 +474,11 @@ pub(crate) struct WorkerContext {
     /// `304` back with zero body bytes downloaded — the optimal first-tick
     /// path. Empty for non-URL sources.
     pub(crate) initial_validators: CacheHeadersState,
+    /// Format spec version and warnings of the store loaded at bootstrap.
+    /// Bootstrap already logged those warnings, so they seed the worker's
+    /// dedup set and are not repeated on the first refresh.
+    pub(crate) initial_spec_version: Option<u32>,
+    pub(crate) initial_warnings: Vec<PolicyStoreWarning>,
     /// Forwarded from `BootstrapConfig.authorization_config` so each refresh
     /// tick enforces the same "schema must be present" invariant the
     /// bootstrap load did. Without this, a refresh against a store that
@@ -467,6 +509,10 @@ async fn run_worker(ctx: WorkerContext, shutdown_rx: oneshot::Receiver<()>) {
     let mut state = RefreshState {
         last_body_hash: ctx.initial_body_hash,
         validators: ctx.initial_validators.clone(),
+        warnings: WarningDedup {
+            logged: ctx.initial_warnings.iter().copied().collect(),
+            last_spec_version: ctx.initial_spec_version,
+        },
         ..RefreshState::default()
     };
     let mut shutdown_rx = shutdown_rx;
@@ -684,6 +730,22 @@ async fn parse_swap_and_record(
         },
     };
 
+    // Report format warnings before the rebuild: they describe the fetched
+    // store, which the operator must fix regardless of whether the rebuild
+    // that follows succeeds.
+    for warning in state
+        .warnings
+        .take_new(parsed.spec_version, &parsed.warnings)
+    {
+        ctx.log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(warning.to_string()),
+        );
+    }
+
     // Capture the refreshed policy count BEFORE `parsed` is moved into
     // `rebuild`. Used to refresh the `instance.policy_count` gauge after the
     // swap — otherwise the gauge would stay pinned to the bootstrap value
@@ -804,6 +866,86 @@ fn etag_opaque_tag(etag: &str) -> &str {
 mod tests {
     use super::*;
     use std::collections::HashMap;
+
+    const MISSING: PolicyStoreWarning = PolicyStoreWarning::MissingSpecVersion {
+        assumed: 1,
+        current: 2,
+    };
+    const OUTDATED: PolicyStoreWarning = PolicyStoreWarning::OutdatedSpecVersion {
+        found: 1,
+        current: 2,
+    };
+
+    #[test]
+    fn warning_dedup_logs_each_warning_once() {
+        let mut dedup = WarningDedup::default();
+
+        assert_eq!(
+            dedup.take_new(Some(1), &[MISSING]),
+            vec![MISSING],
+            "a warning not seen before should be logged"
+        );
+        assert!(
+            dedup.take_new(Some(1), &[MISSING]).is_empty(),
+            "a refresh landing on the same version must not re-log the same warning"
+        );
+        assert_eq!(
+            dedup.take_new(Some(1), &[MISSING, OUTDATED]),
+            vec![OUTDATED],
+            "only the warning not seen before should be logged"
+        );
+    }
+
+    #[test]
+    fn warning_dedup_resets_on_newer_spec_version() {
+        let mut dedup = WarningDedup::default();
+        dedup.take_new(Some(1), &[OUTDATED]);
+
+        assert_eq!(
+            dedup.take_new(Some(2), &[OUTDATED]),
+            vec![OUTDATED],
+            "a newer format version should clear the set so warnings are reported again"
+        );
+    }
+
+    #[test]
+    fn warning_dedup_keeps_set_on_same_or_older_spec_version() {
+        let mut dedup = WarningDedup::default();
+        dedup.take_new(Some(2), &[OUTDATED]);
+
+        assert!(
+            dedup.take_new(Some(1), &[OUTDATED]).is_empty(),
+            "rolling back to an older version must not reset the set"
+        );
+        assert!(
+            dedup.take_new(Some(1), &[OUTDATED]).is_empty(),
+            "staying on that older version must keep deduping"
+        );
+    }
+
+    #[test]
+    fn warning_dedup_seeded_from_bootstrap_does_not_relog() {
+        // Bootstrap logged its warnings already, so the worker starts seeded.
+        let mut dedup = WarningDedup {
+            logged: HashSet::from([MISSING]),
+            last_spec_version: Some(1),
+        };
+
+        assert!(
+            dedup.take_new(Some(1), &[MISSING]).is_empty(),
+            "the first refresh must not repeat what bootstrap already logged"
+        );
+    }
+
+    #[test]
+    fn warning_dedup_logs_nothing_for_a_current_store() {
+        let mut dedup = WarningDedup::default();
+
+        assert!(
+            dedup.take_new(Some(2), &[]).is_empty(),
+            "a store with no warnings should log nothing"
+        );
+    }
 
     #[test]
     fn choose_for_tick_from_plain_get_probes_head_then_get() {
