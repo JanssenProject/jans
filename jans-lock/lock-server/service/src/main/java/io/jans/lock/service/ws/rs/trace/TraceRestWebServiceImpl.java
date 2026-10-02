@@ -227,12 +227,12 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		try {
 			log.debug("Retrieving TRACE execution, traceExecutionId: {}", traceExecutionId);
 			checkEnabled();
+			checlStart(start);
 			requireMaxLength(traceExecutionId, MAX_EXECUTION_ID_LENGTH, "trace_execution_id");
 			if (StringUtils.isNotBlank(executionAuthority)) {
 				requireMaxLength(executionAuthority, MAX_EXECUTION_ID_LENGTH, "execution_authority");
 			}
 			requireCountInRange(count);
-
 			TraceRequestContext context = resolveContext();
 			String domainId = context.getEvidenceDomainId();
 			TraceRetrievalService.ExecutionResult result = retrievalService.getExecution(domainId, traceExecutionId,
@@ -246,6 +246,12 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 			throw TraceErrors.toWebApplicationException(ex, errorResponseFactory);
 		} finally {
 			applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
+		}
+	}
+
+	private void checlStart(int start) {
+		if (start < 0) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, "start_out_of_range");
 		}
 	}
 
