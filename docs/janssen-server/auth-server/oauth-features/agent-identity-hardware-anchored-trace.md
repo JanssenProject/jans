@@ -141,7 +141,7 @@ sequenceDiagram
     TEE-->>Agent: raw evidence
     Agent->>AS: POST /attestation { challenge_id, evidence: raw evidence, evidence_format, attested_key: K.public }
     Note over AS: core: nonce single-use, attested key == K == challenge key<br/>then attestation script runs
-    AS->>Verifier: raw evidence (script calls the verifier · agent never does)
+    AS->>Verifier: raw evidence (script calls the verifier)
     Verifier-->>AS: AttestationResultJWT
     Note over Verifier: platform verifier CREATES AttestationResultJWT<br/>(its signed appraisal of the raw evidence · echoes nonce + K.public)
     Note over AS: script: AttestationResultJWT signature + issuer trusted,<br/>nonce echoed, key bound, measurement policy<br/>core: persist assessment · sign AttestationAssessmentJWT
@@ -166,7 +166,7 @@ sequenceDiagram
     Agent->>TEE: sign DPoP proof (+ private_key_jwt)
     TEE-->>Agent: signatures (key never leaves)
     Agent->>AS: POST /token grant=jwt-bearer assertion=ID-JAG (or client_credentials)<br/>DPoP proof · resource=#lt;PEP#gt;
-    Note over AS: DPoP key = enrolled key<br/>affirming assessment younger than max age<br/>else 400 attestation_required { nonce }
+    Note over AS: jkt = thumbprint of the DPoP proof public key (K.public)<br/>jkt must be a registered key of client_id<br/>assessment looked up by latestAffirming(client_id, jkt)<br/>assessment.appraised_at within max age, else 400 attestation_required { nonce }
     AS-->>Lock: AUTHORIZATION_DECISION (issue-jwt-svid)
     AS-->>Agent: JWT-SVID { sub: spiffe id, aud, exp +10m, cnf.jkt, txn, attestation, act }
 
@@ -817,6 +817,14 @@ then 400 attestation_required
   "expires_in": 300
 }
 ```
+
+How the server finds the assessment: the token request carries **no** `attestation_id`. The DPoP
+proof carries the public key; its RFC 7638 thumbprint is `jkt`. That `jkt` was the challenge key
+at `/attestation` and is the `jkt` column of the stored assessment, and the enrollment bound the
+same key to `client_id`. So `(client_id, jkt)` is a natural key: the server looks up the newest
+unexpired `affirming` assessment for that pair and never needs the agent to name it. The
+`attestation_id` becomes known to the agent (and useful) only in the inline paths below, and it
+is stamped into the SVID's `attestation.id` so verifiers and auditors can reference it.
 
 New `TokenErrorResponseType.ATTESTATION_REQUIRED("attestation_required")`. The agent satisfies it
 in one of three ways, in order of preference:
