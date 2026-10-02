@@ -345,6 +345,52 @@ sequenceDiagram
 The script never sees the nonce lifecycle, the key-binding check or persistence; those are core
 and identical for every platform.
 
+#### Why two requests: challenge first, evidence second
+
+Remote attestation is a **challenge-response** protocol (RFC 9334 §8.1, "freshness"). The
+verifier must prove that the evidence it receives was produced *after* it asked for it, by *this*
+hardware, about *this* key; otherwise an attacker records one good attestation and replays it for
+ever. The only way to get that property is for the verifier to pick an unpredictable value, hand
+it to the attester, and require the hardware to sign over it. The hardware does exactly this:
+a TPM quote takes `qualifyingData`, an SEV-SNP report takes 64 bytes of `REPORT_DATA`, a TDX
+quote takes `REPORTDATA`, and Azure Attestation / Intel Trust Authority both echo a caller-supplied
+nonce into their result JWT. In every case the nonce has to exist before the evidence can be
+generated, so one HTTP request cannot carry both.
+
+What each request does:
+
+| | `POST /attestation/challenge` | `POST /attestation` |
+|---|---|---|
+| Who speaks | Agent asks, jans answers | Agent presents, jans judges |
+| Input | The public key that will be attested, optionally `client_id` and `purpose` | The challenge id, the evidence, its format, the same public key |
+| jans does | Generates ≥ 128 random bits, stores `{ nonce, jkt, client_id, purpose, expires_at }` under `challenge_id`, returns nonce + accepted formats | Consumes the challenge (single use), checks the key matches the challenge, runs the script, checks the script's answer, persists the assessment, signs the result token, emits the TRACE record |
+| Agent does next | Asks its hardware to produce evidence with the nonce in the report data (and, for delegated formats, sends that evidence to the platform verifier) | Uses `attestation_id` / `attestation_result` at DCR or `/token` |
+| Binds | nonce ↔ key ↔ (client) ↔ purpose | evidence ↔ nonce ↔ key, plus the verdict |
+
+Why the challenge is bound to the key and not only random: the evidence proves "this platform
+holds key K and saw nonce N". If the challenge were not tied to K, an attacker with any attested
+machine could request a challenge, attest *its own* key K′ and present the result for a
+registration whose `jwks` contains K. The core check `attested_jkt == challenge.jkt ==
+registered key` closes that gap and is deliberately outside the script.
+
+Why `/attestation` is separate from `/register` and `/token` even though both call it:
+
+- The same assessment is needed in two places (enrollment and every issuance) and by two kinds of
+  caller (an unregistered agent and a registered one). One endpoint, one service, one policy.
+- An agent can attest ahead of time, before the first `/token` of a burst, and re-attest on a
+  timer, so attestation latency (which includes a round trip to a platform verifier) stays off
+  the token path.
+- The verdict is evidence in its own right. Negative verdicts must be recorded too; folding them
+  into a `400` from `/register` would lose them.
+- Operators can gate `/attestation` differently (rate limits, IP allowlists, a WAF rule for 64 KB
+  bodies) from the OAuth endpoints.
+
+The one-step DCR path (section 9.5) is the same protocol with the roles of the two messages played
+by the `stale_evidence` error and the retried registration: the first `/register` without evidence
+*is* the challenge request, the error body *is* the challenge, the second `/register` *is* the
+evidence submission. It exists for compatibility with the shipped `evidence` parameter; new agents
+should use the explicit endpoint.
+
 ### 9.3 Request and response definitions
 
 Base path `/jans-auth/restv1/attestation`. Gated by new `FeatureFlagType.ATTESTATION`
@@ -545,6 +591,43 @@ JWT signed with the server's OIDC signing key, `typ: "attestation-result+jwt"`:
 `sub` is the attested `jkt`, `jti` is the `attestation_id`. It is the RATS "passport": a relying
 party checks signature, `exp`, `status`, and that `sub` equals the thumbprint of the key the caller
 is proving possession of.
+
+#### The `status` vocabulary and why a verdict is not a boolean
+
+`status` uses the RATS Attestation Results for Secure Interactions vocabulary
+(draft-ietf-rats-ar4si, "EAR"), which is also what TRACE puts in `appraisal.status`. jans uses
+three of its values; the fourth exists in the vocabulary and is listed for completeness.
+
+| `status` | Meaning | Produced when | At DCR / `/token` | Recorded |
+|----------|---------|---------------|-------------------|----------|
+| `affirming` | Evidence verified **and** every policy check passed: trusted verifier signature, nonce echoed, attested key equals the challenge key, measurement in `allowed_measurements`, debug disabled | All checks green | Accepted | Yes |
+| `warning` | Evidence verified and key-bound, but policy could not be fully applied or a non-fatal condition exists: `allowed_measurements` empty (no measurement policy configured), measurement allowed but `firmware_version` below a recommended level, verifier result close to its own expiry | Script reports a soft finding | Rejected by default; accepted when `attestationAcceptWarning=true` (demo and staging). Introspection and the SVID `attestation` claim show `warning`, so a relying party can still apply its own stricter rule | Yes |
+| `contraindicated` | Evidence rejected: untrusted or invalid signature, expired, nonce missing or wrong, attested key differs from the challenge key, measurement not allowed, debug enabled | Any hard failure, including the core post-checks (`key_mismatch`, `nonce_mismatch`) that override the script | Rejected, always | Yes |
+| `none` | The verifier made no appraisal (for example it only relayed evidence) | Not produced by jans; a script returning no status is treated as `contraindicated` with reason `no_verdict` | Rejected | Yes |
+
+`reasons` carries the stable codes behind a `warning` or `contraindicated`, so an operator can tell
+"wrong policy" from "wrong hardware" from "replay" without reading logs.
+
+Why keep a status instead of returning `200` only for success:
+
+- **Negative verdicts are evidence.** The demo plan's accountability story is "this token was
+  issued after this key and environment passed this policy at this time". The complementary story,
+  "this environment was refused at this time for this reason", is equally important for an
+  auditor and for an operator debugging an agent that cannot get tokens. A `400` is not
+  recordable in the same way as a signed, stored verdict.
+- **Policy and cryptography are different failures.** `warning` separates "the hardware is real
+  and the key is bound, but you have not told me which measurements to accept" from "the evidence
+  is forged". Collapsing both into "false" hides a misconfiguration behind a security error.
+- **Relying parties see it.** The SVID carries `attestation.status`; introspection returns it; the
+  TRACE record carries it. A payments PEP can refuse `warning` while a logging PEP accepts it,
+  without jans knowing either policy.
+- **It is the industry vocabulary.** EAR, Azure Attestation's and Intel Trust Authority's result
+  tokens, and TRACE all speak in appraisal statuses. Using the same words means the attestation
+  result token maps one-to-one into `appraisal.status` of an agentrust record and needs no
+  translation table.
+
+The gates themselves stay simple: enrollment and issuance require `affirming` (or `warning` when
+explicitly allowed); everything else is a refusal with the `reasons` list in the response.
 
 ### 9.7 Persistence
 
