@@ -132,11 +132,13 @@ sequenceDiagram
     participant PEP as PEP / Relying Party
 
     Note over TEE,AS: ① ATTEST + ENROLL — once per deployment
-    Agent->>TEE: generate non-exportable keypair K (private half never leaves)
+    Agent->>TEE: generate non-exportable keypair K
+    TEE-->>Agent: K.public (private half never leaves)
     Agent->>AS: POST /attestation/challenge { attested_key: K.public }
     AS-->>Agent: { challenge_id, nonce }
     Agent->>TEE: produce evidence binding nonce + K.public
     Note over TEE: TEE / TPM CREATES raw evidence<br/>(quote / report, signed by vendor-rooted platform key)
+    TEE-->>Agent: raw evidence
     Agent->>Verifier: raw evidence (optional, delegated appraisal)
     Verifier-->>Agent: attestation result JWT
     Note over Verifier: platform verifier CREATES attestation result<br/>(its signed appraisal of the raw evidence · echoes nonce + K.public)
@@ -161,6 +163,7 @@ sequenceDiagram
 
     Note over TEE,AS: ④ ISSUE — every few minutes
     Agent->>TEE: sign DPoP proof (+ private_key_jwt)
+    TEE-->>Agent: signatures (key never leaves)
     Agent->>AS: POST /token grant=jwt-bearer assertion=ID-JAG (or client_credentials)<br/>DPoP proof · resource=#lt;PEP#gt;
     Note over AS: DPoP key = enrolled key<br/>affirming assessment younger than max age<br/>else 400 attestation_required { nonce }
     AS-->>Lock: AUTHORIZATION_DECISION (issue-jwt-svid)
@@ -168,6 +171,7 @@ sequenceDiagram
 
     Note over TEE,PEP: ⑤ PRESENT & VERIFY — per request
     Agent->>TEE: fresh DPoP proof for the PEP
+    TEE-->>Agent: proof
     Agent->>PEP: request + JWT-SVID + DPoP proof
     Note over PEP: local: signature via bundle, sub, aud, exp<br/>DPoP key ↔ cnf.jkt · PDP decision · copy txn
     PEP-->>Lock: CAPABILITY_INVOKED / RUNTIME_EFFECT
@@ -176,9 +180,10 @@ sequenceDiagram
 
 Steps 1 to 14 establish the hardware binding; if the appraisal is not `affirming` no identity is
 ever assigned. Steps 15 to 16 run on the bundle's refresh cadence, never per token. Steps 17 to 20
-put a human at the root of the execution. Everything after is steady state: every token is
+put a human at the root of the execution. Steps 21 to 30 are the steady state: every token is
 short-lived, pinned to the hardware key via `cnf`, stamped with the assessment it was issued
-under, and recorded.
+under, and recorded. Every call into the TPM / TEE returns only a public key, a signature or a
+piece of evidence; the private half of `K` never crosses that boundary.
 
 Reading the arrows: a **solid** arrow is a request the sender initiates and waits for; a
 **dashed** arrow is either the reply to the solid arrow above it, or a one-way notification the
