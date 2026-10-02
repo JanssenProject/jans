@@ -65,10 +65,20 @@ public interface PersistenceEntryManager extends EntityManager {
 	 * {@code @Version} value still equals the value held on {@code entry} at call time. On success,
 	 * increments the stored version and writes the same new value back onto {@code entry}.
 	 *
+	 * <p>Like {@link #merge(Object)}, this call pre-reads the entry's current attributes to build
+	 * the diff. If the entry does not exist at all when the call begins, the backend's normal
+	 * not-found behavior for {@code merge()} applies (e.g. {@code EntryPersistenceException}), not
+	 * {@code VersionMismatchException} -- a backend cannot cheaply tell "never existed" apart from
+	 * "deleted before this call" without an extra round trip, and this method does not add one.
+	 * {@code VersionMismatchException} is reserved for a version that no longer matches at the final
+	 * compare-and-swap, which also covers the entry being deleted in the race window between this
+	 * call's own pre-read and its write.</p>
+	 *
 	 * @throws io.jans.orm.exception.MappingException if entry's class has more than one
 	 *         {@code @Version} field, or that field's current value on {@code entry} is null
 	 * @throws io.jans.orm.exception.VersionMismatchException if the stored version no longer matches
-	 *         (another writer updated first, or the entry no longer exists)
+	 *         at the compare-and-swap (another writer updated first, or the entry was deleted after
+	 *         this call's own pre-read)
 	 * @throws io.jans.orm.exception.UnsupportedOperationException if the active persistence backend
 	 *         does not implement versioned updates, or {@code entry}'s class has zero
 	 *         {@code @Version} fields
