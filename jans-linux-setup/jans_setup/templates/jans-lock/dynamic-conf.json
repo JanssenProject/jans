@@ -48,6 +48,7 @@
 		"receiptAllocationRetryLimit": 8,
 		"receiptRepairIntervalSeconds": 300,
 		"pendingReceiptTimeoutSeconds": 120,
-		"maxBulkRecords": 100
+		"maxBulkRecords": 100,
+		"maxBulkRequestBytes": 4194304
 	}
 }

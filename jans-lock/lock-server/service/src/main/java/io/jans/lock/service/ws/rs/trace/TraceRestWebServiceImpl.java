@@ -328,8 +328,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 	 * JSON object) is left for {@link #ingestOne} to report as that item's own error.
 	 */
 	private List<String> splitBulkElements(InputStream body, TraceConfiguration config) {
-		long maxBulkBytes = (long) config.getMaxRequestBytes() * config.getMaxBulkRecords();
-		String rawText = readBoundedUtf8(body, maxBulkBytes);
+		String rawText = readBoundedUtf8(body, config.getMaxBulkRequestBytes());
 
 		JsonFactory factory = new JsonFactory();
 		try (JsonParser parser = factory.createParser(rawText)) {
