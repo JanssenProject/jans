@@ -546,6 +546,26 @@ find jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2 \
   cp "$f" "test-reports/${mod}-$(basename "$f")" 2>/dev/null || true
 done
 echo "collected $(find test-reports -name '*.xml' 2>/dev/null | wc -l) report files"
+lock_test_status=0
+if [ "${REQUIRE_LOCK_TESTS:-0}" = 1 ]; then
+  python3 - <<'PY'
+from pathlib import Path
+from xml.etree import ElementTree
+
+report_dir = Path("jans-lock/lock-server/service/target/surefire-reports")
+method = "testVerify_EachEventKindFixture_Verifies"
+cases = []
+for path in report_dir.glob("TEST-*.xml"):
+    if path.name == "TEST-TestSuite.xml":
+        continue
+    cases.extend(case for case in ElementTree.parse(path).iter("testcase")
+                 if case.get("name") == method)
+if len(cases) != 1 or any(case.find(tag) is not None
+                          for case in cases for tag in ("failure", "error", "skipped")):
+    raise SystemExit("::error::signed RUNTIME_EFFECT verification test did not pass")
+PY
+  lock_test_status=$?
+fi
 echo "::endgroup::"
 
 # ---------------------------------------------------------------------------
@@ -571,5 +591,8 @@ fi
 if [ -n "$integration_no_reports" ]; then
   echo "::error::suites produced no test reports:$integration_no_reports"
   exit 1
+fi
+if [ "$lock_test_status" -ne 0 ]; then
+  exit "$lock_test_status"
 fi
 echo "[info] run_aio_integration.sh complete"
