@@ -1725,6 +1725,17 @@ components:
           type: array
           items:
             type: string
+        lockAuditEnabled:
+          type: boolean
+        lockAuditEndpoint:
+          type: string
+        lockAuditClientId:
+          type: string
+        lockAuditClientPassword:
+          type: string
+        lockAuditFlushInterval:
+          type: integer
+          format: int32
         rp:
           type: array
           items:
@@ -1775,49 +1786,18 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        authenticationAttempts:
-          type: integer
-          format: int64
-        authenticationSuccessRate:
-          type: number
-          format: double
-        registrationSuccesses:
-          type: integer
-          format: int64
-        registrationFailures:
-          type: integer
-          format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
-        registrationAttempts:
-          type: integer
-          format: int64
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationFailures:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
         registrationSuccessRate:
           type: number
           format: double
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        period:
-          type: string
-        fallbackEvents:
-          type: integer
-          format: int64
+        authenticationSuccessRate:
+          type: number
+          format: double
+        registrationAvgDuration:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
         deviceTypes:
           type: object
           additionalProperties:
@@ -1828,6 +1808,37 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        period:
+          type: string
+        registrationAttempts:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
@@ -1890,6 +1901,8 @@ components:
           type: string
         deviceInfo:
           $ref: "#/components/schemas/DeviceInfo"
+        nativeClientTelemetry:
+          $ref: "#/components/schemas/NativeClientTelemetry"
         errorReason:
           type: string
         errorCategory:
@@ -1903,6 +1916,8 @@ components:
         ipAddress:
           type: string
         sessionId:
+          type: string
+        clientCorrelationId:
           type: string
         nodeId:
           type: string
@@ -1930,6 +1945,35 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Fido2MetricsEntry"
+    NativeClientTelemetry:
+      type: object
+      properties:
+        client_correlation_id:
+          type: string
+        platform:
+          type: string
+        native_api:
+          type: string
+        os_version:
+          type: string
+        play_services_version:
+          type: string
+        device_manufacturer:
+          type: string
+        device_model:
+          type: string
+        credential_provider:
+          type: string
+        is_device_secure:
+          type: boolean
+        flow_context:
+          type: string
+        app_version:
+          type: string
+        distribution_channel:
+          type: string
+        last_client_error_code:
+          type: string
     ApiError:
       type: object
       properties:
