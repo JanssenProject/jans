@@ -1039,13 +1039,5 @@
     "pgsql": {
       "type": "TEXT"
     }
-  },
-  "jansVersion": {
-    "mysql": {
-      "type": "BIGINT"
-    },
-    "pgsql": {
-      "type": "BIGINT"
-    }
   }
 }

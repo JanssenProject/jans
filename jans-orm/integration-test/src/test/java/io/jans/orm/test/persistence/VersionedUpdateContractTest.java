@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.orm.test;
+package io.jans.orm.test.persistence;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
@@ -17,39 +17,42 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.VersionMismatchException;
+import io.jans.orm.test.BaseOrmTest;
 import io.jans.orm.test.model.VersionedTestEntry;
 
 /**
- * CAS (`@Version` / `updateWithVersion`) acceptance tests for every backend that implements
- * {@code mergeWithVersion} -- SQL (task 04), LDAP (task 05).
+ * Shared, backend-agnostic CAS (`@Version` / `updateWithVersion`) contract test suite. Asserts the
+ * contract documented in D-3 through D-8: sequential CAS success, stale-version rejection,
+ * concurrent-writers-exactly-one-winner, `merge()` still bumping the version, and the pre-read
+ * not-found behavior staying distinct from a version conflict.
  *
- * <p>Requires task 03's {@code jansVersion} attribute/column already provisioned for
- * {@code jansTestVersioned} wherever the active profile points (SQL table column or LDAP schema;
- * see {@code VersionedTestEntry}) -- this test's own code is not what provisions it.</p>
+ * <p>One concrete subclass per landed backend (mirrors
+ * {@code io.jans.lock.service.trace.store.TraceStoreContractTest}'s abstract-base-class pattern,
+ * adapted to TestNG): each subclass only fixes {@link #requiredPersistenceType()} and is skipped
+ * via {@link BaseOrmTest#requirePersistenceType(String...)} when the active {@code -Dcfg} profile
+ * doesn't match it, so running the whole suite against a single live profile still exercises
+ * exactly the backend that profile provides.</p>
+ *
+ * <p>Requires task 03's {@code jansVersion} attribute/column already provisioned for the
+ * {@code jansTestVersioned} object class wherever the active profile points (SQL table column or
+ * LDAP schema; see {@link VersionedTestEntry}) -- this test's own code is not what provisions it.</p>
  *
  * @author Yuriy Movchan Date: 10/02/2026
  */
-public class VersionedCasTest extends BaseOrmTest {
+public abstract class VersionedUpdateContractTest extends BaseOrmTest {
 
 	private static final String VERSION_TEST_BASE_DN = "ou=version_test,o=jans";
 
-	@BeforeClass
-	public void checkPersistenceType() {
-		// Parent class @BeforeClass runs first, so entryManager is already initialized.
-		// Backend-agnostic by design (task 09 will fold this into the shared cross-backend suite) --
-		// SQL (task 04) and LDAP (task 05) both implement mergeWithVersion; Couchbase/Spanner don't yet.
-		requirePersistenceType(SQL, LDAP);
-	}
+	protected abstract String requiredPersistenceType();
 
-	@AfterClass(alwaysRun = true)
-	public void cleanup() {
-		// Each test method removes its own row; nothing shared to clean up here.
+	@BeforeClass
+	public void requireOwnPersistenceType() {
+		requirePersistenceType(requiredPersistenceType());
 	}
 
 	@Test
