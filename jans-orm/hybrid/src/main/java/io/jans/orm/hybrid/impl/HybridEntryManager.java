@@ -379,6 +379,15 @@ public class HybridEntryManager extends BaseEntryManager<HybridPersistenceOperat
     	return persistenceEntryManager.merge(entry);
     }
 
+    @Override
+    public Void updateWithVersion(Object entry) {
+		Class<?> entryClass = entry.getClass();
+		Object dnValue = getDNValue(entry, entryClass);
+
+		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dnValue);
+    	return persistenceEntryManager.updateWithVersion(entry);
+    }
+
 	@Override
     public void persist(Object entry) {
         Class<?> entryClass = entry.getClass();
