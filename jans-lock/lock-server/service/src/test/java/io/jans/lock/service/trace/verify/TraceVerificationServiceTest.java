@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
@@ -42,6 +43,7 @@ import io.jans.lock.service.trace.crypto.Ed25519Capability;
 import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
 import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
 import io.jans.lock.service.trace.crypto.Ed25519Verifier;
+import io.jans.lock.service.trace.crypto.StrictBase64Url;
 import io.jans.lock.service.trace.error.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
@@ -183,6 +185,31 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 			assertEquals(fixture.tree().path("trace").path("event_kind").textValue(),
 					verified.getInputs().getEventKind());
 		}
+	}
+
+	@Test
+	void testVerify_SignedRuntimeEffectWithUnrepresentableExtension_RejectedBeforeKeyLookup() throws Exception {
+		String safeNumber = "\"observation_count\":9007199254740991";
+		String unsafeNumber = "\"observation_count\":9007199254740993";
+		SignedAssertionFactory fixture = SignedAssertionFactory.runtimeEffect().producer(PRODUCER).kid(KID)
+				.withField(9007199254740991L, "trace", "event", "observation_count");
+
+		String safeJson = fixture.sign(keyPair.getPrivate());
+		assertTrue(service.verify(body(safeJson), ctx("*")).getVerification().isSignatureValid());
+
+		ObjectNode unsafeRoot = fixture.tree();
+		String unsafeInput = JcsCanonicalizer.canonicalize(JcsCanonicalizer.withoutField(unsafeRoot, "signature"))
+				.replace(safeNumber, unsafeNumber);
+		assertTrue(unsafeInput.contains(unsafeNumber));
+		byte[] signature = Ed25519TestKeys.sign(keyPair.getPrivate(), unsafeInput.getBytes(StandardCharsets.UTF_8));
+		unsafeRoot.put("signature", StrictBase64Url.encode(signature));
+		String unsafeJson = MAPPER.writeValueAsString(unsafeRoot).replace(safeNumber, unsafeNumber);
+		assertTrue(unsafeJson.contains(unsafeNumber));
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.verify(body(unsafeJson), ctx("*")));
+		assertEquals(TraceErrorResponseType.INVALID_REQUEST, ex.getErrorId());
+		assertEquals("not_canonicalizable", ex.getReason());
 	}
 
 	@Test
