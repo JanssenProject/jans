@@ -18,12 +18,14 @@
 
 package io.jans.fido2.service.handler;
 
-import io.jans.service.exception.ExceptionHandler;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.error.Fido2RPError;
+import io.jans.service.exception.ExceptionHandler;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 
-import jakarta.inject.Inject;
-
+@ApplicationScoped
 public class Fido2RuntimeExceptionHandler {
 
     @Inject
@@ -31,9 +33,8 @@ public class Fido2RuntimeExceptionHandler {
 
     @ExceptionHandler(value = { Fido2RuntimeException.class })
     public void handleException(Fido2RuntimeException ex) {
-        log.error("Get exception: {}", ex.getFormattedMessage().getErrorMessage(), ex);
-        // return handleExceptionInternal(ex, ex.getFormattedMessage(), new
-        // HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
-        // TODO: Finish Fido2RuntimeException exception handling
+        Fido2RPError formatted = ex.getFormattedMessage();
+        log.error("Fido2RuntimeException - status: {}, errorMessage: {}",
+                formatted.getStatus(), formatted.getErrorMessage(), ex);
     }
 }
