@@ -33,6 +33,16 @@
           "type": "TEXT"
         }
       }
+    },
+    {
+      "desc": "jans big integer version",
+      "equality": "integerMatch",
+      "names": [
+        "jansVersion"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.2.840.113556.1.4.906",
+      "x_origin": "Jans created attribute"
     }
   ],
   "objectClasses": [
@@ -48,6 +58,25 @@
       ],
       "names": [
         "jansBinEntry"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "uid",
+        "dat",
+        "jansVersion"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansTestVersioned"
       ],
       "oid": "jansObjClass",
       "sup": [
