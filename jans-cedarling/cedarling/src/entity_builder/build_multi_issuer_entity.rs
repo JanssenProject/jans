@@ -286,6 +286,11 @@ pub(crate) struct MultiIssuerSetupEntities {
     pub tokens: HashMap<String, Entity>,
     pub issuers: HashSet<Entity>,
     pub default_entities: DefaultEntities,
+    /// Names (mappings) of validated tokens that could not be turned into a
+    /// Cedar entity. The caller pairs each with its original request index to
+    /// produce a [`DroppedToken`](crate::DroppedToken) with
+    /// [`DropReason::EntityBuildFailed`](crate::DropReason::EntityBuildFailed).
+    pub dropped_names: Vec<String>,
 }
 
 impl EntityBuilder {
@@ -301,6 +306,7 @@ impl EntityBuilder {
         let mut built_entities = BuiltEntities::from(&self.iss_entities);
 
         let mut token_entities = HashMap::new();
+        let mut dropped_names = Vec::new();
         for (token_name, token) in tokens {
             match self.build_single_token_entity(token, &built_entities) {
                 Ok(entity) => match self.generate_entity_key(token_name, token) {
@@ -319,6 +325,7 @@ impl EntityBuilder {
                             ))
                             .set_error(e.to_string()),
                         );
+                        dropped_names.push(token_name.clone());
                     },
                 },
                 Err(e) => {
@@ -332,6 +339,7 @@ impl EntityBuilder {
                         ))
                         .set_error(e.to_string()),
                     );
+                    dropped_names.push(token_name.clone());
                 },
             }
         }
@@ -354,6 +362,7 @@ impl EntityBuilder {
             tokens: token_entities,
             issuers,
             default_entities: self.default_entities.clone(),
+            dropped_names,
         })
     }
 
@@ -1054,6 +1063,14 @@ mod tests {
         assert_eq!(entities_data.tokens.len(), 2);
         assert!(entities_data.tokens.contains_key("acme_access_token"));
         assert!(entities_data.tokens.contains_key("dolphin_dolphintoken"));
+
+        // The token that validated but failed entity building (missing issuer)
+        // is reported by name so the caller can mark it EntityBuildFailed.
+        assert_eq!(
+            entities_data.dropped_names,
+            vec!["Jans::Id_Token".to_string()],
+            "the token that failed entity building must be reported in dropped_names"
+        );
     }
 
     #[test]

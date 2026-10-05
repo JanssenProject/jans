@@ -40,6 +40,7 @@ use uuid7::Uuid;
 
 mod authorize_result;
 mod build_ctx;
+mod dropped_token;
 mod error_metrics;
 mod errors;
 pub(crate) mod metrics;
@@ -47,6 +48,7 @@ pub(crate) mod metrics;
 pub(crate) mod request;
 
 pub use authorize_result::{AuthorizeResult, MultiIssuerAuthorizeResult};
+pub use dropped_token::{DropReason, DroppedToken};
 pub use errors::*;
 
 /// Configuration to Authz to initialize service without errors
@@ -228,6 +230,7 @@ impl Authz {
         let MultiIssuerSetup {
             validated_tokens,
             entities: setup_entities,
+            dropped_tokens,
         } = self
             .multi_issuer_setup(&request.tokens, custom_processor)
             .await?;
@@ -327,7 +330,8 @@ impl Authz {
         // clone cost is excluded from the latency measurement
         let decision_time_micro_sec = calculate_elapsed_time(start_time);
 
-        let result = MultiIssuerAuthorizeResult::new(authz_result.clone(), request_id);
+        let result =
+            MultiIssuerAuthorizeResult::new(authz_result.clone(), request_id, dropped_tokens);
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
@@ -365,6 +369,7 @@ impl Authz {
                 decision: result.decision,
                 pushed_data: pushed_data_info,
                 batch_id: None,
+                dropped_tokens: &result.dropped_tokens,
             },
         );
 
@@ -443,6 +448,7 @@ impl Authz {
         let MultiIssuerSetup {
             validated_tokens,
             entities: setup_entities,
+            dropped_tokens,
         } = self
             .multi_issuer_setup(&request.tokens, custom_processor)
             .await?;
@@ -515,6 +521,7 @@ impl Authz {
                     principal: DecisionLogEntry::principal(false, false),
                     pushed_data: pushed_data_info.clone(),
                     batch_id: Some(batch_id),
+                    dropped_tokens: &dropped_tokens,
                 },
             );
 
@@ -537,6 +544,7 @@ impl Authz {
             results.push(Ok(MultiIssuerAuthorizeResult::new(
                 response,
                 item_request_id,
+                dropped_tokens.clone(),
             )));
         }
 
@@ -735,6 +743,7 @@ impl Authz {
                 principal: DecisionLogEntry::all_principals(logged_principals),
                 pushed_data: pushed_data_info,
                 batch_id: None,
+                dropped_tokens: &[],
             },
         );
 
@@ -874,6 +883,7 @@ impl Authz {
                     principal: DecisionLogEntry::all_principals(&logged_principals),
                     pushed_data: pushed_data_info.clone(),
                     batch_id: Some(batch_id),
+                    dropped_tokens: &[],
                 },
             );
 
@@ -994,7 +1004,7 @@ impl Authz {
         custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<MultiIssuerSetup, AuthorizeError> {
         let custom_timeout = self.custom_token_timeout();
-        let validated_tokens = self
+        let validated = self
             .config
             .jwt_service
             .validate_multi_issuer_tokens(
@@ -1009,19 +1019,38 @@ impl Authz {
                 self.config.metrics.record_authz_error();
             })?;
 
+        // `&validated` derefs to the validated-token map the entity builder expects.
         let setup_entities = self
             .config
             .entity_builder
-            .build_multi_issuer_setup_entities(&validated_tokens, self.config.log_service.as_ref())
+            .build_multi_issuer_setup_entities(&validated, self.config.log_service.as_ref())
             .map_err(|e| {
                 self.config.metrics.record_error(&e);
                 self.config.metrics.record_authz_error();
                 AuthorizeError::MultiIssuerEntity(e)
             })?;
 
+        let crate::jwt::ValidatedMultiIssuerTokens {
+            tokens: validated_tokens,
+            indices,
+            dropped: mut dropped_tokens,
+        } = validated;
+
+        // Merge entity-build drops after the validation drops, recovering each
+        // token's original request index from the validation pass.
+        for name in &setup_entities.dropped_names {
+            let index = indices.get(name).copied().unwrap_or(0);
+            dropped_tokens.push(DroppedToken::new(
+                name.clone(),
+                index,
+                DropReason::EntityBuildFailed,
+            ));
+        }
+
         Ok(MultiIssuerSetup {
             validated_tokens,
             entities: setup_entities,
+            dropped_tokens,
         })
     }
 
@@ -1163,6 +1192,7 @@ impl Authz {
             diagnostics: DiagnosticsSummary::from_diagnostics(metadata.decision_diagnostics),
             pushed_data: metadata.pushed_data.clone(),
             batch_id: metadata.batch_id,
+            dropped_tokens: metadata.dropped_tokens.to_vec(),
         });
         self.config.log_service.log_fn(entry);
     }
@@ -1375,6 +1405,9 @@ struct DecisionLogMetadata<'a> {
     /// Shared correlation id when this entry is part of a batch call.
     /// Indexed in the decision-log entry — see [`DecisionLogEntry::batch_id`].
     batch_id: Option<Uuid>,
+    /// Tokens dropped from a multi-issuer decision. Empty (and omitted from the
+    /// logged entry) for single-issuer and unsigned paths.
+    dropped_tokens: &'a [DroppedToken],
 }
 
 /// Helper struct to hold named parameters for [`Authz::log_debug`] method.
@@ -1414,6 +1447,9 @@ struct UnsignedSetup {
 struct MultiIssuerSetup {
     validated_tokens: HashMap<String, Arc<crate::jwt::Token>>,
     entities: MultiIssuerSetupEntities,
+    /// Tokens dropped across validation and entity building, merged in input
+    /// order (validation drops first). Shared by every item in a batch.
+    dropped_tokens: Vec<DroppedToken>,
 }
 
 /// Structure to hold entites created from tokens

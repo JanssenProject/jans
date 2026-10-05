@@ -238,6 +238,17 @@ async fn test_single_acme_access_token_authorization() {
         authz_result.decision,
         "Authorization should be ALLOW for acme access token"
     );
+
+    // No token was dropped, so the field is empty and absent from JSON.
+    assert!(
+        authz_result.dropped_tokens.is_empty(),
+        "a fully-successful decision must report no dropped tokens"
+    );
+    let serialized = serde_json::to_value(&authz_result).expect("result serializes");
+    assert!(
+        serialized.get("dropped_tokens").is_none(),
+        "dropped_tokens must be omitted from JSON when empty"
+    );
 }
 
 /// Test single Dolphin custom token authorization with waiver claim
@@ -343,6 +354,16 @@ async fn test_unknown_mapping_is_dropped_without_failing_the_request() {
         "the valid token must still decide the request"
     );
 
+    assert_eq!(
+        authz_result.dropped_tokens,
+        vec![crate::DroppedToken::new(
+            "Nope::Token",
+            1,
+            crate::DropReason::JwtValidationFailed,
+        )],
+        "the unknown-mapping token must be surfaced in dropped_tokens"
+    );
+
     // Metrics are disabled without Lock telemetry, so assert the reason via logs.
     let logs = cedarling.pop_logs();
     let dropped_as_unknown_mapping = logs.iter().any(|log| {
@@ -353,6 +374,27 @@ async fn test_unknown_mapping_is_dropped_without_failing_the_request() {
     assert!(
         dropped_as_unknown_mapping,
         "the dropped token must be reported as an unknown mapping"
+    );
+
+    // The decision log carries the same drop list for the audit trail, and the
+    // reason message must stay claim-free.
+    let decision_log = logs
+        .iter()
+        .find(|log| log.get("dropped_tokens").is_some())
+        .expect("a decision-log entry must carry dropped_tokens");
+    let dropped = decision_log
+        .get("dropped_tokens")
+        .and_then(|d| d.as_array())
+        .expect("dropped_tokens must be an array");
+    assert_eq!(dropped.len(), 1, "exactly one token was dropped");
+    assert_eq!(
+        dropped[0].get("reason").and_then(|r| r.get("kind")),
+        Some(&json!("jwt_validation_failed")),
+        "decision-log drop reason must use the stable kind slug"
+    );
+    assert!(
+        !decision_log.to_string().contains("dolphin_stray_790"),
+        "the drop record must not leak the token's jti claim"
     );
 }
 
@@ -1112,6 +1154,16 @@ async fn test_validation_non_deterministic_tokens() {
         result.decision,
         "Should be ALLOW - first Acme token has write:documents scope"
     );
+
+    assert_eq!(
+        result.dropped_tokens,
+        vec![crate::DroppedToken::new(
+            "Acme::Access_Token",
+            1,
+            crate::DropReason::DuplicateToken,
+        )],
+        "the duplicate token must be reported as DuplicateToken at index 1"
+    );
 }
 
 /// Test validation - Valid multiple tokens with same type from different issuers
@@ -1271,6 +1323,16 @@ async fn test_validation_graceful_degradation_invalid_token() {
     assert!(
         result.decision,
         "Should be ALLOW - valid Acme token has required scope despite invalid token being present"
+    );
+
+    assert_eq!(
+        result.dropped_tokens,
+        vec![crate::DroppedToken::new(
+            "Invalid::Token",
+            1,
+            crate::DropReason::JwtValidationFailed,
+        )],
+        "the invalid token must be reported as JwtValidationFailed at index 1"
     );
 }
 
@@ -1454,5 +1516,64 @@ async fn test_resource_entity_build_failure_logs_error() {
     assert!(
         has_error_log,
         "Should log error when resource entity fails to build in multi-issuer authorization"
+    );
+}
+
+/// A malformed token input (empty payload) is dropped with `InvalidInput`
+/// carrying the specific input error, while a valid sibling token still
+/// decides the request. Covers the "token validates but another entry is
+/// invalid" partial-failure path and the claim-free `InvalidInput` detail.
+#[tokio::test]
+async fn test_invalid_input_token_is_dropped_with_reason() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
+    let acme_access_token = generate_token_using_claims(json!({
+        "iss": "https://idp.acme.com",
+        "sub": "acme_user_invalid_input",
+        "jti": "acme_invalid_input",
+        "client_id": "acme_client",
+        "scope": ["read:wiki", "write:profile"],
+        "aud": "my-client-id",
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
+    }));
+
+    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+        vec![
+            TokenInput::new("Acme::Access_Token".to_string(), acme_access_token),
+            TokenInput::new("Dolphin::Access_Token".to_string(), String::new()),
+        ],
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "WikiPages"
+                },
+                "name": "Wiki Pages"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
+        "Acme::Action::\"ReadProfile\"".to_string(),
+        None,
+    );
+
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("a malformed sibling token must not fail the whole request");
+
+    assert!(
+        result.decision,
+        "the valid Acme token must still decide the request"
+    );
+    assert_eq!(
+        result.dropped_tokens,
+        vec![crate::DroppedToken::new(
+            "Dolphin::Access_Token",
+            1,
+            crate::DropReason::InvalidInput(crate::authz::TokenInputError::EmptyPayload),
+        )],
+        "the empty-payload token must be reported as InvalidInput(EmptyPayload) at index 1"
     );
 }

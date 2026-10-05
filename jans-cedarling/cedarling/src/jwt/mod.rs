@@ -92,6 +92,7 @@ use crate::LogWriter;
 use crate::authz::MultiIssuerValidationError;
 use crate::authz::metrics::MetricsCollector;
 use crate::authz::request::TokenInput;
+use crate::authz::{DropReason, DroppedToken};
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 
@@ -183,6 +184,38 @@ struct TokenCallCtx<'a> {
     index: usize,
     now: chrono::DateTime<Utc>,
     seen_combinations: &'a mut HashSet<(SmolStr, SmolStr)>,
+}
+
+/// Outcome of dispatching a single multi-issuer token input: either a
+/// validated Cedar token or the claim-free reason it was dropped.
+enum TokenOutcome {
+    Validated(Arc<Token>),
+    Dropped(DropReason),
+}
+
+/// Result of [`JwtService::validate_multi_issuer_tokens`].
+///
+/// Primarily the map of validated tokens keyed by mapping (it [`Deref`]s to it
+/// so existing map access keeps working), plus the drop metadata the caller
+/// threads into the authorization result and decision log.
+///
+/// [`Deref`]: std::ops::Deref
+#[derive(Debug)]
+pub(crate) struct ValidatedMultiIssuerTokens {
+    /// Validated tokens keyed by their mapping (token name).
+    pub tokens: HashMap<String, Arc<Token>>,
+    /// Mapping (token name) -> original request index, for surviving tokens.
+    pub indices: HashMap<String, usize>,
+    /// Tokens dropped during validation, in input order.
+    pub dropped: Vec<DroppedToken>,
+}
+
+impl std::ops::Deref for ValidatedMultiIssuerTokens {
+    type Target = HashMap<String, Arc<Token>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.tokens
+    }
 }
 
 impl JwtService {
@@ -422,12 +455,14 @@ impl JwtService {
         custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
         custom_issuers: &CustomIssuerIndex,
         custom_timeout: Option<Duration>,
-    ) -> Result<HashMap<String, Arc<Token>>, MultiIssuerValidationError> {
+    ) -> Result<ValidatedMultiIssuerTokens, MultiIssuerValidationError> {
         if tokens.is_empty() {
             return Err(MultiIssuerValidationError::EmptyTokenArray);
         }
 
         let mut validated_tokens = HashMap::new();
+        let mut indices = HashMap::new();
+        let mut dropped = Vec::new();
         let mut seen_combinations = HashSet::new();
 
         let now = Utc::now();
@@ -441,6 +476,11 @@ impl JwtService {
                         Some(LogLevel::WARN),
                     ));
                 }
+                dropped.push(DroppedToken::new(
+                    token.mapping.clone(),
+                    index,
+                    DropReason::InvalidInput(err),
+                ));
                 continue;
             }
 
@@ -473,8 +513,14 @@ impl JwtService {
                 self.validate_jwt_token(&mut ctx)?
             };
 
-            if let Some(cedar_token) = result {
-                validated_tokens.insert(token_name, cedar_token);
+            match result {
+                TokenOutcome::Validated(cedar_token) => {
+                    validated_tokens.insert(token_name.clone(), cedar_token);
+                    indices.insert(token_name, index);
+                },
+                TokenOutcome::Dropped(reason) => {
+                    dropped.push(DroppedToken::new(token.mapping.clone(), index, reason));
+                },
             }
         }
 
@@ -490,20 +536,25 @@ impl JwtService {
             return Err(MultiIssuerValidationError::TokenValidationFailed);
         }
 
-        Ok(validated_tokens)
+        Ok(ValidatedMultiIssuerTokens {
+            tokens: validated_tokens,
+            indices,
+            dropped,
+        })
     }
 
     /// Dispatch a single token input whose mapping routes to a custom issuer.
     ///
-    /// Returns `Ok(None)` when the token is dropped (no processor, duplicate, or
-    /// non-required failure) and `Err` only when the failure is fail-closed.
+    /// Returns `TokenOutcome::Dropped` when the token is dropped (no processor,
+    /// duplicate, or non-required failure) and `Err` only when the failure is
+    /// fail-closed.
     async fn handle_custom_token(
         &self,
         custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
         custom_issuers: &CustomIssuerIndex,
         custom_timeout: Option<Duration>,
         ctx: &mut TokenCallCtx<'_>,
-    ) -> Result<Option<Arc<Token>>, MultiIssuerValidationError> {
+    ) -> Result<TokenOutcome, MultiIssuerValidationError> {
         let Some(processor) = custom_processor else {
             let err = MultiIssuerValidationError::CustomToken(
                 CustomTokenError::NoProcessorRegistered(ctx.token.mapping.clone()),
@@ -519,7 +570,7 @@ impl JwtService {
                     Some(LogLevel::WARN),
                 ));
             }
-            return Ok(None);
+            return Ok(TokenOutcome::Dropped(DropReason::NoProcessorRegistered));
         };
 
         if let Ok((issuer, _)) = custom_issuers.resolve(&ctx.token.mapping) {
@@ -537,7 +588,7 @@ impl JwtService {
                         Some(LogLevel::WARN),
                     ));
                 }
-                return Ok(None);
+                return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
             }
         }
 
@@ -558,18 +609,18 @@ impl JwtService {
                     .unwrap_or_default();
                 let combination = (issuer, SmolStr::from(ctx.token.mapping.as_str()));
                 if ctx.seen_combinations.insert(combination) {
-                    Ok(Some(cedar_token))
-                } else if let Some(logger) = &self.logger {
-                    logger.log_any(JwtLogEntry::new(
-                        format!(
-                            "Non-deterministic custom token detected: type '{}' (duplicate found, skipping)",
-                            ctx.token.mapping
-                        ),
-                        Some(LogLevel::WARN),
-                    ));
-                    Ok(None)
+                    Ok(TokenOutcome::Validated(cedar_token))
                 } else {
-                    Ok(None)
+                    if let Some(logger) = &self.logger {
+                        logger.log_any(JwtLogEntry::new(
+                            format!(
+                                "Non-deterministic custom token detected: type '{}' (duplicate found, skipping)",
+                                ctx.token.mapping
+                            ),
+                            Some(LogLevel::WARN),
+                        ));
+                    }
+                    Ok(TokenOutcome::Dropped(DropReason::DuplicateToken))
                 }
             },
             Err(err) => {
@@ -581,11 +632,12 @@ impl JwtService {
                     return Err(err);
                 }
                 self.metrics.record_error(&err);
+                let timed_out = matches!(
+                    err,
+                    MultiIssuerValidationError::CustomToken(CustomTokenError::Timeout(_))
+                );
                 if let Some(logger) = &self.logger {
-                    let reason = if matches!(
-                        err,
-                        MultiIssuerValidationError::CustomToken(CustomTokenError::Timeout(_))
-                    ) {
+                    let reason = if timed_out {
                         "timeout"
                     } else {
                         "processor error"
@@ -598,19 +650,25 @@ impl JwtService {
                         Some(LogLevel::WARN),
                     ));
                 }
-                Ok(None)
+                let reason = if timed_out {
+                    DropReason::CustomProcessingTimedOut
+                } else {
+                    DropReason::CustomProcessingFailed
+                };
+                Ok(TokenOutcome::Dropped(reason))
             },
         }
     }
 
     /// Validate a single JWT token input via the cache or single-token validation.
     ///
-    /// Returns `Ok(None)` when the token is dropped (duplicate or validation
-    /// failure); issuer/claim errors abort the whole batch as before.
+    /// Returns `TokenOutcome::Dropped` when the token is dropped (unknown
+    /// mapping, duplicate, or validation failure); issuer/claim errors abort
+    /// the whole batch as before.
     fn validate_jwt_token(
         &self,
         ctx: &mut TokenCallCtx<'_>,
-    ) -> Result<Option<Arc<Token>>, MultiIssuerValidationError> {
+    ) -> Result<TokenOutcome, MultiIssuerValidationError> {
         let Some(token_key) = self.token_keys_by_entity_type.get(&ctx.token.mapping) else {
             let err = UnknownTokenMapping(ctx.token.mapping.clone());
             self.metrics.record_error(&err);
@@ -620,12 +678,12 @@ impl JwtService {
                     Some(LogLevel::WARN),
                 ));
             }
-            return Ok(None);
+            return Ok(TokenOutcome::Dropped(DropReason::JwtValidationFailed));
         };
         let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(token_key));
 
         if let Some(cedar_token) = self.token_cache.find(&token_kind, &ctx.token.payload) {
-            return Ok(Some(cedar_token));
+            return Ok(TokenOutcome::Validated(cedar_token));
         }
 
         // Validate JWT using existing single token validation
@@ -662,7 +720,7 @@ impl JwtService {
                         ctx.now,
                     );
 
-                    Ok(Some(cedar_token))
+                    Ok(TokenOutcome::Validated(cedar_token))
                 } else {
                     // Log warning but continue processing
                     if let Some(logger) = &self.logger {
@@ -674,7 +732,7 @@ impl JwtService {
                             Some(LogLevel::WARN),
                         ));
                     }
-                    Ok(None)
+                    Ok(TokenOutcome::Dropped(DropReason::DuplicateToken))
                 }
             },
             Err(err) => {
@@ -686,7 +744,7 @@ impl JwtService {
                     ));
                 }
                 self.metrics.record_error(&err);
-                Ok(None)
+                Ok(TokenOutcome::Dropped(DropReason::JwtValidationFailed))
             },
         }
     }

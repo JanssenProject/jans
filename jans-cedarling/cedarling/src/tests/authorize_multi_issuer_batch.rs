@@ -266,3 +266,51 @@ async fn batch_multi_issuer_bad_action_surfaces_error_only_at_that_item() {
         "item 2 allowed"
     );
 }
+
+/// A token dropped during the shared setup must be reported identically on
+/// every item's result, the drop list is per-item and repeats across the
+/// batch (the drop happens once, before per-item evaluation).
+#[tokio::test]
+async fn batch_multi_issuer_dropped_token_repeats_on_every_item() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
+    let stray = TokenInput::new(
+        "Nope::Token".to_string(),
+        generate_token_using_claims(json!({
+            "iss": "https://idp.dolphin.sea",
+            "sub": "dolphin_user_123",
+            "jti": "dolphin_stray_batch",
+            "aud": "dolphin_audience",
+            "exp": 2_000_000_000,
+            "iat": 1_516_239_022,
+        })),
+    );
+
+    let request = BatchAuthorizeMultiIssuerRequest::new(
+        vec![dolphin_userinfo_token(), stray],
+        vec![
+            allowing_item(),
+            denying_item("wrong-resource"),
+            allowing_item(),
+        ],
+    );
+
+    let response = cedarling
+        .authorize_multi_issuer_batch(request)
+        .await
+        .expect("batch should be processed");
+
+    assert_eq!(response.results.len(), 3);
+    let expected = vec![crate::DroppedToken::new(
+        "Nope::Token",
+        1,
+        crate::DropReason::JwtValidationFailed,
+    )];
+    for (i, r) in response.results.iter().enumerate() {
+        assert_eq!(
+            expect_ok(r, i).dropped_tokens,
+            expected,
+            "item {i} must carry the same shared drop list"
+        );
+    }
+}

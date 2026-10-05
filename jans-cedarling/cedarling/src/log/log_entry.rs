@@ -13,6 +13,7 @@ use std::sync::Arc;
 
 use super::LogLevel;
 use super::interface::{Indexed, Loggable};
+use crate::authz::DroppedToken;
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
 use crate::lock::AuditPayload;
@@ -357,6 +358,11 @@ pub(crate) struct DecisionLogEntry {
     /// belonging to one batch.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub batch_id: Option<Uuid>,
+    /// Tokens dropped from a multi-issuer decision (claim-free). Absent from
+    /// the serialized entry when empty, so single-issuer and unsigned decision
+    /// logs are unchanged.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub dropped_tokens: Vec<DroppedToken>,
 }
 
 /// Telemetry log entry following the 3-map model.

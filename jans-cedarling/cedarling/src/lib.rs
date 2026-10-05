@@ -58,7 +58,10 @@ pub use authz::request::{
     BatchAuthorizeUnsignedRequest, BatchItem, CedarEntityMapping, EntityData, RequestUnsigned,
     TokenInput,
 };
-pub use authz::{AuthorizeError, AuthorizeResult, BatchItemError, MultiIssuerAuthorizeResult};
+pub use authz::{
+    AuthorizeError, AuthorizeResult, BatchItemError, DropReason, DroppedToken,
+    MultiIssuerAuthorizeResult,
+};
 pub use bootstrap_config::*;
 /// Identifier of a Cedar policy, re-exported from [`cedar_policy`] so callers can
 /// pass the policy IDs from `response.diagnostics().reason()` to the annotation
