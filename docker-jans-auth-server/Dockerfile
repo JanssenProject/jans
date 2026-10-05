@@ -55,7 +55,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 
 ENV CN_VERSION=0.0.0-nightly
 ENV CN_RELEASE_TAG=nightly
-ENV CN_BUILD_DATE='2026-04-23 15:20'
+ENV CN_BUILD_DATE='2026-10-05T02:45:57Z'
 
 # Override CN_RELEASE_DOWNLOAD_URL at build time to install a locally-built WAR (e.g. the AIO
 # integration CI serves the PR-built artifacts) instead of the published release.
@@ -106,7 +106,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ARG JANS_SOURCE_VERSION=ffc51a67dc3d72c7cc26ea31fb401d287d672e9c
+ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 

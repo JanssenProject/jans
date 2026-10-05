@@ -46,7 +46,7 @@ RUN wget -nv https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON
 
 ENV CN_VERSION=0.0.0-nightly
 ENV CN_RELEASE_TAG=nightly
-ENV CN_BUILD_DATE='2026-02-27 08:34'
+ENV CN_BUILD_DATE='2026-10-05T02:45:57Z'
 
 ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-link-server-${CN_VERSION}.war
 
@@ -64,7 +64,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/schema \
     /app/templates/jans-link
 
-ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
+ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
