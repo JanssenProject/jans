@@ -249,6 +249,10 @@ The following methods are called on the result obtained from the authorization c
 
     The request ID for this authorization call, used for log retrieval and auditing
 
+- `dropped_tokens`
+
+    The supplied tokens that were not used in this decision (empty when every token contributed).
+
 ## Logs
 
 These methods are called to retrieve logs from the memory of the Cedarling instance when it is running in `memory` mode.
