@@ -9,6 +9,13 @@ package io.jans.configapi.util;
 public class ApiConstants {
     
     private ApiConstants() {}
+    
+    public static final String READ_REQUEST = "READ";
+    public static final String WRITE_REQUEST = "WRITE";
+    public static final String DELETE_REQUEST = "DELETE";
+    public static final String INTROSPECTION_SCOPES  = "introspection.scopes";
+    public static final String INTROSPECTION_CLIENT_ID = "introspection_client_id";
+    public static final String INTROSPECTION_USER_INUM = "introspection_user_inum";
 
     public static final String BASE_API_URL = "/";
     public static final String SEPARATOR = "/";

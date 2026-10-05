@@ -15696,11 +15696,11 @@ components:
           type: boolean
         adminCanView:
           type: boolean
+        userCanEdit:
+          type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -17592,10 +17592,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -17742,6 +17742,12 @@ components:
         externalLoggerConfiguration:
           type: string
           description: The path to the external log4j2 logging configuration.
+        superAdminScopes:
+          type: array
+          description: List of Super Admin oAuth scopes.
+          items:
+            type: string
+            description: List of Super Admin oAuth scopes.
         disableJdkLogger:
           type: boolean
           description: Choose whether to disable JDK loggers.

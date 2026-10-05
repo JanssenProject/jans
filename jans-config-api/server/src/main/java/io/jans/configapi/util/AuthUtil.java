@@ -129,8 +129,80 @@ public class AuthUtil {
         return this.configurationFactory.getApiAppConfiguration().getUserRolePermissionExcludedClients();
     }
     
+    public List<String> getExcludedClients() {
+        List<String> excludedClients = getUserRolePermissionExcludedClients();
+        return excludedClients == null ? Collections.emptyList() : excludedClients;
+    }
+    
     public boolean isFetchUserRoleInIntrospectionFlag() {
         return this.configurationFactory.getApiAppConfiguration().isFetchUserRoleInIntrospectionFlag();
+    }
+    
+    public List<String> getSuperAdminScopes() {
+        return this.configurationFactory.getApiAppConfiguration().getSuperAdminScopes();
+    }
+
+    public String getSuperAdminReadScope() {
+        String readScope = null;
+        if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
+            return readScope;
+        }
+        return getSuperAdminScopes().stream().filter(scope -> scope.contains("read")).findFirst().orElse(null);
+    }
+
+    public String getSuperAdminWriteScope() {
+        String writeScope = null;
+        if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
+            return writeScope;
+        }
+        return getSuperAdminScopes().stream().filter(scope -> scope.contains("write")).findFirst().orElse(null);
+    }
+
+    public String getSuperAdminDeleteScope() {
+        String deleteScope = null;
+        if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
+            return deleteScope;
+        }
+        return getSuperAdminScopes().stream().filter(scope -> scope.contains("delete")).findFirst().orElse(null);
+    }
+
+    public boolean hasSuperAdminReadScope(List<String> userScopes) {
+        if (userScopes == null || userScopes.isEmpty()) {
+            return false;
+        }
+        return userScopes.contains(getSuperAdminReadScope());
+    }
+
+    public boolean hasSuperAdminWriteScope(List<String> userScopes) {
+        if (userScopes == null || userScopes.isEmpty()) {
+            return false;
+        }
+        return userScopes.contains(getSuperAdminWriteScope());
+    }
+
+    public boolean hasSuperAdminDeleteScope(List<String> userScopes) {
+        if (userScopes == null || userScopes.isEmpty()) {
+            return false;
+        }
+        return userScopes.contains(getSuperAdminDeleteScope());
+    }
+    
+    public boolean hasSuperAdminScope(List<String> userScopes, final String httpRequestMethod) {
+        if (userScopes == null || userScopes.isEmpty() || StringUtils.isBlank(httpRequestMethod)) {
+            return false;
+        }
+
+        switch (httpRequestMethod) {
+        case ApiConstants.READ_REQUEST:
+            return hasSuperAdminReadScope(userScopes) || hasSuperAdminWriteScope(userScopes);
+    
+        case ApiConstants.DELETE_REQUEST:
+            return hasSuperAdminDeleteScope(userScopes) || hasSuperAdminWriteScope(userScopes);
+
+        default:
+            return hasSuperAdminWriteScope(userScopes);
+   
+        }
     }
     
     public String getIssuer() {
@@ -747,7 +819,6 @@ public class AuthUtil {
         }
 
         return attributeValueList;
-
     }
 
     public String getUserInum(HttpHeaders httpHeaders) {
@@ -794,6 +865,17 @@ public class AuthUtil {
         PrintWriter pw = new PrintWriter(sw);
         throwable.printStackTrace(pw); // Redirects the trace output into the StringWriter
         return sw.toString();
+    }
+    
+    public List<String> getStringList(Object rawObject){
+        return Optional.ofNullable(rawObject)
+                .filter(List.class::isInstance)
+                .map(List.class::cast)
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .toList();         
     }
 
 }

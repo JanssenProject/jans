@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.mgt.rest;
 
+import io.jans.as.model.common.IntrospectionResponse;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
 import io.jans.configapi.core.model.ApiError;
@@ -7,6 +8,7 @@ import io.jans.configapi.core.model.exception.ApiApplicationException;
 import io.jans.configapi.core.util.ApiErrorResponse;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
+
 import io.jans.configapi.plugin.mgt.model.user.CustomUser;
 import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.service.UserMgmtService;
@@ -80,7 +82,7 @@ public class UserResource extends BaseResource {
 
     @Inject
     UserMgmtService userMgmtSrv;
-
+    
     /**
      * Retrieves a paged list of users matching the provided search, filter, and sort parameters.
      *
@@ -163,7 +165,7 @@ public class UserResource extends BaseResource {
         CustomUser customUser = null;
         try {
             // validate user role-permission
-            validateUserPermission(inum, null);
+            validateUserPermission(inum, null, ApiConstants.READ_REQUEST);
 
             User user = userMgmtSrv.getUserBasedOnInum(inum);
             checkResourceNotNull(user, USER);
@@ -295,7 +297,7 @@ public class UserResource extends BaseResource {
             @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isInfoEnabled()) {
-            logger.info("User details to be updated - customUser:{}, removeNonLDAPAttributes:{}", escapeLog(customUser),
+            logger.info("User details to be updated - customUser:{}, removeNonLDAPAttributes:{}, ", escapeLog(customUser),
                     removeNonLDAPAttributes);
         }
 
@@ -304,7 +306,7 @@ public class UserResource extends BaseResource {
             User user = setUserAttributes(customUser);
 
             // validate user role-permission
-            validateUserPermission(null, user);
+            validateUserPermission(null, user, ApiConstants.WRITE_REQUEST);
 
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(user);
@@ -391,7 +393,8 @@ public class UserResource extends BaseResource {
             User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
 
             // validate user role-permission
-            validateUserPermission(inum, null);            
+            validateUserPermission(inum, existingUser, ApiConstants.WRITE_REQUEST);     
+            
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(existingUser);
             checkResourceNotNull(existingUser, USER);
@@ -696,9 +699,15 @@ public class UserResource extends BaseResource {
         return user;
     }
     
-    private void validateUserPermission(String inumPathVariable, User user) throws ApiApplicationException {
+    private void validateUserPermission(String inumPathVariable, User user, String httpRequestMethod) throws ApiApplicationException {
         if(logger.isInfoEnabled()) {
-            logger.info("ValidateUserPermission - inumPathVariable:{}, user:{}", escapeLog(inumPathVariable), escapeLog(user));
+            logger.info("ValidateUserPermission - inumPathVariable:{}, user:{}, httpRequestMethod:{}", escapeLog(inumPathVariable), escapeLog(user), httpRequestMethod);
+        }
+
+        logger.error("\n\n\n ValidateUserPermission - inumPathVariable:{}, user:{}, httpRequestMethod:{}", escapeLog(inumPathVariable), escapeLog(user), httpRequestMethod);
+        
+        if (!authUtil.isUserRolePermissionValidationEnabled()) {
+            return;
         }
 
         HttpHeaders httpHeaders = getHttpHeaders();
@@ -706,7 +715,7 @@ public class UserResource extends BaseResource {
             return;
         }
         String loggedInUserInum = authUtil.getUserInum(httpHeaders);    
-
+        
         if (StringUtils.isBlank(loggedInUserInum)) {
             return;
         }
@@ -717,15 +726,15 @@ public class UserResource extends BaseResource {
         }
 
         // logged-in user updating other user profile - validate permission
-        validateUserPermission(loggedInUserInum, inumPathVariable, user);
+        validateUserPermission(loggedInUserInum, inumPathVariable, user, httpRequestMethod);
     }
 
-    private void validateUserPermission(String loggedInUserInum, String inumPathVariable, User candidateUser)
+    private void validateUserPermission(String loggedInUserInum, String inumPathVariable, User candidateUser, String httpRequestMethod)
             throws ApiApplicationException {
 
         if(logger.isInfoEnabled()) {
-            logger.info("validateUserPermission - loggedInUserInum {}, inumPathVariable:{}, candidateUser:{}",
-                escapeLog(loggedInUserInum), escapeLog(inumPathVariable), escapeLog(candidateUser));
+            logger.info("validateUserPermission - loggedInUserInum {}, inumPathVariable:{}, candidateUser:{}, httpRequestMethod:{}",
+                escapeLog(loggedInUserInum), escapeLog(inumPathVariable), escapeLog(candidateUser), httpRequestMethod);
         }
 
         if (StringUtils.isBlank(loggedInUserInum) && candidateUser == null) {
@@ -740,17 +749,21 @@ public class UserResource extends BaseResource {
                             new StringBuilder("Logged-in user{").append(loggedInUserInum).append("} details missing")));
         }
 
-        boolean isAdmin = isAdminUser(loggedInUserInum, loggedInUser);
+        boolean isAdmin = isAdminUser(loggedInUserInum, loggedInUser, httpRequestMethod);
         if(logger.isInfoEnabled()) {
             logger.info("validateUserPermission - loggedInUserInum:{}, isAdmin:{}", escapeLog(loggedInUserInum), isAdmin);
         }
 
         if (StringUtils.isNotBlank(inumPathVariable) && !isAdmin) {
+            StringBuilder errMsg =  new StringBuilder("PathVariable User {").append(loggedInUserInum)
+                    .append("} does not have super admin permission to fetch/modify user{")
+                    .append(inumPathVariable).append("}");
+                    
+            if(logger.isErrorEnabled()) {
+                logger.error("validateUserPermission - errMsg:{}",escapeLog(errMsg));
+            }
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
-                            new StringBuilder("User{").append(loggedInUserInum)
-                                    .append("} does not have 'admin' role to fetch/modify user{")
-                                    .append(inumPathVariable).append("}")));
+                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),errMsg));
         }
 
         if(candidateUser == null) {
@@ -766,46 +779,51 @@ public class UserResource extends BaseResource {
         // Return if logged-in user is updating own profile
         if (StringUtils.isNotBlank(candidateUserInum) && !loggedInUserInum.equals(candidateUserInum) && !isAdmin) {
             StringBuilder errMsg = new StringBuilder("Logged-in user{").append(loggedInUserInum)
-                    .append("} has insufficient User role-permission, to view/update details of {")
-                    .append(inumPathVariable).append("}");
-            if(logger.isInfoEnabled()) {
-                logger.error("validateUserPermission - UNAUTHORIZED-insufficient-permission - errMsg:{}",escapeLog(errMsg));
+                    .append("} does not have super admin permission, to view/update details of {")
+                    .append(candidateUserInum).append("}");
+            if(logger.isErrorEnabled()) {
+                logger.error("validateUserPermission - candidateUserInum - errMsg:{}",escapeLog(errMsg));
             }
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
         }
     }
 
-    private boolean isAdminUser(String loggedInUserInum, User loggedInUser) throws ApiApplicationException {
-        logger.info("isAdminUser - loggedInUserInum:{}, loggedInUser:{}", loggedInUserInum, loggedInUser);
+    private boolean isAdminUser(String loggedInUserInum, User loggedInUser, String httpRequestMethod)  {
+        logger.error("UserResource::isAdminUser() - loggedInUserInum:{}, loggedInUser:{}, httpRequestMethod:{}, getContainerRequestContext():{}", loggedInUserInum, loggedInUser, httpRequestMethod, getContainerRequestContext());
         boolean isAdmin = false;
 
         if (loggedInUser == null) {
             return isAdmin;
         }
-
-        List<String> loggedInUserRoleList = authUtil.getUserRole(loggedInUser);
-        if(logger.isDebugEnabled()) {
-            logger.debug("isAdminUser - loggedInUserInum:{}, loggedInUserRoleList:{}", escapeLog(loggedInUserInum),
-                loggedInUserRoleList);
-        }
-
-        if (loggedInUserRoleList == null || loggedInUserRoleList.isEmpty()) {
-            StringBuilder errMsg = new StringBuilder("User role-permission is missing for logged-in user {")
-                    .append(loggedInUserInum).append("}");
-            if(logger.isInfoEnabled()) {
-                logger.error("validateUserPermission - UNAUTHORIZED- missing-role - errMsg:{}", escapeLog(errMsg));
-            }
-            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
-
-        }
-
-        isAdmin = loggedInUserRoleList.stream().anyMatch((ele -> ele.equalsIgnoreCase("api-admin")));
+       
+        isAdmin = authUtil.hasSuperAdminScope(getIntrospectionScope(), httpRequestMethod);
         if(logger.isInfoEnabled()){
             logger.info("isAdminUser - loggedInUserInum:{}, isAdmin:{}", escapeLog(loggedInUserInum), isAdmin);
         }
         return isAdmin;
+    }
+    
+    private List<String> getIntrospectionScope(){
+        logger.error("UserResource::getScope() -  getHttpHeaders():{}",  getHttpHeaders());
+        
+        
+        IntrospectionResponse introspectionResponse = null;
+        if (getHttpHeaders()!=null) {
+            
+            logger.error("UserResource::getScope() -  getHttpHeaders().getHeaderString(HttpHeaders.AUTHORIZATION):{}",  getHttpHeaders().getHeaderString(HttpHeaders.AUTHORIZATION));
+            introspectionResponse = authUtil.getIntrospectionResponse(getHttpHeaders().getHeaderString(HttpHeaders.AUTHORIZATION));
+        }
+
+               
+        List<String> tokenScope = null;        
+        if(introspectionResponse != null) {            
+            tokenScope = introspectionResponse.getScope();
+
+        }
+        
+        logger.error("\n\n\n *** UserResource::isAdminUser - getContainerRequestContext():{}, tokenScope:{}", getContainerRequestContext(), tokenScope);
+        return tokenScope;
     }
 
 }

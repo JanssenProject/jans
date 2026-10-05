@@ -813,6 +813,8 @@ components:
           $ref: "#/components/schemas/CedarlingConfiguration"
         grpcConfiguration:
           $ref: "#/components/schemas/GrpcConfiguration"
+        traceConfiguration:
+          $ref: "#/components/schemas/TraceConfiguration"
         statEnabled:
           type: boolean
           description: Active stat enabled
@@ -945,6 +947,79 @@ components:
           type: string
           description: URI to policy store. Policy store can be either json/zip
       description: List of Policy Sources
+    TraceClientDomainBinding:
+      type: object
+      properties:
+        clientId:
+          type: string
+          description: OAuth client id bound to the evidence domain
+        evidenceDomainId:
+          type: string
+          description: Evidence domain id the client is bound to
+        allowedProducerIds:
+          type: array
+          description: Producer ids the client is allowed to submit records for; "*"
+            allows any producer
+          items:
+            type: string
+            description: Producer ids the client is allowed to submit records for;
+              "*" allows any producer
+      description: OAuth client to evidence-domain bindings
+    TraceConfiguration:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Enable TRACE evidence ingestion endpoints
+        defaultEvidenceDomainId:
+          type: string
+          description: Evidence domain id used when a submitting client has no explicit
+            binding
+        clientDomainBindings:
+          type: array
+          description: OAuth client to evidence-domain bindings
+          items:
+            $ref: "#/components/schemas/TraceClientDomainBinding"
+        latenessThresholdSeconds:
+          type: integer
+          description: Seconds after signed_at a record is accepted before being flagged
+            late
+          format: int32
+        maxRequestBytes:
+          type: integer
+          description: Maximum accepted TRACE request body size in bytes
+          format: int32
+        maxJsonDepth:
+          type: integer
+          description: Maximum accepted JSON nesting depth of a TRACE assertion
+          format: int32
+        maxStringLength:
+          type: integer
+          description: Maximum accepted JSON string length (UTF-16 units) in a TRACE
+            assertion
+          format: int32
+        maxArrayLength:
+          type: integer
+          description: Maximum accepted JSON array length in a TRACE assertion
+          format: int32
+        maxObjectMembers:
+          type: integer
+          description: Maximum accepted JSON object member count in a TRACE assertion
+          format: int32
+        receiptAllocationRetryLimit:
+          type: integer
+          description: Maximum retries when allocating a receipt-chain sequence number
+          format: int32
+        receiptRepairIntervalSeconds:
+          type: integer
+          description: Interval in seconds between receipt repair timer runs
+          format: int32
+        pendingReceiptTimeoutSeconds:
+          type: integer
+          description: Seconds a PENDING receipt may stay unresolved before the repair
+            timer settles it
+          format: int32
+      description: TRACE evidence ingestion configuration
     JsonPatch:
       type: object
     JsonNode:

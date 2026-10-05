@@ -6,6 +6,7 @@ package io.jans.configapi.filters;
  */
 
 import io.jans.configapi.core.test.BaseTest;
+import io.jans.configapi.filters.SecurityResponseHeadersFilter;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;

@@ -97,6 +97,9 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "The path to the external log4j2 logging configuration.")
     private String externalLoggerConfiguration;
+    
+    @Schema(description = "List of Super Admin oAuth scopes.")
+    private List<String> superAdminScopes;
 
     @Schema(description = "Choose whether to disable JDK loggers.")
     private Boolean disableJdkLogger = true;
@@ -357,6 +360,14 @@ public class ApiAppConfiguration implements Configuration {
     public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
+    
+    public List<String> getSuperAdminScopes() {
+        return superAdminScopes;
+    }
+
+    public void setSuperAdminScopes(List<String> superAdminScopes) {
+        this.superAdminScopes = superAdminScopes;
+    }
 
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
@@ -476,7 +487,7 @@ public class ApiAppConfiguration implements Configuration {
                 + authOpenidTokenUrl + ", authOpenidRevokeUrl=" + authOpenidRevokeUrl + ", exclusiveAuthScopes="
                 + exclusiveAuthScopes + ", corsConfigurationFilters=" + corsConfigurationFilters + ", loggingLevel="
                 + loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
-                + externalLoggerConfiguration + ", disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount
+                + externalLoggerConfiguration + ", superAdminScopes=" + superAdminScopes +" ,disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount
                 + ", acrExclusionList=" + acrExclusionList + ", userExclusionAttributes=" + userExclusionAttributes
                 + ", userMandatoryAttributes=" + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration
                 + ", auditLogConf=" + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf
