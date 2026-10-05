@@ -74,6 +74,36 @@ pub struct MultiIssuerAuthorizeResult {
     pub response: Response,
     pub decision: bool,
     pub request_id: String,
+    pub dropped_tokens: Vec<DroppedToken>,
+}
+
+/// A token dropped during multi-issuer authorization, identified by its input
+/// `mapping` and zero-based `index`. `reason` is the stable reason slug
+/// (`jwt_validation_failed`, `duplicate_token`, …); `detail` carries the
+/// claim-free input error for `invalid_input`, otherwise empty.
+#[derive(Debug, uniffi::Record)]
+pub struct DroppedToken {
+    pub mapping: String,
+    // i64 (not u64) so the Kotlin/Java binding exposes a signed Long rather
+    // than a JVM-hostile ULong; usize casts fit trivially.
+    pub index: i64,
+    pub reason: String,
+    pub detail: String,
+}
+
+impl From<core::DroppedToken> for DroppedToken {
+    fn from(d: core::DroppedToken) -> Self {
+        let detail = match &d.reason {
+            core::DropReason::InvalidInput(e) => e.to_string(),
+            _ => String::new(),
+        };
+        Self {
+            mapping: d.mapping,
+            index: d.index as i64,
+            reason: d.reason.slug().to_string(),
+            detail,
+        }
+    }
 }
 
 impl From<core::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult {
@@ -82,6 +112,7 @@ impl From<core::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult {
             response: result.response.into(),
             decision: result.decision,
             request_id: result.request_id,
+            dropped_tokens: result.dropped_tokens.into_iter().map(Into::into).collect(),
         }
     }
 }

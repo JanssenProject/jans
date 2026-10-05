@@ -6,6 +6,7 @@
  */
 
 use super::authorize_result_response::AuthorizeResultResponse;
+use super::dropped_token::DroppedToken;
 use pyo3::prelude::*;
 
 /// MultiIssuerAuthorizeResult
@@ -24,6 +25,10 @@ use pyo3::prelude::*;
 ///
 /// .. method:: request_id(self) -> str
 ///     Returns the unique request ID for this authorization.
+///
+/// .. method:: dropped_tokens(self) -> list[DroppedToken]
+///     Returns the tokens the caller supplied that were not used in this
+///     decision (empty when every token contributed).
 ///
 #[pyclass]
 pub struct MultiIssuerAuthorizeResult {
@@ -45,6 +50,16 @@ impl MultiIssuerAuthorizeResult {
     /// Get the request ID associated with this result
     fn request_id(&self) -> String {
         self.inner.request_id.clone()
+    }
+
+    /// Tokens dropped from this decision (empty when every token was used).
+    fn dropped_tokens(&self) -> Vec<DroppedToken> {
+        self.inner
+            .dropped_tokens
+            .iter()
+            .cloned()
+            .map(DroppedToken::from)
+            .collect()
     }
 }
 

@@ -8,8 +8,9 @@ use cedarling::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest,
     BatchAuthorizeResponse as CedarBatchAuthorizeResponse, BatchAuthorizeUnsignedRequest,
     BatchItemError as CedarBatchItemError, BootstrapConfig, BootstrapConfigRaw, DataApi,
-    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage,
-    MetricsSnapshot as CedarMetricsSnapshot, PolicyId, RequestUnsigned, TrustedIssuerLoadingInfo,
+    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats,
+    DroppedToken as CedarDroppedToken, LogStorage, MetricsSnapshot as CedarMetricsSnapshot,
+    PolicyId, RequestUnsigned, TrustedIssuerLoadingInfo,
 };
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
@@ -47,6 +48,14 @@ pub struct MultiIssuerAuthorizeResult {
     /// Request ID of the authorization request
     #[wasm_bindgen(getter_with_clone)]
     pub request_id: String,
+
+    /// Tokens the caller supplied that were not used in this decision.
+    ///
+    /// Not a `wasm_bindgen` field (its element type is a plain Rust struct);
+    /// read it from JS via [`Self::dropped_tokens`] or `jsonString`. Omitted
+    /// from the JSON form when empty.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    dropped_tokens: Vec<CedarDroppedToken>,
 }
 
 #[wasm_bindgen]
@@ -55,6 +64,13 @@ impl MultiIssuerAuthorizeResult {
     #[wasm_bindgen(js_name = jsonString)]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
+    }
+
+    /// Tokens dropped from this decision, as an array of
+    /// `{mapping, index, reason}` objects (empty when every token was used).
+    #[wasm_bindgen(js_name = droppedTokens)]
+    pub fn dropped_tokens(&self) -> Result<JsValue, Error> {
+        serde_wasm_bindgen::to_value(&self.dropped_tokens)
     }
 }
 
@@ -66,6 +82,7 @@ impl From<cedarling::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult 
             },
             decision: value.decision,
             request_id: value.request_id,
+            dropped_tokens: value.dropped_tokens,
         }
     }
 }
