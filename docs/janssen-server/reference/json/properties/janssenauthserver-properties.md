@@ -264,7 +264,7 @@ tags:
 | requestUriHashVerificationEnabled | Boolean value specifying whether the OP supports use of the request_uri hash verification | [Details](#requesturihashverificationenabled) |
 | requestUriParameterSupported | Boolean value specifying whether the OP supports use of the request_uri parameter | [Details](#requesturiparametersupported) |
 | requirePar | Boolean value to indicate of Pushed Authorisation Request(PAR)is required | [Details](#requirepar) |
-| requirePkce | Boolean value true check for Proof Key for Code Exchange (PKCE). Required unconditionally for the authorization code grant per OAuth 2.1. | [Details](#requirepkce) |
+| requirePkce | Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled. | [Details](#requirepkce) |
 | requireRequestObjectEncryption | Boolean value true encrypts request object | [Details](#requirerequestobjectencryption) |
 | requireRequestUriRegistration | Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter | [Details](#requirerequesturiregistration) |
 | responseModesSupported | This list details which OAuth 2.0 response modes are supported by this OP | [Details](#responsemodessupported) |
@@ -2637,7 +2637,7 @@ tags:
 
 ## requirePkce
 
-- Description: Boolean value true check for Proof Key for Code Exchange (PKCE). Required unconditionally for the authorization code grant per OAuth 2.1.
+- Description: Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled.
 
 - Required: No
 
