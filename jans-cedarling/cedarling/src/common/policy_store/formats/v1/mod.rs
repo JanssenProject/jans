@@ -76,3 +76,86 @@ pub(crate) fn parse(loaded: LoadedPolicyStore) -> Result<PolicyStoreDoc, ParseSt
         },
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::common::policy_store::loader::{CustomIssuerFile, IssuerFile, PolicyFile};
+
+    /// Golden v1 store: no `policy_store_spec_version`, and every version-specific
+    /// file parses with v1 semantics, including the frozen `jti` default.
+    #[test]
+    fn golden_store_parses() {
+        let loaded = LoadedPolicyStore {
+            metadata_json: r#"{
+                "cedar_version": "4.4.0",
+                "policy_store": { "id": "abc123def456", "name": "Golden v1", "version": "1.0.0" }
+            }"#
+            .to_string(),
+            schema: None,
+            schema_source_exists: false,
+            policies: vec![PolicyFile {
+                name: "allow.cedar".to_string(),
+                content: "permit(principal, action, resource);".to_string(),
+            }],
+            templates: vec![],
+            entities: vec![],
+            trusted_issuers: vec![IssuerFile {
+                name: "jans.json".to_string(),
+                content: r#"{
+                    "name": "Jans Server",
+                    "description": "Jans OpenID Connect Provider",
+                    "configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
+                    "token_metadata": {
+                        "access_token": { "entity_type_name": "Jans::Access_token" }
+                    }
+                }"#
+                .to_string(),
+            }],
+            custom_issuers: vec![CustomIssuerFile {
+                name: "acme.json".to_string(),
+                content:
+                    r#"{ "tokens_mappings": { "Acme::Custom": { "required_claims": ["sub"] } } }"#
+                        .to_string(),
+            }],
+        };
+
+        let doc = parse(loaded).expect("golden v1 store should parse");
+
+        assert_eq!(
+            doc.metadata.policy_store.name, "Golden v1",
+            "metadata name mismatch"
+        );
+        assert_eq!(
+            doc.metadata.policy_store.version, "1.0.0",
+            "content version mismatch"
+        );
+
+        assert_eq!(
+            doc.trusted_issuers.len(),
+            1,
+            "one issuer file should yield one issuer"
+        );
+        let token = &doc.trusted_issuers[0].issuer.token_metadata["access_token"];
+        assert_eq!(
+            token.entity_type_name, "Jans::Access_token",
+            "token metadata mismatch"
+        );
+        assert_eq!(
+            token.token_id, "jti",
+            "v1 must keep its frozen `jti` default"
+        );
+
+        assert!(
+            doc.custom_issuers[0].meta.tokens_mappings["Acme::Custom"]
+                .required_claims
+                .contains("sub"),
+            "custom issuer should parse"
+        );
+        assert_eq!(
+            doc.content.policies.len(),
+            1,
+            "policy files should pass through"
+        );
+    }
+}
