@@ -73,16 +73,16 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.logIt(f"Extracting {jetty_archive} into {jetty_dist}")
         shutil.unpack_archive(jetty_archive, format='gztar', extract_dir=jetty_dist)
 
-        jettyDestinationPath = os.path.join(jetty_dist, '{}-{}'.format(self.jetty_dist_string, self.jetty_exact_version_string))
+        jetty_destination_path = os.path.join(jetty_dist, '{}-{}'.format(self.jetty_dist_string, self.jetty_exact_version_string))
 
-        self.run([paths.cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
-        self.run([paths.cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
+        self.run([paths.cmd_ln, '-sf', jetty_destination_path, self.jetty_home])
+        self.run([paths.cmd_chmod, '-R', "755", "%s/bin/" % jetty_destination_path])
 
         self.applyChangesInFiles(self.app_custom_changes[NAME_STR])
 
         self.replace_favicon()
 
-        self.chown(jettyDestinationPath, Config.jetty_user, Config.jetty_group, recursive=True)
+        self.chown(jetty_destination_path, Config.jetty_user, Config.jetty_group, recursive=True)
         self.run([paths.cmd_chown, '-h', '{}:{}'.format(Config.jetty_user, Config.jetty_group), self.jetty_home])
 
         self.run([paths.cmd_mkdir, '-p', self.jetty_base])
