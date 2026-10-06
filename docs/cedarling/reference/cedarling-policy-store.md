@@ -315,16 +315,52 @@ The current version is **2**. The oldest version Cedarling still reads is **1**.
 | `3` or higher | Error: newer than this Cedarling supports |
 | not a non-negative integer (`"2"`, `-1`, `2.5`) | Error |
 
-### Version changelog
+Each version below is a numbered entry of the specification. Any change to the
+policy store file format bumps `policy_store_spec_version` and adds its entry to
+this section in the same pull request.
 
-| Version | Changes |
-| --- | --- |
-| 1 | The original directory-based and `.cjar` format. It has no `policy_store_spec_version` field, so any store that omits the field is read as version 1. |
-| 2 | Adds the `policy_store_spec_version` field. Nothing else changed: a version 1 store becomes a valid version 2 store by adding the field. |
+### Version 1
 
-### Upgrading a store
+**Status:** supported, outdated. **Change type:** baseline.
 
-To move a store from version 1 to version 2, add the field to `metadata.json`:
+The original directory-based and `.cjar` format. It has no
+`policy_store_spec_version` field, so any store that omits the field is read as
+version 1.
+
+```json
+{
+  "cedar_version": "4.4.0",
+  "policy_store": {
+    "id": "abc123def456",
+    "name": "My Application Policies"
+  }
+}
+```
+
+### Version 2
+
+**Status:** current. **Change type:** additive.
+
+**What changed:** `metadata.json` gains the required `policy_store_spec_version`
+field. No other file changes.
+
+**Why:** without a declared format version, Cedarling cannot tell which revision
+of the format a store follows, so a breaking change would be silently misread
+instead of migrated or rejected.
+
+Before (version 1):
+
+```json
+{
+  "cedar_version": "4.4.0",
+  "policy_store": {
+    "id": "abc123def456",
+    "name": "My Application Policies"
+  }
+}
+```
+
+After (version 2):
 
 ```json
 {
@@ -337,8 +373,22 @@ To move a store from version 1 to version 2, add the field to `metadata.json`:
 }
 ```
 
-No other file in the store needs to change. A store that omits the field keeps
-loading, so upgrading is not urgent, but every load logs the warning below.
+**Upgrading from version 1:**
+
+1. Add `"policy_store_spec_version": 2` at the root of `metadata.json`.
+2. No other file in the store needs to change.
+3. Run `cedarling-cli validate` against the store. It should pass with no
+   "outdated" warning.
+
+A version 1 store keeps loading, so upgrading is not urgent, but every load logs
+the warning below.
+
+### Unknown fields
+
+In every version, unknown keys in `metadata.json` and in trusted-issuer files are
+ignored, so a misspelled optional key is silently dropped rather than reported.
+Unknown keys in custom-issuer files are rejected with an error. Migrating a store
+from one version to the next keeps every field the older version recognizes.
 
 ### Warnings
 
