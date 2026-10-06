@@ -7,7 +7,7 @@
 package io.jans.as.server.discovery.ws.rs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.error.DefaultErrorResponse;
 import io.jans.as.model.gluu.GluuErrorResponseType;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.DiscoveryService;
@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -37,9 +38,6 @@ public class OAuthAuthorizationServerMetadataWS {
 
     @Inject
     private Logger log;
-
-    @Inject
-    private ErrorResponseFactory errorResponseFactory;
 
     @Inject
     private DiscoveryService discoveryService;
@@ -71,12 +69,22 @@ public class OAuthAuthorizationServerMetadataWS {
             return buildResponse(jsonObj);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
-            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, GluuErrorResponseType.SERVER_ERROR, "Internal error.");
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(buildErrorEntity())
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build());
         }
     }
 
     private Response buildResponse(JSONObject jsonObj) throws JsonProcessingException {
         final String entity = ServerUtil.toPrettyJson(jsonObj).replace("\\/", "/");
         return Response.ok(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
+    }
+
+    private static String buildErrorEntity() {
+        final DefaultErrorResponse errorResponse = new DefaultErrorResponse();
+        errorResponse.setType(GluuErrorResponseType.SERVER_ERROR);
+        errorResponse.setErrorDescription("Internal error.");
+        return errorResponse.toJSonString();
     }
 }

@@ -77,6 +77,7 @@ paths:
                 description: OAuth 2.0 Authorization Server Metadata
                 required:
                   - issuer
+                  - response_types_supported
                 properties:
                   issuer:
                     type: string

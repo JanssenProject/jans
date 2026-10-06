@@ -1,9 +1,9 @@
 package io.jans.as.server.discovery.ws.rs;
 
-import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.service.DiscoveryService;
 import io.jans.as.server.service.LocalResponseCache;
 import io.jans.as.server.service.external.ExternalDiscoveryService;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.json.JSONObject;
 import org.mockito.InjectMocks;
@@ -17,7 +17,9 @@ import org.testng.annotations.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * Tests for OAuthAuthorizationServerMetadataWS.
@@ -34,9 +36,6 @@ public class OAuthAuthorizationServerMetadataWSTest {
     private Logger log;
 
     @Mock
-    private ErrorResponseFactory errorResponseFactory;
-
-    @Mock
     private DiscoveryService discoveryService;
 
     @Mock
@@ -51,16 +50,21 @@ public class OAuthAuthorizationServerMetadataWSTest {
     }
 
     @Test
-    public void getMetadata_whenNotCached_shouldReturnDiscoveryServiceResponse() {
+    public void getMetadata_whenScriptModificationAccepted_shouldReturnModifiedResponse() {
         JSONObject discoveryResponse = new JSONObject();
         discoveryResponse.put("issuer", "https://example.com");
         when(discoveryService.process()).thenReturn(discoveryResponse);
-        when(externalDiscoveryService.modifyDiscovery(any(), any())).thenReturn(true);
+        when(externalDiscoveryService.modifyDiscovery(any(), any())).thenAnswer(invocation -> {
+            invocation.<JSONObject>getArgument(0).put("scripted", true);
+            return true;
+        });
 
         Response response = oAuthAuthorizationServerMetadataWS.getMetadata(null, null);
+        JSONObject responseJson = new JSONObject(response.getEntity().toString());
 
         assertEquals(response.getStatus(), 200);
-        assertTrue(response.getEntity().toString().contains("https://example.com"));
+        assertTrue(responseJson.getBoolean("scripted"));
+        assertEquals(responseJson.getString("issuer"), "https://example.com");
     }
 
     @Test
@@ -80,11 +84,34 @@ public class OAuthAuthorizationServerMetadataWSTest {
         JSONObject discoveryResponse = new JSONObject();
         discoveryResponse.put("issuer", "https://example.com");
         when(discoveryService.process()).thenReturn(discoveryResponse);
-        when(externalDiscoveryService.modifyDiscovery(any(), any())).thenReturn(false);
+        when(externalDiscoveryService.modifyDiscovery(any(), any())).thenAnswer(invocation -> {
+            invocation.<JSONObject>getArgument(0).put("scripted", true);
+            return false;
+        });
 
         Response response = oAuthAuthorizationServerMetadataWS.getMetadata(null, null);
+        JSONObject responseJson = new JSONObject(response.getEntity().toString());
 
         assertEquals(response.getStatus(), 200);
-        assertTrue(response.getEntity().toString().contains("https://example.com"));
+        assertFalse(responseJson.has("scripted"));
+        assertEquals(responseJson.getString("issuer"), "https://example.com");
+    }
+
+    @Test
+    public void getMetadata_whenDiscoveryServiceThrows_shouldReturnServerErrorWithDescription() {
+        when(discoveryService.process()).thenThrow(new RuntimeException("boom"));
+
+        try {
+            oAuthAuthorizationServerMetadataWS.getMetadata(null, null);
+            fail("Expected WebApplicationException to be thrown");
+        } catch (WebApplicationException ex) {
+            final Response response = ex.getResponse();
+            final JSONObject responseJson = new JSONObject(response.getEntity().toString());
+
+            assertEquals(response.getStatus(), 500);
+            assertEquals(responseJson.getString("error"), "server_error");
+            assertTrue(responseJson.has("error_description"));
+            assertFalse(responseJson.getString("error_description").isEmpty());
+        }
     }
 }
