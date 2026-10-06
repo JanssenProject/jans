@@ -1275,7 +1275,7 @@ mod test {
             match warning {
                 DefaultEntityWarning::NonObjectParentEntry { entry_id, value } => {
                     assert_eq!(entry_id, "test_entity");
-                    assert!(!value.is_empty());
+                    assert_ne!(value, "");
                 },
                 DefaultEntityWarning::InvalidParentUid { .. } => {
                     panic!("Expected NonObjectParentEntry warning, got {warning:?}")
@@ -1320,7 +1320,7 @@ mod test {
             match warning {
                 DefaultEntityWarning::NonObjectParentEntry { entry_id, value } => {
                     assert_eq!(entry_id, "test_entity");
-                    assert!(!value.is_empty());
+                    assert_ne!(value, "");
                 },
                 DefaultEntityWarning::InvalidParentUid { .. } => {
                     panic!("Expected NonObjectParentEntry warning, got {warning:?}")
