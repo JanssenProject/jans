@@ -52,9 +52,12 @@ impl DroppedToken {
 /// embed token payloads, claim values, or processor-supplied error text. Only
 /// the drop category (and, for [`DropReason::InvalidInput`], which input field
 /// was malformed) is exposed. The serde representation is adjacently tagged
-/// `{"kind": "...", "detail": ...}` and the `kind` slugs are a stable API
-/// consumed by language bindings; see [`DropReason::slug`].
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, thiserror::Error)]
+/// `{"kind": "...", "detail": ..., "message": "..."}`: `detail` only appears
+/// for [`DropReason::InvalidInput`], while `message` is the [`DropReason`]
+/// `Display` text and is therefore present and non-empty for every variant,
+/// including unit ones. The `kind` slugs are a stable API consumed by
+/// language bindings; see [`DropReason::slug`].
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, thiserror::Error)]
 #[serde(tag = "kind", content = "detail", rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum DropReason {
@@ -90,6 +93,23 @@ pub enum DropReason {
     EntityBuildFailed,
 }
 
+impl Serialize for DropReason {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeMap;
+
+        let mut map = serializer.serialize_map(None)?;
+        map.serialize_entry("kind", self.slug())?;
+        if let Self::InvalidInput(err) = self {
+            map.serialize_entry("detail", err)?;
+        }
+        map.serialize_entry("message", &self.message())?;
+        map.end()
+    }
+}
+
 impl DropReason {
     /// Stable slug identifying this reason which matches the serde `kind` tag and
     /// is safe to use as a metric label, a structured log field, or a
@@ -105,6 +125,15 @@ impl DropReason {
             Self::CustomProcessingTimedOut => "custom_processing_timed_out",
             Self::EntityBuildFailed => "entity_build_failed",
         }
+    }
+
+    /// Claim-free human-readable message for this reason, derived from
+    /// [`Display`](std::fmt::Display). Always non-empty, including for unit
+    /// variants. Serialized as the `message` entry and surfaced through the
+    /// result, decision log, and language bindings.
+    #[must_use]
+    pub fn message(&self) -> String {
+        self.to_string()
     }
 }
 
@@ -144,9 +173,42 @@ mod tests {
         let value = serde_json::to_value(&reason).expect("serialize");
         assert_eq!(
             value,
-            json!({"kind": "invalid_input", "detail": "empty_payload"}),
+            json!({
+                "kind": "invalid_input",
+                "detail": "empty_payload",
+                "message": "token input was invalid: Empty payload"
+            }),
             "InvalidInput should carry the specific input error as adjacent detail"
         );
+    }
+
+    #[test]
+    fn every_reason_serializes_non_empty_message() {
+        let cases = [
+            DropReason::InvalidInput(TokenInputError::EmptyMapping),
+            DropReason::JwtValidationFailed,
+            DropReason::DuplicateToken,
+            DropReason::NoProcessorRegistered,
+            DropReason::CustomProcessingFailed,
+            DropReason::CustomProcessingTimedOut,
+            DropReason::EntityBuildFailed,
+        ];
+        for reason in cases {
+            let value = serde_json::to_value(&reason).expect("serialize reason");
+            let message = value
+                .get("message")
+                .and_then(|m| m.as_str())
+                .unwrap_or_default();
+            assert_eq!(
+                message,
+                reason.to_string(),
+                "message must be the claim-free Display text for {reason:?}"
+            );
+            assert!(
+                !message.is_empty(),
+                "message must be non-empty for every reason, got {reason:?}"
+            );
+        }
     }
 
     #[test]
@@ -154,8 +216,11 @@ mod tests {
         let value = serde_json::to_value(DropReason::EntityBuildFailed).expect("serialize");
         assert_eq!(
             value,
-            json!({"kind": "entity_build_failed"}),
-            "unit reasons must not emit a detail field"
+            json!({
+                "kind": "entity_build_failed",
+                "message": "entity building failed"
+            }),
+            "unit reasons must not emit a detail field but must carry a message"
         );
     }
 
@@ -167,6 +232,20 @@ mod tests {
         assert_eq!(
             dropped, round,
             "DroppedToken should round-trip through JSON"
+        );
+
+        // The hand-written `message` entry must not disturb the derived
+        // `Deserialize`, which only reads `kind` and `detail`.
+        let dropped = DroppedToken::new(
+            "Jans::Access_Token",
+            0,
+            DropReason::InvalidInput(TokenInputError::EmptyPayload),
+        );
+        let s = serde_json::to_string(&dropped).expect("serialize");
+        let round: DroppedToken = serde_json::from_str(&s).expect("deserialize");
+        assert_eq!(
+            dropped, round,
+            "an InvalidInput DroppedToken should round-trip through JSON"
         );
     }
 

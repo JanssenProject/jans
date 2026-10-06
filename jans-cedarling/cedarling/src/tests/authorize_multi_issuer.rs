@@ -392,9 +392,21 @@ async fn test_unknown_mapping_is_dropped_without_failing_the_request() {
         Some(&json!("jwt_validation_failed")),
         "decision-log drop reason must use the stable kind slug"
     );
+    assert_eq!(
+        dropped[0].get("reason").and_then(|r| r.get("message")),
+        Some(&json!("JWT validation failed")),
+        "decision-log drop reason must carry the claim-free Display message"
+    );
     assert!(
         !decision_log.to_string().contains("dolphin_stray_790"),
         "the drop record must not leak the token's jti claim"
+    );
+
+    let result_json = serde_json::to_value(&authz_result).expect("result serializes");
+    assert_eq!(
+        result_json["dropped_tokens"][0]["reason"]["message"],
+        json!("JWT validation failed"),
+        "the result JSON drop reason must carry the claim-free Display message"
     );
 }
 

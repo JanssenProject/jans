@@ -83,7 +83,9 @@ pub struct MultiIssuerAuthorizeResult {
     /// Tokens the caller supplied that were not used in this decision.
     ///
     /// Each entry identifies a dropped token by its input mapping and index
-    /// and carries a claim-free [`DropReason`](crate::DropReason). The field is
+    /// and carries a claim-free [`DropReason`](crate::DropReason) whose
+    /// serialized form always includes a non-empty `message` derived from the
+    /// reason's `Display`. The field is
     /// omitted from the serialized form when empty, so a result with no drops
     /// is wire-compatible with the previous shape.
     #[serde(skip_serializing_if = "Vec::is_empty")]

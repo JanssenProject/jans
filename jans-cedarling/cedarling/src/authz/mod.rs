@@ -1037,7 +1037,11 @@ impl Authz {
         } = validated;
 
         // Merge entity-build drops after the validation drops, recovering each
-        // token's original request index from the validation pass.
+        // token's original request index from the validation pass. Validation
+        // drops alone can already be out of order (a duplicate-mapping drop
+        // carries the prior index but is pushed while processing the later
+        // one), and entity-build drops append after, so sort everything by
+        // the original request index for a stable audit trail.
         for name in &setup_entities.dropped_names {
             let index = indices.get(name).copied().unwrap_or(0);
             dropped_tokens.push(DroppedToken::new(
@@ -1046,6 +1050,7 @@ impl Authz {
                 DropReason::EntityBuildFailed,
             ));
         }
+        dropped_tokens.sort_by_key(|d| d.index);
 
         Ok(MultiIssuerSetup {
             validated_tokens,

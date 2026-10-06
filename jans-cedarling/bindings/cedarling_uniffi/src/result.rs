@@ -80,7 +80,8 @@ pub struct MultiIssuerAuthorizeResult {
 /// A token dropped during multi-issuer authorization, identified by its input
 /// `mapping` and zero-based `index`. `reason` is the stable reason slug
 /// (`jwt_validation_failed`, `duplicate_token`, …); `detail` carries the
-/// claim-free input error for `invalid_input`, otherwise empty.
+/// claim-free input error for `invalid_input`, otherwise empty; `message`
+/// carries the claim-free reason message and is non-empty for every reason.
 #[derive(Debug, uniffi::Record)]
 pub struct DroppedToken {
     pub mapping: String,
@@ -89,6 +90,7 @@ pub struct DroppedToken {
     pub index: i64,
     pub reason: String,
     pub detail: String,
+    pub message: String,
 }
 
 impl From<core::DroppedToken> for DroppedToken {
@@ -97,11 +99,13 @@ impl From<core::DroppedToken> for DroppedToken {
             core::DropReason::InvalidInput(e) => e.to_string(),
             _ => String::new(),
         };
+        let message = d.reason.message();
         Self {
             mapping: d.mapping,
             index: d.index as i64,
             reason: d.reason.slug().to_string(),
             detail,
+            message,
         }
     }
 }

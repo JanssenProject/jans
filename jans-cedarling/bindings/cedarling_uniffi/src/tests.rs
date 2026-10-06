@@ -888,3 +888,18 @@ fn test_drain_metrics_local_mode_snapshot_and_reset() {
         snapshot_reset.operational_stats
     );
 }
+
+#[test]
+fn test_dropped_token_carries_claim_free_message() {
+    let dropped = crate::result::DroppedToken::from(cedarling::DroppedToken::new(
+        "Jans::Access_Token",
+        1,
+        cedarling::DropReason::DuplicateToken,
+    ));
+    assert_eq!(dropped.reason, "duplicate_token", "stable reason slug");
+    assert_eq!(
+        dropped.message, "duplicate issuer and token-type combination",
+        "a unit reason must expose a non-empty claim-free message"
+    );
+    assert_eq!(dropped.detail, "", "detail stays empty for unit reasons");
+}

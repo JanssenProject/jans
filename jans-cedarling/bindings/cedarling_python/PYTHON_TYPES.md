@@ -500,6 +500,9 @@ Attributes
     str: stable reason slug (e.g. ``"jwt_validation_failed"``).
 .. attribute:: detail
     str: claim-free detail for ``invalid_input``; empty otherwise.
+.. attribute:: message
+    str: claim-free reason message from ``DropReason``'s display text;
+    non-empty for every reason.
 ---
 
 EntityData

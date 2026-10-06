@@ -358,7 +358,8 @@ pub(crate) struct DecisionLogEntry {
     /// belonging to one batch.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub batch_id: Option<Uuid>,
-    /// Tokens dropped from a multi-issuer decision (claim-free). Absent from
+    /// Tokens dropped from a multi-issuer decision (claim-free; every reason
+    /// serializes a non-empty `message`). Absent from
     /// the serialized entry when empty, so single-issuer and unsigned decision
     /// logs are unchanged.
     #[serde(skip_serializing_if = "Vec::is_empty")]

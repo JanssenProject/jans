@@ -24,6 +24,9 @@ use pyo3::prelude::*;
 ///     str: stable reason slug (e.g. ``"jwt_validation_failed"``).
 /// .. attribute:: detail
 ///     str: claim-free detail for ``invalid_input``; empty otherwise.
+/// .. attribute:: message
+///     str: claim-free reason message from ``DropReason``'s display text;
+///     non-empty for every reason.
 #[pyclass]
 pub struct DroppedToken {
     #[pyo3(get)]
@@ -34,6 +37,8 @@ pub struct DroppedToken {
     reason: String,
     #[pyo3(get)]
     detail: String,
+    #[pyo3(get)]
+    message: String,
 }
 
 #[pymethods]
@@ -52,11 +57,13 @@ impl From<cedarling::DroppedToken> for DroppedToken {
             cedarling::DropReason::InvalidInput(e) => e.to_string(),
             _ => String::new(),
         };
+        let message = d.reason.message();
         Self {
             mapping: d.mapping,
             index: d.index,
             reason: d.reason.slug().to_string(),
             detail,
+            message,
         }
     }
 }
