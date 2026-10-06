@@ -70,6 +70,7 @@ Contains policy store identification and versioning:
 
 ```json
 {
+  "policy_store_spec_version": 2,
   "cedar_version": "4.4.0",
   "policy_store": {
     "id": "abc123def456",
@@ -81,6 +82,10 @@ Contains policy store identification and versioning:
   }
 }
 ```
+
+`policy_store_spec_version` declares which revision of the policy store file
+format the store is written in. See
+[Policy store specification versions](#policy-store-specification-versions).
 
 #### Policy Files
 
@@ -289,6 +294,87 @@ cd policy-store && zip -r ../policy-store.cjar .
 ```
 
 **Note:** In WASM environments, only URL-based and inline string sources are available. Use `CEDARLING_POLICY_STORE_URI` with a `.cjar` URL or `initFromArchiveBytes()` for custom fetch scenarios.
+
+## Policy store specification versions
+
+`metadata.json` carries `policy_store_spec_version`, an integer naming the
+revision of the **file format** a store is written in. It is distinct from the
+two other versions in the file: `policy_store.version` is your own content
+version, and `cedar_version` is the Cedar language version. Cedarling reads the
+spec version before anything else in the store, so an unsupported format fails
+with a version error instead of a confusing schema or policy error.
+
+The current version is **2**. The oldest version Cedarling still reads is **1**.
+
+| `policy_store_spec_version` | Behavior |
+| --- | --- |
+| omitted, or `null` | Read as version 1, migrated to the current version, with a warning |
+| `1` | Read as version 1, migrated to the current version, with a warning |
+| `2` | Read as version 2, no warning |
+| `0` | Error: older than the oldest supported version |
+| `3` or higher | Error: newer than this Cedarling supports |
+| not a non-negative integer (`"2"`, `-1`, `2.5`) | Error |
+
+### Version changelog
+
+| Version | Changes |
+| --- | --- |
+| 1 | The original directory-based and `.cjar` format. It has no `policy_store_spec_version` field, so any store that omits the field is read as version 1. |
+| 2 | Adds the `policy_store_spec_version` field. Nothing else changed: a version 1 store becomes a valid version 2 store by adding the field. |
+
+### Upgrading a store
+
+To move a store from version 1 to version 2, add the field to `metadata.json`:
+
+```json
+{
+  "policy_store_spec_version": 2,
+  "cedar_version": "4.4.0",
+  "policy_store": {
+    "id": "abc123def456",
+    "name": "My Application Policies"
+  }
+}
+```
+
+No other file in the store needs to change. A store that omits the field keeps
+loading, so upgrading is not urgent, but every load logs the warning below.
+
+### Warnings
+
+Warnings are non-fatal: the store loads and is migrated to the current version
+in memory. Cedarling logs them once at startup at `WARN`, and the
+`cedarling-cli validate` report lists them as diagnostics that do not change
+whether validation passes. The background refresh worker de-duplicates them, so
+a periodic refresh of an outdated store does not repeat the same warning.
+
+When the field is missing:
+
+```text
+policy store format is outdated: metadata.json has no policy_store_spec_version, so it was read as spec version 1; please update the policy store to spec version 2
+```
+
+When the field declares a supported but older version:
+
+```text
+policy store format is outdated: policy_store_spec_version is 1; please update the policy store to spec version 2
+```
+
+### Errors
+
+These fail closed — the store is not loaded.
+
+```text
+Invalid metadata in file metadata.json: policy_store_spec_version must be a non-negative integer, got <value>
+```
+
+```text
+Unsupported policy store: policy_store_spec_version <found> is newer than the latest version this Cedarling supports (2); upgrade Cedarling
+```
+
+```text
+Unsupported policy store: policy_store_spec_version <found> is no longer supported; the oldest supported version is 1
+```
 
 ## Advanced: Loading from Bytes
 
