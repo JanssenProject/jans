@@ -4,7 +4,7 @@ The example covered in this page takes the ["Hello world"](../basics-hello-world
 
 ## About types and variables
 
-Agama supports data types like _string_, _boolean_, _number_, _list_ or _map_. The [language reference](https://docs.jans.io/stable/agama/language-reference/) page explores types and variables manipulation in detail. 
+Agama supports data types like _string_, _boolean_, _number_, _list_ or _map_. The [language reference](../../../../../agama/language-reference.md) page explores types and variables manipulation in detail. 
 
 Some relevant facts before proceeding with the example:
 

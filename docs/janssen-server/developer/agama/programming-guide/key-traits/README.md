@@ -2,7 +2,7 @@
 
 This page does not feature any example, instead, it highlights important aspects of the language which are key to write valid programs in Agama. Readers are encouraged not to skip this topic.
 
-Technically Agama is a DSL (domain-specific language) for depicting web flows. It's simple, compact, and expressive enough to cope with intricate flows despite the number of language [constructs](https://docs.jans.io/stable/agama/language-reference/#language-keywords) is small.
+Technically Agama is a DSL (domain-specific language) for depicting web flows. It's simple, compact, and expressive enough to cope with intricate flows despite the number of language [constructs](../../../../../agama/language-reference.md#language-keywords) is small.
 
 At first, developers may find the following features unexpected:
 

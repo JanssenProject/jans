@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 import io.jans.orm.test.model.SimpleBinaryEntry;
 
 /**
- * Binary data persistence with @BinaryData annotation. jansData column should has
+ * Binary data persistence with @BinaryData annotation. jansDataBin column should has
  * binary type (bytea/BLOB) to store raw binary data without base64 conversion and
  * jansDataStr column should has string type to check base64 fallback.
  *
@@ -26,7 +26,7 @@ import io.jans.orm.test.model.SimpleBinaryEntry;
  *
  * CREATE TABLE "jansBinEntry" (doc_id character varying(64) PRIMARY KEY,
  *     dn character varying(128), "objectClass" character varying(48),
- *     "displayName" character varying(128), "jansData" bytea, "jansDataStr" text);
+ *     "displayName" character varying(128), "jansDataBin" bytea, "jansDataStr" text);
  *
  * Test is skipped when DB has no jansBinEntry table.
  *
@@ -60,7 +60,7 @@ public class BinaryDataTest extends BaseOrmTest {
 		SimpleBinaryEntry newEntry = new SimpleBinaryEntry();
 		newEntry.setDn(String.format("inum=%s,ou=binary,o=jans", getRandomInum()));
 		newEntry.setDisplayName("Binary data test");
-		newEntry.setData(binaryData);
+		newEntry.setDataBin(binaryData);
 		newEntry.setDataStr(binaryData);
 
 		try {
@@ -77,20 +77,20 @@ public class BinaryDataTest extends BaseOrmTest {
 		SimpleBinaryEntry foundEntry = entryManager.find(SimpleBinaryEntry.class, persistedEntry.getDn());
 
 		assertNotNull(foundEntry);
-		assertEquals(foundEntry.getData(), binaryData);
+		assertEquals(foundEntry.getDataBin(), binaryData);
 		assertEquals(foundEntry.getDataStr(), binaryData);
 	}
 
 	@Test(dependsOnMethods = "readBinaryData")
 	public void updateBinaryData() {
 		SimpleBinaryEntry foundEntry = entryManager.find(SimpleBinaryEntry.class, persistedEntry.getDn());
-		foundEntry.setData(binaryData2);
+		foundEntry.setDataBin(binaryData2);
 		foundEntry.setDataStr(binaryData2);
 
 		entryManager.merge(foundEntry);
 
 		SimpleBinaryEntry updatedEntry = entryManager.find(SimpleBinaryEntry.class, persistedEntry.getDn());
-		assertEquals(updatedEntry.getData(), binaryData2);
+		assertEquals(updatedEntry.getDataBin(), binaryData2);
 		assertEquals(updatedEntry.getDataStr(), binaryData2);
 	}
 
@@ -101,7 +101,7 @@ public class BinaryDataTest extends BaseOrmTest {
 		entryManager.merge(foundEntry);
 
 		SimpleBinaryEntry unchangedEntry = entryManager.find(SimpleBinaryEntry.class, persistedEntry.getDn());
-		assertEquals(unchangedEntry.getData(), binaryData2);
+		assertEquals(unchangedEntry.getDataBin(), binaryData2);
 		assertEquals(unchangedEntry.getDataStr(), binaryData2);
 	}
 

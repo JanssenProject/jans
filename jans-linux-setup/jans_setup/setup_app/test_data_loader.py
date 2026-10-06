@@ -31,6 +31,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.install_var = 'loadTestData'
         self.register_progess()
         self.template_base = os.path.join(Config.templateFolder, 'test')
+        self.schema_file = os.path.join(Config.install_dir, 'schema/jans_test_schema.json')
 
     def enable_cusom_scripts(self):
         self.logIt("Enabling custom scripts")
@@ -69,6 +70,33 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         agama_config['enabled'] = True
         self.dbUtils.set_jans_auth_conf_dynamic({'agamaConfiguration': agama_config})
         self.dbUtils.enable_script('BADA-BADA')
+
+    def create_tables(self):
+        self.dbUtils.read_jans_schema(others=[self.schema_file])
+        base.current_app.RDBMInstaller.create_tables([self.schema_file])
+        self.dbUtils.rdm_automapper(True)
+
+    def copy_ssl_public_cert(self):
+        # copy postgresql cert file to output directory
+        output_dir = os.path.join(Config.output_dir, 'test/jans-orm/conf')
+        if Config.rdbm_type == 'pgsql':
+            ssl_public_cert_path = Config.postgresql_ca_crt_fn
+            target = os.path.join(output_dir, 'postgresql.crt')
+            self.copyFile(ssl_public_cert_path, target)
+        else:
+            _, data_dir = self.dbUtils.exec_raw_sql_cmd("SHOW VARIABLES LIKE 'datadir'")
+            _, ssl_ca_fn = self.dbUtils.exec_raw_sql_cmd("SHOW VARIABLES LIKE 'ssl_ca'")
+            ssl_ca_fn_path = os.path.join(data_dir, ssl_ca_fn)
+            self.run([Config.cmd_keytool,
+                '-importcert',
+                '-noprompt',
+                '-alias', 'mysql-ca',
+                '-file', ssl_ca_fn_path,
+                '-keystore', os.path.join(output_dir, 'mysql.p12'),
+                '-storetype', 'PKCS12',
+                '-storepass', 'changeit'
+                  ])
+
 
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
@@ -154,6 +182,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             self.dbUtils.read_jans_schema(others=jans_schema_json_files)
             base.current_app.RDBMInstaller.create_tables(jans_schema_json_files)
             self.dbUtils.rdm_automapper(force=True)
+            self.create_tables()
 
         self.writeFile(
             os.path.join(Config.output_dir, 'test/jans-auth/server/config-jans-auth-test.properties'),
@@ -288,6 +317,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.chown(super_gluu_creds_fn, Config.jetty_user, Config.root_user)
 
         Config.pbar.progress(self.service_name, "Restarting Services", False)
+
+        self.copy_ssl_public_cert()
 
         # Disable token binding module
         if base.os_name in ('ubuntu18', 'ubuntu20'):

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -461,5 +462,131 @@ func TestPatchMapper(t *testing.T) {
 
 	if len(patches) != 6 {
 		t.Errorf("expected 7 patch, got %d", len(patches))
+	}
+}
+
+func TestAttrConfigState(t *testing.T) {
+
+	obj := cty.ObjectVal(map[string]cty.Value{
+		"declared":   cty.StringVal("value"),
+		"zero":       cty.BoolVal(false),
+		"undeclared": cty.NullVal(cty.String),
+		"unknown":    cty.UnknownVal(cty.String),
+	})
+
+	testCases := []struct {
+		name     string
+		config   cty.Value
+		key      string
+		expected configState
+	}{
+		{"declared", obj, "declared", configSet},
+		{"zero value is still declared", obj, "zero", configSet},
+		{"undeclared", obj, "undeclared", configNull},
+		{"unknown", obj, "unknown", configUnavailable},
+		{"missing attribute", obj, "missing", configUnavailable},
+		{"nil config", cty.NilVal, "declared", configUnavailable},
+		{"null config", cty.NullVal(cty.EmptyObject), "declared", configUnavailable},
+		{"non object config", cty.StringVal("x"), "declared", configUnavailable},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := attrConfigState(tc.config, tc.key); got != tc.expected {
+				t.Errorf("Got %d, expected %d", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestDecoderKeepsUndeclaredFields(t *testing.T) {
+
+	type testCase struct {
+		Att1 string `schema:"att1"`
+		Att2 string `schema:"att2"`
+		Att3 int    `schema:"att3"`
+	}
+
+	entity := testCase{
+		Att1: "server val 1",
+		Att2: "server val 2",
+		Att3: 42,
+	}
+
+	declared := map[string]any{"att2": "config val 2"}
+
+	getter := func(key string) (any, bool) {
+		val, ok := declared[key]
+		return val, ok
+	}
+
+	if err := decoder(getter, &entity); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := testCase{
+		Att1: "server val 1",
+		Att2: "config val 2",
+		Att3: 42,
+	}
+
+	if diff := cmp.Diff(expected, entity); diff != "" {
+		t.Errorf("Got different entity after merge: %s", diff)
+	}
+}
+
+func TestPruneUndeclared(t *testing.T) {
+
+	blockType := cty.Object(map[string]cty.Type{
+		"attestation_mode": cty.String,
+		"metadata_servers": cty.List(cty.Object(map[string]cty.Type{
+			"url": cty.String,
+		})),
+	})
+
+	cfg := cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+		"attestation_mode": cty.StringVal("enforced"),
+		"metadata_servers": cty.NullVal(blockType.AttributeType("metadata_servers")),
+	})})
+
+	val := []any{map[string]any{
+		"attestation_mode": "enforced",
+		"metadata_servers": []any{},
+	}}
+
+	pruned, ok := pruneUndeclared(cfg, val).([]any)
+	if !ok {
+		t.Fatalf("Got %T, expected []any", pruneUndeclared(cfg, val))
+	}
+
+	entry, ok := pruned[0].(map[string]any)
+	if !ok {
+		t.Fatalf("Got %T, expected map[string]any", pruned[0])
+	}
+
+	if _, present := entry["metadata_servers"]; present {
+		t.Error("Undeclared metadata_servers was kept")
+	}
+
+	if entry["attestation_mode"] != "enforced" {
+		t.Errorf("Got %v, expected enforced", entry["attestation_mode"])
+	}
+}
+
+func TestPruneUndeclaredKeepsDeclaredZeroValue(t *testing.T) {
+
+	cfg := cty.ObjectVal(map[string]cty.Value{
+		"attestation_mode": cty.StringVal(""),
+	})
+
+	val := map[string]any{"attestation_mode": ""}
+
+	pruned, ok := pruneUndeclared(cfg, val).(map[string]any)
+	if !ok {
+		t.Fatalf("Got %T, expected map[string]any", pruneUndeclared(cfg, val))
+	}
+
+	if _, present := pruned["attestation_mode"]; !present {
+		t.Error("Declared empty attestation_mode was dropped")
 	}
 }

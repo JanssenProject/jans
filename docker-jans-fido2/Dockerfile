@@ -17,7 +17,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=12.1.8
+ARG JETTY_VERSION=12.1.14
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -47,7 +47,7 @@ RUN wget -nv https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON
 
 ENV CN_VERSION=0.0.0-nightly
 ENV CN_RELEASE_TAG=nightly
-ENV CN_BUILD_DATE='2026-02-27 08:28'
+ENV CN_BUILD_DATE='2026-10-06T16:25:49Z'
 
 # Override CN_RELEASE_DOWNLOAD_URL at build time to install a locally-built WAR (e.g. the AIO
 # integration CI serves the PR-built artifacts) instead of the published release.
@@ -72,7 +72,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/templates/jans-fido2 \
     /app/static/fido2
 
-ARG JANS_SOURCE_VERSION=1f9dcae94e09bc6a672f02685fe01397035292e8
+ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 

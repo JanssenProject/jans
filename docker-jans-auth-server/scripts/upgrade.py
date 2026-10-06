@@ -30,9 +30,11 @@ def _transform_lock_dynamic_config(conf, manager):
 
     # add missing top-level keys
     hostname = manager.config.get("hostname")
+    client_id = manager.config.get("lock_client_id")
+
     for missing_key, value in [
         ("baseEndpoint", f"https://{hostname}/jans-auth/api/v1"),
-        ("clientId", manager.config.get("lock_client_id")),
+        ("clientId", client_id),
         ("clientPassword", manager.secret.get("lock_client_encoded_pw")),
         ("tokenUrl", f"https://{hostname}/jans-auth/restv1/token"),
         ("statEnabled", True),
@@ -53,6 +55,28 @@ def _transform_lock_dynamic_config(conf, manager):
         ("auditPersistenceMode", "internal"),
         ("grpcConfiguration", {
             "serverMode": "bridge",
+        }),
+        ("traceConfiguration", {
+            "enabled": True,
+            "defaultEvidenceDomainId": "",
+            "clientDomainBindings": [
+                {
+                    "clientId": client_id,
+                    "evidenceDomainId": "default",
+                    "allowedProducerIds": ["*"],
+                },
+            ],
+            "latenessThresholdSeconds": 300,
+            "maxRequestBytes": 262144,
+            "maxJsonDepth": 32,
+            "maxStringLength": 8192,
+            "maxArrayLength": 256,
+            "maxObjectMembers": 256,
+            "receiptAllocationRetryLimit": 8,
+            "receiptRepairIntervalSeconds": 300,
+            "pendingReceiptTimeoutSeconds": 120,
+            "maxBulkRecords": 100,
+            "maxBulkRequestBytes": 4194304,
         }),
     ]:
         if missing_key not in conf:

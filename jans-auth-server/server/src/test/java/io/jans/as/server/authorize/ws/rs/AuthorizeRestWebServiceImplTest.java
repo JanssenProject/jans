@@ -304,6 +304,28 @@ public class AuthorizeRestWebServiceImplTest {
         verify(redirectUri, never()).addResponseParameter(eq(AuthorizeResponseParam.ISS), any());
     }
 
+    @Test
+    public void validatePkceIfNeeded_whenDeviceUserCodePresent_shouldSkipPkceValidation() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        Client client = new Client();
+
+        authorizeRestWebService.validatePkceIfNeeded(authzRequest, client, "KPST-JWGW");
+
+        verify(authorizeRestWebServiceValidator, never()).validatePkce(any(), any(), any(), any());
+    }
+
+    @Test
+    public void validatePkceIfNeeded_whenNoDeviceUserCode_shouldValidatePkce() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setCodeChallenge("challenge");
+        authzRequest.setCodeChallengeMethod("S256");
+        Client client = new Client();
+
+        authorizeRestWebService.validatePkceIfNeeded(authzRequest, client, null);
+
+        verify(authorizeRestWebServiceValidator).validatePkce("challenge", "S256", authzRequest.getRedirectUriResponse(), client);
+    }
+
     private void invokeAddResponseParameterIss(RedirectUri redirectUri, ResponseMode responseMode) throws Exception {
         Method method = AuthorizeRestWebServiceImpl.class.getDeclaredMethod(
                 "addResponseParameterIss", RedirectUri.class, ResponseMode.class);

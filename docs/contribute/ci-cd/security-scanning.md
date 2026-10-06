@@ -22,7 +22,7 @@ output, and where results land, then describes the pen-test that correlates them
 
 ## Pen-test (DAST)
 
-`scan-pentest.yml` is dispatched by "Build Docker Images" at the release ref once
+`scan-pentest.yml` is dispatched by "Build: Docker Images" at the release ref once
 the images are published for a nightly or tagged (`v**`) release — so it scans the
 freshly published all-in-one image — and can also be dispatched manually (pass
 `release_tag` to ingest that release's SBOM/Trivy assets; leave it empty for an

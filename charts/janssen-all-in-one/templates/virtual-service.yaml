@@ -140,6 +140,20 @@ spec:
           number: 8080
       weight: 100
   {{- end }}
+  {{ if index .Values "auth-server" "ingress" "oauthServerConfigEnabled" -}}
+  - name: "{{ .Release.Name }}-istio-oauth-server-config"
+    match:
+    - uri:
+        exact: "/.well-known/oauth-authorization-server"
+    rewrite:
+      uri: "/jans-auth/restv1/oauth-authorization-server"
+    route:
+    - destination:
+        host: {{ .Values.service.name  }}.{{ .Release.Namespace  }}.svc.cluster.local
+        port:
+          number: 8080
+      weight: 100
+  {{- end }}
 
   {{- /* casa routes */}}
   {{ if .Values.casa.ingress.casaEnabled }}

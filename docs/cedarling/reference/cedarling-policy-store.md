@@ -82,6 +82,10 @@ Contains policy store identification and versioning:
 }
 ```
 
+For `.cjar`/directory stores the ID comes from `metadata.json`. It must be
+hex (8-64 characters), otherwise loading fails with `InvalidPolicyStoreId`.
+It may be omitted, in which case the getter reports none.
+
 #### Policy Files
 
 Policies are stored as human-readable `.cedar` files in the `policies/` directory:
@@ -288,20 +292,20 @@ The directory structure can be packaged as a `.cjar` file (ZIP archive) for dist
 cd policy-store && zip -r ../policy-store.cjar .
 ```
 
-**Note:** In WASM environments, only URL-based and inline string sources are available. Use `CEDARLING_POLICY_STORE_URI` with a `.cjar` URL or `init_from_archive_bytes()` for custom fetch scenarios.
+**Note:** In WASM environments, only URL-based and inline string sources are available. Use `CEDARLING_POLICY_STORE_URI` with a `.cjar` URL or `initFromArchiveBytes()` for custom fetch scenarios.
 
 ## Advanced: Loading from Bytes
 
 For scenarios requiring custom fetch logic (e.g., auth headers), archive bytes can be loaded directly:
 
-- **WASM**: Use `init_from_archive_bytes(config, bytes)` function
+- **WASM**: Use `initFromArchiveBytes(config, bytes)` function
 - **Rust**: Use `PolicyStoreSource::ArchiveBytes(Vec<u8>)` or `load_policy_store_archive_bytes()` function
 
 ```javascript
 // WASM example with custom fetch
 const response = await fetch(url, { headers: { Authorization: "..." } });
 const bytes = new Uint8Array(await response.arrayBuffer());
-const cedarling = await init_from_archive_bytes(config, bytes);
+const cedarling = await initFromArchiveBytes(config, bytes);
 ```
 
 ## Background refresh
@@ -311,6 +315,10 @@ For URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a L
 ### Per-request consistency
 
 Every public Cedarling method snapshots the current `Authz` via `Arc<ArcSwap<Authz>>::load()` at entry and uses that snapshot for the duration of the call. A refresh that lands mid-request can never produce a partially-updated view — in-flight authorizations always finish against the pre-swap policy store. The post-swap store is visible to all *subsequent* calls.
+
+The `policy_store_id()` getter reports the currently published store, so the
+value can change after a refresh to a store with a different ID and callers
+must not cache it.
 
 ### Strategy ladder
 
@@ -378,6 +386,9 @@ The structure accepted for YAML test fixtures is defined as follows:
   }
 }
 ```
+
+The ID is the `policy_stores` map key, is not required to be hex, and is not
+validated.
 
 - **cedar_version** : (_String_) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
 - **policies** : (_Object_) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).

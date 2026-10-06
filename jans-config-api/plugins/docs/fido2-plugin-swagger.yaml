@@ -1658,6 +1658,12 @@ components:
           type: boolean
         fido2MetricsAggregationEnabled:
           type: boolean
+        trustedProxyEnabled:
+          type: boolean
+        trustedProxyIpRanges:
+          type: array
+          items:
+            type: string
         personCustomObjectClassList:
           type: array
           items:
@@ -1715,6 +1721,21 @@ components:
           type: boolean
         attestationMode:
           type: string
+        allowedTopOrigins:
+          type: array
+          items:
+            type: string
+        lockAuditEnabled:
+          type: boolean
+        lockAuditEndpoint:
+          type: string
+        lockAuditClientId:
+          type: string
+        lockAuditClientPassword:
+          type: string
+        lockAuditFlushInterval:
+          type: integer
+          format: int32
         rp:
           type: array
           items:
@@ -1735,6 +1756,13 @@ components:
           type: array
           items:
             type: string
+        policy:
+          $ref: "#/components/schemas/RequestedPartyPolicy"
+    RequestedPartyPolicy:
+      type: object
+      properties:
+        attestationMode:
+          type: string
     JsonNode:
       type: object
     Fido2MetricsAggregation:
@@ -1758,10 +1786,6 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
         metricsData:
           type: object
           additionalProperties:
@@ -1811,6 +1835,10 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
@@ -1873,6 +1901,8 @@ components:
           type: string
         deviceInfo:
           $ref: "#/components/schemas/DeviceInfo"
+        nativeClientTelemetry:
+          $ref: "#/components/schemas/NativeClientTelemetry"
         errorReason:
           type: string
         errorCategory:
@@ -1886,6 +1916,8 @@ components:
         ipAddress:
           type: string
         sessionId:
+          type: string
+        clientCorrelationId:
           type: string
         nodeId:
           type: string
@@ -1913,6 +1945,35 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Fido2MetricsEntry"
+    NativeClientTelemetry:
+      type: object
+      properties:
+        client_correlation_id:
+          type: string
+        platform:
+          type: string
+        native_api:
+          type: string
+        os_version:
+          type: string
+        play_services_version:
+          type: string
+        device_manufacturer:
+          type: string
+        device_model:
+          type: string
+        credential_provider:
+          type: string
+        is_device_secure:
+          type: boolean
+        flow_context:
+          type: string
+        app_version:
+          type: string
+        distribution_channel:
+          type: string
+        last_client_error_code:
+          type: string
     ApiError:
       type: object
       properties:

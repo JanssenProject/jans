@@ -192,7 +192,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 		credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
 		int alg = commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
 		credIdAndCounters.setSignatureAlgorithm(alg);
-		credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
+		credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData, credential.getRpId()));
 	}
 
 }

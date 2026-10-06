@@ -42,7 +42,7 @@ mod tests;
 use std::collections::{HashMap, HashSet};
 use std::{fmt::Write, sync::Arc};
 
-use crate::authz::metrics::MetricsCollector;
+use crate::authz::metrics::{MetricsCollector, MetricsMode, resolve_metrics_mode};
 use crate::context_data_api::DataStore;
 pub use crate::context_data_api::{
     CedarType, CedarValueMapper, ConfigValidationError, DataApi, DataEntry, DataError,
@@ -52,6 +52,7 @@ pub use crate::context_data_api::{
 pub use crate::jwt::TrustedIssuerLoadingInfo;
 pub use crate::jwt::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
 use authz::Authz;
+pub use authz::metrics::{MetricsError, MetricsSnapshot};
 pub use authz::request::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
     BatchAuthorizeUnsignedRequest, BatchItem, CedarEntityMapping, EntityData, RequestUnsigned,
@@ -151,6 +152,10 @@ pub struct Cedarling {
     /// [`Self::set_custom_token_processor`].
     custom_token_processor: Arc<arc_swap::ArcSwapOption<CustomTokenProcessorHolder>>,
     data: Arc<DataStore>,
+    /// Metrics collector shared with log, data store, authz and refresh worker.
+    /// Owned locally when [`MetricsMode::Local`]; otherwise held only so the
+    /// injected callers can record into it.
+    metrics: Arc<MetricsCollector>,
     /// Held purely for its `Drop` side effect: dropping the last `Arc` closes
     /// the worker's `oneshot` shutdown channel so the background refresh loop
     /// exits when [`Cedarling`] goes away. The leading `_` tells the compiler
@@ -176,17 +181,15 @@ impl Cedarling {
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName::from(config.application_name.clone()));
 
-        let metrics = Arc::new(
-            if config
-                .lock_config
-                .as_ref()
-                .is_some_and(|c| c.telemetry_interval.is_some())
-            {
-                MetricsCollector::new(0)
-            } else {
-                MetricsCollector::disabled()
-            },
+        let telemetry_active = config
+            .lock_config
+            .as_ref()
+            .is_some_and(|c| c.telemetry_interval.is_some());
+        let metrics_mode = resolve_metrics_mode(
+            telemetry_active,
+            config.authorization_config.metrics_collection,
         );
+        let metrics = Arc::new(MetricsCollector::new(metrics_mode));
 
         let log = crate::log::init_logger(
             &config.log_config,
@@ -268,8 +271,40 @@ impl Cedarling {
             authz: authz_swap,
             custom_token_processor: Arc::new(arc_swap::ArcSwapOption::const_empty()),
             data,
+            metrics,
             _refresh_handle: refresh_handle,
         })
+    }
+
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval.
+    ///
+    /// Only available when `CEDARLING_METRICS_COLLECTION` is enabled at bootstrap
+    /// and no Lock telemetry ticker owns the collector. Returns
+    /// [`MetricsError::LockTelemetry`] whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has
+    /// no telemetry endpoint and metrics are not shipped anywhere: the ticker
+    /// is spawned based on the interval alone.
+    ///
+    /// The returned `interval` is a [`std::time::Duration`] with sub-second
+    /// precision, and serializes as fractional seconds under the
+    /// `interval_secs` key.
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
+        match self.metrics.mode() {
+            MetricsMode::Local => Ok(self.metrics.snapshot_and_reset()),
+            MetricsMode::Disabled => Err(MetricsError::Disabled),
+            MetricsMode::LockTelemetry => Err(MetricsError::LockTelemetry),
+        }
+    }
+
+    /// Returns the ID of the currently published policy store, if it carries one.
+    ///
+    /// `None` when the store carries no ID. The value is an opaque,
+    /// source-dependent string: do not parse it or assume hex. It may change
+    /// after a background refresh.
+    #[must_use]
+    pub fn policy_store_id(&self) -> Option<String> {
+        self.authz.load().policy_store_id()
     }
 
     // The following public methods retain async signatures for API compatibility
@@ -590,6 +625,7 @@ fn maybe_spawn_refresh_worker(
         initial_body_hash: seed.initial_body_hash,
         initial_validators: seed.initial_validators,
         strict_schema_validation: config.authorization_config.strict_schema_validation,
+        archive_limits: config.policy_store_config.archive_limits(),
     };
     Some(Arc::new(spawn_refresh_worker(ctx)))
 }
@@ -945,38 +981,48 @@ impl Cedarling {
                 };
 
                 // Metadata Level
-                // For directory/archive, the loader already ran MetadataValidator.
-                // For legacy YAML/JSON stores, we run validate_legacy_metadata.
-                let metadata_res = match &loaded.store.metadata {
-                    Some(metadata) => {
-                        use crate::common::policy_store::validator::MetadataValidator;
-                        match MetadataValidator::validate(metadata) {
-                            Ok(()) => LevelResult::Ok,
-                            Err(e) => LevelResult::Failed {
-                                errors: vec![Diagnostic {
-                                    file: "<metadata>".into(),
-                                    line: None,
-                                    column: None,
-                                    message: e.to_string(),
-                                }],
-                            },
-                        }
-                    },
-                    None => {
-                        match crate::common::policy_store::validator::validate_legacy_metadata(
-                            &loaded.store.store,
-                        ) {
-                            Ok(()) => LevelResult::Ok,
-                            Err(e) => LevelResult::Failed {
-                                errors: vec![Diagnostic {
-                                    file: "<inline>".into(),
-                                    line: None,
-                                    column: None,
-                                    message: e.to_string(),
-                                }],
-                            },
-                        }
-                    },
+                // Legacy YAML sources synthesize `metadata: Some(..)` with the
+                // user-chosen `policy_stores` key as `id`, so matching on
+                // `Option` cannot distinguish strict vs legacy. Branch on
+                // `config.source` instead; every other source keeps strict
+                // `MetadataValidator` checks.
+                let metadata_res = if matches!(
+                    &config.source,
+                    PolicyStoreSource::Yaml(_) | PolicyStoreSource::FileYaml(_)
+                ) {
+                    match crate::common::policy_store::validator::validate_legacy_metadata(
+                        &loaded.store.store,
+                    ) {
+                        Ok(()) => LevelResult::Ok,
+                        Err(e) => LevelResult::Failed {
+                            errors: vec![Diagnostic {
+                                file: "<inline>".into(),
+                                line: None,
+                                column: None,
+                                message: e.to_string(),
+                            }],
+                        },
+                    }
+                } else {
+                    match &loaded.store.metadata {
+                        Some(metadata) => {
+                            use crate::common::policy_store::validator::MetadataValidator;
+                            match MetadataValidator::validate(metadata) {
+                                Ok(()) => LevelResult::Ok,
+                                Err(e) => LevelResult::Failed {
+                                    errors: vec![Diagnostic {
+                                        file: "<metadata>".into(),
+                                        line: None,
+                                        column: None,
+                                        message: e.to_string(),
+                                    }],
+                                },
+                            }
+                        },
+                        None => LevelResult::Skipped {
+                            reason: "no metadata present".into(),
+                        },
+                    }
                 };
 
                 Ok(ValidationReport {

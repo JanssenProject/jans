@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -31,6 +33,7 @@ import org.slf4j.Logger;
 
 import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseEdDSAAlgorithm;
+import io.jans.fido2.ctap.CoseMLDSAAlgorithm;
 import io.jans.fido2.ctap.CoseRSAAlgorithm;
 import io.jans.fido2.model.common.PublicKeyCredentialParameters;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -126,6 +129,55 @@ class AttestationServiceAlgorithmSelectionTest {
         // an empty configured result does not silently become an empty pubKeyCredParams.
         assertTrue(advertisedAlgorithms().isEmpty());
         verify(log).error(contains("None of the configured enabledFidoAlgorithms"), any(Object.class));
+    }
+
+    /**
+     * ML-DSA ships on the standard build only, so the standard-only decision rests on this: an ML-DSA name
+     * reaches pubKeyCredParams when the running provider can honour it, and is dropped when it cannot.
+     */
+    @ParameterizedTest(name = "{0} is advertised when the provider supports it")
+    @CsvSource({ "ML-DSA-44, -48", "ML-DSA-65, -49", "ML-DSA-87, -50" })
+    void whenProviderSupportsMlDsa_itIsAdvertised(String configuredName, int codePoint) {
+        fido2Configuration.setEnabledFidoAlgorithms(List.of(configuredName));
+
+        assertEquals(Set.of(codePoint), advertisedAlgorithms());
+    }
+
+    /** The underscore spelling has to resolve too, since it is what a Java-shaped config would carry. */
+    @Test
+    void whenMlDsaIsConfiguredWithUnderscores_itIsAdvertised() {
+        fido2Configuration.setEnabledFidoAlgorithms(List.of("ML_DSA_65"));
+
+        assertEquals(Set.of(CoseMLDSAAlgorithm.ML_DSA_65.getNumericValue()), advertisedAlgorithms());
+    }
+
+    /**
+     * The FIPS build's provider has no ML-DSA, so isSupported reports false and the algorithm must not be
+     * offered. Advertising it there would fail the ceremony after the authenticator picked it - the
+     * advertise-then-fail shape this tree exists to remove.
+     */
+    @ParameterizedTest(name = "{0} is not advertised when the provider lacks it")
+    @CsvSource({ "ML-DSA-44, -48", "ML-DSA-65, -49", "ML-DSA-87, -50" })
+    void whenProviderLacksMlDsa_itIsNotAdvertised(String configuredName, int codePoint) {
+        fido2Configuration.setEnabledFidoAlgorithms(List.of(configuredName));
+        when(signatureVerifier.isSupported(codePoint)).thenReturn(false);
+
+        Set<Integer> advertised = advertisedAlgorithms();
+
+        assertTrue(!advertised.contains(codePoint), configuredName + " must not be advertised without provider support");
+        verify(log).error(contains("not supported by this server"), any(Object.class));
+    }
+
+    /**
+     * A FIPS deployment can share a configuration with a standard one: the algorithms its provider does
+     * support still come through, and only ML-DSA drops out.
+     */
+    @Test
+    void whenProviderLacksMlDsa_theRestOfTheConfigurationStillApplies() {
+        fido2Configuration.setEnabledFidoAlgorithms(List.of("ES256", "ML-DSA-65"));
+        when(signatureVerifier.isSupported(CoseMLDSAAlgorithm.ML_DSA_65.getNumericValue())).thenReturn(false);
+
+        assertEquals(Set.of(CoseEC2Algorithm.ES256.getNumericValue()), advertisedAlgorithms());
     }
 
     @Test

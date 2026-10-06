@@ -8,7 +8,7 @@ Cross-platform authorization benchmarks for the Cedarling bindings,
 regenerated on pushes to `main` that change `jans-cedarling/**`,
 or on a manual `workflow_dispatch` run against `main`.
 
-_Last updated: 2026-09-07 06:27 UTC (commit da0b952)._
+_Last updated: 2026-09-25 19:38 UTC (commit 371c3f0)._
 
 ## Provenance
 
@@ -18,7 +18,7 @@ _Last updated: 2026-09-07 06:27 UTC (commit da0b952)._
   directional rather than exact, especially for closely-matched bindings.
 - Warm-up iterations per scenario: **100**; measured (sample count) per scenario: **1000**.
 - Exact host, OS, and compiler/runtime versions for this run are recorded
-  in the immutable workflow logs: [https://github.com/JanssenProject/jans/actions/runs/34089392083/attempts/1](https://github.com/JanssenProject/jans/actions/runs/34089392083/attempts/1).
+  in the immutable workflow logs: [https://github.com/JanssenProject/jans/actions/runs/36178869455/attempts/1](https://github.com/JanssenProject/jans/actions/runs/36178869455/attempts/1).
 - Scenario definitions and fixtures: `jans-cedarling/bindings/benchmarks/fixtures/scenarios.json`.
 
 ## Cross-Platform Binding Benchmarks
@@ -27,33 +27,33 @@ _Last updated: 2026-09-07 06:27 UTC (commit da0b952)._
 
 | Scenario | c | go | python | rust | wasm |
 |----------|----------:|----------:|----------:|----------:|----------:|
-| multi_issuer_2_tokens | 120.1 | 261.3 | 188.2 | 208.7 | 461.1 |
-| multi_issuer_3_tokens | 181.7 | 318.7 | 246.9 | 268.0 | 544.5 |
-| multi_issuer_batch_10 | 808.1 | 1,551.3 | 1,196.0 | 1,395.0 | 2,793.3 |
-| multi_issuer_batch_25 | 1,888.7 | 3,670.6 | 2,841.8 | 3,368.1 | 6,574.7 |
+| multi_issuer_2_tokens | 209.5 | 196.4 | 189.5 | 203.6 | 481.8 |
+| multi_issuer_3_tokens | 275.3 | 281.4 | 247.4 | 264.3 | 560.9 |
+| multi_issuer_batch_10 | 1,366.7 | 1,344.7 | 1,180.8 | 1,380.4 | 2,973.9 |
+| multi_issuer_batch_25 | 3,263.8 | 3,208.4 | 2,778.3 | 3,301.2 | 7,059.5 |
 | multi_issuer_sig_status | _skipped_ | _skipped_ | _skipped_ | _skipped_ | _skipped_ |
-| unsigned_batch_10 | 217.9 | 494.1 | 290.1 | 387.3 | 1,127.5 |
-| unsigned_batch_25 | 553.7 | 1,192.5 | 717.5 | 957.8 | 2,659.4 |
-| unsigned_deep_json | 79.1 | 190.0 | 118.2 | 140.5 | 331.9 |
-| unsigned_simple | 22.3 | 75.8 | 32.4 | 44.6 | 208.9 |
+| unsigned_batch_10 | 367.1 | 396.1 | 284.8 | 366.6 | 1,220.5 |
+| unsigned_batch_25 | 901.6 | 980.4 | 695.1 | 902.4 | 2,975.1 |
+| unsigned_deep_json | 143.6 | 144.1 | 116.1 | 138.8 | 351.9 |
+| unsigned_simple | 45.4 | 44.7 | 31.5 | 42.3 | 189.3 |
 
 > **Note:** `unsigned_batch_*` and `multi_issuer_batch_*` measure the full batch call, not per-item latency.
 
-### Relative speed per scenario (x, lower = faster)
+### Relative speed per scenario (x vs Rust, lower = faster)
 
-_Ratios are computed from full-precision `mean_ns`, so they may not match dividing the rounded µs values shown above._
+_Ratios use each binding's full-precision `mean_ns` over Rust's, so they may not match dividing the rounded µs values shown above. Rows where Rust is unavailable use the fastest binding as the baseline._
 
 | Scenario | c | go | python | rust | wasm |
 |----------|----------:|----------:|----------:|----------:|----------:|
-| multi_issuer_2_tokens | 1.00x ███ | 2.18x ██████ | 1.57x ████ | 1.74x █████ | 3.84x ██████████ |
-| multi_issuer_3_tokens | 1.00x ███ | 1.75x ██████ | 1.36x █████ | 1.48x █████ | 3.00x ██████████ |
-| multi_issuer_batch_10 | 1.00x ███ | 1.92x ██████ | 1.48x ████ | 1.73x █████ | 3.46x ██████████ |
-| multi_issuer_batch_25 | 1.00x ███ | 1.94x ██████ | 1.50x ████ | 1.78x █████ | 3.48x ██████████ |
+| multi_issuer_2_tokens | 1.03x ████ | 0.96x ████ | 0.93x ████ | 1.00x ████ | 2.37x ██████████ |
+| multi_issuer_3_tokens | 1.04x █████ | 1.06x █████ | 0.94x ████ | 1.00x █████ | 2.12x ██████████ |
+| multi_issuer_batch_10 | 0.99x █████ | 0.97x █████ | 0.86x ████ | 1.00x █████ | 2.15x ██████████ |
+| multi_issuer_batch_25 | 0.99x █████ | 0.97x █████ | 0.84x ████ | 1.00x █████ | 2.14x ██████████ |
 | multi_issuer_sig_status | _skipped_ | _skipped_ | _skipped_ | _skipped_ | _skipped_ |
-| unsigned_batch_10 | 1.00x ██ | 2.27x ████ | 1.33x ███ | 1.78x ███ | 5.17x ██████████ |
-| unsigned_batch_25 | 1.00x ██ | 2.15x ████ | 1.30x ███ | 1.73x ████ | 4.80x ██████████ |
-| unsigned_deep_json | 1.00x ██ | 2.40x ██████ | 1.49x ████ | 1.78x ████ | 4.20x ██████████ |
-| unsigned_simple | 1.00x █ | 3.41x ████ | 1.46x ██ | 2.00x ██ | 9.39x ██████████ |
+| unsigned_batch_10 | 1.00x ███ | 1.08x ███ | 0.78x ██ | 1.00x ███ | 3.33x ██████████ |
+| unsigned_batch_25 | 1.00x ███ | 1.09x ███ | 0.77x ██ | 1.00x ███ | 3.30x ██████████ |
+| unsigned_deep_json | 1.04x ████ | 1.04x ████ | 0.84x ███ | 1.00x ████ | 2.54x ██████████ |
+| unsigned_simple | 1.07x ██ | 1.06x ██ | 0.74x ██ | 1.00x ██ | 4.48x ██████████ |
 
 _Latency columns (Mean, p50, p95, p99, Min, Max) in the detail tables below are microseconds (µs)._
 
@@ -61,70 +61,70 @@ _Latency columns (Mean, p50, p95, p99, Min, Max) in the detail tables below are 
 
 | Scenario | Mean (µs) | p50 (µs) | p95 (µs) | p99 (µs) | Min (µs) | Max (µs) | Allocs/op | Status |
 |----------|----:|----:|----:|----:|----:|----:|----------:|--------|
-| multi_issuer_2_tokens | 120.1 | 117.8 | 137.3 | 145.8 | 107.4 | 199.1 | — | ok |
-| multi_issuer_3_tokens | 181.7 | 174.0 | 221.2 | 267.4 | 161.9 | 304.5 | — | ok |
-| multi_issuer_batch_10 | 808.1 | 806.3 | 849.2 | 880.2 | 749.7 | 1,050.4 | — | ok |
-| multi_issuer_batch_25 | 1,888.7 | 1,879.7 | 1,979.2 | 2,011.6 | 1,800.9 | 2,176.7 | — | ok |
+| multi_issuer_2_tokens | 209.5 | 203.6 | 231.3 | 248.3 | 198.3 | 320.4 | — | ok |
+| multi_issuer_3_tokens | 275.3 | 267.5 | 301.3 | 345.7 | 259.1 | 445.9 | — | ok |
+| multi_issuer_batch_10 | 1,366.7 | 1,358.9 | 1,418.2 | 1,497.9 | 1,334.7 | 1,745.9 | — | ok |
+| multi_issuer_batch_25 | 3,263.8 | 3,254.5 | 3,333.6 | 3,407.7 | 3,208.2 | 3,777.0 | — | ok |
 | multi_issuer_sig_status | — | — | — | — | — | — | — | skipped (mock_op_unavailable) |
-| unsigned_batch_10 | 217.9 | 215.1 | 235.2 | 276.3 | 202.3 | 364.1 | — | ok |
-| unsigned_batch_25 | 553.7 | 544.6 | 603.2 | 856.3 | 476.3 | 1,421.8 | — | ok |
-| unsigned_deep_json | 79.1 | 77.0 | 92.8 | 97.6 | 73.5 | 128.5 | — | ok |
-| unsigned_simple | 22.3 | 21.7 | 23.3 | 37.3 | 20.9 | 47.0 | — | ok |
+| unsigned_batch_10 | 367.1 | 357.2 | 391.1 | 420.7 | 350.0 | 701.4 | — | ok |
+| unsigned_batch_25 | 901.6 | 900.0 | 918.5 | 977.2 | 865.6 | 1,095.5 | — | ok |
+| unsigned_deep_json | 143.6 | 137.3 | 164.7 | 244.8 | 134.0 | 274.2 | — | ok |
+| unsigned_simple | 45.4 | 43.7 | 62.0 | 71.2 | 42.8 | 94.2 | — | ok |
 
 ### go detail
 
 | Scenario | Mean (µs) | p50 (µs) | p95 (µs) | p99 (µs) | Min (µs) | Max (µs) | Allocs/op | Status |
 |----------|----:|----:|----:|----:|----:|----:|----------:|--------|
-| multi_issuer_2_tokens | 261.3 | 252.7 | 307.0 | 357.8 | 235.2 | 924.6 | 29.078 | ok |
-| multi_issuer_3_tokens | 318.7 | 308.9 | 357.0 | 411.0 | 289.8 | 1,068.3 | 31.088 | ok |
-| multi_issuer_batch_10 | 1,551.3 | 1,529.3 | 1,628.1 | 1,882.9 | 1,464.8 | 9,390.6 | 356.156 | ok |
-| multi_issuer_batch_25 | 3,670.6 | 3,611.8 | 3,904.9 | 4,448.6 | 3,500.5 | 14,256.1 | 881.561 | ok |
+| multi_issuer_2_tokens | 196.4 | 191.3 | 233.5 | 280.0 | 162.9 | 660.2 | 29.044 | ok |
+| multi_issuer_3_tokens | 281.4 | 270.2 | 348.1 | 501.2 | 230.9 | 854.6 | 31.103 | ok |
+| multi_issuer_batch_10 | 1,344.7 | 1,330.6 | 1,450.1 | 1,867.5 | 1,201.5 | 2,137.4 | 356.256 | ok |
+| multi_issuer_batch_25 | 3,208.4 | 3,174.5 | 3,444.1 | 4,082.9 | 2,919.4 | 4,903.0 | 881.59 | ok |
 | multi_issuer_sig_status | — | — | — | — | — | — | — | skipped (mock_op_unavailable) |
-| unsigned_batch_10 | 494.1 | 487.4 | 553.1 | 753.4 | 449.6 | 1,106.8 | 355.241 | ok |
-| unsigned_batch_25 | 1,192.5 | 1,164.9 | 1,282.0 | 1,855.7 | 1,114.0 | 5,001.4 | 865.488 | ok |
-| unsigned_deep_json | 190.0 | 182.7 | 215.7 | 260.7 | 174.4 | 641.8 | 68.054 | ok |
-| unsigned_simple | 75.8 | 70.7 | 100.7 | 137.1 | 67.9 | 244.4 | 37.031 | ok |
+| unsigned_batch_10 | 396.1 | 385.8 | 447.9 | 715.9 | 338.2 | 1,183.0 | 355.274 | ok |
+| unsigned_batch_25 | 980.4 | 945.1 | 1,170.3 | 1,564.9 | 864.4 | 1,954.5 | 865.52 | ok |
+| unsigned_deep_json | 144.1 | 139.8 | 171.9 | 210.9 | 121.3 | 604.0 | 68.061 | ok |
+| unsigned_simple | 44.7 | 40.6 | 59.3 | 85.2 | 35.4 | 391.0 | 37.01 | ok |
 
 ### python detail
 
 | Scenario | Mean (µs) | p50 (µs) | p95 (µs) | p99 (µs) | Min (µs) | Max (µs) | Allocs/op | Status |
 |----------|----:|----:|----:|----:|----:|----:|----------:|--------|
-| multi_issuer_2_tokens | 188.2 | 182.6 | 211.1 | 230.3 | 176.9 | 291.3 | — | ok |
-| multi_issuer_3_tokens | 246.9 | 241.2 | 268.1 | 287.3 | 233.1 | 392.0 | — | ok |
-| multi_issuer_batch_10 | 1,196.0 | 1,189.8 | 1,236.4 | 1,309.1 | 1,164.2 | 1,420.4 | — | ok |
-| multi_issuer_batch_25 | 2,841.8 | 2,808.0 | 2,928.6 | 3,886.7 | 2,751.5 | 5,153.8 | — | ok |
+| multi_issuer_2_tokens | 189.5 | 183.0 | 215.4 | 255.6 | 177.7 | 341.7 | — | ok |
+| multi_issuer_3_tokens | 247.4 | 242.0 | 265.7 | 289.4 | 234.3 | 353.1 | — | ok |
+| multi_issuer_batch_10 | 1,180.8 | 1,175.4 | 1,210.2 | 1,296.0 | 1,156.1 | 1,369.0 | — | ok |
+| multi_issuer_batch_25 | 2,778.3 | 2,760.8 | 2,847.1 | 3,088.4 | 2,701.3 | 4,384.9 | — | ok |
 | multi_issuer_sig_status | — | — | — | — | — | — | — | skipped (mock_op_unavailable) |
-| unsigned_batch_10 | 290.1 | 284.6 | 305.2 | 347.5 | 279.1 | 421.2 | — | ok |
-| unsigned_batch_25 | 717.5 | 717.5 | 730.1 | 785.6 | 692.1 | 930.3 | — | ok |
-| unsigned_deep_json | 118.2 | 114.3 | 137.5 | 164.3 | 111.2 | 250.2 | — | ok |
-| unsigned_simple | 32.4 | 31.6 | 35.7 | 47.5 | 30.8 | 64.9 | — | ok |
+| unsigned_batch_10 | 284.8 | 278.0 | 312.3 | 388.6 | 272.7 | 435.3 | — | ok |
+| unsigned_batch_25 | 695.1 | 694.7 | 708.6 | 769.0 | 677.6 | 806.9 | — | ok |
+| unsigned_deep_json | 116.1 | 112.7 | 133.3 | 156.1 | 109.8 | 192.3 | — | ok |
+| unsigned_simple | 31.5 | 30.8 | 33.8 | 47.3 | 30.1 | 68.7 | — | ok |
 
 ### rust detail
 
 | Scenario | Mean (µs) | p50 (µs) | p95 (µs) | p99 (µs) | Min (µs) | Max (µs) | Allocs/op | Status |
 |----------|----:|----:|----:|----:|----:|----:|----------:|--------|
-| multi_issuer_2_tokens | 208.7 | 202.2 | 232.7 | 255.9 | 196.1 | 315.4 | — | ok |
-| multi_issuer_3_tokens | 268.0 | 261.7 | 292.4 | 313.9 | 253.2 | 352.1 | — | ok |
-| multi_issuer_batch_10 | 1,395.0 | 1,389.5 | 1,453.5 | 1,508.9 | 1,352.2 | 1,661.3 | — | ok |
-| multi_issuer_batch_25 | 3,368.1 | 3,356.5 | 3,467.0 | 3,581.6 | 3,270.7 | 4,209.9 | — | ok |
+| multi_issuer_2_tokens | 203.6 | 198.1 | 225.3 | 234.8 | 193.9 | 308.8 | — | ok |
+| multi_issuer_3_tokens | 264.3 | 256.8 | 285.7 | 337.7 | 249.6 | 359.5 | — | ok |
+| multi_issuer_batch_10 | 1,380.4 | 1,376.5 | 1,416.5 | 1,470.5 | 1,347.4 | 1,675.5 | — | ok |
+| multi_issuer_batch_25 | 3,301.2 | 3,265.8 | 3,399.3 | 4,413.4 | 3,207.2 | 7,016.2 | — | ok |
 | multi_issuer_sig_status | — | — | — | — | — | — | — | skipped (mock_op_unavailable) |
-| unsigned_batch_10 | 387.3 | 372.9 | 427.1 | 648.9 | 358.2 | 765.7 | — | ok |
-| unsigned_batch_25 | 957.8 | 940.6 | 1,031.2 | 1,362.2 | 902.1 | 1,752.5 | — | ok |
-| unsigned_deep_json | 140.5 | 135.7 | 162.5 | 183.3 | 132.1 | 263.6 | — | ok |
-| unsigned_simple | 44.6 | 42.7 | 61.3 | 70.5 | 41.4 | 99.7 | — | ok |
+| unsigned_batch_10 | 366.6 | 356.2 | 390.2 | 452.6 | 348.7 | 650.4 | — | ok |
+| unsigned_batch_25 | 902.4 | 900.9 | 921.2 | 986.8 | 865.0 | 1,115.9 | — | ok |
+| unsigned_deep_json | 138.8 | 131.9 | 176.6 | 200.9 | 128.4 | 243.4 | — | ok |
+| unsigned_simple | 42.3 | 41.1 | 48.9 | 66.5 | 39.7 | 70.3 | — | ok |
 
 ### wasm detail
 
 | Scenario | Mean (µs) | p50 (µs) | p95 (µs) | p99 (µs) | Min (µs) | Max (µs) | Allocs/op | Status |
 |----------|----:|----:|----:|----:|----:|----:|----------:|--------|
-| multi_issuer_2_tokens | 461.1 | 449.0 | 561.4 | 731.7 | 410.3 | 901.3 | — | ok |
-| multi_issuer_3_tokens | 544.5 | 536.3 | 595.8 | 770.2 | 507.2 | 1,015.7 | — | ok |
-| multi_issuer_batch_10 | 2,793.3 | 2,701.5 | 3,446.7 | 4,317.6 | 2,597.4 | 4,512.3 | — | ok |
-| multi_issuer_batch_25 | 6,574.7 | 6,382.2 | 8,234.4 | 8,747.2 | 6,245.4 | 9,555.5 | — | ok |
+| multi_issuer_2_tokens | 481.8 | 459.7 | 675.0 | 786.3 | 416.6 | 990.5 | — | ok |
+| multi_issuer_3_tokens | 560.9 | 552.8 | 619.5 | 816.9 | 518.6 | 987.7 | — | ok |
+| multi_issuer_batch_10 | 2,973.9 | 2,861.1 | 3,936.9 | 4,617.7 | 2,761.1 | 5,388.4 | — | ok |
+| multi_issuer_batch_25 | 7,059.5 | 6,848.7 | 8,850.0 | 9,852.1 | 6,647.9 | 10,870.6 | — | ok |
 | multi_issuer_sig_status | — | — | — | — | — | — | — | skipped (mock_op_unavailable) |
-| unsigned_batch_10 | 1,127.5 | 1,075.8 | 1,455.4 | 1,686.3 | 1,029.1 | 2,265.7 | — | ok |
-| unsigned_batch_25 | 2,659.4 | 2,512.2 | 3,616.3 | 4,208.6 | 2,428.0 | 8,365.1 | — | ok |
-| unsigned_deep_json | 331.9 | 319.2 | 443.6 | 521.7 | 289.7 | 748.2 | — | ok |
-| unsigned_simple | 208.9 | 200.5 | 279.1 | 435.4 | 141.1 | 899.1 | — | ok |
+| unsigned_batch_10 | 1,220.5 | 1,191.0 | 1,380.0 | 1,946.3 | 1,150.5 | 2,368.1 | — | ok |
+| unsigned_batch_25 | 2,975.1 | 2,845.5 | 3,980.3 | 4,670.4 | 2,748.6 | 10,107.3 | — | ok |
+| unsigned_deep_json | 351.9 | 335.7 | 486.8 | 576.3 | 304.9 | 729.0 | — | ok |
+| unsigned_simple | 189.3 | 167.5 | 300.4 | 383.5 | 151.5 | 720.8 | — | ok |
 
 

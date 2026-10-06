@@ -1,5 +1,6 @@
 node_modules/
 dist/
 .build/
+**/.wrangler/
 test-results/
 package-lock.json

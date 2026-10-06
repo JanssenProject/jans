@@ -50,6 +50,26 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 			{"code", "token"},
 			{"code", "id_token"},
 		},
+		CookieSameSite:                             "strict",
+		DisableExternalLoggerConfiguration:         true,
+		IdJagLifetime:                              3600,
+		IdJagIssueRefreshToken:                     true,
+		AuthorizationResponseIssParameterSupported: true,
+		SpiffeBundleMaxResponseSize:                1024,
+		SpiffeBundleConnectTimeoutMs:               5000,
+		SpiffeBundleReadTimeoutMs:                  5000,
+		SpiffeTrustDomains: []jans.SpiffeTrustDomainConfiguration{
+			{
+				TrustDomain:                  "example.org",
+				BundleEndpointUrl:            "https://example.org/bundle",
+				BundleCacheLifetimeInMinutes: 30,
+			},
+		},
+		IdJagTrustedIdpIssuers: []jans.TrustedIssuerConfig{
+			{
+				AutomaticallyGrantedScopes: []string{"openid"},
+			},
+		},
 	}
 
 	if err := toSchemaResource(data, authConfig); err != nil {
@@ -63,8 +83,8 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(patches) != 6 {
-		t.Errorf("Got %d patches, expected 6", len(patches))
+	if len(patches) != 16 {
+		t.Errorf("Got %d patches, expected 16", len(patches))
 	}
 
 	if err := fromSchemaResource(data, &newConfig); err != nil {

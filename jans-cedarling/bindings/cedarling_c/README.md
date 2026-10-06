@@ -313,6 +313,19 @@ if (ret == 0) {
 cedarling_free_string_array(&failed_ids);
 ```
 
+### Policy Store ID
+
+Get the ID of the currently published policy store. On success `id` is NULL when the store carries no ID. The value is opaque and may change after a background refresh, so don't cache it.
+
+```c
+char* id = NULL;
+ret = cedarling_get_policy_store_id(instance_id, &id);
+if (ret == 0 && id != NULL) {
+    printf("Policy store ID: %s\n", id);
+}
+cedarling_free_string(id);
+```
+
 ### Cleanup
 
 ```c
@@ -370,6 +383,12 @@ cedarling_clear_last_error();
 | `cedarling_loaded_trusted_issuers_count(instance_id, out_count)` | Get number of successfully loaded trusted issuers |
 | `cedarling_loaded_trusted_issuer_ids(instance_id, result)` | Get IDs of successfully loaded trusted issuers |
 | `cedarling_failed_trusted_issuer_ids(instance_id, result)` | Get IDs of trusted issuers that failed to load |
+
+### Policy Store
+
+| Function | Description |
+|----------|-------------|
+| `cedarling_get_policy_store_id(instance_id, out_id)` | Get the current policy store ID (`*out_id` is NULL when unset; free with `cedarling_free_string`) |
 
 ### Context Data API
 

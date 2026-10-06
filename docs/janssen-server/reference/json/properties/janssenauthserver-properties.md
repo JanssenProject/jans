@@ -43,7 +43,7 @@ tags:
 | authorizationEncryptionEncValuesSupported | A list of the authorization encryption algorithms supported | [Details](#authorizationencryptionencvaluessupported) |
 | authorizationEndpoint | The authorization endpoint URL | [Details](#authorizationendpoint) |
 | authorizationRequestCustomAllowedParameters | This list details the allowed custom parameters for authorization requests | [Details](#authorizationrequestcustomallowedparameters) |
-| authorizationResponseIssParameterSupported | Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false. | [Details](#authorizationresponseissparametersupported) |
+| authorizationResponseIssParameterSupported | Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: true. | [Details](#authorizationresponseissparametersupported) |
 | authorizationSigningAlgValuesSupported | List of authorization signing algorithms supported by this OP | [Details](#authorizationsigningalgvaluessupported) |
 | backchannelAuthenticationEndpoint | Backchannel Authentication Endpoint | [Details](#backchannelauthenticationendpoint) |
 | backchannelAuthenticationRequestSigningAlgValuesSupported | Backchannel Authentication Request Signing Alg Values Supported | [Details](#backchannelauthenticationrequestsigningalgvaluessupported) |
@@ -89,6 +89,7 @@ tags:
 | connectionServiceConfiguration | Connection service Configuration | [Details](#connectionserviceconfiguration) |
 | consentGatheringScriptBackwardCompatibility | Boolean value specifying whether to turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration | [Details](#consentgatheringscriptbackwardcompatibility) |
 | cookieDomain | Sets cookie domain for all cookies created by OP | [Details](#cookiedomain) |
+| cookieSameSite | Sets SameSite attribute value (None, Lax or Strict) for all cookies created by OP (session_id, uma_session_id, session_state, opbs, current_sessions, consent_session_id, rp_origin_id). Defaults to None to preserve cross-site SSO flows (silent authentication via hidden iframe with prompt=none, cross-site POST to the authorization endpoint). Setting Lax breaks silent/iframe-based authentication and cross-site POST to the authorization endpoint for RPs hosted on a different site than the OP. Setting Strict additionally breaks normal top-level cross-site SSO redirects, effectively disabling SSO for any RP not on the same site as the OP. Value is matched case-insensitively against None/Lax/Strict; any other value falls back to None. See auth-server session management docs before changing. | [Details](#cookiesamesite) |
 | corsConfigurationFilters | This list specifies the CORS configuration filters | [Details](#corsconfigurationfilters) |
 | cssLocation | The location for CSS files | [Details](#csslocation) |
 | customHeadersWithAuthorizationResponse | Choose whether to enable the custom response header parameter to return custom headers with the authorization response | [Details](#customheaderswithauthorizationresponse) |
@@ -263,7 +264,7 @@ tags:
 | requestUriHashVerificationEnabled | Boolean value specifying whether the OP supports use of the request_uri hash verification | [Details](#requesturihashverificationenabled) |
 | requestUriParameterSupported | Boolean value specifying whether the OP supports use of the request_uri parameter | [Details](#requesturiparametersupported) |
 | requirePar | Boolean value to indicate of Pushed Authorisation Request(PAR)is required | [Details](#requirepar) |
-| requirePkce | Boolean value true check for Proof Key for Code Exchange (PKCE) | [Details](#requirepkce) |
+| requirePkce | Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled. | [Details](#requirepkce) |
 | requireRequestObjectEncryption | Boolean value true encrypts request object | [Details](#requirerequestobjectencryption) |
 | requireRequestUriRegistration | Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter | [Details](#requirerequesturiregistration) |
 | responseModesSupported | This list details which OAuth 2.0 response modes are supported by this OP | [Details](#responsemodessupported) |
@@ -647,11 +648,11 @@ tags:
 
 ## authorizationResponseIssParameterSupported
 
-- Description: Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.
+- Description: Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: true.
 
 - Required: No
 
-- Default value: false
+- Default value: true
 
 
 ## authorizationSigningAlgValuesSupported
@@ -1053,6 +1054,15 @@ tags:
 ## cookieDomain
 
 - Description: Sets cookie domain for all cookies created by OP
+
+- Required: No
+
+- Default value: None
+
+
+## cookieSameSite
+
+- Description: Sets SameSite attribute value (None, Lax or Strict) for all cookies created by OP (session_id, uma_session_id, session_state, opbs, current_sessions, consent_session_id, rp_origin_id). Defaults to None to preserve cross-site SSO flows (silent authentication via hidden iframe with prompt=none, cross-site POST to the authorization endpoint). Setting Lax breaks silent/iframe-based authentication and cross-site POST to the authorization endpoint for RPs hosted on a different site than the OP. Setting Strict additionally breaks normal top-level cross-site SSO redirects, effectively disabling SSO for any RP not on the same site as the OP. Value is matched case-insensitively against None/Lax/Strict; any other value falls back to None. See auth-server session management docs before changing.
 
 - Required: No
 
@@ -2627,11 +2637,11 @@ tags:
 
 ## requirePkce
 
-- Description: Boolean value true check for Proof Key for Code Exchange (PKCE)
+- Description: Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled.
 
 - Required: No
 
-- Default value: false
+- Default value: true
 
 
 ## requireRequestObjectEncryption
