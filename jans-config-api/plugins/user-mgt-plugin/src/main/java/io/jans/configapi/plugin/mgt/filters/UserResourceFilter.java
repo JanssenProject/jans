@@ -60,7 +60,7 @@ public class UserResourceFilter extends BaseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.info("======================== Inside UserResourceFilter filter... ========================");
+            log.error("======================== Inside UserResourceFilter filter... ========================");
 
             // Verify current UserRolePermission
             validateUserRolePermission(requestContext, resourceInfo, httpHeaders);
@@ -80,17 +80,22 @@ public class UserResourceFilter extends BaseFilter {
     private void validateUserRolePermission(ContainerRequestContext requestContext, ResourceInfo resourceInfo,
             HttpHeaders httpHeaders) {
 
+        log.error("\n\n\n UserResourceFilter::authUtil.isUserRolePermissionValidationEnabled():{} {}", authUtil.isUserRolePermissionValidationEnabled(),"\n\n\n");
         // This authorization should be in addition to AuthorizationFilter authorization
         if (!authUtil.isUserRolePermissionValidationEnabled()) {
+            log.error(" UserResourceFilter - Skip validateUserRolePermission as authUtil.isUserRolePermissionValidationEnabled() not enabled");
             return;
         }
-
+        log.error(" UserResourceFilter - authUtil.isValidateUserInumInIntrospectionFlag():{}, !getExcludedClients().isEmpty():{}", authUtil.isValidateUserInumInIntrospectionFlag(), !getExcludedClients().isEmpty());
         IntrospectionResponse introspectionResponse = null;
         if (authUtil.isValidateUserInumInIntrospectionFlag() || !getExcludedClients().isEmpty()) {
             introspectionResponse = getIntrospectionResponse(requestContext);
+            log.error("\n\n\n UserResourceFilter - Setting data in requestContext \n\n\n");
+            setScopeSecurityContext(requestContext, introspectionResponse);
         }
-
+        log.error("\n\n\n UserResourceFilter - isRolePermissionExemptClient(introspectionResponse):{}", isRolePermissionExemptClient(introspectionResponse));
         if (isRolePermissionExemptClient(introspectionResponse)) {
+            log.error("\n\n\n UserResourceFilter - Skip validateUserRolePermission as isRolePermissionExemptClient \n\n\n");
             return;
         }
 
@@ -101,26 +106,27 @@ public class UserResourceFilter extends BaseFilter {
                     Response.status(Response.Status.BAD_REQUEST).build());
         }
 
+        log.error("\n\n\n UserResourceFilter - validateDataInIntrospectionResponse \n\n\n");
         validateDataInIntrospectionResponse(introspectionResponse, userInum);
 
         // Fetch current UserRolePermission of user using `User-inum` in httpHeaders
         Set<String> userCurrentScopes = authUtil.getUserRolePermission(httpHeaders);
-        log.debug("userCurrentScopes:{}", userCurrentScopes);
+        log.error("UserResourceFilter - userCurrentScopes:{}", userCurrentScopes);
 
         // Find missing permission viz-a-viz scopes as defined in resourceInfo
         Map<ProtectionScopeType, List<String>> resourceScopesByType = authUtil.getResourceScopesByType(resourceInfo);
-        log.debug("resourceScopesByType:{}", resourceScopesByType);
+        log.debug("UserResourceFilter - resourceScopesByType:{}", resourceScopesByType);
         if (resourceScopesByType == null || resourceScopesByType.isEmpty()) {
             return;
         }
 
         List<String> resourceScopes = authUtil.getAllScopeList(resourceScopesByType);
-        log.debug("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
+        log.error("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
 
         // For any missing scopes throw unauthorized error
         List<String> safeList = new ArrayList<>(userCurrentScopes);
         List<String> missingScopes = authUtil.findMissingScopes(resourceScopesByType, safeList);
-        log.info("missingScopes:{}", missingScopes);
+        log.error("missingScopes:{}", missingScopes);
         if (missingScopes != null && !missingScopes.isEmpty()) {
             log.error("Insufficient scopes!!! for new token as well - Required scope:{}, userCurrentScopes:{}",
                     resourceScopes, userCurrentScopes);
@@ -190,5 +196,21 @@ public class UserResourceFilter extends BaseFilter {
         }
 
         return introspectionResponse;
+    }
+    
+    private void setScopeSecurityContext(ContainerRequestContext requestContext, IntrospectionResponse introspectionResponse) {
+        if(requestContext == null || introspectionResponse ==null) {
+            return;
+        }
+
+        String inum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
+        List<String> introspectionTokenScopes = introspectionResponse.getScope();
+        log.error("\n\n\n\n ******************* UserResourceFilter - setScopeSecurityContext  inum:{}, introspectionTokenScopes:{}", inum, introspectionTokenScopes);
+        
+        // request-scoped, dies with request. No leakage across threads/requests.
+        requestContext.setProperty(ApiConstants.INTROSPECTION_CLIENT_ID, introspectionResponse.getClientId());
+        requestContext.setProperty(ApiConstants.INTROSPECTION_SCOPES, introspectionTokenScopes);
+        requestContext.setProperty(ApiConstants.INTROSPECTION_USER_INUM, inum);
+        log.error(" UserResourceFilter - setScopeSecurityContext - requestContext.getProperty(ApiConstants.INTROSPECTION_CLIENT_ID):{}, requestContext.getProperty(ApiConstants.INTROSPECTION_SCOPES):{}, requestContext.getProperty(ApiConstants.INTROSPECTION_USER_INUM):{} - {}", requestContext.getProperty(ApiConstants.INTROSPECTION_CLIENT_ID), requestContext.getProperty(ApiConstants.INTROSPECTION_SCOPES), requestContext.getProperty(ApiConstants.INTROSPECTION_USER_INUM)," ******************* \n\n\n\n");
     }
 }
