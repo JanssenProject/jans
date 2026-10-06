@@ -37,7 +37,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -97,17 +99,140 @@ public class ClientIdMetadataService {
     // ==================== Public API ====================
 
     /**
+     * Resolve a client by client_id, transparently handling both traditional (inum-based)
+     * and CIMD (URL-based) client identifiers.
+     * <p>
+     * Callers that previously looked up clients via {@code ClientService#getClient(String)}
+     * directly must use this method instead wherever the client_id may originate from an
+     * authorization request, so that CIMD clients (persisted under {@code cimd-<sha256(url)>})
+     * are resolved correctly rather than looked up by the literal URL.
+     *
+     * @param clientId the client_id, either a traditional inum or a CIMD URL
+     * @return the resolved Client, or null if not found
+     */
+    public Client resolveClient(String clientId) {
+        if (isCimdClientId(clientId)) {
+            log.debug("Processing CIMD client_id: {}", clientId);
+            return getClient(clientId);
+        }
+        return clientService.getClient(clientId);
+    }
+
+    /**
+     * Best-effort client resolution for logout-notification purposes (Single Logout front/back-channel).
+     * Unlike {@link #resolveClient(String)}, a CIMD client is never re-fetched over the network here, even
+     * if its TTL has expired: we return whatever was last successfully persisted, or null if it was never
+     * successfully onboarded at all. Notifying an RP of logout doesn't require fresh metadata the way an
+     * authorization decision does, so a transient re-fetch failure (network hiccup, metadata host down)
+     * must not silently drop an already-known CIMD client from the Single Logout audience.
+     * <p>
+     * URL-shaped client_ids are recognized here even when the CIMD feature flag is currently disabled
+     * (unlike {@link #isCimdClientId(String)}), so a client onboarded while CIMD was enabled is still
+     * looked up by its persisted CIMD record rather than by the literal URL, which would never match.
+     * This never triggers a live fetch, so no network access is re-enabled by disabling the feature.
+     * If no persisted CIMD record exists for a URL-shaped client_id (e.g. it was never onboarded via
+     * CIMD, or a traditional client happens to have been registered with a URL-shaped client_id), this
+     * falls back to an exact literal lookup via {@link ClientService#getClient(String)} so that case is
+     * still resolved; that fallback never fetches a CIMD document either.
+     *
+     * @param clientId the client_id, either a traditional inum or a CIMD URL
+     * @return the resolved Client, or null if not found / never successfully onboarded
+     */
+    public Client resolveClientForLogout(String clientId) {
+        if (!isCimdUrlShape(clientId)) {
+            return clientService.getClient(clientId);
+        }
+        String id = computeId(clientId);
+        String dn = clientService.buildClientDn(id);
+        Client existing = clientService.getClientByDn(dn);
+        if (existing != null && existing.getAttributes() != null && existing.getAttributes().isCimdClient()) {
+            existing.setClientId(clientId);
+            return existing;
+        }
+        log.debug("No persisted CIMD client found for logout notification: {}, falling back to literal client_id lookup", clientId);
+        return clientService.getClient(clientId);
+    }
+
+    /**
+     * Batch variant of {@link #resolveClientForLogout(String)}. Never triggers a live CIMD fetch, so
+     * per-entry failures are limited to unexpected persistence errors; those are logged and skipped so one
+     * bad entry doesn't drop the rest of the Single Logout audience.
+     *
+     * @param clientIds the client_ids to resolve, either traditional inums or CIMD URLs
+     * @return the resolved clients (entries that failed to resolve are simply omitted)
+     */
+    public Set<Client> resolveClientsForLogout(Collection<String> clientIds) {
+        Set<Client> result = new HashSet<>();
+        if (clientIds == null) {
+            return result;
+        }
+        for (String clientId : clientIds) {
+            try {
+                Client client = resolveClientForLogout(clientId);
+                if (client != null) {
+                    result.add(client);
+                }
+            } catch (RuntimeException e) {
+                log.debug("Failed to resolve client_id '{}' for logout notification (best-effort, skipping).", clientId, e);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Batch variant of {@link #resolveClient(String)}, mirroring {@link ClientService#getClient(Collection, boolean)}.
+     * When {@code silent} is true, a failure to resolve any single client_id (including a CIMD fetch/validation
+     * failure) is skipped rather than propagated, so one bad entry doesn't fail the whole batch.
+     *
+     * @param clientIds the client_ids to resolve, either traditional inums or CIMD URLs
+     * @param silent    when true, per-entry resolution failures are swallowed instead of thrown
+     * @return the resolved clients (entries that failed to resolve are simply omitted)
+     */
+    public Set<Client> resolveClients(Collection<String> clientIds, boolean silent) {
+        Set<Client> result = new HashSet<>();
+        if (clientIds == null) {
+            return result;
+        }
+        for (String clientId : clientIds) {
+            try {
+                Client client = resolveClient(clientId);
+                if (client != null) {
+                    result.add(client);
+                }
+            } catch (RuntimeException e) {
+                if (!silent) {
+                    throw e;
+                }
+                log.debug("Failed to resolve client_id '{}' in batch (silent).", clientId, e);
+            }
+        }
+        return result;
+    }
+
+    /**
      * Check if client_id is a CIMD URL candidate.
      *
      * @param clientId the client_id to check
      * @return true if CIMD feature is enabled and client_id is a valid URL with allowed scheme
      */
     public boolean isCimdClientId(String clientId) {
-        if (StringUtils.isBlank(clientId)) {
+        if (!isFeatureEnabled()) {
             return false;
         }
+        return isCimdUrlShape(clientId);
+    }
 
-        if (!isFeatureEnabled()) {
+    /**
+     * Structural check for whether client_id is a CIMD URL candidate, independent of whether the CIMD
+     * feature flag is currently enabled. Used for logout resolution, where an already-persisted CIMD
+     * client must still be found by its computed id even if CIMD has since been disabled; new CIMD
+     * onboarding (a live fetch) is gated separately by {@link #isCimdClientId(String)}.
+     *
+     * @param clientId the client_id to check
+     * @return true if client_id is a valid URL with an allowed scheme
+     */
+    boolean isCimdUrlShape(String clientId) {
+        if (StringUtils.isBlank(clientId)) {
             return false;
         }
 

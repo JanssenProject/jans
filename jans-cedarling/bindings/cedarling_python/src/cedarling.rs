@@ -182,6 +182,12 @@ use std::time::Duration;
 ///
 ///     :returns: A MetricsSnapshot object
 ///     :raises ValueError: If metrics collection is disabled or owned by lock telemetry.
+///
+/// .. method:: policy_store_id(self) -> str | None
+///
+///     Returns the ID of the currently published policy store, if it carries one.
+///
+///     :returns: The store ID, or None when the store carries no ID.
 #[derive(Clone)]
 #[pyclass(from_py_object)]
 pub struct Cedarling {
@@ -543,6 +549,11 @@ impl Cedarling {
             .drain_metrics()
             .map(|snapshot| snapshot.into())
             .map_err(|e| PyValueError::new_err(e.to_string()))
+    }
+
+    /// Returns the ID of the currently published policy store, if it carries one.
+    fn policy_store_id(&self) -> Option<String> {
+        self.inner.policy_store_id()
     }
 
     /// Returns true if trusted issuer with the given policy-store id is loaded.

@@ -539,7 +539,7 @@ mod tests {
         let archive = builder.build_archive().unwrap();
 
         // Verify it's a valid ZIP
-        assert!(!archive.is_empty());
+        assert_ne!(archive, [] as [u8; 0]);
         assert_eq!(&archive[0..2], &[0x50, 0x4B]); // ZIP magic number
     }
 
@@ -565,18 +565,18 @@ mod tests {
     #[test]
     fn test_path_traversal_archive() {
         let archive = create_path_traversal_archive();
-        assert!(!archive.is_empty());
+        assert_ne!(archive, [] as [u8; 0]);
     }
 
     #[test]
     fn test_corrupted_archive() {
         let archive = create_corrupted_archive();
-        assert!(!archive.is_empty());
+        assert_ne!(archive, [] as [u8; 0]);
     }
 
     #[test]
     fn test_deep_nested_archive() {
         let archive = create_deep_nested_archive(50);
-        assert!(!archive.is_empty());
+        assert_ne!(archive, [] as [u8; 0]);
     }
 }

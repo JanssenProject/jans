@@ -297,6 +297,16 @@ impl Cedarling {
         }
     }
 
+    /// Returns the ID of the currently published policy store, if it carries one.
+    ///
+    /// `None` when the store carries no ID. The value is an opaque,
+    /// source-dependent string: do not parse it or assume hex. It may change
+    /// after a background refresh.
+    #[must_use]
+    pub fn policy_store_id(&self) -> Option<String> {
+        self.authz.load().policy_store_id()
+    }
+
     // The following public methods retain async signatures for API compatibility
     // to avoid breaking changes. They use #[allow(unknown_lints, clippy::unused_async, clippy::unused_async_trait_impl)] since
     // they no longer await internally. Future maintainers can safely remove
@@ -979,25 +989,33 @@ impl Cedarling {
                 };
 
                 // Metadata Level
-                // Every loader attaches metadata; Agama YAML versions are checked at load.
-                let metadata_res = match &loaded.store.metadata {
-                    Some(metadata) => {
-                        use crate::common::policy_store::validator::MetadataValidator;
-                        match MetadataValidator::validate(metadata) {
-                            Ok(()) => LevelResult::Ok,
-                            Err(e) => LevelResult::Failed {
-                                errors: vec![Diagnostic {
-                                    file: "<metadata>".into(),
-                                    line: None,
-                                    column: None,
-                                    message: e.to_string(),
-                                }],
-                            },
-                        }
-                    },
-                    None => LevelResult::Skipped {
-                        reason: "no metadata present".into(),
-                    },
+                // Agama YAML metadata uses the user-chosen `policy_stores` key as `id` and is
+                // already checked by `validate_legacy_store` at load; strict checks apply elsewhere.
+                let metadata_res = if matches!(
+                    &config.source,
+                    PolicyStoreSource::Yaml(_) | PolicyStoreSource::FileYaml(_)
+                ) {
+                    LevelResult::Ok
+                } else {
+                    match &loaded.store.metadata {
+                        Some(metadata) => {
+                            use crate::common::policy_store::validator::MetadataValidator;
+                            match MetadataValidator::validate(metadata) {
+                                Ok(()) => LevelResult::Ok,
+                                Err(e) => LevelResult::Failed {
+                                    errors: vec![Diagnostic {
+                                        file: "<metadata>".into(),
+                                        line: None,
+                                        column: None,
+                                        message: e.to_string(),
+                                    }],
+                                },
+                            }
+                        },
+                        None => LevelResult::Skipped {
+                            reason: "no metadata present".into(),
+                        },
+                    }
                 };
 
                 let warnings = loaded

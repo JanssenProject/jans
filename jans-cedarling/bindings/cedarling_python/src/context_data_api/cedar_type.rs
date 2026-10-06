@@ -4,6 +4,9 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
+
+// pyo3 `from_py_object` expansion clones Copy types
+#![allow(clippy::clone_on_copy)]
 use pyo3::prelude::*;
 
 /// CedarType

@@ -1725,6 +1725,17 @@ components:
           type: array
           items:
             type: string
+        lockAuditEnabled:
+          type: boolean
+        lockAuditEndpoint:
+          type: string
+        lockAuditClientId:
+          type: string
+        lockAuditClientPassword:
+          type: string
+        lockAuditFlushInterval:
+          type: integer
+          format: int32
         rp:
           type: array
           items:
@@ -1749,19 +1760,9 @@ components:
           $ref: "#/components/schemas/RequestedPartyPolicy"
     RequestedPartyPolicy:
       type: object
-      description: >-
-        Assurance policy for a single relying party, overriding the corresponding global setting. Every
-        field is optional; an omitted field falls back to the global value, so a relying party with no
-        policy behaves exactly as it did before per-RP policy existed.
       properties:
         attestationMode:
           type: string
-          description: >-
-            Attestation mode for this relying party. Omitted falls back to the global attestationMode.
-          enum:
-            - disabled
-            - monitor
-            - enforced
     JsonNode:
       type: object
     Fido2MetricsAggregation:
@@ -1789,11 +1790,41 @@ components:
           type: object
           additionalProperties:
             type: object
+        period:
+          type: string
+        registrationAttempts:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
         fallbackEvents:
           type: integer
           format: int64
-        period:
-          type: string
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationSuccessRate:
+          type: number
+          format: double
+        registrationAvgDuration:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
         deviceTypes:
           type: object
           additionalProperties:
@@ -1804,40 +1835,10 @@ components:
           additionalProperties:
             type: integer
             format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        registrationFailures:
-          type: integer
-          format: int64
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationFailures:
-          type: integer
-          format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        authenticationSuccesses:
-          type: integer
-          format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
@@ -1900,6 +1901,8 @@ components:
           type: string
         deviceInfo:
           $ref: "#/components/schemas/DeviceInfo"
+        nativeClientTelemetry:
+          $ref: "#/components/schemas/NativeClientTelemetry"
         errorReason:
           type: string
         errorCategory:
@@ -1913,6 +1916,8 @@ components:
         ipAddress:
           type: string
         sessionId:
+          type: string
+        clientCorrelationId:
           type: string
         nodeId:
           type: string
@@ -1940,6 +1945,35 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Fido2MetricsEntry"
+    NativeClientTelemetry:
+      type: object
+      properties:
+        client_correlation_id:
+          type: string
+        platform:
+          type: string
+        native_api:
+          type: string
+        os_version:
+          type: string
+        play_services_version:
+          type: string
+        device_manufacturer:
+          type: string
+        device_model:
+          type: string
+        credential_provider:
+          type: string
+        is_device_secure:
+          type: boolean
+        flow_context:
+          type: string
+        app_version:
+          type: string
+        distribution_channel:
+          type: string
+        last_client_error_code:
+          type: string
     ApiError:
       type: object
       properties:

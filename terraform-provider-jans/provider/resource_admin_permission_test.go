@@ -8,8 +8,10 @@ func TestAdminUIPermission_Mapping(t *testing.T) {
 	data := schema.Data(nil)
 
 	permission := jans.AdminUIPermission{
-		Permission:  "permission",
-		Description: "description",
+		Permission:                   "permission",
+		Description:                  "description",
+		Tag:                          "tag",
+		EssentialPermissionInAdminUI: true,
 	}
 
 	if err := toSchemaResource(data, permission); err != nil {

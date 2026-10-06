@@ -544,7 +544,7 @@ public class AuthenticationFilter implements Filter {
                         requireAuth = !authenticator.authenticateClient(servletRequest, true);
                     }
                 } else if (tokenEndpoint) {
-                    Client client = clientService.getClient(servletRequest.getParameter(Constants.CLIENT_ID));
+                    Client client = resolveClientForTokenEndpointAuthn(servletRequest.getParameter(Constants.CLIENT_ID));
                     if (client != null && client.hasAuthenticationMethod(AuthenticationMethod.NONE)) {
                         identity.logout();
 

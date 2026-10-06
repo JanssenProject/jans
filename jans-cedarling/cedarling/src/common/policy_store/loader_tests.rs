@@ -593,7 +593,7 @@ fn test_load_and_parse_schema_end_to_end() {
         .expect("Schema should be present in loaded directory");
     // Get the Cedar schema object
     let schema = parsed.get_schema();
-    assert!(!format!("{schema:?}").is_empty());
+    assert_ne!(format!("{schema:?}"), "");
 }
 
 #[test]
@@ -1387,7 +1387,7 @@ fn test_complete_policy_store_with_issuers() {
     // Verify everything works together
     assert!(!policy_set.is_empty());
     assert_eq!(entity_store.iter().count(), 1);
-    assert!(!format!("{:?}", parsed_schema.get_schema()).is_empty());
+    assert_ne!(format!("{:?}", parsed_schema.get_schema()), "");
 
     let store =
         formats::parse_policy_store(loaded_directory, false).expect("complete store should parse");

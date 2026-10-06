@@ -887,7 +887,10 @@ mod policy_metadata_tests {
         assert_eq!(result, ["/trial", "/upgrade"]);
 
         assert_eq!(container.annotation_values(ids.iter(), "audit"), ["true"]);
-        assert!(container.annotation_values(ids.iter(), "absent").is_empty());
+        assert_eq!(
+            container.annotation_values(ids.iter(), "absent"),
+            [] as [std::string::String; 0]
+        );
     }
 
     #[test]
@@ -914,7 +917,10 @@ mod policy_metadata_tests {
         let ids = [PolicyId::new("plain")];
 
         assert!(container.annotations_map(ids.iter()).is_empty());
-        assert!(container.annotation_values(ids.iter(), "any").is_empty());
+        assert_eq!(
+            container.annotation_values(ids.iter(), "any"),
+            [] as [std::string::String; 0]
+        );
 
         let by_policy = container.annotations_by_policy(ids.iter());
         assert_eq!(by_policy.len(), 1);

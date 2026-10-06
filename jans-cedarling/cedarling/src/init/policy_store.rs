@@ -82,7 +82,7 @@ fn extract_first_policy_store(
                     .unwrap_or(&agama_policy_store.cedar_version)
                     .to_string(),
                 policy_store: crate::common::policy_store::metadata::PolicyStoreInfo {
-                    id: String::new(),
+                    id: k.clone(),
                     name: k.clone(),
                     version: v.version.clone().unwrap_or_default(),
                     description: None,
@@ -576,6 +576,26 @@ mod test {
             .expect("valid legacy store with schema");
         let result = extract_first_policy_store(&agama, true);
         result.expect("should succeed with schema and strict=true");
+    }
+
+    #[test]
+    fn test_extract_first_policy_store_legacy_id_matches_map_key() {
+        let agama: LegacyAgamaPolicyStore = serde_json::from_value(make_full_legacy_json())
+            .expect("valid legacy store with schema");
+        let result = extract_first_policy_store(&agama, false).expect("should succeed with schema");
+        assert_eq!(
+            result.id, "test",
+            "PolicyStoreWithID.id should equal map key"
+        );
+        assert_eq!(
+            result
+                .metadata
+                .expect("legacy store should carry metadata")
+                .policy_store
+                .id,
+            "test",
+            "metadata.policy_store.id should equal map key"
+        );
     }
 
     #[test]

@@ -16,7 +16,9 @@ import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricType;
 import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
 import io.jans.model.ApplicationType;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -194,9 +196,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param username Username attempting registration
      * @param request HTTP request for device info extraction
      * @param startTime Start time of the operation
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyRegistrationAttempt(String username, HttpServletRequest request, long startTime) {
-        recordRegistrationMetrics(username, request, startTime, null, ATTEMPT_STATUS, null, Fido2MetricType.FIDO2_REGISTRATION_ATTEMPT);
+    public void recordPasskeyRegistrationAttempt(String username, HttpServletRequest request, long startTime,
+                                                 NativeClientTelemetry telemetry) {
+        recordRegistrationMetrics(username, request, startTime, null, ATTEMPT_STATUS, null,
+                Fido2MetricType.FIDO2_REGISTRATION_ATTEMPT, telemetry);
     }
 
     /**
@@ -206,9 +211,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param request HTTP request for device info extraction
      * @param startTime Start time of the operation
      * @param authenticatorType Type of authenticator used
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyRegistrationSuccess(String username, HttpServletRequest request, long startTime, String authenticatorType) {
-        recordRegistrationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null, Fido2MetricType.FIDO2_REGISTRATION_SUCCESS);
+    public void recordPasskeyRegistrationSuccess(String username, HttpServletRequest request, long startTime,
+                                                 String authenticatorType, NativeClientTelemetry telemetry) {
+        recordRegistrationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null,
+                Fido2MetricType.FIDO2_REGISTRATION_SUCCESS, telemetry);
     }
 
     /**
@@ -219,9 +227,11 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param startTime Start time of the operation
      * @param errorReason Reason for failure
      * @param authenticatorType Type of authenticator used (if known)
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime, String errorReason, String authenticatorType) {
-        recordPasskeyRegistrationFailure(username, request, startTime, errorReason, authenticatorType, null);
+    public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime,
+                                                 String errorReason, String authenticatorType, NativeClientTelemetry telemetry) {
+        recordPasskeyRegistrationFailure(username, request, startTime, errorReason, authenticatorType, null, telemetry);
     }
 
     /**
@@ -234,21 +244,24 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param authenticatorType Type of authenticator used (if known)
      * @param aaguid AAGUID the failure concerns, or null when the failure is not tied to one. Recorded
      *        so attestation rejections can be broken down by authenticator model.
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
     public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime,
-                                                 String errorReason, String authenticatorType, String aaguid) {
+                                                 String errorReason, String authenticatorType, String aaguid,
+                                                 NativeClientTelemetry telemetry) {
         recordRegistrationEvent(request, new MetricEvent(Fido2MetricsConstants.REGISTRATION,
                 Fido2MetricType.FIDO2_REGISTRATION_FAILURE, username, Fido2MetricsConstants.FAILURE,
-                authenticatorType, errorReason, startTime).withAaguid(aaguid));
+                authenticatorType, errorReason, startTime, telemetry).withAaguid(aaguid));
     }
 
     /**
      * Common method to record registration metrics
      */
     private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime,
-                                        String authenticatorType, String status, String errorReason, Fido2MetricType metricType) {
+                                        String authenticatorType, String status, String errorReason, Fido2MetricType metricType,
+                                        NativeClientTelemetry telemetry) {
         recordRegistrationEvent(request, new MetricEvent(Fido2MetricsConstants.REGISTRATION, metricType, username, status,
-                authenticatorType, errorReason, startTime));
+                authenticatorType, errorReason, startTime, telemetry));
     }
 
     /**
@@ -284,9 +297,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param username Username attempting authentication
      * @param request HTTP request for device info extraction
      * @param startTime Start time of the operation
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyAuthenticationAttempt(String username, HttpServletRequest request, long startTime) {
-        recordAuthenticationMetrics(username, request, startTime, null, ATTEMPT_STATUS, null, Fido2MetricType.FIDO2_AUTHENTICATION_ATTEMPT);
+    public void recordPasskeyAuthenticationAttempt(String username, HttpServletRequest request, long startTime,
+                                                    NativeClientTelemetry telemetry) {
+        recordAuthenticationMetrics(username, request, startTime, null, ATTEMPT_STATUS, null,
+                Fido2MetricType.FIDO2_AUTHENTICATION_ATTEMPT, telemetry);
     }
 
     /**
@@ -296,9 +312,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param request HTTP request for device info extraction
      * @param startTime Start time of the operation
      * @param authenticatorType Type of authenticator used
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyAuthenticationSuccess(String username, HttpServletRequest request, long startTime, String authenticatorType) {
-        recordAuthenticationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null, Fido2MetricType.FIDO2_AUTHENTICATION_SUCCESS);
+    public void recordPasskeyAuthenticationSuccess(String username, HttpServletRequest request, long startTime,
+                                                    String authenticatorType, NativeClientTelemetry telemetry) {
+        recordAuthenticationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null,
+                Fido2MetricType.FIDO2_AUTHENTICATION_SUCCESS, telemetry);
     }
 
     /**
@@ -309,9 +328,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param startTime Start time of the operation
      * @param errorReason Reason for failure
      * @param authenticatorType Type of authenticator used (if known)
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyAuthenticationFailure(String username, HttpServletRequest request, long startTime, String errorReason, String authenticatorType) {
-        recordAuthenticationMetrics(username, request, startTime, authenticatorType, "FAILURE", errorReason, Fido2MetricType.FIDO2_AUTHENTICATION_FAILURE);
+    public void recordPasskeyAuthenticationFailure(String username, HttpServletRequest request, long startTime,
+                                                    String errorReason, String authenticatorType, NativeClientTelemetry telemetry) {
+        recordAuthenticationMetrics(username, request, startTime, authenticatorType, "FAILURE", errorReason,
+                Fido2MetricType.FIDO2_AUTHENTICATION_FAILURE, telemetry);
     }
 
     /**
@@ -327,14 +349,15 @@ public class MetricService extends io.jans.service.metric.MetricService {
      */
     public void recordPasskeyAuthenticationAbandoned(String username, long ceremonyStartTime) {
         recordAuthenticationMetrics(username, null, ceremonyStartTime, null, Fido2MetricsConstants.ABANDONED, null,
-                Fido2MetricType.FIDO2_AUTHENTICATION_ABANDONED);
+                Fido2MetricType.FIDO2_AUTHENTICATION_ABANDONED, null);
     }
 
     /**
      * Common method to record authentication metrics
      */
     private void recordAuthenticationMetrics(String username, HttpServletRequest request, long startTime,
-                                          String authenticatorType, String status, String errorReason, Fido2MetricType metricType) {
+                                          String authenticatorType, String status, String errorReason, Fido2MetricType metricType,
+                                          NativeClientTelemetry telemetry) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
@@ -343,7 +366,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
         // so all of its data has to be read here, while we are still on the request thread.
         RequestSnapshot requestSnapshot = snapshotRequest(request);
         MetricEvent event = new MetricEvent("AUTHENTICATION", metricType, username, status, authenticatorType,
-                                            errorReason, startTime);
+                                            errorReason, startTime, telemetry);
 
         CompletableFuture.runAsync(() -> {
             try {
@@ -384,11 +407,13 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
         if (event.errorReason != null) {
             metricsData.setErrorReason(event.errorReason);
-            // A trust diagnostic code is not an inferred category — it is the value the attestation path
-            // deliberately recorded, and the attestation-rejections endpoint selects on it. Gating it on
-            // fido2ErrorCategorization would leave that endpoint silently empty whenever this unrelated
-            // toggle is off, so only the keyword-based bucketing stays behind the flag.
+            // A trust or native-failure diagnostic code is not an inferred category — it is the value
+            // the verify() path deliberately recorded, and the attestation-rejections endpoint selects
+            // on it. Gating it on fido2ErrorCategorization would leave that endpoint silently empty
+            // whenever this unrelated toggle is off, so only the keyword-based bucketing stays behind
+            // the flag.
             if (AttestationTrustDiagnostic.isDiagnosticCode(event.errorReason)
+                    || NativeFailureDiagnostic.isDiagnosticCode(event.errorReason)
                     || appConfiguration.isFido2ErrorCategorization()) {
                 metricsData.setErrorCategory(categorizeError(event.errorReason));
             }
@@ -424,9 +449,10 @@ public class MetricService extends io.jans.service.metric.MetricService {
         private final String errorReason;
         private final long startTime;
         private final String aaguid;
+        private final NativeClientTelemetry telemetry;
 
         private MetricEvent(String operationType, Fido2MetricType metricType, String username, String status,
-                            String authenticatorType, String errorReason, long startTime) {
+                            String authenticatorType, String errorReason, long startTime, NativeClientTelemetry telemetry) {
             this.operationType = operationType;
             this.metricType = metricType;
             this.username = username;
@@ -435,6 +461,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             this.errorReason = errorReason;
             this.startTime = startTime;
             this.aaguid = null;
+            this.telemetry = telemetry;
         }
 
         private MetricEvent(MetricEvent source, String aaguid) {
@@ -446,6 +473,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             this.errorReason = source.errorReason;
             this.startTime = source.startTime;
             this.aaguid = aaguid;
+            this.telemetry = source.telemetry;
         }
 
         /** The same event attributed to an authenticator model. */
@@ -632,6 +660,15 @@ public class MetricService extends io.jans.service.metric.MetricService {
         metricsData.setSessionId(requestSnapshot.sessionId);
         metricsData.setDeviceInfo(requestSnapshot.deviceInfo);
 
+        // Optional native-client telemetry (#14607). client_correlation_id is promoted to its own
+        // top-level field, sibling to sessionId, rather than left buried inside the telemetry blob —
+        // see Fido2MetricsEntry.clientCorrelationId for why: it needs to be independently queryable
+        // to actually correlate a start call with its matching finish call.
+        if (event.telemetry != null) {
+            metricsData.setNativeClientTelemetry(event.telemetry);
+            metricsData.setClientCorrelationId(event.telemetry.getClientCorrelationId());
+        }
+
         // Set node identifier (for cluster environments) - only if available
         try {
             String nodeId = networkService.getMacAdress();
@@ -662,6 +699,9 @@ public class MetricService extends io.jans.service.metric.MetricService {
         // to contain a keyword — JFS_MDS_METADATA_EXPIRED reads as "expired" and would land in TIMEOUT.
         if (AttestationTrustDiagnostic.isDiagnosticCode(errorReason)) {
             return AttestationTrustDiagnostic.CATEGORY;
+        }
+        if (NativeFailureDiagnostic.isDiagnosticCode(errorReason)) {
+            return NativeFailureDiagnostic.CATEGORY;
         }
 
         String lowerError = errorReason.toLowerCase();

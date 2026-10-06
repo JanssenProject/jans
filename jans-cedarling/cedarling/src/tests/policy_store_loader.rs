@@ -474,6 +474,144 @@ permit(
     assert!(failed_ids.is_empty());
 }
 
+/// Test that `Cedarling::policy_store_id()` returns the store ID for
+/// directory and `.cjar` sources.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_directory_and_cjar() {
+    let builder = create_authz_policy_store_builder();
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+    let from_dir = get_cedarling_from_directory(temp_dir.path().to_path_buf()).await;
+    assert_eq!(
+        from_dir.policy_store_id(),
+        Some("a1b2c3d4e5f6a7b8".to_string()),
+        "directory store should report builder ID"
+    );
+
+    let cjar_dir = TempDir::new().expect("Failed to create temp directory");
+    let cjar_path = cjar_dir.path().join("test_policy_store.cjar");
+    fs::write(&cjar_path, &archive).expect("Failed to write archive file");
+    let from_cjar = get_cedarling_from_cjar_file(cjar_path).await;
+    assert_eq!(
+        from_cjar.policy_store_id(),
+        Some("a1b2c3d4e5f6a7b8".to_string()),
+        ".cjar store should report builder ID"
+    );
+}
+
+/// Test that a legacy YAML store reports the `policy_stores` map key.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_legacy_yaml() {
+    use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
+    let yaml = r#"
+cedar_version: "4.0.0"
+policy_stores:
+  legacy-test-key:
+    name: Test Store
+    policies: {}
+"#;
+    let cedarling = get_cedarling_with_callback(PolicyStoreSource::Yaml(yaml.to_string()), |cfg| {
+        cfg.authorization_config.strict_schema_validation = false;
+    })
+    .await;
+    assert_eq!(
+        cedarling.policy_store_id(),
+        Some("legacy-test-key".to_string()),
+        "legacy store should report map key"
+    );
+}
+
+/// Test that a new-format store without an ID reports `None`.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_missing_returns_none() {
+    let mut builder = create_authz_policy_store_builder();
+    builder.extra_files.insert(
+        "metadata.json".to_string(),
+        r#"{"cedar_version":"4.4.0","policy_store":{"name":"Integration Test Policy Store","version":"1.0.0"}}"#.to_string(),
+    );
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+    let cedarling = get_cedarling_from_directory(temp_dir.path().to_path_buf()).await;
+    assert_eq!(
+        cedarling.policy_store_id(),
+        None,
+        "store without metadata id should report None"
+    );
+}
+
+/// Test that hot-swapping `Authz` updates the reported ID.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_hot_reload_updates() {
+    let builder_a = create_authz_policy_store_builder();
+    let archive_a = builder_a
+        .build_archive()
+        .expect("Failed to build test archive");
+    let dir_a = extract_archive_to_temp_dir(&archive_a);
+    let a = get_cedarling_from_directory(dir_a.path().to_path_buf()).await;
+
+    let mut builder_b = create_authz_policy_store_builder();
+    builder_b.id = "b1b2c3d4e5f6a7b8".to_string();
+    let archive_b = builder_b
+        .build_archive()
+        .expect("Failed to build test archive");
+    let dir_b = extract_archive_to_temp_dir(&archive_b);
+    let b = get_cedarling_from_directory(dir_b.path().to_path_buf()).await;
+
+    assert_eq!(
+        a.policy_store_id(),
+        Some("a1b2c3d4e5f6a7b8".to_string()),
+        "first store should report its own ID"
+    );
+    a.authz.store(b.authz.load_full());
+    assert_eq!(
+        a.policy_store_id(),
+        Some("b1b2c3d4e5f6a7b8".to_string()),
+        "after swap first should report second ID"
+    );
+}
+
+/// Test that a malformed new-format ID fails to load.
+/// Validator unit tests already cover `InvalidPolicyStoreId` at the
+/// `MetadataValidator` level; this covers the `Cedarling::new` surface.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_malformed_fails_to_load() {
+    use crate::InitCedarlingError;
+    use crate::common::policy_store::errors::ValidationError;
+    use crate::init::policy_store::PolicyStoreLoadError;
+    use crate::init::service_config::ServiceConfigError;
+    use crate::tests::utils::cedarling_util::get_config;
+
+    let mut builder = create_authz_policy_store_builder();
+    builder.id = "not-hex!".to_string();
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+    let config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
+    let Err(err) = Cedarling::new(&config).await else {
+        panic!("malformed ID should fail to load")
+    };
+    assert!(
+        matches!(
+            err,
+            InitCedarlingError::ServiceConfig(ServiceConfigError::PolicyStore(
+                PolicyStoreLoadError::Validation(ValidationError::InvalidPolicyStoreId { .. })
+            ))
+        ),
+        "expected InvalidPolicyStoreId, got: {err:?}"
+    );
+}
+
 /// Test that the `TrustedIssuerLoadingInfo` trait correctly tracks failed issuers on `Cedarling`.
 #[test]
 #[cfg(not(target_arch = "wasm32"))]

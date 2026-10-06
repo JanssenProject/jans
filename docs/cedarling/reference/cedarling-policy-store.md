@@ -87,6 +87,10 @@ Contains policy store identification and versioning:
 format the store is written in. See
 [Policy store specification versions](#policy-store-specification-versions).
 
+For `.cjar`/directory stores the ID comes from `metadata.json`. It must be
+hex (8-64 characters), otherwise loading fails with `InvalidPolicyStoreId`.
+It may be omitted, in which case the getter reports none.
+
 #### Policy Files
 
 Policies are stored as human-readable `.cedar` files in the `policies/` directory:
@@ -448,6 +452,10 @@ For URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a L
 
 Every public Cedarling method snapshots the current `Authz` via `Arc<ArcSwap<Authz>>::load()` at entry and uses that snapshot for the duration of the call. A refresh that lands mid-request can never produce a partially-updated view — in-flight authorizations always finish against the pre-swap policy store. The post-swap store is visible to all *subsequent* calls.
 
+The `policy_store_id()` getter reports the currently published store, so the
+value can change after a refresh to a store with a different ID and callers
+must not cache it.
+
 ### Strategy ladder
 
 The worker selects from three fetch strategies and degrades automatically when the upstream proves it doesn't support the more efficient mode. A periodic probe attempts to upgrade back so a transiently misconfigured upstream doesn't permanently lock the worker into a heavier path.
@@ -514,6 +522,9 @@ The structure accepted for YAML test fixtures is defined as follows:
   }
 }
 ```
+
+The ID is the `policy_stores` map key, is not required to be hex, and is not
+validated.
 
 - **cedar_version** : (_String_) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
 - **policies** : (_Object_) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).

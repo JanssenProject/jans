@@ -69,7 +69,7 @@ async fn batch_unsigned_single_item_allow() {
         "single item should allow"
     );
     // batch_id is a UUIDv7 — a non-nil value.
-    assert!(!response.batch_id.to_string().is_empty());
+    assert_ne!(response.batch_id.to_string(), "");
 }
 
 /// Happy path: N=25, mixed allow/deny items keep their per-item decisions and

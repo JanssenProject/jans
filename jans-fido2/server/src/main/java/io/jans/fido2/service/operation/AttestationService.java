@@ -22,7 +22,9 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.fido2.service.trust.AttestationTrustDiagnostics;
+import io.jans.fido2.service.trust.NativeFailureDiagnostics;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.CoseService;
@@ -246,7 +248,8 @@ public class AttestationService {
 
 		// Record metrics for registration attempt
 		try {
-			metricService.recordPasskeyRegistrationAttempt(attestationOptions.getUsername(), httpRequest, startTime);
+			metricService.recordPasskeyRegistrationAttempt(attestationOptions.getUsername(), httpRequest, startTime,
+					attestationOptions.getTelemetry());
 		} catch (Exception e) {
 			log.debug("Failed to record registration attempt metrics", e);
 		}
@@ -421,7 +424,7 @@ public class AttestationService {
 		authenticatorType = registrationData.getAuthentictatorAttachment();
 		
 		// Record metrics for successful registration
-		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType);
+		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType, attestationResult.getTelemetry());
 
 		lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, null));
 
@@ -429,7 +432,8 @@ public class AttestationService {
 
 		} catch (Exception e) {
 			// Record metrics for failed registration
-			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
+			recordRegistrationFailureMetrics(username, httpRequest, startTime, e, authenticatorType,
+					attestationResult != null ? attestationResult.getTelemetry() : null);
 
 			// A failure here can still mean the registration was already committed as `registered`
 			// (e.g. an external interception script throwing after persistence, at line ~409 above,
@@ -752,26 +756,28 @@ public class AttestationService {
 	/**
 	 * Record registration success metrics
 	 */
-	private void recordRegistrationSuccessMetrics(String username, HttpServletRequest httpRequest, 
-												  long startTime, String authenticatorType) {
+	private void recordRegistrationSuccessMetrics(String username, HttpServletRequest httpRequest,
+												  long startTime, String authenticatorType, NativeClientTelemetry telemetry) {
 		try {
-			metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType);
+			metricService.recordPasskeyRegistrationSuccess(username, httpRequest, startTime, authenticatorType, telemetry);
 		} catch (Exception e) {
 			log.debug("Failed to record registration success metrics", e);
 		}
 	}
-	
+
 	/**
 	 * Record registration failure metrics
 	 */
 	private void recordRegistrationFailureMetrics(String username, HttpServletRequest httpRequest,
-												  long startTime, Exception error, String authenticatorType) {
+												  long startTime, Exception error, String authenticatorType,
+												  NativeClientTelemetry telemetry) {
 		try {
 			String message = error.getMessage() != null ? error.getMessage() : "Unknown error";
 
-			// A trust or metadata rejection is recorded under its diagnostic code instead of the raw
-			// message, so rejections can be counted by cause rather than by wording. Every other failure
-			// keeps its message untouched, and nothing here changes the response the client receives.
+			// A trust, metadata or native-failure rejection is recorded under its diagnostic code
+			// instead of the raw message, so rejections can be counted by cause rather than by wording.
+			// Every other failure keeps its message untouched, and nothing here changes the response
+			// the client receives.
 			String diagnosticCode = AttestationTrustDiagnostics.resolveCode(error);
 			String errorReason = message;
 			String aaguid = null;
@@ -780,10 +786,16 @@ public class AttestationService {
 				aaguid = AttestationTrustDiagnostics.resolveAaguid(error);
 				// The original message stays in the log, so the substitution loses no detail.
 				log.debug("Attestation rejected for aaguid {} with diagnostic {}: {}", aaguid, diagnosticCode, message);
+			} else {
+				String nativeFailureCode = NativeFailureDiagnostics.resolveCode(error);
+				if (nativeFailureCode != null) {
+					errorReason = nativeFailureCode;
+					log.debug("Attestation rejected with native-failure diagnostic {}: {}", nativeFailureCode, message);
+				}
 			}
 
 			metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason,
-					authenticatorType, aaguid);
+					authenticatorType, aaguid, telemetry);
 		} catch (Exception metricsException) {
 			log.debug("Failed to record registration failure metrics", metricsException);
 		}
