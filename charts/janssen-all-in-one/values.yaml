@@ -248,12 +248,15 @@ auth-server:
     webfingerAdditionalAnnotations: { }
     # -- Enable endpoint /.well-known/authzen-configuration
     authzenConfigEnabled: true
+    # -- Enable endpoint /.well-known/oauth-authorization-server
     oauthServerConfigEnabled: true
     # -- authzen config ingress resource labels. key app is taken
     authzenConfigLabels: { }
     # -- authzen config ingress resource additional annotations.
     authzenAdditionalAnnotations: { }
+    # -- oauth-authorization-server ingress resource labels. key app is taken
     oauthServerConfigLabels: { }
+    # -- oauth-authorization-server ingress resource additional annotations.
     oauthServerAdditionalAnnotations: { }
     # -- Auth server ingress resource labels. key app is taken
     authServerLabels: { }
@@ -678,6 +681,7 @@ gateway-api:
     webfingerEnabled: true
     # -- Enable endpoint /.well-known/authzen-configuration
     authzenConfigEnabled: true
+    # -- Enable endpoint /.well-known/oauth-authorization-server
     oauthServerConfigEnabled: true
     # -- Enable endpoint /.well-known/lock-server-configuration (if enabled, auth-server.lockEnabled must be enabled)
     lockConfigEnabled: false
