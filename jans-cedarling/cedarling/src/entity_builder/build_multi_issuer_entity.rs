@@ -307,11 +307,28 @@ impl EntityBuilder {
 
         let mut token_entities = HashMap::new();
         let mut dropped_names = Vec::new();
+        let mut entity_key_to_token_name: HashMap<String, String> = HashMap::new();
         for (token_name, token) in tokens {
             match self.build_single_token_entity(token, &built_entities) {
                 Ok(entity) => match self.generate_entity_key(token_name, token) {
                     Ok(entity_key) => {
                         built_entities.insert(&entity.uid());
+                        if let Some(displaced) =
+                            entity_key_to_token_name.insert(entity_key.clone(), token_name.clone())
+                        {
+                            log_service.log_any(
+                                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                                    LogLevel::WARN,
+                                    None,
+                                ))
+                                .set_message(format!(
+                                    "Entity key collision for token '{token_name}': \
+                                    replaces '{displaced}'"
+                                ))
+                                .set_error(format!("duplicate entity key '{entity_key}'")),
+                            );
+                            dropped_names.push(displaced);
+                        }
                         token_entities.insert(entity_key, entity);
                     },
                     Err(e) => {

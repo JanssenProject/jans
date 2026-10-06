@@ -977,6 +977,39 @@ result = cedarling.authorize_multi_issuer(request)
 
 However, if every token is invalid, Cedarling will raise an error. **It is important that users always handle errors gracefully.**
 
+#### Inspecting dropped tokens
+
+A dropped token no longer has to be recovered from the logs. Every
+`MultiIssuerAuthorizeResult` carries a `dropped_tokens` list, and the same list
+is written to the decision-log entry for the request. Each entry identifies the
+caller's token by its input `mapping` and its zero-based `index` in the request
+`tokens` array, plus a claim-free `reason`:
+
+```python
+result = cedarling.authorize_multi_issuer(request)
+
+for dropped in result.dropped_tokens():
+    print(f"token #{dropped.index} ({dropped.mapping}) dropped: {dropped.reason}")
+```
+
+`reason` is one of the following stable slugs:
+
+| Reason slug | Meaning |
+|-------------|---------|
+| `invalid_input` | The token input was malformed (empty mapping or payload). `detail` names the field. |
+| `jwt_validation_failed` | Signature/claims validation failed, or no trusted issuer declares the token's mapping. |
+| `duplicate_token` | A token with the same issuer and token type was already accepted (see [Non-Deterministic Tokens](#non-deterministic-tokens)). |
+| `no_processor_registered` | The mapping routes to a custom issuer but no processor is registered, and the mapping is not `required`. |
+| `custom_processing_failed` | A registered custom processor rejected the token. |
+| `custom_processing_timed_out` | A registered custom processor exceeded `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS`. |
+| `entity_build_failed` | The token validated but a Cedar entity could not be built from it. |
+
+The reason is deliberately claim-free: it never contains token payloads or claim
+values, so it is safe to log and surface to callers. When no token is dropped
+the list is empty and the field is omitted from the serialized result. For a
+batch request the list is produced once (tokens are validated once for the whole
+batch) and repeats on every item's result.
+
 ### Non-Deterministic Tokens
 
 ```python

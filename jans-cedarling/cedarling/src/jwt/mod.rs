@@ -515,6 +515,22 @@ impl JwtService {
 
             match result {
                 TokenOutcome::Validated(cedar_token) => {
+                    if let Some(prior_index) = indices.get(&token_name).copied() {
+                        if let Some(logger) = &self.logger {
+                            logger.log_any(JwtLogEntry::new(
+                                format!(
+                                    "Duplicate mapping detected: '{token_name}' \
+                                    at index {index} replaces index {prior_index} (last wins)"
+                                ),
+                                Some(LogLevel::WARN),
+                            ));
+                        }
+                        dropped.push(DroppedToken::new(
+                            token_name.clone(),
+                            prior_index,
+                            DropReason::DuplicateToken,
+                        ));
+                    }
                     validated_tokens.insert(token_name.clone(), cedar_token);
                     indices.insert(token_name, index);
                 },
@@ -683,7 +699,27 @@ impl JwtService {
         let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(token_key));
 
         if let Some(cedar_token) = self.token_cache.find(&token_kind, &ctx.token.payload) {
-            return Ok(TokenOutcome::Validated(cedar_token));
+            let issuer = cedar_token
+                .get_claim_val("iss")
+                .and_then(|iss| iss.as_str())
+                .ok_or(MultiIssuerValidationError::MissingIssuer)?;
+            let combination = (
+                SmolStr::from(issuer),
+                SmolStr::from(ctx.token.mapping.as_str()),
+            );
+            if ctx.seen_combinations.insert(combination) {
+                return Ok(TokenOutcome::Validated(cedar_token));
+            }
+            if let Some(logger) = &self.logger {
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
+                        ctx.token.mapping, issuer
+                    ),
+                    Some(LogLevel::WARN),
+                ));
+            }
+            return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
         }
 
         // Validate JWT using existing single token validation
