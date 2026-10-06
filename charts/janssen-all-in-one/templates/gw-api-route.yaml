@@ -29,6 +29,7 @@
 {{- $uma2ConfigEnabled := or $routes.uma2ConfigEnabled (index .Values "auth-server" "ingress" "uma2ConfigEnabled") -}}
 {{- $webfingerEnabled := or $routes.webfingerEnabled (index .Values "auth-server" "ingress" "webfingerEnabled") -}}
 {{- $authzenConfigEnabled := or $routes.authzenConfigEnabled (index .Values "auth-server" "ingress" "authzenConfigEnabled") -}}
+{{- $oauthServerConfigEnabled := $routes.oauthServerConfigEnabled -}}
 {{- $lockConfigEnabled := or $routes.lockConfigEnabled (index .Values "auth-server" "ingress" "lockConfigEnabled") -}}
 {{- $lockAuditEnabled := or $routes.lockAuditEnabled (index .Values "auth-server" "ingress" "lockAuditEnabled") -}}
 {{- $casaEnabled := or $routes.casaEnabled .Values.casa.ingress.casaEnabled -}}
@@ -182,6 +183,23 @@ spec:
         path:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/restv1/authzen-configuration
+    backendRefs:
+    - name: {{ $svcName }}
+      port: {{ $svcPort }}
+  {{- end }}
+
+  {{- /* 8. OAuth Authorization Server Metadata */}}
+  {{- if $oauthServerConfigEnabled }}
+  - matches:
+    - path:
+        type: Exact
+        value: /.well-known/oauth-authorization-server
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplaceFullPath
+          replaceFullPath: /jans-auth/restv1/oauth-authorization-server
     backendRefs:
     - name: {{ $svcName }}
       port: {{ $svcPort }}
