@@ -35,7 +35,7 @@
 | authorizationEncryptionEncValuesSupported | A list of the authorization encryption algorithms supported | [Details](#authorizationencryptionencvaluessupported) |
 | authorizationEndpoint | The authorization endpoint URL | [Details](#authorizationendpoint) |
 | authorizationRequestCustomAllowedParameters | This list details the allowed custom parameters for authorization requests | [Details](#authorizationrequestcustomallowedparameters) |
-| authorizationResponseIssParameterSupported | Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false. | [Details](#authorizationresponseissparametersupported) |
+| authorizationResponseIssParameterSupported | Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: true. | [Details](#authorizationresponseissparametersupported) |
 | authorizationSigningAlgValuesSupported | List of authorization signing algorithms supported by this OP | [Details](#authorizationsigningalgvaluessupported) |
 | backchannelAuthenticationEndpoint | Backchannel Authentication Endpoint | [Details](#backchannelauthenticationendpoint) |
 | backchannelAuthenticationRequestSigningAlgValuesSupported | Backchannel Authentication Request Signing Alg Values Supported | [Details](#backchannelauthenticationrequestsigningalgvaluessupported) |
@@ -256,7 +256,7 @@
 | requestUriHashVerificationEnabled | Boolean value specifying whether the OP supports use of the request_uri hash verification | [Details](#requesturihashverificationenabled) |
 | requestUriParameterSupported | Boolean value specifying whether the OP supports use of the request_uri parameter | [Details](#requesturiparametersupported) |
 | requirePar | Boolean value to indicate of Pushed Authorisation Request(PAR)is required | [Details](#requirepar) |
-| requirePkce | Boolean value true check for Proof Key for Code Exchange (PKCE) | [Details](#requirepkce) |
+| requirePkce | Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled. | [Details](#requirepkce) |
 | requireRequestObjectEncryption | Boolean value true encrypts request object | [Details](#requirerequestobjectencryption) |
 | requireRequestUriRegistration | Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter | [Details](#requirerequesturiregistration) |
 | responseModesSupported | This list details which OAuth 2.0 response modes are supported by this OP | [Details](#responsemodessupported) |
@@ -640,11 +640,11 @@
 
 ## authorizationResponseIssParameterSupported
 
-- Description: Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.
+- Description: Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: true.
 
 - Required: No
 
-- Default value: false
+- Default value: true
 
 
 ## authorizationSigningAlgValuesSupported
@@ -2629,11 +2629,11 @@
 
 ## requirePkce
 
-- Description: Boolean value true check for Proof Key for Code Exchange (PKCE)
+- Description: Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled.
 
 - Required: No
 
-- Default value: false
+- Default value: true
 
 
 ## requireRequestObjectEncryption
