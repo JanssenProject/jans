@@ -1,5 +1,4 @@
 import os
-import glob
 import re
 import shutil
 import zipfile
@@ -74,7 +73,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.logIt(f"Extracting {jetty_archive} into {jetty_dist}")
         shutil.unpack_archive(jetty_archive, format='gztar', extract_dir=jetty_dist)
 
-        jettyDestinationPath = max(glob.glob(os.path.join(jetty_dist, '{}-*'.format(self.jetty_dist_string))))
+        jettyDestinationPath = os.path.join(jetty_dist, '{}-{}'.format(self.jetty_dist_string, self.jetty_exact_version_string))
 
         self.run([paths.cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
         self.run([paths.cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
@@ -117,14 +116,11 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
 
     def get_jetty_info(self):
-        # first try latest versions
         self.jetty_dist_string = 'jetty-home'
-        jetty_archive_list = glob.glob(os.path.join(Config.dist_app_dir, '{}-*.tar.gz'.format(self.jetty_dist_string)))
+        jetty_archive = os.path.join(Config.dist_app_dir, '{}-{}.tar.gz'.format(self.jetty_dist_string, base.current_app.app_info['JETTY_VERSION']))
 
-        if not jetty_archive_list:
-            self.logIt("Jetty archive not found in {}. Exiting...".format(Config.dist_app_dir), True, True)
-
-        jetty_archive = max(jetty_archive_list)
+        if not os.path.exists(jetty_archive):
+            self.logIt("Jetty archive {} not found. Exiting...".format(jetty_archive), True, True)
 
         jetty_archive_fn = os.path.basename(jetty_archive)
         jetty_regex = re.search(rf'{self.jetty_dist_string}-(\d*\.\d*)', jetty_archive_fn)
