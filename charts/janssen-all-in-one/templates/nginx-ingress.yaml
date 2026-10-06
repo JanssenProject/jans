@@ -746,7 +746,7 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/oauth-authorization-server$
+          - path: /\.well-known/oauth-authorization-server$
             pathType: ImplementationSpecific
             backend:
               service:
