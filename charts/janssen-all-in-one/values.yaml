@@ -248,10 +248,13 @@ auth-server:
     webfingerAdditionalAnnotations: { }
     # -- Enable endpoint /.well-known/authzen-configuration
     authzenConfigEnabled: true
+    oauthServerConfigEnabled: true
     # -- authzen config ingress resource labels. key app is taken
     authzenConfigLabels: { }
     # -- authzen config ingress resource additional annotations.
     authzenAdditionalAnnotations: { }
+    oauthServerConfigLabels: { }
+    oauthServerAdditionalAnnotations: { }
     # -- Auth server ingress resource labels. key app is taken
     authServerLabels: { }
     # -- Auth server ingress resource additional annotations.
@@ -675,6 +678,7 @@ gateway-api:
     webfingerEnabled: true
     # -- Enable endpoint /.well-known/authzen-configuration
     authzenConfigEnabled: true
+    oauthServerConfigEnabled: true
     # -- Enable endpoint /.well-known/lock-server-configuration (if enabled, auth-server.lockEnabled must be enabled)
     lockConfigEnabled: false
     # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService (if enabled, auth-server.lockEnabled must be enabled)

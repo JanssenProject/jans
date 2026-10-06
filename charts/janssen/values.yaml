@@ -794,6 +794,7 @@ global:
       lockAuditEnabled: false
       # -- Enable endpoint /.well-known/authzen-configuration
       authzenConfigEnabled: true
+      oauthServerConfigEnabled: true
       # -- Lock config ingress resource labels. key app is taken
       lockConfigLabels: { }
       # -- Lock config ingress resource additional annotations.
@@ -826,6 +827,8 @@ global:
       authzenConfigLabels: { }
       # -- authzen config ingress resource additional annotations.
       authzenAdditionalAnnotations: { }
+      oauthServerConfigLabels: { }
+      oauthServerAdditionalAnnotations: { }
       # -- Auth server ingress resource labels. key app is taken
       authServerLabels: { }
       # -- Auth server ingress resource additional annotations.
@@ -1261,6 +1264,7 @@ gateway-api:
     webfingerEnabled: true
     # -- Enable endpoint /.well-known/authzen-configuration
     authzenConfigEnabled: true
+    oauthServerConfigEnabled: true
     # -- Enable endpoint /.well-known/lock-server-configuration (if enabled, global.auth-server.lockEnabled must be enabled)
     lockConfigEnabled: false
     # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService (if enabled, global.auth-server.lockEnabled must be enabled)

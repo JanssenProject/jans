@@ -707,4 +707,52 @@ spec:
                   number: 8080
 {{- end }}
 
+---
+
+{{ if index .Values "auth-server" "ingress" "oauthServerConfigEnabled" -}}
+{{ $fullName := include "janssen-all-in-one.fullname" . -}}
+{{- $ingressPath := index .Values "nginx-ingress" "ingress" "path" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-oauth-server-config
+  labels:
+    app: {{ $fullName }}-oauth-server-config
+{{- if index .Values "nginx-ingress" "ingress" "additionalLabels" }}
+{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalLabels") | indent 4 }}
+{{- end }}
+{{- if index .Values "auth-server" "ingress" "oauthServerConfigLabels" }}
+{{ toYaml (index .Values "auth-server" "ingress" "oauthServerConfigLabels") | indent 4 }}
+{{- end }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/restv1/oauth-authorization-server
+{{- if index .Values "auth-server" "ingress" "oauthServerAdditionalAnnotations" }}
+{{ toYaml (index .Values "auth-server" "ingress" "oauthServerAdditionalAnnotations") | indent 4 }}
+{{- end }}
+{{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
+{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalAnnotations") | indent 4 }}
+{{- end }}
+spec:
+  ingressClassName: {{ index .Values "nginx-ingress" "ingress" "ingressClassName" }}
+{{- if index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+  tls:
+    - hosts:
+        - {{ .Values.fqdn | quote }}
+      secretName: {{ index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+{{- end }}
+  rules:
+    - host: {{ .Values.fqdn | quote }}
+      http:
+        paths:
+          - path: /.well-known/oauth-authorization-server$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.service.name }}
+                port:
+                  number: 8080
+{{- end }}
+
 {{- end }}
