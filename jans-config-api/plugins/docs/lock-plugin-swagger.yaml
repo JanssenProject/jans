@@ -1019,6 +1019,16 @@ components:
           description: Seconds a PENDING receipt may stay unresolved before the repair
             timer settles it
           format: int32
+        maxBulkRecords:
+          type: integer
+          description: Maximum number of assertions accepted in one POST /audit/trace/bulk
+            request
+          format: int32
+        maxBulkRequestBytes:
+          type: integer
+          description: "Maximum total body size, in bytes, buffered for one POST /audit/trace/bulk\
+            \ request; clamped to 16777216 regardless of this value"
+          format: int32
       description: TRACE evidence ingestion configuration
     JsonPatch:
       type: object

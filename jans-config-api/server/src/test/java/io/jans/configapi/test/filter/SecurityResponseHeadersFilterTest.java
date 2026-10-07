@@ -1,117 +1,172 @@
-package io.jans.configapi.filters;
+package io.jans.configapi.test.filter;
 /*
- * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
- *
+ * Janssen Project software is available under the MIT License (2008).
+ * See http://opensource.org/licenses/MIT for full text.
  * Copyright (c) 2020, Janssen Project
  */
 
+<<<<<<< HEAD
 import io.jans.configapi.core.test.BaseTest;
 import io.jans.configapi.filters.SecurityResponseHeadersFilter;
+=======
+>>>>>>> c3bfe5541b1044b0de5b612b345913f2b827b97b
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.jans.configapi.filters.SecurityResponseHeadersFilter;
+
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
+
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
+
 /**
- * Verifies that SecurityResponseHeadersFilter applies the standard security
- * headers uniformly, on both a successful (200) response and an
- * unauthorized/error response, so the filter is proven to run regardless of
- * outcome and not just on the happy path.
+ * Unit test for SecurityResponseHeadersFilter.
  *
- * Extends the project's shared BaseTest, so it picks up the same
- * test.properties (token endpoint, client id/secret, grant type) that every
- * other config-api integration test already uses - no new configuration
- * required to run it.
+ * Exercises the filter directly against mocked JAX-RS context objects, so it
+ * needs no running server, no network, and no test.properties - just the
+ * filter class itself plus TestNG + Mockito on the test classpath.
  *
- * NOTE: written to match the conventions visible in the existing
- * io.jans.configapi.test.auth.ClientResourceTest (BaseTest +
- * getAccessTokenForGivenScope + a plain JAX-RS Client). It has not been
- * compiled or run against the real module - verify method names on the actual
- * BaseTest in your checkout (getAccessTokenForGivenScope, propertiesMap keys,
- * base URL property name) before relying on it, they may differ slightly by
- * branch/version.
+ *
+ * Suggested test-scope dependency (if not already present in the module's
+ * pom.xml):
+ *   org.mockito:mockito-core
+ *
+ * 
  */
-public class SecurityResponseHeadersFilterTest extends BaseTest {
+public class SecurityResponseHeadersFilterTest {
 
-    private static final Logger log = LoggerFactory.getLogger(SecurityResponseHeadersFilterTest.class);
+    private static final String HEADER_CSP = "Content-Security-Policy";
+    private static final String HEADER_XFO = "X-Frame-Options";
+    private static final String HEADER_XCTO = "X-Content-Type-Options";
+    private static final String HEADER_REFERRER = "Referrer-Policy";
 
-    // Any endpoint works, since the filter is global; this one already exists
-    // and is exercised elsewhere in the test suite (config/jans-auth-server).
-    private static final String CONFIG_ENDPOINT_PATH = "/jans-config-api/api/v1/jans-auth-server/config";
-    private static final String CONFIG_READ_SCOPE = "https://jans.io/oauth/jans-auth-server/config/properties.readonly";
+    private static final String EXPECTED_CSP = "default-src 'none'; frame-ancestors 'none'";
+    private static final String EXPECTED_XFO = "DENY";
+    private static final String EXPECTED_XCTO = "nosniff";
+    private static final String EXPECTED_REFERRER = "no-referrer";
 
-    private Client client;
-    private String issuerUrl;
+    @Mock
+    private ContainerRequestContext requestContext;
 
-    @BeforeClass
-    public void setupClient() {
-        client = ClientBuilder.newClient();
-        // propertiesMap / issuer base URL wiring follows BaseTest's existing
-        // pattern (see getAccessToken()/getAccessTokenForGivenScope() there);
-        // adjust the key name if your BaseTest exposes it differently.
-        issuerUrl = getIssuer();
-    }
+    @Mock
+    private ContainerResponseContext responseContext;
 
-    @AfterClass
-    public void teardownClient() {
-        if (client != null) {
-            client.close();
-        }
-    }
+    @Mock
+    private UriInfo uriInfo;
 
-    @Test
-    public void securityHeadersPresentOnSuccessfulResponse() {
-        String accessToken = getAccessTokenForGivenScope(CONFIG_READ_SCOPE);
-        Assert.assertNotNull(accessToken, "Could not obtain access token for scope " + CONFIG_READ_SCOPE);
+    private SecurityResponseHeadersFilter filter;
+    private MultivaluedMap<String, Object> headers;
 
-        Invocation.Builder request = client.target(issuerUrl + CONFIG_ENDPOINT_PATH).request(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + accessToken);
+    @BeforeMethod
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
 
-        try (Response response = request.get()) {
-            log.info("GET {} -> {}", CONFIG_ENDPOINT_PATH, response.getStatus());
-            Assert.assertEquals(response.getStatus(), 200, "Expected a successful authenticated response");
-            assertSecurityHeaders(response);
-        }
+        filter = new SecurityResponseHeadersFilter();
+        headers = new MultivaluedHashMap<>();
+
+        Mockito.when(responseContext.getHeaders()).thenReturn(headers);
+        Mockito.when(requestContext.getUriInfo()).thenReturn(uriInfo);
+        Mockito.when(uriInfo.getPath()).thenReturn("/jans-auth-server/config");
     }
 
     @Test
-    public void securityHeadersPresentOnUnauthorizedResponse() {
-        // Deliberately no Authorization header, to confirm the filter also
-        // decorates error/4xx responses coming out of the auth filter chain,
-        // not just successful resource output.
-        Invocation.Builder request = client.target(issuerUrl + CONFIG_ENDPOINT_PATH)
-                .request(MediaType.APPLICATION_JSON);
+    public void addsAllFourSecurityHeadersWhenNonePresent() throws IOException {
+        filter.filter(requestContext, responseContext);
 
-        try (Response response = request.get()) {
-            log.info("Unauthenticated GET {} -> {}", CONFIG_ENDPOINT_PATH, response.getStatus());
-            Assert.assertEquals(response.getStatus(), 401, "Expected 401 without a bearer token");
-            assertSecurityHeaders(response);
-        }
+        assertSingleHeader(HEADER_CSP, EXPECTED_CSP);
+        assertSingleHeader(HEADER_XFO, EXPECTED_XFO);
+        assertSingleHeader(HEADER_XCTO, EXPECTED_XCTO);
+        assertSingleHeader(HEADER_REFERRER, EXPECTED_REFERRER);
     }
 
-    private void assertSecurityHeaders(Response response) {
-        assertHeaderEquals(response, "X-Content-Type-Options", "nosniff");
-        assertHeaderEquals(response, "X-Frame-Options", "DENY");
-        assertHeaderEquals(response, "Referrer-Policy", "no-referrer");
+    @Test
+    public void cspValueContainsStrictFrameAncestorsDirective() throws IOException {
+        filter.filter(requestContext, responseContext);
 
-        String csp = response.getHeaderString("Content-Security-Policy");
-        Assert.assertNotNull(csp, "Content-Security-Policy header missing");
+        String csp = (String) headers.getFirst(HEADER_CSP);
+        Assert.assertNotNull(csp);
         Assert.assertTrue(csp.contains("frame-ancestors 'none'"),
-                "Content-Security-Policy should contain frame-ancestors 'none', got: " + csp);
+                "CSP should contain a strict frame-ancestors directive, got: " + csp);
     }
 
-    private void assertHeaderEquals(Response response, String headerName, String expectedValue) {
-        String actual = response.getHeaderString(headerName);
-        Assert.assertNotNull(actual, headerName + " header missing from response");
-        Assert.assertEquals(actual, expectedValue, headerName + " header had unexpected value");
+    @Test
+    public void xFrameOptionsAndCspFrameAncestorsStayInLockstep() throws IOException {
+        // Both controls exist to enforce the same "do not frame this" policy;
+        // this test pins that relationship so a future edit can't silently
+        // loosen one while leaving the other strict.
+        filter.filter(requestContext, responseContext);
+
+        String csp = (String) headers.getFirst(HEADER_CSP);
+        String xfo = (String) headers.getFirst(HEADER_XFO);
+
+        boolean cspDenies = csp != null && csp.contains("frame-ancestors 'none'");
+        boolean xfoDenies = "DENY".equals(xfo);
+
+        Assert.assertEquals(cspDenies, xfoDenies,
+                "CSP frame-ancestors and X-Frame-Options must express the same framing policy");
+    }
+
+    @Test
+    public void doesNotOverwriteHeaderAlreadySetByAnUpstreamFilterOrResource() throws IOException {
+        // A more specific, deliberately-set value (e.g. a resource that has a
+        // legitimate reason to allow framing from a specific origin) must
+        // survive - this filter should only fill gaps, never clobber.
+        headers.putSingle(HEADER_XFO, "SAMEORIGIN");
+
+        filter.filter(requestContext, responseContext);
+
+        Assert.assertEquals(headers.getFirst(HEADER_XFO), "SAMEORIGIN",
+                "Filter must not overwrite a header a resource/filter already set");
+        // The other three headers, which were never set, should still be added.
+        assertSingleHeader(HEADER_CSP, EXPECTED_CSP);
+        assertSingleHeader(HEADER_XCTO, EXPECTED_XCTO);
+        assertSingleHeader(HEADER_REFERRER, EXPECTED_REFERRER);
+    }
+
+    @Test
+    public void appliesHeadersRegardlessOfResponseStatus() throws IOException {
+        // The filter must not be conditional on status - it should decorate
+        // error responses (401/403/500 from exception mappers) exactly like
+        // a 200. Simulate a 401 by having the mock report that status; the
+        // filter implementation doesn't branch on it, so headers should still
+        // be applied identically.
+        Mockito.when(responseContext.getStatus()).thenReturn(401);
+
+        filter.filter(requestContext, responseContext);
+
+        assertSingleHeader(HEADER_CSP, EXPECTED_CSP);
+        assertSingleHeader(HEADER_XFO, EXPECTED_XFO);
+        assertSingleHeader(HEADER_XCTO, EXPECTED_XCTO);
+        assertSingleHeader(HEADER_REFERRER, EXPECTED_REFERRER);
+    }
+
+    @Test
+    public void doesNotThrowWhenUriInfoIsUnavailable() throws IOException {
+        // Defensive: some request contexts (e.g. certain error paths) may not
+        // have a fully populated UriInfo. The filter only uses it for a debug
+        // log line, so a null UriInfo must not break header application.
+        Mockito.when(requestContext.getUriInfo()).thenReturn(null);
+
+        filter.filter(requestContext, responseContext);
+
+        assertSingleHeader(HEADER_CSP, EXPECTED_CSP);
+    }
+
+    private void assertSingleHeader(String name, String expectedValue) {
+        Assert.assertTrue(headers.containsKey(name), "Missing header: " + name);
+        Assert.assertEquals(headers.get(name).size(), 1,
+                "Expected exactly one value for header " + name);
+        Assert.assertEquals(headers.getFirst(name), expectedValue,
+                "Unexpected value for header " + name);
     }
 }

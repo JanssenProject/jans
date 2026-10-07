@@ -475,7 +475,7 @@ mod test {
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
         assert_eq!(received[0].service, "test_app");
-        assert!(!received[0].node_name.is_empty());
+        assert_ne!(received[0].node_name, "");
     }
 
     #[tokio::test]
@@ -599,7 +599,7 @@ mod test {
         let entry = &received[0];
 
         assert_eq!(entry.service, "test_app");
-        assert!(!entry.node_name.is_empty());
+        assert_ne!(entry.node_name, "");
         assert_eq!(entry.event_type, "Decision");
         assert_eq!(entry.action, "Test");
         assert_eq!(entry.decision_result, "ALLOW");
@@ -626,7 +626,7 @@ mod test {
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
         assert_eq!(received[0].service, "test_app");
-        assert!(!received[0].node_name.is_empty());
+        assert_ne!(received[0].node_name, "");
     }
 
     #[tokio::test]
@@ -666,7 +666,7 @@ mod test {
         let received = telemetry_rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
         assert_eq!(received[0].service, "test_app");
-        assert!(!received[0].node_name.is_empty());
+        assert_ne!(received[0].node_name, "");
         assert_eq!(received[0].interval_secs, 60);
     }
 

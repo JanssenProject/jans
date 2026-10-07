@@ -32,6 +32,12 @@ public class TraceConfiguration {
     public static final int DEFAULT_RECEIPT_ALLOCATION_RETRY_LIMIT = 8;
     public static final int DEFAULT_RECEIPT_REPAIR_INTERVAL_SECONDS = 300;
     public static final int DEFAULT_PENDING_RECEIPT_TIMEOUT_SECONDS = 120;
+    public static final int DEFAULT_MAX_BULK_RECORDS = 100;
+    public static final int DEFAULT_MAX_BULK_REQUEST_BYTES = 4_194_304;
+    /** Ceiling {@link #getMaxBulkRequestBytes()} clamps to regardless of configuration, so a
+     *  careless value can never make the bulk endpoint buffer an unbounded amount of memory per
+     *  request (CWE-770). Not itself configurable. */
+    public static final int HARD_MAX_BULK_REQUEST_BYTES = 16_777_216;
 
     @DocProperty(description = "Enable TRACE evidence ingestion endpoints", defaultValue = "true")
     @Schema(description = "Enable TRACE evidence ingestion endpoints")
@@ -80,6 +86,14 @@ public class TraceConfiguration {
     @DocProperty(description = "Seconds a PENDING receipt may stay unresolved before the repair timer settles it", defaultValue = "120")
     @Schema(description = "Seconds a PENDING receipt may stay unresolved before the repair timer settles it")
     private int pendingReceiptTimeoutSeconds = DEFAULT_PENDING_RECEIPT_TIMEOUT_SECONDS;
+
+    @DocProperty(description = "Maximum number of assertions accepted in one POST /audit/trace/bulk request", defaultValue = "100")
+    @Schema(description = "Maximum number of assertions accepted in one POST /audit/trace/bulk request")
+    private int maxBulkRecords = DEFAULT_MAX_BULK_RECORDS;
+
+    @DocProperty(description = "Maximum total body size, in bytes, buffered for one POST /audit/trace/bulk request; clamped to 16777216 regardless of this value", defaultValue = "4194304")
+    @Schema(description = "Maximum total body size, in bytes, buffered for one POST /audit/trace/bulk request; clamped to 16777216 regardless of this value")
+    private int maxBulkRequestBytes = DEFAULT_MAX_BULK_REQUEST_BYTES;
 
     public boolean isEnabled() {
         return enabled;
@@ -179,6 +193,28 @@ public class TraceConfiguration {
         this.pendingReceiptTimeoutSeconds = pendingReceiptTimeoutSeconds;
     }
 
+    public int getMaxBulkRecords() {
+        return maxBulkRecords > 0 ? maxBulkRecords : DEFAULT_MAX_BULK_RECORDS;
+    }
+
+    public void setMaxBulkRecords(int maxBulkRecords) {
+        this.maxBulkRecords = maxBulkRecords;
+    }
+
+    /**
+     * @return the configured value (falling back to the default when {@code <= 0}), clamped to
+     *         {@link #HARD_MAX_BULK_REQUEST_BYTES} so misconfiguration can never make the bulk
+     *         endpoint buffer an unbounded amount of memory for one request
+     */
+    public int getMaxBulkRequestBytes() {
+        int configured = maxBulkRequestBytes > 0 ? maxBulkRequestBytes : DEFAULT_MAX_BULK_REQUEST_BYTES;
+        return Math.min(configured, HARD_MAX_BULK_REQUEST_BYTES);
+    }
+
+    public void setMaxBulkRequestBytes(int maxBulkRequestBytes) {
+        this.maxBulkRequestBytes = maxBulkRequestBytes;
+    }
+
     @Override
     public String toString() {
         return "TraceConfiguration [enabled=" + enabled + ", defaultEvidenceDomainId=" + defaultEvidenceDomainId
@@ -188,7 +224,8 @@ public class TraceConfiguration {
                 + getMaxArrayLength() + ", maxObjectMembers=" + getMaxObjectMembers()
                 + ", receiptAllocationRetryLimit=" + getReceiptAllocationRetryLimit()
                 + ", receiptRepairIntervalSeconds=" + getReceiptRepairIntervalSeconds()
-                + ", pendingReceiptTimeoutSeconds=" + getPendingReceiptTimeoutSeconds() + "]";
+                + ", pendingReceiptTimeoutSeconds=" + getPendingReceiptTimeoutSeconds() + ", maxBulkRecords="
+                + getMaxBulkRecords() + ", maxBulkRequestBytes=" + getMaxBulkRequestBytes() + "]";
     }
 
 }
