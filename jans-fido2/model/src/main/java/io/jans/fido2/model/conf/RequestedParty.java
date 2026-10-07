@@ -23,6 +23,12 @@ public class RequestedParty {
 
     private List<String> origins = new ArrayList<String>();
 
+    /**
+     * Per-RP assurance policy. Null means this RP has no policy of its own and every decision falls back
+     * to the global configuration, which is how every relying party behaved before this field existed.
+     */
+    private RequestedPartyPolicy policy;
+
 
 	public String getId() {
 		return id;
@@ -38,5 +44,13 @@ public class RequestedParty {
 
 	public void setOrigins(List<String> origins) {
 		this.origins = origins;
+	}
+
+	public RequestedPartyPolicy getPolicy() {
+		return policy;
+	}
+
+	public void setPolicy(RequestedPartyPolicy policy) {
+		this.policy = policy;
 	}
 }

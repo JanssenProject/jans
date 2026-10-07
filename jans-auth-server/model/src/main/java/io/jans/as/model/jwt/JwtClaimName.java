@@ -227,6 +227,16 @@ public final class JwtClaimName {
     public static final String REFRESH_TOKEN_HASH = "urn:openid:params:jwt:claim:rt_hash";
     public static final String AUTH_REQ_ID = "urn:openid:params:jwt:claim:auth_req_id";
 
+    // OAuth 2.0 / Token Exchange / ID-JAG
+    public static final String CLIENT_ID = "client_id";
+    public static final String SCOPE = "scope";
+    public static final String RESOURCE = "resource";
+    public static final String AUTHORIZATION_DETAILS = "authorization_details";
+    public static final String SUB_ID = "sub_id";
+    public static final String AUD_SUB = "aud_sub";
+    public static final String TENANT = "tenant";
+    public static final String AUD_TENANT = "aud_tenant";
+
     /**
      * The caller references the constants using <tt>JwtClaimName.TYPE</tt>,
      * and so on. Thus, the caller should be prevented from constructing objects of

@@ -11,6 +11,8 @@ import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.GeneralException;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.oauth2.sdk.id.*;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
@@ -63,11 +65,12 @@ public class OIDCFlowService {
     private String endSessionEndpoint;
     private String jwksUri;
 
-    public Pair<String, String> getAuthnRequestUrl(String acr) throws GeneralException {
-        return getAuthnRequestUrl(Collections.singletonList(acr), null);
+    public Pair<String, String> getAuthnRequestUrl(String acr, CodeVerifier codeVerifier) throws GeneralException {
+        return getAuthnRequestUrl(Collections.singletonList(acr), null, codeVerifier);
     }
     
-    public Pair<String, String> getAuthnRequestUrl(List<String> acrValues, String prompt) throws GeneralException {
+    public Pair<String, String> getAuthnRequestUrl(List<String> acrValues, String prompt, CodeVerifier codeVerifier)
+            throws GeneralException {
         
         try {
             ClientID clientID = new ClientID(settings.getClient().getClientId());
@@ -86,6 +89,7 @@ public class OIDCFlowService {
             State state = new State();
             AuthenticationRequest request = builder.endpointURI(new URI(authzEndpoint))
                     .state(state)
+                    .codeChallenge(codeVerifier, CodeChallengeMethod.S256)
                     .acrValues(acrValues.stream().map(ACR::new).collect(Collectors.toList()))
                     .build();
             
@@ -130,7 +134,7 @@ public class OIDCFlowService {
         
     }
 
-    public Pair<String, String> getTokens(String code) throws GeneralException {
+    public Pair<String, String> getTokens(String code, CodeVerifier codeVerifier) throws GeneralException {
         
         Pair<String, String> tokens = null;
         ErrorObject error = null;
@@ -138,7 +142,7 @@ public class OIDCFlowService {
 
             AuthorizationCode acode = new AuthorizationCode(code);
             URI callback = new URI(settings.getRedirectUri());
-            AuthorizationGrant codeGrant = new AuthorizationCodeGrant(acode, callback);
+            AuthorizationGrant codeGrant = new AuthorizationCodeGrant(acode, callback, codeVerifier);
 
             ClientID clientID = new ClientID(settings.getClient().getClientId());
             Secret clientSecret = new Secret(settings.getClient().getClientSecret());

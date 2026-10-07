@@ -40,7 +40,7 @@ pub struct JwtConfig {
     /// Only tokens signed with algorithms in this list can be valid.
     pub signature_algorithms_supported: HashSet<Algorithm>,
     /// Maximum TTL (in seconds) for cached tokens.
-    /// Zero means no TTL limit is applied.
+    /// Zero disables the token cache entirely.
     ///
     /// Defaults to [`Self::DEFAULT_TOKEN_CACHE_MAX_TTL_SECS`] (5 seconds): small
     /// enough that revocation / status-list changes are picked up promptly while
@@ -156,9 +156,8 @@ impl JwtConfig {
     /// who construct the struct programmatically cannot bypass the bootstrap
     /// deserializer's normalization.
     pub(crate) fn normalize(&mut self) {
-        self.status_list_refresh_interval_max = normalize_status_list_refresh_interval_max(
-            self.status_list_refresh_interval_max,
-        );
+        self.status_list_refresh_interval_max =
+            normalize_status_list_refresh_interval_max(self.status_list_refresh_interval_max);
     }
 
     /// Creates a new `JwtConfig` instance with validation turned off for all tokens.

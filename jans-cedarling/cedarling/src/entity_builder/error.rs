@@ -13,15 +13,24 @@ use smol_str::SmolStr;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum InitEntityBuilderError {
+pub(crate) enum InitEntityBuilderError {
     #[error("error while initializing trusted issuer entities: {0}")]
     BuildIssEntities(BuildEntityErrors),
     #[error("error while initializing the mapping schema: {0}")]
     BuildMappingSchema(#[from] BuildMappingSchemaError),
+    #[error(
+        "iss mismatch: schema declares iss='{schema_iss_type}' but issuer \
+         '{issuer_name}' expects '{expected_iss_type}'"
+    )]
+    IssTypeMismatch {
+        issuer_name: String,
+        schema_iss_type: String,
+        expected_iss_type: String,
+    },
 }
 
 #[derive(Debug, Error)]
-pub struct BuildEntityErrors(Vec<BuildEntityError>);
+pub(crate) struct BuildEntityErrors(Vec<BuildEntityError>);
 
 impl From<Vec<BuildEntityError>> for BuildEntityErrors {
     fn from(errors: Vec<BuildEntityError>) -> Self {

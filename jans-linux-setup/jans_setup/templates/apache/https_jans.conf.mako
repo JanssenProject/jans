@@ -159,12 +159,13 @@
     ProxyPass   /.well-known/fido2-configuration http://localhost:${jans_fido2_port}/jans-fido2/restv1/configuration
     ProxyPass   /.well-known/webauthn http://localhost:${jans_fido2_port}/jans-fido2/restv1/webauthn/configuration
     ProxyPass   /.well-known/authzen-configuration http://localhost:${jans_auth_port}/jans-auth/restv1/authzen-configuration
+    ProxyPass   /.well-known/oauth-authorization-server http://localhost:${jans_auth_port}/jans-auth/restv1/oauth-authorization-server
     ProxyPass   /.well-known/scim-configuration http://localhost:8087/jans-scim/restv1/scim-configuration
     ProxyPass   /firebase-messaging-sw.js http://localhost:${jans_auth_port}/jans-auth/firebase-messaging-sw.js
     ProxyPass   /device-code http://localhost:${jans_auth_port}/jans-auth/device_authorization.htm
 
     % if context.get('install_jans_lock') in ('true', True):
-    ProxyPass   /.well-known/lock-server-configuration http://localhost:${lock_host_port}/${lock_host_suffix}/api/v1/configuration'
+    ProxyPass   /.well-known/lock-server-configuration http://localhost:${lock_host_port}/${lock_host_suffix}/api/v1/configuration
     <Location /jans-lock>
         Header edit Set-Cookie ^((?!opbs|session_state).*)$ $1;HttpOnly
         ProxyPass http://localhost:${lock_host_port}/${lock_host_suffix} retry=5 connectiontimeout=60 timeout=60

@@ -43,8 +43,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.pylib_dir = os.path.join(self.jans_cli_install_dir, 'cli', 'pylib')
 
-        if not base.snap:
-            self.register_progess()
+        self.register_progess()
 
 
     def install(self):

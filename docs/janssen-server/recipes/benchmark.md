@@ -111,7 +111,7 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
        enabled: true
      cnPersistenceType: sql
      cloud:
-       testEnviroment: false
+       testEnvironment: false
      fqdn: example.gluu.info
      isFqdnRegistered: true
      # In the event the fqdn above is not resolvable from the internet comment the above line and uncomment the below two setting your lbIp to your master ndoe ip.

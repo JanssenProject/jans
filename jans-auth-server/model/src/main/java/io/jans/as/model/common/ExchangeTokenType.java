@@ -12,7 +12,8 @@ public enum ExchangeTokenType {
     ACCESS_TOKEN(Constants.TOKEN_TYPE_ACCESS_TOKEN),
     DEVICE_SECRET(Constants.ACTOR_TOKEN_TYPE_DEVICE_SECRET),
     ID_TOKEN(Constants.SUBJECT_TOKEN_TYPE_ID_TOKEN),
-    TX_TOKEN(Constants.TOKEN_TYPE_TX_TOKEN);
+    TX_TOKEN(Constants.TOKEN_TYPE_TX_TOKEN),
+    ID_JAG(Constants.TOKEN_TYPE_ID_JAG);
 
     private final String name;
 

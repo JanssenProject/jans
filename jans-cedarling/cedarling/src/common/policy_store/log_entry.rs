@@ -8,7 +8,7 @@
 use serde::Serialize;
 
 use crate::log::interface::{Indexed, Loggable};
-use crate::log::{BaseLogEntry, LogLevel, LogType};
+use crate::log::{BaseLogEntry, LogLevel};
 
 /// Log entry for policy store operations.
 #[derive(Serialize, Clone)]
@@ -40,6 +40,7 @@ impl PolicyStoreLogEntry {
     /// operations, such as successful loads, completed validations, or routine status
     /// updates. This is the recommended choice for most non-error, non-warning policy
     /// store events that should be visible in production logs.
+    #[allow(dead_code)]
     pub(super) fn info(msg: impl Into<String>) -> Self {
         Self::new(msg, Some(LogLevel::INFO))
     }
@@ -58,10 +59,6 @@ impl PolicyStoreLogEntry {
 impl Loggable for PolicyStoreLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
-    }
-
-    fn get_log_kind(&self) -> Option<LogType> {
-        self.base.get_log_kind()
     }
 }
 

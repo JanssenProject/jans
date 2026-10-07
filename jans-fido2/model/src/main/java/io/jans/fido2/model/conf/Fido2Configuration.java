@@ -36,23 +36,71 @@ public class Fido2Configuration {
 	@DocProperty(description = "Expiration time in seconds for approved authentication requests")
 	private int authenticationHistoryExpiration = 15 * 24 * 3600; // 15 days
 
+	@DocProperty(description = "Boolean value indicating whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled", defaultValue = "true")
+	private boolean recordAbandonedAssertions = true;
+	@DocProperty(description = "Expiration time in seconds for abandoned assertion ceremonies. Kept much shorter than authenticationHistoryExpiration because conditional-UI ceremonies start on nearly every login page load, making abandonment the highest-volume outcome", defaultValue = "86400")
+	private int abandonedRequestExpiration = 24 * 3600; // 1 day
+	@DocProperty(description = "Interval in seconds between sweeps for lapsed assertion ceremonies. Must stay below unfinishedRequestExpiration so a ceremony cannot lapse and be deleted between two sweeps", defaultValue = "30")
+	private int abandonedRequestSweepInterval = 30;
+
 	@DocProperty(description = "Authenticators metadata in json format")
 	private String serverMetadataFolder;
 	@DocProperty(description = "List of Requested Credential Types")
-	private List<String> enabledFidoAlgorithms = new ArrayList<String>();
+	private List<String> enabledFidoAlgorithms = new ArrayList<>();
 	@DocProperty(description = "Authenticators metadata in json format")
 	@JsonProperty(value = "rp")
-	private List<RequestedParty> requestedParties = new ArrayList<RequestedParty>();
+	private List<RequestedParty> requestedParties = new ArrayList<>();
 	@DocProperty(description = "String value to provide source of URLs with external metadata")
-	private List<MetadataServer> metadataServers = new ArrayList<MetadataServer>();
-	@DocProperty(description = "Boolean value indicating whether the MDS download should be omitted")
+	private List<MetadataServer> metadataServers = new ArrayList<>();
+	@DocProperty(description = "Boolean value indicating whether the MDS download should be omitted", defaultValue = "false")
 	private boolean disableMetadataService = false;
+	@DocProperty(description = "Number of times the MDS TOC download is retried at server startup when the TOC blob is missing (a missing TOC prevents attestation validation)", defaultValue = "3")
+	private int mdsDownloadStartupRetries = 3;
+	@DocProperty(description = "Delay in seconds between MDS TOC download retries at server startup when the TOC blob is missing", defaultValue = "30")
+	private int mdsDownloadStartupRetryInterval = 30;
 	@DocProperty(description = "Hints to the RP - security-key, client-device, hybrid")
-	private List<String> hints = new ArrayList<String>();
-	@DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)")
+	private List<String> hints = new ArrayList<>();
+	@DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)", defaultValue = "false")
 	private boolean enterpriseAttestation = false;
-	@DocProperty(description = "String value indicating whether MDS validation should be omitted during attestation")
+	@DocProperty(description = "String value indicating whether MDS validation should be omitted during attestation", defaultValue = "monitor")
 	private String attestationMode = "monitor";
+	@DocProperty(description = "Full origins (scheme, host and optional port) permitted to frame a cross-origin ceremony; empty denies every framed ceremony")
+	private List<String> allowedTopOrigins = new ArrayList<>();
+
+	@DocProperty(description = "Boolean value indicating whether passkey registration and authentication events are delivered to the Lock Server as audit evidence", defaultValue = "false")
+	private boolean lockAuditEnabled = false;
+	@DocProperty(description = "Base URL of the Lock Server audit endpoint (e.g. https://lock.example.com/audit); /log and /log/bulk are derived from it")
+	private String lockAuditEndpoint;
+	@DocProperty(description = "OAuth2 client ID used to obtain a token (scope https://jans.io/oauth/lock/log.write) for posting Lock Server audit events")
+	private String lockAuditClientId;
+	@DocProperty(description = "OAuth2 client secret (encrypted), paired with lockAuditClientId")
+	private String lockAuditClientPassword;
+	@DocProperty(description = "Interval in seconds between batched deliveries of buffered Lock Server audit events. Read once at server startup; changing it requires a restart to take effect", defaultValue = "20")
+	private int lockAuditFlushInterval = 20;
+
+	public boolean isRecordAbandonedAssertions() {
+		return recordAbandonedAssertions;
+	}
+
+	public void setRecordAbandonedAssertions(boolean recordAbandonedAssertions) {
+		this.recordAbandonedAssertions = recordAbandonedAssertions;
+	}
+
+	public int getAbandonedRequestExpiration() {
+		return abandonedRequestExpiration;
+	}
+
+	public void setAbandonedRequestExpiration(int abandonedRequestExpiration) {
+		this.abandonedRequestExpiration = abandonedRequestExpiration;
+	}
+
+	public int getAbandonedRequestSweepInterval() {
+		return abandonedRequestSweepInterval;
+	}
+
+	public void setAbandonedRequestSweepInterval(int abandonedRequestSweepInterval) {
+		this.abandonedRequestSweepInterval = abandonedRequestSweepInterval;
+	}
 
 	public String getAuthenticatorCertsFolder() {
 		return authenticatorCertsFolder;
@@ -100,6 +148,14 @@ public class Fido2Configuration {
 
 	public void setRequestedParties(List<RequestedParty> requestedParties) {
 		this.requestedParties = requestedParties;
+	}
+
+	public List<String> getAllowedTopOrigins() {
+		return allowedTopOrigins;
+	}
+
+	public void setAllowedTopOrigins(List<String> allowedTopOrigins) {
+		this.allowedTopOrigins = allowedTopOrigins;
 	}
 
 	public List<String> getHints() {
@@ -154,6 +210,22 @@ public class Fido2Configuration {
 		this.disableMetadataService = disableMetadataService;
 	}
 
+	public int getMdsDownloadStartupRetries() {
+		return mdsDownloadStartupRetries;
+	}
+
+	public void setMdsDownloadStartupRetries(int mdsDownloadStartupRetries) {
+		this.mdsDownloadStartupRetries = mdsDownloadStartupRetries;
+	}
+
+	public int getMdsDownloadStartupRetryInterval() {
+		return mdsDownloadStartupRetryInterval;
+	}
+
+	public void setMdsDownloadStartupRetryInterval(int mdsDownloadStartupRetryInterval) {
+		this.mdsDownloadStartupRetryInterval = mdsDownloadStartupRetryInterval;
+	}
+
 	public List<MetadataServer> getMetadataServers() {
 		return metadataServers;
 	}
@@ -170,32 +242,48 @@ public class Fido2Configuration {
 		this.attestationMode = attestationMode;
 	}
 
-	public Fido2Configuration(String authenticatorCertsFolder, String mdsAccessToken, String mdsCertsFolder,
-			String mdsTocsFolder, boolean checkU2fAttestations, boolean debugUserAutoEnrollment,
-			int unfinishedRequestExpiration, int authenticationHistoryExpiration, String serverMetadataFolder,
-			List<String> enabledFidoAlgorithms, List<RequestedParty> requestedParties,
-			List<MetadataServer> metadataServers, boolean disableMetadataService, String attestationMode,
-			List<String> hints, boolean enterpriseAttestation) {
-		super();
-		this.authenticatorCertsFolder = authenticatorCertsFolder;
+	public boolean isLockAuditEnabled() {
+		return lockAuditEnabled;
+	}
 
-		this.mdsCertsFolder = mdsCertsFolder;
-		this.mdsTocsFolder = mdsTocsFolder;
+	public void setLockAuditEnabled(boolean lockAuditEnabled) {
+		this.lockAuditEnabled = lockAuditEnabled;
+	}
 
-		this.userAutoEnrollment = debugUserAutoEnrollment;
-		this.unfinishedRequestExpiration = unfinishedRequestExpiration;
-		this.authenticationHistoryExpiration = authenticationHistoryExpiration;
-		this.serverMetadataFolder = serverMetadataFolder;
-		this.enabledFidoAlgorithms = enabledFidoAlgorithms;
-		this.requestedParties = requestedParties;
-		this.metadataServers = metadataServers;
-		this.disableMetadataService = disableMetadataService;
-		this.attestationMode = attestationMode;
-		this.hints = hints;
-		this.enterpriseAttestation = enterpriseAttestation;
+	public String getLockAuditEndpoint() {
+		return lockAuditEndpoint;
+	}
+
+	public void setLockAuditEndpoint(String lockAuditEndpoint) {
+		this.lockAuditEndpoint = lockAuditEndpoint;
+	}
+
+	public String getLockAuditClientId() {
+		return lockAuditClientId;
+	}
+
+	public void setLockAuditClientId(String lockAuditClientId) {
+		this.lockAuditClientId = lockAuditClientId;
+	}
+
+	public String getLockAuditClientPassword() {
+		return lockAuditClientPassword;
+	}
+
+	public void setLockAuditClientPassword(String lockAuditClientPassword) {
+		this.lockAuditClientPassword = lockAuditClientPassword;
+	}
+
+	public int getLockAuditFlushInterval() {
+		return lockAuditFlushInterval;
+	}
+
+	public void setLockAuditFlushInterval(int lockAuditFlushInterval) {
+		this.lockAuditFlushInterval = lockAuditFlushInterval;
 	}
 
 	public Fido2Configuration() {
+		// Default constructor required for JSON (Jackson) deserialization of the FIDO2 configuration.
 	}
 
 	@Override
@@ -205,9 +293,12 @@ public class Fido2Configuration {
 				+ userAutoEnrollment + ", unfinishedRequestExpiration=" + unfinishedRequestExpiration
 				+ ", authenticationHistoryExpiration=" + authenticationHistoryExpiration + ", serverMetadataFolder="
 				+ serverMetadataFolder + ", enabledFidoAlgorithms=" + enabledFidoAlgorithms + ", requestedParties="
-				+ requestedParties + ", metadataServers=" + metadataServers + ", disableMetadataService="
-				+ disableMetadataService + ", hints=" + hints + ", enterpriseAttestation=" + enterpriseAttestation
-				+ ", attestationMode=" + attestationMode + "]";
+				+ requestedParties + ", metadataServers=" + metadataServers + ", allowedTopOrigins=" + allowedTopOrigins + ", disableMetadataService="
+				+ disableMetadataService + ", mdsDownloadStartupRetries=" + mdsDownloadStartupRetries
+				+ ", mdsDownloadStartupRetryInterval=" + mdsDownloadStartupRetryInterval + ", hints=" + hints
+				+ ", enterpriseAttestation=" + enterpriseAttestation + ", attestationMode=" + attestationMode
+				+ ", lockAuditEnabled=" + lockAuditEnabled + ", lockAuditEndpoint=" + lockAuditEndpoint
+				+ ", lockAuditFlushInterval=" + lockAuditFlushInterval + "]"; // lockAuditClientPassword deliberately excluded, see #14676
 	}
 
 }

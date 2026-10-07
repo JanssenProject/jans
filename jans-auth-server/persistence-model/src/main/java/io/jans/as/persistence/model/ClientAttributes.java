@@ -74,6 +74,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("tokenExchangeScripts")
     private List<String> tokenExchangeScripts;
 
+    @JsonProperty("idJagScripts")
+    private List<String> idJagScripts;
+
     @JsonProperty("consentGatheringScripts")
     private List<String> consentGatheringScripts;
 
@@ -179,6 +182,12 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("cimdExpiresAt")
     private Long cimdExpiresAt;
 
+    @JsonProperty("spiffeId")
+    private String spiffeId;
+
+    @JsonProperty("spiffeBundleEndpoint")
+    private String spiffeBundleEndpoint;
+
     public Boolean getRequirePkce() {
         if (requirePkce == null) {
             requirePkce = false;
@@ -220,6 +229,22 @@ public class ClientAttributes implements Serializable {
 
     public boolean isCimdExpired() {
         return cimdExpiresAt != null && System.currentTimeMillis() > cimdExpiresAt;
+    }
+
+    public String getSpiffeId() {
+        return spiffeId;
+    }
+
+    public void setSpiffeId(String spiffeId) {
+        this.spiffeId = spiffeId;
+    }
+
+    public String getSpiffeBundleEndpoint() {
+        return spiffeBundleEndpoint;
+    }
+
+    public void setSpiffeBundleEndpoint(String spiffeBundleEndpoint) {
+        this.spiffeBundleEndpoint = spiffeBundleEndpoint;
     }
 
     public List<String> getAuthorizationDetailsTypes() {
@@ -437,6 +462,16 @@ public class ClientAttributes implements Serializable {
         return this;
     }
 
+    public List<String> getIdJagScripts() {
+        if (idJagScripts == null) idJagScripts = Lists.newArrayList();
+        return idJagScripts;
+    }
+
+    public ClientAttributes setIdJagScripts(List<String> idJagScripts) {
+        this.idJagScripts = idJagScripts;
+        return this;
+    }
+
     public List<String> getConsentGatheringScripts() {
         if (consentGatheringScripts == null) consentGatheringScripts = Lists.newArrayList();
         return consentGatheringScripts;
@@ -648,6 +683,8 @@ public class ClientAttributes implements Serializable {
     public String toString() {
         return "ClientAttributes{" +
                 "tlsClientAuthSubjectDn='" + tlsClientAuthSubjectDn + '\'' +
+                ", spiffeId='" + spiffeId + '\'' +
+                ", spiffeBundleEndpoint='" + spiffeBundleEndpoint + '\'' +
                 ", runIntrospectionScriptBeforeJwtCreation=" + runIntrospectionScriptBeforeJwtCreation +
                 ", keepClientAuthorizationAfterExpiration=" + keepClientAuthorizationAfterExpiration +
                 ", allowSpontaneousScopes=" + allowSpontaneousScopes +
@@ -662,6 +699,7 @@ public class ClientAttributes implements Serializable {
                 ", additionalAudience=" + additionalAudience +
                 ", postAuthnScripts=" + postAuthnScripts +
                 ", tokenExchangeScripts=" + tokenExchangeScripts +
+                ", idJagScripts=" + idJagScripts +
                 ", consentGatheringScripts=" + consentGatheringScripts +
                 ", introspectionScripts=" + introspectionScripts +
                 ", rptClaimsScripts=" + rptClaimsScripts +

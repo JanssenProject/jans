@@ -129,10 +129,14 @@ impl JwkSet {
             .and_then(|v| v.to_str().ok())
             .and_then(parse_max_age);
 
-        let jwk_set = response
-            .json::<JwkSet>()
-            .await
-            .map_err(HttpError::JsonDeserializeResponse)?;
+        // Read the body with the configured size cap so a hostile JWKS endpoint
+        // can't OOM the backend with an oversized response.
+        let bytes =
+            crate::http_utils::read_response_capped(response, client.max_response_size_bytes())
+                .await
+                .map_err(|e| HttpError::Request(HttpClientError::new(e, None)))?;
+        let jwk_set: JwkSet =
+            serde_json::from_slice(&bytes).map_err(HttpError::JsonDeserializeBytes)?;
 
         Ok((jwk_set, max_age))
     }
@@ -174,20 +178,24 @@ impl StatusListJwtStr {
             }
         }
 
-        let status_list_jwt = response.text().await.map_err(HttpError::ReadTextResponse)?;
+        let bytes =
+            crate::http_utils::read_response_capped(response, client.max_response_size_bytes())
+                .await
+                .map_err(|e| HttpError::Request(HttpClientError::new(e, None)))?;
+        let status_list_jwt = String::from_utf8(bytes).map_err(HttpError::InvalidUtf8)?;
 
         Ok(StatusListJwtStr::new(status_list_jwt))
     }
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum HttpError {
+pub(crate) enum HttpError {
     #[error("HTTP request failed: {0}")]
     Request(#[from] HttpClientError),
-    #[error("failed to deserialize response from JSON: {0}")]
-    JsonDeserializeResponse(#[source] reqwest::Error),
-    #[error("failed to read the response text: {0}")]
-    ReadTextResponse(#[source] reqwest::Error),
+    #[error("failed to deserialize response body bytes as JSON: {0}")]
+    JsonDeserializeBytes(#[source] serde_json::Error),
+    #[error("response body is not valid UTF-8: {0}")]
+    InvalidUtf8(#[source] std::string::FromUtf8Error),
     #[error("the value of the '{0}' header is invalid: {1}")]
     InvalidHeader(String, ToStrError),
     #[error("{0}")]

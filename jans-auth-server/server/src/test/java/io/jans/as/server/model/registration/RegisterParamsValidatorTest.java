@@ -2,6 +2,7 @@ package io.jans.as.server.model.registration;
 
 import com.beust.jcommander.internal.Lists;
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
@@ -10,6 +11,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.server.service.net.SectorIdentifierUriService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.mockito.InjectMocks;
@@ -44,6 +46,9 @@ public class RegisterParamsValidatorTest {
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
+
+    @Mock
+    private SectorIdentifierUriService sectorIdentifierUriService;
 
     // ---- WEB application type ----
     @Test
@@ -363,6 +368,45 @@ public class RegisterParamsValidatorTest {
     }
 
     @Test
+    public void validateRedirectUris_sectorIdentifierNotAllowed_shouldSkipFetchAndThrow() {
+        when(sectorIdentifierUriService.isAllowedSectorIdentifierUri("http://169.254.169.254/latest/meta-data/")).thenReturn(false);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
+
+        try {
+            registerParamsValidator.validateRedirectUris(
+                    Collections.singletonList(GrantType.AUTHORIZATION_CODE),
+                    Collections.singletonList(ResponseType.CODE),
+                    ApplicationType.WEB,
+                    SubjectType.PUBLIC,
+                    Collections.singletonList("https://example.com/cb"),
+                    "http://169.254.169.254/latest/meta-data/");
+        } catch (WebApplicationException e) {
+            verify(errorResponseFactory, times(1)).createWebApplicationException(eq(Response.Status.BAD_REQUEST), eq(RegisterErrorResponseType.INVALID_CLIENT_METADATA), any());
+        }
+        verify(sectorIdentifierUriService, never()).fetchSectorIdentifierContent(anyString());
+    }
+
+    @Test
+    public void validateRedirectUris_sectorIdentifierAllowedAndContainsRedirectUris_shouldReturnTrue() {
+        when(appConfiguration.getClientWhiteList()).thenReturn(Collections.singletonList("*"));
+        when(appConfiguration.getClientBlackList()).thenReturn(Collections.emptyList());
+        when(sectorIdentifierUriService.isAllowedSectorIdentifierUri("https://rp.example/sector.json")).thenReturn(true);
+        when(sectorIdentifierUriService.fetchSectorIdentifierContent("https://rp.example/sector.json"))
+                .thenReturn("[\"https://example.com/cb\"]");
+
+        boolean result = registerParamsValidator.validateRedirectUris(
+                Collections.singletonList(GrantType.AUTHORIZATION_CODE),
+                Collections.singletonList(ResponseType.CODE),
+                ApplicationType.WEB,
+                SubjectType.PUBLIC,
+                Collections.singletonList("https://example.com/cb"),
+                "https://rp.example/sector.json");
+
+        assertTrue(result);
+        verify(sectorIdentifierUriService).fetchSectorIdentifierContent("https://rp.example/sector.json");
+    }
+
+    @Test
     public void validateAlgorithms_whenAlgIsAmoungSupported_shouldNotRaiseException() {
         RegisterRequest request = new RegisterRequest();
         request.setAccessTokenSigningAlg(SignatureAlgorithm.RS256);
@@ -381,5 +425,126 @@ public class RegisterParamsValidatorTest {
         when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
 
         registerParamsValidator.validateAlgorithms(request);
+    }
+
+    @Test
+    public void validateSpiffe_noSpiffeMetadata_shouldNotThrowAndShouldNotCheckFeatureFlag() {
+        RegisterRequest request = new RegisterRequest();
+
+        registerParamsValidator.validateSpiffe(request);
+
+        verify(appConfiguration, never()).isFeatureEnabled(any());
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateSpiffe_spiffeIdPresentButFeatureDisabled_shouldThrow() {
+        RegisterRequest request = new RegisterRequest();
+        request.setSpiffeId("spiffe://example.org/my-workload");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(false);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
+
+        registerParamsValidator.validateSpiffe(request);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateSpiffe_bundleEndpointPresentButFeatureDisabled_shouldThrow() {
+        // spiffe_bundle_endpoint alone (no spiffe_id) must also trigger the feature-flag gate.
+        RegisterRequest request = new RegisterRequest();
+        request.setSpiffeBundleEndpoint("https://bundle.example.org/keys.json");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(false);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
+
+        registerParamsValidator.validateSpiffe(request);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateSpiffe_featureEnabled_invalidSpiffeIdSyntax_shouldThrow() {
+        RegisterRequest request = new RegisterRequest();
+        request.setSpiffeId("not-a-valid-spiffe-id");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(true);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
+
+        registerParamsValidator.validateSpiffe(request);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateSpiffe_featureEnabled_bundleEndpointWithoutSpiffeId_shouldThrow() {
+        RegisterRequest request = new RegisterRequest();
+        request.setSpiffeBundleEndpoint("https://bundle.example.org/keys.json");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(true);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
+
+        registerParamsValidator.validateSpiffe(request);
+    }
+
+    @Test
+    public void validateSpiffe_featureEnabled_validExactSpiffeId_shouldNotThrow() {
+        RegisterRequest request = new RegisterRequest();
+        request.setSpiffeId("spiffe://example.org/my-workload");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(true);
+
+        registerParamsValidator.validateSpiffe(request);
+    }
+
+    @Test
+    public void validateSpiffe_featureEnabled_validWildcardSpiffeId_shouldNotThrow() {
+        RegisterRequest request = new RegisterRequest();
+        request.setSpiffeId("spiffe://example.org/client/*");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(true);
+
+        registerParamsValidator.validateSpiffe(request);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateSpiffe_featureEnabled_bundleEndpointNotHttps_shouldThrow() {
+        RegisterRequest request = new RegisterRequest();
+        request.setSpiffeId("spiffe://example.org/my-workload");
+        request.setSpiffeBundleEndpoint("http://bundle.example.org/keys.json");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(true);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
+
+        registerParamsValidator.validateSpiffe(request);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateSpiffe_featureEnabled_bundleEndpointMissingHost_shouldThrow() {
+        RegisterRequest request = new RegisterRequest();
+        request.setSpiffeId("spiffe://example.org/my-workload");
+        request.setSpiffeBundleEndpoint("https:///no-host");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(true);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
+
+        registerParamsValidator.validateSpiffe(request);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateSpiffe_featureEnabled_bundleEndpointMalformedUri_shouldThrow() {
+        RegisterRequest request = new RegisterRequest();
+        request.setSpiffeId("spiffe://example.org/my-workload");
+        request.setSpiffeBundleEndpoint("not a valid uri with spaces");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(true);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
+
+        registerParamsValidator.validateSpiffe(request);
+    }
+
+    @Test
+    public void validateSpiffe_featureEnabled_validHttpsBundleEndpoint_shouldNotThrow() {
+        RegisterRequest request = new RegisterRequest();
+        request.setSpiffeId("spiffe://example.org/my-workload");
+        request.setSpiffeBundleEndpoint("https://bundle.example.org/keys.json");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(true);
+
+        registerParamsValidator.validateSpiffe(request);
     }
 }

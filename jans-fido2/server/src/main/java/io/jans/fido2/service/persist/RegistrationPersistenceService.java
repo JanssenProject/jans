@@ -75,7 +75,7 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
             if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
                 user = userService.addDefaultUser(userName);
             } else {
-                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "User auto enrollment is disabled. User does not exist!");
             }
         }
         userInum = userService.getUserInum(user);

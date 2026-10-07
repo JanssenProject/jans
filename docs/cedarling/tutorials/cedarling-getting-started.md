@@ -32,10 +32,13 @@ From here, you can either jump directly to the language-specific examples above 
 
 The main way you will interact with Cedarling are through the following interfaces
 
-- [Initialization](#initialization)
-- [Authorization](#authorization)
-- [Context Data API](#context-data-api)
-- [Logging](#logging)
+- [Getting Started with Cedarling](#getting-started-with-cedarling)
+  - [Cedarling Interfaces](#cedarling-interfaces)
+    - [Initialization](#initialization)
+    - [Authorization](#authorization)
+    - [Context Data API](#context-data-api)
+    - [Logging](#logging)
+  - [What's next?](#whats-next)
 
 ### Initialization
 
@@ -71,9 +74,12 @@ The bootstrap configuration and policy store directly influence how Cedarling pe
 === "JavaScript"
 
     ```js
-    import initWasm, { init } from "/pkg/cedarling_wasm.js";
+    import { init } from "@janssenproject/cedarling_wasm";
 
-    let cedarling = await init({});
+    const cedarling = await init({
+      CEDARLING_APPLICATION_NAME: "My App",
+      CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+    });
     ```
 
 === "Python"
@@ -167,7 +173,7 @@ The authorization, or `authz`, interface is used to evaluate access control deci
 
 When using Cedarling, **Action** and **Resource** are typically defined in the [policy store](../reference/cedarling-policy-store.md), while **Principal** and **Context** are supplied at runtime via the `authz` interface.
 
-Cedarling provides two authorization methods. Not sure which to use? See the [quick start decision guide](../quick-start/cedarling-quick-start.md#which-authorization-method-should-i-use).
+Cedarling provides two authorization methods. Not sure which to use? See the [quick start decision guide](../reference/cedarling-authz.md#which-authorization-method-should-i-use).
 
 **Multi-Issuer Authorization (Token-based) — Recommended**
 
@@ -225,19 +231,19 @@ The Context Data API allows you to push external data into the Cedarling evaluat
 
     ```js
     // Push data with optional TTL (5 minutes = 300 seconds)
-    cedarling.push_data_ctx("user:123", {
+    cedarling.pushDataCtx("user:123", {
       role: ["admin", "editor"],
       country: "US"
-    }, 300);
+    }, 300n);
 
     // Get data
-    const value = cedarling.get_data_ctx("user:123");
+    const value = cedarling.getDataCtx("user:123");
     if (value) {
       console.log(`User roles: ${value.role}`);
     }
 
     // Get statistics
-    const stats = cedarling.get_stats_ctx();
+    const stats = cedarling.getStatsCtx();
     console.log(`Entries: ${stats.entry_count}/${stats.max_entries}`);
     ```
 

@@ -1,9 +1,11 @@
 package io.jans.as.server.service;
 
-import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdAccessMap;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.server.service.net.SectorIdentifierUriService;
 import io.jans.as.server.session.ws.rs.EndSessionService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -14,9 +16,13 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -31,7 +37,7 @@ public class RedirectionUriServiceTest {
     private Logger log;
 
     @Mock
-    private ClientService clientService;
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
@@ -44,6 +50,9 @@ public class RedirectionUriServiceTest {
 
     @Mock
     private EndSessionService endSessionService;
+
+    @Mock
+    private SectorIdentifierUriService sectorIdentifierUriService;
 
     @Test
     public void validatePostLogoutRedirectUri_whenAllowedByClientWhiteList_shouldReturnUrl() {
@@ -61,6 +70,28 @@ public class RedirectionUriServiceTest {
 
         final String result = redirectionUriService.validatePostLogoutRedirectUri("https://postlogout.com", new String[0]);
         assertEquals("", result);
+    }
+
+    @Test
+    public void validatePostLogoutRedirectUri_whenCookieBackedSessionHasGrantedCimdClient_shouldResolveViaClientIdMetadataService() {
+        final String cimdClientId = "https://rp.example.org/client-metadata.json";
+        final String postLogoutUri = "https://rp.example.org/logout-callback";
+
+        final Client cimdClient = new Client();
+        cimdClient.setClientId(cimdClientId);
+        cimdClient.setPostLogoutRedirectUris(new String[]{postLogoutUri});
+
+        when(clientIdMetadataService.resolveClientsForLogout(anySet())).thenReturn(Collections.singleton(cimdClient));
+
+        final Map<String, Boolean> granted = new HashMap<>();
+        granted.put(cimdClientId, true);
+        final SessionId sessionId = new SessionId();
+        sessionId.setPermissionGrantedMap(new SessionIdAccessMap(granted));
+
+        final String result = redirectionUriService.validatePostLogoutRedirectUri(sessionId, postLogoutUri);
+
+        assertEquals(postLogoutUri, result);
+        verify(clientIdMetadataService).resolveClientsForLogout(granted.keySet());
     }
 
     @Test
@@ -140,46 +171,48 @@ public class RedirectionUriServiceTest {
     }
 
     @Test
-    public void getSectorRedirectUris_whenHttpScheme_shouldReturnEmptyAndSkipFetch() {
+    public void getSectorRedirectUris_whenNotAllowed_shouldReturnEmptyAndSkipFetch() {
+        when(sectorIdentifierUriService.isAllowedSectorIdentifierUri("http://169.254.169.254/latest/meta-data/")).thenReturn(false);
+
         final List<String> result = redirectionUriService.getSectorRedirectUris("http://169.254.169.254/latest/meta-data/");
         assertTrue(result.isEmpty());
-        verify(redirectionUriService, never()).fetchSectorIdentifierContent(anyString());
+        verify(sectorIdentifierUriService, never()).fetchSectorIdentifierContent(anyString());
     }
 
     @Test
-    public void getSectorRedirectUris_whenHttpsAndBlocklisted_shouldReturnEmptyAndSkipFetch() {
-        when(appConfiguration.getRequestUriBlockList()).thenReturn(Lists.newArrayList("https://internal.example/*"));
-
-        final List<String> result = redirectionUriService.getSectorRedirectUris("https://internal.example/sector.json");
-        assertTrue(result.isEmpty());
-        verify(redirectionUriService, never()).fetchSectorIdentifierContent(anyString());
+    public void isUriEqual_loopbackWithDifferentPort_shouldReturnTrue() {
+        assertTrue(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/cb", new String[]{"http://127.0.0.1:4000/cb"}, true));
     }
 
     @Test
-    public void getSectorRedirectUris_whenMalformedUri_shouldReturnEmptyAndSkipFetch() {
-        final List<String> result = redirectionUriService.getSectorRedirectUris("not a uri");
-        assertTrue(result.isEmpty());
-        verify(redirectionUriService, never()).fetchSectorIdentifierContent(anyString());
+    public void isUriEqual_loopbackWithDifferentPortAndPath_shouldReturnFalse() {
+        assertFalse(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/other", new String[]{"http://127.0.0.1:4000/cb"}, true));
     }
 
     @Test
-    public void getSectorRedirectUris_whenHttpsAndAllowed_shouldInvokeFetch() {
+    public void isUriEqual_nonLoopbackWithDifferentPort_shouldReturnFalse() {
+        assertFalse(RedirectionUriService.isUriEqual("https://client.example.com:5000/cb", new String[]{"https://client.example.com:4000/cb"}));
+    }
+
+    @Test
+    public void isUriEqual_loopbackWithDifferentPortWithoutVariance_shouldReturnFalse() {
+        assertFalse(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/cb", new String[]{"http://127.0.0.1:4000/cb"}));
+    }
+
+    @Test
+    public void isUriEqual_loopbackWithEncodedSlashInRegisteredPath_shouldReturnFalse() {
+        assertFalse(RedirectionUriService.isUriEqual("http://127.0.0.1:5000/cb/extra", new String[]{"http://127.0.0.1:4000/cb%2Fextra"}, true));
+    }
+
+    @Test
+    public void getSectorRedirectUris_whenAllowed_shouldInvokeFetch() {
+        when(sectorIdentifierUriService.isAllowedSectorIdentifierUri(anyString())).thenReturn(true);
         when(localResponseCache.getSectorRedirectUris(anyString())).thenReturn(null);
-        doReturn(null).when(redirectionUriService).fetchSectorIdentifierContent(anyString());
+        when(sectorIdentifierUriService.fetchSectorIdentifierContent(anyString())).thenReturn(null);
 
         final List<String> result = redirectionUriService.getSectorRedirectUris("https://rp.example/sector.json");
         assertTrue(result.isEmpty());
-        verify(redirectionUriService).fetchSectorIdentifierContent("https://rp.example/sector.json");
-    }
-
-    @Test
-    public void isAllowedSectorIdentifierUri_httpsWithoutBlocklist_returnsTrue() {
-        assertTrue(redirectionUriService.isAllowedSectorIdentifierUri("https://rp.example/sector.json"));
-    }
-
-    @Test
-    public void isAllowedSectorIdentifierUri_httpScheme_returnsFalse() {
-        assertFalse(redirectionUriService.isAllowedSectorIdentifierUri("http://rp.example/sector.json"));
+        verify(sectorIdentifierUriService).fetchSectorIdentifierContent("https://rp.example/sector.json");
     }
 
     private Client getClientForValidateRedirectionUri_full() {

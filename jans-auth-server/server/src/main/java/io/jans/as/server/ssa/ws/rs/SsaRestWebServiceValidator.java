@@ -120,6 +120,7 @@ public class SsaRestWebServiceValidator {
      * <p>
      * This method validates the metadata of a new SSA.
      * - "lifetime" cannot be 0 or negative
+     * - "one_time_use" and "rotate_ssa" cannot both be true
      * </p>
      *
      * @param createRequest SSA Metadata
@@ -129,6 +130,10 @@ public class SsaRestWebServiceValidator {
         if (createRequest.getLifetime() != null && createRequest.getLifetime() < 1) {
             log.warn("SSA Metadata validation: 'lifetime' cannot be 0 or negative");
             throw errorResponseFactory.createBadRequestException(SsaErrorResponseType.INVALID_SSA_METADATA, "Invalid SSA Metadata");
+        }
+        if (Boolean.TRUE.equals(createRequest.getOneTimeUse()) && Boolean.TRUE.equals(createRequest.getRotateSsa())) {
+            log.warn("SSA Metadata validation: 'one_time_use' and 'rotate_ssa' cannot both be true");
+            throw errorResponseFactory.createBadRequestException(SsaErrorResponseType.INVALID_SSA_METADATA, "Invalid SSA Metadata: 'one_time_use' and 'rotate_ssa' cannot both be true");
         }
     }
 }

@@ -4,14 +4,11 @@ Gluu's OTP interception script uses the two-factor event/counter-based HOTP algo
 
 In order to use this authentication mechanism users will need to install a mobile authenticator, like [Google Authenticator 2](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2), that supports HOTP/TOTP.
 
-#External Jars
-1. oauth-otp.jar 
-Use following group id and artifact id in maven
-a. <groupId>com.lochbridge.oath</groupId>
-  <artifactId>oath-otp</artifactId>
+# External Jars
 
-b.  <groupId>com.lochbridge.oath</groupId>
-  <artifactId>oath-otp-keyprovisioning</artifactId>
+This script uses the [otp-java](https://github.com/BastiaanJansen/otp-java)
+library (RFC 4226 HOTP + RFC 6238 TOTP), available on Maven Central:
 
-c. <groupId>com.lochbridge.oath</groupId>
-  <artifactId>oath-parent</artifactId>
+    <groupId>com.github.bastiaanjansen</groupId>
+    <artifactId>otp-java</artifactId>
+    <version>2.1.0</version>

@@ -11,8 +11,11 @@ import io.jans.fido2.model.metric.Fido2MetricsAggregation;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.SearchScope;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -26,7 +29,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.OptionalDouble;
 
 /**
  * Service for managing FIDO2 metrics data operations
@@ -47,8 +49,25 @@ public class Fido2MetricsService {
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     private PersistenceEntryManager persistenceEntryManager;
 
+    /** Response keys for the attestation-rejection analysis. */
+    private static final String TOTAL_REJECTIONS = "totalRejections";
+    private static final String REGISTRATION_ATTEMPTS = "registrationAttempts";
+    private static final String REASON_CODES = "reasonCodes";
+    private static final String TOP_REJECTED_AAGUIDS = "topRejectedAaguids";
+    private static final String REJECTION_RATE = "rejectionRate";
+    private static final String REJECTION_RATE_NOTE = "rejectionRateNote";
+
+    /** Response keys for the performance analysis, alongside the average in Fido2MetricsConstants. */
+    private static final String REGISTRATION_MIN_DURATION = "registrationMinDuration";
+    private static final String REGISTRATION_MAX_DURATION = "registrationMaxDuration";
+    private static final String AUTHENTICATION_MIN_DURATION = "authenticationMinDuration";
+    private static final String AUTHENTICATION_MAX_DURATION = "authenticationMaxDuration";
+
     private static final String METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
     private static final String METRICS_AGGREGATION_BASE_DN = "ou=fido2-aggregations,o=jans";
+
+    /** Page size for the paged prior-adopters lookup in {@link #getUsersRegisteredBefore}. */
+    private static final int PRIOR_ADOPTERS_CHUNK_SIZE = 1000;
 
     // ========== METRICS ENTRY OPERATIONS ==========
 
@@ -97,11 +116,9 @@ public class Fido2MetricsService {
                 Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endDate)
             );
 
-            List<Fido2MetricsEntry> entries = persistenceEntryManager.findEntries(
+            return persistenceEntryManager.findEntries(
                 METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter
             );
-
-            return entries;
         } catch (Exception e) {
             log.error("Failed to retrieve metrics entries: {}", e.getMessage(), e);
             return Collections.emptyList();
@@ -348,39 +365,109 @@ public class Fido2MetricsService {
     // ========== ANALYTICS AND REPORTING ==========
 
     /**
-     * Get user adoption metrics
+     * Get user adoption metrics.
+     * <p>
+     * "New" and "returning" are decided against every successful registration on record, not just the
+     * rows inside {@code [startTime, endTime]}: a user only counts as new the first time their
+     * registration succeeds, and as returning if they had already registered before the window began.
+     * {@code adoptionRate} is newUsers against the cumulative population of everyone who has ever
+     * registered as of {@code endTime} — a self-contained figure bounded by how long metrics entries
+     * are retained, not a rate against the full identity directory.
      */
     public Map<String, Object> getUserAdoptionMetrics(LocalDateTime startTime, LocalDateTime endTime) {
         List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
-        
+
         Map<String, Object> metrics = new HashMap<>();
-        
-        // Total unique users
+
+        // Every user with any activity in this window, regardless of operation or outcome
         Set<String> uniqueUsers = entries.stream()
             .map(Fido2MetricsEntry::getUserId)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
         metrics.put(Fido2MetricsConstants.TOTAL_UNIQUE_USERS, uniqueUsers.size());
 
-        // New users (first registration)
-        Set<String> newUsers = entries.stream()
-            .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()) && Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
+        // Users already known to have registered successfully before this window began
+        Set<String> priorAdopters = getUsersRegisteredBefore(startTime);
+
+        // Registration successes recorded inside this window
+        Set<String> registeredInWindow = entries.stream()
+            .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType())
+                    && Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
             .map(Fido2MetricsEntry::getUserId)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
+
+        // New users: this is the first time their registration ever succeeded
+        Set<String> newUsers = new HashSet<>(registeredInWindow);
+        newUsers.removeAll(priorAdopters);
         metrics.put(Fido2MetricsConstants.NEW_USERS, newUsers.size());
 
-        // Returning users
+        // Returning users: active this window, and already an adopter before it began.
+        // Computed directly against priorAdopters rather than as uniqueUsers minus newUsers, so a user
+        // who registers a second passkey and signs in within the same window is still counted here.
         Set<String> returningUsers = new HashSet<>(uniqueUsers);
-        returningUsers.removeAll(newUsers);
+        returningUsers.retainAll(priorAdopters);
         metrics.put(Fido2MetricsConstants.RETURNING_USERS, returningUsers.size());
 
-        // Adoption rate
-        if (!uniqueUsers.isEmpty()) {
-            metrics.put(Fido2MetricsConstants.ADOPTION_RATE, (double) newUsers.size() / uniqueUsers.size());
+        // Adoption rate: new users against the cumulative population of everyone who has ever
+        // registered as of endTime (priorAdopters and newUsers are disjoint by construction).
+        long cumulativeAdopters = (long) priorAdopters.size() + newUsers.size();
+        if (cumulativeAdopters > 0) {
+            metrics.put(Fido2MetricsConstants.ADOPTION_RATE, (double) newUsers.size() / cumulativeAdopters);
+        } else {
+            metrics.put(Fido2MetricsConstants.ADOPTION_RATE, null);
         }
 
         return metrics;
+    }
+
+    /**
+     * Distinct users whose registration succeeded at any point before {@code beforeTime}, searched
+     * directly against the metrics store rather than derived from the {@code [startTime, endTime]}
+     * window. Bounded by the metrics retention policy: a user whose only prior registration entry has
+     * already been cleaned up by {@link #cleanupOldData} will not appear here, and will be reported as
+     * new again.
+     */
+    private Set<String> getUsersRegisteredBefore(LocalDateTime beforeTime) {
+        try {
+            // Strictly before beforeTime, so a registration timestamped exactly at the window's start
+            // is not counted both as a prior adopter and as part of this window.
+            Date exclusiveUpperBound = new Date(convertToDate(beforeTime).getTime() - 1);
+
+            Filter filter = Filter.createANDFilter(
+                Filter.createEqualityFilter("jansFido2MetricsOperationType", Fido2MetricsConstants.REGISTRATION),
+                Filter.createEqualityFilter("jansFido2MetricsStatus", Fido2MetricsConstants.SUCCESS),
+                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, exclusiveUpperBound)
+            );
+
+            // Paged retrieval: the unpaged findEntries(filter) overload issues a single search that a
+            // persistence backend enforcing a result-size limit can reject outright, which would
+            // misclassify every in-window registration as new. Paging in PRIOR_ADOPTERS_CHUNK_SIZE
+            // batches keeps this working past that limit.
+            return persistenceEntryManager.findEntries(METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter,
+                    SearchScope.SUB, null, 0, 0, PRIOR_ADOPTERS_CHUNK_SIZE)
+                .stream()
+                .map(Fido2MetricsEntry::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        } catch (Exception e) {
+            log.error("Failed to retrieve prior registrations before {}: {}", beforeTime, e.getMessage(), e);
+            return Collections.emptySet();
+        }
+    }
+
+    /**
+     * Whether this entry records a ceremony a user was actually present for.
+     * <p>
+     * A ceremony writes more than one entry: an ATTEMPT when it starts, and a terminal entry when it
+     * resolves. The ATTEMPT carries no duration, and an ABANDONED entry's duration is the expiration
+     * window the sweep observed rather than anything the user waited on. Only SUCCESS and FAILURE are
+     * outcomes reached with the user there, and only those occur exactly once per ceremony, so only
+     * those may enter a latency figure or a per-ceremony count.
+     */
+    private static boolean isCompletedCeremony(Fido2MetricsEntry entry) {
+        return Fido2MetricsConstants.SUCCESS.equals(entry.getStatus())
+                || Fido2MetricsConstants.FAILURE.equals(entry.getStatus());
     }
 
     /**
@@ -388,46 +475,80 @@ public class Fido2MetricsService {
      */
     public Map<String, Object> getPerformanceMetrics(LocalDateTime startTime, LocalDateTime endTime) {
         List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
-        
-        Map<String, Object> metrics = new HashMap<>();
-        
-        // Registration performance
-        List<Long> registrationDurations = entries.stream()
-            .filter(e -> "REGISTRATION".equals(e.getOperationType()) && e.getDurationMs() != null)
-            .map(Fido2MetricsEntry::getDurationMs)
-            .collect(Collectors.toList());
-        
-        if (!registrationDurations.isEmpty()) {
-            metrics.put("registrationAvgDuration", registrationDurations.stream().mapToLong(Long::longValue).average().orElse(0.0));
-            metrics.put("registrationMinDuration", registrationDurations.stream().mapToLong(Long::longValue).min().orElse(0L));
-            metrics.put("registrationMaxDuration", registrationDurations.stream().mapToLong(Long::longValue).max().orElse(0L));
-        }
 
-        // Authentication performance
-        List<Long> authenticationDurations = entries.stream()
-            .filter(e -> "AUTHENTICATION".equals(e.getOperationType()) && e.getDurationMs() != null)
-            .map(Fido2MetricsEntry::getDurationMs)
-            .collect(Collectors.toList());
-        
-        if (!authenticationDurations.isEmpty()) {
-            metrics.put("authenticationAvgDuration", authenticationDurations.stream().mapToLong(Long::longValue).average().orElse(0.0));
-            metrics.put("authenticationMinDuration", authenticationDurations.stream().mapToLong(Long::longValue).min().orElse(0L));
-            metrics.put("authenticationMaxDuration", authenticationDurations.stream().mapToLong(Long::longValue).max().orElse(0L));
-        }
+        Map<String, Object> metrics = new HashMap<>();
+
+        putDurationStats(metrics, entries, Fido2MetricsConstants.REGISTRATION,
+                Fido2MetricsConstants.REGISTRATION_AVG_DURATION, REGISTRATION_MIN_DURATION,
+                REGISTRATION_MAX_DURATION);
+        putDurationStats(metrics, entries, Fido2MetricsConstants.AUTHENTICATION,
+                Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION, AUTHENTICATION_MIN_DURATION,
+                AUTHENTICATION_MAX_DURATION);
 
         return metrics;
+    }
+
+    /**
+     * Summarize how long one operation type took, over the ceremonies that completed.
+     * <p>
+     * Abandoned ceremonies are excluded: their recorded duration is how long the ceremony stayed open
+     * before the sweep claimed it, which measures {@code unfinishedRequestExpiration} rather than
+     * user-perceived latency. Including them made the average track the configured window instead of
+     * the server — three sign-ins of about 30ms alongside four abandonments reported roughly 111
+     * seconds.
+     * <p>
+     * The keys are left absent rather than zeroed when nothing completed, which is the behaviour
+     * callers have always seen for an empty range.
+     */
+    private void putDurationStats(Map<String, Object> metrics, List<Fido2MetricsEntry> entries,
+            String operationType, String avgKey, String minKey, String maxKey) {
+        LongSummaryStatistics durations = completedDurations(entries, operationType);
+
+        if (durations.getCount() == 0) {
+            return;
+        }
+
+        metrics.put(avgKey, durations.getAverage());
+        metrics.put(minKey, durations.getMin());
+        metrics.put(maxKey, durations.getMax());
+    }
+
+    /**
+     * How long one operation type took, over the ceremonies that completed.
+     * <p>
+     * Shared by the live analytics and by aggregation generation so both apply one rule. An
+     * aggregation is persisted and never recomputed, so a duration admitted here is one no later fix
+     * can take back out.
+     */
+    private static LongSummaryStatistics completedDurations(List<Fido2MetricsEntry> entries,
+            String operationType) {
+        return entries.stream()
+            .filter(e -> operationType.equals(e.getOperationType()))
+            .filter(Fido2MetricsService::isCompletedCeremony)
+            .filter(e -> e.getDurationMs() != null)
+            .mapToLong(Fido2MetricsEntry::getDurationMs)
+            .summaryStatistics();
     }
 
     /**
      * Get device/platform analytics
      */
     public Map<String, Object> getDeviceAnalytics(LocalDateTime startTime, LocalDateTime endTime) {
-        List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
-        
+        // Counted per ceremony rather than per entry. A ceremony writes an ATTEMPT at /options and a
+        // terminal entry at /result, and a conditional-UI ceremony writes a further ATTEMPT that the
+        // login page issues on every page load, so grouping every entry counted one sign-in two or
+        // three times. Proportions survived that; absolute counts did not. Abandoned ceremonies
+        // cannot appear here either way — the sweep runs off a request thread and so has no device
+        // details to record. Still approximate in multi-node deployments, where a ceremony can be
+        // recorded more than once.
+        List<Fido2MetricsEntry> ceremonies = getMetricsEntries(startTime, endTime).stream()
+            .filter(Fido2MetricsService::isCompletedCeremony)
+            .collect(Collectors.toList());
+
         Map<String, Object> analytics = new HashMap<>();
-        
+
         // Device types
-        Map<String, Long> deviceTypes = entries.stream()
+        Map<String, Long> deviceTypes = ceremonies.stream()
             .filter(e -> e.getDeviceInfo() != null && e.getDeviceInfo().getDeviceType() != null)
             .collect(Collectors.groupingBy(
                 e -> e.getDeviceInfo().getDeviceType(),
@@ -436,7 +557,7 @@ public class Fido2MetricsService {
         analytics.put("deviceTypes", deviceTypes);
 
         // Authenticator types
-        Map<String, Long> authenticatorTypes = entries.stream()
+        Map<String, Long> authenticatorTypes = ceremonies.stream()
             .filter(e -> e.getAuthenticatorType() != null)
             .collect(Collectors.groupingBy(
                 Fido2MetricsEntry::getAuthenticatorType,
@@ -445,7 +566,7 @@ public class Fido2MetricsService {
         analytics.put("authenticatorTypes", authenticatorTypes);
 
         // Browsers
-        Map<String, Long> browsers = entries.stream()
+        Map<String, Long> browsers = ceremonies.stream()
             .filter(e -> e.getDeviceInfo() != null && e.getDeviceInfo().getBrowser() != null)
             .collect(Collectors.groupingBy(
                 e -> e.getDeviceInfo().getBrowser(),
@@ -454,7 +575,7 @@ public class Fido2MetricsService {
         analytics.put("browsers", browsers);
 
         // Operating systems
-        Map<String, Long> operatingSystems = entries.stream()
+        Map<String, Long> operatingSystems = ceremonies.stream()
             .filter(e -> e.getDeviceInfo() != null && e.getDeviceInfo().getOs() != null)
             .collect(Collectors.groupingBy(
                 e -> e.getDeviceInfo().getOs(),
@@ -466,11 +587,30 @@ public class Fido2MetricsService {
     }
 
     /**
-     * Get error analysis
+     * Get error analysis over both operation types.
      */
     public Map<String, Object> getErrorAnalysis(LocalDateTime startTime, LocalDateTime endTime) {
-        List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
-        
+        return getErrorAnalysis(startTime, endTime, null);
+    }
+
+    /**
+     * Get error analysis, optionally for one operation type.
+     * <p>
+     * Pooling registration and authentication makes a deployment with healthy sign-in and poor
+     * enrolment indistinguishable from the reverse: both report the same middling success rate, and
+     * the two have different causes and different fixes. Pooling stays the default so existing
+     * callers see what they always have.
+     *
+     * @param operationType {@link Fido2MetricsConstants#REGISTRATION} or
+     *        {@link Fido2MetricsConstants#AUTHENTICATION} to report that ceremony alone, or null to
+     *        report both together
+     */
+    public Map<String, Object> getErrorAnalysis(LocalDateTime startTime, LocalDateTime endTime,
+            String operationType) {
+        List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime).stream()
+            .filter(e -> operationType == null || operationType.equals(e.getOperationType()))
+            .collect(Collectors.toList());
+
         Map<String, Object> analysis = new HashMap<>();
         
         // Error categories
@@ -491,10 +631,12 @@ public class Fido2MetricsService {
             ));
         analysis.put("topErrors", topErrors);
 
-        // Single-pass tally of status counts (ATTEMPT = started, SUCCESS/FAILURE = completed)
+        // Single-pass tally of status counts (ATTEMPT = started, SUCCESS/FAILURE = completed,
+        // ABANDONED = observed to have lapsed without ever completing)
         long totalStarted = 0;
         long successfulOperations = 0;
         long failedOperations = 0;
+        long abandonedOperations = 0;
         for (Fido2MetricsEntry e : entries) {
             String status = e.getStatus();
             if (Fido2MetricsConstants.ATTEMPT.equals(status)) {
@@ -503,52 +645,214 @@ public class Fido2MetricsService {
                 successfulOperations++;
             } else if (Fido2MetricsConstants.FAILURE.equals(status)) {
                 failedOperations++;
+            } else if (Fido2MetricsConstants.ABANDONED.equals(status)) {
+                abandonedOperations++;
             }
         }
 
-        if (totalStarted > 0) {
-            // Normal case: rates as proportion of started operations (ATTEMPT count)
-            double successRate = (double) successfulOperations / totalStarted;
-            double failureRate = (double) failedOperations / totalStarted;
-            // When mixed legacy/new data (SUCCESS+FAILURE > ATTEMPT), scale so completionRate = successRate + failureRate and all stay in [0.0, 1.0]
-            double rawCompletion = successRate + failureRate;
-            if (rawCompletion > 1.0) {
-                double scale = 1.0 / rawCompletion;
-                successRate *= scale;
-                failureRate *= scale;
-            }
-            double completionRate = successRate + failureRate;
-            double dropOffRate = Math.max(0.0, 1.0 - completionRate);
+        // Reported alongside dropOffRate rather than replacing it: dropOffRate is inferred as the
+        // residual of attempts minus completions, so it also absorbs ceremonies still in flight at the
+        // edge of the query window, whereas this counts ceremonies actually observed to have lapsed.
+        // Approximate in multi-node deployments, where a ceremony can be counted more than once.
+        analysis.put(Fido2MetricsConstants.ABANDONED_OPERATIONS, abandonedOperations);
 
-            analysis.put(Fido2MetricsConstants.SUCCESS_RATE, successRate);
-            analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
-            analysis.put(Fido2MetricsConstants.COMPLETION_RATE, completionRate);
-            analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, dropOffRate);
-        } else {
-            // Fallback when no ATTEMPT entries (e.g. legacy data): use completed-only denominator
-            long totalCompleted = successfulOperations + failedOperations;
-            if (totalCompleted > 0) {
-                double successRate = (double) successfulOperations / totalCompleted;
-                double failureRate = (double) failedOperations / totalCompleted;
-                analysis.put(Fido2MetricsConstants.SUCCESS_RATE, successRate);
-                analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
-                analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 1.0);
-                analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
-            } else {
-                // Empty dataset: emit rate keys with defaults so response shape is stable for clients
-                analysis.put(Fido2MetricsConstants.SUCCESS_RATE, 0.0);
-                analysis.put(Fido2MetricsConstants.FAILURE_RATE, 0.0);
-                analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 0.0);
-                analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
-            }
-        }
+        putCeremonyRates(analysis, totalStarted, successfulOperations, failedOperations, abandonedOperations);
 
         return analysis;
     }
 
     /**
+     * Publish the ceremony rates for this range, saying so where one cannot be computed.
+     * <p>
+     * These rates are ratios against the ATTEMPT count, which is what a ceremony writes when it
+     * starts. A range can hold terminal entries whose ATTEMPT falls outside it, or predate attempt
+     * tracking altogether, and then some of them have no denominator. Publishing 0.0 or 1.0 in that
+     * case made an unmeasured rate indistinguishable from a measured one: a window holding only
+     * legacy data reported a flawless completion rate with no abandonment, none of which had been
+     * observed. A rate that cannot be computed is reported as null with a
+     * {@link Fido2MetricsConstants#RATE_NOTE} saying why, as {@code rejectionRateNote} already does
+     * for the attestation breakdown.
+     * <p>
+     * successRate and failureRate are reported as observed. They were previously scaled down
+     * whenever the completions outnumbered the attempts so that the two summed inside [0,1], which
+     * published a figure nobody had measured and marked it in no way; the inconsistency goes in the
+     * note instead.
+     */
+    private static void putCeremonyRates(Map<String, Object> analysis, long totalStarted, long successfulOperations,
+            long failedOperations, long abandonedOperations) {
+        long totalCompleted = successfulOperations + failedOperations;
+
+        if (totalStarted <= 0) {
+            // No denominator for anything measured against starts. The share of the completions that
+            // succeeded is still worth reporting where there are any, but it answers a different
+            // question from the usual successRate, so the note says which one.
+            Double successRate = totalCompleted > 0 ? (double) successfulOperations / totalCompleted : null;
+            Double failureRate = totalCompleted > 0 ? (double) failedOperations / totalCompleted : null;
+            analysis.put(Fido2MetricsConstants.SUCCESS_RATE, successRate);
+            analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
+            analysis.put(Fido2MetricsConstants.COMPLETION_RATE, null);
+            analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, null);
+            analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, null);
+            analysis.put(Fido2MetricsConstants.RATE_NOTE, totalCompleted > 0
+                    ? "No ceremony starts were recorded in this range, so completionRate, dropOffRate and "
+                            + "abandonmentRate have no denominator and cannot be computed. successRate and "
+                            + "failureRate are shares of the ceremonies that completed, not of the ceremonies "
+                            + "that started. Widen the range, or check whether this data predates attempt "
+                            + "tracking."
+                    : "No ceremonies were recorded in this range, so no rate can be computed.");
+            return;
+        }
+
+        analysis.put(Fido2MetricsConstants.SUCCESS_RATE, (double) successfulOperations / totalStarted);
+        analysis.put(Fido2MetricsConstants.FAILURE_RATE, (double) failedOperations / totalStarted);
+
+        List<String> notes = new ArrayList<>();
+
+        if (totalCompleted > totalStarted) {
+            // More ceremonies completed than were seen to start, so some of them started before this
+            // range or before attempts were recorded at all. Completion is capped at the whole
+            // population rather than published above 1.0, and the residual that dropOffRate is inferred
+            // from then carries no information about anyone dropping off.
+            analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 1.0);
+            analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, null);
+            notes.add("More ceremonies completed than were recorded as started, so some completions belong to "
+                    + "starts outside this range: completionRate is capped at 1.0, and dropOffRate, inferred "
+                    + "from what is left over, cannot be computed. successRate and failureRate are reported as "
+                    + "observed and may sum above 1.0. Widen the range for an exact figure.");
+        } else {
+            double completionRate = (double) totalCompleted / totalStarted;
+            analysis.put(Fido2MetricsConstants.COMPLETION_RATE, completionRate);
+            analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 1.0 - completionRate);
+        }
+
+        if (abandonedOperations > totalStarted) {
+            // Same shape of gap, seen from the other side: data recorded before conditional-UI
+            // ceremonies were counted as attempts produces abandonments with no matching ATTEMPT.
+            analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, 1.0);
+            notes.add("More ceremonies were abandoned than were recorded as started, so some abandonments "
+                    + "belong to starts outside this range: abandonmentRate is capped at 1.0. Widen the range "
+                    + "for an exact figure.");
+        } else {
+            analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, (double) abandonedOperations / totalStarted);
+        }
+
+        if (!notes.isEmpty()) {
+            analysis.put(Fido2MetricsConstants.RATE_NOTE, String.join(" ", notes));
+        }
+    }
+
+    /**
+     * Break down attestation rejections by trust diagnostic code over a time range.
+     * <p>
+     * Reads the same metrics store as {@link #getErrorAnalysis}: a rejection is an entry whose error
+     * category is {@link AttestationTrustDiagnostic#CATEGORY}. No new store, no new collection path.
+     *
+     * @param startTime range start
+     * @param endTime   range end
+     * @return counts per reason code and per AAGUID, plus the totals needed to interpret them
+     */
+    public Map<String, Object> getAttestationRejectionAnalysis(LocalDateTime startTime, LocalDateTime endTime) {
+        List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
+
+        List<Fido2MetricsEntry> rejections = entries.stream()
+            .filter(e -> AttestationTrustDiagnostic.CATEGORY.equals(e.getErrorCategory()))
+            .filter(e -> e.getErrorReason() != null)
+            .collect(Collectors.toList());
+
+        Map<String, Long> reasonCodes = rejections.stream()
+            .collect(Collectors.groupingBy(
+                Fido2MetricsEntry::getErrorReason,
+                Collectors.counting()
+            ));
+
+        Map<String, Long> topRejectedAaguids = rejections.stream()
+            .map(this::extractAaguid)
+            .filter(Objects::nonNull)
+            .collect(Collectors.groupingBy(
+                aaguid -> aaguid,
+                Collectors.counting()
+            ));
+
+        long totalRejections = rejections.size();
+
+        long registrationAttempts = entries.stream()
+            .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()))
+            .filter(e -> Fido2MetricsConstants.ATTEMPT.equals(e.getStatus()))
+            .count();
+
+        Map<String, Object> analysis = new HashMap<>();
+        analysis.put(TOTAL_REJECTIONS, totalRejections);
+        analysis.put(REGISTRATION_ATTEMPTS, registrationAttempts);
+        analysis.put(REASON_CODES, reasonCodes);
+        analysis.put(TOP_REJECTED_AAGUIDS, topRejectedAaguids);
+        putRejectionRate(analysis, totalRejections, registrationAttempts);
+
+        return analysis;
+    }
+
+    /**
+     * The rejection rate, expressed against the registration attempts in the same range.
+     * <p>
+     * A rejection and the attempt it belongs to are separate records with their own timestamps, so a
+     * range can contain one without the other. A bare ratio would then publish a rate above 1.0 (the
+     * attempt was recorded just before the range started) or 0.0 against real rejections (no attempts
+     * in range at all). Neither is a number an administrator can act on, so a rate is reported only
+     * when the denominator can carry it, and the reason is stated when it cannot.
+     */
+    private void putRejectionRate(Map<String, Object> analysis, long totalRejections, long registrationAttempts) {
+        if (registrationAttempts <= 0) {
+            analysis.put(REJECTION_RATE, null);
+            analysis.put(REJECTION_RATE_NOTE, totalRejections > 0
+                    ? "No registration attempts were recorded in this range, so the rate cannot be computed. "
+                            + "Widen the range, or check whether these rejections predate attempt tracking."
+                    : "No registration attempts were recorded in this range.");
+        } else if (totalRejections > registrationAttempts) {
+            analysis.put(REJECTION_RATE, 1.0);
+            analysis.put(REJECTION_RATE_NOTE, "Some rejections belong to attempts recorded before this range, "
+                    + "so the rate is capped at 1.0. Widen the range for an exact figure.");
+        } else {
+            analysis.put(REJECTION_RATE, (double) totalRejections / registrationAttempts);
+        }
+    }
+
+    /**
+     * Reads the AAGUID an attestation rejection was recorded against, if any. Rejections that are not
+     * tied to an authenticator model — an attestation format the mode does not permit, for instance —
+     * carry none, and are counted in the reason codes only.
+     */
+    private String extractAaguid(Fido2MetricsEntry entry) {
+        Map<String, Object> additionalData = entry.getAdditionalData();
+        if (additionalData == null) {
+            return null;
+        }
+        Object aaguid = additionalData.get(Fido2MetricsConstants.AAGUID);
+        if (aaguid == null) {
+            return null;
+        }
+        String value = aaguid.toString().trim();
+        return value.isEmpty() ? null : value;
+    }
+
+    /**
      * Calculate aggregation for a specific time period
      */
+    private static long countByStatus(List<Fido2MetricsEntry> entries, String operationType, String status) {
+        return entries.stream()
+                .filter(e -> operationType.equals(e.getOperationType()) && status.equals(e.getStatus()))
+                .count();
+    }
+
+    /**
+     * The denominator a success rate is computed against.
+     * <p>
+     * Normally the ATTEMPT count, which is what every operation writes when it starts. Data recorded
+     * before ATTEMPT entries existed has none, so the completions are used instead rather than
+     * reporting no rate at all for it.
+     */
+    private static long rateDenominator(long attempts, long successes, long failures) {
+        return attempts > 0 ? attempts : successes + failures;
+    }
+
     private Fido2MetricsAggregation calculateAggregation(String aggregationType, String period, LocalDateTime startTime, LocalDateTime endTime) {
         try {
             // Get all entries for the time period
@@ -565,44 +869,47 @@ public class Fido2MetricsService {
             Fido2MetricsAggregation aggregation = new Fido2MetricsAggregation(aggregationType, period, startDate, endDate);
             Map<String, Object> metricsData = new HashMap<>();
 
-            // Calculate registration metrics
-            long registrationAttempts = entries.stream()
-                .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()))
-                .count();
-            
-            long registrationSuccesses = entries.stream()
-                .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()) && 
-                           Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
-                .count();
-            
-            long registrationFailures = registrationAttempts - registrationSuccesses;
-            
+            // Each status is counted directly rather than deriving failures from an operation total.
+            // That total includes the ATTEMPT entry every operation writes when it starts, so deriving
+            // failures from it reported one failure for every success: a completed operation produces
+            // two entries, and total minus successes counted the ATTEMPT as a failure.
+            long registrationAttempts = countByStatus(entries, Fido2MetricsConstants.REGISTRATION,
+                    Fido2MetricsConstants.ATTEMPT);
+            long registrationSuccesses = countByStatus(entries, Fido2MetricsConstants.REGISTRATION,
+                    Fido2MetricsConstants.SUCCESS);
+            long registrationFailures = countByStatus(entries, Fido2MetricsConstants.REGISTRATION,
+                    Fido2MetricsConstants.FAILURE);
+
             metricsData.put(Fido2MetricsConstants.REGISTRATION_ATTEMPTS, registrationAttempts);
             metricsData.put(Fido2MetricsConstants.REGISTRATION_SUCCESSES, registrationSuccesses);
             metricsData.put(Fido2MetricsConstants.REGISTRATION_FAILURES, registrationFailures);
-            
-            if (registrationAttempts > 0) {
-                metricsData.put(Fido2MetricsConstants.REGISTRATION_SUCCESS_RATE, (double) registrationSuccesses / registrationAttempts);
+
+            long registrationDenominator = rateDenominator(registrationAttempts, registrationSuccesses,
+                    registrationFailures);
+            if (registrationDenominator > 0) {
+                metricsData.put(Fido2MetricsConstants.REGISTRATION_SUCCESS_RATE, (double) registrationSuccesses / registrationDenominator);
             }
 
-            // Calculate authentication metrics
-            long authenticationAttempts = entries.stream()
-                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()))
-                .count();
-            
-            long authenticationSuccesses = entries.stream()
-                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()) && 
-                           Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
-                .count();
-            
-            long authenticationFailures = authenticationAttempts - authenticationSuccesses;
-            
+            // Counted the same way, with abandonment kept out of successes and failures alike: a
+            // ceremony that was never completed is neither verified nor server-rejected.
+            long authenticationAttempts = countByStatus(entries, Fido2MetricsConstants.AUTHENTICATION,
+                    Fido2MetricsConstants.ATTEMPT);
+            long authenticationSuccesses = countByStatus(entries, Fido2MetricsConstants.AUTHENTICATION,
+                    Fido2MetricsConstants.SUCCESS);
+            long authenticationFailures = countByStatus(entries, Fido2MetricsConstants.AUTHENTICATION,
+                    Fido2MetricsConstants.FAILURE);
+            long authenticationAbandonments = countByStatus(entries, Fido2MetricsConstants.AUTHENTICATION,
+                    Fido2MetricsConstants.ABANDONED);
+
             metricsData.put(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS, authenticationAttempts);
             metricsData.put(Fido2MetricsConstants.AUTHENTICATION_SUCCESSES, authenticationSuccesses);
             metricsData.put(Fido2MetricsConstants.AUTHENTICATION_FAILURES, authenticationFailures);
-            
-            if (authenticationAttempts > 0) {
-                metricsData.put(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE, (double) authenticationSuccesses / authenticationAttempts);
+            metricsData.put(Fido2MetricsConstants.ABANDONED_OPERATIONS, authenticationAbandonments);
+
+            long authenticationDenominator = rateDenominator(authenticationAttempts, authenticationSuccesses,
+                    authenticationFailures);
+            if (authenticationDenominator > 0) {
+                metricsData.put(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE, (double) authenticationSuccesses / authenticationDenominator);
             }
 
             // Calculate fallback events
@@ -618,8 +925,11 @@ public class Fido2MetricsService {
                 .collect(Collectors.toSet());
             aggregation.setUniqueUsers((long) uniqueUsers.size());
 
-            // Calculate device types
+            // Calculate device types, one per completed ceremony. An ATTEMPT or ABANDONED entry has
+            // no authenticator type to record, so this held by construction; selecting on the
+            // ceremony makes it hold by intent, as it does on the devices endpoint.
             Map<String, Long> deviceTypes = entries.stream()
+                .filter(Fido2MetricsService::isCompletedCeremony)
                 .filter(e -> e.getAuthenticatorType() != null)
                 .collect(Collectors.groupingBy(
                     Fido2MetricsEntry::getAuthenticatorType,
@@ -636,25 +946,20 @@ public class Fido2MetricsService {
                 ));
             metricsData.put(Fido2MetricsConstants.ERROR_COUNTS, errorCounts);
 
-            // Calculate average durations
-            OptionalDouble avgRegistrationDuration = entries.stream()
-                .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()) && 
-                           e.getDurationMs() != null)
-                .mapToLong(Fido2MetricsEntry::getDurationMs)
-                .average();
-            
-            if (avgRegistrationDuration.isPresent()) {
-                metricsData.put(Fido2MetricsConstants.REGISTRATION_AVG_DURATION, avgRegistrationDuration.getAsDouble());
+            // Calculate average durations, over the ceremonies that completed. Abandonment records
+            // the expiration window the ceremony sat open rather than user-perceived latency, and an
+            // aggregation row is written once and never recalculated, so admitting one here would
+            // outlive any later correction.
+            LongSummaryStatistics registrationDurations = completedDurations(entries,
+                    Fido2MetricsConstants.REGISTRATION);
+            if (registrationDurations.getCount() > 0) {
+                metricsData.put(Fido2MetricsConstants.REGISTRATION_AVG_DURATION, registrationDurations.getAverage());
             }
 
-            OptionalDouble avgAuthenticationDuration = entries.stream()
-                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()) && 
-                           e.getDurationMs() != null)
-                .mapToLong(Fido2MetricsEntry::getDurationMs)
-                .average();
-            
-            if (avgAuthenticationDuration.isPresent()) {
-                metricsData.put(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION, avgAuthenticationDuration.getAsDouble());
+            LongSummaryStatistics authenticationDurations = completedDurations(entries,
+                    Fido2MetricsConstants.AUTHENTICATION);
+            if (authenticationDurations.getCount() > 0) {
+                metricsData.put(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION, authenticationDurations.getAverage());
             }
 
             aggregation.setMetricsData(metricsData);
@@ -717,104 +1022,220 @@ public class Fido2MetricsService {
     private Fido2MetricsEntry convertToMetricsEntry(Fido2MetricsData metricsData) {
         Fido2MetricsEntry entry = new Fido2MetricsEntry();
         entry.setId(UUID.randomUUID().toString());
-        
+
         // Convert LocalDateTime to Date for ORM compatibility (already in UTC)
         if (metricsData.getTimestamp() != null) {
             entry.setTimestamp(convertToDate(metricsData.getTimestamp()));
         }
-        
+
+        // Values are shortened to the column widths declared in
+        // static/rdbm/sql_data_types.json. Without this an oversized user agent or
+        // exception message makes the whole INSERT fail and the entry is lost.
+        MetricsFieldTruncation truncation = new MetricsFieldTruncation();
+
         // Essential fields - always set
-        setEssentialFields(entry, metricsData);
-        
+        setEssentialFields(entry, metricsData, truncation);
+
         // Optional fields - only set if available
-        setOptionalFields(entry, metricsData);
-        
+        setOptionalFields(entry, metricsData, truncation);
+
         // Device info - only set if available and non-empty
-        setDeviceInfo(entry, metricsData);
-        
+        setDeviceInfo(entry, metricsData, truncation);
+
+        // Native-client telemetry (#14607) - only set if available
+        setNativeClientTelemetry(entry, metricsData, truncation);
+
+        if (truncation.hasTruncations()) {
+            log.warn("FIDO2 metrics entry {} had oversized field(s) shortened to fit the schema: {}",
+                    entry.getId(), truncation.describe());
+        }
+
         return entry;
     }
-    
+
     /**
      * Set essential fields that are always present
      */
-    private void setEssentialFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
-        entry.setUserId(metricsData.getUserId());
-        entry.setUsername(metricsData.getUsername());
-        entry.setOperationType(metricsData.getOperationType());
-        entry.setStatus(metricsData.getOperationStatus());
+    private void setEssentialFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData,
+            MetricsFieldTruncation truncation) {
+        entry.setUserId(truncation.apply("userId", metricsData.getUserId(),
+                Fido2MetricsConstants.MAX_LENGTH_USER_ID));
+        entry.setUsername(truncation.apply("username", metricsData.getUsername(),
+                Fido2MetricsConstants.MAX_LENGTH_USERNAME));
+        entry.setOperationType(truncation.apply("operationType", metricsData.getOperationType(),
+                Fido2MetricsConstants.MAX_LENGTH_OPERATION_TYPE));
+        entry.setStatus(truncation.apply("status", metricsData.getOperationStatus(),
+                Fido2MetricsConstants.MAX_LENGTH_STATUS));
     }
-    
+
     /**
      * Set optional fields that may be null or empty
      */
-    private void setOptionalFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
+    private void setOptionalFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData,
+            MetricsFieldTruncation truncation) {
+        // Metric classification
+        setIfNotEmpty(metricsData.getMetricType(), "metricType",
+                Fido2MetricsConstants.MAX_LENGTH_METRIC_TYPE, truncation, entry::setMetricType);
+
         // Performance metrics
         if (metricsData.getDurationMs() != null) {
             entry.setDurationMs(metricsData.getDurationMs());
         }
-        
+
         // Authenticator info
-        setIfNotEmpty(metricsData.getAuthenticatorType(), entry::setAuthenticatorType);
-        
+        setIfNotEmpty(metricsData.getAuthenticatorType(), "authenticatorType",
+                Fido2MetricsConstants.MAX_LENGTH_AUTHENTICATOR_TYPE, truncation, entry::setAuthenticatorType);
+
         // Error info
-        setIfNotEmpty(metricsData.getErrorReason(), entry::setErrorReason);
-        setIfNotEmpty(metricsData.getErrorCategory(), entry::setErrorCategory);
-        
+        setIfNotEmpty(metricsData.getErrorReason(), "errorReason",
+                Fido2MetricsConstants.MAX_LENGTH_ERROR_REASON, truncation, entry::setErrorReason);
+        setIfNotEmpty(metricsData.getErrorCategory(), "errorCategory",
+                Fido2MetricsConstants.MAX_LENGTH_ERROR_CATEGORY, truncation, entry::setErrorCategory);
+
         // Fallback info
-        setIfNotEmpty(metricsData.getFallbackMethod(), entry::setFallbackMethod);
-        setIfNotEmpty(metricsData.getFallbackReason(), entry::setFallbackReason);
-        
+        setIfNotEmpty(metricsData.getFallbackMethod(), "fallbackMethod",
+                Fido2MetricsConstants.MAX_LENGTH_FALLBACK_METHOD, truncation, entry::setFallbackMethod);
+        setIfNotEmpty(metricsData.getFallbackReason(), "fallbackReason",
+                Fido2MetricsConstants.MAX_LENGTH_FALLBACK_REASON, truncation, entry::setFallbackReason);
+
         // Network info
-        setIfNotEmpty(metricsData.getIpAddress(), entry::setIpAddress);
-        setIfNotEmpty(metricsData.getUserAgent(), entry::setUserAgent);
-        
+        setIfNotEmpty(metricsData.getIpAddress(), "ipAddress",
+                Fido2MetricsConstants.MAX_LENGTH_IP_ADDRESS, truncation, entry::setIpAddress);
+        setIfNotEmpty(metricsData.getUserAgent(), "userAgent",
+                Fido2MetricsConstants.MAX_LENGTH_USER_AGENT, truncation, entry::setUserAgent);
+
         // Session info
-        setIfNotEmpty(metricsData.getSessionId(), entry::setSessionId);
-        
+        setIfNotEmpty(metricsData.getSessionId(), "sessionId",
+                Fido2MetricsConstants.MAX_LENGTH_SESSION_ID, truncation, entry::setSessionId);
+
+        // Caller-supplied correlation ID (#14607), sibling to sessionId - kept as its own top-level
+        // field rather than left buried inside the nativeClientTelemetry blob, so it stays queryable.
+        setIfNotEmpty(metricsData.getClientCorrelationId(), "clientCorrelationId",
+                Fido2MetricsConstants.MAX_LENGTH_CLIENT_CORRELATION_ID, truncation, entry::setClientCorrelationId);
+
         // Cluster info
-        setIfNotEmpty(metricsData.getNodeId(), entry::setNodeId);
-    }
-    
-    /**
-     * Set field value if string is not null and not empty
-     */
-    private void setIfNotEmpty(String value, java.util.function.Consumer<String> setter) {
-        if (value != null && !value.trim().isEmpty()) {
-            setter.accept(value);
+        setIfNotEmpty(metricsData.getNodeId(), "nodeId",
+                Fido2MetricsConstants.MAX_LENGTH_NODE_ID, truncation, entry::setNodeId);
+
+        // Free-form detail, persisted as JSON on the existing jansFido2MetricsAdditionalData attribute.
+        // Attestation rejections use it to carry the AAGUID they concern.
+        if (metricsData.getAdditionalData() != null && !metricsData.getAdditionalData().isEmpty()) {
+            entry.setAdditionalData(metricsData.getAdditionalData());
         }
     }
-    
+
+    /**
+     * Set field value if string is not null and not empty, shortened to the column width
+     */
+    private void setIfNotEmpty(String value, String fieldName, int maxLength,
+            MetricsFieldTruncation truncation, java.util.function.Consumer<String> setter) {
+        if (value != null && !value.trim().isEmpty()) {
+            setter.accept(truncation.apply(fieldName, value, maxLength));
+        }
+    }
+
     /**
      * Set device info if available and non-empty
      */
-    private void setDeviceInfo(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
+    private void setDeviceInfo(Fido2MetricsEntry entry, Fido2MetricsData metricsData,
+            MetricsFieldTruncation truncation) {
         if (metricsData.getDeviceInfo() == null) {
             return;
         }
-        
+
         Fido2MetricsEntry.DeviceInfo deviceInfo = new Fido2MetricsEntry.DeviceInfo();
         boolean hasDeviceInfo = false;
-        
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowser(), deviceInfo::setBrowser);
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowserVersion(), deviceInfo::setBrowserVersion);
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOperatingSystem(), deviceInfo::setOs);
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOsVersion(), deviceInfo::setOsVersion);
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getDeviceType(), deviceInfo::setDeviceType);
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getUserAgent(), deviceInfo::setUserAgent);
-        
+
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowser(), "deviceInfo.browser",
+                Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD, truncation, deviceInfo::setBrowser);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowserVersion(), "deviceInfo.browserVersion",
+                Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD, truncation, deviceInfo::setBrowserVersion);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOperatingSystem(), "deviceInfo.os",
+                Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD, truncation, deviceInfo::setOs);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOsVersion(), "deviceInfo.osVersion",
+                Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD, truncation, deviceInfo::setOsVersion);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getDeviceType(), "deviceInfo.deviceType",
+                Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD, truncation, deviceInfo::setDeviceType);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getUserAgent(), "deviceInfo.userAgent",
+                Fido2MetricsConstants.MAX_LENGTH_USER_AGENT, truncation, deviceInfo::setUserAgent);
+
         if (hasDeviceInfo) {
             entry.setDeviceInfo(deviceInfo);
         }
     }
-    
+
     /**
-     * Set device field if value is not null and not empty
+     * Set device field if value is not null and not empty, shortened to the column width
      * @return true if field was set, false otherwise
      */
-    private boolean setDeviceField(String value, java.util.function.Consumer<String> setter) {
+    private boolean setDeviceField(String value, String fieldName, int maxLength,
+            MetricsFieldTruncation truncation, java.util.function.Consumer<String> setter) {
         if (value != null && !value.trim().isEmpty()) {
-            setter.accept(value);
+            setter.accept(truncation.apply(fieldName, value, maxLength));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Set native-client telemetry (#14607) if available. {@code NativeClientTelemetry} is the same
+     * class on both {@code Fido2MetricsData} (transient) and {@code Fido2MetricsEntry} (persisted) -
+     * unlike deviceInfo, which has two separate classes - so this builds a fresh, truncated copy
+     * rather than mutating the caller's instance.
+     */
+    private void setNativeClientTelemetry(Fido2MetricsEntry entry, Fido2MetricsData metricsData,
+            MetricsFieldTruncation truncation) {
+        NativeClientTelemetry source = metricsData.getNativeClientTelemetry();
+        if (source == null) {
+            return;
+        }
+
+        NativeClientTelemetry telemetry = new NativeClientTelemetry();
+        boolean hasTelemetry = false;
+
+        hasTelemetry |= setTelemetryField(source.getClientCorrelationId(), "telemetry.clientCorrelationId",
+                truncation, telemetry::setClientCorrelationId);
+        hasTelemetry |= setTelemetryField(source.getPlatform(), "telemetry.platform",
+                truncation, telemetry::setPlatform);
+        hasTelemetry |= setTelemetryField(source.getNativeApi(), "telemetry.nativeApi",
+                truncation, telemetry::setNativeApi);
+        hasTelemetry |= setTelemetryField(source.getOsVersion(), "telemetry.osVersion",
+                truncation, telemetry::setOsVersion);
+        hasTelemetry |= setTelemetryField(source.getPlayServicesVersion(), "telemetry.playServicesVersion",
+                truncation, telemetry::setPlayServicesVersion);
+        hasTelemetry |= setTelemetryField(source.getDeviceManufacturer(), "telemetry.deviceManufacturer",
+                truncation, telemetry::setDeviceManufacturer);
+        hasTelemetry |= setTelemetryField(source.getDeviceModel(), "telemetry.deviceModel",
+                truncation, telemetry::setDeviceModel);
+        hasTelemetry |= setTelemetryField(source.getCredentialProvider(), "telemetry.credentialProvider",
+                truncation, telemetry::setCredentialProvider);
+        hasTelemetry |= setTelemetryField(source.getFlowContext(), "telemetry.flowContext",
+                truncation, telemetry::setFlowContext);
+        hasTelemetry |= setTelemetryField(source.getAppVersion(), "telemetry.appVersion",
+                truncation, telemetry::setAppVersion);
+        hasTelemetry |= setTelemetryField(source.getDistributionChannel(), "telemetry.distributionChannel",
+                truncation, telemetry::setDistributionChannel);
+        hasTelemetry |= setTelemetryField(source.getLastClientErrorCode(), "telemetry.lastClientErrorCode",
+                truncation, telemetry::setLastClientErrorCode);
+
+        if (source.getDeviceSecure() != null) {
+            telemetry.setDeviceSecure(source.getDeviceSecure());
+            hasTelemetry = true;
+        }
+
+        if (hasTelemetry) {
+            entry.setNativeClientTelemetry(telemetry);
+        }
+    }
+
+    /**
+     * Set a telemetry field if value is not null and not empty, shortened to the policy cap
+     * @return true if field was set, false otherwise
+     */
+    private boolean setTelemetryField(String value, String fieldName,
+            MetricsFieldTruncation truncation, java.util.function.Consumer<String> setter) {
+        if (value != null && !value.trim().isEmpty()) {
+            setter.accept(truncation.apply(fieldName, value, Fido2MetricsConstants.MAX_LENGTH_NATIVE_TELEMETRY_FIELD));
             return true;
         }
         return false;

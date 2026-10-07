@@ -108,10 +108,6 @@
                             "type": "string",
                             "pattern": "^[a-z]+$"
                         },
-                        "cnGoogleSecretManagerPassPhrase": {
-                            "description": "Passphrase for Janssen secret in Google Secret Manager. This is used for encrypting and decrypting data from the Google Secret Manager. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
-                            "$ref": "#/definitions/password"
-                        },
                         "cnMaxRamPercent": {
                             "description": "Value passed to Java option -XX:MaxRAMPercentage",
                             "type": "string",
@@ -420,6 +416,14 @@
                                     "description": "authzen config ingress resource additional annotations.",
                                     "type": "object"
                                 },
+                                "oauthServerConfigLabels": {
+                                    "description": "oauth-authorization-server ingress resource labels. key app is taken",
+                                    "type": "object"
+                                },
+                                "oauthServerAdditionalAnnotations": {
+                                    "description": "oauth-authorization-server ingress resource additional annotations.",
+                                    "type": "object"
+                                },
                                 "authServerLabels": {
                                     "description": "Auth server config ingress resource labels. key app is taken",
                                     "type": "object"
@@ -462,6 +466,10 @@
                                 },
                                 "authzenConfigEnabled": {
                                     "description": "Enable endpoint /.well-known/authzen-configuration",
+                                    "type": "boolean"
+                                },
+                                "oauthServerConfigEnabled": {
+                                    "description": "Enable endpoint /.well-known/oauth-authorization-server",
                                     "type": "boolean"
                                 }
                             }
@@ -513,7 +521,7 @@
                 "cloud": {
                     "type": "object",
                     "properties": {
-                        "testEnviroment": {
+                        "testEnvironment": {
                             "description": "Boolean flag if enabled will strip resources requests and limits from all services.",
                             "type": "boolean"
                         }

@@ -8,11 +8,14 @@
 //! Blocking client of Cedarling
 
 use crate::{
-    AuthorizeError, AuthorizeResult, BootstrapConfig, DataApi, DataEntry, DataError,
-    DataStoreStats, EntityData, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult,
-    PolicyMetadata, RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
+    AuthorizeError, AuthorizeResult, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
+    BatchAuthorizeUnsignedRequest, BatchItemError, BootstrapConfig, DataApi, DataEntry, DataError,
+    DataStoreStats, EntityData, InitCedarlingError, LogStorage, MetricsError, MetricsSnapshot,
+    MultiIssuerAuthorizeResult, PolicyId, PolicyMetadata, RequestUnsigned, TokenInput,
+    TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::runtime::Runtime;
@@ -21,8 +24,8 @@ use tokio::runtime::Runtime;
 /// It is safe to share between threads.
 #[derive(Clone)]
 pub struct Cedarling {
-    runtime: Arc<Runtime>,
     instance: AsyncCedarling,
+    runtime: Arc<Runtime>,
 }
 
 impl Cedarling {
@@ -54,7 +57,21 @@ impl Cedarling {
         &self,
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        self.instance.authz.authorize_unsigned(&request)
+        self.instance.authz.load().authorize_unsigned(&request)
+    }
+
+    /// Authorize a batch of unsigned requests. See
+    /// [`crate::Cedarling::authorize_unsigned_batch`] for full semantics.
+    #[allow(clippy::needless_pass_by_value)]
+    pub fn authorize_unsigned_batch(
+        &self,
+        request: BatchAuthorizeUnsignedRequest,
+    ) -> Result<BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>, AuthorizeError>
+    {
+        self.instance
+            .authz
+            .load()
+            .authorize_unsigned_batch(&request)
     }
 
     /// Authorize multi-issuer request.
@@ -64,7 +81,24 @@ impl Cedarling {
         &self,
         request: crate::authz::request::AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
-        self.instance.authz.authorize_multi_issuer(&request)
+        // Route through the async client so the registered custom token processor
+        // is picked up; drive it to completion on the owned runtime.
+        self.runtime
+            .block_on(self.instance.authorize_multi_issuer(request))
+    }
+
+    /// Authorize a batch of multi-issuer requests. See
+    /// [`crate::Cedarling::authorize_multi_issuer_batch`] for full semantics.
+    #[allow(clippy::needless_pass_by_value)]
+    pub fn authorize_multi_issuer_batch(
+        &self,
+        request: BatchAuthorizeMultiIssuerRequest,
+    ) -> Result<
+        BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>,
+        AuthorizeError,
+    > {
+        self.runtime
+            .block_on(self.instance.authorize_multi_issuer_batch(request))
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -77,6 +111,7 @@ impl Cedarling {
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
         self.instance
             .authz
+            .load()
             .get_matching_policies_unsigned(principal, actions, resources)
     }
 
@@ -88,14 +123,88 @@ impl Cedarling {
         actions: &[String],
         resources: &[EntityData],
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
-        self.instance
-            .authz
-            .get_matching_policies_multi_issuer(tokens, actions, resources)
+        self.runtime.block_on(
+            self.instance
+                .get_matching_policies_multi_issuer(tokens, actions, resources),
+        )
+    }
+
+    /// Merge the annotations (`@key("value")`) of the given policies into a single map.
+    ///
+    /// Lossy on duplicate keys across policies; see [`AsyncCedarling::annotations_map`]
+    /// for details and the policy-store refresh caveat.
+    pub fn annotations_map<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, String> {
+        self.instance.authz.load().annotations_map(ids)
+    }
+
+    /// Collect every value of the annotation `key` across the given policies,
+    /// preserving duplicates; see [`AsyncCedarling::annotation_values`].
+    pub fn annotation_values<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+        key: &str,
+    ) -> Vec<String> {
+        self.instance.authz.load().annotation_values(ids, key)
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID;
+    /// see [`AsyncCedarling::annotations_by_policy`].
+    pub fn annotations_by_policy<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        self.instance.authz.load().annotations_by_policy(ids)
+    }
+
+    /// Register (or clear) the custom token processor. See
+    /// [`crate::Cedarling::set_custom_token_processor`].
+    ///
+    /// A processor's `process` runs inside this client's `block_on`, so it must not
+    /// re-enter **any** blocking Cedarling method that itself calls `block_on`
+    /// (`authorize_multi_issuer`, `authorize_multi_issuer_batch`,
+    /// `get_matching_policies_multi_issuer`, `shut_down`) including via a different
+    /// [`Cedarling`] clone, since `Clone` shares the runtime. Doing so panics with
+    /// "Cannot start a runtime from within a runtime". A processor should be
+    /// self-contained or drive its own executor.
+    pub fn set_custom_token_processor(
+        &self,
+        processor: Option<Arc<dyn crate::CustomTokenProcessor>>,
+    ) {
+        self.instance.set_custom_token_processor(processor);
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub fn shut_down(&self) {
         self.runtime.block_on(self.instance.shut_down());
+    }
+
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval.
+    ///
+    /// Only available when `CEDARLING_METRICS_COLLECTION` is enabled at bootstrap
+    /// and no Lock telemetry ticker owns the collector. Returns
+    /// [`MetricsError::LockTelemetry`] whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has
+    /// no telemetry endpoint and metrics are not shipped anywhere.
+    ///
+    /// The returned `interval` is a [`std::time::Duration`] with sub-second
+    /// precision, and serializes as fractional seconds under the
+    /// `interval_secs` key.
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
+        self.instance.drain_metrics()
+    }
+
+    /// Returns the ID of the currently published policy store, if it carries one.
+    ///
+    /// `None` when the store carries no ID. The value is an opaque,
+    /// source-dependent string: do not parse it or assume hex. It may change
+    /// after a background refresh.
+    #[must_use]
+    pub fn policy_store_id(&self) -> Option<String> {
+        self.instance.policy_store_id()
     }
 }
 

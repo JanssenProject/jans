@@ -424,6 +424,11 @@ public enum RegisterRequestParam {
     TOKEN_EXCHANGE_SCRIPT_DNS("token_exchange_script_dns"),
 
     /**
+     * list of identity assertion (ID-JAG) script dns
+     */
+    IDENTITY_ASSERTION_SCRIPT_DNS("id_jag_script_dns"),
+
+    /**
      * list of consent gathering script dns
      */
     CONSENT_GATHERING_SCRIPT_DNS("consent_gathering_script_dns"),
@@ -521,7 +526,21 @@ public enum RegisterRequestParam {
 
     DEFAULT_PROMPT_LOGIN("default_prompt_login"),
 
-    AUTHORIZED_ACR_VALUES("authorized_acr_values");
+    AUTHORIZED_ACR_VALUES("authorized_acr_values"),
+
+    /**
+     * The SPIFFE ID of the client (e.g. spiffe://example.org/my-oauth-client), used by SPIFFE-based
+     * client authentication (draft-ietf-oauth-spiffe-client-auth). May have a trailing "/*" for
+     * path-segment prefix matching against presented SVIDs.
+     */
+    SPIFFE_ID("spiffe_id"),
+
+    /**
+     * URL of the SPIFFE Bundle Endpoint for the client's trust domain, per
+     * draft-ietf-oauth-spiffe-client-auth. Informational only: the authorization server validates
+     * SVIDs against its own admin-configured trust bundle mapping, not this client-supplied value.
+     */
+    SPIFFE_BUNDLE_ENDPOINT("spiffe_bundle_endpoint");
 
     /**
      * Parameter name

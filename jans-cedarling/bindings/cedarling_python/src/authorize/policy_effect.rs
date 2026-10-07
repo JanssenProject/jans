@@ -4,6 +4,9 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
+
+// pyo3 `from_py_object` expansion clones Copy types
+#![allow(clippy::clone_on_copy)]
 use pyo3::prelude::*;
 
 /// PolicyEffect
@@ -16,7 +19,7 @@ use pyo3::prelude::*;
 /// - Permit: The policy permits the request.
 /// - Forbid: The policy forbids the request.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[pyo3(name = "PolicyEffect")]
 pub enum PolicyEffect {
     /// The policy permits the request.

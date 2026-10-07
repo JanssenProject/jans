@@ -108,12 +108,16 @@ func resourceLoggingConfigurationUpdate(ctx context.Context, d *schema.ResourceD
 
 	c := meta.(*jans.Client)
 
-	var loggingConfig jans.LoggingConfiguration
-	if err := fromSchemaResource(d, &loggingConfig); err != nil {
+	loggingConfig, err := c.GetLoggingConfiguration(ctx)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if _, err := c.UpdateLoggingConfiguration(ctx, &loggingConfig); err != nil {
+	if err := mergeFromSchemaResource(d, loggingConfig); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if _, err := c.UpdateLoggingConfiguration(ctx, loggingConfig); err != nil {
 		return diag.FromErr(err)
 	}
 

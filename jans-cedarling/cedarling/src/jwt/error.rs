@@ -23,31 +23,13 @@ pub enum JwtProcessingError {
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum JwtServiceInitError {
+pub(crate) enum JwtServiceInitError {
     #[error(
         "the JWT service is configured to validate signed JWTs but no algorithms were provided"
     )]
     NoSupportedAlgorithms,
-    #[error(
-        "Failed to initialize Key Service for JwtService due to a conflictig config: both a local \
-         JWKS and trusted issuers was provided."
-    )]
-    ConflictingJwksConfig,
-    #[error(
-        "Failed to initialize Key Service for JwtService due to a missing config: no local JWKS \
-         or trusted issuers was provided."
-    )]
-    MissingJwksConfig,
-    #[error("Encountered an unsupported algorithm in the config: {0}")]
-    UnsupportedAlgorithm(String),
-    #[error("failed to parse the openid_configuration_endpoint for the trusted issuer `{0}`: {1}")]
-    ParseOidcUrl(String, url::ParseError),
     #[error("failed to prepare keys for the KeyService: {0}")]
     PrepareKeys(#[from] key_service::KeyServiceError),
-    #[error(
-        "the key service has no decoding keys. please provide a local JWKS or make sure your policy store has trustsed issuers"
-    )]
-    KeyServiceMissingKeys,
     #[error("failed to GET the openid configuration for the trusted issuers: {0}")]
     GetOpenidConfigurations(#[from] HttpError),
     #[error("failed to update JWT status list: {0}")]
@@ -59,7 +41,7 @@ pub enum JwtServiceInitError {
 }
 
 #[derive(Debug, derive_more::From)]
-pub struct AggregatedTrustedIssuerError(pub Vec<JwtServiceInitError>);
+pub(crate) struct AggregatedTrustedIssuerError(pub Vec<JwtServiceInitError>);
 
 impl std::fmt::Display for AggregatedTrustedIssuerError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

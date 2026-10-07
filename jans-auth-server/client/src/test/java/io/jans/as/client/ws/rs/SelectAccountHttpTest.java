@@ -97,7 +97,7 @@ public class SelectAccountHttpTest extends BaseTest {
         assertTrue(currentSessions.contains(account2SessionId));
 
         output("5. Check that we have 2 buttons for Account 1 and Account 2");
-        final SelectPage selectPage = SelectPage.navigate(pageConfig, authorizationEndpoint + "?" + authorizationRequest.getQueryString());
+        final SelectPage selectPage = SelectPage.navigate(pageConfig, authorizationRequestUrl(authorizationEndpoint, authorizationRequest));
         assertNotNull(selectPage.getAccountButton("Jans Auth Test User"));
         assertNotNull(selectPage.getAccountButton("Jans Auth Test User2"));
 
@@ -131,7 +131,7 @@ public class SelectAccountHttpTest extends BaseTest {
         authorizationRequest.setState(state);
         authorizationRequest.setPrompts(Lists.newArrayList(Prompt.SELECT_ACCOUNT));
 
-        String authorizationRequestUrl = authorizationEndpoint + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(authorizationEndpoint, authorizationRequest);
 
         final SelectPage selectPage = SelectPage.navigate(pageConfig, authorizationRequestUrl);
 

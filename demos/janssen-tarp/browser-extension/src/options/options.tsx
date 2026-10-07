@@ -33,9 +33,9 @@ const Options = () => {
     });
   }, [dataChanged]);
 
-  function handleDataChange() {
+  const handleDataChange = React.useCallback(() => {
     setDataChanged(true);
-  }
+  }, []);
 
   function renderPage({ optionType, data }: { optionType: string; data: Record<string, unknown> }) {
     switch (optionType) {

@@ -64,11 +64,27 @@
     "fields": [
       "jansAppTyp",
       "jansMetricTyp",
+      "jansMetricSubTyp",
       "jansStartDate",
       "jansEndDate"
     ],
     "custom": [
-      "`del`, `exp`"
+      "`del`, `exp`",
+      "`jansMetricTyp`, `jansStartDate`, `jansAppTyp`"
+    ]
+  },
+  "jansMetricAggregation": {
+    "fields": [
+      "jansAggregationType",
+      "jansAppTyp",
+      "jansMetricTyp",
+      "jansMetricSubTyp",
+      "jansStartDate",
+      "jansEndDate"
+    ],
+    "custom": [
+      "`del`, `exp`",
+      "`jansAggregationType`, `jansAppTyp`, `jansMetricTyp`, `jansStartDate`"
     ]
   },
   "jansToken": {
@@ -248,6 +264,37 @@
   "jansHealthEntry": {
     "fields": [
       "eventTime"
+    ]
+  },
+  "jansTraceRecord": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceRecordId",
+      "jansTraceExecKey",
+      "jansTraceExecId",
+      "jansTraceChainPosKey",
+      "jansTraceReceiptSeq",
+      "jansTraceCapKeys",
+      "jansTraceTokenKeys"
+    ]
+  },
+  "jansTraceReceipt": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceReceiptSeq",
+      "jansTraceReceiptState"
+    ]
+  },
+  "jansTraceChain": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceProducerId"
+    ]
+  },
+  "jansTraceProducerKey": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceProducerId"
     ]
   },
   "__common__": {

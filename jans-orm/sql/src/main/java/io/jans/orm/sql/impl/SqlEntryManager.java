@@ -44,9 +44,11 @@ import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.PasswordAttributeData;
 import io.jans.orm.model.PersistenceMetadata;
+import io.jans.orm.model.SearchProjection;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.reflect.property.PropertyAnnotation;
+import io.jans.orm.reflect.property.Setter;
 import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.sql.model.ConvertedExpression;
@@ -196,10 +198,11 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
                 AttributeData resultAttributeData;
                 if (Boolean.TRUE.equals(multiValued)) {
-                	resultAttributeData = new AttributeData(toInternalAttribute(baseObjectClass, attributeName), realValues, multiValued, attribute.getJsonValue());
+                	resultAttributeData = new AttributeData(toInternalAttribute(baseObjectClass, attributeName), realValues, multiValued, attribute.getJsonValue(), attribute.getBinaryValue());
                 } else {
                 	resultAttributeData = new AttributeData(toInternalAttribute(baseObjectClass, attributeName), realValues[0]);
                 	resultAttributeData.setJsonValue(attribute.getJsonValue());
+                	resultAttributeData.setBinaryValue(attribute.getBinaryValue());
                 }
 
                 resultAttributes.add(resultAttributeData);
@@ -236,11 +239,13 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 Object[] attributeValues = null;
                 Boolean multiValued = null;
                 Boolean jsonValue = null;
+                Boolean binaryValue = null;
                 if (attribute != null) {
                     attributeName = attribute.getName();
                     attributeValues = attribute.getValues();
                     multiValued = attribute.getMultiValued();
                     jsonValue = attribute.getJsonValue();
+                    binaryValue = attribute.getBinaryValue();
                 }
 
                 String oldAttributeName = null;
@@ -254,16 +259,14 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 AttributeModificationType modificationType = attributeDataModification.getModificationType();
 				if ((AttributeModificationType.ADD == modificationType) ||
                 	(AttributeModificationType.FORCE_UPDATE == modificationType)) {
-                    modification = createModification(attribute, modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, attributeValues);
+                    modification = createModification(attribute, modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
                 } else {
                     if ((AttributeModificationType.REMOVE == modificationType)) {
-                		if ((attribute == null) && isEmptyAttributeValues(oldAttribute)) {
-							// It's RDBS case. We don't need to set null to already empty table cell
-                			continue;
-                		}
-                		modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, oldAttributeValues);
+                		// REMOVE for already empty table cells not reaches this method. For entities with
+                		// forceUpdate DB state is unknown, hence REMOVE should set null to table cell
+                		modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, binaryValue, oldAttributeValues);
                     } else if ((AttributeModificationType.REPLACE == modificationType)) {
-                        modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, attributeValues);
+                        modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
                     }
                 }
 
@@ -567,6 +570,97 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 		return getOperationService().search(key, objectClass, expression, scope, toInternalAttributes(objectClass, attributes), orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
 	}
 
+    @Override
+    public <T> PagedResult<EntryData> findAggregatedEntries(String baseDN, Class<T> entryClass, Filter filter,
+            SearchProjection projection, int start, int count) {
+        if (StringHelper.isEmptyString(baseDN)) {
+            throw new MappingException("Base DN to find entries is null");
+        }
+        if (projection == null) {
+            throw new MappingException("Projection to find entries is null");
+        }
+
+        return findAggregatedEntriesImpl(baseDN, entryClass, filter, projection, SearchReturnDataType.SEARCH_COUNT, start, count);
+    }
+
+    @Override
+    public <T> List<T> findDistinctEntries(String baseDN, Class<T> entryClass, Filter filter,
+            SearchProjection projection, int start, int count) {
+        if (StringHelper.isEmptyString(baseDN)) {
+            throw new MappingException("Base DN to find entries is null");
+        }
+        if ((projection == null) || !projection.isDistinct() || projection.hasAggregates()) {
+            throw new MappingException("findDistinctEntries requires a distinct-only projection");
+        }
+
+        PagedResult<EntryData> searchResult = findAggregatedEntriesImpl(baseDN, entryClass, filter, projection,
+                SearchReturnDataType.SEARCH, start, count);
+
+        return createProjectionEntities(entryClass, searchResult.getEntries());
+    }
+
+    protected <T> PagedResult<EntryData> findAggregatedEntriesImpl(String baseDN, Class<T> entryClass, Filter filter,
+            SearchProjection projection, SearchReturnDataType returnDataType, int start, int count) {
+        checkEntryClass(entryClass, false);
+        String[] objectClasses = getTypeObjectClasses(entryClass);
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+
+        Filter searchFilter;
+        if (objectClasses.length > 0) {
+            searchFilter = addObjectClassFilter(filter, objectClasses);
+        } else {
+            searchFilter = filter;
+        }
+
+        Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
+
+        String key = toSQLKey(baseDN).getKey();
+
+        ConvertedExpression convertedExpression;
+        try {
+            convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
+        } catch (SearchException ex) {
+            throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter), ex);
+        }
+
+        // Deliberately no default sort and no default return attributes: both would violate
+        // strict GROUP BY modes; ordering is derived from the projection itself
+        try {
+            PagedResult<EntryData> searchResult = getOperationService().searchAggregated(key,
+                    getBaseObjectClass(entryClass, objectClasses), convertedExpression, projection, returnDataType, start, count);
+
+            if (searchResult == null) {
+                throw new EntryPersistenceException(String.format("Failed to find aggregated entries with key: '%s', expression: '%s'", key, convertedExpression));
+            }
+
+            return searchResult;
+        } catch (SearchException ex) {
+            throw new EntryPersistenceException(String.format("Failed to find aggregated entries with key: '%s'", key), ex);
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to find aggregated entries with key: '%s', expression: '%s'", key, toExpressionForException(convertedExpression, searchFilter)), ex);
+        }
+    }
+
+    private <T> List<T> createProjectionEntities(Class<T> entryClass, List<EntryData> rows) {
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+
+        // Projection rows have no DN; key them synthetically for bean creation and erase the DN afterwards
+        Map<String, List<AttributeData>> entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(rows.size());
+        int rowIndex = 0;
+        for (EntryData row : rows) {
+            entriesAttributes.put("_row_" + rowIndex++, row.getAttributeData());
+        }
+
+        List<T> entries = createEntities(entryClass, propertiesAnnotations, entriesAttributes, false);
+
+        Setter dnSetter = getSetter(entryClass, getDNPropertyName(entryClass));
+        for (T entry : entries) {
+            dnSetter.set(entry, null);
+        }
+
+        return entries;
+    }
+
     protected <T> List<T> createEntities(String baseDN, Class<T> entryClass, PagedResult<EntryData> searchResult) {
         ParsedKey keyWithInum = toSQLKey(baseDN);
         List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
@@ -734,7 +828,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         return searchResult.getTotalEntriesCount();
     }
 
-    private AttributeDataModification createModification(final AttributeData attribute, final AttributeModificationType type, final String attributeName, final Boolean multiValued, final Boolean jsonValue, final Object... attributeValues) {
+    private AttributeDataModification createModification(final AttributeData attribute, final AttributeModificationType type, final String attributeName, final Boolean multiValued, final Boolean jsonValue, final Boolean binaryValue, final Object... attributeValues) {
         String realAttributeName = attributeName;
 
         Object[] realValues = attributeValues;
@@ -743,14 +837,14 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         }
 
         escapeValues(realValues);
-        
+
         if (Boolean.TRUE.equals(multiValued)) {
-            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues, multiValued, jsonValue));
+            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues, multiValued, jsonValue, binaryValue));
         } else {
         	if ((realValues == null) || (realValues.length == 0)) {
                 return new AttributeDataModification(type, new AttributeData(realAttributeName, null));
         	}
-            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues[0], null, jsonValue));
+            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues[0], null, jsonValue, binaryValue));
         }
     }
 
