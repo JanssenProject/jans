@@ -1133,7 +1133,11 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        krakend-builder-image: ['builder:2.9.0', 'builder:2.9.0-linux-generic']
+        include:
+          - krakend-builder-image: 'builder:2.9.0'
+            krakend-builder-digest: 'sha256:c885b27a4ce1a30202d60548fb0083cdd0d1831df801b4601e95b0fb6d612a7d'
+          - krakend-builder-image: 'builder:2.9.0-linux-generic'
+            krakend-builder-digest: 'sha256:3633ef6815d716d42eeb38149aa5dc02eec4ab0e7b276811549b0e2dc5513584'
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -1181,13 +1185,13 @@ jobs:
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
         wget https://github.com/JanssenProject/jans/releases/download/${{ env.VERSION }}/libcedarling_go-${{ env.TAG }}_x86-64.so -O libcedarling_go.so
-        docker run --rm -v "$PWD:/app" -w /app krakend/"${{ matrix.krakend-builder-image }}" sh -c "${{ env.ADD_GIT }} && go build -buildmode=plugin -o cedarling-krakend-amd64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so ."
+        docker run --rm -v "$PWD:/app" -w /app krakend/"${{ matrix.krakend-builder-image }}@${{ matrix.krakend-builder-digest }}" sh -c "${{ env.ADD_GIT }} && go build -buildmode=plugin -o cedarling-krakend-amd64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so ."
         rm libcedarling_go.so
     - name: Build plugin for ARM64
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
         wget https://github.com/JanssenProject/jans/releases/download/${{ env.VERSION }}/libcedarling_go-${{ env.TAG }}_arm64.so -O libcedarling_go.so
-        docker run --rm -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=${{ env.CC }}" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" sh -c "${{ env.ADD_GIT }} && go build -ldflags='-extldflags=-fuse-ld=bfd -extld=${{ env.CC }}' -buildmode=plugin -o cedarling-krakend-arm64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so ."
+        docker run --rm -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=${{ env.CC }}" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}@${{ matrix.krakend-builder-digest }}" sh -c "${{ env.ADD_GIT }} && go build -ldflags='-extldflags=-fuse-ld=bfd -extld=${{ env.CC }}' -buildmode=plugin -o cedarling-krakend-arm64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so ."
         rm libcedarling_go.so
     - name: Sign and upload Cedarling Krakend plugins
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
