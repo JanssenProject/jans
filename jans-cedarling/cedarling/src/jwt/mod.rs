@@ -183,7 +183,14 @@ struct TokenCallCtx<'a> {
     token: &'a TokenInput,
     index: usize,
     now: chrono::DateTime<Utc>,
-    seen_combinations: &'a mut HashSet<(SmolStr, SmolStr)>,
+    seen_combinations: &'a mut HashSet<SeenToken>,
+}
+
+/// Accepted `(issuer, mapping)` pair seen in the current multi-issuer request.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct SeenToken {
+    issuer: SmolStr,
+    mapping: SmolStr,
 }
 
 /// Outcome of dispatching a single multi-issuer token input: either a
@@ -202,7 +209,7 @@ pub(crate) struct ValidatedMultiIssuerTokens {
     pub tokens: HashMap<String, Arc<Token>>,
     /// Mapping (token name) -> original request index, for surviving tokens.
     pub indices: HashMap<String, usize>,
-    /// Tokens dropped during validation, in input order.
+    /// Tokens dropped during validation.
     pub dropped: Vec<DroppedToken>,
 }
 
@@ -578,10 +585,10 @@ impl JwtService {
         };
 
         if let Ok((issuer, _)) = custom_issuers.resolve(&ctx.token.mapping) {
-            let combination = (
-                SmolStr::from(issuer.issuer_id.as_str()),
-                SmolStr::from(ctx.token.mapping.as_str()),
-            );
+            let combination = SeenToken {
+                issuer: SmolStr::from(issuer.issuer_id.as_str()),
+                mapping: SmolStr::from(ctx.token.mapping.as_str()),
+            };
             if ctx.seen_combinations.contains(&combination) {
                 if let Some(logger) = &self.logger {
                     logger.log_any(JwtLogEntry::new(
@@ -611,8 +618,10 @@ impl JwtService {
                     .extract_normalized_issuer()
                     .map(|i| SmolStr::from(i.as_str()))
                     .unwrap_or_default();
-                let combination = (issuer, SmolStr::from(ctx.token.mapping.as_str()));
-                if ctx.seen_combinations.insert(combination) {
+                if ctx.seen_combinations.insert(SeenToken {
+                    issuer,
+                    mapping: SmolStr::from(ctx.token.mapping.as_str()),
+                }) {
                     Ok(TokenOutcome::Validated(cedar_token))
                 } else {
                     if let Some(logger) = &self.logger {
@@ -691,10 +700,10 @@ impl JwtService {
                 .get_claim_val("iss")
                 .and_then(|iss| iss.as_str())
                 .ok_or(MultiIssuerValidationError::MissingIssuer)?;
-            let combination = (
-                SmolStr::from(issuer),
-                SmolStr::from(ctx.token.mapping.as_str()),
-            );
+            let combination = SeenToken {
+                issuer: SmolStr::from(issuer),
+                mapping: SmolStr::from(ctx.token.mapping.as_str()),
+            };
             if ctx.seen_combinations.insert(combination) {
                 return Ok(TokenOutcome::Validated(cedar_token));
             }
@@ -722,10 +731,10 @@ impl JwtService {
                     .ok_or(MultiIssuerValidationError::MissingIssuer)?;
 
                 // Check for non-deterministic tokens (graceful validation)
-                let combination = (
-                    SmolStr::from(issuer),
-                    SmolStr::from(ctx.token.mapping.as_str()),
-                );
+                let combination = SeenToken {
+                    issuer: SmolStr::from(issuer),
+                    mapping: SmolStr::from(ctx.token.mapping.as_str()),
+                };
                 if ctx.seen_combinations.insert(combination) {
                     // Convert ValidatedJwt to Token
                     let claims = TokenClaims::try_from(validated_jwt.claims)
