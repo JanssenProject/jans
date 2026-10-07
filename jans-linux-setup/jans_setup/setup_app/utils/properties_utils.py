@@ -206,7 +206,7 @@ class PropertiesUtils(SetupUtils):
 
         try:
             p = Properties()
-            for obj_name, obj in inspect.getmembers(Config):
+            for obj_name, member in inspect.getmembers(Config):
                 obj_name = str(obj_name)
                 if obj_name in ('post_messages', 'properties_password', 'non_setup_properties', 'addPostSetupService'):
                     continue
@@ -214,8 +214,8 @@ class PropertiesUtils(SetupUtils):
                 if obj_name.startswith('cmd_'):
                     continue
 
-                if not obj_name.startswith('__') and (not callable(obj)):
-                    value = get_string(obj)
+                if not obj_name.startswith('__') and (not callable(member)):
+                    value = get_string(member)
                     if value != '':
                         p[obj_name] = value
 
