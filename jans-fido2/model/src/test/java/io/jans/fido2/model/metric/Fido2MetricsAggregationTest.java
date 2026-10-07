@@ -244,8 +244,6 @@ class Fido2MetricsAggregationTest {
         assertEquals(a, a);
 
         // Null and other-type comparisons.
-        assertNotEquals(null, a);
-        assertNotEquals("string", a);
         assertFalse(a.equals(null));
         assertFalse(a.equals("string"));
 
