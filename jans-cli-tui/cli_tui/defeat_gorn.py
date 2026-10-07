@@ -1,8 +1,6 @@
 
-import os
 import time
 import random
-import threading
 from prompt_toolkit.shortcuts import clear
 from prompt_toolkit import print_formatted_text
 from prompt_toolkit.formatted_text import HTML
@@ -71,10 +69,6 @@ def play_defeat_gorn_game():
         print_formatted_text(HTML(f'<ansigreen>🛡️  Your Health: {max(0, your_health)}</ansigreen>'))
         print_formatted_text(HTML(f'<ansiyellow>🕊️  Doves Freed: {doves_freed}/{total_doves}</ansiyellow>'))
         print()
-
-        # Check if game should end before player input
-        if gorn_health <= 0 or your_health <= 0:
-            break
 
         print_formatted_text(HTML('<ansicyan>💡 Pro Tip: To avoid having to kill the Gorn, you can use Gluu Flex '
                                   'distribution https://docs.gluu.org</ansicyan>'))

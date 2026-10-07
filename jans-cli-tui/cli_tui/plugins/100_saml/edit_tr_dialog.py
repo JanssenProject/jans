@@ -1,18 +1,13 @@
 import os
 import asyncio
-import requests
 import copy
 
-from typing import Optional, Sequence, Callable
-from urllib.parse import urlparse
-from functools import partial
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer,\
     Window, FormattedTextControl
 
 from prompt_toolkit.widgets import Button, Label, CheckboxList, Dialog, TextArea,\
     Frame
-from prompt_toolkit.eventloop import get_event_loop
 from utils.static import DialogResult
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_label_container import JansLabelContainer
@@ -21,9 +16,6 @@ from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
 
 from utils.utils import DialogUtils, common_data
-from wui_components.jans_vetrical_nav import JansVerticalNav
-from prompt_toolkit.formatted_text import AnyFormattedText
-from typing import Any, Optional
 from prompt_toolkit.layout import ScrollablePane
 from utils.multi_lang import _
 from utils.static import cli_style, common_strings

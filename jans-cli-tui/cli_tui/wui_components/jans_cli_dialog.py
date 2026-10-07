@@ -1,10 +1,9 @@
 from functools import partial
 from asyncio import Future
 from prompt_toolkit.widgets import Button, Dialog
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence
 from prompt_toolkit.layout.containers import AnyContainer
 from prompt_toolkit.layout.dimension import AnyDimension
-from prompt_toolkit.formatted_text import AnyFormattedText
 from utils.multi_lang import _
 
 class JansGDialog:

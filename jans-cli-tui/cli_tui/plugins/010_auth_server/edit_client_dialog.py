@@ -28,7 +28,6 @@ from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import AnyFormattedText, HTML
-from prompt_toolkit.eventloop import get_event_loop
 
 from utils.static import DialogResult, cli_style, common_strings, ISOFORMAT
 from utils.multi_lang import _
@@ -285,10 +284,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 )
 
         client_secret_next_widget.handler = partial(change_view_hide, client_secret_widget)
-
-        #require_pkce = self.data.get('attributes', {}).get('redirectUrisRegex')
-        #if require_pkce is None:
-        #    require_pkce = self.myparent.app_configuration.get('requirePkce', False)
 
         token_endpoint_authmethods = [('none', 'none')]
         for method in schema['properties']['tokenEndpointAuthMethod']['enum']:
@@ -1219,7 +1214,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
             return
 
         def on_text_changed(event):
-            search_text = event.text
             matching_items = []
             search_text = event.text
             for item in scopes_list:
@@ -1411,7 +1405,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     )
                     scope_result = scope_response.json()
                 except Exception:
-                    display_name = 'None'
+                    pass  # fall back to scope DN below
 
                 display_name = scope_result.get(
                     'displayName') or scope_result.get('inum')

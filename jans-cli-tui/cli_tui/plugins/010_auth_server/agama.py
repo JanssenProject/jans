@@ -9,7 +9,6 @@ import time
 
 from urllib import request
 from functools import partial
-from datetime import datetime
 from typing import Any
 from types import SimpleNamespace
 
@@ -22,7 +21,7 @@ from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, Window, HorizontalAlign
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.widgets import Button, Label, TextArea, Box, Frame, RadioList
+from prompt_toolkit.widgets import Button, Label, TextArea, Box, RadioList
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, fromisoformat, get_help_with, common_data
@@ -242,10 +241,6 @@ class Agama(DialogUtils):
                 fdata.save_data = json.dumps(result, indent=2)
                 file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.save_as, ok_handler=save_data)
                 self.app.show_jans_dialog(file_browser_dialog)
-
-            def export_current_config():
-                asyncio.ensure_future(get_current_config_coroutine())
-
 
             def export_sample_config():
                 if not project_details['details']['projectMetadata'].get('configs'):
@@ -602,7 +597,7 @@ class Agama(DialogUtils):
             try:
                 download_project_dialog.future.set_result(True)
             except Exception:
-                pass
+                pass  # dialog already closed by user
 
             self.upload_project(file_path=download_path, community_project_name=project_name)
 

@@ -1,9 +1,7 @@
 import re
-import os 
 
-from typing import TypeVar, Callable, Optional, Sequence, Union
+from typing import Callable, Optional
 
-from prompt_toolkit.key_binding.key_processor import KeyPressEvent
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 from prompt_toolkit.layout.containers import Window
@@ -78,10 +76,11 @@ class JansNavBar():
                 view.cur_navbar_selection = i
                 try: 
                     self.myparent.layout.focus(view.nav_window)
-                except:
-                    pass
+                except Exception:
+                    pass  # nav window not in current layout
                 view._set_selection()
                 return True
+        return None
 
 
 
@@ -96,14 +95,13 @@ class JansNavBar():
             try: ## i couldnt access the plugin content from here
                 cur_view = self.myparent._plugins[cur_plugin].nav_bar
                 self._set_tab_for_view(cur_view, ev)
-            except:
-                pass
+            except Exception:
+                pass  # plugin has no nav bar
 
     def add_key_binding(
         self, 
         shorcut_key:str,
         )-> None:
-        r = os.urandom(3).hex()
         for binding in self.myparent.bindings.bindings:
             if len(binding.keys) == 2 and binding.keys[0].value == 'escape' and binding.keys[1].lower() == shorcut_key:
                 return
@@ -144,8 +142,6 @@ class JansNavBar():
         """
 
         result = []
-        nitems = len(self.navbar_entries)
-        total_text_lenght = 0
         rows = []
         row = []
         screen_width = self.myparent.output.get_size().columns
