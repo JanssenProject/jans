@@ -1030,17 +1030,16 @@ impl Authz {
             })?;
 
         let crate::jwt::ValidatedMultiIssuerTokens {
-            tokens: validated_tokens,
+            tokens: mut validated_tokens,
             indices,
             dropped: mut dropped_tokens,
         } = validated;
 
-        // Merge entity-build drops after the validation drops, recovering each
-        // token's original request index from the validation pass. Validation
-        // drops alone can already be out of order (a duplicate-mapping drop
-        // carries the prior index but is pushed while processing the later
-        // one), and entity-build drops append after, so sort everything by
-        // the original request index for a stable audit trail.
+        // Merge entity-build drops, recovering each token's original request
+        // index from the validation pass. A duplicate-mapping drop carries the
+        // prior index but is pushed while processing the later input, so
+        // validation drops alone are already unordered by index; entity-build
+        // drops append after.
         for name in &setup_entities.dropped_names {
             let index = indices.get(name).copied().unwrap_or(0);
             dropped_tokens.push(DroppedToken::new(
@@ -1049,7 +1048,12 @@ impl Authz {
                 DropReason::EntityBuildFailed,
             ));
         }
-        dropped_tokens.sort_by_key(|d| d.index);
+
+        // A token that failed entity building must not also be reported as
+        // used: drop it from the validated map so `LogTokensInfo` (built from
+        // this map for both single and batch paths) never logs the same
+        // mapping under both `tokens` and `dropped_tokens`.
+        validated_tokens.retain(|name, _| !setup_entities.dropped_names.contains(name));
 
         Ok(MultiIssuerSetup {
             validated_tokens,
@@ -1452,8 +1456,9 @@ struct UnsignedSetup {
 struct MultiIssuerSetup {
     validated_tokens: HashMap<String, Arc<crate::jwt::Token>>,
     entities: MultiIssuerSetupEntities,
-    /// Tokens dropped across validation and entity building, merged in input
-    /// order (validation drops first). Shared by every item in a batch.
+    /// Tokens dropped across validation and entity building. Order is not
+    /// guaranteed; use each entry's `index` to correlate with the request
+    /// `tokens` array. Shared by every item in a batch.
     dropped_tokens: Vec<DroppedToken>,
 }
 

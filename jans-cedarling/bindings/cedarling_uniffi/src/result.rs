@@ -77,33 +77,62 @@ pub struct MultiIssuerAuthorizeResult {
     pub dropped_tokens: Vec<DroppedToken>,
 }
 
+/// Why a token was dropped. Mirrors [`core::DropReason`]; the conversion is
+/// exhaustive so a new core variant becomes a compile error here instead of
+/// a silent gap.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum DropReason {
+    InvalidInput,
+    JwtValidationFailed,
+    DuplicateToken,
+    NoProcessorRegistered,
+    CustomProcessingFailed,
+    CustomProcessingTimedOut,
+    EntityBuildFailed,
+}
+
+impl From<&core::DropReason> for DropReason {
+    fn from(value: &core::DropReason) -> Self {
+        match value {
+            core::DropReason::InvalidInput(_) => DropReason::InvalidInput,
+            core::DropReason::JwtValidationFailed => DropReason::JwtValidationFailed,
+            core::DropReason::DuplicateToken => DropReason::DuplicateToken,
+            core::DropReason::NoProcessorRegistered => DropReason::NoProcessorRegistered,
+            core::DropReason::CustomProcessingFailed => DropReason::CustomProcessingFailed,
+            core::DropReason::CustomProcessingTimedOut => {
+                DropReason::CustomProcessingTimedOut
+            },
+            core::DropReason::EntityBuildFailed => DropReason::EntityBuildFailed,
+        }
+    }
+}
+
 /// A token dropped during multi-issuer authorization, identified by its input
-/// `mapping` and zero-based `index`. `reason` is the stable reason slug
-/// (`jwt_validation_failed`, `duplicate_token`, …); `detail` carries the
-/// claim-free input error for `invalid_input`, otherwise empty; `message`
-/// carries the claim-free reason message and is non-empty for every reason.
+/// `mapping` and zero-based `index`. `reason` is the drop reason enum;
+/// `detail` is the stable detail slug for `InvalidInput`
+/// (`"empty_mapping"` / `"empty_payload"`), empty otherwise.
+/// `message` carries the claim-free reason message and is
+/// non-empty for every reason.
 #[derive(Debug, uniffi::Record)]
 pub struct DroppedToken {
     pub mapping: String,
     // i64 (not u64) so the Kotlin/Java binding exposes a signed Long rather
     // than a JVM-hostile ULong; usize casts fit trivially.
     pub index: i64,
-    pub reason: String,
+    pub reason: DropReason,
     pub detail: String,
     pub message: String,
 }
 
 impl From<core::DroppedToken> for DroppedToken {
     fn from(d: core::DroppedToken) -> Self {
-        let detail = match &d.reason {
-            core::DropReason::InvalidInput(e) => e.to_string(),
-            _ => String::new(),
-        };
+        let detail = d.reason.detail().unwrap_or_default().to_string();
         let message = d.reason.message();
+        let reason = DropReason::from(&d.reason);
         Self {
             mapping: d.mapping,
             index: d.index as i64,
-            reason: d.reason.slug().to_string(),
+            reason,
             detail,
             message,
         }

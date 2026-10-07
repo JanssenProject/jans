@@ -483,6 +483,25 @@ errors : list of PolicyEvaluationError
     A list of errors that occurred during the authorization process. These are unordered as policies may be evaluated in any order.
 ---
 
+DropReason
+==========
+
+Why a token was dropped from a multi-issuer authorization.
+Mirrors ``cedarling::DropReason``; exhaustive so a new core variant
+becomes a compile error here instead of a silent gap.
+
+Values
+------
+
+- InvalidInput
+- JwtValidationFailed
+- DuplicateToken
+- NoProcessorRegistered
+- CustomProcessingFailed
+- CustomProcessingTimedOut
+- EntityBuildFailed
+---
+
 DroppedToken
 ============
 
@@ -497,9 +516,10 @@ Attributes
 .. attribute:: index
     int: zero-based position in the request's ``tokens`` list.
 .. attribute:: reason
-    str: stable reason slug (e.g. ``"jwt_validation_failed"``).
+    DropReason: why the token was dropped.
 .. attribute:: detail
-    str: claim-free detail for ``invalid_input``; empty otherwise.
+    str: stable detail slug for ``InvalidInput`` (``"empty_mapping"`` /
+    ``"empty_payload"``); empty otherwise. Same value as the core JSON.
 .. attribute:: message
     str: claim-free reason message from ``DropReason``'s display text;
     non-empty for every reason.

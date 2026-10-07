@@ -896,10 +896,39 @@ fn test_dropped_token_carries_claim_free_message() {
         1,
         cedarling::DropReason::DuplicateToken,
     ));
-    assert_eq!(dropped.reason, "duplicate_token", "stable reason slug");
+    assert_eq!(
+        dropped.reason,
+        crate::result::DropReason::DuplicateToken,
+        "reason must be the enum variant"
+    );
     assert_eq!(
         dropped.message, "duplicate issuer and token-type combination",
         "a unit reason must expose a non-empty claim-free message"
     );
     assert_eq!(dropped.detail, "", "detail stays empty for unit reasons");
+}
+
+#[test]
+fn test_dropped_token_detail_is_stable_slug() {
+    let reason: cedarling::DropReason =
+        serde_json::from_value(json!({"kind": "invalid_input", "detail": "empty_payload"}))
+            .expect("invalid_input reason should deserialize");
+    let dropped = crate::result::DroppedToken::from(cedarling::DroppedToken::new(
+        "Jans::Access_Token",
+        0,
+        reason,
+    ));
+    assert_eq!(
+        dropped.reason,
+        crate::result::DropReason::InvalidInput,
+        "reason must be the enum variant"
+    );
+    assert_eq!(
+        dropped.detail, "empty_payload",
+        "detail must be the stable slug, same value as the core JSON"
+    );
+    assert_eq!(
+        dropped.message, "token input was invalid: Empty payload",
+        "message carries the human-readable Display text"
+    );
 }

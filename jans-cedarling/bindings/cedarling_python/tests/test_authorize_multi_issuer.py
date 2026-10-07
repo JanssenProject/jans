@@ -6,6 +6,7 @@
 from cedarling_python import (
     Cedarling,
     AuthorizeMultiIssuerRequest,
+    DropReason,
     EntityData,
     TokenInput,
 )
@@ -219,7 +220,8 @@ def test_validation_graceful_degradation_invalid_token():
 
     dropped = result.dropped_tokens()
     assert len(dropped) == 1, "the invalid token must be reported as dropped"
-    assert dropped[0].reason == "jwt_validation_failed", "stable reason slug"
+    assert dropped[0].reason == DropReason.JwtValidationFailed, "reason enum"
+    assert dropped[0].detail == "", "detail stays empty for unit reasons"
     assert dropped[0].message == "JWT validation failed", (
         "every drop must expose a non-empty claim-free message"
     )

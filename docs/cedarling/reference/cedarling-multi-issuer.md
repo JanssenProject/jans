@@ -998,7 +998,7 @@ for dropped in result.dropped_tokens():
 
 | Reason slug | Meaning |
 |-------------|---------|
-| `invalid_input` | The token input was malformed (empty mapping or payload). `detail` names the field. |
+| `invalid_input` | The token input was malformed (empty mapping or payload). `detail` is the stable slug (`"empty_mapping"` / `"empty_payload"`). |
 | `jwt_validation_failed` | Signature/claims validation failed, or no trusted issuer declares the token's mapping. |
 | `duplicate_token` | A token with the same issuer and token type was already accepted (see [Non-Deterministic Tokens](#non-deterministic-tokens)). |
 | `no_processor_registered` | The mapping routes to a custom issuer but no processor is registered, and the mapping is not `required`. |
@@ -1009,8 +1009,10 @@ for dropped in result.dropped_tokens():
 The reason is deliberately claim-free: it never contains token payloads or claim
 values, so it is safe to log and surface to callers. `message` is always the
 reason's `Display` text (e.g. `duplicate issuer and token-type combination`) and
-is non-empty for every slug, while `detail` additionally names the malformed
-field for `invalid_input`. When no token is dropped
+is non-empty for every slug, while `detail` is the stable slug for
+`invalid_input` (same value as the core JSON) and empty otherwise. Order is not
+guaranteed; use each entry's `index` to correlate with the request `tokens`
+array. When no token is dropped
 the list is empty and the field is omitted from the serialized result. For a
 batch request the list is produced once (tokens are validated once for the whole
 batch) and repeats on every item's result.

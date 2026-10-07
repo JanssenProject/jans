@@ -49,6 +49,7 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<authorize_result::AuthorizeResult>()?;
     m.add_class::<multi_issuer_authorize_result::MultiIssuerAuthorizeResult>()?;
     m.add_class::<dropped_token::DroppedToken>()?;
+    m.add_class::<dropped_token::DropReason>()?;
     m.add_class::<policy_effect::PolicyEffect>()?;
     m.add_class::<policy_metadata::PolicyMetadata>()?;
 

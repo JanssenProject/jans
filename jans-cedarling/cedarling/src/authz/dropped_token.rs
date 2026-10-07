@@ -59,7 +59,6 @@ impl DroppedToken {
 /// language bindings; see [`DropReason::slug`].
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, thiserror::Error)]
 #[serde(tag = "kind", content = "detail", rename_all = "snake_case")]
-#[non_exhaustive]
 pub enum DropReason {
     /// The token input itself was malformed (empty mapping or payload) before
     /// any validation was attempted.
@@ -102,8 +101,8 @@ impl Serialize for DropReason {
 
         let mut map = serializer.serialize_map(None)?;
         map.serialize_entry("kind", self.slug())?;
-        if let Self::InvalidInput(err) = self {
-            map.serialize_entry("detail", err)?;
+        if let Some(detail) = self.detail() {
+            map.serialize_entry("detail", detail)?;
         }
         map.serialize_entry("message", &self.message())?;
         map.end()
@@ -134,6 +133,22 @@ impl DropReason {
     #[must_use]
     pub fn message(&self) -> String {
         self.to_string()
+    }
+
+    /// Stable machine-readable detail for this reason. Currently `Some` only
+    /// for [`DropReason::InvalidInput`], where it names the malformed input
+    /// field (`"empty_mapping"` / `"empty_payload"`); `None` otherwise.
+    /// Bindings surface this as the flattened `detail` string (empty when
+    /// `None`) so every language reports the same value as the core JSON.
+    #[must_use]
+    pub const fn detail(&self) -> Option<&'static str> {
+        match self {
+            Self::InvalidInput(err) => Some(match err {
+                TokenInputError::EmptyMapping => "empty_mapping",
+                TokenInputError::EmptyPayload => "empty_payload",
+            }),
+            _ => None,
+        }
     }
 }
 
