@@ -989,33 +989,36 @@ impl Cedarling {
                 };
 
                 // Metadata Level
-                // Agama YAML metadata uses the user-chosen `policy_stores` key as `id` and is
-                // already checked by `validate_legacy_store` at load; strict checks apply elsewhere.
-                let metadata_res = if matches!(
-                    &config.source,
-                    PolicyStoreSource::Yaml(_) | PolicyStoreSource::FileYaml(_)
-                ) {
-                    LevelResult::Ok
-                } else {
-                    match &loaded.store.metadata {
-                        Some(metadata) => {
-                            use crate::common::policy_store::validator::MetadataValidator;
-                            match MetadataValidator::validate(metadata) {
-                                Ok(()) => LevelResult::Ok,
-                                Err(e) => LevelResult::Failed {
-                                    errors: vec![Diagnostic {
-                                        file: "<metadata>".into(),
-                                        line: None,
-                                        column: None,
-                                        message: e.to_string(),
-                                    }],
-                                },
-                            }
-                        },
-                        None => LevelResult::Skipped {
-                            reason: "no metadata present".into(),
-                        },
-                    }
+                // Agama YAML uses the user-chosen `policy_stores` key as `id`, which need not be
+                // hex, so clear it to skip only that check; every other metadata rule still applies.
+                let metadata_res = match &loaded.store.metadata {
+                    Some(metadata) => {
+                        use crate::common::policy_store::validator::MetadataValidator;
+                        let result = if matches!(
+                            &config.source,
+                            PolicyStoreSource::Yaml(_) | PolicyStoreSource::FileYaml(_)
+                        ) {
+                            let mut metadata = metadata.clone();
+                            metadata.policy_store.id.clear();
+                            MetadataValidator::validate(&metadata)
+                        } else {
+                            MetadataValidator::validate(metadata)
+                        };
+                        match result {
+                            Ok(()) => LevelResult::Ok,
+                            Err(e) => LevelResult::Failed {
+                                errors: vec![Diagnostic {
+                                    file: "<metadata>".into(),
+                                    line: None,
+                                    column: None,
+                                    message: e.to_string(),
+                                }],
+                            },
+                        }
+                    },
+                    None => LevelResult::Skipped {
+                        reason: "no metadata present".into(),
+                    },
                 };
 
                 let warnings = loaded

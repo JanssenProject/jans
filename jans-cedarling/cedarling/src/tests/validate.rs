@@ -278,3 +278,51 @@ async fn test_validate_unsupported_spec_version_fails_metadata() {
         "the metadata level should fail naming the unsupported version: {report:?}"
     );
 }
+
+/// Minimal Agama YAML store whose `policy_stores` key is `key`.
+fn yaml_store_with_key(key: &str) -> crate::PolicyStoreConfig {
+    let store = format!(
+        r#"
+cedar_version: v4.0.0
+policy_stores:
+  "{key}":
+    name: Test Store
+    schema:
+      encoding: none
+      content_type: cedar-json
+      body: '{{"Jans": {{"entityTypes": {{}}, "actions": {{}}}}}}'
+    policies: {{}}
+"#
+    );
+    crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::Yaml(store),
+        ..Default::default()
+    }
+}
+
+async fn validate_metadata(config: &crate::PolicyStoreConfig) -> LevelResult {
+    Cedarling::validate_policy_store(config, &crate::http::HttpClientConfig::default())
+        .await
+        .expect("infra layer ok")
+        .metadata
+}
+
+#[tokio::test]
+async fn test_validate_yaml_non_hex_key_passes_metadata() {
+    // The `policy_stores` key becomes the store ID and need not be hex.
+    let metadata = validate_metadata(&yaml_store_with_key("test_store")).await;
+    assert!(
+        matches!(metadata, LevelResult::Ok),
+        "a non-hex YAML key should pass metadata: {metadata:?}"
+    );
+}
+
+#[tokio::test]
+async fn test_validate_yaml_key_rules_other_than_id_still_apply() {
+    let metadata = validate_metadata(&yaml_store_with_key(&"a".repeat(256))).await;
+    assert!(
+        matches!(&metadata, LevelResult::Failed { errors }
+            if errors.iter().any(|e| e.message.contains("name too long"))),
+        "a YAML key over 255 bytes should fail the name check: {metadata:?}"
+    );
+}
