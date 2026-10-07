@@ -411,28 +411,26 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		}
 
 		if (isValidateAfterUpdate()) {
-			if (!forceUpdate) {
-				// Compare loaded entry data after merge
-	
-				// Step 1. Rebuild map with attributes which we planned to persist
-				attributesToPersistMap = getAttributesMap(attributesToPersist);
-				if (versionProperty != null) {
-					// Reflect the bump applied above, or the post-merge re-diff flags it as a spurious "missing change"
-					attributesToPersistMap.put(versionAttributeName, new AttributeData(versionAttributeName, newVersionValue));
-				}
-	
-				// Step 2. Load current entry from DB
-				List<AttributeData> attributesAfterMergeFromLdap = find(dnValue.toString(), objectClasses, propertiesAnnotationsMap, currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
-	
-				// Step 3. Compare loaded entry data with initial entry data
-				List<AttributeDataModification> attributeDataModificationsAftermerge = prepareAttributeDataModifications(entryClass,
-						dnValue, entry, propertiesAnnotations, attributesToPersistMap, attributesAfterMergeFromLdap, null,
-						false, false, forceUpdate);
-	
-				if (attributeDataModificationsAftermerge.size() > 0) {
-					LOG.warn("Detected changes which not exists in enry after merge. Entry DN: {}, missing changes: {}",
-							dnValue, attributeDataModificationsAftermerge);
-				}
+			// Compare loaded entry data after merge
+
+			// Step 1. Rebuild map with attributes which we planned to persist
+			attributesToPersistMap = getAttributesMap(attributesToPersist);
+			if (versionProperty != null) {
+				// Reflect the bump applied above, or the post-merge re-diff flags it as a spurious "missing change"
+				attributesToPersistMap.put(versionAttributeName, new AttributeData(versionAttributeName, newVersionValue));
+			}
+
+			// Step 2. Load current entry from DB
+			List<AttributeData> attributesAfterMergeFromLdap = find(dnValue.toString(), objectClasses, propertiesAnnotationsMap, currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
+
+			// Step 3. Compare loaded entry data with initial entry data
+			List<AttributeDataModification> attributeDataModificationsAftermerge = prepareAttributeDataModifications(entryClass,
+					dnValue, entry, propertiesAnnotations, attributesToPersistMap, attributesAfterMergeFromLdap, null,
+					false, false, forceUpdate);
+
+			if (attributeDataModificationsAftermerge.size() > 0) {
+				LOG.warn("Detected changes which not exists in enry after merge. Entry DN: {}, missing changes: {}",
+						dnValue, attributeDataModificationsAftermerge);
 			}
 		}
 
