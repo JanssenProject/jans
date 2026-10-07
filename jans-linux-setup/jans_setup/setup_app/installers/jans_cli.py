@@ -1,9 +1,5 @@
 import os
-import glob
-import re
 import configparser
-import tarfile
-import shutil
 import time
 
 from setup_app import paths
@@ -104,6 +100,9 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         if not 'jans_host' in config['DEFAULT']:
             config['DEFAULT']['jans_host'] = Config.hostname
+
+        if not 'ca_cert' in config['DEFAULT']:
+            config['DEFAULT']['ca_cert'] = os.path.join(Config.certFolder, 'httpd.crt')
 
         for key_ in options:
             config['DEFAULT'][key_] = options[key_]

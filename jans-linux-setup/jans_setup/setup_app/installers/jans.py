@@ -3,17 +3,12 @@ import sys
 import time
 import zipfile
 import inspect
-import base64
 import shutil
-import re
-import requests
-import zipfile
 import site
 
 from pathlib import Path
 
 from setup_app import paths
-from setup_app import static
 from setup_app.utils import base
 from setup_app.static import InstallTypes, AppType, InstallOption
 from setup_app.config import Config
@@ -144,12 +139,13 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         systemd_conf = []
 
-        for l in open(systemd_conf_fn):
-            tl = l.strip('#').strip()
-            if tl.startswith('DefaultTimeoutStartSec'):
-                systemd_conf.append('DefaultTimeoutStartSec=300s\n')
-            else:
-                systemd_conf.append(l)
+        with open(systemd_conf_fn) as f:
+            for l in f:
+                tl = l.strip('#').strip()
+                if tl.startswith('DefaultTimeoutStartSec'):
+                    systemd_conf.append('DefaultTimeoutStartSec=300s\n')
+                else:
+                    systemd_conf.append(l)
 
         self.writeFile(systemd_conf_fn, ''.join(systemd_conf))
 
@@ -206,7 +202,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         try:
             salt_text = 'encodeSalt = {}'.format(Config.encode_salt)
             self.writeFile(Config.salt_fn, salt_text)
-        except:
+        except Exception:
             self.logIt("Error writing salt", True, True)
 
     def render_templates(self, templates=None):
@@ -218,7 +214,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         for fullPath in templates:
             try:
                 self.renderTemplate(fullPath)
-            except:
+            except Exception:
                 self.logIt("Error writing template %s" % fullPath, True)
 
 
@@ -227,7 +223,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         try:
             self.renderTemplate(Config.ldif_configuration)
-        except:
+        except Exception:
             self.logIt("Error writing template", True)
 
 
@@ -245,7 +241,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     script_name = os.path.split(init_file)[-1]
                     self.copyFile(init_file, "/etc/init.d")
                     self.run([paths.cmd_chmod, "755", "/etc/init.d/%s" % script_name])
-                except:
+                except Exception:
                     self.logIt("Error copying script file %s to /etc/init.d" % init_file)
 
 
@@ -345,7 +341,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.appendLine(f'{apache_user}     hard nofile     262144', conf_fn)
             self.appendLine('jetty      soft nofile     131072', conf_fn)
             self.appendLine('jetty      hard nofile     262144', conf_fn)
-        except:
+        except Exception:
             self.logIt("Could not set limits.")
 
 
@@ -364,7 +360,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         os.makedirs(dest_dir)
                     self.backupFile(output_fn, dest_fn)
                     shutil.copyfile(output_fn, dest_fn)
-                except:
+                except Exception:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
 
 

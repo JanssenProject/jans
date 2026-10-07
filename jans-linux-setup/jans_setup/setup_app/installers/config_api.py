@@ -1,16 +1,10 @@
 import os
-import time
-import glob
 import json
-import base64
-import shutil
-import zipfile
-from string import Template
 
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.utils import base
-from setup_app.utils.ldif_utils import myLdifParser, create_client_ldif
+from setup_app.utils.ldif_utils import create_client_ldif
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.pylib.ldif4.ldif import LDIFWriter
@@ -107,48 +101,46 @@ class ConfigApiInstaller(JettyInstaller):
             Config.jca_client_pw = self.getPW()
             Config.jca_client_encoded_pw = self.obscure(Config.jca_client_pw)
 
-        scope_ldif_fd = open(self.scope_ldif_fn, 'wb')
-        ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
-        scopes = {}
-        jansUmaScopes_all = [ 'inum=C4F7,ou=scopes,o=jans' ]
+        with open(self.scope_ldif_fn, 'wb') as scope_ldif_fd:
+            ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
+            scopes = {}
+            jansUmaScopes_all = [ 'inum=C4F7,ou=scopes,o=jans' ]
 
-        if hasattr(base.current_app, 'ScimInstaller'):
-            scim_scopes = base.current_app.ScimInstaller.create_user_scopes()
-            jansUmaScopes_all += scim_scopes
+            if hasattr(base.current_app, 'ScimInstaller'):
+                scim_scopes = base.current_app.ScimInstaller.create_user_scopes()
+                jansUmaScopes_all += scim_scopes
 
-        scope_levels = {'scopes':'1', 'groupScopes':'2', 'superScopes':'3'}
+            scope_levels = {'scopes':'1', 'groupScopes':'2', 'superScopes':'3'}
 
-        for resource in scopes_def['resources']:
+            for resource in scopes_def['resources']:
 
-            for condition in resource.get('conditions', []):
-                for scope_level in scope_levels:
-                    for scope in (condition.get(scope_level, [])):
+                for condition in resource.get('conditions', []):
+                    for scope_level in scope_levels:
+                        for scope in (condition.get(scope_level, [])):
 
-                        if not scope.get('inum'):
-                            continue
+                            if not scope.get('inum'):
+                                continue
 
-                        if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(jansId={})(objectClass=jansScope))'.format(scope['name'])):
-                            continue
+                            if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(jansId={})(objectClass=jansScope))'.format(scope['name'])):
+                                continue
 
-                        if not scope['name'] in scopes:
-                            scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'])
-                            scopes[scope['name']] = {'dn': scope_dn}
-                            display_name = 'Config API scope {}'.format(scope['name'])
-                            description = 'Config API {} scope {}'.format(scope_level, scope['name'])
-                            ldif_dict = {
-                                        'objectClass': ['top', 'jansScope'],
-                                        'description': [description],
-                                        'displayName': [display_name],
-                                        'inum': [scope['inum']],
-                                        'jansDefScope': ['false'],
-                                        'jansId': [scope['name']],
-                                        'jansScopeTyp': [scope_type],
-                                        'jansAttrs': [json.dumps({"spontaneousClientId":None, "spontaneousClientScopes":[], "showInConfigurationEndpoint": False})],
-                                    }
-                            ldif_scopes_writer.unparse(scope_dn, ldif_dict)
-                            jansUmaScopes_all.append(scope_dn)
-
-        scope_ldif_fd.close()
+                            if not scope['name'] in scopes:
+                                scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'])
+                                scopes[scope['name']] = {'dn': scope_dn}
+                                display_name = 'Config API scope {}'.format(scope['name'])
+                                description = 'Config API {} scope {}'.format(scope_level, scope['name'])
+                                ldif_dict = {
+                                            'objectClass': ['top', 'jansScope'],
+                                            'description': [description],
+                                            'displayName': [display_name],
+                                            'inum': [scope['inum']],
+                                            'jansDefScope': ['false'],
+                                            'jansId': [scope['name']],
+                                            'jansScopeTyp': [scope_type],
+                                            'jansAttrs': [json.dumps({"spontaneousClientId":None, "spontaneousClientScopes":[], "showInConfigurationEndpoint": False})],
+                                        }
+                                ldif_scopes_writer.unparse(scope_dn, ldif_dict)
+                                jansUmaScopes_all.append(scope_dn)
 
         create_client = True
         if Config.installed_instance and self.dbUtils.search('ou=clients,o=jans', search_filter='(&(inum={})(objectClass=jansClnt))'.format(Config.jca_client_id)):

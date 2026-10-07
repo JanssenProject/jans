@@ -1,19 +1,11 @@
 import os
-import re
-import glob
-import ssl
-import time
-import json
-import uuid
 
 from xml.etree import ElementTree
 
-from setup_app import paths
 from setup_app.config import Config
 from setup_app.pylib.ldif4.ldif import LDIFWriter
-from setup_app.static import AppType, InstallOption, SetupProfiles
+from setup_app.static import AppType, InstallOption
 from setup_app.utils import base
-from setup_app.utils.properties_utils import propertiesUtils
 from setup_app.utils.ldif_utils import myLdifParser
 from setup_app.installers.jetty import JettyInstaller
 

@@ -1,14 +1,11 @@
-import re
 import os
 import time
 import pprint
 import inspect
-import json
 from collections import OrderedDict
 
 from setup_app.paths import INSTALL_DIR, LOG_DIR
 from setup_app.static import InstallTypes
-from setup_app.utils.printVersion import get_war_info
 from setup_app.utils import base
 
 OPENBANKING_PROFILE = 'openbanking'
@@ -40,22 +37,22 @@ class Config:
     installed_instance = False
 
     @classmethod
-    def get(self, attr, default=None):
-        return getattr(self, attr) if hasattr(self, attr) else default
+    def get(cls, attr, default=None):
+        return getattr(cls, attr) if hasattr(cls, attr) else default
 
     @classmethod
-    def dump(self, dumpFile=False):
-        if self.dump_config_on_error:
+    def dump(cls, dumpFile=False):
+        if cls.dump_config_on_error:
             return
 
         myDict = {}
-        for obj_name, obj in inspect.getmembers(self):
+        for obj_name, obj in inspect.getmembers(cls):
             obj_name = str(obj_name)
             if not obj_name.startswith('__') and (not callable(obj)):
                 myDict[obj_name] = obj
 
         if dumpFile:
-            fn = os.path.join(self.install_dir, 'config-'+time.ctime().replace(' ', '-'))
+            fn = os.path.join(cls.install_dir, 'config-'+time.ctime().replace(' ', '-'))
             with open(fn, 'w') as w:
                 w.write(pprint.pformat(myDict, indent=2))
         else:
@@ -63,31 +60,31 @@ class Config:
             pp.pprint(myDict)
 
     @classmethod
-    def calculate_mem(self):
-        self.application_max_ram = int(Config.jans_max_mem)
+    def calculate_mem(cls):
+        cls.application_max_ram = int(Config.jans_max_mem)
 
     @classmethod
-    def set_rdbm_schema(self):
-        if not self.get('rdbm_schema'):
-            self.rdbm_schema = 'public' if self.rdbm_type == 'pgsql' else self.rdbm_db
+    def set_rdbm_schema(cls):
+        if not cls.get('rdbm_schema'):
+            cls.rdbm_schema = 'public' if cls.rdbm_type == 'pgsql' else cls.rdbm_db
 
     @classmethod
-    def init(self, install_dir=INSTALL_DIR):
+    def init(cls, install_dir=INSTALL_DIR):
 
-        self.install_dir = install_dir
-        self.data_dir = os.path.join(self.install_dir, 'setup_app/data')
-        self.profile = base.current_app.profile 
+        cls.install_dir = install_dir
+        cls.data_dir = os.path.join(cls.install_dir, 'setup_app/data')
+        cls.profile = base.current_app.profile 
 
-        self.thread_queue = None
-        self.jetty_user = self.jetty_group = 'jetty'
-        self.root_user = self.root_group = 'root'
-        self.backend_service = 'network.target'
-        self.dump_config_on_error = False
+        cls.thread_queue = None
+        cls.jetty_user = cls.jetty_group = 'jetty'
+        cls.root_user = cls.root_group = 'root'
+        cls.backend_service = 'network.target'
+        cls.dump_config_on_error = False
 
-        if not self.output_dir:
-            self.output_dir = os.path.join(install_dir, 'output')
+        if not cls.output_dir:
+            cls.output_dir = os.path.join(install_dir, 'output')
 
-        self.default_store_type = 'PKCS12'
+        cls.default_store_type = 'PKCS12'
 
         #create dummy progress bar that logs to file in case not defined
         progress_log_file = os.path.join(LOG_DIR, 'progress-bar.log')
@@ -108,18 +105,18 @@ class Config:
                 with open(progress_log_file, 'a') as w:
                     w.write("{}: {}\n".format(service_name, msg))
 
-        self.pbar = DummyProgress()
+        cls.pbar = DummyProgress()
 
-        self.properties_password = None
-        self.noPrompt = False
+        cls.properties_password = None
+        cls.noPrompt = False
 
-        self.dist_app_dir = os.path.join(self.distFolder, 'app')
-        self.dist_jans_dir = os.path.join(self.distFolder, 'jans')
-        self.distTmpFolder = os.path.join(self.distFolder, 'tmp')
-        self.jans_scripts_dir = os.path.join(self.jansOptFolder, 'scripts')
+        cls.dist_app_dir = os.path.join(cls.distFolder, 'app')
+        cls.dist_jans_dir = os.path.join(cls.distFolder, 'jans')
+        cls.distTmpFolder = os.path.join(cls.distFolder, 'tmp')
+        cls.jans_scripts_dir = os.path.join(cls.jansOptFolder, 'scripts')
 
-        self.downloadWars = None
-        self.templateRenderingDict = {
+        cls.downloadWars = None
+        cls.templateRenderingDict = {
                                         'jans_auth_test_client_2_inum': 'AB77-1A2B',
                                         'jans_auth_test_client_3_inum': '3E20',
                                         'jans_auth_test_client_4_inum': 'FF81-2D39',
@@ -130,173 +127,173 @@ class Config:
                                      }
 
         # java commands
-        self.cmd_java = os.path.join(self.jre_home, 'bin/java')
-        self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
-        self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
+        cls.cmd_java = os.path.join(cls.jre_home, 'bin/java')
+        cls.cmd_keytool = os.path.join(cls.jre_home, 'bin/keytool')
+        cls.cmd_jar = os.path.join(cls.jre_home, 'bin/jar')
 
-        if self.profile == OPENBANKING_PROFILE:
-            self.use_external_key = True
-            self.ob_key_fn = ''
-            self.ob_cert_fn = ''
-            self.ob_alias = ''
-            self.static_kid = ''
-            self.jwks_uri = ''
+        if cls.profile == OPENBANKING_PROFILE:
+            cls.use_external_key = True
+            cls.ob_key_fn = ''
+            cls.ob_cert_fn = ''
+            cls.ob_alias = ''
+            cls.static_kid = ''
+            cls.jwks_uri = ''
 
         # Component ithversions
-        self.apache_version = None
+        cls.apache_version = None
 
         #passwords
-        self.admin_password = ''
+        cls.admin_password = ''
 
         #DB installation types
-        self.rdbm_install = InstallTypes.LOCAL
+        cls.rdbm_install = InstallTypes.LOCAL
 
         #rdbm
-        self.rdbm_install_type = InstallTypes.LOCAL
-        self.rdbm_type = 'pgsql'
-        self.rdbm_host = 'localhost'
-        self.rdbm_port = 3306
-        self.rdbm_db = 'jansdb'
-        self.rdbm_user = 'jans'
-        self.rdbm_password = None
-        self.rdbm_password_enc = ''
-        self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
-        self.schema_files = [os.path.join(self.install_dir, 'schema', schemma_fn) for schemma_fn in ('jans_schema.json', 'custom_schema.json')]
-        self.rdbm_sslmode = 'disable'
-        self.rdbm_sslfactory = 'org.postgresql.ssl.NonValidatingFactory'
+        cls.rdbm_install_type = InstallTypes.LOCAL
+        cls.rdbm_type = 'pgsql'
+        cls.rdbm_host = 'localhost'
+        cls.rdbm_port = 3306
+        cls.rdbm_db = 'jansdb'
+        cls.rdbm_user = 'jans'
+        cls.rdbm_password = None
+        cls.rdbm_password_enc = ''
+        cls.static_rdbm_dir = os.path.join(cls.install_dir, 'static/rdbm')
+        cls.schema_files = [os.path.join(cls.install_dir, 'schema', schemma_fn) for schemma_fn in ('jans_schema.json', 'custom_schema.json')]
+        cls.rdbm_sslmode = 'disable'
+        cls.rdbm_sslfactory = 'org.postgresql.ssl.NonValidatingFactory'
 
         # Jans components installation status
-        self.loadData = True
-        self.install_jans = True
-        self.install_jre = True
-        self.install_jetty = True
-        self.install_jython = True
-        self.install_jans_auth = True
-        self.install_httpd = True
-        self.install_scim_server = True
-        self.install_fido2 = True
-        self.install_config_api = True
-        self.install_casa = False
-        self.install_jans_cli = True
-        self.install_link = False
-        self.loadTestData = False
-        self.allowPreReleasedFeatures = False
-        self.install_jans_shib = False
-        self.install_jans_lock = False
-        self.install_opa = False
+        cls.loadData = True
+        cls.install_jans = True
+        cls.install_jre = True
+        cls.install_jetty = True
+        cls.install_jython = True
+        cls.install_jans_auth = True
+        cls.install_httpd = True
+        cls.install_scim_server = True
+        cls.install_fido2 = True
+        cls.install_config_api = True
+        cls.install_casa = False
+        cls.install_jans_cli = True
+        cls.install_link = False
+        cls.loadTestData = False
+        cls.allowPreReleasedFeatures = False
+        cls.install_jans_shib = False
+        cls.install_jans_lock = False
+        cls.install_opa = False
 
         # backward compatibility
-        self.os_type = base.os_type
-        self.os_version = base.os_version
-        self.os_initdaemon = base.os_initdaemon
+        cls.os_type = base.os_type
+        cls.os_version = base.os_version
+        cls.os_initdaemon = base.os_initdaemon
 
-        self.persistence_type = 'sql'
+        cls.persistence_type = 'sql'
 
-        self.setup_properties_fn = os.path.join(self.install_dir, 'setup.properties')
-        self.savedProperties = os.path.join(self.install_dir, 'setup.properties.last')
+        cls.setup_properties_fn = os.path.join(cls.install_dir, 'setup.properties')
+        cls.savedProperties = os.path.join(cls.install_dir, 'setup.properties.last')
 
-        self.jansOptBinFolder = os.path.join(self.jansOptFolder, 'bin')
-        self.jansOptSystemFolder = os.path.join(self.jansOptFolder, 'system')
-        self.jansOptPythonFolder = os.path.join(self.jansOptFolder, 'python')
-        self.configFolder = os.path.join(self.jansBaseFolder, 'conf') 
+        cls.jansOptBinFolder = os.path.join(cls.jansOptFolder, 'bin')
+        cls.jansOptSystemFolder = os.path.join(cls.jansOptFolder, 'system')
+        cls.jansOptPythonFolder = os.path.join(cls.jansOptFolder, 'python')
+        cls.configFolder = os.path.join(cls.jansBaseFolder, 'conf') 
 
-        self.salt_fn = os.path.join(self.configFolder,'salt')
-        self.jans_properties_fn = os.path.join(self.configFolder,'jans.properties')
-        self.jans_hybrid_roperties_fn = os.path.join(self.configFolder, 'jans-hybrid.properties')
+        cls.salt_fn = os.path.join(cls.configFolder,'salt')
+        cls.jans_properties_fn = os.path.join(cls.configFolder,'jans.properties')
+        cls.jans_hybrid_roperties_fn = os.path.join(cls.configFolder, 'jans-hybrid.properties')
 
-        self.cache_provider_type = 'NATIVE_PERSISTENCE'
+        cls.cache_provider_type = 'NATIVE_PERSISTENCE'
 
-        self.java_type = 'jre'
+        cls.java_type = 'jre'
 
-        self.hostname = None
-        self.ip = None
-        self.orgName = None
-        self.countryCode = None
-        self.city = None
-        self.state = None
-        self.admin_email = None
-        self.encode_salt = None
-        self.admin_inum = None
+        cls.hostname = None
+        cls.ip = None
+        cls.orgName = None
+        cls.countryCode = None
+        cls.city = None
+        cls.state = None
+        cls.admin_email = None
+        cls.encode_salt = None
+        cls.admin_inum = None
 
-        self.jans_max_mem = int(base.current_mem_size * .85 * 1000) # 85% of physical memory
-        self.calculate_mem()
+        cls.jans_max_mem = int(base.current_mem_size * .85 * 1000) # 85% of physical memory
+        cls.calculate_mem()
 
-        self.templateFolder = os.path.join(self.install_dir, 'templates')
-        self.staticFolder = os.path.join(self.install_dir, 'static')
+        cls.templateFolder = os.path.join(cls.install_dir, 'templates')
+        cls.staticFolder = os.path.join(cls.install_dir, 'static')
 
-        self.extensionFolder = os.path.join(self.staticFolder, 'extension')
-        self.script_catalog_dir = os.path.join(self.install_dir, 'script_catalog')
+        cls.extensionFolder = os.path.join(cls.staticFolder, 'extension')
+        cls.script_catalog_dir = os.path.join(cls.install_dir, 'script_catalog')
 
-        self.jansScriptFiles = [
-                            os.path.join(self.staticFolder, 'scripts/logmanager.sh'),
-                            os.path.join(self.staticFolder, 'scripts/jans'),
-                            os.path.join(self.staticFolder, 'scripts/jans_services_status.py'),
-                            os.path.join(self.staticFolder, 'scripts/get_agama_lab_projects.py'),
+        cls.jansScriptFiles = [
+                            os.path.join(cls.staticFolder, 'scripts/logmanager.sh'),
+                            os.path.join(cls.staticFolder, 'scripts/jans'),
+                            os.path.join(cls.staticFolder, 'scripts/jans_services_status.py'),
+                            os.path.join(cls.staticFolder, 'scripts/get_agama_lab_projects.py'),
                             ]
 
-        self.defaultTrustStoreFN = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
-        self.defaultTrustStorePW = 'changeit'
+        cls.defaultTrustStoreFN = os.path.join(cls.jre_home, 'jre/lib/security/cacerts')
+        cls.defaultTrustStorePW = 'changeit'
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
 
-        self.jans_python_readme = os.path.join(self.jansOptPythonFolder, 'libs/python.txt')
-        self.jansRDBMProperties = os.path.join(self.configFolder, 'jans-sql.properties')
+        cls.jans_python_readme = os.path.join(cls.jansOptPythonFolder, 'libs/python.txt')
+        cls.jansRDBMProperties = os.path.join(cls.configFolder, 'jans-sql.properties')
 
-        self.ldif_base = os.path.join(self.output_dir, 'base.ldif')
-        self.ldif_attributes = os.path.join(self.output_dir, 'attributes.ldif')
-        self.ldif_scopes = os.path.join(self.output_dir, 'scopes.ldif')
-        self.ldif_agama = os.path.join(self.output_dir, 'agama.ldif')
+        cls.ldif_base = os.path.join(cls.output_dir, 'base.ldif')
+        cls.ldif_attributes = os.path.join(cls.output_dir, 'attributes.ldif')
+        cls.ldif_scopes = os.path.join(cls.output_dir, 'scopes.ldif')
+        cls.ldif_agama = os.path.join(cls.output_dir, 'agama.ldif')
 
-        self.ldif_metric = os.path.join(self.staticFolder, 'metric/o_metric.ldif')
-        self.ldif_site = os.path.join(self.install_dir, 'static/site/site.ldif')
-        self.ldif_configuration = os.path.join(self.output_dir, 'configuration.ldif')
+        cls.ldif_metric = os.path.join(cls.staticFolder, 'metric/o_metric.ldif')
+        cls.ldif_site = os.path.join(cls.install_dir, 'static/site/site.ldif')
+        cls.ldif_configuration = os.path.join(cls.output_dir, 'configuration.ldif')
 
-        self.system_profile_update_init = os.path.join(self.output_dir, 'system_profile_init')
-        self.system_profile_update_systemd = os.path.join(self.output_dir, 'system_profile_systemd')
+        cls.system_profile_update_init = os.path.join(cls.output_dir, 'system_profile_init')
+        cls.system_profile_update_systemd = os.path.join(cls.output_dir, 'system_profile_systemd')
 
         ### rsyslog file customised for init.d
-        self.rsyslogUbuntuInitFile = os.path.join(self.install_dir, 'static/system/ubuntu/rsyslog')
+        cls.rsyslogUbuntuInitFile = os.path.join(cls.install_dir, 'static/system/ubuntu/rsyslog')
 
         # OpenID key generation default setting
-        self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
-        if self.profile == OPENBANKING_PROFILE:
-            self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
+        cls.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
+        if cls.profile == OPENBANKING_PROFILE:
+            cls.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
         else:
-            self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
+            cls.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
 
-        self.default_enc_key_algs = 'RSA1_5 RSA-OAEP ECDH-ES'
-        self.default_key_expiration = 365
+        cls.default_enc_key_algs = 'RSA1_5 RSA-OAEP ECDH-ES'
+        cls.default_key_expiration = 365
 
-        self.smtp_jks_fn = os.path.join(self.certFolder, 'smtp-keys.' + self.default_store_type.lower())
-        self.smtp_alias = 'smtp_sig_ec256'
-        self.smtp_signing_alg = 'SHA256withECDSA'
+        cls.smtp_jks_fn = os.path.join(cls.certFolder, 'smtp-keys.' + cls.default_store_type.lower())
+        cls.smtp_alias = 'smtp_sig_ec256'
+        cls.smtp_signing_alg = 'SHA256withECDSA'
 
-        self.post_messages = []
+        cls.post_messages = []
 
-        self.ldif_files = [self.ldif_base,
-                           self.ldif_attributes,
-                           self.ldif_scopes,
-                           self.ldif_site,
-                           self.ldif_metric,
-                           self.ldif_configuration,
-                           self.ldif_agama,
+        cls.ldif_files = [cls.ldif_base,
+                           cls.ldif_attributes,
+                           cls.ldif_scopes,
+                           cls.ldif_site,
+                           cls.ldif_metric,
+                           cls.ldif_configuration,
+                           cls.ldif_agama,
                            ]
 
 
-        self.ce_templates = {
-                            self.jans_python_readme: True,
-                             self.etc_hostname: False,
-                             self.network: False,
-                             self.jans_properties_fn: True,
-                             self.ldif_base: False,
-                             self.ldif_attributes: False,
-                             self.ldif_scopes: False,
-                             self.ldif_agama: False,
+        cls.ce_templates = {
+                            cls.jans_python_readme: True,
+                             cls.etc_hostname: False,
+                             cls.network: False,
+                             cls.jans_properties_fn: True,
+                             cls.ldif_base: False,
+                             cls.ldif_attributes: False,
+                             cls.ldif_scopes: False,
+                             cls.ldif_agama: False,
                              }
 
 
-        self.service_requirements = {
+        cls.service_requirements = {
                         'jans-auth': ['network-online.target', 72],
                         'jans-fido2': ['network-online.target', 73],
                         'identity': ['jans-auth', 74],
@@ -309,8 +306,8 @@ class Config:
                         }
 
 
-        self.non_setup_properties = {
-            'jans_auth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
+        cls.non_setup_properties = {
+            'jans_auth_client_jar_fn': os.path.join(cls.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
                 }
 
         Config.addPostSetupService = []

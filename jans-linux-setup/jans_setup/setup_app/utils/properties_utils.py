@@ -1,19 +1,12 @@
 import os
 import sys
-import json
 import subprocess
 import uuid
-import glob
-import urllib
-import ssl
-import re
 import pymysql
 import psycopg2
 import inspect
-import tempfile
 
 from setup_app import paths
-from setup_app.messages import msg
 from setup_app.utils import base
 from setup_app.static import InstallTypes, colors, BackendStrings
 
@@ -38,6 +31,8 @@ class PropertiesUtils(SetupUtils):
 
         if itype == int:
             return int(ival)
+
+        return None
 
     def getYNPrompt(self, propmt_text, default='Y'):
         default = default.lower()
@@ -126,13 +121,13 @@ class PropertiesUtils(SetupUtils):
 
         for digest in ('sha256', 'md5'):
             cmd = [paths.cmd_openssl, 'enc', '-md', digest, '-d', '-aes-256-cbc', '-in',  fn, '-out', out_file, '-k', passwd]
-            self.logIt('Running: ' + ' '.join(cmd))
+            self.logIt('Running: ' + ' '.join(cmd[:-1] + ['***']))
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, err = p.communicate()
             if not err.decode().strip():
                 break
         else:
-            print("Can't decrypt {} with password {}\n Exiting ...".format(fn, passwd))
+            print("Can't decrypt {} with supplied password\n Exiting ...".format(fn))
             self.run(['rm', '-f', out_file])
             sys.exit(False)
 
@@ -141,9 +136,7 @@ class PropertiesUtils(SetupUtils):
     def load_properties(self, prop_file, no_update=[]):
         self.logIt('Loading Properties %s' % prop_file)
 
-        no_update += ['noPrompt', 'jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
-
-        map_db = []
+        no_update = no_update + ['noPrompt', 'jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
 
         if prop_file.endswith('.enc'):
             if not Config.properties_password:
@@ -156,6 +149,7 @@ class PropertiesUtils(SetupUtils):
             p = base.read_properties_file(prop_file)
         except Exception:
             self.logIt("Error loading properties", True)
+            sys.exit(False)
 
 
         if p.get('enable-script'):
@@ -200,9 +194,6 @@ class PropertiesUtils(SetupUtils):
         if not prop_fn:
             prop_fn = Config.savedProperties
 
-        if not obj:
-            obj = self
-
         self.logIt('Saving properties to %s' % prop_fn)
 
         def get_string(value):
@@ -232,17 +223,6 @@ class PropertiesUtils(SetupUtils):
                 p.store(f, encoding="utf-8")
 
             self.run([paths.cmd_chmod, '600', prop_fn])
-
-            # uncomment later
-            return
-
-            self.run([paths.cmd_openssl, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.admin_password])
-
-            Config.post_messages.append(
-                "Encrypted properties file saved to {0}.enc with password {1}\nDecrypt the file with the following command if you want to re-use:\nopenssl enc -d -aes-256-cbc -in {2}.enc -out {3}".format(
-                prop_fn,  Config.admin_password, os.path.basename(prop_fn), os.path.basename(Config.setup_properties_fn)))
-
-            self.run(['rm', '-f', prop_fn])
 
         except Exception:
             self.logIt("Error saving properties", True)

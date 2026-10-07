@@ -1,4 +1,4 @@
-from nose.tools import assert_true, assert_equal, assert_is_none, assert_false
+from nose.tools import assert_true, assert_equal, assert_false
 from setup import getOpts
 
 

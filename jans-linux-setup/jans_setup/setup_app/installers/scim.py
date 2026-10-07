@@ -1,6 +1,4 @@
 import os
-import glob
-import shutil
 
 from setup_app.utils import base
 from setup_app.static import AppType, InstallOption
@@ -63,11 +61,10 @@ class ScimInstaller(JettyInstaller):
 
         scope['inum'] = [inum_base + '.' + os.urandom(3).hex().upper()]
         ldif_scope_fn = os.path.join(self.output_folder, '{}.ldif'.format(scope['inum'][0]))
-        scope_ldif_fd = open(ldif_scope_fn, 'wb')
-        scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'][0])
-        ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
-        ldif_scopes_writer.unparse(scope_dn, scope)
-        scope_ldif_fd.close()
+        with open(ldif_scope_fn, 'wb') as scope_ldif_fd:
+            scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'][0])
+            ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
+            ldif_scopes_writer.unparse(scope_dn, scope)
         self.dbUtils.import_ldif([ldif_scope_fn])
         return scope_dn
 
@@ -92,56 +89,52 @@ class ScimInstaller(JettyInstaller):
         cfg_yml = base.read_yaml_file(self.jans_scim_openapi_fn)
         config_scopes = cfg_yml['components']['securitySchemes']['scim_oauth']['flows']['clientCredentials']['scopes']
 
-        scope_ldif_fd = open(self.ldif_scopes_fn, 'wb')
-        ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
+        with open(self.ldif_scopes_fn, 'wb') as scope_ldif_fd:
+            ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
 
-        scopes_dn = self.create_user_scopes()
-        for scope in config_scopes:
-            if scope in self.user_scopes:
-                continue
-            inum = '1200.' + os.urandom(3).hex().upper()
-            scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
-            scopes_dn.append(scope_dn)
-            display_name = 'Scim {}'.format(os.path.basename(scope))
-            ldif_scopes_writer.unparse(
-                    scope_dn, {
-                                'objectClass': ['top', 'jansScope'],
-                                'description': [config_scopes[scope]],
-                                'displayName': [display_name],
-                                'inum': [inum],
-                                'jansId': [scope],
-                                'jansScopeTyp': ['oauth'],
-                                })
+            scopes_dn = self.create_user_scopes()
+            for scope in config_scopes:
+                if scope in self.user_scopes:
+                    continue
+                inum = '1200.' + os.urandom(3).hex().upper()
+                scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
+                scopes_dn.append(scope_dn)
+                display_name = 'Scim {}'.format(os.path.basename(scope))
+                ldif_scopes_writer.unparse(
+                        scope_dn, {
+                                    'objectClass': ['top', 'jansScope'],
+                                    'description': [config_scopes[scope]],
+                                    'displayName': [display_name],
+                                    'inum': [inum],
+                                    'jansId': [scope],
+                                    'jansScopeTyp': ['oauth'],
+                                    })
 
-        scope_ldif_fd.close()
+        with open(self.ldif_clients_fn, 'wb') as client_ldif_fd:
+            client_scopes_writer = LDIFWriter(client_ldif_fd, cols=1000)
 
-        client_ldif_fd = open(self.ldif_clients_fn, 'wb')
-        client_scopes_writer = LDIFWriter(client_ldif_fd, cols=1000)
+            self.check_clients([('scim_client_id', '1201.')])
 
-        self.check_clients([('scim_client_id', '1201.')])
+            if not Config.get('scim_client_pw'):
+                Config.scim_client_pw = self.getPW()
+                Config.scim_client_encoded_pw = self.obscure(Config.scim_client_pw)
 
-        if not Config.get('scim_client_pw'):
-            Config.scim_client_pw = self.getPW()
-            Config.scim_client_encoded_pw = self.obscure(Config.scim_client_pw)
-
-        scim_client_dn = 'inum={},ou=clients,o=jans'.format(Config.scim_client_id)
-        client_scopes_writer.unparse(
-                scim_client_dn, {
-                'objectClass': ['top', 'jansClnt'],
-                'displayName': ['SCIM client'],
-                'jansAccessTknSigAlg': ['RS256'],
-                'jansAppTyp': ['native'],
-                'jansAttrs': ['{}'],
-                'jansGrantTyp': ['client_credentials'],
-                'jansScope': scopes_dn,
-                'jansSubjectTyp': ['pairwise'],
-                'jansTknEndpointAuthMethod': ['client_secret_basic'],
-                'inum': [Config.scim_client_id],
-                'jansClntSecret': [Config.scim_client_encoded_pw],
-                'jansRedirectURI': ['https://{}/.well-known/scim-configuration'.format(Config.hostname)]
-                })
-
-        client_ldif_fd.close()
+            scim_client_dn = 'inum={},ou=clients,o=jans'.format(Config.scim_client_id)
+            client_scopes_writer.unparse(
+                    scim_client_dn, {
+                    'objectClass': ['top', 'jansClnt'],
+                    'displayName': ['SCIM client'],
+                    'jansAccessTknSigAlg': ['RS256'],
+                    'jansAppTyp': ['native'],
+                    'jansAttrs': ['{}'],
+                    'jansGrantTyp': ['client_credentials'],
+                    'jansScope': scopes_dn,
+                    'jansSubjectTyp': ['pairwise'],
+                    'jansTknEndpointAuthMethod': ['client_secret_basic'],
+                    'inum': [Config.scim_client_id],
+                    'jansClntSecret': [Config.scim_client_encoded_pw],
+                    'jansRedirectURI': ['https://{}/.well-known/scim-configuration'.format(Config.hostname)]
+                    })
 
     def create_folders(self):
         self.createDirs(self.output_folder)

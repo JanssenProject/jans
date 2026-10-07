@@ -1,7 +1,6 @@
 import os
 import json
 import datetime
-import zipfile
 from setup_app import paths
 from setup_app.utils import base
 
@@ -73,14 +72,14 @@ class AttribDataTypes:
         if dtype == 'json':
             try:
                 retVal = json.loads(val)
-            except Exception as e:
-                pass
+            except Exception:
+                pass  # not JSON, keep raw value
 
         if dtype == 'integer':
             try:
                 retVal = int(retVal)
-            except:
-                pass
+            except Exception:
+                pass  # not an integer, keep raw value
         elif dtype == 'datetime':
             if not isinstance(val, datetime.datetime):
 

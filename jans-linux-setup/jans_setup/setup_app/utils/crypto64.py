@@ -32,7 +32,6 @@ class Crypto64:
         return encoded_pw.decode('utf-8')
 
     def unobscure(self, data=""):
-        engine = triple_des(Config.encode_salt, ECB, pad=None, padmode=PAD_PKCS5)
         cipher = triple_des(Config.encode_salt)
         decrypted = cipher.decrypt(base64.b64decode(data), padmode=PAD_PKCS5)
         return decrypted.decode('utf-8')
@@ -45,8 +44,6 @@ class Crypto64:
         key = os.path.join(cert_dir, suffix) + '.key'
         csr = os.path.join(cert_dir, suffix) + '.csr'
         public_certificate = os.path.join(cert_dir, suffix) + '.crt'
-        if not truststore_fn:
-            truststore_fn = Config.defaultTrustStoreFN
 
         self.run([paths.cmd_openssl,
                   'genrsa',
@@ -68,7 +65,7 @@ class Crypto64:
                   ])
 
         certCn = cn
-        if certCn == None:
+        if certCn is None:
             certCn = Config.hostname
 
         self.run([paths.cmd_openssl,
@@ -201,7 +198,7 @@ class Crypto64:
         try:
             plain_file_text = self.readFile(fn, rmode='rb')
             plain_file_b64encoded_text = base64.b64encode(plain_file_text).decode('utf-8').strip()
-        except:
+        except Exception:
             self.logIt("Error loading file", True)
 
         if num_spaces > 0:
@@ -249,13 +246,13 @@ class Crypto64:
     def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
         self.logIt("Generating Jans Auth OpenID Connect keys")
 
-        if dn_name == None:
+        if dn_name is None:
             dn_name = Config.default_openid_jks_dn_name
 
-        if key_algs == None:
+        if key_algs is None:
             key_algs = Config.default_sig_key_algs
 
-        if key_expiration == None:
+        if key_expiration is None:
             key_expiration = Config.default_key_expiration
 
         if not enc_keys:
@@ -281,6 +278,7 @@ class Crypto64:
 
         if output:
             return output.splitlines()
+        return None
 
     def export_openid_key(self, jks_path, jks_pwd, cert_alias, cert_path):
         self.logIt("Exporting Jans Auth OpenID Connect keys")
@@ -316,7 +314,7 @@ class Crypto64:
             self.run([Config.cmd_chown, 'jetty:jetty', fn])
             self.run([Config.cmd_chmod, '600', fn])
             self.logIt("Wrote jans Auth OpenID Connect key to %s" % fn)
-        except:
+        except Exception:
             self.logIt("Error writing command : %s" % fn, True)
 
 
@@ -343,14 +341,12 @@ class Crypto64:
                 Config.encoded_cb_password = self.obscure(Config.cb_password)
             if Config.get('opendj_p12_pass'):
                 Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
-        except:
+        except Exception:
             self.logIt("Error encoding passwords", True, True)
 
     def encode_test_passwords(self):
         self.logIt("Encoding test passwords")
         hostname = Config.hostname.split('.')[0]
-
-        test_client_ids = []
 
         for tmp_str in list(Config.templateRenderingDict.keys()):
             if re.match(r'(.*?)test_client_(\d*)_inum', tmp_str):

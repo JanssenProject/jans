@@ -1,7 +1,5 @@
 import os
-import sys
 import time
-import subprocess
 import re
 import socket
 import shutil
@@ -23,7 +21,6 @@ from mako.template import Template as MakoTemplate
 from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils import base
-from setup_app.static import InstallTypes
 from setup_app.utils.crypto64 import Crypto64
 
 MAKO_TEMPLATE_SUFFIX = '.mako'
@@ -31,7 +28,7 @@ MAKO_TEMPLATE_SUFFIX = '.mako'
 class SetupUtils(Crypto64):
 
     @classmethod
-    def init(self):
+    def init(cls):
         #let's make commands available via Config object
         for attr in dir(paths):
             if attr.startswith('cmd_'):
@@ -98,7 +95,7 @@ class SetupUtils(Crypto64):
         try:
             with open(fileName, 'a') as w:
                 w.write('%s\n' % line)
-        except:
+        except Exception:
             self.logIt("Error loading file %s" % fileName)
 
 
@@ -114,7 +111,7 @@ class SetupUtils(Crypto64):
             detectedIP = [(testSocket.connect(('8.8.8.8', 80)),
                            testSocket.getsockname()[0],
                            testSocket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
-        except:
+        except Exception:
             self.logIt("No detected IP address", True)
 
         return detectedIP
@@ -149,10 +146,10 @@ class SetupUtils(Crypto64):
 
         try:
             detectedHostname = socket.gethostbyaddr(Config.ip)[0]
-        except:
+        except Exception:
             try:
                 detectedHostname = os.popen("/bin/hostname").read().strip()
-            except:
+            except Exception:
                 self.logIt("No detected hostname", True)
 
         return detectedHostname
@@ -163,7 +160,7 @@ class SetupUtils(Crypto64):
         try:
             with open(inFilePath, rmode) as f:
                 inFilePathText = f.read()
-        except:
+        except Exception:
             if logError:
                 self.logIt("Error reading %s" % inFilePathText, True)
 
@@ -182,7 +179,7 @@ class SetupUtils(Crypto64):
         try:
             with open(outFilePath, 'w') as w:
                 w.write(text)
-        except:
+        except Exception:
             self.logIt("Error writing %s" % inFilePathText, True)
 
         return inFilePathText
@@ -200,9 +197,9 @@ class SetupUtils(Crypto64):
                     inFilePathLines.insert(index, text)
                     inFileText = ''.join(inFilePathLines)
                     self.writeFile(inFilePath, inFileText)
-                except:
+                except Exception:
                     self.logIt("Error writing %s" % inFilePathLines, True)
-            except:
+            except Exception:
                 self.logIt("Error reading %s" % inFilePathLines, True)
 
     def commentOutText(self, text):
@@ -248,7 +245,7 @@ class SetupUtils(Crypto64):
         try:
             shutil.copy(inFile, destFolder)
             self.logIt("Copied %s to %s" % (inFile, destFolder))
-        except:
+        except Exception:
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
 
     def copy_tree(self, src, dest, ignore=[]):
@@ -268,7 +265,7 @@ class SetupUtils(Crypto64):
             if not os.path.exists(name):
                 os.makedirs(name, 0o700)
                 self.logIt('Created dir: %s' % name)
-        except:
+        except Exception:
             self.logIt("Error making directory %s" % name, True)
 
     def removeDirs(self, name):
@@ -276,7 +273,7 @@ class SetupUtils(Crypto64):
             if os.path.exists(name):
                 shutil.rmtree(name)
                 self.logIt('Removed dir: %s' % name)
-        except:
+        except Exception:
             self.logIt("Error removing directory %s" % name, True)
 
     def removeFile(self, fileName):
@@ -284,7 +281,7 @@ class SetupUtils(Crypto64):
             if os.path.exists(fileName):
                 os.remove(fileName)
                 self.logIt('Removed file: %s' % fileName)
-        except:
+        except Exception:
             self.logIt("Error removing file %s" % fileName, True)
 
     def parse_url(self, url):
@@ -431,7 +428,7 @@ class SetupUtils(Crypto64):
             groupadd = '/usr/sbin/groupadd'
             self.run([groupadd, groupName])
             self.logOSChanges("Group %s was created" % (groupName))
-        except:
+        except Exception:
             self.logIt("Error adding group", True)
 
     def addUserToGroup(self, groupName, userName):
@@ -439,7 +436,7 @@ class SetupUtils(Crypto64):
             usermod = '/usr/sbin/usermod'
             self.run([usermod, '-a', '-G', groupName, userName])
             self.logOSChanges("User %s was added to group %s" % (userName,groupName))
-        except:
+        except Exception:
             self.logIt("Error adding group", True)
 
     def load_certificate_text(self, filePath):
@@ -455,6 +452,7 @@ class SetupUtils(Crypto64):
             for idir in ignoredirs:
                 if p.as_posix().startswith(idir):
                     return True
+            return False
 
         tp = Path(templatesFolder)
         for te in tp.rglob('*'):
@@ -468,7 +466,6 @@ class SetupUtils(Crypto64):
                 self.logIt("Rendering template {}".format(te))
                 rp = te.relative_to(Config.templateFolder)
                 output_dir = rp.parent
-                template_name = rp.name
 
                 full_output_dir = Path(Config.output_dir, output_dir)
                 full_output_file = Path(Config.output_dir, rp)

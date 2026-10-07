@@ -9,7 +9,7 @@ import argparse
 from collections import OrderedDict
 try:
     from ldap.schema.models import AttributeType, ObjectClass
-except:
+except ImportError:
     print("This tool requires python3-ldap package. Please install and re-run")
     sys.exit()
 

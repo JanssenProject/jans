@@ -15,7 +15,6 @@ class msg:
     ip_label = "IP Address"
     hostname_label = "Hostname"
     orgName_label = "Organization Name"
-    state_label = "State"
     admin_email_label = "Support Email"
     city_label = "City or Locality"
     state_label = "State or Province"
@@ -33,7 +32,6 @@ class msg:
     install_scim_server_label = "Install Scim"
     install_fido2_label = "Install Fido2"
 
-    insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
     insufficient_mem_size = "RAM size was determined to be {:0.1f} GB. This is less than the suggested RAM size of {} GB"
     insufficient_number_of_cpu = "Available CPU Units found was {}. This is less than the required amount of {} CPU Units"
     insufficient_file_max = "Maximum number of files that can be opened on this computer is {}. Please increase number of file-max to {} on the host system and re-run setup.py"

@@ -1,18 +1,13 @@
 import os
 import glob
-import json
 import shutil
-import datetime
-import tempfile
 
-from pathlib import Path
 
-from setup_app import paths
 from setup_app.utils import base
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
-from setup_app.utils.ldif_utils import myLdifParser, create_client_ldif
+from setup_app.utils.ldif_utils import create_client_ldif
 
 Config.shibboleth_idp_port = '8086'
 Config.shibboleth_idp_entity_id = ''

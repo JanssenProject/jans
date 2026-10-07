@@ -1,12 +1,6 @@
 import os
 import re
-import io
-import sys
-import time
-import sqlalchemy
-import shutil
 import random
-import glob
 import tempfile
 
 from pathlib import Path
@@ -113,11 +107,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     self.fix_unit_file('mysql')
                     self.enable('mysql')
                     Config.backend_service = 'mysql.service'
-                    for l in open('/var/log/mysql/mysqld.log'):
-                        if 'A temporary password is generated for' in l:
-                            n = l.find('root@localhost:')
-                            mysql_tmp_root_passwd = l[n+15:].strip()
-                            break
+                    with open('/var/log/mysql/mysqld.log') as f:
+                        for l in f:
+                            if 'A temporary password is generated for' in l:
+                                n = l.find('root@localhost:')
+                                mysql_tmp_root_passwd = l[n+15:].strip()
+                                break
                     Config.mysql_root_password = self.get_rdbm_pw()
                     self.run(f'''mysql -u root -p'{mysql_tmp_root_passwd}' -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{Config.mysql_root_password}'" --connect-expired-password''', shell=True)
 
@@ -427,8 +422,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
     def create_indexes(self):
 
-        indexes = []
-
         sql_indexes_fn = os.path.join(Config.static_rdbm_dir, Config.rdbm_type + '_index.json')
         sql_indexes = base.readJsonFile(sql_indexes_fn)
 
@@ -450,8 +443,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 if attr.name == 'doc_id':
                     continue
                 ind_name = self.get_index_name(attr.name)
-                data_type = self.get_sql_col_type(attr, tblCls)
-                data_type = data_type.replace('VARCHAR', 'CHAR')
 
                 if isinstance(attr.type, self.dbUtils.json_dialects_instance):
 

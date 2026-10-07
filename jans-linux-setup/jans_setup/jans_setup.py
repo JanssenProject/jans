@@ -4,11 +4,7 @@ import readline
 import os
 import sys
 import time
-import glob
-import inspect
-import zipfile
 import shutil
-import traceback
 import code
 import site
 import warnings
@@ -59,7 +55,7 @@ def ami_packaged():
             if rp:
                 return True
         except ValueError:
-            pass
+            pass  # not under this site-packages dir
 
     return False
 
@@ -123,7 +119,6 @@ from setup_app.config import Config
 from setup_app.utils.progress import jansProgress
 
 from setup_app.setup_options import get_setup_options
-from setup_app.utils import printVersion
 
 from setup_app.test_data_loader import TestDataLoader
 from setup_app.utils.properties_utils import propertiesUtils
@@ -179,7 +174,7 @@ tty_columns = terminal_size.columns
 # check if we are running in terminal
 try:
     os.get_terminal_size()
-except:
+except Exception:
     argsp.no_progress = True
 
 if not (argsp.n or Config.installed_instance):
@@ -445,7 +440,7 @@ def main():
             for m in Config.post_messages:
                 print(m)
 
-        except:
+        except Exception:
 
             base.logIt("FATAL", True, True)
 

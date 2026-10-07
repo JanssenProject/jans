@@ -1,6 +1,5 @@
 import os
 import sys
-import argparse
 
 from setup_app.static import InstallTypes, SetupProfiles
 from setup_app.utils import base

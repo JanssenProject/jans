@@ -1,13 +1,10 @@
 import os
 import glob
 import json
-import shutil
 import datetime
 import tempfile
 
-from pathlib import Path
 
-from setup_app import paths
 from setup_app.utils import base
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
@@ -70,7 +67,6 @@ class JansLockInstaller(JettyInstaller):
         _, jans_auth_config = self.dbUtils.get_jans_auth_conf_dynamic()
         Config.templateRenderingDict['jans_auth_token_endpoint'] = jans_auth_config['tokenEndpoint']
 
-        jans_scopes = self.dbUtils.get_scopes()
         scope_openid = self.dbUtils.get_scope_by_jansid('openid')
         scopes = [ scope_openid['dn'] ]
 

@@ -1,9 +1,7 @@
 import os
 import glob
-import shutil
 import uuid
 
-from pathlib import Path
 
 from setup_app import paths
 from setup_app.utils import base

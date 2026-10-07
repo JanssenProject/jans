@@ -54,7 +54,6 @@ os.environ['LC_ALL'] = 'C'
 
 # first import paths and make changes if necassary
 from setup_app import paths
-from setup_app import static
 
 # second import module base, this makes some initial settings
 from setup_app.utils import base
@@ -79,7 +78,6 @@ sys.path.insert(0, base.pylib_dir)
 from setup_app.utils.package_utils import packageUtils
 packageUtils.check_and_install_packages()
 
-from setup_app.messages import msg
 from setup_app.config import Config
 from setup_app.static import colors
 from setup_app.utils.progress import jansProgress
@@ -90,7 +88,6 @@ from setup_app.installers.jans import JansInstaller
 from setup_app.installers.httpd import HttpdInstaller
 from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
-from setup_app.installers.jans_auth import JansAuthInstaller
 from setup_app.installers.rdbm import RDBMInstaller
 from setup_app.installers.jans_lock import JansLockInstaller
 

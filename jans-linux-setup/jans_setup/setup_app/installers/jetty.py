@@ -191,7 +191,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         try:
             self.renderTemplateInOut(service_name, os.path.join(Config.templateFolder, NAME_STR), os.path.join(Config.output_dir, NAME_STR))
-        except:
+        except Exception:
             self.logIt("Error rendering service '%s' defaults" % service_name, True)
 
         jetty_service_configuration = os.path.join(Config.output_dir, NAME_STR, service_name)
@@ -211,7 +211,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                         os.path.join(Config.output_dir, NAME_STR, web_resources),
                         os.path.join(self.jetty_base, service_name, WEBAPPS)
                         )
-        except:
+        except Exception:
             self.logIt("Error rendering service '%s' web_resources.xml" % service_name, True)
 
         # Render web context file
@@ -226,7 +226,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                     os.path.join(Config.templateFolder, NAME_STR),
                     out_file=os.path.join(self.jetty_base, service_name, 'webapps/{}.xml'.format(service_name))
                 )
-        except:
+        except Exception:
             self.logIt("Error rendering service '%s' context xml" % service_name, True)
 
 
@@ -451,16 +451,9 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini')) or os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.d/server.ini'))
 
     def configure_extra_libs(self, target_war_fn):
-        version_rec = re.compile(r'-(\d+)?\.')
-
         builtin_libs = []
         war_zip = zipfile.ZipFile(target_war_fn)
         for builtin_path in war_zip.namelist():
             if  builtin_path.endswith('.jar'):
                 builtin_libs.append(os.path.basename( builtin_path))
         war_zip.close()
-
-        def in_war(name):
-            for fn in builtin_libs:
-                if fn.startswith(name):
-                     return fn

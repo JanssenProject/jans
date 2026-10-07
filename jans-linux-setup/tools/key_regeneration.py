@@ -2,7 +2,6 @@
 
 import os
 import shutil
-import glob
 import json
 import subprocess
 import sys
@@ -10,18 +9,14 @@ import zipfile
 import argparse
 import enum
 import requests
-import zipfile
 import ldap3
 import base64
 import bz2
 import pymysql
 import re
-import urllib3
 import tempfile
 
-import xml.etree.ElementTree as ET
 from types import ModuleType
-from urllib.parse import urlparse
 from requests.auth import HTTPBasicAuth
 from datetime import datetime
 
@@ -41,6 +36,7 @@ ldap_group.add_argument('-expiration_hours', help="Keys expire in hours", type=i
 ldap_group.add_argument('-expiration', help="Keys expire in days", default=365, type=int)
 ldap_group.add_argument('-auth-client', help="Path to {}-client-jar-with-dependencies.jar".format(_AUTH_NAME_.lower()))
 ldap_group.add_argument('-data-dir', help="Directory to keep keys", default='/opt/{}/keys'.format(_VENDOR_))
+parser.add_argument('-couchbase-ca-cert', help="CA bundle used to verify the Couchbase server TLS certificate")
 argsp = parser.parse_args()
 
 
@@ -50,6 +46,7 @@ def jproperties_parser(prop_fn):
         for i,c in enumerate(l):
             if c in ':=':
                 return i
+        return None
 
     prop = {}
 
@@ -80,9 +77,10 @@ def backup_file(fn):
 def run_command(args):
     if type(args) == type([]):
         cmd = ' '.join(args)
+        display_cmd = ' '.join('***' if i and args[i-1] in ('-keypasswd', '-storepass') else arg for i, arg in enumerate(args))
     else:
-        cmd = args
-    print("Executing command", cmd)
+        cmd = display_cmd = args
+    print("Executing command", display_cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     result = p.communicate()
     return result
@@ -110,7 +108,7 @@ class CBM:
     def exec_query(self, query):
         print("Executing n1ql {}".format(query))
         data = {'statement': query}
-        verify_ssl = False
+        verify_ssl = argsp.couchbase_ca_cert or True
         result = requests.post(self.n1ql_api, data=data, auth=self.auth, verify=verify_ssl)
         return result
 
@@ -135,6 +133,9 @@ class Spanner:
                         self.credentials['connection.database']
                         )
                 )
+        else:
+            print("Only Spanner emulator connections are supported. Exiting ...")
+            sys.exit(1)
 
         req = requests.post(session_url)
         result = req.json()

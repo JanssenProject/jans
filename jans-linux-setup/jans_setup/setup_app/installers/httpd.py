@@ -61,6 +61,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
         self.writeFile(os.path.join(self.server_root, 'index.html'), 'OK')
 
+        icons_conf_fn = None
         if base.os_type == 'suse':
             icons_conf_fn = '/etc/apache2/default-server.conf'
         elif base.clone_type == 'deb':

@@ -1,10 +1,6 @@
 import os
-import glob
-import shutil
 
-from setup_app import paths
 from setup_app.utils import base
-from setup_app.utils.package_utils import packageUtils
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller

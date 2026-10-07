@@ -34,6 +34,7 @@ def get_endpint_data(endpoint, status_code_only=False):
                 return {'status': 'ok'}
             return response.json()
     except Exception as _:
+        # unreachable or invalid response is reported as down
         pass
     return {'status': 'downn'}
 

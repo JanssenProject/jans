@@ -7,7 +7,6 @@ if '--version' in sys.argv:
     sys.exit()
 
 import os
-import time
 import json
 import shutil
 import socket
@@ -18,13 +17,13 @@ disk = os.environ.get('SNAP_COMMON', '/')
 
 try:
     loadavg = os. getloadavg()
-except:
+except Exception:
     loadavg = (0,0,0)
 
 try:
     du=shutil.disk_usage(disk)
     free_disk_space = '{}%'.format(round((du.free/du.total) * 100, 1))
-except:
+except Exception:
     free_disk_space = '0%'
 
 swapsize = 1
@@ -46,13 +45,15 @@ try:
                 memorysize = int(l.split(':')[1].split()[0]) / 1024.0
             elif l.startswith('MemAvailable'):
                 memoryfree = int(l.split(':')[1].split()[0]) / 1024.0
-except:
+except Exception:
+    # keep defaults when /proc/meminfo is unavailable
     pass
 
 try:
     with open('/proc/uptime') as f:
         uptime = int(float(f.read().strip().split()[0]))
-except:
+except Exception:
+    # keep default uptime when /proc/uptime is unavailable
     pass
 
 try:
@@ -60,7 +61,7 @@ try:
     sock.connect(("8.8.8.8", 80))
     ip_addr = sock.getsockname()[0]
     sock.close()
-except:
+except Exception:
     try:
         net_if_list = socket.if_nameindex()
 
@@ -82,15 +83,17 @@ except:
         ip = struct.unpack('16sH2x4s8x', res)[2]
         ip_addr = socket.inet_ntoa(ip)
         sock.close()
-    except:
+    except Exception:
+        # leave ip_addr empty when no interface address can be read
         pass
 
 try:
     hostname = socket.gethostbyaddr(ip_addr)[0]
-except:
+except Exception:
     try:
         hostname = socket.gethostname()
-    except:
+    except Exception:
+        # leave hostname empty when it cannot be resolved
         pass
 
 if swapsize == 0:
@@ -110,7 +113,7 @@ elif d == 1:
 else:
     day_s = '{} days, '.format(d)
 
-uptime_s = '{}{}:{:02d}'.format(day_s, h, m, s)
+uptime_s = '{}{}:{:02d}'.format(day_s, h, m)
 
 if '-j' in sys.argv:
     data = {

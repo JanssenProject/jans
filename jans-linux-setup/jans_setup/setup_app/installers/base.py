@@ -10,7 +10,6 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 
 from setup_app.utils.db_utils import dbUtils
 from setup_app.utils.progress import jansProgress
-from setup_app.utils.printVersion import get_war_info
 
 class BaseInstaller:
     needdb = True
@@ -139,6 +138,7 @@ class BaseInstaller:
         result = self.dbUtils.search('ou=scopes,o=jans', search_filter=search_filter)
         if result:
             return result.get('dn')
+        return None
 
 
     def get_systemd_service_list(self, service):
@@ -166,7 +166,7 @@ class BaseInstaller:
                     self.run([base.service_path, operation, service], None, None, True)
                 else:
                     self.run([base.service_path, service, operation], None, None, True)
-            except:
+            except Exception:
                 self.logIt("Error running operation {} for service {}".format(operation, service), True)
 
     def enable(self, service=None):
@@ -257,7 +257,7 @@ class BaseInstaller:
         scopes_json_fn = os.path.join(self.templates_dir, 'scopes.json')
 
         if not os.path.exists(scopes_json_fn):
-            return
+            return None
 
         self.logIt(f"Creating {self.service_name} scopes from {scopes_json_fn}")
         scopes = base.readJsonFile(scopes_json_fn)

@@ -1,22 +1,14 @@
 import os
-import sys
-import glob
-import time
 import json
 import socket
-import urllib.request
-import base64
 import shutil
 
-from setup_app import paths
 from setup_app import static
 from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
-from setup_app.utils.ldif_utils import myLdifParser, schema2json
-from setup_app.pylib.schema import ObjectClass
-from setup_app.pylib.ldif4.ldif import LDIFWriter
+from setup_app.utils.ldif_utils import schema2json
 from setup_app.pylib.jproperties import Properties
 
 class TestDataLoader(BaseInstaller, SetupUtils):
@@ -107,7 +99,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         socket.setdefaulttimeout(3)
         try:
             socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 443))
-        except:
+        except Exception:
             self.logIt("Failed to connect 8.8.8.8:443.", True)
             print("Test data loader needs internet connection. Giving up ...")
             return
