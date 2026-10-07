@@ -23,7 +23,6 @@ SEALER_PASSWORD_FILE = f"{IDP_HOME}/credentials/.sealer_password"
 
 def _private_opener(path, flags):
     fd = os.open(path, flags, 0o600)
-    # mode above only applies on create; tighten pre-existing files too
     os.fchmod(fd, 0o600)
     return fd
 

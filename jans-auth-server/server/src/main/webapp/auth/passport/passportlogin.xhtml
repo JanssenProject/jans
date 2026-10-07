@@ -322,7 +322,6 @@ border-color: #d6e9c6;
 			}
 			function fillCredential() {
 				var username = window.localStorage.getItem('form-username');
-				// purge passwords persisted by older versions of this page
 				window.localStorage.removeItem('form-password');
 				$(".usernameField").val(username);
 			}

@@ -37,7 +37,6 @@ from http.client import HTTPConnection
 from logging.handlers import RotatingFileHandler
 from pygments import highlight, lexers, formatters
 
-# Imported for its side effect: line editing in input() prompts.
 importlib.import_module('readline')
 
 home_dir = Path.home()
@@ -474,8 +473,6 @@ class JCA_CLI:
         if args.noverify:
             self.verify_ssl = False
         else:
-            # Linux setup issues a self-signed cert; its path is recorded as ca_cert so
-            # verification works out of the box without disabling it.
             ca_cert = config['DEFAULT'].get('ca_cert')
             self.verify_ssl = ca_cert if ca_cert and os.path.isfile(ca_cert) else True
         self.mtls_client_cert = None
