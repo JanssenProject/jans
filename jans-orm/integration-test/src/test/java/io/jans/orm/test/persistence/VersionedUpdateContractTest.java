@@ -26,8 +26,8 @@ import io.jans.orm.test.BaseOrmTest;
 import io.jans.orm.test.model.VersionedTestEntry;
 
 /**
- * Shared, backend-agnostic CAS (`@Version` / `updateWithVersion`) contract test suite. Asserts the
- * contract documented in D-3 through D-8: sequential CAS success, stale-version rejection,
+ * Shared, backend-agnostic CAS (`@Version` / `updateWithVersion`) contract test suite. Asserts through:
+ * sequential CAS success, stale-version rejection,
  * concurrent-writers-exactly-one-winner, `merge()` still bumping the version, and the pre-read
  * not-found behavior staying distinct from a version conflict.
  *
@@ -100,7 +100,7 @@ public abstract class VersionedUpdateContractTest extends BaseOrmTest {
 	/*
 	 * "not found" only means VersionMismatchException when the row is
 	 * deleted in the race window between updateWithVersion's own pre-read and its write.
-	 * updateWithVersion pre-reads the entry the same way merge() does (D-3), so a DN that was
+	 * updateWithVersion pre-reads the entry the same way merge() does, so a DN that was
 	 * already gone before the call began surfaces merge()'s normal not-found behavior instead
 	 * (EntryPersistenceException for SQL) -- same as calling merge() on a nonexistent entry today.
 	 */
