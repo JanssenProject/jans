@@ -21,7 +21,7 @@ from io.jans.as.model.jws import RSASigner;
 from io.jans.as.model.jwt import Jwt;
 from io.jans.as.client import JwkClient;
 from io.jans.as.model.crypto.signature import AlgorithmFamily;
-from java.util import HashMap, HashSet, ArrayList, Arrays, Date
+from java.util import ArrayList, Arrays
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):

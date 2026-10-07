@@ -21,7 +21,7 @@ def jks_created():
 
 
 def jwks_created():
-    with open(os.open("/etc/certs/auth-server-keys.json", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
+    with open("/etc/certs/auth-server-keys.json", "w", opener=lambda p, flags: os.open(p, flags, 0o600)) as f:
         f.write(base64.b64decode(
             manager.secret.get("auth_openid_key_base64")
         ).decode())

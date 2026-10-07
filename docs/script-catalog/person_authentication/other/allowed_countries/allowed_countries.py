@@ -8,10 +8,9 @@ from org.apache.http.params import CoreConnectionPNames
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service.net import HttpService
 from io.jans.util import StringHelper
-from java.util import Arrays, IdentityHashMap
 
 
 import sys

@@ -385,7 +385,7 @@ class Manager:
 
             if path and (contents := self.secret.get(secret)):
                 logger.info("Detected non-empty secret=%r and env=%r used by adapter=%r. The secret will be populated into %r.", secret, env, adapter, path)
-                with open(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
+                with open(path, "w", opener=lambda p, flags: os.open(p, flags, 0o600)) as f:
                     f.write(contents)
 
     def bootstrap(self) -> None:

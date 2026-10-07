@@ -977,7 +977,6 @@ class JCA_CLI:
         self.get_access_token(security)
 
         mime_type = self.get_mime_for_endpoint(endpoint)
-        open_files = []
 
         if mime_type == 'multipart/form-data':
             data_js = json.loads(data) if (isinstance(data, str) or isinstance(data, bytes)) else copy.deepcopy(data)
@@ -987,9 +986,8 @@ class JCA_CLI:
             for prop in schema['properties']:
                 if schema['properties'][prop].get('type') == 'string' and schema['properties'][prop].get('format') == 'binary':
                     if prop in data_js:
-                        upload_fh = open(data_js[prop], 'rb')
-                        open_files.append(upload_fh)
-                        multi_part_fields[prop] = (os.path.basename(data_js[prop]), upload_fh, 'application/octet-stream')
+                        with open(data_js[prop], 'rb') as upload_fh:
+                            multi_part_fields[prop] = (os.path.basename(data_js[prop]), upload_fh.read(), 'application/octet-stream')
                 else:
                     multi_part_fields[prop] = (None, json.dumps(data_js[prop]), 'application/json')
             data = MultipartEncoder(fields=multi_part_fields)
@@ -1020,16 +1018,12 @@ class JCA_CLI:
         else:
             post_params['data'] = data
 
-        try:
-            if method == 'post':
-                response = session.post(**post_params)
-            elif method == 'put':
-                response = session.put(**post_params)
-            else:
-                raise ValueError("Unsupported method: {}".format(method))
-        finally:
-            for upload_fh in open_files:
-                upload_fh.close()
+        if method == 'post':
+            response = session.post(**post_params)
+        elif method == 'put':
+            response = session.put(**post_params)
+        else:
+            raise ValueError("Unsupported method: {}".format(method))
 
         self.log_response(response)
 

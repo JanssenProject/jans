@@ -18,7 +18,7 @@ import sys
 import json
 
 
-from java.util import Collections, HashSet, ArrayList, Arrays, Date
+from java.util import Collections
 
 from com.google.api.client.googleapis.auth.oauth2 import GoogleIdTokenVerifier
 

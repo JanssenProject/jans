@@ -12,6 +12,7 @@ from io.jans.as.model.crypto import  AuthCryptoProvider
 from io.jans.as.model.crypto.signature import SignatureAlgorithm
 from io.jans.as.server.service.net import HttpService
 from java.io import File
+from java.lang import Throwable
 from java.io import FileInputStream
 from java.io import FileReader
 from java.io import IOException
@@ -320,7 +321,7 @@ class ClientRegistration(ClientRegistrationType):
                         keySpec = PKCS8EncodedKeySpec(content);
                         privateKey = kf.generatePrivate(keySpec);
                         return privateKey
-                except:
+                except (Exception, Throwable):
                         print "Client registration. Failed to getPrivateKey: %s" %(sys.exc_info()[1])
                         return False
 
@@ -335,7 +336,7 @@ class ClientRegistration(ClientRegistrationType):
                 http_service_response = httpService.executePost(httpClient, self.tokenUrl, None, headers , self.buildPostDataFortoken(jwt,softwareStatementId))
                                                 
                 http_response = http_service_response.getHttpResponse()
-           except:
+           except (Exception, Throwable):
                 print "Client Registration. getAccessToken", sys.exc_info()[1]
                 return None
 
@@ -367,7 +368,7 @@ class ClientRegistration(ClientRegistrationType):
                         httpService = CdiUtil.bean(HttpService)
                         http_service_response = httpService.executeGet(httpClient, self.tppUrl+"?filter="+ URLEncoder.encode(self.buildFilter(softwareStatementId)) + "&attributes=totalResults",  header )
                         http_response = http_service_response.getHttpResponse()
-                except:
+                except (Exception, Throwable):
                         print "Client Registration. verification. Exception: ", sys.exc_info()[1]
                         return False
 
@@ -407,7 +408,7 @@ class ClientRegistration(ClientRegistrationType):
                         softwareStatementId = CertUtils.getCN(cert)
                         print "CN of AS-%s" % softwareStatementId
                         return softwareStatementId
-               except:
+               except (Exception, Throwable):
                         print "Client Registration. Failed to get CN of AS from the transport keystore. Exception: ", sys.exc_info()[1]
                         return None
 

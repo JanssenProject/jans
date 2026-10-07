@@ -551,7 +551,7 @@ class SqlClient(SqlSchemaMixin):
             if filepath and (contents := self.manager.secret.get(secret_name)):
                 logger.info("Detected non-empty secret_name=%r. The secret will be populated into %r.", secret_name, filepath)
 
-                with open(os.open(filepath, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
+                with open(filepath, "w", opener=lambda p, flags: os.open(p, flags, 0o600)) as f:
                     f.write(contents)
 
     @property

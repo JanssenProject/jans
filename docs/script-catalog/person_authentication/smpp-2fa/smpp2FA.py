@@ -409,7 +409,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     0,
                     code
                 )
-                print("SMPP Message sent to #{} with message id {}".format(number, message_id))
+                print("SMPP Message sent with message id {}".format(message_id))
                 status = True
             except PDUException as e:
                 print("SMPP Invalid PDU parameter: {}".format(e))

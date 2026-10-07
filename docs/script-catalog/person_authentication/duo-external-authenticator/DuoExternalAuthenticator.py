@@ -90,6 +90,7 @@ class PersonAuthentication(PersonAuthenticationType):
             identity = CdiUtil.bean(Identity)
             
             state = ServerUtil.getFirstValue(requestParameters, "state")
+            token = None
             # Get state to verify consistency and originality
             if  identity.getWorkingParameter('state_duo') == state :
             
@@ -105,7 +106,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
             # User successfully passed Duo authentication.
             
-            if "allow" == token.getAuth_result().getStatus():
+            if token is not None and "allow" == token.getAuth_result().getStatus():
                return True
                
             return False

@@ -8,7 +8,7 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.jsf2.message import FacesMessages
 from jakarta.faces.application import FacesMessage
 from io.jans.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList, IdentityHashMap
+from java.util import IdentityHashMap
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import UserService, AuthenticationService
 from io.jans.util import StringHelper

@@ -62,7 +62,7 @@ class ConsentGathering(ConsentGatheringType):
             pageAttributes = context.getPageAttributes()
             
             # Generate random consent gathering request
-            consentRequest = "Requested transaction #%s approval for the amount of sum $ %s.00" % ( random.randint(100000, 1000000), random.randint(1, 100) )
+            consentRequest = "Requested transaction #%s approval for the amount of sum $ %s.00" % ( random.SystemRandom().randint(100000, 1000000), random.SystemRandom().randint(1, 100) )
             pageAttributes.put("consent_request", consentRequest)
             return True
 

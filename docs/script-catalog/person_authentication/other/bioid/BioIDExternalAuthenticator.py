@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from java.util import HashMap, HashSet, ArrayList, Arrays, Date
+from java.util import Arrays
 from java.nio.charset import Charset
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity

@@ -11,10 +11,15 @@ SHIBBOLETH_HOME = os.environ.get("SHIBBOLETH_HOME", "/opt/shibboleth-idp")
 SEALER_PASSWORD_FILE = f"{SHIBBOLETH_HOME}/credentials/.sealer_password"
 
 
-def _write_private(path, data):
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+def _private_opener(path, flags):
+    fd = os.open(path, flags, 0o600)
+    # mode above only applies on create; tighten pre-existing files too
     os.fchmod(fd, 0o600)
-    with open(fd, "wb" if isinstance(data, bytes) else "w") as f:
+    return fd
+
+
+def _write_private(path, data):
+    with open(path, "wb" if isinstance(data, bytes) else "w", opener=_private_opener) as f:
         f.write(data)
 
 

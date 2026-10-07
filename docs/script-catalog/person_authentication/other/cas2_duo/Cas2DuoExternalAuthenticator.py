@@ -5,8 +5,6 @@
 #
 
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.server.service import AuthenticationService
-from io.jans.util import StringHelper
 from java.util import ArrayList
 
 from Cas2ExternalAuthenticator import PersonAuthentication as Cas2ExternalAuthenticator
