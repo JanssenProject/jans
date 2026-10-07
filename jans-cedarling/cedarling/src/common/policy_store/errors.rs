@@ -146,6 +146,10 @@ pub(crate) enum PolicyStoreError {
         #[source]
         source: std::io::Error,
     },
+
+    /// Maximum directory recursion depth exceeded
+    #[error("Maximum directory recursion depth ({max_depth}) exceeded at '{path}'")]
+    MaxDepthExceeded { path: String, max_depth: usize },
 }
 
 /// Details about Cedar parsing errors.
@@ -217,8 +221,9 @@ pub(crate) enum CedarParseErrorDetail {
 }
 
 /// Validation errors for policy store components.
+// this type is `unreachable_pub`
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum ValidationError {
+pub enum ValidationError {
     /// Failed to parse metadata JSON
     #[error("Invalid metadata in file {file}: failed to parse JSON")]
     MetadataJsonParseFailed {
@@ -305,7 +310,9 @@ pub(crate) enum ValidationError {
     EmptySchemaDirectory { path: String },
 
     /// Neither schema.cedarschema file nor schemas/ directory found
-    #[error("No schema source found: neither '{searched_file}' nor directory '{searched_dir}/' exists")]
+    #[error(
+        "No schema source found: neither '{searched_file}' nor directory '{searched_dir}/' exists"
+    )]
     MissingSchemaSource {
         searched_file: String,
         searched_dir: String,
@@ -340,6 +347,21 @@ pub(crate) enum ArchiveError {
     /// Path traversal attempt detected
     #[error("Path traversal attempt detected in archive: '{path}'")]
     PathTraversal { path: String },
+
+    /// A single entry decompresses past `CEDARLING_POLICY_STORE_MAX_FILE_SIZE`.
+    #[error(
+        "Archive entry '{path}' exceeds the maximum decompressed entry size of {limit} bytes \
+         (CEDARLING_POLICY_STORE_MAX_FILE_SIZE)"
+    )]
+    EntrySizeExceeded { path: String, limit: u64 },
+
+    /// The archive's combined decompressed size exceeds the configured cap.
+    #[error("Archive exceeds the maximum total decompressed size of {limit} bytes")]
+    ArchiveSizeExceeded { limit: u64 },
+
+    /// The archive holds more entries than the configured cap.
+    #[error("Archive contains {count} entries, exceeding the maximum of {limit}")]
+    TooManyEntries { count: usize, limit: usize },
 
     /// Unsupported operation on this platform
     #[cfg(target_arch = "wasm32")]

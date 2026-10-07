@@ -100,10 +100,7 @@ impl AuthorizeMultiIssuerRequest {
             Some(ctx) => Python::attach(|py| -> Result<Option<serde_json::Value>, PyErr> {
                 let bound = ctx.clone_ref(py).into_bound(py);
                 Ok(Some(from_pyobject(bound).map_err(|err| {
-                    PyRuntimeError::new_err(format!(
-                        "Failed to convert context to json: {}",
-                        err
-                    ))
+                    PyRuntimeError::new_err(format!("Failed to convert context to json: {}", err))
                 })?))
             })?,
             None => None,

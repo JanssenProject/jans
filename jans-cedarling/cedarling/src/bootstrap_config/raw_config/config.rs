@@ -3,15 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::super::log_config::StdOutMode;
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
+use super::super::log_config::StdOutMode;
 use super::default_values::{
     default_enabled_feature_toggle, default_http_client_max_response_size_bytes,
     default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
-    default_jwks_refresh_min_interval,
-    default_log_channel_capacity, default_log_max_retries,
-    default_status_list_refresh_interval_max,
+    default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
+    default_policy_store_max_file_size, default_status_list_refresh_interval_max,
     default_token_cache_capacity, default_token_cache_max_ttl, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
@@ -24,10 +23,10 @@ use super::json_util::{
     deserialize_or_parse_string_as_json, deserialize_status_list_refresh_interval_max,
     parse_option_string,
 };
-use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
-use crate::log::LogLevel;
 use crate::JwtConfig;
 use crate::LockTransport;
+use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
+use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
 #[cfg(not(target_arch = "wasm32"))]
@@ -35,6 +34,8 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 #[cfg(not(target_arch = "wasm32"))]
 use std::env;
+
+use std::num::NonZeroUsize;
 
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
@@ -136,6 +137,13 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "parse_option_string"
     )]
     pub policy_store_local_fn: Option<String>,
+    /// URL to a Policy Store CJAR file
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_CJAR_URL",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub policy_store_cjar_url: Option<String>,
 
     /// Maximum number of default entities allowed in a policy store.
     /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.
@@ -185,6 +193,30 @@ pub struct BootstrapConfigRaw {
     )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub strict_schema_validation: FeatureToggle,
+
+    /// Whether to enable local collection of telemetry metrics, exposed via
+    /// [`Cedarling::drain_metrics`](crate::Cedarling::drain_metrics).
+    ///
+    /// Disabled unless set to `enabled`; lock telemetry always takes precedence
+    /// and owns the collector when active.
+    #[serde(
+        rename = "CEDARLING_METRICS_COLLECTION",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub metrics_collection: FeatureToggle,
+
+    /// Timeout in milliseconds applied to a
+    /// [`CustomTokenProcessor::process`](crate::CustomTokenProcessor::process)
+    /// call for **non-JWT** custom tokens. `0` (default) disables the timeout;
+    /// a positive value races `process` against the deadline, producing a
+    /// distinct timeout error.
+    #[serde(
+        rename = "CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub custom_token_processor_timeout_millis: u64,
 
     /// Cedarling will only accept tokens signed with these algorithms.
     #[serde(
@@ -282,7 +314,7 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json",
         default = "default_log_channel_capacity"
     )]
-    pub lock_log_channel_capacity: usize,
+    pub lock_log_channel_capacity: NonZeroUsize,
 
     /// Maximum number of retry attempts for sending logs to the lock server.
     /// Uses exponential backoff strategy for retrying.
@@ -485,6 +517,16 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_POLICY_STORE_REFRESH_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub policy_store_refresh_interval_secs: u64,
+
+    /// Maximum decompressed size, in bytes, of a single entry inside a `.cjar`
+    /// policy store archive. Bounds zip-bomb expansion. `0` disables the cap.
+    /// Default: 10 MB (`10485760`).
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_MAX_FILE_SIZE",
+        default = "default_policy_store_max_file_size",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub policy_store_max_file_size: u64,
 }
 
 impl Default for BootstrapConfigRaw {
@@ -532,6 +574,7 @@ fn get_cedarling_env_vars() -> HashMap<String, serde_json::Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
     use crate::jwt_config::{MIN_JWKS_REFRESH_SECS, MIN_STATUS_LIST_REFRESH_SECS};
     use std::{
         env,
@@ -816,6 +859,62 @@ mod tests {
     }
 
     #[test]
+    fn test_policy_store_max_file_size_and_http_cap_default_independently() {
+        with_env_vars(&[], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+            assert_eq!(
+                config.policy_store_max_file_size,
+                ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE,
+                "Policy store max file size should default to 10 MB"
+            );
+            assert_eq!(
+                config.http_client_max_response_size_bytes,
+                crate::HttpClientConfig::DEFAULT_MAX_RESPONSE_SIZE_BYTES,
+                "An unset HTTP cap must use its own default, not the archive cap"
+            );
+        });
+    }
+
+    #[test]
+    fn test_policy_store_max_file_size_from_env_var() {
+        with_env_vars(&[("CEDARLING_POLICY_STORE_MAX_FILE_SIZE", "2048")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+            assert_eq!(
+                config.policy_store_max_file_size, 2048,
+                "Policy store max file size should match environment value"
+            );
+        });
+    }
+
+    #[test]
+    fn test_policy_store_max_file_size_rejects_invalid_values() {
+        // `0` is the documented disable sentinel and stays valid; anything that
+        // isn't a non-negative integer must fail the bootstrap rather than
+        // silently fall back to the default cap.
+        with_env_vars(&[("CEDARLING_POLICY_STORE_MAX_FILE_SIZE", "0")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None)
+                .expect("0 is the disable sentinel and must be accepted");
+            assert_eq!(
+                config.policy_store_max_file_size, 0,
+                "0 must be preserved rather than replaced by the default"
+            );
+        });
+
+        for invalid in ["-1", "not-a-number"] {
+            with_env_vars(&[("CEDARLING_POLICY_STORE_MAX_FILE_SIZE", invalid)], || {
+                let err = BootstrapConfigRaw::from_raw_config_and_env(None)
+                    .expect_err("a non-u64 max file size must be rejected");
+                assert!(
+                    matches!(err, BootstrapConfigLoadingError::DecodingJSON(_)),
+                    "expected a decoding error for input {invalid:?}, got {err:?}"
+                );
+            });
+        }
+    }
+
+    #[test]
     fn test_jwks_refresh_interval_from_env_var() {
         with_env_vars(
             &[
@@ -937,5 +1036,62 @@ mod tests {
                 );
             },
         );
+    }
+
+    /// Tests that `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS` defaults to
+    /// `0` (timeout disabled) when not provided.
+    #[test]
+    fn test_custom_token_processor_timeout_default() {
+        with_env_vars(&[], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+            assert_eq!(
+                config.custom_token_processor_timeout_millis, 0,
+                "custom token processor timeout should default to 0 (disabled)"
+            );
+        });
+    }
+
+    /// Tests that `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS` is parsed
+    /// from environment variables.
+    #[test]
+    fn test_custom_token_processor_timeout_from_env() {
+        with_env_vars(
+            &[("CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS", "500")],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+                assert_eq!(
+                    config.custom_token_processor_timeout_millis, 500,
+                    "custom token processor timeout should match the value supplied via env var"
+                );
+            },
+        );
+    }
+
+    /// Tests that `CEDARLING_METRICS_COLLECTION` defaults to disabled when not provided.
+    #[test]
+    fn test_metrics_collection_default() {
+        with_env_vars(&[], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+            assert_eq!(
+                config.metrics_collection,
+                FeatureToggle::Disabled,
+                "metrics collection should default to disabled"
+            );
+        });
+    }
+
+    /// Tests that `CEDARLING_METRICS_COLLECTION` is parsed from environment variables
+    /// as a feature toggle (`"enabled"`/`"disabled"`), consistent with the other
+    /// boolean bootstrap properties.
+    #[test]
+    fn test_metrics_collection_from_env() {
+        with_env_vars(&[("CEDARLING_METRICS_COLLECTION", "enabled")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+            assert_eq!(
+                config.metrics_collection,
+                FeatureToggle::Enabled,
+                "metrics collection should enable when env var is enabled"
+            );
+        });
     }
 }

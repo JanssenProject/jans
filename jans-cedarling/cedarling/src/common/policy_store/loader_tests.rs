@@ -7,13 +7,14 @@
 //!
 //! This module is extracted from `loader.rs` for maintainability.
 
-use super::super::archive_handler::ArchiveVfs;
+use super::super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::super::entity_parser::EntityParser;
 use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 use super::super::issuer_parser::IssuerParser;
-use super::super::manager::PolicyStoreManager;
+use super::super::manager::{ConversionError, PolicyStoreManager};
 use super::super::vfs_adapter::{DirEntry, MemoryVfs, PhysicalVfs, VfsFileSystem};
 use super::*;
+use std::fmt::Write as FmtWrite;
 use std::fs::{self, File};
 use std::io::{Cursor, Read, Write};
 use std::path::{Path, PathBuf};
@@ -590,7 +591,7 @@ fn test_load_and_parse_schema_end_to_end() {
         .expect("Schema should be present in loaded directory");
     // Get the Cedar schema object
     let schema = parsed.get_schema();
-    assert!(!format!("{schema:?}").is_empty());
+    assert_ne!(format!("{schema:?}"), "");
 }
 
 #[test]
@@ -832,6 +833,222 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     // Create issuer map
     let issuer_map = IssuerParser::create_issuer_map(all_issuers);
     assert_eq!(issuer_map.len(), 2, "Map should have 2 issuers");
+}
+
+#[test]
+fn test_load_custom_issuers_end_to_end() {
+    let temp_dir = TempDir::new().unwrap();
+    let dir = temp_dir.path();
+    create_test_policy_store(dir).expect("Failed to create test policy store");
+
+    // Create custom-issuers directory with one issuer file.
+    let ci_dir = dir.join("custom-issuers");
+    fs::create_dir(&ci_dir).unwrap();
+    fs::write(
+        ci_dir.join("acme.json"),
+        r#"{
+            "id": "acme",
+            "tokens_mappings": {
+                "Acme::CustomToken": {
+                    "required": true,
+                    "required_claims": ["sub"]
+                }
+            }
+        }"#,
+    )
+    .unwrap();
+
+    let loader = DefaultPolicyStoreLoader::new_physical();
+    let loaded_directory = loader
+        .load_directory(dir.to_str().unwrap(), true)
+        .expect("directory load should succeed");
+
+    // Loader half: the file is read from custom-issuers/.
+    assert_eq!(
+        loaded_directory.custom_issuers.len(),
+        1,
+        "should load 1 custom issuer file"
+    );
+
+    // Manager half: convert wires it into PolicyStore.custom_issuers.
+    // strict=false so the assertion does not depend on a schema being present.
+    let store = PolicyStoreManager::convert_to_legacy(loaded_directory, false)
+        .expect("conversion should succeed");
+    let acme = store
+        .custom_issuers
+        .get("acme")
+        .expect("acme custom issuer should be present");
+    let token = acme
+        .tokens_mappings
+        .get("Acme::CustomToken")
+        .expect("acme should declare the Acme::CustomToken type");
+    assert!(token.required);
+    assert!(token.required_claims.contains("sub"));
+}
+
+const ACME_JSON: &str = r#"{
+    "id": "acme",
+    "tokens_mappings": {
+        "Acme::CustomToken": {
+            "required": true,
+            "required_claims": ["sub"]
+        }
+    }
+}"#;
+
+// Build a minimal valid archive containing `custom-issuers/acme.json`.
+fn make_archive_with_custom_issuer(entries: &[(&str, &str)]) -> Vec<u8> {
+    let options = || {
+        FileOptions::<ExtendedFileOptions>::default()
+            .compression_method(CompressionMethod::Deflated)
+    };
+    let mut bytes = Vec::new();
+    {
+        let cursor = Cursor::new(&mut bytes);
+        let mut zip = zip::ZipWriter::new(cursor);
+
+        zip.start_file("metadata.json", options()).unwrap();
+        zip.write_all(
+            br#"{"cedar_version":"4.4.0","policy_store":{"id":"fedcba654321","name":"Test","version":"1.0.0"}}"#,
+        )
+        .unwrap();
+
+        zip.start_file("schema.cedarschema", options()).unwrap();
+        zip.write_all(b"namespace Acme { entity CustomToken; }")
+            .unwrap();
+
+        zip.start_file("policies/default.cedar", options()).unwrap();
+        zip.write_all(b"permit(principal, action, resource);")
+            .unwrap();
+
+        for (path, content) in entries {
+            zip.start_file(*path, options()).unwrap();
+            zip.write_all(content.as_bytes()).unwrap();
+        }
+
+        zip.finish().unwrap();
+    }
+    bytes
+}
+
+#[test]
+fn test_load_custom_issuers_archive_vfs_end_to_end() {
+    let archive_bytes = make_archive_with_custom_issuer(&[("custom-issuers/acme.json", ACME_JSON)]);
+
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes.clone(), ArchiveLimits::default())
+        .expect("ArchiveVfs from buffer");
+    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+    let loaded_directory = loader
+        .load_directory(".", true)
+        .expect("load_directory should succeed");
+
+    assert_eq!(
+        loaded_directory.custom_issuers.len(),
+        1,
+        "ArchiveVfs: should discover 1 custom issuer file"
+    );
+
+    let store = PolicyStoreManager::convert_to_legacy(loaded_directory, false)
+        .expect("convert_to_legacy should succeed");
+    let acme = store
+        .custom_issuers
+        .get("acme")
+        .expect("acme custom issuer should be present after convert");
+    let token = acme
+        .tokens_mappings
+        .get("Acme::CustomToken")
+        .expect("acme should declare the Acme::CustomToken type");
+    assert!(token.required);
+    assert!(token.required_claims.contains("sub"));
+
+    let loaded2 = load_policy_store_archive_bytes(&archive_bytes, true, ArchiveLimits::default())
+        .expect("load_policy_store_archive_bytes should succeed");
+
+    assert_eq!(
+        loaded2.custom_issuers.len(),
+        1,
+        "archive_bytes path: should discover 1 custom issuer file"
+    );
+
+    let store2 = PolicyStoreManager::convert_to_legacy(loaded2, false)
+        .expect("convert_to_legacy (archive_bytes) should succeed");
+    assert!(
+        store2.custom_issuers.contains_key("acme"),
+        "acme issuer must survive round-trip through archive_bytes loader"
+    );
+}
+
+#[test]
+fn test_load_custom_issuers_archive_vfs_duplicate_id_errors() {
+    let archive_bytes = make_archive_with_custom_issuer(&[
+        (
+            "custom-issuers/a.json",
+            r#"{ "id": "dup", "tokens_mappings": { "A::T": {} } }"#,
+        ),
+        (
+            "custom-issuers/b.json",
+            r#"{ "id": "dup", "tokens_mappings": { "B::T": {} } }"#,
+        ),
+    ]);
+
+    let loaded = load_policy_store_archive_bytes(&archive_bytes, true, ArchiveLimits::default())
+        .expect("load should succeed — dedup is detected at convert time");
+
+    let err = PolicyStoreManager::convert_to_legacy(loaded, false)
+        .expect_err("duplicate custom issuer ID should fail conversion");
+    assert!(
+        matches!(&err, ConversionError::IssuerConversion(msg) if msg.contains("Duplicate custom issuer ID")),
+        "got: {err:?}"
+    );
+}
+
+#[test]
+fn test_load_custom_issuers_absent_yields_empty() {
+    let temp_dir = TempDir::new().unwrap();
+    let dir = temp_dir.path();
+    create_test_policy_store(dir).expect("Failed to create test policy store");
+
+    let loader = DefaultPolicyStoreLoader::new_physical();
+    let loaded_directory = loader
+        .load_directory(dir.to_str().unwrap(), true)
+        .expect("directory load should succeed");
+
+    assert!(
+        loaded_directory.custom_issuers.is_empty(),
+        "no custom-issuers/ dir -> empty"
+    );
+}
+
+#[test]
+fn test_load_custom_issuers_duplicate_id_errors() {
+    let temp_dir = TempDir::new().unwrap();
+    let dir = temp_dir.path();
+    create_test_policy_store(dir).expect("Failed to create test policy store");
+
+    let ci_dir = dir.join("custom-issuers");
+    fs::create_dir(&ci_dir).unwrap();
+    fs::write(
+        ci_dir.join("a.json"),
+        r#"{ "id": "dup", "tokens_mappings": { "A::T": {} } }"#,
+    )
+    .unwrap();
+    fs::write(
+        ci_dir.join("b.json"),
+        r#"{ "id": "dup", "tokens_mappings": { "B::T": {} } }"#,
+    )
+    .unwrap();
+
+    let loader = DefaultPolicyStoreLoader::new_physical();
+    let loaded_directory = loader
+        .load_directory(dir.to_str().unwrap(), true)
+        .expect("directory load should succeed");
+
+    let err = PolicyStoreManager::convert_to_legacy(loaded_directory, false)
+        .expect_err("duplicate custom issuer id should fail conversion");
+    assert!(
+        matches!(&err, ConversionError::IssuerConversion(msg) if msg.contains("Duplicate custom issuer ID")),
+        "got: {err:?}"
+    );
 }
 
 #[test]
@@ -1165,7 +1382,7 @@ fn test_complete_policy_store_with_issuers() {
     // Verify everything works together
     assert!(!policy_set.is_empty());
     assert_eq!(entity_store.iter().count(), 1);
-    assert!(!format!("{:?}", parsed_schema.get_schema()).is_empty());
+    assert_ne!(format!("{:?}", parsed_schema.get_schema()), "");
     assert_eq!(issuer_map.len(), 1);
     assert!(issuer_map.contains_key("main_issuer"));
 }
@@ -1227,8 +1444,8 @@ fn test_archive_vfs_end_to_end_from_file() {
     zip.finish().unwrap();
 
     // Step 1: Create ArchiveVfs from file path
-    let archive_vfs =
-        ArchiveVfs::from_file(&archive_path).expect("Should create ArchiveVfs from .cjar file");
+    let archive_vfs = ArchiveVfs::from_file(&archive_path, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from .cjar file");
 
     // Step 2: Create loader with ArchiveVfs
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -1270,8 +1487,8 @@ fn test_archive_vfs_end_to_end_from_bytes() {
     let archive_bytes = create_test_archive("WASM Archive Store", "fedcba654321", &[], &[]);
 
     // Create ArchiveVfs from bytes (works in WASM!)
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
 
     // Create loader and load policy store
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -1344,10 +1561,13 @@ fn test_archive_vfs_with_multiple_policies() {
         zip.finish().unwrap();
     }
 
-    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded_directory = loader.load_directory(".", true).expect("Should load policies");
+    let loaded_directory = loader
+        .load_directory(".", true)
+        .expect("Should load policies");
 
     // Verify all policies loaded recursively from subdirectories
     assert_eq!(loaded_directory.policies.len(), 3);
@@ -1391,17 +1611,19 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
 
         zip.start_file("schema.cedarschema", options())
             .expect("Should create schema.cedarschema in archive");
-        zip.write_all(schema_content).expect("Should write schema content");
+        zip.write_all(schema_content)
+            .expect("Should write schema content");
 
         zip.start_file("policies/test.cedar", options())
             .expect("Should create test.cedar in archive");
-        zip.write_all(policy_content).expect("Should write policy content");
+        zip.write_all(policy_content)
+            .expect("Should write policy content");
 
         zip.finish().expect("Should finalize archive");
     }
 
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded_directory = loader
         .load_directory(".", true)
@@ -1781,8 +2003,8 @@ fn test_load_schema_from_schemas_dir_in_archive() {
         zip.finish().unwrap();
     }
 
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let result = loader
@@ -1955,7 +2177,9 @@ fn test_load_schema_from_schemas_dir_mixed_extensions() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".", true).expect("Should skip .txt files");
+    let result = loader
+        .load_directory(".", true)
+        .expect("Should skip .txt files");
 
     let parsed_schema = result.schema.expect("Schema should be present");
     let entity_types: Vec<_> = parsed_schema
@@ -2116,12 +2340,11 @@ fn test_archive_shared_namespace_full_pipeline() {
         zip.write_all(b"permit(principal, action, resource);")
             .expect("Should write policy content");
 
-        zip.finish()
-            .expect("Should finalize archive");
+        zip.finish().expect("Should finalize archive");
     }
 
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let result = loader
@@ -2152,5 +2375,50 @@ fn test_archive_shared_namespace_full_pipeline() {
     assert!(
         type_names.contains(&"App::Admin".to_string()),
         "Archive schema should contain App::Admin; got: {type_names:?}"
+    );
+}
+
+#[test]
+fn test_max_recursion_depth_exceeded() {
+    let vfs = MemoryVfs::new();
+
+    vfs.create_file(
+        "metadata.json",
+        br#"{
+        "cedar_version": "4.4.0",
+        "policy_store": {
+            "id": "abcdef1234567890",
+            "name": "Deep Nesting Test",
+            "version": "1.0.0"
+        }
+    }"#,
+    )
+    .unwrap();
+
+    vfs.create_file(
+        "schema.cedarschema",
+        b"namespace App { entity User; entity Resource; action \"read\" appliesTo { principal: [User], resource: [Resource] }; }",
+    )
+    .unwrap();
+
+    // Build a directory tree deeper than MAX_RECURSION_DEPTH (64).
+    // Place a .cedar file at the bottom so the only failure path is the depth check.
+    let depth = 66;
+    let mut path = String::from("policies");
+    for i in 0..depth {
+        let _ = write!(path, "/level{i}");
+    }
+    let file_path = format!("{path}/deep.cedar");
+    vfs.create_file(&file_path, b"permit(principal, action, resource);")
+        .unwrap();
+
+    let loader = DefaultPolicyStoreLoader::new(vfs);
+    let result = loader.load_directory(".", true);
+
+    let err = result.expect_err("Should fail with MaxDepthExceeded");
+    let err_msg = err.to_string();
+    assert!(
+        err_msg.contains("Maximum directory recursion depth"),
+        "Error should mention max depth, got: {err_msg}"
     );
 }

@@ -60,6 +60,7 @@ resource "jans_app_configuration" "global" {
 - `authorization_encryption_enc_values_supported` (List of String) A list of the authorization encryption algorithms supported.
 - `authorization_endpoint` (String) The authorization endpoint URL. Example: https://server.example.com/restv1/authorize
 - `authorization_request_custom_allowed_parameters` (Block List) Authorization Request Custom Allowed Parameters. To avoid diverging state, those should be defined in alphabetical order. (see [below for nested schema](#nestedblock--authorization_request_custom_allowed_parameters))
+- `authorization_response_iss_parameter_supported` (Boolean) Boolean value specifying whether the authorization response iss parameter is supported.
 - `authorization_signing_alg_values_supported` (List of String) A list of the authorization signing algorithms supported.
 - `authorize_challenge_session_lifetime_in_seconds` (Number) The lifetime of the authorize challenge session in seconds.
 - `backchannel_authentication_endpoint` (String) Backchannel Authentication Endpoint. Example: https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()
@@ -106,6 +107,7 @@ resource "jans_app_configuration" "global" {
 - `connection_service_configuration` (Block List, Max: 1) HTTP connection pool configuration. (see [below for nested schema](#nestedblock--connection_service_configuration))
 - `consent_gathering_script_backward_compatibility` (Boolean) Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false AS will pick up script based on client configuration.
 - `cookie_domain` (String) Sets cookie domain for all cookies created by OP.
+- `cookie_same_site` (String) SameSite attribute value for the session cookie.
 - `cors_configuration_filters` (Block List) CORS Configuration filters. (see [below for nested schema](#nestedblock--cors_configuration_filters))
 - `css_location` (String) The location for CSS files.
 - `custom_headers_with_authorization_response` (Boolean) Boolean value specifying whether to enable Custom Response Header parameter to return custom headers with the Authorization Response.
@@ -130,6 +132,7 @@ resource "jans_app_configuration" "global" {
 - `device_authz_response_type_to_process_authz` (String) Response type used to process device authz requests.
 - `device_authz_token_poll_interval` (Number) Default interval returned to the client to process device token requests.
 - `disable_authn_for_max_age_zero` (Boolean) Boolean value specifying whether to disable authentication for max age zero.
+- `disable_external_logger_configuration` (Boolean) Boolean value specifying whether to ignore the external log4j2 logging configuration.
 - `disable_jdk_logger` (Boolean) Boolean value specifying whether to enable JDK Loggers.
 - `disable_prompt_consent` (Boolean) Boolean value specifying whether to disable prompt consent.
 - `disable_prompt_create` (Boolean) Boolean value specifying whether to disable prompt create.
@@ -187,6 +190,9 @@ resource "jans_app_configuration" "global" {
 - `http_logging_exclude_paths` (List of String) List of base URI for which request/response logging filter should not record activity. Example: "/auth/img", "/auth/stylesheet"
 - `http_logging_response_body_content` (Boolean) Boolean value specifying whether to log response body content.
 - `id_generation_endpoint` (String) URL for the ID Generation Endpoint. Example: https://server.example.com/restv1/id
+- `id_jag_issue_refresh_token` (Boolean) Boolean value specifying whether to issue a refresh token for the ID Assertion Grant (JAG).
+- `id_jag_lifetime` (Number) Lifetime of the ID Assertion Grant (JAG) in seconds.
+- `id_jag_trusted_idp_issuers` (Block List) List of trusted IDP issuers for the ID Assertion Grant (JAG). (see [below for nested schema](#nestedblock--id_jag_trusted_idp_issuers))
 - `id_token_encryption_alg_values_supported` (List of String) A list of the JWE encryption algorithms (alg values) supported by the OP 
                                                         for the ID Token to encode the Claims in a JWT. One of "RSA1_5", "RSA-OAEP", "A128KW", "A256KW".
 - `id_token_encryption_enc_values_supported` (List of String) A list of the JWE encryption algorithms (enc values) supported by the OP for 
@@ -333,6 +339,10 @@ resource "jans_app_configuration" "global" {
 - `skip_session_authn_time_check_during_prompt_login` (Boolean) Boolean value to skip session authentication time check during prompt login
 - `software_statement_validation_claim_name` (String) Validation claim name for software statement.
 - `software_statement_validation_type` (String) Validation type used for software statement.
+- `spiffe_bundle_connect_timeout_ms` (Number) SPIFFE bundle endpoint connect timeout in milliseconds.
+- `spiffe_bundle_max_response_size` (Number) Maximum SPIFFE bundle endpoint response size in bytes.
+- `spiffe_bundle_read_timeout_ms` (Number) SPIFFE bundle endpoint read timeout in milliseconds.
+- `spiffe_trust_domains` (Block List) List of SPIFFE trust domain bundle sources. (see [below for nested schema](#nestedblock--spiffe_trust_domains))
 - `spontaneous_scope_lifetime` (Number) The lifetime of spontaneous scope in seconds.
 - `ssa_configuration` (Block List, Max: 1) List of SSA Configurations. (see [below for nested schema](#nestedblock--ssa_configuration))
 - `stat_authorization_scope` (String) Scope required for Statistical Authorization.
@@ -525,6 +535,14 @@ Optional:
 - `type` (String)
 
 
+<a id="nestedblock--id_jag_trusted_idp_issuers"></a>
+### Nested Schema for `id_jag_trusted_idp_issuers`
+
+Optional:
+
+- `automatically_granted_scopes` (List of String)
+
+
 <a id="nestedblock--lock_message_config"></a>
 ### Nested Schema for `lock_message_config`
 
@@ -564,6 +582,16 @@ Optional:
 - `well_formed` (Boolean) Whether the extractor is well formed.
 
 
+
+
+<a id="nestedblock--spiffe_trust_domains"></a>
+### Nested Schema for `spiffe_trust_domains`
+
+Optional:
+
+- `bundle_cache_lifetime_in_minutes` (Number)
+- `bundle_endpoint_url` (String)
+- `trust_domain` (String)
 
 
 <a id="nestedblock--ssa_configuration"></a>

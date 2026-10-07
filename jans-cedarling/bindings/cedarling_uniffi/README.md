@@ -95,6 +95,125 @@ Use `make android BUILD_TYPE=release` or `make android BUILD_TYPE=debug` to buil
 
 6. Run the project on simulator.
 
+### TLS Setup (Required for JWT Validation)
+
+Android has no built-in TLS backend for Rust's `rustls`, so Cedarling uses
+[`rustls-platform-verifier`](https://github.com/rustls/rustls-platform-verifier)
+to verify certificates via the Android platform trust store. This must be
+initialized once with the app's `Context` **before** any HTTPS call — i.e.
+before creating a `Cedarling` instance with `CEDARLING_JWT_SIG_VALIDATION` or
+`CEDARLING_JWT_STATUS_VALIDATION` set to `enabled`. Skipping this causes a
+crash on startup:
+
+```text
+uniffi.cedarling_uniffi.InternalException: Task panicked:
+"Expect rustls-platform-verifier to be initialized"
+```
+
+#### Changes required in the Android app for HTTPS calls
+
+##### 1. Add the rustls-platform-verifier Kotlin component
+
+The Rust side calls into a small Kotlin component (`org.rustls.platformverifier`) to use Android's system trust store. It ships inside the `rustls-platform-verifier-android` crate in your local cargo registry, and Gradle can resolve it from there.
+
+In `settings.gradle.kts`:
+
+```kotlin
+// Locates the Maven repository bundled inside the rustls-platform-verifier-android
+// crate. See https://github.com/rustls/rustls-platform-verifier#android
+fun rustlsPlatformVerifierMavenRepo(): File {
+    val json = providers.exec {
+        workingDir = rootDir
+        commandLine(
+            "cargo", "metadata",
+            "--format-version", "1",
+            "--filter-platform", "aarch64-linux-android",
+            // Path to the Cargo.toml of cedarling_uniffi (or any crate that
+            // depends on rustls-platform-verifier). Adjust for your layout:
+            "--manifest-path", File(rootDir, "../Cargo.toml").absolutePath
+        )
+    }.standardOutput.asText.get()
+
+    @Suppress("UNCHECKED_CAST")
+    val packages = (groovy.json.JsonSlurper().parseText(json) as Map<String, Any>)["packages"] as List<Map<String, Any>>
+    val manifestPath = File(packages.first { it["name"] == "rustls-platform-verifier-android" }["manifest_path"] as String)
+    return File(manifestPath.parentFile, "maven")
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri(rustlsPlatformVerifierMavenRepo())
+            metadataSources { artifact() }
+        }
+    }
+}
+```
+
+In `app/build.gradle.kts`:
+
+```kotlin
+implementation("rustls:rustls-platform-verifier:0.1.1@aar")
+```
+
+If your app uses R8/ProGuard, add the following to `proguard-rules.pro` (the component is only reached via JNI, so shrinkers see it as dead code):
+
+```proguard
+-keep, includedescriptorclasses class org.rustls.platformverifier.** { *; }
+-keep class org.jans.cedarling.CedarlingAndroid { *; }
+```
+
+##### 2. Initialize TLS before using Cedarling
+
+The Cedarling UniFFI binding exports a JNI entry point (`Java_org_jans_cedarling_CedarlingAndroid_initTls`, defined in the binding's `src/android.rs`). Add the matching Kotlin declaration — the package and classname must be exactly `org.jans.cedarling.CedarlingAndroid`:
+
+```kotlin
+package org.jans.cedarling
+
+import android.content.Context
+
+object CedarlingAndroid {
+    @Volatile
+    private var initialized = false
+
+    init {
+        System.loadLibrary("cedarling_uniffi")
+    }
+
+    @JvmStatic
+    external fun initTls(context: Context)
+
+    /** Idempotent convenience wrapper around [initTls]. */
+    @JvmStatic
+    fun ensureInitialized(context: Context) {
+        if (!initialized) {
+            synchronized(this) {
+                if (!initialized) {
+                    initTls(context.applicationContext)
+                    initialized = true
+                }
+            }
+        }
+    }
+}
+```
+
+Call it once before constructing any Cedarling instance, e.g. in `Application.onCreate()` or your main activity:
+
+```kotlin
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    CedarlingAndroid.ensureInitialized(applicationContext)
+    // ...
+}
+```
+
+##### 3. Enable JWT validation for testing
+
+Test Cedarling authorization in the Android app with the `CEDARLING_JWT_SIG_VALIDATION` and `CEDARLING_JWT_STATUS_VALIDATION` bootstrap properties set to `enabled`.
+
 ## Kotlin Binding
 
 Here we delve into the process of generating the Kotlin binding for cedarling and use it in a sample Java Maven project to run the authorization.
@@ -130,12 +249,23 @@ The method will execute the steps for Cedarling initialization with a sample boo
 
 Cedarling supports multiple ways to load policy stores:
 
-#### Legacy Single-File Formats
+#### Policy Store Configuration
+
+Choose either a local archive or a remote URI (they are mutually exclusive):
+
+**Local Archive (`.cjar` or directory):**
 
 ```json
 {
-  "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
-  "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store",
+  "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar"
+}
+```
+
+**Remote URI (with optional background refresh):**
+
+```json
+{
+  "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store.cjar",
   "CEDARLING_POLICY_STORE_REFRESH_INTERVAL": 60
 }
 ```
@@ -190,9 +320,9 @@ Regenerate Kotlin/Swift bindings from the library (`uniffi-bindgen generate …`
 | `load_from_file` | `Cedarling.loadFromFile(...)` | `Cedarling.loadFromFile(path:)` |
 | `load_from_json_with_archive_bytes` | `Cedarling.loadFromJsonWithArchiveBytes(...)` | `Cedarling.loadFromJsonWithArchiveBytes(config:archiveBytes:)` |
 
-- **`load_from_json`** — Policy store location comes from the JSON (`CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_URI`, or `CEDARLING_POLICY_STORE_LOCAL`), same as core Cedarling bootstrap rules.
+- **`load_from_json`** — Policy store location comes from the JSON (`CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_URI`, or `CEDARLING_POLICY_STORE_LOCAL` for inline YAML; inline JSON is rejected), same as core Cedarling bootstrap rules.
 - **`load_from_file`** — Load bootstrap from a path, then resolve the policy store from fields in that file.
-- **`load_from_json_with_archive_bytes`** — Pass the bootstrap JSON as a string **and** the raw bytes of a `.cjar` archive. Fields `CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_URI`, and `CEDARLING_POLICY_STORE_LOCAL_FN` in the JSON are **ignored**; the archive is the only policy source. This mirrors the WASM helper `init_from_archive_bytes` and fits **Android `assets/`**, where you open files with `AssetManager` (no ordinary filesystem path for native code), or any host that already has the archive in memory.
+- **`load_from_json_with_archive_bytes`** — Pass the bootstrap JSON as a string **and** the raw bytes of a `.cjar` archive. Fields `CEDARLING_POLICY_STORE_URI`, `CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_LOCAL`, and `CEDARLING_POLICY_STORE_CJAR_URL` in the JSON are **ignored**; the archive is the only policy source. This mirrors the WASM helper `initFromArchiveBytes` and fits **Android `assets/`**, where you open files with `AssetManager` (no ordinary filesystem path for native code), or any host that already has the archive in memory.
 
 **Kotlin (Android assets):**
 
@@ -200,7 +330,10 @@ Regenerate Kotlin/Swift bindings from the library (`uniffi-bindgen generate …`
 val bootstrapJson =
     assets.open("bootstrap.json").bufferedReader().use { it.readText() }
 val archiveBytes = assets.open("policy-store.cjar").readBytes()
-val cedarling = Cedarling.loadFromJsonWithArchiveBytes(bootstrapJson, archiveBytes)
+val buffer = java.nio.ByteBuffer.allocateDirect(archiveBytes.size)
+buffer.put(archiveBytes)
+buffer.flip()
+val cedarling = Cedarling.loadFromJsonWithArchiveBytes(bootstrapJson, buffer)
 ```
 
 **Swift (bundle resources):**
@@ -408,6 +541,34 @@ print("Entries: \(stats.entryCount)/\(stats.maxEntries)")
 print("Total size: \(stats.totalSizeBytes) bytes")
 print("Capacity usage: \(stats.capacityUsagePercent)%")
 ```
+
+### Drain Metrics
+
+Destructive read: returns a `MetricsSnapshot` (`policyStats`,
+`errorCounters`, `operationalStats`, `interval`) and resets the
+counters.
+
+**Kotlin:**
+
+```kotlin
+val snapshot = cedarling.drainMetrics()
+println("Requests: ${snapshot.operationalStats["authz.requests_total"]}")
+println("Interval: ${snapshot.interval}")
+```
+
+**Swift:**
+
+```swift
+let snapshot = try cedarling.drainMetrics()
+print("Requests: \(snapshot.operationalStats["authz.requests_total"] ?? 0)")
+print("Interval: \(snapshot.interval)s")
+```
+
+Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails with `LockTelemetry`
+whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server
+has no telemetry endpoint. `interval` is a Duration with sub-second
+precision (Kotlin `java.time.Duration`, Swift `TimeInterval` seconds,
+Python `datetime.timedelta`).
 
 ### Error Handling
 

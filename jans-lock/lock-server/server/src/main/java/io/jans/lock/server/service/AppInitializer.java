@@ -31,6 +31,7 @@ import io.jans.lock.service.config.ConfigurationFactory;
 import io.jans.lock.service.stat.StatService;
 import io.jans.lock.service.stat.StatTimer;
 import io.jans.lock.service.status.StatusCheckerTimer;
+import io.jans.lock.service.trace.receipt.TraceReceiptRepairTimer;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PersistenceConfiguration;
@@ -131,6 +132,9 @@ public class AppInitializer {
     
     @Inject StatTimer statTimer;
 
+    @Inject
+    private TraceReceiptRepairTimer traceReceiptRepairTimer;
+
 	@PostConstruct
 	public void createApplicationComponents() {
 		try {
@@ -173,6 +177,7 @@ public class AppInitializer {
 		statusCheckerTimer.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
         statTimer.initTimer();
+        traceReceiptRepairTimer.initTimer();
 
         // Initialize Document Store Manager
         documentStoreManager.initTimer(Arrays.asList(DOCUMENT_STORE_MANAGER_JANS_LOCK_TYPE));

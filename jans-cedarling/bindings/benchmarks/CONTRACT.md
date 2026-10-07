@@ -1,6 +1,6 @@
 # Cedarling Cross-Platform Benchmark Contract
 
-Single source of truth for how every binding bench (Java/UniFFI, Go, Python, WASM, C) must behave so the results are directly comparable.
+Single source of truth for how every binding bench (Rust, Java/UniFFI, Go, Python, WASM, C) must behave so the results are directly comparable.
 
 ## Fixtures (`fixtures/scenarios.json`)
 
@@ -13,8 +13,16 @@ Every binding loads the same manifest and dispatches scenarios by `id`. No inlin
 | `multi_issuer_2_tokens` | multi_issuer | 2 | off | off | matches criterion `authz_authorize_multi_issuer` |
 | `multi_issuer_3_tokens` | multi_issuer | 3 | off | off | matches the prior Java/Python/WASM/C bench shape |
 | `multi_issuer_sig_status` | multi_issuer | runtime-generated | on | on | JWT decode + sig verify + status-list + mock OP |
+| `unsigned_batch_10` | unsigned_batch | 0 | off | off | batch API, N=10 items; **`mean_ns` is per whole batch call** |
+| `unsigned_batch_25` | unsigned_batch | 0 | off | off | batch API, N=25 items; per-batch timing |
+| `multi_issuer_batch_10` | multi_issuer_batch | 2 | off | off | batch API, N=10 items; per-batch timing |
+| `multi_issuer_batch_25` | multi_issuer_batch | 2 | off | off | batch API, N=25 items; per-batch timing |
 
 `multi_issuer_sig_status` requires a per-binding mock OP. Bindings without one emit `{"status":"skipped","reason":"mock_op_unavailable"}`.
+
+### Batch scenarios
+
+`unsigned_batch` / `multi_issuer_batch` reuse the single-item fixture shape plus an `item_count: N` field. Each iteration builds N `BatchItem`s, cloning the fixture resource with entity ids suffixed `-0..-N-1`. `mean_ns` is per whole batch call — divide by `item_count` for per-item cost; the delta vs `unsigned_simple` / `multi_issuer_2_tokens` is the setup-amortization win.
 
 ### Fixture schema
 
@@ -25,7 +33,8 @@ Every binding loads the same manifest and dispatches scenarios by `id`. No inlin
   "scenarios": [
     {
       "id": "unsigned_simple",
-      "kind": "unsigned" | "multi_issuer",
+      "kind": "unsigned" | "multi_issuer" | "unsigned_batch" | "multi_issuer_batch",
+      "item_count": 10,                                  // batch kinds only; ignored otherwise
       "policy_store_fn": "test_files/...yaml",
       "config_overrides": { "CEDARLING_...": <string | array | bool | number> },
       "principal": { ... } | null,
@@ -55,7 +64,7 @@ One JSON object per scenario × binding, one per line on stdout. Example:
 
 | field | type | notes |
 |---|---|---|
-| `binding` | string | `"java"`, `"go"`, `"python"`, `"wasm"`, `"c"` |
+| `binding` | string | `"rust"`, `"java"`, `"go"`, `"python"`, `"wasm"`, `"c"` |
 | `scenario` | string | matches `id` from the manifest |
 | `iter` | number | `measure_iters` executed |
 | `mean_ns` / `p50_ns` / `p95_ns` / `p99_ns` / `min_ns` / `max_ns` | number | wall-clock per call, nanoseconds |

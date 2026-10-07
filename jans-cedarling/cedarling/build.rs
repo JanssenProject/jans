@@ -29,9 +29,8 @@ fn emit_build_metadata() {
             .unwrap_or_default()
     });
 
-    let timestamp = std::env::var("CEDARLING_BUILD_TIMESTAMP").unwrap_or_else(|_| {
-        chrono::Utc::now().to_rfc3339()
-    });
+    let timestamp = std::env::var("CEDARLING_BUILD_TIMESTAMP")
+        .unwrap_or_else(|_| chrono::Utc::now().to_rfc3339());
 
     println!("cargo:rustc-env=CEDARLING_BUILD_COMMIT={commit}");
     println!("cargo:rustc-env=CEDARLING_BUILD_TIMESTAMP={timestamp}");
@@ -43,7 +42,9 @@ fn emit_build_metadata() {
 /// Uses `--git-dir` / `--git-common-dir` so the lookup works correctly in
 /// linked worktrees, submodules, and nested workspaces.
 fn git_rerun_if_changed() {
-    let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") else { return };
+    let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") else {
+        return;
+    };
 
     let git_dir_output = std::process::Command::new("git")
         .args(["-C", &manifest_dir, "rev-parse", "--git-dir"])
@@ -96,25 +97,24 @@ fn git_rerun_if_changed() {
         println!("cargo:rerun-if-changed={}", head.display());
 
         if let Ok(content) = std::fs::read_to_string(&head)
-            && let Some(ref_path) = content.strip_prefix("ref: ") {
-                let ref_file = git_dir.join(ref_path.trim());
-                let candidate = ref_file.exists().then_some(ref_file)
-                    .or_else(|| {
-                        let f = common_dir.join(ref_path.trim());
-                        f.exists().then_some(f)
-                    });
-                if let Some(f) = candidate {
-                    println!("cargo:rerun-if-changed={}", f.display());
-                }
+            && let Some(ref_path) = content.strip_prefix("ref: ")
+        {
+            let ref_file = git_dir.join(ref_path.trim());
+            let candidate = ref_file.exists().then_some(ref_file).or_else(|| {
+                let f = common_dir.join(ref_path.trim());
+                f.exists().then_some(f)
+            });
+            if let Some(f) = candidate {
+                println!("cargo:rerun-if-changed={}", f.display());
+            }
         }
     }
 
     let packed_refs = git_dir.join("packed-refs");
-    let candidate = packed_refs.exists().then_some(packed_refs)
-        .or_else(|| {
-            let f = common_dir.join("packed-refs");
-            f.exists().then_some(f)
-        });
+    let candidate = packed_refs.exists().then_some(packed_refs).or_else(|| {
+        let f = common_dir.join("packed-refs");
+        f.exists().then_some(f)
+    });
     if let Some(f) = candidate {
         println!("cargo:rerun-if-changed={}", f.display());
     }

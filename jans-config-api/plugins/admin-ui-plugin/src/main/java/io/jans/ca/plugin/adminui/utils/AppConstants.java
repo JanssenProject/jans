@@ -4,6 +4,7 @@ public interface AppConstants {
     public static final String ADMIN_UI_CONFIG_DN = "ou=admin-ui,ou=configuration,o=jans";
     public static final String ADMIN_UI_RESOURCE_SCOPES_MAPPING_DN = "ou=adminUIResourceScopesMapping,ou=admin-ui,o=jans";
     public static final String WEBHOOK_DN = "ou=auiWebhooks,ou=admin-ui,o=jans";
+    public static final String POLICY_STORE_DN = "ou=adminUIPolicyStore,ou=admin-ui,o=jans";
     public static final String ADMIN_UI_FEATURES_DN = "ou=auiFeatures,ou=admin-ui,o=jans";
     public static final String ADS_CONFIG_DN = "ou=agama-developer-studio,ou=configuration,o=jans";
     public static final String DEFAULT_POLICY_STORE_FILE_PATH = "./custom/config/adminUI/policy-store.cjar";
@@ -21,6 +22,9 @@ public interface AppConstants {
     //fields name
     public static final String WEBHOOK_ID = "webhookId";
     public static final String INUM = "inum";
+    public static final String STATUS = "jansStatus";
+    public static final String STATUS_ACTIVE = "active";
+    public static final String STATUS_INACTIVE = "inactive";
     public static final String ADMIN_UI_FEATURE_ID = "featureId";
     public static final String AUTHORIZATION = "Authorization";
     public static final String CONTENT_TYPE = "Content-Type";

@@ -26,6 +26,8 @@ pub enum ParseStatusListError {
     JwtInvalidBitsType(serde_json::Value),
     #[error("failed to convert bits value: {0}")]
     BitsConversion(#[from] std::num::TryFromIntError),
+    #[error("decompressed status list exceeds the maximum allowed size of {0} bytes")]
+    DecompressedSizeExceeded(u64),
 }
 
 #[derive(Debug, Error)]

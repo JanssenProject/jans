@@ -1,5 +1,6 @@
 package io.jans.configapi.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
@@ -19,7 +20,8 @@ import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.as.model.crypto.PublicKey;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
-import io.jans.util.StringHelper;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.json.JSONObject;
 
@@ -43,27 +45,25 @@ public class JwtUtil {
     @Inject
     AuthUtil authUtil;
 
-    public boolean isJwt(String token) throws Exception {
-        log.trace("\n\n JwtUtil::isJwt()  token = " + token);
+    public boolean isJwt(String token) throws InvalidJwtException {
         boolean isJwt = false;
         try {
             this.parse(token);
             isJwt = true;
         } catch (Exception ex) {
-            log.error("Not jwt token " + token);
+            log.debug("Not jwt token ");
         }
         return isJwt;
     }
 
     public Jwt parse(String encodedJwt) throws InvalidJwtException {
-        log.trace("\n\n JwtUtil::parse()  encodedJwt = " + encodedJwt);
-        if (StringHelper.isNotEmpty(encodedJwt)) {
-            return Jwt.parse(encodedJwt);
+        if (encodedJwt==null || StringUtils.isBlank(encodedJwt)) {
+            throw new InvalidJwtException("Null Jwt token cannot be parsed");
         }
-        return null;
+        return Jwt.parse(encodedJwt);
     }
 
-    public List<String> validateToken(String token) throws InvalidJwtException, Exception {
+    public List<String> validateToken(String token) throws InvalidJwtException, JsonProcessingException {
         // 1. Parse Jwt token
         // 2. Validate Token
         // 3. Validate Issuer
@@ -75,27 +75,21 @@ public class JwtUtil {
         try {
             // Parse Token
             Jwt jwt = this.parse(token);
-            log.trace("JwtUtil::validateToken() -JWT details : " + " jwt.getSigningInput() = " + jwt.getSigningInput()
-                    + " ,jwt.getEncodedSignature() = " + jwt.getEncodedSignature() + " ,jwt.getHeader().getKeyId() = "
-                    + jwt.getHeader().getKeyId() + " ,jwt.getHeader().getSignatureAlgorithm() = "
-                    + jwt.getHeader().getSignatureAlgorithm()
-                    + " ,jwt.getClaims().getClaimAsString(JwtHeaderName.ALGORITHM) = "
-                    + jwt.getClaims().getClaimAsString(JwtHeaderName.ALGORITHM)
-                    + " ,jwt.getClaims().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD) = "
-                    + jwt.getClaims().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD) + ".");
-
+          
+            if(jwt == null) {
+                throw new WebApplicationException("JWT is blank",
+                        Response.status(Response.Status.UNAUTHORIZED).build());    
+            }
+            
             final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
             List<String> scopes = jwt.getClaims().getClaimAsStringList("scope");
-
-            log.debug("\n\n JwtUtil::validateToken() - expiresAt = " + expiresAt + " , issuer =" + issuer
-                    + " , scopes = " + scopes + "\n");
 
             // Validate token is not expired
             log.info("Validate JWT");
             final Date now = new Date();
             if (now.after(expiresAt)) {
-                log.error("ID Token is expired. (It is after " + now + ").");
+                log.error("ID Token is expired. (It is after {} -)", now);
                 throw new WebApplicationException("ID Token is expired",
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
@@ -110,17 +104,14 @@ public class JwtUtil {
             // Retrieve JSON Web Key Set Uri
             log.info("Retrieve JSON Web Key Set URI");
             String jwksUri = this.getJwksUri(issuer);
-            log.trace("\n\n JwtUtil::validateToken() - jwksUri = " + jwksUri);
 
             // Retrieve JSON Web Key Set
             log.info("Retrieve JSON Web Key Set");
             JSONWebKeySet jsonWebKeySet = this.getJSONWebKeys(jwksUri);
-            log.trace("\n\n JwtUtil::validateToken() - jsonWebKeySet = " + jsonWebKeySet);
-
+            
             // Verify the signature used to sign the access token
             log.info("Verify JWT signature");
             boolean isJwtSignatureValid = this.validateSignature(jwt, jsonWebKeySet);
-            log.debug("\n\n JwtUtil::validateToken() - isJwtSignatureValid = " + isJwtSignatureValid + "\n\n");
 
             if (!isJwtSignatureValid) {
                 throw new WebApplicationException("Jwt Signature is Invalid.",
@@ -129,104 +120,21 @@ public class JwtUtil {
 
             return scopes;
         } catch (InvalidJwtException exp) {
-            log.error("Not a valid Jwt token = " + exp);
-            throw exp;
-        }
-
-    }
-
-    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, Exception {
-        log.trace("Validate Jwt Token - token = " + token + " ,resourceScopes = " + resourceScopes + "\n");
-        // 1. Parse Jwt token
-        // 2. Validate Token
-        // 3. Validate Issuer
-        // 4. Retrieve Auth Server JSON Web Keys - jwks_uri"
-        // :"https://localhost/jans-auth/restv1/jwks",
-        // 5. Verify the signature used to sign the access token
-        // 6. Verify the scopes
-
-        try {
-            // Parse Token
-            Jwt jwt = this.parse(token);
-            log.trace("JwtUtil::validateToken() -JWT details : " + " jwt.getSigningInput() = " + jwt.getSigningInput()
-                    + " ,jwt.getEncodedSignature() = " + jwt.getEncodedSignature() + " ,jwt.getHeader().getKeyId() = "
-                    + jwt.getHeader().getKeyId() + " ,jwt.getHeader().getSignatureAlgorithm() = "
-                    + jwt.getHeader().getSignatureAlgorithm()
-                    + " ,jwt.getClaims().getClaimAsString(JwtHeaderName.ALGORITHM) = "
-                    + jwt.getClaims().getClaimAsString(JwtHeaderName.ALGORITHM)
-                    + " ,jwt.getClaims().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD) = "
-                    + jwt.getClaims().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD) + ".");
-
-            final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
-            String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
-            List<String> scopes = jwt.getClaims().getClaimAsStringList("scope");
-
-            log.debug("\n\n JwtUtil::validateToken() - expiresAt = " + expiresAt + " , issuer =" + issuer
-                    + " , scopes = " + scopes + "\n");
-
-            // Validate token is not expired
-            log.info("Validate JWT");
-            final Date now = new Date();
-            if (now.after(expiresAt)) {
-                log.error("ID Token is expired. (It is after " + now + ").");
-                throw new WebApplicationException("ID Token is expired",
-                        Response.status(Response.Status.UNAUTHORIZED).build());
-            }
-
-            // Validate issuer
-            log.info("Validate JWT Issuer");
-            if (!authUtil.isValidIssuer(issuer)) {
-                throw new WebApplicationException("Jwt Issuer is Invalid.",
-                        Response.status(Response.Status.UNAUTHORIZED).build());
-            }
-
-            // Retrieve JSON Web Key Set Uri
-            log.info("Retrieve JSON Web Key Set URI");
-            String jwksUri = this.getJwksUri(issuer);
-            log.trace("\n\n JwtUtil::validateToken() - jwksUri = " + jwksUri);
-
-            // Retrieve JSON Web Key Set
-            log.info("Retrieve JSON Web Key Set");
-            JSONWebKeySet jsonWebKeySet = this.getJSONWebKeys(jwksUri);
-            log.trace("\n\n JwtUtil::validateToken() - jsonWebKeySet = " + jsonWebKeySet);
-
-            // Verify the signature used to sign the access token
-            log.info("Verify JWT signature");
-            boolean isJwtSignatureValid = this.validateSignature(jwt, jsonWebKeySet);
-            log.debug("\n\n JwtUtil::validateToken() - isJwtSignatureValid = " + isJwtSignatureValid + "\n\n");
-
-            if (!isJwtSignatureValid) {
-                throw new WebApplicationException("Jwt Signature is Invalid.",
-                        Response.status(Response.Status.UNAUTHORIZED).build());
-            }
-
-            // Validate Scopes
-            log.info("Validate token scopes");
-            if (!authUtil.validateScope(scopes, resourceScopes)) {
-                log.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: " + scopes);
-                throw new WebApplicationException("Insufficient scopes. Required scope",
-                        Response.status(Response.Status.UNAUTHORIZED).build());
-            }
-
-        } catch (InvalidJwtException exp) {
-            log.error("Not a valid Jwt token = " + exp);
-            throw exp;
+            log.error("Not a valid Jwt token", exp);
+            throw new WebApplicationException("Not a valid Jwt token - could not parse Jwt", exp);
         }
 
     }
 
     public boolean validateSignature(Jwt jwt, JSONWebKeySet jsonWebKeySet) {
-        log.trace("\n\n JwtUtil::validateSignature() - jwt = " + jwt + " , jsonWebKeySet =" + jsonWebKeySet + "\n");
         try {
 
             final String kid = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
             final String algorithm = jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
             final SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
-            log.trace("\n\n JwtUtil::validateSignature() - kid = " + kid + " , algorithm =" + algorithm
-                    + " signatureAlgorithm = " + signatureAlgorithm + "\n");
-            PublicKey publicKey = getPublicKey(kid, jsonWebKeySet, signatureAlgorithm);
+          
+            PublicKey publicKey = getPublicKey(kid, jsonWebKeySet);
 
-            log.trace("\n\n JwtUtil::validateSignature() - publicKey = " + publicKey + "\n");
             if (publicKey == null) {
                 log.error("Failed to get RSA public key.");
                 return false;
@@ -261,9 +169,7 @@ public class JwtUtil {
         }
     }
 
-    public PublicKey getPublicKey(String kid, JSONWebKeySet jsonWebKeySet, SignatureAlgorithm signatureAlgorithm) {
-        log.trace("\n\n JwtUtil::getPublicKey() - kid = " + kid + " , jsonWebKeySet =" + jsonWebKeySet
-                + " , signatureAlgorithm =  " + signatureAlgorithm + "\n");
+    public PublicKey getPublicKey(String kid, JSONWebKeySet jsonWebKeySet) {
         JSONWebKey key = jsonWebKeySet.getKey(kid);
         if (key != null) {
             switch (key.getKty()) {
@@ -280,26 +186,21 @@ public class JwtUtil {
     }
 
     public JSONObject fromJson(String json) throws IOException {
-        log.trace("\n\n JwtUtil::fromJson() - json = " + json + " \n");
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JsonOrgModule());
         return mapper.readValue(json, JSONObject.class);
     }
 
-    public String getJwksUri(String issuer) throws Exception {
-        log.debug("JwtUtil::getJSONWebKeys() - issuer = " + issuer);
-        if (StringHelper.isNotEmpty(issuer) && issuer.equals(configurationService.find().getIssuer())) {
-            return configurationService.find().getJwksUri();
+    public String getJwksUri(String issuer) throws JsonProcessingException {
+        if (StringUtils.isNotBlank(issuer) && issuer.equals(configurationService.find().getIssuer())) {
+            return authUtil.resolveAuthServerUrl(configurationService.find().getJwksUri());
         }
         return AuthClientFactory.getJwksUri(issuer);
 
     }
 
-    public JSONWebKeySet getJSONWebKeys(String jwksUri) throws Exception {
-        log.debug("\n\n JwtUtil::getJSONWebKeys() - jwksUri = " + jwksUri + " \n");
-        JSONWebKeySet jsonWebKeySet = AuthClientFactory.getJSONWebKeys(jwksUri);
-        log.trace("\n\n JwtUtil::getJSONWebKeys() - jsonWebKeySet = " + jsonWebKeySet + " \n");
-        return jsonWebKeySet;
+    public JSONWebKeySet getJSONWebKeys(String jwksUri) {
+        return AuthClientFactory.getJSONWebKeys(jwksUri);
     }
 
 }

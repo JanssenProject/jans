@@ -65,6 +65,126 @@ Attributes
 :param diagnostics: Additional information on the decision (wrapped `Diagnostics` object).
 ---
 
+BatchAuthorizeMultiIssuerRequest
+================================
+
+A Python wrapper for the Rust `cedarling::BatchAuthorizeMultiIssuerRequest`.
+Bundles one token set with N `BatchItem`s; tokens are validated and token
+entities built once for the whole batch.
+
+Attributes
+----------  
+:param tokens: List of `TokenInput` shared across every item.  
+:param items: List of `BatchItem` objects, evaluated in input order.
+
+Example
+-------
+```python
+req = BatchAuthorizeMultiIssuerRequest(
+    tokens=[TokenInput(mapping="Jans::Access_Token", payload="eyJ...")],
+    items=[BatchItem(resource=res1, action="Read", context={}), ...],
+)
+```
+---
+
+# BatchAuthorizeMultiIssuerResponse
+Multi-issuer analog of `BatchAuthorizeUnsignedResponse`.
+
+Attributes:
+    batch_id (str): The shared UUIDv7 identifier for this batch evaluation.
+    results (List[BatchItemMultiIssuerResult]): The evaluation results, in input order.
+---
+
+BatchAuthorizeUnsignedRequest
+=============================
+
+A Python wrapper for the Rust `cedarling::BatchAuthorizeUnsignedRequest`.
+Bundles one optional principal with N `BatchItem`s; every item is evaluated
+against the same principal snapshot and pushed-data snapshot.
+
+Attributes
+----------  
+:param principal: Optional `EntityData` shared across every item.  
+:param items: List of `BatchItem` objects, evaluated in input order.
+
+Example
+-------
+```python
+req = BatchAuthorizeUnsignedRequest(
+    principal=principal,
+    items=[BatchItem(resource=res1, action="Read", context={}), ...],
+)
+```
+---
+
+# BatchAuthorizeUnsignedResponse
+A Python wrapper for `cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
+
+Carries a shared `batch_id` (UUIDv7) alongside per-item results. Each entry
+in `results` is a `BatchItemUnsignedResult` — an `AuthorizeResult` when
+Cedar reached a decision, or a `BatchItemError` when the item failed during
+per-item preparation or request validation. `results[i]` corresponds to the
+`items[i]` supplied to the request.
+
+Attributes:
+    batch_id (str): The shared UUIDv7 identifier for this batch evaluation.
+    results (List[BatchItemUnsignedResult]): The evaluation results, in input order.
+---
+
+BatchItem
+=========
+
+A Python wrapper for the Rust `cedarling::BatchItem` struct. Represents one
+`{resource, action, context}` triple inside a batch authorization request.
+
+Attributes
+----------  
+:param resource: `EntityData` describing the resource for this item.  
+:param action: The action string for this item (e.g., 'Jans::Action::"Read"').  
+:param context: Optional Python dict of per-item context. `None` defaults to `{}`.
+
+Example
+-------
+```python
+item = BatchItem(resource=resource, action="Jans::Action::\"Read\"", context={})
+```
+---
+
+BatchItemError
+==============
+
+Per-item preparation/validation failure surfaced inside a batch response at
+`results[i].error`.
+
+Attributes
+----------  
+:param category: Stable variant slug (`action_parse`, `resource_build`,
+    `context_build`, `principal_build`, `schema_validation`,
+    `multi_issuer_entity`, `request_validation`).  
+:type category: str  
+:param item_index: Position of the failing item in the original `items` list.  
+:type item_index: int  
+:param message: Human-readable diagnostic. Safe to log.  
+:type message: str
+---
+
+# BatchItemMultiIssuerResult
+
+A Python wrapper for a single result slot in a multi-issuer batch response.
+
+Use `is_ok()` to check success, `unwrap()` to retrieve the
+`MultiIssuerAuthorizeResult` when `True`, and the `error` property
+to retrieve the `BatchItemError` when `False`.
+---
+
+BatchItemUnsignedResult
+=======================
+
+One slot in a batch unsigned response's `results` list. Callers switch on
+`is_ok()` — on `True`, call `unwrap()` for the `AuthorizeResult`; on `False`,
+read `.error` for the `BatchItemError`.
+---
+
 BootstrapConfig
 =========
 
@@ -262,6 +382,27 @@ Methods
 
     :returns: A DataStoreStats object
     :raises DataErrorCtx: If the operation fails
+
+.. method:: drain_metrics(self) -> MetricsSnapshot
+
+    Destructive read: returns the telemetry metrics snapshot and resets
+    the counters for the next interval.
+
+    Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+    Lock telemetry ticker owns the collector. Raises `ValueError` when
+    Lock telemetry owns the collector, i.e. whenever
+    `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+    server has no telemetry endpoint. `interval` is a
+    `datetime.timedelta` with sub-second precision.
+
+    :returns: A MetricsSnapshot object
+    :raises ValueError: If metrics collection is disabled or owned by lock telemetry.
+
+.. method:: policy_store_id(self) -> str | None
+
+    Returns the ID of the currently published policy store, if it carries one.
+
+    :returns: The store ID, or None when the store carries no ID.
 ---
 
 DataEntry
@@ -362,6 +503,26 @@ Methods
 .. method:: from_dict(cls, value: dict) -> EntityData
     Initialize a new EntityData from a dictionary.
     The dictionary should contain a `cedar_entity_mapping` field with `entity_type` and `id` subfields.
+---
+
+MetricsSnapshot
+================
+
+Destructive read: telemetry metrics snapshot with per-policy stats, error
+counters, and operational counters for the current interval. Draining
+resets the counters, so use a single consumer.
+
+Attributes
+----------
+policy_stats : dict
+    Per-policy evaluation counts (`policy_id`, `policy_id.allow`,
+    `policy_id.deny`)
+error_counters : dict
+    Classified error counters keyed by error metric key
+operational_stats : dict
+    Operational counters and gauges (authorization, cache, JWT, data, lock)
+interval : datetime.timedelta
+    Duration of the snapshot interval with sub-second precision.
 ---
 
 MultiIssuerAuthorizeResult
@@ -468,6 +629,10 @@ Error encountered while parsing Action to EntityUid
 
 # authorize_errors.AuthorizeError
 Exception raised by authorize_errors
+---
+
+# authorize_errors.BatchValidationError
+Error encountered while validating a batch authorization request
 ---
 
 # authorize_errors.BuildContextError

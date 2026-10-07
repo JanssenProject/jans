@@ -15,21 +15,26 @@
     </properties>
     
     <dependencies>
-        <!-- MCP Core SDK -->
+        <!-- MCP Core SDK — fixed GHSA-8jxr-pr72-r468 (DNS rebinding) and GHSA-hv2w-8mjj-jw22 (wildcard CORS) -->
         <dependency>
             <groupId>io.modelcontextprotocol.sdk</groupId>
-            <artifactId>mcp</artifactId>
-            <!-- TODO: upgrade to >=1.1.1 — see https://github.com/JanssenProject/jans/issues/14192 -->
-            <version>0.16.0</version>
+            <artifactId>mcp-core</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <!-- Jackson 2 binding for MCP SDK (code uses com.fasterxml.jackson ObjectMapper) -->
+        <dependency>
+            <groupId>io.modelcontextprotocol.sdk</groupId>
+            <artifactId>mcp-json-jackson2</artifactId>
+            <version>1.1.1</version>
         </dependency>
 
-        
 
-        <!-- Jackson for JSON processing -->
+
+        <!-- Jackson for JSON processing — fixed GHSA-5jmj-h7xm-6q6v and related 2.21.x advisories -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.21.1</version>
+            <version>2.21.5</version>
         </dependency>
         
         <!-- Java HTTP Client (built-in from Java 11+) -->

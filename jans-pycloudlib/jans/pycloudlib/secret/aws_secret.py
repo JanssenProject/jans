@@ -2,7 +2,6 @@
 
 import json
 import logging
-import lzma
 import os
 import sys
 import typing as _t
@@ -136,7 +135,6 @@ class AwsSecret(BaseSecret):
         if not names:
             return {}
 
-        data = {}
         payload = b""
 
         for name in names:
@@ -154,13 +152,7 @@ class AwsSecret(BaseSecret):
         if not payload:
             return {}
 
-        try:
-            # previously data is compressed using lzma
-            data: dict[str, _t.Any] = json.loads(lzma.decompress(payload).decode())
-            logger.warning("Loaded legacy data.")
-        except lzma.LZMAError:
-            data = json.loads(payload.decode())
-        return data
+        return json.loads(payload.decode())
 
     def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.

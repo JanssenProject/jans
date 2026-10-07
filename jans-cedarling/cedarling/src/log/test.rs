@@ -91,11 +91,12 @@ async fn test_log_memory_logger() {
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
-            cedar_lang_version: None,
-            cedar_sdk_version: None,
-            build_commit: None,
-            build_timestamp: None,
-        };
+        cedar_lang_version: None,
+        cedar_sdk_version: None,
+        build_commit: None,
+        build_timestamp: None,
+        batch_id: None,
+    };
 
     // Act
     strategy.log_any(entry);
@@ -103,10 +104,10 @@ async fn test_log_memory_logger() {
     // Assert
     match &strategy.logger() {
         LogStrategyLogger::MemoryLogger(memory_logger) => {
-            assert!(!memory_logger.get_log_ids().is_empty());
+            assert_ne!(memory_logger.get_log_ids(), [] as [std::string::String; 0]);
             memory_logger.pop_logs();
             // after popping, the memory logger should be empty
-            assert!(memory_logger.get_log_ids().is_empty());
+            assert_eq!(memory_logger.get_log_ids(), [] as [std::string::String; 0]);
             // it is empty after popping, so we can continue testing
         },
         _ => panic!("Expected MemoryLogger"),
@@ -177,11 +178,12 @@ fn test_log_stdout_logger() {
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
-            cedar_lang_version: None,
-            cedar_sdk_version: None,
-            build_commit: None,
-            build_timestamp: None,
-        };
+        cedar_lang_version: None,
+        cedar_sdk_version: None,
+        build_commit: None,
+        build_timestamp: None,
+        batch_id: None,
+    };
     // Serialize the log entry to JSON
     let json_str = json!(LogEntryWithClientInfo::from_loggable(
         log_entry.clone(),

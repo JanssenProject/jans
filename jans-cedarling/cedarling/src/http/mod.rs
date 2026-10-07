@@ -8,8 +8,10 @@ mod spawn_task;
 
 pub use spawn_task::*;
 
+use crate::http_utils::{
+    Backoff, HttpRequestError, HttpRequestReasonError, Sender, read_response_capped,
+};
 use cache_headers::CacheHeadersState;
-use crate::http_utils::{Backoff, HttpRequestError, HttpRequestReasonError, Sender, read_response_capped};
 pub(crate) use reqwest::RequestBuilder;
 use reqwest::{Client, ClientBuilder};
 #[cfg(test)]

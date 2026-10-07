@@ -14,10 +14,12 @@ import redis.clients.jedis.JedisPoolConfig;
  */
 public abstract class AbstractRedisProvider {
 
+	protected CacheConfiguration cacheConfiguration;
 	protected RedisConfiguration redisConfiguration;
 
-	public AbstractRedisProvider(RedisConfiguration redisConfiguration) {
-		this.redisConfiguration = redisConfiguration;
+	public AbstractRedisProvider(CacheConfiguration cacheConfiguration) {
+		this.cacheConfiguration = cacheConfiguration;
+		this.redisConfiguration = cacheConfiguration.getRedisConfiguration();
         HostAndPort.setLocalhost("127.0.0.1");
 	}
 
@@ -33,16 +35,26 @@ public abstract class AbstractRedisProvider {
 		return redisConfiguration;
 	}
 
+	private String getTestKey() {
+		String keyPrefix = cacheConfiguration.getKeyPrefix();
+		if (keyPrefix == null) {
+			keyPrefix = "";
+		}
+		return keyPrefix + "testKey";
+	}
+
 	public void testConnection() {
-		put(2, "testKey", "testValue");
-		if (!"testValue".equals(get("testKey"))) {
+		String key = getTestKey();
+		put(2, key, "testValue");
+		if (!"testValue".equals(get(key))) {
 			throw new RuntimeException("Failed to connect to redis server. Configuration: " + redisConfiguration);
 		}
 	}
 
 	public boolean isConnected() {
-		put(2, "testKey", "testValue");
-		if (!"testValue".equals(get("testKey"))) {
+		String key = getTestKey();
+		put(2, key, "testValue");
+		if (!"testValue".equals(get(key))) {
 			return false;
 		}
 		return true;

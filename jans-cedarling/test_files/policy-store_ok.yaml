@@ -33,6 +33,7 @@ policy_stores:
                 action in [Jans::Action::"Update"],
                 resource is Jans::Issue
             )when{
+                principal has aud &&
                 principal.access_token.org_id == resource.org_id &&
                 principal.aud == "5b4487c4-8db1-409d-a653-f907b8094039"
             };
@@ -48,6 +49,7 @@ policy_stores:
                 action in [Jans::Action::"Update"],
                 resource is Jans::Issue
             )when{
+                principal has id_token &&
                 principal.country == resource.country &&
                 principal.id_token.aud.contains("5b4487c4-8db1-409d-a653-f907b8094039")
             };

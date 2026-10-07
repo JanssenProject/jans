@@ -176,6 +176,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## API Reference
 
+The full API is auto-generated from the `cedarling` crate source on every
+release: [Cedarling Rust API documentation](https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html).
+The sections below are a narrative overview of the most-used types and methods.
+
 ### Core Types
 
 - `Cedarling`
@@ -302,7 +306,7 @@ You can also configure Cedarling using environment variables:
 export CEDARLING_APPLICATION_NAME="my_app"
 export CEDARLING_LOG_TYPE="stdout"
 export CEDARLING_LOG_LEVEL="INFO"
-export CEDARLING_POLICY_STORE_LOCAL_FN="/path/to/policy-store.yaml"
+export CEDARLING_POLICY_STORE_LOCAL_FN="/path/to/policy-store.cjar"
 ```
 
 ### Configuration Loading

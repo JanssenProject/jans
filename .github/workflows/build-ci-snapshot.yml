@@ -1,0 +1,130 @@
+name: "Build: CI droplet snapshot"
+
+# Bakes the toolchain the integration run installs on every VM (JDK, maven, docker, the pinned rust
+# toolchain, protoc) into a DigitalOcean snapshot. test-integration.yml boots from the newest
+# jans-ci-base-* snapshot and falls back to stock Ubuntu when none exists, so this is optional.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * 0"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Build and snapshot
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          set -euo pipefail
+          [ -n "${DO_TOKEN:-}" ] || { echo "::error::DO_TOKEN secret is not set"; exit 1; }
+          api() { curl -sS --connect-timeout 10 --max-time 60 -H "Authorization: Bearer ${DO_TOKEN}" \
+                    -H "Content-Type: application/json" "$@"; }
+
+          rust=$(sed -n 's/^ *channel *= *"\(.*\)"/\1/p' jans-cedarling/rust-toolchain.toml)
+          [ -n "$rust" ] || { echo "::error::could not read the pinned rust channel"; exit 1; }
+          echo "[info] rust toolchain: $rust"
+          stamp=$(date -u +%Y%m%d%H%M)
+
+          # Marker file: the poll below waits for it rather than trusting cloud-init's own status,
+          # which reports done even when a package step failed.
+          user_data=$(cat <<EOF
+          #!/bin/bash
+          set -euxo pipefail
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get -o DPkg::Lock::Timeout=600 update -qq
+          apt-get -o DPkg::Lock::Timeout=600 install -y -qq \
+            openjdk-17-jdk maven rsync build-essential pkg-config libssl-dev protobuf-compiler zip unzip
+          curl -fsSL https://get.docker.com | sh
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${rust}
+          git config --global --add safe.directory '*'
+          touch /root/.jans-ci-base-ready
+          EOF
+          )
+
+          ssh-keygen -t rsa -b 4096 -N '' -f id_snap -q
+          key_id=$(api -X POST "https://api.digitalocean.com/v2/account/keys" \
+            -d "$(jq -n --arg name "jans-ci-snap-${{ github.run_id }}" --arg key "$(cat id_snap.pub)" \
+                  '{name:$name, public_key:$key}')" | jq -er '.ssh_key.id')
+          cleanup() {
+            [ -n "${droplet_id:-}" ] && api -X DELETE "https://api.digitalocean.com/v2/droplets/$droplet_id" >/dev/null || true
+            api -X DELETE "https://api.digitalocean.com/v2/account/keys/$key_id" >/dev/null || true
+          }
+          trap cleanup EXIT
+
+          droplet_id=$(api -X POST "https://api.digitalocean.com/v2/droplets" \
+            -d "$(jq -n --arg name "jans-ci-snap-${{ github.run_id }}" --argjson key "$key_id" \
+                        --arg ud "$user_data" \
+                  '{name:$name, region:"nyc1", size:"s-4vcpu-8gb", image:"ubuntu-22-04-x64",
+                    ssh_keys:[$key], tags:["jans-ci-snap"], user_data:$ud}')" \
+            | jq -er '.droplet.id')
+          echo "[info] droplet $droplet_id"
+
+          ip=""
+          for _ in $(seq 1 60); do
+            ip=$(api "https://api.digitalocean.com/v2/droplets/$droplet_id" \
+                 | jq -r '.droplet.networks.v4[]? | select(.type=="public") | .ip_address' | head -n1)
+            [ -n "$ip" ] && [ "$ip" != "null" ] && break
+            sleep 10
+          done
+          [ -n "$ip" ] && [ "$ip" != "null" ] || { echo "::error::no public IP"; exit 1; }
+          SSH=(ssh -i id_snap -o StrictHostKeyChecking=no -o ConnectTimeout=10 "root@$ip")
+          for _ in $(seq 1 60); do "${SSH[@]}" true 2>/dev/null && break; sleep 10; done
+
+          ready=""
+          for _ in $(seq 1 90); do
+            "${SSH[@]}" 'test -f /root/.jans-ci-base-ready' 2>/dev/null && { ready=1; break; }
+            sleep 20
+          done
+          [ -n "$ready" ] || {
+            echo "::error::provisioning never completed"
+            "${SSH[@]}" 'tail -n 60 /var/log/cloud-init-output.log' 2>&1 || true
+            exit 1; }
+          "${SSH[@]}" 'java -version; mvn -v | head -1; docker --version; . /root/.cargo/env && rustc -V' 2>&1
+
+          api -X POST "https://api.digitalocean.com/v2/droplets/$droplet_id/actions" \
+            -d '{"type":"shutdown"}' >/dev/null
+          for _ in $(seq 1 30); do
+            [ "$(api "https://api.digitalocean.com/v2/droplets/$droplet_id" | jq -r '.droplet.status')" = "off" ] && break
+            sleep 10
+          done
+
+          action_id=$(api -X POST "https://api.digitalocean.com/v2/droplets/$droplet_id/actions" \
+            -d "$(jq -n --arg n "jans-ci-base-$stamp" '{type:"snapshot", name:$n}')" | jq -er '.action.id')
+          for _ in $(seq 1 90); do
+            st=$(api "https://api.digitalocean.com/v2/actions/$action_id" | jq -r '.action.status')
+            [ "$st" = "completed" ] && break
+            [ "$st" = "errored" ] && { echo "::error::snapshot action errored"; exit 1; }
+            sleep 20
+          done
+          [ "$st" = "completed" ] || { echo "::error::snapshot did not complete in time"; exit 1; }
+          echo "[info] created snapshot jans-ci-base-$stamp"
+
+          # Keep the two newest; a rollback target plus the current one.
+          api "https://api.digitalocean.com/v2/snapshots?resource_type=droplet&per_page=200" \
+          | jq -r '[.snapshots[]? | select(.name|startswith("jans-ci-base-"))]
+                   | sort_by(.created_at) | reverse | .[2:] | .[].id' \
+          | while read -r old; do
+              [ -n "$old" ] || continue
+              echo "[info] deleting old snapshot $old"
+              api -X DELETE "https://api.digitalocean.com/v2/snapshots/$old" >/dev/null || true
+            done

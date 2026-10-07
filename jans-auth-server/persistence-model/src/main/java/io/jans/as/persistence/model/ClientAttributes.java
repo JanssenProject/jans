@@ -182,6 +182,12 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("cimdExpiresAt")
     private Long cimdExpiresAt;
 
+    @JsonProperty("spiffeId")
+    private String spiffeId;
+
+    @JsonProperty("spiffeBundleEndpoint")
+    private String spiffeBundleEndpoint;
+
     public Boolean getRequirePkce() {
         if (requirePkce == null) {
             requirePkce = false;
@@ -223,6 +229,22 @@ public class ClientAttributes implements Serializable {
 
     public boolean isCimdExpired() {
         return cimdExpiresAt != null && System.currentTimeMillis() > cimdExpiresAt;
+    }
+
+    public String getSpiffeId() {
+        return spiffeId;
+    }
+
+    public void setSpiffeId(String spiffeId) {
+        this.spiffeId = spiffeId;
+    }
+
+    public String getSpiffeBundleEndpoint() {
+        return spiffeBundleEndpoint;
+    }
+
+    public void setSpiffeBundleEndpoint(String spiffeBundleEndpoint) {
+        this.spiffeBundleEndpoint = spiffeBundleEndpoint;
     }
 
     public List<String> getAuthorizationDetailsTypes() {
@@ -661,6 +683,8 @@ public class ClientAttributes implements Serializable {
     public String toString() {
         return "ClientAttributes{" +
                 "tlsClientAuthSubjectDn='" + tlsClientAuthSubjectDn + '\'' +
+                ", spiffeId='" + spiffeId + '\'' +
+                ", spiffeBundleEndpoint='" + spiffeBundleEndpoint + '\'' +
                 ", runIntrospectionScriptBeforeJwtCreation=" + runIntrospectionScriptBeforeJwtCreation +
                 ", keepClientAuthorizationAfterExpiration=" + keepClientAuthorizationAfterExpiration +
                 ", allowSpontaneousScopes=" + allowSpontaneousScopes +

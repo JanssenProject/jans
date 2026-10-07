@@ -51,7 +51,15 @@ To maintain system integrity and security, we recommend upgrading to the latest 
 
 Once a version reaches its EOL date:
 
-1. Online documentation will be moved to the **Legacy Archive**.
+1. Online documentation is moved to the **Legacy Archive**: the version is
+   removed from [docs.jans.io](https://docs.jans.io) and published instead as a
+   signed `docs-<version>.tar.gz` asset on that version's
+   [GitHub release](https://github.com/JanssenProject/jans/releases). Existing
+   `https://docs.jans.io/<version>/` links serve a notice with a download link
+   and redirect to the current documentation.
 2. Knowledge Base articles will remain searchable but will no longer be updated.
 3. Community forums for that version will be set to **Read-Only**.
+
+The documentation site keeps the current stable release, the four releases
+before it, and the in-development `head` and `nightly` builds.
 

@@ -6,6 +6,7 @@ Go test output (the integration script is TestNG-specific).
 
   default : print a Markdown table to stdout (append to $GITHUB_STEP_SUMMARY)
   --gate  : exit 1 if any test failed/errored, or if no results were produced
+  --zulip : print a compact one-message summary (status line + failed list) for chat
 
 Reports dir: $REPORTS_DIR (default ./test-reports). Matrix label: $MATRIX.
 """
@@ -39,6 +40,7 @@ def collect(reports_dir):
 
 def main():
     gate = "--gate" in sys.argv
+    zulip = "--zulip" in sys.argv
     reports_dir = os.environ.get("REPORTS_DIR", "test-reports")
     matrix = os.environ.get("MATRIX", "")
     tests, failures, errors, skipped, failed = collect(reports_dir)
@@ -51,6 +53,22 @@ def main():
         sys.exit(1 if bad else 0)
 
     passed = tests - failures - errors - skipped
+
+    if zulip:
+        label = f" ({matrix})" if matrix else ""
+        if tests == 0:
+            head = "⚠️ **no results**"
+        elif bad:
+            head = f"❌ **{bad} failed**"
+        else:
+            head = "✅ **all passed**"
+        print(f"{head}{label} — {passed}/{tests} passed, {failures} failed, "
+              f"{errors} errored, {skipped} skipped")
+        if failed:
+            print("\nFailed:")
+            for name in sorted(set(failed)):
+                print(f"- `{name}`")
+        return
     label = f" ({matrix})" if matrix else ""
     status = "❌ failures" if bad else ("✅ all passed" if tests else "⚠️ no results")
     print(f"## Terraform provider tests{label}\n")

@@ -112,6 +112,48 @@ func (c *Cedarling) AuthorizeMultiIssuer(request AuthorizeMultiIssuerRequest) (M
 	return authorize_result, nil
 }
 
+// AuthorizeUnsignedBatch runs a batch of unsigned authorize requests against
+// one shared principal. Setup work (principal build + pushed-data snapshot)
+// runs once and each item is evaluated in input order. Batch-level failures
+// (validation, principal parse) return an error; per-item failures are returned
+// as BatchItemError entries that callers must inspect without failing the whole batch.
+func (c *Cedarling) AuthorizeUnsignedBatch(request BatchAuthorizeUnsignedRequest) (BatchAuthorizeUnsignedResponse, error) {
+	request_json, err := json.Marshal(request)
+	if err != nil {
+		return BatchAuthorizeUnsignedResponse{}, err
+	}
+	result := internal.CallAuthorizeUnsignedBatch(c.instance_id, unsafeString(request_json))
+	if err = result.Error(); err != nil {
+		return BatchAuthorizeUnsignedResponse{}, err
+	}
+	var response BatchAuthorizeUnsignedResponse
+	if err = json.Unmarshal(unsafeBytes(result.JsonValue()), &response); err != nil {
+		return BatchAuthorizeUnsignedResponse{}, err
+	}
+	return response, nil
+}
+
+// AuthorizeMultiIssuerBatch runs a batch of multi-issuer authorize requests
+// against one shared token set. Tokens are validated and token/issuer entities
+// built once, then each item is evaluated in input order. Batch-level failures
+// (validation, JWT verification, status-list refresh) return an error;
+// per-item failures are returned as BatchItemError entries that callers must inspect.
+func (c *Cedarling) AuthorizeMultiIssuerBatch(request BatchAuthorizeMultiIssuerRequest) (BatchAuthorizeMultiIssuerResponse, error) {
+	request_json, err := json.Marshal(request)
+	if err != nil {
+		return BatchAuthorizeMultiIssuerResponse{}, err
+	}
+	result := internal.CallAuthorizeMultiIssuerBatch(c.instance_id, unsafeString(request_json))
+	if err = result.Error(); err != nil {
+		return BatchAuthorizeMultiIssuerResponse{}, err
+	}
+	var response BatchAuthorizeMultiIssuerResponse
+	if err = json.Unmarshal(unsafeBytes(result.JsonValue()), &response); err != nil {
+		return BatchAuthorizeMultiIssuerResponse{}, err
+	}
+	return response, nil
+}
+
 func (c *Cedarling) PopLogs() []string {
 	return internal.CallPopLogs(c.instance_id)
 }
@@ -285,6 +327,32 @@ func (c *Cedarling) GetStatsCtx() (DataStoreStats, error) {
 	return stats, nil
 }
 
+// DrainMetrics is a destructive read: it returns the telemetry metrics
+// and resets the counters for the next interval, so there should be a
+// single consumer.
+// Returns an error when metrics collection is disabled, or
+// when the collector is owned by the Lock telemetry ticker.
+func (c *Cedarling) DrainMetrics() (MetricsSnapshot, error) {
+	result := internal.CallDrainMetrics(c.instance_id)
+	err := result.Error()
+	if err != nil {
+		return MetricsSnapshot{}, err
+	}
+
+	jsonValue := result.JsonValue()
+	if jsonValue == "" || jsonValue == "null" {
+		return MetricsSnapshot{}, nil
+	}
+
+	var snapshot MetricsSnapshot
+	err = json.Unmarshal(unsafeBytes(jsonValue), &snapshot)
+	if err != nil {
+		return MetricsSnapshot{}, err
+	}
+
+	return snapshot, nil
+}
+
 // IsTrustedIssuerLoadedByName returns true if the trusted issuer with the given id finished loading successfully.
 func (c *Cedarling) IsTrustedIssuerLoadedByName(issuerID string) bool {
 	return internal.CallIsTrustedIssuerLoadedByName(c.instance_id, issuerID)
@@ -298,6 +366,14 @@ func (c *Cedarling) IsTrustedIssuerLoadedByIss(issClaim string) bool {
 // TotalIssuers returns the number of trusted issuers configured in the policy store.
 func (c *Cedarling) TotalIssuers() uint {
 	return internal.CallTotalIssuers(c.instance_id)
+}
+
+// PolicyStoreID returns the ID of the currently published policy store.
+// The bool is false when the store carries no ID. The value is opaque and
+// can change after a background refresh.
+func (c *Cedarling) PolicyStoreID() (string, bool) {
+	id := internal.CallPolicyStoreId(c.instance_id)
+	return id, id != ""
 }
 
 // LoadedTrustedIssuersCount returns how many trusted issuers loaded successfully.

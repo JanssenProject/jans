@@ -17,10 +17,11 @@ import multiprocessing
 import ssl
 import tempfile
 import urllib.request
+import secrets
 
 from pathlib import Path
 from collections import OrderedDict
-
+from urllib.error import URLError
 
 # disable ssl certificate check
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -36,9 +37,6 @@ cur_dir = Path(__file__).parent.as_posix()
 ces_dir = Path(__file__).parent.parent.as_posix()
 par_dir = Path(__file__).parent.parent.parent.as_posix()
 pylib_dir = os.path.join(ces_dir, 'pylib')
-
-snap = os.environ.get('SNAP','')
-snap_common = snap_common_dir = os.environ.get('SNAP_COMMON','')
 
 re_split_host = re.compile(r'[^,\s,;]+')
 
@@ -112,13 +110,9 @@ def get_os_description():
 
     if fipsl and fipsl[0] == 'crypto.fips_enabled' and fipsl[-1] == '1':
         descs += ' [FIPS]'
-    if snap:
-        descs += ' [SNAP]'
 
     return descs
 
-if snap:
-    snapctl = shutil.which('snapctl')
 
 systemctl = False
 systemctl_cmd = shutil.which('systemctl')
@@ -133,7 +127,7 @@ current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
 current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 current_number_of_cpu = multiprocessing.cpu_count()
 
-disk_st = os.statvfs(snap_common if snap else '/')
+disk_st = os.statvfs('/opt')
 current_free_disk_space = round(disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024), 1)
 
 class current_app:
@@ -199,7 +193,7 @@ def check_resources():
 
 
     if current_free_disk_space < static.suggested_free_disk_space:
-        print(("{0}Warning: Available free disk space was determined to be {1} "
+        print(("{0}Warning: Available free disk space on /opt was determined to be {1} "
             "GB. This is less than the required disk space of {2} GB.{3}".format(
                                                         static.colors.WARNING,
                                                         current_free_disk_space,
@@ -283,8 +277,6 @@ def get_clean_args(args):
 
 # args = command + args, i.e. ['ls', '-ltr']
 def run(args, cwd=None, env=None, useWait=False, shell=False, get_stderr=False):
-    if snap and args[0] in [paths.cmd_chown]:
-        return ''
 
     output = ''
     log_arg = ' '.join(args) if type(args) is list else args
@@ -381,19 +373,51 @@ def download(url, dst, verbose=False, headers=None):
     opener.addheaders = headers
     urllib.request.install_opener(opener)
 
-    mylog("Downloading {} to {}".format(url, dst))
+    mylog(f"Downloading {url} to {dst}")
     download_tries = 1
+    download_ok = False
+    dst_tmp_fn = dst + '~' + os.urandom(4).hex()
     while download_tries < 4:
         try:
-            urllib.request.urlretrieve(url, dst)
-            mylog("Download size: {} bytes".format(os.path.getsize(dst)))
+            urllib.request.urlretrieve(url, dst_tmp_fn)
+            shutil.move(dst_tmp_fn, dst)
+            mylog(f"Download size: {os.path.getsize(dst)} bytes")
             time.sleep(0.1)
-        except:
-             mylog("Error downloading {}. Download will be re-tried once more".format(url))
-             download_tries += 1
-             time.sleep(1)
+            download_ok = True
+        except URLError:
+            download_tries += 1
+            if download_tries < 4:
+                retry_sec = 1.0 + (secrets.randbelow(3000) / 1000.0)
+                mylog(f"Error downloading {url}. Download will be re-tried in {retry_sec} seconds.")
+                time.sleep(retry_sec)
+        except Exception as e:
+            mylog("Can't contuinue {e}")
+            sys.exit(2)
         else:
             break
+        finally:
+            if os.path.exists(dst_tmp_fn):
+                mylog(f"Removing file {dst_tmp_fn}")
+                os.remove(dst_tmp_fn)
+
+    if not download_ok:
+        env_var = re.sub(r'[^\w]', '_', fn, re.ASCII)
+        if env_var[0].isnumeric():
+            env_var = '_' + env_var
+        mylog(f"Unable to download {url}, looking for environmental variable {env_var} for fallback")
+        src = os.environ.get(env_var)
+        if src and os.path.isfile(src):
+            if os.path.exists(dst) and os.path.samefile(src, dst):
+                mylog(f"Fallback source {src} already matches destination {dst}. Passing")
+                return
+
+            mylog(f"Copying {src} to {dst}")
+            shutil.copy(src, dst)
+        elif os.path.exists(dst):
+            mylog(f"File {dst} was already exist, Continuing with old file...")
+        else:
+            mylog(f"File {dst} is not available for this time. Exiting ...")
+            sys.exit(2)
 
     urllib.request.install_opener(None)
 
@@ -496,3 +520,9 @@ current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')
 
 def as_bool(val):
     return str(val).lower() in ('t', 'true', 'y', 'yes', 'on', 'ok', '1')
+
+def is_valid_identifier(s, *, warning=True):
+    retval = bool(re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', s))
+    if not retval and warning:
+        print("The input should not begin with a number and should only contain ASCII letters, numerals, and underscores.")
+    return retval
