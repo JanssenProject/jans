@@ -101,7 +101,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         if not 'jans_host' in config['DEFAULT']:
             config['DEFAULT']['jans_host'] = Config.hostname
 
-        if not 'ca_cert' in config['DEFAULT']:
+        if 'ca_cert' not in config['DEFAULT']:
             config['DEFAULT']['ca_cert'] = os.path.join(Config.certFolder, 'httpd.crt')
 
         for key_ in options:

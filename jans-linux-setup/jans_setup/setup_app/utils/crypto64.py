@@ -95,7 +95,7 @@ class Crypto64:
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key])
         self.run([paths.cmd_chmod, '700', key])
 
-        self.import_cert_into_keystore(cert_fn=public_certificate, alias=f'{Config.hostname}_{suffix}')
+        self.import_cert_into_keystore(cert_fn=public_certificate, alias=f'{Config.hostname}_{suffix}', truststore_fn=truststore_fn, truststore_pw=truststore_pw)
 
         return key, csr, public_certificate
 

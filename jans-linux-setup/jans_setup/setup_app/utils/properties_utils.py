@@ -189,7 +189,7 @@ class PropertiesUtils(SetupUtils):
 
         return p
 
-    def save_properties(self, prop_fn=None, obj=None):
+    def save_properties(self, prop_fn=None):
 
         if not prop_fn:
             prop_fn = Config.savedProperties
