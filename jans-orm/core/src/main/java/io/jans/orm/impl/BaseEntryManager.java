@@ -236,7 +236,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	@SuppressWarnings("unchecked")
 	protected Void merge(Object entry, boolean isSchemaUpdate, boolean isConfigurationUpdate, AttributeModificationType schemaModificationType) {
 		if (entry == null) {
-			throw new MappingException("Entry for check if exists is null");
+			throw new MappingException("Entry to update is null");
 		}
 
 		Class<?> entryClass = entry.getClass();
@@ -291,7 +291,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		String versionAttributeName = null;
 		Long newVersionValue = null;
 		if (versionProperty != null) {
-			// Version column is always bumped unconditionally, never diffed like a normal field (D-7).
+			// Version column is always bumped unconditionally, never diffed like a normal field
 			versionAttributeName = getVersionAttributeName(entryClass, versionProperty.getPropertyName(), propertiesAnnotations);
 			AttributeData currentVersionAttribute = getAttributesMap(attributesFromLdap).get(versionAttributeName);
 			long currentVersionValue = getLongAttributeValue(currentVersionAttribute);
@@ -309,8 +309,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				// Step 1. Rebuild map with attributes which we planned to persist
 				attributesToPersistMap = getAttributesMap(attributesToPersist);
 				if (versionProperty != null) {
-					// Reflect the bump applied above, or the post-merge re-diff flags it as a
-					// spurious "missing change" (D-8).
+					// Reflect the bump applied above, or the post-merge re-diff flags it as a spurious "missing change"
 					attributesToPersistMap.put(versionAttributeName, new AttributeData(versionAttributeName, newVersionValue));
 				}
 
@@ -378,8 +377,6 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
 		Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
 
-		String versionAttributeName = getVersionAttributeName(entryClass, versionPropertyName, propertiesAnnotations);
-
 		Object dnValue = getDNValue(entry, entryClass);
 
 		Integer expirationValue = getExpirationValue(entry, entryClass, true);
@@ -393,8 +390,15 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		List<AttributeData> attributesFromLdap = find(dnValue.toString(), objectClasses, propertiesAnnotationsMap,
 				currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
 
+		if (LOG.isTraceEnabled()) {
+			dumpAttributes("attributesFromLdap", attributesFromLdap);
+			dumpAttributes("attributesToPersist", attributesToPersist);
+		}
+
 		List<AttributeDataModification> attributeDataModifications = prepareAttributeDataModifications(entryClass, dnValue,
 				entry, propertiesAnnotations, attributesToPersistMap, attributesFromLdap, null, false, false, forceUpdate);
+
+		String versionAttributeName = getVersionAttributeName(entryClass, versionPropertyName, propertiesAnnotations);
 
 		long newVersionValue = expectedVersionValue + 1;
 		applyVersionBump(attributeDataModifications, versionAttributeName, newVersionValue);
@@ -404,6 +408,32 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		if (!updated) {
 			throw new VersionMismatchException(dnValue.toString(), Long.valueOf(expectedVersionValue));
+		}
+
+		if (isValidateAfterUpdate()) {
+			if (!forceUpdate) {
+				// Compare loaded entry data after merge
+	
+				// Step 1. Rebuild map with attributes which we planned to persist
+				attributesToPersistMap = getAttributesMap(attributesToPersist);
+				if (versionProperty != null) {
+					// Reflect the bump applied above, or the post-merge re-diff flags it as a spurious "missing change"
+					attributesToPersistMap.put(versionAttributeName, new AttributeData(versionAttributeName, newVersionValue));
+				}
+	
+				// Step 2. Load current entry from DB
+				List<AttributeData> attributesAfterMergeFromLdap = find(dnValue.toString(), objectClasses, propertiesAnnotationsMap, currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
+	
+				// Step 3. Compare loaded entry data with initial entry data
+				List<AttributeDataModification> attributeDataModificationsAftermerge = prepareAttributeDataModifications(entryClass,
+						dnValue, entry, propertiesAnnotations, attributesToPersistMap, attributesAfterMergeFromLdap, null,
+						false, false, forceUpdate);
+	
+				if (attributeDataModificationsAftermerge.size() > 0) {
+					LOG.warn("Detected changes which not exists in enry after merge. Entry DN: {}, missing changes: {}",
+							dnValue, attributeDataModificationsAftermerge);
+				}
+			}
 		}
 
 		versionSetter.set(entry, Long.valueOf(newVersionValue));
