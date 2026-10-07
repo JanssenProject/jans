@@ -2,6 +2,7 @@ package io.jans.configapi.util;
 
 import com.unboundid.ldap.sdk.DN;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.common.User;
@@ -11,12 +12,14 @@ import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
+
 import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.model.configuration.AuditLogConf;
 import io.jans.configapi.model.configuration.DataFormatConversionConf;
 import io.jans.configapi.model.configuration.PluginConf;
 import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
+import io.jans.configapi.security.service.OpenIdService;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.model.role.RolePermissionMapping;
 import io.jans.configapi.core.rest.ProtectedApi;
@@ -60,8 +63,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -97,10 +102,17 @@ public class AuthUtil {
     @Inject
     AuthClientFactory authClientFactory;
 
+    @Inject 
+    OpenIdService openIdService;
+    
     public String getOpenIdConfigurationEndpoint() {
         return this.configurationService.find().getOpenIdConfigurationEndpoint();
     }
 
+    public String getAuthIssuerUrl() {
+        return this.configurationFactory.getApiAppConfiguration().getAuthIssuerUrl();
+    }
+    
     public String getAuthOpenidConfigurationUrl() {
         return this.configurationFactory.getApiAppConfiguration().getAuthOpenidConfigurationUrl();
     }
@@ -844,8 +856,14 @@ public class AuthUtil {
     }
 
     public IntrospectionResponse getIntrospectionResponse(String token) {
-        return AuthClientFactory.getIntrospectionResponse(token,
-                token.substring("Bearer".length()).trim(), this.getIssuer(),false);
+        try {
+            return openIdService.getIntrospectionResponse(token,
+                    token.substring("Bearer".length()).trim(), this.getAuthIssuerUrl());
+        } catch (JsonProcessingException ex) {
+            log.error("AuthUtil::getIntrospectionResponse() - Error while token Introspection token:{}, exception:{} ", token, ex);
+            throw new WebApplicationException("AuthUtil::getIntrospectionResponse - Token is Invalid.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
     }
 
     public String getJsonNodeKeyValue(JsonNode jsonNode, String key) {

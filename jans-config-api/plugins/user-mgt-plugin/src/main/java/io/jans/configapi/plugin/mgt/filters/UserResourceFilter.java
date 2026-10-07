@@ -101,6 +101,7 @@ public class UserResourceFilter extends BaseFilter {
 
         // For user mgt endpoint Header attribute `User-inum` is mandatory
         String userInum = authUtil.getUserInum(httpHeaders);
+        log.error("\n\n\n UserResourceFilter - logged in user:{}", userInum);
         if (StringUtils.isBlank(userInum)) {
             throw new WebApplicationException("Header attribute `User-inum` missing",
                     Response.status(Response.Status.BAD_REQUEST).build());
@@ -176,8 +177,8 @@ public class UserResourceFilter extends BaseFilter {
         }
 
         String inum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
-        log.debug("Header userInum :{} and  token Introspection inum:{}", userInum, inum);
-        if (StringUtils.isBlank(inum) || !inum.equalsIgnoreCase(userInum)) {
+        log.error("\n\n NEW Header userInum :{} and  token Introspection inum:{}", userInum, inum);
+        if (StringUtils.isNotBlank(inum) && !inum.equalsIgnoreCase(userInum)) {
             throw new WebApplicationException("Header attribute `User-inum` does not correspond to User token",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
