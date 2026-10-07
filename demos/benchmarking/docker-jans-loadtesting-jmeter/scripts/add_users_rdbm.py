@@ -99,7 +99,7 @@ def make_secret(password):
     sha.update(salt)
     digest_ = sha.digest()
     b64encoded = base64.b64encode(digest_ + salt).decode('utf-8')
-    encrypted_password = '{{SSHA}}{0}'.format(b64encoded)
+    encrypted_password = '{{SSHA}}{0}'.format(b64encoded)  # // # gitleaks:allow
     return encrypted_password
 
 

@@ -40,7 +40,7 @@ class Crypto64:
         if not cert_dir:
             cert_dir = Config.certFolder
         self.logIt('Generating Certificate for %s' % suffix)
-        key_with_password = '%s/%s.key.orig' % (cert_dir, suffix)
+        key_with_password = '%s/%s.key.orig' % (cert_dir, suffix)  # // # gitleaks:allow
         key = os.path.join(cert_dir, suffix) + '.key'
         csr = os.path.join(cert_dir, suffix) + '.csr'
         public_certificate = os.path.join(cert_dir, suffix) + '.crt'

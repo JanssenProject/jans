@@ -211,7 +211,7 @@ class KeyRegenerator:
             self.prop_dn = 'jansAuth_ConfigurationEntryDN'
 
 
-        self.conf_keystore_secret = 'keyStoreSecret'
+        self.conf_keystore_secret = 'keyStoreSecret'  # // # gitleaks:allow
         self.key_regenerator_jar = '{}-client-jar-with-dependencies.jar'.format(_AUTH_NAME_.lower())
 
         self.java_cmd = '/opt/jre/bin/java'

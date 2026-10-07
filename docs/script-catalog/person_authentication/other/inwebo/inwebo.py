@@ -170,7 +170,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def validateInweboToken(self, iw_api_uri, iw_service_id, user_name, iw_token, step):
         httpService = CdiUtil.bean(HttpService)
         
-        request_uri = iw_api_uri + "action=authenticateExtended" + "&serviceId=" + str(iw_service_id) + "&userId=" + httpService.encodeUrl(user_name) + "&token=" + str(iw_token)+"&format=json"
+        request_uri = iw_api_uri + "action=authenticateExtended" + "&serviceId=" + str(iw_service_id) + "&userId=" + httpService.encodeUrl(user_name) + "&token=" + str(iw_token)+"&format=json"  # // # gitleaks:allow
         print "InWebo. Token verification. Attempting to send authentication request:", request_uri
         
         try:

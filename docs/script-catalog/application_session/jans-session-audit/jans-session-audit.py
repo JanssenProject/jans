@@ -381,7 +381,7 @@ class ApplicationSession(ApplicationSessionType):
                     self.logOut("ERROR","ApplicationSession.generateJansData(): Errror: ex = {}".format(ex))
                     jans_data += ',"%s": "%s"' % (attr_name, "None")
 
-        attr_key = "permissionGrantedMap"
+        attr_key = "permissionGrantedMap"  # // # gitleaks:allow
         attr_name = "permissionGrantedMap"
 
         if attr_key.strip().upper() in (audit_data_el.strip().upper() for audit_data_el in audit_data):

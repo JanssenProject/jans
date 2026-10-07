@@ -68,7 +68,7 @@ class msg:
     ask_install_fido2 = "Install Fido2"
 
     notify_select_backend = "Please select one of the backends either local install or remote" 
-    weak_password = "Password for {} must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character."
+    weak_password = "Password for {} must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character."  # // # gitleaks:allow
 
     no_help = "No help is provided for this screen."
 

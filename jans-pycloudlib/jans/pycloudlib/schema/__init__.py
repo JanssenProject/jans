@@ -816,7 +816,7 @@ def load_schema_from_file(path, exclude_configmap=False, exclude_secret=False, k
 
     # exclude configmap from loading mechanism
     if exclude_configmap:
-        key = "_configmap"
+        key = "_configmap"  # // # gitleaks:allow
         exclude_attrs = [key]
         out.pop(key, None)
 
