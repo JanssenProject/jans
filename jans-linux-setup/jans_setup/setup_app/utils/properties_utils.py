@@ -189,6 +189,20 @@ class PropertiesUtils(SetupUtils):
 
         return p
 
+    @staticmethod
+    def _property_string(value):
+        if isinstance(value, str):
+            return str(value).strip()
+        if isinstance(value, (bool, int, float)):
+            return str(value)
+        return ''
+
+    @staticmethod
+    def _is_saved_property(name, member):
+        if name in ('post_messages', 'properties_password', 'non_setup_properties', 'addPostSetupService'):
+            return False
+        return not name.startswith(('cmd_', '__')) and not callable(member)
+
     def save_properties(self, prop_fn=None):
 
         if not prop_fn:
@@ -196,28 +210,15 @@ class PropertiesUtils(SetupUtils):
 
         self.logIt('Saving properties to %s' % prop_fn)
 
-        def get_string(value):
-            if isinstance(value, str):
-                return str(value).strip()
-            elif isinstance(value, bool) or isinstance(value, int) or isinstance(value, float):
-                return str(value)
-            else:
-                return ''
-
         try:
             p = Properties()
             for obj_name, member in inspect.getmembers(Config):
                 obj_name = str(obj_name)
-                if obj_name in ('post_messages', 'properties_password', 'non_setup_properties', 'addPostSetupService'):
+                if not self._is_saved_property(obj_name, member):
                     continue
-
-                if obj_name.startswith('cmd_'):
-                    continue
-
-                if not obj_name.startswith('__') and (not callable(member)):
-                    value = get_string(member)
-                    if value != '':
-                        p[obj_name] = value
+                value = self._property_string(member)
+                if value != '':
+                    p[obj_name] = value
 
             with open(prop_fn, 'wb') as f:
                 p.store(f, encoding="utf-8")
