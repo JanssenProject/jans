@@ -3,6 +3,8 @@ package io.jans.configapi.plugin.mgt.filters;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.core.filter.BaseFilter;
 import io.jans.configapi.core.util.ProtectionScopeType;
+import io.jans.configapi.rest.security.ScopeContext;
+import io.jans.configapi.rest.security.ScopeSecurityContext;
 import io.jans.configapi.util.*;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
@@ -18,6 +20,7 @@ import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +34,8 @@ import org.slf4j.Logger;
 public class UserResourceFilter extends BaseFilter {
 
     protected static final String USER_INUM = "inum";
+    protected static final String PATH = "/jans-config-api/mgt/";
+
 
     @Inject
     Logger log;
@@ -49,6 +54,9 @@ public class UserResourceFilter extends BaseFilter {
 
     @Inject
     private AuthUtil authUtil;
+    
+    @Inject 
+    ScopeContext scopeContext;
 
     /**
      * Additional User Management requests by extracting a user details and
@@ -60,8 +68,13 @@ public class UserResourceFilter extends BaseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.error("======================== Inside UserResourceFilter filter... ========================");
-
+            log.info(" Inside UserResourceFilter filter - info.getPath():{}, PATH:{}", info.getPath(), PATH);
+      
+            if( info.getPath() ==null || !info.getPath().contains(PATH)) {
+                log.info(" Exiting as not User Management Endpoint!");
+                return;
+            }
+            
             // Verify current UserRolePermission
             validateUserRolePermission(requestContext, resourceInfo, httpHeaders);
 
@@ -205,13 +218,16 @@ public class UserResourceFilter extends BaseFilter {
         }
 
         String inum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
+        String subject = introspectionResponse.getSubject();
         List<String> introspectionTokenScopes = introspectionResponse.getScope();
-        log.error("\n\n\n\n ******************* UserResourceFilter - setScopeSecurityContext  inum:{}, introspectionTokenScopes:{}", inum, introspectionTokenScopes);
+        log.error("\n\n\n\n ******************* UserResourceFilter::setScopeSecurityContext() - inum:{}, subject:{}, introspectionTokenScopes:{}", inum, subject, introspectionTokenScopes);
+        Set<String> scopes = new HashSet<>(introspectionTokenScopes);
+        scopeContext.setScopes(scopes);
+        scopeContext.setSubject(subject);
+
+        // Also expose via SecurityContext for anything using @RolesAllowed-style checks
+        requestContext.setSecurityContext(new ScopeSecurityContext(subject, scopes));
         
-        // request-scoped, dies with request. No leakage across threads/requests.
-        requestContext.setProperty(ApiConstants.INTROSPECTION_CLIENT_ID, introspectionResponse.getClientId());
-        requestContext.setProperty(ApiConstants.INTROSPECTION_SCOPES, introspectionTokenScopes);
-        requestContext.setProperty(ApiConstants.INTROSPECTION_USER_INUM, inum);
-        log.error(" UserResourceFilter - setScopeSecurityContext - requestContext.getProperty(ApiConstants.INTROSPECTION_CLIENT_ID):{}, requestContext.getProperty(ApiConstants.INTROSPECTION_SCOPES):{}, requestContext.getProperty(ApiConstants.INTROSPECTION_USER_INUM):{} - {}", requestContext.getProperty(ApiConstants.INTROSPECTION_CLIENT_ID), requestContext.getProperty(ApiConstants.INTROSPECTION_SCOPES), requestContext.getProperty(ApiConstants.INTROSPECTION_USER_INUM)," ******************* \n\n\n\n");
+       
     }
 }
