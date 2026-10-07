@@ -21,6 +21,7 @@ class Fido2UserMetricsTest {
 
     private static final double DELTA = 1e-9;
     private static final long ONE_DAY_MS = 24L * 60 * 60 * 1000;
+    private static final long ONE_HOUR_MS = 60L * 60 * 1000;
 
     @Test
     void testDefaultConstructorInitialState() {
@@ -305,6 +306,15 @@ class Fido2UserMetricsTest {
         old.setFirstRegistrationDate(new Date(System.currentTimeMillis() - 31 * ONE_DAY_MS));
         assertFalse(old.isNewUser(), "31 days ago must not count as new");
 
+        // Near the 30-day cutoff: 1h margin each side absorbs timing jitter but still catches a shifted cutoff.
+        Fido2UserMetrics justInside = new Fido2UserMetrics();
+        justInside.setFirstRegistrationDate(new Date(System.currentTimeMillis() - 30 * ONE_DAY_MS + ONE_HOUR_MS));
+        assertTrue(justInside.isNewUser(), "just inside 30 days must still count as new");
+
+        Fido2UserMetrics justOutside = new Fido2UserMetrics();
+        justOutside.setFirstRegistrationDate(new Date(System.currentTimeMillis() - 30 * ONE_DAY_MS - ONE_HOUR_MS));
+        assertFalse(justOutside.isNewUser(), "just outside 30 days must not count as new");
+
         Fido2UserMetrics nullDate = new Fido2UserMetrics();
         nullDate.setFirstRegistrationDate(null);
         assertFalse(nullDate.isNewUser(), "null firstRegistrationDate must not throw and must return false");
@@ -319,6 +329,15 @@ class Fido2UserMetricsTest {
         Fido2UserMetrics old = new Fido2UserMetrics();
         old.setLastActivityDate(new Date(System.currentTimeMillis() - 31 * ONE_DAY_MS));
         assertFalse(old.isActiveUser(), "31 days ago must not count as active");
+
+        // Near the 30-day cutoff: 1h margin each side absorbs timing jitter but still catches a shifted cutoff.
+        Fido2UserMetrics justInside = new Fido2UserMetrics();
+        justInside.setLastActivityDate(new Date(System.currentTimeMillis() - 30 * ONE_DAY_MS + ONE_HOUR_MS));
+        assertTrue(justInside.isActiveUser(), "just inside 30 days must still count as active");
+
+        Fido2UserMetrics justOutside = new Fido2UserMetrics();
+        justOutside.setLastActivityDate(new Date(System.currentTimeMillis() - 30 * ONE_DAY_MS - ONE_HOUR_MS));
+        assertFalse(justOutside.isActiveUser(), "just outside 30 days must not count as active");
 
         Fido2UserMetrics nullDate = new Fido2UserMetrics();
         nullDate.setLastActivityDate(null);
