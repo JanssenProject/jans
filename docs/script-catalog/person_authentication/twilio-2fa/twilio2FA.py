@@ -7,11 +7,9 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService
-from io.jans.as.server.service import UserService
 from io.jans.as.server.service import SessionIdService
 from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
-from io.jans.util import ArrayHelper
 from java.util import Arrays
 from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
@@ -19,12 +17,10 @@ from io.jans.jsf2.message import FacesMessages
 import com.twilio.Twilio as Twilio
 import com.twilio.rest.api.v2010.account.Message as Message
 import com.twilio.type.PhoneNumber as PhoneNumber
-import org.codehaus.jettison.json.JSONArray as JSONArray
 
 
-import java
+from java.lang import Throwable
 import random
-import jarray
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -43,16 +39,16 @@ class PersonAuthentication(PersonAuthenticationType):
         # Get Custom Properties
         try:
             self.ACCOUNT_SID = configurationAttributes.get("twilio_sid").getValue2()
-        except:
+        except (Exception, Throwable):
             print 'TwilioSMS, Missing required configuration attribute "twilio_sid"'
 
         try:
             self.AUTH_TOKEN = configurationAttributes.get("twilio_token").getValue2()
-        except:
+        except (Exception, Throwable):
             print'TwilioSMS, Missing required configuration attribute "twilio_token"'
         try:
             self.FROM_NUMBER = configurationAttributes.get("from_number").getValue2()
-        except:
+        except (Exception, Throwable):
             print'TwilioSMS, Missing required configuration attribute "from_number"'
 
         if None in (self.ACCOUNT_SID, self.AUTH_TOKEN, self.FROM_NUMBER):
@@ -83,7 +79,6 @@ class PersonAuthentication(PersonAuthenticationType):
         print "=============================================="
         print "====TWILIO SMS AUTHENCATION==================="
         print "=============================================="
-        userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
         sessionIdService = CdiUtil.bean(SessionIdService)
         facesMessages = CdiUtil.bean(FacesMessages)
@@ -91,9 +86,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         session_attributes = self.identity.getSessionId().getSessionAttributes()
         form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
-        form_name = ServerUtil.getFirstValue(requestParameters, "TwilioSmsloginForm")
 
-        print "TwilioSMS. form_response_passcode: %s" % str(form_passcode)
+        print "TwilioSMS. form_response_passcode received"
 
         if step == 1:
             print "=============================================="
@@ -113,7 +107,7 @@ class PersonAuthentication(PersonAuthenticationType):
             foundUser = None
             try:
                 foundUser = authenticationService.getAuthenticatedUser()
-            except:
+            except (Exception, Throwable):
                 print 'TwilioSMS, Error retrieving user %s from LDAP' % (user_name)
                 return False
 
@@ -121,14 +115,14 @@ class PersonAuthentication(PersonAuthenticationType):
                 isVerified = foundUser.getAttribute("phoneNumberVerified")
                 if isVerified:
                     self.mobile_number = foundUser.getAttribute("employeeNumber")
-                if  self.mobile_number == None:
+                if  self.mobile_number is None:
                     self.mobile_number = foundUser.getAttribute("mobile")
-                if  self.mobile_number == None:
+                if  self.mobile_number is None:
                     self.mobile_number = foundUser.getAttribute("telephoneNumber")
-                if  self.mobile_number == None:
+                if  self.mobile_number is None:
                     print "TwilioSMS, Error finding mobile number for user '%s'" % user_name    
                     
-            except:
+            except (Exception, Throwable):
                 facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to determine mobile phone number")
                 print 'TwilioSMS, Error finding mobile number for "%s". Exception: %s` % (user_name, sys.exc_info()[1])`'
                 return False
@@ -175,14 +169,14 @@ class PersonAuthentication(PersonAuthenticationType):
             print "=TWILIO SMS STEP 2 | Password Authentication=="
             print "=============================================="
             code = session_attributes.get("code")
-            print '=======> Session code is "%s"' % str(code)
+            print '=======> Session code found'
             sessionIdService = CdiUtil.bean(SessionIdService)
             sessionId = sessionIdService.getSessionId() # fetch from persistence
             code = sessionId.getSessionAttributes().get("code")
-            print '=======> Database code is "%s"' % str(code)
+            print '=======> Database code found'
             self.identity.setSessionId(sessionId)
             print "=============================================="
-            print "TwilioSMS. Code: %s" % str(code)
+            print "TwilioSMS. Code present: %s" % str(code is not None)
             print "=============================================="
             if code is None:
                 print "TwilioSMS. Failed to find previously sent code"
@@ -193,7 +187,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             if len(form_passcode) != 6:
-                print "TwilioSMS. Passcode from response is not 6 digits: %s" % form_passcode
+                print "TwilioSMS. Passcode from response is not 6 digits"
                 return False
 
             if form_passcode == code:
@@ -204,7 +198,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return True
 
             print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
-            print "TwilioSMS. FAIL! User entered the wrong code! %s != %s" % (form_passcode, code)
+            print "TwilioSMS. FAIL! User entered the wrong code!"
             print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
             facesMessages.add(FacesMessage.SEVERITY_ERROR, "Incorrect Twilio code, please try again.")
             print "================================================"

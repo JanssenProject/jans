@@ -30,7 +30,7 @@ class ScimEventHandler(ScimType):
     def createUser(self, user, configurationAttributes):
         return True
 
-    def updateUser(self, user, configur ationAttributes):
+    def updateUser(self, user, configurationAttributes):
         return True
 
     def deleteUser(self, user, configurationAttributes):

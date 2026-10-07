@@ -4,19 +4,12 @@
 # Author: Jorge Munoz
 # Author: Yuriy Movchan
 #
-from io.jans.service.cdi.util import CdiUtil
 from io.jans.model.custom.script.type.fido2 import Fido2ExtensionType
-from io.jans.fido2.service.operation import AttestationService
-from io.jans.fido2.service.operation import AssertionService
-from io.jans.util import StringHelper
-from org.json import JSONObject
-from com.fasterxml.jackson.databind import JsonNode
 from org.apache.logging.log4j import ThreadContext
 from io.jans.fido2.model.u2f.error import Fido2ErrorResponseFactory
 from io.jans.fido2.model.u2f.error import Fido2ErrorResponseType
 from io.jans.as.model.config import Constants
 
-from java.lang import String
 
 class Fido2Extension(Fido2ExtensionType):
 
@@ -46,36 +39,30 @@ class Fido2Extension(Fido2ExtensionType):
     # This method is called in Attestation register endpoint before start the registration process
     def registerAttestationStart(self, paramAsJsonNode, context):
         print "Fido2Extension. registerAttestationStart"
-        attestationService = CdiUtil.bean(AttestationService)
 
         return True
 
     # This method is called in Attestation register endpoint after start the registration process
     def registerAttestationFinish(self, paramAsJsonNode, context):
         print "Fido2Extension. registerAttestationFinish"
-        attestationService = CdiUtil.bean(AttestationService)
 
         return True
 
     # This method is called in Attestation verify endpoint before finish the registration verification process
     def verifyAttestationStart(self, paramAsJsonNode, context):
         print "Fido2Extension. verifyAttestationStart"
-        attestationService = CdiUtil.bean(AttestationService)
 
         return True
 
     # This method is called in Attestation verify endpoint after finish the registration verification process
     def verifyAttestationFinish(self, paramAsJsonNode, context):
         print "Fido2Extension. verifyAttestationFinish"
-        attestationService = CdiUtil.bean(AttestationService)
 
         return True
 
     # This method is called in Assertion authenticate endpoint before start the authentication process
     def authenticateAssertionStart(self, paramAsJsonNode, context):
         print "Fido2Extension. authenticateAssertionStart"
-
-        assertionService = CdiUtil.bean(AssertionService)
 
         if paramAsJsonNode.hasNonNull("username"):
             print "Fido2Extension. Username: '%s'" % paramAsJsonNode.get("username").asText()
@@ -89,20 +76,17 @@ class Fido2Extension(Fido2ExtensionType):
     # This method is called in Assertion authenticate endpoint after start the authentication process
     def authenticateAssertionFinish(self, paramAsJsonNode, context):
         print "Fido2Extension. authenticateAssertionFinish"
-        assertionService = CdiUtil.bean(AssertionService)
 
         return True
 
     # This method is called in Assertion verify endpoint before finish the authentication verification process
     def verifyAssertionStart(self, paramAsJsonNode, context):
         print "Fido2Extension. verifyAssertionStart"
-        assertionService = CdiUtil.bean(AssertionService)
         
         return True
 
     # This method is called in Assertion verify endpoint after finish the authentication verification process
     def verifyAssertionFinish(self, paramAsJsonNode, context):
         print "Fido2Extension. verifyAssertionFinish"
-        assertionService = CdiUtil.bean(AssertionService)
         
         return True

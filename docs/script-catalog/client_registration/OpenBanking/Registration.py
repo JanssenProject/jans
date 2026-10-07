@@ -61,76 +61,76 @@ class ClientRegistration(ClientRegistrationType):
         print "Client registration. Initialization"
  
         if (not configurationAttributes.containsKey("keyId")):
-	        print "Client registration. Initialization failed. Property keyId is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property keyId is not specified"
+                return False
         else: 
-        	self.keyId = configurationAttributes.get("keyId").getValue2() 
+                self.keyId = configurationAttributes.get("keyId").getValue2() 
             
         if (not configurationAttributes.containsKey("clientScopes")):
-	        print "Client registration. Initialization failed. Property clientScopes is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property clientScopes is not specified"
+                return False
         else: 
-        	self.clientScopes = configurationAttributes.get("clientScopes").getValue2() 
+                self.clientScopes = configurationAttributes.get("clientScopes").getValue2() 
 
         if (not configurationAttributes.containsKey("signingCert")):
-	        print "Client registration. Initialization failed. Property signingCert is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property signingCert is not specified"
+                return False
         else: 
-        	self.signingCert = configurationAttributes.get("signingCert").getValue2() 
+                self.signingCert = configurationAttributes.get("signingCert").getValue2() 
 
         if (not configurationAttributes.containsKey("signingKey")):
-	        print "Client registration. Initialization failed. Property signingKey is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property signingKey is not specified"
+                return False
         else: 
-        	self.signingKey = configurationAttributes.get("signingKey").getValue2() 
+                self.signingKey = configurationAttributes.get("signingKey").getValue2() 
         
         if (not configurationAttributes.containsKey("transportKeyStore")):
-	        print "Client registration. Initialization failed. Property transportKeyStore is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property transportKeyStore is not specified"
+                return False
         else: 
-        	self.transportKeyStore = configurationAttributes.get("transportKeyStore").getValue2() 
+                self.transportKeyStore = configurationAttributes.get("transportKeyStore").getValue2() 
 
         if (not configurationAttributes.containsKey("transportKeyStorePassword")):
-	        print "Client registration. Initialization failed. Property transportKeyStorePassword is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property transportKeyStorePassword is not specified"
+                return False
         else: 
-        	self.transportKeyStorePassword = configurationAttributes.get("transportKeyStorePassword").getValue2() 
+                self.transportKeyStorePassword = configurationAttributes.get("transportKeyStorePassword").getValue2() 
 
         if (not configurationAttributes.containsKey("trustKeyStore")):
-	        print "Client registration. Initialization failed. Property trustKeyStore is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property trustKeyStore is not specified"
+                return False
         else: 
-        	self.trustKeyStore = configurationAttributes.get("trustKeyStore").getValue2() 
+                self.trustKeyStore = configurationAttributes.get("trustKeyStore").getValue2() 
 
         if (not configurationAttributes.containsKey("trustKeyStorePassword")):
-	        print "Client registration. Initialization failed. Property trustKeyStorePassword is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property trustKeyStorePassword is not specified"
+                return False
         else: 
-        	self.trustKeyStorePassword = configurationAttributes.get("trustKeyStorePassword").getValue2() 
+                self.trustKeyStorePassword = configurationAttributes.get("trustKeyStorePassword").getValue2() 
 
         if (not configurationAttributes.containsKey("jwks_endpoint")):
-	        print "Client registration. Initialization failed. Property jwks_endpoint is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property jwks_endpoint is not specified"
+                return False
         else: 
-        	self.jwks_endpoint = configurationAttributes.get("jwks_endpoint").getValue2() 
+                self.jwks_endpoint = configurationAttributes.get("jwks_endpoint").getValue2() 
             
         if (not configurationAttributes.containsKey("tokenUrl")):
-	        print "Client registration. Initialization failed. Property tokenUrl is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property tokenUrl is not specified"
+                return False
         else: 
-        	self.tokenUrl = configurationAttributes.get("tokenUrl").getValue2() 
+                self.tokenUrl = configurationAttributes.get("tokenUrl").getValue2() 
 
         if (not configurationAttributes.containsKey("tppUrl")):
-	        print "Client registration. Initialization failed. Property tppUrl is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property tppUrl is not specified"
+                return False
         else: 
-        	self.tppUrl = configurationAttributes.get("tppUrl").getValue2() 
+                self.tppUrl = configurationAttributes.get("tppUrl").getValue2() 
 
         if (not configurationAttributes.containsKey("aud")):
-	        print "Client registration. Initialization failed. Property aud is not specified"
-	        return False
+                print "Client registration. Initialization failed. Property aud is not specified"
+                return False
         else: 
-        	self.aud = configurationAttributes.get("aud").getValue2() 
+                self.aud = configurationAttributes.get("aud").getValue2() 
 
         print "Client registration. Initialized successfully"
 
@@ -147,7 +147,7 @@ class ClientRegistration(ClientRegistrationType):
         client = context.getClient()
         configurationAttributes = context.getConfigurationAttibutes()
 
-	# validate the DCR
+        # validate the DCR
         valid = self.validateDCR(context.getRegisterRequest(), client, configurationAttributes)
         if valid == False:
              print "Client registration. Registration failed. Invalid DCR of AS. CN - %s" % cnOfAuthServer 
@@ -168,11 +168,11 @@ class ClientRegistration(ClientRegistrationType):
         dnOfIntrospectionScript = "inum=CABA-2222,ou=scripts,o=jans"
         client.getAttributes().getIntrospectionScripts().add(dnOfIntrospectionScript)
 
-	client.setClientId(cn)
+        client.setClientId(cn)
         client.setJwksUri(Jwt.parse(context.getRegisterRequest().getSoftwareStatement()).getClaims().getClaimAsString("org_jwks_endpoint"))
                 
         # scopes must be mapped to the client automatically in the DCR script
-	# These can be trusted because the client has been vetted by OBIE
+        # These can be trusted because the client has been vetted by OBIE
         # https://github.com/JanssenProject/jans-setup/issues/32
         scopeService = CdiUtil.bean(ScopeService)
         scopeArr = []
@@ -198,7 +198,7 @@ class ClientRegistration(ClientRegistrationType):
         if StringHelper.equalsIgnoreCase(client.getAuthenticationMethod().toString(), "tls_client_auth"):
                   if registerRequest.getTlsClientAuthSubjectDn() is None:
                             print "Client registration. validateDCR. DCR doesnt contain TlsClientAuthSubjectDn"
-			    return False
+                            return False
                   else:
                             return True 
         else: 
@@ -243,139 +243,139 @@ class ClientRegistration(ClientRegistrationType):
                 print "Client Registration. Failed to get client_id / Software_statement_id for AS"
                 return False
         accessToken = self.getAccessToken(softwareStatementId)
-	if accessToken is None:
+        if accessToken is None:
                 print "Client Registration. Failed to get accessToken to query SCIM endpoint on OBIE"
                 return False
 
-	passed = self.verifyRoles(accessToken, softwareStatementId)
-	print "Software verification passed : "+ str(passed)
+        passed = self.verifyRoles(accessToken, softwareStatementId)
+        print "Software verification passed : "+ str(passed)
         return passed
    
-		        
+                        
     def buildPostDataFortoken(self, encodedJWT, softwareStatementId) :
-		postParameters = LinkedHashMap()
-		postParameters.put("scope", self.clientScopes)
-		postParameters.put("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-		postParameters.put("grant_type", "client_credentials")
-		postParameters.put("client_id", softwareStatementId)
-		postParameters.put("client_assertion", encodedJWT)
+                postParameters = LinkedHashMap()
+                postParameters.put("scope", self.clientScopes)
+                postParameters.put("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                postParameters.put("grant_type", "client_credentials")
+                postParameters.put("client_id", softwareStatementId)
+                postParameters.put("client_assertion", encodedJWT)
 
-		postData = StringBuilder()
-		for param in postParameters.entrySet():
-			if postData.length() != 0:
-				postData.append('&')
-			postData.append(URLEncoder.encode(param.getKey(), "UTF-8"))
-			postData.append('=')
-			postData.append(URLEncoder.encode(String(param.getValue()), "UTF-8").replace("+", "%20"))
-		print "Post data: "+postData.toString()
-		return postData.toString()
+                postData = StringBuilder()
+                for param in postParameters.entrySet():
+                        if postData.length() != 0:
+                                postData.append('&')
+                        postData.append(URLEncoder.encode(param.getKey(), "UTF-8"))
+                        postData.append('=')
+                        postData.append(URLEncoder.encode(String(param.getValue()), "UTF-8").replace("+", "%20"))
+                print "Post data: "+postData.toString()
+                return postData.toString()
 
     def getSslContext(self) :
-	keyStore = KeyStore.getInstance("PKCS12")
+        keyStore = KeyStore.getInstance("PKCS12")
         pwdArray = [x for x in self.transportKeyStorePassword]
         trustPwdArray = [x for x in self.trustKeyStorePassword]
-	keyStore.load( FileInputStream(self.transportKeyStore), pwdArray)
+        keyStore.load( FileInputStream(self.transportKeyStore), pwdArray)
         
-	sslContext = SSLContexts.custom().loadKeyMaterial(keyStore,   pwdArray).loadTrustMaterial( File(self.trustKeyStore), trustPwdArray).build()
-	return sslContext	
+        sslContext = SSLContexts.custom().loadKeyMaterial(keyStore,   pwdArray).loadTrustMaterial( File(self.trustKeyStore), trustPwdArray).build()
+        return sslContext	
 
 
     def buildFilter(self, softwareStatementId) :
-		#filter = "(urn:openbanking:softwarestatement:1.0:SoftwareStatements[Id eq \"" + softwareStatementId
-		#		+ "\" and Active eq true] ) and urn:openbanking:competentauthorityclaims:1.0:Authorisations[  #MemberState eq \"GBR\"  and Psd2Role eq \"PISP\" and Status eq \"Active\" ])"
-		filter = "(urn:openbanking:softwarestatement:1.0:SoftwareStatements[Id eq \"" + softwareStatementId	+ "\" and Active eq true] ) "
-		return filter	
+                #filter = "(urn:openbanking:softwarestatement:1.0:SoftwareStatements[Id eq \"" + softwareStatementId
+                #		+ "\" and Active eq true] ) and urn:openbanking:competentauthorityclaims:1.0:Authorisations[  #MemberState eq \"GBR\"  and Psd2Role eq \"PISP\" and Status eq \"Active\" ])"
+                filter = "(urn:openbanking:softwarestatement:1.0:SoftwareStatements[Id eq \"" + softwareStatementId	+ "\" and Active eq true] ) "
+                return filter	
     
 
     def getEncodedJWTForToken(self, softwareStatementId, clientScopes, aud, kid,signingKeyFile):
-		jws = JsonWebSignature()
-		claims = JwtClaims()
-		claims.setClaim("iss", softwareStatementId)
-		claims.setClaim("sub", softwareStatementId)
-		claims.setClaim("scope", clientScopes)
-		claims.setClaim("aud", aud)
-		claims.setClaim("jti", UUID.randomUUID())
-		unixTime = Instant.now().getEpochSecond()
-		claims.setClaim("iat", unixTime)
-		claims.setClaim("exp", unixTime + 1000) # 60000 one min
-		jws.setPayload(claims.toJson())
+                jws = JsonWebSignature()
+                claims = JwtClaims()
+                claims.setClaim("iss", softwareStatementId)
+                claims.setClaim("sub", softwareStatementId)
+                claims.setClaim("scope", clientScopes)
+                claims.setClaim("aud", aud)
+                claims.setClaim("jti", UUID.randomUUID())
+                unixTime = Instant.now().getEpochSecond()
+                claims.setClaim("iat", unixTime)
+                claims.setClaim("exp", unixTime + 1000) # 60000 one min
+                jws.setPayload(claims.toJson())
 
-		# dont change the order
-		jws.getHeaders().setObjectHeaderValue("typ", "JWT");
-		jws.setAlgorithmHeaderValue("RS256");
-		jws.getHeaders().setObjectHeaderValue("kid", kid);
+                # dont change the order
+                jws.getHeaders().setObjectHeaderValue("typ", "JWT");
+                jws.setAlgorithmHeaderValue("RS256");
+                jws.getHeaders().setObjectHeaderValue("kid", kid);
 
-		privateKey = self.getPrivateKey(signingKeyFile);
-		jws.setKey(privateKey);
+                privateKey = self.getPrivateKey(signingKeyFile);
+                jws.setKey(privateKey);
 
-		jwsCompactSerialization = jws.getCompactSerialization();
-		return jwsCompactSerialization;
-	
+                jwsCompactSerialization = jws.getCompactSerialization();
+                return jwsCompactSerialization;
+        
     def getPrivateKey(self, file) :
-		reader = PemReader(FileReader(File(file)))
-		pemObject = reader.readPemObject()
-		content = pemObject.getContent()
-		try:
-			kf = KeyFactory.getInstance("RSA");
-			keySpec = PKCS8EncodedKeySpec(content);
-			privateKey = kf.generatePrivate(keySpec);
-			return privateKey
-		except:
-			print "Client registration. Failed to getPrivateKey: %s" %(sys.exc_info()[1])
-			return False
+                reader = PemReader(FileReader(File(file)))
+                pemObject = reader.readPemObject()
+                content = pemObject.getContent()
+                try:
+                        kf = KeyFactory.getInstance("RSA");
+                        keySpec = PKCS8EncodedKeySpec(content);
+                        privateKey = kf.generatePrivate(keySpec);
+                        return privateKey
+                except:
+                        print "Client registration. Failed to getPrivateKey: %s" %(sys.exc_info()[1])
+                        return False
 
     def getAccessToken(self, softwareStatementId) :
            
-	   try:
-	     	sslContext = self.getSslContext()
-	    	httpClient = HttpClients.custom().setSSLContext(sslContext).build()
-           	headers = { "Content-type" : "application/x-www-form-urlencoded" }
+           try:
+                sslContext = self.getSslContext()
+                httpClient = HttpClients.custom().setSSLContext(sslContext).build()
+                headers = { "Content-type" : "application/x-www-form-urlencoded" }
                 httpService = CdiUtil.bean(HttpService)
                 jwt = self.getEncodedJWTForToken(softwareStatementId, self.clientScopes, self.tokenUrl , self.keyId, self.signingKey )
                 http_service_response = httpService.executePost(httpClient, self.tokenUrl, None, headers , self.buildPostDataFortoken(jwt,softwareStatementId))
-						
+                                                
                 http_response = http_service_response.getHttpResponse()
            except:
-            	print "Client Registration. getAccessToken", sys.exc_info()[1]
-            	return None
+                print "Client Registration. getAccessToken", sys.exc_info()[1]
+                return None
 
            try:
                 if not httpService.isResponseStastusCodeOk(http_response):
-                   	print "Cert. Client Registration. getAccessToken. Get invalid response from server: ", str(http_response.getStatusLine().getStatusCode())
-                	httpService.consume(http_response)
-                	return None
+                        print "Cert. Client Registration. getAccessToken. Get invalid response from server: ", str(http_response.getStatusLine().getStatusCode())
+                        httpService.consume(http_response)
+                        return None
     
-            	response_bytes = httpService.getResponseContent(http_response)
-            	response_string = httpService.convertEntityToString(response_bytes)
-            	httpService.consume(http_response)
+                response_bytes = httpService.getResponseContent(http_response)
+                response_string = httpService.convertEntityToString(response_bytes)
+                httpService.consume(http_response)
            finally:
-           	http_service_response.closeConnection()
+                http_service_response.closeConnection()
 
            if response_string == None:
-            	print "Client Registration. getAccessToken. Got empty response from validation server"
-            	return None
+                print "Client Registration. getAccessToken. Got empty response from validation server"
+                return None
         
-	   response = json.loads(response_string)
+           response = json.loads(response_string)
            print "response access token: "+ response["access_token"]
-	   return response["access_token"]
+           return response["access_token"]
 
     def  verifyRoles(self, accessToken, softwareStatementId) :
-		header =  { "Authorization": "Bearer " + accessToken }
-        	try:
-            		sslContext = self.getSslContext()
-	    		httpClient = HttpClients.custom().setSSLContext(sslContext).build()
+                header =  { "Authorization": "Bearer " + accessToken }
+                try:
+                        sslContext = self.getSslContext()
+                        httpClient = HttpClients.custom().setSSLContext(sslContext).build()
                         httpService = CdiUtil.bean(HttpService)
                         http_service_response = httpService.executeGet(httpClient, self.tppUrl+"?filter="+ URLEncoder.encode(self.buildFilter(softwareStatementId)) + "&attributes=totalResults",  header )
-			http_response = http_service_response.getHttpResponse()
-		except:
+                        http_response = http_service_response.getHttpResponse()
+                except:
                         print "Client Registration. verification. Exception: ", sys.exc_info()[1]
                         return False
 
                 try:
                         if not httpService.isResponseStastusCodeOk(http_response):
-                        	print "Client Registration. verification. Got invalid response from validation server: ", str(http_response.getStatusLine().getStatusCode())
-                        	httpService.consume(http_response)
-                        	return False
+                                print "Client Registration. verification. Got invalid response from validation server: ", str(http_response.getStatusLine().getStatusCode())
+                                httpService.consume(http_response)
+                                return False
     
                         response_bytes = httpService.getResponseContent(http_response)
                         response_string = httpService.convertEntityToString(response_bytes)
@@ -399,14 +399,14 @@ class ClientRegistration(ClientRegistrationType):
 
     def getCN_of_AS(self ) : 
                try:
-	                keyStore = KeyStore.getInstance("PKCS12")
+                        keyStore = KeyStore.getInstance("PKCS12")
                         pwdArray = [x for x in self.transportKeyStorePassword]
                         keyStore.load( FileInputStream(self.transportKeyStore), pwdArray)
                         alias = String( keyStore.aliases().nextElement())
-		        cert =  keyStore.getCertificate(alias)
-		        softwareStatementId = CertUtils.getCN(cert)
-		        print "CN of AS-%s" % softwareStatementId
-		        return softwareStatementId
+                        cert =  keyStore.getCertificate(alias)
+                        softwareStatementId = CertUtils.getCN(cert)
+                        print "CN of AS-%s" % softwareStatementId
+                        return softwareStatementId
                except:
                         print "Client Registration. Failed to get CN of AS from the transport keystore. Exception: ", sys.exc_info()[1]
                         return None

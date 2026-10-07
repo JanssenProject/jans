@@ -4,12 +4,10 @@
 # Author: Yuriy Movchan
 #
 
-from io.jans.service.cdi.util import CdiUtil
-from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.server.service import UserService, AuthenticationService
-from io.jans.util import ArrayHelper, StringHelper
-from java.util import ArrayList, Arrays
+from io.jans.as.server.service import AuthenticationService
+from io.jans.util import StringHelper
+from java.util import ArrayList
 
 from Cas2ExternalAuthenticator import PersonAuthentication as Cas2ExternalAuthenticator
 from DuoExternalAuthenticator import PersonAuthentication as DuoExternalAuthenticator
@@ -67,7 +65,6 @@ class PersonAuthentication(PersonAuthenticationType):
     def authenticate(self, configurationAttributes, requestParameters, step):
         result = False
 
-        start_duo = False
         if step == 1:
             # Execute CAS2 for step #1
             result = self.cas2ExternalAuthenticator.authenticate(configurationAttributes, requestParameters, step)
@@ -127,10 +124,10 @@ class PersonAuthentication(PersonAuthenticationType):
         cas2_result = self.cas2ExternalAuthenticator.getExtraParametersForStep(configurationAttributes, step)
         duo_result = self.duoExternalAuthenticator.getExtraParametersForStep(configurationAttributes, step)
         
-        if cas2_result == None:
+        if cas2_result is None:
             return duo_result
 
-        if duo_result == None:
+        if duo_result is None:
             return cas2_result
         
         result_list = ArrayList()

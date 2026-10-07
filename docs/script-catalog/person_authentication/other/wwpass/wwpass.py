@@ -85,7 +85,7 @@ class WWPassConnection(object):
             cafile (str): ??
         """
 
-        self.context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLSv1)
+        self.context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
         self.context.load_cert_chain(certfile=cert_file, keyfile=key_file)
         if cafile is None:
             self.context.load_verify_locations(cadata=DEFAULT_CADATA)
@@ -212,6 +212,7 @@ class WWPassConnection(object):
 class WWPassConnectionMT(WWPassConnection):
 
     def __init__(self, key_file, cert_file, timeout=10, spfe_addr='https://spfe.wwpass.com', ca_file=None, initial_connections=2):
+        WWPassConnection.__init__(self, key_file, cert_file, timeout, spfe_addr, ca_file)
         self.Pool = []
         self.key_file = key_file
         self.cert_file = cert_file

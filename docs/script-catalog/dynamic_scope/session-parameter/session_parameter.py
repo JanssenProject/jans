@@ -7,11 +7,8 @@
 from io.jans.model.custom.script.type.scope import DynamicScopeType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.service import SessionIdService
-from io.jans.as.server.service import UserService
-from io.jans.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList
+from java.util import Arrays
 
-import java
 
 class DynamicScope(DynamicScopeType):
     def __init__(self, currentTimeMillis):

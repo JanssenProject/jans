@@ -13,14 +13,13 @@ from io.jans.as.server.service import AuthenticationService, UserService
 from io.jans.jsf2.service import FacesService
 from io.jans.jsf2.message import FacesMessages
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.orm import PersistenceEntryManager
 from io.jans.service.cdi.util import CdiUtil
 
 from jakarta.faces.application import FacesMessage
 from java.util import Arrays
 
-import java
 import sys
+from java.lang import Throwable
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -33,7 +32,7 @@ class PersonAuthentication(PersonAuthenticationType):
         prop = "finish_userid_db_attribute"
         self.finish_userid_db_attr = self.configProperty(configurationAttributes, prop)
         
-        if self.finish_userid_db_attr == None:
+        if self.finish_userid_db_attr is None:
             print "Agama. Property '%s' is missing value" % prop
             return False
 
@@ -69,7 +68,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 bridge = CdiUtil.bean(NativeJansFlowBridge)
                 result = bridge.close()
                 
-                if result == None or not result.isSuccess():
+                if result is None or not result.isSuccess():
                     print "Agama. Flow DID NOT finished successfully"
                     return False
                 else:
@@ -77,7 +76,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     data = result.getData()
                     userId = data.get("userId") if data != None else None
                     
-                    if userId == None:
+                    if userId is None:
                         print "Agama. No userId provided in flow result."                        
                         self.setMessageError(FacesMessage.SEVERITY_ERROR, "Unable to determine identity of user")
                         return False
@@ -107,11 +106,12 @@ class PersonAuthentication(PersonAuthenticationType):
                     data.put("_encInum", CdiUtil.bean(EncryptionService).encrypt(inum))                    
                     jsonData = CdiUtil.bean(ObjectMapper).writeValueAsString(data) 
                     CdiUtil.bean(Identity).setWorkingParameter(self.resultParam, jsonData)
-            except:
+            except (Exception, Throwable):
                 print "Agama. Exception: ", sys.exc_info()[1]
                 return False
 
             return True
+        return None
 
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
@@ -124,7 +124,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Agama. Prepare for Step 1"
 
             session = CdiUtil.bean(Identity).getSessionId()
-            if session == None:
+            if session is None:
                 print "Agama. Failed to retrieve session_id"
                 return False
                 
@@ -139,7 +139,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
             
             (qn, ins) = self.extractParams(param)
-            if qn == None:
+            if qn is None:
                 print "Agama. Unable to determine the Agama flow to launch. Check the docs"
                 return False
                 
@@ -147,7 +147,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 bridge = CdiUtil.bean(NativeJansFlowBridge)
                 running = bridge.prepareFlow(session.getId(), qn, ins, False, self.startUrl)
                 
-                if running == None:
+                if running is None:
                     print "Agama. Flow '%s' does not exist or cannot be launched from a browser!" % qn
                     return False
                 elif running:
@@ -156,7 +156,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Agama. Redirecting to start/resume agama flow '%s'..." % qn
                 
                 CdiUtil.bean(FacesService).redirectToExternalURL(bridge.getTriggerUrl())
-            except:
+            except (Exception, Throwable):
                 print "Agama. An error occurred when launching flow '%s'. Check jans-auth logs" % qn
                 print "Agama. Exception: ", sys.exc_info()[1]
                 return False
@@ -164,6 +164,7 @@ class PersonAuthentication(PersonAuthenticationType):
             #    ex.printStackTrace() 
             #    return False
             return True
+        return None
         
     def getExtraParametersForStep(self, configurationAttributes, step):
         return Arrays.asList(self.resultParam)

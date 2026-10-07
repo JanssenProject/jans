@@ -18,16 +18,14 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService, SessionIdService
 from io.jans.as.server.service.common import UserService
-from io.jans.util import StringHelper, ArrayHelper
+from io.jans.util import StringHelper
 from io.jans.as.server.util import ServerUtil
-from org.gluu.oxauth.model.config import Constants
-from jakarta.ws.rs.core import Response
 from java.util import Arrays
 from io.jans.as.server.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 
 import sys
-import java
+from java.lang import Throwable
 import json
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -101,14 +99,11 @@ class PersonAuthentication(PersonAuthenticationType):
             user_name = credentials.getUsername()
 
             authenticated_user = self.processBasicAuthentication(credentials)
-            if authenticated_user == None:
+            if authenticated_user is None:
                 return False
 
             uaf_auth_method = "authenticate"
-            # Uncomment this block if you need to allow user second device registration
-            #enrollment_mode = ServerUtil.getFirstValue(requestParameters, "loginForm:registerButton")
-            #if StringHelper.isNotEmpty(enrollment_mode):
-            #    uaf_auth_method = "enroll"
+            # To allow user second device registration, switch uaf_auth_method to "enroll" when request parameter "loginForm:registerButton" is set
             
             if uaf_auth_method == "authenticate":
                 user_enrollments = self.findEnrollments(credentials)
@@ -125,12 +120,12 @@ class PersonAuthentication(PersonAuthenticationType):
             print "UAF. Authenticate for step 2"
 
             session = CdiUtil.bean(SessionIdService).getSessionId()
-            if session == None:
+            if session is None:
                 print "UAF. Prepare for step 2. Failed to determine session_id"
                 return False
 
             user = authenticationService.getAuthenticatedUser()
-            if (user == None):
+            if (user is None):
                 print "UAF. Authenticate for step 2. Failed to determine user name"
                 return False
             user_name = user.getUserId()
@@ -148,38 +143,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             # Request STATUS_OBB
-            if True:
-                #TODO: Remove this condition
-                # It's workaround becuase it's not possible to call STATUS_OBB 2 times. First time on browser and second ime on server
-                uaf_user_device_handle = ServerUtil.getFirstValue(requestParameters, "auth_handle")
-            else:
-                uaf_obb_auth_method = session_attributes.get("uaf_obb_auth_method")
-                uaf_obb_server_uri = session_attributes.get("uaf_obb_server_uri")
-                uaf_obb_start_response = session_attributes.get("uaf_obb_start_response")
-
-                # Prepare STATUS_OBB
-                uaf_obb_start_response_json = json.loads(uaf_obb_start_response)
-                uaf_obb_status_request_dictionary = { "operation": "STATUS_%s" % uaf_obb_auth_method,
-                                                      "userName": user_name,
-                                                      "needDetails": 1,
-                                                      "oobStatusHandle": uaf_obb_start_response_json["oobStatusHandle"],
-                                                    }
-    
-                uaf_obb_status_request = json.dumps(uaf_obb_status_request_dictionary, separators=(',',':'))
-                print "UAF. Authenticate for step 2. Prepared STATUS request: '%s' to send to '%s'" % (uaf_obb_status_request, uaf_obb_server_uri)
-
-                uaf_status_obb_response = self.executePost(uaf_obb_server_uri, uaf_obb_status_request)
-                if uaf_status_obb_response == None:
-                    return False
-
-                print "UAF. Authenticate for step 2. Get STATUS response: '%s'" % uaf_status_obb_response
-                uaf_status_obb_response_json = json.loads(uaf_status_obb_response)
-                
-                if uaf_status_obb_response_json["statusCode"] != 4000:
-                    print "UAF. Authenticate for step 2. UAF operation status is invalid. statusCode: '%s'" % uaf_status_obb_response_json["statusCode"]
-                    return False
-
-                uaf_user_device_handle = uaf_status_obb_response_json["additionalInfo"]["authenticatorsResult"]["handle"]
+            # It's workaround becuase it's not possible to call STATUS_OBB 2 times. First time on browser and second ime on server
+            uaf_user_device_handle = ServerUtil.getFirstValue(requestParameters, "auth_handle")
 
             if StringHelper.isEmpty(uaf_user_device_handle):
                 print "UAF. Prepare for step 2. Failed to get UAF handle"
@@ -192,7 +157,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Validate if user used device with same keYHandle
                 user_enrollments = self.findEnrollments(credentials)
                 if len(user_enrollments) == 0:
-                    uaf_auth_method = "enroll"
                     print "UAF. Authenticate for step 2. There is no UAF enrollment for user '%s'." % user_name
                     return False
                 
@@ -207,10 +171,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Check if there is user which has uaf_user_external_uid
                 # Avoid mapping user cert to more than one IDP account
                 find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", uaf_user_external_uid)
-                if find_user_by_external_uid == None:
+                if find_user_by_external_uid is None:
                     # Add uaf_user_external_uid to user's external GUID list
                     find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", uaf_user_external_uid)
-                    if find_user_by_external_uid == None:
+                    if find_user_by_external_uid is None:
                         print "UAF. Authenticate for step 2. Failed to update current user"
                         return False
     
@@ -224,7 +188,6 @@ class PersonAuthentication(PersonAuthenticationType):
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         identity = CdiUtil.bean(Identity)
-        credentials = identity.getCredentials()
 
         session_attributes = identity.getSessionId().getSessionAttributes()
 
@@ -236,12 +199,12 @@ class PersonAuthentication(PersonAuthenticationType):
             print "UAF. Prepare for step 2"
 
             session = CdiUtil.bean(SessionIdService).getSessionId()
-            if session == None:
+            if session is None:
                 print "UAF. Prepare for step 2. Failed to determine session_id"
                 return False
 
             user = authenticationService.getAuthenticatedUser()
-            if (user == None):
+            if (user is None):
                 print "UAF. Prepare for step 2. Failed to determine user name"
                 return False
 
@@ -271,7 +234,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             # Request START_OBB
             uaf_obb_start_response = self.executePost(uaf_obb_server_uri, uaf_obb_start_request)
-            if uaf_obb_start_response == None:
+            if uaf_obb_start_response is None:
                 return False
 
             print "UAF. Prepare for step 2. Get START response: '%s'" % uaf_obb_start_response
@@ -321,12 +284,11 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def setRequestScopedParameters(self, identity):
-        if self.registration_uri != None:
+        if self.registration_uri is not None:
             identity.setWorkingParameter("external_registration_uri", self.registration_uri)
         identity.setWorkingParameter("qr_options", self.customQrOptions)
 
     def processBasicAuthentication(self, credentials):
-        userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
@@ -340,7 +302,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
 
         find_user_by_uid = authenticationService.getAuthenticatedUser()
-        if find_user_by_uid == None:
+        if find_user_by_uid is None:
             print "UAF. Process basic authentication. Failed to find user '%s'" % user_name
             return None
         
@@ -352,12 +314,12 @@ class PersonAuthentication(PersonAuthenticationType):
         userService = CdiUtil.bean(UserService)
         user_name = credentials.getUsername()
         user = userService.getUser(user_name, "oxExternalUid")
-        if user == None:
+        if user is None:
             print "UAF. Find enrollments. Failed to find user"
             return result
         
         user_custom_ext_attribute = userService.getCustomAttribute(user, "oxExternalUid")
-        if user_custom_ext_attribute == None:
+        if user_custom_ext_attribute is None:
             return result
         
         uaf_prefix = "uaf:"
@@ -378,7 +340,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             http_service_response = httpService.executePost(self.http_client, request_uri, None, request_headers, request_data)
             http_response = http_service_response.getHttpResponse()
-        except:
+        except (Exception, Throwable):
             print "UAF. Validate POST response. Exception: ", sys.exc_info()[1]
             return None
 
@@ -395,4 +357,3 @@ class PersonAuthentication(PersonAuthenticationType):
             return response_string
         finally:
             http_service_response.closeConnection()
-        return None

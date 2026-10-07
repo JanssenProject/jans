@@ -3,16 +3,11 @@ from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper,ArrayHelper
-from io.jans.as.server.util import ServerUtil
-from io.jans.as.server.service import UserService, AuthenticationService,SessionIdService
+from io.jans.as.server.service import AuthenticationService,SessionIdService
 from io.jans.as.server.service.net import HttpService
-from io.jans.as.server.service.common import EncryptionService
 from jakarta.faces.application import FacesMessage
-from jakarta.faces.context import FacesContext
-from io.jans.jsf2.service import FacesService
 from io.jans.jsf2.message import FacesMessages
-from java.util import Arrays
-from java.lang import String
+from java.lang import String, Throwable
 from java.lang import System
 import java
 import sys
@@ -49,7 +44,7 @@ class PersonAuthentication(PersonAuthenticationType):
         f = open(iw_creds_file, 'r')
         try:
            creds = json.loads(f.read())
-        except:
+        except (Exception, Throwable):
             print "unexpected error - "+sys.exc_info()[0]
             return False
         finally:
@@ -57,12 +52,6 @@ class PersonAuthentication(PersonAuthenticationType):
         iw_cert_password = creds["CERT_PASSWORD"]
         
         #TODO: the password should not be in plaintext
-        #try:
-         #   encryptionService = CdiUtil.bean(EncryptionService)
-          #  iw_cert_password = encryptionService.decrypt(iw_cert_password)
-        #except:
-         #   print("oops!",sys.exc_info()[0],"occured.")
-          #  return False
 
         httpService = CdiUtil.bean(HttpService)
         self.client = httpService.getHttpsClient(None, None, None, iw_cert_store_type, iw_cert_path, iw_cert_password)
@@ -89,7 +78,6 @@ class PersonAuthentication(PersonAuthenticationType):
     
     def authenticate(self, configurationAttributes, requestParameters, step):
         
-        userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
         identity = CdiUtil.bean(Identity)
         
@@ -123,7 +111,7 @@ class PersonAuthentication(PersonAuthenticationType):
             elif (step == 2):
                 print "elif (step == 2):"
                 session = CdiUtil.bean(SessionIdService).getSessionId()
-                if session == None:
+                if session is None:
                     print "InWebo. Authenticate for step 2. session_id is not exists"
                     return False
 
@@ -163,7 +151,6 @@ class PersonAuthentication(PersonAuthenticationType):
     
     def getPageForStep(self, configurationAttributes, step):
         
-        identity = CdiUtil.bean(Identity)
         if (step == 1):
             return "/auth/inwebo/iw_va.xhtml"
         elif (step == 2):
@@ -190,7 +177,7 @@ class PersonAuthentication(PersonAuthenticationType):
             http_service_response = httpService.executeGet(self.client, request_uri)
             http_response = http_service_response.getHttpResponse()
             print "status - ", http_response.getStatusLine().getStatusCode()
-        except: 
+        except (Exception, Throwable): 
             print "inWebo validate method. Exception: ", sys.exc_info()[1]
             return False
 
@@ -230,7 +217,6 @@ class PersonAuthentication(PersonAuthenticationType):
         #endTime = curTime + (timeout * 1000)
         
         try:
-            response_status = None
             http_service_response = httpService.executeGet(self.client, request_uri)
             http_response = http_service_response.getHttpResponse()
              
@@ -243,7 +229,7 @@ class PersonAuthentication(PersonAuthenticationType):
             response_string = httpService.convertEntityToString(response_bytes)
             httpService.consume(http_response)
         
-        except: 
+        except (Exception, Throwable): 
             print "inWebo validate method. Exception: ", sys.exc_info()[1]
             return False
     

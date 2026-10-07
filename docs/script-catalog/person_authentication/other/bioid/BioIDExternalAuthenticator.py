@@ -2,23 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from java.util import Collections, HashMap, HashSet, ArrayList, Arrays, Date
-from io.jans.config import GluuConfiguration
-from io.jans.orm import PersistenceEntryManager
+from java.util import HashMap, HashSet, ArrayList, Arrays, Date
 from java.nio.charset import Charset
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.server.service import AuthenticationService, SessionIdService
-from io.jans.as.server.service.common import UserService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.util import StringHelper
 from io.jans.as.server.service.net import HttpService
 from org.json import JSONObject
 import base64
-import java
 
 from io.jans.util import StringHelper
-from java.lang import String
+from java.lang import String, Throwable
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -74,7 +70,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         print "BioID. Authenticate "
-        authenticationService = CdiUtil.bean(AuthenticationService)
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
         user_name = credentials.getUsername()
@@ -82,10 +77,8 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step == 1):
             print "BioID. Authenticate for step 1"
 
-            logged_in = False
-            userService = CdiUtil.bean(UserService)
             authenticated_user = self.processBasicAuthentication(credentials)
-            if authenticated_user == None:
+            if authenticated_user is None:
                 print "BioID. User does not exist"
                 return False
             
@@ -109,7 +102,6 @@ class PersonAuthentication(PersonAuthenticationType):
             auth_method = identity.getWorkingParameter("bioID_auth_method")
             print "BioID. Authenticate method for step %s. bioID_auth_method: '%s'" % (step,auth_method)
             user_name = identity.getWorkingParameter("user_name")
-            bcid = self.STORAGE + "." + self.PARTITION + "." + str(String(user_name).hashCode())
             
             if step == 2 and 'enrollment' == auth_method:
                 
@@ -204,7 +196,6 @@ class PersonAuthentication(PersonAuthenticationType):
         httpService = CdiUtil.bean(HttpService)
 
         http_client = httpService.getHttpsClient()
-        http_client_params = http_client.getParams()
 
         bioID_service_url = self.ENDPOINT + "token?id="+self.APP_IDENTIFIER+"&bcid="+bcid+"&task="+forTask+"&livedetection=true"
         encodedString = base64.b64encode((self.APP_IDENTIFIER+":"+self.APP_SECRET).encode('utf-8'))
@@ -213,7 +204,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             http_service_response = httpService.executeGet(http_client, bioID_service_url, bioID_service_headers)
             http_response = http_service_response.getHttpResponse()
-        except:
+        except (Exception, Throwable):
             print "BioID. Unable to obtain access token. Exception: ", sys.exc_info()[1]
             return None
 
@@ -234,7 +225,6 @@ class PersonAuthentication(PersonAuthenticationType):
         httpService = CdiUtil.bean(HttpService)
 
         http_client = httpService.getHttpsClient()
-        http_client_params = http_client.getParams()
 
         bioID_service_url = self.ENDPOINT + "isenrolled?bcid="+bcid+"&trait=Face"
         print "BioID. isenrolled URL - %s" %bioID_service_url
@@ -244,7 +234,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             http_service_response = httpService.executeGet(http_client, bioID_service_url, bioID_service_headers)
             http_response = http_service_response.getHttpResponse()
-        except:
+        except (Exception, Throwable):
             print "BioID. failed to invoke isenrolled API: ", sys.exc_info()[1]
             return None
 
@@ -260,7 +250,6 @@ class PersonAuthentication(PersonAuthenticationType):
             http_service_response.closeConnection()
         
     def processBasicAuthentication(self, credentials):
-        userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
@@ -275,7 +264,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
 
         find_user_by_uid = authenticationService.getAuthenticatedUser()
-        if find_user_by_uid == None:
+        if find_user_by_uid is None:
             print "OTP. Process basic authentication. Failed to find user '%s'" % user_name
             return None
         
@@ -285,7 +274,6 @@ class PersonAuthentication(PersonAuthenticationType):
     def performBiometricOperation(self, token, task):
         httpService = CdiUtil.bean(HttpService)
         http_client = httpService.getHttpsClient()
-        http_client_params = http_client.getParams()
         bioID_service_url = self.ENDPOINT + task+"?livedetection=true"
         bioID_service_headers = {"Authorization": "Bearer "+token}
 
@@ -301,7 +289,7 @@ class PersonAuthentication(PersonAuthenticationType):
             else:
                 print "BioID. Reason for failure : %s " % json_response.get("Error") 
                 return False
-        except:
+        except (Exception, Throwable):
             print "BioID. failed to invoke %s API: %s" %(task,sys.exc_info()[1])
             return None
             
