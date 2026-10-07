@@ -20,9 +20,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        
+        <!--
+          Java 17: the baseline Shibboleth IdP 5 requires, so the plugin stays loadable on any
+          IdP 5 deployment. `release` rather than `source`/`target` so the compiler also refuses
+          APIs newer than the target, which source/target cannot catch.
+        -->
+        <maven.compiler.release>17</maven.compiler.release>
+
         <jans.bom.version>${project.version}</jans.bom.version>
         <jans-core.version>${project.version}</jans-core.version>
         <jans-auth.version>${project.version}</jans-auth.version>
@@ -36,9 +40,18 @@
         <jetty.version>12.0.25</jetty.version>
 
         <slf4j.version>2.0.17</slf4j.version>
+        <slf4j-simple.version>1.7.36</slf4j-simple.version>
+        <log4j-logging.version>2.24.1</log4j-logging.version>
         <logback.version>1.5.32</logback.version>
         
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
+
+        <assertj.version>3.27.7</assertj.version>
+        <junit-jupiter-params.version>5.9.2</junit-jupiter-params.version>
+        <mockito.version>5.23.0</mockito.version>
+        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+        <checkstyle.version>10.20.1</checkstyle.version>
+        <spotbugs-annotations.version>4.5.3</spotbugs-annotations.version>
         
         <sonar.projectKey>JanssenProject_jans-shibboleth-idp</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -52,15 +65,17 @@
         <developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
     </scm>
 
-    <prerequisites>
-        <maven>${maven.min-version}</maven>
-    </prerequisites>
-
     <modules>
-        <module>idp-conf</module>
+        <!-- <module>idp-conf</module>
         <module>shib-jans-authn</module>
         <module>webapp</module>
-        <module>keygenerator</module>
+        <module>keygenerator</module> -->
+        <module>kernel</module>
+        <module>adapter-kernel</module>
+        <module>trust-domain</module>
+        <module>trust-adapters</module>
+        <module>file-staging-domain</module>
+        <module>file-staging-adapters</module>
     </modules>
 
     <repositories>
@@ -96,6 +111,36 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${junit-jupiter-params.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-annotations</artifactId>
+                <version>${spotbugs-annotations.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j-simple.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -107,8 +152,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.15.0</version>
                     <configuration>
-                        <source>${maven.compiler.source}</source>
-                        <target>${maven.compiler.target}</target>
+                        <release>${maven.compiler.release}</release>
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
@@ -122,6 +166,12 @@
                     <artifactId>maven-war-plugin</artifactId>
                     <version>3.5.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.5</version>
+                </plugin>
+                
             </plugins>
         </pluginManagement>
     </build>
