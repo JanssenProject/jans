@@ -38,11 +38,11 @@ import io.jans.orm.test.model.VersionedTestEntry;
  * doesn't match it, so running the whole suite against a single live profile still exercises
  * exactly the backend that profile provides.</p>
  *
- * <p>Requires task 03's {@code jansVersion} attribute/column already provisioned for the
+ * <p>Requires {@code jansVersion} attribute/column already provisioned for the
  * {@code jansTestVersioned} object class wherever the active profile points (SQL table column or
  * LDAP schema; see {@link VersionedTestEntry}) -- this test's own code is not what provisions it.</p>
  *
- * @author Yuriy Movchan Date: 10/02/2026
+ * @author Yuriy Movchan
  */
 public abstract class VersionedUpdateContractTest extends BaseOrmTest {
 
@@ -98,7 +98,7 @@ public abstract class VersionedUpdateContractTest extends BaseOrmTest {
 	}
 
 	/*
-	 * D-4's task-04 amendment: "not found" only means VersionMismatchException when the row is
+	 * "not found" only means VersionMismatchException when the row is
 	 * deleted in the race window between updateWithVersion's own pre-read and its write.
 	 * updateWithVersion pre-reads the entry the same way merge() does (D-3), so a DN that was
 	 * already gone before the call began surfaces merge()'s normal not-found behavior instead

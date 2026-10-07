@@ -7,10 +7,10 @@
 package io.jans.orm.test.persistence;
 
 /**
- * Runs {@link VersionedUpdateContractTest} against the SQL backend (task 04). Skipped when the
+ * Runs {@link VersionedUpdateContractTest} against the SQL backend. Skipped when the
  * active {@code -Dcfg} profile's persistence type isn't {@code sql}.
  *
- * @author Yuriy Movchan Date: 10/02/2026
+ * @author Yuriy Movchan
  */
 public class SqlVersionedUpdateContractTest extends VersionedUpdateContractTest {
 

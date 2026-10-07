@@ -7,11 +7,11 @@
 package io.jans.orm.test.persistence;
 
 /**
- * Runs {@link VersionedUpdateContractTest} against the LDAP backend (task 05), via the RFC 4528
+ * Runs {@link VersionedUpdateContractTest} against the LDAP backend, via the RFC 4528
  * assertion control. Skipped when the active {@code -Dcfg} profile's persistence type isn't
  * {@code ldap}.
  *
- * @author Yuriy Movchan Date: 10/02/2026
+ * @author Yuriy Movchan
  */
 public class LdapVersionedUpdateContractTest extends VersionedUpdateContractTest {
 

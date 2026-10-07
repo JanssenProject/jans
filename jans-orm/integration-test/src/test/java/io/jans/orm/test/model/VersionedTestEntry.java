@@ -16,8 +16,10 @@ import io.jans.orm.annotation.Version;
 
 /**
  * Minimal entity dedicated to {@code @Version}/{@code updateWithVersion} CAS integration tests.
- * Requires task 03's {@code jansVersion} column to exist on the backing table before these
+ * Requires {@code jansVersion} column to exist on the backing table before these
  * tests can run against a given profile.
+ * 
+ * @author Yuriy Movchan
  */
 @DataEntry
 @ObjectClass("jansTestVersioned")

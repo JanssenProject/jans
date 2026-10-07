@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * from conf/salt. It's test copy of jans-core PropertiesDecrypter/StringEncrypter
  * functionality because jans-orm can't depend on jans-core modules.
  *
- * @author Yuriy Movchan Date: 09/08/2026
+ * @author Yuriy Movchan
  */
 public final class TestPropertiesDecrypter {
 

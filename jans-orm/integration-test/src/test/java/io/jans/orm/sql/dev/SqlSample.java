@@ -59,7 +59,7 @@ public final class SqlSample {
         VersionedTestEntry loadedVersionedTestEntry2 = sqlEntryManager.find(VersionedTestEntry.class, newVersionedTestEntry.getDn());
         LOG.info("Version after find '{}'", loadedVersionedTestEntry2.getVersion());
 
-        
+        // Simple User entry
         SimpleUser newUser = new SimpleUser();
         newUser.setDn(String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis()));
         newUser.setUserId("sample_user_" + System.currentTimeMillis());
