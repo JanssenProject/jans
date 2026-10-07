@@ -18,7 +18,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version~debian13_amd64.deb -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.debian13_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
@@ -45,7 +45,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
           --bundle jans-debian13-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_replace-janssen-version~debian13_amd64.deb
+          jans_replace-janssen-version-stable.debian13_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -57,20 +57,19 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version~debian13_amd64.deb.sha256sum -P /tmp
-    sha256sum -c jans_replace-janssen-version~debian13_amd64.deb.sha256sum
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.debian13_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
-    jans_replace-janssen-version~debian13_amd64.deb: OK
+    jans_replace-janssen-version-stable.debian13_amd64.deb: OK
     ```
 
 - Install the package
 
 ```shell title="Command"
-sudo apt install ./jans_replace-janssen-version~debian13_amd64.deb
+sudo apt install ./jans_replace-janssen-version-stable.debian13_amd64.deb
 ```
 
 ## Run the setup script

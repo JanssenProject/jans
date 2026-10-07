@@ -21,7 +21,7 @@ resource "jans_custom_user" "test" {
 	mail 										= "test@jans.io"
 	display_name 						= "display-test"
 	given_name 							= "given-name-test"
-	user_password 					= "password"
+	user_password 					= var.user_password
 
 	custom_attributes {
 		name 					= "nickname"
@@ -35,6 +35,10 @@ resource "jans_custom_user" "test" {
 		# returned from the API
     ignore_changes = [ user_password ]
   }
+}
+variable "user_password" {
+  type      = string
+  sensitive = true
 }
 ```
 
@@ -93,9 +97,9 @@ Required:
 
 - `multi_valued` (Boolean) Indicates if the attribute can hold multiple values.
 - `name` (String) Name of the attribute. Example: name, displayName, birthdate, email
-- `values` (List of String) List of values for the attribute.
 
 Optional:
 
 - `display_value` (String) Display value for the attribute.
 - `value` (String) Value for the attribute.
+- `values` (List of String) List of values for the attribute.

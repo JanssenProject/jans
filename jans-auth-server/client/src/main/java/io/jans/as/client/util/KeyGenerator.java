@@ -115,7 +115,7 @@ public class KeyGenerator {
 
                 if (!((cmd.hasOption(SIGNING_KEYS) || cmd.hasOption(ENCRYPTION_KEYS))
                         && (cmd.hasOption(EXPIRATION) || cmd.hasOption(EXPIRATION_HOURS)))) {
-                    help();
+                    help(1);
                 }
 
                 final KeyOpsType keyOpsType = parseKeyOps(cmd);
@@ -125,7 +125,7 @@ public class KeyGenerator {
                 List<Algorithm> signatureAlgorithms = cmd.hasOption(SIGNING_KEYS) ? Algorithm.fromString(sigAlgorithms, Use.SIGNATURE) : new ArrayList<>();
                 List<Algorithm> encryptionAlgorithms = cmd.hasOption(ENCRYPTION_KEYS) ? Algorithm.fromString(encAlgorithms, Use.ENCRYPTION) : new ArrayList<>();
                 if (signatureAlgorithms.isEmpty() && encryptionAlgorithms.isEmpty()) {
-                    help();
+                    help(1);
                 }
 
                 KeyGeneratorContext context = new KeyGeneratorContext();
@@ -141,23 +141,23 @@ public class KeyGenerator {
                         && cmd.hasOption(DN_NAME)) {
                     generateKeysWithJansAuth(cmd, signatureAlgorithms, encryptionAlgorithms, context);
                 } else {
-                    help();
+                    help(1);
                 }
             } catch (ParseException e) {
                 log.error("Failed to generate keys", e);
-                help();
+                help(1);
             }
         }
 
         @Nullable
         private KeyOpsType parseKeyOps(CommandLine cmd) {
             if (!cmd.hasOption(KEY_OPS_TYPE)) {
-                help();
+                help(1);
             }
 
             final KeyOpsType keyOpsType = KeyOpsType.fromString(cmd.getOptionValue(KEY_OPS_TYPE));
             if (keyOpsType == null) {
-                help();
+                help(1);
             }
             return keyOpsType;
         }
@@ -173,9 +173,10 @@ public class KeyGenerator {
                 context.setCryptoProvider(new AuthCryptoProvider(keystore, keypasswd, dnName));
                 generateKeys(context, signatureAlgorithms, encryptionAlgorithms);
             } catch (Exception e) {
+                System.err.println("Failed to generate keys with `jans-auth` crypto: " + e.getMessage());
                 e.printStackTrace();
                 log.error("Failed to generate keys with `jans-auth` crypto", e);
-                help();
+                System.exit(1);
             }
         }
 
@@ -273,12 +274,17 @@ public class KeyGenerator {
         }
 
         private void help() {
+            help(0);
+        }
+
+        // non-zero exitCode lets callers detect invalid args/failure instead of treating printed usage as JWKS output
+        private void help(int exitCode) {
             HelpFormatter formatter = new HelpFormatter();
 
             formatter.printHelp(
                     "KeyGenerator -sig_keys alg ... -enc_keys alg ... -expiration n_days [-expiration_hours n_hours] [-ox11 url] [-keystore path -keypasswd secret -dnname dn_name]",
                     options);
-            System.exit(0);
+            System.exit(exitCode);
         }
     }
 }

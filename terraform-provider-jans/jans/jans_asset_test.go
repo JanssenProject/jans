@@ -3,14 +3,10 @@ package jans
 import (
 	"bytes"
 	"context"
-	"io"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestCreateJansAsset(t *testing.T) {
-	t.Skip("Service not implemented")
 	c, err := NewInsecureClient(host, user, pass)
 	if err != nil {
 		t.Fatal(err)
@@ -18,27 +14,23 @@ func TestCreateJansAsset(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Generate metadata dynamically
-	metadataReader, err := GenerateMetadataReader(GetCurrentHost())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	metadataBytes, err := io.ReadAll(metadataReader)
-	if err != nil {
-		t.Fatal(err)
-	}
-	file := bytes.NewReader(metadataBytes)
-
+	// jans-auth allows the .properties extension (i18n asset dir mapping).
 	doc, err := c.CreateJansAsset(ctx, Document{
-		FileName:    "metadata.xml",
+		FileName:    "test.properties",
 		Description: "A document made for testing purposes",
-		Document:    "Doc",
-		BaseDn:      "RandomBaseDN",
-		Level:       "1",
-	}, file)
+		Service:     "jans-auth",
+		Level:       1,
+	}, bytes.NewReader([]byte("test.key=test value\n")))
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	t.Cleanup(func() {
+		_ = c.DeleteJansAsset(ctx, doc.Inum)
+	})
+
+	if doc.Inum == "" {
+		t.Fatal("expected inum to be set after create")
 	}
 
 	gotDoc, err := c.GetJansAsset(ctx, doc.Inum)
@@ -46,39 +38,12 @@ func TestCreateJansAsset(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if diff := cmp.Diff(doc, gotDoc); diff != "" {
-		t.Fatalf("mismatch: %s", diff)
+	if gotDoc.FileName != "test.properties" {
+		t.Errorf("expected fileName test.properties, got %q", gotDoc.FileName)
 	}
-
-	// Generate fresh metadata for update
-	metadataReader, err = GenerateMetadataReader(GetCurrentHost())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	metadataBytes, err = io.ReadAll(metadataReader)
-	if err != nil {
-		t.Fatal(err)
-	}
-	file1 := bytes.NewReader(metadataBytes)
 
 	doc.Description = "Updated description"
-	if doc, err = c.UpdateJansAsset(ctx, *doc, file1); err != nil {
+	if _, err = c.UpdateJansAsset(ctx, *doc, bytes.NewReader([]byte("test.key=updated\n"))); err != nil {
 		t.Fatal(err)
 	}
-
-	gotDoc, err = c.GetJansAsset(ctx, doc.Inum)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if diff := cmp.Diff(doc, gotDoc); diff != "" {
-		t.Fatalf("mismatch: %s", diff)
-	}
-
-	t.Cleanup(func() {
-		if err := c.DeleteJansAsset(ctx, doc.Inum); err != nil {
-			t.Fatal(err)
-		}
-	})
 }

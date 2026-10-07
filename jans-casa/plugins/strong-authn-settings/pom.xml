@@ -28,11 +28,6 @@
            <name>GitHub Packages</name>
            <url>https://maven.pkg.github.com/JanssenProject/jans</url>
         </repository>
-        <repository>
-            <id>jans</id>
-            <name>Janssen project repository</name>
-            <url>https://maven.jans.io/maven</url>
-        </repository>
     </repositories>
 
     <build>

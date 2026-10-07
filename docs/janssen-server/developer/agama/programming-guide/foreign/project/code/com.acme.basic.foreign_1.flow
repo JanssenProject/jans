@@ -1,0 +1,32 @@
+Flow com.acme.basic.foreign_1
+    Basepath ""
+
+// ==== Concatenation ====
+
+strings = [ "Better", "safe", "than", "sorry" ]
+proverb = Call java.lang.String#join " " strings
+Log "A proverb says: '%'" proverb
+    
+// ==== Finding the smallest ====
+
+numbers = [ 2, -2, 0, 3, -3, 4 ]
+smallest = Call java.util.Collections#min numbers
+Log "Smallest number is:" smallest
+    
+// ==== Pseudo-random number generation ==== 
+
+sr = Call java.security.SecureRandom#new
+randNumber = Call sr nextInt 4
+Log randNumber
+
+// ==== void returning methods ====
+
+lil = Call java.util.LinkedList#new
+Call lil add 3.1416
+
+// ==== Exception handling ====
+
+number | E = Call java.lang.Integer#parseInt "Aha!" 16
+Log "@e An error occurred." E.message
+
+Finish true

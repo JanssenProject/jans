@@ -140,14 +140,6 @@
             "description": "Represents an individual Cedar policy, including metadata and content.",
             "type": "object",
             "properties": {
-                "cedar_version": {
-                    "description": "The version of the Cedar language that Cedarling should use for policy evaluation.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A name for the policy.",
-                    "type": "string"
-                },
                 "description": {
                     "description": "A short, optional description explaining the purpose of this policy.",
                     "type": "string",
@@ -170,7 +162,7 @@
                     ]
                 }
             },
-            "required": ["creation_date", "policy_content"],
+            "required": ["policy_content"],
             "additionalProperties": true
         },
         "PolicyContent": {
@@ -242,49 +234,10 @@
                     "description": "The Cedar entity type that tokens from this issuer should be mapped to (e.g., 'Jans::AccessToken'). This is required.",
                     "type": "string"
                 },
-                "principal_mapping": {
-                    "description": "A list of Cedar principal types to which this token should be mapped (e.g., ['Jans::Workload']). Defaults to an empty list.",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "default": [],
-                    "uniqueItems": true
-                },
                 "token_id": {
                     "description": "The claim in the token that should be treated as the unique identifier for the token. Defaults to 'jti'.",
                     "type": "string",
                     "default": "jti"
-                },
-                "user_id": {
-                    "description": "The primary claim to extract from the token to create the Workload entity. If not specified, Cedarling will attempt to use 'sub' before failing.",
-                    "type": "string",
-                    "default": "sub"
-                },
-                "role_mapping": {
-                    "description": "The claim in the token that lists the user's roles (e.g., 'role', 'group', 'memberOf'). Defaults to 'role'.",
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ],
-                    "default": "role"
-                },
-                "workload_id": {
-                    "description": "The primary claim to extract from the token to create the Workload entity. If not specified, Cedarling will attempt to use 'aud', followed by 'client_id', before failing.",
-                    "type": "string",
-                    "default": "aud"
-                },
-                "claim_mapping": {
-                    "description": "An object defining custom mappings from token claims to Cedar entity attributes. Defaults to an empty object.",
-                    "type": "object",
-                    "default": {}
                 },
                 "required_claims": {
                     "description": "A list of claims that must be present in the token for it to be considered valid. Defaults to an empty list.",

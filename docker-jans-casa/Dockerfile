@@ -16,13 +16,13 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=12.1.8
+ARG JETTY_VERSION=12.1.14
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
 
 # Install jetty
-RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
+RUN wget -nv https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
     && mkdir -p /opt \
     && tar -xzf /tmp/jetty.tar.gz -C /opt \
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
@@ -33,25 +33,27 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ====
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2026-02-19 08:51'
+ENV CN_RELEASE_TAG=nightly
+ENV CN_BUILD_DATE='2026-10-06T16:25:49Z'
 
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
+ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/casa-${CN_VERSION}.war
 
 # Install Casa
 RUN mkdir -p ${JETTY_BASE}/jans-casa/webapps \
-    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-casa/webapps/jans-casa.war \
+    && wget -nv ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-casa/webapps/jans-casa.war \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-casa --add-modules=server,resources,http,forwarded,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
 
 # casa plugins
-RUN mkdir -p ${JETTY_BASE}/jans-casa/plugins \
+RUN set -e \
+    && mkdir -p ${JETTY_BASE}/jans-casa/plugins \
     && for casa_plugin in acct-linking authorized-clients bioid-plugin custom-branding strong-authn-settings; \
     do \
-        wget -nv "https://jenkins.jans.io/maven/io/jans/casa/plugins/${casa_plugin}/${CN_VERSION}/${casa_plugin}-${CN_VERSION}-jar-with-dependencies.jar" -O "${JETTY_BASE}/jans-casa/plugins/${casa_plugin}-${CN_VERSION}.jar"; \
+        wget -nv "https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/${casa_plugin}-${CN_VERSION}-jar-with-dependencies.jar" -O "${JETTY_BASE}/jans-casa/plugins/${casa_plugin}-${CN_VERSION}.jar" || exit 1; \
     done
 
 # casa agama
 RUN mkdir -p /usr/share/java \
-    && wget -q https://maven.jans.io/maven/io/jans/casa-agama/${CN_VERSION}/casa-agama-${CN_VERSION}-project.zip -O /usr/share/java/casa-agama-project.zip
+    && wget -nv https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/casa-agama-${CN_VERSION}-project.zip -O /usr/share/java/casa-agama-project.zip
 
 # ===========
 # Assets sync
@@ -61,7 +63,8 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-casa
 
-ENV JANS_SOURCE_VERSION=c0ae216653f1a615ad053ac1f88f54dfbffd0842
+ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
+ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -109,8 +112,8 @@ WORKDIR /opt/prometheus
 
 ENV PROMETHEUS_AGENT_VERSION=1.5.0
 COPY static/prometheus-config.yaml /opt/prometheus/
-RUN wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar \
-    && wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256 \
+RUN wget -nv --tries=5 --retry-connrefused --retry-on-http-error=429,500,502,503,504 --waitretry=15 -T 30 https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar \
+    && wget -nv --tries=5 --retry-connrefused --retry-on-http-error=429,500,502,503,504 --waitretry=15 -T 30 https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256 \
     && sha256sum -c jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256
 
 WORKDIR /
@@ -188,7 +191,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     CN_CASA_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
-    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_CASA_ADMIN_LOCK_FILE=/opt/jans/jetty/jans-casa/resources/.administrable \

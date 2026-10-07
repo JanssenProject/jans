@@ -104,9 +104,6 @@ public class AuthorizeAction {
     private Logger log;
 
     @Inject
-    private ClientService clientService;
-
-    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
@@ -193,6 +190,9 @@ public class AuthorizeAction {
     @Inject
     private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
 
+    @Inject
+    private ClientIdMetadataService clientIdMetadataService;
+
     // OAuth 2.0 request parameters
     private String scope;
     private String responseType;
@@ -278,7 +278,7 @@ public class AuthorizeAction {
 
         Client client = null;
         try {
-            client = clientService.getClient(clientId);
+            client = clientIdMetadataService.resolveClient(clientId);
         } catch (EntryPersistenceException ex) {
             log.debug("Permission denied. Failed to find client by inum '{}' in DB.", clientId, ex);
             permissionDenied();
@@ -311,7 +311,7 @@ public class AuthorizeAction {
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, session != null ? session.getSessionAttributes().get(SESSION_USER_CODE) : null, (HttpServletRequest) externalContext.getRequest());
         } catch (WebApplicationException e) {
             log.error(e.getMessage(), e);
-            permissionDenied();
+            permissionDenied(client);
             return;
         }
 
@@ -323,7 +323,7 @@ public class AuthorizeAction {
                 session = handleAcrChange(session, prompts);
             } else {
                 log.error("ACR is changed, please provide a supported and enabled acr value");
-                permissionDenied();
+                permissionDenied(client);
                 return;
             }
         }
@@ -348,7 +348,7 @@ public class AuthorizeAction {
 
                 if (customScriptConfiguration == null) {
                     log.error("Failed to get CustomScriptConfiguration. auth_step: {}, acr_values: {}", 1, this.acrValues);
-                    permissionDenied();
+                    permissionDenied(client);
                     return;
                 }
 
@@ -501,7 +501,7 @@ public class AuthorizeAction {
             boolean result = consentGatherer.configure(session.getUserDn(), clientId, state, acrValuesList);
             if (!result) {
                 log.error("Failed to initialize external consent-gathering flow.");
-                permissionDenied();
+                permissionDenied(client);
                 return;
             }
         }
@@ -628,8 +628,8 @@ public class AuthorizeAction {
             return null;
         }
         try {
-            return clientService.getClient(clientId);
-        } catch (EntryPersistenceException e) {
+            return clientIdMetadataService.resolveClient(clientId);
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
         }
@@ -1018,6 +1018,16 @@ public class AuthorizeAction {
         authorizeService.permissionDenied(session);
     }
 
+    /**
+     * Same as {@link #permissionDenied()} but reuses a client already resolved earlier in the same
+     * authorization decision, avoiding a redundant (and, for a CIMD client_id, network-dependent) second
+     * resolution purely to build a JARM (response_mode=jwt) denial response.
+     */
+    private void permissionDenied(Client client) {
+        final SessionId session = getSession();
+        authorizeService.permissionDenied(session, client);
+    }
+
     public void invalidRequest() {
         log.trace("invalidRequest");
         StringBuilder sb = new StringBuilder();
@@ -1106,7 +1116,13 @@ public class AuthorizeAction {
             return UNKNOWN;
         }
 
-        final Client client = clientService.getClient(clientId);
+        Client client;
+        try {
+            client = clientIdMetadataService.resolveClient(clientId);
+        } catch (WebApplicationException e) {
+            log.debug("Failed to resolve client_id '{}' for display name.", clientId, e);
+            return UNKNOWN;
+        }
         return getCheckedClientDisplayName(client);
     }
 

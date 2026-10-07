@@ -125,7 +125,7 @@ this.
     "openid_configuration_endpoint": "https://your-idp.example.com/.well-known/openid-configuration"
     ```
 
-- Package the policy store as a `.cjar` archive (a ZIP file of the directory contents) and host it somewhere accessible via URL. The `CEDARLING_POLICY_STORE_URI` property requires either a `.cjar` URL or a legacy JSON URL — it does not support raw directory URLs.
+- Package the policy store as a `.cjar` archive (a ZIP file of the directory contents) and host it somewhere accessible via URL. The `CEDARLING_POLICY_STORE_URI` property requires an endpoint that returns a valid `.cjar`/ZIP archive — raw directory URLs are unsupported.
 
     To create a `.cjar` archive from the `tarpDemo` directory:
 
@@ -180,14 +180,11 @@ We will now add the policy store details in the Janssen Tarp that is installed i
      "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
      "CEDARLING_LOG_TYPE": "std_out",
      "CEDARLING_LOG_LEVEL": "INFO",
-     "CEDARLING_USER_AUTHZ": "enabled",
-     "CEDARLING_WORKLOAD_AUTHZ": "disabled",
      "CEDARLING_JWT_SIG_VALIDATION": "enabled",
      "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
      "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
        "HS256", "RS256"
-     ],
-     "CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM": false
+     ]
    }
    ```
 
@@ -310,7 +307,7 @@ This method uses `authorize_unsigned` — no JWT validation is performed. Use th
 
 ### Step-1: Create the Cedar Policy and Schema
 
-The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (a JSON file). To aid in this quick start guide, we have already created a [policy store](https://github.com/JanssenProject/CedarlingQuickstart/releases/download/0.0.1/tarpUnsignedDemo.cjar) at
+The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (in the folder-based format or as a `.cjar` archive). To aid in this quick start guide, we have already created a [policy store](https://github.com/JanssenProject/CedarlingQuickstart/releases/download/0.0.1/tarpUnsignedDemo.cjar) at
 [quick start GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart/tree/main).
 We will use this policy store to allow/deny the incoming authorization request.
 
@@ -360,14 +357,11 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
        "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
        "CEDARLING_LOG_TYPE": "std_out",
        "CEDARLING_LOG_LEVEL": "INFO",
-       "CEDARLING_USER_AUTHZ": "enabled",
-       "CEDARLING_WORKLOAD_AUTHZ": "disabled",
        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
          "HS256", "RS256"
-       ],
-       "CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM": false
+       ]
    }
    ```
 

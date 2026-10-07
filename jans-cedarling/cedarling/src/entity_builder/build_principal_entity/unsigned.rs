@@ -17,14 +17,14 @@ impl EntityBuilder {
         built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildUnsignedEntityError> {
         let type_name: &str = &principal.cedar_mapping.entity_type;
-        let id_srcs = vec![EntityIdSrc::String(&principal.cedar_mapping.id)];
-        let attrs_srcs = vec![AttrSrc::Unsigned(&principal.attributes)];
+        let id_srcs = [EntityIdSrc::String(&principal.cedar_mapping.id)];
+        let attrs_srcs = [AttrSrc::Unsigned(&principal.attributes)];
 
         let principal = self
             .build_principal_entity(
                 type_name,
                 &id_srcs,
-                attrs_srcs,
+                &attrs_srcs,
                 &TokenPrincipalMappings::default(),
                 built_entities,
                 HashSet::new(),

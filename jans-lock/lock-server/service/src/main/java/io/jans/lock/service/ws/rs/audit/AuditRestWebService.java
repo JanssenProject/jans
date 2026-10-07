@@ -16,7 +16,7 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
+import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.audit.HealthEntry;
 import io.jans.lock.model.audit.LogEntry;
 import io.jans.lock.model.audit.TelemetryEntry;
@@ -83,7 +83,7 @@ public interface AuditRestWebService {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS }, grpcMethodName = "ProcessBulkHealth")
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_health_write", path="/audit/health/bulk")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_health_bulk_write", path="/audit/health/bulk")
 	Response processBulkHealthRequest(List<HealthEntry> healthEntries, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
@@ -119,7 +119,7 @@ public interface AuditRestWebService {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS }, grpcMethodName = "ProcessBulkLog")
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_log_write", path="/audit/log/bulk")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_log_bulk_write", path="/audit/log/bulk")
 	Response processBulkLogRequest(List<LogEntry> logEntries, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
@@ -155,7 +155,7 @@ public interface AuditRestWebService {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS }, grpcMethodName = "ProcessBulkTelemetry")
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_telemetry_write", path="/audit/telemetry/bulk")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_telemetry_bulk_write", path="/audit/telemetry/bulk")
 	Response processBulkTelemetryRequest(List<TelemetryEntry> telemetryEntries, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 

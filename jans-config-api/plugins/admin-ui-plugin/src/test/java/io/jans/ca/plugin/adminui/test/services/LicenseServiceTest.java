@@ -51,11 +51,14 @@ public class LicenseServiceTest {
         adminConf = mock(AdminConf.class);
         licenseConfig = mock(LicenseConfig.class);
         auiConfiguration = mock(AUIConfiguration.class);
-        //licenseConfiguration = mock(LicenseConfiguration.class);
         lenient().when(entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN)).thenReturn(adminConf);
         lenient().when(adminConf.getMainSettings()).thenReturn(mock(MainSettings.class));
         lenient().when(adminConf.getMainSettings().getLicenseConfig()).thenReturn(licenseConfig);
 
+        // The service also reads the in-memory license configuration; stub that path so
+        // auiConfiguration / licenseConfiguration are never null during validation.
+        lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
+        lenient().when(auiConfiguration.getLicenseConfiguration()).thenReturn(licenseConfiguration);
     }
 
     @Test
@@ -97,8 +100,11 @@ public class LicenseServiceTest {
         lenient().when(licenseConfig.getScanLicenseApiHostname()).thenReturn("valid-scan-url");
         lenient().when(licenseConfig.getLicenseHardwareKey()).thenReturn("valid-hardware-key");
         when(licenseConfig.getOidcClient()).thenReturn(new OIDCClientSettings("test-host", "test-client-id", "test-client-secret"));
-        when(licenseConfig.getLicenseDetailsLastUpdatedOn()).thenReturn("2024-01-01");
         when(licenseConfig.getIntervalForSyncLicenseDetailsInDays()).thenReturn(30L);
+
+        // In-memory license details: not expired and recently synced, so no re-sync is triggered.
+        lenient().when(licenseConfiguration.getLicenseValidUpto()).thenReturn(LocalDate.now().plusDays(30).toString());
+        lenient().when(licenseConfiguration.getLicenseDetailsLastUpdatedOn()).thenReturn(LocalDate.now().minusDays(5).toString());
 
         GenericResponse response = licenseDetailsService.validateLicenseConfiguration();
         assertTrue(response.isSuccess());
@@ -116,6 +122,7 @@ public class LicenseServiceTest {
         lenient().when(licenseConfiguration.getLicenseValidUpto()).thenReturn(LocalDate.now().plusDays(30).toString());
         lenient().when(licenseConfiguration.getLicenseDetailsLastUpdatedOn()).thenReturn(LocalDate.now().minusDays(5).toString());
         lenient().when(licenseConfiguration.getIntervalForSyncLicenseDetailsInDays()).thenReturn(10L);
+        lenient().when(licenseConfiguration.getLicenseMAUThreshold()).thenReturn(500L);
 
         // Call the method under test
         GenericResponse response = licenseDetailsService.checkLicense();

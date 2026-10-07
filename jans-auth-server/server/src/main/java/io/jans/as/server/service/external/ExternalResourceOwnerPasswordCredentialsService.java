@@ -18,9 +18,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
 import java.util.List;
 
+import jakarta.ws.rs.WebApplicationException;
+
 /**
- * @author Yuriy Zabrovarnyy
- */
+* @author Yuriy Zabrovarnyy
+*/
+
 @ApplicationScoped
 @DependsOn("appInitializer")
 @Named
@@ -68,6 +71,11 @@ public class ExternalResourceOwnerPasswordCredentialsService extends ExternalScr
             log.debug("Finished external 'executeExternalAuthenticate' method, script name: {}, context: {}, result: {}",
                     customScriptConfiguration.getName(), context, result);
             return result;
+        } catch (WebApplicationException e) {
+            if (log.isTraceEnabled()) {
+                log.trace("WebApplicationException from script", e);
+            }
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);

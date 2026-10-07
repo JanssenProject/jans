@@ -16,11 +16,11 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.session.EndSessionErrorResponseType;
 import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
+import io.jans.as.server.service.net.SectorIdentifierUriService;
 import io.jans.as.server.session.ws.rs.EndSessionService;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +29,8 @@ import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,9 +47,6 @@ public class RedirectionUriService {
     private static final Logger log = LoggerFactory.getLogger(RedirectionUriService.class);
 
     @Inject
-    private ClientService clientService;
-
-    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
@@ -59,8 +58,14 @@ public class RedirectionUriService {
     @Inject
     private EndSessionService endSessionService;
 
+    @Inject
+    private SectorIdentifierUriService sectorIdentifierUriService;
+
+    @Inject
+    private ClientIdMetadataService clientIdMetadataService;
+
     public String validateRedirectionUri(String clientIdentifier, String redirectionUri) {
-        Client client = clientService.getClient(clientIdentifier);
+        Client client = clientIdMetadataService.resolveClient(clientIdentifier);
         if (client == null) {
             return null;
         }
@@ -73,24 +78,18 @@ public class RedirectionUriService {
             return result;
         }
 
+        if (!sectorIdentifierUriService.isAllowedSectorIdentifierUri(sectorIdentiferUri)) {
+            return result;
+        }
+
         final List<String> sectorRedirectUris = localResponseCache.getSectorRedirectUris(sectorIdentiferUri);
         if (sectorRedirectUris != null) {
             return sectorRedirectUris;
         }
 
-        jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
-
-        String entity = null;
-        try {
-            Response clientResponse = clientRequest.target(sectorIdentiferUri).request().buildGet().invoke();
-            int status = clientResponse.getStatus();
-            if (status != 200) {
-                return result;
-            }
-
-            entity = clientResponse.readEntity(String.class);
-        } finally {
-            clientRequest.close();
+        String entity = sectorIdentifierUriService.fetchSectorIdentifierContent(sectorIdentiferUri);
+        if (StringUtils.isBlank(entity)) {
+            return result;
         }
 
         JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
@@ -120,7 +119,7 @@ public class RedirectionUriService {
                 if (redirectUris != null) {
                     log.trace("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
                             client.getClientId(), redirectionUri, redirectUris.length);
-                    if (isUriEqual(redirectionUri, redirectUris)) {
+                    if (isUriEqual(redirectionUri, redirectUris, true)) {
                         log.trace("Redirect URI 'equals' found, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
 
                         return redirectionUri;
@@ -156,7 +155,17 @@ public class RedirectionUriService {
     }
 
     public static boolean isUriEqual(String redirectionUri, String[] redirectUris) {
-        final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
+        return isUriEqual(redirectionUri, redirectUris, false);
+    }
+
+    /**
+     * @param allowLoopbackPortVariance RFC 8252 7.3: for authorization redirect URIs on the loopback interface the AS MUST
+     *                                  allow the port to vary from what was registered, since native apps typically obtain
+     *                                  an ephemeral port at request time. Must be false for other comparisons (e.g. post logout).
+     */
+    public static boolean isUriEqual(String redirectionUri, String[] redirectUris, boolean allowLoopbackPortVariance) {
+        final boolean redirectionUriIsLoopback = allowLoopbackPortVariance && isLoopbackRedirectUri(redirectionUri);
+        final String redirectUriWithoutParams = uriWithoutParams(redirectionUriIsLoopback ? stripPort(redirectionUri) : redirectionUri);
 
         for (String uri : redirectUris) {
             log.debug("Comparing {} == {}", uri, redirectionUri);
@@ -164,15 +173,59 @@ public class RedirectionUriService {
                 return true;
             }
 
-            String uriWithoutParams = uriWithoutParams(uri);
-            final Map<String, String> params = getParams(uri);
+            final boolean ignorePort = redirectionUriIsLoopback && isLoopbackRedirectUri(uri);
+            final String registeredUri = ignorePort ? stripPort(uri) : uri;
+
+            String uriWithoutParams = uriWithoutParams(registeredUri);
+            final Map<String, String> params = getParams(registeredUri);
 
             if ((uriWithoutParams.equals(redirectUriWithoutParams) && params.size() == 0 && getParams(redirectionUri).size() == 0) ||
-                    uriWithoutParams.equals(redirectUriWithoutParams) && params.size() > 0 && compareParams(redirectionUri, uri)) {
+                    uriWithoutParams.equals(redirectUriWithoutParams) && params.size() > 0 && compareParams(redirectionUri, registeredUri)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean isLoopbackRedirectUri(String uri) {
+        if (StringUtils.isBlank(uri)) {
+            return false;
+        }
+        try {
+            final URI parsed = new URI(uri);
+            final String host = parsed.getHost();
+            return "http".equalsIgnoreCase(parsed.getScheme())
+                    && ("127.0.0.1".equals(host) || "::1".equals(host) || "[::1]".equals(host));
+        } catch (URISyntaxException e) {
+            return false;
+        }
+    }
+
+    private static String stripPort(String uri) {
+        try {
+            final URI parsed = new URI(uri);
+            if (parsed.getPort() == -1) {
+                return uri;
+            }
+            // rebuild from raw components so escaped characters are not decoded
+            final StringBuilder sb = new StringBuilder(parsed.getScheme()).append("://");
+            if (parsed.getRawUserInfo() != null) {
+                sb.append(parsed.getRawUserInfo()).append('@');
+            }
+            sb.append(parsed.getHost());
+            if (parsed.getRawPath() != null) {
+                sb.append(parsed.getRawPath());
+            }
+            if (parsed.getRawQuery() != null) {
+                sb.append('?').append(parsed.getRawQuery());
+            }
+            if (parsed.getRawFragment() != null) {
+                sb.append('#').append(parsed.getRawFragment());
+            }
+            return sb.toString();
+        } catch (URISyntaxException e) {
+            return uri;
+        }
     }
 
 
@@ -180,7 +233,7 @@ public class RedirectionUriService {
 
         boolean isBlank = Util.isNullOrEmpty(postLogoutRedirectUri);
 
-        Client client = clientService.getClient(clientId);
+        Client client = clientIdMetadataService.resolveClient(clientId);
 
         if (client != null) {
             String[] postLogoutRedirectUris = client.getPostLogoutRedirectUris();
@@ -205,7 +258,7 @@ public class RedirectionUriService {
         }
 
         final Set<Client> clientsByDns = sessionId.getPermissionGrantedMap() != null
-                ? clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true)
+                ? clientIdMetadataService.resolveClientsForLogout(sessionId.getPermissionGrantedMap().getClientIds(true))
                 : Sets.newHashSet();
 
         log.trace("Validating post logout redirect URI: postLogoutRedirectUri = {}", postLogoutRedirectUri);

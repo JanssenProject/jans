@@ -11,6 +11,7 @@ interface SettingsDialogProps {
   model: string;
   customModel: string;
   mcpServerUrl: string;
+  ollamaBaseUrl: string;
   connectionStatus: ConnectionStatus;
   apiKeyError: string;
   modelError: string;
@@ -21,6 +22,7 @@ interface SettingsDialogProps {
   onModelChange: (model: string) => void;
   onCustomModelChange: (model: string) => void;
   onMcpUrlChange: (url: string) => void;
+  onOllamaBaseUrlChange: (url: string) => void;
   onTestConnection: () => void;
   onSaveSettings: () => void;
   onClearSettings: () => void;
@@ -35,6 +37,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   model,
   customModel,
   mcpServerUrl,
+  ollamaBaseUrl,
   connectionStatus,
   apiKeyError,
   modelError,
@@ -45,6 +48,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   onModelChange,
   onCustomModelChange,
   onMcpUrlChange,
+  onOllamaBaseUrlChange,
   onTestConnection,
   onSaveSettings,
   onClearSettings,
@@ -55,6 +59,9 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
     LLM_PROVIDERS.find((p) => p.value === provider) || LLM_PROVIDERS[0];
 
   const getAvailableModels = () => getCurrentProviderConfig().models;
+
+  const requiresApiKey = getCurrentProviderConfig().requiresApiKey !== false;
+  const hasBaseUrl = getCurrentProviderConfig().hasBaseUrl === true;
 
   const connectionDotColor =
     connectionStatus === 'connected'
@@ -109,28 +116,12 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                 >
                   {/* Provider icon */}
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${p.value === 'openai'
-                      ? 'bg-green-100'
-                      : p.value === 'gemini'
-                        ? 'bg-blue-100'
-                        : 'bg-purple-100'
+                      ? 'bg-blue-100'
+                      : p.value === 'claude'
+                        ? 'bg-amber-100'
+                        : 'bg-green-100'
                     }`}>
-                    {p.value === 'openai' && (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="1.8">
-                        <circle cx="12" cy="12" r="9" />
-                        <path d="M12 7v5l3 3" strokeLinecap="round" />
-                      </svg>
-                    )}
-                    {p.value === 'gemini' && (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.8">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                      </svg>
-                    )}
-                    {p.value === 'deepseek' && (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8">
-                        <path d="M12 2l7 7-7 7-7-7 7-7z" />
-                        <path d="M5 15l7 7 7-7" />
-                      </svg>
-                    )}
+                    {p.icon}
                   </div>
                   <span className="text-sm font-semibold text-gray-900">{p.label}</span>
                   <span className="text-xs text-gray-500">{p.description}</span>
@@ -140,6 +131,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* ── API Key ── */}
+          {requiresApiKey && (
           <div>
             <p className="text-sm font-semibold text-gray-700 mb-2">
               {getCurrentProviderConfig().label} API Key:
@@ -178,6 +170,26 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
               Format: {getCurrentProviderConfig().apiKeyFormat} · Keep this private and never share it publicly.
             </p>
           </div>
+          )}
+
+          {/* ── Ollama Server Endpoint (local providers only) ── */}
+          {hasBaseUrl && (
+            <div>
+              <p className="text-sm font-semibold text-gray-700 mb-2">Ollama Server Endpoint:</p>
+              <div className="flex items-center border rounded-xl overflow-hidden border-gray-300 focus-within:border-gray-400 focus-within:ring-1 focus-within:ring-gray-300">
+                <input
+                  type="text"
+                  value={ollamaBaseUrl}
+                  onChange={(e) => onOllamaBaseUrlChange(e.target.value)}
+                  placeholder="http://localhost:11434/v1"
+                  className="flex-1 px-4 py-3 text-sm text-gray-700 placeholder-gray-400 outline-none bg-white"
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-1.5">
+                No API key needed — Ollama runs locally. Just pick a model and make sure your Ollama server is running.
+              </p>
+            </div>
+          )}
 
           {/* ── Model Selection + MCP Server (side by side) ── */}
           <div className="grid grid-cols-2 gap-5">
@@ -290,16 +302,16 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     </a>
                   </li>
                   <li>
-                    · <strong>Google Gemini</strong>: Visit{' '}
-                    <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-900">
-                      makersuite.google.com
+                    · <strong>Anthropic Claude</strong>: Visit{' '}
+                    <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-900">
+                      console.anthropic.com
                     </a>
                   </li>
                   <li>
-                    · <strong>DeepSeek</strong>: Visit{' '}
-                    <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-900">
-                      platform.deepseek.com
-                    </a>
+                    · <strong>Ollama</strong>: No API key — install from{' '}
+                    <a href="https://ollama.com/download" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-900">
+                      ollama.com
+                    </a>{' '}and run it locally
                   </li>
                 </ul>
                 <p className="text-blue-700 pt-1">
@@ -314,7 +326,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
           <div className="flex items-center gap-3 pt-1">
             <button
               onClick={onSaveSettings}
-              disabled={!apiKey.trim() || (model === 'custom' && !customModel.trim())}
+              disabled={(requiresApiKey && !apiKey.trim()) || (model === 'custom' && !customModel.trim())}
               className="px-6 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
             >
               Save Settings

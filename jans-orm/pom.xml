@@ -56,10 +56,7 @@
 		<module>hybrid</module>
 		<module>cdi</module>
 		<module>standalone</module>
-		<module>ldap-sample</module>
-		<module>couchbase-sample</module>
- 		<module>sql-sample</module>
- 		<module>spanner-sample</module>
+		<module>integration-test</module>
 	</modules>
 
 	<repositories>
@@ -72,11 +69,6 @@
 			<id>mavencentral</id>
 			<name>maven central</name>
 			<url>https://repo1.maven.org/maven2</url>
-		</repository>
-		<repository>
-			<id>jans</id>
-			<name>Janssen project repository</name>
-			<url>https://maven.jans.io/maven</url>
 		</repository>
 		<repository>
 			<id>bouncycastle</id>

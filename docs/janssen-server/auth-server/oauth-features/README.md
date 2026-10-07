@@ -33,6 +33,7 @@ The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/
 - Global Token Revocation [(spec)](https://www.ietf.org/archive/id/draft-parecki-oauth-global-token-revocation-03.html)
 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants [(spec)](https://datatracker.ietf.org/doc/html/rfc7523)
 - OAuth 2.0 Client ID Metadata Document [(spec draft)](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-01.html)
+- OAuth 2.0 Authorization Server Issuer Identification [(spec)](https://datatracker.ietf.org/doc/html/rfc9207) [(doc)](./authorization-server-issuer-identification.md)
 
 ## Protocol Overview
 

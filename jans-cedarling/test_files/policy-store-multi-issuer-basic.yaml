@@ -16,13 +16,8 @@ policy_stores:
         token_metadata:
           access_token:
             entity_type_name: "Acme::Access_Token"
-            workload_id: "client_id"
-            principal_mapping:
-              - "Acme::Workload"
           id_token:
             entity_type_name: "Acme::Id_Token"
-            principal_mapping:
-              - "Acme::User"
       DolphinIssuer:
         name: "Dolphin"
         description: "Dolphin Sea Identity Provider"
@@ -30,13 +25,8 @@ policy_stores:
         token_metadata:
           access_token:
             entity_type_name: "Dolphin::Access_Token"
-            workload_id: "client_id"
-            principal_mapping:
-              - "Dolphin::Workload"
           dolphin_token:
             entity_type_name: "Dolphin::Dolphin_Token"
-            principal_mapping:
-              - "Dolphin::User"
           userinfo_token:
             entity_type_name: "Dolphin::Userinfo_token"
     policies:

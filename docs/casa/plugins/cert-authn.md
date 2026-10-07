@@ -159,7 +159,7 @@ Offering users the login page and the account onboarding regarded above is up to
 !!! Note
     Instructions provided here assume usage of TUI. Do the equivalent in admin-ui or other configuration mechanism
 
-1. Download the certificate authentication Agama project archive: `https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn-agama/replace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip`
+1. Download the certificate authentication Agama project archive: `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip`
 
 1. Transfer the zip file to a location in the server and deploy it. For example, if using TUI, go to Agama menu -> "Upload project". Wait one minute
 
@@ -199,7 +199,7 @@ The next **optional** step is assigning an icon to certificate authentication fo
 
 ## Install the cert-authn plugin
 
-1. Download the plugin jar file `https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn/replace-janssen-version/cert-authn-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
+1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
 
 1. Wait one minute. In the admin console, navigate to the "Authentication methods" page. A new "User certificates" widget will appear. Enable the authentication method, drag it to the location (priority) desired, and hit "Save"
 
@@ -211,7 +211,7 @@ This step is required only if account onboarding via certificate attributes is d
 
 Note these instructions apply for VM-based installations. On containers-based environments, please open a GitHub discussion or a support ticket.
 
-1. Download file `https://maven.jans.io/maven/io/jans/jans-scim-model/replace-janssen-version/jans-scim-model-replace-janssen-version.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
+1. Download file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-scim-model-replace-janssen-version.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
 
 1. Edit the file `/etc/default/jans-casa`: locate a segment that reads `-Dacr=` and assign `agama_io.jans.casa.cert.oneStepAuthn` as new value. Save the change
 

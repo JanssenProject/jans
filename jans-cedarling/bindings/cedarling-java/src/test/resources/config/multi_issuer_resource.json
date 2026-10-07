@@ -1,8 +1,0 @@
-{
-  "cedar_entity_mapping": {
-    "entity_type": "Jans::Issue",
-    "id": "random_id"
-  },
-  "org_id": "some_long_id",
-  "country": "US"
-}

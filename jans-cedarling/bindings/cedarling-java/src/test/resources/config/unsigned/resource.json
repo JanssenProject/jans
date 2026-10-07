@@ -1,0 +1,6 @@
+{
+  "cedar_entity_mapping": {
+    "entity_type": "Jans::SecretDocument",
+    "id": "some_id"
+  }
+}

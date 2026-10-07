@@ -22,7 +22,9 @@
       "global_token_revocation",
       "status_list",
       "session_status_list",
-      "access_evaluation"
+      "access_evaluation",
+      "client_id_metadata_document",
+      "identity_assertion_authz_grant"
     ],
     "issuer":"${config.oxauth.issuer}",
     "loginPage":"${config.oxauth.contextPath}/login.htm",
@@ -75,8 +77,6 @@
     ],
     "grantTypesSupported":[
         "authorization_code",
-        "implicit",
-        "password",
         "client_credentials",
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
@@ -344,6 +344,7 @@
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:openid:params:grant-type:ciba",
         "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:token-exchange",
         "urn:ietf:params:oauth:grant-type:jwt-bearer"
     ],
     "claimTypesSupported":[

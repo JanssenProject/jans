@@ -28,7 +28,7 @@
 		<jans.version>${project.version}</jans.version>
 		
 		<resteasy.version>6.2.3.Final</resteasy.version>
-		<jackson.version>2.18.6</jackson.version>
+		<jackson.version>2.22.1</jackson.version>
 		<jetty.version>11.0.25</jetty.version>
 		<weld.version>4.0.3.Final</weld.version>	
 
@@ -41,7 +41,8 @@
 		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
 
 		<rest-assured.version>5.0.1</rest-assured.version>
-		<testng.version>7.8.0</testng.version>
+		<testng.version>7.10.2</testng.version>
+		<mockito.version>5.14.2</mockito.version>
 		<snake.version>2.0</snake.version>
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
@@ -82,11 +83,6 @@
 			<id>mavencentral</id>
 			<name>maven central</name>
 			<url>https://repo1.maven.org/maven2</url>
-		</repository>
-		<repository>
-			<id>jans</id>
-			<name>Janssen project repository</name>
-			<url>https://maven.jans.io/maven</url>
 		</repository>
 		<repository>
 			<id>bouncycastle</id>
@@ -191,6 +187,17 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
+				<artifactId>jans-core-cedarling</artifactId>
+				<version>${jans.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>org.jboss.resteasy</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
 				<artifactId>jans-core-server</artifactId>
 				<version>${jans.version}</version>
 				<exclusions>
@@ -231,6 +238,11 @@
 				<artifactId>agama-transpiler</artifactId>
 				<version>${jans.version}</version>
 			</dependency>
+			<dependency>
+	            <groupId>io.jans</groupId>
+	            <artifactId>cedarling-java</artifactId>
+	            <version>${jans.version}</version>
+        </dependency>
 
 			<!-- Security -->
 			<dependency>
@@ -322,8 +334,13 @@
 				<artifactId>testng</artifactId>
 				<version>${testng.version}</version>
 		    </dependency>
-		    
-			
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>	
+				<version>${mockito.version}</version>			
+				<scope>test</scope>
+			</dependency>		    
+		
 			<dependency>
 				<groupId>net.masterthought</groupId>
 				<artifactId>cucumber-reporting</artifactId>

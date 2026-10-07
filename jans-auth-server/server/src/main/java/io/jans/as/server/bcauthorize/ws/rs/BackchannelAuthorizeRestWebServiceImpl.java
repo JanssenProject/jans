@@ -6,24 +6,20 @@
 
 package io.jans.as.server.bcauthorize.ws.rs;
 
-import io.jans.as.client.JwkClient;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.UserService;
+import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.DefaultErrorResponse;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidClaimException;
 import io.jans.as.model.exception.InvalidJwtException;
-import io.jans.as.model.jws.ECDSASigner;
-import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidator;
@@ -239,16 +235,11 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                     return builder.build();
                 }
 
-                boolean validSignature = false;
-                if (algorithm.getFamily() == AlgorithmFamily.RSA) {
-                    RSAPublicKey publicKey = JwkClient.getRSAPublicKey(client.getJwksUri(), keyId);
-                    RSASigner rsaSigner = new RSASigner(algorithm, publicKey);
-                    validSignature = rsaSigner.validate(jwt);
-                } else if (algorithm.getFamily() == AlgorithmFamily.EC) {
-                    ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(client.getJwksUri(), keyId);
-                    ECDSASigner ecdsaSigner = new ECDSASigner(algorithm, publicKey);
-                    validSignature = ecdsaSigner.validate(jwt);
-                }
+                // Resolves the client's JWKS from its inline `jwks` if registered that way,
+                // otherwise fetches it from `jwks_uri` (see CommonUtils#getJwks).
+                JSONObject jwks = CommonUtils.getJwks(client);
+                boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
+                        keyId, jwks, null, algorithm);
                 if (!validSignature) {
                     builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
                     builder.entity(errorResponseFactory.getErrorAsJson(UNKNOWN_USER_ID));
@@ -270,6 +261,8 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
         } catch (InvalidJwtException e) {
             log.error(e.getMessage(), e);
         } catch (JSONException e) {
+            log.error(e.getMessage(), e);
+        } catch (CryptoProviderException e) {
             log.error(e.getMessage(), e);
         }
         if (user == null) {

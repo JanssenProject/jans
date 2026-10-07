@@ -23,9 +23,9 @@ Config.lock_redis_port = '6379'
 class JansLockInstaller(JettyInstaller):
 
     source_files = [
-                (os.path.join(Config.dist_jans_dir, 'jans-lock.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-server/{0}/jans-lock-server-{0}.war').format(base.current_app.app_info['jans_version'])),
-                (os.path.join(Config.dist_jans_dir, 'lock-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/lock-plugin/{0}/lock-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
-                (os.path.join(Config.dist_jans_dir, 'jans-lock-server-service-deps-pack.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-server/{0}/jans-lock-server-{0}-service-deps-pack.zip'.format(base.current_app.app_info['jans_version']))),
+                (os.path.join(Config.dist_jans_dir, 'jans-lock.war'), base.determine_jans_artifact_url('maven/io/jans/jans-lock-server/{0}/jans-lock-server-{0}.war').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'lock-plugin.jar'), base.determine_jans_artifact_url('maven/io/jans/jans-config-api/plugins/lock-plugin/{0}/lock-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'jans-lock-server-service-deps-pack.zip'), base.determine_jans_artifact_url('maven/io/jans/jans-lock-server/{0}/jans-lock-server-{0}-service-deps-pack.zip'.format(base.current_app.app_info['jans_version']))),
                 ]
 
     def __init__(self):

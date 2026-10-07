@@ -89,9 +89,9 @@ const StatusPanel: React.FC<StatusPanelProps> = ({
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900">LLM Provider</p>
+          <p className="text-sm font-semibold text-gray-900">MCP Server</p>
           <p className="text-xs text-gray-500 truncate">
-            {providerLabel} · {modelName}
+            {mcpServerUrl || 'Not configured'}
           </p>
           <div className="mt-2 space-y-1.5">
             <div className="flex items-center justify-between text-xs">

@@ -16,6 +16,13 @@ const PORT = parseInt(process.env.PORT || "3001", 10);
 const SERVER_NAME = "jans-tarp-mcp-server";
 const SERVER_VERSION = "1.0.0";
 
+// Providers that run locally and need no API key (e.g. Ollama). For these we
+// allow an LLM config record to be stored with only provider + model; the key
+// is optional and defaults to a placeholder.
+const KEYLESS_PROVIDERS = ["ollama"];
+const isKeylessProvider = (provider?: string): boolean =>
+  !!provider && KEYLESS_PROVIDERS.includes(provider.toLowerCase());
+
 // Types
 interface OIDCDiscoveryMetadata {
   registration_endpoint?: string;
@@ -380,38 +387,30 @@ server.registerTool(
   }
 );
 
-// Create HTTP transport for handling HTTP requests
-const transport = new StreamableHTTPServerTransport({
-  sessionIdGenerator: undefined, // Stateless mode
-  enableJsonResponse: true, // Return JSON responses instead of SSE
-});
-
 /**
- * Establishes the MCP server's connection to the configured transport.
+ * Handle an incoming MCP HTTP request by delegating to a fresh transport and ensure a JSON-RPC error response on failure.
  *
- * Attempts to connect the global MCP `server` to the provided `transport`. On successful connection it logs a confirmation; on failure it logs the error and terminates the process with exit code `1`.
- */
-async function connectMcpServer() {
-  try {
-    await server.connect(transport);
-    console.log("MCP Server connected to StreamableHTTPServerTransport");
-  } catch (error) {
-    console.error("Failed to connect MCP Server:", error);
-    process.exit(1);
-  }
-}
-
-/**
- * Handle an incoming MCP HTTP request by delegating to the configured transport and ensure a JSON-RPC error response on failure.
+ * In stateless mode a `StreamableHTTPServerTransport` (and its server connection) must be created per request — reusing a single instance across requests causes every request after the first to fail with a 500. A new transport is created and connected to the MCP server for each call, then closed once the response finishes.
  *
- * Delegates request processing to `transport.handleRequest(req, res, req.body)`. If an unhandled error occurs and no response has been sent, responds with a JSON-RPC 2.0 error object (code -32603) and includes the original request id; in development mode the error's string form is included in the `data` field.
+ * If an unhandled error occurs and no response has been sent, responds with a JSON-RPC 2.0 error object (code -32603) and includes the original request id; in development mode the error's string form is included in the `data` field.
  *
  * @param req - Express request for the incoming MCP call
  * @param res - Express response used to send the transport result or an error response
  */
 async function handleMcpRequest(req: express.Request, res: express.Response) {
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined, // Stateless mode
+    enableJsonResponse: true, // Return JSON responses instead of SSE
+  });
+
+  // Clean up the transport (and its server connection) when the response closes.
+  res.on("close", () => {
+    transport.close();
+  });
+
   try {
-    const result = await transport.handleRequest(req, res, req.body);
+    await server.connect(transport);
+    await transport.handleRequest(req, res, req.body);
 
     if (process.env.NODE_ENV === 'development') {
       console.log('MCP request handled successfully');
@@ -454,7 +453,9 @@ app.get("/health", (_req, res) => {
  */
 app.post("/api/keys", async (req, res) => {
   try {
-    const { provider, model, key } = req.body;
+    const { provider, model } = req.body;
+    // Keyless providers (e.g. Ollama) may omit the key — default to a placeholder.
+    const key: string = req.body.key || (isKeylessProvider(provider) ? provider : "");
 
     if ((!provider && !model) || !key) {
       return res.status(400).json({
@@ -526,7 +527,9 @@ app.post("/api/keys", async (req, res) => {
  */
 app.put("/api/keys", async (req, res) => {
   try {
-    const { provider, model, key } = req.body;
+    const { provider, model } = req.body;
+    // Keyless providers (e.g. Ollama) may omit the key — default to a placeholder.
+    const key: string = req.body.key || (isKeylessProvider(provider) ? provider : "");
 
     if (!model || !key) {
       return res.status(400).json({
@@ -753,8 +756,6 @@ const httpServer = app.listen(PORT, async () => {
 
   // Initialize database
   await database.initialize();
-  // Connect MCP server after Express starts
-  await connectMcpServer();
 
   console.log("Server ready to accept requests");
 });

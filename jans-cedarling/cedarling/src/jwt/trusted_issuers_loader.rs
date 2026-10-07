@@ -13,6 +13,7 @@ use thiserror::Error;
 use tokio::sync::Notify;
 use tokio_util::sync::CancellationToken;
 
+use crate::http_utils::Backoff;
 use crate::{
     JwtConfig, LogLevel,
     async_sleep::sleep,
@@ -20,19 +21,20 @@ use crate::{
     http::HttpClient,
     jwt::{
         GetFromUrl, IssuerConfig, IssuerIndex, JwtLogEntry, JwtServiceInitError, KeyService,
-        OpenIdConfig, TokenCache, key_service::KeyServiceError,
-        loading_state::TrustedIssuerLoadingState, status_list::StatusListCache,
+        OpenIdConfig, TokenCache,
+        key_service::KeyServiceError,
+        loading_state::TrustedIssuerLoadingState,
+        status_list::{InitForIssArgs, StatusListCache},
         validation::JwtValidatorCache,
     },
     jwt_config::{DEFAULT_JWKS_REFRESH_INTERVAL_SECS, TrustedIssuerLoaderConfig},
     log::{BaseLogEntry, LogEntry, LogWriter, Logger},
 };
-use http_utils::Backoff;
 
 use crate::http::spawn_task;
 
 #[derive(Error, Debug)]
-pub enum TrustedIssuerLoaderError {
+pub(crate) enum TrustedIssuerLoaderError {
     #[error(
         "failed to acquire semaphore permit for concurrent issuer loading - this indicates a serious concurrency issue or resource exhaustion"
     )]
@@ -226,11 +228,19 @@ pub(super) async fn load_trusted_issuer(
             .status_lists
             .init_for_iss(
                 &iss_config,
-                &loader.validators,
-                &loader.key_service,
-                loader.token_cache.clone(),
-                loader.logger.clone(),
-                http_client,
+                InitForIssArgs {
+                    validators: &loader.validators,
+                    key_service: &loader.key_service,
+                    token_cache: loader.token_cache.clone(),
+                    logger: loader.logger.clone(),
+                    http_client,
+                    // `JwtConfig` has already been normalized in `JwtService::new`,
+                    // so this value is guaranteed to be in the safe range.
+                    refresh_interval_max: std::time::Duration::from_secs(
+                        loader.jwt_config.status_list_refresh_interval_max,
+                    ),
+                    cancel_tkn: loader.jwks_cancel_token.clone(),
+                },
             )
             .await?;
     }
@@ -453,6 +463,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
+            max_response_size_bytes: None,
         })
         .expect("http client should be constructed")
     });

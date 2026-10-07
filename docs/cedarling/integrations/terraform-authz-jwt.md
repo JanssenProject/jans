@@ -267,7 +267,6 @@ The `mapping` field tells Cedarling which Cedar entity type to instantiate from 
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["RS256"],
         "CEDARLING_JWT_SIG_VALIDATION": "enabled",
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
         "CEDARLING_POLICY_STORE_LOCAL_FN": "/app/demo/terraform-jwt/policy-store"
       }
     }

@@ -17,7 +17,6 @@
 	<modules>
 		<module>model</module>
 		<module>client</module>
-		<module>cedarling</module>
 		<module>service</module>
 		<module>server</module>
 		<module>server-fips</module>
@@ -63,11 +62,6 @@
 			<id>github</id>
 			<name>GitHub Packages</name>
 			<url>https://maven.pkg.github.com/JanssenProject/jans</url>
-		</repository>
-		<repository>
-			<id>jans</id>
-			<name>Janssen project repository</name>
-			<url>https://maven.jans.io/maven</url>
 		</repository>
 		<repository>
 			<id>bouncycastle</id>

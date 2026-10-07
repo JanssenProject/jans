@@ -21,6 +21,6 @@ jansRptAsJwt: false
 jansScope: inum=C4F7,ou=scopes,o=jans
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
-jansTrustedClnt: false
+jansTrustedClnt: %(test_client_trusted)s
 objectClass: top
 objectClass: jansClnt

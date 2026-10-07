@@ -4,6 +4,7 @@
 # Copyright (c) 2024, Gluu, Inc.
 
 from typing import Optional, List, final, Dict, Any
+from datetime import timedelta
 from enum import Enum
 
 @final
@@ -14,7 +15,6 @@ class BootstrapConfig:
     Example Usage:
         bootstrap_config = BootstrapConfig({
             "CEDARLING_APPLICATION_NAME": "MyApp",
-            "CEDARLING_POLICY_STORE_ID": "12345",
             "CEDARLING_LOG_TYPE": "memory",
             "CEDARLING_LOG_TTL": 30,
             ...
@@ -158,6 +158,52 @@ class Cedarling:
         """
         ...
 
+    def authorize_unsigned_batch(
+        self, request: BatchAuthorizeUnsignedRequest
+    ) -> BatchAuthorizeUnsignedResponse:
+        """
+        Authorize a batch of unsigned requests against one shared principal.
+
+        Setup work (principal build + pushed-data snapshot) runs once and each
+        item is evaluated in input order. Batch-level failures (validation,
+        principal parse) raise ``BatchValidationError``; per-item failures
+        are returned as BatchItemError entries that callers must inspect without affecting other items.
+
+        Args:
+            request: BatchAuthorizeUnsignedRequest with items and optional principal.
+
+        Returns:
+            BatchAuthorizeUnsignedResponse with ``batch_id`` and per-item results.
+
+        Raises:
+            BatchValidationError: If the batch request is empty or malformed.
+            AuthorizeError: Any batch-level authorization error variant.
+        """
+        ...
+
+    def authorize_multi_issuer_batch(
+        self, request: BatchAuthorizeMultiIssuerRequest
+    ) -> BatchAuthorizeMultiIssuerResponse:
+        """
+        Authorize a batch of multi-issuer requests against one shared token set.
+
+        Tokens are validated and token/issuer entities built once, then each
+        item is evaluated in input order. Batch-level failures (validation,
+        JWT verification, status-list refresh) raise; per-item failures
+        are returned as BatchItemError entries that callers must inspect.
+
+        Args:
+            request: BatchAuthorizeMultiIssuerRequest with items and tokens.
+
+        Returns:
+            BatchAuthorizeMultiIssuerResponse with ``batch_id`` and per-item results.
+
+        Raises:
+            BatchValidationError: If the batch request is empty or malformed.
+            AuthorizeError: Any batch-level authorization error variant.
+        """
+        ...
+
     def get_matching_policies_unsigned(
         self,
         principal: Optional[EntityData],
@@ -207,6 +253,53 @@ class Cedarling:
 
         Raises:
             AuthorizeError: If token validation or policy matching fails.
+        """
+        ...
+
+    def annotations_map(self, policy_ids: List[str]) -> Dict[str, str]:
+        """
+        Merge the annotations (``@key("value")``) of the given policies into a single dict.
+
+        Intended for resolving the determining policies of an authorization decision:
+        pass ``list(result.response.diagnostics.reason)``.
+
+        Lossy: if the same annotation key appears on several policies, one value wins
+        arbitrarily. Use ``annotation_values`` / ``annotations_by_policy`` when
+        duplicates matter. Unknown policy IDs are silently skipped.
+
+        Args:
+            policy_ids: List of policy ID strings.
+
+        Returns:
+            A dict mapping annotation keys to values.
+        """
+        ...
+
+    def annotation_values(self, policy_ids: List[str], key: str) -> List[str]:
+        """
+        Collect every value of the annotation ``key`` across the given policies,
+        preserving duplicates. Unknown policy IDs are silently skipped.
+
+        Args:
+            policy_ids: List of policy ID strings.
+            key: The annotation key to look up.
+
+        Returns:
+            A list of annotation values.
+        """
+        ...
+
+    def annotations_by_policy(self, policy_ids: List[str]) -> Dict[str, Dict[str, str]]:
+        """
+        Return the annotations of each given policy, grouped by policy ID
+        the loss-free companion to ``annotations_map``. Unknown policy IDs are
+        silently skipped.
+
+        Args:
+            policy_ids: List of policy ID strings.
+
+        Returns:
+            A dict mapping policy IDs to their annotation dicts.
         """
         ...
 
@@ -401,6 +494,35 @@ class Cedarling:
         """
         ...
 
+    def drain_metrics(self) -> "MetricsSnapshot":
+        """
+        Destructive read: return the telemetry metrics snapshot and reset
+        the counters for the next interval.
+
+        Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+        Lock telemetry ticker owns the collector. Raises `ValueError` when
+        Lock telemetry owns the collector, i.e. whenever
+        `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+        server has no telemetry endpoint. `interval` is a
+        `datetime.timedelta` with sub-second precision.
+
+        Raises:
+            ValueError: If metrics collection is disabled or owned by lock
+                telemetry.
+        """
+        ...
+
+    def policy_store_id(self) -> Optional[str]:
+        """
+        Get the ID of the currently published policy store.
+
+        Returns:
+            The store ID, or None when the store carries no ID.
+            The value is opaque and source-dependent; it may change
+            after a background refresh.
+        """
+        ...
+
     def is_trusted_issuer_loaded_by_name(self, issuer_id: str) -> bool:
         """
         Check whether a trusted issuer was loaded by issuer identifier.
@@ -558,6 +680,93 @@ class MultiIssuerAuthorizeResult:
     def request_id(self) -> str: ...
 
 @final
+class BatchItem:
+    """One `{resource, action, context}` triple in a batch authorize request."""
+
+    resource: EntityData
+    action: str
+    context: Dict[str, Any] | None
+
+    def __init__(
+        self,
+        resource: EntityData,
+        action: str,
+        context: Dict[str, Any] | None = None,
+    ) -> None: ...
+
+@final
+class BatchAuthorizeUnsignedRequest:
+    """One optional principal evaluated against N BatchItems."""
+
+    principal: Optional[EntityData]
+    items: List[BatchItem]
+
+    def __init__(
+        self,
+        items: List[BatchItem],
+        principal: Optional[EntityData] = None,
+    ) -> None: ...
+
+@final
+class BatchAuthorizeMultiIssuerRequest:
+    """One token set evaluated against N BatchItems."""
+
+    tokens: List[TokenInput]
+    items: List[BatchItem]
+
+    def __init__(
+        self,
+        tokens: List[TokenInput],
+        items: List[BatchItem],
+    ) -> None: ...
+
+@final
+class BatchItemError:
+    """Per-item build failure inside a batch response — Cedar was never
+    reached for that item. Carries the variant tag, item position, and a
+    human-readable diagnostic."""
+
+    category: str
+    item_index: int
+    message: str
+
+    def __repr__(self) -> str: ...
+
+@final
+class BatchItemUnsignedResult:
+    """One slot in `BatchAuthorizeUnsignedResponse.results`. Switch on
+    `is_ok()` — on True call `unwrap()` for the `AuthorizeResult`; on False
+    read `.error` for the `BatchItemError`."""
+
+    error: Optional[BatchItemError]
+
+    def is_ok(self) -> bool: ...
+    def unwrap(self) -> AuthorizeResult: ...
+
+@final
+class BatchItemMultiIssuerResult:
+    """Multi-issuer analog of `BatchItemUnsignedResult`."""
+
+    error: Optional[BatchItemError]
+
+    def is_ok(self) -> bool: ...
+    def unwrap(self) -> MultiIssuerAuthorizeResult: ...
+
+@final
+class BatchAuthorizeUnsignedResponse:
+    """Result of `Cedarling.authorize_unsigned_batch`."""
+
+    batch_id: str
+    results: List[BatchItemUnsignedResult]
+
+@final
+class BatchAuthorizeMultiIssuerResponse:
+    """Result of `Cedarling.authorize_multi_issuer_batch`."""
+
+    batch_id: str
+    results: List[BatchItemMultiIssuerResult]
+
+@final
 class DataEntry:
     """
     A data entry in the DataStore with value and metadata.
@@ -615,6 +824,25 @@ class DataStoreStats:
     memory_alert_threshold: float
     memory_alert_triggered: bool
 
+@final
+class MetricsSnapshot:
+    """
+    Destructive read: telemetry metrics snapshot with per-policy stats,
+    error counters, and operational counters for the current interval.
+    Draining resets the counters, so use a single consumer.
+
+    Attributes:
+        policy_stats: Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
+        error_counters: Classified error counters keyed by error metric key.
+        operational_stats: Operational counters and gauges (authorization, cache, JWT, data, lock).
+        interval: Duration of the snapshot interval with sub-second precision.
+    """
+
+    policy_stats: dict[str, int]
+    error_counters: dict[str, int]
+    operational_stats: dict[str, int]
+    interval: timedelta
+
 class CedarType(Enum):
     """
     Represents the type of a Cedar value based on JSON structure.
@@ -645,7 +873,7 @@ class CedarType(Enum):
 
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
-    def __eq__(self, other: "CedarType") -> bool: ...
+    def __eq__(self, other: object) -> bool: ...
 
 class PolicyEffect(Enum):
     """
@@ -661,7 +889,7 @@ class PolicyEffect(Enum):
 
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
-    def __eq__(self, other: "PolicyEffect") -> bool: ...
+    def __eq__(self, other: object) -> bool: ...
 
 @final
 class PolicyMetadata:

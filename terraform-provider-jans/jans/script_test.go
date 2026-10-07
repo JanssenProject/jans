@@ -74,7 +74,7 @@ func TestScripts(t *testing.T) {
 	}
 
 	loadScript.Name = "test_script"
-	loadScript.LocationType = "file"
+	loadScript.LocationType = "ldap"
 
 	updatedScript, err := client.UpdateScript(ctx, loadScript)
 	if err != nil {

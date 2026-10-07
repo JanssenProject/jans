@@ -146,6 +146,7 @@ public class ParRestWebService {
 
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseModeObj), state, httpRequest, errorResponseFactory);
             redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
+            redirectUriResponse.setAppConfiguration(appConfiguration);
 
             parValidator.validateRequestUriIsAbsent(requestUri);
             final String dpopJkt = dpopService.getDPoPJwkThumbprint(httpRequest, client, auditLog);
@@ -187,7 +188,12 @@ public class ParRestWebService {
             parValidator.validateRequestObject(redirectUriResponse, par, client);
 
             parValidator.validatePkce(par.getAttributes().getCodeChallenge(), par.getAttributes().getCodeChallengeMethod(), state);
-            authorizeRestWebServiceValidator.validatePkce(par.getAttributes().getCodeChallenge(), redirectUriResponse, client);
+            try {
+                authorizeRestWebServiceValidator.validatePkce(par.getAttributes().getCodeChallenge(), par.getAttributes().getCodeChallengeMethod(), redirectUriResponse, client);
+            } catch (WebApplicationException e) {
+                // PAR errors must be returned as HTTP 400 JSON regardless of response_mode (e.g. form_post)
+                throw errorResponseFactory.createBadRequestException(AuthorizeErrorResponseType.INVALID_REQUEST, state);
+            }
 
             final ExecutionContext context = new ExecutionContext(httpRequest, httpResponse);
             context.setClient(client);

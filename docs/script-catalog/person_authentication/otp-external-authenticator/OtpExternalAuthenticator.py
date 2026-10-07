@@ -18,16 +18,12 @@ import jarray
 import json
 import sys
 from com.google.common.io import BaseEncoding
-from com.lochbridge.oath.otp import HOTP
-from com.lochbridge.oath.otp import HOTPValidator
-from com.lochbridge.oath.otp import HmacShaAlgorithm
-from com.lochbridge.oath.otp import TOTP
-from com.lochbridge.oath.otp.keyprovisioning import OTPAuthURIBuilder
-from com.lochbridge.oath.otp.keyprovisioning import OTPKey
-from com.lochbridge.oath.otp.keyprovisioning.OTPKey import OTPType
+from com.bastiaanjansen.otp import HMACAlgorithm
+from com.bastiaanjansen.otp import HOTPGenerator
+from com.bastiaanjansen.otp import TOTPGenerator
 from java.security import SecureRandom
+from java.time import Duration
 from java.util import Arrays, HashMap
-from java.util.concurrent import TimeUnit
 from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
@@ -166,9 +162,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 if not StringHelper.isEmpty(auth_result):
                     # defect fix #1225  - Retry the step, show QR code again
                     if auth_result == 'timeout':
-						print "OTP. QR-code timeout. Authenticate for step %s. Reinitializing current step" % step
-						identity.setWorkingParameter("retry_current_step", True)
-						return True
+                        print "OTP. QR-code timeout. Authenticate for step %s. Reinitializing current step" % step
+                        identity.setWorkingParameter("retry_current_step", True)
+                        return True
 
                     print "OTP. Authenticate for step 2. User not enrolled OTP"
                     return False
@@ -181,7 +177,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return otp_auth_result
         elif step == 3:
-            print 3
             print "OTP. Authenticate for step 3"
 
             authenticationService = CdiUtil.bean(AuthenticationService)
@@ -333,11 +328,11 @@ class PersonAuthentication(PersonAuthenticationType):
             hmacShaAlgorithmType = None
 
             if StringHelper.equalsIgnoreCase(hmacShaAlgorithm, "sha1"):
-                hmacShaAlgorithmType = HmacShaAlgorithm.HMAC_SHA_1
+                hmacShaAlgorithmType = HMACAlgorithm.SHA1
             elif StringHelper.equalsIgnoreCase(hmacShaAlgorithm, "sha256"):
-                hmacShaAlgorithmType = HmacShaAlgorithm.HMAC_SHA_256
+                hmacShaAlgorithmType = HMACAlgorithm.SHA256
             elif StringHelper.equalsIgnoreCase(hmacShaAlgorithm, "sha512"):
-                hmacShaAlgorithmType = HmacShaAlgorithm.HMAC_SHA_512
+                hmacShaAlgorithmType = HMACAlgorithm.SHA512
             else:
                 print "OTP. Load OTP configuration. Invalid TOTP HMAC SHA algorithm: '%s'" % hmacShaAlgorithm
                  
@@ -462,7 +457,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "OTP. Process HOTP authentication during authentication. otpCode is valid"
 
                         # Update current moving factor in user entry
-                        enrolledAuthenticator.addCustom("movingFactor", moving_factor)
+                        enrolledAuthenticator.addCustom("movingFactor", validation_result["movingFactor"])
 
                         # Update moving factor in user entry
                         updatedUser = userService.updateUser(user)
@@ -503,30 +498,32 @@ class PersonAuthentication(PersonAuthenticationType):
     def generateHotpKey(self, secretKey, movingFactor):
         digits = self.hotpConfiguration["digits"]
 
-        hotp = HOTP.key(secretKey).digits(digits).movingFactor(movingFactor).build()
-        
-        return hotp.value()
+        hotp = HOTPGenerator.Builder(self.toBase32(secretKey)).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
+
+        return hotp.generate(movingFactor)
 
     def validateHotpKey(self, secretKey, movingFactor, totpKey):
         lookAheadWindow = self.hotpConfiguration["lookAheadWindow"]
         digits = self.hotpConfiguration["digits"]
 
-        htopValidationResult = HOTPValidator.lookAheadWindow(lookAheadWindow).validate(secretKey, movingFactor, digits, totpKey)
-        if htopValidationResult.isValid():
-            return { "result": True, "movingFactor": htopValidationResult.getNewMovingFactor() }
+        hotp = HOTPGenerator.Builder(self.toBase32(secretKey)).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
+        # otp-java's verify(code, counter) checks a single counter; iterate the
+        # look-ahead window so we can return the matched counter as the new
+        # moving factor (lochbridge's HOTPValidationResult.getNewMovingFactor()).
+        counter = movingFactor
+        while counter <= movingFactor + lookAheadWindow:
+            if hotp.verify(totpKey, counter):
+                return { "result": True, "movingFactor": counter + 1 }
+            counter += 1
 
         return { "result": False, "movingFactor": None }
 
     def generateHotpSecretKeyUri(self, secretKey, issuer, userDisplayName):
         digits = self.hotpConfiguration["digits"]
 
-        secretKeyBase32 = self.toBase32(secretKey)
-        otpKey = OTPKey(secretKeyBase32, OTPType.HOTP)
-        label = issuer + " %s" % userDisplayName
+        hotp = HOTPGenerator.Builder(self.toBase32(secretKey)).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
 
-        otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).build()
-
-        return otpAuthURI.toUriString()
+        return hotp.getURI(0, issuer, userDisplayName).toString()
 
     # TOTP methods
     def generateSecretTotpKey(self):
@@ -534,14 +531,21 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return self.generateSecretKey(keyLength)
 
-    def generateTotpKey(self, secretKey):
+    def buildTotpGenerator(self, secretKey):
         digits = self.totpConfiguration["digits"]
         timeStep = self.totpConfiguration["timeStep"]
         hmacShaAlgorithmType = self.totpConfiguration["hmacShaAlgorithmType"]
 
-        totp = TOTP.key(secretKey).digits(digits).timeStep(TimeUnit.SECONDS.toMillis(timeStep)).hmacSha(hmacShaAlgorithmType).build()
-        
-        return totp.value()
+        # otp-java sets password length + algorithm on the wrapped HOTP generator
+        # via a Consumer; Jython coerces this function to that interface.
+        def configure(builder):
+            builder.withPasswordLength(digits)
+            builder.withAlgorithm(hmacShaAlgorithmType)
+
+        return TOTPGenerator.Builder(self.toBase32(secretKey)).withHOTPGenerator(configure).withPeriod(Duration.ofSeconds(timeStep)).build()
+
+    def generateTotpKey(self, secretKey):
+        return self.buildTotpGenerator(secretKey).now()
 
     def validateTotpKey(self, secretKey, totpKey, user_name):
         localTotpKey = self.generateTotpKey(secretKey)
@@ -577,16 +581,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return user_cached_OTP
         
     def generateTotpSecretKeyUri(self, secretKey, issuer, userDisplayName):
-        digits = self.totpConfiguration["digits"]
-        timeStep = self.totpConfiguration["timeStep"]
-
-        secretKeyBase32 = self.toBase32(secretKey)
-        otpKey = OTPKey(secretKeyBase32, OTPType.TOTP)
-        label = issuer + " %s" % userDisplayName
-
-        otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).timeStep(TimeUnit.SECONDS.toMillis(timeStep)).build()
-
-        return otpAuthURI.toUriString()
+        return self.buildTotpGenerator(secretKey).getURI(issuer, userDisplayName).toString()
 
     # Utility methods
     def toBase32(self, bytes):

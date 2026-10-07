@@ -12,7 +12,7 @@ import (
 
 func resourceScope() *schema.Resource {
 
-	return &schema.Resource{
+	r := &schema.Resource{
 		Description:   "Resource for managing OAuth scopes",
 		CreateContext: resourceScopeCreate,
 		ReadContext:   resourceScopeRead,
@@ -176,6 +176,14 @@ func resourceScope() *schema.Resource {
 			},
 		},
 	}
+
+	// the nested "clients" block embeds the oidc_client schema, whose
+	// last_access_time/last_logon_time changed from epoch int to RFC3339 string.
+	r.SchemaVersion = 1
+	r.StateUpgraders = []schema.StateUpgrader{
+		{Version: 0, Type: scopeV0Type(r.Schema), Upgrade: upgradeScopeClientsTimestampsV0},
+	}
+	return r
 }
 
 func resourceScopeCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {

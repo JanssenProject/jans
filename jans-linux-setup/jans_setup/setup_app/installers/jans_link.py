@@ -13,8 +13,8 @@ from setup_app.installers.jetty import JettyInstaller
 class JansLinkInstaller(JettyInstaller):
 
     source_files = [
-            (os.path.join(Config.dist_jans_dir, 'jans-link.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-link-server/{0}/jans-link-server-{0}.war').format(base.current_app.app_info['jans_version'])),
-            (os.path.join(Config.dist_jans_dir, 'jans-link-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/jans-link-plugin/{0}/jans-link-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+            (os.path.join(Config.dist_jans_dir, 'jans-link.war'), base.determine_jans_artifact_url('maven/io/jans/jans-link-server/{0}/jans-link-server-{0}.war').format(base.current_app.app_info['jans_version'])),
+            (os.path.join(Config.dist_jans_dir, 'jans-link-plugin.jar'), base.determine_jans_artifact_url('maven/io/jans/jans-config-api/plugins/jans-link-plugin/{0}/jans-link-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
             ]
 
     def __init__(self):
