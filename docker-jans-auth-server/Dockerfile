@@ -53,8 +53,8 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=0.0.0-nightly
-ENV CN_RELEASE_TAG=nightly
+ENV CN_VERSION=2.5.0
+ENV CN_RELEASE_TAG=v2.5.0
 ENV CN_BUILD_DATE='2026-10-06T16:25:49Z'
 
 # Override CN_RELEASE_DOWNLOAD_URL at build time to install a locally-built WAR (e.g. the AIO
@@ -106,7 +106,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
+ARG JANS_SOURCE_VERSION=a9223d0f19bb130e14021b1e6931b782dc00eea9
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
@@ -272,7 +272,7 @@ EXPOSE $CN_AUTH_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="2.5.0-1" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 
