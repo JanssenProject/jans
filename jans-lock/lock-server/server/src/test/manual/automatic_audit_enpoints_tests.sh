@@ -107,51 +107,72 @@ BULK_HEALTH_JSON_REST='[
 
 # Telemetry
 SINGLE_TELEMETRY_JSON_REST='{
-  "creationDate":               "2024-04-21T18:00:00-05:00",
-  "eventTime":                  "2024-04-21T18:25:43-05:00",
-  "service":                    "jans-auth",
-  "nodeName":                   "node-1",
-  "status":                     "ok",
-  "lastPolicyLoadSize":         1024,
-  "policySuccessLoadCounter":   100,
-  "policyFailedLoadCounter":    3,
-  "lastPolicyEvaluationTimeNs": 100000,
-  "avgPolicyEvaluationTimeNs":  75000,
-  "memoryUsage":                2097152,
-  "evaluationRequestsCount":    100,
-  "policyStats":                {"stat_1":100,"stat_2":3}
+  "creationDate":  "2024-04-21T18:00:00-05:00",
+  "service":       "jans-auth",
+  "nodeName":      "node-1",
+  "status":        "ok",
+  "policyStats": {
+    "policy_success_load_counter": 100,
+    "policy_failed_load_counter":  3,
+    "last_policy_load_size":       1024
+  },
+  "errorCounters": {
+    "policy_load_errors":  3,
+    "evaluation_errors":   0
+  },
+  "operationalStats": {
+    "evaluation_requests_count":      100,
+    "last_policy_evaluation_time_ns": 100000,
+    "avg_policy_evaluation_time_ns":  75000,
+    "memory_usage":                   2097152
+  },
+  "intervalSecs":  60
 }'
 
 BULK_TELEMETRY_JSON_REST='[
   {
-    "creationDate":               "2024-04-21T18:00:00-05:00",
-    "eventTime":                  "2024-04-21T18:25:43-05:00",
-    "service":                    "jans-auth",
-    "nodeName":                   "node-1",
-    "status":                     "ok",
-    "lastPolicyLoadSize":         1024,
-    "policySuccessLoadCounter":   100,
-    "policyFailedLoadCounter":    3,
-    "lastPolicyEvaluationTimeNs": 100000,
-    "avgPolicyEvaluationTimeNs":  75000,
-    "memoryUsage":                2097152,
-    "evaluationRequestsCount":    100,
-    "policyStats":                {"stat_1":100,"stat_2":3}
+    "creationDate":  "2024-04-21T18:00:00-05:00",
+    "service":       "jans-auth",
+    "nodeName":      "node-1",
+    "status":        "ok",
+    "policyStats": {
+      "policy_success_load_counter": 100,
+      "policy_failed_load_counter":  3,
+      "last_policy_load_size":       1024
+    },
+    "errorCounters": {
+      "policy_load_errors":  3,
+      "evaluation_errors":   0
+    },
+    "operationalStats": {
+      "evaluation_requests_count":      100,
+      "last_policy_evaluation_time_ns": 100000,
+      "avg_policy_evaluation_time_ns":  75000,
+      "memory_usage":                   2097152
+    },
+    "intervalSecs":  60
   },
   {
-    "creationDate":               "2024-04-21T19:00:00Z",
-    "eventTime":                  "2024-04-21T19:10:22Z",
-    "service":                    "jans-lock",
-    "nodeName":                   "node-2",
-    "status":                     "ok",
-    "lastPolicyLoadSize":         2048,
-    "policySuccessLoadCounter":   250,
-    "policyFailedLoadCounter":    1,
-    "lastPolicyEvaluationTimeNs": 85000,
-    "avgPolicyEvaluationTimeNs":  92000,
-    "memoryUsage":                4194304,
-    "evaluationRequestsCount":    420,
-    "policyStats":                {"p1":300,"p2":120}
+    "creationDate":  "2024-04-21T19:00:00Z",
+    "service":       "jans-lock",
+    "nodeName":      "node-2",
+    "status":        "ok",
+    "policyStats": {
+      "policy_success_load_counter": 250,
+      "policy_failed_load_counter":  1,
+      "last_policy_load_size":       2048
+    },
+    "errorCounters": {
+      "policy_load_errors":  1,
+      "evaluation_errors":   2
+    },
+    "operationalStats": {
+      "evaluation_requests_count":      420,
+      "last_policy_evaluation_time_ns": 85000,
+      "avg_policy_evaluation_time_ns":  92000,
+      "memory_usage":                   4194304
+    },
+    "intervalSecs":  60
   }
 ]'
 
