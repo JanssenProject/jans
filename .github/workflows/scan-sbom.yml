@@ -28,8 +28,6 @@ jobs:
     - name: Install Cosign
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
 
-    # Authenticated gh calls: anonymous api.github.com requests from shared runner IPs
-    # hit the rate limit and return an error body instead of the SBOM / release JSON.
     - name: Fetch Jans SBOM from Github
       env:
         GH_TOKEN: ${{ github.token }}
@@ -90,7 +88,6 @@ jobs:
         EVENT_REF: ${{ github.event.ref }}
       run: |
         VERSION="$(echo "$EVENT_REF" | cut -d '/' -f 3)"
-        # The tag push can land before its release is created.
         for i in $(seq 1 20); do
           gh release view "${VERSION}" > /dev/null 2>&1 && break
           echo "Release ${VERSION} not found yet (attempt ${i}/20); retrying in 15s."

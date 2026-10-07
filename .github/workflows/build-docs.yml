@@ -16,8 +16,6 @@ on:
       - 'mkdocs.yml'
       - 'docker-jans-**/README.md'
       - 'CHANGELOG.md'
-  # Release docs chain after the publish workflow: generation resolves jans-bom from
-  # GitHub Packages, which that workflow deploys for the same tag.
   workflow_run:
     workflows: ["Build: Publish"]
     types:

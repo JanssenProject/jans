@@ -1,7 +1,5 @@
 name: "Build: Developer docs"
 on:
-  # Chained after the publish workflow so jans-bom is in GitHub Packages before javadoc
-  # generation resolves it.
   workflow_run:
     workflows: ["Build: Publish"]
     types:
