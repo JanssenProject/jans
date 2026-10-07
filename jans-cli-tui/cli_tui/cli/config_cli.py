@@ -13,7 +13,7 @@ import json
 import re
 import urllib3
 import configparser
-import readline  # noqa: F401
+import importlib
 import argparse
 import random
 import traceback
@@ -36,6 +36,9 @@ from urllib.parse import urljoin
 from http.client import HTTPConnection
 from logging.handlers import RotatingFileHandler
 from pygments import highlight, lexers, formatters
+
+# Imported for its side effect: line editing in input() prompts.
+importlib.import_module('readline')
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
