@@ -1,0 +1,573 @@
+# Passkey Telemetry & Metrics
+
+When metrics are enabled (the default), the Janssen FIDO2 server records **every passkey
+registration and authentication** and exposes the results through a built-in **metrics and
+analytics API**. This gives you adoption, success rates, performance, device mix, and
+error/drop-off analysis for your passkey rollout — without bolting on an external analytics
+stack.
+
+This page explains 
+
+- What you can learn using the metrics API
+- How the data is produced
+- How to consume the API
+
+For the exact request/response schemas of every endpoint, refer to the
+[OpenAPI (Swagger) specification](#api-reference).
+
+## Why it matters
+
+Metrics API can answer following critical questions related to usage and roll-out of passkeys 
+within your organization. 
+
+| Question | Where the answer comes from |
+|---|---|
+| Is adoption growing? How many users are new vs. returning? | `analytics/adoption`, `analytics/trends` |
+| Are registrations and sign-ins actually succeeding? | aggregation `summary`, `analytics/errors` |
+| How many users start a passkey flow but drop off? | `analytics/errors` (`dropOffRate`, `abandonmentRate`) |
+| Why are users failing — cancels, timeouts, bad credentials? | `analytics/errors` (`errorCategories`, `topErrors`) |
+| Why are authenticators being rejected at registration? | `analytics/attestation-rejections` (`reasonCodes`, `topRejectedAaguids`) |
+| Which platforms, browsers, and authenticator types are in use? | `analytics/devices` (counted per completed ceremony) |
+| Is passkey latency healthy, or getting worse? | `analytics/performance` (completed ceremonies only) |
+| How does this month compare to last? | `analytics/comparison` |
+
+Since the API serves this data as plain JSON, it can be easily used by a dashboard, an alerting rule, or a periodic report. 
+
+## Event tracking
+
+Following events are tracked and they are sent to the FIDO2 endpoints:
+
+- Registration (passkey enrollment)
+    - Attempt
+    - Success
+    - Failure (with error reason and category).
+- Authentication (passkey sign-in)
+    - Attempt
+    - Success
+    - Failure (with error reason and category).
+- Fallback (when a user skips the passkey during a 2FA step and uses another method (e.g. password), recorded with method and reason).
+
+!!! note 
+    First-factor username/password authentication is not handled by FIDO2 server.
+    You can find those metrics in the Authorization server that handles the first-factor
+    authentication.
+
+## How it works
+
+Two kinds of data are produced:
+
+- **Raw entries** — one record per event, written as each registration or authentication
+  happens. Each entry carries user, outcome (`ATTEMPT` / `SUCCESS` / `FAILURE`), duration,
+  authenticator type, and the request context described below. Use these for auditing or
+  custom analysis.
+- **Aggregations** — pre-computed summaries for a period (`HOURLY`, `DAILY`, `WEEKLY`,
+  `MONTHLY`), produced on a schedule and stored. Dashboards read these instead of scanning
+  raw data.
+
+!!! note "ATTEMPT vs. completion"
+    Each operation produces a separate `ATTEMPT` entry when the user starts and a
+    `SUCCESS`/`FAILURE`/`ABANDONED` entry if it resolves. An `ATTEMPT` with no matching entry is
+    either a ceremony **still in flight** or one the user **dropped off** from — the two are not
+    distinguishable at query time, which is why `dropOffRate`, computed as that residual, is an
+    inference rather than a count.
+
+### The outcomes of an authentication ceremony
+
+A ceremony that is posted back — whether it passes verification or is rejected — always reaches one of
+the first two outcomes below. The third applies only to ceremonies issued for a named user, and only
+while `recordAbandonedAssertions` is enabled (the default); anything else that lapses stays `pending`
+and is deleted by normal cleanup, as it was before. Each outcome is recorded both as the `jansStatus` of
+the `jansFido2AuthnEntry` row and as a metrics entry status:
+
+| Outcome | `jansStatus` | Metric status | Meaning |
+|---|---|---|---|
+| Verified success | `authenticated` | `SUCCESS` | An assertion was posted and passed verification |
+| Verified failure | `failed` | `FAILURE` | An assertion was posted and the server rejected it — bad signature, stale challenge, unknown credential, RP ID mismatch |
+| Abandonment | `abandoned` | `ABANDONED` | A ceremony issued for a named user whose window elapsed with nothing posted back. Usernameless ceremonies are excluded — see below |
+
+Abandonment is detected by a sweep that runs every `abandonedRequestSweepInterval` seconds and relabels
+named-user ceremonies still marked `pending` past `unfinishedRequestExpiration`. Abandoned rows are
+retained for `abandonedRequestExpiration`, deliberately much shorter than
+`authenticationHistoryExpiration`. Set `recordAbandonedAssertions` to `false` to disable the sweep.
+
+!!! note "Usernameless ceremonies are not counted as abandonment"
+    A login page offering usernameless (conditional-UI) sign-in starts a ceremony on every page load,
+    before it knows who is signing in. If the user then identifies themselves, a second, named ceremony
+    is issued and that is the one they complete — the first is simply left untouched.
+
+    Those ceremonies are **not** swept. Counting them produced an abandonment for every successful
+    sign-in, attributed to no user at all. They are skipped rather than recorded under a different
+    label because the server cannot tell the two cases apart: a usernameless ceremony nobody looked at
+    and one the user engaged with and gave up on are both just `pending` when the window elapses.
+
+    They keep the behaviour they had before abandonment recording existed — they stay `pending` and the
+    cleaner removes them. `abandonmentRate` therefore covers ceremonies issued for a named user.
+
+`abandonmentRate` and `dropOffRate` answer different questions and are reported side by side.
+`dropOffRate` is inferred as the residual of attempts minus completions, so it also absorbs
+ceremonies still in flight when the query runs; `abandonmentRate` counts ceremonies actually
+observed to have lapsed. In multi-node deployments the sweep is not coordinated across nodes, so
+`abandonmentRate` is approximate — an exact count is available by querying `jansStatus = 'abandoned'`
+directly within the retention window.
+
+!!! note "An unknown rate is `null`, not zero"
+    A rate here is a ratio against the `ATTEMPT` count. A range can hold terminal entries whose
+    `ATTEMPT` falls outside it, or predate attempt tracking entirely, and then a rate has no
+    denominator to be computed from. Those rates are reported as `null` and never as `0.0` or `1.0`,
+    which on a dashboard would be indistinguishable from a range that really was measured at a
+    flawless completion rate with no abandonment.
+
+    Whenever any rate in the response is `null`, capped at `1.0`, or measured against a different
+    denominator, a `rateNote` field is present saying which and why; it is absent when everything was
+    computed as normal. `successRate` and `failureRate` are reported as observed and are never
+    rescaled, so in a range whose completions outnumber its recorded starts they can sum above 1.0 —
+    the `rateNote` says so. Render an unknown rate as unknown; it must not look like a zero.
+
+!!! warning "A failed fingerprint is never a `FAILURE`"
+    With platform authenticators such as Touch ID, Face ID or Windows Hello, user verification
+    happens **inside the authenticator**. A wrong fingerprint causes the operating system to retry
+    locally and eventually fall back to the device passcode; the authenticator only emits an
+    assertion once verification has already succeeded. None of those failed attempts reach the
+    browser, let alone this server.
+
+    Consequently **the count of failed biometric attempts is not obtainable by any relying party**,
+    and "the user failed their fingerprint" can never be recorded as an authentication failure. A
+    user who fights with Touch ID and gives up is indistinguishable, at the protocol level, from one
+    who cancelled immediately — both surface as `NotAllowedError` in the browser and as an
+    `abandoned` ceremony here. A `FAILURE` means the server rejected an assertion it received, which
+    in practice means a protocol-level problem rather than a user who could not verify.
+
+### Request context on raw entries
+
+Beyond the outcome itself, each raw entry records where the operation came from:
+
+| Field | Source |
+|---|---|
+| `ipAddress` | First valid address from `X-Forwarded-For` and the other common proxy headers, otherwise the socket remote address. |
+| `userAgent` | The `User-Agent` request header, up to 512 characters. |
+| `deviceInfo` | Browser, OS and device type parsed from the user agent, plus a copy of the user agent itself. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
+| `sessionId` | The `session_id` cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither. |
+| `clientCorrelationId` | The optional `client_correlation_id` a native client attached via the `telemetry` request field — see [Native-client telemetry](#native-client-telemetry-optional) below. Sibling to `sessionId`, not derived from it: caller-supplied and absent unless the client sends one. |
+| `nativeClientTelemetry` | The full optional `telemetry` object a native client attached, stored as-is — see below. |
+| `metricType` | The metric name of the event, e.g. `fido2_registration_success`. |
+| `nodeId` | Identifier of the cluster node that served the request. |
+
+!!! note "Oversized values are shortened, not dropped"
+    Free-form fields — `userAgent`, `sessionId`, `clientCorrelationId`, `username`, `errorReason`,
+    `fallbackReason`, and each individual member of `nativeClientTelemetry` — are shortened to the
+    width of their database column (or, for `nativeClientTelemetry`'s members, a 128-character
+    policy cap) before being stored, so a single unusually long value cannot fail the write and lose
+    the whole entry. Real-world values fit comfortably; when a value is actually shortened the FIDO2
+    server logs one `WARN` naming the field and its original length. The value itself is
+    never logged, since these fields are personal data.
+
+!!! warning "Behind a reverse proxy"
+    `ipAddress` is only as trustworthy as the proxy headers reaching the FIDO2 server. If
+    your deployment terminates TLS at a proxy, make sure it sets `X-Forwarded-For` and
+    strips any client-supplied value; otherwise the recorded address can be spoofed by the
+    caller.
+
+!!! note "The browser never calls FIDO2 directly"
+    A passkey ceremony's actual HTTP client is the Authorization Server (via an Agama flow or the
+    person-authentication interception script) or Casa — the browser talks to one of those, and
+    they relay attestation/assertion calls to FIDO2 over a plain service-to-service connection.
+    Without anything forwarding the browser's own connection details on that hop, `ipAddress`
+    records the relay's own address on every entry, `userAgent` records the relay's HTTP client
+    library (e.g. `Apache-HttpClient/4.5.14`), and `deviceInfo`'s parsed fields fall back to
+    `UNKNOWN` accordingly, since there's no real browser user agent to parse.
+
+    Both relays therefore pass what they observed on the browser's request to FIDO2: the
+    connecting address (the servlet request's `getRemoteAddr()`), sent as `X-Forwarded-For`, and the
+    browser's `User-Agent`. They never copy a raw `X-Forwarded-For` header from the incoming request.
+    Jetty may, however, derive `getRemoteAddr()` from such a header: in the Janssen container images
+    its `forwarded` module is enabled, so when Apache or nginx fronts the Authorization Server or
+    Casa and sets `X-Forwarded-For`, the connecting address already resolves to the real browser IP.
+    If a different proxy sits in front of a relay and Jetty is not set up to trust it, the address
+    FIDO2 records is that proxy's, not the browser's — `trustedProxyIpRanges` cannot recover an
+    address the relay never forwarded.
+
+    Forwarding requires the FIDO2 endpoint to be `https://` (plain `http://` is only accepted for a
+    loopback host), because the end user's address and user agent are not sent in clear text. For a
+    non-loopback `http://` endpoint the person-authentication interception script logs a warning and
+    calls FIDO2 without the context, so the entry records the relay as described above. Casa's
+    passkey enrollment and the Agama `FidoValidator` do not fall back: the call fails before it is
+    sent, so use an `https://` FIDO2 endpoint with them.
+
+    On the FIDO2 side, if `trustedProxyEnabled` is `true`, add the Authorization Server's and Casa's
+    own addresses to `trustedProxyIpRanges` (see
+    [Client IP in metrics](fido2-server-properties-config.md#client-ip-in-metrics)) so the forwarded
+    value is honored. If `trustedProxyEnabled` is left unset, it is already honored with no
+    configuration — that default trusts `X-Forwarded-For` from *any* caller, not only the two
+    relays, which is the same pre-existing exposure the setting itself warns about. `userAgent`
+    carries no equivalent trust setting: whatever the relay sends is recorded as-is, the same as
+    it always was for a direct caller.
+
+### Internal diagnostic codes
+
+For some failure causes, `errorReason` carries an internal `JFS_*` code instead of a free-text
+message — deliberately recorded so the same cause is always spelled the same way, rather than
+however a particular exception happened to word it. `errorCategory` is set to a matching category
+name in the same cases, so these failures can be counted by cause on `analytics/errors` without
+falling into the catch-all `OTHER` bucket.
+
+- **Attestation-trust codes** (`errorCategory: "ATTESTATION_TRUST"`) — an unknown AAGUID, an
+  authenticator blocked by an MDS status report, an untrusted root certificate, and similar
+  registration-time trust failures. Also broken out on `analytics/attestation-rejections`, which
+  filters to this category. See [Trust Diagnostics](trust-diagnostics.md) for the full list and what
+  to check for each.
+- **`JFS_RPID_HASH_MISMATCH`** (`errorCategory: "NATIVE_FAILURE"`) — the RP ID hash the authenticator
+  signed over does not match the RP ID the server expected, on either a registration or an
+  authentication ceremony. Not exclusive to native clients in principle, but in practice a hallmark
+  of a misconfigured Android asset-link or iOS AASA association presenting the wrong RP ID to the
+  authenticator. The first of a growing set of native-failure diagnostic codes tracked in
+  [issue #14608](https://github.com/JanssenProject/jans/issues/14608).
+
+A code never reaches the client: `ErrorResponseFactory`/`Fido2ErrorResponse` still return the
+unchanged `{status: "failed", errorMessage: "…"}` envelope — the code is metrics/log detail only.
+
+### Native-client telemetry (optional)
+
+A native app/SDK (iOS, Android) may attach an optional `telemetry` object to any attestation or
+assertion start/finish request, carrying context no `User-Agent` string can — Play Services
+version, OEM Credential Manager behavior, the last client-side error code, and more. See the
+`NativeClientTelemetry` schema in the
+[OpenAPI (Swagger) specification](#api-reference) for the full field list.
+
+The field is entirely optional: a request that omits it behaves exactly as before, and an
+unrecognized value in an enum-shaped field (`platform`, `native_api`, `flow_context`) is accepted
+rather than rejecting the request.
+
+A submitted `telemetry` object is persisted on the raw entry it was attached to — both the full
+object (`nativeClientTelemetry`) and, separately, its `client_correlation_id`. `client_correlation_id`
+is deliberately promoted to its own top-level, independently queryable field rather than left buried
+inside the `nativeClientTelemetry` blob: it is what lets a start (`options`) call and its matching
+finish (`result`) call be correlated with each other, the way `sessionId` correlates every entry
+within one browser session. Query `entries` (or `entries/operation/{operationType}`) for two rows
+sharing the same `clientCorrelationId` to join a ceremony's own start and finish.
+
+!!! note "Correlation is opt-in and client-driven"
+    The server never generates a `client_correlation_id` itself — it only stores whatever the client
+    sends. A client that never adopts the `telemetry` field, or sends it without
+    `client_correlation_id`, gets no correlation and no change in behavior; this is purely additive.
+
+### Aggregation schedule and retention
+
+A scheduler computes aggregations on a cadence
+(hourly aggregations shortly after each hour, then daily/weekly/monthly). Entries older than
+the configured retention window are cleaned up automatically. In a cluster the aggregation
+job uses a distributed lock; if the lock is unavailable it falls back to single-node mode
+and logs that it did so, so aggregation keeps working.
+
+An aggregation is computed once for its period and stored; it is not recalculated, and the
+retention sweep clears raw entries without clearing aggregations. Two consequences worth knowing:
+
+!!! note "Aggregations recorded before Jans 2.4.0"
+    Rows written before 2.4.0 averaged abandoned ceremonies into the duration figures and counted
+    device types per entry rather than per ceremony, so `aggregations/{type}/summary` and
+    `analytics/trends` report those periods as they were computed at the time. They are not
+    corrected retrospectively: once a period's raw entries pass retention there is nothing left to
+    recompute from. Treat periods predating the upgrade as legacy data and read current latency
+    from `analytics/performance`, which is computed live from entries.
+
+## Configuration
+
+Telemetry is controlled by properties in the FIDO2 **dynamic configuration** (see the
+[FIDO2 Server Properties](fido2-server-properties-config.md) reference for how to read and
+update dynamic configuration). Out of the box metrics use the default values for these properties
+as listed below:
+
+| Property | Default | Description |
+|---|---|---|
+| `fido2MetricsEnabled` | `true` | Master switch for metrics collection. If `false`, no entries are stored. |
+| `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs. |
+| `fido2MetricsRetentionDays` | `90` | Days to retain metrics entries before automatic cleanup. Aggregations are not swept — they are the long-term record that outlives the entries they were computed from. |
+| `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored. Entries are still written when this is `false` — only the `deviceInfo` field is omitted. Use `fido2MetricsEnabled` to stop writing entries altogether. |
+| `fido2ErrorCategorization` | `true` | Whether failures are categorized for the error-analysis endpoint. |
+| `fido2PerformanceMetrics` | `true` | Whether operation durations are tracked. |
+
+### Aggregation schedule
+
+`fido2MetricsAggregationEnabled` turns the aggregation jobs on and off, but *when* they run is not
+part of the dynamic configuration. Each job is registered against a fixed Quartz cron expression
+read from `fido2-metrics.properties`, which is packaged inside `fido2-server.war`:
+
+| Key | Default cron | Runs |
+|---|---|---|
+| `fido2.metrics.aggregation.hourly.cron` | `0 5 * * * ?` | 5 minutes past every hour |
+| `fido2.metrics.aggregation.daily.cron` | `0 10 1 * * ?` | 01:10 every day |
+| `fido2.metrics.aggregation.weekly.cron` | `0 15 1 ? * MON` | 01:15 every Monday |
+| `fido2.metrics.aggregation.monthly.cron` | `0 20 1 1 * ?` | 01:20 on the 1st of each month |
+
+Each cron key has a matching `...enabled` key that registers or skips that individual job. The
+properties file is read once when the scheduler class loads, so changes require a server restart.
+Because it ships inside the WAR, these values are not reachable through the Config API and there is
+currently no supported way to retune the schedule from dynamic configuration.
+
+!!! warning "Don't confuse these with `metricReporter*`"
+    The `metricReporterEnabled` / `metricReporterInterval` / `metricReporterKeepDataDays`
+    properties belong to the legacy jans-core metric reporter and are **separate** from the
+    passkey telemetry feature above. Passkey telemetry is governed by the `fido2Metrics*`
+    properties.
+
+You can always check the currently effective configuration at runtime using the command below.
+
+```bash title="Command"
+curl -X GET "https://<your-jans-server>/jans-fido2/restv1/metrics/config" \
+  -H "Accept: application/json"
+```
+
+## Security
+
+Secure these endpoints at the infrastructure level. The metrics API **does not enforce authentication on its own**, and some responses can contain PII (userId, username, IP address, user-agent, session ID). Protection must be applied in front of the FIDO2 server — an API gateway with OAuth 2.0 / API keys, a reverse proxy with auth, or network/firewall rules. Per-user endpoints such as `entries/user/{userId}` are especially sensitive and should be restricted to administrators or the user themselves.
+
+
+## Healthcheck
+
+Use `health` endpoint to check the current status of metrics API.
+
+```bash
+curl -X GET "https://<your-jans-server>/jans-fido2/restv1/metrics/health" \
+  -H "Accept: application/json"
+```
+
+A healthy service returns HTTP 200 with `"status": "UP"` while `503` / `"DOWN"` indicates a
+database or configuration problem (check the FIDO2 server logs).
+
+## API reference
+
+The telemetry API is a set of read-only `GET` endpoints grouped as raw entries,
+aggregations, analytics, and utility (`config`, `health`). For the complete list of paths,
+parameters, and response schemas, use the Swagger spec:
+
+- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)**
+
+| Group | Endpoints |
+|---|---|
+| Raw entries | `entries`, `entries/user/{userId}`, `entries/operation/{operationType}` |
+| Aggregations | `aggregations/{type}`, `aggregations/{type}/summary` |
+| Analytics | `analytics/adoption`, `analytics/performance`, `analytics/devices`, `analytics/errors`, `analytics/attestation-rejections`, `analytics/trends/{type}`, `analytics/comparison/{type}` |
+| Utility | `config`, `health` |
+
+`{type}` is one of `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`; `{operationType}` is
+`REGISTRATION` or `AUTHENTICATION`.
+
+`analytics/errors` also accepts an optional `operationType` query parameter. Without it the rates
+cover registration and authentication together, which cannot tell a deployment with healthy sign-in
+and poor enrolment apart from the reverse — pass it to read one ceremony at a time:
+
+```bash
+curl -s "$BASE/analytics/errors?$RANGE&operationType=AUTHENTICATION"
+```
+
+## Sample dashboard
+
+You can build a passkey rollout dashboard using the data provided by metrics API. 
+
+Most metrics API endpoints take `startTime` and `endTime` in ISO-8601 format, interpreted
+as UTC. For example: `2026-01-01T00:00:00` or `2026-01-01T12:00:00Z`.
+
+To build a minimal dashboard you would typically need three calls per dashboard refresh — a KPI summary, adoption,
+and errors — over your chosen timeframe. For instance:
+
+```bash
+BASE="https://<your-jans-server>/jans-fido2/restv1/metrics"
+RANGE="startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59"
+
+curl -s "$BASE/aggregations/DAILY/summary?$RANGE"   # totals + avg success rates
+curl -s "$BASE/analytics/adoption?$RANGE"           # new vs returning users
+curl -s "$BASE/analytics/errors?$RANGE"             # failure + drop-off breakdown
+```
+
+You can build daily and monthly trend reports for passkey adoption and performance from the
+response data.
+
+Though the interpretation of various KPIs differ per implementation, a sample interpretation 
+is given below.
+
+- **Registration success rate** is healthy above ~0.80
+- **authentication success rate** above ~0.90 (sign-in is usually higher, since no key generation is involved).
+- A high **`dropOffRate`** or high **`USER_CANCELLED`** count usually points at UX friction
+  in the passkey prompt.
+- A high **`abandonmentRate`** points at the same friction but is the firmer signal, since it counts
+  ceremonies observed to have lapsed rather than inferring them. Remember that it cannot separate a
+  deliberate cancel from repeated biometric failures — see the warning above.
+- During rollout, expect a high **`adoptionRate`** (many new users); as the base matures it
+  falls and **`returningUsers`** dominates — that's the healthy direction.
+- Rising **average durations** (`analytics/performance`) is an early warning of
+  infrastructure or authenticator problems. These durations cover only ceremonies that completed —
+  a ceremony the user walked away from is measured by `unfinishedRequestExpiration`, not by how
+  fast the server answered, so read abandonment from `abandonmentRate` rather than from latency.
+
+
+
+## Troubleshooting
+
+| Symptom | What to check |
+|---|---|
+| Empty array `[]` in API response | Confirm `metricsEnabled` (and `aggregationEnabled` for aggregation endpoints) via `GET /metrics/config`; confirm activity occurred in the range; current-hour aggregations appear a few minutes after the hour. |
+| `403 Forbidden` | Metrics disabled in config, or access blocked by your gateway/proxy. |
+| `400 Bad Request` | Fix the `startTime`/`endTime` ISO format and ensure `startTime` ≤ `endTime`. |
+| `503` on `health` | Database/persistence unreachable; check FIDO2 server logs (see [FIDO Logs](logs.md)). |
+| Aggregations not updating | Look for "aggregation scheduler initialized" in the logs; in a cluster verify the distributed lock, or confirm single-node fallback is logged. |
+| Nothing is collected at all, and the log shows `Failed to store FIDO2 metrics entry` caused by `value too long for type character varying` (PostgreSQL) or `Data too long for column` (MySQL) | The metrics columns predate the widened schema. New installs and container deployments correct themselves; an in-place VM upgrade needs the one-time migration below. |
+
+### Widening the metrics columns on an existing VM install
+
+Deployments created before the column widths were corrected store the metrics tables with
+64-character columns, which is too small for a browser user agent. Every write is then
+rejected and the tables stay empty — with the aggregation job still running normally and
+reporting success, since it has nothing to summarise.
+
+New VM installs and container/Kubernetes deployments are handled automatically: the
+persistence loader compares the declared schema against the live one and widens the columns
+on its next run. An existing VM install needs the change applied once, by hand.
+
+The statements below only widen columns — no stored value is truncated or removed. They do,
+however, take locks, so plan when you run them:
+
+- **PostgreSQL** takes an `ACCESS EXCLUSIVE` lock on each table for the duration of the
+  statement, blocking reads and writes. Increasing a `varchar` length and converting
+  `varchar` to `text` do not rewrite the table, so the lock is normally held only briefly.
+- **MySQL** can widen a `VARCHAR` in place only while the length-prefix size is unchanged.
+  The conversions to `TEXT` require `ALGORITHM=COPY`, which rebuilds the table and blocks
+  writes for the duration.
+
+Run these in a maintenance window, or confirm that your MySQL version supports an online DDL
+algorithm for these specific changes before applying them to a busy table. In practice the
+cost is small on an affected deployment, because the metrics tables are empty — that is the
+symptom being fixed.
+
+=== "PostgreSQL"
+
+    ```sql
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUserAgent"      TYPE VARCHAR(512);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsErrorReason"    TYPE VARCHAR(1024);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsFallbackReason" TYPE VARCHAR(512);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsSessionId"      TYPE VARCHAR(128);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUsername"       TYPE VARCHAR(256);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUserId"         TYPE VARCHAR(128);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsDeviceInfo"     TYPE TEXT;
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsAdditionalData" TYPE TEXT;
+
+    ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansLastUserAgent"    TYPE VARCHAR(512);
+    ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUsername"         TYPE VARCHAR(256);
+    ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUserId"           TYPE VARCHAR(128);
+    ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUserSegments"     TYPE TEXT;
+    ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansBehaviorPatterns" TYPE TEXT;
+    ```
+
+=== "MySQL"
+
+    ```sql
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUserAgent      VARCHAR(512);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsErrorReason    VARCHAR(1024);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsFallbackReason VARCHAR(512);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsSessionId      VARCHAR(128);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUsername       VARCHAR(256);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUserId         VARCHAR(128);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsDeviceInfo     TEXT;
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsAdditionalData TEXT;
+
+    ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansLastUserAgent    VARCHAR(512);
+    ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUsername         VARCHAR(256);
+    ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUserId           VARCHAR(128);
+    ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUserSegments     TEXT;
+    ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansBehaviorPatterns TEXT;
+    ```
+
+To confirm the change took effect:
+
+```sql
+SELECT column_name, data_type, character_maximum_length
+FROM information_schema.columns
+WHERE table_name IN ('jansFido2MetricsEntry', 'jansFido2UserMetrics')
+  AND data_type IN ('character varying', 'varchar', 'text')
+ORDER BY table_name, column_name;
+```
+
+PostgreSQL reports the type as `character varying`, MySQL as `varchar`, so the filter covers
+both.
+
+Then register a passkey from a browser — a real one, so a full-length `User-Agent` is sent.
+
+Record the **username** you registered with and the **UTC timestamp** of the attempt. The
+queries below take both, as `<test-username>` and `<event-utc>`, plus a `<start-utc>`/`<end-utc>`
+window bracketing the attempt. Binding the checks to your own event is what stops a row left
+over from earlier traffic reading as a successful migration.
+
+=== "PostgreSQL"
+
+    ```sql
+    -- 1. raw events for the test account, inside the test window
+    SELECT "jansFido2MetricsTimestamp", "jansFido2MetricsOperationType", "jansFido2MetricsStatus",
+           length("jansFido2MetricsUserAgent") AS ua_chars
+    FROM "jansFido2MetricsEntry"
+    WHERE "jansFido2MetricsUsername" = '<test-username>'
+      AND "jansFido2MetricsTimestamp" BETWEEN TIMESTAMP '<start-utc>' AND TIMESTAMP '<end-utc>'
+    ORDER BY "jansFido2MetricsTimestamp" DESC;
+
+    -- 2. per-user rollup for the same account
+    SELECT "jansUsername", length("jansLastUserAgent") AS ua_chars
+    FROM "jansFido2UserMetrics"
+    WHERE "jansUsername" = '<test-username>';
+
+    -- 3. aggregation bucket for the hour containing the attempt
+    SELECT "jansId", "jansStartTime", "jansEndTime"
+    FROM "jansFido2MetricsAggregation"
+    WHERE "jansAggregationType" = 'HOURLY'
+      AND "jansStartTime" = date_trunc('hour', TIMESTAMP '<event-utc>');
+    ```
+
+=== "MySQL"
+
+    ```sql
+    -- 1. raw events for the test account, inside the test window
+    SELECT jansFido2MetricsTimestamp, jansFido2MetricsOperationType, jansFido2MetricsStatus,
+           CHAR_LENGTH(jansFido2MetricsUserAgent) AS ua_chars
+    FROM jansFido2MetricsEntry
+    WHERE jansFido2MetricsUsername = '<test-username>'
+      AND jansFido2MetricsTimestamp BETWEEN '<start-utc>' AND '<end-utc>'
+    ORDER BY jansFido2MetricsTimestamp DESC;
+
+    -- 2. per-user rollup for the same account
+    SELECT jansUsername, CHAR_LENGTH(jansLastUserAgent) AS ua_chars
+    FROM jansFido2UserMetrics
+    WHERE jansUsername = '<test-username>';
+
+    -- 3. aggregation bucket for the hour containing the attempt
+    SELECT jansId, jansStartTime, jansEndTime
+    FROM jansFido2MetricsAggregation
+    WHERE jansAggregationType = 'HOURLY'
+      AND jansStartTime = DATE_FORMAT('<event-utc>', '%Y-%m-%d %H:00:00');
+    ```
+
+Reading the results:
+
+- **Query 1** must return the events you just performed. `ua_chars` should equal the character
+  count of your browser's real user agent — typically 100–350, not 64. That is what separates a
+  working migration from the truncation guard quietly trimming the value, and no
+  `oversized field(s) shortened` warning should appear in the log for ordinary traffic. The
+  MySQL variant uses `CHAR_LENGTH` because MySQL's `LENGTH` counts bytes rather than
+  characters, which would inflate the figure for a non-ASCII user agent.
+- **Query 2** returning nothing while query 1 returns rows means the column widths are correct
+  and the per-user service is failing for a separate reason — check the FIDO2 log for
+  `NoClassDefFoundError: Could not initialize class ...Fido2UserMetricsService`, which
+  indicates the configuration keys are missing.
+- **Query 3** must return exactly one row, and only after the scheduler has run for the hour
+  *following* the one containing your attempt: it summarises the previous completed hour, a few
+  minutes past each hour, in UTC. This table is the only proof that the aggregation ran — the
+  job logs `Hourly aggregation completed` even when it finds nothing to summarise.
+
+If you cannot reach the database directly, the raw entries are also available over the API.
+This substitutes for query 1 only; it reads raw entries and cannot confirm that the aggregation
+ran:
+
+```http
+GET /jans-fido2/restv1/metrics/entries?startTime=<ISO-8601>&endTime=<ISO-8601>
+```
+
+## Related documentation
+
+- [FIDO2 Server Properties](fido2-server-properties-config.md) — reading/updating the `fido2Metrics*` properties
+- [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md) — deploying the passkey experience these metrics measure
+- [FIDO Logs](logs.md) — server-side logging and diagnostics
