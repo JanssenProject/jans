@@ -1,0 +1,5 @@
+{
+  "success": true,
+  "responseCode": 200,
+  "responseMessage": "Sync of role-to-scope mappings from the policy store completed successfully."
+}

@@ -12,3 +12,12 @@ Janssen includes a FIDO2 component (or FIDO server) to provide the following inf
 - **Trusted repository for public keys** used in the authentication process, ensuring secure, private, and passwordless authentication.
 
 During Janssen installation, the administrator will install the FIDO2 component in order to enable passkeys as an authentication mechanism.
+
+## Documentation
+
+The canonical FIDO2 / Passkeys documentation lives on the Janssen docs site — this README does not duplicate it:
+
+- [FIDO2 / Passkeys — administration guide](https://docs.jans.io/head/janssen-server/fido/)
+- [Passkeys Implementation Guide (how-to)](https://docs.jans.io/head/janssen-server/recipes/passkey-impl-guide/)
+- [Passkey Telemetry & Metrics](https://docs.jans.io/head/janssen-server/fido/passkey-telemetry/)
+- [FIDO2 Server Properties](https://docs.jans.io/head/janssen-server/fido/fido2-server-properties-config/)

@@ -15,6 +15,7 @@ use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
+use crate::lock::AuditPayload;
 use crate::log::loggable_fn::LoggableFn;
 use cedar_policy::EntityUid;
 use rand::Rng;
@@ -49,6 +50,16 @@ pub struct LogEntry {
     /// cedar-policy sdk  version
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cedar_sdk_version: Option<semver::Version>,
+    /// Git commit hash at build time
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub build_commit: Option<String>,
+    /// Build timestamp in RFC 3339 format
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub build_timestamp: Option<String>,
+    /// Shared batch correlation id, indexed for lookup via
+    /// [`LogStorage::get_logs_by_request_id`].
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub batch_id: Option<Uuid>,
 }
 
 impl LogEntry {
@@ -60,6 +71,9 @@ impl LogEntry {
             error_msg: None,
             cedar_lang_version: None,
             cedar_sdk_version: None,
+            build_commit: None,
+            build_timestamp: None,
+            batch_id: None,
         }
     }
 
@@ -83,6 +97,22 @@ impl LogEntry {
         self.cedar_sdk_version = Some(cedar_policy::get_sdk_version());
         self
     }
+
+    pub(crate) fn set_build_info(
+        mut self,
+        build_commit: Option<&str>,
+        build_timestamp: Option<&str>,
+    ) -> Self {
+        self.build_commit = build_commit.map(ToString::to_string);
+        self.build_timestamp = build_timestamp.map(ToString::to_string);
+        self
+    }
+
+    /// Attach a `batch_id` to this entry for indexing and audit correlation.
+    pub(crate) fn set_batch_id(mut self, batch_id: Uuid) -> Self {
+        self.batch_id = Some(batch_id);
+        self
+    }
 }
 
 impl Indexed for LogEntry {
@@ -91,7 +121,9 @@ impl Indexed for LogEntry {
     }
 
     fn get_additional_ids(&self) -> Vec<Uuid> {
-        self.base.get_additional_ids()
+        let mut ids = self.base.get_additional_ids();
+        ids.extend(self.batch_id);
+        ids
     }
 
     fn get_tags(&self) -> Vec<&str> {
@@ -102,10 +134,6 @@ impl Indexed for LogEntry {
 impl Loggable for LogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
-    }
-
-    fn get_log_kind(&self) -> Option<LogType> {
-        self.base.get_log_kind()
     }
 }
 
@@ -321,6 +349,14 @@ pub(crate) struct DecisionLogEntry {
     /// Information about pushed data that was injected into the context
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pushed_data: Option<PushedDataInfo>,
+    /// Shared correlation id when this entry was produced from a batch
+    /// authorization call. `None` for single-item calls.
+    ///
+    /// Indexed via [`get_additional_ids`](Indexed::get_additional_ids) — use
+    /// [`LogStorage::get_logs_by_request_id`] to retrieve all decision entries
+    /// belonging to one batch.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub batch_id: Option<Uuid>,
 }
 
 /// Telemetry log entry following the 3-map model.
@@ -374,7 +410,9 @@ impl Indexed for DecisionLogEntry {
     }
 
     fn get_additional_ids(&self) -> Vec<Uuid> {
-        self.base.get_additional_ids()
+        let mut ids = self.base.get_additional_ids();
+        ids.extend(self.batch_id);
+        ids
     }
 
     fn get_tags(&self) -> Vec<&str> {
@@ -387,8 +425,8 @@ impl Loggable for DecisionLogEntry {
         self.base.get_log_level()
     }
 
-    fn get_log_kind(&self) -> Option<LogType> {
-        self.base.get_log_kind()
+    fn to_audit_payload(&self) -> Option<AuditPayload> {
+        Some(AuditPayload::Decision(Box::new(self.clone())))
     }
 }
 
@@ -411,8 +449,8 @@ impl Loggable for MetricsLogEntry {
         self.base.get_log_level()
     }
 
-    fn get_log_kind(&self) -> Option<LogType> {
-        self.base.get_log_kind()
+    fn to_audit_payload(&self) -> Option<AuditPayload> {
+        Some(AuditPayload::Metric(Box::new(self.clone())))
     }
 }
 
@@ -426,7 +464,7 @@ fn get_std_rng() -> StdRng {
 // Static variable initialize only once at start of program and available during all program live cycle.
 // Import inside function guarantee that it is used only inside function.
 pub(crate) fn gen_uuid7() -> Uuid {
-    use std::sync::{LazyLock, Mutex};
+    use std::cell::RefCell;
     use uuid7::V7Generator;
 
     // from docs uuid7 crate
@@ -434,22 +472,27 @@ pub(crate) fn gen_uuid7() -> Uuid {
     // A suggested value is 10_000 (milliseconds).
     const ROLLBACK_ALLOWANCE: u64 = 10_000;
 
-    static GLOBAL_V7_GENERATOR: LazyLock<
-        Mutex<V7Generator<uuid7::generator::with_rand010::Adapter<StdRng>>>,
-    > = LazyLock::new(|| {
-        let mut g = V7Generator::with_rand010(get_std_rng());
-        g.set_rollback_allowance(ROLLBACK_ALLOWANCE);
-        Mutex::new(g)
-    });
-
-    let mut g = GLOBAL_V7_GENERATOR
-        .lock()
-        .expect("GLOBAL_V7_GENERATOR should be locked");
+    // Thread-local generator avoids the global `Mutex::lock` on the request-id hot path.
+    // Monotonicity is preserved per-thread; UUIDs remain time-ordered across threads via the
+    // millisecond timestamp, which is sufficient for unique identifiers (no documented global
+    // monotonic-ordering guarantee). Under `wasm32-unknown-unknown` this collapses to a single
+    // static slot (single-threaded), still removing the lock.
+    thread_local! {
+        static V7_GENERATOR: RefCell<
+            V7Generator<uuid7::generator::with_rand010::Adapter<StdRng>>,
+        > = {
+            let mut g = V7Generator::with_rand010(get_std_rng());
+            g.set_rollback_allowance(ROLLBACK_ALLOWANCE);
+            RefCell::new(g)
+        };
+    }
 
     let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
 
-    #[allow(clippy::cast_sign_loss)]
-    g.generate_or_reset_with_ts(custom_unix_ts_ms as u64)
+    V7_GENERATOR.with(|g| {
+        g.borrow_mut()
+            .generate_or_reset_with_ts(custom_unix_ts_ms.cast_unsigned())
+    })
 }
 
 /// Generates a new `UUIDv4` object utilizing the random number generator inside.
@@ -583,10 +626,6 @@ impl Loggable for BaseLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.level
     }
-
-    fn get_log_kind(&self) -> Option<LogType> {
-        Some(self.log_kind)
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
@@ -608,5 +647,53 @@ impl LogTokensInfo {
 
     pub(crate) fn is_empty(&self) -> bool {
         self.0.is_empty()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Uuid, gen_uuid7};
+    use std::collections::HashSet;
+    use std::sync::{Arc, Mutex};
+    use std::thread;
+
+    #[test]
+    fn gen_uuid7_thread_local_storm_is_unique() {
+        const THREADS: usize = 32;
+        const PER_THREAD: usize = 5_000;
+
+        let collected: Arc<Mutex<Vec<Uuid>>> = Arc::new(Mutex::new(Vec::new()));
+
+        thread::scope(|scope| {
+            for _ in 0..THREADS {
+                let collected = Arc::clone(&collected);
+                scope.spawn(move || {
+                    let mut local = Vec::with_capacity(PER_THREAD);
+                    for _ in 0..PER_THREAD {
+                        local.push(gen_uuid7());
+                    }
+                    collected.lock().expect("collect lock").extend(local);
+                });
+            }
+        });
+
+        let ids = collected.lock().expect("collect lock");
+        assert_eq!(
+            ids.len(),
+            THREADS * PER_THREAD,
+            "all UUIDs generated by worker threads should be collected"
+        );
+
+        assert!(
+            ids.iter().all(|id| id.as_bytes()[6] >> 4 == 0x7),
+            "all generated UUIDs should have the UUIDv7 version nibble"
+        );
+
+        let unique: HashSet<&Uuid> = ids.iter().collect();
+        assert_eq!(
+            unique.len(),
+            ids.len(),
+            "uuid7 collision under thread storm"
+        );
     }
 }

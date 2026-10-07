@@ -28,7 +28,9 @@ import io.jans.orm.impl.model.ParsedKey;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
 import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SearchProjection;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.reflect.property.PropertyAnnotation;
@@ -152,6 +154,20 @@ public class HybridEntryManager extends BaseEntryManager<HybridPersistenceOperat
     public <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope) {
     	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(baseDN);
     	return persistenceEntryManager.countEntries(baseDN, entryClass, filter, scope);
+    }
+
+	@Override
+    public <T> PagedResult<EntryData> findAggregatedEntries(String baseDN, Class<T> entryClass, Filter filter,
+            SearchProjection projection, int start, int count) {
+    	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(baseDN);
+    	return persistenceEntryManager.findAggregatedEntries(baseDN, entryClass, filter, projection, start, count);
+    }
+
+	@Override
+    public <T> List<T> findDistinctEntries(String baseDN, Class<T> entryClass, Filter filter,
+            SearchProjection projection, int start, int count) {
+    	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(baseDN);
+    	return persistenceEntryManager.findDistinctEntries(baseDN, entryClass, filter, projection, start, count);
     }
 
 	@Override

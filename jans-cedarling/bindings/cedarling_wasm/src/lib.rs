@@ -5,13 +5,16 @@
 
 use cedarling::bindings::cedar_policy;
 use cedarling::{
-    AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, DataApi,
+    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest,
+    BatchAuthorizeResponse as CedarBatchAuthorizeResponse, BatchAuthorizeUnsignedRequest,
+    BatchItemError as CedarBatchItemError, BootstrapConfig, BootstrapConfigRaw, DataApi,
     DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage,
-    RequestUnsigned, TrustedIssuerLoadingInfo,
+    MetricsSnapshot as CedarMetricsSnapshot, PolicyId, RequestUnsigned, TrustedIssuerLoadingInfo,
 };
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
 use serde_wasm_bindgen::Error;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::Duration;
 use wasm_bindgen::prelude::*;
@@ -30,7 +33,7 @@ pub struct Cedarling {
 /// A WASM wrapper for the Rust `cedarling::MultiIssuerAuthorizeResult` struct.
 /// Represents the result of a multi-issuer authorization request.
 #[wasm_bindgen]
-#[derive(serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize)]
 pub struct MultiIssuerAuthorizeResult {
     /// Result of Cedar policy authorization
     #[wasm_bindgen(getter_with_clone)]
@@ -49,6 +52,7 @@ pub struct MultiIssuerAuthorizeResult {
 #[wasm_bindgen]
 impl MultiIssuerAuthorizeResult {
     /// Convert `MultiIssuerAuthorizeResult` to json string value
+    #[wasm_bindgen(js_name = jsonString)]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
@@ -66,8 +70,24 @@ impl From<cedarling::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult 
     }
 }
 
-/// Create a new instance of the Cedarling application.
-/// This function can take as config parameter the eather `Map` other `Object`
+/// Creates a Cedarling application from bootstrap properties.
+///
+/// # Arguments
+///
+/// * `config` - A JavaScript `Map` or plain object of Cedarling
+///   bootstrap-property names and values.
+///
+/// # Example
+///
+/// ```javascript
+/// await initWasm();
+/// const cedarling = await init({
+///   CEDARLING_APPLICATION_NAME: "task-api",
+///   CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+///   CEDARLING_LOG_TYPE: "memory",
+///   CEDARLING_LOG_TTL: 120,
+/// });
+/// ```
 #[wasm_bindgen]
 pub async fn init(config: JsValue) -> Result<Cedarling, Error> {
     if config.is_instance_of::<Map>() {
@@ -87,16 +107,26 @@ pub async fn init(config: JsValue) -> Result<Cedarling, Error> {
 /// that was fetched with custom logic (e.g., with authentication headers).
 ///
 /// # Arguments
-/// * `config` - Bootstrap configuration (Map or Object). Policy store config is ignored.
+/// * `config` - Bootstrap configuration (Map or Object) without a policy-store
+///   source property. The archive bytes provide the policy store.
 /// * `archive_bytes` - The .cjar archive bytes (Uint8Array)
 ///
 /// # Example
 /// ```javascript
-/// const response = await fetch(url, { headers: { Authorization: 'Bearer ...' } });
-/// const bytes = new Uint8Array(await response.arrayBuffer());
-/// const cedarling = await init_from_archive_bytes(config, bytes);
+/// await initWasm();
+/// const config = {
+///   CEDARLING_APPLICATION_NAME: "task-api",
+///   CEDARLING_LOG_TYPE: "memory",
+///   CEDARLING_LOG_TTL: 120,
+/// };
+/// const response = await fetch("https://example.com/policy-store.cjar", {
+///   headers: { Authorization: "Bearer <token>" },
+/// });
+/// if (!response.ok) throw new Error("Unable to fetch policy store");
+/// const archiveBytes = new Uint8Array(await response.arrayBuffer());
+/// const cedarling = await initFromArchiveBytes(config, archiveBytes);
 /// ```
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = initFromArchiveBytes)]
 pub async fn init_from_archive_bytes(
     config: JsValue,
     archive_bytes: js_sys::Uint8Array,
@@ -138,8 +168,23 @@ pub async fn init_from_archive_bytes(
 
 #[wasm_bindgen]
 impl Cedarling {
-    /// Create a new instance of the Cedarling application.
-    /// Assume that config is `Object`
+    /// Creates a Cedarling application from bootstrap properties.
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - A plain object of Cedarling bootstrap-property names and values.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// await initWasm();
+    /// const cedarling = await Cedarling.new({
+    ///   CEDARLING_APPLICATION_NAME: "task-api",
+    ///   CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+    ///   CEDARLING_LOG_TYPE: "memory",
+    ///   CEDARLING_LOG_TTL: 120,
+    /// });
+    /// ```
     pub async fn new(config: &Object) -> Result<Cedarling, Error> {
         let config: BootstrapConfigRaw = serde_wasm_bindgen::from_value(config.into())?;
 
@@ -151,8 +196,24 @@ impl Cedarling {
             .map_err(Error::new)
     }
 
-    /// Create a new instance of the Cedarling application.
-    /// Assume that config is `Map`
+    /// Creates a new Cedarling application from a JavaScript `Map`.
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - A `Map` of Cedarling bootstrap-property names and values.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// await initWasm();
+    /// const cedarling = await Cedarling.newFromMap(new Map([
+    ///   ["CEDARLING_APPLICATION_NAME", "task-api"],
+    ///   ["CEDARLING_POLICY_STORE_URI", "https://example.com/policy-store.cjar"],
+    ///   ["CEDARLING_LOG_TYPE", "memory"],
+    ///   ["CEDARLING_LOG_TTL", 120],
+    /// ]));
+    /// ```
+    #[wasm_bindgen(js_name = newFromMap)]
     pub async fn new_from_map(config: Map) -> Result<Cedarling, Error> {
         let conf_js_val = config.unchecked_into();
 
@@ -167,14 +228,20 @@ impl Cedarling {
     /// partial evaluation; residual-dependent requests fail closed with
     /// `Decision::Deny` and surface residual policy ids in
     /// `response.diagnostics.reason`.
-    pub async fn authorize_unsigned(&self, request: JsValue) -> Result<AuthorizeResult, Error> {
-        // if `request` is map convert to object
-        let request_object: JsValue = if request.is_instance_of::<Map>() {
-            Object::from_entries(&request)?.into()
-        } else {
-            request
-        };
-        let cedar_request: RequestUnsigned = serde_wasm_bindgen::from_value(request_object)?;
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - JSON string representation of [`RequestUnsigned`].
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const result = await cedarling.authorizeUnsigned(JSON.stringify(request));
+    /// ```
+    #[wasm_bindgen(js_name = authorizeUnsigned)]
+    pub async fn authorize_unsigned(&self, request: &str) -> Result<AuthorizeResult, Error> {
+        let cedar_request: RequestUnsigned = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
         let result = self
             .instance
             .authorize_unsigned(cedar_request)
@@ -184,19 +251,24 @@ impl Cedarling {
     }
 
     /// Authorize multi-issuer request.
-    /// Makes authorization decision based on multiple JWT tokens from different issuers
+    /// Makes authorization decision based on multiple JWT tokens from different issuers.
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - JSON string representation of [`AuthorizeMultiIssuerRequest`].
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const result = await cedarling.authorizeMultiIssuer(JSON.stringify(request));
+    /// ```
+    #[wasm_bindgen(js_name = authorizeMultiIssuer)]
     pub async fn authorize_multi_issuer(
         &self,
-        request: JsValue,
+        request: &str,
     ) -> Result<MultiIssuerAuthorizeResult, Error> {
-        // if `request` is map convert to object
-        let request_object: JsValue = if request.is_instance_of::<Map>() {
-            Object::from_entries(&request)?.into()
-        } else {
-            request
-        };
-        let cedar_request: AuthorizeMultiIssuerRequest =
-            serde_wasm_bindgen::from_value(request_object)?;
+        let cedar_request: AuthorizeMultiIssuerRequest = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
         let result = self
             .instance
             .authorize_multi_issuer(cedar_request)
@@ -205,8 +277,160 @@ impl Cedarling {
         Ok(result.into())
     }
 
-    /// Get logs and remove them from the storage.
-    /// Returns `Array` of `Map`
+    /// Authorize a batch of unsigned requests against one shared principal.
+    ///
+    /// Setup work (principal build + pushed-data snapshot) runs once and each
+    /// item is evaluated in input order. Results are returned inside a
+    /// [`BatchAuthorizeUnsignedResponse`] carrying the shared `batch_id`.
+    /// Batch-level failures (validation, principal parse) reject the whole
+    /// call; per-item failures are returned as `BatchItemError` results and
+    /// exposed by WASM with `is_ok=false` and `error`, while genuine Cedar
+    /// denials remain `AuthorizeResult` values with `decision=false`.
+    /// # Arguments
+    ///
+    /// * `request` - JSON string representation of [`BatchAuthorizeUnsignedRequest`].
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const result = await cedarling.authorizeUnsignedBatch(JSON.stringify(batchRequest));
+    /// ```
+    #[wasm_bindgen(js_name = authorizeUnsignedBatch)]
+    pub async fn authorize_unsigned_batch(
+        &self,
+        request: &str,
+    ) -> Result<BatchAuthorizeUnsignedResponse, Error> {
+        let cedar_request: BatchAuthorizeUnsignedRequest = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
+        let response = self
+            .instance
+            .authorize_unsigned_batch(cedar_request)
+            .await
+            .map_err(Error::new)?;
+        Ok(response.into())
+    }
+
+    /// Authorize a batch of multi-issuer requests against one shared token set.
+    ///
+    /// Tokens are validated and token/issuer entities are built once, then
+    /// each item is evaluated in input order. Batch-level failures (validation,
+    /// JWT verification, status-list refresh) reject the whole call; per-item
+    /// failures are returned as `BatchItemError` results and exposed by WASM
+    /// with `is_ok=false` and `error`, while genuine Cedar denials remain
+    /// `AuthorizeResult` values with `decision=false`.
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - JSON string representation of [`BatchAuthorizeMultiIssuerRequest`].
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const result = await cedarling.authorizeMultiIssuerBatch(JSON.stringify(batchRequest));
+    /// ```
+    #[wasm_bindgen(js_name = authorizeMultiIssuerBatch)]
+    pub async fn authorize_multi_issuer_batch(
+        &self,
+        request: &str,
+    ) -> Result<BatchAuthorizeMultiIssuerResponse, Error> {
+        let cedar_request: BatchAuthorizeMultiIssuerRequest = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
+        let response = self
+            .instance
+            .authorize_multi_issuer_batch(cedar_request)
+            .await
+            .map_err(Error::new)?;
+        Ok(response.into())
+    }
+
+    /// Merge the annotations (`@key("value")`) of the given policies into a single object.
+    ///
+    /// Intended for resolving the determining policies of an authorization decision:
+    /// pass `result.response.diagnostics.reason`.
+    ///
+    /// Lossy: if the same annotation key appears on several policies, one value wins
+    /// arbitrarily. Use `annotationValues` / `annotationsByPolicy` when duplicates
+    /// matter. Unknown policy IDs are silently skipped.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy_ids` - List of policy IDs whose annotations should be merged into
+    ///   a single object. Typically `result.response.diagnostics.reason` from an
+    ///   authorization result.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const annotations = cedarling.annotationsMap(result.response.diagnostics.reason);
+    /// // { redirect: "/upgrade", tier: "premium" }
+    /// ```
+    #[wasm_bindgen(js_name = annotationsMap)]
+    pub fn annotations_map(&self, policy_ids: Vec<String>) -> Result<JsValue, Error> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        let annotations = self.instance.annotations_map(ids.iter());
+        to_object_recursive(serde_wasm_bindgen::to_value(&annotations)?)
+    }
+
+    /// Collect every value of the annotation `key` across the given policies,
+    /// preserving duplicates. Unknown policy IDs are silently skipped.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy_ids` - List of policy IDs to search. Typically
+    ///   `result.response.diagnostics.reason` from an authorization result.
+    /// * `key` - The annotation key to collect values for (e.g. `"redirect"`).
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const redirects = cedarling.annotationValues(
+    ///   result.response.diagnostics.reason,
+    ///   "redirect",
+    /// );
+    /// // ["/upgrade"]
+    /// ```
+    #[wasm_bindgen(js_name = annotationValues)]
+    pub fn annotation_values(&self, policy_ids: Vec<String>, key: &str) -> Vec<String> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        self.instance.annotation_values(ids.iter(), key)
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID. It is
+    /// the loss-free companion to `annotationsMap`. Unknown policy IDs are
+    /// silently skipped.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy_ids` - List of policy IDs whose annotations should be returned
+    ///   grouped by policy ID. Typically `result.response.diagnostics.reason` from
+    ///   an authorization result.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const byPolicy = cedarling.annotationsByPolicy(result.response.diagnostics.reason);
+    /// // { "5": { redirect: "/upgrade", tier: "premium" } }
+    /// ```
+    #[wasm_bindgen(js_name = annotationsByPolicy)]
+    pub fn annotations_by_policy(&self, policy_ids: Vec<String>) -> Result<JsValue, Error> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        let by_policy = self.instance.annotations_by_policy(ids.iter());
+        to_object_recursive(serde_wasm_bindgen::to_value(&by_policy)?)
+    }
+
+    /// Returns all retained memory logs and removes them from storage.
+    /// Other log configurations return an empty array.
+    ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const logs = cedarling.popLogs();
+    /// ```
+    #[wasm_bindgen(js_name = popLogs)]
     pub fn pop_logs(&self) -> Result<Array, Error> {
         let result = Array::new();
         for log in self.instance.pop_logs() {
@@ -216,8 +440,18 @@ impl Cedarling {
         Ok(result)
     }
 
-    /// Get specific log entry.
-    /// Returns `Map` with values or `null`.
+    /// Returns one retained memory log by ID, or `null` when it is not retained.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The retained log identifier.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const log = cedarling.getLogById("request-id");
+    /// ```
+    #[wasm_bindgen(js_name = getLogById)]
     pub fn get_log_by_id(&self, id: &str) -> Result<JsValue, Error> {
         let result = if let Some(log_json_value) = self.instance.get_log_by_id(id) {
             convert_json_to_object(&log_json_value)?
@@ -227,8 +461,18 @@ impl Cedarling {
         Ok(result)
     }
 
-    /// Returns a list of all log ids.
-    /// Returns `Array` of `String`
+    /// Returns identifiers for all retained memory logs.
+    ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const ids = cedarling.getLogIds();
+    /// ```
+    #[wasm_bindgen(js_name = getLogIds)]
     pub fn get_log_ids(&self) -> Array {
         let result = Array::new();
         for log_id in self.instance.get_log_ids() {
@@ -238,8 +482,19 @@ impl Cedarling {
         result
     }
 
-    /// Get logs by tag, like `log_kind` or `log level`.
-    /// Tag can be `log_kind`, `log_level`.
+    /// Returns retained memory logs matching an indexed value.
+    ///
+    /// # Arguments
+    ///
+    /// * `tag` - A log kind (`"System"`, `"Decision"`, or `"Metric"`) or a
+    ///   system-log level such as `"DEBUG"`.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const logs = cedarling.getLogsByTag("System");
+    /// ```
+    #[wasm_bindgen(js_name = getLogsByTag)]
     pub fn get_logs_by_tag(&self, tag: &str) -> Result<Vec<JsValue>, Error> {
         self.instance
             .get_logs_by_tag(tag)
@@ -248,8 +503,18 @@ impl Cedarling {
             .collect()
     }
 
-    /// Get logs by request_id.
-    /// Return log entries that match the given request_id.
+    /// Returns retained memory logs for one request ID.
+    ///
+    /// # Arguments
+    ///
+    /// * `requestId` - The request identifier to match.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const logs = cedarling.getLogsByRequestId("request-id");
+    /// ```
+    #[wasm_bindgen(js_name = getLogsByRequestId)]
     pub fn get_logs_by_request_id(&self, request_id: &str) -> Result<Vec<JsValue>, Error> {
         self.instance
             .get_logs_by_request_id(request_id)
@@ -258,9 +523,20 @@ impl Cedarling {
             .collect()
     }
 
-    /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
-    /// Tag can be `log_kind`, `log_level`.
-    /// Return log entries that match the given request_id and tag.
+    /// Returns retained memory logs matching one request ID and indexed value.
+    ///
+    /// # Arguments
+    ///
+    /// * `requestId` - The request identifier to match.
+    /// * `tag` - A log kind (`"System"`, `"Decision"`, or `"Metric"`) or a
+    ///   system-log level such as `"DEBUG"`.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const logs = cedarling.getLogsByRequestIdAndTag("request-id", "System");
+    /// ```
+    #[wasm_bindgen(js_name = getLogsByRequestIdAndTag)]
     pub fn get_logs_by_request_id_and_tag(
         &self,
         request_id: &str,
@@ -273,7 +549,18 @@ impl Cedarling {
             .collect()
     }
 
-    /// Closes the connections to the Lock Server and pushes all available logs.
+    /// Closes Lock Server connections and pushes all available logs.
+    ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// await cedarling.shutDown();
+    /// ```
+    #[wasm_bindgen(js_name = shutDown)]
     pub async fn shut_down(&self) {
         self.instance.shut_down().await;
     }
@@ -291,9 +578,10 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// cedarling.push_data_ctx("user:123", { name: "John", age: 30 }, 3600);
-    /// cedarling.push_data_ctx("config", { setting: "value" }); // Uses default TTL
+    /// cedarling.pushDataCtx("user:123", { name: "John", age: 30 }, 3600);
+    /// cedarling.pushDataCtx("config", { setting: "value" }); // Uses default TTL
     /// ```
+    #[wasm_bindgen(js_name = pushDataCtx)]
     pub fn push_data_ctx(
         &self,
         key: &str,
@@ -323,11 +611,12 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const value = cedarling.get_data_ctx("user:123");
+    /// const value = cedarling.getDataCtx("user:123");
     /// if (value !== null) {
     ///     console.log(value.name); // "John"
     /// }
     /// ```
+    #[wasm_bindgen(js_name = getDataCtx)]
     pub fn get_data_ctx(&self, key: &str) -> Result<JsValue, Error> {
         match self.instance.get_data_ctx(key).map_err(Error::new)? {
             Some(value) => {
@@ -339,7 +628,7 @@ impl Cedarling {
     }
 
     /// Get a data entry with full metadata by key.
-    /// Returns null if the key doesn't exist or the entry has expired.
+    /// Returns undefined if the key doesn't exist or the entry has expired.
     ///
     /// # Arguments
     ///
@@ -348,15 +637,16 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const entry = cedarling.get_data_entry_ctx("user:123");
-    /// if (entry !== null) {
+    /// const entry = cedarling.getDataEntryCtx("user:123");
+    /// if (entry !== undefined) {
     ///     console.log(entry.key); // "user:123"
-    ///     console.log(entry.value); // { name: "John", age: 30 }
+    ///     console.log(entry.value()); // { name: "John", age: 30 }
     ///     console.log(entry.data_type); // "Record"
     ///     console.log(entry.created_at); // "2024-01-01T12:00:00Z"
     ///     console.log(entry.access_count); // 5
     /// }
     /// ```
+    #[wasm_bindgen(js_name = getDataEntryCtx)]
     pub fn get_data_entry_ctx(&self, key: &str) -> Result<Option<DataEntry>, Error> {
         match self.instance.get_data_entry_ctx(key).map_err(Error::new)? {
             Some(entry) => {
@@ -377,23 +667,29 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const removed = cedarling.remove_data_ctx("user:123");
+    /// const removed = cedarling.removeDataCtx("user:123");
     /// if (removed) {
     ///     console.log("Entry was successfully removed");
     /// }
     /// ```
+    #[wasm_bindgen(js_name = removeDataCtx)]
     pub fn remove_data_ctx(&self, key: &str) -> Result<bool, Error> {
         self.instance.remove_data_ctx(key).map_err(Error::new)
     }
 
     /// Clear all entries from the data store.
     ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
     /// # Example
     ///
     /// ```javascript
-    /// cedarling.clear_data_ctx();
+    /// cedarling.clearDataCtx();
     /// console.log("All data entries cleared");
     /// ```
+    #[wasm_bindgen(js_name = clearDataCtx)]
     pub fn clear_data_ctx(&self) -> Result<(), Error> {
         self.instance.clear_data_ctx().map_err(Error::new)
     }
@@ -401,14 +697,19 @@ impl Cedarling {
     /// List all entries with their metadata.
     /// Returns an array of DataEntry objects.
     ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
     /// # Example
     ///
     /// ```javascript
-    /// const entries = cedarling.list_data_ctx();
+    /// const entries = cedarling.listDataCtx();
     /// entries.forEach(entry => {
     ///     console.log(`${entry.key}: ${entry.data_type} (accessed ${entry.access_count} times)`);
     /// });
     /// ```
+    #[wasm_bindgen(js_name = listDataCtx)]
     pub fn list_data_ctx(&self) -> Result<Array, Error> {
         let entries = self.instance.list_data_ctx().map_err(Error::new)?;
         let result = Array::new();
@@ -421,19 +722,65 @@ impl Cedarling {
 
     /// Get statistics about the data store.
     ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
     /// # Example
     ///
     /// ```javascript
-    /// const stats = cedarling.get_stats_ctx();
+    /// const stats = cedarling.getStatsCtx();
     /// console.log(`Entries: ${stats.entry_count}/${stats.max_entries || 'unlimited'}`);
     /// console.log(`Capacity: ${stats.capacity_usage_percent.toFixed(2)}%`);
     /// console.log(`Total size: ${stats.total_size_bytes} bytes`);
     /// ```
+    #[wasm_bindgen(js_name = getStatsCtx)]
     pub fn get_stats_ctx(&self) -> Result<DataStoreStats, Error> {
         self.instance
             .get_stats_ctx()
             .map(|stats| stats.into())
             .map_err(Error::new)
+    }
+
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval.
+    ///
+    /// Fails when `CEDARLING_METRICS_COLLECTION` is disabled or whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set (even if the Lock server
+    /// has no telemetry endpoint). `interval_secs` is fractional seconds,
+    /// so sub-second intervals are reported exactly.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const snapshot = cedarling.drainMetrics();
+    /// console.log(`Requests: ${snapshot.operational_stats.get("authz.requests_total")}`);
+    /// ```
+    #[wasm_bindgen(js_name = drainMetrics)]
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, Error> {
+        self.instance
+            .drain_metrics()
+            .map(Into::into)
+            .map_err(Error::new)
+    }
+
+    /// Get the ID of the currently published policy store, if it carries one.
+    ///
+    /// `undefined` means the store carries no ID. The value is an opaque,
+    /// source-dependent string; it may change after a background refresh.
+    ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const id = cedarling.policyStoreId();
+    /// ```
+    #[wasm_bindgen(js_name = policyStoreId)]
+    pub fn policy_store_id(&self) -> Option<String> {
+        self.instance.policy_store_id()
     }
 
     /// Check whether a trusted issuer was loaded by issuer identifier.
@@ -445,8 +792,9 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const ok = cedarling.is_trusted_issuer_loaded_by_name("issuer_id");
+    /// const ok = cedarling.isTrustedIssuerLoadedByName("issuer_id");
     /// ```
+    #[wasm_bindgen(js_name = isTrustedIssuerLoadedByName)]
     pub fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
         self.instance.is_trusted_issuer_loaded_by_name(issuer_id)
     }
@@ -460,41 +808,57 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const ok = cedarling.is_trusted_issuer_loaded_by_iss("https://issuer.example.org");
+    /// const ok = cedarling.isTrustedIssuerLoadedByIss("https://issuer.example.org");
     /// ```
+    #[wasm_bindgen(js_name = isTrustedIssuerLoadedByIss)]
     pub fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
         self.instance.is_trusted_issuer_loaded_by_iss(iss_claim)
     }
 
     /// Get the total number of trusted issuer entries discovered.
     ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
     /// # Example
     ///
     /// ```javascript
-    /// const total = cedarling.total_issuers();
+    /// const total = cedarling.totalIssuers();
     /// ```
+    #[wasm_bindgen(js_name = totalIssuers)]
     pub fn total_issuers(&self) -> usize {
         self.instance.total_issuers()
     }
 
     /// Get the number of trusted issuers loaded successfully.
     ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
     /// # Example
     ///
     /// ```javascript
-    /// const loadedCount = cedarling.loaded_trusted_issuers_count();
+    /// const loadedCount = cedarling.loadedTrustedIssuersCount();
     /// ```
+    #[wasm_bindgen(js_name = loadedTrustedIssuersCount)]
     pub fn loaded_trusted_issuers_count(&self) -> usize {
         self.instance.loaded_trusted_issuers_count()
     }
 
     /// Get trusted issuer identifiers loaded successfully.
     ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
     /// # Example
     ///
     /// ```javascript
-    /// const ids = cedarling.loaded_trusted_issuer_ids();
+    /// const ids = cedarling.loadedTrustedIssuerIds();
     /// ```
+    #[wasm_bindgen(js_name = loadedTrustedIssuerIds)]
     pub fn loaded_trusted_issuer_ids(&self) -> Array {
         let result = Array::new();
         for id in self.instance.loaded_trusted_issuer_ids() {
@@ -505,11 +869,16 @@ impl Cedarling {
 
     /// Get trusted issuer identifiers that failed to load.
     ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
     /// # Example
     ///
     /// ```javascript
-    /// const ids = cedarling.failed_trusted_issuer_ids();
+    /// const ids = cedarling.failedTrustedIssuerIds();
     /// ```
+    #[wasm_bindgen(js_name = failedTrustedIssuerIds)]
     pub fn failed_trusted_issuer_ids(&self) -> Array {
         let result = Array::new();
         for id in self.instance.failed_trusted_issuer_ids() {
@@ -565,7 +934,7 @@ fn to_object_recursive(value: JsValue) -> Result<JsValue, Error> {
 /// A WASM wrapper for the Rust `cedarling::AuthorizeResult` struct.
 /// Represents the result of an authorization request.
 #[wasm_bindgen]
-#[derive(serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize)]
 pub struct AuthorizeResult {
     /// Cedar authorization response for the request.
     #[wasm_bindgen(getter_with_clone)]
@@ -586,6 +955,7 @@ pub struct AuthorizeResult {
 #[wasm_bindgen]
 impl AuthorizeResult {
     /// Convert `AuthorizeResult` to json string value
+    #[wasm_bindgen(js_name = jsonString)]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
@@ -603,10 +973,213 @@ impl From<cedarling::AuthorizeResult> for AuthorizeResult {
     }
 }
 
+/// Per-item build failure surfaced inside a batch response at `results[i]`
+/// when Cedar couldn't be reached for that item.
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct BatchItemError {
+    inner: CedarBatchItemError,
+}
+
+#[wasm_bindgen]
+impl BatchItemError {
+    /// Stable variant slug — `action_parse`, `resource_build`, `context_build`,
+    /// `principal_build`, `schema_validation`, `multi_issuer_entity`,
+    /// `request_validation`.
+    #[wasm_bindgen(getter)]
+    pub fn category(&self) -> String {
+        self.inner.category().to_string()
+    }
+
+    /// Position of the failing item in the original `items` vector.
+    #[wasm_bindgen(getter)]
+    pub fn item_index(&self) -> usize {
+        self.inner.item_index()
+    }
+
+    /// Human-readable diagnostic. Safe to log.
+    #[wasm_bindgen(getter)]
+    pub fn message(&self) -> String {
+        self.inner.to_string()
+    }
+}
+
+impl From<CedarBatchItemError> for BatchItemError {
+    fn from(inner: CedarBatchItemError) -> Self {
+        Self { inner }
+    }
+}
+
+/// One slot in a batch response's `results` array. Callers switch on
+/// `is_ok()` — on `true`, read `unwrap()`; on `false`, read `error()`.
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct BatchItemUnsignedResult {
+    inner: Result<AuthorizeResult, BatchItemError>,
+}
+
+#[wasm_bindgen]
+impl BatchItemUnsignedResult {
+    /// `true` when Cedar evaluated this item (Allow or Deny); `false` when it
+    /// failed to build.
+    #[wasm_bindgen(getter)]
+    pub fn is_ok(&self) -> bool {
+        self.inner.is_ok()
+    }
+
+    /// The Cedar decision if `is_ok()`; throws otherwise.
+    pub fn unwrap(&self) -> Result<AuthorizeResult, Error> {
+        self.inner
+            .as_ref()
+            .cloned()
+            .map_err(|_| Error::new("BatchItemUnsignedResult is Err"))
+    }
+
+    /// The per-item error if `!is_ok()`; `undefined` otherwise.
+    #[wasm_bindgen(getter)]
+    pub fn error(&self) -> Option<BatchItemError> {
+        self.inner.as_ref().err().cloned()
+    }
+}
+
+impl From<Result<cedarling::AuthorizeResult, CedarBatchItemError>> for BatchItemUnsignedResult {
+    fn from(r: Result<cedarling::AuthorizeResult, CedarBatchItemError>) -> Self {
+        Self {
+            inner: r.map(Into::into).map_err(Into::into),
+        }
+    }
+}
+
+/// Multi-issuer analog of [`BatchItemUnsignedResult`].
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct BatchItemMultiIssuerResult {
+    inner: Result<MultiIssuerAuthorizeResult, BatchItemError>,
+}
+
+#[wasm_bindgen]
+impl BatchItemMultiIssuerResult {
+    /// `true` when Cedar evaluated this item.
+    #[wasm_bindgen(getter)]
+    pub fn is_ok(&self) -> bool {
+        self.inner.is_ok()
+    }
+
+    /// The multi-issuer decision if `is_ok()`; throws otherwise.
+    pub fn unwrap(&self) -> Result<MultiIssuerAuthorizeResult, Error> {
+        self.inner
+            .as_ref()
+            .cloned()
+            .map_err(|_| Error::new("BatchItemMultiIssuerResult is Err"))
+    }
+
+    /// The per-item error if `!is_ok()`; `undefined` otherwise.
+    #[wasm_bindgen(getter)]
+    pub fn error(&self) -> Option<BatchItemError> {
+        self.inner.as_ref().err().cloned()
+    }
+}
+
+impl From<Result<cedarling::MultiIssuerAuthorizeResult, CedarBatchItemError>>
+    for BatchItemMultiIssuerResult
+{
+    fn from(r: Result<cedarling::MultiIssuerAuthorizeResult, CedarBatchItemError>) -> Self {
+        Self {
+            inner: r.map(Into::into).map_err(Into::into),
+        }
+    }
+}
+
+/// WASM wrapper for `cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
+///
+/// Carries a shared `batch_id` (UUIDv7) alongside per-item results. Each result
+/// is a [`BatchItemUnsignedResult`] — Cedar decision on `is_ok()`, per-item
+/// build failure on `error`. `results[i]` corresponds to `items[i]`.
+#[wasm_bindgen]
+#[derive(Debug)]
+pub struct BatchAuthorizeUnsignedResponse {
+    inner_batch_id: String,
+    inner_results: Vec<BatchItemUnsignedResult>,
+}
+
+#[wasm_bindgen]
+impl BatchAuthorizeUnsignedResponse {
+    /// Shared correlation id stamped on every per-item decision log entry.
+    #[wasm_bindgen(getter)]
+    pub fn batch_id(&self) -> String {
+        self.inner_batch_id.clone()
+    }
+
+    /// Per-item results in input order — each slot is a
+    /// [`BatchItemUnsignedResult`].
+    #[wasm_bindgen(getter)]
+    pub fn results(&self) -> Vec<BatchItemUnsignedResult> {
+        self.inner_results.clone()
+    }
+}
+
+impl From<CedarBatchAuthorizeResponse<Result<cedarling::AuthorizeResult, CedarBatchItemError>>>
+    for BatchAuthorizeUnsignedResponse
+{
+    fn from(
+        value: CedarBatchAuthorizeResponse<Result<cedarling::AuthorizeResult, CedarBatchItemError>>,
+    ) -> Self {
+        Self {
+            inner_batch_id: value.batch_id.to_string(),
+            inner_results: value.results.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+/// WASM wrapper for
+/// `cedarling::BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>`.
+/// Same shape as [`BatchAuthorizeUnsignedResponse`] with multi-issuer results.
+#[wasm_bindgen]
+#[derive(Debug)]
+pub struct BatchAuthorizeMultiIssuerResponse {
+    inner_batch_id: String,
+    inner_results: Vec<BatchItemMultiIssuerResult>,
+}
+
+#[wasm_bindgen]
+impl BatchAuthorizeMultiIssuerResponse {
+    /// Shared correlation id stamped on every per-item decision log entry.
+    #[wasm_bindgen(getter)]
+    pub fn batch_id(&self) -> String {
+        self.inner_batch_id.clone()
+    }
+
+    /// Per-item results in input order — each slot is a
+    /// [`BatchItemMultiIssuerResult`].
+    #[wasm_bindgen(getter)]
+    pub fn results(&self) -> Vec<BatchItemMultiIssuerResult> {
+        self.inner_results.clone()
+    }
+}
+
+impl
+    From<
+        CedarBatchAuthorizeResponse<
+            Result<cedarling::MultiIssuerAuthorizeResult, CedarBatchItemError>,
+        >,
+    > for BatchAuthorizeMultiIssuerResponse
+{
+    fn from(
+        value: CedarBatchAuthorizeResponse<
+            Result<cedarling::MultiIssuerAuthorizeResult, CedarBatchItemError>,
+        >,
+    ) -> Self {
+        Self {
+            inner_batch_id: value.batch_id.to_string(),
+            inner_results: value.results.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
 /// A WASM wrapper for the Rust `cedar_policy::Response` struct.
 /// Represents the result of an authorization request.
 #[wasm_bindgen]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AuthorizeResultResponse {
     // It can be premature optimization, but RC allows avoiding clone actual structure
     inner: Rc<cedar_policy::Response>,
@@ -742,7 +1315,7 @@ pub struct DataEntry {
     /// Timestamp when this entry was created (RFC 3339 format)
     #[wasm_bindgen(getter_with_clone)]
     pub created_at: String,
-    /// Timestamp when this entry expires (RFC 3339 format), or null if no TTL
+    /// Timestamp when this entry expires (RFC 3339 format). The getter returns undefined if no TTL.
     #[wasm_bindgen(getter_with_clone)]
     pub expires_at: Option<String>,
     /// Number of times this entry has been accessed
@@ -758,6 +1331,7 @@ impl DataEntry {
     }
 
     /// Convert `DataEntry` to json string value
+    #[wasm_bindgen(js_name = jsonString)]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
@@ -807,6 +1381,7 @@ pub struct DataStoreStats {
 #[wasm_bindgen]
 impl DataStoreStats {
     /// Convert `DataStoreStats` to json string value
+    #[wasm_bindgen(js_name = jsonString)]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
@@ -824,6 +1399,78 @@ impl From<CedarDataStoreStats> for DataStoreStats {
             capacity_usage_percent: value.capacity_usage_percent,
             memory_alert_threshold: value.memory_alert_threshold,
             memory_alert_triggered: value.memory_alert_triggered,
+        }
+    }
+}
+
+/// A WASM wrapper for the Rust `cedarling::MetricsSnapshot` struct.
+/// Represents a snapshot of the collected telemetry metrics for the current
+/// interval. Destructive read: taking a snapshot resets the collected
+/// metrics, so use a single consumer.
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct MetricsSnapshot {
+    /// Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
+    #[wasm_bindgen(getter_with_clone)]
+    pub policy_stats: Map,
+    /// Classified error counters keyed by error metric key.
+    #[wasm_bindgen(getter_with_clone)]
+    pub error_counters: Map,
+    /// Operational counters and gauges (authorization, cache, JWT, data, lock).
+    #[wasm_bindgen(getter_with_clone)]
+    pub operational_stats: Map,
+    /// Duration of the snapshot interval in fractional seconds.
+    /// Exposed as `Number` (not `BigInt`) so plain JS arithmetic works.
+    pub interval_secs: f64,
+}
+
+#[wasm_bindgen]
+impl MetricsSnapshot {
+    /// Convert `MetricsSnapshot` to json string value.
+    ///
+    /// `policy_stats`, `error_counters` and `operational_stats` are converted
+    /// from `Map` to plain objects so `JSON.stringify` emits their entries.
+    #[wasm_bindgen(js_name = jsonString)]
+    pub fn json_string(&self) -> Result<String, Error> {
+        let obj = Object::new();
+        Reflect::set(
+            &obj,
+            &"policy_stats".into(),
+            &Object::from_entries(&self.policy_stats)?.into(),
+        )?;
+        Reflect::set(
+            &obj,
+            &"error_counters".into(),
+            &Object::from_entries(&self.error_counters)?.into(),
+        )?;
+        Reflect::set(
+            &obj,
+            &"operational_stats".into(),
+            &Object::from_entries(&self.operational_stats)?.into(),
+        )?;
+        Reflect::set(
+            &obj,
+            &"interval_secs".into(),
+            &JsValue::from_f64(self.interval_secs),
+        )?;
+        Ok(String::from(js_sys::JSON::stringify(&obj)?))
+    }
+}
+
+impl From<CedarMetricsSnapshot> for MetricsSnapshot {
+    fn from(value: CedarMetricsSnapshot) -> Self {
+        fn to_map(counters: HashMap<String, i64>) -> Map {
+            let map = Map::new();
+            for (key, counter) in counters {
+                map.set(&JsValue::from(key), &JsValue::from_f64(counter as f64));
+            }
+            map
+        }
+        Self {
+            policy_stats: to_map(value.policy_stats),
+            error_counters: to_map(value.error_counters),
+            operational_stats: to_map(value.operational_stats),
+            interval_secs: value.interval.as_secs_f64(),
         }
     }
 }

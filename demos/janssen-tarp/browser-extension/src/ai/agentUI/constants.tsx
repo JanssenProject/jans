@@ -8,7 +8,6 @@ import {
 import {
   LLMProvider,
   ConnectionStatus,
-  AlertSeverity,
 } from "./types";
 
 export const LLM_PROVIDERS: LLMProvider[] = [
@@ -64,69 +63,97 @@ export const LLM_PROVIDERS: LLMProvider[] = [
   },
 
   {
-    value: "gemini",
-    label: "Google Gemini",
+    value: "claude",
+    label: "Anthropic Claude",
     icon: <Bot className="h-5 w-5 text-orange-500" />,
-    description: "Google's Gemini models",
-    apiKeyFormat: "AIza...",
-    apiKeyPlaceholder: "AIza...",
+    description: "Claude models from Anthropic",
+    apiKeyFormat: "sk-ant-...",
+    apiKeyPlaceholder: "sk-ant-...",
     apiKeyValidation: (key: string) =>
-      key.startsWith("AIza") && key.length > 30,
+      key.startsWith("sk-ant-") && key.length > 40,
     apiKeyValidationMessage:
-      "API key should start with 'AIza' and be at least 30 characters",
+      "API key should start with 'sk-ant-' and be at least 40 characters",
     models: [
       {
-        value: "gemini-1.5-pro",
-        label: "Gemini 1.5 Pro",
+        value: "claude-opus-4-8",
+        label: "Claude Opus 4.8",
         description:
-          "Most capable Gemini model",
+          "Most capable Opus model",
       },
       {
-        value: "gemini-1.5-flash",
-        label: "Gemini 1.5 Flash",
+        value: "claude-opus-4-7",
+        label: "Claude Opus 4.7",
         description:
-          "Fast and efficient model",
+          "Previous-generation Opus; highly autonomous",
       },
       {
-        value: "gemini-pro",
-        label: "Gemini Pro",
+        value: "claude-opus-4-6",
+        label: "Claude Opus 4.6",
         description:
-          "Original Gemini Pro model",
+          "Older Opus with adaptive thinking",
+      },
+      {
+        value: "claude-opus-4-5",
+        label: "Claude Opus 4.5",
+        description:
+          "Legacy Opus model",
+      },
+      {
+        value: "claude-sonnet-4-6",
+        label: "Claude Sonnet 4.6",
+        description:
+          "Best balance of speed and intelligence",
+      },
+      {
+        value: "claude-sonnet-4-5",
+        label: "Claude Sonnet 4.5",
+        description:
+          "Legacy Sonnet model",
+      },
+      {
+        value: "claude-haiku-4-5",
+        label: "Claude Haiku 4.5",
+        description:
+          "Fastest and most cost-effective",
       },
     ],
   },
 
   {
-    value: "deepseek",
-    label: "DeepSeek",
+    value: "ollama",
+    label: "Ollama",
     icon: <Compass className="h-5 w-5 text-green-500" />,
-    description: "DeepSeek AI models",
-    apiKeyFormat: "Bearer ...",
-    apiKeyPlaceholder:
-      "Enter your DeepSeek API key",
-    apiKeyValidation: (key: string) =>
-      key.length > 10,
-    apiKeyValidationMessage:
-      "API key should be at least 10 characters",
+    description: "Local models via Ollama (no API key)",
+    requiresApiKey: false,
+    hasBaseUrl: true,
+    apiKeyFormat: "Not required",
+    apiKeyPlaceholder: "Not required for Ollama",
+    apiKeyValidation: () => true,
+    apiKeyValidationMessage: "",
     models: [
       {
-        value: "deepseek-chat",
-        label: "DeepSeek Chat",
-        description: "Main chat model",
+        value: "llama3.1",
+        label: "Llama 3.1",
+        description: "Meta's Llama 3.1 model",
       },
       {
-        value: "deepseek-coder",
-        label: "DeepSeek Coder",
-        description:
-          "Specialized for coding",
+        value: "llama3.2",
+        label: "Llama 3.2",
+        description: "Meta's Llama 3.2 model",
+      },
+      {
+        value: "qwen2.5",
+        label: "Qwen 2.5",
+        description: "Alibaba's Qwen 2.5 model",
+      },
+      {
+        value: "mistral",
+        label: "Mistral",
+        description: "Mistral 7B model",
       },
     ],
   },
 ];
-
-export const PROVIDER_ICONS = Object.fromEntries(
-  LLM_PROVIDERS.map((p) => [p.value, p.icon])
-) as Record<string, React.ReactElement>;
 
 export const DEFAULT_MODEL = "gpt-4o-mini";
 export const DEFAULT_PROVIDER = "openai";
@@ -139,27 +166,12 @@ export function getProviderColor(
   switch (provider) {
     case "openai":
       return "#3b82f6"; // blue-500
-    case "gemini":
+    case "claude":
       return "#f59e0b"; // amber-500
-    case "deepseek":
+    case "ollama":
       return "#22c55e"; // green-500
     default:
       return "#9ca3af"; // gray-400
-  }
-}
-
-export function getConnectionStatusSeverity(
-  status: ConnectionStatus
-): AlertSeverity {
-  switch (status) {
-    case "connected":
-      return "success";
-    case "connecting":
-      return "warning";
-    case "disconnected":
-      return "error";
-    default:
-      return "info";
   }
 }
 

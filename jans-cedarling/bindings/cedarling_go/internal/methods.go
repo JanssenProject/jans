@@ -61,6 +61,14 @@ func CallAuthorizeMultiIssuer(instance_id uint, request_json string) Result {
 	return result
 }
 
+func CallAuthorizeUnsignedBatch(instance_id uint, request_json string) Result {
+	return G2R.authorize_unsigned_batch(&instance_id, &request_json)
+}
+
+func CallAuthorizeMultiIssuerBatch(instance_id uint, request_json string) Result {
+	return G2R.authorize_multi_issuer_batch(&instance_id, &request_json)
+}
+
 func CallPopLogs(instance_id uint) []string {
 	logs := G2R.pop_logs(&instance_id)
 	return logs
@@ -129,6 +137,13 @@ func CallGetStatsCtx(instance_id uint) Result {
 	result := G2R.get_stats_ctx(&instance_id)
 	return result
 }
+
+func CallDrainMetrics(instance_id uint) Result {
+	result := G2R.drain_metrics(&instance_id)
+	return result
+}
+
+func CallPolicyStoreId(instance_id uint) string { return G2R.policy_store_id(&instance_id) }
 
 func CallIsTrustedIssuerLoadedByName(instance_id uint, issuerID string) bool {
 	return G2R.is_trusted_issuer_loaded_by_name(&instance_id, &issuerID)

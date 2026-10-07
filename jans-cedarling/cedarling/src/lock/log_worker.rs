@@ -8,22 +8,21 @@
 
 use super::log_entry::LockLogEntry;
 use crate::LogWriter;
-use crate::lock::transport::{AuditKind, AuditTransport, SerializedAuditEntry};
+use crate::lock::transport::{AuditItem, AuditKind, AuditTransport};
 use crate::log::LoggerWeak;
 
 use super::WORKER_HTTP_RETRY_DUR;
-use futures::StreamExt;
-use futures::channel::mpsc;
-use http_utils::Backoff;
+use crate::http_utils::Backoff;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::time::sleep;
+use tokio::sync::mpsc;
+use tokio::time::{MissedTickBehavior, interval};
 use tokio_util::sync::CancellationToken;
 
 /// Responsible for sending logs to the lock server
 pub(super) struct AuditWorker<T: AuditTransport> {
-    buffer: VecDeque<SerializedAuditEntry>,
+    buffer: VecDeque<AuditItem>,
     audit_interval: Duration,
     transport: Arc<T>,
     kind: AuditKind,
@@ -54,23 +53,39 @@ where
 
     pub(super) async fn run(
         &mut self,
-        mut rx: mpsc::Receiver<SerializedAuditEntry>,
+        mut rx: mpsc::Receiver<AuditItem>,
         cancel_tkn: CancellationToken,
     ) {
+        let mut flush_tick = interval(self.audit_interval);
+        flush_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+        flush_tick.tick().await;
+
         loop {
             tokio::select! {
-                entry = rx.next() => {
-                    let Some(entry) = entry else { break; };
+                entry = rx.recv() => {
+                    let Some(entry) = entry else {
+                        // This branch can win the select race against
+                        // `cancelled()` during Drop-based teardown, so flush
+                        // here too instead of silently discarding the buffer.
+                        self.flush(None).await;
+                        break;
+                    };
                     self.buffer.push_back(entry);
+                    if matches!(self.kind, AuditKind::Telemetry(_)) {
+                        self.flush(Some(&cancel_tkn)).await;
+                    }
                 },
 
                 // Send logs to the server
-                () = sleep(self.audit_interval) => {
-                    self.flush(&cancel_tkn).await;
+                _ = flush_tick.tick() => {
+                    self.flush(Some(&cancel_tkn)).await;
                 },
 
                 () = cancel_tkn.cancelled() => {
-                    self.flush(&cancel_tkn).await;
+                    while let Ok(entry) = rx.try_recv() {
+                        self.buffer.push_back(entry);
+                    }
+                    self.flush(None).await;
                     self.logger
                         .as_ref()
                         .and_then(std::sync::Weak::upgrade)
@@ -84,14 +99,14 @@ where
         }
     }
 
-    async fn flush(&mut self, cancel_tkn: &CancellationToken) {
+    async fn flush(&mut self, cancel_tkn: Option<&CancellationToken>) {
         // save the length at the time the function is called
         let batch_size = self.buffer.len();
         if batch_size == 0 {
             return;
         }
 
-        let entries: Vec<SerializedAuditEntry> = self.buffer.drain(0..batch_size).collect();
+        let entries: Vec<AuditItem> = self.buffer.drain(0..batch_size).collect();
 
         let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
         let mut backoff = Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, Some(self.max_retries));
@@ -111,14 +126,35 @@ where
                         self.kind,
                     )));
 
-                    tokio::select! {
-                        _ = backoff.snooze() => {},
-                        () = cancel_tkn.cancelled() => {
-                            logger.log_any(LockLogEntry::warn(format!(
-                                "cancellation requested during retry; dropping {batch_size} {} entries",
-                                self.kind,
-                            )));
-                            break;
+                    match cancel_tkn {
+                        Some(tkn) => {
+                            tokio::select! {
+                                result = backoff.snooze() => {
+                                    if result.is_err() {
+                                        logger.log_any(LockLogEntry::warn(format!(
+                                            "retries exhausted; dropping {batch_size} {} entries",
+                                            self.kind,
+                                        )));
+                                        break;
+                                    }
+                                },
+                                () = tkn.cancelled() => {
+                                    logger.log_any(LockLogEntry::warn(format!(
+                                        "cancellation requested during retry; dropping {batch_size} {} entries",
+                                        self.kind,
+                                    )));
+                                    break;
+                                },
+                            }
+                        },
+                        None => {
+                            if backoff.snooze().await.is_err() {
+                                logger.log_any(LockLogEntry::warn(format!(
+                                    "retries exhausted; dropping {batch_size} {} entries",
+                                    self.kind,
+                                )));
+                                break;
+                            }
                         },
                     }
                 },

@@ -12,9 +12,13 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricType;
 import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
 import io.jans.model.ApplicationType;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -22,13 +26,23 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.net.NetworkService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.concurrent.CompletableFuture;
 
@@ -84,6 +98,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     private static final String UNKNOWN_ERROR = "UNKNOWN";
     private static final String ATTEMPT_STATUS = "ATTEMPT";
     private static final String SUCCESS_STATUS = "SUCCESS";
+    private static final String SESSION_ID_COOKIE = "session_id";
     
     // Cache for username-to-userId mapping to reduce database load
     // TTL: 1 hour (3600000 ms) - balances performance with data freshness
@@ -159,8 +174,8 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     @Override
-    public ApplicationType getApplicationType() {
-        return ApplicationType.FIDO2;
+    public String getString() {
+        return ApplicationType.FIDO2.getValue();
     }
 
     @Override
@@ -169,7 +184,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
 	@Override
-	public String getNodeIndetifier() {
+	public String getNodeIdentifier() {
 		return networkService.getMacAdress();
 	}
 
@@ -181,9 +196,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param username Username attempting registration
      * @param request HTTP request for device info extraction
      * @param startTime Start time of the operation
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyRegistrationAttempt(String username, HttpServletRequest request, long startTime) {
-        recordRegistrationMetrics(username, request, startTime, null, ATTEMPT_STATUS, null, Fido2MetricType.FIDO2_REGISTRATION_ATTEMPT);
+    public void recordPasskeyRegistrationAttempt(String username, HttpServletRequest request, long startTime,
+                                                 NativeClientTelemetry telemetry) {
+        recordRegistrationMetrics(username, request, startTime, null, ATTEMPT_STATUS, null,
+                Fido2MetricType.FIDO2_REGISTRATION_ATTEMPT, telemetry);
     }
 
     /**
@@ -193,9 +211,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param request HTTP request for device info extraction
      * @param startTime Start time of the operation
      * @param authenticatorType Type of authenticator used
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyRegistrationSuccess(String username, HttpServletRequest request, long startTime, String authenticatorType) {
-        recordRegistrationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null, Fido2MetricType.FIDO2_REGISTRATION_SUCCESS);
+    public void recordPasskeyRegistrationSuccess(String username, HttpServletRequest request, long startTime,
+                                                 String authenticatorType, NativeClientTelemetry telemetry) {
+        recordRegistrationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null,
+                Fido2MetricType.FIDO2_REGISTRATION_SUCCESS, telemetry);
     }
 
     /**
@@ -206,27 +227,64 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param startTime Start time of the operation
      * @param errorReason Reason for failure
      * @param authenticatorType Type of authenticator used (if known)
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime, String errorReason, String authenticatorType) {
-        recordRegistrationMetrics(username, request, startTime, authenticatorType, "FAILURE", errorReason, Fido2MetricType.FIDO2_REGISTRATION_FAILURE);
+    public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime,
+                                                 String errorReason, String authenticatorType, NativeClientTelemetry telemetry) {
+        recordPasskeyRegistrationFailure(username, request, startTime, errorReason, authenticatorType, null, telemetry);
+    }
+
+    /**
+     * Record failed passkey registration, attributing it to an authenticator model.
+     *
+     * @param username Username who failed registration
+     * @param request HTTP request for device info extraction
+     * @param startTime Start time of the operation
+     * @param errorReason Reason for failure
+     * @param authenticatorType Type of authenticator used (if known)
+     * @param aaguid AAGUID the failure concerns, or null when the failure is not tied to one. Recorded
+     *        so attestation rejections can be broken down by authenticator model.
+     * @param telemetry Optional native-client telemetry (#14607), or null
+     */
+    public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime,
+                                                 String errorReason, String authenticatorType, String aaguid,
+                                                 NativeClientTelemetry telemetry) {
+        recordRegistrationEvent(request, new MetricEvent(Fido2MetricsConstants.REGISTRATION,
+                Fido2MetricType.FIDO2_REGISTRATION_FAILURE, username, Fido2MetricsConstants.FAILURE,
+                authenticatorType, errorReason, startTime, telemetry).withAaguid(aaguid));
     }
 
     /**
      * Common method to record registration metrics
      */
-    private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime, 
-                                        String authenticatorType, String status, String errorReason, Fido2MetricType metricType) {
+    private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime,
+                                        String authenticatorType, String status, String errorReason, Fido2MetricType metricType,
+                                        NativeClientTelemetry telemetry) {
+        recordRegistrationEvent(request, new MetricEvent(Fido2MetricsConstants.REGISTRATION, metricType, username, status,
+                authenticatorType, errorReason, startTime, telemetry));
+    }
+
+    /**
+     * Records a registration event. The event is assembled by the caller rather than passed as a
+     * parameter list, which keeps the AAGUID dimension from pushing this past a readable signature.
+     */
+    private void recordRegistrationEvent(HttpServletRequest request, MetricEvent event) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
 
+        // The request is request-scoped and unreachable from the async thread below,
+        // so all of its data has to be read here, while we are still on the request thread.
+        RequestSnapshot requestSnapshot = snapshotRequest(request);
+
         CompletableFuture.runAsync(() -> {
             try {
-                recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_REGISTRATION_DURATION);
-                recordDetailedMetrics(username, status, request, startTime, authenticatorType, errorReason, 
-                                    this::createRegistrationMetricsData);
+                recordBasicMetrics(event.metricType, event.startTime, event.status,
+                        Fido2MetricType.FIDO2_REGISTRATION_DURATION);
+                recordDetailedMetrics(event, requestSnapshot);
             } catch (Exception e) {
-                log.warn("Failed to record passkey registration {} metrics: {}", status.toLowerCase(), e.getMessage());
+                log.warn("Failed to record passkey registration {} metrics: {}", event.status.toLowerCase(),
+                        e.getMessage());
             }
         });
     }
@@ -239,9 +297,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param username Username attempting authentication
      * @param request HTTP request for device info extraction
      * @param startTime Start time of the operation
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyAuthenticationAttempt(String username, HttpServletRequest request, long startTime) {
-        recordAuthenticationMetrics(username, request, startTime, null, ATTEMPT_STATUS, null, Fido2MetricType.FIDO2_AUTHENTICATION_ATTEMPT);
+    public void recordPasskeyAuthenticationAttempt(String username, HttpServletRequest request, long startTime,
+                                                    NativeClientTelemetry telemetry) {
+        recordAuthenticationMetrics(username, request, startTime, null, ATTEMPT_STATUS, null,
+                Fido2MetricType.FIDO2_AUTHENTICATION_ATTEMPT, telemetry);
     }
 
     /**
@@ -251,9 +312,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param request HTTP request for device info extraction
      * @param startTime Start time of the operation
      * @param authenticatorType Type of authenticator used
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyAuthenticationSuccess(String username, HttpServletRequest request, long startTime, String authenticatorType) {
-        recordAuthenticationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null, Fido2MetricType.FIDO2_AUTHENTICATION_SUCCESS);
+    public void recordPasskeyAuthenticationSuccess(String username, HttpServletRequest request, long startTime,
+                                                    String authenticatorType, NativeClientTelemetry telemetry) {
+        recordAuthenticationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null,
+                Fido2MetricType.FIDO2_AUTHENTICATION_SUCCESS, telemetry);
     }
 
     /**
@@ -264,25 +328,50 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param startTime Start time of the operation
      * @param errorReason Reason for failure
      * @param authenticatorType Type of authenticator used (if known)
+     * @param telemetry Optional native-client telemetry (#14607), or null
      */
-    public void recordPasskeyAuthenticationFailure(String username, HttpServletRequest request, long startTime, String errorReason, String authenticatorType) {
-        recordAuthenticationMetrics(username, request, startTime, authenticatorType, "FAILURE", errorReason, Fido2MetricType.FIDO2_AUTHENTICATION_FAILURE);
+    public void recordPasskeyAuthenticationFailure(String username, HttpServletRequest request, long startTime,
+                                                    String errorReason, String authenticatorType, NativeClientTelemetry telemetry) {
+        recordAuthenticationMetrics(username, request, startTime, authenticatorType, "FAILURE", errorReason,
+                Fido2MetricType.FIDO2_AUTHENTICATION_FAILURE, telemetry);
+    }
+
+    /**
+     * Record a passkey authentication that was started and never completed.
+     * <p>
+     * Unlike the success and failure recorders this runs on the sweep timer rather than a request
+     * thread, so there is no request to take device details from — {@code snapshotRequest} yields an
+     * empty snapshot. The ceremony's own start time is passed in so the recorded duration is how long
+     * the ceremony stayed open, not how long the sweep took.
+     *
+     * @param username the ceremony user, or null for a conditional-UI ceremony that never had one
+     * @param ceremonyStartTime when the ceremony was issued, in epoch millis
+     */
+    public void recordPasskeyAuthenticationAbandoned(String username, long ceremonyStartTime) {
+        recordAuthenticationMetrics(username, null, ceremonyStartTime, null, Fido2MetricsConstants.ABANDONED, null,
+                Fido2MetricType.FIDO2_AUTHENTICATION_ABANDONED, null);
     }
 
     /**
      * Common method to record authentication metrics
      */
-    private void recordAuthenticationMetrics(String username, HttpServletRequest request, long startTime, 
-                                          String authenticatorType, String status, String errorReason, Fido2MetricType metricType) {
+    private void recordAuthenticationMetrics(String username, HttpServletRequest request, long startTime,
+                                          String authenticatorType, String status, String errorReason, Fido2MetricType metricType,
+                                          NativeClientTelemetry telemetry) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
 
+        // The request is request-scoped and unreachable from the async thread below,
+        // so all of its data has to be read here, while we are still on the request thread.
+        RequestSnapshot requestSnapshot = snapshotRequest(request);
+        MetricEvent event = new MetricEvent("AUTHENTICATION", metricType, username, status, authenticatorType,
+                                            errorReason, startTime, telemetry);
+
         CompletableFuture.runAsync(() -> {
             try {
                 recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_AUTHENTICATION_DURATION);
-                recordDetailedMetrics(username, status, request, startTime, authenticatorType, errorReason, 
-                                    this::createAuthenticationMetricsData);
+                recordDetailedMetrics(event, requestSnapshot);
             } catch (Exception e) {
                 log.warn("Failed to record passkey authentication {} metrics: {}", status.toLowerCase(), e.getMessage());
             }
@@ -302,41 +391,188 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
     
     /**
-     * Record detailed metrics with device info collection
+     * Record the detailed entry for a passkey event.
+     *
+     * Persistence is governed by fido2MetricsEnabled alone. fido2DeviceInfoCollection
+     * only decides whether the parsed device info rides along - it is not a second
+     * master switch, so every other field is recorded either way.
      */
-    private void recordDetailedMetrics(String username, String status, HttpServletRequest request, long startTime, 
-                                     String authenticatorType, String errorReason, 
-                                     MetricsDataCreator dataCreator) {
-        if (appConfiguration.isFido2DeviceInfoCollection()) {
-            Fido2MetricsData metricsData = dataCreator.create(username, status, request, authenticatorType);
-            
-            if (!ATTEMPT_STATUS.equals(status)) {
-                long duration = System.currentTimeMillis() - startTime;
-                metricsData.setDurationMs(duration);
+    private void recordDetailedMetrics(MetricEvent event, RequestSnapshot requestSnapshot) {
+        Fido2MetricsData metricsData = createMetricsData(event, requestSnapshot);
+        boolean completed = !ATTEMPT_STATUS.equals(event.status);
+
+        if (completed) {
+            metricsData.setDurationMs(System.currentTimeMillis() - event.startTime);
+        }
+
+        if (event.errorReason != null) {
+            metricsData.setErrorReason(event.errorReason);
+            // A trust or native-failure diagnostic code is not an inferred category — it is the value
+            // the verify() path deliberately recorded, and the attestation-rejections endpoint selects
+            // on it. Gating it on fido2ErrorCategorization would leave that endpoint silently empty
+            // whenever this unrelated toggle is off, so only the keyword-based bucketing stays behind
+            // the flag.
+            if (AttestationTrustDiagnostic.isDiagnosticCode(event.errorReason)
+                    || NativeFailureDiagnostic.isDiagnosticCode(event.errorReason)
+                    || appConfiguration.isFido2ErrorCategorization()) {
+                metricsData.setErrorCategory(categorizeError(event.errorReason));
             }
-            
-            if (errorReason != null) {
-                metricsData.setErrorReason(errorReason);
-                if (appConfiguration.isFido2ErrorCategorization()) {
-                    metricsData.setErrorCategory(categorizeError(errorReason));
-                }
-            }
-            
-            storeFido2MetricsData(metricsData);
-            
-            // Update user-level metrics (skip for ATTEMPT status)
-            if (!ATTEMPT_STATUS.equals(status)) {
-                updateUserMetrics(metricsData);
-            }
+        }
+
+        if (event.aaguid != null) {
+            // Carried in additionalData rather than a new column: the attribute already exists on the
+            // entry and is persisted as JSON, so breaking rejections down by authenticator model needs
+            // no schema change.
+            Map<String, Object> additionalData = new HashMap<>();
+            additionalData.put(Fido2MetricsConstants.AAGUID, event.aaguid);
+            metricsData.setAdditionalData(additionalData);
+        }
+
+        storeFido2MetricsData(metricsData);
+
+        // Update user-level metrics (skip for ATTEMPT status)
+        if (completed) {
+            updateUserMetrics(metricsData);
         }
     }
     
     /**
-     * Functional interface for creating metrics data
+     * Everything known about a single passkey event before the request is consumed.
      */
-    @FunctionalInterface
-    private interface MetricsDataCreator {
-        Fido2MetricsData create(String username, String status, HttpServletRequest request, String authenticatorType);
+    private static final class MetricEvent {
+
+        private final String operationType;
+        private final Fido2MetricType metricType;
+        private final String username;
+        private final String status;
+        private final String authenticatorType;
+        private final String errorReason;
+        private final long startTime;
+        private final String aaguid;
+        private final NativeClientTelemetry telemetry;
+
+        private MetricEvent(String operationType, Fido2MetricType metricType, String username, String status,
+                            String authenticatorType, String errorReason, long startTime, NativeClientTelemetry telemetry) {
+            this.operationType = operationType;
+            this.metricType = metricType;
+            this.username = username;
+            this.status = status;
+            this.authenticatorType = authenticatorType;
+            this.errorReason = errorReason;
+            this.startTime = startTime;
+            this.aaguid = null;
+            this.telemetry = telemetry;
+        }
+
+        private MetricEvent(MetricEvent source, String aaguid) {
+            this.operationType = source.operationType;
+            this.metricType = source.metricType;
+            this.username = source.username;
+            this.status = source.status;
+            this.authenticatorType = source.authenticatorType;
+            this.errorReason = source.errorReason;
+            this.startTime = source.startTime;
+            this.aaguid = aaguid;
+            this.telemetry = source.telemetry;
+        }
+
+        /** The same event attributed to an authenticator model. */
+        private MetricEvent withAaguid(String aaguid) {
+            return aaguid == null ? this : new MetricEvent(this, aaguid);
+        }
+    }
+
+    /**
+     * Immutable copy of the per-request values used by the FIDO2 metrics.
+     *
+     * Metrics are persisted on a background thread, where the request-scoped
+     * {@code HttpServletRequest} is no longer reachable. Reading it there yields
+     * either a null field or a scope-not-active failure, so the values are read
+     * once on the request thread and carried across in this holder instead.
+     */
+    private static final class RequestSnapshot {
+
+        private static final RequestSnapshot EMPTY = new RequestSnapshot(null, null, null, null);
+
+        private final String ipAddress;
+        private final String userAgent;
+        private final String sessionId;
+        private final Fido2MetricsData.DeviceInfo deviceInfo;
+
+        private RequestSnapshot(String ipAddress, String userAgent, String sessionId,
+                                Fido2MetricsData.DeviceInfo deviceInfo) {
+            this.ipAddress = ipAddress;
+            this.userAgent = userAgent;
+            this.sessionId = sessionId;
+            this.deviceInfo = deviceInfo;
+        }
+    }
+
+    /**
+     * Read every request-derived metric value while still on the request thread.
+     *
+     * Must not be called from an asynchronous task - see {@link RequestSnapshot}.
+     *
+     * @param request HTTP request being served, may be null or an inactive proxy
+     * @return snapshot of the request, never null
+     */
+    private RequestSnapshot snapshotRequest(HttpServletRequest request) {
+        if (request == null) {
+            return RequestSnapshot.EMPTY;
+        }
+
+        String ipAddress = null;
+        String userAgent = null;
+        String sessionId = null;
+        Fido2MetricsData.DeviceInfo deviceInfo = null;
+
+        try {
+            ipAddress = extractIpAddress(request);
+            userAgent = request.getHeader("User-Agent");
+            sessionId = extractSessionId(request);
+        } catch (Exception e) {
+            // A request-scoped proxy outside of an active request lands here
+            log.debug("Failed to extract request details: {}", e.getMessage());
+            return RequestSnapshot.EMPTY;
+        }
+
+        if (appConfiguration.isFido2DeviceInfoCollection()) {
+            try {
+                deviceInfo = deviceInfoExtractor.extractDeviceInfo(request);
+            } catch (Exception e) {
+                log.debug("Failed to extract device info: {}", e.getMessage());
+                deviceInfo = deviceInfoExtractor.createMinimalDeviceInfo();
+            }
+        }
+
+        return new RequestSnapshot(ipAddress, userAgent, sessionId, deviceInfo);
+    }
+
+    /**
+     * Resolve the session this FIDO2 operation belongs to.
+     *
+     * FIDO2 endpoints are stateless, so the authoritative value is the Jans
+     * {@code session_id} cookie set by the auth server; the servlet session is
+     * only a fallback for deployments that do create one.
+     *
+     * @param request HTTP servlet request
+     * @return session identifier, or null when the request carries none
+     */
+    private String extractSessionId(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (SESSION_ID_COOKIE.equals(cookie.getName())) {
+                    String value = cookie.getValue();
+                    if (value != null && !value.trim().isEmpty()) {
+                        return value;
+                    }
+                }
+            }
+        }
+
+        HttpSession session = request.getSession(false);
+        return session == null ? null : session.getId();
     }
 
     // ========== FIDO2 PASSKEY FALLBACK METRICS ==========
@@ -356,21 +592,22 @@ public class MetricService extends io.jans.service.metric.MetricService {
         CompletableFuture.runAsync(() -> {
             try {
                 incrementFido2Counter(Fido2MetricType.FIDO2_FALLBACK_EVENT);
-                
-                if (appConfiguration.isFido2DeviceInfoCollection()) {
-                    Fido2MetricsData metricsData = new Fido2MetricsData();
-                    metricsData.setOperationType("FALLBACK");
-                    metricsData.setOperationStatus("EVENT");
-                    metricsData.setUsername(username);
-                    metricsData.setFallbackMethod(fallbackMethod);
-                    metricsData.setFallbackReason(reason);
-                    // Use UTC timezone to align with FIDO2 services
-                    LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
-                    metricsData.setStartTime(utcNow);
-                    metricsData.setEndTime(utcNow);
-                    
-                    storeFido2MetricsData(metricsData);
-                }
+
+                // A fallback event carries no device info, so it is not gated on
+                // fido2DeviceInfoCollection - fido2MetricsEnabled above is the switch.
+                Fido2MetricsData metricsData = new Fido2MetricsData();
+                metricsData.setMetricType(Fido2MetricType.FIDO2_FALLBACK_EVENT.getMetricName());
+                metricsData.setOperationType("FALLBACK");
+                metricsData.setOperationStatus("EVENT");
+                metricsData.setUsername(username);
+                metricsData.setFallbackMethod(fallbackMethod);
+                metricsData.setFallbackReason(reason);
+                // Use UTC timezone to align with FIDO2 services
+                LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
+                metricsData.setStartTime(utcNow);
+                metricsData.setEndTime(utcNow);
+
+                storeFido2MetricsData(metricsData);
             } catch (Exception e) {
                 log.warn("Failed to record passkey fallback metrics: {}", e.getMessage());
             }
@@ -380,75 +617,58 @@ public class MetricService extends io.jans.service.metric.MetricService {
     // ========== PRIVATE HELPER METHODS ==========
 
     /**
-     * Check if FIDO2 metrics collection is enabled
+     * Check if FIDO2 metrics collection is enabled.
+     *
+     * Deliberately not gated on isMetricReporterEnabled(): metricReporter* belongs to the
+     * legacy jans-core reporter and is a separate feature from passkey telemetry. Writes
+     * go through Fido2MetricsService, which has always gated on fido2MetricsEnabled alone,
+     * so including the reporter flag here left the two halves disagreeing - aggregations
+     * ran while the raw entries they summarise were silently dropped.
      */
     private boolean isFido2MetricsEnabled() {
-        return appConfiguration.isFido2MetricsEnabled() && isMetricReporterEnabled();
+        return appConfiguration.isFido2MetricsEnabled();
     }
 
     /**
-     * Create registration metrics data object
+     * Create the metrics data object for a passkey event
      */
-    private Fido2MetricsData createRegistrationMetricsData(String username, String status, HttpServletRequest request, String authenticatorType) {
-        return createMetricsData("REGISTRATION", username, status, request, authenticatorType);
-    }
-
-    /**
-     * Create authentication metrics data object
-     */
-    private Fido2MetricsData createAuthenticationMetricsData(String username, String status, HttpServletRequest request, String authenticatorType) {
-        return createMetricsData("AUTHENTICATION", username, status, request, authenticatorType);
-    }
-
-    /**
-     * Common method to create metrics data objects
-     */
-    private Fido2MetricsData createMetricsData(String operationType, String username, String status, HttpServletRequest request, String authenticatorType) {
+    private Fido2MetricsData createMetricsData(MetricEvent event, RequestSnapshot requestSnapshot) {
         Fido2MetricsData metricsData = new Fido2MetricsData();
-        metricsData.setOperationType(operationType);
-        metricsData.setOperationStatus(status);
-        metricsData.setUsername(username);
-        
+        metricsData.setMetricType(event.metricType.getMetricName());
+        metricsData.setOperationType(event.operationType);
+        metricsData.setOperationStatus(event.status);
+        metricsData.setUsername(event.username);
+
         // Look up the real userId (inum) from username
         // This is the immutable unique identifier that should be used for analytics
-        String userId = getUserIdFromUsername(username);
+        String userId = getUserIdFromUsername(event.username);
         metricsData.setUserId(userId);
-        
+
         // Use UTC timezone to align with FIDO2 services
         LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
         metricsData.setStartTime(utcNow);
         metricsData.setEndTime(utcNow);
-        
-        if (authenticatorType != null) {
-            metricsData.setAuthenticatorType(authenticatorType);
+
+        if (event.authenticatorType != null) {
+            metricsData.setAuthenticatorType(event.authenticatorType);
             incrementFido2Counter(Fido2MetricType.FIDO2_DEVICE_TYPE_USAGE);
         }
-        
-        // Extract HTTP request details
-        if (request != null) {
-            try {
-                // Extract IP address - check proxy headers first, then fall back to remote address
-                String ipAddress = extractIpAddress(request);
-                metricsData.setIpAddress(ipAddress);
-                
-                // Extract User-Agent header
-                String userAgent = request.getHeader("User-Agent");
-                metricsData.setUserAgent(userAgent);
-            } catch (Exception e) {
-                log.debug("Failed to extract request details: {}", e.getMessage());
-            }
-            
-            // Extract device info if enabled
-            if (appConfiguration.isFido2DeviceInfoCollection()) {
-                try {
-                    metricsData.setDeviceInfo(deviceInfoExtractor.extractDeviceInfo(request));
-                } catch (Exception e) {
-                    log.debug("Failed to extract device info: {}", e.getMessage());
-                    metricsData.setDeviceInfo(deviceInfoExtractor.createMinimalDeviceInfo());
-                }
-            }
+
+        // HTTP request details, captured on the request thread by snapshotRequest()
+        metricsData.setIpAddress(requestSnapshot.ipAddress);
+        metricsData.setUserAgent(requestSnapshot.userAgent);
+        metricsData.setSessionId(requestSnapshot.sessionId);
+        metricsData.setDeviceInfo(requestSnapshot.deviceInfo);
+
+        // Optional native-client telemetry (#14607). client_correlation_id is promoted to its own
+        // top-level field, sibling to sessionId, rather than left buried inside the telemetry blob —
+        // see Fido2MetricsEntry.clientCorrelationId for why: it needs to be independently queryable
+        // to actually correlate a start call with its matching finish call.
+        if (event.telemetry != null) {
+            metricsData.setNativeClientTelemetry(event.telemetry);
+            metricsData.setClientCorrelationId(event.telemetry.getClientCorrelationId());
         }
-        
+
         // Set node identifier (for cluster environments) - only if available
         try {
             String nodeId = networkService.getMacAdress();
@@ -465,13 +685,25 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
-     * Categorize error reasons for analytics
+     * Categorize error reasons for analytics.
+     * <p>
+     * Public so the assertion entry can be labelled with the same category that is recorded in the
+     * metrics store. Deriving both from one place is what keeps the two sources from disagreeing.
      */
-    private String categorizeError(String errorReason) {
+    public String categorizeError(String errorReason) {
         if (errorReason == null) {
             return UNKNOWN_ERROR;
         }
-        
+
+        // Checked before the keyword matching below, which would otherwise mis-bucket codes that happen
+        // to contain a keyword — JFS_MDS_METADATA_EXPIRED reads as "expired" and would land in TIMEOUT.
+        if (AttestationTrustDiagnostic.isDiagnosticCode(errorReason)) {
+            return AttestationTrustDiagnostic.CATEGORY;
+        }
+        if (NativeFailureDiagnostic.isDiagnosticCode(errorReason)) {
+            return NativeFailureDiagnostic.CATEGORY;
+        }
+
         String lowerError = errorReason.toLowerCase();
         
         if (lowerError.contains("timeout") || lowerError.contains("expired")) {
@@ -525,72 +757,311 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
-     * Extract IP address from HTTP request, checking proxy headers first
-     * Handles X-Forwarded-For, Proxy-Client-IP, and other common proxy headers
-     * 
-     * SECURITY NOTE: This method trusts proxy headers without validation. In production,
-     * ensure the application is behind a trusted reverse proxy (e.g., nginx, Apache, load balancer)
-     * that strips or validates these headers. If the application is directly exposed to the internet,
-     * clients can spoof these headers to mask their real IP address.
-     * 
-     * For enhanced security, consider:
-     * 1. Only trusting proxy headers when behind a known reverse proxy
-     * 2. Validating the source IP is from a trusted proxy before trusting forwarded headers
-     * 3. Making proxy header trust configurable via application configuration
-     * 
-     * @param request HTTP servlet request
-     * @return Client IP address (may be spoofed if not behind trusted proxy)
+     * The proxy headers other than X-Forwarded-For, consulted only in legacy mode. Trusted mode ignores
+     * them: a proxy overwrites X-Forwarded-For but passes these through as the client sent them.
      */
-    private String extractIpAddress(HttpServletRequest request) {
+    private static final String[] LEGACY_PROXY_HEADERS = { "Proxy-Client-IP", "WL-Proxy-Client-IP",
+            "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP", "HTTP_CLIENT_IP",
+            "HTTP_FORWARDED_FOR", "HTTP_FORWARDED" };
+
+    private static final String X_FORWARDED_FOR = "X-Forwarded-For";
+
+    /** Bits the ::ffff: mapping occupies before the embedded IPv4 address. */
+    private static final int IPV4_MAPPED_PREFIX_BITS = 96;
+
+    private static final int IPV4_ADDRESS_BITS = 32;
+
+    private static final int IPV6_ADDRESS_BITS = 128;
+
+    /**
+     * Extracts the client IP to record against a metrics entry.
+     * <p>
+     * Proxy headers are supplied by whoever sent the request, so believing them unconditionally lets any
+     * caller that can reach an endpoint choose the address recorded against its own ceremony. What may be
+     * believed is therefore governed by {@code trustedProxyEnabled}:
+     * <ul>
+     * <li><b>unset</b> - legacy behaviour, headers are trusted unconditionally. This is the default so
+     * that upgrading changes nothing, and it leaves the exposure in place.
+     * <li><b>false</b> - headers are never read; the socket address is used.
+     * <li><b>true</b> - headers are read only when the socket address falls inside
+     * {@code trustedProxyIpRanges}. An empty range list trusts nothing.
+     * </ul>
+     * When trusted, {@code X-Forwarded-For} is walked right to left, skipping hops that are themselves
+     * trusted proxies, and the first untrusted address wins. The leftmost entry is attacker-controlled -
+     * a client can prepend anything before the real proxy appends - so taking it would defeat the check.
+     *
+     * @param request the current request, may be {@code null}
+     * @return the address to record, or {@code null} when there is no request
+     */
+    String extractIpAddress(HttpServletRequest request) {
         if (request == null) {
             return null;
         }
-        
-        // Get the direct remote address first (most trustworthy)
+
         String directRemoteAddr = request.getRemoteAddr();
-        
-        // List of proxy headers to check (in order of preference)
-        // Only check these if we're behind a trusted proxy (validation should be added in production)
-        String[] proxyHeadersToTry = {
-            "X-Forwarded-For",
-            "Proxy-Client-IP",
-            "WL-Proxy-Client-IP",
-            "HTTP_X_FORWARDED_FOR",
-            "HTTP_X_FORWARDED",
-            "HTTP_X_CLUSTER_CLIENT_IP",
-            "HTTP_CLIENT_IP",
-            "HTTP_FORWARDED_FOR",
-            "HTTP_FORWARDED"
-        };
-        
-        // Check proxy headers (trusted only if behind reverse proxy)
-        // TODO: Add configuration option to enable/disable proxy header trust
-        // TODO: Add validation to ensure request came from trusted proxy IP range
-        for (String header : proxyHeadersToTry) {
-            String ip = request.getHeader(header);
-            if (ip != null && !ip.trim().isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
-                // X-Forwarded-For can contain multiple IPs; take the first one
-                int commaIndex = ip.indexOf(',');
-                if (commaIndex > 0) {
-                    ip = ip.substring(0, commaIndex).trim();
-                }
-                // Basic validation: check if it looks like a valid IP
-                if (isValidIpAddress(ip)) {
-                    return ip;
+        Boolean trustedProxyEnabled = appConfiguration.getTrustedProxyEnabled();
+
+        // Unset is its own state, not a synonym for false: it keeps the pre-existing behaviour so that
+        // upgrading changes nothing. Testing it first keeps the three states visibly distinct.
+        if (trustedProxyEnabled == null) {
+            return extractLegacy(request, directRemoteAddr);
+        }
+
+        if (trustedProxyEnabled.booleanValue()) {
+            return extractFromTrustedProxy(request, directRemoteAddr);
+        }
+
+        return directRemoteAddr;
+    }
+
+    /**
+     * Header extraction for a deployment that has declared which proxies it trusts.
+     */
+    private String extractFromTrustedProxy(HttpServletRequest request, String directRemoteAddr) {
+        List<String> trustedRanges = appConfiguration.getTrustedProxyIpRanges();
+        if ((trustedRanges == null) || trustedRanges.isEmpty()) {
+            log.warn("trustedProxyEnabled is true but trustedProxyIpRanges is empty - ignoring proxy headers");
+
+            return directRemoteAddr;
+        }
+
+        if (!isFromTrustedProxy(directRemoteAddr, trustedRanges)) {
+            log.debug("Ignoring proxy headers: remoteAddr '{}' is not in any trusted proxy range",
+                    directRemoteAddr);
+
+            return directRemoteAddr;
+        }
+
+        String forwardedFor = request.getHeader(X_FORWARDED_FOR);
+        if (StringUtils.isNotBlank(forwardedFor)) {
+            String[] hops = forwardedFor.split(",");
+            for (int i = hops.length - 1; i >= 0; i--) {
+                String hop = hops[i].trim();
+                if (isUsableForwardedAddress(hop) && !isFromTrustedProxy(hop, trustedRanges)) {
+                    return hop;
                 }
             }
         }
-        
-        // Fallback to direct remote address (most secure)
+
+        // No usable X-Forwarded-For. The alternative proxy headers are deliberately NOT consulted here:
+        // a proxy overwrites X-Forwarded-For but passes other request headers through untouched, so one
+        // the client set would arrive intact and has passed no trusted-range check. A deployment that has
+        // declared its proxies is stating that X-Forwarded-For is the contract.
         return directRemoteAddr;
     }
-    
+
+    /**
+     * Pre-existing behaviour, kept byte-for-byte for deployments that have not configured proxy trust:
+     * walk every proxy header in order and take the leftmost value of the first one that parses.
+     * <p>
+     * Every header is split on commas, not just {@code X-Forwarded-For}. Any of them can arrive carrying a
+     * chain, and the previous implementation split them all - narrowing that would silently change which
+     * address an untouched deployment records.
+     */
+    private String extractLegacy(HttpServletRequest request, String directRemoteAddr) {
+        String leftmost = leftmostUsableAddress(request.getHeader(X_FORWARDED_FOR));
+        if (leftmost != null) {
+            return leftmost;
+        }
+
+        for (String header : LEGACY_PROXY_HEADERS) {
+            leftmost = leftmostUsableAddress(request.getHeader(header));
+            if (leftmost != null) {
+                return leftmost;
+            }
+        }
+
+        return directRemoteAddr;
+    }
+
+    /**
+     * The leftmost address of a possibly comma-separated header value, or {@code null} when there is
+     * nothing usable. Legacy mode only - the leftmost entry is the one a client controls, so trusted mode
+     * must never resolve a header this way.
+     */
+    private String leftmostUsableAddress(String headerValue) {
+        if (StringUtils.isBlank(headerValue)) {
+            return null;
+        }
+
+        String leftmost = headerValue.split(",")[0].trim();
+
+        return isUsableForwardedAddress(leftmost) ? leftmost : null;
+    }
+
+    private boolean isUsableForwardedAddress(String value) {
+        return StringUtils.isNotBlank(value) && !"unknown".equalsIgnoreCase(value) && isValidIpAddress(value);
+    }
+
+    /**
+     * Whether an address falls inside at least one of the configured trusted ranges.
+     */
+    boolean isFromTrustedProxy(String remoteAddr, List<String> trustedRanges) {
+        if (StringUtils.isBlank(remoteAddr) || (trustedRanges == null)) {
+            return false;
+        }
+
+        for (String cidr : trustedRanges) {
+            if (StringUtils.isNotBlank(cidr) && isIpInCidr(remoteAddr.trim(), cidr.trim())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * CIDR membership for IPv4 and IPv6, using only {@link InetAddress}.
+     * <p>
+     * Both operands must be IP literals. {@link InetAddress#getByName(String)} resolves a hostname through
+     * DNS, and this runs on the request path for every metrics write, so a mistyped range would otherwise
+     * become a blocking lookup.
+     *
+     * @param ip   address to test
+     * @param cidr range in CIDR notation, e.g. {@code 10.0.0.0/8}; a bare address means a full-length mask
+     * @return true when {@code ip} falls inside {@code cidr}
+     */
+    boolean isIpInCidr(String ip, String cidr) {
+        String[] parts = cidr.split("/", 2);
+        if (!isIpLiteral(ip) || !isIpLiteral(parts[0])) {
+            log.warn("Ignoring trusted proxy range '{}': both sides must be IP literals", cidr);
+
+            return false;
+        }
+
+        try {
+            byte[] cidrBytes = normalizeAddress(InetAddress.getByName(parts[0])).getAddress();
+            byte[] testBytes = normalizeAddress(InetAddress.getByName(ip)).getAddress();
+
+            // An IPv4 address can never fall inside an IPv6 range, or the reverse.
+            if (cidrBytes.length != testBytes.length) {
+                return false;
+            }
+
+            // Written as IPv6 is decided from the text, not the parsed type: InetAddress.getByName
+            // collapses an IPv4-mapped literal to an Inet4Address itself, so the parsed object no longer
+            // remembers how the administrator wrote it, while the prefix they chose does.
+            boolean writtenAsIpv6 = parts[0].indexOf(':') >= 0;
+            int maxBits = cidrBytes.length * Byte.SIZE;
+            int typedPrefix = (parts.length == 2) ? Integer.parseInt(parts[1].trim())
+                    : (writtenAsIpv6 ? IPV6_ADDRESS_BITS : IPV4_ADDRESS_BITS);
+            int prefixLength = prefixAfterNormalising(typedPrefix, writtenAsIpv6, cidrBytes.length);
+            if ((prefixLength < 0) || (prefixLength > maxBits)) {
+                // Reported as typed, since that is what the administrator wrote.
+                log.warn("Ignoring trusted proxy range '{}': prefix length {} is out of range", cidr,
+                        typedPrefix);
+
+                return false;
+            }
+
+            return matchesPrefix(cidrBytes, testBytes, prefixLength);
+        } catch (NumberFormatException | UnknownHostException e) {
+            log.warn("Ignoring trusted proxy range '{}': {}", cidr, e.getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * Whether a value is an IP literal that {@link InetAddress#getByName(String)} can parse without a DNS
+     * lookup. Deliberately stricter than {@code isValidIpAddress}, which admits {@code localhost} and
+     * rejects the IPv4-mapped form {@code ::ffff:a.b.c.d} that a dual-stack JVM reports.
+     */
+    private boolean isIpLiteral(String value) {
+        if (StringUtils.isBlank(value)) {
+            return false;
+        }
+
+        // Every IPv6 form contains a colon; allowing dots covers the IPv4-mapped shape. Restricting the
+        // rest to hex digits keeps hostnames out, so getByName can never resolve.
+        if (value.indexOf(':') >= 0) {
+            return value.matches("[0-9a-fA-F:.]+");
+        }
+
+        return isValidIpv4Address(value);
+    }
+
+    /**
+     * Re-expresses a prefix length against the normalised address.
+     * <p>
+     * An administrator writes the prefix against the range as typed, but {@link #normalizeAddress} narrows
+     * an IPv4-mapped range to its 4-byte form. A prefix written against the 16-byte form therefore has to
+     * shed the 96 bits the {@code ::ffff:} mapping occupies to keep meaning the same thing, so that
+     * {@code ::ffff:10.0.0.0/104} and {@code 10.0.0.0/8} select the same addresses. Without this the
+     * former is rejected as out of range and the range is silently ignored.
+     * <p>
+     * A prefix of 32 or less is left as written: that form already worked and is a natural thing to
+     * configure, so re-reading it would break a range in use. Between 33 and 95 a mapped prefix covers
+     * part of the mapping itself and is meaningless either way; it goes negative here and is rejected.
+     */
+    private static int prefixAfterNormalising(int typedPrefix, boolean writtenAsIpv6, int normalisedLength) {
+        boolean narrowedToIpv4 = writtenAsIpv6 && (normalisedLength == Integer.BYTES);
+        if (!narrowedToIpv4) {
+            return typedPrefix;
+        }
+
+        // A prefix that would fit an IPv4 mask is left alone. Writing ::ffff:10.0.0.0/8 is natural when
+        // the address was copied from a log on a dual-stack JVM, it already worked, and re-reading it on
+        // the IPv6 scale would silently stop honouring a range that is in use.
+        if (typedPrefix <= IPV4_ADDRESS_BITS) {
+            return typedPrefix;
+        }
+
+        return typedPrefix - IPV4_MAPPED_PREFIX_BITS;
+    }
+
+    private static boolean matchesPrefix(byte[] cidrBytes, byte[] testBytes, int prefixLength) {
+        int remainingBits = prefixLength;
+        for (int i = 0; (i < cidrBytes.length) && (remainingBits > 0); i++) {
+            if (remainingBits >= Byte.SIZE) {
+                if (cidrBytes[i] != testBytes[i]) {
+                    return false;
+                }
+                remainingBits -= Byte.SIZE;
+            } else {
+                int mask = 0xFF << (Byte.SIZE - remainingBits);
+                if ((cidrBytes[i] & mask) != (testBytes[i] & mask)) {
+                    return false;
+                }
+                remainingBits = 0;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Converts an IPv4-mapped IPv6 address ({@code ::ffff:a.b.c.d}) to its IPv4 form, so that a dual-stack
+     * JVM returning the mapped shape from {@code getRemoteAddr()} still matches an IPv4 range.
+     */
+    private static InetAddress normalizeAddress(InetAddress address) throws UnknownHostException {
+        if (!(address instanceof Inet6Address)) {
+            return address;
+        }
+
+        byte[] bytes = address.getAddress();
+        for (int i = 0; i < 10; i++) {
+            if (bytes[i] != 0) {
+                return address;
+            }
+        }
+        if ((bytes[10] != (byte) 0xFF) || (bytes[11] != (byte) 0xFF)) {
+            return address;
+        }
+
+        return InetAddress.getByAddress(Arrays.copyOfRange(bytes, 12, 16));
+    }
+
     /**
      * Basic validation for IP address format
+     *
+     * Package-private so the parsing can be exercised directly - it guards a value taken
+     * from caller-controlled proxy headers.
+     *
      * @param ip IP address string to validate
      * @return true if format appears valid, false otherwise
      */
-    private boolean isValidIpAddress(String ip) {
+    boolean isValidIpAddress(String ip) {
         if (ip == null || ip.trim().isEmpty()) {
             return false;
         }
@@ -600,14 +1071,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
             return true;
         }
         
-        // Validate IPv4: each octet must be 0-255
-        // More precise regex: (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?) for each octet
-        if (ip.matches("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")) {
+        if (isValidIpv4Address(ip)) {
             return true;
         }
-        
+
         // Validate IPv6: simplified check for colons (full validation would be more complex)
-        // This is a basic check - for production, consider using InetAddress.getByName()
+        // The pattern admits no letters beyond hex digits, so getByName cannot trigger a DNS lookup
         if (ip.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
             // Additional validation: try parsing with InetAddress for more robust check
             try {
@@ -617,8 +1086,43 @@ public class MetricService extends io.jans.service.metric.MetricService {
                 return false;
             }
         }
-        
+
         return false;
+    }
+
+    /**
+     * Validate dotted-quad IPv4 form, each octet being 0-255.
+     *
+     * Parsed rather than matched against a regex: the equivalent expression needs four
+     * alternation groups and trips complexity limits without being any clearer.
+     *
+     * @param ip candidate address, already known to be non-blank
+     * @return true if the value is a well-formed IPv4 address
+     */
+    private boolean isValidIpv4Address(String ip) {
+        String[] octets = ip.split("\\.", -1);
+        if (octets.length != 4) {
+            return false;
+        }
+
+        for (String octet : octets) {
+            if (octet.isEmpty() || octet.length() > 3) {
+                return false;
+            }
+            for (int i = 0; i < octet.length(); i++) {
+                // Deliberately not Character.isDigit: that accepts non-ASCII Unicode digits
+                // (e.g. Arabic-Indic), which Integer.parseInt would then happily convert.
+                char digit = octet.charAt(i);
+                if (digit < '0' || digit > '9') {
+                    return false;
+                }
+            }
+            if (Integer.parseInt(octet) > 255) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -746,7 +1250,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             String operationType = metricsData.getOperationType();
             String logIdentifier = metricsData.getUserId() != null ? metricsData.getUserId() : "[unknown-user]";
             
-            if ("REGISTRATION".equals(operationType)) {
+            if (Fido2MetricsConstants.REGISTRATION.equals(operationType)) {
                 userMetricsService.updateUserRegistrationMetrics(request);
                 log.debug("Updated user registration metrics for userId: {}", logIdentifier);
             } else if ("AUTHENTICATION".equals(operationType)) {

@@ -82,10 +82,12 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
         }
         await initWasm();
         instance = await init(config);
-        const result: MultiIssuerAuthorizeResult = await instance.authorize_multi_issuer(reqObj);
-        setAuthzResult(result.json_string());
+        const result: MultiIssuerAuthorizeResult = await instance.authorizeMultiIssuer(
+          JSON.stringify(reqObj)
+        );
+        setAuthzResult(result.jsonString());
         try {
-          const logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
+          const logs = await instance.getLogsByRequestIdAndTag(result.request_id, logType);
           if (logs.length !== 0) {
             setAuthzLogs(logs.map((log: unknown) => JSON.stringify(log, null, 2)).join('\n'));
           }
@@ -95,7 +97,7 @@ export default function MultiIssuerAuthzForm({ data }: CedarlingMultiIssuerAuthz
       } catch (err: unknown) {
         setAuthzResult(String(err));
         if (instance) {
-          const logs = await instance.pop_logs();
+          const logs = await instance.popLogs();
           if (logs.length !== 0) {
             setAuthzLogs(logs.map((log: unknown) => JSON.stringify(log, null, 2)).join('\n'));
           }

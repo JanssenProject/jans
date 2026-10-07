@@ -28,6 +28,12 @@ public final class Fido2MetricsConstants {
     public static final String FAILURE_RATE = "failureRate";
     public static final String COMPLETION_RATE = "completionRate";
     public static final String DROP_OFF_RATE = "dropOffRate";
+    /**
+     * Explains any rate in the same response that is null, or that had to be capped or read against a
+     * different denominator than usual. Absent when every rate was computed as it should be. An
+     * unknown rate must not be rendered as a zero.
+     */
+    public static final String RATE_NOTE = "rateNote";
 
     // Aggregation Types
     public static final String HOURLY = "HOURLY";
@@ -44,6 +50,11 @@ public final class Fido2MetricsConstants {
     public static final String SUCCESS = "SUCCESS";
     public static final String FAILURE = "FAILURE";
     public static final String ATTEMPT = "ATTEMPT";
+    /** A ceremony that was started and never completed — neither verified nor rejected. */
+    public static final String ABANDONED = "ABANDONED";
+
+    /** Key under which an attestation rejection records the AAGUID it concerns, in additionalData. */
+    public static final String AAGUID = "aaguid";
 
     // Report Categories
     public static final String CATEGORY = "category";
@@ -102,6 +113,9 @@ public final class Fido2MetricsConstants {
     public static final String FALLBACK_EVENTS = "fallbackEvents";
     public static final String DEVICE_TYPES = "deviceTypes";
     public static final String ERROR_COUNTS = "errorCounts";
+    /** Ceremonies observed to have lapsed, as opposed to the residual that {@link #DROP_OFF_RATE} infers. */
+    public static final String ABANDONED_OPERATIONS = "abandonedOperations";
+    public static final String ABANDONMENT_RATE = "abandonmentRate";
     public static final String PERFORMANCE_METRICS = "performanceMetrics";
     public static final String TOTAL_OPERATIONS = "totalOperations";
     
@@ -113,6 +127,7 @@ public final class Fido2MetricsConstants {
     // Query parameter names
     public static final String PARAM_START_TIME = "startTime";
     public static final String PARAM_END_TIME = "endTime";
+    public static final String PARAM_OPERATION_TYPE = "operationType";
     
     // Fallback method constants
     public static final String FALLBACK_METHOD_PASSWORD = "PASSWORD";
@@ -126,4 +141,44 @@ public final class Fido2MetricsConstants {
     
     // Health check keys
     public static final String HEALTH_SERVICE_AVAILABLE = "serviceAvailable";
+
+    // Maximum persisted field lengths
+    //
+    // These mirror the column widths declared in
+    // jans-linux-setup/jans_setup/static/rdbm/sql_data_types.json. Change one side
+    // and you must change the other in the same commit; Fido2MetricsConstantsTest
+    // pins these numbers so the build fails if only one moves.
+    //
+    // Units are characters, not bytes. PostgreSQL "character varying(n)" and MySQL
+    // VARCHAR(n) both count characters, so a single limit serves both dialects.
+
+    // Backed by VARCHAR columns - exceeding these makes the INSERT fail outright.
+    public static final int MAX_LENGTH_USER_ID = 128;
+    public static final int MAX_LENGTH_USERNAME = 256;
+    public static final int MAX_LENGTH_OPERATION_TYPE = 64;
+    public static final int MAX_LENGTH_STATUS = 64;
+    public static final int MAX_LENGTH_METRIC_TYPE = 64;
+    public static final int MAX_LENGTH_AUTHENTICATOR_TYPE = 64;
+    public static final int MAX_LENGTH_ERROR_CATEGORY = 64;
+    public static final int MAX_LENGTH_FALLBACK_METHOD = 64;
+    public static final int MAX_LENGTH_IP_ADDRESS = 64;
+    public static final int MAX_LENGTH_NODE_ID = 64;
+    public static final int MAX_LENGTH_SESSION_ID = 128;
+    public static final int MAX_LENGTH_USER_AGENT = 512;
+    public static final int MAX_LENGTH_FALLBACK_REASON = 512;
+    public static final int MAX_LENGTH_ERROR_REASON = 1024;
+    public static final int MAX_LENGTH_CLIENT_CORRELATION_ID = 128;
+
+    /**
+     * Applied to the individual members of the serialized deviceInfo blob. That
+     * column is TEXT, so this is a policy cap that keeps one pathological value
+     * from bloating the row rather than a schema limit.
+     */
+    public static final int MAX_LENGTH_DEVICE_INFO_FIELD = 128;
+
+    /**
+     * Applied to the individual members of the serialized nativeClientTelemetry blob (#14607),
+     * same policy as {@link #MAX_LENGTH_DEVICE_INFO_FIELD}.
+     */
+    public static final int MAX_LENGTH_NATIVE_TELEMETRY_FIELD = 128;
 }

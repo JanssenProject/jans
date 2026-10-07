@@ -18,7 +18,8 @@ RUN apk update \
 RUN mkdir -p /app/static /app/schema /app/static/opendj /app/templates
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=f5b81afbb2be4834e9caf2e518af9f5ec42f4dd9
+ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
+ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -46,7 +47,8 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
     && cp ${JANS_SETUP_DIR}/static/site/site.ldif /app/templates/o_site.ldif \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli \
+    && cp -R ${JANS_SETUP_DIR}/templates/test /app/templates/test
 
 WORKDIR /
 
@@ -143,7 +145,6 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     GOOGLE_PROJECT_ID="" \
-    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_AWS_SECRETS_ENDPOINT_URL="" \

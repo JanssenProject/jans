@@ -59,7 +59,8 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=f5b81afbb2be4834e9caf2e518af9f5ec42f4dd9
+ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
+ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -132,6 +133,7 @@ COPY --from=jans-config-api-src /usr/bin/facter /usr/local/bin/facter
 COPY --from=jans-config-api-src /app/scripts /app/jans_aio/jans_config_api
 COPY --from=jans-config-api-src /var/log/adminui /var/log/adminui
 COPY --from=jans-config-api-src /opt/jans/bin /opt/jans/bin
+COPY --from=jans-config-api-src /usr/share/java/admin-ui-plugin-agama-pw.gama /usr/share/java/admin-ui-plugin-agama-pw.gama
 RUN ln -sf /app/jans_aio/jans_config_api/entrypoint.sh /app/bin/jans-config-api-entrypoint.sh
 
 COPY --from=jans-fido2-src /opt/jans/jetty/jans-fido2 /opt/jans/jetty/jans-fido2
@@ -205,6 +207,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_JETTY_REQUEST_HEADER_SIZE=8192 \
     CN_JETTY_IDLE_TIMEOUT=30000 \
     CN_CONFIG_API_CREATE_SCOPES=true \
+    CN_PERSISTENCE_LOAD_TEST_DATA=false \
     CN_AUTH_JETTY_HOST=127.0.0.1 \
     CN_AUTH_JETTY_PORT=8081 \
     CN_CONFIG_API_JETTY_HOST=127.0.0.1 \

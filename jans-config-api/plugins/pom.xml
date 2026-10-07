@@ -23,6 +23,7 @@
                 <module>fido2-plugin</module>
                 <module>lock-plugin</module>
                 <module>shibboleth-plugin</module>
+                <module>metric-plugin</module>
         </modules>
 
         <dependencies>

@@ -17,7 +17,6 @@
 	<modules>
 		<module>model</module>
 		<module>client</module>
-		<module>cedarling</module>
 		<module>service</module>
 		<module>server</module>
 		<module>server-fips</module>

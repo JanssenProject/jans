@@ -50,24 +50,56 @@ class Plugin(DialogUtils):
         """
         title = _("Enter Request Party Properties")
         schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/RequestedParty')
-        cur_data = kwargs.get('passed', ['', ''])
+        try:
+            policy_schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/RequestedPartyPolicy')
+        except Exception:
+            # get_schema_from_reference indexes the spec directly, so a server whose spec predates
+            # this schema raises rather than returning nothing. Help text is not worth crashing a
+            # dialog that works today.
+            policy_schema = {}
+        cur_data = kwargs.get('passed', ['', '', ''])
         name_widget = self.app.getTitledText(_("ID"), name='id', value=cur_data[0], jans_help=self.app.get_help_from_schema(self.schema, 'id'), style='class:outh-scope-text')
         domains_widget = self.app.getTitledText(_("Origins"), name='origins', value='\n'.join(cur_data[1].split(', ')),  height=3, jans_help=self.app.get_help_from_schema(self.schema, 'origins'), style='class:dialog-titled-widget')
+        # An empty value is not "no attestation" - it means this RP states no preference and the global
+        # attestationMode applies, which is how every RP behaved before per-RP policy existed.
+        attestation_mode_widget = self.app.getTitledWidget(
+                _("Attestation Mode"),
+                name='attestationMode',
+                widget=DropDownWidget(
+                    values=[('', _('-- inherit global --')), ('disabled', 'disabled'), ('monitor', 'monitor'), ('enforced', 'enforced')],
+                    value=cur_data[2] if len(cur_data) > 2 else '',
+                    select_one_option=False
+                    ),
+                jans_help=self.app.get_help_from_schema(policy_schema, 'attestationMode'),
+                style='class:outh-scope-text'
+                )
 
         def add_request_party(dialog: Dialog) -> None:
             name_ = name_widget.me.text
             domains_ = domains_widget.me.text
-            new_data = [name_, ', '.join(domains_.splitlines())]
+            attestation_mode_ = attestation_mode_widget.me.value or ''
+            new_data = [name_, ', '.join(domains_.splitlines()), attestation_mode_]
 
             if not kwargs.get('data'):
                 self.requested_parties_container.add_item(new_data)
             else:
                 self.requested_parties_container.replace_item(kwargs['selected'], new_data)
 
-        body = HSplit([name_widget, domains_widget])
+        body = HSplit([name_widget, domains_widget, attestation_mode_widget])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_request_party)]
         dialog = JansGDialog(self.app, title=title, body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
+
+    def _original_requested_party(self, rp_id: str) -> dict:
+        """The relying party as it was loaded, so that fields this screen does not display are not lost.
+
+        A renamed relying party has no original to match, and is treated as new.
+        """
+        for rp in getattr(self, 'requested_parties_original', []):
+            if rp.get('id') == rp_id:
+                return rp
+
+        return {}
 
     def delete_requested_party(self, **kwargs: Any) -> None:
         """This method for deleting the requested party
@@ -148,14 +180,20 @@ class Plugin(DialogUtils):
         requested_parties_title = _("Requested Parties")
         add_party_title =  _("Add Party")
 
+        # The rows carry only what is displayed, so the untouched relying parties are kept here and the
+        # edited fields written back onto them on save. Rebuilding a relying party from its row would
+        # discard every field this screen does not show - today the policy, tomorrow whatever is added next.
+        self.requested_parties_original = list(fido2_static_config.get('rp', []) or [])
+
         requested_parties_data = []
-        for rp in fido2_static_config.get('rp', {}):
-            requested_parties_data.append([rp.get('id',''), ', '.join(rp.get('origins', []))])
+        for rp in self.requested_parties_original:
+            policy = rp.get('policy') or {}
+            requested_parties_data.append([rp.get('id',''), ', '.join(rp.get('origins', [])), policy.get('attestationMode', '')])
 
         self.requested_parties_container = JansVerticalNav(
                 myparent=self.app,
-                headers=['id', 'origins'],
-                preferred_size=[30, 30],
+                headers=['id', 'origins', 'attestation mode'],
+                preferred_size=[30, 30, 20],
                 data=requested_parties_data,
                 on_enter=self.edit_requested_party,
                 on_delete=self.delete_requested_party,
@@ -290,8 +328,28 @@ class Plugin(DialogUtils):
         fido2_static['hints'] = fido2_config.pop('hints')
 
         fido2_static['rp'] = []
-        for name, domains in self.requested_parties_container.data:
-            fido2_static['rp'].append({'id': name, 'origins': domains.splitlines()})
+        for row in self.requested_parties_container.data:
+            name, domains = row[0], row[1]
+            attestation_mode = row[2] if len(row) > 2 else ''
+            # Start from the relying party as it was loaded so fields this screen does not show survive.
+            rp = dict(self._original_requested_party(name))
+            rp['id'] = name
+            # The row holds the origins comma-joined, both as loaded and as the dialog writes them back,
+            # so splitting on lines here would save every multi-origin RP as one malformed origin.
+            rp['origins'] = [origin.strip() for origin in domains.split(',') if origin.strip()]
+
+            policy = dict(rp.get('policy') or {})
+            if attestation_mode:
+                policy['attestationMode'] = attestation_mode
+            else:
+                policy.pop('attestationMode', None)
+            # An RP that overrides nothing must serialise as it did before the policy field existed.
+            if policy:
+                rp['policy'] = policy
+            else:
+                rp.pop('policy', None)
+
+            fido2_static['rp'].append(rp)
 
         fido2_config['fido2Configuration'] = fido2_static
 

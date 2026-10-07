@@ -105,23 +105,27 @@ public class GrpcToJavaMapper {
 
         TelemetryEntry telemetryEntry = new TelemetryEntry();
         telemetryEntry.setCreationDate(toZonedDateTime(grpcEntry.getCreationDate()));
-        telemetryEntry.setEventTime(toZonedDateTime(grpcEntry.getEventTime()));
         telemetryEntry.setService(grpcEntry.getService());
         telemetryEntry.setNodeName(grpcEntry.getNodeName());
         telemetryEntry.setStatus(grpcEntry.getStatus());
-        telemetryEntry.setLastPolicyLoadSize(grpcEntry.getLastPolicyLoadSize());
-        telemetryEntry.setPolicySuccessLoadCounter(grpcEntry.getPolicySuccessLoadCounter());
-        telemetryEntry.setPolicyFailedLoadCounter(grpcEntry.getPolicyFailedLoadCounter());
-        telemetryEntry.setLastPolicyEvaluationTimeNs(grpcEntry.getLastPolicyEvaluationTimeNs());
-        telemetryEntry.setAvgPolicyEvaluationTimeNs(grpcEntry.getAvgPolicyEvaluationTimeNs());
-        telemetryEntry.setMemoryUsage(grpcEntry.getMemoryUsage());
-        telemetryEntry.setEvaluationRequestsCount(grpcEntry.getEvaluationRequestsCount());
-        
-        // Convert policy stats map
+        telemetryEntry.setIntervalSecs(grpcEntry.getIntervalSecs());
+
         if (grpcEntry.getPolicyStatsCount() > 0) {
             Map<String, Long> policyStats = new HashMap<>();
             grpcEntry.getPolicyStatsMap().forEach(policyStats::put);
             telemetryEntry.setPolicyStats(policyStats);
+        }
+
+        if (grpcEntry.getErrorCountersCount() > 0) {
+            Map<String, Long> errorCounters = new HashMap<>();
+            grpcEntry.getErrorCountersMap().forEach(errorCounters::put);
+            telemetryEntry.setErrorCounters(errorCounters);
+        }
+
+        if (grpcEntry.getOperationalStatsCount() > 0) {
+            Map<String, Long> operationalStats = new HashMap<>();
+            grpcEntry.getOperationalStatsMap().forEach(operationalStats::put);
+            telemetryEntry.setOperationalStats(operationalStats);
         }
 
         return telemetryEntry;

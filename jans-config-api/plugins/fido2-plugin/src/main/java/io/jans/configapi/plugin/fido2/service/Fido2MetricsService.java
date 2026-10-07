@@ -30,6 +30,7 @@ public class Fido2MetricsService {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String AUTHORIZATION = "Authorization";
+    private static final String OPERATION_TYPE = "operationType";
     private static final String METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
     private static final String FIDO2_METRICS_BASE_URL = "/jans-fido2/restv1/metrics";
     private static final String FIDO2_METRICS_ENTRIES_URL = "/entries";
@@ -74,6 +75,10 @@ public class Fido2MetricsService {
 
     public String getErrorAnalysisUrl() {
         return getFido2MetricsUrl() + "/analytics/errors";
+    }
+
+    public String getAttestationRejectionAnalysisUrl() {
+        return getFido2MetricsUrl() + "/analytics/attestation-rejections";
     }
 
     public String getTrendAnalysisUrl() {
@@ -265,7 +270,42 @@ public class Fido2MetricsService {
      */
     public JsonNode getErrorAnalysis(String token, LocalDateTime startTime, LocalDateTime endTime)
             throws JsonProcessingException {
-        return getAnalyticsMetrics(token, this.getErrorAnalysisUrl(), startTime, endTime);
+        return getErrorAnalysis(token, startTime, endTime, null);
+    }
+
+    /**
+     * Get error analysis (error categories, frequencies), optionally for one operation type
+     *
+     * @param startTime     Start time in ISO format
+     * @param endTime       End time in ISO format
+     * @param operationType REGISTRATION or AUTHENTICATION to report that ceremony
+     *                      alone, or null to report both together
+     * @return Error analysis data
+     */
+    public JsonNode getErrorAnalysis(String token, LocalDateTime startTime, LocalDateTime endTime,
+            String operationType) throws JsonProcessingException {
+        // Request headers
+        Map<String, String> headers = buildHeaders(token);
+
+        // Request data
+        Map<String, String> data = buildTimeRange(startTime, endTime);
+        if (StringUtils.isNotBlank(operationType)) {
+            data.put(OPERATION_TYPE, operationType);
+        }
+
+        return getMetricsData(this.getErrorAnalysisUrl(), headers, data);
+    }
+
+    /**
+     * Get attestation rejections broken down by trust diagnostic code
+     *
+     * @param startTime Start time in ISO format
+     * @param endTime   End time in ISO format
+     * @return Attestation rejection analysis
+     */
+    public JsonNode getAttestationRejectionAnalysis(String token, LocalDateTime startTime, LocalDateTime endTime)
+            throws JsonProcessingException {
+        return getAnalyticsMetrics(token, this.getAttestationRejectionAnalysisUrl(), startTime, endTime);
     }
 
     /**

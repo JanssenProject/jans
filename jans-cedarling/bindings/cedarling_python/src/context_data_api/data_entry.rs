@@ -18,8 +18,8 @@ use super::cedar_type::CedarType;
 /// ----------
 /// key : str
 ///     The key for this entry
-/// value : dict
-///     The actual value stored (as a Python dict)
+/// value : dict | list | str | int | float | bool | None
+///     The actual value stored, deserialized from JSON — may be any JSON-compatible Python shape
 /// data_type : CedarType
 ///     The inferred Cedar type of the value
 /// created_at : str

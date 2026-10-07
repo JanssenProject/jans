@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { handleUserPrompt } from "../../index";
 import { LLM_MODEL_STORAGE_KEY, LLM_PROVIDER_STORAGE_KEY, MCP_SERVER_URL } from '../types';
 import { mcpApiService } from '../../service/MCPAPIService';
+import { providerRequiresApiKey } from '../../helper/Constants';
 
 export const useAIOperations = (notifyOnDataChange: () => void) => {
   const [query, setQuery] = useState("");
@@ -39,12 +40,14 @@ export const useAIOperations = (notifyOnDataChange: () => void) => {
         throw new Error("Please configure MCP server URL first");
       }
 
-      // Fetch API key from MCP server
+      // Fetch API key from MCP server (keyless providers like Ollama need none).
       mcpApiService.setBaseUrl(savedMcpUrl);
-      const apiKeyData = await mcpApiService.findApiKeyByProvider(savedProvider, savedModel);
+      if (providerRequiresApiKey(savedProvider)) {
+        const apiKeyData = await mcpApiService.findApiKeyByProvider(savedProvider, savedModel);
 
-      if (!apiKeyData) {
-        throw new Error(`Please configure your ${savedProvider} API key first in Settings`);
+        if (!apiKeyData) {
+          throw new Error(`Please configure your ${savedProvider} API key first in Settings`);
+        }
       }
 
       // For now, we'll pass null and let it handle the error
@@ -53,7 +56,7 @@ export const useAIOperations = (notifyOnDataChange: () => void) => {
         setResult(result.content);
       } else if (result?.type === 'tool_results') {
         setResult(result?.results);
-        if (result?.results?.[0]?.notifyOnDataChange) {
+        if (result?.results?.some((r: { notifyOnDataChange?: boolean }) => r?.notifyOnDataChange)) {
           notifyOnDataChange();
         }
       } else {

@@ -7,26 +7,28 @@ import (
 
 // ScimAppConfigurations is the definition of the SCIM app configuration.
 type ScimAppConfigurations struct {
-        BaseDN                      string `schema:"base_dn" json:"baseDN"`
-        DisableLoggerTimer          bool   `schema:"disable_logger_timer" json:"disableLoggerTimer"`
-        DisableAuditLogger          bool   `schema:"disable_audit_logger" json:"disableAuditLogger"`
-        ApplicationUrl              string `schema:"application_url" json:"applicationUrl"`
-        BaseEndpoint                string `schema:"base_endpoint" json:"baseEndpoint"`
-        PersonCustomObjectClass     string `schema:"person_custom_object_class" json:"personCustomObjectClass"`
-        OxAuthIssuer                string `schema:"ox_auth_issuer" json:"oxAuthIssuer"`
-        ProtectionMode              string `schema:"protection_mode" json:"protectionMode"`
-        MaxCount                    int    `schema:"max_count" json:"maxCount"`
-        UserExtensionSchemaURI      string `schema:"user_extension_schema_uri" json:"userExtensionSchemaURI"`
-        LoggingLevel                string `schema:"logging_level" json:"loggingLevel"`
-        LoggingLayout               string `schema:"logging_layout" json:"loggingLayout"`
-        ExternalLoggerConfiguration string `schema:"external_logger_configuration" json:"externalLoggerConfiguration"`
-        MetricReporterInterval      int    `schema:"metric_reporter_interval" json:"metricReporterInterval"`
-        MetricReporterKeepDataDays  int    `schema:"metric_reporter_keep_data_days" json:"metricReporterKeepDataDays"`
-        MetricReporterEnabled       bool   `schema:"metric_reporter_enabled" json:"metricReporterEnabled"`
-        DisableJdkLogger            bool   `schema:"disable_jdk_logger" json:"disableJdkLogger"`
-        UseLocalCache               bool   `schema:"use_local_cache" json:"useLocalCache"`
-        BulkMaxOperations           int    `schema:"bulk_max_operations" json:"bulkMaxOperations"`
-        BulkMaxPayloadSize          int    `schema:"bulk_max_payload_size" json:"bulkMaxPayloadSize"`
+        BaseDN                             string `schema:"base_dn" json:"baseDN"`
+        DisableLoggerTimer                 bool   `schema:"disable_logger_timer" json:"disableLoggerTimer"`
+        DisableAuditLogger                 bool   `schema:"disable_audit_logger" json:"disableAuditLogger"`
+        ApplicationUrl                     string `schema:"application_url" json:"applicationUrl"`
+        BaseEndpoint                       string `schema:"base_endpoint" json:"baseEndpoint"`
+        PersonCustomObjectClass            string `schema:"person_custom_object_class" json:"personCustomObjectClass"`
+        OxAuthIssuer                       string `schema:"ox_auth_issuer" json:"oxAuthIssuer"`
+        ProtectionMode                     string `schema:"protection_mode" json:"protectionMode"`
+        MaxCount                           int    `schema:"max_count" json:"maxCount"`
+        UserExtensionSchemaURI             string `schema:"user_extension_schema_uri" json:"userExtensionSchemaURI"`
+        LoggingLevel                       string `schema:"logging_level" json:"loggingLevel"`
+        LoggingLayout                      string `schema:"logging_layout" json:"loggingLayout"`
+        ExternalLoggerConfiguration        string `schema:"external_logger_configuration" json:"externalLoggerConfiguration"`
+        MetricReporterInterval             int    `schema:"metric_reporter_interval" json:"metricReporterInterval"`
+        MetricReporterKeepDataDays         int    `schema:"metric_reporter_keep_data_days" json:"metricReporterKeepDataDays"`
+        MetricReporterEnabled              bool   `schema:"metric_reporter_enabled" json:"metricReporterEnabled"`
+        DisableJdkLogger                   bool   `schema:"disable_jdk_logger" json:"disableJdkLogger"`
+        UseLocalCache                      bool   `schema:"use_local_cache" json:"useLocalCache"`
+        BulkMaxOperations                  int    `schema:"bulk_max_operations" json:"bulkMaxOperations"`
+        BulkMaxPayloadSize                 int    `schema:"bulk_max_payload_size" json:"bulkMaxPayloadSize"`
+        DisableExternalLoggerConfiguration bool   `schema:"disable_external_logger_configuration" json:"disableExternalLoggerConfiguration"`
+        SkipDefinedPasswordValidation      bool   `schema:"skip_defined_password_validation" json:"skipDefinedPasswordValidation"`
 }
 
 // GetScimAppConfiguration returns the current SCIM App configuration.

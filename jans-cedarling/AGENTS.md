@@ -50,12 +50,14 @@
 - Prefer Result<T, E> over panics
 - Use derive_more for error derivation when needed
 - Include context in error messages
+- Never use runtime validation that can panic (e.g. `assert!`, `expect`, `unwrap`) for input validation in production code. Use `Result` and propagate errors through the type system instead. The only exceptions are invariants that are statically guaranteed by the type system or explicitly agreed with the user.
 
 **Types:**
 - Use typed-builder for complex struct construction
 - Leverage serde for serialization/deserialization
 - Use smol_str for string optimization where appropriate
 - Prefer strong typing over stringly-typed APIs
+- Make invalid states unrepresentable: use enums, newtypes, and the type system to encode constraints at compile time. Avoid runtime checks where a more precise type can guarantee correctness statically.
 
 **Visibility:**
 - Use the most restrictive visibility level possible: private (no modifier) better than `pub(super)`, `pub(super)` better than `pub(crate)`, `pub(crate)` better than `pub`.

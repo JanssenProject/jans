@@ -134,13 +134,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -239,13 +239,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -346,13 +346,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -450,13 +450,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -556,13 +556,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -637,13 +637,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -721,13 +721,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -804,13 +804,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -887,13 +887,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -969,13 +969,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -1051,13 +1051,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -1133,12 +1133,12 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -1213,13 +1213,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -1294,13 +1294,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -1381,13 +1381,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
@@ -1466,13 +1466,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertJweResponse(response);
+        assertJweResponse(response, authorizationResponse);
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
@@ -1545,7 +1545,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
 
@@ -1632,7 +1632,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
 
@@ -1645,7 +1645,8 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    private void assertJweResponse(Jwe jwe){
+    private void assertJweResponse(Jwe jwe, AuthorizationResponse authorizationResponse) {
+        assertNull(authorizationResponse.getIssuer(), "iss must be omitted from redirect URI for JARM responses (RFC 9207)");
         assertNotNull(jwe.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
         assertNotNull(jwe.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
         assertNotNull(jwe.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));

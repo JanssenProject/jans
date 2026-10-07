@@ -6,9 +6,13 @@
 
 package io.jans.fido2.ctap;
 
+// S115: the constant names intentionally mirror the WebAuthn attestation "fmt" identifiers
+// (with '-' replaced by '_') because AttestationProcessorFactory resolves them via
+// AttestationFormat.valueOf(fmt.replace('-', '_')). Renaming them to UPPER_CASE would break that lookup.
+@SuppressWarnings("java:S115")
 public enum AttestationFormat {
 
-    fido_u2f("fido-u2f"), packed("packed"), tpm("tpm"), none("none"), apple("apple");
+    fido_u2f("fido-u2f"), packed("packed"), tpm("tpm"), none("none"), apple("apple"), android_key("android-key");
 
     private final String fmt;
 

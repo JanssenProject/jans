@@ -1,7 +1,8 @@
 package io.jans.casa.plugins.authnmethod.service.otp;
 
-import com.github.bastiaanjansen.otp.HMACAlgorithm;
-import com.github.bastiaanjansen.otp.HOTPGenerator;
+import com.bastiaanjansen.otp.HMACAlgorithm;
+import com.bastiaanjansen.otp.HOTPGenerator;
+import com.google.common.io.BaseEncoding;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.conf.otp.HOTPConfig;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class HOTPAlgorithmService implements IOTPAlgorithm {
     }
 
     private HOTPGenerator buildGenerator(byte[] secret) {
-        return new HOTPGenerator.Builder(secret)
+        return new HOTPGenerator.Builder(BaseEncoding.base32().omitPadding().encode(secret))
                 .withPasswordLength(conf.getDigits())
                 .withAlgorithm(HMACAlgorithm.SHA1)
                 .build();
@@ -50,7 +51,7 @@ public class HOTPAlgorithmService implements IOTPAlgorithm {
     public String generateSecretKeyUri(byte[] secretKey, String displayName) {
         logger.trace("Generating secret key URI");
         try {
-            URI uri = buildGenerator(secretKey).getURI(issuer, displayName.replace(':', ' '));
+            URI uri = buildGenerator(secretKey).getURI(0, issuer, displayName.replace(':', ' '));
             return uri.toString();
         } catch (Exception e) {
             throw new IllegalStateException("Could not build HOTP key URI", e);

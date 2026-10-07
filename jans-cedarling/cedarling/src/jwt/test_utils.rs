@@ -16,7 +16,7 @@ use jsonwebtoken::DecodingKey;
 use mockito::{Mock, Server, ServerGuard};
 use reqwest::Client;
 use serde::Serialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use url::Url;
 
 use {jsonwebkey as jwk, jsonwebtoken as jwt};
@@ -346,6 +346,19 @@ impl MockServer {
                 .with_header("content-type", "application/statuslist+jwt")
                 .with_body_from_request(move |_| build_jwt_claims())
                 .expect(1)
+                .create(),
+        );
+        self.endpoints.status_list = endpoint;
+    }
+
+    /// Replaces the status list endpoint mock with one that always returns 500,
+    /// simulating an unavailable status endpoint so the background refresh fails.
+    /// Dropping the previous `Mock` removes it from the server.
+    pub(crate) fn fail_status_list_endpoint(&mut self) {
+        let endpoint = Some(
+            self.server
+                .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
+                .with_status(500)
                 .create(),
         );
         self.endpoints.status_list = endpoint;

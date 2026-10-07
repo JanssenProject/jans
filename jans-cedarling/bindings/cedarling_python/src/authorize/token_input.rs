@@ -24,7 +24,7 @@ use pyo3::prelude::*;
 /// # Create a token input for multi-issuer authorization
 /// token = TokenInput(mapping="Jans::Access_Token", payload="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
 /// ```
-#[pyclass(get_all, set_all)]
+#[pyclass(get_all, set_all, from_py_object)]
 #[derive(Clone)]
 pub struct TokenInput {
     /// Token mapping type

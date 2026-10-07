@@ -65,6 +65,36 @@ impl HttpRequestError {
         matches!(self.reason, HttpRequestReasonError::MaxRetriesExceeded)
     }
 
+    /// `true` when the error indicates the response body could not be read
+    /// (TCP drop mid-stream, content-decoding failure, length mismatch, etc.)
+    /// — the HTTP transaction reached a status but the body fetch failed.
+    /// Lets callers route such failures into a distinct outcome bucket
+    /// rather than conflating them with status-code errors.
+    pub fn is_decode_error(&self) -> bool {
+        matches!(self.reason, HttpRequestReasonError::DecodeResponseBytes(_))
+    }
+
+    /// `true` when the error indicates an upstream rejected the request with
+    /// a non-success HTTP status (4xx / 5xx) outside of any retry path.
+    /// Distinguishes "we got a response but it was an error status" from
+    /// transport failures (`MaxRetriesExceeded`) so callers can classify
+    /// metrics correctly.
+    pub fn is_http_status_error(&self) -> bool {
+        matches!(self.reason, HttpRequestReasonError::HttpStatusError)
+    }
+
+    /// The HTTP status code captured at the failure point, if any. `Some(...)`
+    /// means the HTTP transaction reached a status (whether 2xx, 3xx, 4xx, or
+    /// 5xx); `None` means the failure happened before a response arrived
+    /// (DNS, TCP connect, TLS, etc.). Callers can use this to disambiguate
+    /// "couldn't reach upstream" from "got a bad status" — particularly
+    /// useful when the retry layer collapses 4xx/5xx exhaustion into the
+    /// generic `MaxRetriesExceeded` variant: a `Some(status)` there still
+    /// means we received responses, just unacceptable ones.
+    pub fn status_code(&self) -> Option<StatusCode> {
+        self.status_code
+    }
+
     pub fn with_retry_count(mut self, count: u32) -> Self {
         self.retry_count = count;
         self
@@ -96,6 +126,8 @@ impl Display for HttpRequestError {
 pub enum HttpRequestReasonError {
     #[error("max retries exceeded")]
     MaxRetriesExceeded,
+    #[error("response status indicates failure")]
+    HttpStatusError,
     #[error("failed to deserialize response to JSON: {0}")]
     DeserializeToJson(#[source] reqwest::Error),
     #[error("failed to deserialize response body bytes to JSON: {0}")]
@@ -383,9 +415,106 @@ mod tests {
         let err = read_response_capped(resp, Some(1024))
             .await
             .expect_err("body exceeds cap");
-        assert!(matches!(
-            err,
-            HttpRequestReasonError::ResponseTooLarge { limit: 1024, .. }
-        ));
+        assert!(
+            matches!(
+                err,
+                HttpRequestReasonError::ResponseTooLarge { limit: 1024, .. }
+            ),
+            "body over the 1024-byte cap must surface as ResponseTooLarge {{ limit: 1024, .. }}, got {err:?}",
+        );
+    }
+
+    #[tokio::test]
+    async fn is_decode_error_true_only_for_response_bytes_failure() {
+        // We want a real `DecodeResponseBytes`: response status + headers
+        // arrive, but the body stream is truncated before all of the
+        // advertised `Content-Length` bytes show up.
+        //
+        // Mockito's `with_chunked_body(|w| Err(...))` *can* produce that
+        // state, but in practice mockito tears the connection down before
+        // the response line reaches the client, so reqwest reports
+        // `IncompleteMessage` at send-time — a flaky race we hit on CI.
+        // A one-shot raw TCP listener gives us deterministic control: we
+        // send full headers (with `Content-Length: 1000`), flush, write 7
+        // bytes of body, then close — the client always sees the response,
+        // then always sees the truncated body.
+        use std::io::{Read, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind");
+        let addr = listener.local_addr().expect("local_addr");
+        let server = std::thread::spawn(move || {
+            let (mut sock, _) = listener.accept().expect("accept");
+            // Drain the request headers so the kernel doesn't RST the
+            // connection while we're writing the response.
+            let mut buf = [0u8; 1024];
+            let mut total = 0usize;
+            while total < buf.len() {
+                match sock.read(&mut buf[total..]) {
+                    Ok(0) => break,
+                    Ok(n) => {
+                        total += n;
+                        if buf[..total].windows(4).any(|w| w == b"\r\n\r\n") {
+                            break;
+                        }
+                    },
+                    Err(_) => break,
+                }
+            }
+            sock.write_all(
+                b"HTTP/1.1 200 OK\r\nContent-Length: 1000\r\nConnection: close\r\n\r\n",
+            )
+            .expect("write headers");
+            sock.flush().expect("flush headers");
+            // Far fewer than the advertised 1000 bytes, then drop = close.
+            let _ = sock.write_all(b"partial");
+        });
+        let resp = reqwest::get(format!("http://{addr}/")).await.expect("send");
+        let e = resp
+            .bytes()
+            .await
+            .expect_err("expected truncated body to produce DecodeResponseBytes");
+        server.join().ok();
+        let err = HttpRequestError::new(
+            HttpRequestReasonError::DecodeResponseBytes(e),
+            Some(reqwest::StatusCode::OK),
+        );
+        assert!(
+            err.is_decode_error(),
+            "DecodeResponseBytes must satisfy is_decode_error()",
+        );
+        assert!(
+            !err.is_max_retries_exceeded(),
+            "DecodeResponseBytes must NOT satisfy is_max_retries_exceeded()",
+        );
+        assert!(
+            !err.is_http_status_error(),
+            "DecodeResponseBytes must NOT satisfy is_http_status_error()",
+        );
+
+        // Cross-check the negative directions on stable error variants.
+        let max_retries =
+            HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None);
+        assert!(
+            !max_retries.is_decode_error(),
+            "MaxRetriesExceeded must not satisfy is_decode_error() — the three classifiers are mutually exclusive",
+        );
+        assert!(
+            max_retries.is_max_retries_exceeded(),
+            "MaxRetriesExceeded variant must satisfy is_max_retries_exceeded()",
+        );
+
+        let status =
+            HttpRequestError::new(HttpRequestReasonError::HttpStatusError, None);
+        assert!(
+            !status.is_decode_error(),
+            "HttpStatusError must not satisfy is_decode_error() — they classify different failure modes",
+        );
+        assert!(
+            !status.is_max_retries_exceeded(),
+            "HttpStatusError must not satisfy is_max_retries_exceeded() — that variant is for transport-exhausted retries, not status errors",
+        );
+        assert!(
+            status.is_http_status_error(),
+            "HttpStatusError variant must satisfy is_http_status_error()",
+        );
     }
 }

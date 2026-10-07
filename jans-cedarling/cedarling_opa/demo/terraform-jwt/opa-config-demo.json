@@ -2,7 +2,6 @@
   "_comment": "DEMO-ONLY configuration — JWT signature validation is DISABLED so the demo can be tested with self-signed or crafted JWTs. Do NOT use this in production.",
   "plugins": {
     "cedarling_opa": {
-      "stderr": false,
       "bootstrap_config": {
         "CEDARLING_APPLICATION_NAME": "TerraformJwtAuthzDemo",
 

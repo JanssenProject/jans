@@ -1,0 +1,5 @@
+DO NOT MODIFY ME!
+
+this is "a.txt", a sample input for sigstore-conformance's test suite.
+
+DO NOT MODIFY ME!

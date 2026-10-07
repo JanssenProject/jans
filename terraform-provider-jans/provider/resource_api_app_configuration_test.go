@@ -152,7 +152,7 @@ func testAccResourceCheckApiAppConfigurationImport(states []*terraform.InstanceS
 			return err
 		}
 
-		if err := checkAttribute(is, "endpoint_injection_enabled", "false"); err != nil {
+		if err := checkAttribute(is, "endpoint_injection_enabled", "true"); err != nil {
 			return err
 		}
 

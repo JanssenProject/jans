@@ -100,7 +100,7 @@ Add the artifact `jans-scim-client` to your project pom, eg:
   <repository>
     <id>Jans</id>
     <name>Janssen repository</name>
-    <url>https://maven.jans.io/maven</url>
+    <url>https://maven.pkg.github.com/JanssenProject/jans</url>
   </repository>
 </repositories>
 ...

@@ -19,10 +19,10 @@ func TestPersistance(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Check that we're using a SQL database (MySQL in this case)
-	// The API doesn't return persistenceType, but we can infer it from productName
-	if cfg.ProductName != "MySQL" {
-		t.Fatalf("Expected MySQL database, got %s", cfg.ProductName)
+	// Check that we're using a SQL database. The backend may be MySQL or PostgreSQL
+	// depending on the CI matrix leg, so accept either.
+	if cfg.ProductName != "MySQL" && cfg.ProductName != "PostgreSQL" {
+		t.Fatalf("Expected a SQL database (MySQL or PostgreSQL), got %s", cfg.ProductName)
 	}
 
 	if cfg.DatabaseName == "" {

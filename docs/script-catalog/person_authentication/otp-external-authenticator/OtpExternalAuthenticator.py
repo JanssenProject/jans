@@ -18,9 +18,9 @@ import jarray
 import json
 import sys
 from com.google.common.io import BaseEncoding
-from com.github.bastiaanjansen.otp import HMACAlgorithm
-from com.github.bastiaanjansen.otp import HOTPGenerator
-from com.github.bastiaanjansen.otp import TOTPGenerator
+from com.bastiaanjansen.otp import HMACAlgorithm
+from com.bastiaanjansen.otp import HOTPGenerator
+from com.bastiaanjansen.otp import TOTPGenerator
 from java.security import SecureRandom
 from java.time import Duration
 from java.util import Arrays, HashMap
@@ -162,9 +162,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 if not StringHelper.isEmpty(auth_result):
                     # defect fix #1225  - Retry the step, show QR code again
                     if auth_result == 'timeout':
-						print "OTP. QR-code timeout. Authenticate for step %s. Reinitializing current step" % step
-						identity.setWorkingParameter("retry_current_step", True)
-						return True
+                        print "OTP. QR-code timeout. Authenticate for step %s. Reinitializing current step" % step
+                        identity.setWorkingParameter("retry_current_step", True)
+                        return True
 
                     print "OTP. Authenticate for step 2. User not enrolled OTP"
                     return False
@@ -177,7 +177,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return otp_auth_result
         elif step == 3:
-            print 3
             print "OTP. Authenticate for step 3"
 
             authenticationService = CdiUtil.bean(AuthenticationService)
@@ -458,7 +457,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "OTP. Process HOTP authentication during authentication. otpCode is valid"
 
                         # Update current moving factor in user entry
-                        enrolledAuthenticator.addCustom("movingFactor", moving_factor)
+                        enrolledAuthenticator.addCustom("movingFactor", validation_result["movingFactor"])
 
                         # Update moving factor in user entry
                         updatedUser = userService.updateUser(user)
@@ -499,7 +498,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def generateHotpKey(self, secretKey, movingFactor):
         digits = self.hotpConfiguration["digits"]
 
-        hotp = HOTPGenerator.Builder(secretKey).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
+        hotp = HOTPGenerator.Builder(self.toBase32(secretKey)).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
 
         return hotp.generate(movingFactor)
 
@@ -507,7 +506,7 @@ class PersonAuthentication(PersonAuthenticationType):
         lookAheadWindow = self.hotpConfiguration["lookAheadWindow"]
         digits = self.hotpConfiguration["digits"]
 
-        hotp = HOTPGenerator.Builder(secretKey).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
+        hotp = HOTPGenerator.Builder(self.toBase32(secretKey)).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
         # otp-java's verify(code, counter) checks a single counter; iterate the
         # look-ahead window so we can return the matched counter as the new
         # moving factor (lochbridge's HOTPValidationResult.getNewMovingFactor()).
@@ -522,9 +521,9 @@ class PersonAuthentication(PersonAuthenticationType):
     def generateHotpSecretKeyUri(self, secretKey, issuer, userDisplayName):
         digits = self.hotpConfiguration["digits"]
 
-        hotp = HOTPGenerator.Builder(secretKey).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
+        hotp = HOTPGenerator.Builder(self.toBase32(secretKey)).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
 
-        return hotp.getURI(issuer, userDisplayName).toString()
+        return hotp.getURI(0, issuer, userDisplayName).toString()
 
     # TOTP methods
     def generateSecretTotpKey(self):
@@ -543,7 +542,7 @@ class PersonAuthentication(PersonAuthenticationType):
             builder.withPasswordLength(digits)
             builder.withAlgorithm(hmacShaAlgorithmType)
 
-        return TOTPGenerator.Builder(secretKey).withHOTPGenerator(configure).withPeriod(Duration.ofSeconds(timeStep)).build()
+        return TOTPGenerator.Builder(self.toBase32(secretKey)).withHOTPGenerator(configure).withPeriod(Duration.ofSeconds(timeStep)).build()
 
     def generateTotpKey(self, secretKey):
         return self.buildTotpGenerator(secretKey).now()

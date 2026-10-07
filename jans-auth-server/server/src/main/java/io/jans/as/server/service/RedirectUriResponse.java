@@ -7,6 +7,8 @@
 package io.jans.as.server.service;
 
 import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.server.util.RedirectUtil;
@@ -29,6 +31,7 @@ public class RedirectUriResponse {
     private final HttpServletRequest httpRequest;
     private final ErrorResponseFactory errorFactory;
     private boolean fapiCompatible = false;
+    private AppConfiguration appConfiguration;
 
     public RedirectUriResponse(RedirectUri redirectUri, String state, HttpServletRequest httpRequest, ErrorResponseFactory errorFactory) {
         this.redirectUri = redirectUri;
@@ -47,6 +50,7 @@ public class RedirectUriResponse {
             reason = null;
         }
         redirectUri.parseQueryString(errorFactory.getErrorAsQueryString(errorType, state, reason));
+        addIssIfEnabled();
         return new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUri, httpRequest).build());
     }
 
@@ -60,7 +64,16 @@ public class RedirectUriResponse {
 
     public Response.ResponseBuilder createErrorBuilder(IErrorType errorType) {
         redirectUri.parseQueryString(errorFactory.getErrorAsQueryString(errorType, state));
+        addIssIfEnabled();
         return RedirectUtil.getRedirectResponseBuilder(redirectUri, httpRequest);
+    }
+
+    private void addIssIfEnabled() {
+        if (appConfiguration != null
+                && Boolean.TRUE.equals(appConfiguration.getAuthorizationResponseIssParameterSupported())
+                && (redirectUri.getResponseMode() == null || !redirectUri.getResponseMode().isJarm())) {
+            redirectUri.addResponseParameter(AuthorizeResponseParam.ISS, appConfiguration.getIssuer());
+        }
     }
 
     public RedirectUri getRedirectUri() {
@@ -73,5 +86,9 @@ public class RedirectUriResponse {
 
     public void setFapiCompatible(boolean fapiCompatible) {
         this.fapiCompatible = fapiCompatible;
+    }
+
+    public void setAppConfiguration(AppConfiguration appConfiguration) {
+        this.appConfiguration = appConfiguration;
     }
 }

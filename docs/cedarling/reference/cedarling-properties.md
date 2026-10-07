@@ -26,23 +26,31 @@ These properties are effective regardless of which authorization method is in us
 
 ### Loading the policy store
 
-To load the policy store, one of the following properties must be set.
-
-- **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
-
-- **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store from. Cedarling automatically detects the format as one of the following.
-      - URLs ending in `.cjar` → loads as Cedar Archive
-      - Other URLs → loads as legacy JSON from Lock Server
+To load the policy store, one of the following properties must be set:
 
 - **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format as one of the following. This property is not supported in WASM due to lack of file-system access. 
       - Directories → loads as directory-based policy store
       - `.cjar` files → loads as Cedar Archive
-      - `.json` files → loads as JSON
-      - `.yaml`/`.yml` files → loads as YAML
+      - `.yaml`/`.yml` files → loads as YAML (supported for test suites)
+      *(Note: Legacy `.json` files are no longer supported. Please migrate to the folder-based format or `.cjar` archive.)*
 
-!!! note "New Directory-Based Format"
-    For native platforms, the Cedarling now supports a directory-based policy store format with human-readable Cedar files. 
+- **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store archive from. The URL must point to a Cedar Archive (`.cjar` or zip archive). Legacy JSON endpoints are no longer supported.
+
+- **`CEDARLING_POLICY_STORE_LOCAL`** : Inline YAML policy store string (primarily supported for test suites and inline configurations). Inline JSON format is deprecated and rejected; migrate to folder-based `.cjar` archives, directories, or inline YAML.
+
+!!! note "Folder-Based Policy Store Format"
+    Cedarling uses a folder-based policy store format with human-readable Cedar files (either as a directory or a `.cjar` archive). 
     See [Policy Store Formats](./cedarling-policy-store.md#policy-store-formats) for details.
+
+### Refreshing the policy store
+
+- **`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`** : Background refresh interval in seconds for URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Cedar Archive URL). When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory `Authz` instance when the upstream changes. A server-side `Cache-Control: max-age` / `Expires` hint may *shorten* the next interval but never extends it. Default is `0` (refresh disabled — load-once-at-startup behavior). Non-zero values below `5` seconds are clamped to `5`. Ignored for local sources (`CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_LOCAL`). See [Background refresh](./cedarling-policy-store.md#background-refresh) for the per-request consistency model, the strategy ladder, and the emitted metric keys.
+
+### Limiting policy store size
+
+- **`CEDARLING_POLICY_STORE_MAX_FILE_SIZE`** : Maximum decompressed size, in bytes, of a single file inside a Cedar Archive (`.cjar`). Archives are ZIP files, so a small download can expand into a very large buffer in memory (a "zip bomb"); an archive whose entry exceeds this limit is rejected with an error rather than being decompressed. The whole-archive decompressed size is capped at ten times this value, and an archive may hold at most 10000 entries. Set to `0` to disable the size caps. Default is `10485760` (10 MB).
+
+    This limit is independent of `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`, which bounds the compressed archive while it is downloaded. Serving a `.cjar` over HTTP whose compressed size exceeds `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES` (10 MB by default) requires raising that property as well.
 
 ### Optional properties
 
@@ -73,6 +81,10 @@ the Cedarling will use the default value as specified in the property definition
 - **`CEDARLING_DATA_STORE_ENABLE_METRICS`** : Whether to enable metrics tracking for data entries (access counts, etc.). Default value is `true`.
 
 - **`CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD`** : Memory usage threshold percentage (0.0-100.0) for triggering alerts. Default value is `80.0`. When capacity usage exceeds this threshold, `memory_alert_triggered` will be `true` in statistics.
+
+**Telemetry metrics:**
+
+- **`CEDARLING_METRICS_COLLECTION`** : `enabled` | `disabled`. Whether to enable local collection of telemetry metrics, exposed via the `drain_metrics` API. `drain_metrics` is a destructive read: it returns a snapshot of the metrics and resets the interval window, so use a single consumer. It takes effect only when no Lock telemetry ticker is active; setting `CEDARLING_LOCK_TELEMETRY_INTERVAL` to a non-zero value makes the Lock ticker own the collector, even if the Lock server has no telemetry endpoint in which case the local metrics snapshot fails with `LockTelemetry`. Default is `disabled`.
 
 **HTTP client:**
 
@@ -114,7 +126,9 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
 
 - **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. When enabled, this requires the `iss` claim to be present in all tokens and the issuer URL must use the `https` scheme. Loopback hosts (`localhost`, `127.0.0.1`, `::1`) are allowed over plain HTTP so local development is not blocked. Default is `enabled`. **Disabling this is strongly discouraged outside of testing**: a JWT without signature validation is just plain JSON and is trivially spoofable.
 - **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info. Default is `enabled`. If the issuer does not publish a `status_list_endpoint`, status checks are skipped gracefully for that issuer.
-- **`CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX`** : Upper bound on the Status List JWT refresh interval, in seconds. When the Status List JWT fetched from the issuer carries a `ttl` claim (per the IETF `oauth-status-list` spec), the effective refresh interval is `min(jwt_ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)` — the issuer can always request a *more frequent* refresh, but never a less frequent one. When the JWT omits `ttl`, this value is used directly. A value of `0` or an unset variable resolves to the built-in default (`300` seconds) so the status list cannot silently go stale forever. Non-zero values below `5` are clamped to `5`.
+- **`CEDARLING_STRICT_SCHEMA_VALIDATION`** : `enabled` | `disabled` -- When `enabled` (default), a Cedar schema is required and policies/entities are validated against it (current behavior). When `disabled`, Cedarling runs without schema-based validation, allowing quick-start and prototyping without maintaining a schema. If disabled and a schema is present, a warning is logged that the schema is loaded but not enforced. Default is `enabled`. **Disabling this removes the load-time guard on attribute names and types.** Typos in policies will silently fail to match and claim/attribute types are not validated. **Keep enabled outside of prototyping**.
+- **`CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS`** : Timeout in milliseconds applied to the custom token processor call for **non-JWT** custom tokens. `0` (default) disables the timeout.
+- **`CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX`** : Upper bound on the Status List JWT refresh interval, in seconds. When the Status List JWT fetched from the issuer carries a `ttl` claim (per the IETF `oauth-status-list` spec), the effective refresh interval is `min(jwt_ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)` — the issuer can always request a *more frequent* refresh, but never a less frequent one. When the JWT omits `ttl`, this value is used directly. A value of `0` or an unset variable resolves to the built-in default (`300` seconds) so the status list cannot silently go stale forever. Non-zero values below `5` are clamped to `5`. **Fail-closed semantics**: if a background refresh fails (network error, 5xx, invalid status list body) the cached status list is dropped and all tokens that depend on it are rejected until the next successful refresh. This ensures a revoked token is never accepted based on stale data at the cost of temporarily denying valid tokens when the status endpoint is unreachable.
 - **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.
 - **`CEDARLING_LOCAL_JWKS`** : Path to a local file containing a JWKS. Keys from this file are loaded at startup and added to the key store before fetching remote issuer keys. Useful for development, testing, or air-gapped environments. Only used when `CEDARLING_JWT_SIG_VALIDATION` is `enabled`.
 - **`CEDARLING_JWKS_REFRESH_INTERVAL`** : Optional override for JWKS periodic refresh interval in seconds. When set, overrides the `Cache-Control: max-age` from the JWKS endpoint. If omitted, the server-driven interval or a 1-hour fallback is used.

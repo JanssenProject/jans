@@ -1,0 +1,82 @@
+name: "Test: sigstore-verifier conformance scan and WASM build"
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "jans-cedarling/sigstore-verifier/**"
+permissions:
+  contents: read
+
+jobs:
+  conformance_scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        path: jans
+    - name: Checkout sigstore-conformance test assets
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        repository: sigstore/sigstore-conformance
+        # Pinned commit, not a branch — this is test-fixture data, not code we
+        # trust to execute, but pin it anyway for reproducible CI runs.
+        ref: 080de1d994486b318459dfb6cb0724a4f8d62f7b
+        path: sigstore-conformance
+        persist-credentials: false
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      with:
+        workspaces: jans/jans-cedarling
+    # sigstore-verifier is a standalone, protobuf-free crate — no `protoc`
+    # needed here, unlike the rest of the jans-cedarling workspace.
+    - name: Run sigstore-verifier conformance scan
+      working-directory: jans/jans-cedarling
+      # tests/conformance_scan.rs is inert (silently skips) unless this env
+      # var is set — it's already exercised (as a no-op) by the main
+      # jans-cedarling test suite, this is what makes it do something.
+      env:
+        SIGSTORE_CONFORMANCE_DIR: ${{ github.workspace }}/sigstore-conformance/test/assets/bundle-verify
+      run: cargo test --locked -p sigstore-verifier --test conformance_scan -- --nocapture
+
+  # `wasm32-unknown-unknown` support is the reason this crate exists rather
+  # than a `sigstore-rs` dependency, and it is an acceptance criterion of
+  # issue #14465 — but nothing in CI built it for wasm. The workspace's other
+  # wasm steps are all scoped to `-p cedarling_wasm`, and no workspace crate
+  # depends on `sigstore-verifier`, so it got no coverage transitively either.
+  wasm_build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+        targets: wasm32-unknown-unknown
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      with:
+        workspaces: jans-cedarling
+    - name: Build sigstore-verifier for wasm32-unknown-unknown
+      working-directory: jans-cedarling
+      # `+stable` is required: jans-cedarling/rust-toolchain.toml pins 1.95.0,
+      # so plain `cargo` here would use that toolchain, while the step above
+      # installed the wasm target for stable — the build would fail with
+      # "can't find crate for `core`". test-cedarling.yml's wasm clippy step
+      # selects the toolchain the same way for the same reason.
+      run: cargo +stable build --locked -p sigstore-verifier --target wasm32-unknown-unknown

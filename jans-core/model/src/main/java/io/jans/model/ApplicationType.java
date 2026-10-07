@@ -19,13 +19,12 @@ import io.jans.orm.annotation.AttributeEnum;
 public enum ApplicationType implements AttributeEnum {
 
     OX_AUTH("jans_auth", "Jans Auth"),
-    OX_TRUST("oxtrust", "oxTrust"),
     FIDO2("fido2", "FIDO2"),
     SCIM("scim", "SCIM"),
-    CACHE_REFRESH("link_interception", "Link Interception"),
-    JANS_CONFIG_API("jans_config_api", "Jans Config API"),
-    JANS_CLIENT_API("jans_client_api", "Jans Client API"),
-    JANS_LOCK("jans_lock", "Jans Lock");
+    CACHE_REFRESH("link", "Link Interception"),
+    JANS_CONFIG_API("config_api", "Jans Config API"),
+    JANS_CLIENT_API("client_api", "Jans Client API"),
+    JANS_LOCK("lock", "Jans Lock");
 
     private String value;
     private String displayName;

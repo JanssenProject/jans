@@ -13,6 +13,13 @@ tags:
 The procedures for running the Janssen integration test suite against an installed
 Janssen Server.
 
+!!! tip "Automated alternative"
+    The integration suite also runs in CI via the
+    [`test-integration.yml`](https://github.com/JanssenProject/jans/blob/main/.github/workflows/test-integration.yml)
+    workflow, which provisions an all-in-one (AIO) server with the test data pre-loaded. To run a
+    local AIO instead of the manual VM install below, use `automation/start_janssen_aio_demo.sh`.
+    This guide covers the manual VM-based workflow.
+
 ## Component Setup
 
 Instructions in this guide can be used if Janssen Server is installed on a VM.
