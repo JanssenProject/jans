@@ -47,14 +47,14 @@ Open a kubectl shell from the top right navigation menu `>_` and run:
 === "MySQL"
 
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
+    wget https://raw.githubusercontent.com/JanssenProject/jans/v2.5.0/automation/mysql.yaml
     kubectl apply -f mysql.yaml # adjust values as preferred
     ```
 
 === "PostgreSQL"
 
     ```bash 
-    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
+    wget https://raw.githubusercontent.com/JanssenProject/jans/v2.5.0/automation/pgsql.yaml
     kubectl apply -f pgsql.yaml # adjust values as preferred
     ```
 

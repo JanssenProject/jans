@@ -23,7 +23,7 @@ https://jans-dynamic-mysql/jans-auth/restv1/revoke
 ```
 
 More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v2.5.0/jans-auth-server/docs/swagger.yaml#/Token/revoke).
 
 
 

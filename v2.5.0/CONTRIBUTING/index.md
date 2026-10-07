@@ -272,13 +272,13 @@ Above command contains references to the release number at two places. `v1.1.4` 
 name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
 make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.
 
-To avoid this manual, error-prone approach the Janssen Project uses a release marker, `replace-janssen-version` instead
+To avoid this manual, error-prone approach the Janssen Project uses a release marker, `2.5.0` instead
 of writing actual release numbers in the `head`(latest) documentation branch. So, when there is a need to mention the release number, instead of
 writing the actual release number, use the release marker. Let's see how to document the above command (at the `head` version)
 so that it stays up-to-date release after release.
 
 ```bash
-wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
+wget https://github.com/JanssenProject/jans/releases/download/v2.5.0/jans_2.5.0.ubuntu20.04_amd64.deb -P /tmp
 ```
 
 !!! Warning
