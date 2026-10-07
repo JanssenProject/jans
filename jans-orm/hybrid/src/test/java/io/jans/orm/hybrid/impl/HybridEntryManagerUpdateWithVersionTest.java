@@ -23,8 +23,8 @@ import io.jans.orm.exception.UnsupportedOperationException;
 import io.jans.orm.exception.VersionMismatchException;
 
 /**
- * Unit tests for {@link HybridEntryManager#updateWithVersion(Object)} -- task 06. No live DB: the
- * delegate resolution ({@code getEntryManagerForDn}) is exercised against mocked
+ * Unit tests for {@link HybridEntryManager#updateWithVersion(Object)}. No live DB: the delegate
+ * resolution ({@code getEntryManagerForDn}) is exercised against mocked
  * {@link PersistenceEntryManager} sub-managers, same as {@code merge}/{@code persist} already do.
  */
 public class HybridEntryManagerUpdateWithVersionTest {

@@ -24,9 +24,9 @@ import com.unboundid.ldap.sdk.Modification;
 import io.jans.orm.exception.UnsupportedOperationException;
 
 /**
- * Unit test for task 05 acceptance criterion 4: the RFC 4528 assertion-control capability check
- * in {@link LdapOperationServiceImpl#updateEntryWithVersion} must reject -- before sending any
- * modify request -- when the connected server does not advertise the control. No live server:
+ * The RFC 4528 assertion-control capability check in
+ * {@link LdapOperationServiceImpl#updateEntryWithVersion} must reject -- before sending any modify
+ * request -- when the connected server does not advertise the control. No live server:
  * {@link LdapConnectionProvider} is mocked directly, since its own capability check
  * ({@code isSupportsAssertionRequestControl}) is exactly the thing being stood in for.
  */

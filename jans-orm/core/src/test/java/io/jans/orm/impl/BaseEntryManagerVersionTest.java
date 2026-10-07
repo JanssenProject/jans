@@ -65,7 +65,7 @@ public class BaseEntryManagerVersionTest {
 		VersionedEntry entry = new VersionedEntry();
 		entry.setDn("o=test");
 		entry.setUid("same");
-		// Stale in-memory value -- merge() must bump off the DB value (5), not this one (D-7).
+		// Stale in-memory value -- merge() must bump off the DB value (5), not this one.
 		entry.setVersion(3L);
 
 		entryManager.merge(entry);

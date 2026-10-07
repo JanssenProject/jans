@@ -252,7 +252,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
             List<AttributeDataModification> modifications = buildSqlModifications(baseObjectClass, attributeDataModifications);
             String internalVersionAttributeName = toInternalAttribute(baseObjectClass, versionAttributeName);
 
-            // Unlike merge(), this call must never be skipped for an empty diff (D-8) -- the version
+            // Unlike merge(), this call must never be skipped for an empty diff -- the version
             // bump (and therefore the CAS check) always has to reach the database.
             return getOperationService().updateEntryWithVersion(toSQLKey(dn).getKey(), baseObjectClass, modifications,
                     internalVersionAttributeName, expectedVersionValue);

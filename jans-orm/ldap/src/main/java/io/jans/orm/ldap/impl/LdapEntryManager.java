@@ -228,7 +228,7 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
         try {
             List<Modification> modifications = buildLdapModifications(attributeDataModifications);
 
-            // Unlike merge(), this call must never be skipped for an empty diff (D-8) -- the version
+            // Unlike merge(), this call must never be skipped for an empty diff -- the version
             // bump (and therefore the CAS check) always has to reach the server.
             return getOperationService().updateEntryWithVersion(dn, modifications, versionAttributeName, expectedVersionValue);
         } catch (ConnectionException ex) {
