@@ -1019,11 +1019,10 @@ impl Authz {
                 self.config.metrics.record_authz_error();
             })?;
 
-        // `&validated` derefs to the validated-token map the entity builder expects.
         let setup_entities = self
             .config
             .entity_builder
-            .build_multi_issuer_setup_entities(&validated, self.config.log_service.as_ref())
+            .build_multi_issuer_setup_entities(&validated.tokens, self.config.log_service.as_ref())
             .map_err(|e| {
                 self.config.metrics.record_error(&e);
                 self.config.metrics.record_authz_error();
@@ -1274,6 +1273,7 @@ impl Authz {
             .await?;
 
         let principal_types: HashSet<cedar_policy::EntityTypeName> = validated_tokens
+            .tokens
             .keys()
             .map(|mapping| {
                 cedar_policy::EntityTypeName::from_str(mapping)

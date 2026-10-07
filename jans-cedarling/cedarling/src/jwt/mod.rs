@@ -193,13 +193,9 @@ enum TokenOutcome {
     Dropped(DropReason),
 }
 
-/// Result of [`JwtService::validate_multi_issuer_tokens`].
-///
-/// Primarily the map of validated tokens keyed by mapping (it [`Deref`]s to it
-/// so existing map access keeps working), plus the drop metadata the caller
-/// threads into the authorization result and decision log.
-///
-/// [`Deref`]: std::ops::Deref
+/// Result of [`JwtService::validate_multi_issuer_tokens`]: the validated tokens
+/// plus the drop metadata the caller threads into the authorization result and
+/// decision log. Access the fields explicitly (e.g. `result.tokens`).
 #[derive(Debug)]
 pub(crate) struct ValidatedMultiIssuerTokens {
     /// Validated tokens keyed by their mapping (token name).
@@ -208,14 +204,6 @@ pub(crate) struct ValidatedMultiIssuerTokens {
     pub indices: HashMap<String, usize>,
     /// Tokens dropped during validation, in input order.
     pub dropped: Vec<DroppedToken>,
-}
-
-impl std::ops::Deref for ValidatedMultiIssuerTokens {
-    type Target = HashMap<String, Arc<Token>>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.tokens
-    }
 }
 
 impl JwtService {
@@ -1260,7 +1248,7 @@ mod test {
             .await
             .expect("custom token should validate");
         assert!(
-            out.contains_key("Acme::CustomToken"),
+            out.tokens.contains_key("Acme::CustomToken"),
             "validated output should contain the custom token under its mapping name"
         );
 
@@ -1343,12 +1331,12 @@ mod test {
             .await
             .expect("a non-required custom failure must not fail the whole request");
         assert_eq!(
-            out.len(),
+            out.tokens.len(),
             1,
             "only the succeeding custom token should be kept; the failing one must be skipped"
         );
         assert!(
-            out.contains_key("Ok::T"),
+            out.tokens.contains_key("Ok::T"),
             "the output should contain the token from the succeeding custom issuer"
         );
     }
@@ -1507,7 +1495,7 @@ mod test {
             .await
             .expect("a custom token whose exp is in the future should validate");
         assert!(
-            validated.contains_key("Acme::CustomToken"),
+            validated.tokens.contains_key("Acme::CustomToken"),
             "an unexpired custom token should reach the validated token map"
         );
     }
@@ -1571,7 +1559,7 @@ mod test {
             .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
             .await
             .expect("no timeout -> slow processor completes");
-        assert!(out.contains_key("Acme::CustomToken"));
+        assert!(out.tokens.contains_key("Acme::CustomToken"));
         assert_eq!(calls.load(Ordering::SeqCst), 1);
     }
 
@@ -1649,7 +1637,7 @@ mod test {
             .await;
         assert!(result.is_ok());
 
-        let validated_tokens = result.unwrap();
+        let validated_tokens = result.unwrap().tokens;
         assert_eq!(validated_tokens.len(), 2);
 
         // Verify the tokens have the correct mapping
@@ -1788,7 +1776,7 @@ mod test {
             .await;
         assert!(result.is_ok());
 
-        let validated_tokens = result.unwrap();
+        let validated_tokens = result.unwrap().tokens;
         assert_eq!(validated_tokens.len(), 1); // Only the valid token should be returned
     }
 
@@ -1857,7 +1845,7 @@ mod test {
             .await;
         assert!(result.is_ok());
 
-        let validated_tokens = result.unwrap();
+        let validated_tokens = result.unwrap().tokens;
         assert_eq!(validated_tokens.len(), 1); // Only the first token should be returned (graceful validation)
     }
 
