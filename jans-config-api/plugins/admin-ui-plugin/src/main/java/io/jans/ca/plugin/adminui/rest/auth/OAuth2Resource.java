@@ -101,7 +101,7 @@ public class OAuth2Resource {
                             "; Path=/" +
                             "; HttpOnly" +
                             "; Secure" +
-                            "; SameSite=None";
+                            "; SameSite=Strict";
             oAuth2Service.setAdminUISession(sessionId, apiTokenRequest.getUjwt());
 
             return Response.ok(CommonUtils.createGenericResponse(true, 200, "Admin UI Session created successfully."))
@@ -149,7 +149,7 @@ public class OAuth2Resource {
                             "; Max-Age=0" +
                             "; HttpOnly" +
                             "; Secure" +
-                            "; SameSite=None";
+                            "; SameSite=Strict";
 
             // Return a response with the new, invalidated cookie
             return Response.ok(CommonUtils.createGenericResponse(true, 200, "Admin UI Session revoked successfully."))

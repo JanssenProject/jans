@@ -40,7 +40,11 @@ public class ErrorResponseFactory implements Configuration {
     }
 
     private WebApplicationException createWebApplicationException(Response.Status status, IErrorType type, String reason, Throwable e) {
-        WebApplicationException error = new WebApplicationException(Response
+        // The cause is attached, not just logged. The response — status, media type and the
+        // {status:"failed", errorMessage:"..."} envelope — is byte-for-byte what it was before; the
+        // cause is only visible server-side, where it lets a failure carry structured detail (such as
+        // an attestation trust diagnostic) out to the code that records metrics.
+        WebApplicationException error = new WebApplicationException(e, Response
                 .status(status)
                 .entity(errorAsJson(type, reason))
                 .type(MediaType.APPLICATION_JSON_TYPE)

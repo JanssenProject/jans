@@ -237,6 +237,104 @@ pub unsafe extern "C" fn cedarling_authorize_multi_issuer(
     })
 }
 
+/// Authorize a batch of unsigned requests (JSON body).
+///
+/// The request body is a JSON object of the shape
+/// `{ "principal": {...} | null, "items": [ { "resource": {...}, "action": "...",
+/// "context": {...} }, ... ] }`. The response body carries `batch_id` (UUIDv7
+/// string) alongside `results` — one `AuthorizeResult` per input item, in
+/// input order. Batch-level failures (validation, principal parse) return an
+/// error; per-item failures are returned as `Err` (`BatchItemError`) entries
+/// that callers must inspect without failing the whole call.
+///
+/// # Safety
+///
+/// - `request_json` must be a valid NUL-terminated UTF-8 C string.
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn cedarling_authorize_unsigned_batch(
+    instance_id: u64,
+    request_json: *const c_char,
+    result: *mut CedarlingResult,
+) -> c_int {
+    ffi_guard_int!({
+        clear_last_error();
+        if result.is_null() {
+            set_last_error("null result pointer");
+            return CedarlingErrorCode::InvalidArgument as c_int;
+        }
+        if request_json.is_null() {
+            unsafe {
+                *result = CedarlingResult::error(
+                    CedarlingErrorCode::InvalidArgument,
+                    "null request_json pointer",
+                );
+            }
+            return CedarlingErrorCode::InvalidArgument as c_int;
+        }
+
+        let request_str = match c_string_to_string(request_json) {
+            Ok(s) => s,
+            Err(code) => unsafe {
+                *result = CedarlingResult::error(code, "Invalid request JSON string");
+                return code as c_int;
+            },
+        };
+
+        let auth_result = authorize_unsigned_batch(instance_id, &request_str);
+        unsafe { *result = auth_result };
+        unsafe { (*result).error_code as c_int }
+    })
+}
+
+/// Authorize a batch of multi-issuer requests (JSON body).
+///
+/// The request body is a JSON object of the shape `{ "tokens": [...],
+/// "items": [...] }`. Response semantics mirror
+/// [`cedarling_authorize_unsigned_batch`]: shared `batch_id` + per-item
+/// results, batch-level errors fail the whole call, per-item failures
+/// are returned as `Err` (`BatchItemError`) entries that callers must inspect.
+///
+/// # Safety
+///
+/// - `request_json` must be a valid NUL-terminated UTF-8 C string.
+/// - `result` must point to writable [`CedarlingResult`] storage; release with [`cedarling_free_result`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn cedarling_authorize_multi_issuer_batch(
+    instance_id: u64,
+    request_json: *const c_char,
+    result: *mut CedarlingResult,
+) -> c_int {
+    ffi_guard_int!({
+        clear_last_error();
+        if result.is_null() {
+            set_last_error("null result pointer");
+            return CedarlingErrorCode::InvalidArgument as c_int;
+        }
+        if request_json.is_null() {
+            unsafe {
+                *result = CedarlingResult::error(
+                    CedarlingErrorCode::InvalidArgument,
+                    "null request_json pointer",
+                );
+            }
+            return CedarlingErrorCode::InvalidArgument as c_int;
+        }
+
+        let request_str = match c_string_to_string(request_json) {
+            Ok(s) => s,
+            Err(code) => unsafe {
+                *result = CedarlingResult::error(code, "Invalid request JSON string");
+                return code as c_int;
+            },
+        };
+
+        let auth_result = authorize_multi_issuer_batch(instance_id, &request_str);
+        unsafe { *result = auth_result };
+        unsafe { (*result).error_code as c_int }
+    })
+}
+
 // Context Data API functions
 
 /// Push context data (JSON value) under `key` with optional TTL in seconds.
@@ -903,6 +1001,45 @@ pub unsafe extern "C" fn cedarling_total_issuers(instance_id: u64, out_count: *m
                 *out_count = 0;
                 code as c_int
             },
+        }
+    })
+}
+
+/// Write the ID of the currently published policy store into `*out_id`.
+///
+/// On success `*out_id` is either an owned string or null when the store carries
+/// no ID. The value is opaque and source-dependent, and may change after a
+/// background refresh. On error `*out_id` is set to null.
+///
+/// # Safety
+///
+/// - `out_id` must point to writable `char*` storage.
+/// - A non-null `*out_id` must be freed once with [`cedarling_free_string`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn cedarling_get_policy_store_id(
+    instance_id: u64,
+    out_id: *mut *mut c_char,
+) -> c_int {
+    ffi_guard_int!({
+        clear_last_error();
+        if out_id.is_null() {
+            set_last_error("null out_id pointer");
+            return CedarlingErrorCode::InvalidArgument as c_int;
+        }
+        unsafe { *out_id = ptr::null_mut() };
+        match policy_store_id(instance_id) {
+            Ok(None) => CedarlingErrorCode::Success as c_int,
+            Ok(Some(id)) => match std::ffi::CString::new(id) {
+                Ok(c_id) => unsafe {
+                    *out_id = c_id.into_raw();
+                    CedarlingErrorCode::Success as c_int
+                },
+                Err(_) => {
+                    set_last_error("policy store ID contains an interior NUL byte");
+                    CedarlingErrorCode::Internal as c_int
+                },
+            },
+            Err(code) => code as c_int,
         }
     })
 }

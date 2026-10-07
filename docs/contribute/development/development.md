@@ -116,7 +116,7 @@ Please refer to the instructions [here](../../cedarling/tutorials/rust.md#buildi
       ```shell
       cd jans-linux-setup
       ```
- 2. Use the [setup package binding](../../../jans-linux-setup#installation) instructions to build setup package
+ 2. Use the [setup package binding](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/README.md#installation) instructions to build setup package
 
 ### Build jans-cli-tui
 
@@ -125,8 +125,7 @@ Please refer to the instructions [here](../../cedarling/tutorials/rust.md#buildi
       ```shell
       cd jans-cli-tui
       ```
- 2. Use the [jans-cli-tui package binding guide](../../../jans-cli-tui#installation) to build TUI package
-
+ 2. Use the [jans-cli-tui package binding guide](https://github.com/JanssenProject/jans/blob/main/jans-cli-tui/README.md#installation) to build TUI package
 ## Next steps:
 
 - [Setup local development workspace using Eclipse](./local-run-under-eclipse.md)

@@ -276,13 +276,13 @@
         <dependency>
             <groupId>com.fasterxml</groupId>
             <artifactId>aalto-xml</artifactId>
-            <version>1.3.4</version>
+            <version>1.4.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
-            <version>1.6.7</version>
+            <version>1.6.8</version>
         </dependency>
 
         <dependency>

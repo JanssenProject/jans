@@ -62,6 +62,9 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	private Logger log;
 
 	@Inject
+	private io.jans.fido2.service.RpPolicyService rpPolicyService;
+
+	@Inject
 	private CommonVerifiers commonVerifiers;
 
 	@Inject
@@ -106,8 +109,8 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	    userVerificationVerifier.verifyUserPresent(authData);
 	    commonVerifiers.verifyRpIdHash(authData, registration.getOrigin());
 
-	    if (isAttestationModeEnabled()) {
-	        processAttestation(attStmt, authData, clientDataHash, signature, credIdAndCounters, alg);
+	    if (isAttestationModeEnabled(registration.getRpId())) {
+	        processAttestation(attStmt, authData, clientDataHash, signature, credIdAndCounters, alg, registration.getRpId());
 	    } else {
 	        log.debug("In Global fido configuration, AttestationMode is DISABLED, hence skipping the attestation check");
 	    }
@@ -115,16 +118,16 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	    setCredIdAndCounters(authData, credIdAndCounters);
 	}
 
-	private boolean isAttestationModeEnabled() {
-	    return !appConfiguration.getFido2Configuration().getAttestationMode()
-	            .equalsIgnoreCase(AttestationMode.DISABLED.getValue());
+	private boolean isAttestationModeEnabled(String origin) {
+	    return !AttestationMode.DISABLED.getValue()
+	            .equalsIgnoreCase(rpPolicyService.resolveAttestationMode(origin));
 	}
 
 	private void processAttestation(JsonNode attStmt, AuthData authData, byte[] clientDataHash, String signature,
-	        CredAndCounterData credIdAndCounters, int alg) {
+	        CredAndCounterData credIdAndCounters, int alg, String origin) {
 	    
 	    if (attStmt.hasNonNull("x5c")) {
-	        processX5cAttestation(attStmt, authData, clientDataHash, signature, credIdAndCounters, alg);
+	        processX5cAttestation(attStmt, authData, clientDataHash, signature, credIdAndCounters, alg, origin);
 	    } else if (attStmt.hasNonNull("ecdaaKeyId")) {
 	        processEcdaaKeyIdAttestation(attStmt);
 	    } else {
@@ -133,7 +136,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	}
 
 	private void processX5cAttestation(JsonNode attStmt, AuthData authData, byte[] clientDataHash, String signature,
-	        CredAndCounterData credIdAndCounters, int alg) {
+	        CredAndCounterData credIdAndCounters, int alg, String origin) {
 	    Iterator<JsonNode> certificatesIterator = attStmt.get("x5c").elements();
 	    ArrayList<String> certificatePath = new ArrayList<>();
 	    
@@ -153,7 +156,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	    credIdAndCounters.setSignatureAlgorithm(alg);
 	    
 	    try {
-	        JsonNode metaData = getMetaDataFromCertificates(certificates);
+	        JsonNode metaData = getMetaDataFromCertificates(certificates, origin);
 	        List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates(metaData, certificates);
 
 	        X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
@@ -168,14 +171,14 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	    }
 	}
 
-	private JsonNode getMetaDataFromCertificates(List<X509Certificate> certificates) throws Exception {
+	private JsonNode getMetaDataFromCertificates(List<X509Certificate> certificates, String origin) throws Exception {
 	    for (X509Certificate cert : certificates) {
 	        X509CertificateHolder certificateHolder = convertToX509CertificateHolder(cert);
 	        Extension ext = certificateHolder.getExtension(Extension.subjectKeyIdentifier);
 
 	        if (ext != null) {
 	            byte[] ski = ext.getExtnValue().getEncoded();
-	            return attestationCertificateService.getMetadataForU2fAuthenticator(bytesToHex(ski));
+	            return attestationCertificateService.getMetadataForU2fAuthenticator(bytesToHex(ski), origin);
 	        }
 	    }
 	    log.debug("Ski not present in MDS3");

@@ -19,23 +19,14 @@ without typing a username or password. The browser detects registered passkeys a
 as autofill suggestions on the username field. If Conditional UI is unavailable or fails, the
 flow falls back gracefully to traditional authentication methods.
 
-```text
-┌──────────────────────────────────────────────────────────────────────┐
-│                     Authentication Flow                              │
-│                                                                      │
-│  ┌─────────────┐    Browser supports    ┌──────────────────────┐    │
-│  │  Login Page │──  Conditional UI? ──▶│  Conditional UI Flow │    │
-│  └─────────────┘         Yes            └──────────────────────┘    │
-│         │                                          │                 │
-│         │ No                               Success │ Failure         │
-│         ▼                                          ▼                 │
-│  ┌─────────────────────┐            ┌─────────────────────────┐     │
-│  │ Username + Password │            │   Fallback Strategies   │     │
-│  └─────────────────────┘            └─────────────────────────┘     │
-└──────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A[Login Page] --> B{Browser Supports Conditional UI?}
+    B -->|Yes| C[Conditional UI Flow]
+    B -->|No| D[Username + Password]
+    C -->|Success| E[Use passkey]
+    C -->|Failure| F[Fallback Strategies]
 ```
-
----
 
 ## How Conditional UI Works
 
@@ -80,12 +71,12 @@ The check requires two conditions:
 
 ### Step 2 — Preparing Assertion Options
 
-`Fido2ExternalAuthenticator.py` prepares the assertion request in `prepareForStep` (step 1).
+`PasskeyInterceptionScript.py` prepares the assertion request in `prepareForStep` (step 1).
 It reads the `allowList` cookie to populate `allowCredentials`, which tells the browser which
 passkeys to surface in autofill:
 
 ```python
-# Fido2ExternalAuthenticator.py — prepareForStep, step 1
+# PasskeyInterceptionScript.py — prepareForStep, step 1
 assertionRequest = AssertionOptions()
 assertionRequest.setRpId(domain)
 assertionRequest.setAllowCredentials(Arrays.asList(allowList))  # from cookie
@@ -134,10 +125,10 @@ knows to use it as the anchor for passkey autofill suggestions:
 ### Step 5 — Server-Side Verification
 
 When the user selects a passkey, the browser returns a credential response. The login page
-submits this to the server, and `Fido2ExternalAuthenticator.py` verifies it:
+submits this to the server, and `PasskeyInterceptionScript.py` verifies it:
 
 ```python
-# Fido2ExternalAuthenticator.py — authenticate, step 1
+# PasskeyInterceptionScript.py — authenticate, step 1
 if token_response is not None:
     identity.setWorkingParameter("conditionalUI", "true")
     assertionService = Fido2ClientFactory.instance().createAssertionService(self.metaDataConfiguration)
@@ -154,7 +145,7 @@ if token_response is not None:
 challenge page needed) and 2 for the standard username/password + FIDO flow:
 
 ```python
-# Fido2ExternalAuthenticator.py
+# PasskeyInterceptionScript.py
 def getCountAuthenticationSteps(self, configurationAttributes):
     identity = CdiUtil.bean(Identity)
     conditionalUI = identity.getWorkingParameter("conditionalUI")
@@ -192,7 +183,7 @@ It stores credential descriptors on the client without linking them to a usernam
 The cookie is set with the following protections:
 
 ```python
-# Fido2ExternalAuthenticator.py — persistCookie
+# PasskeyInterceptionScript.py — persistCookie
 coo = Cookie("allowList", value)
 coo.setSecure(True)    # HTTPS-only transmission
 coo.setHttpOnly(True)  # Not accessible via JavaScript
@@ -211,7 +202,7 @@ coo.setSameSite("Strict")  # CSRF protection — use "Lax" if cross-site navigat
 After a successful registration (attestation), the new credential is added to the cookie:
 
 ```python
-# Fido2ExternalAuthenticator.py — authenticate, step 2 (enroll path)
+# PasskeyInterceptionScript.py — authenticate, step 2 (enroll path)
 attestationResponse = json.loads(attestationStatusEntity)
 new_credential = attestationResponse.get("credential")
 self.persistCookie(new_credential)
@@ -222,7 +213,7 @@ self.persistCookie(new_credential)
 The cookie is read at the start of each session to build the `allowCredentials` list:
 
 ```python
-# Fido2ExternalAuthenticator.py — getCookieValue
+# PasskeyInterceptionScript.py — getCookieValue
 for cookie in httpRequest.getCookies():
     if cookie.getName() == "allowList":
         value = Base64Util.base64urldecodeToString(cookie.getValue())
@@ -311,7 +302,7 @@ falls back to username/password.
 **What the script does**:
 
 ```python
-# Fido2ExternalAuthenticator.py — prepareForStep, step 1
+# PasskeyInterceptionScript.py — prepareForStep, step 1
 allowList = self.getCookieValue()  # Returns [] if no cookie
 assertionRequest.setAllowCredentials(Arrays.asList(allowList))  # Empty list
 ```
@@ -524,14 +515,14 @@ the standard form submission.
 
 ### Messaging
 
-| Situation | Recommended Message |
-|---|---|
-| Passkey autofill shown | *(No message needed — browser handles it)* |
-| Browser unsupported | "For faster sign-in, upgrade to a browser that supports passkeys." |
-| No passkey on device | "Sign in with your password, then add a passkey for next time." |
-| Stale passkey | "That passkey is no longer valid. Please use your password." |
+| Situation | Recommended Message                                                              |
+|---|---                                                                                       |
+| Passkey autofill shown | *(No message needed — browser handles it)*                          |
+| Browser unsupported | "For faster sign-in, upgrade to a browser that supports passkeys."     |
+| No passkey on device | "Sign in with your password, then add a passkey for next time."       |
+| Stale passkey | "That passkey is no longer valid. Please use your password."                 |
 | After successful registration | "Passkey added! You'll be able to sign in faster next time." |
-| Security key prompt | "Insert your security key and press its button." |
+| Security key prompt | "Insert your security key and press its button."                       |
 
 ### Flow Design Principles
 
@@ -553,7 +544,7 @@ the standard form submission.
 ### Step 1 — Registration (Writing the allowList Cookie)
 
 When a user registers a new passkey, persist the credential to the `allowList` cookie.
-Use the `Fido2ExternalAuthenticator.py` as a reference. The key points:
+Use `PasskeyInterceptionScript.py` as a reference. The key points:
 
 ```python
 # After successful attestation:
@@ -651,14 +642,12 @@ If the Fido2 metrics service reports a high fallback rate, investigate:
 
 ## Related Documentation
 
-- [Passwordless Login Experience](passwordlessLoginExperience.md) — sequence diagrams
-  and quick-start guide for usernameless login
-- [FIDO2 Configuration](config.md) — server-side configuration parameters including
+- [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md) — practical, step-by-step developer deployment guide
+- [FIDO2 Configuration](../config-guide/fido2-config/janssen-fido2-configuration.md) — server-side configuration parameters including
   attestation mode, hints, and algorithm support
 - [Vendor Metadata](vendor-metadata.md) — FIDO MDS3 integration and attestation
   validation
-- [Types of Credentials](types-of-creds.md) — authenticator hints and credential types
 - [FIDO Logs](logs.md) — logging configuration for FIDO2 server diagnostics
-- [Fido2ExternalAuthenticator.py](../../../script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) — reference implementation
+- [PasskeyInterceptionScript.py](../../script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) — reference implementation
 - [passkeys.dev Device Support](https://passkeys.dev/device-support/) — live browser and
   OS compatibility matrix

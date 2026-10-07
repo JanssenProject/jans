@@ -175,13 +175,13 @@ Set up your identity platform with the configuration tools.
 === "TUI (Terminal User Interface)"
 
     ```bash
-    sudo /opt/jans/bin/jans-tui.py
+    sudo /opt/jans/jans-cli/jans_cli_tui.py
     ```
 
 === "Command Line"
 
     ```bash
-    sudo /opt/jans/bin/jans-cli.py
+    /opt/jans/jans-cli/config-cli.py
     ```
 
 === "Terraform"

@@ -39,11 +39,11 @@ function emit(row) {
 }
 
 function buildConfig(scenario, repoRoot) {
-  // WASM accepts the policy store inline; convert YAML on the host.
+  // WASM accepts the policy store inline; pass YAML directly.
   const policyStorePath = path.join(repoRoot, scenario.policy_store_fn);
   return {
     ...(scenario.config_overrides || {}),
-    CEDARLING_POLICY_STORE_LOCAL: yamlFileToJsonString(policyStorePath),
+    CEDARLING_POLICY_STORE_LOCAL: fs.readFileSync(policyStorePath, "utf8"),
   };
 }
 
@@ -71,11 +71,83 @@ function buildRequest(scenario) {
       context: ctx,
     };
   }
+  if (scenario.kind === "unsigned_batch") {
+    const req = { items: buildBatchItems(scenario, ctx) };
+    if (scenario.principal) {
+      req.principal = scenario.principal;
+    }
+    return req;
+  }
+  if (scenario.kind === "multi_issuer_batch") {
+    return {
+      tokens: scenario.tokens || [],
+      items: buildBatchItems(scenario, ctx),
+    };
+  }
   throw new Error(`unknown scenario kind: ${scenario.kind}`);
+}
+
+// Clones the fixture resource item_count times with distinct entity ids
+// (base id suffixed `-0..-N-1`) so each item is a distinct authorization.
+function buildBatchItems(scenario, ctx) {
+  const n = scenario.item_count ?? 0;
+  if (n <= 0) {
+    throw new Error("item_count must be > 0 for a batch scenario");
+  }
+  const base = scenario.resource;
+  const baseMapping = base.cedar_entity_mapping;
+  const baseId = baseMapping.id;
+  const items = new Array(n);
+  for (let i = 0; i < n; i += 1) {
+    items[i] = {
+      resource: {
+        ...base,
+        cedar_entity_mapping: {
+          entity_type: baseMapping.entity_type,
+          id: `${baseId}-${i}`,
+        },
+      },
+      action: scenario.action,
+      context: ctx,
+    };
+  }
+  return items;
+}
+
+function batchAllAllow(results) {
+  if (!results || results.length === 0) return false;
+  for (const r of results) {
+    if (!r.is_ok) return false;
+    if (!r.unwrap().decision) return false;
+  }
+  return true;
 }
 
 function percentile(sorted, frac) {
   return sorted[Math.floor(sorted.length * frac)];
+}
+
+function pickInvoker(cedarling, scenario, request) {
+  switch (scenario.kind) {
+    case "unsigned":
+      return async () =>
+        (await cedarling.authorizeUnsigned(request)).decision;
+    case "multi_issuer":
+      return async () =>
+        (await cedarling.authorizeMultiIssuer(request)).decision;
+    case "unsigned_batch":
+      return async () =>
+        batchAllAllow(
+          (await cedarling.authorizeUnsignedBatch(request)).results,
+        );
+    case "multi_issuer_batch":
+      return async () =>
+        batchAllAllow(
+          (await cedarling.authorizeMultiIssuerBatch(request)).results,
+        );
+    default:
+      throw new Error(`unknown scenario kind: ${scenario.kind}`);
+  }
 }
 
 async function runScenario(scenario, repoRoot, warmupIters, measureIters) {
@@ -94,12 +166,8 @@ async function runScenario(scenario, repoRoot, warmupIters, measureIters) {
   try {
     const config = buildConfig(scenario, repoRoot);
     const cedarling = await init(config);
-    const request = buildRequest(scenario);
-    const invoke =
-      scenario.kind === "unsigned"
-        ? async () => (await cedarling.authorize_unsigned(request)).decision
-        : async () =>
-            (await cedarling.authorize_multi_issuer(request)).decision;
+    const request = JSON.stringify(buildRequest(scenario));
+    const invoke = pickInvoker(cedarling, scenario, request);
 
     if (!(await invoke())) {
       emit({

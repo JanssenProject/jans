@@ -23,6 +23,7 @@
       "status_list",
       "session_status_list",
       "access_evaluation",
+      "client_id_metadata_document",
       "identity_assertion_authz_grant"
     ],
     "issuer":"${config.oxauth.issuer}",
@@ -76,8 +77,6 @@
     ],
     "grantTypesSupported":[
         "authorization_code",
-        "implicit",
-        "password",
         "client_credentials",
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",

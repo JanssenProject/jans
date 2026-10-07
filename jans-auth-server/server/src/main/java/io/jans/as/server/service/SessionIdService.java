@@ -272,6 +272,9 @@ public class SessionIdService {
                 }
             }
 
+            // New login flow starts - authentication metric of previous flow must not suppress reporting
+            currentSessionAttributes.remove(AuthenticationService.AUTH_METRIC_SUCCESS_REPORTED);
+
             session.setSessionAttributes(currentSessionAttributes);
 
             if (force) {

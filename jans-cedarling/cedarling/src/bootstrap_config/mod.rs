@@ -34,7 +34,7 @@ pub use jwt_config::JwtConfig;
 pub use lock_config::{LockServiceConfig, LockServiceConfigRaw, LockTransport};
 pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};
 pub use policy_store_config::{PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSource};
-pub use raw_config::{BootstrapConfigRaw, FeatureToggle};
+pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -223,8 +223,7 @@ pub enum BootstrapConfigLoadingError {
 
     /// Error returned when multiple policy store sources were provided.
     #[error(
-        "Multiple store options were provided. Make sure you only one of these properties is set: \
-         `CEDARLING_POLICY_STORE_URI` or `CEDARLING_POLICY_STORE_LOCAL`"
+        "Multiple store options were provided. Make sure only one policy store source is configured."
     )]
     ConflictingPolicyStores,
 
@@ -232,8 +231,16 @@ pub enum BootstrapConfigLoadingError {
     #[error("No Policy store was provided.")]
     MissingPolicyStore,
 
+    /// Error returned when attempting to use the legacy JSON policy store format.
+    #[error(
+        "Legacy JSON policy store format is no longer supported. Please migrate to the folder-based policy store format (.cjar archive or directory)."
+    )]
+    LegacyJsonNotSupported,
+
     /// Error returned when the policy store file is in an unsupported format.
-    #[error("Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML")]
+    #[error(
+        "Unsupported policy store file format for: {0}. Supported formats include: YAML, CJAR, or a directory"
+    )]
     UnsupportedPolicyStoreFileFormat(String),
 
     /// Error returned when failing to load a local JWKS
@@ -284,6 +291,22 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_default_config_ships_independent_size_caps() {
+        let config = BootstrapConfig::load_default().unwrap();
+
+        assert_eq!(
+            config.policy_store_config.max_file_size,
+            crate::common::policy_store::archive_handler::ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE,
+            "The shipped default config must carry the bundled archive cap"
+        );
+        assert_eq!(
+            config.http_client_config.max_response_size_bytes,
+            Some(crate::HttpClientConfig::DEFAULT_MAX_RESPONSE_SIZE_BYTES),
+            "The shipped default config must use the HTTP cap's own default"
+        );
+    }
+
+    #[test]
     fn test_load_default_config() {
         let config = BootstrapConfig::load_default().unwrap();
 
@@ -300,7 +323,7 @@ mod tests {
         // Verify policy store configuration
         assert!(matches!(
             config.policy_store_config.source,
-            PolicyStoreSource::FileJson(_)
+            PolicyStoreSource::CjarFile(_)
         ));
 
         // Verify JWT configuration
@@ -323,6 +346,10 @@ mod tests {
         assert_eq!(
             config.authorization_config.decision_log_default_jwt_id,
             "jti"
+        );
+        assert!(
+            !config.authorization_config.metrics_collection,
+            "metrics collection must be disabled by default"
         );
 
         // Verify data store configuration

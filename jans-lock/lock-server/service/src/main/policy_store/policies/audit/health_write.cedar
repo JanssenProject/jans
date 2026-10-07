@@ -1,0 +1,12 @@
+@id("lock_audit_health_write")
+permit(
+  principal,
+  action in [Jans::Action::"POST"],
+  resource == Jans::HTTP_Request::"lock_audit_health_write"
+)
+when {
+context has tokens &&
+  context.tokens has jans_access_token &&
+  context.tokens.jans_access_token has scope &&
+  context.tokens.jans_access_token.scope.contains("https://jans.io/oauth/lock/health.write")
+};

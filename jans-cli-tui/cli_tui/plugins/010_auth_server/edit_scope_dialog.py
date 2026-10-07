@@ -299,17 +299,8 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         )
 
         self.alt_tabs['dynamic'] = HSplit([
-
                         self.dynamic_scope_scripts_widget,
-                        self.app.getTitledText(
-                                _("Claims"),
-                                name='claims',
-                                value='\n'.join(self.data.get('claims', [])),
-                                height=3, 
-                                jans_help=self.app.get_help_from_schema(self.schema, 'claims'),
-                                style=cli_style.edit_text
-                                ),
-
+                        self.claims_container,
                         ],width=D(),
                     )
 

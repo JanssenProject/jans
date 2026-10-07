@@ -59,7 +59,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ARG JANS_SOURCE_VERSION=b375b3744fd7b4cc57cd333c3c20992edf182ca8
+ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -133,6 +133,7 @@ COPY --from=jans-config-api-src /usr/bin/facter /usr/local/bin/facter
 COPY --from=jans-config-api-src /app/scripts /app/jans_aio/jans_config_api
 COPY --from=jans-config-api-src /var/log/adminui /var/log/adminui
 COPY --from=jans-config-api-src /opt/jans/bin /opt/jans/bin
+COPY --from=jans-config-api-src /usr/share/java/admin-ui-plugin-agama-pw.gama /usr/share/java/admin-ui-plugin-agama-pw.gama
 RUN ln -sf /app/jans_aio/jans_config_api/entrypoint.sh /app/bin/jans-config-api-entrypoint.sh
 
 COPY --from=jans-fido2-src /opt/jans/jetty/jans-fido2 /opt/jans/jetty/jans-fido2

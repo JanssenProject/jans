@@ -11,12 +11,13 @@ use tokio::time::{MissedTickBehavior, interval};
 use tokio_util::sync::CancellationToken;
 use url::Url;
 
-use super::health_registry::{HealthRegistry, HealthStatus};
+use super::health_registry::HealthRegistry;
 use super::transport::mapping::LockServerHealthEntry;
-use super::transport::{AuditKind, AuditTransport};
+use super::transport::{AuditItem, AuditKind, AuditPayload, AuditTransport};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::http::{JoinHandle, spawn_task};
 use crate::lock::LockLogEntry;
+use crate::lock::health_registry::{HealthStatus, SystemHealth};
 use crate::log::{LogWriter, LoggerWeak};
 
 pub(super) struct HealthTickerParams {
@@ -31,8 +32,8 @@ pub(super) struct HealthTickerParams {
 pub(super) struct HealthTicker<T: AuditTransport> {
     transport: Arc<T>,
     health_url: Url,
-    pdp_id: String,
-    app_name: String,
+    pdp_id: PdpID,
+    app_name: Option<ApplicationName>,
     interval: Duration,
     logger: Option<LoggerWeak>,
     registry: HealthRegistry,
@@ -47,10 +48,8 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
         let ticker = Self {
             transport,
             health_url: params.health_url,
-            pdp_id: params.pdp_id.to_string(),
-            app_name: params
-                .app_name
-                .map_or_else(String::new, |n| n.0.to_string()),
+            pdp_id: params.pdp_id,
+            app_name: params.app_name,
             interval: params.health_interval,
             logger: params.logger,
             registry: params.registry,
@@ -79,19 +78,16 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
         let entry = self.build_health_entry();
         let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
 
-        let serialized = match serde_json::to_string(&entry) {
-            Ok(s) => s.into_boxed_str(),
-            Err(e) => {
-                logger.log_any(LockLogEntry::error(format!(
-                    "failed to serialize health entry: {e}"
-                )));
-                return;
-            },
+        let item = AuditItem {
+            payload: AuditPayload::Health(Box::new(entry)),
+            pdp_id: self.pdp_id,
+            app_name: self.app_name.clone(),
+            status: None,
         };
 
         let result = self
             .transport
-            .send(&[serialized], &AuditKind::Health(self.health_url.clone()))
+            .send(&[item], &AuditKind::Health(self.health_url.clone()))
             .await;
 
         if let Err(e) = result {
@@ -106,20 +102,22 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
         let engine_status = self.registry.collect();
 
         let overall_status = if engine_status.is_empty() {
-            "unknown"
+            SystemHealth::Unknown
         } else if engine_status.values().all(|s| *s == HealthStatus::Success) {
-            "running"
+            SystemHealth::Running
         } else {
-            "degraded"
-        }
-        .to_string();
+            SystemHealth::Degraded
+        };
 
         LockServerHealthEntry {
             creation_date: now.clone(),
             event_time: now,
-            service: self.app_name.clone(),
-            node_name: self.pdp_id.clone(),
-            status: overall_status,
+            service: self
+                .app_name
+                .as_ref()
+                .map_or_else(String::new, |n| n.0.to_string()),
+            node_name: self.pdp_id.to_string(),
+            status: overall_status.to_string(),
             engine_status,
         }
     }
@@ -128,7 +126,7 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::lock::transport::{SerializedAuditEntry, TransportResult};
+    use crate::lock::{health_registry::HealthStatus, transport::TransportResult};
     use std::sync::Arc;
     use url::Url;
 
@@ -139,7 +137,7 @@ mod test {
     impl AuditTransport for NoopTransport {
         async fn send(
             &self,
-            _entries: &[SerializedAuditEntry],
+            _entries: &[AuditItem],
             _audit_kind: &AuditKind,
         ) -> TransportResult<()> {
             Ok(())
@@ -152,8 +150,8 @@ mod test {
         HealthTicker {
             transport: Arc::new(NoopTransport),
             health_url: Url::parse("http://localhost/health").unwrap(),
-            pdp_id: PdpID::new().to_string(),
-            app_name: String::new(),
+            pdp_id: PdpID::new(),
+            app_name: None,
             interval: Duration::from_secs(10),
             logger: None,
             registry,

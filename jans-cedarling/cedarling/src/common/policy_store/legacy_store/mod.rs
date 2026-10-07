@@ -19,7 +19,6 @@ use base64::prelude::*;
 use cedar_policy::{Policy, PolicyId};
 use cedar_policy_core::extensions::Extensions;
 use cedar_policy_core::validator::ValidatorSchema;
-use semver::Version;
 use serde::de::{self, Error};
 use serde::{Deserialize, Deserializer};
 use url::Url;
@@ -448,12 +447,10 @@ impl From<LegacyDefaultEntitiesWithWarns> for DefaultEntitiesWithWarns {
 #[cfg_attr(test, derive(PartialEq))]
 pub(crate) struct LegacyPolicyStore {
     pub version: Option<String>,
-    pub name: String,
-    pub description: Option<String>,
-    pub cedar_version: Option<Version>,
     pub schema: Option<LegacyCedarSchema>,
     pub policies: LegacyPoliciesContainer,
     pub trusted_issuers: Option<HashMap<String, LegacyTrustedIssuer>>,
+    pub custom_issuers: Option<HashMap<String, super::CustomIssuerMetadata>>,
     pub default_entities: LegacyDefaultEntitiesWithWarns,
 }
 
@@ -468,12 +465,15 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
             .as_object()
             .ok_or_else(|| de::Error::custom("policy store entry must be a JSON object"))?;
 
+        // validate that `name` is present and is a string, even though we
+        // no longer store it — this preserves the legacy contract so
+        // malformed policy stores still fail with a clear message
         let name = obj.get("name").ok_or_else(|| {
             de::Error::custom("missing required field 'name' in policy store entry")
         })?;
-        let name = name
-            .as_str()
-            .ok_or_else(|| de::Error::custom("'name' must be a string"))?;
+        if !name.is_string() {
+            return Err(de::Error::custom("'name' must be a string"));
+        }
 
         let schema = obj
             .get("schema")
@@ -500,17 +500,6 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
                 .or_else(|| obj.get("policy_store_version"))
                 .and_then(|v| v.as_str())
                 .map(std::string::ToString::to_string),
-            name: name.to_string(),
-            description: obj
-                .get("description")
-                .and_then(|v| v.as_str())
-                .map(std::string::ToString::to_string),
-            cedar_version: obj
-                .get("cedar_version")
-                .map(parse_maybe_cedar_version)
-                .transpose()
-                .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {e}")))?
-                .flatten(),
             schema,
             policies: LegacyPoliciesContainer::deserialize(policies)
                 .map_err(|e| de::Error::custom(format!("error parsing policies: {e}")))?,
@@ -519,6 +508,15 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
                 .map(|v| {
                     HashMap::<String, LegacyTrustedIssuer>::deserialize(v).map_err(|e| {
                         de::Error::custom(format!("error parsing trusted issuers: {e}"))
+                    })
+                })
+                .transpose()?,
+            custom_issuers: obj
+                .get("custom_issuers")
+                .filter(|v| !v.is_null())
+                .map(|v| {
+                    HashMap::<String, super::CustomIssuerMetadata>::deserialize(v).map_err(|e| {
+                        de::Error::custom(format!("error parsing custom issuers: {e}"))
                     })
                 })
                 .transpose()?,
@@ -542,15 +540,13 @@ impl From<LegacyPolicyStore> for super::PolicyStore {
         let schema: Option<super::CedarSchema> = v.schema.map(std::convert::Into::into);
         super::PolicyStore {
             version: v.version,
-            name: v.name,
-            description: v.description,
-            cedar_version: v.cedar_version,
             schema_source_exists: schema.is_some(),
             schema,
             policies: v.policies.into(),
             trusted_issuers: v
                 .trusted_issuers
                 .map(|issuers| issuers.into_iter().map(|(k, v)| (k, v.into())).collect()),
+            custom_issuers: v.custom_issuers.unwrap_or_default(),
             default_entities: v.default_entities.into(),
         }
     }
@@ -559,6 +555,7 @@ impl From<LegacyPolicyStore> for super::PolicyStore {
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 pub(crate) struct LegacyAgamaPolicyStore {
+    pub cedar_version: String,
     pub policy_stores: HashMap<String, LegacyPolicyStore>,
 }
 
@@ -577,7 +574,16 @@ impl<'de> Deserialize<'de> for LegacyAgamaPolicyStore {
             de::Error::custom("missing required field 'policy_stores' in policy store")
         })?;
 
+        let cedar_version = match obj.get("cedar_version") {
+            Some(v) => v
+                .as_str()
+                .ok_or_else(|| de::Error::custom("'cedar_version' must be a string if present"))?
+                .to_string(),
+            None => "4.0.0".to_string(),
+        };
+
         let mut store = LegacyAgamaPolicyStore {
+            cedar_version,
             policy_stores: HashMap::new(),
         };
 
@@ -593,18 +599,5 @@ impl<'de> Deserialize<'de> for LegacyAgamaPolicyStore {
         }
 
         Ok(store)
-    }
-}
-
-fn parse_maybe_cedar_version(value: &serde_json::Value) -> Result<Option<Version>, String> {
-    match value {
-        serde_json::Value::Null => Ok(None),
-        serde_json::Value::String(s) => {
-            let s = s.strip_prefix('v').unwrap_or(s);
-            Version::parse(s)
-                .map(Some)
-                .map_err(|e| format!("error parsing cedar version: {e}"))
-        },
-        _ => Err("cedar_version must be a string or null".to_string()),
     }
 }

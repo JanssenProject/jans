@@ -6,7 +6,7 @@ resource "jans_custom_user" "test" {
 	mail 										= "test@jans.io"
 	display_name 						= "display-test"
 	given_name 							= "given-name-test"
-	user_password 					= "password"
+	user_password 					= var.user_password
 
 	custom_attributes {
 		name 					= "nickname"
@@ -20,4 +20,8 @@ resource "jans_custom_user" "test" {
 		# returned from the API
     ignore_changes = [ user_password ]
   }
+}
+variable "user_password" {
+  type      = string
+  sensitive = true
 }

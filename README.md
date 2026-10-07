@@ -7,7 +7,7 @@
 
 Janssen is a self-funded project chartered directly under the Linux Foundation
 to foster the development of enterprise digital identity and access management
-infrastructure. As the lead Contributors, the [Gluu team](https://gluu.org) drives the
+infrastructure. As the lead Contributors, the [Gluu](https://gluu.org) team drives the
 priorities on a day-to-day basis, governed and guided by the Janssen community
 Technical Steering Committee.
 
@@ -55,27 +55,26 @@ The table below lists components of the Janssen Project and their
 | **[Jans Auth Server](jans-auth-server)**     | A complete OAuth Authorization Server and a [certified](https://openid.net/certification/) OpenID Connect Provider written in Java. It's the upstream open-source core of [Gluu Flex](https://gluu.org/flex).                                     | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Agama](agama)**                           | Agama offers an interoperable way to design authentication flows, coded in a DSL purpose-built for writing identity journeys.                                                                                                               | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Jans FIDO](jans-fido2)**                  | Enables end-users to enroll and authenticate with passkeys and other FIDO authenticators.                                                                                                                                                   | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
-| **[Jans SCIM](jans-scim)**                   | [SCIM](http://www.simplecloud.info/) JSON/REST [API](https://docs.jans.io/head/admin/reference/openapi/) for user management, including associated FIDO devices.                                                                            | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
+| **[Jans SCIM](jans-scim)**                   | [SCIM](http://www.simplecloud.info/) JSON/REST [API](https://docs.jans.io/stable/janssen-server/reference/openapi/) for user management, including associated FIDO devices.                                                                            | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Jans Config API](jans-config-api)**       | RESTful APIs manage configuration for all Janssen components.                                                                                                                                                                                           | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Text UI ("TUI")](jans-cli-tui)**          | User interface accessible from command line. TUI is text-based interactive configuration tool that leverages config-API to configure Janssen Server modules                                                                                                                                                 | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Jans CLI](jans-cli-tui)**                 | Command line configuration tools to help you correctly call the Config API.                                                                                                                                                 | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Jans Casa](jans-casa)**                   | Jans Casa is a self-service web portal for end-users to manage authentication and authorization preferences for their account in the Janssen Server                                                                                         | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
-| **[Jans Cedarling](jans-cedarling)**         | Cedarling is an embeddable stateful Policy Decision Point for authorization requests. In simple terms, the Cedarling returns the answer: should the application allow this action on this resource given these JWT tokens. It is written in Rust with bindings to WASM, iOS, Android, and Python.                                                                | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
+| **[Jans Cedarling](jans-cedarling)**         | Cedarling is an embeddable stateful Policy Decision Point for authorization requests. In simple terms, the Cedarling returns the answer: should the application allow this action on this resource given these JWT tokens. It is written in Rust with bindings to WASM, iOS, Android, and Python.                                                                | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77) |
 | **[Jans Lock](jans-lock)**                   | An enterprise authorization solution featuring the Cedarling, a stateless PDP and the Lock Server which centralizes audit logs and configuration.                                                                                           | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Janssen Tarp](demos/janssen-tarp)**       | An OpenID Connect RP test website that runs as a browser plugin in Chrome or Firefox.                                                                                                                                                       | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans Chip](demos/jans-chip)**             | Sample iOS and Android mobile applications that implement the full OAuth and FIDO security stack for app integrity, client constrained access tokens, and user presence.                                                                    | ![Demo](https://img.shields.io/badge/Demo-%23368af7)             |
 
 ## Installation
 
-You can install the Janssen federation stack in a Kubernetes cluster or as a single VM.
+The Janssen Project offers several installation options to fit different needs:
 
-Development environments: [Quick Start](https://docs.jans.io/head/janssen-server/install/docker-install/quick-start/)
-| [Local K8S](https://docs.jans.io/head/janssen-server/install/helm-install/local/) | [VM install](https://docs.jans.io/head/janssen-server/install/vm-install/vm-requirements/)
-
-Production deployments: [Amazon EKS](https://docs.jans.io/head/janssen-server/install/helm-install/amazon-eks/) | [Microsoft Azure AKS](https://docs.jans.io/head/janssen-server/install/helm-install/microsoft-azure/) | [Google GKE](https://docs.jans.io/head/janssen-server/install/helm-install/google-gke/) | [Rancher](https://docs.jans.io/head/janssen-server/install/helm-install/rancher/)
+1. [Helm deployments](https://docs.jans.io/stable/janssen-server/install/helm-install/) for production-grade setup on Kubernetes like Amazon, Google, Microsoft, Local, and Rancher
+2. [Docker deployment](https://docs.jans.io/stable/janssen-server/install/docker-install/quick-start/) for development/testing (not production)
+3. [VM packages](https://docs.jans.io/stable/janssen-server/install/vm-install/) for Ubuntu, SUSE and Red Hat
 
 Check out the
-[Janssen Documentation](https://docs.jans.io/head/janssen-server/install/)
+[Janssen Documentation](https://docs.jans.io/stable/janssen-server/install/)
 for details.
 
 ## Community

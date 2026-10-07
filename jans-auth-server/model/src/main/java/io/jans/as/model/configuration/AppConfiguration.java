@@ -48,6 +48,9 @@ public class AppConfiguration implements Configuration {
     public static final int DEFAULT_USER_INFO_LIFETIME = 3600;
     public static final int DEFAULT_ID_JAG_LIFETIME = 300;
 
+    // OAuth 2.1 caps the authorization code lifetime at a short duration to limit the exposure window of a leaked code.
+    public static final int MAX_AUTHORIZATION_CODE_LIFETIME = 600; // 10 min
+
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
 
@@ -102,7 +105,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL for Pushed Authorisation Request (PAR) Endpoint")
     private String parEndpoint;
 
-    @DocProperty(description = "Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to put minimize claims in token (for security).")
+    @DocProperty(description = "Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to minimize the claims in the id_token (for security).", defaultValue = "false")
     private Boolean includeRequestedClaimsInIdToken = false;
 
     @DocProperty(description = "Boolean value to indicate whether to allow client assertion 'aud' without strict server issuer match. Default value is false which means that server requires strict match.", defaultValue = "false")
@@ -111,7 +114,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value to indicate of Pushed Authorisation Request(PAR)is required", defaultValue = "false")
     private Boolean requirePar = false;
 
-    @DocProperty(description = "Boolean value to indicate whether public client is allowed for Pushed Authorisation Request(PAR)", defaultValue = "false")
+    @DocProperty(description = "Boolean value indicating whether public clients are forbidden from using Pushed Authorization Requests (PAR); when true, public clients are not allowed to use PAR.", defaultValue = "false")
     private Boolean parForbidPublicClient = false;
 
     @DocProperty(description = "Boolean value to indicate whether to allow user identification by uid claim from assertion at Token Endpoint", defaultValue = "false")
@@ -174,8 +177,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value true encrypts request object", defaultValue = "false")
     private Boolean requireRequestObjectEncryption = false;
 
-    @DocProperty(description = "Boolean value true check for Proof Key for Code Exchange (PKCE)", defaultValue = "false")
-    private Boolean requirePkce = false;
+    @DocProperty(description = "Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled.", defaultValue = "true")
+    private Boolean requirePkce = true;
 
     @DocProperty(description = "Boolean value true allow all value for revoke endpoint", defaultValue = "false")
     private Boolean allowAllValueForRevokeEndpoint = false;
@@ -195,7 +198,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Archived JWK lifetime in seconds")
     private int archivedJwkLifetimeInSeconds;
 
-    @DocProperty(description = "Boolean value to indicate whether to uppercase keys returns from /open-banking/v3.1/aisp/account-access-consents endpoint", defaultValue = "false")
+    @DocProperty(description = "Boolean value to indicate whether to uppercase keys returned from /open-banking/v3.1/aisp/account-access-consents endpoint", defaultValue = "false")
     private Boolean uppercaseResponseKeysInAccountAccessConsent = false;
 
     @DocProperty(description = "UMA Configuration endpoint URL")
@@ -294,19 +297,19 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoSigningAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoEncryptionAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoEncryptionEncValuesSupported;
 
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
     private List<String> introspectionSigningAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
     private List<String> introspectionEncryptionAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
     private List<String> introspectionEncryptionEncValuesSupported;
 
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Logout Status JWT at Authorization Endpoint to encode the claims in a JWT")
@@ -315,10 +318,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
     private List<String> txTokenSigningAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
     private List<String> txTokenEncryptionAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
     private List<String> txTokenEncryptionEncValuesSupported;
 
     @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT")
@@ -516,7 +519,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The acr mappings. When AS meets key-value in map, it tries to replace 'key' with 'value' as very first thing and use that 'value' in further processing.")
     private Map<String, String> acrMappings;
 
-    @DocProperty(description = "The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence then client consent script configuration.")
+    @DocProperty(description = "The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence than client consent script configuration.")
     private Map<String, String> acrToConsentScriptNameMapping;
 
     @DocProperty(description = "The acr mapping to agama consent flow name. When AS meets acr it tries to match agama consent name and set it into session attributes under 'consent_flow' name. This makes it available for main Agama Consent script, so it knows which flow to invoke.")
@@ -528,7 +531,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to enable client authentication filters")
     private Boolean clientAuthenticationFiltersEnabled;
 
-    @DocProperty(description = "Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registratio")
+    @DocProperty(description = "Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration")
     private Boolean clientRegDefaultToCodeFlowWithRefresh;
 
     @DocProperty(description = "Boolean value specifying whether to Grant types and Response types can be auto fixed")
@@ -684,6 +687,17 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Sets cookie domain for all cookies created by OP")
     private String cookieDomain;
+
+    @DocProperty(description = "Sets SameSite attribute value (None, Lax or Strict) for all cookies created by OP " +
+            "(session_id, uma_session_id, session_state, opbs, current_sessions, consent_session_id, rp_origin_id). " +
+            "Defaults to None to preserve cross-site SSO flows (silent authentication via hidden iframe with " +
+            "prompt=none, cross-site POST to the authorization endpoint). Setting Lax breaks silent/iframe-based " +
+            "authentication and cross-site POST to the authorization endpoint for RPs hosted on a different site " +
+            "than the OP. Setting Strict additionally breaks normal top-level cross-site SSO redirects, " +
+            "effectively disabling SSO for any RP not on the same site as the OP. Value is matched case-" +
+            "insensitively against None/Lax/Strict; any other value falls back to None. See auth-server " +
+            "session management docs before changing.", defaultValue = "None")
+    private String cookieSameSite = "None";
 
     @DocProperty(description = "enable OAuth Audit Logging")
     private Boolean enabledOAuthAuditLogging;
@@ -1000,7 +1014,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Defines if Response body will be logged. Default value is false", defaultValue = "false")
     private Boolean httpLoggingResponseBodyContent = false;
 
-    @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
+    @DocProperty(description = "When true, skips authentication filter processing for OPTIONS requests (the filter returns early before client authentication)", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
 
     @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
@@ -1010,7 +1024,7 @@ public class AppConfiguration implements Configuration {
     private ConnectionServiceConfiguration connectionServiceConfiguration;
 
     // Client ID Metadata Document (CIMD) Configuration
-    @DocProperty(description = "Allowed URL schemes for CIMD client_id (default: https only)")
+    @DocProperty(description = "Allowed URL schemes for CIMD client_id (default: https only)", defaultValue = "[\"https\"]")
     private List<String> cimdSchemeAllowlist;
 
     @DocProperty(description = "Allowed domains for CIMD client_id URLs")
@@ -1037,8 +1051,21 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Maximum TTL in minutes for persisted CIMD client metadata (upper bound, even if HTTP Cache-Control specifies longer)", defaultValue = "1440")
     private Integer cimdMaxTtlMinutes = 1440;
 
-    @DocProperty(description = "Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.", defaultValue = "false")
-    private Boolean authorizationResponseIssParameterSupported = false;
+    @DocProperty(description = "Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: true.", defaultValue = "true")
+    private Boolean authorizationResponseIssParameterSupported = true;
+
+    // SPIFFE-based client authentication (draft-ietf-oauth-spiffe-client-auth) Configuration
+    @DocProperty(description = "Admin-configured, out-of-band trust anchor mapping (trust domain -> SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied `spiffe_bundle_endpoint` is never trusted as a trust anchor source; only trust domains listed here are honored.")
+    private List<SpiffeTrustDomainConfiguration> spiffeTrustDomains;
+
+    @DocProperty(description = "Maximum response size in bytes for SPIFFE Bundle Endpoint fetch", defaultValue = "1048576")
+    private Integer spiffeBundleMaxResponseSize = 1048576;
+
+    @DocProperty(description = "Connection timeout in milliseconds for SPIFFE Bundle Endpoint fetch", defaultValue = "5000")
+    private Integer spiffeBundleConnectTimeoutMs = 5000;
+
+    @DocProperty(description = "Read timeout in milliseconds for SPIFFE Bundle Endpoint fetch", defaultValue = "10000")
+    private Integer spiffeBundleReadTimeoutMs = 10000;
 
     public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
         if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
@@ -1198,7 +1225,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getRequirePkce() {
-        if (requirePkce == null) requirePkce = false;
+        if (requirePkce == null) requirePkce = true;
         return requirePkce;
     }
 
@@ -2567,6 +2594,9 @@ public class AppConfiguration implements Configuration {
     }
 
     public int getAuthorizationCodeLifetime() {
+        if (authorizationCodeLifetime <= 0 || authorizationCodeLifetime > MAX_AUTHORIZATION_CODE_LIFETIME) {
+            return MAX_AUTHORIZATION_CODE_LIFETIME;
+        }
         return authorizationCodeLifetime;
     }
 
@@ -3066,6 +3096,14 @@ public class AppConfiguration implements Configuration {
 
     public void setCookieDomain(String cookieDomain) {
         this.cookieDomain = cookieDomain;
+    }
+
+    public String getCookieSameSite() {
+        return cookieSameSite;
+    }
+
+    public void setCookieSameSite(String cookieSameSite) {
+        this.cookieSameSite = cookieSameSite;
     }
 
     public Boolean getEnabledOAuthAuditLogging() {
@@ -3986,6 +4024,42 @@ public class AppConfiguration implements Configuration {
         this.cimdMaxTtlMinutes = cimdMaxTtlMinutes;
     }
 
+    public List<SpiffeTrustDomainConfiguration> getSpiffeTrustDomains() {
+        if (spiffeTrustDomains == null) spiffeTrustDomains = new ArrayList<>();
+        return spiffeTrustDomains;
+    }
+
+    public void setSpiffeTrustDomains(List<SpiffeTrustDomainConfiguration> spiffeTrustDomains) {
+        this.spiffeTrustDomains = spiffeTrustDomains;
+    }
+
+    public Integer getSpiffeBundleMaxResponseSize() {
+        if (spiffeBundleMaxResponseSize == null) spiffeBundleMaxResponseSize = 1048576;
+        return spiffeBundleMaxResponseSize;
+    }
+
+    public void setSpiffeBundleMaxResponseSize(Integer spiffeBundleMaxResponseSize) {
+        this.spiffeBundleMaxResponseSize = spiffeBundleMaxResponseSize;
+    }
+
+    public Integer getSpiffeBundleConnectTimeoutMs() {
+        if (spiffeBundleConnectTimeoutMs == null) spiffeBundleConnectTimeoutMs = 5000;
+        return spiffeBundleConnectTimeoutMs;
+    }
+
+    public void setSpiffeBundleConnectTimeoutMs(Integer spiffeBundleConnectTimeoutMs) {
+        this.spiffeBundleConnectTimeoutMs = spiffeBundleConnectTimeoutMs;
+    }
+
+    public Integer getSpiffeBundleReadTimeoutMs() {
+        if (spiffeBundleReadTimeoutMs == null) spiffeBundleReadTimeoutMs = 10000;
+        return spiffeBundleReadTimeoutMs;
+    }
+
+    public void setSpiffeBundleReadTimeoutMs(Integer spiffeBundleReadTimeoutMs) {
+        this.spiffeBundleReadTimeoutMs = spiffeBundleReadTimeoutMs;
+    }
+
     public Map<String, TrustedIssuerConfig> getIdJagTrustedIdpIssuers() {
         if (idJagTrustedIdpIssuers == null) idJagTrustedIdpIssuers = new HashMap<>();
         return idJagTrustedIdpIssuers;
@@ -4014,7 +4088,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getAuthorizationResponseIssParameterSupported() {
-        if (authorizationResponseIssParameterSupported == null) authorizationResponseIssParameterSupported = false;
+        if (authorizationResponseIssParameterSupported == null) authorizationResponseIssParameterSupported = true;
         return authorizationResponseIssParameterSupported;
     }
 

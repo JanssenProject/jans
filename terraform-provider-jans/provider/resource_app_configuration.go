@@ -77,6 +77,26 @@ func resourceTrustedSsaIssuers() *schema.Resource {
 	}
 }
 
+func resourceSpiffeTrustDomainConfiguration() *schema.Resource {
+
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"trust_domain": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"bundle_endpoint_url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"bundle_cache_lifetime_in_minutes": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+		},
+	}
+}
+
 func resourceSsaValidationConfig() *schema.Resource {
 
 	return &schema.Resource{
@@ -2565,6 +2585,58 @@ func resourceAppConfiguration() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			"cookie_same_site": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "SameSite attribute value for the session cookie.",
+			},
+			"disable_external_logger_configuration": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to ignore the external log4j2 logging configuration.",
+			},
+			"id_jag_lifetime": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Lifetime of the ID Assertion Grant (JAG) in seconds.",
+			},
+			"id_jag_issue_refresh_token": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to issue a refresh token for the ID Assertion Grant (JAG).",
+			},
+			"authorization_response_iss_parameter_supported": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether the authorization response iss parameter is supported.",
+			},
+			"spiffe_bundle_max_response_size": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Maximum SPIFFE bundle endpoint response size in bytes.",
+			},
+			"spiffe_bundle_connect_timeout_ms": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "SPIFFE bundle endpoint connect timeout in milliseconds.",
+			},
+			"spiffe_bundle_read_timeout_ms": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "SPIFFE bundle endpoint read timeout in milliseconds.",
+			},
+			"spiffe_trust_domains": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of SPIFFE trust domain bundle sources.",
+				Elem:        resourceSpiffeTrustDomainConfiguration(),
+			},
+			"id_jag_trusted_idp_issuers": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of trusted IDP issuers for the ID Assertion Grant (JAG).",
+				Elem:        resourceTrustedSsaIssuers(),
 			},
 		},
 		Importer: &schema.ResourceImporter{

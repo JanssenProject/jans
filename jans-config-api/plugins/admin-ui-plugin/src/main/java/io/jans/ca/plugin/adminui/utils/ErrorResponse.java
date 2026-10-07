@@ -46,6 +46,7 @@ public enum ErrorResponse {
     ISS_CLAIM_NOT_FOUND("ISS claim not found in jwt"),
     ERROR_IN_DCR("Error in DCR using SSA."),
     LICENSE_NOT_PRESENT("Active license not present in configuration."),
+    HARDWARE_ID_NOT_PRESENT("Hardware ID not present in configuration."),
     LICENSE_EXPIRY_DATE_NOT_PRESENT("Active license expiry date not present."),
     LICENSE_INFO_LAST_FETCHED_ON_ABSENT("License details last fetched date missing. Fetching details from Agama Lab."),
     LICENSE_IS_EXPIRED("The license is expired."),
@@ -75,10 +76,15 @@ public enum ErrorResponse {
     ADMINUI_SESSION_REMOVE_ERROR("Error in removing Admin UI session"),
     ORG_ID_CLAIM_NOT_FOUND("org_id claim not found in jwt"),
     POLICY_STORE_UPLOAD_ERROR("Error in uploading policy-store"),
+    POLICY_STORE_UPDATE_ERROR("Error in updating policy-store"),
+    POLICY_STORE_DELETE_ERROR("Error in deleting policy-store"),
+    POLICY_STORE_GET_ERROR("Error in fetching policy-store"),
+    POLICY_STORE_NOT_EXIST("Policy store does not exist"),
     BAD_REQUEST_IN_POLICY_STORE_UPLOAD("Bad Request: No Policy Store file provided"),
-    UNSUPPORTED_POLICY_STORE_EXTENSION("Bad Request: The Policy Store extension is not .cjar and is not supported"),
+    UNSUPPORTED_POLICY_STORE_EXTENSION("Bad Request: The Policy Store extension is not .cjar or of application/zip mime and is not supported"),
     POLICY_STORE_DOMAIN_NOT_MATCHING("The hostname of the configuration_endpoint in policy-store does not matches with hostname of OpenID Provider."),
-    ERROR_IN_POLICY_STORE("Bad Request: Error in reading Policy Store file")
+    ERROR_IN_POLICY_STORE("Bad Request: Error in reading Policy Store file"),
+    NO_ACTIVE_POLICY_STORE_FOUND("No active policy-store found. Activate a policy-store before syncing role-to-scope mappings.")
     ;
 
     private final String description;

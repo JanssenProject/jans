@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -837,6 +838,9 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
     	for (int i = 0; i < attributeValues.length; i++) {
     		if (attributeValues[i] instanceof Date) {
     			attributeStringValues[i] = StaticUtils.encodeGeneralizedTime((Date) attributeValues[i]);
+    		} else if (attributeValues[i] instanceof byte[]) {
+    			// LDAP ORM not supports binary values for non certificate attributes. Convert them to base64 strings
+    			attributeStringValues[i] = Base64.encodeBase64String((byte[]) attributeValues[i]);
     		} else {
     			attributeStringValues[i] = attributeValues[i].toString();
     		}

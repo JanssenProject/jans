@@ -31,3 +31,46 @@ ATTRIBUTE CHANGES:
 *********************************************************************************
 {{- end }}
 {{- end }}
+
+{{- if index .Values "gateway-api" "enabled" }}
+{{- $routes := index .Values "gateway-api" "routes" }}
+{{- $authIngress := index .Values "auth-server" "ingress" }}
+{{- $casaIngress := .Values.casa.ingress }}
+{{- $configApiIngress := index .Values "config-api" "ingress" }}
+{{- $fido2Ingress := .Values.fido2.ingress }}
+{{- $scimIngress := .Values.scim.ingress }}
+{{- $legacy := dict "authServerEnabled" $authIngress.authServerEnabled "openidConfigEnabled" $authIngress.openidConfigEnabled "deviceCodeEnabled" $authIngress.deviceCodeEnabled "firebaseMessagingEnabled" $authIngress.firebaseMessagingEnabled "uma2ConfigEnabled" $authIngress.uma2ConfigEnabled "webfingerEnabled" $authIngress.webfingerEnabled "authzenConfigEnabled" $authIngress.authzenConfigEnabled "lockConfigEnabled" $authIngress.lockConfigEnabled "lockAuditEnabled" $authIngress.lockAuditEnabled "casaEnabled" $casaIngress.casaEnabled "configApiEnabled" $configApiIngress.configApiEnabled "fido2Enabled" $fido2Ingress.fido2Enabled "fido2ConfigEnabled" $fido2Ingress.fido2ConfigEnabled "fido2WebauthnEnabled" $fido2Ingress.fido2WebauthnEnabled "scimEnabled" $scimIngress.scimEnabled "scimConfigEnabled" $scimIngress.scimConfigEnabled }}
+{{- $stale := list }}
+{{- range $flag, $legacyValue := $legacy }}
+{{- if and $legacyValue (not (index $routes $flag)) }}
+{{- $stale = append $stale $flag }}
+{{- end }}
+{{- end }}
+{{- if $stale }}
+*********************************************************************************
+***       DEPRECATION: INGRESS FLAGS STILL DRIVING GATEWAY API ROUTES         ***
+*********************************************************************************
+
+The following Gateway API routes are enabled ONLY by the deprecated
+`<service>.ingress.*` flags, because their `gateway-api.routes.*` counterpart is
+set to false:
+{{ range $stale }}
+  - {{ . }}
+{{- end }}
+
+These routes still render today via a compatibility fallback, but that fallback
+will be REMOVED in a future release and the routes would then disappear.
+
+RECOMMENDATION: set the flags listed above under `gateway-api.routes`, e.g.
+
+  gateway-api:
+    routes:
+      {{ first $stale }}: true
+
+NOTE: `<service>.ingress.*` continues to control the nginx Ingress and Istio
+VirtualService resources. Only its effect on Gateway API HTTPRoutes is
+deprecated.
+
+*********************************************************************************
+{{- end }}
+{{- end }}

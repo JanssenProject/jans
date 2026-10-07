@@ -119,8 +119,8 @@ AUTH_DYNAMIC_CONF_DELTA = {
     "idTokenSigningAlgValuesSupported": ["none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"],
     "accessTokenSigningAlgValuesSupported": ["none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"],
     "requestObjectSigningAlgValuesSupported": ["none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"],
-    "softwareStatementValidationClaimName": "jwks_uri",
-    "softwareStatementValidationType": "jwks_uri",
+    "softwareStatementValidationClaimName": "jwks",
+    "softwareStatementValidationType": "jwks",
     "umaGrantAccessIfNoPolicies": True,
     "rejectJwtWithNoneAlg": False,
     "removeRefreshTokensForClientOnLogout": True,
@@ -409,6 +409,13 @@ class TestDataLoader:
 
         conf = json.loads(row["jansConfDyn"])
         conf.update(AUTH_DYNAMIC_CONF_DELTA)
+        # Whitelist the AIO's own FQDN: it resolves to an RFC1918 docker IP that
+        # SectorIdentifierUriService rejects for loop-back sector_identifier_uri / request_uri
+        # fetches unless the host is explicitly whitelisted.
+        hostname = self.manager.config.get("hostname")
+        if hostname:
+            existing = conf.get("externalUriWhiteList") or []
+            conf["externalUriWhiteList"] = sorted(set(existing) | {hostname})
         self.client.update("jansAppConf", doc_id, {
             "jansConfDyn": json.dumps(conf),
             "jansRevision": (row.get("jansRevision") or 0) + 1,

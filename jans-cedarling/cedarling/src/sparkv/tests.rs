@@ -82,11 +82,7 @@ macro_rules! sparkv_tests {
         #[test]
         fn test_get_item() {
             let mut sparkv = <$sparkv_type>::new();
-            let item = KvEntry::new(
-                "keyARaw",
-                "value99".to_string(),
-                Duration::seconds(1),
-            );
+            let item = KvEntry::new("keyARaw", "value99".to_string(), Duration::seconds(1));
             sparkv.data.insert(item.key.clone(), item);
             let get_result = sparkv.get_item("keyARaw");
             let unwrapped = get_result.unwrap();
@@ -96,7 +92,11 @@ macro_rules! sparkv_tests {
                 "get_item should return Some for existing key"
             );
             assert_eq!(unwrapped.key, "keyARaw", "item key should match");
-            assert_eq!(unwrapped.value, "value99".to_string(), "item value should match");
+            assert_eq!(
+                unwrapped.value,
+                "value99".to_string(),
+                "item value should match"
+            );
 
             assert!(
                 sparkv.get_item("non-existent").is_none(),
@@ -321,12 +321,7 @@ macro_rules! sparkv_tests {
             let mut config: Config = Config::new();
             config.auto_clear_expired = false;
             let mut sparkv = <$sparkv_type>::with_config(config);
-            _ = sparkv.set_with_ttl(
-                "no-longer",
-                "value".into(),
-                Duration::milliseconds(10),
-                &[],
-            );
+            _ = sparkv.set_with_ttl("no-longer", "value".into(), Duration::milliseconds(10), &[]);
             _ = sparkv.set_with_ttl("no-longer", "v".into(), Duration::seconds(90), &[]);
             _ = sparkv.set_with_ttl("not-expired", "value".into(), Duration::seconds(60), &[]);
             std::thread::sleep(std::time::Duration::from_millis(20));
@@ -389,12 +384,7 @@ macro_rules! sparkv_tests {
             let mut config: Config = Config::new();
             config.auto_clear_expired = true; // explicitly setting it to true
             let mut sparkv = <$sparkv_type>::with_config(config);
-            _ = sparkv.set_with_ttl(
-                "no-longer",
-                "value".into(),
-                Duration::milliseconds(10),
-                &[],
-            );
+            _ = sparkv.set_with_ttl("no-longer", "value".into(), Duration::milliseconds(10), &[]);
             _ = sparkv.set_with_ttl("no-longer", "v".into(), Duration::seconds(90), &[]);
             std::thread::sleep(std::time::Duration::from_millis(20));
             _ = sparkv.set_with_ttl("not-expired", "value".into(), Duration::seconds(60), &[]);

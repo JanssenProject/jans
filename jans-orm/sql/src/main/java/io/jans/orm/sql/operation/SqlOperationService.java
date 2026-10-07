@@ -24,6 +24,7 @@ import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SearchProjection;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.operation.PersistenceOperationService;
 import io.jans.orm.sql.impl.SqlBatchOperationWraper;
@@ -43,6 +44,17 @@ public interface SqlOperationService extends PersistenceOperationService {
 	String JSONB_TYPE_NAME = "jsonb";
 	String LONGTEXT_TYPE_NAME = "longtext";
 	String TIMESTAMP = "timestamp";
+
+	// MySQL/MariaDB binary column types
+	String BINARY_TYPE_NAME = "binary";
+	String VARBINARY_TYPE_NAME = "varbinary";
+	String TINYBLOB_TYPE_NAME = "tinyblob";
+	String BLOB_TYPE_NAME = "blob";
+	String MEDIUMBLOB_TYPE_NAME = "mediumblob";
+	String LONGBLOB_TYPE_NAME = "longblob";
+
+	// PostgreSQL binary column type
+	String BYTEA_TYPE_NAME = "bytea";
 
     static String DN = "dn";
     static String UID = "uid";
@@ -75,6 +87,9 @@ public interface SqlOperationService extends PersistenceOperationService {
             String[] attributes, OrderSpecifier<?>[] orderBy, SqlBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType,
             int start, int count, int pageSize) throws SearchException;
 
+    PagedResult<EntryData> searchAggregated(String key, String objectClass, ConvertedExpression expression,
+            SearchProjection projection, SearchReturnDataType returnDataType, int start, int count) throws SearchException;
+
     String[] createStoragePassword(String[] passwords, AttributeData attributeData);
 
     boolean isBinaryAttribute(String attribute);
@@ -99,6 +114,8 @@ public interface SqlOperationService extends PersistenceOperationService {
 	DatabaseMetaData getMetadata();
 
 	boolean isJsonColumn(String tableName, String attributeType);
+
+	boolean isBinaryColumn(String tableName, String attributeType);
 
 	TableMapping getTabeMapping(String key, String objectClass);
 

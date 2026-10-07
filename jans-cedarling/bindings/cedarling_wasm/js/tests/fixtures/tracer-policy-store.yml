@@ -1,0 +1,31 @@
+cedar_version: 4.0.0
+policy_stores:
+  abc123def456:
+    name: Tracer
+    policies:
+      allow:
+        description: Allow reading a Tracer resource
+        creation_date: 2026-01-01T00:00:00Z
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |
+            @id("allow")
+            permit(
+              principal,
+              action == Tracer::Action::"Read",
+              resource
+            );
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |
+        namespace Tracer {
+          entity User;
+          entity Resource;
+          action "Read" appliesTo {
+            principal: [User],
+            resource: [Resource],
+            context: {}
+          };
+        }

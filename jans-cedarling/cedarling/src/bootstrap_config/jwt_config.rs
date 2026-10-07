@@ -156,9 +156,8 @@ impl JwtConfig {
     /// who construct the struct programmatically cannot bypass the bootstrap
     /// deserializer's normalization.
     pub(crate) fn normalize(&mut self) {
-        self.status_list_refresh_interval_max = normalize_status_list_refresh_interval_max(
-            self.status_list_refresh_interval_max,
-        );
+        self.status_list_refresh_interval_max =
+            normalize_status_list_refresh_interval_max(self.status_list_refresh_interval_max);
     }
 
     /// Creates a new `JwtConfig` instance with validation turned off for all tokens.

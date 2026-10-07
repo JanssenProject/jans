@@ -110,8 +110,12 @@ async fn test_unsigned_schema_present_flag_false() {
             create_test_principal("Jans::TestPrincipal1", "id1", json!({"is_ok": true}))
                 .expect("principal should build"),
         ),
-        create_test_principal("Jans::Issue", "random_id", json!({"org_id": "some_long_id", "country": "US"}))
-            .expect("resource should build"),
+        create_test_principal(
+            "Jans::Issue",
+            "random_id",
+            json!({"org_id": "some_long_id", "country": "US"}),
+        )
+        .expect("resource should build"),
     );
 
     let result = cedarling
@@ -130,9 +134,9 @@ async fn test_unsigned_schema_present_flag_false() {
 /// strict=true + no schema → init error
 #[test]
 async fn test_unsigned_strict_true_missing_schema_fails_init() {
-    let mut config = crate::tests::utils::cedarling_util::get_config(
-        PolicyStoreSource::Yaml(POLICY_STORE_NO_SCHEMA.to_string()),
-    );
+    let mut config = crate::tests::utils::cedarling_util::get_config(PolicyStoreSource::Yaml(
+        POLICY_STORE_NO_SCHEMA.to_string(),
+    ));
     config.authorization_config.strict_schema_validation = true;
 
     let result = Cedarling::new(&config).await;
@@ -166,7 +170,10 @@ async fn test_unsigned_no_principal_without_schema() {
         .await
         .expect("no-principal request should succeed without schema");
 
-    assert!(result.decision, "no-principal public action should be allowed");
+    assert!(
+        result.decision,
+        "no-principal public action should be allowed"
+    );
     assert_eq!(
         result.response.decision(),
         Decision::Allow,
@@ -204,9 +211,10 @@ async fn test_multi_issuer_without_schema_single_token() {
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
-        vec![
-            TokenInput::new("Dolphin::Access_Token".to_string(), dolphin_token),
-        ],
+        vec![TokenInput::new(
+            "Dolphin::Access_Token".to_string(),
+            dolphin_token,
+        )],
         EntityData::from_json(
             &json!({
                 "cedar_entity_mapping": {
@@ -233,9 +241,9 @@ async fn test_multi_issuer_without_schema_single_token() {
 /// Multi-issuer without schema: strict=true → init error (schema-less fixture)
 #[test]
 async fn test_multi_issuer_without_schema_strict_true_fails() {
-    let mut config = crate::tests::utils::cedarling_util::get_config(
-        PolicyStoreSource::Yaml(POLICY_STORE_MULTI_ISSUER_NO_SCHEMA.to_string()),
-    );
+    let mut config = crate::tests::utils::cedarling_util::get_config(PolicyStoreSource::Yaml(
+        POLICY_STORE_MULTI_ISSUER_NO_SCHEMA.to_string(),
+    ));
     config.authorization_config.strict_schema_validation = true;
 
     let result = Cedarling::new(&config).await;
