@@ -195,8 +195,8 @@
 
             function fillPlatformField() {
                 try {
-                    var re = /^([^\.]+\.[^\.]+)\..+/;
-                    var result = re.exec(platform.version);
+                    const re = /^([^.]+\.[^.]+)\..+/;
+                    const result = re.exec(platform.version);
                     if (result != null) {
                         platform.version=result[1];
                     }

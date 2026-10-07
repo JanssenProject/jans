@@ -6,12 +6,10 @@
 
 package io.jans.lock.service.policy;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -91,16 +89,8 @@ public class LockPolicyStoreFileProvider implements PolicyStoreFileProvider {
     }
 
     private static Path createPrivateTempFile() throws IOException {
-        if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
-            return Files.createTempFile("lock-policy-store-", ".cjar",
-                    PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
-        }
-        Path file = Files.createTempFile("lock-policy-store-", ".cjar");
-        File f = file.toFile();
-        f.setReadable(true, true);
-        f.setWritable(true, true);
-        f.setExecutable(false);
-        return file;
+        return Files.createTempFile("lock-policy-store-", ".cjar",
+                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
     }
 
     private void copyAndPatchZip(String openIdIssuer) throws IOException {
