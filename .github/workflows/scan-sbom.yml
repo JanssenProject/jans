@@ -90,6 +90,10 @@ jobs:
         VERSION="$(echo "$EVENT_REF" | cut -d '/' -f 3)"
         for i in $(seq 1 20); do
           gh release view "${VERSION}" > /dev/null 2>&1 && break
+          if [ "$i" -eq 20 ]; then
+            echo "Release ${VERSION} not found after 20 attempts." >&2
+            exit 1
+          fi
           echo "Release ${VERSION} not found yet (attempt ${i}/20); retrying in 15s."
           sleep 15
         done

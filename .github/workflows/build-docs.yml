@@ -137,7 +137,7 @@ jobs:
           TAG: ${{ github.event.workflow_run.head_branch }}
         run: |
           draft=$(gh release view "$TAG" -R "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft' || echo missing)
-          echo "Release ${TAG} draft=${draft}"
+          [ "$draft" = "false" ] || echo "::warning::Release ${TAG} not published (draft=${draft}); release docs skipped."
           echo "published=$([ "$draft" = "false" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: Generate docs

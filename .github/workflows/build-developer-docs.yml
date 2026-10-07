@@ -69,6 +69,9 @@ jobs:
             exit 1
           fi
           sha="${RUN_SHA:-}"
+          if [ -z "$sha" ] && [ "$DRY_RUN_INPUT" != "true" ]; then
+            sha=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${REQUESTED_TAG}" --jq '.sha')
+          fi
           echo "Documenting ${REQUESTED_TAG} from ${sha:-$GITHUB_REF}"
           echo "tag=${REQUESTED_TAG}" >> "$GITHUB_OUTPUT"
           echo "sha=${sha}" >> "$GITHUB_OUTPUT"
