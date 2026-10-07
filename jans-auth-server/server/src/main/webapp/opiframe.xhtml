@@ -16,6 +16,10 @@
         window.addEventListener("message", receiveMessage, false);
 
         function receiveMessage(e) {
+            // any registered RP origin may poll; origin is bound into the session_state hash below
+            if (!e.origin || e.origin === "null" || typeof e.data !== "string") {
+                return;
+            }
             var message = e.data;
             var clientId = message.split(' ')[0];
             var sessionState = message.split(' ')[1];

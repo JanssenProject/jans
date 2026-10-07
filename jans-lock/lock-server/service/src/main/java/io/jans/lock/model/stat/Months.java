@@ -78,7 +78,7 @@ public class Months {
             return true;
         }
 
-        log.error("Invalid month `{}`, month must be 6 chars length in format yyyyMM, e.g. 202212", month);
+        log.error("Invalid month `{}`, month must be 6 chars length in format yyyyMM, e.g. 202212", month.replaceAll("[\\r\\n]", "_"));
         return false;
     }
 

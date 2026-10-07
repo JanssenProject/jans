@@ -551,12 +551,8 @@ class SqlClient(SqlSchemaMixin):
             if filepath and (contents := self.manager.secret.get(secret_name)):
                 logger.info("Detected non-empty secret_name=%r. The secret will be populated into %r.", secret_name, filepath)
 
-                with open(filepath, "w") as f:
+                with open(os.open(filepath, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
                     f.write(contents)
-
-                # client key must be protected using 600 permission
-                if secret_name == "sql_ssl_client_key":  # noqa: B105
-                    os.chmod(filepath, 0o600)
 
     @property
     def engine(self) -> Engine:

@@ -26,7 +26,7 @@ def test_invalid_log_config():
         # when we set invalid log configuration it should raise ValueError
         load_bootstrap_config(log_type="String")
     except ValueError:
-        pass
+        pass  # expected
     else:
         assert False, "ValueError was not raised when setting invalid log_type"
 

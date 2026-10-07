@@ -63,10 +63,7 @@ class CertKey(String):
     def _deserialize(self, value, attr, obj, **kwargs):
         super()._deserialize(value, attr, obj, **kwargs)
 
-        # try:
         values = pem.parse(value)
-        # except AttributeError:
-        #     values = []
 
         if not values:
             # try parsing base64-decoded

@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import sys
+
 from flask import Flask
 from main.config import ConfigLoader, get_instance_path
 from main.extensions import api, cors, cedarling
@@ -36,6 +38,6 @@ def create_app():
         cedarling.init_app(app)
     except Exception as e:
         logger.warning(f"Exception during initializing cedarling: {e}")
-        exit(1)
+        sys.exit(1)
     register_routes(api)
     return app

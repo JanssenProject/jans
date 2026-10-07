@@ -726,9 +726,9 @@ class WebHandler:
             valid_to = int(self.opts.get("valid-to", 365))
         except ValueError:
             valid_to = 365
-        finally:
-            if valid_to < 1:
-                valid_to = 365
+
+        if valid_to < 1:
+            valid_to = 365
 
         ssl_cert = "/etc/certs/web_https.crt"
         ssl_key = "/etc/certs/web_https.key"
@@ -820,7 +820,6 @@ def _parse_opts(opts):
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 def certmanager():
     """Manage certs and crypto keys."""
-    ...
 
 
 @certmanager.command()

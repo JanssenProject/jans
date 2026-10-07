@@ -11,6 +11,13 @@ SHIBBOLETH_HOME = os.environ.get("SHIBBOLETH_HOME", "/opt/shibboleth-idp")
 SEALER_PASSWORD_FILE = f"{SHIBBOLETH_HOME}/credentials/.sealer_password"
 
 
+def _write_private(path, data):
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    os.fchmod(fd, 0o600)
+    with open(fd, "wb" if isinstance(data, bytes) else "w") as f:
+        f.write(data)
+
+
 class ShibbolethSetup:
     def __init__(self, manager) -> None:
         self.manager = manager
@@ -72,9 +79,7 @@ jetty.deploy.scanInterval=0
         idp_signing_cert = self.manager.secret.get("shibboleth_idp_signing_cert")
 
         if idp_signing_key:
-            key_path = Path(f"{credentials_dir}/idp-signing.key")
-            key_path.write_text(idp_signing_key)
-            os.chmod(key_path, 0o600)
+            _write_private(f"{credentials_dir}/idp-signing.key", idp_signing_key)
         if idp_signing_cert:
             Path(f"{credentials_dir}/idp-signing.crt").write_text(idp_signing_cert)
 
@@ -82,21 +87,18 @@ jetty.deploy.scanInterval=0
         idp_encryption_cert = self.manager.secret.get("shibboleth_idp_encryption_cert")
 
         if idp_encryption_key:
-            key_path = Path(f"{credentials_dir}/idp-encryption.key")
-            key_path.write_text(idp_encryption_key)
-            os.chmod(key_path, 0o600)
+            _write_private(f"{credentials_dir}/idp-encryption.key", idp_encryption_key)
         if idp_encryption_cert:
             Path(f"{credentials_dir}/idp-encryption.crt").write_text(idp_encryption_cert)
 
         sealer_key = self.manager.secret.get("shibboleth_sealer_key")
         if sealer_key:
-            sealer_path = Path(f"{credentials_dir}/sealer.jks")
+            sealer_path = f"{credentials_dir}/sealer.jks"
             try:
                 sealer_bytes = base64.b64decode(sealer_key)
-                sealer_path.write_bytes(sealer_bytes)
+                _write_private(sealer_path, sealer_bytes)
             except Exception:
-                sealer_path.write_bytes(sealer_key.encode() if isinstance(sealer_key, str) else sealer_key)
-            os.chmod(sealer_path, 0o600)
+                _write_private(sealer_path, sealer_key.encode() if isinstance(sealer_key, str) else sealer_key)
 
     def _get_sealer_password(self) -> str:
         """Get sealer password from environment, file, or secret.
@@ -156,9 +158,7 @@ idp.logout.elaboration=true
 idp.logout.authenticated=true
 """
 
-        props_path = Path(f"{SHIBBOLETH_HOME}/conf/idp.properties")
-        props_path.write_text(props.strip())
-        os.chmod(props_path, 0o600)
+        _write_private(f"{SHIBBOLETH_HOME}/conf/idp.properties", props.strip())
 
     def configure_relying_party(self) -> None:
         logger.info("Configuring relying-party.xml")
@@ -278,6 +278,4 @@ jans.auth.scopes=openid,profile,email
 jans.auth.ssl.validation=true
 """
 
-        props_path = Path(f"{SHIBBOLETH_HOME}/conf/jans.properties")
-        props_path.write_text(jans_props.strip())
-        os.chmod(props_path, 0o600)
+        _write_private(f"{SHIBBOLETH_HOME}/conf/jans.properties", jans_props.strip())

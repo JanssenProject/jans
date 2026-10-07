@@ -469,7 +469,7 @@
             // Currently not neccessary - therefore the button is not shown!
             // $('#uuimirror').show().click(mirror);
 
-            $('#uuistart').show().click(function () { startRecording(task === 'enrollment'); });
+            $('#uuistart').show().click(function () { startRecording(); });
 
 
             $('#uuiok').show().click(function () {
@@ -549,14 +549,8 @@
             };
             let onError = function (xhr) {};
             let loader = new THREE.OBJLoader(manager);
-            let material = new THREE.MeshLambertMaterial({ transparent: false, opacity: 0.8 });
 
             loader.load('./model/head.obj', function (head) {
-                head.traverse(function (child) {
-                    if (child instanceof THREE.Mesh) {
-                     // child.material = material;
-                    }
-                });
                 head.name = 'BioIDHead';
                 head.position.y = 0;
                 scene.add(head);

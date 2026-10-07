@@ -38,11 +38,11 @@ Selenium.prototype.initialiseLabels = function()
                 break;
             case "while":
             case "endwhile":
-                cycles.push( [command_rows[i].command.toLowerCase(), i] )
+                cycles.push( [command_rows[i].command.toLowerCase(), i] );
                 break;
             case "foreach":
             case "endforeach":
-                forEachCmds.push( [command_rows[i].command.toLowerCase(), i] )
+                forEachCmds.push( [command_rows[i].command.toLowerCase(), i] );
                 break;
         }
     }
@@ -71,7 +71,7 @@ Selenium.prototype.initialiseLabels = function()
 
 Selenium.prototype.continueFromRow = function( row_num )
 {
-    if(row_num == undefined || row_num == null || row_num < 0) {
+    if(row_num == undefined || row_num < 0) {
         throw new Error( "Invalid row_num specified." );
     }
     testCase.debugContext.debugIndex = row_num;
@@ -108,9 +108,9 @@ Selenium.prototype.doWhile = function( condition )
 Selenium.prototype.doEndWhile = function()
 {
     var last_row = testCase.debugContext.debugIndex;
-    var while_row = whileLabels.ends[ last_row ] - 1;
+    var while_row = whileLabels.ends[ last_row ];
     if( undefined == while_row ) throw new Error( "Corresponding 'While' is not found." );
-    this.continueFromRow( while_row );
+    this.continueFromRow( while_row - 1 );
 }
 
 Selenium.prototype.doPush= function(value, varName)

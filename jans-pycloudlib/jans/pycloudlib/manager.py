@@ -29,20 +29,20 @@ logger = logging.getLogger(__name__)
 class AdapterProtocol(_t.Protocol):  # pragma: no cover
     """Custom class to define adapter contracts (only useful for type check)."""
 
-    def get(self, key: str, default: _t.Any = "") -> _t.Any:  # noqa: D102
-        ...
+    def get(self, key: str, default: _t.Any = "") -> _t.Any:
+        """Get value of a key."""
 
-    def set(self, key: str, value: _t.Any) -> bool:  # noqa: D102
-        ...
+    def set(self, key: str, value: _t.Any) -> bool:
+        """Set value of a key."""
 
-    def all(self) -> dict[str, _t.Any]:  # noqa: A003,D102
-        ...
+    def all(self) -> dict[str, _t.Any]:  # noqa: A003
+        """Get all key-value pairs (deprecated in favor of `get_all`)."""
 
-    def get_all(self) -> dict[str, _t.Any]:  # noqa: D102
-        ...
+    def get_all(self) -> dict[str, _t.Any]:
+        """Get all key-value pairs."""
 
-    def set_all(self, data: dict[str, _t.Any]) -> bool:  # noqa: D102
-        ...
+    def set_all(self, data: dict[str, _t.Any]) -> bool:
+        """Set all key-value pairs."""
 
 
 class BaseConfiguration(ABC):
@@ -385,7 +385,7 @@ class Manager:
 
             if path and (contents := self.secret.get(secret)):
                 logger.info("Detected non-empty secret=%r and env=%r used by adapter=%r. The secret will be populated into %r.", secret, env, adapter, path)
-                with open(path, "w") as f:
+                with open(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
                     f.write(contents)
 
     def bootstrap(self) -> None:

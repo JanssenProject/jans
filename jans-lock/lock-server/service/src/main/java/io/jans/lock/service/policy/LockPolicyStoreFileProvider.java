@@ -6,12 +6,15 @@
 
 package io.jans.lock.service.policy;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -57,7 +60,7 @@ public class LockPolicyStoreFileProvider implements PolicyStoreFileProvider {
         }
 
         try {
-            tempZipFile = Files.createTempFile("lock-policy-store-", ".cjar");
+            tempZipFile = createPrivateTempFile();
             log.info("Preparing policy store from classpath resource '{}' (issuer: {})", POLICY_STORE_RESOURCE, openIdIssuer);
 
             copyAndPatchZip(openIdIssuer);
@@ -85,6 +88,19 @@ public class LockPolicyStoreFileProvider implements PolicyStoreFileProvider {
             }
             tempZipFile = null;
         }
+    }
+
+    private static Path createPrivateTempFile() throws IOException {
+        if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
+            return Files.createTempFile("lock-policy-store-", ".cjar",
+                    PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
+        }
+        Path file = Files.createTempFile("lock-policy-store-", ".cjar");
+        File f = file.toFile();
+        f.setReadable(true, true);
+        f.setWritable(true, true);
+        f.setExecutable(false);
+        return file;
     }
 
     private void copyAndPatchZip(String openIdIssuer) throws IOException {

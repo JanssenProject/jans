@@ -5,6 +5,7 @@ Currently, hooks are meant to be overriden manually. In the future,
 we can use specialized hooks/plugins system.
 """
 import base64
+import os
 
 
 def get_auth_keys_hook(manager):
@@ -14,5 +15,5 @@ def get_auth_keys_hook(manager):
         decode=True,
         binary_mode=True,
     )
-    with open("/etc/certs/auth-keys.json", "w") as f:
+    with open(os.open("/etc/certs/auth-keys.json", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
         f.write(base64.b64decode(manager.secret.get("auth_openid_key_base64")).decode())

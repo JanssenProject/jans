@@ -1,7 +1,6 @@
 import os
 import logging
 import shutil
-from pathlib import Path
 from string import Template
 
 from jans.pycloudlib import get_manager
@@ -9,8 +8,6 @@ from jans.pycloudlib.persistence import CouchbaseClient
 from jans.pycloudlib.persistence import LdapClient
 from jans.pycloudlib.persistence import SpannerClient
 from jans.pycloudlib.persistence import SqlClient
-from jans.pycloudlib.persistence import PersistenceMapper
-from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import get_random_chars
 
 logging.basicConfig(
@@ -24,7 +21,14 @@ JETTY_BASE = os.environ.get("JETTY_BASE", "/opt/jans/jetty")
 SEALER_PASSWORD_FILE = f"{IDP_HOME}/credentials/.sealer_password"
 
 
-def get_persistence_client():
+def _write_private(path, data):
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    os.fchmod(fd, 0o600)
+    with open(fd, "wb" if isinstance(data, bytes) else "w") as f:
+        f.write(data)
+
+
+def get_persistence_client(manager):
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "sql")
 
     if persistence_type == "couchbase":
@@ -34,13 +38,13 @@ def get_persistence_client():
     elif persistence_type == "spanner":
         return SpannerClient()
     else:
-        return SqlClient()
+        return SqlClient(manager)
 
 
 class ShibbolethBootstrap:
     def __init__(self, manager):
         self.manager = manager
-        self.persistence_client = get_persistence_client()
+        self.persistence_client = get_persistence_client(manager)
 
     def setup_idp_home(self):
         logger.info("Setting up IDP home directory")
@@ -88,9 +92,7 @@ class ShibbolethBootstrap:
             "-keysize", "128",
         ], check=True)
 
-        with open(SEALER_PASSWORD_FILE, "w") as f:
-            f.write(sealer_password)
-        os.chmod(SEALER_PASSWORD_FILE, 0o600)
+        _write_private(SEALER_PASSWORD_FILE, sealer_password)
         os.chmod(sealer_file, 0o600)
 
         return sealer_password
@@ -116,8 +118,7 @@ class ShibbolethBootstrap:
         with open(src) as f:
             txt = Template(f.read()).safe_substitute(ctx)
 
-        with open(dst, "w") as f:
-            f.write(txt)
+        _write_private(dst, txt)
 
     def setup_credentials(self):
         logger.info("Setting up credentials")
@@ -132,9 +133,7 @@ class ShibbolethBootstrap:
 
         if signing_key:
             key_path = f"{IDP_HOME}/credentials/idp-signing.key"
-            with open(key_path, "w") as f:
-                f.write(signing_key)
-            os.chmod(key_path, 0o600)
+            _write_private(key_path, signing_key)
 
         encryption_cert = self.manager.secret.get("shibboleth_idp_encryption_cert")
         encryption_key = self.manager.secret.get("shibboleth_idp_encryption_key")
@@ -146,9 +145,7 @@ class ShibbolethBootstrap:
 
         if encryption_key:
             key_path = f"{IDP_HOME}/credentials/idp-encryption.key"
-            with open(key_path, "w") as f:
-                f.write(encryption_key)
-            os.chmod(key_path, 0o600)
+            _write_private(key_path, encryption_key)
 
     def setup_webapp(self):
         logger.info("Setting up webapp")

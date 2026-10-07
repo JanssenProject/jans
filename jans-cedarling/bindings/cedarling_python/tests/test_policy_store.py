@@ -76,7 +76,7 @@ def test_policy_store_source_wrong_type():
     try:
         load_bootstrap_config("invalid_config.abc")
     except ValueError:
-        pass
+        pass  # expected
     else:
         assert False, "ValueError was not raised when a policy store has an unsupported file type"
 

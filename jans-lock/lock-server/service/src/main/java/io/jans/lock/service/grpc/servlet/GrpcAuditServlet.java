@@ -128,13 +128,24 @@ public class GrpcAuditServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        handleGrpcRequest(req, resp, false);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        safeHandle(req, resp, false);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        handleGrpcRequest(req, resp, true);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+        safeHandle(req, resp, true);
+    }
+
+    private void safeHandle(HttpServletRequest req, HttpServletResponse resp, boolean post) {
+        try {
+            handleGrpcRequest(req, resp, post);
+        } catch (IOException | ServletException ex) {
+            log.error("Failed to process gRPC request", ex);
+            if (!resp.isCommitted()) {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+        }
     }
 
     @Override

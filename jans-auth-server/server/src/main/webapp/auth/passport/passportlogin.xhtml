@@ -322,16 +322,14 @@ border-color: #d6e9c6;
 			}
 			function fillCredential() {
 				var username = window.localStorage.getItem('form-username');
-				var password = window.localStorage.getItem('form-password');
+				// purge passwords persisted by older versions of this page
+				window.localStorage.removeItem('form-password');
 				$(".usernameField").val(username);
-				$(".passwordField").val(password);
 			}
 
 			function storeCrendential() {
 				var username = $(".usernameField").val();
-				var password = $(".passwordField").val();
 				window.localStorage.setItem('form-username', username);
-				window.localStorage.setItem('form-password', password);
 			}
 			function checkRememberMe() {
 				if ($('.rememberField:checked').val()) {
