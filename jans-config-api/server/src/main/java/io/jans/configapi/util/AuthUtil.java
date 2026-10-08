@@ -885,7 +885,7 @@ public class AuthUtil {
         return sw.toString();
     }
     
-    public List<String> getStringList(Object rawObject){
+    public static List<String> getListFromRawObject(Object rawObject){
         return Optional.ofNullable(rawObject)
                 .filter(List.class::isInstance)
                 .map(List.class::cast)
@@ -894,6 +894,42 @@ public class AuthUtil {
                 .filter(String.class::isInstance)
                 .map(String.class::cast)
                 .toList();         
+    }
+    
+    public static Optional<String> getString(Object raw) {
+        if (raw == null) {
+            return Optional.empty();
+        }
+        if (raw instanceof String s) {
+            return Optional.of(s);
+        }
+        throw new IllegalStateException(
+                "Expected String, found " + raw.getClass().getName());
+    }
+
+    public static List<String> getStringList(Object raw) {
+        if (raw == null) {
+            return Collections.emptyList();
+        }
+
+        if (!(raw instanceof List<?> rawList)) {
+            throw new IllegalStateException(
+                    "Expected List, found " + raw.getClass().getName());
+        }
+
+        // Verify every element is actually a String before the cast —
+        // type erasure can't check this for you.
+        for (Object element : rawList) {
+            if (!(element instanceof String)) {
+                throw new IllegalStateException(
+                        "Expected List<String>, found element of type "
+                                + (element == null ? "null" : element.getClass().getName()));
+            }
+        }
+
+        @SuppressWarnings("unchecked") // safe: every element verified above
+        List<String> result = (List<String>) rawList;
+        return Collections.unmodifiableList(result);
     }
 
 }

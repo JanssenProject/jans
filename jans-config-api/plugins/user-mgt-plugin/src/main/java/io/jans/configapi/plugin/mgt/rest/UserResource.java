@@ -25,6 +25,7 @@ import io.jans.util.exception.InvalidAttributeException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
@@ -160,7 +161,7 @@ public class UserResource extends BaseResource {
             ApiAccessConstants.USER_WRITE_ACCESS }, superScopes = { ApiAccessConstants.USER_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getUserByInum(@Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
+    public Response getUserByInum( @Context HttpServletRequest servletRequest, @Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isInfoEnabled()) {
             logger.info("User search by inum:{}", escapeLog(inum));
@@ -168,10 +169,10 @@ public class UserResource extends BaseResource {
         CustomUser customUser = null;
         try {
             
-            logger.error("\n\n\n *** UserResource::getUserByInum() -  scopeContext.getScopes():{}, scopeContext.getSubject():{}",  scopeContext.getScopes(), scopeContext.getSubject());
-            
+            logger.error("\n\n\n *** UserResource::getUserByInum() -  servletRequest:{}, getContextScope(servletRequest):{}, getContextSubject(servletRequest):{}", servletRequest, getContextScope(servletRequest), getContextSubject(servletRequest));
+          
             // validate user role-permission
-            validateUserPermission(inum, null, ApiConstants.READ_REQUEST);
+            validateUserPermission(inum, null, ApiConstants.READ_REQUEST, servletRequest);
 
             User user = userMgmtSrv.getUserBasedOnInum(inum);
             checkResourceNotNull(user, USER);
@@ -299,7 +300,7 @@ public class UserResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.USER_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    public Response updateUser(@Valid CustomUser customUser,
+    public Response updateUser(@Context HttpServletRequest servletRequest, @Valid CustomUser customUser,
             @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isInfoEnabled()) {
@@ -311,10 +312,9 @@ public class UserResource extends BaseResource {
             // get User object
             User user = setUserAttributes(customUser);
 
-            logger.error("\n\n\n *** UserResource::updateUser() -  scopeContext.getScopes():{}, scopeContext.getSubject():{}",  scopeContext.getScopes(), scopeContext.getSubject());
-            
+            logger.error("\n\n\n *** UserResource::updateUser() -  servletRequest:{}, getContextScope(servletRequest):{}, getContextSubject(servletRequest):{}", servletRequest, getContextScope(servletRequest), getContextSubject(servletRequest));
             // validate user role-permission
-            validateUserPermission(null, user, ApiConstants.WRITE_REQUEST);
+            validateUserPermission(null, user, ApiConstants.WRITE_REQUEST, servletRequest);
 
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(user);
@@ -386,7 +386,7 @@ public class UserResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.USER_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchUser(
+    public Response patchUser(@Context HttpServletRequest servletRequest,
             @Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
             @NotNull UserPatchRequest userPatchRequest,
             @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
@@ -400,10 +400,10 @@ public class UserResource extends BaseResource {
             // check if user exists
             User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
 
-            logger.error("\n\n\n *** UserResource::patchUser() -  scopeContext.getScopes():{}, scopeContext.getSubject():{}",  scopeContext.getScopes(), scopeContext.getSubject());
-                        
+            logger.error("\n\n\n *** UserResource::patchUser() -  servletRequest:{}, getContextScope(servletRequest):{}, getContextSubject(servletRequest):{}", servletRequest, getContextScope(servletRequest), getContextSubject(servletRequest));
+            
             // validate user role-permission
-            validateUserPermission(inum, existingUser, ApiConstants.WRITE_REQUEST);     
+            validateUserPermission(inum, existingUser, ApiConstants.WRITE_REQUEST, servletRequest);     
             
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(existingUser);
@@ -709,7 +709,7 @@ public class UserResource extends BaseResource {
         return user;
     }
     
-    private void validateUserPermission(String inumPathVariable, User user, String httpRequestMethod) throws ApiApplicationException {
+    private void validateUserPermission(String inumPathVariable, User user, String httpRequestMethod, HttpServletRequest servletRequest) throws ApiApplicationException {
         if(logger.isInfoEnabled()) {
             logger.info("ValidateUserPermission - inumPathVariable:{}, user:{}, httpRequestMethod:{}", escapeLog(inumPathVariable), user, httpRequestMethod);
         }
@@ -737,10 +737,10 @@ public class UserResource extends BaseResource {
         }
 
         // logged-in user updating other user profile - validate permission
-        validateUserPermission(loggedInUserInum, inumPathVariable, user, httpRequestMethod);
+        validateUserPermission(loggedInUserInum, inumPathVariable, user, httpRequestMethod, servletRequest);
     }
 
-    private void validateUserPermission(String loggedInUserInum, String inumPathVariable, User candidateUser, String httpRequestMethod)
+    private void validateUserPermission(String loggedInUserInum, String inumPathVariable, User candidateUser, String httpRequestMethod, HttpServletRequest servletRequest)
             throws ApiApplicationException {
         logger.error("validateUserPermission - loggedInUserInum {}, inumPathVariable:{}, candidateUser:{}, httpRequestMethod:{}",
                 escapeLog(loggedInUserInum), escapeLog(inumPathVariable), escapeLog(candidateUser), httpRequestMethod);
@@ -761,7 +761,7 @@ public class UserResource extends BaseResource {
                             new StringBuilder("Logged-in user{").append(loggedInUserInum).append("} details missing")));
         }
 
-        boolean isAdmin = isAdminUser(loggedInUserInum, loggedInUser, httpRequestMethod);
+        boolean isAdmin = isAdminUser(loggedInUserInum, loggedInUser, httpRequestMethod, servletRequest);
         if(logger.isInfoEnabled()) {
             logger.info("validateUserPermission - loggedInUserInum:{}, isAdmin:{}", escapeLog(loggedInUserInum), isAdmin);
         }
@@ -801,7 +801,7 @@ public class UserResource extends BaseResource {
         }
     }
 
-    private boolean isAdminUser(String loggedInUserInum, User loggedInUser, String httpRequestMethod)  {
+    private boolean isAdminUser(String loggedInUserInum, User loggedInUser, String httpRequestMethod, HttpServletRequest servletRequest)  {
         logger.error("\n\n\n ****************** UserResource::isAdminUser() - loggedInUserInum:{}, loggedInUser:{}, httpRequestMethod:{}", loggedInUserInum, loggedInUser, httpRequestMethod);
         boolean isAdmin = false;
 
@@ -809,27 +809,26 @@ public class UserResource extends BaseResource {
             return isAdmin;
         }
        
-        isAdmin = authUtil.hasSuperAdminScope(getContextScope(), httpRequestMethod);
+        isAdmin = authUtil.hasSuperAdminScope(getContextScope(servletRequest), httpRequestMethod);
         if(logger.isInfoEnabled()){
             logger.info("isAdminUser - loggedInUserInum:{}, isAdmin:{}", escapeLog(loggedInUserInum), isAdmin);
         }
         return isAdmin;
     }
     
-    private List<String> getContextScope(){
-        logger.error("\n\n\n *** UserResource::getContextScope() -  scopeContext:{}, scopeContext.getScopes():{}",  scopeContext, scopeContext.getScopes());
-        
-        List<String> tokenScope = null;
-        String tokenSubject = null;
-
-        
-        if(scopeContext!= null) {    
-            tokenSubject = scopeContext.getSubject();          
-            tokenScope = List.copyOf(scopeContext.getScopes());
+    private List<String> getContextScope(HttpServletRequest servletRequest) {
+        List<String> scopes = null;
+        if (servletRequest == null) {
+            return scopes;
         }
-        
-        logger.error("\n\n\n *** UserResource::getContextScope() - tokenSubject:{}, tokenInum:{}", tokenSubject, tokenScope);
-        return tokenScope;
+        return AuthUtil.getStringList(
+                servletRequest.getAttribute(ApiConstants.INTROSPECTION_SCOPES));
+    }
+
+    private String getContextSubject(HttpServletRequest servletRequest) {
+        return AuthUtil.getString(
+                servletRequest.getAttribute(ApiConstants.INTROSPECTION_SUBJECT))
+                .orElseThrow(() -> null);
     }
 
 }

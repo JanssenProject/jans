@@ -18,6 +18,8 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
+import jakarta.servlet.http.HttpServletRequest;
+
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,7 +36,7 @@ import org.slf4j.Logger;
 public class UserResourceFilter extends BaseFilter {
 
     protected static final String USER_INUM = "inum";
-    protected static final String PATH = "/jans-config-api/mgt/";
+    protected static final String PATH = "/configuser";
 
 
     @Inject
@@ -44,7 +46,7 @@ public class UserResourceFilter extends BaseFilter {
     UriInfo info;
 
     @Context
-    HttpServletRequest request;
+    HttpServletRequest servletRequest;
 
     @Context
     private HttpHeaders httpHeaders;
@@ -55,8 +57,6 @@ public class UserResourceFilter extends BaseFilter {
     @Inject
     private AuthUtil authUtil;
     
-    @Inject 
-    ScopeContext scopeContext;
 
     /**
      * Additional User Management requests by extracting a user details and
@@ -104,7 +104,7 @@ public class UserResourceFilter extends BaseFilter {
         if (authUtil.isValidateUserInumInIntrospectionFlag() || !getExcludedClients().isEmpty()) {
             introspectionResponse = getIntrospectionResponse(requestContext);
             log.error("\n\n\n UserResourceFilter - Setting data in requestContext \n\n\n");
-            setScopeSecurityContext(requestContext, introspectionResponse);
+            setScopeInRequest(introspectionResponse);
         }
         log.error("\n\n\n UserResourceFilter - isRolePermissionExemptClient(introspectionResponse):{}", isRolePermissionExemptClient(introspectionResponse));
         if (isRolePermissionExemptClient(introspectionResponse)) {
@@ -212,22 +212,20 @@ public class UserResourceFilter extends BaseFilter {
         return introspectionResponse;
     }
     
-    private void setScopeSecurityContext(ContainerRequestContext requestContext, IntrospectionResponse introspectionResponse) {
-        if(requestContext == null || introspectionResponse ==null) {
+    private void setScopeInRequest(IntrospectionResponse introspectionResponse) {
+        if(servletRequest == null || introspectionResponse ==null) {
             return;
         }
 
         String inum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
         String subject = introspectionResponse.getSubject();
         List<String> introspectionTokenScopes = introspectionResponse.getScope();
-        log.error("\n\n\n\n ******************* UserResourceFilter::setScopeSecurityContext() - inum:{}, subject:{}, introspectionTokenScopes:{}", inum, subject, introspectionTokenScopes);
-        Set<String> scopes = new HashSet<>(introspectionTokenScopes);
-        scopeContext.setScopes(scopes);
-        scopeContext.setSubject(subject);
-
-        // Also expose via SecurityContext for anything using @RolesAllowed-style checks
-        requestContext.setSecurityContext(new ScopeSecurityContext(subject, scopes));
         
+        log.error("\n\n\n\n ******************* UserResourceFilter::setScopeInRequest() - inum:{}, subject:{}, introspectionTokenScopes:{}", inum, subject, introspectionTokenScopes);
+
+        servletRequest.setAttribute(ApiConstants.INTROSPECTION_SUBJECT, subject);
+        servletRequest.setAttribute(ApiConstants.INTROSPECTION_SCOPES, inum);
+        servletRequest.setAttribute(ApiConstants.INTROSPECTION_SCOPES, introspectionTokenScopes);        
        
     }
 }
