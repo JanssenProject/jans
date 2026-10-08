@@ -83,6 +83,7 @@ on:
       - ".github/workflows/scripts/render_test_profiles.py"
       - "automation/ci/run_aio_integration.sh"
       - "jans-linux-setup/jans_setup/templates/test/**"
+      - "jans-linux-setup/jans_setup/schema/jans_test_schema.json"
       - "jans-auth-server/**"
       - "jans-scim/**"
       - "jans-config-api/**"

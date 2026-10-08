@@ -11,12 +11,9 @@ from io.jans.as.model.config import StaticConfiguration
 from io.jans.as.model.ldap import TokenEntity
 from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
-from io.jans.util import StringHelper, ArrayHelper
 from io.jans.as.model.config import Constants
-from java.util import Arrays, ArrayList
 from io.jans.as.service.external.session import SessionEventType
 
-import java
 
 class ApplicationSession(ApplicationSessionType):
     def __init__(self, currentTimeMillis):

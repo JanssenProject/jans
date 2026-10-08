@@ -190,17 +190,9 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!--
-			grpc-netty-shaded bundles its own Netty so it does not conflict
-			with the Netty version pulled in by WireMock / Jetty.
-			Pin to the same gRPC minor version that wiremock-grpc-extension
-			1.0.0-beta.4 uses internally (~1.62.x) to avoid binary
-			incompatibilities between grpc-core and the transport layer.
-		-->
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-netty-shaded</artifactId>
-			<version>1.62.2</version>
 			<scope>test</scope>
 		</dependency>
 

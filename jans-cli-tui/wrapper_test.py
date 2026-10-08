@@ -1,6 +1,4 @@
-import os
 import sys
-import json
 from cli_tui.cli import config_cli
 test_client = config_cli.client_id if config_cli.test_client else None
 config_cli.debug = True

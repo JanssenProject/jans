@@ -288,7 +288,7 @@ services:
       - "127.0.0.1:8200:8200"
 
   traefik:
-    image: traefik:v3.6.1
+    image: traefik:v3.6.1@sha256:fd5932c796f7e2db9fd6bff485ef693d53797f0ee8ad03dc68aa424ea6f21958
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"

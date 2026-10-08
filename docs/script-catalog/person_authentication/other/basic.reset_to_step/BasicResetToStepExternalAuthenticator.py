@@ -7,7 +7,7 @@
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.server.service import UserService, AuthenticationService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.util import StringHelper
 
 
@@ -52,7 +52,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = CdiUtil.bean(UserService)
                 logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):

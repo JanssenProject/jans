@@ -25,6 +25,7 @@ import json
 import sys
 import datetime
 import urllib
+from java.lang import Throwable
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -39,7 +40,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             creds = json.loads(f.read())
             print creds
-        except:
+        except (Exception, Throwable):
             print "OIDC: Initialization. Failed to load creds from file:", oidc_creds_file
             print "Exception: ", sys.exc_info()[1]
             return False
@@ -81,6 +82,7 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
+        foundUser = None
         if step == 1:
             externalOIDCState = ServerUtil.getFirstValue(requestParameters, "state")
 

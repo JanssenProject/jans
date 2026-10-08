@@ -18,8 +18,6 @@ from io.jans.jsf2.message import FacesMessages
 from java.time import LocalDateTime, Duration
 from java.time.format import DateTimeFormatter
 
-import java
-import datetime
 import json
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -81,7 +79,6 @@ class PersonAuthentication(PersonAuthenticationType):
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
             cacheService = CdiUtil.bean(CacheService)
-            userService = CdiUtil.bean(UserService)
 
 
             logged_in = False
@@ -110,7 +107,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     if remainingAttempts > 0 and userSatus == "active":
                         facesMessages.add(FacesMessage.SEVERITY_INFO, StringHelper.toString(remainingAttempts)+" more attempt(s) before account is LOCKED!")
 
-                if (countInvalidLogin >= self.maximumInvalidLoginAttemps) and ((userSatus == None) or (userSatus == "active")):
+                if (countInvalidLogin >= self.maximumInvalidLoginAttemps) and ((userSatus is None) or (userSatus == "active")):
                     print "Basic (lock account). Locking '%s' for '%s' seconds" % ( user_name, self.lockExpirationTime)
                     self.lockUser(user_name)
                     return False
@@ -121,7 +118,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     unlock_and_authenticate = False
 
                     object_from_store = cacheService.get(None, "lock_user_" + user_name)
-                    if object_from_store == None:
+                    if object_from_store is None:
                         # Object in cache was expired. We need to unlock user
                         print "Basic (lock account). User locking details for user '%s' not exists" % user_name
                         unlock_and_authenticate = True
@@ -189,11 +186,11 @@ class PersonAuthentication(PersonAuthenticationType):
         userService = CdiUtil.bean(UserService)
 
         find_user_by_uid = userService.getUser(user_name, attribute_name)
-        if find_user_by_uid == None:
+        if find_user_by_uid is None:
             return None
 
         custom_attribute_value = userService.getCustomAttribute(find_user_by_uid, attribute_name)
-        if custom_attribute_value == None:
+        if custom_attribute_value is None:
             return None
         
         attribute_value = custom_attribute_value.getValue()
@@ -209,7 +206,7 @@ class PersonAuthentication(PersonAuthenticationType):
         userService = CdiUtil.bean(UserService)
 
         find_user_by_uid = userService.getUser(user_name)
-        if find_user_by_uid == None:
+        if find_user_by_uid is None:
             return None
         
         userService.setCustomAttribute(find_user_by_uid, attribute_name, attribute_value)
@@ -229,7 +226,7 @@ class PersonAuthentication(PersonAuthenticationType):
         facesMessages.setKeepMessages()
 
         find_user_by_uid = userService.getUser(user_name)
-        if (find_user_by_uid == None):
+        if (find_user_by_uid is None):
             return None
 
         status_attribute_value = userService.getCustomAttribute(find_user_by_uid, "gluuStatus")
@@ -240,7 +237,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return
         
         userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "inactive")
-        updated_user = userService.updateUser(find_user_by_uid)
+        userService.updateUser(find_user_by_uid)
 
         object_to_store = json.dumps({'locked': True, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
 
@@ -257,7 +254,7 @@ class PersonAuthentication(PersonAuthenticationType):
         cacheService= CdiUtil.bean(CacheService)
 
         find_user_by_uid = userService.getUser(user_name)
-        if (find_user_by_uid == None):
+        if (find_user_by_uid is None):
             return None
 
         object_to_store = json.dumps({'locked': False, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
@@ -265,7 +262,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         userService.setCustomAttribute(find_user_by_uid, "jansStatus", "active")
         userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, None)
-        updated_user = userService.updateUser(find_user_by_uid)
+        userService.updateUser(find_user_by_uid)
 
 
         print "Basic (lock account). Lock user. User '%s' unlocked" % user_name
