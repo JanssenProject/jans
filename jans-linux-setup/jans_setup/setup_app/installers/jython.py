@@ -11,7 +11,7 @@ from setup_app.installers.base import BaseInstaller
 
 class JythonInstaller(BaseInstaller, SetupUtils):
 
-    jython_link = 'https://maven.jans.io/maven/io/jans/jython-installer/{0}/jython-installer-{0}.jar'.format(base.current_app.app_info['JYTHON_VERSION'])
+    jython_link = 'https://repo1.maven.org/maven2/org/python/jython-installer/{0}/jython-installer-{0}.jar'.format(base.current_app.app_info['JYTHON_VERSION'])
     source_files = [
             (os.path.join(Config.dist_app_dir, os.path.basename(jython_link)), jython_link),
             ]
@@ -22,8 +22,7 @@ class JythonInstaller(BaseInstaller, SetupUtils):
         self.install_var = 'install_jython'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
-        if not base.snap:
-            self.register_progess()
+        self.register_progess()
 
         self.needdb = False # we don't need backend connection in this class
 

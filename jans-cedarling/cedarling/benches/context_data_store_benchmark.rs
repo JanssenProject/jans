@@ -94,6 +94,7 @@ static BSCONFIG: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
     },
     policy_store_config: PolicyStoreConfig {
         source: PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
+        ..Default::default()
     },
     jwt_config: JwtConfig::new_without_validation(),
     authorization_config: AuthorizationConfig::default(),
@@ -112,6 +113,7 @@ static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| B
     },
     policy_store_config: PolicyStoreConfig {
         source: PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA.to_string()),
+        ..Default::default()
     },
     jwt_config: JwtConfig::new_without_validation(),
     authorization_config: AuthorizationConfig::default(),

@@ -116,6 +116,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private AuthenticationFilterService authenticationFilterService;
 
     @Inject
+    private AuthenticationService authenticationService;
+
+    @Inject
     private SessionIdService sessionIdService;
 
     @Inject
@@ -305,6 +308,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                     AuthorizeErrorResponseType.SESSION_SELECTION_REQUIRED, authzRequest.getState()));
             redirectUriResponse.addResponseParameter("hint", "Use prompt=login in order to alter existing session.");
+            addResponseParameterIss(redirectUriResponse, authzRequest.getResponseModeEnum());
             applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
             return RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, authzRequest.getHttpRequest()).build();
         } catch (EntryPersistenceException e) { // Invalid clientId
@@ -360,7 +364,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         validateRequestJwt(authzRequest, isPar, client);
 
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
-        authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getRedirectUriResponse(), client);
+        validatePkceIfNeeded(authzRequest, client, deviceAuthzUserCode);
 
         dpopService.validateDpopThumprintIsPresent(authzRequest.getDpopJkt(), authzRequest.getState());
 
@@ -510,6 +514,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionIdService.computeSessionState(sessionUser, authzRequest.getClientId(), authzRequest.getRedirectUri()));
         authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.STATE, authzRequest.getState());
 
+        addResponseParameterIss(authzRequest.getRedirectUriResponse().getRedirectUri(), authzRequest.getResponseModeEnum());
         addResponseParameterScope(authzRequest, authorizationGrant);
 
         clientService.updateAccessTime(client, false);
@@ -522,6 +527,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         runCiba(authzRequest, client);
         processDeviceAuthorization(deviceAuthzUserCode, user);
+        if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
+            deviceAuthorizationService.removeUserCodeFromSession(sessionIdService.getSessionId(authzRequest.getHttpRequest()));
+        }
 
         return builder;
     }
@@ -551,6 +559,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             for (Entry<String, String> entry : customResponseHeaders.entrySet()) {
                 builder.header(entry.getKey(), entry.getValue());
             }
+        }
+    }
+
+    private void addResponseParameterIss(RedirectUri redirectUri, ResponseMode responseMode) {
+        if (Boolean.TRUE.equals(appConfiguration.getAuthorizationResponseIssParameterSupported())
+                && (responseMode == null || !responseMode.isJarm())) {
+            redirectUri.addResponseParameter(AuthorizeResponseParam.ISS, appConfiguration.getIssuer());
         }
     }
 
@@ -804,6 +819,17 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             log.debug("validateMaxAge - redirect to authorization page, request {}", authzRequest);
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
+    }
+
+    /**
+     * Device flow: user approves on the authorization page and no authorization code is issued (the device
+     * redeems device_code at the token endpoint), so there is no code_challenge to validate in that case.
+     */
+    void validatePkceIfNeeded(AuthzRequest authzRequest, Client client, String deviceAuthzUserCode) {
+        if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
+            return;
+        }
+        authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getCodeChallengeMethod(), authzRequest.getRedirectUriResponse(), client);
     }
 
     public void checkOfflineAccessScopes(List<ResponseType> responseTypes, List<Prompt> prompts, Client client, Set<String> scopes) {
@@ -1100,6 +1126,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             sessionUser.setUserDn(null);
             sessionUser.setUser(null);
             sessionUser.setAuthenticationTime(null);
+            sessionUser.getSessionAttributes().remove(AuthenticationService.AUTH_METRIC_SUCCESS_REPORTED);
         }
 
         identity.logout();
@@ -1118,6 +1145,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         persistenceSessionId.setUserDn(null);
         persistenceSessionId.setUser(null);
         persistenceSessionId.setAuthenticationTime(null);
+        persistenceSessionId.getSessionAttributes().remove(AuthenticationService.AUTH_METRIC_SUCCESS_REPORTED);
         boolean result = sessionIdService.updateSessionId(persistenceSessionId);
         sessionIdService.externalEvent(new SessionEvent(SessionEventType.UNAUTHENTICATED, persistenceSessionId).setHttpRequest(httpRequest));
         if (!result) {
@@ -1161,6 +1189,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             return null;
         }
 
+        final boolean hadSessionUser = user != null;
+
         final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(executionContext);
         context.setUser(user);
 
@@ -1168,6 +1198,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             user = context.getUser();
             if (user != null) {
                 log.trace("ROPC - User {} is authenticated successfully by external script.", user.getUserId());
+                authenticationService.incUserAuthenticationMetricIfNotReported(true);
                 return user;
             } else {
                 log.trace("ROPC returned True but user is not set (set valid user in context.setUser(<user>))");
@@ -1176,6 +1207,17 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             log.trace("ROPC script returned False.");
         }
 
+        // count failure only for real credential attempts, not for every authorization request with forced ROPC
+        if (!hadSessionUser && hasRopcCredentials(executionContext)) {
+            authenticationService.incUserAuthenticationMetricIfNotReported(false);
+        }
+
         return null;
+    }
+
+    private boolean hasRopcCredentials(ExecutionContext executionContext) {
+        HttpServletRequest httpRequest = executionContext.getHttpRequest();
+        return httpRequest != null && (StringUtils.isNotBlank(httpRequest.getParameter("username"))
+                || StringUtils.isNotBlank(httpRequest.getParameter("password")));
     }
 }

@@ -57,7 +57,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     if let Ok(report) = guard.report().build() {
-        println!("report: {:?}", &report);
+        println!("report: {report:?}");
 
         // write output flamegraph to an SVG file
         let file = File::create(format!(
@@ -99,6 +99,7 @@ async fn init_cedarling_multi_issuer(
             source: cedarling::PolicyStoreSource::Yaml(
                 serde_yaml_ng::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
+            ..Default::default()
         },
         jwt_config: JwtConfig {
             jwks: None,

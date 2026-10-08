@@ -107,6 +107,19 @@ public class DiscoveryServiceTest {
     }
 
     @Test
+    public void process_whenCalled_shouldReturnCodeChallengeMethodsSupported() {
+        lenient().when(appConfiguration.isFeatureEnabled(any())).thenReturn(false);
+        lenient().when(appConfiguration.getEndSessionEndpoint()).thenReturn("https://as.com/end_session");
+
+        final JSONObject json = discoveryService.process();
+
+        assertTrue(json.has(ConfigurationResponseClaim.CODE_CHALLENGE_METHODS_SUPPORTED));
+        final List<String> codeChallengeMethods = new ArrayList<>();
+        json.getJSONArray(ConfigurationResponseClaim.CODE_CHALLENGE_METHODS_SUPPORTED).forEach(item -> codeChallengeMethods.add((String) item));
+        assertTrue(codeChallengeMethods.contains("S256"));
+    }
+
+    @Test
     public void getAcrValuesList_whenCalled_shouldContainInternalAuthnAlias() {
         final List<String> acrValuesList = DiscoveryService.getAcrValuesList(new ArrayList<>());
         assertTrue(acrValuesList.contains("simple_password_auth"));
@@ -132,5 +145,27 @@ public class DiscoveryServiceTest {
         final JSONObject json = discoveryService.process();
 
         assertFalse(json.has(ConfigurationResponseClaim.CLIENT_ID_METADATA_DOCUMENT_SUPPORTED));
+    }
+
+    @Test
+    public void process_whenAuthorizationResponseIssParameterSupportedIsEnabled_shouldReturnTrue() {
+        lenient().when(appConfiguration.isFeatureEnabled(any())).thenReturn(false);
+        when(appConfiguration.getAuthorizationResponseIssParameterSupported()).thenReturn(true);
+
+        final JSONObject json = discoveryService.process();
+
+        assertTrue(json.has(ConfigurationResponseClaim.AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED));
+        assertEquals(Boolean.TRUE, json.optBoolean(ConfigurationResponseClaim.AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED));
+    }
+
+    @Test
+    public void process_whenAuthorizationResponseIssParameterSupportedIsDisabled_shouldReturnFalse() {
+        lenient().when(appConfiguration.isFeatureEnabled(any())).thenReturn(false);
+        when(appConfiguration.getAuthorizationResponseIssParameterSupported()).thenReturn(false);
+
+        final JSONObject json = discoveryService.process();
+
+        assertTrue(json.has(ConfigurationResponseClaim.AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED));
+        assertEquals(Boolean.FALSE, json.optBoolean(ConfigurationResponseClaim.AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED));
     }
 }

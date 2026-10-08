@@ -1,0 +1,267 @@
+[
+  {
+    "file": "missing_producer.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:producer"
+  },
+  {
+    "file": "missing_kid.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:kid"
+  },
+  {
+    "file": "missing_record_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:record_id"
+  },
+  {
+    "file": "missing_trace.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace"
+  },
+  {
+    "file": "missing_trace_eat_profile.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.eat_profile"
+  },
+  {
+    "file": "missing_trace_event_kind.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.event_kind"
+  },
+  {
+    "file": "missing_trace_signed_at.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.signed_at"
+  },
+  {
+    "file": "missing_trace_trace_execution_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.trace_execution_id"
+  },
+  {
+    "file": "missing_trace_execution_authority.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.execution_authority"
+  },
+  {
+    "file": "missing_trace_event.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.event"
+  },
+  {
+    "file": "missing_producer_chain.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:producer_chain"
+  },
+  {
+    "file": "missing_producer_chain_producer_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:producer_chain.producer_id"
+  },
+  {
+    "file": "missing_producer_chain_producer_instance_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:producer_chain.producer_instance_id"
+  },
+  {
+    "file": "missing_producer_chain_producer_chain_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:producer_chain.producer_chain_id"
+  },
+  {
+    "file": "missing_producer_chain_sequence_number.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:producer_chain.sequence_number"
+  },
+  {
+    "file": "missing_producer_chain_prev_record_hash.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:producer_chain.prev_record_hash"
+  },
+  {
+    "file": "missing_signature.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:signature"
+  },
+  {
+    "file": "producer_format.json",
+    "errorId": "producer_mismatch",
+    "reason": "producer_format"
+  },
+  {
+    "file": "producer_chain_mismatch.json",
+    "errorId": "producer_mismatch",
+    "reason": "producer_chain_mismatch"
+  },
+  {
+    "file": "record_id_format.json",
+    "errorId": "invalid_assertion",
+    "reason": "record_id_format"
+  },
+  {
+    "file": "unsupported_profile.json",
+    "errorId": "unsupported_profile",
+    "reason": null
+  },
+  {
+    "file": "event_kind_unsupported.json",
+    "errorId": "invalid_assertion",
+    "reason": "event_kind_unsupported"
+  },
+  {
+    "file": "signed_at_range_negative.json",
+    "errorId": "invalid_assertion",
+    "reason": "range:trace.signed_at"
+  },
+  {
+    "file": "signed_at_in_future.json",
+    "errorId": "invalid_assertion",
+    "reason": "signed_at_in_future"
+  },
+  {
+    "file": "trace_execution_id_empty.json",
+    "errorId": "invalid_assertion",
+    "reason": "empty:trace.trace_execution_id"
+  },
+  {
+    "file": "execution_authority_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.execution_authority"
+  },
+  {
+    "file": "sequence_number_zero.json",
+    "errorId": "invalid_assertion",
+    "reason": "range:producer_chain.sequence_number"
+  },
+  {
+    "file": "prev_record_hash_format.json",
+    "errorId": "invalid_assertion",
+    "reason": "prev_record_hash_format"
+  },
+  {
+    "file": "parent_record_ids_format.json",
+    "errorId": "invalid_assertion",
+    "reason": "parent_record_ids_format"
+  },
+  {
+    "file": "parent_record_id_entry_missing_field.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:parent_record_ids[0].producer_id"
+  },
+  {
+    "file": "signature_not_base64url.json",
+    "errorId": "invalid_signature",
+    "reason": "signature_format"
+  },
+  {
+    "file": "signature_wrong_length.json",
+    "errorId": "invalid_signature",
+    "reason": "signature_length"
+  },
+  {
+    "file": "domain_field_forbidden_top.json",
+    "errorId": "domain_field_forbidden",
+    "reason": null
+  },
+  {
+    "file": "domain_field_forbidden_trace.json",
+    "errorId": "domain_field_forbidden",
+    "reason": null
+  },
+  {
+    "file": "ad_missing_bundle_hash.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.policy.bundle_hash"
+  },
+  {
+    "file": "ad_bundle_hash_wrong_format.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.policy.bundle_hash"
+  },
+  {
+    "file": "ad_outcome_invalid.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.event.outcome"
+  },
+  {
+    "file": "ad_missing_runtime_pdp_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.runtime.pdp_id"
+  },
+  {
+    "file": "capability_ids_empty.json",
+    "errorId": "invalid_assertion",
+    "reason": "empty:trace.event.capability_ids"
+  },
+  {
+    "file": "capability_ids_entry_invalid_outcome.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.event.capability_ids[0].outcome"
+  },
+  {
+    "file": "capability_id_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.event.capability_ids[0].capability_id"
+  },
+  {
+    "file": "ci_with_policy_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.policy"
+  },
+  {
+    "file": "ci_missing_enforcement_point_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.event.enforcement_point_id"
+  },
+  {
+    "file": "ci_outcome_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.event.outcome"
+  },
+  {
+    "file": "re_with_capability_ids_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.capability_ids"
+  },
+  {
+    "file": "re_with_policy_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.policy"
+  },
+  {
+    "file": "re_missing_outcome.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.event.outcome"
+  },
+  {
+    "file": "re_invalid_result_digest.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.event.result_digest"
+  },
+  {
+    "file": "tokens_both_jti_fingerprint.json",
+    "errorId": "invalid_assertion",
+    "reason": "token_ref_identity"
+  },
+  {
+    "file": "tokens_neither_jti_fingerprint.json",
+    "errorId": "invalid_assertion",
+    "reason": "token_ref_identity"
+  },
+  {
+    "file": "tokens_fingerprint_wrong_format.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.event.tokens[0].fingerprint"
+  },
+  {
+    "file": "tokens_issuer_http_non_localhost.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.event.tokens[0].issuer"
+  },
+  {
+    "file": "tokens_raw_jwt_as_jti.json",
+    "errorId": "invalid_assertion",
+    "reason": "raw_token_material"
+  }
+]

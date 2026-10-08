@@ -50,7 +50,7 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
             log.debug("Starting RedisProvider ... configuration:" + redisConfiguration);
             defaultPutExpiration = redisConfiguration.getDefaultPutExpiration() > 0 ? redisConfiguration.getDefaultPutExpiration()
                     : DEFAULT_PUT_EXPIRATION_IN_SECONDS;
-            redisProvider = RedisProviderFactory.create(cacheConfiguration.getRedisConfiguration());
+            redisProvider = RedisProviderFactory.create(cacheConfiguration);
             redisProvider.create();
             log.debug("RedisProvider started.");
         } catch (Exception e) {
@@ -135,4 +135,8 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
         return CacheProviderType.REDIS;
     }
 
+    @Override
+    public CacheConfiguration getCacheConfiguration() {
+        return cacheConfiguration;
+    }
 }

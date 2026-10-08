@@ -335,8 +335,7 @@ public class AuthzRequestService {
         }
 
         // JARM
-        Set<ResponseMode> jwtResponseModes = Sets.newHashSet(ResponseMode.QUERY_JWT, ResponseMode.FRAGMENT_JWT, ResponseMode.JWT, ResponseMode.FORM_POST_JWT);
-        if (jwtResponseModes.contains(authzRequest.getResponseModeEnum())) {
+        if (authzRequest.getResponseModeEnum() != null && authzRequest.getResponseModeEnum().isJarm()) {
             JsonWebResponse jwe = parseRequestToJwr(authzRequest.getRequest());
             fillRedirectUriResponseforJARM(redirectUriResponse, jwe, client);
         }
@@ -572,6 +571,7 @@ public class AuthzRequestService {
     public void createRedirectUriResponse(AuthzRequest authzRequest) {
         RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(authzRequest.getRedirectUri(), authzRequest.getResponseTypeList(), authzRequest.getResponseModeEnum()), authzRequest.getState(), authzRequest.getHttpRequest(), errorResponseFactory);
         redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
+        redirectUriResponse.setAppConfiguration(appConfiguration);
 
         authzRequest.setRedirectUriResponse(redirectUriResponse);
     }

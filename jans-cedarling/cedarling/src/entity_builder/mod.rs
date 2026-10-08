@@ -20,7 +20,6 @@ mod schema;
 mod trusted_issuer_index;
 pub(crate) mod value_to_expr;
 
-use crate::RequestUnsigned;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::default_entities::DefaultEntities;
@@ -40,7 +39,10 @@ use std::sync::Arc;
 use url::Origin;
 
 pub(crate) use crate::entity_builder::trusted_issuer_index::TrustedIssuerIndex;
-pub(crate) use build_multi_issuer_entity::MultiIssuerEntityError;
+pub(crate) use build_multi_issuer_entity::{
+    MultiIssuerEntityError, MultiIssuerSetupEntities, is_valid_issuer_id, sanitize_issuer_name,
+    simplify_token_type,
+};
 pub(crate) use built_entities::BuiltEntities;
 
 pub(crate) use error::*;
@@ -64,6 +66,10 @@ impl EntityBuilder {
         default_entities: DefaultEntities,
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
+
+        if let Some(schema) = schema.as_ref() {
+            Self::validate_iss_types(&issuers_index, schema)?;
+        }
 
         let (ok, errs) = issuers_index
             .values()
@@ -94,29 +100,66 @@ impl EntityBuilder {
         })
     }
 
-    /// Builds the entities using the unsigned interface
-    pub(super) fn build_entities_unsigned(
+    /// Build just the principal entity for an unsigned request, without a resource.
+    ///
+    /// Callers that need to amortize principal construction across many items
+    /// (batch authorization) call this once and then invoke
+    /// [`Self::build_resource_entity`] per item.
+    pub(crate) fn build_unsigned_principal(
         &self,
-        request: &RequestUnsigned,
-    ) -> Result<BuiltEntitiesUnsigned, BuildUnsignedEntityError> {
+        principal: Option<&EntityData>,
+    ) -> Result<UnsignedPrincipalBuild, BuildUnsignedEntityError> {
         let mut built_entities = BuiltEntities::default();
-
-        let mut principal_entity: Option<Entity> = None;
-        if let Some(principal) = request.principal.as_ref() {
-            let principal = self.build_principal_unsigned(principal, &built_entities)?;
-            built_entities.insert(&principal.uid());
-            principal_entity = Some(principal);
-        }
-
-        let resource = self
-            .build_resource_entity(&request.resource)
-            .map_err(Box::new)?;
-
-        Ok(BuiltEntitiesUnsigned {
-            principal: principal_entity,
-            resource,
+        let principal = match principal {
+            Some(principal) => {
+                let entity = self.build_principal_unsigned(principal, &built_entities)?;
+                built_entities.insert(&entity.uid());
+                Some(entity)
+            },
+            None => None,
+        };
+        Ok(UnsignedPrincipalBuild {
+            principal,
             built_entities,
         })
+    }
+
+    /// Rejects a token whose schema `iss` type cannot match what the builder emits.
+    fn validate_iss_types(
+        issuers_index: &TrustedIssuerIndex,
+        schema: &MappingSchema,
+    ) -> Result<(), InitEntityBuilderError> {
+        const ISS_CLAIM: &str = "iss";
+
+        for iss in issuers_index.values() {
+            let expected_iss_type = Self::trusted_issuer_typename(&iss.name);
+
+            for token_metadata in iss.token_metadata.values() {
+                let entity_type_name = token_metadata.entity_type_name.as_str();
+                let Some(shape) = schema.get_entity_shape(entity_type_name) else {
+                    continue;
+                };
+                let Some(iss_shape) = shape.get(ISS_CLAIM) else {
+                    continue;
+                };
+                // Only an entity-reference `iss` constrains the type. A `String`
+                // `iss` is not checked here: for JWT tokens `add_iss_claim` still
+                // overwrites it with an `EntityUid`, so such a declaration would be
+                // a silent schema mismatch rather than an accepted value.
+                if let schema::AttrSrc::EntityRef(schema::EntityRefAttrSrc(schema_iss_type)) =
+                    iss_shape.src()
+                    && schema_iss_type.as_str() != expected_iss_type
+                {
+                    return Err(InitEntityBuilderError::IssTypeMismatch {
+                        issuer_name: iss.name.clone(),
+                        schema_iss_type: schema_iss_type.to_string(),
+                        expected_iss_type,
+                    });
+                }
+            }
+        }
+
+        Ok(())
     }
 
     pub(super) fn trusted_issuer_typename(namespace: &str) -> String {
@@ -137,9 +180,9 @@ impl EntityBuilder {
     }
 }
 
-pub(super) struct BuiltEntitiesUnsigned {
+/// Output of [`EntityBuilder::build_unsigned_principal`].
+pub(crate) struct UnsignedPrincipalBuild {
     pub principal: Option<Entity>,
-    pub resource: Entity,
     pub built_entities: BuiltEntities,
 }
 
@@ -180,28 +223,6 @@ fn default_tkn_entity_name(tkn_name: &str) -> Option<&'static str> {
 #[derive(Default)]
 pub(super) struct TokenPrincipalMappings(HashMap<String, Vec<(String, RestrictedExpression)>>);
 
-impl From<Vec<TokenPrincipalMapping>> for TokenPrincipalMappings {
-    fn from(value: Vec<TokenPrincipalMapping>) -> Self {
-        Self(value.into_iter().fold(HashMap::new(), |mut acc, mapping| {
-            acc.entry(mapping.principal.clone())
-                .or_default()
-                .push((mapping.attr_name.clone(), mapping.expr.clone()));
-            acc
-        }))
-    }
-}
-
-/// Represents a token and it's UID
-#[derive(Clone)]
-pub(super) struct TokenPrincipalMapping {
-    /// The principal where token will be inserted
-    principal: String,
-    /// The name of the attribute of the token
-    attr_name: String,
-    /// An `EntityUID` reference to the token
-    expr: RestrictedExpression,
-}
-
 impl TokenPrincipalMappings {
     fn get(&self, principal: &str) -> Option<&Vec<(String, RestrictedExpression)>> {
         self.0.get(principal)
@@ -219,11 +240,13 @@ impl TokenPrincipalMappings {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::common::policy_store::{TrustedIssuer, token_entity_metadata::TokenEntityMetadata};
     use cedar_policy::{Entities, Schema};
     use serde_json::Value;
     use std::collections::HashMap;
     use std::sync::LazyLock;
     use test_utils::assert_eq;
+    use url::Url;
 
     pub(super) static CEDARLING_VALIDATOR_SCHEMA: LazyLock<ValidatorSchema> = LazyLock::new(|| {
         ValidatorSchema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
@@ -280,5 +303,57 @@ mod test {
         // Check if the entity conforms to the schema
         Entities::from_entities([entity.clone()], schema)
             .unwrap_or_else(|_| panic!("{} entity should conform to the schema", entity.uid()));
+    }
+
+    #[test]
+    fn rejects_iss_type_from_foreign_namespace() {
+        const SCHEMA: &str = r"
+        namespace Jans {
+            entity TrustedIssuer;
+            entity Access_token = { iss: TrustedIssuer };
+        }
+        namespace Alpha {
+            entity TrustedIssuer;
+            entity Access_token = { iss: TrustedIssuer };
+        }";
+
+        let iss_name: &str = "Alpha";
+        let token_metadata = HashMap::from([(
+            "access_token".to_string(),
+            TokenEntityMetadata::builder()
+                .entity_type_name("Jans::Access_token".to_string())
+                .build(),
+        )]);
+        let issuers = HashMap::from([(
+            iss_name.to_lowercase(),
+            TrustedIssuer::new(
+                iss_name.to_string(),
+                String::default(),
+                Url::parse("https://idp.example/auth").expect("valid url"),
+                token_metadata,
+            ),
+        )]);
+
+        let schema = ValidatorSchema::from_str(SCHEMA).expect("valid schema");
+        let err = EntityBuilder::new(
+            TrustedIssuerIndex::new(&issuers, None),
+            Some(&schema),
+            DefaultEntities::default(),
+        )
+        .map(|_| ())
+        .expect_err("mismatched iss namespace must be rejected at startup");
+
+        assert!(
+            matches!(
+                err,
+                InitEntityBuilderError::IssTypeMismatch {
+                    ref schema_iss_type,
+                    ref expected_iss_type,
+                    ..
+                } if schema_iss_type == "Jans::TrustedIssuer"
+                    && expected_iss_type == "Alpha::TrustedIssuer"
+            ),
+            "expected mismatched iss namespace to be rejected, got: {err}"
+        );
     }
 }

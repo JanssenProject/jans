@@ -125,7 +125,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         if (expectedResponseTypes.size() == 0) {
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
             authorizeClient.setRequest(authorizationRequest);
-            AuthorizationResponse authorizationResponse = authorizeClient.exec();
+            AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
             showClient(authorizeClient);
             assertEquals(authorizationResponse.getStatus(), 302);
@@ -190,6 +190,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
             // 5. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
@@ -255,7 +256,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 // silly validation of html content returned by server but at least it verifies that logout_uri and post_logout_uri are present
                 assertTrue(endSessionResponse.getHtmlPage().contains("<html>"));
                 assertTrue(endSessionResponse.getHtmlPage().contains(logoutUri));
-                assertTrue(endSessionResponse.getHtmlPage().contains(postLogoutRedirectUri));
+                // the page embeds the URL in a JS string via escapeEcmaScript, which escapes '/' as '\/'
+                assertTrue(endSessionResponse.getHtmlPage().replace("\\/", "/").contains(postLogoutRedirectUri));
                 // assertEquals(endSessionResponse.getState(), endSessionId); // commented out, for http-based logout we get html page
             }
         }

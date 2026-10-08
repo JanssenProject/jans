@@ -238,6 +238,12 @@ public class RegisterService {
         if (requestObject.getTlsClientAuthSubjectDn() != null) {
             client.getAttributes().setTlsClientAuthSubjectDn(requestObject.getTlsClientAuthSubjectDn());
         }
+         if (requestObject.getSpiffeId() != null) {
+            client.getAttributes().setSpiffeId(requestObject.getSpiffeId());
+        }
+        if (requestObject.getSpiffeBundleEndpoint() != null) {
+            client.getAttributes().setSpiffeBundleEndpoint(requestObject.getSpiffeBundleEndpoint());
+        }
         if (requestObject.getRedirectUrisRegex() != null) {
             client.getAttributes().setRedirectUrisRegex(requestObject.getRedirectUrisRegex());
         }
@@ -270,6 +276,9 @@ public class RegisterService {
         }
         if (requestObject.getTokenExchangeScriptDns() != null) {
             client.getAttributes().setTokenExchangeScripts(requestObject.getTokenExchangeScriptDns());
+        }
+        if (requestObject.getIdJagScriptDns() != null) {
+            client.getAttributes().setIdJagScripts(requestObject.getIdJagScriptDns());
         }
         if (requestObject.getConsentGatheringScriptDns() != null) {
             client.getAttributes().setConsentGatheringScripts(requestObject.getConsentGatheringScriptDns());

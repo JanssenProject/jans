@@ -152,15 +152,6 @@
       "title-prefixes": []
     }
   },
-  "comp-docker-jans-monolith": {
-    "color": "0052CC",
-    "description": "Touching folder /docker-jans-monolith",
-    "auto-label": {
-      "branch": "",
-      "paths": ["docker-jans-monolith"],
-      "title-prefixes": []
-    }
-  },
   "comp-docker-jans-persistence-loader": {
     "color": "0052CC",
     "description": "Touching folder /docker-jans-persistence-loader",

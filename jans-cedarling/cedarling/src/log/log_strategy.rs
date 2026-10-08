@@ -12,6 +12,7 @@ use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
+use crate::lock::AuditItem;
 use crate::lock::LockService;
 use crate::lock::health_registry::HealthRegistry;
 use crate::log::BaseLogEntry;
@@ -82,6 +83,32 @@ impl LogStrategy {
         &self.logger
     }
 
+    /// Returns `true` if any sink would accept a log at the given level.
+    /// Use to short-circuit expensive entry construction when logging is off.
+    fn would_log(&self, entry_level: Option<LogLevel>) -> bool {
+        let has_lock = self
+            .lock_service
+            .read()
+            .expect("obtain lock_service read lock")
+            .is_some();
+        if has_lock {
+            return true;
+        }
+
+        // If logger is Off and no lock_service, nothing will consume this entry
+        if matches!(self.logger, LogStrategyLogger::Off(_)) {
+            return false;
+        }
+
+        if let Some(logger_level) = &self.log_level
+            && let Some(entry_log_level) = entry_level
+        {
+            return *logger_level <= entry_log_level;
+        }
+
+        true
+    }
+
     fn log_entry<T: Loggable>(&self, entry: T) {
         let entry =
             LogEntryWithClientInfo::from_loggable(entry, self.pdp_id, self.app_name.clone());
@@ -90,8 +117,15 @@ impl LogStrategy {
             .read()
             .expect("obtain lock_service read lock")
             .as_ref()
+            && let Some(payload) = entry.to_audit_payload()
         {
-            lock_service.log_any(entry.clone());
+            let item = AuditItem {
+                payload,
+                pdp_id: self.pdp_id,
+                app_name: self.app_name.clone(),
+                status: None,
+            };
+            lock_service.dispatch_audit(item);
         }
         match &self.logger {
             LogStrategyLogger::Off(log) => log.log_any(entry),
@@ -105,6 +139,10 @@ impl LogStrategy {
         R: Loggable + Indexed,
         for<'a> F: Fn(BaseLogEntry) -> R,
     {
+        if !self.would_log(log_fn.get_log_level()) {
+            return;
+        }
+
         if let Some(logger_level) = &self.log_level {
             if log_fn.can_log(*logger_level) {
                 let entry = log_fn.build();
@@ -174,14 +212,17 @@ impl<Entry: Loggable + Indexed> Loggable for LogEntryWithClientInfo<Entry> {
         self.entry.get_log_level()
     }
 
-    fn get_log_kind(&self) -> Option<super::LogType> {
-        self.entry.get_log_kind()
+    fn to_audit_payload(&self) -> Option<crate::lock::AuditPayload> {
+        self.entry.to_audit_payload()
     }
 }
 
 // Implementation of LogWriter
 impl LogWriter for LogStrategy {
     fn log_any<T: Loggable>(&self, entry: T) {
+        if !self.would_log(entry.get_log_level()) {
+            return;
+        }
         self.log_entry(entry);
     }
 

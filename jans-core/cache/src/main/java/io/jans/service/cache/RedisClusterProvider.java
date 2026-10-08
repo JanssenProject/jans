@@ -31,8 +31,8 @@ public class RedisClusterProvider extends AbstractRedisProvider {
 
     private JedisCluster pool;
 
-    public RedisClusterProvider(RedisConfiguration redisConfiguration) {
-        super(redisConfiguration);
+    public RedisClusterProvider(CacheConfiguration configuration) {
+        super(configuration);
     }
 
     public void create() {
@@ -47,10 +47,10 @@ public class RedisClusterProvider extends AbstractRedisProvider {
 
                 pool = new JedisCluster(hosts(getRedisConfiguration().getServers()), redisConfiguration.getConnectionTimeout(),
                         redisConfiguration.getSoTimeout(), redisConfiguration.getMaxRetryAttempts(),
-                        password, UUID.randomUUID().toString(), poolConfig, true);
+                        redisConfiguration.getUsername(), password, UUID.randomUUID().toString(), poolConfig, true);
             } else {
                 pool = new JedisCluster(hosts(getRedisConfiguration().getServers()), redisConfiguration.getConnectionTimeout(),
-                        redisConfiguration.getSoTimeout(), redisConfiguration.getMaxRetryAttempts(), password, poolConfig);
+                        redisConfiguration.getSoTimeout(), redisConfiguration.getMaxRetryAttempts(), redisConfiguration.getUsername(), password, poolConfig);
             }
 
             testConnection();

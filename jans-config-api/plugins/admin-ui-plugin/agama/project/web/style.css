@@ -1,0 +1,232 @@
+.errorMessage {
+color: red;
+}
+
+.infoMessage {
+color: blue;
+}
+
+
+.loginCard{
+  background-image: url('wave.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: bottom;
+}
+
+.button-gradient {
+  background-image: linear-gradient(to right, #1D976C 0%, #93F9B9  51%, #1D976C  100%);
+  margin: 10px;
+  padding: 15px 45px;
+  text-align: center;
+  text-transform: uppercase;
+  transition: 0.5s;
+  background-size: 200% auto;
+  color: white;            
+  box-shadow: 0 0 20px #eee;
+  border-radius: 10px;
+  display: block;
+}
+
+.button-gradient:hover {
+  background-position: right center; /* change the direction of the change here */
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ---------- Gluu dark (Admin UI) theme ---------- */
+:root {
+  --gl-bg: #0a2035;
+  --gl-bg-2: #071a2c;
+  --gl-card: #0c2947;
+  --gl-border: #2fb6d9;
+  --gl-border-soft: rgba(47, 182, 217, 0.35);
+  --gl-text: #ffffff;
+  --gl-muted: #9fb6cc;
+  --gl-accent: #22d3ee;
+  --gl-accent-2: #1e9fbf;
+}
+
+body.gl-dark {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 0%, #10314f 0%, var(--gl-bg) 45%, var(--gl-bg-2) 100%);
+  color: var(--gl-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.gl-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.gl-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--gl-card);
+  border: 1px solid var(--gl-border);
+  border-radius: 12px;
+  padding: 40px 32px 32px;
+  box-sizing: border-box;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+.gl-logo {
+  display: block;
+  margin: 0 auto 8px;
+  max-width: 190px;
+  height: auto;
+}
+
+.gl-title {
+  margin: 24px 0 28px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--gl-text);
+  position: relative;
+}
+
+.gl-title::after {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 3px;
+  margin: 14px auto 0;
+  border-radius: 3px;
+  background: var(--gl-accent);
+}
+
+.gl-alert {
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.gl-alert-error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #ffb4b4;
+}
+
+.gl-alert-warn {
+  background: rgba(234, 179, 8, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.5);
+  color: #ffe08a;
+}
+
+.gl-alert-success {
+  background: rgba(34, 211, 238, 0.12);
+  border: 1px solid rgba(34, 211, 238, 0.5);
+  color: #a5eefc;
+}
+
+.gl-text {
+  margin: 0 0 24px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--gl-muted);
+}
+
+.gl-otp input {
+  text-align: center;
+  letter-spacing: 0.4em;
+  font-size: 20px;
+}
+
+.gl-field {
+  margin-bottom: 18px;
+}
+
+.gl-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--gl-muted);
+}
+
+.gl-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  font-size: 15px;
+  color: var(--gl-text);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--gl-border-soft);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.gl-field input::placeholder {
+  color: rgba(159, 182, 204, 0.6);
+}
+
+.gl-field input:focus {
+  border-color: var(--gl-accent);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18);
+}
+
+.gl-btn {
+  display: block;
+  width: 100%;
+  margin-top: 26px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #04202f;
+  background: linear-gradient(90deg, var(--gl-accent) 0%, var(--gl-accent-2) 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.05s;
+}
+
+.gl-btn:hover {
+  filter: brightness(1.08);
+}
+
+.gl-btn:active {
+  transform: translateY(1px);
+}
+
+.gl-link {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--gl-accent);
+  cursor: pointer;
+}
+
+.gl-link:hover {
+  text-decoration: underline;
+}
+
+.ribbon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 22px;
+    margin-right: -50px;
+    margin-top: 15px;
+    -ms-transform: rotate(45deg); /* IE 9 */
+    -webkit-transform: rotate(45deg); /* Safari prior 9.0 */
+    transform: rotate(45deg); /* Standard syntax */
+  }
+         

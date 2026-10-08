@@ -89,14 +89,16 @@ In summary, for a token to be validated by Cedarling, two conditions must be met
 2. The token must be provided under a **token name** defined in the corresponding `token_metadata`
 
   ```js
-  // Example authorize_multi_issuer call
-  cedarling.authorize_multi_issuer({
-    tokens: [
-      { mapping: "Jans::Access_Token", payload: "<access_token>" }, // will be validated
-      { mapping: "Jans::Id_Token", payload: "<id_token>" },         // will be ignored unless defined in token_metadata
-    ],
-    // ...
-  })
+  // Example authorizeMultiIssuer call
+  const result = await cedarling.authorizeMultiIssuer(
+    JSON.stringify({
+      tokens: [
+        { mapping: "Jans::Access_Token", payload: "<access_token>" }, // will be validated
+        { mapping: "Jans::Id_Token", payload: "<id_token>" }, // ignored unless defined in token_metadata
+      ],
+      // ...
+    }),
+  );
   ```
 
 ## JWT Content Validation
@@ -198,6 +200,14 @@ This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
 >
 > Enforcing token revocation can help mitigate account takeover risks by allowing for near-instant invalidation of compromised tokens.
 
+### Status List Refresh Cadence
+
+By design, the refresh interval for the Status List JWT is driven by the `ttl` claim **inside the Status List JWT itself**, as defined by the IETF spec. Cedarling spawns a background task that re-fetches the list every `ttl` seconds.
+
+The bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` (default `300` seconds) caps that interval: the effective refresh interval is `min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)`, so the issuer can always request a *more frequent* refresh, but never a less frequent one. When the issuer omits the `ttl` claim, the max value is used directly so the cache cannot silently go stale forever. A value of `0` or an unset variable resolves to the built-in default. Non-zero values below `5` seconds are clamped up to `5` seconds.
+
+Cedarling applies **fail-closed** semantics: if a background refresh fails (network error, 5xx response, or an invalid status list body) the cached status list is dropped and all tokens that reference it are rejected until the next successful refresh. This prevents a revoked token from being accepted based on stale data at the cost of temporarily denying valid tokens when the issuer's status endpoint is unreachable.
+
 ## JWT Validation Flow Diagram
 
 JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the `authorize_multi_issuer` flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
@@ -218,4 +228,3 @@ A local JWKS can be used by setting the `CEDARLING_LOCAL_JWKS` bootstrap propert
 * Where keys are `Trusted Issuer IDs` assigned to each key store
 * and the values contains the JSON Web Keys as defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
 * The `trusted_issuer_id` is used to tag a JWKS with a unique identifier and enables using multiple key stores.
-

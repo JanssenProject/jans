@@ -3,6 +3,7 @@ package cedarling_go
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // Represents a cedarling principal or resource entity
@@ -192,7 +193,7 @@ type AuthorizeMultiIssuerRequest struct {
 	Tokens   []TokenInput `json:"tokens"`
 	Resource EntityData   `json:"resource"`
 	Action   string       `json:"action"`
-	Context  any          `json:"context,omitempty"`
+	Context  any          `json:"context"`
 }
 
 func (r AuthorizeMultiIssuerRequest) MarshalJSON() ([]byte, error) {
@@ -222,6 +223,119 @@ type MultiIssuerAuthorizeResult struct {
 	RequestID string        `json:"request_id"`
 }
 
+// BatchItem is one {resource, action, context} triple in a batch
+// authorization request. When Context is nil it is serialized as an empty
+// object; explicit non-object values are rejected at validate-time.
+type BatchItem struct {
+	Resource EntityData `json:"resource"`
+	Action   string     `json:"action"`
+	Context  any        `json:"context"`
+}
+
+// MarshalJSON emits Context as `{}` when nil so the batch validate step doesn't
+// reject the item.
+func (b BatchItem) MarshalJSON() ([]byte, error) {
+	context := b.Context
+	if context == nil {
+		context = json.RawMessage(`{}`)
+	}
+	aux := struct {
+		Resource EntityData `json:"resource"`
+		Action   string     `json:"action"`
+		Context  any        `json:"context"`
+	}{
+		Resource: b.Resource,
+		Action:   b.Action,
+		Context:  context,
+	}
+	return json.Marshal(aux)
+}
+
+// BatchAuthorizeUnsignedRequest bundles one optional principal with N BatchItems.
+type BatchAuthorizeUnsignedRequest struct {
+	Principal *EntityData `json:"principal,omitempty"`
+	Items     []BatchItem `json:"items"`
+}
+
+// BatchAuthorizeMultiIssuerRequest bundles one token set with N BatchItems.
+type BatchAuthorizeMultiIssuerRequest struct {
+	Tokens []TokenInput `json:"tokens"`
+	Items  []BatchItem  `json:"items"`
+}
+
+// BatchItemError is the per-item build failure surfaced inside a batch
+// response when Cedar couldn't be reached for that item. Category is the
+// stable variant slug ("action_parse", "resource_build", …); ItemIndex is
+// the position of the failing item in the original items list.
+type BatchItemError struct {
+	Variant   string `json:"variant"`
+	Message   string `json:"message"`
+	ItemIndex uint64 `json:"item_index"`
+}
+
+// BatchItemUnsignedResult is one slot in BatchAuthorizeUnsignedResponse.Results.
+// Exactly one of Ok / Err is non-nil: Ok when Cedar evaluated the item
+// (Allow or Deny), Err when the item failed to build. Use IsOk() to switch.
+type BatchItemUnsignedResult struct {
+	Ok  *AuthorizeResult
+	Err *BatchItemError
+}
+
+// IsOk reports whether Cedar reached a decision on this item.
+func (r BatchItemUnsignedResult) IsOk() bool { return r.Ok != nil }
+
+// UnmarshalJSON decodes the {"Ok":{...}} / {"Err":{...}} discriminated
+// union emitted by the core lib.
+func (r *BatchItemUnsignedResult) UnmarshalJSON(data []byte) error {
+	var raw struct {
+		Ok  *AuthorizeResult `json:"Ok,omitempty"`
+		Err *BatchItemError  `json:"Err,omitempty"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	*r = BatchItemUnsignedResult{Ok: raw.Ok, Err: raw.Err}
+	return nil
+}
+
+// BatchItemMultiIssuerResult is the multi-issuer analog of
+// BatchItemUnsignedResult.
+type BatchItemMultiIssuerResult struct {
+	Ok  *MultiIssuerAuthorizeResult
+	Err *BatchItemError
+}
+
+// IsOk reports whether Cedar reached a decision on this item.
+func (r BatchItemMultiIssuerResult) IsOk() bool { return r.Ok != nil }
+
+// UnmarshalJSON decodes the {"Ok":{...}} / {"Err":{...}} discriminated union.
+func (r *BatchItemMultiIssuerResult) UnmarshalJSON(data []byte) error {
+	var raw struct {
+		Ok  *MultiIssuerAuthorizeResult `json:"Ok,omitempty"`
+		Err *BatchItemError             `json:"Err,omitempty"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	*r = BatchItemMultiIssuerResult{Ok: raw.Ok, Err: raw.Err}
+	return nil
+}
+
+// BatchAuthorizeUnsignedResponse carries a shared batch_id alongside per-item
+// results. Results[i] corresponds to the Items[i] supplied in the request.
+type BatchAuthorizeUnsignedResponse struct {
+	BatchID string                    `json:"batch_id"`
+	Results []BatchItemUnsignedResult `json:"results"`
+}
+
+// BatchAuthorizeMultiIssuerResponse carries a shared batch_id alongside
+// per-item multi-issuer results. Results[i] corresponds to the Items[i]
+// supplied in the request.
+type BatchAuthorizeMultiIssuerResponse struct {
+	BatchID string                       `json:"batch_id"`
+	Results []BatchItemMultiIssuerResult `json:"results"`
+}
+
 // DataEntry represents a single entry in the data store with metadata
 type DataEntry struct {
 	Key         string  `json:"key"`
@@ -243,4 +357,15 @@ type DataStoreStats struct {
 	CapacityUsagePercent float64 `json:"capacity_usage_percent"`
 	MemoryAlertThreshold float64 `json:"memory_alert_threshold"`
 	MemoryAlertTriggered bool    `json:"memory_alert_triggered"`
+}
+
+// MetricsSnapshot represents the telemetry metrics snapshot for the current interval.
+// Local snapshots are only available when CEDARLING_METRICS_COLLECTION is enabled.
+type MetricsSnapshot struct {
+	PolicyStats      map[string]int64 `json:"policy_stats"`
+	ErrorCounters    map[string]int64 `json:"error_counters"`
+	OperationalStats map[string]int64 `json:"operational_stats"`
+	// Interval elapsed since the previous drain. Crosses the binding as
+	// whole nanoseconds, which is exactly how time.Duration is represented.
+	Interval time.Duration `json:"interval_nanos"`
 }

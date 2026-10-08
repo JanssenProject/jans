@@ -28,7 +28,6 @@
 // Uses policy-store-multi-issuer-basic.yaml which has schema supporting tokens in context
 const char* BOOTSTRAP_CONFIG = "{\n"
     "    \"CEDARLING_APPLICATION_NAME\": \"MultiIssuerExample\",\n"
-    "    \"CEDARLING_POLICY_STORE_ID\": \"multi_issuer_basic_store\",\n"
     "    \"CEDARLING_JWT_SIG_VALIDATION\": \"disabled\",\n"
     "    \"CEDARLING_JWT_STATUS_VALIDATION\": \"disabled\",\n"
     "    \"CEDARLING_LOG_TYPE\": \"memory\",\n"

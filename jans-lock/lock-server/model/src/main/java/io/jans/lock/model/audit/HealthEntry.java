@@ -41,33 +41,34 @@ public class HealthEntry extends BaseEntry implements Serializable {
 	private String inum;
 
 	@JsonProperty("creationDate")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-	@Schema(description = "Creation date of the entry", example = "2024-04-21T17:25:43-05:00")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
+	@Schema(description = "Creation date of the entry", example = "2026-07-24T15:33:06.875Z")
 	@AttributeName(name = "creationDate")
 	private Date creationDate;
 
 	@JsonProperty("eventTime")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-	@Schema(description = "Time when the event occurred", example = "2024-04-21T18:25:43-05:00")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
+	@Schema(description = "Time when the event occurred", example = "2026-07-24T15:33:06.875Z")
 	@AttributeName(name = "eventTime")
 	private Date eventTime;
 
 	@JsonProperty("service")
-	@Schema(description = "Service name", example = "jans-auth")
+	@Schema(description = "Service name", example = "Lock Server")
 	@AttributeName(name = "jansService")
 	private String service;
 
 	@JsonProperty("nodeName")
-	@Schema(description = "Node name or identifier", example = "1")
+	@Schema(description = "Node name or identifier", example = "04bbe9ef-a853-417c-a2b8-5328b62936e2")
 	@AttributeName(name = "jansNodeName")
 	private String nodeName;
 
 	@JsonProperty("status")
-	@Schema(description = "Health status", example = "ok", allowableValues = { "ok", "warning", "error" })
+	@Schema(description = "Health status", example = "running")
 	@AttributeName(name = "jansStatus")
 	private String status;
 
-	// Details: cedarEngineStatus, cedarPolicyStatus, tokenDataStatus. etc..
+	// Details: policy_load, core, etc..
+	@JsonProperty("engineStatus")
 	@JsonObject
 	@AttributeName(name = "engineStatus")
 	private Map<String, String> engineStatus;

@@ -79,7 +79,6 @@ Before performing authorization, you need to configure a Cedarling instance. Con
 ```c
 const char* config = "{"
     "\"CEDARLING_APPLICATION_NAME\": \"MyApp\","
-    "\"CEDARLING_POLICY_STORE_ID\": \"your-policy-store-id\","
     "\"CEDARLING_LOG_LEVEL\": \"INFO\","
     "\"CEDARLING_LOG_TYPE\": \"std_out\","
     "\"CEDARLING_POLICY_STORE_LOCAL_FN\": \"/path/to/policy-store.yaml\""
@@ -91,7 +90,6 @@ const char* config = "{"
 | Property | Description |
 |----------|-------------|
 | `CEDARLING_APPLICATION_NAME` | Name of your application |
-| `CEDARLING_POLICY_STORE_ID` | ID of the policy store |
 | `CEDARLING_LOG_LEVEL` | Logging level (DEBUG, INFO, WARN, ERROR) |
 | `CEDARLING_LOG_TYPE` | Log output type (std_out, memory, off) |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` | Path to local policy store file |
@@ -120,7 +118,6 @@ int main() {
     // Configuration JSON
     const char* config = "{"
         "\"CEDARLING_APPLICATION_NAME\": \"MyApp\","
-        "\"CEDARLING_POLICY_STORE_ID\": \"example-policy-store\","
         "\"CEDARLING_LOG_LEVEL\": \"INFO\","
         "\"CEDARLING_LOG_TYPE\": \"std_out\","
         "\"CEDARLING_POLICY_STORE_LOCAL_FN\": \"./policy-store.yaml\""
@@ -242,6 +239,43 @@ if (ret == 0) {
 }
 cedarling_free_result(&auth_result);
 ```
+
+### Batch Authorization
+
+The response body is a JSON string. Each `results[i]` is either `{"Ok": {decision, request_id, response}}` (Cedar reached a decision) or `{"Err": {"variant": "...", "message": "...", "item_index": i}}` (item failed to build). Positional mapping to `items[i]` is preserved for both branches; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry.
+
+Request body: `{ "principal": {...} | null, "items": [ { "resource": ..., "action": "...", "context": {} }, ... ] }`.
+
+```c
+const char* request =
+    "{"
+    "  \"principal\": { \"cedar_entity_mapping\": { \"entity_type\": \"Jans::TestPrincipal1\", \"id\": \"u1\" }, \"is_ok\": true },"
+    "  \"items\": ["
+    "    { \"resource\": { \"cedar_entity_mapping\": { \"entity_type\": \"Jans::Issue\", \"id\": \"doc-1\" }, \"org_id\": \"acme\", \"country\": \"US\" },"
+    "      \"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\", \"context\": {} },"
+    "    { \"resource\": { \"cedar_entity_mapping\": { \"entity_type\": \"Jans::Issue\", \"id\": \"doc-2\" }, \"org_id\": \"acme\", \"country\": \"US\" },"
+    "      \"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\", \"context\": {} }"
+    "  ]"
+    "}";
+
+CedarlingResult batch_result;
+int ret = cedarling_authorize_unsigned_batch(instance_id, request, &batch_result);
+if (ret == 0) {
+    // batch_result.data is a JSON string. Feed it through your JSON parser to
+    // switch on `"Ok"` / `"Err"` per item, e.g.:
+    //   { "batch_id": "01945...",
+    //     "results": [
+    //       { "Ok":  { "decision": true, "request_id": "...", "response": {...} } },
+    //       { "Err": { "variant": "action_parse", "message": "...", "item_index": 1 } }
+    //     ] }
+    printf("%s\n", (char*)batch_result.data);
+} else {
+    printf("Batch error: %s\n", batch_result.error_message);
+}
+cedarling_free_result(&batch_result);
+```
+
+For multi-issuer, the request body is `{ "tokens": [...], "items": [...] }` and the call is `cedarling_authorize_multi_issuer_batch`. Same response shape and lifecycle (`cedarling_free_result` when done). See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
 ## Context Data API
 
@@ -462,7 +496,6 @@ int main() {
     // Configuration
     const char* config = "{"
         "\"CEDARLING_APPLICATION_NAME\": \"ExampleApp\","
-        "\"CEDARLING_POLICY_STORE_ID\": \"example-store\","
         "\"CEDARLING_LOG_LEVEL\": \"DEBUG\","
         "\"CEDARLING_LOG_TYPE\": \"memory\","
         "\"CEDARLING_POLICY_STORE_LOCAL_FN\": \"./policy-store.yaml\""

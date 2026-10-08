@@ -1,0 +1,20 @@
+{
+    "configuration_endpoint": "https://op-provider.gluu.org/.well-known/openid-configuration",
+    "description": "",
+    "token_metadata": {
+        "access_token": {
+            "entity_type_name": "Jans::Access_token",
+            "token_id": "jti"
+        },
+        "id_token": {
+            "entity_type_name": "Jans::id_token",
+            "token_id": "jti"
+        },
+        "userinfo_token": {
+            "entity_type_name": "Jans::Userinfo_token",
+            "token_id": "jti"
+        }
+    },
+    "name": "Jans",
+    "id": "06084b27257090d6df2e90fbd3757ea21244ff43e9d8"
+}

@@ -29,6 +29,18 @@ public class Fido2AuthenticationData extends Fido2Data {
 
     private String rpId;
 
+    /**
+     * Why the ceremony did not succeed. Set alongside a non-successful {@link #status} so the entry
+     * carries the same reason that is recorded in the metrics store, rather than the two disagreeing.
+     */
+    private String errorReason;
+
+    /**
+     * The bucket {@link #errorReason} falls into, using the same categorization the metrics store
+     * applies, so both can be grouped the same way.
+     */
+    private String errorCategory;
+
     public String getId() {
         return id;
     }
@@ -119,11 +131,28 @@ public class Fido2AuthenticationData extends Fido2Data {
 		this.credId = credId;
 	}
 
+	public String getErrorReason() {
+		return errorReason;
+	}
+
+	public void setErrorReason(String errorReason) {
+		this.errorReason = errorReason;
+	}
+
+	public String getErrorCategory() {
+		return errorCategory;
+	}
+
+	public void setErrorCategory(String errorCategory) {
+		this.errorCategory = errorCategory;
+	}
+
 	@Override
 	public String toString() {
 		return "Fido2AuthenticationData [id=" + id + ", username=" + username + ", origin=" + origin + ", userId="
 				+ userId + ", challenge=" + challenge + ", credId=" + credId + ", assertionRequest=" + assertionRequest
 				+ ", assertionResponse=" + assertionResponse + ", userVerificationOption=" + userVerificationOption
-				+ ", status=" + status + ", rpId=" + rpId + "]";
+				+ ", status=" + status + ", rpId=" + rpId + ", errorReason=" + errorReason + ", errorCategory="
+				+ errorCategory + "]";
 	}
 }

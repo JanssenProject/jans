@@ -24,7 +24,6 @@
 // Configuration JSON - uses policy-store_ok_2.yaml for unsigned authorization
 const char* BOOTSTRAP_CONFIG = "{\n"
     "    \"CEDARLING_APPLICATION_NAME\": \"UnsignedAuthExample\",\n"
-    "    \"CEDARLING_POLICY_STORE_ID\": \"a1bf93115de86de760ee0bea1d529b521489e5a11747\",\n"
     "    \"CEDARLING_LOG_TYPE\": \"std_out\",\n"
     "    \"CEDARLING_LOG_TTL\": 60,\n"
     "    \"CEDARLING_LOG_LEVEL\": \"DEBUG\",\n"

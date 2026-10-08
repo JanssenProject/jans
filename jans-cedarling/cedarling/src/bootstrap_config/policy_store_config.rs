@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 use crate::bootstrap_config::BootstrapConfigLoadingError;
+use crate::common::policy_store::archive_handler::ArchiveLimits;
 
 /// `PolicyStoreConfig` - Configuration for the policy store.
 ///
@@ -15,6 +16,79 @@ use crate::bootstrap_config::BootstrapConfigLoadingError;
 pub struct PolicyStoreConfig {
     /// Specifies the source from which the policy will be read.
     pub source: PolicyStoreSource,
+
+    /// Base refresh interval in seconds for URL-based policy store sources
+    /// (`CjarUrl`, `LockServer`, `Uri`). `0` disables background refresh and preserves
+    /// the load-once-at-startup behavior. Ignored for local sources. A server
+    /// `Cache-Control: max-age` / `Expires` hint may *shorten* the next
+    /// interval but never lengthens it.
+    #[serde(default)]
+    pub refresh_interval_secs: u64,
+
+    /// `CEDARLING_POLICY_STORE_MAX_FILE_SIZE` — cap on the decompressed size of
+    /// a single `.cjar` entry, in bytes. `0` disables the cap.
+    #[serde(default = "default_policy_store_max_file_size")]
+    pub max_file_size: u64,
+}
+
+/// Serde default for [`PolicyStoreConfig::max_file_size`], so a config
+/// deserialized without the field still gets a bounded archive loader.
+pub(crate) fn default_policy_store_max_file_size() -> u64 {
+    ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE
+}
+
+impl PolicyStoreConfig {
+    /// Minimum refresh interval, in seconds — anything smaller is clamped up to
+    /// this value to avoid a busy-poll against the upstream.
+    pub(crate) const MIN_REFRESH_INTERVAL_SECS: u64 = 5;
+
+    /// True if the source is a remote URL and refresh is enabled.
+    #[must_use]
+    pub fn refresh_enabled(&self) -> bool {
+        self.refresh_interval_secs > 0
+            && matches!(
+                self.source,
+                PolicyStoreSource::CjarUrl(_)
+                    | PolicyStoreSource::LockServer(_)
+                    | PolicyStoreSource::Uri(_)
+            )
+    }
+
+    /// Returns the effective refresh interval after applying the
+    /// `MIN_REFRESH_INTERVAL_SECS` floor, plus a boolean indicating whether
+    /// clamping occurred. `0` (disabled) passes through unchanged. Callers
+    /// should emit a `WARN` log when `clamped` is true so operators see the
+    /// silent normalization. Single point of normalization so deserializer
+    /// inputs (env vars, JSON, dict) can't drift apart.
+    #[must_use]
+    pub(crate) fn effective_refresh_interval(&self) -> (u64, bool) {
+        let raw = self.refresh_interval_secs;
+        if raw == 0 || raw >= Self::MIN_REFRESH_INTERVAL_SECS {
+            (raw, false)
+        } else {
+            (Self::MIN_REFRESH_INTERVAL_SECS, true)
+        }
+    }
+}
+
+impl PolicyStoreConfig {
+    /// Resource limits for `.cjar` loading, derived from [`Self::max_file_size`].
+    #[must_use]
+    pub(crate) fn archive_limits(&self) -> ArchiveLimits {
+        ArchiveLimits::from_max_file_size(self.max_file_size)
+    }
+}
+
+impl Default for PolicyStoreConfig {
+    fn default() -> Self {
+        Self {
+            source: PolicyStoreSource::Yaml(
+                "cedar_version: v4.0.0\npolicy_stores: {}\n".to_string(),
+            ),
+            refresh_interval_secs: 0,
+            max_file_size: default_policy_store_max_file_size(),
+        }
+    }
 }
 
 /// Raw policy store config
@@ -28,11 +102,6 @@ pub struct PolicyStoreConfigRaw {
 /// `PolicyStoreSource` represents the source from which policies will be retrieved.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum PolicyStoreSource {
-    /// Read the policy directly from a raw JSON string.
-    ///
-    /// The string contains the raw JSON data representing the policy.
-    Json(String),
-
     /// Read the policy directly from a raw YAML string.
     ///
     /// The string contains the raw YAML data representing the policy.
@@ -43,9 +112,6 @@ pub enum PolicyStoreSource {
     ///
     /// The string contains a URI where the policy store can be retrieved.
     LockServer(String),
-
-    /// Read policy from a JSON File.
-    FileJson(PathBuf),
 
     /// Read policy from a YAML File.
     FileYaml(PathBuf),
@@ -67,6 +133,14 @@ pub enum PolicyStoreSource {
     /// in the directory structure format (`metadata.json`, `schema.cedarschema`, `policies/`, etc.).
     Directory(PathBuf),
 
+    /// An unresolved URI whose source type (archive vs lock server) is detected
+    /// at load time via magic byte checking.
+    ///
+    /// During loading, [`load_policy_store`](crate::init::policy_store::load_policy_store)
+    /// resolves this by making an HTTP request to determine whether the URI points
+    /// to a Cedar Archive (`.cjar`) or a Lock Master endpoint.
+    Uri(String),
+
     /// Read policy from Cedar Archive bytes directly.
     ///
     /// The bytes contain a `.cjar` archive (ZIP format) with the policy store.
@@ -79,14 +153,10 @@ pub enum PolicyStoreSource {
 
 /// Raw policy store source
 pub enum PolicyStoreSourceRaw {
-    /// JSON
-    Json(String),
     /// YAML
     Yaml(String),
     /// Lock server
     LockServer(String),
-    /// File JSON
-    FileJson(String),
     /// File YAML
     FileYaml(String),
     /// Cedar Archive file (.cjar)
@@ -102,11 +172,12 @@ impl TryFrom<PolicyStoreConfigRaw> for PolicyStoreConfig {
 
     fn try_from(raw: PolicyStoreConfigRaw) -> Result<Self, Self::Error> {
         let source = match raw.source.as_str() {
-            "json" => PolicyStoreSource::Json(raw.path.unwrap_or_default()),
+            "json" | "file_json" => {
+                return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported);
+            },
             "yaml" => PolicyStoreSource::Yaml(raw.path.unwrap_or_default()),
 
             "lock_server" => PolicyStoreSource::LockServer(raw.path.unwrap_or_default()),
-            "file_json" => PolicyStoreSource::FileJson(raw.path.unwrap_or_default().into()),
             "file_yaml" => PolicyStoreSource::FileYaml(raw.path.unwrap_or_default().into()),
             "cjar_file" => PolicyStoreSource::CjarFile(
                 raw.path
@@ -129,6 +200,12 @@ impl TryFrom<PolicyStoreConfigRaw> for PolicyStoreConfig {
             ),
             _ => PolicyStoreSource::FileYaml("policy-store.yaml".into()),
         };
-        Ok(Self { source })
+        // Explicit field init rather than `..Default::default()`, which would
+        // allocate and immediately discard the default YAML source string.
+        Ok(Self {
+            source,
+            refresh_interval_secs: 0,
+            max_file_size: default_policy_store_max_file_size(),
+        })
     }
 }

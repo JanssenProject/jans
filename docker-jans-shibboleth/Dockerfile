@@ -17,13 +17,13 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=12.1.8
+ARG JETTY_VERSION=12.1.14
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/shibboleth-idp/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
 
 # Install Jetty
-RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
+RUN wget -nv https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
     && mkdir -p /opt \
     && tar -xzf /tmp/jetty.tar.gz -C /opt \
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
@@ -40,7 +40,7 @@ ENV SHIBBOLETH_VERSION=${SHIBBOLETH_VERSION}
 ENV SHIBBOLETH_HOME=${SHIBBOLETH_HOME}
 
 # Download and extract Shibboleth IdP
-RUN wget -q https://shibboleth.net/downloads/identity-provider/archive/${SHIBBOLETH_VERSION}/shibboleth-identity-provider-${SHIBBOLETH_VERSION}.tar.gz -O /tmp/shibboleth-idp.tar.gz \
+RUN wget -nv https://shibboleth.net/downloads/identity-provider/archive/${SHIBBOLETH_VERSION}/shibboleth-identity-provider-${SHIBBOLETH_VERSION}.tar.gz -O /tmp/shibboleth-idp.tar.gz \
     && mkdir -p /opt/shibboleth-idp-installer \
     && tar -xzf /tmp/shibboleth-idp.tar.gz -C /opt/shibboleth-idp-installer --strip-components=1 \
     && rm -rf /tmp/shibboleth-idp.tar.gz
@@ -50,24 +50,25 @@ RUN wget -q https://shibboleth.net/downloads/identity-provider/archive/${SHIBBOL
 # ===============
 
 ENV CN_VERSION=0.0.0-nightly
+ENV CN_RELEASE_TAG=nightly
 ENV CN_BUILD_DATE='2025-02-02 00:00'
 
 # Download Janssen Shibboleth IDP WAR
 # Set CN_REQUIRE_WAR_DOWNLOAD=false for development builds when WAR is not available
 ARG CN_REQUIRE_WAR_DOWNLOAD=true
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-shibboleth-idp-webapp/${CN_VERSION}/jans-shibboleth-idp-webapp-${CN_VERSION}.war
+ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-shibboleth-idp-webapp-${CN_VERSION}.war
 
 #RUN mkdir -p ${SHIBBOLETH_HOME}/war \
 #   && if [ "${CN_REQUIRE_WAR_DOWNLOAD}" = "true" ]; then \
-#       wget -q --tries=3 ${CN_SOURCE_URL} -O ${SHIBBOLETH_HOME}/war/idp.war \
+#       wget -nv --tries=3 ${CN_SOURCE_URL} -O ${SHIBBOLETH_HOME}/war/idp.war \
 #         && test -s ${SHIBBOLETH_HOME}/war/idp.war; \
 #      else \
-#       wget -q ${CN_SOURCE_URL} -O ${SHIBBOLETH_HOME}/war/idp.war || echo "WAR not available, will be built locally"; \
+#       wget -nv ${CN_SOURCE_URL} -O ${SHIBBOLETH_HOME}/war/idp.war || echo "WAR not available, will be built locally"; \
 #    fi
 
 # Download Janssen pycloudlib (pinned to specific ref for reproducibility)
 #ARG JANS_PYCLOUDLIB_REF=main
-#RUN wget -q https://github.com/JanssenProject/jans/archive/refs/heads/${JANS_PYCLOUDLIB_REF}.tar.gz -O /tmp/jans.tar.gz \
+#RUN wget -nv https://github.com/JanssenProject/jans/archive/refs/heads/${JANS_PYCLOUDLIB_REF}.tar.gz -O /tmp/jans.tar.gz \
 #   && mkdir -p /tmp/jans \
 #    && tar -xf /tmp/jans.tar.gz -C /tmp/jans --strip-components=1 \
 #    && cd /tmp/jans/jans-pycloudlib \

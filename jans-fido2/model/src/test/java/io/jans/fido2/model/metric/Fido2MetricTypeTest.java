@@ -43,6 +43,7 @@ class Fido2MetricTypeTest {
         map.put(Fido2MetricType.FIDO2_AUTHENTICATION_SUCCESS, "fido2_authentication_success");
         map.put(Fido2MetricType.FIDO2_AUTHENTICATION_FAILURE, "fido2_authentication_failure");
         map.put(Fido2MetricType.FIDO2_AUTHENTICATION_DURATION, "fido2_authentication_duration");
+        map.put(Fido2MetricType.FIDO2_AUTHENTICATION_ABANDONED, "fido2_authentication_abandoned");
         map.put(Fido2MetricType.FIDO2_FALLBACK_EVENT, "fido2_fallback_event");
         map.put(Fido2MetricType.FIDO2_DEVICE_TYPE_USAGE, "fido2_device_type_usage");
         EXPECTED_METRIC_NAMES = map;
@@ -87,8 +88,8 @@ class Fido2MetricTypeTest {
     }
 
     @Test
-    void testValuesLengthIsTen() {
-        assertEquals(10, Fido2MetricType.values().length,
-                "Fido2MetricType is expected to have exactly 10 values; consumers rely on this fixed set");
+    void testValuesLengthIsEleven() {
+        assertEquals(11, Fido2MetricType.values().length,
+                "Fido2MetricType is expected to have exactly 11 values; consumers rely on this fixed set");
     }
 }

@@ -16,18 +16,10 @@ policy_stores:
         token_metadata:
           access_token:
             entity_type_name: "Jans::Access_Token"
-            workload_id: "client_id"
-            principal_mapping:
-              - "Jans::Workload"
           id_token:
             entity_type_name: "Jans::Id_Token"
-            principal_mapping:
-              - "Jans::User"
           userinfo_token:
             entity_type_name: "Jans::Userinfo_Token"
-            user_id: "sub"
-            principal_mapping:
-              - "Jans::User"
     policies:
       840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: Multi-issuer policy example using context tokens

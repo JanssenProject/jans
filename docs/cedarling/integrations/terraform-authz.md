@@ -194,11 +194,8 @@ The `cedarling.opa.authorize_unsigned` built-in is the right choice here because
       "stderr": false,
       "bootstrap_config": {
         "CEDARLING_APPLICATION_NAME": "TerraformAuthz",
-        "CEDARLING_USER_AUTHZ": "enabled",
-        "CEDARLING_WORKLOAD_AUTHZ": "disabled",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_TTL": 60,
         "CEDARLING_LOG_LEVEL": "INFO",
@@ -217,7 +214,6 @@ The `cedarling.opa.authorize_unsigned` built-in is the right choice here because
 The JWT-based demo ([`terraform-authz-jwt.md`](./terraform-authz-jwt.md)) requires a `policy-store/trusted-issuers/` directory so Cedarling can fetch and validate the signing keys for the incoming OIDC token. This unsigned demo does not need that directory because:
 
 - `CEDARLING_JWT_SIG_VALIDATION: "disabled"` — no signature is checked.
-- `CEDARLING_ID_TOKEN_TRUST_MODE: "never"` — Cedarling never tries to resolve an issuer from an ID token.
 - Identity is asserted directly in the `authorize_unsigned` payload (via the `principal` object in the OPA `input`) rather than carried inside a signed JWT.
 
 The policy-store directory for this demo therefore contains only `metadata.json`, `schema.cedarschema`, and `policies/`. If you later switch to signed tokens, add a `trusted-issuers/` subdirectory with one JSON file per issuer — see the [trusted issuer file format](./terraform-authz-jwt.md#trusted-issuer-file-format) in the JWT guide for the exact schema and field reference.

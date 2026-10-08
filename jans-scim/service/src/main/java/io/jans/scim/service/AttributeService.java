@@ -9,6 +9,7 @@ package io.jans.scim.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
@@ -54,12 +55,9 @@ public class AttributeService extends io.jans.service.AttributeService {
 
 		List<JansAttribute> result = new ArrayList<JansAttribute>();
 		for (JansAttribute attribute : attributes) {
-			boolean isEmpty = attribute.getScimCustomAttr() == null;
-			if (!isEmpty) {
-				if ((attribute.getScimCustomAttr() != null) && attribute.getScimCustomAttr()) {
-					result.add(attribute);
-				}
-			}
+            if (Optional.ofNullable(attribute.getScimCustomAttr()).orElse(false)) {
+                result.add(attribute);
+            }
 		}
 		return result;
 	}

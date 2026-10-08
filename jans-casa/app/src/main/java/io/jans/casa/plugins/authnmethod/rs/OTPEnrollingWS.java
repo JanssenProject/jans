@@ -22,7 +22,7 @@ import io.jans.casa.plugins.authnmethod.service.otp.IOTPAlgorithm;
 import io.jans.casa.rest.ProtectedApi;
 import org.slf4j.Logger;
 
-import static com.lochbridge.oath.otp.keyprovisioning.OTPKey.OTPType;
+import io.jans.casa.plugins.authnmethod.service.otp.OTPType;
 
 @ApplicationScoped
 @ProtectedApi(scopes = "https://jans.io/casa.enroll")

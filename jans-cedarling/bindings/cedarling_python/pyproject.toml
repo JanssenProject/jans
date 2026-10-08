@@ -4,6 +4,9 @@ build-backend = "maturin"
 
 [project]
 name = "cedarling_python"
+description = "Python bindings for Cedarling, a Rust-based authorization engine for Cedar policies"
+authors = [{name = "Janssen Project", email = "support@jans.io"}]
+readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",
@@ -11,6 +14,10 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://docs.jans.io/stable/cedarling/"
+Source = "https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_python"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]

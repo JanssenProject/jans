@@ -173,10 +173,6 @@ func TestUser(t *testing.T) {
 
 func TestGroupAssignment(t *testing.T) {
 
-	if skipKnownFailures {
-		t.SkipNow()
-	}
-
 	client, err := NewInsecureClient(host, user, pass)
 	if err != nil {
 		t.Fatal(err)

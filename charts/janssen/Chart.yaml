@@ -34,7 +34,7 @@ icon: >-
 home: https://jans.io
 sources:
   - https://jans.io
-  - https://github.com/JanssenProject/jans/charts/janssen
+  - https://github.com/JanssenProject/jans/tree/main/charts/janssen
 maintainers:
   - name: moabu
     email: support@jans.io

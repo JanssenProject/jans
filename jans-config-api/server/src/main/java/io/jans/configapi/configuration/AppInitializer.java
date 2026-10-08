@@ -13,6 +13,8 @@ import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
 import io.jans.configapi.service.logger.LoggerService;
+import io.jans.core.cedarling.model.CedarlingConfiguration;
+import io.jans.core.cedarling.model.LockProtectionMode;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.model.custom.script.CustomScriptType;
@@ -28,12 +30,14 @@ import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.BeforeDestroyed;
 import jakarta.enterprise.context.Initialized;
+
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
@@ -103,9 +107,10 @@ public class AppInitializer {
         // configuration
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
-        this.createAuthorizationService();
+        AuthorizationService authorizationService = this.createAuthorizationService();
         ApiAppConfiguration apiAppConfiguration = this.configurationFactory.getApiAppConfiguration();
-        log.info("Initialized ApiAppConfiguration:{}", apiAppConfiguration);
+        log.info("Initialized authorizationService.getClass().getCanonicalName():{}, ApiAppConfiguration:{}",
+                authorizationService.getClass().getCanonicalName(), apiAppConfiguration);
 
         // Initialize python interpreter
         pythonService
@@ -169,8 +174,8 @@ public class AppInitializer {
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
         log.info(
-                "=============  AppInitializer::createAuthorizationService() - configurationFactory.getApiProtectionType():{} ",
-                configurationFactory.getApiProtectionType());
+                "=============  AppInitializer::createAuthorizationService() - configurationFactory.getApiProtectionType():{}, getProtectionMode():{} ",
+                configurationFactory.getApiProtectionType(), getProtectionMode());
 
         if (StringHelper.isEmpty(configurationFactory.getApiProtectionType())) {
             throw new ConfigurationException("API Protection Type not defined");
@@ -179,7 +184,10 @@ public class AppInitializer {
             // Verify resources available
             apiProtectionService.verifyResources(configurationFactory.getApiProtectionType(),
                     configurationFactory.getApiClientId());
+
+            log.info("=============  AppInitializer::Initializing OpenIdAuthorizationService  =============");
             return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
+
         } catch (Exception ex) {
             if (log.isErrorEnabled()) {
                 log.error("Failed to create AuthorizationService instance - apiProtectionType:{}, exception:{} ",
@@ -190,12 +198,28 @@ public class AppInitializer {
         }
     }
 
+    @Produces
+    @ApplicationScoped
+    public LockProtectionMode getProtectionMode() {
+        return this.configurationFactory.getApiAppConfiguration().getProtectionMode();
+    }
+
+    @Produces
+    @Dependent
+    public CedarlingConfiguration getCedarlingConfiguration() {
+        return (this.getConfigAPICedarlingConfiguration() != null) ? this.getConfigAPICedarlingConfiguration() : null;
+    }
+
     public void recreatePersistanceEntryManager(@Observes @LdapConfigurationReload String event) {
         closePersistenceEntryManager();
         PersistenceEntryManager ldapEntryManager = persistenceEntryManagerInstance.get();
         persistenceEntryManagerInstance.destroy(ldapEntryManager);
         log.debug("Recreated instance {} with operation service: {} - event:{}", ldapEntryManager,
                 ldapEntryManager.getOperationService(), event);
+    }
+
+    private CedarlingConfiguration getConfigAPICedarlingConfiguration() {
+        return this.configurationFactory.getApiAppConfiguration().getCedarlingConfiguration();
     }
 
     private void closePersistenceEntryManager() {
@@ -223,7 +247,8 @@ public class AppInitializer {
 
     private void initCustomScripts() {
         List<CustomScriptType> supportedCustomScriptTypes = new ArrayList<>();
-        customScriptManager.initTimer(Arrays.asList(CustomScriptType.CONFIG_API, CustomScriptType.PERSISTENCE_EXTENSION));
+        customScriptManager
+                .initTimer(Arrays.asList(CustomScriptType.CONFIG_API, CustomScriptType.PERSISTENCE_EXTENSION));
         log.info("Initialized Custom Scripts!");
     }
 
@@ -236,7 +261,7 @@ public class AppInitializer {
             log.info("Loading Custom Asset for serviceName:{} ", serviceName);
             this.documentStoreManager.initTimer(Arrays.asList(serviceName));
             log.info("Custom Asset for serviceName:{} loaded", serviceName);
-            
+
         } catch (Exception ex) {
             log.error("Error while loadCustomAsset is - ", ex);
         }

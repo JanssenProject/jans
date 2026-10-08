@@ -5,6 +5,8 @@
 
 //! Module that contains structures used as configuration internally in the application
 //! It is usefull to use it with DI container
+use std::sync::Arc;
+
 use derive_more::derive::Display;
 use serde::Serialize;
 use uuid7::Uuid;
@@ -24,12 +26,26 @@ impl PdpID {
     }
 }
 
-/// Name of application from configuration
-#[derive(Debug, Clone, Default, PartialEq, serde::Serialize, serde::Deserialize)]
-pub(crate) struct ApplicationName(pub(crate) String);
+/// Name of application from configuration.
+/// Interned as Arc<str> so clone is cheap.
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct ApplicationName(pub(crate) Arc<str>);
+
+impl serde::Serialize for ApplicationName {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(&self.0)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for ApplicationName {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let s = String::deserialize(deserializer)?;
+        Ok(Self(s.into()))
+    }
+}
 
 impl From<String> for ApplicationName {
     fn from(value: String) -> Self {
-        Self(value)
+        Self(value.into())
     }
 }

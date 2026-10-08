@@ -25,44 +25,43 @@ overridden to implement your business case.
 |------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [Person Authentication](../../../script-catalog/person_authentication/person-authentication.md)            | Allows the definition of multi-step authentication workflows, including adaptive authentication - where the number of steps varies depending on the context.                                                                                             |
 | [Consent Gathering](../../../script-catalog/consent_gathering/consent-gathering.md)                        | Allows exact customization of the authorization (or consent) process. By default, the OP will request authorization for each scope, and display the respective scope description.                                                                        |
-| [Link Interception (Link Interception)](../../../script-catalog/link_interception/link-interception.md)    | Allows implementing custom business logic in existing link interception script.                                                                                                                                                                          |
 | [Client Registration](../../../script-catalog/client_registration/client-registration.md)                  | Allows implementing custom business logic during dynamic client registration, including validating SSA's and granting scopes.                                                                                                                            |
 | [Dynamic Scopes](../../../script-catalog/dynamic_scope/dynamic-scope.md)                                   | Enables admin to generate scopes on the fly, for example by calling external APIs                                                                                                                                                                        |
-| [ID Generator](../../../script-catalog/id_generator/id-generator.md)                                       |                                                                                                                                                                                                                                                          |
+| [ID Generator](../../../script-catalog/id_generator/id-generator.md)                                       | Allows administrators to implement custom rules for generating unique identifiers for new person, client, and other entries.                                                                                                                             |
 | [Update Token](../../../script-catalog/update_token/update-token.md)                                       | Enables transformation of claims and values in id_token, Access token and Refresh tokens; allows the setting of token lifetime; allows the addition or removal of scopes to / from tokens; allows the addition of audit logs each time a token is created. |
-| Session Management                                                                                         |                                                                                                                                                                                                                                                          |
+| [Session Management](../../auth-server/session-management/README.md)                                       | Allows custom actions to be performed when an application session is created or an end-session event occurs.                                                                                                                                             |
 | [Token Exchange](../../../script-catalog/token_exchange/token-exchange.md)                                 | Token Exchange custom script which allows to perform custom validation, send error response and modify existing response if needed.                                                                                                                      |
-| [SCIM](../../../script-catalog/scim/scim.md)                                                               |                                                                                                                                                                                                                                                          |
+| [SCIM](../../../script-catalog/scim/scim.md)                                                               | Allows customization of SCIM operations, including modifying resources and responses, triggering actions, and implementing fine-grained access to resources.                                                                                             |
 | [Introspection](../../../script-catalog/introspection/README.md)                                            | Introspection scripts allows to modify response of Introspection Endpoint spec and present additional meta information surrounding the token.                                                                                                            |
-| [Post Authentication](../../../script-catalog/post_authn/post-authentication.md)                           |                                                                                                                                                                                                                                                          |
-| [Client Authentication](../../../script-catalog/client_authn/client-authn.md)                              |                                                                                                                                                                                                                                                          |
-| [Authorization Challenge](../../../script-catalog/authorization_challenge/authorization-challenge.md)      |                                                                                                                                                                                                                                                          |
-| [Authorization Detail](../../../script-catalog/authz_detail/authz-detail.md)                               |                                                                                                                                                                                                                                                          |
+| [Post Authentication](../../../script-catalog/post_authn/post-authentication.md)                           | Allows forcing re-authentication or re-authorization during an authorization request, including for pre-authorized clients or clients with persisted authorizations.                                                                                     |
+| [Client Authentication](../../../script-catalog/client_authn/client-authn.md)                              | Customizes client authentication and supports authentication methods beyond the built-in methods.                                                                                                                                                        |
+| [Authorization Challenge](../../../script-catalog/authorization_challenge/authorization-challenge.md)      | Customizes the Authorization Challenge Endpoint to implement authentication and multi-step authorization flows.                                                                                                                                          |
+| [Authorization Detail](../../../script-catalog/authz_detail/authz-detail.md)                               | Validates and customizes the representation of individual authorization details in an `authorization_details` request.                                                                                                                                   |
 | [Access Evaluation](../../../script-catalog/access_evaluation/access-evaluation.md)                        | Access Evaluation custom script for Access Evaluation Endpoint (AuthZEN)                                                                                                                                                                                 |
 | [Access Evaluation Discovery](../../../script-catalog/access_evaluation/access-evaluation-discovery.md)    | Access Evaluation Discovery custom script for `/.well-known/authzen-configuration` Access Evaluation Discovery Endpoint (AuthZEN)                                                                                                                        |
-| [Select Account](../../../script-catalog/select_account/select-account.md)                                 |                                                                                                                                                                                                                                                          |
-| [Resource Owner Password Credentials](../../../script-catalog/resource_owner_password_credentials/ropc.md) |                                                                                                                                                                                                                                                          |
-| [UMA 2 RPT Authorization Policies](../../../script-catalog/uma_rpt_policy/uma-rpt.md)                      |                                                                                                                                                                                                                                                          |
-| [UMA 2 Claims-Gathering](../../../script-catalog/uma_claims_gathering/uma-claims-web.md)                   |                                                                                                                                                                                                                                                          |
-| [UMA RPT Claims](../../../script-catalog/uma_rpt_claims/uma-claims-jwt.md)                                 |                                                                                                                                                                                                                                                          |
+| [Select Account](../../../script-catalog/select_account/select-account.md)                                 | Customizes account selection behavior, including the selection page, session display, and whether a session can be selected.                                                                                                                             |
+| [Resource Owner Password Credentials](../../../script-catalog/resource_owner_password_credentials/ropc.md) | Customizes the Resource Owner Password Credentials Grant authentication flow, including modifying the authentication result or implementing custom authentication.                                                                                       |
+| [UMA 2 RPT Authorization Policies](../../../script-catalog/uma_rpt_policy/uma-rpt.md)                      | Applies custom policies to UMA scopes to grant or deny access requests.                                                                                                                                                                                  |
+| [UMA 2 Claims-Gathering](../../../script-catalog/uma_claims_gathering/uma-claims-web.md)                   | Collects claims through a multi-step web flow for UMA authorization requests.                                                                                                                                                                            |
+| [UMA RPT Claims](../../../script-catalog/uma_rpt_claims/uma-claims-jwt.md)                                 | Customizes the claims in a UMA RPT by modifying its JSON representation.                                                                                                                                                                                 |
 | [Fido2 Extension](../../../script-catalog/fido2_extension/fido2-extension.md)                              | Extension of attestation and assertion endpoints                                                                                                                                                                                                         |
 | [Discovery](../../../script-catalog/discovery/discovery.md)                                                | OpenID discovery response modification                                                                                                                                                                                                                   |
 | [Logout Status JWT](../../../script-catalog/logout_status_jwt/logout-status-jwt.md)                        | Logout Status JWT modification: lifetime and claims                                    |
 | [PAR](../../../script-catalog/par/par.md)                                                                  | PAR Script to modify PAR before persistence or/and change response from `/par` endpoint                                                                                                                                                                  |
 | [Transaction Token](../../../script-catalog/tx_token/txtoken.md)                                           | TxToken Script to modify TxToken payload, response from endpoint or lifetime.        |
 | [Cookie](../../../script-catalog/cookie/cookie.md)                                                         | Cookies attributes modification script                                                                                                                                                                                                                   |
-| [CIBA - End User notification](../../../script-catalog/ciba/ciba.md)                                       |                                                                                                                                                                                                                                                          |
-| [Configuration API](../../../script-catalog/config_api/config-api.md)                                      |                                                                                                                                                                                                                                                          |
-| [IDP](../../../script-catalog/idp/idp-extension.md)                                                        |                                                                                                                                                                                                                                                          |
-| [End Session](../../../script-catalog/end_session/end-session.md)                                          |                                                                                                                                                                                                                                                          |
-| [Persistence Extension](../../../script-catalog/persistence_extension/persistence.md)                      |                                                                                                                                                                                                                                                          |
-| [Revoke Token](../../../script-catalog/revoke_token/revoke-token.md)                                       |                                                                                                                                                                                                                                                          |
-| [Application Session](../../../script-catalog/application_session/application-session.md)                  |                                                                                                                                                                                                                                                          |
-| [Spontaneous Scope](../../../script-catalog/spontaneous_scope/spontaneous-scope.md)                        |                                                                                                                                                                                                                                                          |
-| [Create User](../../../script-catalog/create_user/create-user.md)                                          |                                                                                                                                                                                                                                                          |
-| SSA Response Modification                                                                                  |                                                                                                                                                                                                                                                          |
-| [Health Check](../../../script-catalog/health_check/health-check.md)                                      |                                                                                                                                                                                                                                                          |
-| Lock Extension                                                                                             |                                                                                                                                                                                                                                                          |
+| [CIBA - End User notification](../../../script-catalog/ciba/ciba.md)                                       | Customizes how users are notified of CIBA authentication requests through their Authentication Device.                                                                                                                                                   |
+| [Configuration API](../../../script-catalog/config_api/config-api.md)                                      | Adds custom authorization and response-processing logic to Configuration API requests.                                                                                                                                                                   |
+| [IDP](../../../script-catalog/idp/idp-extension.md)                                                        | Translates and updates user attributes during external identity-provider authentication.                                                                                                                                                                 |
+| [End Session](../../../script-catalog/end_session/end-session.md)                                          | Customizes the HTML response for OpenID Connect Frontchannel Logout.                                                                                                                                                                                     |
+| [Persistence Extension](../../../script-catalog/persistence_extension/persistence.md)                      | Extends persistence behavior by initializing and releasing services and customizing password hashing and comparison.                                                                                                                                     |
+| [Revoke Token](../../../script-catalog/revoke_token/revoke-token.md)                                       | Customizes token revocation by determining whether a token should be revoked or revocation should be skipped.                                                                                                                                            |
+| [Application Session](../../../script-catalog/application_session/application-session.md)                  | Allows customization of application session events, including session start, session end, and active session responses.                                                                                                                                  |
+| [Spontaneous Scope](../../../script-catalog/spontaneous_scope/spontaneous-scope.md)                        | Allows customization of spontaneous scope handling during authorization requests.                                                                                                                                                                        |
+| [Create User](../../../script-catalog/create_user/create-user.md)                                          | Customizes the user registration process initiated with the `prompt=create` authorization request.                                                                                                                                                       |
+| [SSA Response Modification](../../../script-catalog/ssa/ssa-modify-response.md)                            | Customizes responses and data for SSA creation, retrieval, and revocation operations.                                                                                                                                                                    |
+| [Health Check](../../../script-catalog/health_check/health-check.md)                                       | Customizes the response returned by the Health Check Endpoint.                                                                                                                                                                                           |
+| Lock Extension                                                                                             | Allows customization of data and policy operations before they are added or removed.                                                                                                                                                                                                                                                         |
 
 ## Implementation languages - Jython or pure Java
 
@@ -223,6 +222,103 @@ class UpdateToken(UpdateTokenType):
 1. This [article](./interception-scripts-debug-ce.md) covers the details for debugging a script in a developer environment (CE).
 
 2. This [article](./interception-scripts-debug.md) covers the details for debugging a script in a CN environment.
+
+***
+
+## Unit testing custom scripts
+
+You don't need to start the Authorization Server to verify your script logic.
+The interception interfaces (e.g. `DiscoveryType`, `UpdateTokenType`,
+`IntrospectionType`) are plain Java interfaces, so a script class can be
+instantiated and its methods called directly from a unit test.
+
+### Recommended approach
+
+The `ExecutionContext` (and other context objects passed to interception
+methods) holds references to most server-side objects at runtime. **You only
+need to populate the parts of the context your script actually reads.** This
+keeps tests focused and fast.
+
+Cover both **positive** and **negative** scenarios for each branch of script
+logic:
+
+- **Positive** — provide the inputs the script expects and assert the
+  observable outcome (response was modified, return value is `true`, etc.).
+- **Negative** — provide missing/empty inputs and assert the failure mode
+  (`NullPointerException`, `false` return, response left untouched, etc.).
+  These tests document the script's preconditions.
+
+Two mocking styles work well:
+
+1. **Plain construction** — build a real `ExecutionContext`, set what you need
+   (`context.setClient(client)`), and pass it. Easiest to read.
+2. **Mockito** — already used heavily in jans-auth-server tests. Useful when
+   the real object is heavy or pulls in too many collaborators. Stub only the
+   methods the script calls.
+
+### Example: Discovery script
+
+Given a `Discovery` script that does not touch context:
+
+```java
+public boolean modifyResponse(Object responseAsJsonObject, Object context) {
+    JSONObject response = (JSONObject) responseAsJsonObject;
+    response.accumulate("key_from_java", "value_from_script_on_java");
+    return true;
+}
+```
+
+A bare `new ExecutionContext()` is enough — there is nothing to set up:
+
+```java
+DiscoveryType script = new Discovery();
+JSONObject response = new JSONObject();
+
+assertTrue(script.modifyResponse(response, new ExecutionContext()));
+assertEquals(response.getString("key_from_java"), "value_from_script_on_java");
+```
+
+If the same script is changed to read the client from the context:
+
+```java
+public boolean modifyResponse(Object responseAsJsonObject, Object context) {
+    ExecutionContext executionContext = (ExecutionContext) context;
+    JSONObject response = (JSONObject) responseAsJsonObject;
+    response.accumulate("client_id_from_script", executionContext.getClient().getClientId());
+    return true;
+}
+```
+
+…the negative test is to pass an empty context and assert NPE; the positive
+test sets the client (either with a real `Client` or a Mockito mock):
+
+```java
+// negative — empty context, client is null
+assertThrows(NullPointerException.class,
+        () -> script.modifyResponse(new JSONObject(), new ExecutionContext()));
+
+// positive — explicit setter
+Client client = new Client();
+client.setClientId("test_id");
+ExecutionContext context = new ExecutionContext();
+context.setClient(client);
+
+JSONObject response = new JSONObject();
+assertTrue(script.modifyResponse(response, context));
+assertEquals(response.getString("client_id_from_script"), "test_id");
+```
+
+### Full sample test
+
+A complete, runnable example covering context-free, client-aware, and
+opt-out (returns `false`) scenarios — both with explicit construction and
+with Mockito — lives in the jans-auth-server test suite:
+
+[`jans-auth-server/server/src/test/java/io/jans/as/server/scripts/DiscoveryScriptTest.java`](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/test/java/io/jans/as/server/scripts/DiscoveryScriptTest.java)
+
+The same pattern applies to every other script type — substitute the type's
+interface and its context object (`ExternalUpdateTokenContext`,
+`ExternalIntrospectionContext`, etc.).
 
 ***
 

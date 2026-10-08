@@ -176,6 +176,7 @@ tags:
 | jansMetric | 1          | jansMetric_jansEndDate   | 1            | jansEndDate   | YES  |         |               |
 | jansMetric | 1          | jansMetric_jansAppTyp    | 1            | jansAppTyp    | YES  |         |               |
 | jansMetric | 1          | jansMetric_jansMetricTyp | 1            | jansMetricTyp | YES  |         |               |
+| jansMetric | 1          | jansMetric_jansMetricSubTyp | 1         | jansMetricSubTyp | YES |       |               |
 | jansMetric | 1          | jansMetric_CustomIdx1    | 1            | del           | YES  |         |               |
 | jansMetric | 1          | jansMetric_CustomIdx1    | 2            | exp           | YES  |         |               |
 
