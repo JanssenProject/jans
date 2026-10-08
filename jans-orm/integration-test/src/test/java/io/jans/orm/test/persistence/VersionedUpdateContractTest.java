@@ -145,6 +145,10 @@ public abstract class VersionedUpdateContractTest extends BaseOrmTest {
 
 		executorService.shutdown();
 		boolean terminated = executorService.awaitTermination(60, TimeUnit.SECONDS);
+		if (!terminated) {
+			executorService.shutdownNow();
+		}
+		
 		Throwable failure = workerFailure.get();
 		if (failure != null) {
 			throw new AssertionError("Unexpected exception in race worker", failure);
