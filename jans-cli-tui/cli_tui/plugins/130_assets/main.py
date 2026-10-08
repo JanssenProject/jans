@@ -173,8 +173,10 @@ class Plugin(DialogUtils):
         display_name_widget = common_data.app.getTitledText(_("File Name"), name='fileName', value=data.get('fileName'), style=cli_style.edit_text_required)
 
         def read_asset(path):
-            self.asset_file_path = path
-            display_name_widget.me.text = os.path.basename(path)
+            path = common_data.app.accept_upload_path(path)
+            if path:
+                self.asset_file_path = path
+                display_name_widget.me.text = os.path.basename(path)
 
         inum_widget = common_data.app.getTitledText(_("inum"), name='inum', value=data.get('inum'), read_only=True, style=cli_style.read_only)
         jans_level_widget =  common_data.app.getTitledWidget(

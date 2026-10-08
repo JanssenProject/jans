@@ -214,7 +214,7 @@ class JansCliApp(Application):
         self.pbar_text = ""
         self.progressing_text = ""
         self.mouse_float = True
-        self.browse_path = '/'
+        self.browse_path = str(Path.home())
         self.app_configuration = {}
         self.current_page = None
         self.jans_help = get_help_with()
@@ -1155,6 +1155,13 @@ class JansCliApp(Application):
             config_cli.log_dir = log_dir
             if hasattr(self, 'cli_object'):
                 self.cli_object.set_logging()
+
+    def accept_upload_path(self, path: str) -> Optional[str]:
+        try:
+            return self.cli_object.resolve_user_file(path)
+        except ValueError as e:
+            self.show_message(_(common_strings.error), str(e))
+            return None
 
     def show_message(
             self,

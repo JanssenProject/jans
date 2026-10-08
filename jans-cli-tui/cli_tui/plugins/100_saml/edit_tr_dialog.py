@@ -76,7 +76,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
 
 
         def read_metadata_file(path):
-            self.metadata_file_path = path
+            self.metadata_file_path = self.app.accept_upload_path(path) or ''
 
         def upload_file():
             file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.file, ok_handler=read_metadata_file)

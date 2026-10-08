@@ -62,7 +62,7 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
         enabled = self.data['enabled'] if 'enabled' in self.data else True
 
         def read_metadata_file(path):
-            self.metadata_file_path = path
+            self.metadata_file_path = common_data.app.accept_upload_path(path)
 
         def upload_file():
             file_browser_dialog = jans_file_browser_dialog(common_data.app, path=common_data.app.browse_path, browse_type=BrowseType.file, ok_handler=read_metadata_file)
