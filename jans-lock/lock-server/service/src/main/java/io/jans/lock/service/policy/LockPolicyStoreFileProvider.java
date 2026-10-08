@@ -110,7 +110,7 @@ public class LockPolicyStoreFileProvider implements PolicyStoreFileProvider {
                     if (JANS_ISSUER_ENTRY.equals(entry.getName())) {
                         byte[] patched = patchIssuerJson(IOUtils.toByteArray(zis), openIdIssuer);
                         zos.write(patched);
-                        log.debug("Patched {} with issuer URL: {}", JANS_ISSUER_ENTRY, openIdIssuer + WELL_KNOWN_PATH);
+                        log.debug("Patched {} with issuer URL: {}{}", JANS_ISSUER_ENTRY, openIdIssuer, WELL_KNOWN_PATH);
                     } else {
                         IOUtils.copy(zis, zos);
                     }

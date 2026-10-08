@@ -66,9 +66,6 @@ public class GrpcAuditServlet extends HttpServlet {
     // Use AtomicReference for thread-safe lazy initialization
     private static final AtomicReference<ServletAdapter> adapterRef = new AtomicReference<>();
 
-    public GrpcAuditServlet() {
-    }
-
     @PostConstruct
     public void initializeGrpc() {
         log.info("gRPC adapter initialization");
@@ -299,8 +296,7 @@ public class GrpcAuditServlet extends HttpServlet {
 
 		public static boolean isGrpcRequest(HttpServletRequest request) {
 			String contentType = request.getContentType();
-	        boolean isGrpcRequest = contentType != null && contentType.startsWith("application/grpc");
-			return isGrpcRequest;
+			return contentType != null && contentType.startsWith("application/grpc");
 		}
 	}
 }
