@@ -510,11 +510,12 @@ jobs:
       - name: Dispatch image consumers
         env:
           GH_TOKEN: ${{ github.token }}
+          TF_GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
           REF: ${{ github.event.workflow_run.head_branch }}
           AIO_IMAGE: ${{ steps.aio.outputs.image }}
         run: |
           set -euo pipefail
-          gh workflow run test-terraform-provider.yml -R "$GITHUB_REPOSITORY" --ref "$REF" \
+          GH_TOKEN="$TF_GH_TOKEN" gh workflow run test-terraform-provider.yml -R "$GITHUB_REPOSITORY" --ref "$REF" \
             -f aio_image_tag="$AIO_IMAGE"
           gh workflow run scan-pentest.yml -R "$GITHUB_REPOSITORY" --ref "$REF" \
             -f aio_image_tag="$AIO_IMAGE" \

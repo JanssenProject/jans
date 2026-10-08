@@ -164,3 +164,24 @@ class JansLockInstaller(JettyInstaller):
 
     def service_post_install_tasks(self):
         base.current_app.ConfigApiInstaller.install_plugin('lock')
+
+
+    def app_test_data_loader(self):
+        if not self.installed():
+            return
+
+        lock_test_client_prefix = '2202.'
+        check_result = self.check_clients([('lock_test_client_id', lock_test_client_prefix)])
+
+        if check_result.get(lock_test_client_prefix) == 1:
+            warning = "Test data for Jans Lock was allready loaded."
+            self.logIt(warning)
+            if Config.installed_instance:
+                print(warning)
+            return
+
+        self.logIt("Loding Jans Lock test data")
+        self.update_rendering_dict()
+        self.render_templates_folder(os.path.join(Config.templateFolder, 'test', self.service_name))
+        ldif_fn = os.path.join(Config.output_dir, 'test', self.service_name, 'data/test-data.ldif')
+        self.dbUtils.import_ldif([ldif_fn])

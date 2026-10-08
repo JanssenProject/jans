@@ -1,8 +1,9 @@
 name: "Build: Developer docs"
 on:
-  release:
+  workflow_run:
+    workflows: ["Build: Publish"]
     types:
-      - published
+      - completed
   workflow_dispatch:
     inputs:
       version:
@@ -24,12 +25,13 @@ jobs:
     if: >-
       github.repository == 'JanssenProject/jans' &&
       (github.event_name == 'workflow_dispatch' ||
-       (github.event_name == 'release' &&
-        github.event.action == 'published' &&
-        (!github.event.release.draft) &&
-        startsWith(github.event.release.tag_name, 'v')))
+       (github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_repository.full_name == github.repository &&
+        startsWith(github.event.workflow_run.head_branch, 'v')))
     name: Publish API references
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: read
@@ -44,7 +46,8 @@ jobs:
         id: release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REQUESTED_TAG: ${{ github.event.inputs.version || github.event.release.tag_name }}
+          REQUESTED_TAG: ${{ github.event.inputs.version || github.event.workflow_run.head_branch }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
           EVENT_NAME: ${{ github.event_name }}
           DRY_RUN_INPUT: ${{ inputs.dry_run }}
         run: |
@@ -65,8 +68,8 @@ jobs:
             echo "ERROR: '${REQUESTED_TAG}' is not a published release." >&2
             exit 1
           fi
-          sha=""
-          if [ "$EVENT_NAME" = "release" ]; then
+          sha="${RUN_SHA:-}"
+          if [ -z "$sha" ] && [ "$DRY_RUN_INPUT" != "true" ]; then
             sha=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${REQUESTED_TAG}" --jq '.sha')
           fi
           echo "Documenting ${REQUESTED_TAG} from ${sha:-$GITHUB_REF}"
@@ -114,7 +117,7 @@ jobs:
 
       - name: Import GPG key
         id: import_gpg
-        if: ${{ github.event_name == 'release' || !inputs.dry_run }}
+        if: ${{ github.event_name == 'workflow_run' || !inputs.dry_run }}
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
         with:
           gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
@@ -132,8 +135,8 @@ jobs:
 
       - name: Publish to developer-docs
         env:
-          DEVELOPER_DOCS_TOKEN: ${{ (github.event_name == 'release' || !inputs.dry_run) && secrets.MOAUTO_WORKFLOW_TOKEN || '' }}
+          DEVELOPER_DOCS_TOKEN: ${{ (github.event_name == 'workflow_run' || !inputs.dry_run) && secrets.MOAUTO_WORKFLOW_TOKEN || '' }}
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
           DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
-          DOCS_SIGN_COMMITS: ${{ (github.event_name == 'release' || !inputs.dry_run) && '1' || '0' }}
+          DOCS_SIGN_COMMITS: ${{ (github.event_name == 'workflow_run' || !inputs.dry_run) && '1' || '0' }}
         run: bash automation/docs/publish-developer-docs.sh "$GENERATED_DIR" "$RELEASE_TAG"

@@ -14,7 +14,6 @@ from setup_app.utils.progress import jansProgress
 class BaseInstaller:
     needdb = True
     dbUtils = dbUtils
-    service_scopes_created = False
 
     def register_progess(self):
         if not hasattr(self, 'output_folder'):
@@ -51,7 +50,7 @@ class BaseInstaller:
         self.render_unit_file()
 
         self.render_import_templates()
-        if not self.service_scopes_created:
+        if not getattr(self, 'service_scopes_created', False):
             self.create_scopes()
 
         self.update_backend()
@@ -289,4 +288,5 @@ class BaseInstaller:
 
         self.dbUtils.import_ldif([scopes_ldif_fn])
         self.service_scopes_created = True
+        self.scopes = scopes_list
         return scopes_list

@@ -184,6 +184,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         ignoredirs = [
                 os.path.join(self.template_base, 'jans-config-api'),
                 os.path.join(self.template_base, 'jans-fido2'),
+                os.path.join(self.template_base, 'jans-lock'),
                 ]
 
         self.render_templates_folder(self.template_base, ignoredirs=ignoredirs)
