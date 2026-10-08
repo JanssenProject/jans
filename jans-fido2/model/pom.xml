@@ -27,6 +27,10 @@
                 <groupId>io.jans</groupId>
                 <artifactId>jans-auth-model</artifactId>
             </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-metric</artifactId>
+            </dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-doc</artifactId>
@@ -42,6 +46,18 @@
 				<groupId>jakarta.enterprise</groupId>
 				<artifactId>jakarta.enterprise.cdi-api</artifactId>
 			</dependency>
+
+			<!-- Test -->
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<scope>test</scope>
+			</dependency>
 	</dependencies>
-	
+
 </project>

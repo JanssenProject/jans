@@ -25,11 +25,11 @@ class CasaInstaller(JettyInstaller):
     client_id_prefix = '3000.'
     casa_dist_dir = os.path.join(Config.dist_jans_dir, 'jans_casa')
     source_files = [
-            (os.path.join(casa_dist_dir, 'jans-casa.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/casa/{0}/casa-{0}.war').format(base.current_app.app_info['jans_version'])),
-            (os.path.join(casa_dist_dir, 'jans-casa-config.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/casa-config/{0}/casa-config-{0}.jar').format(base.current_app.app_info['jans_version'])),
+            (os.path.join(casa_dist_dir, 'jans-casa.war'), base.determine_jans_artifact_url('maven/io/jans/casa/{0}/casa-{0}.war').format(base.current_app.app_info['jans_version'])),
+            (os.path.join(casa_dist_dir, 'jans-casa-config.jar'), base.determine_jans_artifact_url('maven/io/jans/casa-config/{0}/casa-config-{0}.jar').format(base.current_app.app_info['jans_version'])),
             (os.path.join(casa_dist_dir, 'twilio.jar'), os.path.join(base.current_app.app_info['TWILIO_MAVEN'], '{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION']))),
-            (os.path.join(casa_dist_dir, 'jans-fido2-client.jar'), (os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['jans_version'])))),
-            (os.path.join(casa_dist_dir, 'casa-agama-project.zip'), (os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/casa-agama/{0}/casa-agama-{0}-project.zip'.format(base.current_app.app_info['jans_version'])))),
+            (os.path.join(casa_dist_dir, 'jans-fido2-client.jar'), (base.determine_jans_artifact_url('maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['jans_version'])))),
+            (os.path.join(casa_dist_dir, 'casa-agama-project.zip'), (base.determine_jans_artifact_url('maven/io/jans/casa-agama/{0}/casa-agama-{0}-project.zip'.format(base.current_app.app_info['jans_version'])))),
             ]
 
     def __init__(self):
@@ -45,7 +45,6 @@ class CasaInstaller(JettyInstaller):
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
         self.ldif_client_fn = os.path.join(self.output_folder, 'client.ldif')
         self.config_json_fn = os.path.join(self.output_folder, 'casa-config.json')
-        self.scopes_fn = os.path.join(self.templates_dir, 'scopes.json')
         self.casa_agama_deployment_id = '202447d5-d44c-3125-b1f7-207cb33b6bf7'
         self.jans_start_date = self.get_ldap_time()
 
@@ -53,7 +52,6 @@ class CasaInstaller(JettyInstaller):
 
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
 
-        self.casa_scopes = self.create_scopes()
         self.add_plugins()
 
         # enable agama custom script
@@ -77,8 +75,8 @@ class CasaInstaller(JettyInstaller):
 
 
     def generate_configuration(self):
-        if not hasattr(self, 'casa_scopes'):
-            self.casa_scopes = self.create_scopes()
+        if not hasattr(self, 'scopes'):
+            self.create_scopes()
 
         self.check_clients([('casa_client_id', self.client_id_prefix)])
 
@@ -104,7 +102,7 @@ class CasaInstaller(JettyInstaller):
         casa_client_ldif_parser = myLdifParser(self.ldif_client_fn)
         casa_client_ldif_parser.parse()
 
-        casa_client_ldif_parser.entries[0][1]['jansScope'] += self.casa_scopes
+        casa_client_ldif_parser.entries[0][1]['jansScope'] += self.scopes
         with open(self.ldif_client_fn, 'wb') as w:
             casa_client_ldif_writer = LDIFWriter(w)
             casa_client_ldif_writer.unparse(casa_client_ldif_parser.entries[0][0], casa_client_ldif_parser.entries[0][1])

@@ -1,0 +1,16 @@
+{
+  "projectName": "decomposition-reuse",
+  "version": "1.0.0",
+  "author": "Gluu Inc.",
+  "license": "apache-2.0",
+  "description": "Demonstrates Agama's flow composition and reuse",
+  "configs": {
+    "com.acme.workaday.club_admission2": { 
+       "interests": [ "Coding", "Dancing", "Cooking", "Sleeping", "Mining" ],
+       "allowed": {
+         "min": 2,
+         "max": 4
+       }
+    }
+  }
+}

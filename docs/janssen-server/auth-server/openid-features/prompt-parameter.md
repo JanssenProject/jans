@@ -63,7 +63,7 @@ prompt=none
 Basic credential user
 ```
 
-The **prompt=none** parameter causes Jannsen to immediately send a result to the specified
+The **prompt=none** parameter causes Janssen to immediately send a result to the specified
 **redirect_uri** (callback URL) using the specified **response_mode** with one of two possible
 responses: success or error.
 

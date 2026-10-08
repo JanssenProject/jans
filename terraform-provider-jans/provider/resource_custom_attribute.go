@@ -19,8 +19,10 @@ func resourceCustomAttribute() *schema.Resource {
 				Description: "Indicates if the attribute can hold multiple values.",
 			},
 			"values": {
-				Type:        schema.TypeList,
-				Required:    true,
+				Type: schema.TypeList,
+				// server-managed attributes may be scalar-only (value set, values empty)
+				Optional:    true,
+				Computed:    true,
 				Description: "List of values for the attribute.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

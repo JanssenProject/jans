@@ -17,10 +17,42 @@ prepare_dirs() {
     mkdir -p "$demo_volumes_dir"
 }
 
+extract_fqdn() {
+    cert="$demo_templates_dir/web_https.crt"
+
+    # SAN DNS names (preferred)
+    san=$(openssl x509 -in "$cert" -noout -ext subjectAltName 2>/dev/null \
+        | grep -o 'DNS:[^,]*' \
+        | sed 's/DNS://')
+
+    # CN (fallback, deprecated by browsers/RFC 6125)
+    cn=$(openssl x509 -in "$cert" -noout -subject -nameopt multiline 2>/dev/null \
+        | awk -F' = ' '/commonName/ {print $2}')
+
+    if [[ -n "$san" ]]; then
+        echo "$san"
+    else
+        echo "$cn"
+    fi
+}
+
 prepare_certs() {
     echo "[I] Generating self-signed certificates"
 
     fqdn=$1
+
+    if [[ -f "$demo_templates_dir/web_https.crt" ]]; then
+        old_fqdn="$(extract_fqdn)"
+
+        # compare FQDNs; if user-defined FQDN is different with the one from existing cert file, probably
+        # cert and key are stale and need to re-generate new ones; a typical scenario is after changing
+        # the FQDN using cloudtools change-fqdn command
+        if ! grep -Fqx -- "$fqdn" <<< "$old_fqdn"; then
+            for old_file in web_https.key web_https.crt web_https.csr; do
+                rm -f "${demo_templates_dir}/${old_file}"
+            done
+        fi
+    fi
 
     if [[ ! -f "$demo_templates_dir/ca.key" ]]; then
         openssl genrsa -out "$demo_templates_dir/ca.key" 4096
@@ -287,6 +319,12 @@ services:
       - $demo_templates_dir/traefik-tls.yaml:/etc/traefik/conf.d/traefik-tls.yaml
       - $demo_templates_dir/web_https.crt:/etc/certs/web_https.crt
       - $demo_templates_dir/web_https.key:/etc/certs/web_https.key
+    networks:
+      # Alias the FQDN to traefik so in-cluster server-to-server calls over the public URL
+      # (e.g. config-api -> jans-auth introspection on :443) reach traefik's TLS, not a dead loopback.
+      default:
+        aliases:
+          - $fqdn
 
 EOF
 
@@ -298,6 +336,11 @@ EOF
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --bind-address=0.0.0.0
+      # Relaxed durability for a throwaway demo/CI DB: default per-commit fsync + binlog make the
+      # write-heavy test-data load ~2.4x slower than PostgreSQL. Not for production data.
+      - --innodb-flush-log-at-trx-commit=2
+      - --innodb-doublewrite=0
+      - --skip-log-bin
     container_name: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=Test1234#
@@ -311,7 +354,7 @@ EOF
     deploy:
       resources:
         limits:
-          memory: 768M
+          memory: ${MYSQL_MEM_LIMIT:-768M}
     ports:
       - "127.0.0.1:3306:3306"
 
@@ -341,8 +384,6 @@ EOF
   jans:
     image: ghcr.io/janssenproject/jans/all-in-one:$image_version
     container_name: jans
-    extra_hosts:
-      - "$fqdn:$ipaddr"
     environment:
       - CN_CONFIG_CONSUL_HOST=consul
       - CN_CONFIG_CONSUL_NAMESPACE=jans
@@ -498,7 +539,7 @@ check_jans_readiness() {
     while [[ "$retries" -le 20 ]]; do
         cid=$(docker ps --filter network=jans-aio-demo --filter name=jans --filter health=healthy -q ||:)
         if [[ -n "$cid" ]]; then
-            echo "[I] Janssen is ready to accept request"
+            echo "[I] Janssen is ready to accept requests"
             break
         else
             echo "[W] Janssen is not ready yet; retrying in 10 seconds ..."
@@ -521,7 +562,7 @@ JANS_FQDN=$1
 JANS_PERSISTENCE=$2
 JANS_VERSION=$3
 EXT_IP=$4
-JANS_CI_CD_RUN=$5
+JANS_CI_CD_RUN=${5:-${JANS_CI_CD_RUN:-}}
 
 if [[ ! "$JANS_FQDN" ]]; then
     read -rp "Enter Hostname [demoexample.jans.io]: " JANS_FQDN
@@ -569,7 +610,11 @@ prepare_traefik_files
 prepare_jans_configuration "$JANS_FQDN"
 prepare_compose_files "$JANS_FQDN" "$JANS_PERSISTENCE" "$JANS_VERSION" "$EXT_IP" "$LOG_TARGET" "$LOG_LEVEL"
 
-docker compose -f "$basedir/compose.yaml" up -d
+if [[ -f "$basedir/compose.override.yaml" ]]; then
+    docker compose -f "$basedir/compose.yaml" -f "$basedir/compose.override.yaml" up -d
+else
+    docker compose -f "$basedir/compose.yaml" up -d
+fi
 echo "[I] Janssen is starting up!"
 echo "[I] To check the progress, run 'docker compose logs -f' in a separate terminal"
 echo "[I] Checking if Janssen is ready to accept requests (expected time ~3–5 minutes) ..."

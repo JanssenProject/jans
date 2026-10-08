@@ -92,6 +92,9 @@ public class JwtGrantService {
     @Inject
     private UserService userService;
 
+    @Inject
+    private IdJagValidatorService idJagValidatorService;
+
     public JSONObject processJwtBearer(String assertion, String scope, HttpServletRequest httpRequest, Client client, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) throws StringEncrypter.EncryptionException, CryptoProviderException {
 
         log.debug("processJwtBearer - started with client_id: {}, assertion: {}", client.getClientId(), assertion);
@@ -122,7 +125,11 @@ public class JwtGrantService {
                     null, null, null, null, null, executionContext);
         }
 
-        RefreshToken reToken = tokenCreatorService.createRefreshToken(executionContext, scope);
+        // Spec: Resource AS SHOULD NOT issue refresh tokens when exchanging an ID-JAG
+        final boolean isIdJagGrant = assertion != null && idJagValidatorService.isIdJag(Jwt.parseSilently(assertion));
+        RefreshToken reToken = (!isIdJagGrant || Boolean.TRUE.equals(appConfiguration.getIdJagIssueRefreshToken()))
+                ? tokenCreatorService.createRefreshToken(executionContext, scope)
+                : null;
 
         executionContext.getAuditLog().updateOAuth2AuditLog(grant, true);
 
@@ -146,6 +153,11 @@ public class JwtGrantService {
             final String msg = "'assertion' parameter is not valid JWT.";
             log.debug(msg);
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), executionContext.getAuditLog()));
+        }
+
+        // ID-JAG path: delegate entirely to IdJagValidatorService
+        if (idJagValidatorService.isIdJag(jwt)) {
+            return idJagValidatorService.validateIdJag(jwt, client, executionContext);
         }
 
         try {

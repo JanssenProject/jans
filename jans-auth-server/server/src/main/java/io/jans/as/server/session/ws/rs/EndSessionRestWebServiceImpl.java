@@ -95,7 +95,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private CookieService cookieService;
 
     @Inject
-    private ClientService clientService;
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Inject
     private GrantService grantService;
@@ -479,7 +479,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         // default handling
-        final String html = EndSessionUtils.createFronthannelHtml(frontchannelUris, postLogoutRedirectUri, state);
+        final String html = EndSessionUtils.createFrontChannelHtml(frontchannelUris, postLogoutRedirectUri, state);
         log.debug("Constructed html logout page: {}", html);
         return okResponse(html);
     }
@@ -566,7 +566,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         final Set<Client> clients = sessionId.getPermissionGrantedMap() != null ?
-                clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true) :
+                clientIdMetadataService.resolveClientsForLogout(sessionId.getPermissionGrantedMap().getClientIds(true)) :
                 Sets.newHashSet();
         if (authorizationGrant != null) {
             clients.add(authorizationGrant.getClient());

@@ -3,11 +3,16 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use crate::result::{BatchItemMultiIssuerOutcome, BatchItemUnsignedOutcome};
+use crate::BatchItem;
 use crate::Cedarling;
 use crate::CedarlingError;
+use crate::MetricsError;
+use crate::TokenInput;
 use crate::{EntityData, JsonValue};
 use serde_json::json;
 use std::sync::Arc;
+use test_utils::token_claims::generate_token_using_claims;
 
 #[test]
 fn test_authorize_unsigned_success() {
@@ -56,7 +61,9 @@ fn test_authorize_unsigned_success() {
             principal,
             r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
             resource,
-            JsonValue("{}".to_string()),
+            JsonValue {
+                value: "{}".to_string(),
+            },
         )
         .expect("Should be executed successfully.");
 
@@ -79,12 +86,55 @@ fn test_load_from_json_with_archive_bytes_rejects_invalid() {
     let config =
         std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
             .expect("bootstrap.json should be readable");
-    let result = Cedarling::load_from_json_with_archive_bytes(config, vec![0x00, 0x01, 0x02, 0x03]);
+    let result = Cedarling::load_from_json_with_archive_bytes(config, &[0x00, 0x01, 0x02, 0x03]);
     assert!(
         matches!(&result, Err(CedarlingError::InitializationFailed { .. })),
         "invalid archive bytes should yield InitializationFailed, is_ok={}",
         result.is_ok()
     );
+}
+
+#[test]
+fn test_load_from_json_with_archive_bytes_ignores_policy_store_cjar_url() {
+    let mut config: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
+            .expect("bootstrap.json should be readable"),
+    )
+    .expect("bootstrap.json should be valid JSON");
+
+    config["CEDARLING_POLICY_STORE_CJAR_URL"] =
+        serde_json::Value::String("https://example.com/store.cjar".to_string());
+
+    let archive_bytes = std::fs::read(
+        "../../bindings/cedarling_uniffi/androidApp/app/src/main/assets/MyStore.cjar",
+    )
+    .expect("MyStore.cjar should be readable");
+
+    let result = Cedarling::load_from_json_with_archive_bytes(
+        config.to_string(),
+        &archive_bytes,
+    );
+    result.expect(
+        "initialization should succeed using archive bytes, ignoring policy_store_cjar_url",
+    );
+
+    let invalid_result = Cedarling::load_from_json_with_archive_bytes(
+        config.to_string(),
+        &[0x00, 0x01, 0x02, 0x03],
+    );
+    match invalid_result {
+        Err(CedarlingError::InitializationFailed { error_msg }) => {
+            assert!(
+                error_msg.contains("archive") || error_msg.contains("ZIP"),
+                "expected archive error message, got: {error_msg}"
+            );
+            assert!(
+                !error_msg.contains("Conflicting policy stores"),
+                "error must not be ConflictingPolicyStores: {error_msg}"
+            );
+        },
+        Ok(_) => panic!("invalid archive bytes should fail initialization"),
+    }
 }
 
 #[test]
@@ -95,7 +145,9 @@ fn test_data_api_push_and_get() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -104,7 +156,7 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key1".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result.is_some(), "result should not be None");
-    let value: String = serde_json::from_str(&result.unwrap().0)
+    let value: String = serde_json::from_str(&result.unwrap().value)
         .expect("result should be deserializable to string");
     assert_eq!(value, "value1", "retrieved value should match pushed value");
 
@@ -112,7 +164,9 @@ fn test_data_api_push_and_get() {
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#"{"nested": "data"}"#.to_string()),
+            JsonValue {
+                value: r#"{"nested": "data"}"#.to_string(),
+            },
             Some(60),
         )
         .expect("push_data_ctx with TTL should succeed");
@@ -121,8 +175,8 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key2".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result2.is_some(), "result should not be None");
-    let value2: serde_json::Value =
-        serde_json::from_str(&result2.unwrap().0).expect("result should be deserializable to JSON");
+    let value2: serde_json::Value = serde_json::from_str(&result2.unwrap().value)
+        .expect("result should be deserializable to JSON");
     assert_eq!(
         value2,
         serde_json::json!({"nested": "data"}),
@@ -133,7 +187,9 @@ fn test_data_api_push_and_get() {
     cedarling
         .push_data_ctx(
             "key3".to_string(),
-            JsonValue(r#"[1, 2, 3]"#.to_string()),
+            JsonValue {
+                value: r#"[1, 2, 3]"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -142,7 +198,7 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key3".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result3.is_some(), "result should not be None");
-    let value3: Vec<i32> = serde_json::from_str(&result3.unwrap().0)
+    let value3: Vec<i32> = serde_json::from_str(&result3.unwrap().value)
         .expect("result should be deserializable to array");
     assert_eq!(
         value3,
@@ -158,7 +214,9 @@ fn test_data_api_get_data_entry_ctx() {
     cedarling
         .push_data_ctx(
             "test_key".to_string(),
-            JsonValue(r#"{"foo": "bar"}"#.to_string()),
+            JsonValue {
+                value: r#"{"foo": "bar"}"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -183,7 +241,9 @@ fn test_data_api_remove_data_ctx() {
     cedarling
         .push_data_ctx(
             "to_remove".to_string(),
-            JsonValue(r#""data""#.to_string()),
+            JsonValue {
+                value: r#""data""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -223,21 +283,27 @@ fn test_data_api_clear_data_ctx() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#""value2""#.to_string()),
+            JsonValue {
+                value: r#""value2""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key3".to_string(),
-            JsonValue(r#""value3""#.to_string()),
+            JsonValue {
+                value: r#""value3""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -298,21 +364,27 @@ fn test_data_api_list_data_ctx() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#"{"nested": "data"}"#.to_string()),
+            JsonValue {
+                value: r#"{"nested": "data"}"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key3".to_string(),
-            JsonValue(r#"[1, 2, 3]"#.to_string()),
+            JsonValue {
+                value: r#"[1, 2, 3]"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -349,14 +421,18 @@ fn test_data_api_get_stats_ctx() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#""value2""#.to_string()),
+            JsonValue {
+                value: r#""value2""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -374,7 +450,13 @@ fn test_data_api_get_stats_ctx() {
 fn test_data_api_invalid_key() {
     let cedarling = create_test_cedarling();
 
-    let result = cedarling.push_data_ctx("".to_string(), JsonValue(r#""value""#.to_string()), None);
+    let result = cedarling.push_data_ctx(
+        "".to_string(),
+        JsonValue {
+            value: r#""value""#.to_string(),
+        },
+        None,
+    );
     result.expect_err("push_data_ctx with empty key should fail");
 }
 
@@ -409,4 +491,400 @@ fn test_trusted_issuer_loading_info_defaults() {
             "loaded id {id:?} should satisfy is_trusted_issuer_loaded_by_name"
         );
     }
+}
+
+#[test]
+fn test_policy_store_id_legacy() {
+    let cedarling = create_test_cedarling();
+    assert_eq!(
+        cedarling.policy_store_id(),
+        Some("a1bf93115de86de760ee0bea1d529b521489e5a11747".to_string()),
+        "legacy store should report policy_stores map key"
+    );
+}
+
+fn batch_resource(id: &str) -> Arc<EntityData> {
+    Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": id },
+                "app_id": "admin_ui_id",
+                "name": "My App",
+                "permission": "view_clients",
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+            })
+            .to_string(),
+        )
+        .expect("resource EntityData should parse"),
+    )
+}
+
+fn batch_principal(is_ok: bool) -> Arc<EntityData> {
+    Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                },
+                "is_ok": is_ok,
+            })
+            .to_string(),
+        )
+        .expect("principal EntityData should parse"),
+    )
+}
+
+fn batch_item(resource_id: &str) -> BatchItem {
+    BatchItem {
+        resource: batch_resource(resource_id),
+        action: r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
+        context: Some(JsonValue {
+            value: "{}".to_string(),
+        }),
+    }
+}
+
+#[test]
+fn test_authorize_unsigned_batch_ordered_mixed_decisions() {
+    // Mixed items: [ok, bad-action-fail-closed-deny, ok]. Verifies that
+    // results[i] carries the decision produced by items[i] rather than a
+    // uniform pass/fail.
+    let cedarling = create_test_cedarling();
+    let ok_item = batch_item("ok-0");
+    let bad_item = BatchItem {
+        resource: batch_resource("bad-1"),
+        action: "this is not a valid uid".to_string(),
+        context: Some(JsonValue {
+            value: "{}".to_string(),
+        }),
+    };
+    let items = vec![ok_item, bad_item, batch_item("ok-2")];
+
+    let response = cedarling
+        .authorize_unsigned_batch(Some(batch_principal(true)), items)
+        .expect("batch call should succeed");
+
+    assert_eq!(response.results.len(), 3, "N=3 items → N=3 results");
+    match &response.results[0] {
+        BatchItemUnsignedOutcome::Success { result } => {
+            assert!(result.decision, "item 0 must allow");
+        },
+        other => panic!("item 0 must be Success, got: {other:?}"),
+    }
+    match &response.results[1] {
+        BatchItemUnsignedOutcome::Failed { error } => {
+            assert_eq!(
+                error.category, "action_parse",
+                "error category must be action_parse for invalid action"
+            );
+            assert_eq!(
+                error.item_index, 1,
+                "error index must match malformed batch item position"
+            );
+        },
+        other => panic!("item 1 must be Failed(action_parse), got: {other:?}"),
+    }
+    match &response.results[2] {
+        BatchItemUnsignedOutcome::Success { result } => {
+            assert!(result.decision, "item 2 must allow");
+        },
+        other => panic!("item 2 must be Success, got: {other:?}"),
+    }
+    assert!(!response.batch_id.is_empty(), "batch_id must be populated");
+}
+
+#[test]
+fn test_authorize_unsigned_batch_empty_items_rejected() {
+    let cedarling = create_test_cedarling();
+
+    let err = cedarling
+        .authorize_unsigned_batch(Some(batch_principal(true)), Vec::new())
+        .expect_err("empty items must be rejected");
+    let msg = format!("{err:?}");
+    assert!(
+        msg.to_lowercase().contains("empty"),
+        "error should mention empty items, got: {msg}"
+    );
+}
+
+#[test]
+fn test_authorize_unsigned_batch_context_defaults_when_none() {
+    let cedarling = create_test_cedarling();
+    let item = BatchItem {
+        resource: batch_resource("no-ctx"),
+        action: r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
+        context: None,
+    };
+
+    let response = cedarling
+        .authorize_unsigned_batch(Some(batch_principal(true)), vec![item])
+        .expect("batch call should succeed");
+
+    assert_eq!(
+        response.results.len(),
+        1,
+        "single-item batch must produce exactly one result"
+    );
+    match &response.results[0] {
+        BatchItemUnsignedOutcome::Success { result } => assert!(
+            result.decision,
+            "None context defaults to {{}} and the is_ok=true principal must Allow"
+        ),
+        other => panic!("must be Success, got: {other:?}"),
+    }
+}
+
+// ── Multi-issuer batch tests ────────────────────────────────────────
+//
+// These tests exercise the UniFFI marshalling for the multi-issuer batch
+// entry point: `Vec<TokenInput>` + `Vec<BatchItem>` in, `BatchAuthorizeMultiIssuerResponse`
+// out. The actual authorization outcome (Allow/Deny) is exhaustively covered
+// by the core lib tests; here we care that the boundary works and the batch_id +
+// per-item results are populated with the correct arity.
+
+fn multi_issuer_resource(id: &str) -> Arc<EntityData> {
+    Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": id },
+                "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+            })
+            .to_string(),
+        )
+        .expect("resource EntityData should parse"),
+    )
+}
+
+fn multi_issuer_access_token() -> TokenInput {
+    let payload = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "iss": "https://account.gluu.org",
+        "jti": "test-jti",
+        "client_id": "test-client",
+        "aud": "test-aud",
+        "exp": 9_999_999_999_i64,
+        "iat": 1_724_832_259,
+    }));
+    TokenInput {
+        mapping: "Jans::Access_token".to_string(),
+        payload,
+    }
+}
+
+fn multi_issuer_item(id: &str) -> BatchItem {
+    BatchItem {
+        resource: multi_issuer_resource(id),
+        action: r#"Jans::Action::"Update""#.to_string(),
+        context: Some(JsonValue {
+            value: "{}".to_string(),
+        }),
+    }
+}
+
+#[test]
+fn test_authorize_multi_issuer_batch_ordered_results() {
+    let cedarling = create_test_cedarling();
+    let items = (0..3)
+        .map(|i| multi_issuer_item(&format!("res-{i}")))
+        .collect();
+
+    let response = cedarling
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items)
+        .expect("batch call should succeed at the UniFFI boundary");
+
+    assert_eq!(
+        response.results.len(),
+        3,
+        "N=3 items must yield 3 result rows in input order"
+    );
+    assert!(
+        !response.batch_id.is_empty(),
+        "batch_id must be populated (UUIDv7)"
+    );
+}
+
+#[test]
+fn test_authorize_multi_issuer_batch_empty_tokens_rejected() {
+    let cedarling = create_test_cedarling();
+
+    let err = cedarling
+        .authorize_multi_issuer_batch(Vec::new(), vec![multi_issuer_item("x")])
+        .expect_err("empty tokens must be rejected");
+    let msg = format!("{err:?}");
+    assert!(
+        msg.to_lowercase().contains("empty"),
+        "error should mention empty tokens, got: {msg}"
+    );
+}
+
+#[test]
+fn test_authorize_multi_issuer_batch_empty_items_rejected() {
+    let cedarling = create_test_cedarling();
+
+    let err = cedarling
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], Vec::new())
+        .expect_err("empty items must be rejected");
+    let msg = format!("{err:?}");
+    assert!(
+        msg.to_lowercase().contains("empty"),
+        "error should mention empty items, got: {msg}"
+    );
+}
+
+#[test]
+fn test_authorize_multi_issuer_batch_context_none_defaults() {
+    let cedarling = create_test_cedarling();
+    let item = BatchItem {
+        resource: multi_issuer_resource("no-ctx"),
+        action: r#"Jans::Action::"Update""#.to_string(),
+        context: None,
+    };
+
+    let response = cedarling
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], vec![item])
+        .expect("None context should default to {} and marshal cleanly");
+
+    assert_eq!(
+        response.results.len(),
+        1,
+        "single-item batch must produce exactly one result"
+    );
+    assert!(
+        !response.batch_id.is_empty(),
+        "batch_id must be populated (UUIDv7)"
+    );
+}
+
+#[test]
+fn test_authorize_multi_issuer_batch_bad_action_surfaces_error_at_that_item() {
+    // Proves BatchItemMultiIssuerOutcome::Failed round-trips across the UniFFI
+    // boundary — the Err variant survives with category/item_index intact.
+    let cedarling = create_test_cedarling();
+    let items = vec![
+        multi_issuer_item("ok-0"),
+        BatchItem {
+            resource: multi_issuer_resource("bad-1"),
+            action: "this is not a valid uid".to_string(),
+            context: Some(JsonValue {
+                value: "{}".to_string(),
+            }),
+        },
+        multi_issuer_item("ok-2"),
+    ];
+
+    let response = cedarling
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items)
+        .expect("batch call should succeed at the UniFFI boundary");
+
+    assert_eq!(
+        response.results.len(),
+        3,
+        "batch size should match the 3 request items"
+    );
+    match &response.results[1] {
+        BatchItemMultiIssuerOutcome::Failed { error } => {
+            assert_eq!(
+                error.category, "action_parse",
+                "expected action_parse category for malformed action"
+            );
+            assert_eq!(
+                error.item_index, 1,
+                "error item_index must match its position in the batch"
+            );
+        },
+        other => panic!("item 1 must be Failed(action_parse), got: {other:?}"),
+    }
+    assert!(!response.batch_id.is_empty(), "batch_id must be populated");
+}
+
+/// Builds a bootstrap config string with `CEDARLING_METRICS_COLLECTION` set to
+/// `value` (e.g. "enabled" / "disabled").
+fn metrics_config(value: &str) -> String {
+    let raw = std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
+        .expect("bootstrap.json should be readable");
+    let mut config: serde_json::Value =
+        serde_json::from_str(&raw).expect("bootstrap.json should be valid JSON");
+    config["CEDARLING_METRICS_COLLECTION"] = json!(value);
+    config.to_string()
+}
+
+#[test]
+fn test_drain_metrics_disabled_returns_not_enabled() {
+    let cedarling = Cedarling::load_from_json(metrics_config("disabled"))
+        .expect("Cedarling should initialize with metrics disabled");
+
+    let result = cedarling.drain_metrics();
+    assert!(
+        matches!(result, Err(MetricsError::NotEnabled)),
+        "drain_metrics must fail with NotEnabled when metrics collection is disabled"
+    );
+}
+
+#[test]
+fn test_drain_metrics_local_mode_snapshot_and_reset() {
+    let cedarling = Cedarling::load_from_json(metrics_config("enabled"))
+        .expect("Cedarling should initialize with metrics enabled");
+
+    let resource = Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "some_id"
+                },
+                "app_id": "admin_ui_id",
+                "name": "My App",
+                "permission": "view_clients",
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            })
+            .to_string(),
+        )
+        .expect("EntityData should be correctly parsed"),
+    );
+    let principal = Some(Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+                },
+                "is_ok": true
+            })
+            .to_string(),
+        )
+        .expect("EntityData should be correctly parsed"),
+    ));
+
+    let result = cedarling
+        .authorize_unsigned(
+            principal,
+            r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
+            resource,
+            JsonValue {
+                value: "{}".to_string(),
+            },
+        )
+        .expect("authz should be executed successfully");
+    assert!(result.decision, "authz result should be ALLOW: {result:?}");
+
+    let snapshot_after = cedarling
+        .drain_metrics()
+        .expect("drain_metrics should succeed after authorization");
+    assert_eq!(
+        snapshot_after.operational_stats.get("authz.requests_total"),
+        Some(&1),
+        "the authorized request must be counted in the drained interval, got: {:?}",
+        snapshot_after.operational_stats
+    );
+
+    let snapshot_reset = cedarling
+        .drain_metrics()
+        .expect("drain_metrics should succeed on a fresh interval");
+    assert_eq!(
+        snapshot_reset.operational_stats.get("authz.requests_total"),
+        Some(&0),
+        "counters must reset to a fresh zeroed window after a snapshot, got: {:?}",
+        snapshot_reset.operational_stats
+    );
 }

@@ -22,7 +22,7 @@ This guide covers the prerequisites and cluster creation specific to Amazon Elas
 
 4. Install [eksctl](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html)
 
-5. Install [Helm3](https://helm.sh/docs/intro/install/)
+5. Install [Helm](https://helm.sh/docs/intro/install/)
 
 ## Create the EKS Cluster
 

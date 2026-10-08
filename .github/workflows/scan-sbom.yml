@@ -1,0 +1,106 @@
+name: "Scan: SBOM"
+
+on:
+    push:
+      tags:
+      - 'v**'
+      - 'nightly'
+permissions:
+    contents: read
+jobs:
+  enrich_and_upload_sbom:
+    permissions:
+      contents: read
+      id-token: write  # for Cosign keyless OIDC signing
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        sparse-checkout: .
+        sparse-checkout-cone-mode: true
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+
+    - name: Fetch Jans SBOM from Github
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh api "repos/${GITHUB_REPOSITORY}/dependency-graph/sbom" > gh-sbom.json
+        wc gh-sbom.json
+
+    - name: Trim SBOM
+      run: |
+        jq -e '.sbom' gh-sbom.json > trimmed-sbom.json
+        wc trimmed-sbom.json
+
+    - name: Install Parlay CLI
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release download -R snyk/parlay --pattern 'parlay_*_linux_amd64.deb'
+        sudo dpkg -i parlay_*_linux_amd64.deb
+
+    - name: Enrich trimmed SBOM using Parlay
+      shell: bash
+      run: |
+        cat trimmed-sbom.json | \
+        parlay ecosystems enrich - | \
+        parlay scorecard enrich - > jans-sbom.json
+        wc jans-sbom.json
+
+    - name: Install sbomqs to generate compliance reports
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release download -R interlynk-io/sbomqs --pattern 'sbomqs_*_amd64.deb'
+        sudo dpkg -i sbomqs_*_amd64.deb
+
+    - name: Generate compliance reports using sbomqs
+      run: |
+        sbomqs compliance --fsct -j jans-sbom.json > jans-sbom-fsct-report.json
+        wc jans-sbom-fsct-report.json
+
+        sbomqs compliance --bsi-v2 -j jans-sbom.json > jans-sbom-bsi-v2-report.json
+        wc jans-sbom-bsi-v2-report.json
+
+        sbomqs compliance --ntia -j jans-sbom.json > jans-sbom-NTIA-report.json
+        wc jans-sbom-NTIA-report.json
+
+        sbomqs compliance --oct -j jans-sbom.json > jans-sbom-openchain-report.json
+        wc jans-sbom-openchain-report.json
+
+    - name: Sign SBOM and compliance reports
+      run: |
+        for file in jans-sbom.json jans-sbom-fsct-report.json jans-sbom-bsi-v2-report.json jans-sbom-NTIA-report.json jans-sbom-openchain-report.json; do
+          cosign sign-blob --yes --bundle "${file}.bundle" "${file}"
+        done
+
+    - name: Upload the enriched SBOM and compliance reports to the release
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        EVENT_REF: ${{ github.event.ref }}
+      run: |
+        VERSION="$(echo "$EVENT_REF" | cut -d '/' -f 3)"
+        for i in $(seq 1 20); do
+          gh release view "${VERSION}" > /dev/null 2>&1 && break
+          if [ "$i" -eq 20 ]; then
+            echo "Release ${VERSION} not found after 20 attempts." >&2
+            exit 1
+          fi
+          echo "Release ${VERSION} not found yet (attempt ${i}/20); retrying in 15s."
+          sleep 15
+        done
+        gh release upload "${VERSION}" \
+          jans-sbom.json jans-sbom.json.bundle \
+          jans-sbom-fsct-report.json jans-sbom-fsct-report.json.bundle \
+          jans-sbom-bsi-v2-report.json jans-sbom-bsi-v2-report.json.bundle \
+          jans-sbom-NTIA-report.json jans-sbom-NTIA-report.json.bundle \
+          jans-sbom-openchain-report.json jans-sbom-openchain-report.json.bundle \
+          --clobber

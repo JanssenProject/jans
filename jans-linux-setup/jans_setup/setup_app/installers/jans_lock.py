@@ -23,9 +23,9 @@ Config.lock_redis_port = '6379'
 class JansLockInstaller(JettyInstaller):
 
     source_files = [
-                (os.path.join(Config.dist_jans_dir, 'jans-lock.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-server/{0}/jans-lock-server-{0}.war').format(base.current_app.app_info['jans_version'])),
-                (os.path.join(Config.dist_jans_dir, 'lock-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/lock-plugin/{0}/lock-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
-                (os.path.join(Config.dist_jans_dir, 'jans-lock-server-service-deps-pack.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-server/{0}/jans-lock-server-{0}-service-deps-pack.zip'.format(base.current_app.app_info['jans_version']))),
+                (os.path.join(Config.dist_jans_dir, 'jans-lock.war'), base.determine_jans_artifact_url('maven/io/jans/jans-lock-server/{0}/jans-lock-server-{0}.war').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'lock-plugin.jar'), base.determine_jans_artifact_url('maven/io/jans/jans-config-api/plugins/lock-plugin/{0}/lock-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'jans-lock-server-service-deps-pack.zip'), base.determine_jans_artifact_url('maven/io/jans/jans-lock-server/{0}/jans-lock-server-{0}-service-deps-pack.zip'.format(base.current_app.app_info['jans_version']))),
                 ]
 
     def __init__(self):
@@ -168,3 +168,24 @@ class JansLockInstaller(JettyInstaller):
 
     def service_post_install_tasks(self):
         base.current_app.ConfigApiInstaller.install_plugin('lock')
+
+
+    def app_test_data_loader(self):
+        if not self.installed():
+            return
+
+        lock_test_client_prefix = '2202.'
+        check_result = self.check_clients([('lock_test_client_id', lock_test_client_prefix)])
+
+        if check_result.get(lock_test_client_prefix) == 1:
+            warning = "Test data for Jans Lock was allready loaded."
+            self.logIt(warning)
+            if Config.installed_instance:
+                print(warning)
+            return
+
+        self.logIt("Loding Jans Lock test data")
+        self.update_rendering_dict()
+        self.render_templates_folder(os.path.join(Config.templateFolder, 'test', self.service_name))
+        ldif_fn = os.path.join(Config.output_dir, 'test', self.service_name, 'data/test-data.ldif')
+        self.dbUtils.import_ldif([ldif_fn])

@@ -68,6 +68,7 @@ public final class ConfigurationResponseClaim {
     public static final String TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED = "token_endpoint_auth_methods_supported";
     public static final String TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED = "token_endpoint_auth_signing_alg_values_supported";
     public static final String DPOP_SIGNING_ALG_VALUES_SUPPORTED = "dpop_signing_alg_values_supported";
+    public static final String CODE_CHALLENGE_METHODS_SUPPORTED = "code_challenge_methods_supported";
     public static final String DISPLAY_VALUES_SUPPORTED = "display_values_supported";
     public static final String CLAIM_TYPES_SUPPORTED = "claim_types_supported";
     public static final String CLAIMS_SUPPORTED = "claims_supported";
@@ -104,6 +105,13 @@ public final class ConfigurationResponseClaim {
 
     // Client ID Metadata Document (CIMD)
     public static final String CLIENT_ID_METADATA_DOCUMENT_SUPPORTED = "client_id_metadata_document_supported";
+
+    // Identity Assertion Authorization Grant (ID-JAG / Cross-App Access)
+    public static final String IDENTITY_CHAINING_REQUESTED_TOKEN_TYPES_SUPPORTED = "identity_chaining_requested_token_types_supported";
+    public static final String AUTHORIZATION_GRANT_PROFILES_SUPPORTED = "authorization_grant_profiles_supported";
+
+    // RFC 9207 - OAuth 2.0 Authorization Server Issuer Identification
+    public static final String AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED = "authorization_response_iss_parameter_supported";
 
     // AuthZEN
     public static final String AUTHZEN_POLICY_DECISION_POINT = "policy_decision_point";

@@ -81,6 +81,8 @@ public class RegisterRequest extends BaseRequest {
     private String sectorIdentifierUri;
     private String idTokenTokenBindingCnf;
     private String tlsClientAuthSubjectDn;
+    private String spiffeId;
+    private String spiffeBundleEndpoint;
     private Boolean allowSpontaneousScopes;
     private List<String> spontaneousScopes;
     private List<String> spontaneousScopeScriptDns;
@@ -90,6 +92,7 @@ public class RegisterRequest extends BaseRequest {
     private List<String> txTokenScriptDns;
     private List<String> postAuthnScriptDns;
     private List<String> tokenExchangeScriptDns;
+    private List<String> idJagScriptDns;
     private List<String> consentGatheringScriptDns;
     private List<String> introspectionScriptDns;
     private List<String> rptClaimsScriptDns;
@@ -208,6 +211,7 @@ public class RegisterRequest extends BaseRequest {
         this.txTokenScriptDns = new ArrayList<>();
         this.postAuthnScriptDns = new ArrayList<>();
         this.tokenExchangeScriptDns = new ArrayList<>();
+        this.idJagScriptDns = new ArrayList<>();
         this.consentGatheringScriptDns = new ArrayList<>();
         this.introspectionScriptDns = new ArrayList<>();
         this.rptClaimsScriptDns = new ArrayList<>();
@@ -253,6 +257,22 @@ public class RegisterRequest extends BaseRequest {
 
     public void setTlsClientAuthSubjectDn(String tlsClientAuthSubjectDn) {
         this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
+    }
+
+    public String getSpiffeId() {
+        return spiffeId;
+    }
+
+    public void setSpiffeId(String spiffeId) {
+        this.spiffeId = spiffeId;
+    }
+
+    public String getSpiffeBundleEndpoint() {
+        return spiffeBundleEndpoint;
+    }
+
+    public void setSpiffeBundleEndpoint(String spiffeBundleEndpoint) {
+        this.spiffeBundleEndpoint = spiffeBundleEndpoint;
     }
 
     public Boolean getAllowSpontaneousScopes() {
@@ -1818,6 +1838,26 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Gets identity assertion (ID-JAG) script dns
+     *
+     * @return id-jag script dns
+     */
+    public List<String> getIdJagScriptDns() {
+        return idJagScriptDns;
+    }
+
+    /**
+     * Sets identity assertion (ID-JAG) script dns
+     *
+     * @param idJagScriptDns id-jag script dns
+     * @return register request object
+     */
+    public RegisterRequest setIdJagScriptDns(List<String> idJagScriptDns) {
+        this.idJagScriptDns = idJagScriptDns;
+        return this;
+    }
+
+    /**
      * Gets consent gathering script dns
      *
      * @return consent gathering script dns
@@ -1964,6 +2004,8 @@ public class RegisterRequest extends BaseRequest {
         result.setDefaultMaxAge(integerOrNull(requestObject, DEFAULT_MAX_AGE.toString()));
         result.setLifetime(integerOrNull(requestObject, LIFETIME.toString()));
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
+        result.setSpiffeId(requestObject.optString(SPIFFE_ID.toString(), null));
+        result.setSpiffeBundleEndpoint(requestObject.optString(SPIFFE_BUNDLE_ENDPOINT.toString(), null));
         result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
         result.setSpontaneousScopes(extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
         result.setAdditionalAudience(extractListByKey(requestObject, ADDITIONAL_AUDIENCE.toString()));
@@ -1974,6 +2016,7 @@ public class RegisterRequest extends BaseRequest {
         result.setTxTokenScriptDns(extractListByKey(requestObject, TX_TOKEN_SCRIPT_DNS.toString()));
         result.setPostAuthnScriptDns(extractListByKey(requestObject, POST_AUTHN_SCRIPT_DNS.toString()));
         result.setTokenExchangeScriptDns(extractListByKey(requestObject, TOKEN_EXCHANGE_SCRIPT_DNS.toString()));
+        result.setIdJagScriptDns(extractListByKey(requestObject, IDENTITY_ASSERTION_SCRIPT_DNS.toString()));
         result.setConsentGatheringScriptDns(extractListByKey(requestObject, CONSENT_GATHERING_SCRIPT_DNS.toString()));
         result.setIntrospectionScriptDns(extractListByKey(requestObject, INTROSPECTION_SCRIPT_DNS.toString()));
         result.setRptClaimsScriptDns(extractListByKey(requestObject, RPT_CLAIMS_SCRIPT_DNS.toString()));
@@ -2291,6 +2334,12 @@ public class RegisterRequest extends BaseRequest {
         if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
             function.apply(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
         }
+         if (StringUtils.isNotBlank(spiffeId)) {
+            function.apply(SPIFFE_ID.toString(), spiffeId);
+        }
+        if (StringUtils.isNotBlank(spiffeBundleEndpoint)) {
+            function.apply(SPIFFE_BUNDLE_ENDPOINT.toString(), spiffeBundleEndpoint);
+        }
         if (allowSpontaneousScopes != null) {
             function.apply(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes.toString());
         }
@@ -2306,6 +2355,7 @@ public class RegisterRequest extends BaseRequest {
         applyArray(function, TX_TOKEN_SCRIPT_DNS, txTokenScriptDns);
         applyArray(function, POST_AUTHN_SCRIPT_DNS, postAuthnScriptDns);
         applyArray(function, TOKEN_EXCHANGE_SCRIPT_DNS, tokenExchangeScriptDns);
+        applyArray(function, IDENTITY_ASSERTION_SCRIPT_DNS, idJagScriptDns);
         applyArray(function, CONSENT_GATHERING_SCRIPT_DNS, consentGatheringScriptDns);
         applyArray(function, INTROSPECTION_SCRIPT_DNS, introspectionScriptDns);
         applyArray(function, RPT_CLAIMS_SCRIPT_DNS, rptClaimsScriptDns);

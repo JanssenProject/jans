@@ -6,6 +6,8 @@
 
 package io.jans.orm.sql.operation.impl;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +67,7 @@ import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.PasswordAttributeData;
 import io.jans.orm.model.PersistenceMetadata;
+import io.jans.orm.model.SearchProjection;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.operation.auth.PasswordEncryptionHelper;
 import io.jans.orm.sql.impl.SqlBatchOperationWraper;
@@ -101,6 +105,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private String schemaName;
 
+	private SqlAggregationQueryBuilder aggregationQueryBuilder;
+
 	private Path<String> docAlias = ExpressionUtils.path(String.class, DOC_ALIAS);
 	private Path<String> docInnerAlias = ExpressionUtils.path(String.class, DOC_INNER_ALIAS);
 
@@ -118,6 +124,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		this.sqlQueryFactory = connectionProvider.getSqlQueryFactory();
 		this.schemaName = connectionProvider.getSchemaName();
 		this.dbType = connectionProvider.getDbType();
+		this.aggregationQueryBuilder = new SqlAggregationQueryBuilder(this);
 	}
 
     @Override
@@ -204,7 +211,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					sqlInsertQuery.values(convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
 				} else {
 					sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
-					sqlInsertQuery.values(attribute.getValue());
+					sqlInsertQuery.values(convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
 				}
 			}
 			
@@ -252,13 +259,13 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
     					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
     				} else {
-    					sqlUpdateQuery.set(path, attribute.getValue());
+    					sqlUpdateQuery.set(path, convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
     				}
                 } else if (AttributeModificationType.REPLACE == type) {
 					if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
     					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
     				} else {
-    					sqlUpdateQuery.set(path, attribute.getValue());
+    					sqlUpdateQuery.set(path, convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
     				}
                 } else if (AttributeModificationType.REMOVE == type) {
     				sqlUpdateQuery.setNull(path);
@@ -435,19 +442,6 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 		Expression<?> attributesExp = buildSelectAttributes(attributes);
 
-		SQLQuery<?> sqlSelectQuery;
-		if (expression == null) {
-			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath);
-		} else {
-			Predicate whereExp = (Predicate) expression.expression();
-			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath).where(whereExp);
-		}
-
-        SQLQuery<?> baseQuery = sqlSelectQuery;
-        if (orderBy != null) {
-            baseQuery = sqlSelectQuery.orderBy(orderBy);
-        }
-
         List<EntryData> searchResultList = new LinkedList<EntryData>();
 
         String queryStr = null;
@@ -467,7 +461,10 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                        currentLimit = Math.min(pageSize, count - resultCount);
 	                    }
 	
-	                    query = baseQuery.limit(currentLimit).offset(start + resultCount);
+	                    // Build new query for every iteration. SQLQuery can't be executed
+                    // second time because it releases connection after getResults() call
+                    query = buildBaseSearchQuery(tableRelationalPath, attributesExp, expression, orderBy)
+                    		.limit(currentLimit).offset(start + resultCount);
 
 	                    queryStr = query.getSQL().getSQL();
 	                    LOG.debug("Executing query: '" + queryStr + "'");
@@ -504,7 +501,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	    		}
 	        } else {
 	    		try {
-	                SQLQuery<?> query = baseQuery;
+	                SQLQuery<?> query = buildBaseSearchQuery(tableRelationalPath, attributesExp, expression, orderBy);
 	                if (count > 0) {
 	                    query = query.limit(count);
 	                }
@@ -566,6 +563,106 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
         return result;
     }
+
+	@Override
+	public PagedResult<EntryData> searchAggregated(String key, String objectClass, ConvertedExpression expression,
+			SearchProjection projection, SearchReturnDataType returnDataType, int start, int count) throws SearchException {
+		Instant startTime = OperationDurationUtil.instance().now();
+
+		TableMapping tableMapping = connectionProvider.getTableMappingByKey(key, objectClass);
+
+		PagedResult<EntryData> result = searchAggregatedImpl(tableMapping, key, expression, projection, returnDataType, start, count);
+
+		Duration duration = OperationDurationUtil.instance().duration(startTime);
+		OperationDurationUtil.instance().logDebug("SQL operation: search_aggregated, duration: {}, table: {}, key: {}, expression: {}, projection: {}, returnDataType: {}, start: {}, count: {}",
+				duration, tableMapping.getTableName(), key, expression, projection, returnDataType, start, count);
+
+		return result;
+	}
+
+	private PagedResult<EntryData> searchAggregatedImpl(TableMapping tableMapping, String key, ConvertedExpression expression,
+			SearchProjection projection, SearchReturnDataType returnDataType, int start, int count) throws SearchException {
+		RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
+		SqlAggregationQueryBuilder.Result queryParts = aggregationQueryBuilder.build(tableMapping, projection);
+		Predicate whereExp = (expression == null) ? null : (Predicate) expression.expression();
+
+		PagedResult<EntryData> result = new PagedResult<EntryData>();
+		result.setStart(start);
+		result.setEntries(new LinkedList<EntryData>());
+
+		String queryStr = null;
+
+		// Count of groups first: SQLQuery is mutable, so the count subquery must never
+		// be derived from the row query after limit/offset are applied
+		if ((SearchReturnDataType.COUNT == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
+			SQLQuery<?> innerQuery = sqlQueryFactory.select(queryParts.selectExpression()).from(tableRelationalPath);
+			if (whereExp != null) {
+				innerQuery = innerQuery.where(whereExp);
+			}
+			if (projection.isDistinct()) {
+				innerQuery = innerQuery.distinct();
+			} else {
+				innerQuery = innerQuery.groupBy(queryParts.getGroupBy());
+			}
+
+			// Flat COUNT(*) over a grouped query returns per-group counts; wrap in a derived table instead
+			SQLQuery<?> countQuery = sqlQueryFactory.select(Expressions.as(ExpressionUtils.count(Wildcard.all), "TOTAL"))
+					.from(innerQuery, docInnerAlias);
+
+			try {
+				queryStr = countQuery.getSQL().getSQL();
+				LOG.debug("Calculating groups count. Execution query: '" + queryStr + "'");
+
+				try (ResultSet countResult = countQuery.getResults()) {
+					if (!countResult.next()) {
+						throw new SearchException("Failed to calculate count of groups. Query: '" + queryStr + "'");
+					}
+
+					result.setTotalEntriesCount(countResult.getInt("TOTAL"));
+				}
+			} catch (QueryException ex) {
+				throw new SearchException(String.format("Failed to build count groups query. Key: '%s', projection: '%s'", key, projection), ex);
+			} catch (SQLException ex) {
+				throw new SearchException("Failed to calculate count of groups. Query: '" + queryStr + "'", ex);
+			}
+		}
+
+		if ((SearchReturnDataType.SEARCH == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
+			SQLQuery<?> query = sqlQueryFactory.select(queryParts.selectExpression()).from(tableRelationalPath);
+			if (whereExp != null) {
+				query = query.where(whereExp);
+			}
+			if (projection.isDistinct()) {
+				query = query.distinct();
+			} else {
+				query = query.groupBy(queryParts.getGroupBy());
+			}
+			query = query.orderBy(queryParts.getOrderBy());
+			if (count > 0) {
+				query = query.limit(count);
+			}
+			if (start > 0) {
+				query = query.offset(start);
+			}
+
+			try {
+				queryStr = query.getSQL().getSQL();
+				LOG.debug("Executing aggregated query: '" + queryStr + "'");
+
+				try (ResultSet resultSet = query.getResults()) {
+					List<EntryData> entries = getEntryDataList(tableMapping, resultSet);
+					result.setEntries(entries);
+					result.setEntriesCount(entries.size());
+				}
+			} catch (QueryException ex) {
+				throw new SearchException(String.format("Failed to build aggregated query. Key: '%s', projection: '%s'", key, projection), ex);
+			} catch (SQLException | EntryConvertationException ex) {
+				throw new SearchException("Failed to search groups. Query: '" + queryStr + "'", ex);
+			}
+		}
+
+		return result;
+	}
 
 	public String[] createStoragePassword(String[] passwords, AttributeData attributeData) {
         if (ArrayHelper.isEmpty(passwords)) {
@@ -658,12 +755,31 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 						}
 
 						attributeValueObjects = new Object[] { value };
+					} else if (attributeObject instanceof byte[]) {
+						// Binary column. Pass raw binary value without base64 conversion
+						attributeValueObjects = new Object[] { attributeObject };
+					} else if (attributeObject instanceof java.sql.Blob) {
+						java.sql.Blob blobValue = (java.sql.Blob) attributeObject;
+						attributeValueObjects = new Object[] { blobValue.getBytes(1, (int) blobValue.length()) };
 					} else if (attributeObject instanceof Timestamp) {
 						attributeValueObjects = new Object[] {
 								new java.util.Date(((Timestamp) attributeObject).getTime()) };
 					} else if (attributeObject instanceof LocalDateTime) {
 						attributeValueObjects = new Object[] {
 								new java.util.Date(Timestamp.valueOf((LocalDateTime) attributeObject).getTime()) };
+					} else if (attributeObject instanceof BigInteger) {
+						// SUM/COUNT results on PostgreSQL
+						attributeValueObjects = new Object[] { ((BigInteger) attributeObject).longValue() };
+					} else if (attributeObject instanceof BigDecimal) {
+						// SUM/AVG results on MySQL/MariaDB and AVG on PostgreSQL
+						BigDecimal attributeDecimal = (BigDecimal) attributeObject;
+						Object numberValue;
+						try {
+							numberValue = attributeDecimal.longValueExact();
+						} catch (ArithmeticException ex) {
+							numberValue = attributeDecimal.doubleValue();
+						}
+						attributeValueObjects = new Object[] { numberValue };
 					} else {
 						Object value = attributeObject.toString();
 						attributeValueObjects = new Object[] { value };
@@ -787,6 +903,23 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		expresisons.add(Expressions.path(Object.class, docAlias, DOC_ID));
 
 		return Expressions.list(expresisons.toArray(new Expression<?>[0]));
+	}
+
+	private SQLQuery<?> buildBaseSearchQuery(RelationalPathBase<Object> tableRelationalPath, Expression<?> attributesExp,
+			ConvertedExpression expression, OrderSpecifier<?>[] orderBy) {
+		SQLQuery<?> sqlSelectQuery;
+		if (expression == null) {
+			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath);
+		} else {
+			Predicate whereExp = (Predicate) expression.expression();
+			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath).where(whereExp);
+		}
+
+		if (orderBy != null) {
+			sqlSelectQuery = sqlSelectQuery.orderBy(orderBy);
+		}
+
+		return sqlSelectQuery;
 	}
 
 	private RelationalPathBase<Object> buildTableRelationalPath(TableMapping tableMapping) {
@@ -1051,6 +1184,38 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			LOG.error("Failed to convert json value '{}' to array:", jsonValue, ex);
 			throw new MappingException(String.format("Failed to convert json value '%s' to array", jsonValue));
 		}
+	}
+
+	/*
+	 * Prepare single valued attribute value before binding it to DB column
+	 */
+	private Object convertValueToDbColumn(TableMapping tableMapping, AttributeType attributeType, Object value) {
+		if (value instanceof byte[]) {
+			if (isBinaryColumn(tableMapping.getTableName(), attributeType.getType())) {
+				// Store raw binary value without base64 conversion
+				return value;
+			}
+
+			// Fallback to base64 encoded string if DB column is not binary
+			return Base64.encodeBase64String((byte[]) value);
+		}
+
+		return value;
+	}
+
+	@Override
+	public boolean isBinaryColumn(String tableName, String columnTypeName) {
+		if (columnTypeName == null) {
+			return false;
+		}
+
+		return SqlOperationService.BINARY_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.VARBINARY_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.TINYBLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.BLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.MEDIUMBLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.LONGBLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.BYTEA_TYPE_NAME.equals(columnTypeName);
 	}
 
 	public boolean isJsonColumn(String tableName, String columnTypeName) {

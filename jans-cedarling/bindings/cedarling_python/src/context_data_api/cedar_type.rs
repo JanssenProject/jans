@@ -4,6 +4,9 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
+
+// pyo3 `from_py_object` expansion clones Copy types
+#![allow(clippy::clone_on_copy)]
 use pyo3::prelude::*;
 
 /// CedarType
@@ -24,7 +27,7 @@ use pyo3::prelude::*;
 /// - DateTime: DateTime extension type
 /// - Duration: Duration extension type
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[pyo3(name = "CedarType")]
 pub enum CedarType {
     /// String type

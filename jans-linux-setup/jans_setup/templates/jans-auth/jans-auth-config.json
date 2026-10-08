@@ -23,7 +23,9 @@
       "status_list",
       "logout_status_jwt",
       "rate_limit",
-      "access_evaluation"
+      "access_evaluation",
+      "client_id_metadata_document",
+      "identity_assertion_authz_grant"
     ],
     "issuer":"https://%(hostname)s",
     "baseEndpoint":"https://%(hostname)s/jans-auth/restv1",
@@ -80,8 +82,6 @@
     ],
     "grantTypesSupported":[
         "authorization_code",
-        "implicit",
-        "password",
         "client_credentials",
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",

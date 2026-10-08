@@ -9,6 +9,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.audit.ApplicationAuditLogger;
@@ -17,6 +18,7 @@ import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.ExternalIdentityAssertionService;
 import io.jans.as.server.service.external.ExternalTokenExchangeService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
@@ -41,8 +43,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.jans.as.model.config.Constants.OPENID;
-import static io.jans.as.model.config.Constants.TOKEN_TYPE_ACCESS_TOKEN;
+import static io.jans.as.model.config.Constants.*;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -85,10 +86,16 @@ public class TokenExchangeService {
     private ExternalTokenExchangeService externalTokenExchangeService;
 
     @Inject
+    private ExternalIdentityAssertionService externalIdentityAssertionService;
+
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
+    @Inject
+    private IdJagService idJagService;
 
     public void rotateDeviceSecretOnRefreshToken(HttpServletRequest httpRequest, AuthorizationGrant refreshGrant, String scope) {
         if (StringUtils.isBlank(scope) || !scope.contains(ScopeConstants.DEVICE_SSO)) {
@@ -135,6 +142,12 @@ public class TokenExchangeService {
         final HttpServletRequest httpRequest = executionContext.getHttpRequest();
         final Client client = executionContext.getClient();
         final OAuth2AuditLog auditLog = executionContext.getAuditLog();
+
+        // Route ID-JAG token exchange before the device-SSO path
+        final String requestedTokenType = httpRequest.getParameter("requested_token_type");
+        if (TOKEN_TYPE_ID_JAG.equalsIgnoreCase(requestedTokenType)) {
+            return processIdJagTokenExchange(scope, executionContext);
+        }
 
         final ScriptTokenExchangeControl scriptControl = externalTokenExchangeService.externalValidate(executionContext);
 
@@ -229,6 +242,48 @@ public class TokenExchangeService {
             log.error(msg);
             throw new WebApplicationException(response(error(500, TokenErrorResponseType.INVALID_GRANT, msg), context.getAuditLog()));
         }
+    }
+
+    /**
+     * Handles token exchange requests where requested_token_type is id-jag.
+     * Validates subject_token and issues a signed ID-JAG JWT.
+     */
+    private JSONObject processIdJagTokenExchange(String scope, ExecutionContext executionContext) {
+        final HttpServletRequest httpRequest = executionContext.getHttpRequest();
+        final OAuth2AuditLog auditLog = executionContext.getAuditLog();
+
+        final String subjectToken = httpRequest.getParameter("subject_token");
+        final String subjectTokenType = httpRequest.getParameter("subject_token_type");
+        final String audience = httpRequest.getParameter("audience");
+        final String resource = httpRequest.getParameter("resource");
+        final String authzDetailsParam = httpRequest.getParameter("authorization_details");
+
+        tokenRestWebServiceValidator.validateIdJagSubjectTokenType(subjectTokenType, auditLog);
+
+        // §4.3.3: If authorization_details is present, it MUST be parsed as a JSON array
+        if (StringUtils.isNotBlank(authzDetailsParam)) {
+            try {
+                new org.json.JSONArray(authzDetailsParam);
+            } catch (JSONException e) {
+                final String msg = "'authorization_details' must be a JSON array.";
+                log.debug(msg, e);
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
+            }
+        }
+
+        final Jwt subjectJwt = idJagService.validateSubjectToken(subjectToken, subjectTokenType, executionContext);
+
+        // §4.3.3: MUST include granted resource and authorization_details in the issued ID-JAG
+        final String idJagJwt = idJagService.issueIdJag(executionContext, subjectJwt, audience, scope, resource, authzDetailsParam);
+        JSONObject response = idJagService.buildTokenExchangeResponse(idJagJwt);
+        final JSONObject responseClone = new JSONObject(response.toString());
+        if (externalIdentityAssertionService.externalModifyResponse(response, executionContext)) {
+            log.debug("Successfully ran identity-assertion script modifyResponse.");
+        } else {
+            response = responseClone;
+            log.trace("Reverted ID-JAG response: identity-assertion script modifyResponse returned false.");
+        }
+        return response;
     }
 
     public String createNewDeviceSecret(String sessionDn, Client client, String scope) {

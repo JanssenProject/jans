@@ -6,10 +6,10 @@
 // run this example using `cargo run --example lock_integration`
 
 use cedarling::log_config::StdOutLoggerMode;
-use cedarling::{HttpClientConfig,
+use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
-    EntityData, JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    EntityData, HttpClientConfig, JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
 };
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
@@ -48,6 +48,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+            ..Default::default()
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -59,6 +60,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
+            strict_schema_validation: true,
+            ..Default::default()
         },
         lock_config: Some(lock_config),
         max_default_entities: None,

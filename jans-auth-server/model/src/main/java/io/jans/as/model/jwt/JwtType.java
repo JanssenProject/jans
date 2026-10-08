@@ -15,7 +15,8 @@ public enum JwtType {
     JWT("JWT"),
     TX_TOKEN("txntoken+jwt"),
     DPOP_PLUS_JWT("dpop+jwt"),
-    STATUS_LIST_JWT("statuslist+jwt");
+    STATUS_LIST_JWT("statuslist+jwt"),
+    OAUTH_ID_JAG("oauth-id-jag+jwt");
 
     private final String paramName;
 

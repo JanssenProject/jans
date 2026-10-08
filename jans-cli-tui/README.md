@@ -11,7 +11,7 @@ Table of Contents
 
 # _Installation_
 
-When you install Jannsen **jans-cli-tui** is available on system, and can be executed with command
+When you install Janssen **jans-cli-tui** is available on system, and can be executed with command
 
 ```
 /opt/jans/jans-cli/config-cli-tui.py

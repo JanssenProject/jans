@@ -1,7 +1,7 @@
 # Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 # Contact @moabu
 # Sonar cloud https://sonarcloud.io/organizations/janssenproject/projects
-name: Code quality check
+name: "Scan: Sonar"
 
 on:
   push:
@@ -181,7 +181,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           MODULE: ${{ matrix.module }}
+          CHANGED_MODULES: ${{ join(fromJSON(needs.detect-changes.outputs.matrix).module, ' ') }}
         run: |
+          for dep in jans-orm jans-core; do
+            [ "$dep" = "$MODULE" ] && break
+            if echo "$CHANGED_MODULES" | tr ' ' '\n' | grep -qx "$dep"; then
+              echo "Installing changed upstream module $dep"
+              mvn -B -q -DskipTests=true -f "$dep/pom.xml" install
+            fi
+          done
           cd "$MODULE"
           case "$MODULE" in
             "jans-auth-server"|"jans-lock"|"jans-scim"|"jans-config-api")

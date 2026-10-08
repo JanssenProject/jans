@@ -22,11 +22,11 @@ This guide covers the prerequisites and cluster creation specific to Google Kube
 
 4. Install kubectl:
 
-   ```bash
-   gcloud components install kubectl
-   ```
+    ```bash
+    gcloud components install kubectl
+    ```
 
-5. Install [Helm3](https://helm.sh/docs/intro/install/).
+5. Install [Helm](https://helm.sh/docs/intro/install/).
 
 ## Create the GKE Cluster
 

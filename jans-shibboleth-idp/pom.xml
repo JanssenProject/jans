@@ -69,11 +69,6 @@
             <name>Shibboleth Maven Repository</name>
             <url>https://build.shibboleth.net/maven/releases/</url>
         </repository>
-        <repository>
-            <id>jans</id>
-            <name>Janssen Maven Repository</name>
-            <url>https://jenkins.jans.io/maven/</url>
-        </repository>
     </repositories>
 
     <dependencyManagement>

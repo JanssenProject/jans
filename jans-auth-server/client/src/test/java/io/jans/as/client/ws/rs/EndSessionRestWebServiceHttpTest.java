@@ -123,7 +123,8 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         // silly validation of html content returned by server but at least it verifies that logout_uri and post_logout_uri are present
         assertTrue(endSessionResponse1.getHtmlPage().contains("<html>"), "The HTML page is null");
         assertTrue(endSessionResponse1.getHtmlPage().contains(logoutUri), "logout_uri is not present on html page");
-        assertTrue(endSessionResponse1.getHtmlPage().contains(postLogoutRedirectUri), "postLogoutRedirectUri is not present on html page");
+        // the page embeds the URL in a JS string via escapeEcmaScript, which escapes '/' as '\/'
+        assertTrue(endSessionResponse1.getHtmlPage().replace("\\/", "/").contains(postLogoutRedirectUri), "postLogoutRedirectUri is not present on html page");
         // assertEquals(endSessionResponse.getState(), endSessionId); // commented out, for http-based logout we get html page
 
         // 4. End session with an already ended session
@@ -213,7 +214,8 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         // silly validation of html content returned by server but at least it verifies that logout_uri and post_logout_uri are present
         assertTrue(endSessionResponse1.getHtmlPage().contains("<html>"), "The HTML page is null");
         assertTrue(endSessionResponse1.getHtmlPage().contains(logoutUri), "logout_uri is not present on html page");
-        assertTrue(endSessionResponse1.getHtmlPage().contains(postLogoutRedirectUri), "postLogoutRedirectUri is not present on html page");
+        // the page embeds the URL in a JS string via escapeEcmaScript, which escapes '/' as '\/'
+        assertTrue(endSessionResponse1.getHtmlPage().replace("\\/", "/").contains(postLogoutRedirectUri), "postLogoutRedirectUri is not present on html page");
         // assertEquals(endSessionResponse.getState(), endSessionId); // commented out, for http-based logout we get html page
 
         // 4. End session with an already ended session

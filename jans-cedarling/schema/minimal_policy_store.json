@@ -26,8 +26,7 @@
             "openid_configuration_endpoint": "https://idp.example.com/.well-known/openid-configuration",
             "token_metadata": {
                 "access_token": {
-                    "entity_type_name": "Jans::Access_token",
-                    "principal_mapping": ["Jans::Workload"]
+                    "entity_type_name": "Jans::Access_token"
                 }
             }
         }

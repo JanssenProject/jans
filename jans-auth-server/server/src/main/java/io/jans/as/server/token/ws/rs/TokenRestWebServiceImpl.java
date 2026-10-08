@@ -12,6 +12,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authzdetails.AuthzDetails;
+import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
@@ -363,8 +364,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         // The authorization server MAY issue a new refresh token, in which case
         // the client MUST discard the old refresh token and replace it with the new refresh token.
+        // OAuth 2.1: refresh tokens issued to public clients are not sender-constrained here, so they
+        // MUST be rotated on every use regardless of the 'skipRefreshTokenDuringRefreshing' AS setting.
+        final boolean isPublicClient = client.hasAuthenticationMethod(AuthenticationMethod.NONE);
         RefreshToken reToken = null;
-        if (isFalse(appConfiguration.getSkipRefreshTokenDuringRefreshing())) {
+        if (isPublicClient || isFalse(appConfiguration.getSkipRefreshTokenDuringRefreshing())) {
             if (isTrue(appConfiguration.getRefreshTokenExtendLifetimeOnRotation())) {
                 reToken = tokenCreatorService.createRefreshToken(executionContext, scope); // extend lifetime
             } else {
@@ -399,6 +403,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         TokenEntity lockedRefreshToken = lockAndRemoveRefreshToken(refreshToken);
         if (lockedRefreshToken == null) {
             log.trace("Failed to lock refresh token {}", refreshToken);
+            removeOrphanedRefreshToken(reToken);
             return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Failed to lock refresh token."), auditLog);
         }
 
@@ -415,6 +420,20 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 scope,
                 idToken, checkedAuthzDetails);
         return response(Response.ok().entity(entity), auditLog);
+    }
+
+    private void removeOrphanedRefreshToken(RefreshToken replacement) {
+        if (replacement == null) {
+            return;
+        }
+        try {
+            final TokenEntity entity = grantService.getGrantByCode(replacement.getCode());
+            if (entity != null) {
+                grantService.remove(entity);
+            }
+        } catch (Exception e) {
+            log.error("Failed to remove orphaned replacement refresh token.", e);
+        }
     }
 
     private TokenEntity lockAndRemoveRefreshToken(String refreshTokenCode) {
@@ -541,6 +560,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 log.trace("Failed to authenticate user ", new RuntimeException("User name or password is invalid"));
             }
         }
+
+        authenticationService.incUserAuthenticationMetricIfNotReported(user != null);
+
         return user;
     }
 
@@ -760,6 +782,15 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             cibaRequestService.update(cibaRequest);
 
             if (cibaRequest.getStatus() == CibaRequestStatus.PENDING) {
+                if (cibaRequest.isRequestExpired()) {
+                    // Don't rely solely on CibaRequestsProcessorJob: report expiration directly.
+                    // The entry is kept as EXPIRED so the processor job still sends ping/push callbacks and cleans up.
+                    log.debug("The authentication request has expired for authReqId: '{}'", authReqId);
+                    cibaRequest.setStatus(CibaRequestStatus.EXPIRED);
+                    cibaRequestService.update(cibaRequest);
+                    return response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), executionContext.getAuditLog());
+                }
+
                 int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
                 long timeFromLastAccess = currentTime - lastAccess;
 

@@ -19,9 +19,14 @@ func TestLoggingConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if cfg.LoggingLevel != "INFO" {
-		t.Error("expected INFO level")
-	}
+	// initial level is env-dependent (CI runs TRACE); assert the round-trip instead
+	original := cfg.LoggingLevel
+
+	// restore via cleanup so the level is reset even if the update/asserts fail
+	t.Cleanup(func() {
+		cfg.LoggingLevel = original
+		_, _ = client.UpdateLoggingConfiguration(ctx, cfg)
+	})
 
 	cfg.LoggingLevel = "DEBUG"
 
@@ -32,10 +37,5 @@ func TestLoggingConfig(t *testing.T) {
 
 	if updatedConfig.LoggingLevel != "DEBUG" {
 		t.Error("expected DEBUG logging level")
-	}
-
-	updatedConfig.LoggingLevel = "INFO"
-	if _, err := client.UpdateLoggingConfiguration(ctx, updatedConfig); err != nil {
-		t.Errorf("unexpected error: %v", err)
 	}
 }

@@ -18,6 +18,7 @@ import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
+import io.jans.as.server.service.ClientIdMetadataService;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
@@ -69,6 +70,9 @@ public class ParValidator {
 
     @Inject
     private ClientService clientService;
+
+    @Inject
+    private ClientIdMetadataService clientIdMetadataService;
 
     public void validateRequestUriIsAbsent(@Nullable String requestUri) {
         validateRequestUriIsAbsent(requestUri, AuthorizeErrorResponseType.INVALID_REQUEST);
@@ -188,7 +192,7 @@ public class ParValidator {
 
         Client client = sessionClient != null ? sessionClient.getClient() : null;
         if (client == null) {
-            client = clientService.getClient(clientId);
+            client = clientIdMetadataService.resolveClient(clientId);
         }
 
         if (isTrue(appConfiguration.getParForbidPublicClient()) && (client == null || clientService.isPublic(client))) {

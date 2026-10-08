@@ -126,7 +126,7 @@ class Plugin(DialogUtils):
                 version_msgs.append(HTML("\n"))
 
             self.app.show_message(
-                _("Jannsen Application Versions"),
+                _("Janssen Application Versions"),
                 merge_formatted_text(version_msgs),
                 tobefocused=self.app.center_container
                 )

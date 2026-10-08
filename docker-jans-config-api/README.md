@@ -53,14 +53,13 @@ The following environment variables are supported by the container:
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
 - `CN_CONFIG_API_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
 - `CN_CONFIG_API_LOG_LEVEL`: Log level for config api. Options include `OFF`, `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`.  and `ALL`. This defaults to `INFO`
-- `CN_AUTH_SERVER_URL`: Base URL of Janssen Auth server, i.e. `auth-server:8080` (default to empty string).
+- `CN_AUTH_BASE_URL`: Base URL of Janssen Auth server, i.e. `http://auth-server:8080` (default to empty string). `CN_AUTH_SERVER_URL` remains supported as a deprecated fallback.
 - `GOOGLE_APPLICATION_CREDENTIALS`: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
-- `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
 - `CN_CONFIG_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
-- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, `user-mgt`, `lock`, `jans-link`, `shibboleth`). Note that unknown plugin name will be ignored.
+- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, `user-mgt`, `lock`, `jans-link`, `metric`, `shibboleth`). Note that unknown plugin name will be ignored.
 - `CN_TOKEN_SERVER_BASE_URL`: Base URL of token server (default to empty).
 - `CN_TOKEN_SERVER_CERT_FILE`: Path to token server certificate (default to `/etc/certs/token_server.crt`).
 - `CN_ADMIN_UI_PLUGIN_LOGGERS`: Custom logging configuration for AdminUI plugin in JSON-string format with hash type (see [Configure plugin loggers](#configure-plugin-loggers) section for details).

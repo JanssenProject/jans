@@ -502,32 +502,6 @@ class SetupUtils(Crypto64):
 
         return rendered_text
 
-    def add_yacron_job(self, command, schedule, name=None, args={}):
-        from ruamel.yaml import YAML
-
-        if not name:
-            name = command
-
-        yacron_yaml_fn = os.path.join(base.snap_common, 'etc/cron-jobs.yaml')
-
-        yacron_yaml = base.read_yaml_file(self.jans_scim_openapi_fn)
-
-        if not yacron_yaml:
-            yacron_yaml = {'jobs': []}
-
-        if 'jobs' not in yacron_yaml:
-            yacron_yaml['jobs'] = []
-
-        job = { 'command': command, 'schedule': schedule, 'name': name }
-        job.update(args)
-
-        yacron_yaml['jobs'].append(job)
-
-        yaml_obj = YAML()
-
-        with open(yacron_yaml_fn, 'w') as w:
-            yaml_obj.dump(yacron_yaml, w)
-
 
     def chown(self, fn, user, group=None, recursive=False):
         cmd = [paths.cmd_chown]

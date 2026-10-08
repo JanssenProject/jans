@@ -164,12 +164,16 @@ instance = Cedarling(bootstrap_config)
 # From a URL (.cjar or Lock Server)
 # In your bootstrap-config.yaml:
 # CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar"
+# # Optional: re-fetch the policy store every 60s and atomically swap on change.
+# # Default is 0 (load-once-at-startup). See "Refreshing the policy store" in
+# # docs/cedarling/reference/cedarling-properties.md for details.
+# CEDARLING_POLICY_STORE_REFRESH_INTERVAL: 60
 bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
 instance = Cedarling(bootstrap_config)
 
 # Using environment variables instead of a file
 import os
-os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.json"
+os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.cjar"
 bootstrap_config = BootstrapConfig.from_env()
 instance = Cedarling(bootstrap_config)
 ```
@@ -291,6 +295,24 @@ print(f"Entries: {stats.entry_count}/{stats.max_entries}")
 print(f"Total size: {stats.total_size_bytes} bytes")
 print(f"Capacity usage: {stats.capacity_usage_percent}%")
 ```
+
+### Drain Metrics
+
+Destructive read: returns a `MetricsSnapshot` (`policy_stats`,
+`error_counters`, `operational_stats`, `interval`) and resets the
+counters.
+
+```python
+snapshot = instance.drain_metrics()
+print(f"Requests: {snapshot.operational_stats.get('authz.requests_total')}")
+print(f"Interval: {snapshot.interval}")
+```
+
+Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails when the Lock
+telemetry ticker owns the collector i.e. whenever
+`CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has no
+telemetry endpoint. `interval` is a `datetime.timedelta` with sub-second
+precision.
 
 ### Error Handling
 

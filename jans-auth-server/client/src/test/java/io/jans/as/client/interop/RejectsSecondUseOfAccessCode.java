@@ -82,7 +82,7 @@ public class RejectsSecondUseOfAccessCode extends BaseTest {
         {
             TokenClient tokenClient = new TokenClient(tokenEndpoint);
             TokenResponse tokenResponse = tokenClient.execAuthorizationCode(authorizationCode, redirectUri,
-                    clientId, clientSecret);
+                    clientId, clientSecret, codeVerifier(authorizationCode));
 
             showClient(tokenClient);
             AssertBuilder.tokenResponse(tokenResponse)
@@ -108,7 +108,7 @@ public class RejectsSecondUseOfAccessCode extends BaseTest {
         // 5. Request access token using the same authorization code one more time. This call must fail.
         {
             TokenClient tokenClient = new TokenClient(tokenEndpoint);
-            TokenResponse tokenResponse = tokenClient.execAuthorizationCode(authorizationCode, redirectUri, clientId, clientSecret);
+            TokenResponse tokenResponse = tokenClient.execAuthorizationCode(authorizationCode, redirectUri, clientId, clientSecret, codeVerifier(authorizationCode));
 
             showClient(tokenClient);
             assertEquals(tokenResponse.getStatus(), 400, "Unexpected response code: " + tokenResponse.getStatus());

@@ -103,6 +103,7 @@ async fn prepare_cedarling_with_jwt_validation(
             source: cedarling::PolicyStoreSource::Yaml(
                 serde_yaml_ng::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
+            ..Default::default()
         },
         jwt_config: JwtConfig {
             jwks: None,

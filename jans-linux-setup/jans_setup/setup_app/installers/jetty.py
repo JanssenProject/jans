@@ -1,5 +1,4 @@
 import os
-import glob
 import re
 import shutil
 import zipfile
@@ -37,8 +36,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.install_var = 'install_jetty'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
-        if not base.snap:
-            self.register_progess()
+        self.register_progess()
         self.jetty_user_home = '/home/jetty'
         self.jetty_user_home_lib = os.path.join(self.jetty_user_home, 'lib')
 
@@ -75,16 +73,16 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.logIt(f"Extracting {jetty_archive} into {jetty_dist}")
         shutil.unpack_archive(jetty_archive, format='gztar', extract_dir=jetty_dist)
 
-        jettyDestinationPath = max(glob.glob(os.path.join(jetty_dist, '{}-*'.format(self.jetty_dist_string))))
+        jetty_destination_path = os.path.join(jetty_dist, '{}-{}'.format(self.jetty_dist_string, self.jetty_exact_version_string))
 
-        self.run([paths.cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
-        self.run([paths.cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
+        self.run([paths.cmd_ln, '-sf', jetty_destination_path, self.jetty_home])
+        self.run([paths.cmd_chmod, '-R', "755", "%s/bin/" % jetty_destination_path])
 
         self.applyChangesInFiles(self.app_custom_changes[NAME_STR])
 
         self.replace_favicon()
 
-        self.chown(jettyDestinationPath, Config.jetty_user, Config.jetty_group, recursive=True)
+        self.chown(jetty_destination_path, Config.jetty_user, Config.jetty_group, recursive=True)
         self.run([paths.cmd_chown, '-h', '{}:{}'.format(Config.jetty_user, Config.jetty_group), self.jetty_home])
 
         self.run([paths.cmd_mkdir, '-p', self.jetty_base])
@@ -118,14 +116,11 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
 
     def get_jetty_info(self):
-        # first try latest versions
         self.jetty_dist_string = 'jetty-home'
-        jetty_archive_list = glob.glob(os.path.join(Config.dist_app_dir, '{}-*.tar.gz'.format(self.jetty_dist_string)))
+        jetty_archive = os.path.join(Config.dist_app_dir, '{}-{}.tar.gz'.format(self.jetty_dist_string, base.current_app.app_info['JETTY_VERSION']))
 
-        if not jetty_archive_list:
-            self.logIt("Jetty archive not found in {}. Exiting...".format(Config.dist_app_dir), True, True)
-
-        jetty_archive = max(jetty_archive_list)
+        if not os.path.exists(jetty_archive):
+            self.logIt("Jetty archive {} not found. Exiting...".format(jetty_archive), True, True)
 
         jetty_archive_fn = os.path.basename(jetty_archive)
         jetty_regex = re.search(rf'{self.jetty_dist_string}-(\d*\.\d*)', jetty_archive_fn)
@@ -165,9 +160,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             if 'ee9-cdi-decorate' not in jetty_modules_list:
                 jetty_modules_list.append('ee9-cdi-decorate')
             jetty_modules = ','.join(jetty_modules_list)
-
-        if base.snap:
-            Config.templateRenderingDict['jetty_dist'] = self.jetty_base
 
         self.logIt("Preparing %s service base folders" % service_name)
         self.run([paths.cmd_mkdir, '-p', jetty_service_base])
@@ -237,15 +229,15 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         except:
             self.logIt("Error rendering service '%s' context xml" % service_name, True)
 
-        if not base.snap:
-            tmpfiles_base = '/usr/lib/tmpfiles.d'
-            if Config.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
-                self.logIt("Creating 'jetty.conf' tmpfiles daemon file")
-                jetty_tmpfiles_src = '%s/jetty.conf.tmpfiles.d' % Config.templateFolder
-                jetty_tmpfiles_dst = '%s/jetty.conf' % tmpfiles_base
-                self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
-                self.chown(jetty_tmpfiles_dst, Config.root_user, Config.root_group)
-                self.run([paths.cmd_chmod, '644', jetty_tmpfiles_dst])
+
+        tmpfiles_base = '/usr/lib/tmpfiles.d'
+        if Config.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
+            self.logIt("Creating 'jetty.conf' tmpfiles daemon file")
+            jetty_tmpfiles_src = '%s/jetty.conf.tmpfiles.d' % Config.templateFolder
+            jetty_tmpfiles_dst = '%s/jetty.conf' % tmpfiles_base
+            self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
+            self.chown(jetty_tmpfiles_dst, Config.root_user, Config.root_group)
+            self.run([paths.cmd_chmod, '644', jetty_tmpfiles_dst])
 
             self.copyFile(self.jetty_bin_sh_fn, os.path.join(Config.jansOptFolder, 'scripts', service_name), backup=False)
 
@@ -254,12 +246,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         # don't send header to server
         inifile = 'http.ini' if self.jetty_dist_string == 'jetty-home' else 'start.ini'
         self.set_jetty_param(service_name, 'jetty.httpConfig.sendServerVersion', 'false', inifile=inifile)
-
-        if base.snap:
-            run_dir = os.path.join(jetty_service_base, 'run')
-            if not os.path.exists(run_dir):
-                self.run([paths.cmd_mkdir, '-p', run_dir])
-
 
         self.update_jetty_env(self.source_files[0][0])
         jetty_service_webapps = os.path.join(self.jetty_base, self.service_name, 'webapps')

@@ -2,11 +2,13 @@ package io.jans.casa.authn;
 
 import io.jans.fido2.client.AssertionService;
 import io.jans.fido2.client.Fido2ClientFactory;
+import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.NetworkUtils;
 
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.assertion.AssertionResult;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -46,8 +48,10 @@ public class FidoValidator {
     public String assertionRequest(String uid) throws IOException {
 
         logger.debug("Building an assertion request for {}", uid);
+        HttpServletRequest httpRequest = CdiUtil.bean(HttpServletRequest.class);
         //Using assertionService as a private class field gives serialization trouble...
-        AssertionService assertionService = Fido2ClientFactory.instance().createAssertionService(metadataConfiguration);
+        AssertionService assertionService = Fido2ClientFactory.instance().createAssertionService(
+                metadataConfiguration, httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"));
         AssertionOptions options = new AssertionOptions();
         options.setUsername(uid);
         
@@ -70,8 +74,10 @@ public class FidoValidator {
     public void verify(String tokenResponse) throws IOException {
 
         logger.debug("Verifying fido token response : "+tokenResponse);
-        AssertionService assertionService = Fido2ClientFactory.instance().createAssertionService(metadataConfiguration);
-		
+        HttpServletRequest httpRequest = CdiUtil.bean(HttpServletRequest.class);
+        AssertionService assertionService = Fido2ClientFactory.instance().createAssertionService(
+                metadataConfiguration, httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"));
+
         AssertionResult assertionResult = mapper.readValue(tokenResponse, AssertionResult.class);
         try (Response response = assertionService.verify(assertionResult)) {
             int status = response.getStatus();
@@ -84,6 +90,6 @@ public class FidoValidator {
             }
         }
 
-    }    
-    
+    }
+
 }

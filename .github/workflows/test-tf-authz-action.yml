@@ -7,13 +7,19 @@
 # service containers launch before `actions/checkout`, making it impossible to
 # bind-mount the repo's config/rego/policy-store files into the container.
 
-name: Test tf-authz composite action
+name: "Test: tf-authz Action"
 
 permissions:
   contents: read
 
 on:
   push:
+    # Branch pushes only. A release tag push bumps the demo compose to
+    # cedarling-opa:<version> before that image is published; the workflow_run
+    # trigger below runs the tests once the image exists. Excluding tags here
+    # (a branch filter never matches a tag ref) stops the premature tag-push run.
+    branches:
+      - '**'
     paths:
       - 'jans-cedarling/cedarling_opa/demo/terraform/.github/actions/tf-authz/**'
       - 'jans-cedarling/cedarling_opa/demo/terraform/tf_authz.sh'
@@ -25,6 +31,7 @@ on:
       - 'jans-cedarling/cedarling_opa/demo/terraform/run-authz-tests.sh'
       - 'jans-cedarling/cedarling_opa/demo/terraform/PERMISSIONS.md'
       - 'jans-cedarling/cedarling_opa/demo/terraform/check-policy-checklist.sh'
+      - '.github/actions/opa-up/action.yml'
   pull_request:
     paths:
       - 'jans-cedarling/cedarling_opa/demo/terraform/.github/actions/tf-authz/**'
@@ -37,17 +44,39 @@ on:
       - 'jans-cedarling/cedarling_opa/demo/terraform/run-authz-tests.sh'
       - 'jans-cedarling/cedarling_opa/demo/terraform/PERMISSIONS.md'
       - 'jans-cedarling/cedarling_opa/demo/terraform/check-policy-checklist.sh'
+      - '.github/actions/opa-up/action.yml'
+  # A tagged release builds cedarling-opa:<version> via "Build: Docker Images"; run the demo tests only after that image is published, not on the tag push.
+  workflow_run:
+    workflows: ["Build: Docker Images"]
+    types: [completed]
 
 jobs:
   test-authz-action:
     name: Test tf-authz composite action (data-driven)
     runs-on: ubuntu-latest
+    # push/PR events always run. On workflow_run, only proceed for a SUCCESSFUL
+    # release-tag build (head_branch is the vX.Y.Z tag, never main/nightly).
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       startsWith(github.event.workflow_run.head_branch, 'v'))
 
     steps:
+      - name: Resolve checkout ref
+        id: resolve-ref
+        env:
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: echo "ref=${WF_HEAD_BRANCH:-$GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
+          # On workflow_run (release) check out the tag tree that was just built --
+          # its compose pins the published cedarling-opa:<version>. Otherwise the pushed/PR ref.
+          ref: ${{ steps.resolve-ref.outputs.ref }}
           fetch-depth: 2
+          # this job runs repository code; don't leave the GITHUB_TOKEN in .git/config
+          persist-credentials: false
 
       - name: Check PERMISSIONS.md is in sync with Cedar policy IDs
         run: |
@@ -182,23 +211,9 @@ jobs:
           echo "All self-tests passed."
 
       - name: Start opa-cedarling service
-        working-directory: jans-cedarling/cedarling_opa/demo/terraform
-        run: docker compose -f docker-compose.yml up -d
-
-      - name: Wait for opa-cedarling to be healthy
-        working-directory: jans-cedarling/cedarling_opa/demo/terraform
-        run: |
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:8181/health > /dev/null 2>&1; then
-              echo "opa-cedarling is ready."
-              exit 0
-            fi
-            echo "attempt ${i}/30 — not ready, retrying in 2 s..."
-            sleep 2
-          done
-          echo "ERROR: opa-cedarling did not become healthy within 60 s." >&2
-          docker compose -f docker-compose.yml logs opa-cedarling >&2 || true
-          exit 1
+        uses: ./.github/actions/opa-up
+        with:
+          working-directory: jans-cedarling/cedarling_opa/demo/terraform
 
       - name: Run Cedar policy test cases
         working-directory: jans-cedarling/cedarling_opa/demo/terraform
@@ -213,22 +228,22 @@ jobs:
       - name: 'Smoke — ALLOWED: composite action (Ops/plan/staging)'
         uses: ./jans-cedarling/cedarling_opa/demo/terraform/.github/actions/tf-authz
         with:
-          tf_user_id:    ci-ops-bot
+          tf_user_id: ci-ops-bot
           tf_user_roles: Ops
-          tf_workspace:  staging
+          tf_workspace: staging
           tf_subcommand: plan
-          opa_url:       http://localhost:8181
+          opa_url: http://localhost:8181
 
       - name: 'Smoke — DENIED: composite action (Developer/apply/staging)'
         id: smoke-denied
         continue-on-error: true
         uses: ./jans-cedarling/cedarling_opa/demo/terraform/.github/actions/tf-authz
         with:
-          tf_user_id:    ci-dev-bot
+          tf_user_id: ci-dev-bot
           tf_user_roles: Developer
-          tf_workspace:  staging
+          tf_workspace: staging
           tf_subcommand: apply
-          opa_url:       http://localhost:8181
+          opa_url: http://localhost:8181
 
       - name: Assert composite action blocked the unauthorized operation
         run: |
