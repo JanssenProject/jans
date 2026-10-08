@@ -45,7 +45,6 @@ class CasaInstaller(JettyInstaller):
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
         self.ldif_client_fn = os.path.join(self.output_folder, 'client.ldif')
         self.config_json_fn = os.path.join(self.output_folder, 'casa-config.json')
-        self.scopes_fn = os.path.join(self.templates_dir, 'scopes.json')
         self.casa_agama_deployment_id = '202447d5-d44c-3125-b1f7-207cb33b6bf7'
         self.jans_start_date = self.get_ldap_time()
 
@@ -53,7 +52,6 @@ class CasaInstaller(JettyInstaller):
 
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
 
-        self.casa_scopes = self.create_scopes()
         self.add_plugins()
 
         # enable agama custom script
@@ -77,8 +75,8 @@ class CasaInstaller(JettyInstaller):
 
 
     def generate_configuration(self):
-        if not hasattr(self, 'casa_scopes'):
-            self.casa_scopes = self.create_scopes()
+        if not hasattr(self, 'scopes'):
+            self.create_scopes()
 
         self.check_clients([('casa_client_id', self.client_id_prefix)])
 
@@ -104,7 +102,7 @@ class CasaInstaller(JettyInstaller):
         casa_client_ldif_parser = myLdifParser(self.ldif_client_fn)
         casa_client_ldif_parser.parse()
 
-        casa_client_ldif_parser.entries[0][1]['jansScope'] += self.casa_scopes
+        casa_client_ldif_parser.entries[0][1]['jansScope'] += self.scopes
         with open(self.ldif_client_fn, 'wb') as w:
             casa_client_ldif_writer = LDIFWriter(w)
             casa_client_ldif_writer.unparse(casa_client_ldif_parser.entries[0][0], casa_client_ldif_parser.entries[0][1])
