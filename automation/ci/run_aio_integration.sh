@@ -210,6 +210,12 @@ FROM local/$svc:ci
 COPY jans_schema.json custom_schema.json /app/schema/
 EOF
   done
+  # Same for the loader's test-data inputs (test-only tables + test-client LDIFs).
+  docker build -q -t local/persistence-loader:ci -f - jans-linux-setup/jans_setup >/dev/null <<EOF
+FROM local/persistence-loader:ci
+COPY templates/test /app/templates/test
+COPY schema/jans_test_schema.json /app/templates/test/
+EOF
   docker build -t local/aio:ci \
     --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
     --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
@@ -439,9 +445,11 @@ echo "::group::run integration suites"
 # auth-client is the slowest (HtmlUnit browser flows), hence the generous timeout.
 for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
              jans-fido2:jans-fido2/client jans-orm:jans-orm/integration-test \
-             jans-auth-server:jans-auth-server/client; do
+             jans-auth-server:jans-auth-server/client jans-lock:jans-lock/lock-server/client; do
   mod="${entry%%:*}"; dir="${entry#*:}"
   want_module "$mod" || { echo "[info] skipping $dir ($mod not selected)"; continue; }
+  # lock-server is only built (and installed) when the cedarling native lib is ready
+  [ "$mod" = jans-lock ] && [ "$CED_READY" != 1 ] && { echo "[info] skipping $dir (lock-server not built)"; continue; }
   echo "::group::test $dir"
   suitelog="aio-logs/test-$(printf '%s' "$dir" | tr / _).log"
   rc=0; timed_out=0
@@ -489,7 +497,7 @@ want_module jans-core && { timeout -k 30 600 mvn $OPTS -f jans-core/pom.xml test
 want_module jans-auth-server && { timeout -k 30 600 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || note_unit $? jans-auth-server; }
 want_module agama && { timeout -k 30 600 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || note_unit $? agama; }
 [ "$CED_READY" = 1 ] && want_module jans-cedarling && { timeout -k 30 600 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || note_unit $? cedarling-java; }
-[ "$CED_READY" = 1 ] && want_module jans-lock && { timeout -k 30 600 mvn $OPTS $CED_OPTS $NO_FIPS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || note_unit $? jans-lock; }
+[ "$CED_READY" = 1 ] && want_module jans-lock && { timeout -k 30 600 mvn $OPTS $CED_OPTS -pl '!server-fips,!client' -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || note_unit $? jans-lock; }
 # fido2-server units: exclude the two *DeviceRegistration* TestNG tests (need an embedded Weld+DB
 # harness that does not exist here) and the MDS test (hits mds3.fido.tools over the network).
 want_module jans-fido2 && { timeout -k 30 600 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || note_unit $? fido2-server; }

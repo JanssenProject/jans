@@ -11,7 +11,7 @@ image from ``jans-linux-setup/jans_setup/templates/test`` (see the Dockerfile).
 
 Notes:
 
-* The auth test-client secrets are derived deterministically as
+* The auth and jans-lock test-client secrets are derived deterministically as
   ``<inum>-<host-label>`` (matching ``crypto64.encode_test_passwords`` in
   jans-linux-setup) so the test-suite can recompute them without a shared secret.
 * The config-api test client is handled by ``docker-jans-config-api`` bootstrap
@@ -39,6 +39,7 @@ from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
 
 from settings import LOGGING_CONFIG
+from sql_setup import SQLBackend
 from utils import prepare_template_ctx
 
 logging.config.dictConfig(LOGGING_CONFIG)
@@ -53,6 +54,14 @@ TEST_AUTH_CLIENT_INUMS = {
     "jans_auth_test_client_3_inum": "3E20",
     "jans_auth_test_client_4_inum": "FF81-2D39",
 }
+
+# Fixed inum for the jans-lock TRACE test client (mirrors render_test_profiles.py);
+# jans-linux-setup generates a random ``2202.*`` id instead.
+LOCK_TEST_CLIENT_ID = "2202.A7C3-5E19"
+
+# JSON schema of the test-only tables (e.g. jansBinEntry, jansTestVersioned) used by the
+# jans-orm integration tests; kept out of /app/schema so regular deployments never load it.
+TEST_SCHEMA_JSON = f"{TEST_TEMPLATE_BASE}/jans_test_schema.json"
 
 # LDIF schema templates declaring the custom attributes used by the test data;
 # parsed at runtime to add the matching SQL columns.
@@ -69,6 +78,7 @@ TEST_DATA_FILES = (
     f"{TEST_TEMPLATE_BASE}/jans-auth/data/jans-auth-test-data-user.ldif",
     f"{TEST_TEMPLATE_BASE}/scim-client/data/scim-test-data-user.ldif",
     f"{TEST_TEMPLATE_BASE}/jans-fido2/data/fido2-device-registration-test-data.ldif",
+    f"{TEST_TEMPLATE_BASE}/jans-lock/data/test-data.ldif",
 )
 
 # Custom scripts enabled for the test-suite (mirrors test_data_loader).
@@ -191,6 +201,40 @@ class TestDataLoader:
             return "TINYTEXT" if self.client.dialect == "mysql" else "TEXT"
         return "TEXT"
 
+    def create_test_tables(self):
+        """Create the test-only tables declared in ``jans_test_schema.json`` (idempotent)."""
+        if not os.path.isfile(TEST_SCHEMA_JSON):
+            logger.warning("Test schema file %s not found; skipping", TEST_SCHEMA_JSON)
+            return
+
+        with open(TEST_SCHEMA_JSON) as f:
+            schema = json.loads(f.read())
+
+        test_attrs = {attr["names"][0]: attr for attr in schema.get("attributeTypes", [])}
+        backend = SQLBackend(self.manager)
+
+        def column_type(attr, table):
+            # attributes absent from the main schema carry their own SQL type or syntax
+            if not (attr_def := test_attrs.get(attr)):
+                return backend.get_data_type(attr, table)
+            sql_types = attr_def.get("sql_types", {})
+            if type_ := sql_types.get(self.client.dialect) or sql_types.get("mysql"):
+                return type_["type"]
+            return self._resolve_data_type(attr_def["syntax"])
+
+        for oc in schema.get("objectClasses", []):
+            table = oc["names"][0]
+            column_mapping = {
+                "doc_id": backend.get_data_type("doc_id", table),
+                "objectClass": "VARCHAR(48)",
+                "dn": "VARCHAR(128)",
+            }
+            for attr in dict.fromkeys(oc.get("may", [])):
+                column_mapping[attr] = column_type(attr, table)
+
+            logger.info("Creating test table %s", table)
+            self.client.create_table(table, column_mapping, "doc_id")
+
     def add_custom_columns(self):
         """Add the test-only custom attribute columns (idempotent)."""
         existing = self.client.get_table_mapping()
@@ -237,6 +281,10 @@ class TestDataLoader:
             ctx[f"{prefix}_pw"] = pw
             ctx[f"{prefix}_encoded_pw"] = encode_text(pw, salt).decode()
 
+        lock_pw = f"{LOCK_TEST_CLIENT_ID}-{host_label}"
+        ctx["lock_test_client_id"] = LOCK_TEST_CLIENT_ID
+        ctx["lock_test_client_pw"] = lock_pw
+        ctx["lock_test_client_encoded_pw"] = encode_text(lock_pw, salt).decode()
         return ctx
 
     def import_test_data(self, ctx):
@@ -442,6 +490,7 @@ class TestDataLoader:
 
     def load(self):
         logger.info("Loading integration-test data")
+        self.create_test_tables()
         self.add_custom_columns()
         ctx = self.build_ctx()
         self.import_test_data(ctx)
