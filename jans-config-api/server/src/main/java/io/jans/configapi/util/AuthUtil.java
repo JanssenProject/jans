@@ -146,6 +146,16 @@ public class AuthUtil {
         return excludedClients == null ? Collections.emptyList() : excludedClients;
     }
     
+    public boolean isUserRolePermissionExcluded(String inum) {
+        List<String> excludedClients = getExcludedClients();
+        if(excludedClients!=null && !excludedClients.isEmpty() && excludedClients.contains(inum)) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    
     public boolean isFetchUserRoleInIntrospectionFlag() {
         return this.configurationFactory.getApiAppConfiguration().isFetchUserRoleInIntrospectionFlag();
     }
@@ -437,6 +447,26 @@ public class AuthUtil {
         }
         log.info("Final Method Scopes for resourceInfo:{}, scopes:{} ", resourceInfo, scopes);
     }
+    
+    public static List<String> getMethodSuperScopes(Method resourceMethod) {
+        log.info("Method Scopes for resourceMethod:{}", resourceMethod);
+        List<String> superScopes = null ;
+        
+        if(resourceMethod==null) {
+            return superScopes;
+        }
+        
+        ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
+
+        if (methodAnnotation != null) {
+            superScopes = new ArrayList<>();
+            superScopes.addAll(Stream.of(methodAnnotation.superScopes()).collect(Collectors.toList()));
+        }
+        
+        log.info("Final Method Scopes for resourceMethod:{}, superScopes:{} ", resourceMethod, superScopes);
+        return superScopes;
+    }
+
 
     public String requestAccessToken(final String clientId, final List<String> scope) {
         log.info("Request for AccessToken - clientId:{}, scope:{} ", clientId, scope);

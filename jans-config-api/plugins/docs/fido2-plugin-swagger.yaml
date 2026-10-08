@@ -1612,17 +1612,6 @@ paths:
         - https://jans.io/oauth/config/read-all
 components:
   schemas:
-    AndroidApp:
-      type: object
-      properties:
-        packageName:
-          type: string
-        sha256CertFingerprints:
-          type: array
-          items:
-            type: string
-        distribution:
-          type: string
     AppConfiguration:
       type: object
       properties:
@@ -1751,13 +1740,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RequestedParty"
-    IosApp:
-      type: object
-      properties:
-        teamId:
-          type: string
-        bundleId:
-          type: string
     MetadataServer:
       type: object
       properties:
@@ -1774,14 +1756,6 @@ components:
           type: array
           items:
             type: string
-        androidApps:
-          type: array
-          items:
-            $ref: "#/components/schemas/AndroidApp"
-        iosApps:
-          type: array
-          items:
-            $ref: "#/components/schemas/IosApp"
         policy:
           $ref: "#/components/schemas/RequestedPartyPolicy"
     RequestedPartyPolicy:
@@ -1812,55 +1786,55 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
+        authenticationAvgDuration:
+          type: number
+          format: double
         registrationFailures:
+          type: integer
+          format: int64
+        registrationAttempts:
           type: integer
           format: int64
         authenticationAttempts:
           type: integer
           format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
         authenticationSuccessRate:
           type: number
           format: double
-        registrationAvgDuration:
+        registrationSuccessRate:
           type: number
           format: double
-        authenticationAvgDuration:
+        authenticationFailures:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        registrationAvgDuration:
           type: number
           format: double
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        registrationSuccessRate:
-          type: number
-          format: double
-        authenticationSuccesses:
+        registrationSuccesses:
           type: integer
           format: int64
         metricsData:
           type: object
           additionalProperties:
             type: object
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
         fallbackEvents:
           type: integer
           format: int64
         period:
           type: string
         deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        errorCounts:
           type: object
           additionalProperties:
             type: integer
