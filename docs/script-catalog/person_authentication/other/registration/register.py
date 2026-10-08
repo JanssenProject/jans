@@ -5,23 +5,16 @@
 #
 
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.as.server.security import Identity
 from io.jans.jsf2.message import FacesMessages
 from jakarta.faces.application import FacesMessage
 from io.jans.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
+from java.util import IdentityHashMap
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.server.service import UserService, ClientService, AuthenticationService
+from io.jans.as.server.service import UserService, AuthenticationService
 from io.jans.util import StringHelper
 from org.gluu.oxauth.model.common import User
 from io.jans.as.server.util import ServerUtil
-from io.jans.jsf2.service import FacesService
-from org.gluu.oxauth.model.util import Base64Util
-from org.python.core.util import StringUtil
-from io.jans.as.server.service.net import HttpService
-from jakarta.faces.context import FacesContext
 
-import java
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -44,7 +37,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             self.attributesMapping = self.prepareAttributesMapping(remoteAttributesList, localAttributesList)
-            if (self.attributesMapping == None):
+            if (self.attributesMapping is None):
                 print "Registration: Initialization. The attributes mapping isn't valid"
                 return False
 
@@ -73,6 +66,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return ServerUtil.getFirstValue(requestParameters, toBeFeatched)
         except Exception, err:
             print("Registration: Exception inside getUserValueFromAuth " + str(err))
+        return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         print "Registration. Authenticate for step 1"
@@ -94,7 +88,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
         foundUser = userService.getUserByAttribute("mail", self.getUserValueFromAuth("email", requestParameters))
-        if (foundUser == None):
+        if (foundUser is None):
             newUser = User()
 	    for attributesMappingEntry in self.attributesMapping.entrySet():
 		remoteAttribute = attributesMappingEntry.getKey()
@@ -138,6 +132,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getPageForStep(self, configurationAttributes, step):
         if step == 1:
             return "/auth/register/register.xhtml"
+        return None
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
         return -1
@@ -166,7 +161,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 return None
 
             attributeMapping = IdentityHashMap()
-            containsUid = False
             i = 0
             count = len(remoteAttributesListArray)
             while (i < count):
@@ -179,3 +173,4 @@ class PersonAuthentication(PersonAuthenticationType):
             return attributeMapping
         except Exception, err:
             print("Registration: Exception inside prepareAttributesMapping " + str(err))
+        return None

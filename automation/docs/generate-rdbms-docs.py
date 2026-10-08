@@ -1,4 +1,3 @@
-import sys
 import argparse
 import pymysql
 import psycopg2

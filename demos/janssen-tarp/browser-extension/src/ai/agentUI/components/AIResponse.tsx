@@ -1,5 +1,4 @@
 import React from 'react';
-import { getProviderColor } from '../constants';
 
 interface AIResponseProps {
   result: string | any;

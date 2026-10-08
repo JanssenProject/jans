@@ -7,10 +7,9 @@
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.server.service import UserService, AuthenticationService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.util import StringHelper, ArrayHelper
 
-import java
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -20,7 +19,7 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Basic (multi login). Initialization"
 
         login_attributes_list_object = configurationAttributes.get("login_attributes_list")
-        if (login_attributes_list_object == None):
+        if (login_attributes_list_object is None):
             print "Basic (multi login). Initialization. There is no property login_attributes_list"
             return False
 

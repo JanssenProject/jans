@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 from __future__ import print_function
 
-import re
 import zipfile
 import glob
-import sys
 import os
 import json
 import argparse
@@ -12,7 +10,7 @@ import datetime
 
 try:
     from urllib.request import urlopen
-except:
+except ImportError:
     from urllib2 import urlopen
 
 def get_latest_commit(service):

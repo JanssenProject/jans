@@ -5,8 +5,8 @@ from io.jans.as.server.authorize.ws.rs import ConsentGatheringSessionService
 from io.jans.jsf2.service import FacesService
 from io.jans.model.custom.script.type.authz import ConsentGatheringType
 from io.jans.service.cdi.util import CdiUtil
+from java.lang import Throwable
 
-import java
 import sys
 
 class ConsentGathering(ConsentGatheringType):
@@ -40,15 +40,16 @@ class ConsentGathering(ConsentGatheringType):
                 bridge = CdiUtil.bean(NativeJansFlowBridge)
                 result = bridge.close()
 
-                if result == None or not result.isSuccess():
+                if result is None or not result.isSuccess():
                     print "Agama-Consent. Flow DID NOT finished successfully"
                     return False
-            except:
+            except (Exception, Throwable):
                 print "Agama-Consent. Exception: ", sys.exc_info()[1]
                 return False
 
             return True
 
+        return None
 
     def getNextStep(self, step, context):
         return -1
@@ -71,7 +72,7 @@ class ConsentGathering(ConsentGatheringType):
             #session = cgss.getConsentSession(context.getHttpRequest(), context.getHttpResponse(), userDn, False)
             session = cgss.getConnectSession(context.getHttpRequest())
             
-            if session == None:
+            if session is None:
                 print "Agama-Consent. Failed to retrieve session_id"
                 return False
                 
@@ -84,7 +85,7 @@ class ConsentGathering(ConsentGatheringType):
                 return False
 
             (qn, ins) = self.extractParams(param)
-            if qn == None:
+            if qn is None:
                 print "Agama-Consent. Unable to determine the Agama flow to launch. Check the docs"
                 return False
                 
@@ -92,7 +93,7 @@ class ConsentGathering(ConsentGatheringType):
                 bridge = CdiUtil.bean(NativeJansFlowBridge)
                 running = bridge.prepareFlow(sessionId, qn, ins, False, self.enterUrl)
                 
-                if running == None:
+                if running is None:
                     print "Agama-Consent. Flow '%s' does not exist or cannot be launched from a browser!" % qn
                     return False
                 elif running:
@@ -101,7 +102,7 @@ class ConsentGathering(ConsentGatheringType):
                 print "Agama-Consent. Redirecting to start/resume agama flow '%s'..." % qn
                 
                 CdiUtil.bean(FacesService).redirectToExternalURL(bridge.getTriggerUrl())
-            except:
+            except (Exception, Throwable):
                 print "Agama-Consent. An error occurred when launching flow '%s'. Check jans-auth logs" % qn
                 print "Agama-Consent. Exception: ", sys.exc_info()[1]
                 return False

@@ -1,16 +1,13 @@
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.model.custom.script.type.token import UpdateTokenType
 from io.jans.as.server.service import SessionIdService
-from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.server.service import ClientService
 from io.jans.as.server.service.net import HttpService
 from java.nio.charset import Charset
 from org.json import JSONObject
 from jakarta.faces.context import FacesContext
 
-import java
 import sys
-import os
 
 class UpdateToken(UpdateTokenType):
     def __init__(self, currentTimeMillis):
@@ -89,7 +86,6 @@ class UpdateToken(UpdateTokenType):
         httpService = CdiUtil.bean(HttpService)
 
         http_client = httpService.getHttpsClient()
-        http_client_params = http_client.getParams()
 
         url = self.BILLING_API_URL + "organization_balance?organization_id="+org_id
 

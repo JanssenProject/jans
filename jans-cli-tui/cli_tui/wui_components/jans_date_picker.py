@@ -11,9 +11,9 @@ from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.formatted_text import AnyFormattedText, HTML, merge_formatted_text
 from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.widgets import Label
-from prompt_toolkit.layout.containers import Float, HSplit, VSplit, DynamicContainer, Window
+from prompt_toolkit.layout.containers import Float, HSplit, Window
 
-from utils.static import cli_style, ISOFORMAT
+from utils.static import ISOFORMAT
 from utils.multi_lang import _
 
 

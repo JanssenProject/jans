@@ -1,7 +1,7 @@
+import contextlib
 import os
 import json
 import datetime
-import zipfile
 from setup_app import paths
 from setup_app.utils import base
 
@@ -71,16 +71,12 @@ class AttribDataTypes:
         retVal = val
 
         if dtype == 'json':
-            try:
+            with contextlib.suppress(Exception):
                 retVal = json.loads(val)
-            except Exception as e:
-                pass
 
         if dtype == 'integer':
-            try:
+            with contextlib.suppress(Exception):
                 retVal = int(retVal)
-            except:
-                pass
         elif dtype == 'datetime':
             if not isinstance(val, datetime.datetime):
 
