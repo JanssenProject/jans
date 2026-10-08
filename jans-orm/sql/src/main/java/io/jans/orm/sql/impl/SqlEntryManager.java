@@ -66,6 +66,8 @@ import io.jans.orm.util.StringHelper;
  */
 public class SqlEntryManager extends BaseEntryManager<SqlOperationService> implements Serializable {
 
+	private static final String MESSAGE_FAILED_TO_UPDATE_ENTRY = "Failed to update entry: '%s'";
+
 	private static final long serialVersionUID = 2127241817126412574L;
 
     private static final Logger LOG = LoggerFactory.getLogger(SqlEntryManager.class);
@@ -235,11 +237,11 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
             if (modifications.size() > 0) {
                 boolean result = getOperationService().updateEntry(toSQLKey(dn).getKey(), baseObjectClass, modifications);
                 if (!result) {
-                    throw new EntryPersistenceException(String.format("Failed to update entry: '%s'", dn));
+                    throw new EntryPersistenceException(String.format(MESSAGE_FAILED_TO_UPDATE_ENTRY, dn));
                 }
             }
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to update entry: '%s'", dn), ex);
+            throw new EntryPersistenceException(String.format(MESSAGE_FAILED_TO_UPDATE_ENTRY, dn), ex);
         }
     }
 
@@ -257,7 +259,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
             return getOperationService().updateEntryWithVersion(toSQLKey(dn).getKey(), baseObjectClass, modifications,
                     internalVersionAttributeName, expectedVersionValue);
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to update entry: '%s'", dn), ex);
+            throw new EntryPersistenceException(String.format(MESSAGE_FAILED_TO_UPDATE_ENTRY, dn), ex);
         }
     }
 

@@ -16,8 +16,8 @@ public class VersionMismatchException extends BasePersistenceException {
 
     private static final long serialVersionUID = 1L;
 
-    private final String dn;
-    private final Object expectedVersion;
+    private String dn;
+    private Object expectedVersion;
 
     public VersionMismatchException(String dn, Object expectedVersion) {
         super(String.format(
