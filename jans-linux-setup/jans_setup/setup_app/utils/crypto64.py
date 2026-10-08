@@ -368,7 +368,7 @@ class Crypto64:
             if re.match(r'(.*?)test_client_(\d*)_inum', tmp_str):
                 cli_prefix = tmp_str.strip('_inum')
                 cli_pw_var = cli_prefix +'_pw'
-                if not cli_pw_var in Config.template_rendering_dict:
+                if cli_pw_var not in Config.template_rendering_dict:
                     Config.template_rendering_dict[cli_pw_var] = Config.template_rendering_dict[tmp_str] + '-' + hostname
                     Config.template_rendering_dict[cli_prefix + '_encoded_pw'] = self.obscure(Config.template_rendering_dict[cli_pw_var])
 

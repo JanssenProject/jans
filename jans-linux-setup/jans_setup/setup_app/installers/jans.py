@@ -230,8 +230,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def render_test_templates(self):
         self.logIt("Rendering test templates")
 
-        testTepmplatesFolder = os.path.join(Config.template_folder, 'test')
-        self.render_templates_folder(testTepmplatesFolder)
+        test_templates_folder = os.path.join(Config.template_folder, 'test')
+        self.render_templates_folder(test_templates_folder)
 
     def setup_init_scripts(self):
         self.logIt("Setting up init scripts")
