@@ -186,6 +186,7 @@ parser.add_argument("--data", help="Path to json data file")
 parser.add_argument("--output-access-token", help="Prints jwt access token and exits", action='store_true')
 
 args = parser.parse_args()
+DEFAULT_CA_CERT = '/etc/certs/httpd.crt'
 
 
 ################## end of arguments #################
@@ -241,6 +242,15 @@ if not(host and (client_id and client_secret or access_token)):
         debug = config['DEFAULT'].get('debug')
         log_dir = config['DEFAULT'].get('log_dir', log_dir)
         tmp_dir = config['DEFAULT'].get('log_dir', tmp_dir)
+
+
+def ssl_verify_setting():
+    if args.noverify:
+        return False
+    for ca_cert in (config['DEFAULT'].get('ca_cert'), DEFAULT_CA_CERT):
+        if ca_cert and os.path.isfile(ca_cert):
+            return ca_cert
+    return True
 
 
 def get_bool(val):
@@ -466,11 +476,7 @@ class JCA_CLI:
                 plugins.append(plugin)
 
     def ssl_settings(self):
-        if args.noverify:
-            self.verify_ssl = False
-        else:
-            ca_cert = config['DEFAULT'].get('ca_cert')
-            self.verify_ssl = ca_cert if ca_cert and os.path.isfile(ca_cert) else True
+        self.verify_ssl = ssl_verify_setting()
         self.mtls_client_cert = None
         if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
             self.mtls_client_cert = (args.config_api_mtls_client_cert, args.config_api_mtls_client_key)
@@ -969,7 +975,7 @@ class JCA_CLI:
         resolved = os.path.realpath(path)
         for root in (os.getcwd(), str(Path.home()), tempfile.gettempdir()):
             root = os.path.realpath(root)
-            if resolved.startswith(root + os.sep):
+            if os.path.commonpath([resolved, root]) == root:
                 return resolved
         self.raise_error("{} must be under the working, home or temp directory".format(path))
         return None

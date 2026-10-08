@@ -1,4 +1,5 @@
 import os
+import ipaddress
 import re
 import base64
 import json
@@ -35,6 +36,14 @@ class Crypto64:
         cipher = triple_des(Config.encode_salt)
         decrypted = cipher.decrypt(base64.b64decode(data), padmode=PAD_PKCS5)
         return decrypted.decode('utf-8')
+
+    @staticmethod
+    def is_ip_address(value):
+        try:
+            ipaddress.ip_address(value)
+            return True
+        except ValueError:
+            return False
 
     def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None, truststore_pw='changeit', cert_dir=None):
         if not cert_dir:
@@ -78,6 +87,10 @@ class Crypto64:
                   '-subj',
                   '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (Config.country_code, Config.state, Config.city, Config.org_name, certCn, Config.admin_email)
                   ])
+        san_type = 'IP' if self.is_ip_address(certCn) else 'DNS'
+        san_fn = csr + '.ext'
+        with open(san_fn, 'w') as w:
+            w.write('subjectAltName={}:{}\n'.format(san_type, certCn))
         self.run([paths.cmd_openssl,
                   'x509',
                   '-req',
@@ -87,9 +100,12 @@ class Crypto64:
                   csr,
                   '-signkey',
                   key,
+                  '-extfile',
+                  san_fn,
                   '-out',
                   public_certificate
                   ])
+        os.remove(san_fn)
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key_with_password])
         self.run([paths.cmd_chmod, '700', key_with_password])
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key])

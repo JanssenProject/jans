@@ -22,7 +22,7 @@ def resolve_user_path(path):
     resolved = os.path.realpath(path)
     for root in (os.getcwd(), os.path.expanduser('~'), tempfile.gettempdir()):
         root = os.path.realpath(root)
-        if resolved.startswith(root + os.sep):
+        if os.path.commonpath([resolved, root]) == root:
             return resolved
     print("{} must be under the working, home or temp directory".format(path))
     sys.exit(1)
