@@ -13,6 +13,11 @@
         </classes>
     </test>
 
+    <test name="Transpilation result" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.TranspilationResultTest" />
+              </classes>
+    </test>
     <test name="Finish and Log" enabled="true">
         <classes>
             <class name="io.jans.agama.test.FinishAndLogTest" />
@@ -33,6 +38,11 @@
     <test name="Control flow" enabled="true">
         <classes>
             <class name="io.jans.agama.test.ControlFlowTest" />
+          </classes>
+    </test>
+    <test name="Foreign call" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.ForeignCallTest" />
         </classes>
     </test>
 
