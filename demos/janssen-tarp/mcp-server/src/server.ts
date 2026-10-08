@@ -543,15 +543,10 @@ app.put("/api/keys", async (req, res) => {
     // Dynamic query based on what's provided
     let existingKey;
 
-    if (provider && model) {
+    if (provider) {
       // Query by both provider AND model
       existingKey = db.data.apiKeys.find((k: ApiKey) =>
         k.provider === provider && k.model === model
-      );
-    } else if (provider) {
-      // Query only by provider (model not provided)
-      existingKey = db.data.apiKeys.find((k: ApiKey) =>
-        k.provider === provider
       );
     } else {
       // Query only by model (provider not provided)

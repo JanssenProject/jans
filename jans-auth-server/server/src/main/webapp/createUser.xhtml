@@ -191,18 +191,12 @@
         <script type="text/javascript">
             $(document).ready(function () {
                 fillPlatformField();
-
-                var displayNameField = document.getElementById("createForm:displayName");
-                var emailField = document.getElementById("createForm:email");
-                var uidField = document.getElementById("createForm:uid");
-                var passwordField = document.getElementById("createForm:password");
-
             });
 
             function fillPlatformField() {
                 try {
-                    re = /^([^\.]+\.[^\.]+)\..+/;
-                    result = re.exec(platform.version);
+                    const re = /^([^.]+\.[^.]+)\..+/;
+                    const result = re.exec(platform.version);
                     if (result != null) {
                         platform.version=result[1];
                     }

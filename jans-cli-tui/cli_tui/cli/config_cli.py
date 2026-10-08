@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import contextlib
 import os
 import sys
 
@@ -13,16 +14,13 @@ import json
 import re
 import urllib3
 import configparser
-import readline
+import importlib
+import tempfile
 import argparse
 import random
-import datetime
-import code
 import traceback
-import ast
 import base64
 import requests
-import html
 import glob
 import logging
 import http.client
@@ -35,12 +33,13 @@ import urllib.parse
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from pathlib import Path
 from types import SimpleNamespace
-from urllib.parse import urlencode
 from collections import OrderedDict
 from urllib.parse import urljoin
 from http.client import HTTPConnection
 from logging.handlers import RotatingFileHandler
 from pygments import highlight, lexers, formatters
+
+importlib.import_module('readline')
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -103,7 +102,6 @@ def obscure(data=''):
     return base64.b64encode(en_data).decode('utf-8')
 
 def unobscure(s=''):
-    engine = pyDes.triple_des(key, pyDes.ECB, pad=None, padmode=pyDes.PAD_PKCS5)
     cipher = pyDes.triple_des(key)
     decrypted = cipher.decrypt(base64.b64decode(s), padmode=pyDes.PAD_PKCS5)
     return decrypted.decode('utf-8')
@@ -128,7 +126,6 @@ def read_swagger(op_mode):
     op_list = []
     cfg_yaml[op_mode] = {}
     for yaml_fn in glob.glob(os.path.join(cur_dir, 'ops', op_mode, '*.yaml')):
-        fn, ext = os.path.splitext(os.path.basename(yaml_fn))
         yaml_obj = ruamel.yaml.YAML()
         with open(yaml_fn) as f:
             config_ = yaml_obj.load(f.read().replace('\t', ''))
@@ -174,7 +171,7 @@ parser.add_argument("--schema", help="Get the operation schema which describes a
 parser.add_argument("-CC", "--config-api-mtls-client-cert", help="Path to SSL Certificate file")
 parser.add_argument("-CK", "--config-api-mtls-client-key", help="Path to SSL Key file")
 parser.add_argument("--key-password", help="Password for SSL Key file")
-parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true', default=True)
+parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true')
 parser.add_argument("-use-test-client", help="Use test client without device authorization", action='store_true')
 parser.add_argument("--patch-add", help="Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
@@ -189,6 +186,7 @@ parser.add_argument("--data", help="Path to json data file")
 parser.add_argument("--output-access-token", help="Prints jwt access token and exits", action='store_true')
 
 args = parser.parse_args()
+DEFAULT_CA_CERT = '/etc/certs/httpd.crt'
 
 
 ################## end of arguments #################
@@ -231,23 +229,27 @@ if not(host and (client_id and client_secret or access_token)):
         if config['DEFAULT'].get(secret_key_str):
             client_secret = config['DEFAULT'][secret_key_str]
         elif config['DEFAULT'].get(secret_enc_key_str):
-            try:
+            with contextlib.suppress(Exception):
                 client_secret_enc = config['DEFAULT'][secret_enc_key_str]
                 client_secret = unobscure(client_secret_enc)
-            except Exception:
-                pass
 
         if 'access_token' in config['DEFAULT'] and config['DEFAULT']['access_token'].strip():
             access_token = config['DEFAULT']['access_token']
         elif 'access_token_enc' in config['DEFAULT'] and config['DEFAULT']['access_token_enc'].strip():
-            try:
+            with contextlib.suppress(Exception):
                 access_token = unobscure(config['DEFAULT']['access_token_enc'])
-            except Exception:
-                pass
 
         debug = config['DEFAULT'].get('debug')
         log_dir = config['DEFAULT'].get('log_dir', log_dir)
         tmp_dir = config['DEFAULT'].get('log_dir', tmp_dir)
+
+
+def ssl_verify_setting():
+    verify = not args.noverify
+    for ca_cert in (config['DEFAULT'].get('ca_cert'), DEFAULT_CA_CERT):
+        if verify and ca_cert and os.path.isfile(ca_cert):
+            return ca_cert
+    return verify
 
 
 def get_bool(val):
@@ -282,7 +284,7 @@ class JCA_CLI:
 
         self.getCredentials()
         self.wrapped = wrapped
-        if wrapped == None:
+        if wrapped is None:
             self.wrapped = __name__ != "__main__"
         self.access_token = access_token or config['DEFAULT'].get('access_token')
         self.discovery_endpoint = AUTH_DISCOVERY_ENDPOINT
@@ -351,6 +353,7 @@ class JCA_CLI:
                     secret_key_str = 'jca_client_secret'
 
                 secret_enc_key_str = secret_key_str + '_enc'
+                client_secret_data = ''
                 if config['DEFAULT'].get(secret_key_str):
                     client_secret_data = config['DEFAULT'][secret_key_str]
                 elif config['DEFAULT'].get(secret_enc_key_str):
@@ -364,7 +367,7 @@ class JCA_CLI:
     def get_user_info(self):
         user_info = {}
         if 'user_data' in config['DEFAULT']:
-            try:
+            with contextlib.suppress(Exception):
                 user_info = jwt.decode(config['DEFAULT']['user_data'],
                                     options={
                                             'verify_signature': False,
@@ -372,8 +375,6 @@ class JCA_CLI:
                                             'verify_aud': False
                                              }
                                     )
-            except:
-                pass
         return user_info
 
 
@@ -474,10 +475,7 @@ class JCA_CLI:
                 plugins.append(plugin)
 
     def ssl_settings(self):
-        if args.noverify:
-            self.verify_ssl = False
-        else:
-            self.verify_ssl = True
+        self.verify_ssl = ssl_verify_setting()
         self.mtls_client_cert = None
         if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
             self.mtls_client_cert = (args.config_api_mtls_client_cert, args.config_api_mtls_client_key)
@@ -602,6 +600,7 @@ class JCA_CLI:
             if key in config['DEFAULT']:
                 config['DEFAULT'].pop(key)
         write_config()
+        return None
 
 
     def check_access_token(self):
@@ -665,6 +664,7 @@ class JCA_CLI:
             sys.stderr.write(response.text)
             sys.stderr.write(str(e))
             sys.stderr.write('\n')
+        return None
 
     def get_device_authorization (self):
         response = session.post(
@@ -829,15 +829,16 @@ class JCA_CLI:
         return True, ''
 
     def print_exception(self, e):
-        error_printed = False
-        if hasattr(e, 'body'):
+        json_body = None
+        if hasattr(e, 'body') and not self.wrapped:
             try:
-                jsdata = json.loads(e.body.decode())
-                self.raise_error(e.body.decode())
-                error_printed = True
-            except:
-                pass
-        if not error_printed:
+                json_body = e.body.decode()
+                json.loads(json_body)
+            except (AttributeError, ValueError):
+                json_body = None
+        if json_body is not None:
+            self.raise_error(json_body)
+        else:
             msg = "Error retrieving data: "
             err = 'None'
             if isinstance(e, str):
@@ -871,6 +872,7 @@ class JCA_CLI:
         if url.endswith('}'):
             pname = re.findall(r'/\{(.*?)\}$', url)[0]
             return pname
+        return None
 
     def get_endpiont_url_param(self, endpoint):
         param = {}
@@ -959,12 +961,23 @@ class JCA_CLI:
                 self.print_exception(e)
         else:
             return response.text
+        return None
 
     def get_mime_for_endpoint(self, endpoint, req='requestBody'):
         if req in endpoint.info:
             for key in endpoint.info[req]['content']:
                 return key
+        return None
 
+
+    def resolve_user_file(self, path):
+        resolved = os.path.realpath(path)
+        for root in (os.getcwd(), str(Path.home()), tempfile.gettempdir()):
+            root = os.path.realpath(root)
+            if resolved.startswith(os.path.join(root, '')):
+                return resolved
+        self.raise_error("{} must be under the working, home or temp directory".format(path))
+        return None
 
     def post_requests(self, endpoint, data, params=None, method='post'):
 
@@ -984,7 +997,9 @@ class JCA_CLI:
             for prop in schema['properties']:
                 if schema['properties'][prop].get('type') == 'string' and schema['properties'][prop].get('format') == 'binary':
                     if prop in data_js:
-                        multi_part_fields[prop] = (os.path.basename(data_js[prop]), open(data_js[prop], 'rb'), 'application/octet-stream')
+                        upload_path = self.resolve_user_file(data_js[prop])
+                        with open(upload_path, 'rb') as upload_fh:
+                            multi_part_fields[prop] = (os.path.basename(upload_path), upload_fh.read(), 'application/octet-stream')
                 else:
                     multi_part_fields[prop] = (None, json.dumps(data_js[prop]), 'application/json')
             data = MultipartEncoder(fields=multi_part_fields)
@@ -1019,6 +1034,8 @@ class JCA_CLI:
             response = session.post(**post_params)
         elif method == 'put':
             response = session.put(**post_params)
+        else:
+            raise ValueError("Unsupported method: {}".format(method))
 
         self.log_response(response)
 
@@ -1027,7 +1044,7 @@ class JCA_CLI:
 
         try:
             return response.json()
-        except:
+        except Exception:
             if response.status_code in (200, 201, 202, 203):
                 return {'message': response.text}
             else:
@@ -1100,8 +1117,9 @@ class JCA_CLI:
 
         try:
             return response.json()
-        except:
+        except Exception:
             self.print_exception(response.text)
+        return None
 
 
     def parse_command_args(self, args):
@@ -1219,6 +1237,7 @@ class JCA_CLI:
         return val
 
     def get_json_from_file(self, data_fn):
+        data = None
 
         if not os.path.isfile(data_fn):
             try:
@@ -1254,6 +1273,7 @@ class JCA_CLI:
             self.pretty_print(response)
         else:
             return response
+        return None
 
     def exit_with_error(self, error_text):
         self.cli_logger.error(error_text)
@@ -1281,6 +1301,19 @@ class JCA_CLI:
             return f.read()
 
 
+    def load_post_data(self, data_fn, mime_type):
+        if data_fn.endswith('jwt'):
+            with open(data_fn) as reader:
+                return jwt.decode(reader.read(),
+                                  options={"verify_signature": False, "verify_exp": False, "verify_aud": False})
+        try:
+            if mime_type.endswith(('json', 'text')):
+                return self.get_json_from_file(data_fn)
+            return self.read_binary_file(data_fn)
+        except ValueError as ve:
+            self.exit_with_error(str(ve))
+        return None
+
     def process_command_post(self, path, suffix_param, endpoint_params, data_fn, data):
 
         # TODO: suffix_param, endpoint_params
@@ -1292,29 +1325,20 @@ class JCA_CLI:
         params.update(endpoint_params)
 
         if not data and data_fn:
-
-            if data_fn.endswith('jwt'):
-                with open(data_fn) as reader:
-                    data = jwt.decode(reader.read(),
-                                          options={"verify_signature": False, "verify_exp": False, "verify_aud": False})
-            else:
-                try:
-                    if mime_type.endswith(('json', 'text')):
-                        data = self.get_json_from_file(data_fn)
-                    else:
-                        data = self.read_binary_file(data_fn)
-                except ValueError as ve:
-                    self.exit_with_error(str(ve))
+            data = self.load_post_data(data_fn, mime_type)
 
         if path['__method__'] == 'post':
             response = self.post_requests(endpoint, data, params)
         elif path['__method__'] == 'put':
             response = self.post_requests(endpoint, data, params, method='put')
+        else:
+            raise ValueError("Unsupported method: {}".format(path['__method__']))
 
         if self.wrapped:
             return response
 
         self.print_response(response)
+        return None
 
     def process_command_put(self, path, suffix_param, endpoint_params, data_fn, data=None):
         return self.process_command_post(path, suffix_param, endpoint_params, data_fn, data)
@@ -1353,6 +1377,7 @@ class JCA_CLI:
             return response
         else:
             self.print_response(response)
+        return None
 
 
     def process_command_delete(self, path, suffix_param, endpoint_params, data_fn, data=None):
@@ -1366,6 +1391,7 @@ class JCA_CLI:
             self.print_response(response)
         else:
             print(self.colored_text("Object was successfully deleted.", success_color))
+        return None
 
     def process_command_by_id(self, operation_id, url_suffix, endpoint_args, data_fn, data=None):
         path = self.get_path_by_id(operation_id)
@@ -1387,10 +1413,12 @@ class JCA_CLI:
             
             )
 
+        op_path = {}
         if not data:
             op_path = self.get_path_by_id(operation_id)
             if op_path['__method__'] == 'patch' and not data_fn:
                 pop, pdata = '', ''
+                ppath, pval = '', ''
                 if args.patch_add:
                     pop = 'add'
                     pdata = args.patch_add 
@@ -1441,6 +1469,7 @@ class JCA_CLI:
                 for schema in cfg_yaml[self.my_op_mode][plugin]['components']['schemas']:
                     if schema == schema_name:
                         return '#/components/schemas/' + schema
+        return None
 
 
     def get_nasted_schema(self,data):
@@ -1479,6 +1508,7 @@ class JCA_CLI:
                     return result
             elif v == value:
                 return keys + [k]
+        return None
         
 
 
@@ -1510,22 +1540,7 @@ class JCA_CLI:
 
             if '$ref' in schema_['properties'][key_]:
                 current_schema = self.get_schema_from_reference(plugin_name, schema_['properties'][key_]['$ref'])
-                ref = self.get_nasted_schema(current_schema) ## cehck for nasted `$ref` schema
-                
-
-                if False: #ref :
-                    print(ref)
-                    ### Get schema from refrence for the new `ref`
-                    new_schema = self.get_schema_from_reference(plugin_name, ref) 
-
-                    ### Get List of keys to the `ref` value ex: ['properties', 'agamaConfiguration', 'properties', 'clientAuthMapSchema', 'additionalProperties', 'items', '$ref']
-                    keys_to_lookup = self.list_leading_to_value(my_dict=current_schema, value=ref) 
-
-                    ### Change the value that List of keys looks at.
-                    schema_['properties'][key_] =OrderedDict(self.change_certain_value_from_list(keys_to_lookup,current_schema,new_schema['properties'])) 
-
-                else:
-                    schema_['properties'][key_] = current_schema
+                schema_['properties'][key_] = current_schema
                 
             elif schema_['properties'][key_].get('type') == 'array' and '$ref' in schema_['properties'][key_]['items']:
                 
@@ -1556,7 +1571,7 @@ class JCA_CLI:
 
         if schema is None:
             print(self.colored_text("Schema not found.", error_color))
-            return
+            return None
 
         return schema
 
@@ -1600,6 +1615,7 @@ class JCA_CLI:
                 return 'string'
 
             print("END")
+            return None
 
 
         for prop_name in schema.get('properties', {}):

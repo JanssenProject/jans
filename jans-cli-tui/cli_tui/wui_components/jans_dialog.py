@@ -2,12 +2,8 @@ from prompt_toolkit.widgets import (
     Button,
     Dialog,
 )
-from typing import Optional, Sequence, Union
-from prompt_toolkit.layout.containers import (
-    AnyContainer,
-)
+from typing import Optional
 from prompt_toolkit.layout.dimension import AnyDimension
-from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.layout.containers import HSplit
 
 
@@ -41,7 +37,6 @@ class JansDialog():
             if len(x[1]) > len(max_title_str):
                 max_title_str = x[1]
 
-        max_data_str = 41 ## TODO TO BE Dynamic
         self.dialog = Dialog(
             title=str(self.title),
             body=HSplit(

@@ -4,12 +4,10 @@
 // Copyright (c) 2025, Gluu, Inc.
 //
 // WASM cross-platform bench harness. See bindings/benchmarks/CONTRACT.md.
-// YAML→JSON conversion done via a Python subprocess to avoid a js-yaml dep.
 
 import { performance } from "node:perf_hooks";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import { execFileSync } from "node:child_process";
 
 const require = createRequire(import.meta.url);
 const fs = require("node:fs");
@@ -24,14 +22,6 @@ function resolveRepoRoot() {
   if (env && env.length > 0) return path.resolve(env);
   // Default: bench file is in bindings/cedarling_wasm/benchmarks/ ⇒ ../../..
   return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
-}
-
-function yamlFileToJsonString(yamlPath) {
-  const script = `
-import json, pathlib, yaml
-print(json.dumps(yaml.safe_load(pathlib.Path(r'''${yamlPath}''').read_text()), separators=(',',':')))
-`;
-  return execFileSync("python3", ["-c", script], { encoding: "utf8" }).trim();
 }
 
 function emit(row) {

@@ -1,25 +1,21 @@
-import json
 import asyncio
 from functools import partial
-from types import SimpleNamespace
 from typing import Any, Optional
 
-from prompt_toolkit import HTML
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Dialog
+from prompt_toolkit.widgets import Button
 from prompt_toolkit.eventloop import get_event_loop
 
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_user_dialog import EditUserDialog
 from fido_entries import FidoEntries
 from utils.utils import DialogUtils, get_help_with
-from utils.static import DialogResult
 from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
-from utils.static import DialogResult, cli_style, common_strings
+from utils.static import cli_style
 from utils.background_tasks import get_admin_ui_roles
 
 class Plugin(DialogUtils):

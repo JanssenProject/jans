@@ -7,7 +7,6 @@ import glob
 import csv
 import zipfile
 import json
-import datetime
 import copy
 import subprocess
 import traceback
@@ -38,7 +37,7 @@ ces_dir = Path(__file__).parent.parent.as_posix()
 par_dir = Path(__file__).parent.parent.parent.as_posix()
 pylib_dir = os.path.join(ces_dir, 'pylib')
 
-re_split_host = re.compile(r'[^,\s,;]+')
+re_split_host = re.compile(r'[^,\s;]+')
 
 # Determine initdaemon
 with open('/proc/1/status', 'r') as f:
@@ -122,7 +121,8 @@ if systemctl_cmd:
 
 
 # resources
-current_file_max = int(open("/proc/sys/fs/file-max").read().strip())
+with open("/proc/sys/fs/file-max") as f:
+    current_file_max = int(f.read().strip())
 current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
 current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 current_number_of_cpu = multiprocessing.cpu_count()
@@ -218,6 +218,7 @@ def determineApacheVersion(full=False):
         if full:
             return '.'.join((major, minor, pathc))
         return '.'.join((major, minor))
+    return None
 
 def get_os_package_list():
     package_list_fn = os.path.join(paths.DATA_DIR, 'package_list.json')
@@ -279,6 +280,7 @@ def get_clean_args(args):
 def run(args, cwd=None, env=None, useWait=False, shell=False, get_stderr=False):
 
     output = ''
+    err = ''
     log_arg = ' '.join(args) if type(args) is list else args
     logIt('Running: %s' % log_arg)
 
@@ -313,7 +315,7 @@ def run(args, cwd=None, env=None, useWait=False, shell=False, get_stderr=False):
                 logIt(output)
             if err:
                 logIt(err, True)
-    except:
+    except Exception:
         logIt("Error running command : %s" % " ".join(args), True)
 
     if get_stderr:
@@ -327,6 +329,7 @@ def determine_package(glob_pattern):
     package_list = glob.glob(glob_pattern)
     if package_list:
         return max(package_list)
+    return None
 
 
 def readJsonFile(jsonFile, ordered=False):
@@ -335,6 +338,7 @@ def readJsonFile(jsonFile, ordered=False):
     if os.path.exists(jsonFile):
         with open(jsonFile) as f:
             return json.load(f, object_pairs_hook=object_pairs_hook)
+    return None
 
 def read_yaml_file(yaml_fn):
     import ruamel.yaml

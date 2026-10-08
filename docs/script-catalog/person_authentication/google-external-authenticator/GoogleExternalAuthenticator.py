@@ -14,21 +14,17 @@ from io.jans.as.server.util import ServerUtil
 from io.jans.as.common.model.common import User
 from io.jans.orm import PersistenceEntryManager
 from io.jans.config import GluuConfiguration
-from java.math import BigInteger
-from java.security import SecureRandom
-import java
 import sys
 import json
 
 
-from java.util import Collections, HashMap, HashSet, ArrayList, Arrays, Date
+from java.util import Collections
 
-from com.google.api.client.googleapis.auth.oauth2 import GoogleIdToken
-from com.google.api.client.googleapis.auth.oauth2.GoogleIdToken import Payload
 from com.google.api.client.googleapis.auth.oauth2 import GoogleIdTokenVerifier
 
 from com.google.api.client.http.javanet import NetHttpTransport;
 from com.google.api.client.json.jackson2 import JacksonFactory;
+from java.lang import Throwable
 
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -47,7 +43,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print data
             creds = data["web"]
             print creds
-        except:
+        except (Exception, Throwable):
             print "Google. Initialization. Failed to load creds from file:", google_creds_file
             print "Exception: ", sys.exc_info()[1]
 
@@ -102,7 +98,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     foundUser.setAttribute(self.getLocalPrimaryKey(),google_Id)
 
                     userService = CdiUtil.bean(UserService)
-                    result = userService.addUser(foundUser, True)
+                    userService.addUser(foundUser, True)
                     foundUser = self.findUserByGoogleId(google_Id)
 
                 logged_in = authenticationService.authenticate(foundUser.getUserId())

@@ -292,9 +292,6 @@ class LockRecord:
             # delay before retrying to acquire
             time.sleep(self.retry_delay)
 
-        # mark as not acquired
-        return False
-
     def release(self) -> None:
         """Release a lock.
 

@@ -19,7 +19,6 @@ from main.v1.schema import EvaluationRequestSchema, DecisionSchema, WellKnownSch
 from flask.views import MethodView
 from flask import request
 from main.extensions import cedarling
-import json
 from main.infrastructure.services.cedarling_authzen_service import (
     CedarlingAuthzenService,
 )
