@@ -3,6 +3,7 @@ import sys
 import argparse
 import json
 import base64
+import tempfile
 
 from collections import OrderedDict
 from ldap3.utils import dn as dnutils
@@ -15,16 +16,25 @@ parser.add_argument("--infile", help="input ldif file", required=True)
 parser.add_argument("--outfile", help="output ldif file")
 argsp = parser.parse_args()
 
-ldif_file = argsp.infile
+
+
+def resolve_user_path(path):
+    resolved = os.path.realpath(path)
+    for root in (os.getcwd(), os.path.expanduser('~'), tempfile.gettempdir()):
+        root = os.path.realpath(root)
+        if resolved.startswith(root + os.sep):
+            return resolved
+    print("{} must be under the working, home or temp directory".format(path))
+    sys.exit(1)
+
+
+ldif_file = resolve_user_path(argsp.infile)
 
 if not os.path.exists(ldif_file):
     print("File {} does not exist".format(ldif_file))
     sys.exit()
 
-if not argsp.outfile:
-    out_file = ldif_file+'.jans'
-else:
-    out_file = argsp.outfile
+out_file = resolve_user_path(argsp.outfile or ldif_file + '.jans')
 
 with open('schema/jans_schema_mappings.json') as f:
     mapping = json.load(f, object_pairs_hook=OrderedDict)

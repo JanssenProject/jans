@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import contextlib
 import os
 import sys
 
@@ -14,6 +15,7 @@ import re
 import urllib3
 import configparser
 import importlib
+import tempfile
 import argparse
 import random
 import traceback
@@ -226,19 +228,15 @@ if not(host and (client_id and client_secret or access_token)):
         if config['DEFAULT'].get(secret_key_str):
             client_secret = config['DEFAULT'][secret_key_str]
         elif config['DEFAULT'].get(secret_enc_key_str):
-            try:
+            with contextlib.suppress(Exception):
                 client_secret_enc = config['DEFAULT'][secret_enc_key_str]
                 client_secret = unobscure(client_secret_enc)
-            except Exception:
-                pass  # undecodable secret; treated as unset
 
         if 'access_token' in config['DEFAULT'] and config['DEFAULT']['access_token'].strip():
             access_token = config['DEFAULT']['access_token']
         elif 'access_token_enc' in config['DEFAULT'] and config['DEFAULT']['access_token_enc'].strip():
-            try:
+            with contextlib.suppress(Exception):
                 access_token = unobscure(config['DEFAULT']['access_token_enc'])
-            except Exception:
-                pass  # undecodable token; a new one is requested
 
         debug = config['DEFAULT'].get('debug')
         log_dir = config['DEFAULT'].get('log_dir', log_dir)
@@ -360,7 +358,7 @@ class JCA_CLI:
     def get_user_info(self):
         user_info = {}
         if 'user_data' in config['DEFAULT']:
-            try:
+            with contextlib.suppress(Exception):
                 user_info = jwt.decode(config['DEFAULT']['user_data'],
                                     options={
                                             'verify_signature': False,
@@ -368,8 +366,6 @@ class JCA_CLI:
                                             'verify_aud': False
                                              }
                                     )
-            except Exception:
-                pass  # malformed user_data; treat as no user info
         return user_info
 
 
@@ -969,6 +965,15 @@ class JCA_CLI:
         return None
 
 
+    def resolve_user_file(self, path):
+        resolved = os.path.realpath(path)
+        for root in (os.getcwd(), str(Path.home()), tempfile.gettempdir()):
+            root = os.path.realpath(root)
+            if resolved.startswith(root + os.sep):
+                return resolved
+        self.raise_error("{} must be under the working, home or temp directory".format(path))
+        return None
+
     def post_requests(self, endpoint, data, params=None, method='post'):
 
         url = self.get_url_for_endpoint(endpoint.path)
@@ -987,8 +992,9 @@ class JCA_CLI:
             for prop in schema['properties']:
                 if schema['properties'][prop].get('type') == 'string' and schema['properties'][prop].get('format') == 'binary':
                     if prop in data_js:
-                        with open(data_js[prop], 'rb') as upload_fh:
-                            multi_part_fields[prop] = (os.path.basename(data_js[prop]), upload_fh.read(), 'application/octet-stream')
+                        upload_path = self.resolve_user_file(data_js[prop])
+                        with open(upload_path, 'rb') as upload_fh:
+                            multi_part_fields[prop] = (os.path.basename(upload_path), upload_fh.read(), 'application/octet-stream')
                 else:
                     multi_part_fields[prop] = (None, json.dumps(data_js[prop]), 'application/json')
             data = MultipartEncoder(fields=multi_part_fields)
