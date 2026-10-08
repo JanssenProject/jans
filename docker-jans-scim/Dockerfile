@@ -10,7 +10,6 @@ FROM bellsoft/liberica-openjdk-alpine:17.0.20@sha256:1aa69057bcd3eafa77738ec58ba
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache openssl python3 tini curl bash py3-cryptography py3-psycopg2 \
-    && apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/community py3-grpcio abseil-cpp-cord \
     && apk add --no-cache --virtual .build-deps wget git zip
 
 # =====
