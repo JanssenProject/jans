@@ -137,11 +137,22 @@ public class GrpcAuditServlet extends HttpServlet {
     private void safeHandle(HttpServletRequest req, HttpServletResponse resp, boolean post) {
         try {
             handleGrpcRequest(req, resp, post);
-        } catch (IOException | ServletException ex) {
-            log.error("Failed to process gRPC request", ex);
-            if (!resp.isCommitted()) {
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            }
+        } catch (IOException ex) {
+            log.debug("I/O error while processing request", ex);
+        } catch (ServletException ex) {
+            log.error("Failed to process request", ex);
+            sendServerError(resp);
+        }
+    }
+
+    private void sendServerError(HttpServletResponse resp) {
+        if (resp.isCommitted()) {
+            return;
+        }
+        try {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (IOException ex) {
+            log.debug("Failed to send error response", ex);
         }
     }
 

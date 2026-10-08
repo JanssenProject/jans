@@ -112,10 +112,7 @@ public class WellKnownConfiguration extends HttpServlet {
         try {
             processRequest(request, response);
         } catch (IOException ex) {
-            log.error("Failed to process configuration request", ex);
-            if (!response.isCommitted()) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            }
+            log.debug("I/O error while processing configuration request", ex);
         }
     }
 

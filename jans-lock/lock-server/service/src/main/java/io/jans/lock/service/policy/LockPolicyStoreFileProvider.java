@@ -64,7 +64,7 @@ public class LockPolicyStoreFileProvider implements PolicyStoreFileProvider {
             copyAndPatchZip(openIdIssuer);
 
             log.info("Policy store prepared at: {}", tempZipFile);
-        } catch (IOException ex) {
+        } catch (IOException | UnsupportedOperationException ex) {
             cleanup();
             throw new RuntimeException("Failed to prepare policy store from classpath resource: " + POLICY_STORE_RESOURCE, ex);
         }
