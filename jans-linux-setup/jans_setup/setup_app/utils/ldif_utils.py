@@ -8,11 +8,11 @@ from setup_app.pylib.parse_dn import parse_dn
 from setup_app.pylib.ldif4.ldif import LDIFParser, LDIFWriter
 from setup_app.pylib.schema import AttributeType, ObjectClass
 from setup_app.utils.attributes import attribDataTypes
-from setup_app.config import Config
 
 
 class myLdifParser(LDIFParser):
     def __init__(self, ldif_file):
+        super().__init__(ldif_file)
         self.ldif_file = ldif_file
         self.entries = []
 
@@ -83,6 +83,8 @@ def get_document_from_entry(dn, entry):
                 document[k] = oc_list[0]
 
         return key, document
+
+    return None
 
 def get_documents_from_ldif(ldif_file):
     parser = myLdifParser(ldif_file)
@@ -180,8 +182,6 @@ def create_client_ldif(
     if not other_props:
         other_props = {}
 
-    clients_ldif_fd = open(ldif_fn, 'wb')
-    ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
     client_dn = 'inum={},ou=clients,o=jans'.format(client_id)
     if not grant_types:
         grant_types = ['authorization_code', 'refresh_token', 'client_credentials']
@@ -231,6 +231,6 @@ def create_client_ldif(
         if key in client_dict:
             del client_dict[key]
 
-    ldif_clients_writer.unparse(client_dn, client_dict)
-
-    clients_ldif_fd.close()
+    with open(ldif_fn, 'wb') as clients_ldif_fd:
+        ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
+        ldif_clients_writer.unparse(client_dn, client_dict)

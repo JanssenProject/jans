@@ -11,14 +11,7 @@ from io.jans.orm import PersistenceEntryManager
 from io.jans.model.custom.script.type.introspection import IntrospectionType
 from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.model.config.adminui import AdminConf
-from io.jans.as.common.model.session import SessionId
 from org.json import JSONObject
-from java.lang import String
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
 
 
 class Introspection(IntrospectionType):

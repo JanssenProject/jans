@@ -56,10 +56,22 @@ jobs:
         with:
           egress-policy: audit
 
+      - name: Resolve checkout ref
+        id: resolve-ref
+        env:
+          WF_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          WF_HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+        run: |
+          if [ -n "$WF_HEAD_SHA" ] && [ "$WF_HEAD_REPO" != "$GITHUB_REPOSITORY" ]; then
+            echo "::error::refusing to check out code from $WF_HEAD_REPO"
+            exit 1
+          fi
+          echo "ref=${WF_HEAD_SHA:-$GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ steps.resolve-ref.outputs.ref }}
           fetch-depth: 0
           token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
 

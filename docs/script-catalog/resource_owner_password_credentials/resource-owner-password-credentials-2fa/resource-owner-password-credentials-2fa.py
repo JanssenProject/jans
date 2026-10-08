@@ -7,18 +7,16 @@ from io.jans.as.server.service import SessionIdService
 
 from io.jans.as.server.security import Identity
 
-from io.jans.as.server.util import ServerUtil
 
 from io.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
 
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
-from java.lang import String
 from java.util import Date, HashMap
 
-import com.twilio.Twilio as Twilio
-import com.twilio.rest.api.v2010.account.Message as Message
-import com.twilio.type.PhoneNumber as PhoneNumber
+from com.twilio import Twilio
+from com.twilio.rest.api.v2010.account import Message
+from com.twilio.type import PhoneNumber
 # import org.codehaus.jettison.json.JSONArray as JSONArray
 
 import random
@@ -75,17 +73,17 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
 
         try:
             self.TWILIO_ACCOUNT_SID = configurationAttributes.get("twilio_account_sid").getValue2()
-        except:
+        except Exception:
             print '2FA ROPC TWILIO. Missing required configuration attribute "twilio_account_sid"'
         
         try:
             self.TWILIO_AUTH_TOKEN = configurationAttributes.get("twilio_auth_token").getValue2()
-        except:
+        except Exception:
             print '2FA ROPC TWILIO. Missing required configuration attribute "twilio_auth_token"'
         
         try:
             self.TWILIO_FROM_NUMBER = configurationAttributes.get("twilio_from_number").getValue2()
-        except:
+        except Exception:
             print'2FA ROPC TWILIO. Missing required configuration attribute "twilio_from_number"'
         
         if None in (self.TWILIO_ACCOUNT_SID, self.TWILIO_AUTH_TOKEN , self.TWILIO_FROM_NUMBER):
@@ -161,7 +159,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         user = self.fetchUserData(username)
         session_id = request.getParameter(self.SESSION_ID_PARAM_NAME)
         session = self.getSessionById(session_id)
-        if session == None:
+        if session is None:
             print "2FA ROPC TWILIO. Step two auth failed. Session {%s} does not exist or has expired" % session_id
             self.handleSessionExpired(response,context)
             return False
@@ -195,7 +193,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         user = self.fetchUserData(username)
         session_id = request.getParameter(self.SESSION_ID_PARAM_NAME)
         session = self.getSessionById(session_id)
-        if session == None:
+        if session is None:
             print "2FA ROPC TWILIO. Step three auth failed. Session {%s} does not exist or has expired" % session_id
             self.handleSessionExpired(response,context)
             return False
@@ -257,7 +255,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     def deleteSessionById(self,sessionid):
         sessionIdService = CdiUtil.bean(SessionIdService)
         session = sessionIdService.getSessionId(sessionid)
-        if session == None:
+        if session is None:
             return False
         sessionIdService.remove(session)
         return True
@@ -336,8 +334,6 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         session_id_fragment = '%s=%s' % (self.SESSION_ID_HTTP_ATTR,session_id)
         if phone_number != None:
             phone_number_fragment = '%s=%s' % (self.PHONE_NUMBER_HTTP_ATTR,phone_number)
-        
-        if phone_number != None:
             proceed_string = '%s;%s;%s' % (status_fragment,session_id_fragment,phone_number_fragment)
         else:
             proceed_string = "%s;%s" % (status_fragment,session_id_fragment)

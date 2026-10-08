@@ -360,8 +360,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
 
 
 def get_ldif_mappings_hook(group, optional_scopes=None):
-    optional_scopes = optional_scopes or []
-
     def default_files():
         return [
             "base.ldif",

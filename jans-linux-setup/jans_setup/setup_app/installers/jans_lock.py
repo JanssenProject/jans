@@ -1,13 +1,10 @@
 import os
 import glob
 import json
-import shutil
 import datetime
 import tempfile
 
-from pathlib import Path
 
-from setup_app import paths
 from setup_app.utils import base
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
@@ -40,7 +37,7 @@ class JansLockInstaller(JettyInstaller):
         self.systemd_units = []
         self.set_provider_type = True
         self.output_dir = os.path.join(Config.output_dir, self.service_name)
-        self.template_dir = os.path.join(Config.templateFolder, self.service_name)
+        self.template_dir = os.path.join(Config.template_folder, self.service_name)
         self.dynamic_conf_json = os.path.join(self.output_dir, 'dynamic-conf.json')
         self.error_json = os.path.join(self.output_dir, 'errors.json')
         self.static_conf_json = os.path.join(self.output_dir, 'static-conf.json')
@@ -68,9 +65,8 @@ class JansLockInstaller(JettyInstaller):
     def create_client(self):
 
         _, jans_auth_config = self.dbUtils.get_jans_auth_conf_dynamic()
-        Config.templateRenderingDict['jans_auth_token_endpoint'] = jans_auth_config['tokenEndpoint']
+        Config.template_rendering_dict['jans_auth_token_endpoint'] = jans_auth_config['tokenEndpoint']
 
-        jans_scopes = self.dbUtils.get_scopes()
         scope_openid = self.dbUtils.get_scope_by_jansid('openid')
         scopes = [ scope_openid['dn'] ]
 
@@ -110,8 +106,8 @@ class JansLockInstaller(JettyInstaller):
         self.chown(base.current_app.JansAuthInstaller.custom_lib_dir, Config.jetty_user, Config.jetty_group, recursive=True)
 
     def create_policy_template(self):
-        Config.templateRenderingDict['local_trusted_issuer_id'] = os.urandom(22).hex()
-        Config.templateRenderingDict['policy_store_id'] = self.getPW(21)
+        Config.template_rendering_dict['local_trusted_issuer_id'] = os.urandom(22).hex()
+        Config.template_rendering_dict['policy_store_id'] = self.getPW(21)
 
         output_tmp_fn = os.path.join(self.template_dir, os.path.basename(self.policy_conf_json))
         policy_tmp = base.readJsonFile(self.policy_conf_tmp_fn)
@@ -138,10 +134,10 @@ class JansLockInstaller(JettyInstaller):
         for tmp in (self.dynamic_conf_json, self.error_json, self.static_conf_json, self.policy_conf_json):
             self.renderTemplateInOut(tmp, self.template_dir, self.output_dir)
 
-        Config.templateRenderingDict['lock_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
-        Config.templateRenderingDict['lock_error_base64'] = self.generate_base64_file(self.error_json, 1)
-        Config.templateRenderingDict['lock_static_conf_base64'] = self.generate_base64_file(self.static_conf_json, 1)
-        Config.templateRenderingDict['lock_policy_conf_base64'] = self.generate_base64_file(self.policy_conf_json, 1)
+        Config.template_rendering_dict['lock_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
+        Config.template_rendering_dict['lock_error_base64'] = self.generate_base64_file(self.error_json, 1)
+        Config.template_rendering_dict['lock_static_conf_base64'] = self.generate_base64_file(self.static_conf_json, 1)
+        Config.template_rendering_dict['lock_policy_conf_base64'] = self.generate_base64_file(self.policy_conf_json, 1)
 
         self.renderTemplateInOut(self.config_ldif, self.template_dir, self.output_dir)
 
@@ -186,6 +182,6 @@ class JansLockInstaller(JettyInstaller):
 
         self.logIt("Loding Jans Lock test data")
         self.update_rendering_dict()
-        self.render_templates_folder(os.path.join(Config.templateFolder, 'test', self.service_name))
+        self.render_templates_folder(os.path.join(Config.template_folder, 'test', self.service_name))
         ldif_fn = os.path.join(Config.output_dir, 'test', self.service_name, 'data/test-data.ldif')
         self.dbUtils.import_ldif([ldif_fn])
