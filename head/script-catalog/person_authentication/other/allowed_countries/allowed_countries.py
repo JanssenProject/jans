@@ -4,25 +4,18 @@
 # Author: Yuriy Movchan
 #
 
-from java.util import Arrays
 from org.apache.http.params import CoreConnectionPNames
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.model.config import ConfigurationFactory
-from io.jans.as.server.service import UserService, AuthenticationService, SessionIdService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service.net import HttpService
-from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
-from io.jans.as.server.service.common import EncryptionService
-from java.util import Arrays, HashMap, IdentityHashMap
 
-import java
-import datetime
-import urllib
 
 import sys
 import json
+from java.lang import Throwable
 
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -60,9 +53,9 @@ class PersonAuthentication(PersonAuthenticationType):
         if (len(allowedCountriesListArray) > 0 and session_attributes.containsKey("remote_ip")):
             remote_ip = session_attributes.get("remote_ip")
 	    remote_loc_dic = self.determineGeolocationData(remote_ip)
-	    if remote_loc_dic == None:
+	    if remote_loc_dic is None:
 	        print "Super-Gluu. Prepare for step 2. Failed to determine remote location by remote IP '%s'" % remote_ip
-	        return
+	        return None
 	    remote_loc = "%s" % ( remote_loc_dic['countryCode'])
             print "Your remote location is "+remote_loc
             if remote_loc in allowedCountriesListArray:
@@ -119,7 +112,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             http_service_response = httpService.executeGet(http_client, geolocation_service_url,  geolocation_service_headers)
             http_response = http_service_response.getHttpResponse()
-        except:
+        except (Exception, Throwable):
             print "Super-Gluu. Determine remote location. Exception: ", sys.exc_info()[1]
             return None
 
@@ -134,7 +127,7 @@ class PersonAuthentication(PersonAuthenticationType):
         finally:
             http_service_response.closeConnection()
 
-        if response_string == None:
+        if response_string is None:
             print "Super-Gluu. Determine remote location. Get empty response from location server"
             return None
 

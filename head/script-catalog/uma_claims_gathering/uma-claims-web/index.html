@@ -3690,7 +3690,8 @@
             <span class="n">context</span><span class="o">.</span><span class="n">redirectToExternalUrl</span><span class="p">(</span><span class="n">authorizationUrl</span><span class="p">)</span> <span class="c1"># redirect to external url</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">context</span><span class="o">.</span><span class="n">isAuthenticated</span><span class="p">():</span> <span class="c1"># example how to get session attribute if user is authenticated to same AS</span>
-            <span class="n">arc</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getConnectSessionAttributes</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;acr&quot;</span><span class="p">)</span>
+            <span class="n">acr</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getConnectSessionAttributes</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;acr&quot;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="s2">&quot;Connect session acr: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">acr</span>
 
         <span class="k">return</span> <span class="kc">True</span>
 

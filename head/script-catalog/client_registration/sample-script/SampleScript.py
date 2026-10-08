@@ -8,9 +8,8 @@ from io.jans.model.custom.script.type.client import ClientRegistrationType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.service import ScopeService
 from io.jans.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList, HashSet
+from java.util import HashSet
 
-import java
 
 class ClientRegistration(ClientRegistrationType):
     def __init__(self, currentTimeMillis):
@@ -33,8 +32,6 @@ class ClientRegistration(ClientRegistrationType):
     # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
     def createClient(self, context):
         print "Client registration. CreateClient method"
-        registerRequest = context.getRegisterRequest()
-        configurationAttributes = context.getConfigurationAttibutes()
         client = context.getClient()
 
         redirectUris = client.getRedirectUris()

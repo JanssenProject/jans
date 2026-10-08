@@ -3770,9 +3770,8 @@ Jans AS-&gt;&gt;RP: return client credentials</code></pre>
 <span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">CdiUtil</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.service</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScopeService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringHelper</span><span class="p">,</span> <span class="n">ArrayHelper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">java.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">Arrays</span><span class="p">,</span> <span class="n">ArrayList</span><span class="p">,</span> <span class="n">HashSet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">HashSet</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">java</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ClientRegistration</span><span class="p">(</span><span class="n">ClientRegistrationType</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
@@ -3795,8 +3794,6 @@ Jans AS-&gt;&gt;RP: return client credentials</code></pre>
     <span class="c1"># context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">createClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s2">&quot;Client registration. CreateClient method&quot;</span>
-        <span class="n">registerRequest</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getRegisterRequest</span><span class="p">()</span>
-        <span class="n">configurationAttributes</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getConfigurationAttibutes</span><span class="p">()</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getClient</span><span class="p">()</span>
 
         <span class="n">redirectUris</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getRedirectUris</span><span class="p">()</span>

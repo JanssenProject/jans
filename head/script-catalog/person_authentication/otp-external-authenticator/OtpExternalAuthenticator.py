@@ -21,6 +21,7 @@ from com.google.common.io import BaseEncoding
 from com.bastiaanjansen.otp import HMACAlgorithm
 from com.bastiaanjansen.otp import HOTPGenerator
 from com.bastiaanjansen.otp import TOTPGenerator
+from java.lang import Throwable
 from java.security import SecureRandom
 from java.time import Duration
 from java.util import Arrays, HashMap
@@ -107,7 +108,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        authenticationService = CdiUtil.bean(AuthenticationService)
         userAuthenticatorService = CdiUtil.bean(UserAuthenticatorService)
 
         identity = CdiUtil.bean(Identity)
@@ -118,14 +118,10 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             print "OTP. Authenticate for step 1"
             authenticated_user = self.processBasicAuthentication(credentials)
-            if authenticated_user == None:
+            if authenticated_user is None:
                 return False
 
             otp_auth_method = "authenticate"
-            # Uncomment this block if you need to allow user second OTP registration
-            #enrollment_mode = ServerUtil.getFirstValue(requestParameters, "loginForm:registerButton")
-            #if StringHelper.isNotEmpty(enrollment_mode):
-            #    otp_auth_method = "enroll"
 
             if otp_auth_method == "authenticate":
                 user_enrollments = userAuthenticatorService.getUserAuthenticatorsByType(authenticated_user, self.otpType)
@@ -146,7 +142,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            if user == None:
+            if user is None:
                 print "OTP. Authenticate for step 2. Failed to determine user name"
                 return False
 
@@ -181,7 +177,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            if user == None:
+            if user is None:
                 print "OTP. Authenticate for step 2. Failed to determine user name"
                 return False
 
@@ -203,7 +199,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-        credentials = identity.getCredentials()
 
         self.setRequestScopedParameters(identity)
 
@@ -224,7 +219,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if otp_auth_method == 'enroll':
                 authenticationService = CdiUtil.bean(AuthenticationService)
                 user = authenticationService.getAuthenticatedUser()
-                if user == None:
+                if user is None:
                     print "OTP. Prepare for step 2. Failed to load user enty"
                     return False
 
@@ -294,10 +289,10 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def setRequestScopedParameters(self, identity):
-        if self.registrationUri != None:
+        if self.registrationUri is not None:
             identity.setWorkingParameter("external_registration_uri", self.registrationUri)
 
-        if self.customLabel != None:
+        if self.customLabel is not None:
             identity.setWorkingParameter("qr_label", self.customLabel)
 
         identity.setWorkingParameter("qr_options", self.customQrOptions)
@@ -313,7 +308,7 @@ class PersonAuthentication(PersonAuthenticationType):
         f = open(otp_conf_file, 'r')
         try:
             otpConfiguration = json.loads(f.read())
-        except:
+        except (Exception, Throwable):
             print "OTP. Load OTP configuration. Failed to load configuration from file:", otp_conf_file
             return False
         finally:
@@ -337,7 +332,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "OTP. Load OTP configuration. Invalid TOTP HMAC SHA algorithm: '%s'" % hmacShaAlgorithm
                  
             self.totpConfiguration["hmacShaAlgorithmType"] = hmacShaAlgorithmType
-        except:
+        except (Exception, Throwable):
             print "OTP. Load OTP configuration. Invalid configuration file '%s' format. Exception: '%s'" % (otp_conf_file, sys.exc_info()[1])
             return False
         
@@ -345,7 +340,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
@@ -359,7 +353,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
 
         find_user_by_uid = authenticationService.getAuthenticatedUser()
-        if find_user_by_uid == None:
+        if find_user_by_uid is None:
             print "OTP. Process basic authentication. Failed to find user '%s'" % user_name
             return None
         
@@ -367,7 +361,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def validateSessionId(self, identity):
         session = CdiUtil.bean(SessionIdService).getSessionId()
-        if session == None:
+        if session is None:
             print "OTP. Validate session id. Failed to determine session_id"
             return False
 
@@ -394,7 +388,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if otp_auth_method == "enroll":
             # Get key from session
             otp_secret_key_encoded = identity.getWorkingParameter("otp_secret_key")
-            if otp_secret_key_encoded == None:
+            if otp_secret_key_encoded is None:
                 print "OTP. Process OTP authentication. OTP secret key is invalid"
                 return False
             
@@ -403,7 +397,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if self.otpType == "hotp":
                 validation_result = self.validateHotpKey(otp_secret_key, 1, otpCode)
                 
-                if (validation_result != None) and validation_result["result"]:
+                if (validation_result is not None) and validation_result["result"]:
                     print "OTP. Process HOTP authentication during enrollment. otpCode is valid"
 
                     # Store HOTP Secret Key and moving factor in user entry
@@ -415,13 +409,13 @@ class PersonAuthentication(PersonAuthenticationType):
                     userAuthenticatorService.addUserAuthenticator(user, authenticator)
 
                     updatedUser = userService.updateUser(user)
-                    if updatedUser != None:
+                    if updatedUser is not None:
                         return True
 
                     print "OTP. Process HOTP authentication during enrollment. Failed to update user entry"
             elif self.otpType == "totp":
                 validation_result = self.validateTotpKey(otp_secret_key, otpCode, user.getUserId())
-                if (validation_result != None) and validation_result["result"]:
+                if (validation_result is not None) and validation_result["result"]:
                     print "OTP. Process TOTP authentication during enrollment. otpCode is valid"
                     # Store TOTP Secret Key and moving factor in user entry
                     # Add otp_user_external_uid to user's external GUID list
@@ -429,7 +423,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     userAuthenticatorService.addUserAuthenticator(user, authenticator)
 
                     updatedUser = userService.updateUser(user)
-                    if updatedUser != None:
+                    if updatedUser is not None:
                         return True
 
                     print "OTP. Process TOTP authentication during enrollment. Failed to update user entry"
@@ -453,7 +447,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     # Validate TOTP
                     validation_result = self.validateHotpKey(otp_secret_key, moving_factor, otpCode)
-                    if (validation_result != None) and validation_result["result"]:
+                    if (validation_result is not None) and validation_result["result"]:
                         print "OTP. Process HOTP authentication during authentication. otpCode is valid"
 
                         # Update current moving factor in user entry
@@ -461,7 +455,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                         # Update moving factor in user entry
                         updatedUser = userService.updateUser(user)
-                        if updatedUser != None:
+                        if updatedUser is not None:
                             return True
     
                         print "OTP. Process HOTP authentication during authentication. Failed to update user entry"
@@ -472,7 +466,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     # Validate TOTP
                     validation_result = self.validateTotpKey(otp_secret_key, otpCode, user.getUserId())
-                    if (validation_result != None) and validation_result["result"]:
+                    if (validation_result is not None) and validation_result["result"]:
                         print "OTP. Process TOTP authentication during authentication. otpCode is valid"
                         return True
 
