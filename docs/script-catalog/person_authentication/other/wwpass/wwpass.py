@@ -217,8 +217,6 @@ class WWPassConnectionMT(WWPassConnection):
         self.key_file = key_file
         self.cert_file = cert_file
         self.ca_file = ca_file
-        self.timeout = timeout
-        self.spfe_addr = spfe_addr
         for _ in range(initial_connections):
             self.addConnection()
 

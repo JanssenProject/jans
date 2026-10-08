@@ -68,7 +68,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Check if user authenticated already in another custom script
             user = authenticationService.getAuthenticatedUser()
             
-            if user == None:
+            if user is None:
                 print "user is none"
                 credentials = identity.getCredentials()
                 
@@ -133,18 +133,18 @@ class PersonAuthentication(PersonAuthenticationType):
                 self.duo_client.healthCheck()
             except (Exception, Throwable):
                 print "Duo-Universal. Duo config error. Verify the values in Duo-Universal.conf are correct ", sys.exc_info()[1]
-                            
-                state = self.duo_client.generateState()
-                identity.setWorkingParameter("state_duo",state)
-                prompt_uri = self.duo_client.createAuthUrl(user_name, state)
-                
-                facesService = CdiUtil.bean(FacesService)
-                facesService.redirectToExternalURL(prompt_uri )
+                return False
 
-                return True
-                    
-        else:
-            return False
+            state = self.duo_client.generateState()
+            identity.setWorkingParameter("state_duo",state)
+            prompt_uri = self.duo_client.createAuthUrl(user_name, state)
+
+            facesService = CdiUtil.bean(FacesService)
+            facesService.redirectToExternalURL(prompt_uri )
+
+            return True
+
+        return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
         return Arrays.asList("state_duo", "username")

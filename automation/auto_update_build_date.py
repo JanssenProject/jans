@@ -23,7 +23,7 @@ def update_image(image, source_url_env, build_date_env):
     session = HTMLSession()
     req = session.get(base_url)
     if not req.ok:
-        return
+        return None
 
     new_build = req.html.xpath(
         f"//a[contains(@href, '{pkg_url}')]/../following-sibling::td",

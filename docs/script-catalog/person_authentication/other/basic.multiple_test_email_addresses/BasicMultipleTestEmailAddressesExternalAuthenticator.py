@@ -76,7 +76,7 @@ class PersonAuthentication(PersonAuthenticationType):
         else:
             return False
 
-    def getNextStep(self, step, context):
+    def getNextStep(self, configurationAttributes, requestParameters, step):
         return -1
 
     def getExtraParametersForStep(self, configurationAttributes, step):

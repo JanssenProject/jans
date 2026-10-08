@@ -7,9 +7,6 @@
 #    4. Allow/Deny searches
 #
 from io.jans.model.custom.script.type.scim import ScimType
-from io.jans.scim.ws.rs.scim2 import BaseScimWebService
-
-import json
 
 class ScimEventHandler(ScimType):
 

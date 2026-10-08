@@ -60,9 +60,6 @@ except Exception:
     with contextlib.suppress(Exception):
         net_if_list = socket.if_nameindex()
 
-        for netif in net_if_list[:]:
-            if netif[0] == 'lo':
-                net_if_list
         for netif in net_if_list:
             if netif[1].startswith('enp') or netif[1].startswith('eth'):
                 iface = netif[1]

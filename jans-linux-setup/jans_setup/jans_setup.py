@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import contextlib
-import readline
+import importlib
 import os
 import sys
 import time
@@ -14,6 +14,7 @@ import select
 from pathlib import Path
 from queue import Queue
 
+importlib.import_module('readline')
 warnings.filterwarnings("ignore")
 
 uname_cmd = shutil.which('uname')

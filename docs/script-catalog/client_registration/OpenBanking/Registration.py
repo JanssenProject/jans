@@ -4,53 +4,27 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.model.util import JwtUtil
 from io.jans.as.model.util import CertUtils
 from io.jans.as.model.jwt import Jwt
-from io.jans.as.model.config import StaticConfiguration
 from io.jans.as.server.service.net import HttpService
-from org.json import JSONObject
 from io.jans.util import StringHelper
-from io.jans.as.model.crypto import  AuthCryptoProvider
-from io.jans.as.model.crypto.signature import SignatureAlgorithm
-from io.jans.as.server.service.net import HttpService
 from java.io import File
 from java.lang import Throwable
 from java.io import FileInputStream
 from java.io import FileReader
-from java.io import IOException
 from java.net import URLEncoder
 from java.security import KeyFactory
 from java.security import KeyStore
-from java.security import NoSuchAlgorithmException
-from java.security import PrivateKey
-from java.security.spec import EncodedKeySpec
-from java.security.spec import InvalidKeySpecException
 from java.security.spec import PKCS8EncodedKeySpec
 from java.time import Instant
 from java.util import LinkedHashMap
-from java.util import Map
 from java.util import UUID
-from javax.net.ssl import SSLContext
-from org.apache.http import HttpResponse
-from org.apache.http.client import HttpClient
-from org.apache.http.client.methods import  HttpGet
-from org.apache.http.client.methods import HttpPost
-from org.apache.http.entity import StringEntity
 from org.apache.http.impl.client import HttpClients
 from org.apache.http.ssl import SSLContexts
-from org.apache.http.util import EntityUtils
-from org.bouncycastle.util.io.pem import PemObject
 from org.bouncycastle.util.io.pem import PemReader
 from com.google.api.client.json.webtoken import JsonWebSignature
 from io.jans.as.model.jwt import JwtClaims
-from org.json import JSONObject
-from  java.lang import StringBuilder 
+from java.lang import StringBuilder
 from java.lang import String
-from java.lang import System
-from java.util import  HashMap
-import java
 import json
-import uuid
-import calendar
-import time
 import sys
 
 
@@ -352,7 +326,7 @@ class ClientRegistration(ClientRegistrationType):
            finally:
                 http_service_response.closeConnection()
 
-           if response_string == None:
+           if response_string is None:
                 print "Client Registration. getAccessToken. Got empty response from validation server"
                 return None
         
@@ -384,7 +358,7 @@ class ClientRegistration(ClientRegistrationType):
                 finally:
                         http_service_response.closeConnection()
 
-                if response_string == None:
+                if response_string is None:
                         print "Client Registration. verification. Got empty response from location server"
                         return False
         

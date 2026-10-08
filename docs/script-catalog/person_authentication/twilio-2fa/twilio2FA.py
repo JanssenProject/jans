@@ -84,7 +84,6 @@ class PersonAuthentication(PersonAuthenticationType):
         facesMessages = CdiUtil.bean(FacesMessages)
         facesMessages.setKeepMessages()
 
-        session_attributes = self.identity.getSessionId().getSessionAttributes()
         form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
 
         print "TwilioSMS. form_response_passcode received"
@@ -168,8 +167,6 @@ class PersonAuthentication(PersonAuthenticationType):
             print "=============================================="
             print "=TWILIO SMS STEP 2 | Password Authentication=="
             print "=============================================="
-            code = session_attributes.get("code")
-            print '=======> Session code found'
             sessionIdService = CdiUtil.bean(SessionIdService)
             sessionId = sessionIdService.getSessionId() # fetch from persistence
             code = sessionId.getSessionAttributes().get("code")

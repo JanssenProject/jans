@@ -101,7 +101,6 @@ class PersonAuthentication(PersonAuthenticationType):
             
             auth_method = identity.getWorkingParameter("bioID_auth_method")
             print "BioID. Authenticate method for step %s. bioID_auth_method: '%s'" % (step,auth_method)
-            user_name = identity.getWorkingParameter("user_name")
             
             if step == 2 and 'enrollment' == auth_method:
                 
