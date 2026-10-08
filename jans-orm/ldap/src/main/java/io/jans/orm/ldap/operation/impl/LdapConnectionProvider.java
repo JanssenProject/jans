@@ -396,18 +396,18 @@ public class LdapConnectionProvider {
             return cached.booleanValue();
         }
 
-        boolean supported = false;
-        if (isValidConnection()) {
-            try {
-                supported = connectionPool.getRootDSE()
-                        .supportsControl(com.unboundid.ldap.sdk.controls.AssertionRequestControl.ASSERTION_REQUEST_OID);
-            } catch (Exception ex) {
-                LOG.error("Failed to determine if LDAP server supports Assertion Request Control", ex);
-            }
+        if (!isValidConnection()) {
+            return false;
         }
-
-        this.supportsAssertionRequestControl = Boolean.valueOf(supported);
-        return supported;
+        try {
+            boolean supported = connectionPool.getRootDSE()
+                    .supportsControl(com.unboundid.ldap.sdk.controls.AssertionRequestControl.ASSERTION_REQUEST_OID);
+            this.supportsAssertionRequestControl = Boolean.valueOf(supported);
+            return supported;
+        } catch (Exception ex) {
+            LOG.error("Failed to determine if LDAP server supports Assertion Request Control", ex);
+            return false;
+        }
     }
 
     private boolean isValidConnection() {
