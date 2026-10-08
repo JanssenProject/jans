@@ -233,6 +233,9 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
             return getOperationService().updateEntryWithVersion(dn, modifications, versionAttributeName, expectedVersionValue);
         } catch (ConnectionException ex) {
             throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn), ex.getCause());
+        } catch (UnsupportedOperationException ex) {
+        	// Preserve that exception at this wrapper instead of wrapping it.
+            throw ex;
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn), ex);
         }

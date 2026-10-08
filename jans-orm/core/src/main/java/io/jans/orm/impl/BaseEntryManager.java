@@ -233,6 +233,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		return countEntries(dnValue.toString(), entryClass, searchFilter);
 	}
 
+	/**
+	 * Merges the entry without compare-and-set version checking. For versioned entities, callers must
+	 * use {@link #updateWithVersion(Object)} when concurrent-write detection is required.
+	 */
 	@SuppressWarnings("unchecked")
 	protected Void merge(Object entry, boolean isSchemaUpdate, boolean isConfigurationUpdate, AttributeModificationType schemaModificationType) {
 		if (entry == null) {
@@ -364,6 +368,13 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			throw new MappingException(String.format(
 					"Entry '%s' @Version field must be initialized -- call persist() or find() first", entryClass));
 		}
+
+		Class<?> parameterType = ReflectHelper.getSetterType(versionSetter);
+		if (!(parameterType.equals(Long.class) || parameterType.equals(Long.TYPE))) {
+			throw new MappingException(String.format(
+					"Entry '%s' @Version field must be Long/long", entryClass));
+		}
+
 		long expectedVersionValue = ((Long) expectedVersionObject).longValue();
 
 		boolean forceUpdate = isUseEntryForceUpdate(entryClass);

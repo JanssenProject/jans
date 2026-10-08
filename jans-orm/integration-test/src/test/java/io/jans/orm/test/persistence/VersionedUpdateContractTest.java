@@ -8,6 +8,7 @@ package io.jans.orm.test.persistence;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.util.UUID;
@@ -16,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -129,11 +131,13 @@ public abstract class VersionedUpdateContractTest extends BaseOrmTest {
 
 		AtomicInteger successCount = new AtomicInteger();
 		AtomicInteger conflictCount = new AtomicInteger();
+		AtomicReference<Throwable> workerFailure = new AtomicReference<>();
 
 		CountDownLatch startLatch = new CountDownLatch(1);
 		ExecutorService executorService = Executors.newFixedThreadPool(2);
-		Runnable raceA = () -> runRacingUpdate(copyA, "writer-a", startLatch, successCount, conflictCount);
-		Runnable raceB = () -> runRacingUpdate(copyB, "writer-b", startLatch, successCount, conflictCount);
+		Runnable raceA = () -> runRacingUpdate(copyA, "writer-a", startLatch, successCount, conflictCount, workerFailure);
+		Runnable raceB = () -> runRacingUpdate(copyB, "writer-b", startLatch, successCount, conflictCount, workerFailure);
+
 
 		executorService.execute(raceA);
 		executorService.execute(raceB);
@@ -141,6 +145,12 @@ public abstract class VersionedUpdateContractTest extends BaseOrmTest {
 
 		executorService.shutdown();
 		executorService.awaitTermination(60, TimeUnit.SECONDS);
+		boolean terminated = executorService.awaitTermination(60, TimeUnit.SECONDS);
+		Throwable failure = workerFailure.get();
+		if (failure != null) {
+			throw new AssertionError("Unexpected exception in race worker", failure);
+		}
+		assertTrue(terminated, "Race workers did not terminate");
 
 		assertEquals(successCount.get(), 1, "Expected exactly one winner");
 		assertEquals(conflictCount.get(), 1, "Expected exactly one VersionMismatchException");
@@ -165,7 +175,7 @@ public abstract class VersionedUpdateContractTest extends BaseOrmTest {
 	}
 
 	private void runRacingUpdate(VersionedTestEntry entry, String newData, CountDownLatch startLatch,
-			AtomicInteger successCount, AtomicInteger conflictCount) {
+			AtomicInteger successCount, AtomicInteger conflictCount, AtomicReference<Throwable> workerFailure) {
 		try {
 			startLatch.await();
 			entry.setData(newData);
@@ -175,6 +185,8 @@ public abstract class VersionedUpdateContractTest extends BaseOrmTest {
 			conflictCount.incrementAndGet();
 		} catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
+		} catch (Throwable ex) {
+			workerFailure.compareAndSet(null, ex);
 		}
 	}
 
