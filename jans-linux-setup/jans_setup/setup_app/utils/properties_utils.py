@@ -149,7 +149,7 @@ class PropertiesUtils(SetupUtils):
             p = base.read_properties_file(prop_file)
         except Exception:
             self.logIt("Error loading properties", True)
-            sys.exit(False)
+            sys.exit(1)
 
         p = {LEGACY_NAMES.get(key, key): val for key, val in p.items()}
 

@@ -7,7 +7,7 @@ sys.path.append(os.path.join("%(install_dir)s", 'jans_setup/pylib'))
 
 from pyDes import *
 
-saltFn = "%(config_folder)s/salt"
+saltFn = "%(configFolder)s/salt"
 with open(saltFn) as f:
     salt_property = f.read()
 
