@@ -111,13 +111,6 @@
 			<artifactId>jakarta.ejb-api</artifactId>
 		</dependency>
 
-		<!-- Servlet (production scope) -->
-		<dependency>
-			<groupId>jakarta.servlet</groupId>
-			<artifactId>jakarta.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
 		<!-- REST -->
 		<dependency>
 			<groupId>jakarta.ws.rs</groupId>
