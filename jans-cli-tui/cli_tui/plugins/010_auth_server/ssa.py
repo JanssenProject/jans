@@ -1,4 +1,3 @@
-import os
 import copy
 import json
 import time
@@ -7,24 +6,22 @@ import asyncio
 
 from typing import Any
 from datetime import datetime
-from functools import partial
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit
 from prompt_toolkit.layout.containers import DynamicContainer, Window
-from prompt_toolkit.widgets import Button, Label, Checkbox, RadioList, Dialog, TextArea
+from prompt_toolkit.widgets import Button, Label, Checkbox, RadioList, Dialog
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
 
 from cli import config_cli
 from utils.multi_lang import _
-from utils.utils import DialogUtils, fromisoformat
+from utils.utils import DialogUtils
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.jans_label_container import JansLabelContainer
 from wui_components.jans_date_picker import DateSelectWidget
 
 

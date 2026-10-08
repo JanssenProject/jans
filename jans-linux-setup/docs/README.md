@@ -231,12 +231,12 @@ class SampleInstaller(JettyInstaller):
                                                                          # attempting to download. If setup.py is called with -w argument, 
                                                                          # files are forced to download
 
-        # We need to define files to be downloaded if Config.downloadWars was set to True.
+        # We need to define files to be downloaded if Config.download_wars was set to True.
         # You can spicify multiple download files in list. For example self.oxtrust_war = ['ftp://server/app.zip', 'http://piblic/myapp.war']
         # You need to implement `download_files()` function inside the class. It will be called automatically.
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion)
         
-        self.templates_folder = os.path.join(Config.templateFolder, 'sample-app') # folder where themplates of this application exists
+        self.templates_folder = os.path.join(Config.template_folder, 'sample-app') # folder where themplates of this application exists
         self.output_folder = os.path.join(Config.output_dir, 'sample-app') # folder where rendered templates to be written
 
 
@@ -282,7 +282,7 @@ class SampleInstaller(JettyInstaller):
             Config.app_client_jks_pass = self.getPw()
             Config.app_client_jks_pass_encoded = self.obscure(Config.app_client_jks_pass)
         self.app_client_jwks = self.gen_openid_jwks_jks_keys(self.app_client_jks_fn, Config.app_client_jks_pass)
-        Config.templateRenderingDict['app_client_base64_jwks'] = self.generate_base64_string(self.app_client_jwks, 1)
+        Config.template_rendering_dict['app_client_base64_jwks'] = self.generate_base64_string(self.app_client_jwks, 1)
 
     def render_import_templates(self):
         # we need to render and templates here. This fucntion is called after configuration generation fucntion

@@ -77,7 +77,8 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
             context.redirectToExternalUrl(authorizationUrl) # redirect to external url
             return False
         if step == 10 and context.isAuthenticated(): # example how to get session attribute if user is authenticated to same AS
-            arc = context.getConnectSessionAttributes().get("acr")
+            acr = context.getConnectSessionAttributes().get("acr")
+            print "Connect session acr: %s" % acr
 
         return True
 

@@ -146,7 +146,7 @@ public class LicenseResource {
             }
             log.info("Activate the license received from Agama Lab.");
             LicenseRequest licenseRequest = new LicenseRequest();
-            licenseRequest.setLicenseKey(licenseResponse.getResponseObject().get("licenseKey").toString());
+            licenseRequest.setLicenseKey(licenseResponse.getResponseObject().get("licenseKey").asText());
             licenseResponse = null;
             licenseResponse = licenseDetailsService.activateLicense(licenseRequest);
             log.info("License activated (true/false): {}", licenseResponse.isSuccess());
@@ -189,7 +189,7 @@ public class LicenseResource {
             }
             log.info("Activate the trial license from Agama Lab.");
             LicenseRequest licenseRequest = new LicenseRequest();
-            licenseRequest.setLicenseKey(licenseResponse.getResponseObject().get("license-key").toString());
+            licenseRequest.setLicenseKey(licenseResponse.getResponseObject().get("license-key").asText());
             licenseResponse = null;
             licenseResponse = licenseDetailsService.activateLicense(licenseRequest);
             log.info("License activated (true/false): {}", licenseResponse.isSuccess());

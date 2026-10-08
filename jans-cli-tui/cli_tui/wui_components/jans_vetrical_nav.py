@@ -1,4 +1,4 @@
-from typing import Tuple, TypeVar, Callable, Optional, Sequence, Union
+from typing import Tuple, Callable, Optional
 
 
 from prompt_toolkit.layout.containers import HSplit, Window, FloatContainer
@@ -7,7 +7,6 @@ from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.formatted_text import merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import HorizontalLine
 from prompt_toolkit.widgets.base import Border
 from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText

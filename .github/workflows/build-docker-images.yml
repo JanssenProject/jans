@@ -349,7 +349,7 @@ jobs:
         if: steps.build_docker_image.outputs.build
         uses: docker/setup-qemu-action@e9a73d053822dd261763972e27a1731c06462d91 # master
         with:
-          image: tonistiigi/binfmt:master
+          image: tonistiigi/binfmt:master@sha256:de293ee92375004d4b785bf906f563ea0e122354f7c2366aebfee55766093d69
           platforms: ${{ steps.prep.outputs.platforms }}
 
       - name: Set up Docker Buildx
@@ -434,6 +434,7 @@ jobs:
         with:
           image-ref: ghcr.io/janssenproject/jans/all-in-one:${{ steps.prep.outputs.version }}
           format: 'json'
+          trivyignores: '.trivyignore'
           output: 'trivy-report.json'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
       - name: Generate Trivy Table Report (All-in-One only)
@@ -442,6 +443,7 @@ jobs:
         with:
           image-ref: ghcr.io/janssenproject/jans/all-in-one:${{ steps.prep.outputs.version }}
           format: 'table'
+          trivyignores: '.trivyignore'
           output: 'trivy-report.txt'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
       - name: Sign Trivy Reports
@@ -508,11 +510,12 @@ jobs:
       - name: Dispatch image consumers
         env:
           GH_TOKEN: ${{ github.token }}
+          TF_GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
           REF: ${{ github.event.workflow_run.head_branch }}
           AIO_IMAGE: ${{ steps.aio.outputs.image }}
         run: |
           set -euo pipefail
-          gh workflow run test-terraform-provider.yml -R "$GITHUB_REPOSITORY" --ref "$REF" \
+          GH_TOKEN="$TF_GH_TOKEN" gh workflow run test-terraform-provider.yml -R "$GITHUB_REPOSITORY" --ref "$REF" \
             -f aio_image_tag="$AIO_IMAGE"
           gh workflow run scan-pentest.yml -R "$GITHUB_REPOSITORY" --ref "$REF" \
             -f aio_image_tag="$AIO_IMAGE" \

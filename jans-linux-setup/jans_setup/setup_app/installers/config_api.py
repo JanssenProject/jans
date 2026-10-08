@@ -1,16 +1,10 @@
 import os
-import time
-import glob
 import json
-import base64
-import shutil
-import zipfile
-from string import Template
 
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.utils import base
-from setup_app.utils.ldif_utils import myLdifParser, create_client_ldif
+from setup_app.utils.ldif_utils import create_client_ldif
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.pylib.ldif4.ldif import LDIFWriter
@@ -33,7 +27,7 @@ class ConfigApiInstaller(JettyInstaller):
         self.register_progess()
 
 
-        self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
+        self.templates_folder = os.path.join(Config.template_folder, self.service_name)
         self.rs_protect_fn = os.path.join(Config.install_dir, 'setup_app/data/config-api-rs-protect.json')
         self.output_folder = os.path.join(Config.output_dir,'jans-config-api')
         self.scope_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
@@ -56,7 +50,7 @@ class ConfigApiInstaller(JettyInstaller):
 
     def copy_facter_script(self):
         target_fn = '/usr/sbin/facter'
-        self.copyFile(os.path.join(Config.staticFolder, 'scripts/facter'), target_fn)
+        self.copyFile(os.path.join(Config.static_folder, 'scripts/facter'), target_fn)
         self.run([paths.cmd_chmod, '+x', target_fn])
 
     def install_plugin(self, plugin):
@@ -107,48 +101,46 @@ class ConfigApiInstaller(JettyInstaller):
             Config.jca_client_pw = self.getPW()
             Config.jca_client_encoded_pw = self.obscure(Config.jca_client_pw)
 
-        scope_ldif_fd = open(self.scope_ldif_fn, 'wb')
-        ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
-        scopes = {}
-        jansUmaScopes_all = [ 'inum=C4F7,ou=scopes,o=jans' ]
+        with open(self.scope_ldif_fn, 'wb') as scope_ldif_fd:
+            ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
+            scopes = {}
+            jansUmaScopes_all = [ 'inum=C4F7,ou=scopes,o=jans' ]
 
-        if hasattr(base.current_app, 'ScimInstaller'):
-            scim_scopes = base.current_app.ScimInstaller.create_user_scopes()
-            jansUmaScopes_all += scim_scopes
+            if hasattr(base.current_app, 'ScimInstaller'):
+                scim_scopes = base.current_app.ScimInstaller.create_user_scopes()
+                jansUmaScopes_all += scim_scopes
 
-        scope_levels = {'scopes':'1', 'groupScopes':'2', 'superScopes':'3'}
+            scope_levels = {'scopes':'1', 'groupScopes':'2', 'superScopes':'3'}
 
-        for resource in scopes_def['resources']:
+            for resource in scopes_def['resources']:
 
-            for condition in resource.get('conditions', []):
-                for scope_level in scope_levels:
-                    for scope in (condition.get(scope_level, [])):
+                for condition in resource.get('conditions', []):
+                    for scope_level in scope_levels:
+                        for scope in (condition.get(scope_level, [])):
 
-                        if not scope.get('inum'):
-                            continue
+                            if not scope.get('inum'):
+                                continue
 
-                        if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(jansId={})(objectClass=jansScope))'.format(scope['name'])):
-                            continue
+                            if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(jansId={})(objectClass=jansScope))'.format(scope['name'])):
+                                continue
 
-                        if not scope['name'] in scopes:
-                            scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'])
-                            scopes[scope['name']] = {'dn': scope_dn}
-                            display_name = 'Config API scope {}'.format(scope['name'])
-                            description = 'Config API {} scope {}'.format(scope_level, scope['name'])
-                            ldif_dict = {
-                                        'objectClass': ['top', 'jansScope'],
-                                        'description': [description],
-                                        'displayName': [display_name],
-                                        'inum': [scope['inum']],
-                                        'jansDefScope': ['false'],
-                                        'jansId': [scope['name']],
-                                        'jansScopeTyp': [scope_type],
-                                        'jansAttrs': [json.dumps({"spontaneousClientId":None, "spontaneousClientScopes":[], "showInConfigurationEndpoint": False})],
-                                    }
-                            ldif_scopes_writer.unparse(scope_dn, ldif_dict)
-                            jansUmaScopes_all.append(scope_dn)
-
-        scope_ldif_fd.close()
+                            if not scope['name'] in scopes:
+                                scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'])
+                                scopes[scope['name']] = {'dn': scope_dn}
+                                display_name = 'Config API scope {}'.format(scope['name'])
+                                description = 'Config API {} scope {}'.format(scope_level, scope['name'])
+                                ldif_dict = {
+                                            'objectClass': ['top', 'jansScope'],
+                                            'description': [description],
+                                            'displayName': [display_name],
+                                            'inum': [scope['inum']],
+                                            'jansDefScope': ['false'],
+                                            'jansId': [scope['name']],
+                                            'jansScopeTyp': [scope_type],
+                                            'jansAttrs': [json.dumps({"spontaneousClientId":None, "spontaneousClientScopes":[], "showInConfigurationEndpoint": False})],
+                                        }
+                                ldif_scopes_writer.unparse(scope_dn, ldif_dict)
+                                jansUmaScopes_all.append(scope_dn)
 
         create_client = True
         if Config.installed_instance and self.dbUtils.search('ou=clients,o=jans', search_filter='(&(inum={})(objectClass=jansClnt))'.format(Config.jca_client_id)):
@@ -169,20 +161,20 @@ class ConfigApiInstaller(JettyInstaller):
 
     def render_import_templates(self):
 
-        Config.templateRenderingDict['configOauthEnabled'] = 'false' if base.argsp.disable_config_api_security else 'true'
-        Config.templateRenderingDict['apiApprovedIssuer'] = base.argsp.approved_issuer or 'https://{}'.format(Config.hostname)
+        Config.template_rendering_dict['configOauthEnabled'] = 'false' if base.argsp.disable_config_api_security else 'true'
+        Config.template_rendering_dict['apiApprovedIssuer'] = base.argsp.approved_issuer or 'https://{}'.format(Config.hostname)
 
         _, jans_auth_config = self.dbUtils.get_jans_auth_conf_dynamic()
         for param in ('issuer', 'openIdConfigurationEndpoint', 'introspectionEndpoint', 'tokenEndpoint', 'tokenRevocationEndpoint'):
-            Config.templateRenderingDict[param] = jans_auth_config[param]
+            Config.template_rendering_dict[param] = jans_auth_config[param]
 
-        Config.templateRenderingDict['apiProtectionType'] = 'oauth2'
-        Config.templateRenderingDict['endpointInjectionEnabled'] = 'false'
-        Config.templateRenderingDict['httpSSSLCertificateFile'] = base.current_app.HttpdInstaller.httpdCertFn
-        Config.templateRenderingDict['httpSSLCertificateKeyFile'] = base.current_app.HttpdInstaller.httpdKeyFn
+        Config.template_rendering_dict['apiProtectionType'] = 'oauth2'
+        Config.template_rendering_dict['endpointInjectionEnabled'] = 'false'
+        Config.template_rendering_dict['httpSSSLCertificateFile'] = base.current_app.HttpdInstaller.httpdCertFn
+        Config.template_rendering_dict['httpSSLCertificateKeyFile'] = base.current_app.HttpdInstaller.httpdKeyFn
 
         self.renderTemplateInOut(self.dynamic_conf_json, self.templates_folder, self.output_folder, pystring=True)
-        Config.templateRenderingDict['config_api_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
+        Config.template_rendering_dict['config_api_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
         self.renderTemplateInOut(self.config_ldif_fn, self.templates_folder, self.output_folder)
 
         self.dbUtils.import_ldif(self.load_ldif_files)
@@ -209,8 +201,8 @@ class ConfigApiInstaller(JettyInstaller):
         if not stat_scope in scopes:
             scopes.append(stat_scope)
 
-        Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
-        Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
+        Config.template_rendering_dict['config_api_scopes'] = '\n'.join(scopes)
+        Config.template_rendering_dict['config_api_scopes_list'] = ' '.join(scopes_id_list)
 
 
     def app_test_data_loader(self):
@@ -231,7 +223,7 @@ class ConfigApiInstaller(JettyInstaller):
 
         self.logIt("Loding Jans Config Api test data")
         self.update_rendering_dict()
-        self.render_templates_folder(os.path.join(Config.templateFolder, 'test', self.service_name))
+        self.render_templates_folder(os.path.join(Config.template_folder, 'test', self.service_name))
         ldif_fn = os.path.join(Config.output_dir, 'test', self.service_name, 'data/jans-config-api.ldif')
         self.dbUtils.import_ldif([ldif_fn])
 

@@ -1,0 +1,7 @@
+// Flow used by TranspilationResultTest to verify Inputs and Timeout parsing.
+Flow io.jans.test.InputsTimeout
+    Basepath "hello"
+    Timeout 100 seconds
+    Inputs salutation askGender
+Log "starting"
+Finish "john"

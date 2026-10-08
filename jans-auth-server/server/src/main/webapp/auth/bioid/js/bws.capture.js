@@ -328,7 +328,7 @@
 					// Sharing!
                     console.log('this browser does not support cors, e.g. IE8 or 9');
                 }
-                let jqxhr = $.ajax({
+                $.ajax({
                     type: 'POST',
                     url: settings.apiurl + 'upload?tag=' + tag + '&index=' + captured + '&trait=' + settings.trait,
                     data: dataURL,

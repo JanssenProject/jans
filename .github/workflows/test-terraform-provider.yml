@@ -45,7 +45,6 @@ on:
 
 permissions:
   contents: read
-  checks: write   # dorny/test-reporter posts the test report as a check run
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -54,6 +53,9 @@ concurrency:
 jobs:
   terraform-provider:
     if: github.repository == 'JanssenProject/jans'
+    permissions:
+      contents: read
+      checks: write   # dorny/test-reporter posts the test report as a check run
     strategy:
       fail-fast: false
       matrix:

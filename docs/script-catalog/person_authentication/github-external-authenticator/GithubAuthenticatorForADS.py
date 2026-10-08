@@ -5,7 +5,6 @@
 #
 
 from io.jans.as.common.model.common import User
-from io.jans.as.model.jwt import Jwt
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.common.service.common import UserService
 from io.jans.as.server.service.net import HttpService
@@ -18,12 +17,12 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
 from io.jans.jsf2.service import FacesService
-from java.util import Arrays, UUID
+from java.util import Arrays
 
 import json
 import sys
-import datetime
 import urllib
+from java.lang import Throwable
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -38,7 +37,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             creds = json.loads(f.read())
             print creds
-        except:
+        except (Exception, Throwable):
             print "GitHub: Initialization. Failed to load creds from file:", github_creds_file
             print "Exception: ", sys.exc_info()[1]
             return False
@@ -122,6 +121,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             identity.setWorkingParameter("github_repository_Path", user.getAttribute("adsUserGithubRepo"))
             return True
+        return None
 
 
 
@@ -148,7 +148,7 @@ class PersonAuthentication(PersonAuthenticationType):
         elif step == 2:
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            if user == None:
+            if user is None:
                 print "GitHub. Authenticate for step 2. Failed to determine username"
                 return False
             if user.getAttribute("adsUserGithubRepo") is not None and len(user.getAttribute("adsUserGithubRepo")) > 0:
