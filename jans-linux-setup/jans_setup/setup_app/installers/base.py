@@ -20,7 +20,7 @@ class BaseInstaller:
             self.output_folder = os.path.join(Config.output_dir, self.service_name)
 
         if not hasattr(self, 'templates_dir'):
-            self.templates_dir = os.path.join(Config.templateFolder, self.service_name)
+            self.templates_dir = os.path.join(Config.template_folder, self.service_name)
 
         jansProgress.register(self)
 
@@ -45,7 +45,7 @@ class BaseInstaller:
         self.copy_static()
         self.generate_configuration()
 
-        # before rendering templates, let's push variables of this class to Config.templateRenderingDict
+        # before rendering templates, let's push variables of this class to Config.template_rendering_dict
         self.update_rendering_dict()
         self.render_unit_file()
 
@@ -63,7 +63,7 @@ class BaseInstaller:
         units = self.get_systemd_service_list(unit)
 
         for unit in units:
-            unit_files_dir = os.path.join(Config.staticFolder, 'system/systemd')
+            unit_files_dir = os.path.join(Config.static_folder, 'system/systemd')
             unit_file = os.path.join(unit_files_dir, unit + '.service')
             if os.path.exists(unit_file):
                 self.renderTemplateInOut(unit_file, unit_files_dir, Config.unit_files_path)
@@ -76,7 +76,7 @@ class BaseInstaller:
             if not obj_name.startswith('__') and (not callable(obj)):
                 mydict[obj_name] = obj
 
-        Config.templateRenderingDict.update(mydict)
+        Config.template_rendering_dict.update(mydict)
 
 
     def check_clients(self, client_var_id_list, resource=False, create=True):

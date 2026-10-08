@@ -10,7 +10,44 @@ from setup_app.utils import base
 
 OPENBANKING_PROFILE = 'openbanking'
 
-class Config:
+LEGACY_NAMES = {
+    'noPrompt': 'no_prompt',
+    'distTmpFolder': 'dist_tmp_folder',
+    'downloadWars': 'download_wars',
+    'templateRenderingDict': 'template_rendering_dict',
+    'loadData': 'load_data',
+    'loadTestData': 'load_test_data',
+    'allowPreReleasedFeatures': 'allow_pre_released_features',
+    'savedProperties': 'saved_properties',
+    'jansOptBinFolder': 'jans_opt_bin_folder',
+    'jansOptSystemFolder': 'jans_opt_system_folder',
+    'jansOptPythonFolder': 'jans_opt_python_folder',
+    'configFolder': 'config_folder',
+    'orgName': 'org_name',
+    'countryCode': 'country_code',
+    'templateFolder': 'template_folder',
+    'staticFolder': 'static_folder',
+    'extensionFolder': 'extension_folder',
+    'jansScriptFiles': 'jans_script_files',
+    'defaultTrustStoreFN': 'default_trust_store_fn',
+    'defaultTrustStorePW': 'default_trust_store_pw',
+    'jansRDBMProperties': 'jans_rdbm_properties',
+    'rsyslogUbuntuInitFile': 'rsyslog_ubuntu_init_file',
+}
+
+_CURRENT_TO_LEGACY = {current: legacy for legacy, current in LEGACY_NAMES.items()}
+
+
+class _ConfigMeta(type):
+
+    def __setattr__(cls, name, value):
+        current = LEGACY_NAMES.get(name, name)
+        super().__setattr__(current, value)
+        if current in _CURRENT_TO_LEGACY:
+            super().__setattr__(_CURRENT_TO_LEGACY[current], value)
+
+
+class Config(metaclass=_ConfigMeta):
 
     # we define statics here so that is is acessible without construction
     opt_dir = '/opt'
@@ -48,7 +85,7 @@ class Config:
         myDict = {}
         for obj_name, obj in inspect.getmembers(cls):
             obj_name = str(obj_name)
-            if not obj_name.startswith('__') and (not callable(obj)):
+            if not obj_name.startswith('__') and obj_name not in LEGACY_NAMES and (not callable(obj)):
                 myDict[obj_name] = obj
 
         if dump_file:
@@ -108,15 +145,15 @@ class Config:
         cls.pbar = DummyProgress()
 
         cls.properties_password = None
-        cls.noPrompt = False
+        cls.no_prompt = False
 
         cls.dist_app_dir = os.path.join(cls.distFolder, 'app')
         cls.dist_jans_dir = os.path.join(cls.distFolder, 'jans')
-        cls.distTmpFolder = os.path.join(cls.distFolder, 'tmp')
+        cls.dist_tmp_folder = os.path.join(cls.distFolder, 'tmp')
         cls.jans_scripts_dir = os.path.join(cls.jansOptFolder, 'scripts')
 
-        cls.downloadWars = None
-        cls.templateRenderingDict = {
+        cls.download_wars = None
+        cls.template_rendering_dict = {
                                         'jans_auth_test_client_2_inum': 'AB77-1A2B',
                                         'jans_auth_test_client_3_inum': '3E20',
                                         'jans_auth_test_client_4_inum': 'FF81-2D39',
@@ -163,7 +200,7 @@ class Config:
         cls.rdbm_sslfactory = 'org.postgresql.ssl.NonValidatingFactory'
 
         # Jans components installation status
-        cls.loadData = True
+        cls.load_data = True
         cls.install_jans = True
         cls.install_jre = True
         cls.install_jetty = True
@@ -176,8 +213,8 @@ class Config:
         cls.install_casa = False
         cls.install_jans_cli = True
         cls.install_link = False
-        cls.loadTestData = False
-        cls.allowPreReleasedFeatures = False
+        cls.load_test_data = False
+        cls.allow_pre_released_features = False
         cls.install_jans_shib = False
         cls.install_jans_lock = False
         cls.install_opa = False
@@ -190,16 +227,16 @@ class Config:
         cls.persistence_type = 'sql'
 
         cls.setup_properties_fn = os.path.join(cls.install_dir, 'setup.properties')
-        cls.savedProperties = os.path.join(cls.install_dir, 'setup.properties.last')
+        cls.saved_properties = os.path.join(cls.install_dir, 'setup.properties.last')
 
-        cls.jansOptBinFolder = os.path.join(cls.jansOptFolder, 'bin')
-        cls.jansOptSystemFolder = os.path.join(cls.jansOptFolder, 'system')
-        cls.jansOptPythonFolder = os.path.join(cls.jansOptFolder, 'python')
-        cls.configFolder = os.path.join(cls.jansBaseFolder, 'conf') 
+        cls.jans_opt_bin_folder = os.path.join(cls.jansOptFolder, 'bin')
+        cls.jans_opt_system_folder = os.path.join(cls.jansOptFolder, 'system')
+        cls.jans_opt_python_folder = os.path.join(cls.jansOptFolder, 'python')
+        cls.config_folder = os.path.join(cls.jansBaseFolder, 'conf') 
 
-        cls.salt_fn = os.path.join(cls.configFolder,'salt')
-        cls.jans_properties_fn = os.path.join(cls.configFolder,'jans.properties')
-        cls.jans_hybrid_roperties_fn = os.path.join(cls.configFolder, 'jans-hybrid.properties')
+        cls.salt_fn = os.path.join(cls.config_folder,'salt')
+        cls.jans_properties_fn = os.path.join(cls.config_folder,'jans.properties')
+        cls.jans_hybrid_roperties_fn = os.path.join(cls.config_folder, 'jans-hybrid.properties')
 
         cls.cache_provider_type = 'NATIVE_PERSISTENCE'
 
@@ -207,8 +244,8 @@ class Config:
 
         cls.hostname = None
         cls.ip = None
-        cls.orgName = None
-        cls.countryCode = None
+        cls.org_name = None
+        cls.country_code = None
         cls.city = None
         cls.state = None
         cls.admin_email = None
@@ -218,34 +255,34 @@ class Config:
         cls.jans_max_mem = int(base.current_mem_size * .85 * 1000) # 85% of physical memory
         cls.calculate_mem()
 
-        cls.templateFolder = os.path.join(cls.install_dir, 'templates')
-        cls.staticFolder = os.path.join(cls.install_dir, 'static')
+        cls.template_folder = os.path.join(cls.install_dir, 'templates')
+        cls.static_folder = os.path.join(cls.install_dir, 'static')
 
-        cls.extensionFolder = os.path.join(cls.staticFolder, 'extension')
+        cls.extension_folder = os.path.join(cls.static_folder, 'extension')
         cls.script_catalog_dir = os.path.join(cls.install_dir, 'script_catalog')
 
-        cls.jansScriptFiles = [
-                            os.path.join(cls.staticFolder, 'scripts/logmanager.sh'),
-                            os.path.join(cls.staticFolder, 'scripts/jans'),
-                            os.path.join(cls.staticFolder, 'scripts/jans_services_status.py'),
-                            os.path.join(cls.staticFolder, 'scripts/get_agama_lab_projects.py'),
+        cls.jans_script_files = [
+                            os.path.join(cls.static_folder, 'scripts/logmanager.sh'),
+                            os.path.join(cls.static_folder, 'scripts/jans'),
+                            os.path.join(cls.static_folder, 'scripts/jans_services_status.py'),
+                            os.path.join(cls.static_folder, 'scripts/get_agama_lab_projects.py'),
                             ]
 
-        cls.defaultTrustStoreFN = os.path.join(cls.jre_home, 'jre/lib/security/cacerts')
-        cls.defaultTrustStorePW = 'changeit'
+        cls.default_trust_store_fn = os.path.join(cls.jre_home, 'jre/lib/security/cacerts')
+        cls.default_trust_store_pw = 'changeit'
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
 
-        cls.jans_python_readme = os.path.join(cls.jansOptPythonFolder, 'libs/python.txt')
-        cls.jansRDBMProperties = os.path.join(cls.configFolder, 'jans-sql.properties')
+        cls.jans_python_readme = os.path.join(cls.jans_opt_python_folder, 'libs/python.txt')
+        cls.jans_rdbm_properties = os.path.join(cls.config_folder, 'jans-sql.properties')
 
         cls.ldif_base = os.path.join(cls.output_dir, 'base.ldif')
         cls.ldif_attributes = os.path.join(cls.output_dir, 'attributes.ldif')
         cls.ldif_scopes = os.path.join(cls.output_dir, 'scopes.ldif')
         cls.ldif_agama = os.path.join(cls.output_dir, 'agama.ldif')
 
-        cls.ldif_metric = os.path.join(cls.staticFolder, 'metric/o_metric.ldif')
+        cls.ldif_metric = os.path.join(cls.static_folder, 'metric/o_metric.ldif')
         cls.ldif_site = os.path.join(cls.install_dir, 'static/site/site.ldif')
         cls.ldif_configuration = os.path.join(cls.output_dir, 'configuration.ldif')
 
@@ -253,7 +290,7 @@ class Config:
         cls.system_profile_update_systemd = os.path.join(cls.output_dir, 'system_profile_systemd')
 
         ### rsyslog file customised for init.d
-        cls.rsyslogUbuntuInitFile = os.path.join(cls.install_dir, 'static/system/ubuntu/rsyslog')
+        cls.rsyslog_ubuntu_init_file = os.path.join(cls.install_dir, 'static/system/ubuntu/rsyslog')
 
         # OpenID key generation default setting
         cls.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'

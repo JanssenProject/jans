@@ -22,7 +22,7 @@ class ScimInstaller(JettyInstaller):
         self.install_var = 'install_scim_server'
         self.register_progess()
 
-        self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
+        self.templates_folder = os.path.join(Config.template_folder, self.service_name)
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
 
         self.dynamic_config_fn = os.path.join(self.output_folder, 'dynamic-conf.json')
@@ -143,8 +143,8 @@ class ScimInstaller(JettyInstaller):
 
         self.renderTemplateInOut(self.dynamic_config_fn, self.templates_folder, self.output_folder)
         self.renderTemplateInOut(self.static_config_fn, self.templates_folder, self.output_folder)
-        Config.templateRenderingDict['scim_dynamic_conf_base64'] = self.generate_base64_ldap_file(self.dynamic_config_fn)
-        Config.templateRenderingDict['scim_static_conf_base64'] = self.generate_base64_ldap_file(self.static_config_fn)
+        Config.template_rendering_dict['scim_dynamic_conf_base64'] = self.generate_base64_ldap_file(self.dynamic_config_fn)
+        Config.template_rendering_dict['scim_static_conf_base64'] = self.generate_base64_ldap_file(self.static_config_fn)
 
         self.renderTemplateInOut(self.ldif_config_fn, self.templates_folder, self.output_folder)
 

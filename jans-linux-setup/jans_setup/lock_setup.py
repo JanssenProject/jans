@@ -102,8 +102,8 @@ if not argsp.n:
 else:
     Config.hostname = argsp.host_name
     Config.ip = argsp.ip_address
-    Config.orgName = argsp.org_name
-    Config.countryCode = argsp.country
+    Config.org_name = argsp.org_name
+    Config.country_code = argsp.country
     Config.city = argsp.city
     Config.state = argsp.state
     Config.admin_email = argsp.email
@@ -213,7 +213,7 @@ jettyInstaller.calculate_selected_aplications_memory()
 
 jansInstaller.configureSystem()
 jansInstaller.make_salt()
-jansInstaller.renderTemplateInOut(Config.jans_properties_fn, Config.templateFolder, out_file=Config.jans_properties_fn)
+jansInstaller.renderTemplateInOut(Config.jans_properties_fn, Config.template_folder, out_file=Config.jans_properties_fn)
 rdbmInstaller.rdbmProperties()
 jansInstaller.secure_files()
 

@@ -36,7 +36,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         self.jans_cli_install_dir = os.path.join(Config.jansOptFolder, 'jans-cli')
         self.config_ini_fn = config_dir.joinpath('jans-cli.ini')
         self.ldif_client = os.path.join(self.output_folder, 'client.ldif')
-        self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
+        self.templates_folder = os.path.join(Config.template_folder, self.service_name)
         self.pylib_dir = os.path.join(self.jans_cli_install_dir, 'cli', 'pylib')
 
         self.register_progess()
@@ -68,7 +68,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         gama_archiever_fn = 'gama-archieve-cli.py'
         self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, gama_archiever_fn)])
-        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, gama_archiever_fn), os.path.join(Config.jansOptBinFolder, gama_archiever_fn)])
+        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, gama_archiever_fn), os.path.join(Config.jans_opt_bin_folder, gama_archiever_fn)])
 
         #extract python libraries
         base.extract_from_zip(self.source_files[0][0], 'jwt', os.path.join(self.pylib_dir, 'jwt'))

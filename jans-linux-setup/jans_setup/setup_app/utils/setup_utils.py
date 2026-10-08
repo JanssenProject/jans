@@ -123,7 +123,7 @@ class SetupUtils(Crypto64):
         testIP = None
         detectedIP = Config.ip if Config.ip else self.detect_ip()
 
-        if Config.noPrompt and detectedIP:
+        if Config.no_prompt and detectedIP:
             return detectedIP
 
         while not testIP:
@@ -389,7 +389,7 @@ class SetupUtils(Crypto64):
         self.writeFile(out_fp, rendered_text)
 
     def renderTemplate(self, filePath):
-        self.renderTemplateInOut(filePath, Config.templateFolder, Config.output_dir)
+        self.renderTemplateInOut(filePath, Config.template_folder, Config.output_dir)
 
     def createUser(self, userName, homeDir, shell='/bin/bash'):
 
@@ -464,7 +464,7 @@ class SetupUtils(Crypto64):
 
             if te.is_file() and not te.name.endswith('.nrnd'):
                 self.logIt("Rendering template {}".format(te))
-                rp = te.relative_to(Config.templateFolder)
+                rp = te.relative_to(Config.template_folder)
                 output_dir = rp.parent
 
                 full_output_dir = Path(Config.output_dir, output_dir)
@@ -482,7 +482,7 @@ class SetupUtils(Crypto64):
 
     def render_template(self, tmp_fn, pystring=False, rendering_dict=None):
         template_text = self.readFile(tmp_fn)
-        format_dict = self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
+        format_dict = self.merge_dicts(Config.__dict__, Config.template_rendering_dict)
         if rendering_dict:
             format_dict = self.merge_dicts(format_dict, rendering_dict)
         for k in format_dict:

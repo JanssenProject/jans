@@ -1,7 +1,7 @@
 dn: o=jans
 description: Welcome to Janssen!
-displayName: %(orgName)s
-jansOrgShortName: %(orgName)s
+displayName: %(org_name)s
+jansOrgShortName: %(org_name)s
 jansThemeColor: 166309
 o: jans
 objectClass: top

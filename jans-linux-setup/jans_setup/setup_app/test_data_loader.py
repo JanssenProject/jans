@@ -20,9 +20,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.needdb = True
         self.app_type = static.AppType.APPLICATION
         self.install_type = static.InstallOption.OPTONAL
-        self.install_var = 'loadTestData'
+        self.install_var = 'load_test_data'
         self.register_progess()
-        self.template_base = os.path.join(Config.templateFolder, 'test')
+        self.template_base = os.path.join(Config.template_folder, 'test')
         self.schema_file = os.path.join(Config.install_dir, 'schema/jans_test_schema.json')
 
     def enable_cusom_scripts(self):
@@ -117,33 +117,33 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         Config.pbar.progress(self.service_name, "Rendering templates", False)
         self.logIt("Rendering test templates")
 
-        Config.templateRenderingDict['config_jans_auth_test_ldap'] = '# Not available'
+        Config.template_rendering_dict['config_jans_auth_test_ldap'] = '# Not available'
 
         config_jans_auth_test_properties = self.fomatWithDict(
             'server.name=%(hostname)s\nconfig.oxauth.issuer=http://localhost:80\nconfig.oxauth.contextPath=http://localhost:80\nconfig.oxauth.salt=%(encode_salt)s\nconfig.persistence.type=%(persistence_type)s\n\n',
-            self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
+            self.merge_dicts(Config.__dict__, Config.template_rendering_dict)
             )
 
         if Config.rdbm_type in ('mysql', 'pgsql'):
             if Config.rdbm_type == 'mysql':
-                Config.templateRenderingDict['rdbm_schema_name'] = Config.rdbm_db
-                Config.templateRenderingDict['rdbm_name_str'] = Config.rdbm_type
+                Config.template_rendering_dict['rdbm_schema_name'] = Config.rdbm_db
+                Config.template_rendering_dict['rdbm_name_str'] = Config.rdbm_type
             else:
-                Config.templateRenderingDict['rdbm_schema_name'] = 'public'
-                Config.templateRenderingDict['rdbm_name_str'] = 'postgresql'
+                Config.template_rendering_dict['rdbm_schema_name'] = 'public'
+                Config.template_rendering_dict['rdbm_name_str'] = 'postgresql'
 
             template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-sql.properties.nrnd'))
-            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.template_rendering_dict))
             config_jans_auth_test_properties += '\n#sql\n' +  rendered_text
 
             self.logIt("Adding custom attributs and indexes")
 
             schema2json(
-                    os.path.join(Config.templateFolder, 'test/jans-auth/schema/102-jans-auth_test.ldif'),
+                    os.path.join(Config.template_folder, 'test/jans-auth/schema/102-jans-auth_test.ldif'),
                     os.path.join(Config.output_dir, 'test/jans-auth/schema/')
                     )
             schema2json(
-                    os.path.join(Config.templateFolder, 'test/scim-client/schema/103-scim_test.ldif'),
+                    os.path.join(Config.template_folder, 'test/scim-client/schema/103-scim_test.ldif'),
                     os.path.join(Config.output_dir, 'test/scim-client/schema/'),
                     )
 

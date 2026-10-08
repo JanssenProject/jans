@@ -28,7 +28,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.httpdCertFn = os.path.join(Config.certFolder, 'httpd.crt')
 
 
-        self.templates_folder = os.path.join(Config.templateFolder, 'apache')
+        self.templates_folder = os.path.join(Config.template_folder, 'apache')
         self.output_folder = os.path.join(Config.output_dir, 'apache')
 
         self.apache2_conf = os.path.join(self.output_folder, 'httpd.conf')

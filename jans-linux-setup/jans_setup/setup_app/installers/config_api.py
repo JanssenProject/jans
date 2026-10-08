@@ -27,7 +27,7 @@ class ConfigApiInstaller(JettyInstaller):
         self.register_progess()
 
 
-        self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
+        self.templates_folder = os.path.join(Config.template_folder, self.service_name)
         self.rs_protect_fn = os.path.join(Config.install_dir, 'setup_app/data/config-api-rs-protect.json')
         self.output_folder = os.path.join(Config.output_dir,'jans-config-api')
         self.scope_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
@@ -50,7 +50,7 @@ class ConfigApiInstaller(JettyInstaller):
 
     def copy_facter_script(self):
         target_fn = '/usr/sbin/facter'
-        self.copyFile(os.path.join(Config.staticFolder, 'scripts/facter'), target_fn)
+        self.copyFile(os.path.join(Config.static_folder, 'scripts/facter'), target_fn)
         self.run([paths.cmd_chmod, '+x', target_fn])
 
     def install_plugin(self, plugin):
@@ -161,20 +161,20 @@ class ConfigApiInstaller(JettyInstaller):
 
     def render_import_templates(self):
 
-        Config.templateRenderingDict['configOauthEnabled'] = 'false' if base.argsp.disable_config_api_security else 'true'
-        Config.templateRenderingDict['apiApprovedIssuer'] = base.argsp.approved_issuer or 'https://{}'.format(Config.hostname)
+        Config.template_rendering_dict['configOauthEnabled'] = 'false' if base.argsp.disable_config_api_security else 'true'
+        Config.template_rendering_dict['apiApprovedIssuer'] = base.argsp.approved_issuer or 'https://{}'.format(Config.hostname)
 
         _, jans_auth_config = self.dbUtils.get_jans_auth_conf_dynamic()
         for param in ('issuer', 'openIdConfigurationEndpoint', 'introspectionEndpoint', 'tokenEndpoint', 'tokenRevocationEndpoint'):
-            Config.templateRenderingDict[param] = jans_auth_config[param]
+            Config.template_rendering_dict[param] = jans_auth_config[param]
 
-        Config.templateRenderingDict['apiProtectionType'] = 'oauth2'
-        Config.templateRenderingDict['endpointInjectionEnabled'] = 'false'
-        Config.templateRenderingDict['httpSSSLCertificateFile'] = base.current_app.HttpdInstaller.httpdCertFn
-        Config.templateRenderingDict['httpSSLCertificateKeyFile'] = base.current_app.HttpdInstaller.httpdKeyFn
+        Config.template_rendering_dict['apiProtectionType'] = 'oauth2'
+        Config.template_rendering_dict['endpointInjectionEnabled'] = 'false'
+        Config.template_rendering_dict['httpSSSLCertificateFile'] = base.current_app.HttpdInstaller.httpdCertFn
+        Config.template_rendering_dict['httpSSLCertificateKeyFile'] = base.current_app.HttpdInstaller.httpdKeyFn
 
         self.renderTemplateInOut(self.dynamic_conf_json, self.templates_folder, self.output_folder, pystring=True)
-        Config.templateRenderingDict['config_api_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
+        Config.template_rendering_dict['config_api_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
         self.renderTemplateInOut(self.config_ldif_fn, self.templates_folder, self.output_folder)
 
         self.dbUtils.import_ldif(self.load_ldif_files)
@@ -201,8 +201,8 @@ class ConfigApiInstaller(JettyInstaller):
         if not stat_scope in scopes:
             scopes.append(stat_scope)
 
-        Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
-        Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
+        Config.template_rendering_dict['config_api_scopes'] = '\n'.join(scopes)
+        Config.template_rendering_dict['config_api_scopes_list'] = ' '.join(scopes_id_list)
 
 
     def app_test_data_loader(self):
@@ -223,7 +223,7 @@ class ConfigApiInstaller(JettyInstaller):
 
         self.logIt("Loding Jans Config Api test data")
         self.update_rendering_dict()
-        self.render_templates_folder(os.path.join(Config.templateFolder, 'test', self.service_name))
+        self.render_templates_folder(os.path.join(Config.template_folder, 'test', self.service_name))
         ldif_fn = os.path.join(Config.output_dir, 'test', self.service_name, 'data/jans-config-api.ldif')
         self.dbUtils.import_ldif([ldif_fn])
 

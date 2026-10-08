@@ -94,7 +94,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_chgrp, '-R', Config.jetty_group, jettyRunFolder])
 
         self.run(['rm', '-rf', self.jetty_bin_sh_fn])
-        self.copyFile("%s/system/initd/jetty.sh" % Config.staticFolder, self.jetty_bin_sh_fn)
+        self.copyFile("%s/system/initd/jetty.sh" % Config.static_folder, self.jetty_bin_sh_fn)
         self.chown(self.jetty_bin_sh_fn, Config.jetty_user, Config.jetty_group, recursive=True)
         self.run([paths.cmd_chmod, '-R', '755', self.jetty_bin_sh_fn])
 
@@ -129,7 +129,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             self.logIt("Can't determine Jetty version", True, True)
 
         jetty_dist = '/opt/jetty-' + jetty_regex.groups()[0]
-        Config.templateRenderingDict['jetty_dist'] = jetty_dist
+        Config.template_rendering_dict['jetty_dist'] = jetty_dist
         self.jetty_version_string = jetty_regex.groups()[0]
         self.jetty_exact_version_string = jetty_exact_version_regex.groups()[0]
 
@@ -190,7 +190,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.update_rendering_dict()
 
         try:
-            self.renderTemplateInOut(service_name, os.path.join(Config.templateFolder, NAME_STR), os.path.join(Config.output_dir, NAME_STR))
+            self.renderTemplateInOut(service_name, os.path.join(Config.template_folder, NAME_STR), os.path.join(Config.output_dir, NAME_STR))
         except Exception:
             self.logIt("Error rendering service '%s' defaults" % service_name, True)
 
@@ -201,10 +201,10 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         # Render web reources file
         try:
             web_resources = '%s_web_resources.xml' % service_name
-            if os.path.exists(os.path.join(Config.templateFolder, NAME_STR, web_resources)):
+            if os.path.exists(os.path.join(Config.template_folder, NAME_STR, web_resources)):
                 self.renderTemplateInOut(
                         web_resources,
-                        os.path.join(Config.templateFolder, NAME_STR),
+                        os.path.join(Config.template_folder, NAME_STR),
                         os.path.join(Config.output_dir, NAME_STR)
                         )
                 self.copyFile(
@@ -217,13 +217,13 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         # Render web context file
         try:
             web_context = '%s.xml' % service_name
-            jetty_temp_dir = os.path.join(Config.templateFolder, 'jetty')
+            jetty_temp_dir = os.path.join(Config.template_folder, 'jetty')
             if not os.path.exists(os.path.join(jetty_temp_dir, web_context)):
                 web_context = 'default_webcontext.xml'
 
             self.renderTemplateInOut(
                     web_context,
-                    os.path.join(Config.templateFolder, NAME_STR),
+                    os.path.join(Config.template_folder, NAME_STR),
                     out_file=os.path.join(self.jetty_base, service_name, 'webapps/{}.xml'.format(service_name))
                 )
         except Exception:
@@ -233,7 +233,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         tmpfiles_base = '/usr/lib/tmpfiles.d'
         if Config.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
             self.logIt("Creating 'jetty.conf' tmpfiles daemon file")
-            jetty_tmpfiles_src = '%s/jetty.conf.tmpfiles.d' % Config.templateFolder
+            jetty_tmpfiles_src = '%s/jetty.conf.tmpfiles.d' % Config.template_folder
             jetty_tmpfiles_dst = '%s/jetty.conf' % tmpfiles_base
             self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
             self.chown(jetty_tmpfiles_dst, Config.root_user, Config.root_group)
@@ -341,7 +341,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 # We uses this dummy value to render template properly of not installed application
                 applicationMemory = 256
 
-            Config.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
+            Config.template_rendering_dict["%s_max_mem" % applicationName] = applicationMemory
 
             if 'jvm_heap_ration' in applicationConfiguration['memory']:
                 jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
@@ -351,8 +351,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 if maxHeapMem < minHeapMem:
                     minHeapMem = maxHeapMem
 
-                Config.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
-                Config.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
+                Config.template_rendering_dict["%s_max_heap_mem" % applicationName] = maxHeapMem
+                Config.template_rendering_dict["%s_min_heap_mem" % applicationName] = minHeapMem
 
                 if maxHeapMem < 256 and applicationName in allowedApplicationsMemory:
                     retVal = False
@@ -366,7 +366,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         if not jans_apps:
             jans_apps = self.service_name+'.war'
 
-        web_apps_xml_fn = os.path.join(Config.templateFolder, 'jetty/jans-app.xml')
+        web_apps_xml_fn = os.path.join(Config.template_folder, 'jetty/jans-app.xml')
         web_apps_xml = self.readFile(web_apps_xml_fn)
         web_apps_xml = self.fomatWithDict(web_apps_xml, {'jans_app_path': jans_app_path, 'jans_apps': jans_apps})
 

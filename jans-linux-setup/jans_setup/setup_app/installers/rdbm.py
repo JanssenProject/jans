@@ -560,8 +560,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         if Config.rdbm_type in ('pgsql', 'mysql'):
             Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
-            src_temp_fn = os.path.join(Config.templateFolder, 'jans-{}.properties'.format(Config.rdbm_type))
-            targtet_fn = os.path.join(Config.configFolder, Config.jansRDBMProperties)
+            src_temp_fn = os.path.join(Config.template_folder, 'jans-{}.properties'.format(Config.rdbm_type))
+            targtet_fn = os.path.join(Config.config_folder, Config.jans_rdbm_properties)
             rendered_tmp = self.render_template(src_temp_fn)
             self.writeFile(targtet_fn, rendered_tmp)
 

@@ -18,8 +18,8 @@ def test_getOpts():
     setupOptions = {
         'install_dir': '.',
         'setup_properties': None,
-        'noPrompt': False,
-        'downloadWars': False,
+        'no_prompt': False,
+        'download_wars': False,
         'install_jans_auth': True,
         'opendj_install': True,
         'install_httpd': True,
@@ -45,10 +45,10 @@ def test_getOpts():
     assert_equal(setupOptions['setup_properties'], 'tests/dummyfile')  # Preval
 
     setupOptions = getOpts(['-n'], setupOptions)
-    assert_true(setupOptions['noPrompt'])
+    assert_true(setupOptions['no_prompt'])
 
     setupOptions = getOpts(['-N'], setupOptions)
     assert_false(setupOptions['install_httpd'])
 
     setupOptions = getOpts(['-w'], setupOptions)
-    assert_true(setupOptions['downloadWars'])
+    assert_true(setupOptions['download_wars'])

@@ -26,7 +26,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
     def collect(self):
         print("Please wait while collecting properties...")
         self.logIt("Previously installed instance. Collecting properties")
-        salt_fn = os.path.join(Config.configFolder,'salt')
+        salt_fn = os.path.join(Config.config_folder,'salt')
         if os.path.exists(salt_fn):
             salt_prop = base.read_properties_file(salt_fn)
             Config.encode_salt = salt_prop['encodeSalt']
@@ -36,8 +36,8 @@ class CollectProperties(SetupUtils, BaseInstaller):
         jans_ConfigurationDN = 'ou=configuration,o=jans'
 
 
-        if os.path.exists(Config.jansRDBMProperties):
-            jans_sql_prop = base.read_properties_file(Config.jansRDBMProperties)
+        if os.path.exists(Config.jans_rdbm_properties):
+            jans_sql_prop = base.read_properties_file(Config.jans_rdbm_properties)
 
             rdbm_schema = jans_sql_prop.get('db.schema.name')
             if rdbm_schema and not base.is_valid_identifier(rdbm_schema):
@@ -135,14 +135,14 @@ class CollectProperties(SetupUtils, BaseInstaller):
         crt_fn = httpd_crt_fn if os.path.exists(httpd_crt_fn) else '/etc/certs/ob/server.crt'
         ssl_subj = self.get_ssl_subject(crt_fn)
 
-        Config.countryCode = ssl_subj.get('countryName', '')
+        Config.country_code = ssl_subj.get('countryName', '')
         Config.state = ssl_subj.get('stateOrProvinceName', '')
         Config.city = ssl_subj.get('localityName', '')
         Config.admin_email = ssl_subj.get('emailAddress', '')
 
 
-        if not Config.get('orgName'):
-            Config.orgName = ssl_subj.get('organizationName', '')
+        if not Config.get('org_name'):
+            Config.org_name = ssl_subj.get('organizationName', '')
 
         for s in ['jansScimEnabled']:
             setattr(Config, s, oxConfiguration.get(s, False))

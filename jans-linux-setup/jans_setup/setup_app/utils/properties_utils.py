@@ -10,7 +10,7 @@ from setup_app import paths
 from setup_app.utils import base
 from setup_app.static import InstallTypes, colors, BackendStrings
 
-from setup_app.config import Config
+from setup_app.config import Config, LEGACY_NAMES
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.db_utils import dbUtils
 from setup_app.pylib.jproperties import Properties
@@ -82,12 +82,12 @@ class PropertiesUtils(SetupUtils):
                 print('The hostname has to be at least three domain components. Try again\n')
         while not Config.ip:
             Config.ip = self.get_ip()
-        while not Config.orgName:
-            Config.orgName = input('Organization Name: ').strip()
-        while not Config.countryCode:
+        while not Config.org_name:
+            Config.org_name = input('Organization Name: ').strip()
+        while not Config.country_code:
             test_code = input('2 Character Country Code: ').strip()
             if len(test_code) == 2:
-                Config.countryCode = test_code
+                Config.country_code = test_code
             else:
                 print('Country code should only be two characters. Try again\n')
         while not Config.city:
@@ -136,7 +136,7 @@ class PropertiesUtils(SetupUtils):
     def load_properties(self, prop_file, no_update=[]):
         self.logIt('Loading Properties %s' % prop_file)
 
-        no_update = no_update + ['noPrompt', 'jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
+        no_update = no_update + ['no_prompt', 'jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
 
         if prop_file.endswith('.enc'):
             if not Config.properties_password:
@@ -151,6 +151,8 @@ class PropertiesUtils(SetupUtils):
             self.logIt("Error loading properties", True)
             sys.exit(False)
 
+        p = {LEGACY_NAMES.get(key, key): val for key, val in p.items()}
+
 
         if p.get('enable-script'):
             base.argsp.enable_script = p['enable-script'].split()
@@ -158,7 +160,7 @@ class PropertiesUtils(SetupUtils):
         if p.get('install_jans_saml'):
             base.argsp.install_jans_shib = True
 
-        if base.as_bool(p.get('loadTestData', False)):
+        if base.as_bool(p.get('load_test_data', False)):
             base.argsp.t = True
 
         if p.get('rdbm_type') == 'pgsql' and not p.get('rdbm_port'):
@@ -199,14 +201,14 @@ class PropertiesUtils(SetupUtils):
 
     @staticmethod
     def _is_saved_property(name, member):
-        if name in ('post_messages', 'properties_password', 'non_setup_properties', 'addPostSetupService'):
+        if name in LEGACY_NAMES or name in ('post_messages', 'properties_password', 'non_setup_properties', 'addPostSetupService'):
             return False
         return not name.startswith(('cmd_', '__')) and not callable(member)
 
     def save_properties(self, prop_fn=None):
 
         if not prop_fn:
-            prop_fn = Config.savedProperties
+            prop_fn = Config.saved_properties
 
         self.logIt('Saving properties to %s' % prop_fn)
 
@@ -573,14 +575,14 @@ class PropertiesUtils(SetupUtils):
         # Get the Country Code
         long_enough = False
         while not long_enough:
-            countryCode = self.getPrompt("Enter two letter Country Code", Config.countryCode)
-            if len(countryCode) != 2:
+            country_code = self.getPrompt("Enter two letter Country Code", Config.country_code)
+            if len(country_code) != 2:
                 print("Country code must be two characters")
             else:
-                Config.countryCode = countryCode
+                Config.country_code = country_code
                 long_enough = True
 
-        Config.orgName = self.getPrompt("Enter Organization Name", Config.orgName)
+        Config.org_name = self.getPrompt("Enter Organization Name", Config.org_name)
 
         while True:
             Config.admin_email = self.getPrompt('Enter email address for support at your organization', Config.admin_email)
@@ -592,7 +594,7 @@ class PropertiesUtils(SetupUtils):
 
     def promptForProperties(self):
 
-        if Config.noPrompt or '-x' in sys.argv:
+        if Config.no_prompt or '-x' in sys.argv:
             return
 
 

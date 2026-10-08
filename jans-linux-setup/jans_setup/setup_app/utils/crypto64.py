@@ -76,7 +76,7 @@ class Crypto64:
                   '-out',
                   csr,
                   '-subj',
-                  '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (Config.countryCode, Config.state, Config.city, Config.orgName, certCn, Config.admin_email)
+                  '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (Config.country_code, Config.state, Config.city, Config.org_name, certCn, Config.admin_email)
                   ])
         self.run([paths.cmd_openssl,
                   'x509',
@@ -102,7 +102,7 @@ class Crypto64:
 
     def import_cert_into_keystore(self, cert_fn, alias, truststore_fn=None, truststore_pw='changeit'):
         if not truststore_fn:
-            truststore_fn = Config.defaultTrustStoreFN
+            truststore_fn = Config.default_trust_store_fn
 
         self.run([
                 Config.cmd_keytool,
@@ -136,7 +136,7 @@ class Crypto64:
                   '-days', '3650',
                   '-outform', 'PEM',
                   '-out', ca_crt_fn,
-                  '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.countryCode, Config.state, Config.city, Config.orgName, Config.hostname, Config.admin_email)
+                  '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.country_code, Config.state, Config.city, Config.org_name, Config.hostname, Config.admin_email)
                   ])
 
         return ca_key_fn, ca_crt_fn
@@ -156,7 +156,7 @@ class Crypto64:
         self.run([paths.cmd_openssl, 'req', '-new',
             '-key', key_fn,
             '-out', csr_fn,
-            '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.countryCode, Config.state, Config.city, Config.orgName, cn, Config.admin_email)
+            '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.country_code, Config.state, Config.city, Config.org_name, cn, Config.admin_email)
             ])
 
         crt_fn = os.path.join(out_dir, fn_suffix+'.crt')
@@ -175,8 +175,8 @@ class Crypto64:
 
     def prepare_base64_extension_scripts(self, extensions=[]):
         self.logIt("Preparing scripts")
-        # Remove extensionFolder when all scripts are moved to script_catalog_dir
-        for path_ in (Config.extensionFolder, Config.script_catalog_dir):
+        # Remove extension_folder when all scripts are moved to script_catalog_dir
+        for path_ in (Config.extension_folder, Config.script_catalog_dir):
             extension_path = Path(path_)
             for ep in extension_path.glob("**/*"):
                 if ep.is_file() and ep.suffix.lower() in ['.py', '.java']:
@@ -189,7 +189,7 @@ class Crypto64:
 
                     # Prepare key for dictionary
                     base64_script_file = self.generate_base64_file(ep.as_posix(), 1)
-                    Config.templateRenderingDict[extension_script_name] = base64_script_file
+                    Config.template_rendering_dict[extension_script_name] = base64_script_file
 
 
     def generate_base64_file(self, fn, num_spaces=0):
@@ -348,13 +348,13 @@ class Crypto64:
         self.logIt("Encoding test passwords")
         hostname = Config.hostname.split('.')[0]
 
-        for tmp_str in list(Config.templateRenderingDict.keys()):
+        for tmp_str in list(Config.template_rendering_dict.keys()):
             if re.match(r'(.*?)test_client_(\d*)_inum', tmp_str):
                 cli_prefix = tmp_str.strip('_inum')
                 cli_pw_var = cli_prefix +'_pw'
-                if not cli_pw_var in Config.templateRenderingDict:
-                    Config.templateRenderingDict[cli_pw_var] = Config.templateRenderingDict[tmp_str] + '-' + hostname
-                    Config.templateRenderingDict[cli_prefix + '_encoded_pw'] = self.obscure(Config.templateRenderingDict[cli_pw_var])
+                if not cli_pw_var in Config.template_rendering_dict:
+                    Config.template_rendering_dict[cli_pw_var] = Config.template_rendering_dict[tmp_str] + '-' + hostname
+                    Config.template_rendering_dict[cli_prefix + '_encoded_pw'] = self.obscure(Config.template_rendering_dict[cli_pw_var])
 
     def get_server_certificate(self, host):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

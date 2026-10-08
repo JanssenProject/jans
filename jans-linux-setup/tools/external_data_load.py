@@ -80,7 +80,7 @@ from setup_app.utils.db_utils import dbUtils
 Config.init(paths.INSTALL_DIR)
 SetupUtils.init()
 
-Config.templateRenderingDict.update(other_argsp)
+Config.template_rendering_dict.update(other_argsp)
 Config.rdbm_type = 'mysql'
 Config.rdbm_host = argsp.rdbm_host
 Config.rdbm_port = argsp.rdbm_port

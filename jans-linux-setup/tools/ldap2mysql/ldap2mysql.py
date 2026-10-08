@@ -192,7 +192,7 @@ rdbmInstaller.rdbmProperties()
 jansInstaller.renderTemplateInOut(
                     Config.jans_properties_fn,
                     os.path.join(Config.install_dir, 'templates'),
-                    Config.configFolder
+                    Config.config_folder
                 )
 
 if os.path.exists(Config.ox_ldap_properties):

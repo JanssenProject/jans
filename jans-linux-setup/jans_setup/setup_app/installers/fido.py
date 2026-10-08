@@ -30,9 +30,9 @@ class FidoInstaller(JettyInstaller):
         self.install_var = 'install_fido2'
         self.register_progess()
 
-        self.fido2ConfigFolder = os.path.join(Config.configFolder, 'fido2')
+        self.fido2ConfigFolder = os.path.join(Config.config_folder, 'fido2')
         self.output_folder = os.path.join(Config.output_dir, 'jans-fido2')
-        self.template_folder = os.path.join(Config.templateFolder, 'jans-fido2')
+        self.template_folder = os.path.join(Config.template_folder, 'jans-fido2')
         self.fido2_dynamic_conf_json = os.path.join(self.output_folder, 'dynamic-conf.json')
         self.fido2_error_json = os.path.join(self.output_folder, 'jans-fido2-errors.json')
         self.fido2_static_conf_json = os.path.join(self.output_folder, 'static-conf.json')
@@ -62,20 +62,20 @@ class FidoInstaller(JettyInstaller):
                 ):
             self.renderTemplateInOut(tmp_, self.template_folder, self.output_folder)
 
-        Config.templateRenderingDict['fido2_dynamic_conf_base64'] = self.generate_base64_file(self.fido2_dynamic_conf_json, 1)
-        Config.templateRenderingDict['fido2_error_base64'] = self.generate_base64_file(self.fido2_error_json, 1)
-        Config.templateRenderingDict['fido2_static_conf_base64'] = self.generate_base64_file(self.fido2_static_conf_json, 1)
+        Config.template_rendering_dict['fido2_dynamic_conf_base64'] = self.generate_base64_file(self.fido2_dynamic_conf_json, 1)
+        Config.template_rendering_dict['fido2_error_base64'] = self.generate_base64_file(self.fido2_error_json, 1)
+        Config.template_rendering_dict['fido2_static_conf_base64'] = self.generate_base64_file(self.fido2_static_conf_json, 1)
 
-        Config.templateRenderingDict['fido_document_tocs_base64'] = self.generate_base64_file(self.source_files[2][0], 1)
-        Config.templateRenderingDict['fido_document_certs_base64'] = self.generate_base64_file(self.source_files[3][0], 1)
-        Config.templateRenderingDict['Apple_WebAuthn_Root_CA_base64'] = self.generate_base64_file(self.source_files[1][0], 1)
+        Config.template_rendering_dict['fido_document_tocs_base64'] = self.generate_base64_file(self.source_files[2][0], 1)
+        Config.template_rendering_dict['fido_document_certs_base64'] = self.generate_base64_file(self.source_files[3][0], 1)
+        Config.template_rendering_dict['Apple_WebAuthn_Root_CA_base64'] = self.generate_base64_file(self.source_files[1][0], 1)
 
         for f in ('yubico-u2f-ca-cert.crt', 'HyperFIDO_CA_Cert_V1.pem', 'HyperFIDO_CA_Cert_V2.pem'):
             src = os.path.join(Config.install_dir, 'static/fido2/authenticator_cert/', f)
             doc_var, _ = os.path.splitext(f)
             doc_var = doc_var.replace('-','_')
             setattr(Config, doc_var + '_inum', str(uuid.uuid4()))
-            Config.templateRenderingDict[doc_var + '_base64'] = self.generate_base64_file(src, 1)
+            Config.template_rendering_dict[doc_var + '_base64'] = self.generate_base64_file(src, 1)
 
 
         for tmp_ in (self.ldif_fido2, self.ldif_fido2_documents):
@@ -108,7 +108,7 @@ class FidoInstaller(JettyInstaller):
         self.logIt("Loding Jans Fido2 test data")
         self.encode_test_passwords()
         self.update_rendering_dict()
-        test_templates_dir = os.path.join(Config.templateFolder, 'test', self.service_name)
+        test_templates_dir = os.path.join(Config.template_folder, 'test', self.service_name)
         self.render_templates_folder(test_templates_dir)
         import_fn_list = glob.glob(os.path.join(test_templates_dir, 'data/*.ldif'))
         self.dbUtils.import_ldif(import_fn_list)
