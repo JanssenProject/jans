@@ -1,3 +1,4 @@
+grpcio==1.83.0
 ruamel.yaml==0.18.6
 supervisor==4.3.0
 pluggy==1.4.0
