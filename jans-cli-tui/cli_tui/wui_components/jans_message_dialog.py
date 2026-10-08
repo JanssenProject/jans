@@ -1,3 +1,4 @@
+import contextlib
 from functools import partial
 
 from prompt_toolkit.widgets import Button, Dialog
@@ -47,10 +48,8 @@ class JansMessageDialog:
             if self.me in app.root_layout.floats:
                 app.root_layout.floats.remove(self.me)
 
-            try:
+            with contextlib.suppress(Exception):
                 app.layout.focus(self.focus_on_exit)
-            except Exception:
-                pass  # focus target no longer in layout
 
         blist = []
 

@@ -1,3 +1,1 @@
-# GHSA-373j-mhpf-84wg: fixed in jans-config-api-server 1.8.0; nightly builds carry
-# version 0.0.0-nightly, which Trivy sorts below the fixed release.
 CVE-2025-53003

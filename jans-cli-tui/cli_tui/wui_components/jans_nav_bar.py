@@ -1,3 +1,4 @@
+import contextlib
 import re
 
 from typing import Callable, Optional
@@ -74,10 +75,8 @@ class JansNavBar():
             re_search = shortcut_re.search(entry[1])
             if re_search and re_search.group(1).lower() == ev.data:
                 view.cur_navbar_selection = i
-                try: 
+                with contextlib.suppress(Exception):
                     self.myparent.layout.focus(view.nav_window)
-                except Exception:
-                    pass  # nav window not in current layout
                 view._set_selection()
                 return True
         return None
@@ -92,11 +91,9 @@ class JansNavBar():
         if not self._set_tab_for_view(self.myparent.nav_bar, ev):
         # then set sub navbar
             cur_plugin = self.myparent.nav_bar.cur_navbar_selection
-            try: ## i couldnt access the plugin content from here
+            with contextlib.suppress(Exception):
                 cur_view = self.myparent._plugins[cur_plugin].nav_bar
                 self._set_tab_for_view(cur_view, ev)
-            except Exception:
-                pass  # plugin has no nav bar
 
     def add_key_binding(
         self, 

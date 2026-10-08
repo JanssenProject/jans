@@ -1,3 +1,4 @@
+import contextlib
 import copy
 import json
 import asyncio
@@ -1395,7 +1396,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                 inum = scope_dn.split(',')[0].split('=')[1]
                 scope_result = {}
-                try:
+                with contextlib.suppress(Exception):
                     scope_response = self.myparent.cli_object.process_command_by_id(
                         operation_id='get-oauth-scopes-by-inum',
                         url_suffix=URL_SUFFIX_FORMATTER.format(inum),
@@ -1404,8 +1405,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         data={}
                     )
                     scope_result = scope_response.json()
-                except Exception:
-                    pass  # fall back to scope DN below
 
                 display_name = scope_result.get(
                     'displayName') or scope_result.get('inum')

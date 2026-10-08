@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import contextlib
 import readline
 import os
 import sys
@@ -50,12 +51,10 @@ def ami_packaged():
         return True
     my_path = Path(__file__).parent
     for p in site.getsitepackages():
-        try:
+        with contextlib.suppress(ValueError):
             rp = my_path.relative_to(p)
             if rp:
                 return True
-        except ValueError:
-            pass  # not under this site-packages dir
 
     return False
 
@@ -227,7 +226,7 @@ if os.path.exists(Config.jans_properties_fn):
         collectProperties.save()
         sys.exit()
 
-if not Config.noPrompt and not Config.installed_instance and not setup_loaded:
+if not Config.no_prompt and not Config.installed_instance and not setup_loaded:
     propertiesUtils.promptForProperties()
 
 propertiesUtils.check_properties()
@@ -316,7 +315,7 @@ base.current_app.proceed_installation = True
 
 def main():
 
-    if not Config.noPrompt:
+    if not Config.no_prompt:
         proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
         if proceed_prompt and proceed_prompt[0] != 'y':
             base.current_app.proceed_installation = False

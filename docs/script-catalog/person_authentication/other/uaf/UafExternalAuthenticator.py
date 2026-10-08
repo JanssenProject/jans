@@ -103,7 +103,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             uaf_auth_method = "authenticate"
-            # To allow user second device registration, switch uaf_auth_method to "enroll" when request parameter "loginForm:registerButton" is set
             
             if uaf_auth_method == "authenticate":
                 user_enrollments = self.findEnrollments(credentials)
@@ -143,7 +142,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             # Request STATUS_OBB
-            # It's workaround becuase it's not possible to call STATUS_OBB 2 times. First time on browser and second ime on server
             uaf_user_device_handle = ServerUtil.getFirstValue(requestParameters, "auth_handle")
 
             if StringHelper.isEmpty(uaf_user_device_handle):

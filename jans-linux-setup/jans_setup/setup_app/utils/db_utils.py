@@ -1,3 +1,4 @@
+import contextlib
 import warnings
 import sys
 import os
@@ -458,10 +459,8 @@ class DBUtils:
         if Config.rdbm_type == 'pgsql':
             reflect_args['schema'] = Config.rdbm_schema
 
-        try:
+        with contextlib.suppress(Exception):
             metadata.reflect(**reflect_args)
-        except Exception:
-            pass  # reflect raises when table is missing; checked below
 
         return self.get_table_name_with_schema(table, quoted=False) in metadata
 
@@ -507,10 +506,8 @@ class DBUtils:
             json_data = []
             for d in val:
                 if d and isinstance(d, str):
-                    try:
+                    with contextlib.suppress(Exception):
                         d = json.loads(d)
-                    except Exception:
-                        pass  # not JSON, keep raw value
                 json_data.append(d)
 
             return json_data

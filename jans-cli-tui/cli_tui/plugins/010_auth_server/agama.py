@@ -1,3 +1,4 @@
+import contextlib
 import os
 import json
 import asyncio
@@ -571,10 +572,8 @@ class Agama(DialogUtils):
 
             await asyncio.sleep(1)
 
-            try:
+            with contextlib.suppress(Exception):
                 download_project_dialog.future.set_result(True)
-            except Exception:
-                pass  # dialog already closed by user
 
             self.upload_project(file_path=download_path, community_project_name=project_name)
 

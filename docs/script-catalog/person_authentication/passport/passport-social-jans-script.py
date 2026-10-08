@@ -151,13 +151,9 @@ class PersonAuthentication(PersonAuthenticationType):
         faces_context = CdiUtil.bean(FacesContext)
         request_parameters = faces_context.getExternalContext().getRequestParameterMap()
 
-        passport_strategy_failed = None
-        try:
-            passport_strategy_failed = request_parameters['failure']
+        passport_strategy_failed = request_parameters.get('failure')
+        if passport_strategy_failed is not None:
             print("Passport. failure return from passport: %s, Check Passport logs " % passport_strategy_failed)
-        except Exception as _:
-            # no 'failure' param means passport did not report a strategy failure
-            pass
 
         if step == 1:
             #re-read the strategies config (for instance to know which strategies have enabled the email account linking)

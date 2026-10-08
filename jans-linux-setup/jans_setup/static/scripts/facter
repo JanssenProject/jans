@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import contextlib
 import sys
 
 if '--version' in sys.argv:
@@ -34,7 +35,7 @@ uptime = 0
 ip_addr = ''
 hostname = ''
 
-try:
+with contextlib.suppress(Exception):
     with open('/proc/meminfo') as f:
         for l in f:
             if l.startswith('SwapTotal'):
@@ -45,16 +46,10 @@ try:
                 memorysize = int(l.split(':')[1].split()[0]) / 1024.0
             elif l.startswith('MemAvailable'):
                 memoryfree = int(l.split(':')[1].split()[0]) / 1024.0
-except Exception:
-    # keep defaults when /proc/meminfo is unavailable
-    pass
 
-try:
+with contextlib.suppress(Exception):
     with open('/proc/uptime') as f:
         uptime = int(float(f.read().strip().split()[0]))
-except Exception:
-    # keep default uptime when /proc/uptime is unavailable
-    pass
 
 try:
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -62,7 +57,7 @@ try:
     ip_addr = sock.getsockname()[0]
     sock.close()
 except Exception:
-    try:
+    with contextlib.suppress(Exception):
         net_if_list = socket.if_nameindex()
 
         for netif in net_if_list[:]:
@@ -83,18 +78,12 @@ except Exception:
         ip = struct.unpack('16sH2x4s8x', res)[2]
         ip_addr = socket.inet_ntoa(ip)
         sock.close()
-    except Exception:
-        # leave ip_addr empty when no interface address can be read
-        pass
 
 try:
     hostname = socket.gethostbyaddr(ip_addr)[0]
 except Exception:
-    try:
+    with contextlib.suppress(Exception):
         hostname = socket.gethostname()
-    except Exception:
-        # leave hostname empty when it cannot be resolved
-        pass
 
 if swapsize == 0:
     swapsize = 1

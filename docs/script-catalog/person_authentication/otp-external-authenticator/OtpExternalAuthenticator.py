@@ -122,7 +122,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             otp_auth_method = "authenticate"
-            # To allow user second OTP registration, switch otp_auth_method to "enroll" when request parameter "loginForm:registerButton" is set
 
             if otp_auth_method == "authenticate":
                 user_enrollments = userAuthenticatorService.getUserAuthenticatorsByType(authenticated_user, self.otpType)

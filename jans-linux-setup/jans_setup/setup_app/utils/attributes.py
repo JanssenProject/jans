@@ -1,3 +1,4 @@
+import contextlib
 import os
 import json
 import datetime
@@ -70,16 +71,12 @@ class AttribDataTypes:
         retVal = val
 
         if dtype == 'json':
-            try:
+            with contextlib.suppress(Exception):
                 retVal = json.loads(val)
-            except Exception:
-                pass  # not JSON, keep raw value
 
         if dtype == 'integer':
-            try:
+            with contextlib.suppress(Exception):
                 retVal = int(retVal)
-            except Exception:
-                pass  # not an integer, keep raw value
         elif dtype == 'datetime':
             if not isinstance(val, datetime.datetime):
 

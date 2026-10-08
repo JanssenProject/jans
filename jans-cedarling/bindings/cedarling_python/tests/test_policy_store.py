@@ -73,12 +73,8 @@ def test_load_policy_store_ok():
 def test_policy_store_source_wrong_type():
     # map fixture to variable with shorter name for readability
 
-    try:
+    with pytest.raises(ValueError):
         load_bootstrap_config("invalid_config.abc")
-    except ValueError:
-        pass  # expected
-    else:
-        assert False, "ValueError was not raised when a policy store has an unsupported file type"
 
 
 def test_trusted_issuer_loading_info_defaults():
