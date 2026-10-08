@@ -975,7 +975,7 @@ class JCA_CLI:
         resolved = os.path.realpath(path)
         for root in (os.getcwd(), str(Path.home()), tempfile.gettempdir()):
             root = os.path.realpath(root)
-            if os.path.commonpath([resolved, root]) == root:
+            if resolved.startswith(os.path.join(root, '')):
                 return resolved
         self.raise_error("{} must be under the working, home or temp directory".format(path))
         return None
