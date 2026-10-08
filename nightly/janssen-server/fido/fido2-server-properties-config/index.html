@@ -1081,6 +1081,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#native-applications-of-a-relying-party" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Native applications of a relying party
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#advertised-algorithms" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2035,6 +2046,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#native-applications-of-a-relying-party" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Native applications of a relying party
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#advertised-algorithms" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2539,7 +2561,7 @@ address.</p>
 <td style="text-align: left;"><code>rp</code></td>
 <td style="text-align: left;">Array of Objects</td>
 <td style="text-align: left;"><code>[ { "id": "https://jans.io", "origins": ["jans.io"] } ]</code></td>
-<td style="text-align: left;">Relying Party (RP) configuration mapping expected IDs to valid origins. Each entry may also carry a <code>policy</code> object — see <a href="#per-relying-party-policy">Per-relying-party policy</a>.</td>
+<td style="text-align: left;">Relying Party (RP) configuration mapping expected IDs to valid origins. Each entry may also carry a <code>policy</code> object — see <a href="#per-relying-party-policy">Per-relying-party policy</a>. It may also list <code>androidApps</code> and <code>iosApps</code> — see <a href="#native-applications-of-a-relying-party">Native applications of a relying party</a>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>metadataServers</code></td>
@@ -2670,6 +2692,62 @@ changing on upgrade.</p>
 <p>Only <code>attestationMode</code> is settable per RP today. Further fields are added alongside the change that
 enforces them, so that anything listed here is a policy actually in effect rather than a value that is
 merely stored.</p>
+<h3 id="native-applications-of-a-relying-party">Native applications of a relying party<a class="headerlink" href="#native-applications-of-a-relying-party" title="Permanent link">#</a></h3>
+<p>An entry under <code>rp</code> may also list the Android and iOS apps that share its RP ID, next to the web
+<code>origins</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;origins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;https://login.example.com&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;androidApps&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;packageName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.example.app&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;sha256CertFingerprints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;AB:CD:EF:...&quot;</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;distribution&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;play-store&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;iosApps&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;teamId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;T9A667JL6T&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;bundleId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.example.app&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>androidApps[].packageName</code></td>
+<td style="text-align: left;">Android application package name</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>androidApps[].sha256CertFingerprints</code></td>
+<td style="text-align: left;">SHA-256 fingerprints of the app signing certificate, colon-separated hex</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>androidApps[].distribution</code></td>
+<td style="text-align: left;"><code>play-store</code> or <code>self-signed</code>: which signing certificate the fingerprints belong to</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>iosApps[].teamId</code></td>
+<td style="text-align: left;">Apple Developer Team ID</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>iosApps[].bundleId</code></td>
+<td style="text-align: left;">Application bundle identifier</td>
+</tr>
+</tbody>
+</table>
+<p>This is the single place an RP's native apps are recorded. It is what the <code>assetlinks.json</code> and
+<code>apple-app-site-association</code> files are meant to be generated from, and what a deployed copy of them can be
+checked against.</p>
+<p><strong>These fields are recorded but not enforced.</strong> Whether an origin is accepted is decided only by <code>origins</code>
+(see above); a package name, fingerprint, team ID or bundle ID listed here neither allows nor blocks a
+ceremony. When an origin is rejected, the server log says which RPs were considered and that configured native
+apps are not matched against it, to make that visible. An RP with neither list behaves exactly as it did before
+these fields existed, and nothing needs changing on upgrade.</p>
 <h3 id="advertised-algorithms">Advertised algorithms<a class="headerlink" href="#advertised-algorithms" title="Permanent link">#</a></h3>
 <p>The algorithms offered to the authenticator in <code>pubKeyCredParams</code> are not taken from <code>enabledFidoAlgorithms</code>
 directly. An algorithm is advertised only when this server can complete a registration with it end-to-end:
@@ -2759,7 +2837,7 @@ framing policy of every existing deployment.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 01, 2026
+    October 07, 2026
   </span>
 
     

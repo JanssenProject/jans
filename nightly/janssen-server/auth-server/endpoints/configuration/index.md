@@ -78,6 +78,14 @@ Below is a list of all the current available claims, and where they are specifie
 | userinfo_endpoint                                | [OpenID](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata) |
 | userinfo_signing_alg_values_supported            | [OpenID](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata) |
 
+## OAuth 2.0 Authorization Server Metadata Endpoint aka `.well-known/oauth-authorization-server`
+
+Per [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414), OAuth 2.0 clients that are not
+OpenID Connect relying parties can discover authorization server metadata at
+`.well-known/oauth-authorization-server`. This endpoint returns the same metadata
+document as `.well-known/openid-configuration` (OpenID Connect Discovery is a superset
+of RFC 8414 metadata), including any Janssen-specific, non-standard members.
+
 ## Notes on specific OP Server Metadata claims
 
 * **claims_supported** Each user claim (in Jans jargon, "Attribute") has a property called `jansHideOnDiscovery`--if you don't want a claim to appear in `.well-known/openid-configuration`, set this to `true` for the Attribute entity.
