@@ -24,6 +24,13 @@ use pyo3::prelude::*;
 /// - CustomProcessingFailed
 /// - CustomProcessingTimedOut
 /// - EntityBuildFailed
+///
+/// Methods
+/// -------
+///
+/// .. method:: slug(self) -> str
+///     Stable snake-case slug (e.g. ``"jwt_validation_failed"``); same
+///     values as the core JSON ``kind``.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[pyclass(eq, eq_int, frozen, skip_from_py_object)]
 #[pyo3(name = "DropReason")]
@@ -47,6 +54,22 @@ impl From<&cedarling::DropReason> for DropReason {
             cedarling::DropReason::CustomProcessingFailed => DropReason::CustomProcessingFailed,
             cedarling::DropReason::CustomProcessingTimedOut => DropReason::CustomProcessingTimedOut,
             cedarling::DropReason::EntityBuildFailed => DropReason::EntityBuildFailed,
+        }
+    }
+}
+
+#[pymethods]
+impl DropReason {
+    /// Stable snake-case slug for this reason (e.g. ``"jwt_validation_failed"``).
+    fn slug(&self) -> &'static str {
+        match self {
+            DropReason::InvalidInput => "invalid_input",
+            DropReason::JwtValidationFailed => "jwt_validation_failed",
+            DropReason::DuplicateToken => "duplicate_token",
+            DropReason::NoProcessorRegistered => "no_processor_registered",
+            DropReason::CustomProcessingFailed => "custom_processing_failed",
+            DropReason::CustomProcessingTimedOut => "custom_processing_timed_out",
+            DropReason::EntityBuildFailed => "entity_build_failed",
         }
     }
 }

@@ -983,18 +983,19 @@ A dropped token no longer has to be recovered from the logs. Every
 `MultiIssuerAuthorizeResult` carries a `dropped_tokens` list, and the same list
 is written to the decision-log entry for the request. Each entry identifies the
 caller's token by its input `mapping` and its zero-based `index` in the request
-`tokens` array, plus a claim-free `reason` (stable slug) and a non-empty
-`message` (the reason's human-readable text):
+`tokens` array, plus a claim-free `reason` and a non-empty `message` (the
+reason's human-readable text). In Python, `reason` is a `DropReason` enum
+call `.slug()` for the documented snake-case slug:
 
 ```python
 result = cedarling.authorize_multi_issuer(request)
 
 for dropped in result.dropped_tokens():
     print(f"token #{dropped.index} ({dropped.mapping}) dropped: "
-          f"{dropped.reason} - {dropped.message}")
+          f"{dropped.reason.slug()} - {dropped.message}")
 ```
 
-`reason` is one of the following stable slugs:
+`dropped.reason.slug()` is one of the following stable slugs:
 
 | Reason slug | Meaning |
 |-------------|---------|

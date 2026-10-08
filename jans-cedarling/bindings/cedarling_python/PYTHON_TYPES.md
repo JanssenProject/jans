@@ -500,6 +500,13 @@ Values
 - CustomProcessingFailed
 - CustomProcessingTimedOut
 - EntityBuildFailed
+
+Methods
+-------
+
+.. method:: slug(self) -> str
+    Stable snake-case slug (e.g. ``"jwt_validation_failed"``); same
+    values as the core JSON ``kind``.
 ---
 
 DroppedToken
