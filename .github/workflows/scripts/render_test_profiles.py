@@ -33,7 +33,6 @@ FIXED_CLIENT_INUMS = {
     "jans_fido2_test_client_2_inum": "FF81-2D39",
 }
 
-# jans-lock TRACE test client (mirrors LOCK_TEST_CLIENT_ID in test_data_setup.py).
 LOCK_TEST_CLIENT_ID = "2202.A7C3-5E19"
 
 

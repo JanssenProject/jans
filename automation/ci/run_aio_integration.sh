@@ -210,7 +210,6 @@ FROM local/$svc:ci
 COPY jans_schema.json custom_schema.json /app/schema/
 EOF
   done
-  # Same for the loader's test-data inputs (test-only tables + test-client LDIFs).
   docker build -q -t local/persistence-loader:ci -f - jans-linux-setup/jans_setup >/dev/null <<EOF
 FROM local/persistence-loader:ci
 COPY templates/test /app/templates/test
@@ -448,7 +447,6 @@ for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
              jans-auth-server:jans-auth-server/client jans-lock:jans-lock/lock-server/client; do
   mod="${entry%%:*}"; dir="${entry#*:}"
   want_module "$mod" || { echo "[info] skipping $dir ($mod not selected)"; continue; }
-  # lock-server is only built (and installed) when the cedarling native lib is ready
   [ "$mod" = jans-lock ] && [ "$CED_READY" != 1 ] && { echo "[info] skipping $dir (lock-server not built)"; continue; }
   echo "::group::test $dir"
   suitelog="aio-logs/test-$(printf '%s' "$dir" | tr / _).log"

@@ -55,12 +55,8 @@ TEST_AUTH_CLIENT_INUMS = {
     "jans_auth_test_client_4_inum": "FF81-2D39",
 }
 
-# Fixed inum for the jans-lock TRACE test client (mirrors render_test_profiles.py);
-# jans-linux-setup generates a random ``2202.*`` id instead.
 LOCK_TEST_CLIENT_ID = "2202.A7C3-5E19"
 
-# JSON schema of the test-only tables (e.g. jansBinEntry, jansTestVersioned) used by the
-# jans-orm integration tests; kept out of /app/schema so regular deployments never load it.
 TEST_SCHEMA_JSON = f"{TEST_TEMPLATE_BASE}/jans_test_schema.json"
 
 # LDIF schema templates declaring the custom attributes used by the test data;
@@ -214,7 +210,6 @@ class TestDataLoader:
         backend = SQLBackend(self.manager)
 
         def column_type(attr, table):
-            # attributes absent from the main schema carry their own SQL type or syntax
             if not (attr_def := test_attrs.get(attr)):
                 return backend.get_data_type(attr, table)
             sql_types = attr_def.get("sql_types", {})
