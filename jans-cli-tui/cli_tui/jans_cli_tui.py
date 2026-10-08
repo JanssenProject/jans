@@ -751,7 +751,7 @@ class JansCliApp(Application):
         for prop in schema.get('properties', {}):
             if prop == jans_name:
                 return schema['properties'][jans_name].get('description', '')
-        return None
+        return ''
 
     def getTitledText(
             self,

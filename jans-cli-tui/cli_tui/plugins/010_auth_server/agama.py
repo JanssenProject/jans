@@ -151,7 +151,6 @@ class Agama(DialogUtils):
         project_name = project_data['details']['projectMetadata']['projectName']
         fdata = SimpleNamespace()
 
-        export_current_config_button_title = _("Export Current Config")
         export_sample_config_button_title = _("Export Sample Config")
         import_configuration_button_title = _("Import Configuration")
 
@@ -219,28 +218,6 @@ class Agama(DialogUtils):
                 except Exception as e:
                     self.app.show_message(_(common_strings.error), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=fdata.main_dialog)
 
-
-            async def get_current_config_coroutine():
-
-                cli_args = {'operation_id': 'get-agama-prj-configs', 'url_suffix':'name:{}'.format(project_name)}
-                self.app.start_progressing(_("Retrieving project configuration..."))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
-
-                result = None
-                try:
-                    result = response.json()
-                    fdata.save_status = export_current_config_button_title
-                except Exception:
-                    result = response.text
-
-                if not result:
-                    self.app.show_message(_(common_strings.info), _("No configurations defined for {}").format(project_name), tobefocused=fdata.main_dialog)
-                    return
-
-                fdata.save_data = json.dumps(result, indent=2)
-                file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.save_as, ok_handler=save_data)
-                self.app.show_jans_dialog(file_browser_dialog)
 
             def export_sample_config():
                 if not project_details['details']['projectMetadata'].get('configs'):
@@ -486,7 +463,7 @@ class Agama(DialogUtils):
 
             try:
                 result_config = response_config.json()
-            except Exception as e:
+            except Exception:
                 result_config = None
 
             if response.status_code == 200:

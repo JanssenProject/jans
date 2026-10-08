@@ -828,15 +828,16 @@ class JCA_CLI:
         return True, ''
 
     def print_exception(self, e):
-        error_printed = False
-        if hasattr(e, 'body'):
+        json_body = None
+        if hasattr(e, 'body') and not self.wrapped:
             try:
-                json.loads(e.body.decode())
-                self.raise_error(e.body.decode())
-                error_printed = True
-            except (Exception, SystemExit):
-                pass  # fall back to generic message below
-        if not error_printed:
+                json_body = e.body.decode()
+                json.loads(json_body)
+            except (AttributeError, ValueError):
+                json_body = None
+        if json_body is not None:
+            self.raise_error(json_body)
+        else:
             msg = "Error retrieving data: "
             err = 'None'
             if isinstance(e, str):
@@ -1289,6 +1290,19 @@ class JCA_CLI:
             return f.read()
 
 
+    def load_post_data(self, data_fn, mime_type):
+        if data_fn.endswith('jwt'):
+            with open(data_fn) as reader:
+                return jwt.decode(reader.read(),
+                                  options={"verify_signature": False, "verify_exp": False, "verify_aud": False})
+        try:
+            if mime_type.endswith(('json', 'text')):
+                return self.get_json_from_file(data_fn)
+            return self.read_binary_file(data_fn)
+        except ValueError as ve:
+            self.exit_with_error(str(ve))
+        return None
+
     def process_command_post(self, path, suffix_param, endpoint_params, data_fn, data):
 
         # TODO: suffix_param, endpoint_params
@@ -1300,19 +1314,7 @@ class JCA_CLI:
         params.update(endpoint_params)
 
         if not data and data_fn:
-
-            if data_fn.endswith('jwt'):
-                with open(data_fn) as reader:
-                    data = jwt.decode(reader.read(),
-                                          options={"verify_signature": False, "verify_exp": False, "verify_aud": False})
-            else:
-                try:
-                    if mime_type.endswith(('json', 'text')):
-                        data = self.get_json_from_file(data_fn)
-                    else:
-                        data = self.read_binary_file(data_fn)
-                except ValueError as ve:
-                    self.exit_with_error(str(ve))
+            data = self.load_post_data(data_fn, mime_type)
 
         if path['__method__'] == 'post':
             response = self.post_requests(endpoint, data, params)
