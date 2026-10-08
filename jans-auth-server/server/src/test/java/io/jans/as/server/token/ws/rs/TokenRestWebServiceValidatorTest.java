@@ -12,6 +12,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.*;
+import io.jans.as.server.service.RedirectionUriService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.mockito.InjectMocks;
@@ -22,10 +23,13 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.jans.as.server.util.TestUtil.assertBadRequest;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -49,6 +53,9 @@ public class TokenRestWebServiceValidatorTest {
 
     @Mock
     private AbstractCryptoProvider cryptoProvider;
+
+    @Mock
+    private RedirectionUriService redirectionUriService;
 
     @InjectMocks
     private TokenRestWebServiceValidator validator;
@@ -426,5 +433,77 @@ public class TokenRestWebServiceValidatorTest {
     @Test(expectedExceptions = WebApplicationException.class)
     public void validateIdJagSubjectTokenType_whenDeviceSecret_shouldThrow() {
         validator.validateIdJagSubjectTokenType("urn:x-oath:params:oauth:token-type:device-secret", AUDIT_LOG);
+    }
+
+    @Test
+    public void validateRedirectUri_whenGrantRedirectUriMatchesAndStrict_shouldPass() {
+        final Client client = new Client();
+        final AuthorizationCodeGrant grant = grantWithRedirectUri("https://rp.example.org/cb");
+        when(redirectionUriService.validateRedirectionUri(client, "https://rp.example.org/cb")).thenReturn("https://rp.example.org/cb");
+        when(appConfiguration.getStrictTokenRedirectUriValidation()).thenReturn(true);
+
+        validator.validateRedirectUri(grant, client, "https://rp.example.org/cb", AUDIT_LOG, null);
+    }
+
+    @Test
+    public void validateRedirectUri_whenGrantRedirectUriDiffersAndStrict_shouldFailAndInvokeOnFailure() {
+        final Client client = new Client();
+        final AuthorizationCodeGrant grant = grantWithRedirectUri("https://rp.example.org/cb");
+        final AtomicBoolean onFailureCalled = new AtomicBoolean(false);
+        when(redirectionUriService.validateRedirectionUri(client, "https://rp.example.org/other")).thenReturn("https://rp.example.org/other");
+        when(appConfiguration.getStrictTokenRedirectUriValidation()).thenReturn(true);
+
+        try {
+            validator.validateRedirectUri(grant, client, "https://rp.example.org/other", AUDIT_LOG, g -> onFailureCalled.set(true));
+            fail("Mismatched redirect_uri is accepted in strict mode.");
+        } catch (WebApplicationException e) {
+            assertTrue(onFailureCalled.get());
+        }
+    }
+
+    @Test
+    public void validateRedirectUri_whenGrantRedirectUriDiffersAndNotStrict_shouldPass() {
+        final Client client = new Client();
+        final AuthorizationCodeGrant grant = grantWithRedirectUri("https://rp.example.org/cb");
+        when(redirectionUriService.validateRedirectionUri(client, "https://rp.example.org/other")).thenReturn("https://rp.example.org/other");
+        when(appConfiguration.getStrictTokenRedirectUriValidation()).thenReturn(false);
+
+        validator.validateRedirectUri(grant, client, "https://rp.example.org/other", AUDIT_LOG, null);
+    }
+
+    @Test
+    public void validateRedirectUri_whenGrantRedirectUriIsBlankAndStrict_shouldPass() {
+        final Client client = new Client();
+        final AuthorizationCodeGrant grant = grantWithRedirectUri(null);
+        when(redirectionUriService.validateRedirectionUri(client, "https://rp.example.org/cb")).thenReturn("https://rp.example.org/cb");
+        when(appConfiguration.getStrictTokenRedirectUriValidation()).thenReturn(true);
+
+        validator.validateRedirectUri(grant, client, "https://rp.example.org/cb", AUDIT_LOG, null);
+    }
+
+    @Test
+    public void validateRedirectUri_whenRedirectUriIsNotRegistered_shouldFailAndInvokeOnFailure() {
+        final Client client = new Client();
+        final AuthorizationCodeGrant grant = grantWithRedirectUri("https://rp.example.org/cb");
+        final AtomicBoolean onFailureCalled = new AtomicBoolean(false);
+        when(redirectionUriService.validateRedirectionUri(client, "https://evil.example.org/cb")).thenReturn(null);
+
+        try {
+            validator.validateRedirectUri(grant, client, "https://evil.example.org/cb", AUDIT_LOG, g -> onFailureCalled.set(true));
+            fail("Unregistered redirect_uri is accepted.");
+        } catch (WebApplicationException e) {
+            assertTrue(onFailureCalled.get());
+        }
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateRedirectUri_whenRedirectUriIsBlank_shouldFail() {
+        validator.validateRedirectUri(grantWithRedirectUri("https://rp.example.org/cb"), new Client(), "", AUDIT_LOG, null);
+    }
+
+    private static AuthorizationCodeGrant grantWithRedirectUri(String redirectUri) {
+        final AuthorizationCodeGrant grant = new AuthorizationCodeGrant();
+        grant.setRedirectUri(redirectUri);
+        return grant;
     }
 }

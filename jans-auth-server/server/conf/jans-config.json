@@ -441,6 +441,7 @@
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
     "legacyIdTokenClaims": false,
+    "strictTokenRedirectUriValidation": false,
     "customHeadersWithAuthorizationResponse": true,
     "updateUserLastLogonTime": true,
     "updateClientAccessTime":true,
