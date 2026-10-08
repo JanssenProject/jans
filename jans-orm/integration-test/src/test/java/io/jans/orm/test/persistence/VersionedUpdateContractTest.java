@@ -144,7 +144,6 @@ public abstract class VersionedUpdateContractTest extends BaseOrmTest {
 		startLatch.countDown();
 
 		executorService.shutdown();
-		executorService.awaitTermination(60, TimeUnit.SECONDS);
 		boolean terminated = executorService.awaitTermination(60, TimeUnit.SECONDS);
 		Throwable failure = workerFailure.get();
 		if (failure != null) {
