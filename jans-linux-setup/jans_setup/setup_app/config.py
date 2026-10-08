@@ -41,7 +41,7 @@ class Config:
         return getattr(cls, attr) if hasattr(cls, attr) else default
 
     @classmethod
-    def dump(cls, dumpFile=False):
+    def dump(cls, dump_file=False):
         if cls.dump_config_on_error:
             return
 
@@ -51,7 +51,7 @@ class Config:
             if not obj_name.startswith('__') and (not callable(obj)):
                 myDict[obj_name] = obj
 
-        if dumpFile:
+        if dump_file:
             fn = os.path.join(cls.install_dir, 'config-'+time.ctime().replace(' ', '-'))
             with open(fn, 'w') as w:
                 w.write(pprint.pformat(myDict, indent=2))

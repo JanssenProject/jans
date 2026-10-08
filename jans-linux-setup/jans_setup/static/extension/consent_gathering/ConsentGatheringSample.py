@@ -10,18 +10,18 @@ import random
 
 class ConsentGathering(ConsentGatheringType):
 
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
+    def __init__(self, current_time_millis):
+        self.currentTimeMillis = current_time_millis
 
-    def init(self, customScript, configurationAttributes):
-        print "Consent-Gathering. Initializing ..."
-        print "Consent-Gathering. Initialized successfully"
+    def init(self, custom_script, configuration_attributes):
+        print("Consent-Gathering. Initializing ...")
+        print("Consent-Gathering. Initialized successfully")
 
         return True
 
-    def destroy(self, configurationAttributes):
-        print "Consent-Gathering. Destroying ..."
-        print "Consent-Gathering. Destroyed successfully"
+    def destroy(self, configuration_attributes):
+        print("Consent-Gathering. Destroying ...")
+        print("Consent-Gathering. Destroyed successfully")
 
         return True
 
@@ -31,22 +31,22 @@ class ConsentGathering(ConsentGatheringType):
     # Main consent-gather method. Must return True (if gathering performed successfully) or False (if fail).
     # All user entered values can be access via Map<String, String> context.getPageAttributes()
     def authorize(self, step, context): # context is reference of io.jans.as.service.external.context.ConsentGatheringContext
-        print "Consent-Gathering. Authorizing..."
+        print("Consent-Gathering. Authorizing...")
 
         if step == 1:
-            allowButton = context.getRequestParameters().get("authorizeForm:allowButton")
-            if (allowButton != None) and (len(allowButton) > 0):
-                print "Consent-Gathering. Authorization success for step 1"
+            allow_button = context.getRequestParameters().get("authorizeForm:allowButton")
+            if (allow_button is not None) and (len(allow_button) > 0):
+                print("Consent-Gathering. Authorization success for step 1")
                 return True
 
-            print "Consent-Gathering. Authorization declined for step 1"
+            print("Consent-Gathering. Authorization declined for step 1")
         elif step == 2:
-            allowButton = context.getRequestParameters().get("authorizeForm:allowButton")
-            if (allowButton != None) and (len(allowButton) > 0):
-                print "Consent-Gathering. Authorization success for step 2"
+            allow_button = context.getRequestParameters().get("authorizeForm:allowButton")
+            if (allow_button is not None) and (len(allow_button) > 0):
+                print("Consent-Gathering. Authorization success for step 2")
                 return True
 
-            print "Consent-Gathering. Authorization declined for step 2"
+            print("Consent-Gathering. Authorization declined for step 2")
 
         return False
 
@@ -55,15 +55,15 @@ class ConsentGathering(ConsentGatheringType):
 
     def prepareForStep(self, step, context):
         if not context.isAuthenticated():
-            print "User is not authenticated. Aborting authorization flow ..."
+            print("User is not authenticated. Aborting authorization flow ...")
             return False
 
         if step == 2:
-            pageAttributes = context.getPageAttributes()
+            page_attributes = context.getPageAttributes()
             
             # Generate random consent gathering request
-            consentRequest = "Requested transaction #%s approval for the amount of sum $ %s.00" % ( random.SystemRandom().randint(100000, 1000000), random.SystemRandom().randint(1, 100) )
-            pageAttributes.put("consent_request", consentRequest)
+            consent_request = "Requested transaction #%s approval for the amount of sum $ %s.00" % ( random.SystemRandom().randint(100000, 1000000), random.SystemRandom().randint(1, 100) )
+            page_attributes.put("consent_request", consent_request)
             return True
 
         return True
