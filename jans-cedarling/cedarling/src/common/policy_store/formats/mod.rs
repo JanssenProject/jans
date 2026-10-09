@@ -10,6 +10,8 @@
 //! the `migration` chain, and only the current version converts into runtime
 //! types. Runtime types never reference `formats::vN`.
 
+pub(crate) mod datetime;
+pub(crate) mod file_id;
 pub(crate) mod v1;
 pub(crate) mod v2;
 

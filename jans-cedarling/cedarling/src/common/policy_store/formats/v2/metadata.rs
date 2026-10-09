@@ -9,27 +9,9 @@ use chrono::{DateTime, Utc};
 use serde::Deserialize;
 
 use crate::common::policy_store::errors::ValidationError;
+use crate::common::policy_store::formats::datetime;
 use crate::common::policy_store::metadata::{PolicyStoreInfo, PolicyStoreMetadata};
 use crate::common::policy_store::validator::MetadataValidator;
-
-/// Deserializes an optional RFC 3339 timestamp.
-mod datetime_option {
-    use chrono::{DateTime, Utc};
-    use serde::{Deserialize, Deserializer};
-
-    pub(super) fn deserialize<'de, D>(deserializer: D) -> Result<Option<DateTime<Utc>>, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let opt: Option<String> = Option::deserialize(deserializer)?;
-        match opt {
-            Some(s) => DateTime::parse_from_rfc3339(&s)
-                .map(|dt| Some(dt.with_timezone(&Utc)))
-                .map_err(serde::de::Error::custom),
-            None => Ok(None),
-        }
-    }
-}
 
 /// Root of `metadata.json`. Same as v1 plus the required spec version;
 /// unknown fields are still ignored.
@@ -49,9 +31,9 @@ pub(crate) struct PolicyStoreInfoDoc {
     pub(crate) description: Option<String>,
     #[serde(default)]
     pub(crate) version: String,
-    #[serde(default, with = "datetime_option")]
+    #[serde(default, deserialize_with = "datetime::deserialize_option")]
     pub(crate) created_date: Option<DateTime<Utc>>,
-    #[serde(default, with = "datetime_option")]
+    #[serde(default, deserialize_with = "datetime::deserialize_option")]
     pub(crate) updated_date: Option<DateTime<Utc>>,
 }
 

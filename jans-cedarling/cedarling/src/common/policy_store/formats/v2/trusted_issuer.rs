@@ -9,6 +9,7 @@
 //! ensuring they conform to the required schema with proper token metadata and required fields.
 
 use crate::common::policy_store::errors::{PolicyStoreError, TrustedIssuerErrorType};
+use crate::common::policy_store::formats::file_id::id_from_filename;
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value as JsonValue;
@@ -107,18 +108,10 @@ impl IssuerParser {
             })?;
 
         // Get issuer ID from "id" field, or derive from filename
-        let issuer_id = obj
-            .get("id")
-            .and_then(|v| v.as_str())
-            .map(std::string::ToString::to_string)
-            .unwrap_or({
-                // Derive ID from filename (strip .json extension)
-                filename
-                    .strip_suffix(".json")
-                    .or_else(|| filename.strip_suffix(".JSON"))
-                    .unwrap_or(filename)
-                    .to_string()
-            });
+        let issuer_id = obj.get("id").and_then(|v| v.as_str()).map_or_else(
+            || id_from_filename(filename).to_string(),
+            std::string::ToString::to_string,
+        );
 
         // Validate required fields
         let name = obj.get("name").and_then(|v| v.as_str()).ok_or_else(|| {

@@ -10,6 +10,7 @@
 
 use std::collections::{HashMap, HashSet};
 
+use crate::common::policy_store::formats::file_id::id_from_filename;
 use serde::Deserialize;
 use serde_json::Value as JsonValue;
 
@@ -58,13 +59,7 @@ impl CustomIssuerParser {
 
         // Resolve id from the "id" field, else derive from the filename.
         let id = obj.get("id").and_then(JsonValue::as_str).map_or_else(
-            || {
-                let stem = filename
-                    .rfind('.')
-                    .filter(|&dot| filename[dot..].eq_ignore_ascii_case(".json"))
-                    .map_or(filename, |dot| &filename[..dot]);
-                stem.to_string()
-            },
+            || id_from_filename(filename).to_string(),
             std::string::ToString::to_string,
         );
 
