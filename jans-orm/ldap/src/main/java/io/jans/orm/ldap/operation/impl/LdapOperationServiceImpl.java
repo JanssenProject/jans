@@ -730,8 +730,17 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         ModifyRequest modifyRequest = new ModifyRequest(dn, modifications);
         modifyRequest.addControl(new AssertionRequestControl(assertionFilter));
 
-        return modifyEntry(modifyRequest);
-    }
+		try {
+			return modifyEntry(modifyRequest);
+		} catch (ConnectionException ex) {
+			// Entry deleted after the caller's pre-read: same CAS-miss signal as SQL's 0-row update
+			if ((ex.getCause() instanceof LDAPException) && (((LDAPException) ex.getCause()).getResultCode()
+					.intValue() == ResultCode.NO_SUCH_OBJECT_INT_VALUE)) {
+				return false;
+			}
+			throw ex;
+		}
+	}
 
     /**
      * Use this method to add / replace / delete attribute from entry
