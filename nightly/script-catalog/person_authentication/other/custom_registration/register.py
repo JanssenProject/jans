@@ -4,28 +4,21 @@
 # Author: Jose Gonzalez
 # Author: Gasmyr Mougang
 
-from org.gluu.oxauth.model.common import User, WebKeyStorage
+from org.gluu.oxauth.model.common import User
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import UserService, AuthenticationService
 from io.jans.as.server.util import ServerUtil
-from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays
 from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from io.jans.service import MailService
 
 
-import org.codehaus.jettison.json.JSONArray as JSONArray
 
 import json, ast
-import java
 import random
-import jarray
-import smtplib
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -115,22 +108,16 @@ class PersonAuthentication(PersonAuthenticationType):
                 if ufnm is not None:
                     body = body + "<p>First Name : <span style='color: #337ab7;'>"+str(ufnm)+"</span>,</p>"
                     
-                else:
-                    body = body
                     
                     
                 if ulnm is not None:
                     body = body + "<p>Last Name <span style='color: #337ab7;'>"+str(ulnm)+"</span>,</p>"
                     
-                else:
-                    body = body
                     
 
                 if umnm is not None:
                     body = body + "<p>Middle Name <span style='color: #337ab7;'>"+str(umnm)+"</span>,</p>"
                     
-                else:
-                    body = body
                     
                 body = body + "<p>Email : <span style='color: #337ab7;'>"+str(umail)+"</span>,</p><p>Password : <span style='color: #337ab7;'>"+str(upass)+"</span>,</p><p>Use <span style='color: #337ab7;'>%s</span> OTP to finish Registration.</p></div>"
 
@@ -200,6 +187,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
             print "Register. FAIL! User entered the wrong code! %s != %s" % (form_passcode, code)
             print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
+        return None
             #facesMessages.add(facesMessage.SEVERITY_ERROR, "Incorrect Twilio code, please try again.")
             
          
@@ -253,16 +241,16 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
         
     def getAttributesFromJson(self):
-        f = open(self.attributes_json_file_path)
-        data = json.load(f)
+        with open(self.attributes_json_file_path) as f:
+            data = json.load(f)
         data = ast.literal_eval(json.dumps(data))
         attributes = data["en"].keys()
 
         jsonString = ",".join(attributes)
         return jsonString
     def getPasswordStrength(self):
-        f = open(self.attributes_json_file_path)
-        data = json.load(f)
+        with open(self.attributes_json_file_path) as f:
+            data = json.load(f)
         data = ast.literal_eval(json.dumps(data))
         strength = data["passStrength"]
         return strength   

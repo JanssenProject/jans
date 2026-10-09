@@ -11,15 +11,10 @@ from io.jans.as.model.config import StaticConfiguration
 from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 
-from java.util import Date
 from java.util import Calendar
-from java.util import GregorianCalendar
-from java.util import TimeZone
 from java.text import SimpleDateFormat
 
 #### Audit Entries Additional Imports ####
-from io.jans.as.server.security import Identity
-from io.jans.as.server.service import MetricService
 
 from io.jans.orm.model.base import SimpleBranch
 from io.jans.model import ApplicationType
@@ -30,10 +25,8 @@ from io.jans.as.common.model.session import SessionIdState
 from io.jans.orm.model.base import CustomObjectAttribute
 from io.jans.orm.model.base import CustomObjectEntry
 
-import java
 
 import uuid
-import time
 import json
 import ast
 
@@ -150,6 +143,9 @@ class ApplicationSession(ApplicationSessionType):
         user = None
         uid = None
         ip = None
+        client_id = None
+        redirect_uri = None
+        acr = None
 
         session = event.getSessionId()
         if session:
@@ -332,9 +328,8 @@ class ApplicationSession(ApplicationSessionType):
         audit_data = None
         audit_cust_data = None        
         try:
-            file = open(metric_audit_conf_json_file_path)
-            file_data = json.load(file)
-            file.close()
+            with open(metric_audit_conf_json_file_path) as file:
+                file_data = json.load(file)
             file_data = ast.literal_eval(json.dumps(file_data))
             event_types = file_data["event_types"]
             audit_data = file_data["audit_data"]
@@ -350,7 +345,7 @@ class ApplicationSession(ApplicationSessionType):
         session = event.getSessionId()
         self.logOut("DEBUG","ApplicationSession.initCustomObjectEntry(): session = {}".format(session))
         #empty first call
-        attr_value = getattr(session, "userDn")        
+        getattr(session, "userDn")        
         
         for attr_key, attr_name in self.session_attributes_map.items():
             if attr_key.upper() in (audit_data_el.upper() for audit_data_el in audit_data):
@@ -374,7 +369,7 @@ class ApplicationSession(ApplicationSessionType):
         jans_data += '"type": "%s"' % event.getType()
 
         #empty first call
-        attr_value = getattr(session, "userDn")
+        getattr(session, "userDn")
 
         for attr_key, attr_name in self.session_attributes_map.items():
             if attr_key.strip().upper() in (audit_data_el.strip().upper() for audit_data_el in audit_data):
@@ -386,7 +381,7 @@ class ApplicationSession(ApplicationSessionType):
                     self.logOut("ERROR","ApplicationSession.generateJansData(): Errror: ex = {}".format(ex))
                     jans_data += ',"%s": "%s"' % (attr_name, "None")
 
-        attr_key = "permissionGrantedMap"
+        attr_key = "permissionGrantedMap"  # // # gitleaks:allow
         attr_name = "permissionGrantedMap"
 
         if attr_key.strip().upper() in (audit_data_el.strip().upper() for audit_data_el in audit_data):

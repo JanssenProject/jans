@@ -6,7 +6,6 @@
 #
 
 from io.jans.model.custom.script.type.selectaccount import SelectAccountType
-from java.lang import String
 
 class SelectAccount(SelectAccountType):
     def __init__(self, currentTimeMillis):

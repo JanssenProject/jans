@@ -5,17 +5,13 @@
 #
 
 from io.jans.model.custom.script.type.idp import IdpType
-from io.jans.util import StringHelper
 from io.jans.idp.externalauth import AuthenticatedNameTranslator
 from net.shibboleth.idp.authn.principal import UsernamePrincipal, IdPAttributePrincipal
 from net.shibboleth.idp.authn import ExternalAuthentication
 from net.shibboleth.idp.attribute import IdPAttribute, StringAttributeValue
-from net.shibboleth.idp.authn.context import AuthenticationContext, ExternalAuthenticationContext
-from net.shibboleth.idp.attribute.context import AttributeContext
 from javax.security.auth import Subject
 from java.util import Collections, HashMap, HashSet, ArrayList, Arrays
 
-import java
 
 class IdpExtension(IdpType):
 
@@ -69,23 +65,6 @@ class IdpExtension(IdpType):
                 Collections.emptySet(), Collections.emptySet()))
 
             print "Created an IdP subject instance with principals containing attributes for: '%s'" % userProfile.getId()
-
-            if False:
-                idpAttributes = ArrayList()
-                for principalAttribute in principalAttributes:
-                    idpAttributes.add(principalAttribute.getAttribute())
-    
-                request.setAttribute(ExternalAuthentication.ATTRIBUTES_KEY, idpAttributes)
-    
-                authenticationKey = context.getAuthenticationKey()
-                profileRequestContext = ExternalAuthentication.getProfileRequestContext(authenticationKey, request)
-                authContext = profileRequestContext.getSubcontext(AuthenticationContext)
-                extContext = authContext.getSubcontext(ExternalAuthenticationContext)
-    
-                extContext.setSubject(Subject(False, Collections.singleton(principals), Collections.emptySet(), Collections.emptySet()));
-    
-                extContext.getSubcontext(AttributeContext, True).setUnfilteredIdPAttributes(idpAttributes)
-                extContext.getSubcontext(AttributeContext).setIdPAttributes(idpAttributes)
         else:
             print "No attributes released from oxAuth. Creating an IdP principal for: '%s'" % userProfile.getId()
             request.setAttribute(ExternalAuthentication.PRINCIPAL_NAME_KEY, userProfile.getId())
@@ -94,7 +73,7 @@ class IdpExtension(IdpType):
         return False
 
     # Update attributes before releasing them
-    #   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenProject/shib-oxauth-authn3/blob/nightly/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)
+    #   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenProject/shib-oxauth-authn3/blob/vreplace-janssen-version/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateAttributes(self, context, configurationAttributes):
         print "Idp extension. Method: updateAttributes"

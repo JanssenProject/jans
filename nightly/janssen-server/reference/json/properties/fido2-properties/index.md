@@ -10,11 +10,13 @@
 | authenticationHistoryExpiration | Expiration time in seconds for approved authentication requests | [Details](#authenticationhistoryexpiration) |
 | authenticatorCertsFolder | Authenticators certificates folder | [Details](#authenticatorcertsfolder) |
 | baseEndpoint | The base URL for Fido2 endpoints | [Details](#baseendpoint) |
+| bundleId | Application bundle identifier, e.g. com.example.app. Not enforced by the server; used to generate apple-app-site-association. | [Details](#bundleid) |
 | cleanServiceBatchChunkSize | Each clean up iteration fetches chunk of expired data per base dn and removes it from storage | [Details](#cleanservicebatchchunksize) |
 | cleanServiceInterval | Time interval for the Clean Service in seconds | [Details](#cleanserviceinterval) |
 | disableExternalLoggerConfiguration | Choose whether to disable external log4j configuration override | [Details](#disableexternalloggerconfiguration) |
 | disableJdkLogger | Boolean value specifying whether to enable JDK Loggers | [Details](#disablejdklogger) |
 | disableMetadataService | Boolean value indicating whether the MDS download should be omitted | [Details](#disablemetadataservice) |
+| distribution | How the app is distributed - play-store or self-signed. Not enforced by the server; tells which signing certificate the fingerprints belong to. | [Details](#distribution) |
 | enabledFidoAlgorithms | List of Requested Credential Types | [Details](#enabledfidoalgorithms) |
 | enterpriseAttestation | If authenticators have been enabled for use in a specific protected envt (enterprise authenticators) | [Details](#enterpriseattestation) |
 | externalLoggerConfiguration | Path to external Fido2 logging configuration | [Details](#externalloggerconfiguration) |
@@ -41,10 +43,13 @@
 | metricReporterEnabled | Boolean value specifying whether metric reporter is enabled | [Details](#metricreporterenabled) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep report data | [Details](#metricreporterkeepdatadays) |
+| packageName | Android application package name, e.g. com.example.app. Not enforced by the server; used to generate assetlinks.json. | [Details](#packagename) |
 | personCustomObjectClassList | Custom object class list for dynamic person enrolment | [Details](#personcustomobjectclasslist) |
 | recordAbandonedAssertions | Boolean value indicating whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled | [Details](#recordabandonedassertions) |
 | requestedParties | Authenticators metadata in json format | [Details](#requestedparties) |
 | serverMetadataFolder | Authenticators metadata in json format | [Details](#servermetadatafolder) |
+| sha256CertFingerprints | SHA-256 fingerprints of the app signing certificate, as colon-separated hex (AB:CD:...). Not enforced by the server; used to generate assetlinks.json. | [Details](#sha256certfingerprints) |
+| teamId | Apple Developer Team ID, e.g. T9A667JL6T. Not enforced by the server; used to generate apple-app-site-association. | [Details](#teamid) |
 | trustedProxyEnabled | Whether proxy headers may be trusted when recording the client IP in metrics. Unset preserves the legacy behaviour of trusting them unconditionally. False never reads them. True trusts them only from the source addresses listed in trustedProxyIpRanges. | [Details](#trustedproxyenabled) |
 | trustedProxyIpRanges | Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation (for example ["10.0.0.0/8", "192.168.1.0/24"]). Only consulted when trustedProxyEnabled is true; an empty list trusts nothing. | [Details](#trustedproxyipranges) |
 | unfinishedRequestExpiration | Expiration time in seconds for pending enrollment/authentication requests | [Details](#unfinishedrequestexpiration) |
@@ -124,6 +129,15 @@
 - Default value: None
 
 
+## bundleId
+
+- Description: Application bundle identifier, e.g. com.example.app. Not enforced by the server; used to generate apple-app-site-association.
+
+- Required: No
+
+- Default value: None
+
+
 ## cleanServiceBatchChunkSize
 
 - Description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage
@@ -167,6 +181,15 @@
 - Required: No
 
 - Default value: false
+
+
+## distribution
+
+- Description: How the app is distributed - play-store or self-signed. Not enforced by the server; tells which signing certificate the fingerprints belong to.
+
+- Required: No
+
+- Default value: None
 
 
 ## enabledFidoAlgorithms
@@ -403,6 +426,15 @@
 - Default value: None
 
 
+## packageName
+
+- Description: Android application package name, e.g. com.example.app. Not enforced by the server; used to generate assetlinks.json.
+
+- Required: No
+
+- Default value: None
+
+
 ## personCustomObjectClassList
 
 - Description: Custom object class list for dynamic person enrolment
@@ -433,6 +465,24 @@
 ## serverMetadataFolder
 
 - Description: Authenticators metadata in json format
+
+- Required: No
+
+- Default value: None
+
+
+## sha256CertFingerprints
+
+- Description: SHA-256 fingerprints of the app signing certificate, as colon-separated hex (AB:CD:...). Not enforced by the server; used to generate assetlinks.json.
+
+- Required: No
+
+- Default value: None
+
+
+## teamId
+
+- Description: Apple Developer Team ID, e.g. T9A667JL6T. Not enforced by the server; used to generate apple-app-site-association.
 
 - Required: No
 

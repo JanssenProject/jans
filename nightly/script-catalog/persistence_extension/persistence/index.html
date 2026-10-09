@@ -3491,7 +3491,7 @@
 
 
 <h1 id="persistence-script">Persistence Script<a class="headerlink" href="#persistence-script" title="Permanent link">#</a></h1>
-<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
+<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
 <ol>
 <li>Load initialization data from DB or initialize services after the creation of Entry Manager. </li>
 <li>Release resources, terminate services etc. after the destruction of Entry Manager.</li>
@@ -3544,13 +3544,10 @@ The ORM module of the Janssen server does the following:</p>
 <span class="c1"># Author: Yuriy Movchan</span>
 <span class="c1">#</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">CdiUtil</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.persistence</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistenceType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringHelper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.orm.operation.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">PasswordEncryptionHelper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.orm.operation.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">PasswordEncryptionMethod</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">java</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">PersistenceExtension</span><span class="p">(</span><span class="n">PersistenceType</span><span class="p">):</span>
 

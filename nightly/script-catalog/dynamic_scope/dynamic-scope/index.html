@@ -3673,11 +3673,8 @@
 <span class="c1">#</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.scope</span><span class="w"> </span><span class="kn">import</span> <span class="n">DynamicScopeType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.server.service</span><span class="w"> </span><span class="kn">import</span> <span class="n">UserService</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringHelper</span><span class="p">,</span> <span class="n">ArrayHelper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">java.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">Arrays</span><span class="p">,</span> <span class="n">ArrayList</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">Arrays</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">java</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">DynamicScope</span><span class="p">(</span><span class="n">DynamicScopeType</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
@@ -3701,9 +3698,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dynamicScopeContext</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s2">&quot;Dynamic scope. Update method&quot;</span>
 
-        <span class="n">dynamicScopes</span> <span class="o">=</span> <span class="n">dynamicScopeContext</span><span class="o">.</span><span class="n">getDynamicScopes</span><span class="p">()</span>
-        <span class="n">authorizationGrant</span> <span class="o">=</span> <span class="n">dynamicScopeContext</span><span class="o">.</span><span class="n">getAuthorizationGrant</span><span class="p">()</span>
-        <span class="n">user</span> <span class="o">=</span> <span class="n">dynamicScopeContext</span><span class="o">.</span><span class="n">getUser</span><span class="p">()</span>
         <span class="n">jsonWebResponse</span> <span class="o">=</span> <span class="n">dynamicScopeContext</span><span class="o">.</span><span class="n">getJsonWebResponse</span><span class="p">()</span>
         <span class="n">claims</span> <span class="o">=</span> <span class="n">jsonWebResponse</span><span class="o">.</span><span class="n">getClaims</span><span class="p">()</span>
 
