@@ -382,20 +382,22 @@ mod tests {
             "configuration_endpoint": "https://accounts.test.com/.well-known/openid-configuration"
         }"#;
 
-        let result = IssuerParser::parse_issuer(content, "issuer1.json");
-        assert!(result.is_ok(), "Should parse issuer with id");
-
-        let parsed = result.unwrap();
+        let parsed = IssuerParser::parse_issuer(content, "issuer1.json")
+            .expect("an issuer with an explicit id should parse");
         assert_eq!(parsed.len(), 1, "Should have 1 issuer");
-        assert_eq!(parsed[0].id, "3af079fa58a915a4d37a668fb874b7a25b70a37c03cf");
-        assert_eq!(parsed[0].issuer.name, "Test Issuer");
         assert_eq!(
-            parsed[0].issuer.description,
-            "A test OpenID Connect provider"
+            parsed[0].id, "3af079fa58a915a4d37a668fb874b7a25b70a37c03cf",
+            "the explicit id should win over the file name"
+        );
+        assert_eq!(parsed[0].issuer.name, "Test Issuer", "name mismatch");
+        assert_eq!(
+            parsed[0].issuer.description, "A test OpenID Connect provider",
+            "description mismatch"
         );
         assert_eq!(
             parsed[0].issuer.oidc_endpoint.as_str(),
-            "https://accounts.test.com/.well-known/openid-configuration"
+            "https://accounts.test.com/.well-known/openid-configuration",
+            "oidc endpoint mismatch"
         );
     }
 
@@ -407,13 +409,14 @@ mod tests {
             "configuration_endpoint": "https://accounts.test.com/.well-known/openid-configuration"
         }"#;
 
-        let result = IssuerParser::parse_issuer(content, "test-issuer.json");
-        assert!(result.is_ok(), "Should parse issuer without explicit id");
-
-        let parsed = result.unwrap();
+        let parsed = IssuerParser::parse_issuer(content, "test-issuer.json")
+            .expect("an issuer without an explicit id should parse");
         assert_eq!(parsed.len(), 1, "Should have 1 issuer");
-        assert_eq!(parsed[0].id, "test-issuer"); // Derived from filename
-        assert_eq!(parsed[0].issuer.name, "Test Issuer");
+        assert_eq!(
+            parsed[0].id, "test-issuer",
+            "the id should be derived from the file name"
+        );
+        assert_eq!(parsed[0].issuer.name, "Test Issuer", "name mismatch");
     }
 
     #[test]
@@ -435,16 +438,28 @@ mod tests {
             }
         }"#;
 
-        let result = IssuerParser::parse_issuer(content, "jans.json");
-        assert!(result.is_ok(), "Should parse issuer with token metadata");
+        let parsed = IssuerParser::parse_issuer(content, "jans.json")
+            .expect("an issuer with token metadata should parse");
+        assert_eq!(parsed.len(), 1, "Should have 1 issuer");
+        assert_eq!(
+            parsed[0].id, "abd948a5665f6050d6e3ba440bd33ec0884234163aa3",
+            "the explicit id should win over the file name"
+        );
+        assert_eq!(
+            parsed[0].issuer.token_metadata.len(),
+            2,
+            "both token_metadata entries should be parsed"
+        );
 
-        let parsed = result.unwrap();
-        assert_eq!(parsed.len(), 1);
-        assert_eq!(parsed[0].id, "abd948a5665f6050d6e3ba440bd33ec0884234163aa3");
-        assert_eq!(parsed[0].issuer.token_metadata.len(), 2);
-
-        let access_token = parsed[0].issuer.token_metadata.get("access_token").unwrap();
-        assert_eq!(access_token.entity_type_name, "Jans::access_token");
+        let access_token = parsed[0]
+            .issuer
+            .token_metadata
+            .get("access_token")
+            .expect("access_token metadata should be present");
+        assert_eq!(
+            access_token.entity_type_name, "Jans::access_token",
+            "entity_type_name mismatch"
+        );
     }
 
     #[test]
@@ -499,16 +514,12 @@ mod tests {
             "openid_configuration_endpoint": "https://accounts.test.com/.well-known/openid-configuration"
         }"#;
 
-        let result = IssuerParser::parse_issuer(content, "issuer2.json");
-        assert!(
-            result.is_ok(),
-            "Should parse with openid_configuration_endpoint"
-        );
-
-        let parsed = result.unwrap();
+        let parsed = IssuerParser::parse_issuer(content, "issuer2.json")
+            .expect("the canonical openid_configuration_endpoint key should parse");
         assert_eq!(
             parsed[0].issuer.oidc_endpoint.as_str(),
-            "https://accounts.test.com/.well-known/openid-configuration"
+            "https://accounts.test.com/.well-known/openid-configuration",
+            "oidc endpoint mismatch"
         );
     }
 
@@ -580,7 +591,7 @@ mod tests {
                     oidc_endpoint: Url::parse(
                         "https://issuer1.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "access_token".to_string(),
                         token_doc("Jans::Access_token"),
@@ -596,7 +607,7 @@ mod tests {
                     oidc_endpoint: Url::parse(
                         "https://issuer2.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "id_token".to_string(),
                         token_doc("Jans::Id_token"),
@@ -606,8 +617,8 @@ mod tests {
             },
         ];
 
-        let result = IssuerParser::validate_issuers(&issuers);
-        assert!(result.is_ok(), "Should have no validation errors");
+        IssuerParser::validate_issuers(&issuers)
+            .expect("distinct issuer ids should pass validation");
     }
 
     #[test]
@@ -621,7 +632,7 @@ mod tests {
                     oidc_endpoint: Url::parse(
                         "https://issuer1.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "access_token".to_string(),
                         token_doc("Jans::Access_token"),
@@ -637,7 +648,7 @@ mod tests {
                     oidc_endpoint: Url::parse(
                         "https://issuer1.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "id_token".to_string(),
                         token_doc("Jans::Id_token"),
@@ -667,7 +678,7 @@ mod tests {
                 name: "Issuer 1".to_string(),
                 description: "No tokens".to_string(),
                 oidc_endpoint: Url::parse("https://issuer1.com/.well-known/openid-configuration")
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                 token_metadata: HashMap::new(),
             },
             filename: "file1.json".to_string(),
@@ -689,7 +700,7 @@ mod tests {
                     oidc_endpoint: Url::parse(
                         "https://issuer1.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "access_token".to_string(),
                         token_doc("Jans::Access_token"),
@@ -705,7 +716,7 @@ mod tests {
                     oidc_endpoint: Url::parse(
                         "https://issuer2.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "id_token".to_string(),
                         token_doc("Jans::Id_token"),
@@ -717,8 +728,14 @@ mod tests {
 
         let map = IssuerParser::create_issuer_map(issuers);
 
-        assert_eq!(map.len(), 2);
-        assert!(map.contains_key("issuer1"));
-        assert!(map.contains_key("issuer2"));
+        assert_eq!(map.len(), 2, "both issuers should reach the map");
+        assert!(
+            map.contains_key("issuer1"),
+            "issuer1 should be keyed by its id"
+        );
+        assert!(
+            map.contains_key("issuer2"),
+            "issuer2 should be keyed by its id"
+        );
     }
 }

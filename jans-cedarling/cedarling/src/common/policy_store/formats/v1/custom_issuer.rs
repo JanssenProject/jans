@@ -181,8 +181,8 @@ mod tests {
 
     #[test]
     fn parse_minimal_derives_id_from_filename() {
-        let parsed =
-            CustomIssuerParser::parse(&one_token("Acme::CustomToken"), "CustomKeys.json").unwrap();
+        let parsed = CustomIssuerParser::parse(&one_token("Acme::CustomToken"), "CustomKeys.json")
+            .expect("a minimal custom issuer should parse");
         assert_eq!(
             parsed.id, "CustomKeys",
             "id should be derived from filename 'CustomKeys.json' by stripping the .json suffix"
@@ -202,8 +202,8 @@ mod tests {
 
     #[test]
     fn parse_derives_id_from_mixed_case_json_extension() {
-        let parsed =
-            CustomIssuerParser::parse(&one_token("Acme::CustomToken"), "CustomKeys.JsOn").unwrap();
+        let parsed = CustomIssuerParser::parse(&one_token("Acme::CustomToken"), "CustomKeys.JsOn")
+            .expect("a mixed-case .json name should parse");
         assert_eq!(
             parsed.id, "CustomKeys",
             "id should strip the .json extension case-insensitively from 'CustomKeys.JsOn'"
@@ -221,7 +221,8 @@ mod tests {
                 }
             }
         }"#;
-        let parsed = CustomIssuerParser::parse(content, "ignored.json").unwrap();
+        let parsed = CustomIssuerParser::parse(content, "ignored.json")
+            .expect("a custom issuer with an explicit id should parse");
         assert_eq!(
             parsed.id, "acme",
             "id should be taken from the explicit 'id' JSON field"
@@ -230,7 +231,7 @@ mod tests {
             .meta
             .tokens_mappings
             .get("Acme::CustomToken")
-            .unwrap();
+            .expect("the issuer file should parse");
         assert!(
             token.required,
             "required flag should be true as set in the JSON content"
@@ -254,7 +255,8 @@ mod tests {
                 "Acme::WhaleToken": {}
             }
         }"#;
-        let parsed = CustomIssuerParser::parse(content, "ignored.json").unwrap();
+        let parsed = CustomIssuerParser::parse(content, "ignored.json")
+            .expect("a custom issuer with an explicit id should parse");
         assert_eq!(
             parsed.meta.tokens_mappings.len(),
             2,
@@ -361,12 +363,12 @@ mod tests {
                 r#"{ "id": "a", "tokens_mappings": { "M::T": {} } }"#,
                 "f1.json",
             )
-            .unwrap(),
+            .expect("the first issuer file should parse"),
             CustomIssuerParser::parse(
                 r#"{ "id": "a", "tokens_mappings": { "M::U": {} } }"#,
                 "f2.json",
             )
-            .unwrap(),
+            .expect("the second issuer file should parse"),
         ];
         let errors = CustomIssuerParser::validate(&issuers)
             .expect_err("two files sharing an id must be rejected");
@@ -390,12 +392,12 @@ mod tests {
                 r#"{ "id": "a", "tokens_mappings": { "M::T": {} } }"#,
                 "f1.json",
             )
-            .unwrap(),
+            .expect("the first issuer file should parse"),
             CustomIssuerParser::parse(
                 r#"{ "id": "b", "tokens_mappings": { "M::U": {} } }"#,
                 "f2.json",
             )
-            .unwrap(),
+            .expect("the second issuer file should parse"),
         ];
         let map = CustomIssuerParser::create_map(issuers);
         assert_eq!(
@@ -404,11 +406,11 @@ mod tests {
             "map should contain one entry per parsed issuer id ('a' and 'b')"
         );
         assert!(
-            map.get("a").unwrap().tokens_mappings.contains_key("M::T"),
+            map["a"].tokens_mappings.contains_key("M::T"),
             "map entry for id 'a' should preserve its declared token types"
         );
         assert!(
-            map.get("b").unwrap().tokens_mappings.contains_key("M::U"),
+            map["b"].tokens_mappings.contains_key("M::U"),
             "map entry for id 'b' should preserve its declared token types"
         );
     }
