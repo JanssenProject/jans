@@ -57,11 +57,11 @@ impl From<CustomIssuerDoc> for CustomIssuerMetadata {
 #[derive(Debug, Clone)]
 pub(crate) struct ParsedCustomIssuer {
     /// The issuer name/id (map key; sanitized downstream).
-    pub id: String,
+    pub(crate) id: String,
     /// The custom issuer configuration.
-    pub meta: CustomIssuerDoc,
+    pub(crate) meta: CustomIssuerDoc,
     /// Source filename.
-    pub filename: String,
+    pub(crate) filename: String,
 }
 
 /// Parser for custom issuer configuration files.

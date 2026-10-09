@@ -465,6 +465,9 @@ mod tests {
 
     /// Version modules must not import each other, and runtime modules must
     /// not import any version module.
+    ///
+    /// A substring check over sources: an alias such as `use ...::v1 as cur;`
+    /// gets past it, and new files must be added to the lists below by hand.
     #[test]
     fn version_modules_are_isolated() {
         let v0_sources = [

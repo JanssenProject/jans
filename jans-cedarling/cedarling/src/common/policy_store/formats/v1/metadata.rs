@@ -17,6 +17,8 @@ use crate::common::policy_store::validator::MetadataValidator;
 /// unknown fields are still ignored.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub(crate) struct MetadataDoc {
+    /// Dispatch already matched this against [`SPEC_VERSION`](super::SPEC_VERSION),
+    /// so nothing reads it back outside tests.
     pub(crate) policy_store_spec_version: u32,
     pub(crate) cedar_version: String,
     pub(crate) policy_store: PolicyStoreInfoDoc,

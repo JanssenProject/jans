@@ -22,6 +22,7 @@ use super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::entity_parser::{EntityParser, ParsedEntity};
 use super::errors::{ArchiveError, PolicyStoreError, ValidationError};
 use super::formats::v1::trusted_issuer::IssuerParser;
+use super::formats::{ParseStoreError, parse_policy_store};
 use super::loader::DefaultPolicyStoreLoader;
 use super::test_utils::{
     PolicyStoreTestBuilder, create_corrupted_archive, create_deep_nested_archive,
@@ -265,15 +266,13 @@ mod input_validation {
         let loaded_directory = loader
             .load_directory(".", true)
             .expect("metadata content is validated after loading");
-        let result = super::super::formats::parse_policy_store(loaded_directory, true);
+        let result = parse_policy_store(loaded_directory, true);
 
         let err = result.expect_err("Expected error for invalid Cedar syntax");
         assert!(
             matches!(
                 &err,
-                super::super::formats::ParseStoreError::Validation(
-                    ValidationError::InvalidPolicyStoreId { .. }
-                )
+                ParseStoreError::Validation(ValidationError::InvalidPolicyStoreId { .. })
             ),
             "Expected InvalidPolicyStoreId validation error for invalid Cedar syntax fixture, got: {err:?}"
         );

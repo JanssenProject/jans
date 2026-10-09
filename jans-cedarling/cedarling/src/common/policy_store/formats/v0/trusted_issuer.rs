@@ -49,11 +49,11 @@ pub(crate) struct TrustedIssuerDoc {
 #[derive(Debug, Clone)]
 pub(crate) struct ParsedIssuer {
     /// The issuer name (used as key/id)
-    pub id: String,
+    pub(crate) id: String,
     /// The trusted issuer configuration
-    pub issuer: TrustedIssuerDoc,
+    pub(crate) issuer: TrustedIssuerDoc,
     /// Source filename
-    pub filename: String,
+    pub(crate) filename: String,
 }
 
 /// Parser for v0 trusted issuer files.

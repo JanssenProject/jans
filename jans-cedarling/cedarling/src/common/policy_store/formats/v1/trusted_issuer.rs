@@ -77,11 +77,11 @@ impl From<TrustedIssuerDoc> for TrustedIssuer {
 #[derive(Debug, Clone)]
 pub(crate) struct ParsedIssuer {
     /// The issuer name (used as key/id)
-    pub id: String,
+    pub(crate) id: String,
     /// The trusted issuer configuration
-    pub issuer: TrustedIssuerDoc,
+    pub(crate) issuer: TrustedIssuerDoc,
     /// Source filename
-    pub filename: String,
+    pub(crate) filename: String,
 }
 
 /// Issuer parser for loading and validating trusted issuer configurations.
