@@ -207,91 +207,7 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
     public void merge(String dn, String[] objectClasses, List<AttributeDataModification> attributeDataModifications, Integer expiration) {
         // Update entry
         try {
-            List<Modification> modifications = new ArrayList<Modification>(attributeDataModifications.size());
-            for (AttributeDataModification attributeDataModification : attributeDataModifications) {
-                AttributeData attribute = attributeDataModification.getAttribute();
-                AttributeData oldAttribute = attributeDataModification.getOldAttribute();
-
-                String attributeName = null;
-                String[] attributeValues = null;
-                if (attribute != null) {
-                    attributeName = attribute.getName();
-                    attributeValues = convertValuesToStringValues(attribute.getValues());
-                }
-
-                String oldAttributeName = null;
-                String[] oldAttributeValues = null;
-                if (oldAttribute != null) {
-                    oldAttributeName = oldAttribute.getName();
-                    oldAttributeValues = convertValuesToStringValues(oldAttribute.getValues());
-                }
-
-                Modification modification = null;
-                if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
-                    modification = createModification(ModificationType.ADD, attributeName, attributeValues);
-                } else {
-                    if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(ModificationType.DELETE, oldAttributeName, oldAttributeValues);
-                    } else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
-                        if (attributeValues.length == 1) {
-                            modification = createModification(ModificationType.REPLACE, attributeName, attributeValues);
-                        } else {
-                        	String[] oldValues = ArrayHelper.arrayClone(oldAttributeValues);
-                        	String[] newValues = ArrayHelper.arrayClone(attributeValues);
-
-                            Arrays.sort(oldValues);
-                            Arrays.sort(newValues);
-
-                            boolean[] retainOldValues = new boolean[oldValues.length];
-                            Arrays.fill(retainOldValues, false);
-
-                            List<String> addValues = new ArrayList<String>();
-                            List<String> removeValues = new ArrayList<String>();
-
-                            // Add new values
-                            for (String value : newValues) {
-                                int idx = Arrays.binarySearch(oldValues, value, new Comparator<String>() {
-                                    @Override
-                                    public int compare(String o1, String o2) {
-                                    	return o1.toLowerCase().compareTo(o2.toLowerCase());
-                                    }
-                                });
-                                if (idx >= 0) {
-                                    // Old values array contains new value. Retain
-                                    // old value
-                                    retainOldValues[idx] = true;
-                                } else {
-                                    // This is new value
-                                    addValues.add(value);
-                                }
-                            }
-
-                            // Remove values which we don't have in new values
-                            for (int i = 0; i < oldValues.length; i++) {
-                                if (!retainOldValues[i]) {
-                                    removeValues.add(oldValues[i]);
-                                }
-                            }
-
-                            if (removeValues.size() > 0) {
-                                Modification removeModification = createModification(ModificationType.DELETE, attributeName,
-                                        removeValues.toArray(new String[removeValues.size()]));
-                                modifications.add(removeModification);
-                            }
-
-                            if (addValues.size() > 0) {
-                                Modification addModification = createModification(ModificationType.ADD, attributeName,
-                                        addValues.toArray(new String[addValues.size()]));
-                                modifications.add(addModification);
-                            }
-                        }
-                    }
-                }
-
-                if (modification != null) {
-                    modifications.add(modification);
-                }
-            }
+            List<Modification> modifications = buildLdapModifications(attributeDataModifications);
 
             if (modifications.size() > 0) {
                 boolean result = getOperationService().updateEntry(dn, modifications);
@@ -304,6 +220,115 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn), ex);
         }
+    }
+
+    @Override
+    protected boolean mergeWithVersion(String dn, String[] objectClasses, List<AttributeDataModification> attributeDataModifications,
+            Integer expiration, String versionAttributeName, Object expectedVersionValue, Object newVersionValue) {
+        try {
+            List<Modification> modifications = buildLdapModifications(attributeDataModifications);
+
+            // Unlike merge(), this call must never be skipped for an empty diff -- the version
+            // bump (and therefore the CAS check) always has to reach the server.
+            return getOperationService().updateEntryWithVersion(dn, modifications, versionAttributeName, expectedVersionValue);
+        } catch (ConnectionException ex) {
+            throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn), ex.getCause());
+        } catch (io.jans.orm.exception.UnsupportedOperationException ex) {
+            // Propagate unsupported operations without wrapping them.
+            throw ex;
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn), ex);
+        }
+    }
+
+    private List<Modification> buildLdapModifications(List<AttributeDataModification> attributeDataModifications) {
+        List<Modification> modifications = new ArrayList<Modification>(attributeDataModifications.size());
+        for (AttributeDataModification attributeDataModification : attributeDataModifications) {
+            AttributeData attribute = attributeDataModification.getAttribute();
+            AttributeData oldAttribute = attributeDataModification.getOldAttribute();
+
+            String attributeName = null;
+            String[] attributeValues = null;
+            if (attribute != null) {
+                attributeName = attribute.getName();
+                attributeValues = convertValuesToStringValues(attribute.getValues());
+            }
+
+            String oldAttributeName = null;
+            String[] oldAttributeValues = null;
+            if (oldAttribute != null) {
+                oldAttributeName = oldAttribute.getName();
+                oldAttributeValues = convertValuesToStringValues(oldAttribute.getValues());
+            }
+
+            Modification modification = null;
+            if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
+                modification = createModification(ModificationType.ADD, attributeName, attributeValues);
+            } else {
+                if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
+                    modification = createModification(ModificationType.DELETE, oldAttributeName, oldAttributeValues);
+                } else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
+                    if (attributeValues.length == 1) {
+                        modification = createModification(ModificationType.REPLACE, attributeName, attributeValues);
+                    } else {
+                    	String[] oldValues = ArrayHelper.arrayClone(oldAttributeValues);
+                    	String[] newValues = ArrayHelper.arrayClone(attributeValues);
+
+                        Arrays.sort(oldValues);
+                        Arrays.sort(newValues);
+
+                        boolean[] retainOldValues = new boolean[oldValues.length];
+                        Arrays.fill(retainOldValues, false);
+
+                        List<String> addValues = new ArrayList<String>();
+                        List<String> removeValues = new ArrayList<String>();
+
+                        // Add new values
+                        for (String value : newValues) {
+                            int idx = Arrays.binarySearch(oldValues, value, new Comparator<String>() {
+                                @Override
+                                public int compare(String o1, String o2) {
+                                	return o1.toLowerCase().compareTo(o2.toLowerCase());
+                                }
+                            });
+                            if (idx >= 0) {
+                                // Old values array contains new value. Retain
+                                // old value
+                                retainOldValues[idx] = true;
+                            } else {
+                                // This is new value
+                                addValues.add(value);
+                            }
+                        }
+
+                        // Remove values which we don't have in new values
+                        for (int i = 0; i < oldValues.length; i++) {
+                            if (!retainOldValues[i]) {
+                                removeValues.add(oldValues[i]);
+                            }
+                        }
+
+                        if (removeValues.size() > 0) {
+                            Modification removeModification = createModification(ModificationType.DELETE, attributeName,
+                                    removeValues.toArray(new String[removeValues.size()]));
+                            modifications.add(removeModification);
+                        }
+
+                        if (addValues.size() > 0) {
+                            Modification addModification = createModification(ModificationType.ADD, attributeName,
+                                    addValues.toArray(new String[addValues.size()]));
+                            modifications.add(addModification);
+                        }
+                    }
+                }
+            }
+
+            if (modification != null) {
+                modifications.add(modification);
+            }
+        }
+
+        return modifications;
     }
 
     @Override

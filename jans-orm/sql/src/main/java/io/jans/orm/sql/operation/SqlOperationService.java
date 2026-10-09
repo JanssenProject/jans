@@ -76,6 +76,9 @@ public interface SqlOperationService extends PersistenceOperationService {
 
     boolean updateEntry(String key, String objectClass, List<AttributeDataModification> mods) throws UnsupportedOperationException, PersistenceException;
 
+    boolean updateEntryWithVersion(String key, String objectClass, List<AttributeDataModification> mods, String versionAttributeName,
+            Object expectedVersionValue) throws UnsupportedOperationException, PersistenceException;
+
     boolean delete(String key, String objectClass) throws EntryNotFoundException;
 	long delete(String key, String objectClass, ConvertedExpression expression, int count) throws DeleteException;
 

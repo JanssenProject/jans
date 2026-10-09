@@ -63,6 +63,7 @@ public class LdapConnectionProvider {
     private ArrayList<String> binaryAttributes, certificateAttributes;
 
     private boolean supportsSubtreeDeleteRequestControl;
+    private volatile Boolean supportsAssertionRequestControl;
 
 	private Properties props;
 
@@ -382,6 +383,31 @@ public class LdapConnectionProvider {
         }
 
         return supportsSubtreeDeleteRequestControl;
+    }
+
+    /**
+     * Unlike {@link #supportsSubtreeDeleteRequestControl()}, this check is lazy (first call, then
+     * cached) rather than computed at pool-init time, so a connection-pool restart isn't required
+     * to pick it up and construction doesn't pay for a root-DSE round trip it may never need.
+     */
+    public boolean isSupportsAssertionRequestControl() {
+        Boolean cached = this.supportsAssertionRequestControl;
+        if (cached != null) {
+            return cached.booleanValue();
+        }
+
+        if (!isValidConnection()) {
+            return false;
+        }
+        try {
+            boolean supported = connectionPool.getRootDSE()
+                    .supportsControl(com.unboundid.ldap.sdk.controls.AssertionRequestControl.ASSERTION_REQUEST_OID);
+            this.supportsAssertionRequestControl = Boolean.valueOf(supported);
+            return supported;
+        } catch (Exception ex) {
+            LOG.error("Failed to determine if LDAP server supports Assertion Request Control", ex);
+            return false;
+        }
     }
 
     private boolean isValidConnection() {
