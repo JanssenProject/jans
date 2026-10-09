@@ -205,12 +205,21 @@ enum TokenOutcome {
 /// decision log. Access the fields explicitly (e.g. `result.tokens`).
 #[derive(Debug)]
 pub(crate) struct ValidatedMultiIssuerTokens {
-    /// Validated tokens keyed by their mapping (token name).
-    pub tokens: HashMap<String, Arc<Token>>,
-    /// Mapping (token name) -> original request index, for surviving tokens.
-    pub indices: HashMap<String, usize>,
+    /// Validated tokens keyed by their mapping (token name). Each entry carries
+    /// the token alongside its original request index so callers never need a
+    /// separate index lookup.
+    pub tokens: HashMap<String, ValidatedToken>,
     /// Tokens dropped during validation.
     pub dropped: Vec<DroppedToken>,
+}
+
+/// A validated token with its original request index.
+#[derive(Debug, Clone)]
+pub(crate) struct ValidatedToken {
+    /// Validated Cedar token.
+    pub token: Arc<Token>,
+    /// Zero-based position in the request's `tokens` array.
+    pub index: usize,
 }
 
 impl JwtService {
@@ -455,8 +464,7 @@ impl JwtService {
             return Err(MultiIssuerValidationError::EmptyTokenArray);
         }
 
-        let mut validated_tokens = HashMap::new();
-        let mut indices = HashMap::new();
+        let mut validated_tokens: HashMap<String, ValidatedToken> = HashMap::new();
         let mut dropped = Vec::new();
         let mut seen_combinations = HashSet::new();
 
@@ -510,7 +518,8 @@ impl JwtService {
 
             match result {
                 TokenOutcome::Validated(cedar_token) => {
-                    if let Some(prior_index) = indices.get(&token_name).copied() {
+                    if let Some(prior) = validated_tokens.get(&token_name) {
+                        let prior_index = prior.index;
                         if let Some(logger) = &self.logger {
                             logger.log_any(JwtLogEntry::new(
                                 format!(
@@ -523,11 +532,16 @@ impl JwtService {
                         dropped.push(DroppedToken::new(
                             token_name.clone(),
                             prior_index,
-                            DropReason::DuplicateToken,
+                            DropReason::DuplicateMapping,
                         ));
                     }
-                    validated_tokens.insert(token_name.clone(), cedar_token);
-                    indices.insert(token_name, index);
+                    validated_tokens.insert(
+                        token_name.clone(),
+                        ValidatedToken {
+                            token: cedar_token,
+                            index,
+                        },
+                    );
                 },
                 TokenOutcome::Dropped(reason) => {
                     dropped.push(DroppedToken::new(token.mapping.clone(), index, reason));
@@ -549,7 +563,6 @@ impl JwtService {
 
         Ok(ValidatedMultiIssuerTokens {
             tokens: validated_tokens,
-            indices,
             dropped,
         })
     }

@@ -20,6 +20,7 @@ use pyo3::prelude::*;
 /// - InvalidInput
 /// - JwtValidationFailed
 /// - DuplicateToken
+/// - DuplicateMapping
 /// - NoProcessorRegistered
 /// - CustomProcessingFailed
 /// - CustomProcessingTimedOut
@@ -38,6 +39,7 @@ pub enum DropReason {
     InvalidInput,
     JwtValidationFailed,
     DuplicateToken,
+    DuplicateMapping,
     NoProcessorRegistered,
     CustomProcessingFailed,
     CustomProcessingTimedOut,
@@ -50,6 +52,7 @@ impl From<&cedarling::DropReason> for DropReason {
             cedarling::DropReason::InvalidInput(_) => DropReason::InvalidInput,
             cedarling::DropReason::JwtValidationFailed => DropReason::JwtValidationFailed,
             cedarling::DropReason::DuplicateToken => DropReason::DuplicateToken,
+            cedarling::DropReason::DuplicateMapping => DropReason::DuplicateMapping,
             cedarling::DropReason::NoProcessorRegistered => DropReason::NoProcessorRegistered,
             cedarling::DropReason::CustomProcessingFailed => DropReason::CustomProcessingFailed,
             cedarling::DropReason::CustomProcessingTimedOut => DropReason::CustomProcessingTimedOut,
@@ -66,6 +69,7 @@ impl DropReason {
             DropReason::InvalidInput => "invalid_input",
             DropReason::JwtValidationFailed => "jwt_validation_failed",
             DropReason::DuplicateToken => "duplicate_token",
+            DropReason::DuplicateMapping => "duplicate_mapping",
             DropReason::NoProcessorRegistered => "no_processor_registered",
             DropReason::CustomProcessingFailed => "custom_processing_failed",
             DropReason::CustomProcessingTimedOut => "custom_processing_timed_out",

@@ -12,14 +12,13 @@ use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::token_entity_metadata::DEFAULT_TKN_ID;
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
-use crate::jwt::{Token, TokenIssuer};
+use crate::jwt::{Token, TokenIssuer, ValidatedToken};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel};
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
-use std::sync::Arc;
 
 /// Errors that can occur during multi-issuer entity building
 #[derive(Debug, thiserror::Error)]
@@ -300,7 +299,7 @@ impl EntityBuilder {
     /// [`Self::build_resource_entity`] call to complete each decision.
     pub(crate) fn build_multi_issuer_setup_entities(
         &self,
-        tokens: &HashMap<String, Arc<Token>>,
+        tokens: &HashMap<String, ValidatedToken>,
         log_service: &impl LogWriter,
     ) -> Result<MultiIssuerSetupEntities, MultiIssuerEntityError> {
         let mut built_entities = BuiltEntities::from(&self.iss_entities);
@@ -308,7 +307,8 @@ impl EntityBuilder {
         let mut token_entities = HashMap::new();
         let mut dropped_names = Vec::new();
         let mut entity_key_to_token_name: HashMap<String, String> = HashMap::new();
-        for (token_name, token) in tokens {
+        for (token_name, entry) in tokens {
+            let token = &entry.token;
             match self.build_single_token_entity(token, &built_entities) {
                 Ok(entity) => match self.generate_entity_key(token_name, token) {
                     Ok(entity_key) => {
@@ -580,6 +580,7 @@ mod tests {
     use cedar_policy_core::validator::ValidatorSchema;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
     use url::Url;
 
     fn create_test_entity_builder() -> EntityBuilder {
@@ -830,8 +831,19 @@ mod tests {
         let token_two = create_test_token("https://idp.acme.com/auth", "token2", claims2, &builder);
         tokens.insert("Jans::Access_Token2".to_string(), token_two);
 
-        let tokens: HashMap<String, Arc<Token>> =
-            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+        let tokens: HashMap<String, ValidatedToken> = tokens
+            .into_iter()
+            .enumerate()
+            .map(|(i, (k, v))| {
+                (
+                    k,
+                    ValidatedToken {
+                        token: Arc::new(v),
+                        index: i,
+                    },
+                )
+            })
+            .collect();
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
@@ -874,8 +886,19 @@ mod tests {
         let token_three = Token::new("Jans::Id_Token", token_claims3, None);
         tokens.insert("Jans::Id_Token".to_string(), token_three);
 
-        let tokens: HashMap<String, Arc<Token>> =
-            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+        let tokens: HashMap<String, ValidatedToken> = tokens
+            .into_iter()
+            .enumerate()
+            .map(|(i, (k, v))| {
+                (
+                    k,
+                    ValidatedToken {
+                        token: Arc::new(v),
+                        index: i,
+                    },
+                )
+            })
+            .collect();
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
@@ -1069,8 +1092,19 @@ mod tests {
             create_test_token("https://idp.dolphin.sea/auth", "token3", claims3, &builder);
         tokens.insert("Acme::DolphinToken".to_string(), token_three);
 
-        let tokens: HashMap<String, Arc<Token>> =
-            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+        let tokens: HashMap<String, ValidatedToken> = tokens
+            .into_iter()
+            .enumerate()
+            .map(|(i, (k, v))| {
+                (
+                    k,
+                    ValidatedToken {
+                        token: Arc::new(v),
+                        index: i,
+                    },
+                )
+            })
+            .collect();
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
@@ -1110,8 +1144,19 @@ mod tests {
         let token_two = Token::new("Jans::Id_Token", token_claims2, None);
         tokens.insert("Jans::Id_Token".to_string(), token_two);
 
-        let tokens: HashMap<String, Arc<Token>> =
-            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+        let tokens: HashMap<String, ValidatedToken> = tokens
+            .into_iter()
+            .enumerate()
+            .map(|(i, (k, v))| {
+                (
+                    k,
+                    ValidatedToken {
+                        token: Arc::new(v),
+                        index: i,
+                    },
+                )
+            })
+            .collect();
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
 

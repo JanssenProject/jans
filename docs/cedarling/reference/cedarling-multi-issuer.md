@@ -1002,6 +1002,7 @@ for dropped in result.dropped_tokens():
 | `invalid_input` | The token input was malformed (empty mapping or payload). `detail` is the stable slug (`"empty_mapping"` / `"empty_payload"`). |
 | `jwt_validation_failed` | Signature/claims validation failed, or no trusted issuer declares the token's mapping. |
 | `duplicate_token` | A token with the same issuer and token type was already accepted (see [Non-Deterministic Tokens](#non-deterministic-tokens)). |
+| `duplicate_mapping` | Two trusted issuers map to the same entity type; the later input replaced the earlier one (last wins). |
 | `no_processor_registered` | The mapping routes to a custom issuer but no processor is registered, and the mapping is not `required`. |
 | `custom_processing_failed` | A registered custom processor rejected the token. |
 | `custom_processing_timed_out` | A registered custom processor exceeded `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS`. |

@@ -85,6 +85,7 @@ pub enum DropReason {
     InvalidInput,
     JwtValidationFailed,
     DuplicateToken,
+    DuplicateMapping,
     NoProcessorRegistered,
     CustomProcessingFailed,
     CustomProcessingTimedOut,
@@ -97,11 +98,10 @@ impl From<&core::DropReason> for DropReason {
             core::DropReason::InvalidInput(_) => DropReason::InvalidInput,
             core::DropReason::JwtValidationFailed => DropReason::JwtValidationFailed,
             core::DropReason::DuplicateToken => DropReason::DuplicateToken,
+            core::DropReason::DuplicateMapping => DropReason::DuplicateMapping,
             core::DropReason::NoProcessorRegistered => DropReason::NoProcessorRegistered,
             core::DropReason::CustomProcessingFailed => DropReason::CustomProcessingFailed,
-            core::DropReason::CustomProcessingTimedOut => {
-                DropReason::CustomProcessingTimedOut
-            },
+            core::DropReason::CustomProcessingTimedOut => DropReason::CustomProcessingTimedOut,
             core::DropReason::EntityBuildFailed => DropReason::EntityBuildFailed,
         }
     }

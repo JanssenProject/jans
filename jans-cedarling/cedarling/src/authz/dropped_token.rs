@@ -73,6 +73,12 @@ pub enum DropReason {
     #[error("duplicate issuer and token-type combination")]
     DuplicateToken,
 
+    /// Two trusted issuers map to the same entity type and both passed the
+    /// `(iss, mapping)` check. Last wins: this is the earlier token, dropped
+    /// because a later input with the same mapping replaced it.
+    #[error("replaced by a later token with the same mapping")]
+    DuplicateMapping,
+
     /// The mapping routes to a custom issuer but no
     /// [`CustomTokenProcessor`](crate::CustomTokenProcessor) is registered, and
     /// the mapping is not marked required.
@@ -119,6 +125,7 @@ impl DropReason {
             Self::InvalidInput(_) => "invalid_input",
             Self::JwtValidationFailed => "jwt_validation_failed",
             Self::DuplicateToken => "duplicate_token",
+            Self::DuplicateMapping => "duplicate_mapping",
             Self::NoProcessorRegistered => "no_processor_registered",
             Self::CustomProcessingFailed => "custom_processing_failed",
             Self::CustomProcessingTimedOut => "custom_processing_timed_out",
@@ -163,6 +170,7 @@ mod tests {
             DropReason::InvalidInput(TokenInputError::EmptyMapping),
             DropReason::JwtValidationFailed,
             DropReason::DuplicateToken,
+            DropReason::DuplicateMapping,
             DropReason::NoProcessorRegistered,
             DropReason::CustomProcessingFailed,
             DropReason::CustomProcessingTimedOut,
@@ -203,6 +211,7 @@ mod tests {
             DropReason::InvalidInput(TokenInputError::EmptyMapping),
             DropReason::JwtValidationFailed,
             DropReason::DuplicateToken,
+            DropReason::DuplicateMapping,
             DropReason::NoProcessorRegistered,
             DropReason::CustomProcessingFailed,
             DropReason::CustomProcessingTimedOut,
@@ -275,6 +284,10 @@ mod tests {
         assert_eq!(
             DropReason::CustomProcessingTimedOut.to_string(),
             "custom token processing timed out"
+        );
+        assert_eq!(
+            DropReason::DuplicateMapping.to_string(),
+            "replaced by a later token with the same mapping"
         );
     }
 }

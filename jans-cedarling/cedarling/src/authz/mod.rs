@@ -1031,20 +1031,21 @@ impl Authz {
 
         let crate::jwt::ValidatedMultiIssuerTokens {
             tokens: mut validated_tokens,
-            indices,
             dropped: mut dropped_tokens,
         } = validated;
 
         // Merge entity-build drops, recovering each token's original request
-        // index from the validation pass. A duplicate-mapping drop carries the
+        // index from the same validated entry. A duplicate-mapping drop carries the
         // prior index but is pushed while processing the later input, so
         // validation drops alone are already unordered by index; entity-build
         // drops append after.
         for name in &setup_entities.dropped_names {
-            let index = indices.get(name).copied().unwrap_or(0);
+            let Some(entry) = validated_tokens.get(name) else {
+                continue;
+            };
             dropped_tokens.push(DroppedToken::new(
                 name.clone(),
-                index,
+                entry.index,
                 DropReason::EntityBuildFailed,
             ));
         }
@@ -1454,7 +1455,7 @@ struct UnsignedSetup {
 /// that [`LogTokensInfo`] can be produced from the same snapshot the entities
 /// were built from.
 struct MultiIssuerSetup {
-    validated_tokens: HashMap<String, Arc<crate::jwt::Token>>,
+    validated_tokens: HashMap<String, crate::jwt::ValidatedToken>,
     entities: MultiIssuerSetupEntities,
     /// Tokens dropped across validation and entity building. Order is not
     /// guaranteed; use each entry's `index` to correlate with the request

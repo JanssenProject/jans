@@ -910,9 +910,7 @@ fn test_dropped_token_carries_claim_free_message() {
 
 #[test]
 fn test_dropped_token_detail_is_stable_slug() {
-    let reason: cedarling::DropReason =
-        serde_json::from_value(json!({"kind": "invalid_input", "detail": "empty_payload"}))
-            .expect("invalid_input reason should deserialize");
+    let reason = cedarling::DropReason::InvalidInput(cedarling::TokenInputError::EmptyPayload);
     let dropped = crate::result::DroppedToken::from(cedarling::DroppedToken::new(
         "Jans::Access_Token",
         0,

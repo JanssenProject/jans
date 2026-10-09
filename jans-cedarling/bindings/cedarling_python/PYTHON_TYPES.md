@@ -496,6 +496,7 @@ Values
 - InvalidInput
 - JwtValidationFailed
 - DuplicateToken
+- DuplicateMapping
 - NoProcessorRegistered
 - CustomProcessingFailed
 - CustomProcessingTimedOut

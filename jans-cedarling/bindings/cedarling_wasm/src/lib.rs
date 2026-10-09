@@ -67,10 +67,11 @@ impl MultiIssuerAuthorizeResult {
     }
 
     /// Tokens dropped from this decision, as an array of
-    /// `{mapping, index, reason}` objects (empty when every token was used).
+    /// `{mapping, index, reason}` objects (empty when every token was used),
+    /// where `reason` is `{kind, detail?, message}`.
     #[wasm_bindgen(js_name = droppedTokens)]
     pub fn dropped_tokens(&self) -> Result<JsValue, Error> {
-        serde_wasm_bindgen::to_value(&self.dropped_tokens)
+        to_object_recursive(serde_wasm_bindgen::to_value(&self.dropped_tokens)?)
     }
 }
 

@@ -9,13 +9,11 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
 use std::hash::Hash;
-use std::sync::Arc;
 
 use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::authz::DroppedToken;
 use crate::common::policy_store::PoliciesContainer;
-use crate::jwt::Token;
 use crate::lock::AuditPayload;
 use crate::log::loggable_fn::LoggableFn;
 use cedar_policy::EntityUid;
@@ -639,10 +637,18 @@ impl Loggable for BaseLogEntry {
 pub(crate) struct LogTokensInfo(pub HashMap<String, HashMap<String, serde_json::Value>>);
 
 impl LogTokensInfo {
-    pub(crate) fn new(tokens: &HashMap<String, Arc<Token>>, decision_log_jwt_id: &str) -> Self {
+    pub(crate) fn new(
+        tokens: &HashMap<String, crate::jwt::ValidatedToken>,
+        decision_log_jwt_id: &str,
+    ) -> Self {
         let tokens_logging_info = tokens
             .iter()
-            .map(|(tkn_name, tkn)| (tkn_name.clone(), tkn.logging_info(decision_log_jwt_id)))
+            .map(|(tkn_name, entry)| {
+                (
+                    tkn_name.clone(),
+                    entry.token.logging_info(decision_log_jwt_id),
+                )
+            })
             .collect::<HashMap<String, HashMap<String, serde_json::Value>>>();
 
         Self(tokens_logging_info)

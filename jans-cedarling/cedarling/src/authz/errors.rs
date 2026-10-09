@@ -42,9 +42,11 @@ pub enum MultiIssuerValidationError {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, thiserror::Error)]
 #[serde(rename_all = "snake_case")]
 pub enum TokenInputError {
+    /// The token mapping string was empty.
     #[error("Empty mapping string")]
     EmptyMapping,
 
+    /// The token payload was empty.
     #[error("Empty payload")]
     EmptyPayload,
 }

@@ -60,7 +60,7 @@ pub use authz::request::{
 };
 pub use authz::{
     AuthorizeError, AuthorizeResult, BatchItemError, DropReason, DroppedToken,
-    MultiIssuerAuthorizeResult,
+    MultiIssuerAuthorizeResult, TokenInputError,
 };
 pub use bootstrap_config::*;
 /// Identifier of a Cedar policy, re-exported from [`cedar_policy`] so callers can

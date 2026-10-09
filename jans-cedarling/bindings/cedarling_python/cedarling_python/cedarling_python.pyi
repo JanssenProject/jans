@@ -678,6 +678,7 @@ class DropReason:
     InvalidInput: DropReason
     JwtValidationFailed: DropReason
     DuplicateToken: DropReason
+    DuplicateMapping: DropReason
     NoProcessorRegistered: DropReason
     CustomProcessingFailed: DropReason
     CustomProcessingTimedOut: DropReason
