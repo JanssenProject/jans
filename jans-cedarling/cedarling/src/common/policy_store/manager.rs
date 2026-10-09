@@ -19,12 +19,14 @@
 //! └── entities                  →  default_entities: HashMap<String, Value>
 //! ```
 
+use super::custom_issuer_parser::CustomIssuerParser;
 use super::entity_parser::EntityParser;
 use super::issuer_parser::IssuerParser;
 use super::loader::LoadedPolicyStore;
 use super::log_entry::PolicyStoreLogEntry;
 use super::policy_parser::PolicyParser;
-use super::{PoliciesContainer, PolicyStore, TrustedIssuer};
+use super::schema_parser::ParsedSchema;
+use super::{CustomIssuerMetadata, PoliciesContainer, PolicyStore, TrustedIssuer};
 use crate::common::cedar_schema::CedarSchema;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::parse_default_entities_with_warns;
@@ -33,7 +35,6 @@ use crate::log::interface::LogWriter;
 use cedar_policy::PolicySet;
 use cedar_policy_core::extensions::Extensions;
 use cedar_policy_core::validator::ValidatorSchema;
-use semver::Version;
 use std::collections::HashMap;
 
 /// Errors that can occur during policy store conversion.
@@ -55,10 +56,6 @@ pub enum ConversionError {
     #[error("Failed to convert entities: {0}")]
     EntityConversion(String),
 
-    /// Version parsing failed
-    #[error("Failed to parse cedar version '{version}': {details}")]
-    VersionParsing { version: String, details: String },
-
     /// Policy set creation failed
     #[error("Failed to create policy set: {0}")]
     PolicySetCreation(String),
@@ -72,22 +69,23 @@ impl PolicyStoreManager {
     ///
     /// This is the main entry point for converting policy stores loaded from
     /// directory or archive format into the legacy format used by the rest of Cedarling.
+    ///
+    /// When `strict_schema_validation` is `true`, a missing schema causes an error.
+    /// When `false`, missing schema is allowed (schemaless mode).
     pub(crate) fn convert_to_legacy(
         loaded: LoadedPolicyStore,
+        strict_schema_validation: bool,
     ) -> Result<PolicyStore, ConversionError> {
-        Self::convert_to_legacy_with_logger(loaded, None)
-    }
-
-    /// Convert a `LoadedPolicyStore` to `PolicyStore` with optional logging.
-    ///
-    /// This version accepts an optional logger for structured logging during conversion.
-    /// Use this when a logger is available to get detailed conversion logs.
-    fn convert_to_legacy_with_logger(
-        loaded: LoadedPolicyStore,
-        logger: Option<&Logger>,
-    ) -> Result<PolicyStore, ConversionError> {
-        // 1. Convert schema
-        let cedar_schema = Self::convert_schema(&loaded.schema)?;
+        // 1. Convert schema (now optional)
+        let cedar_schema = match loaded.schema {
+            Some(ref parsed_schema) => Some(Self::convert_parsed_schema(parsed_schema)?),
+            None if strict_schema_validation => {
+                return Err(ConversionError::SchemaConversion(
+                    "missing required schema in policy store".to_string(),
+                ));
+            },
+            None => None,
+        };
 
         // 2. Convert policies and templates into a single PoliciesContainer
         let policies_container =
@@ -96,73 +94,63 @@ impl PolicyStoreManager {
         // 3. Convert trusted issuers
         let trusted_issuers = Self::convert_trusted_issuers(&loaded.trusted_issuers)?;
 
-        // 4. Convert entities (logs hierarchy warnings if logger provided)
-        let raw_entities = Self::convert_entities(&loaded.entities, logger)?;
+        // 4. Convert entities
+        let raw_entities = Self::convert_entities(&loaded.entities, None)?;
 
         // Convert raw entities to DefaultEntitiesWithWarns
         let default_entities = parse_default_entities_with_warns(raw_entities).map_err(|e| {
             ConversionError::EntityConversion(format!("Failed to parse default entities: {e}"))
         })?;
 
-        // 5. Parse cedar version
-        let cedar_version = Self::parse_cedar_version(&loaded.metadata.cedar_version)?;
-
-        logger.log_any(PolicyStoreLogEntry::info(format!(
-            "Policy store conversion complete: {} policies, {} issuers, {} entities",
-            policies_container.get_set().policies().count(),
-            trusted_issuers.as_ref().map_or(0, HashMap::len),
-            default_entities.entities().len()
-        )));
-
         Ok(PolicyStore {
-            name: loaded.metadata.policy_store.name,
             version: Some(loaded.metadata.policy_store.version),
-            description: loaded.metadata.policy_store.description,
-            cedar_version: Some(cedar_version),
             schema: cedar_schema,
+            schema_source_exists: loaded.schema_source_exists,
             policies: policies_container,
             trusted_issuers,
+            custom_issuers: Self::convert_custom_issuers(&loaded.custom_issuers)?,
             default_entities,
         })
     }
 
-    /// Convert raw schema string to `CedarSchema`.
+    /// Convert custom (non-JWT) issuer files into a map keyed by issuer id.
     ///
-    /// Uses `ParsedSchema::parse` to parse and validate the schema, then converts
-    /// to the `CedarSchema` format required by the legacy system.
-    ///
-    /// The `CedarSchema` requires:
-    /// - `schema: cedar_policy::Schema`
-    /// - `json: CedarSchemaJson`
-    /// - `validator_schema: ValidatorSchema`
-    fn convert_schema(schema_content: &str) -> Result<CedarSchema, ConversionError> {
-        use super::schema_parser::ParsedSchema;
+    /// Empty (`custom-issuers/` absent) yields an empty map, leaving the JWT path
+    /// unaffected. Parse/duplicate errors surface as [`ConversionError`].
+    fn convert_custom_issuers(
+        files: &[super::loader::CustomIssuerFile],
+    ) -> Result<HashMap<String, CustomIssuerMetadata>, ConversionError> {
+        if files.is_empty() {
+            return Ok(HashMap::new());
+        }
 
-        // Parse and validate schema (parses once and stores the fragment)
-        let parsed_schema =
-            ParsedSchema::parse(schema_content, "schema.cedarschema").map_err(|e| {
-                ConversionError::SchemaConversion(format!("Failed to parse schema: {e}"))
-            })?;
+        let mut parsed = Vec::with_capacity(files.len());
+        for file in files {
+            parsed.push(
+                CustomIssuerParser::parse(&file.content, &file.name)
+                    .map_err(ConversionError::IssuerConversion)?,
+            );
+        }
 
-        // Validate the schema
-        parsed_schema.validate().map_err(|e| {
-            ConversionError::SchemaConversion(format!("Schema validation failed: {e}"))
-        })?;
+        if let Err(errors) = CustomIssuerParser::validate(&parsed) {
+            return Err(ConversionError::IssuerConversion(errors.join("; ")));
+        }
 
-        // Get the Cedar schema from the parsed result
-        let schema = parsed_schema.get_schema().clone();
+        Ok(CustomIssuerParser::create_map(parsed))
+    }
 
-        // Use the already-parsed fragment for JSON conversion (no re-parsing)
-        let json_string = parsed_schema.get_fragment().to_json_string().map_err(|e| {
+    /// Convert a pre-parsed `ParsedSchema` to `CedarSchema`.
+    fn convert_parsed_schema(parsed: &ParsedSchema) -> Result<CedarSchema, ConversionError> {
+        let schema = parsed.get_schema().clone();
+
+        let json_string = parsed.get_fragment().to_json_string().map_err(|e| {
             ConversionError::SchemaConversion(format!("Failed to serialize schema to JSON: {e}"))
         })?;
 
-        // Parse CedarSchemaJson
         let json: CedarSchemaJson = serde_json::from_str(&json_string).map_err(|e| {
             ConversionError::SchemaConversion(format!("Failed to parse CedarSchemaJson: {e}"))
         })?;
 
-        // Create ValidatorSchema
         let validator_schema = ValidatorSchema::from_json_str(
             &json_string,
             Extensions::all_available(),
@@ -176,6 +164,19 @@ impl PolicyStoreManager {
             json,
             validator_schema,
         })
+    }
+
+    /// Convert raw schema string to `CedarSchema`.
+    #[cfg(test)]
+    fn convert_schema(schema_content: &str) -> Result<CedarSchema, ConversionError> {
+        use super::schema_parser::ParsedSchema;
+
+        let parsed_schema =
+            ParsedSchema::parse(schema_content, "schema.cedarschema").map_err(|e| {
+                ConversionError::SchemaConversion(format!("Failed to parse schema: {e}"))
+            })?;
+
+        Self::convert_parsed_schema(&parsed_schema)
     }
 
     /// Convert policy and template files to `PoliciesContainer`.
@@ -343,17 +344,6 @@ impl PolicyStoreManager {
 
         Ok(Some(result))
     }
-
-    /// Parse cedar version string to `semver::Version`.
-    fn parse_cedar_version(version_str: &str) -> Result<Version, ConversionError> {
-        // Handle optional "v" prefix
-        let version_str = version_str.strip_prefix('v').unwrap_or(version_str);
-
-        Version::parse(version_str).map_err(|e| ConversionError::VersionParsing {
-            version: version_str.to_string(),
-            details: e.to_string(),
-        })
-    }
 }
 
 #[cfg(test)]
@@ -376,30 +366,8 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_parse_cedar_version_valid() {
-        let version = PolicyStoreManager::parse_cedar_version("4.0.0").unwrap();
-        assert_eq!(version.major, 4);
-        assert_eq!(version.minor, 0);
-        assert_eq!(version.patch, 0);
-    }
-
-    #[test]
-    fn test_parse_cedar_version_with_v_prefix() {
-        let version = PolicyStoreManager::parse_cedar_version("v4.1.2").unwrap();
-        assert_eq!(version.major, 4);
-        assert_eq!(version.minor, 1);
-        assert_eq!(version.patch, 2);
-    }
-
-    #[test]
-    fn test_parse_cedar_version_invalid() {
-        let result = PolicyStoreManager::parse_cedar_version("invalid");
-        let err = result.expect_err("Expected error for invalid version format");
-        assert!(
-            matches!(err, ConversionError::VersionParsing { .. }),
-            "Expected VersionParsing error, got: {err:?}"
-        );
+    fn parse_schema(content: &str) -> ParsedSchema {
+        ParsedSchema::parse(content, "schema.cedarschema").expect("test schema should parse")
     }
 
     #[test]
@@ -425,7 +393,7 @@ mod tests {
         let cedar_schema = result.unwrap();
         // Verify schema has expected entity types
         let entity_types: Vec<_> = cedar_schema.schema.entity_types().collect();
-        assert!(!entity_types.is_empty());
+        assert_ne!(entity_types, [] as [&cedar_policy::EntityTypeName; 0]);
     }
 
     #[test]
@@ -633,19 +601,11 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_to_legacy_minimal() {
+    fn test_convert_to_legacy_without_schema_strict_true_errors() {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
-            schema: r#"
-        namespace TestApp {
-            entity User;
-            action "read" appliesTo {
-                principal: [User],
-                resource: [User]
-            };
-        }
-    "#
-            .to_string(),
+            schema: None,
+            schema_source_exists: false,
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
@@ -653,26 +613,48 @@ mod tests {
             templates: vec![],
             entities: vec![],
             trusted_issuers: vec![],
+            custom_issuers: vec![],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded);
-        assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
-
-        let store = result.unwrap();
-        assert_eq!(store.name, "Test Store");
-        assert_eq!(store.version, Some("1.0.0".to_string()));
-        assert_eq!(store.description, Some("A test policy store".to_string()));
-        assert!(store.cedar_version.is_some());
-        assert!(!store.policies.get_set().is_empty());
-        assert!(store.trusted_issuers.is_none());
-        assert_eq!(store.default_entities.entities().len(), 0);
+        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
+        let err = result.expect_err(
+            "Expected error when strict_schema_validation is true but schema is missing",
+        );
+        assert!(
+            matches!(&err, ConversionError::SchemaConversion(msg) if msg.contains("missing required schema")),
+            "Expected SchemaConversion error about missing schema, got: {err:?}"
+        );
     }
 
     #[test]
-    fn test_convert_to_legacy_full() {
+    fn test_convert_to_legacy_without_schema_strict_false_succeeds() {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
-            schema: r#"
+            schema: None,
+            schema_source_exists: false,
+            policies: vec![PolicyFile {
+                name: "test.cedar".to_string(),
+                content: "permit(principal, action, resource);".to_string(),
+            }],
+            templates: vec![],
+            entities: vec![],
+            trusted_issuers: vec![],
+            custom_issuers: vec![],
+        };
+
+        let result = PolicyStoreManager::convert_to_legacy(loaded, false);
+        let store = result
+            .expect("Should succeed when strict_schema_validation is false even without schema");
+        assert!(
+            store.schema.is_none(),
+            "schema should be None when no schema was loaded"
+        );
+    }
+
+    #[test]
+    fn test_convert_to_legacy_with_schema_strict_false_succeeds() {
+        let schema = parse_schema(
+            r#"
         namespace TestApp {
             entity User;
             action "read" appliesTo {
@@ -680,8 +662,85 @@ mod tests {
                 resource: [User]
             };
         }
-    "#
-            .to_string(),
+    "#,
+        );
+        let loaded = LoadedPolicyStore {
+            metadata: create_test_metadata(),
+            schema: Some(schema),
+            schema_source_exists: true,
+            policies: vec![PolicyFile {
+                name: "test.cedar".to_string(),
+                content: "permit(principal, action, resource);".to_string(),
+            }],
+            templates: vec![],
+            entities: vec![],
+            trusted_issuers: vec![],
+            custom_issuers: vec![],
+        };
+
+        let result = PolicyStoreManager::convert_to_legacy(loaded, false);
+        let store =
+            result.expect("Should succeed with schema even when strict_schema_validation is false");
+        assert!(
+            store.schema.is_some(),
+            "schema should be Some when schema content was provided"
+        );
+    }
+
+    #[test]
+    fn test_convert_to_legacy_minimal() {
+        let schema = parse_schema(
+            r#"
+        namespace TestApp {
+            entity User;
+            action "read" appliesTo {
+                principal: [User],
+                resource: [User]
+            };
+        }
+    "#,
+        );
+        let loaded = LoadedPolicyStore {
+            metadata: create_test_metadata(),
+            schema: Some(schema),
+            schema_source_exists: true,
+            policies: vec![PolicyFile {
+                name: "test.cedar".to_string(),
+                content: "permit(principal, action, resource);".to_string(),
+            }],
+            templates: vec![],
+            entities: vec![],
+            trusted_issuers: vec![],
+            custom_issuers: vec![],
+        };
+
+        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
+        assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
+
+        let store = result.unwrap();
+        assert_eq!(store.version, Some("1.0.0".to_string()));
+        assert!(!store.policies.get_set().is_empty());
+        assert!(store.trusted_issuers.is_none());
+        assert_eq!(store.default_entities.entities().len(), 0);
+    }
+
+    #[test]
+    fn test_convert_to_legacy_full() {
+        let schema = parse_schema(
+            r#"
+        namespace TestApp {
+            entity User;
+            action "read" appliesTo {
+                principal: [User],
+                resource: [User]
+            };
+        }
+    "#,
+        );
+        let loaded = LoadedPolicyStore {
+            metadata: create_test_metadata(),
+            schema: Some(schema),
+            schema_source_exists: true,
             policies: vec![PolicyFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
@@ -708,9 +767,10 @@ mod tests {
         }"#
                 .to_string(),
             }],
+            custom_issuers: vec![],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded);
+        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();

@@ -16,7 +16,7 @@ This guide covers the prerequisites and cluster creation specific to Azure Kuber
 
 1. Install [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
 
-2. Install [Helm3](https://helm.sh/docs/intro/install/)
+2. Install [Helm](https://helm.sh/docs/intro/install/)
 
 ## Create a Resource Group
 

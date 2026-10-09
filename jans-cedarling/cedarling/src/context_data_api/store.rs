@@ -7,9 +7,9 @@ use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use std::time::Duration as StdDuration;
 
+use crate::sparkv::{Config as SparKVConfig, Error as SparKVError, HashMapSparKV};
 use chrono::{Duration as ChronoDuration, Utc};
 use serde_json::Value;
-use sparkv::{Config as SparKVConfig, Error as SparKVError, SparKV};
 
 use crate::authz::metrics::MetricsCollector;
 
@@ -40,7 +40,7 @@ const MAX_SAFE_DURATION_SECS: u64 = (i64::MAX / 1000) as u64;
 /// - `config.max_ttl = None` means no upper limit on TTL values (10 years max)
 /// - When both `ttl` parameter and `config.default_ttl` are `None`, entries use the infinite TTL
 pub(crate) struct DataStore {
-    storage: RwLock<SparKV<DataEntry>>,
+    storage: RwLock<HashMapSparKV<DataEntry>>,
     config: DataStoreConfig,
     metrics: Arc<MetricsCollector>,
 }
@@ -81,7 +81,7 @@ impl DataStore {
             Some(|entry| serde_json::to_string(entry).map_or(0, |s| s.len()));
 
         Ok(Self {
-            storage: RwLock::new(SparKV::with_config_and_sizer(
+            storage: RwLock::new(HashMapSparKV::with_config_and_sizer(
                 sparkv_config,
                 size_calculator,
             )),
@@ -410,6 +410,7 @@ fn get_effective_ttl(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::authz::metrics::MetricsMode;
     use serde_json::json;
     #[cfg(not(target_arch = "wasm32"))]
     use std::thread;
@@ -417,7 +418,7 @@ mod tests {
     use test_utils::assert_eq;
 
     fn create_test_store() -> DataStore {
-        let metrics = Arc::new(MetricsCollector::new(0));
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Local));
         DataStore::new(DataStoreConfig::default(), metrics).expect("should create store")
     }
 
@@ -574,7 +575,7 @@ mod tests {
             max_entries: 2,
             ..Default::default()
         };
-        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(MetricsMode::Local)))
             .expect("should create store");
 
         store
@@ -598,7 +599,7 @@ mod tests {
             max_entry_size: 200,
             ..Default::default()
         };
-        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(MetricsMode::Local)))
             .expect("should create store");
 
         // Small value should work (use a very short string to ensure it's under 200 bytes with metadata)
@@ -623,7 +624,7 @@ mod tests {
             max_ttl: Some(StdDuration::from_secs(60)),
             ..Default::default()
         };
-        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(MetricsMode::Local)))
             .expect("should create store");
 
         // TTL within limit should work
@@ -646,7 +647,7 @@ mod tests {
             default_ttl: Some(StdDuration::from_millis(100)),
             ..Default::default()
         };
-        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(MetricsMode::Local)))
             .expect("should create store");
 
         // Push without explicit TTL should use default
@@ -806,7 +807,7 @@ mod tests {
             enable_metrics: true,
             ..Default::default()
         };
-        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(MetricsMode::Local)))
             .expect("should create store");
 
         store
@@ -832,7 +833,7 @@ mod tests {
             enable_metrics: false,
             ..Default::default()
         };
-        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(MetricsMode::Local)))
             .expect("should create store");
 
         store
@@ -900,7 +901,11 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            DataStore::new(valid_config, Arc::new(MetricsCollector::new(0))).is_ok(),
+            DataStore::new(
+                valid_config,
+                Arc::new(MetricsCollector::new(MetricsMode::Local))
+            )
+            .is_ok(),
             "expected DataStore::new() to succeed with valid DataStoreConfig"
         );
 
@@ -912,7 +917,10 @@ mod tests {
         };
         assert!(
             matches!(
-                DataStore::new(invalid_config, Arc::new(MetricsCollector::new(0))),
+                DataStore::new(
+                    invalid_config,
+                    Arc::new(MetricsCollector::new(MetricsMode::Local))
+                ),
                 Err(ConfigValidationError::DefaultTtlExceedsMax { .. })
             ),
             "expected DataStore::new() to return ConfigValidationError when default_ttl exceeds max_ttl"
@@ -951,7 +959,7 @@ mod tests {
             enable_metrics: true,
             ..Default::default()
         };
-        let store = DataStore::new(config, Arc::new(MetricsCollector::new(0)))
+        let store = DataStore::new(config, Arc::new(MetricsCollector::new(MetricsMode::Local)))
             .expect("should create store");
 
         let retrieved_config = store.config();

@@ -58,9 +58,7 @@
 //! - **`InvalidSoftwareRoles`**: Software roles claim is not an array
 //! - **`InvalidExpirationTime`**: Expiration time is not a number
 //! - **`InvalidIssuedAtTime`**: Issued at time is not a number
-//! - **`HttpClientError`**: HTTP client initialization failed
 //! - **`JwksFetchError`**: Failed to fetch JWKS from IDP
-//! - **`JwksParseError`**: Failed to parse JWKS response
 //! - **`MissingKeyId`**: JWT header missing key ID
 //! - **`KeyNotFound`**: Key not found in JWKS
 //! - **`KeyDecodeError`**: Failed to decode key data
@@ -74,7 +72,11 @@
 //! before performing Dynamic Client Registration. The validated SSA JWT
 //! is then included in the DCR request to the Identity Provider.
 
-use crate::jwt::{DecodeJwtError, DecodedJwt, decode_jwt};
+use crate::http_utils::HttpRequestError;
+use crate::{
+    http::HttpClient,
+    jwt::{DecodeJwtError, DecodedJwt, decode_jwt},
+};
 use base64::Engine;
 use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
@@ -114,10 +116,6 @@ pub(crate) struct SsaValidationConfig {
     /// Default: false
     pub validate_audience: bool,
 
-    /// Whether to accept invalid SSL certificates when fetching JWKS.
-    /// Default: false
-    pub accept_invalid_certs: bool,
-
     /// Whether to validate that `grant_types` is an array.
     /// Default: true
     pub validate_grant_types_array: bool,
@@ -145,7 +143,6 @@ impl Default for SsaValidationConfig {
             validate_issued_at: true,
             validate_not_before: false,
             validate_audience: false,
-            accept_invalid_certs: false,
             validate_grant_types_array: true,
             validate_software_roles_array: true,
         }
@@ -185,13 +182,12 @@ pub(crate) struct SsaClaims {
 pub(crate) async fn validate_ssa_jwt(
     ssa_jwt: &str,
     jwks_uri: &str,
-    accept_invalid_certs: bool,
+    client: &HttpClient,
 ) -> Result<SsaClaims, SsaValidationError> {
     let config = SsaValidationConfig {
-        accept_invalid_certs,
         ..Default::default()
     };
-    validate_ssa_jwt_with_config(ssa_jwt, jwks_uri, &config).await
+    validate_ssa_jwt_with_config(ssa_jwt, jwks_uri, &config, client).await
 }
 
 /// Validates an SSA JWT with custom configuration.
@@ -202,6 +198,7 @@ pub(crate) async fn validate_ssa_jwt_with_config(
     ssa_jwt: &str,
     jwks_uri: &str,
     config: &SsaValidationConfig,
+    client: &HttpClient,
 ) -> Result<SsaClaims, SsaValidationError> {
     // First decode the JWT to get basic information (header and claims without signature validation)
     // This is needed to extract the algorithm and kid for key selection
@@ -220,7 +217,7 @@ pub(crate) async fn validate_ssa_jwt_with_config(
     }
 
     // Fetch JWKS from the issuer
-    let jwks = fetch_jwks(jwks_uri, config.accept_invalid_certs).await?;
+    let jwks = fetch_jwks(jwks_uri, client).await?;
 
     // Find the appropriate key for validation
     let decoding_key = find_decoding_key(&decoded_jwt, &jwks)?;
@@ -293,31 +290,11 @@ pub(crate) fn validate_ssa_structure_with_config(
 }
 
 /// Fetches JWKS from the specified URI
-async fn fetch_jwks(
-    jwks_uri: &str,
-    accept_invalid_certs: bool,
-) -> Result<Value, SsaValidationError> {
-    use super::init_http_client;
-
-    let client = init_http_client(None, accept_invalid_certs)
-        .map_err(SsaValidationError::HttpClientError)?;
-
-    let response = client
-        .get(jwks_uri)
-        .send()
+async fn fetch_jwks(jwks_uri: &str, client: &HttpClient) -> Result<Value, SsaValidationError> {
+    let jwks: Value = client
+        .get_json(jwks_uri)
         .await
         .map_err(SsaValidationError::JwksFetchError)?;
-
-    if !response.status().is_success() {
-        return Err(SsaValidationError::JwksFetchError(
-            response.error_for_status().unwrap_err(),
-        ));
-    }
-
-    let jwks: Value = response
-        .json()
-        .await
-        .map_err(SsaValidationError::JwksParseError)?;
 
     Ok(jwks)
 }
@@ -353,6 +330,8 @@ fn find_decoding_key(
                         Algorithm::PS384 => "PS384",
                         Algorithm::PS512 => "PS512",
                         Algorithm::EdDSA => "EdDSA",
+                        // `Algorithm` is `#[non_exhaustive]` since jsonwebtoken 11
+                        alg => return Err(SsaValidationError::UnsupportedAlgorithm(alg)),
                     };
 
                     if jwk_alg != jwt_alg_str {
@@ -400,7 +379,7 @@ fn create_decoding_key(
                 Err(SsaValidationError::InvalidKeyFormat)
             }
         },
-        _ => Err(SsaValidationError::UnsupportedAlgorithm),
+        alg => Err(SsaValidationError::UnsupportedAlgorithm(alg)),
     }
 }
 
@@ -453,17 +432,9 @@ pub(crate) enum SsaValidationError {
     #[error("iat must be a number")]
     InvalidIssuedAtTime,
 
-    /// Failed to initialize HTTP client for JWKS fetching
-    #[error("failed to initialize HTTP client: {0}")]
-    HttpClientError(reqwest::Error),
-
     /// Failed to fetch JWKS due to network or HTTP errors
     #[error("failed to fetch JWKS (network/HTTP error): {0}")]
-    JwksFetchError(reqwest::Error),
-
-    /// Failed to parse JWKS JSON response
-    #[error("failed to parse JWKS (JSON parsing error): {0}")]
-    JwksParseError(reqwest::Error),
+    JwksFetchError(HttpRequestError),
 
     /// Missing key ID (kid) in JWT header
     #[error("missing key ID (kid) in JWT header")]
@@ -482,8 +453,8 @@ pub(crate) enum SsaValidationError {
     InvalidKeyFormat,
 
     /// Algorithm is not supported
-    #[error("unsupported algorithm")]
-    UnsupportedAlgorithm,
+    #[error("unsupported algorithm: {0:?}")]
+    UnsupportedAlgorithm(Algorithm),
 
     /// Algorithm is not allowed by configuration
     #[error("algorithm not allowed by configuration: {0:?}")]
@@ -792,10 +763,13 @@ mod tests {
         });
 
         let result = create_decoding_key(&jwk, Algorithm::ES256);
-        assert!(matches!(
-            result,
-            Err(SsaValidationError::UnsupportedAlgorithm)
-        ));
+        assert!(
+            matches!(
+                &result,
+                Err(SsaValidationError::UnsupportedAlgorithm(Algorithm::ES256))
+            ),
+            "ES256 must be rejected as an unsupported algorithm, got: {result:?}"
+        );
     }
 
     #[test]
@@ -901,7 +875,6 @@ mod tests {
         assert!(config.validate_issued_at);
         assert!(!config.validate_not_before);
         assert!(!config.validate_audience);
-        assert!(!config.accept_invalid_certs);
         assert!(config.validate_grant_types_array);
         assert!(config.validate_software_roles_array);
         assert!(config.allowed_algorithms.is_empty()); // Empty means all allowed

@@ -57,6 +57,8 @@ pub trait G2RCall {
 
     fn authorize_unsigned(instance_id: usize, request_json: String) -> Result;
     fn authorize_multi_issuer(instance_id: usize, request_json: String) -> Result;
+    fn authorize_unsigned_batch(instance_id: usize, request_json: String) -> Result;
+    fn authorize_multi_issuer_batch(instance_id: usize, request_json: String) -> Result;
 
     fn pop_logs(instance_id: usize) -> Vec<String>;
     fn get_log_by_id(instance_id: usize, id: String) -> String;
@@ -74,6 +76,8 @@ pub trait G2RCall {
     fn clear_data_ctx(instance_id: usize) -> Result;
     fn list_data_ctx(instance_id: usize) -> Result;
     fn get_stats_ctx(instance_id: usize) -> Result;
+    fn drain_metrics(instance_id: usize) -> Result;
+    fn policy_store_id(instance_id: usize) -> String;
 
     fn is_trusted_issuer_loaded_by_name(instance_id: usize, issuer_id: String) -> bool;
     fn is_trusted_issuer_loaded_by_iss(instance_id: usize, iss_claim: String) -> bool;

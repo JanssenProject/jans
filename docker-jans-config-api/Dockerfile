@@ -16,13 +16,13 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=12.1.8
+ARG JETTY_VERSION=12.1.14
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
 
 # Install jetty
-RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
+RUN wget -nv https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
     && mkdir -p /opt \
     && tar -xzf /tmp/jetty.tar.gz -C /opt \
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
@@ -34,7 +34,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 
 ARG JYTHON_VERSION=2.7.4
 ARG JYTHON_BUILD_DATE='2025-10-17 18:14'
-RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
+RUN wget -nv https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
     && rm -f /tmp/jython-installer.jar /tmp/*.properties
@@ -44,13 +44,17 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2026-02-22 08:12'
+ENV CN_RELEASE_TAG=nightly
+ENV CN_BUILD_DATE='2026-10-06T16:25:49Z'
 
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
+# Base URL for the released WAR + plugin jars; overridable (e.g. CI serving locally-built artifacts)
+# so the image build need not depend on the GitHub release being populated.
+ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}
+ENV CN_SOURCE_URL=${CN_RELEASE_DOWNLOAD_URL}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
 RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
-    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.war \
+    && wget -nv ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.war \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-config-api --add-modules=server,resources,http,forwarded,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
 
 # =======
@@ -58,11 +62,16 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
 # =======
 
 # @TODO: add shibboleth as plugin when artifact is ready
-RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
-    && for plugin in scim admin-ui fido2 user-mgt lock jans-link; \
+RUN set -e \
+    && mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
+    && for plugin in scim admin-ui fido2 user-mgt lock jans-link metric; \
     do \
-        wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
+        wget -nv "${CN_RELEASE_DOWNLOAD_URL}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar" || exit 1; \
     done
+
+# agama projects required by plugins
+RUN mkdir -p /usr/share/java \
+    && wget -nv "${CN_RELEASE_DOWNLOAD_URL}/admin-ui-plugin-${CN_VERSION}-agama-pw.gama" -O "/usr/share/java/admin-ui-plugin-agama-pw.gama"
 
 # ===========
 # Assets sync
@@ -72,10 +81,10 @@ RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
     /app/schema \
     /app/templates/jans-config-api \
-    /usr/share/java \
     /opt/jans/bin
 
-ENV JANS_SOURCE_VERSION=c0ae216653f1a615ad053ac1f88f54dfbffd0842
+ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
+ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -113,13 +122,6 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
 
 WORKDIR /
 
-# add default policy store (for admin-ui and cedarling integration) from https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore
-ARG AUI_POLICY_VERSION=v2.0.0
-ARG AUI_POLICY_FILE=admin_ui_2_0.cjar
-
-RUN mkdir -p ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
-    && wget -nv https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore/releases/download/${AUI_POLICY_VERSION}/${AUI_POLICY_FILE} -O ${JETTY_BASE}/jans-config-api/custom/config/adminUI/policy-store.cjar
-
 # ======
 # Python
 # ======
@@ -141,8 +143,8 @@ WORKDIR /opt/prometheus
 
 ENV PROMETHEUS_AGENT_VERSION=1.5.0
 COPY static/prometheus-config.yaml /opt/prometheus/
-RUN wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar \
-    && wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256 \
+RUN wget -nv --tries=5 --retry-connrefused --retry-on-http-error=429,500,502,503,504 --waitretry=15 -T 30 https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar \
+    && wget -nv --tries=5 --retry-connrefused --retry-on-http-error=429,500,502,503,504 --waitretry=15 -T 30 https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256 \
     && sha256sum -c jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256
 
 WORKDIR /
@@ -215,7 +217,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_CONFIG_API_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
-    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_PROMETHEUS_PORT="" \
@@ -249,6 +250,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-config-api/logs \
     ${JETTY_BASE}/jans-config-api/custom/libs \
     ${JETTY_BASE}/jans-config-api/etc/jetty/security \
+    ${JETTY_BASE}/jans-config-api/custom/config \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java \
@@ -280,7 +282,8 @@ COPY contrib/java.security ${JETTY_BASE}/jans-config-api/etc/jetty/security/java
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
 # adjust ownership and permission
-RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
+RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom/config \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/custom/config \
     && chmod 664 ${JETTY_BASE}/jans-config-api/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-config-api/logs \
     && chmod -R g=u /etc/certs \

@@ -1,9 +1,7 @@
 import os
-import glob
 import random
 import string
 import uuid
-import shutil
 import json
 import tempfile
 import configparser
@@ -21,11 +19,11 @@ Config.jans_auth_port = '8081'
 class JansAuthInstaller(JettyInstaller):
 
     source_files = [
-                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['jans_version']))),
-                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['jans_version']))),
-                    (os.path.join(Config.dist_jans_dir, 'jans-fido2-client.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['jans_version']))),
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), base.determine_jans_artifact_url('maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['jans_version']))),
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), base.determine_jans_artifact_url('maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['jans_version']))),
+                    (os.path.join(Config.dist_jans_dir, 'jans-fido2-client.jar'), base.determine_jans_artifact_url('maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['jans_version']))),
                     (os.path.join(Config.dist_app_dir, 'twilio.jar'), os.path.join(base.current_app.app_info['TWILIO_MAVEN'], '{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION']))),
-                    (os.path.join(Config.dist_jans_dir, 'jans-fido2-model.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-model/{0}/jans-fido2-model-{0}.jar'.format(base.current_app.app_info['jans_version']))),
+                    (os.path.join(Config.dist_jans_dir, 'jans-fido2-model.jar'), base.determine_jans_artifact_url('maven/io/jans/jans-fido2-model/{0}/jans-fido2-model-{0}.jar'.format(base.current_app.app_info['jans_version']))),
                    ]
 
     def __init__(self):
@@ -36,7 +34,7 @@ class JansAuthInstaller(JettyInstaller):
         self.install_var = 'install_jans_auth'
         self.register_progess()
 
-        self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
+        self.templates_folder = os.path.join(Config.template_folder, self.service_name)
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
 
         self.ldif_config = os.path.join(self.output_folder, 'configuration.ldif')
@@ -120,14 +118,14 @@ class JansAuthInstaller(JettyInstaller):
             if scope not in api_role['permissions']:
                 api_role['permissions'].append(scope)
 
-        Config.templateRenderingDict['role_scope_mappings'] = json.dumps(role_mapping)
+        Config.template_rendering_dict['role_scope_mappings'] = json.dumps(role_mapping)
 
 
     def render_import_templates(self):
 
         self.role_scope_mappings()
 
-        Config.templateRenderingDict['person_custom_object_class_list'] = '[]'
+        Config.template_rendering_dict['person_custom_object_class_list'] = '[]'
 
         templates = [self.jans_auth_config_json, self.ldif_people]
 
@@ -138,18 +136,18 @@ class JansAuthInstaller(JettyInstaller):
             base.extract_file(
                 base.current_app.jans_zip,
                 'jans-linux-setup/jans_setup/static/extension/introspection/introspection_role_based_scope.py',
-                os.path.join(Config.extensionFolder, 'introspection/')
+                os.path.join(Config.extension_folder, 'introspection/')
                 )
 
         self.prepare_base64_extension_scripts()
 
-        Config.templateRenderingDict['jans_auth_config_base64'] = self.generate_base64_ldap_file(self.jans_auth_config_json)
-        Config.templateRenderingDict['jans_auth_static_conf_base64'] = self.generate_base64_ldap_file(self.jans_auth_static_conf_json)
-        Config.templateRenderingDict['jans_auth_error_base64'] = self.generate_base64_ldap_file(self.jans_auth_error_json)
-        Config.templateRenderingDict['jans_auth_openid_key_base64'] = self.generate_base64_ldap_file(self.jans_auth_openid_jwks_fn)
+        Config.template_rendering_dict['jans_auth_config_base64'] = self.generate_base64_ldap_file(self.jans_auth_config_json)
+        Config.template_rendering_dict['jans_auth_static_conf_base64'] = self.generate_base64_ldap_file(self.jans_auth_static_conf_json)
+        Config.template_rendering_dict['jans_auth_error_base64'] = self.generate_base64_ldap_file(self.jans_auth_error_json)
+        Config.template_rendering_dict['jans_auth_openid_key_base64'] = self.generate_base64_ldap_file(self.jans_auth_openid_jwks_fn)
 
         self.ldif_scripts = os.path.join(Config.output_dir, 'scripts.ldif')
-        self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.output_dir)
+        self.renderTemplateInOut(self.ldif_scripts, Config.template_folder, Config.output_dir)
         for temp in (self.ldif_config, self.ldif_role_scope_mappings):
             self.renderTemplateInOut(temp, self.templates_folder, self.output_folder)
 
@@ -189,7 +187,7 @@ class JansAuthInstaller(JettyInstaller):
             tmp_fn = os.path.join(tmp_dir, jwks_addr+'.crt')
             self.writeFile(tmp_fn, open_banking_cert)
             self.run([Config.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
-                      Config.defaultTrustStoreFN, '-storepass', 'changeit', 
+                      Config.default_trust_store_fn, '-storepass', 'changeit', 
                       '-noprompt', '-alias', alias, '-file', tmp_fn])
 
 
@@ -213,7 +211,7 @@ class JansAuthInstaller(JettyInstaller):
         base.extract_from_zip(base.current_app.jans_zip, 'agama/misc', self.agama_root)
         self.chown(self.agama_root, Config.jetty_user, Config.jetty_group, recursive=True)
 
-        tmp_dir = os.path.join(Config.templateFolder, 'jetty')
+        tmp_dir = os.path.join(Config.template_folder, 'jetty')
         src_xml = os.path.join(tmp_dir, 'agama_web_resources.xml')
         self.renderTemplateInOut(src_xml, tmp_dir, self.jetty_service_webapps)
         self.chown(os.path.join(self.jetty_service_webapps, os.path.basename(src_xml)), Config.jetty_user, Config.jetty_group)
@@ -258,7 +256,7 @@ class JansAuthInstaller(JettyInstaller):
         crontab_fn = 'jans-clean-data-crontab.py'
         cleaner_fn = 'clean-data.py'
         for fn in (crontab_fn, cleaner_fn):
-            source = os.path.join(Config.staticFolder, 'auth/data_clean/', fn)
+            source = os.path.join(Config.static_folder, 'auth/data_clean/', fn)
             target = os.path.join(cleaner_dir, fn)
             self.copyFile(source, target, backup=False)
             self.run([paths.cmd_chmod, '+x', target])

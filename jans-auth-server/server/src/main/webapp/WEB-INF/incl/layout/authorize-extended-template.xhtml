@@ -18,6 +18,7 @@
 	<ui:define name="body" class="notification_cls">
 		<h:form id="authorizeForm">
 			<h:inputHidden id="session_id" value="#{authorizeAction.sessionId}" />
+			<h:inputHidden id="client_id" value="#{authorizeAction.clientId}" />
 			<ui:param name="client" value='#{_client}' />
 			<div class="notification_popup">
 				<div class="not_header"></div>
@@ -46,7 +47,7 @@
 							<h:outputFormat
 								value="#{msgs['authorize.requestingPermissionForScopes']}">
 								<f:param
-									value="#{authorizeAction.getClientDisplayName(client)}" />
+									value="#{authorizeAction.clientDisplayName}" />
 							</h:outputFormat>
 						</p>
 					</h3>

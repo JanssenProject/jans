@@ -15,6 +15,7 @@ import io.jans.as.persistence.model.ClientAttributes;
 import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.register.ws.rs.RegisterService;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
+import io.jans.as.server.service.net.UriService;
 import jakarta.ws.rs.WebApplicationException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -25,9 +26,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -63,6 +67,9 @@ public class ClientIdMetadataServiceTest {
     @Mock
     private RegisterParamsValidator registerParamsValidator;
 
+    @Mock
+    private UriService uriService;
+
     @BeforeMethod
     public void setUp() {
         lenient().when(appConfiguration.getCimdSchemeAllowlist()).thenReturn(Arrays.asList("https"));
@@ -76,6 +83,249 @@ public class ClientIdMetadataServiceTest {
         // Default: redirect_uri validation passes, external script allows
         lenient().when(registerParamsValidator.validateRedirectUris(any(), any(), any(), any(), any(), any())).thenReturn(true);
         lenient().when(externalDynamicClientRegistrationService.executeExternalCreateClientMethods(any(), any(), any())).thenReturn(true);
+    }
+
+    // ==================== resolveClient Tests ====================
+
+    @Test
+    public void resolveClient_withCimdClientId_shouldDelegateToGetClient() {
+        String cimdClientId = "https://example.com/client";
+        Client cimdClient = new Client();
+        cimdClient.setClientId(cimdClientId);
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        doReturn(cimdClient).when(clientIdMetadataService).getClient(cimdClientId);
+
+        Client result = clientIdMetadataService.resolveClient(cimdClientId);
+
+        assertEquals(cimdClient, result);
+        verify(clientIdMetadataService).getClient(cimdClientId);
+        verify(clientService, never()).getClient(anyString());
+    }
+
+    @Test
+    public void resolveClient_withTraditionalClientId_shouldDelegateToClientService() {
+        String clientId = "traditional-client-123";
+        Client dbClient = new Client();
+        dbClient.setClientId(clientId);
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        when(clientService.getClient(clientId)).thenReturn(dbClient);
+
+        Client result = clientIdMetadataService.resolveClient(clientId);
+
+        assertEquals(dbClient, result);
+        verify(clientService).getClient(clientId);
+        verify(clientIdMetadataService, never()).getClient(anyString());
+    }
+
+    @Test
+    public void resolveClient_withCimdFeatureDisabled_shouldDelegateToClientService() {
+        String cimdClientId = "https://example.com/client";
+        Client dbClient = new Client();
+        dbClient.setClientId(cimdClientId);
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(false);
+        when(clientService.getClient(cimdClientId)).thenReturn(dbClient);
+
+        Client result = clientIdMetadataService.resolveClient(cimdClientId);
+
+        assertEquals(dbClient, result);
+        verify(clientIdMetadataService, never()).getClient(anyString());
+    }
+
+    @Test
+    public void resolveClients_withMixOfCimdAndTraditionalIds_shouldResolveBoth() {
+        String cimdClientId = "https://example.com/client";
+        Client cimdClient = new Client();
+        cimdClient.setClientId(cimdClientId);
+        cimdClient.setDn("inum=" + ClientIdMetadataService.computeId(cimdClientId) + ",ou=clients,o=jans");
+
+        String traditionalClientId = "traditional-client-123";
+        Client dbClient = new Client();
+        dbClient.setClientId(traditionalClientId);
+        dbClient.setDn("inum=" + traditionalClientId + ",ou=clients,o=jans");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        doReturn(cimdClient).when(clientIdMetadataService).getClient(cimdClientId);
+        when(clientService.getClient(traditionalClientId)).thenReturn(dbClient);
+
+        Set<Client> result = clientIdMetadataService.resolveClients(Arrays.asList(cimdClientId, traditionalClientId), true);
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(cimdClient));
+        assertTrue(result.contains(dbClient));
+    }
+
+    @Test
+    public void resolveClients_whenNullCollection_shouldReturnEmptySet() {
+        Set<Client> result = clientIdMetadataService.resolveClients(null, true);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void resolveClients_whenSilentAndOneEntryFailsToResolve_shouldSkipItAndKeepOthers() {
+        String failingClientId = "https://example.com/failing-client";
+        String okClientId = "traditional-client-123";
+        Client dbClient = new Client();
+        dbClient.setClientId(okClientId);
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        doThrow(new WebApplicationException(400)).when(clientIdMetadataService).getClient(failingClientId);
+        when(clientService.getClient(okClientId)).thenReturn(dbClient);
+
+        Set<Client> result = clientIdMetadataService.resolveClients(Arrays.asList(failingClientId, okClientId), true);
+
+        assertEquals(1, result.size());
+        assertTrue(result.contains(dbClient));
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void resolveClients_whenNotSilentAndEntryFailsToResolve_shouldThrow() {
+        String failingClientId = "https://example.com/failing-client";
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(true);
+        doThrow(new WebApplicationException(400)).when(clientIdMetadataService).getClient(failingClientId);
+
+        clientIdMetadataService.resolveClients(Arrays.asList(failingClientId), false);
+    }
+
+    // ==================== resolveClientForLogout / resolveClientsForLogout Tests ====================
+
+    @Test
+    public void resolveClientForLogout_withExpiredCimdClient_shouldReturnPersistedClientWithoutRefetching() {
+        String url = "https://example.com/client";
+        String id = ClientIdMetadataService.computeId(url);
+        String dn = "inum=" + id + ",ou=clients,o=jans";
+
+        ClientAttributes attrs = new ClientAttributes();
+        attrs.setCimdClient(true);
+        attrs.setCimdOriginalClientId(url);
+        attrs.setCimdExpiresAt(System.currentTimeMillis() - 60_000); // expired
+
+        Client persistedClient = new Client();
+        persistedClient.setClientId(id);
+        persistedClient.setAttributes(attrs);
+
+        when(clientService.buildClientDn(id)).thenReturn(dn);
+        when(clientService.getClientByDn(dn)).thenReturn(persistedClient);
+
+        Client result = clientIdMetadataService.resolveClientForLogout(url);
+
+        assertNotNull(result);
+        assertEquals(url, result.getClientId());
+        verify(clientIdMetadataService, never()).doFetch(anyString());
+    }
+
+    @Test
+    public void resolveClientForLogout_withPersistedCimdClientButFeatureDisabled_shouldStillResolveFromPersistedRecord() {
+        String url = "https://example.com/client";
+        String id = ClientIdMetadataService.computeId(url);
+        String dn = "inum=" + id + ",ou=clients,o=jans";
+
+        ClientAttributes attrs = new ClientAttributes();
+        attrs.setCimdClient(true);
+        attrs.setCimdOriginalClientId(url);
+        attrs.setCimdExpiresAt(System.currentTimeMillis() + 60_000);
+
+        Client persistedClient = new Client();
+        persistedClient.setClientId(id);
+        persistedClient.setAttributes(attrs);
+
+        lenient().when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(false);
+        when(clientService.buildClientDn(id)).thenReturn(dn);
+        when(clientService.getClientByDn(dn)).thenReturn(persistedClient);
+
+        Client result = clientIdMetadataService.resolveClientForLogout(url);
+
+        assertNotNull(result);
+        assertEquals(url, result.getClientId());
+        verify(clientIdMetadataService, never()).doFetch(anyString());
+        verify(clientService, never()).getClient(url);
+        verify(appConfiguration, never()).isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT);
+    }
+
+    @Test
+    public void resolveClientForLogout_whenCimdClientNeverPersisted_shouldReturnNull() {
+        String url = "https://example.com/never-onboarded";
+        String id = ClientIdMetadataService.computeId(url);
+        String dn = "inum=" + id + ",ou=clients,o=jans";
+
+        when(clientService.buildClientDn(id)).thenReturn(dn);
+        when(clientService.getClientByDn(dn)).thenReturn(null);
+
+        Client result = clientIdMetadataService.resolveClientForLogout(url);
+
+        assertNull(result);
+        verify(clientIdMetadataService, never()).doFetch(anyString());
+    }
+
+    @Test
+    public void resolveClientForLogout_withUrlShapedTraditionalClientIdAndFeatureDisabled_shouldFallBackToLiteralLookup() {
+        String clientId = "https://example.com/legacy-client";
+        String id = ClientIdMetadataService.computeId(clientId);
+        String dn = "inum=" + id + ",ou=clients,o=jans";
+
+        Client traditionalClient = new Client();
+        traditionalClient.setClientId(clientId);
+
+        lenient().when(appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENT_ID_METADATA_DOCUMENT)).thenReturn(false);
+        when(clientService.buildClientDn(id)).thenReturn(dn);
+        when(clientService.getClientByDn(dn)).thenReturn(null); // never onboarded via CIMD
+        when(clientService.getClient(clientId)).thenReturn(traditionalClient);
+
+        Client result = clientIdMetadataService.resolveClientForLogout(clientId);
+
+        assertEquals(traditionalClient, result);
+        verify(clientIdMetadataService, never()).doFetch(anyString());
+        verify(clientIdMetadataService, never()).getClient(clientId);
+    }
+
+    @Test
+    public void resolveClientForLogout_withTraditionalClientId_shouldDelegateToClientService() {
+        String clientId = "traditional-client-123";
+        Client dbClient = new Client();
+        dbClient.setClientId(clientId);
+
+        when(clientService.getClient(clientId)).thenReturn(dbClient);
+
+        Client result = clientIdMetadataService.resolveClientForLogout(clientId);
+
+        assertEquals(dbClient, result);
+    }
+
+    @Test
+    public void resolveClientsForLogout_whenOneEntryNeverOnboarded_shouldSkipItAndKeepOthers() {
+        String expiredButOnboardedUrl = "https://example.com/client";
+        String expiredId = ClientIdMetadataService.computeId(expiredButOnboardedUrl);
+        String expiredDn = "inum=" + expiredId + ",ou=clients,o=jans";
+
+        ClientAttributes attrs = new ClientAttributes();
+        attrs.setCimdClient(true);
+        attrs.setCimdExpiresAt(System.currentTimeMillis() - 60_000);
+        Client persistedClient = new Client();
+        persistedClient.setClientId(expiredId);
+        persistedClient.setAttributes(attrs);
+
+        String neverOnboardedUrl = "https://example.com/never-onboarded";
+        String neverOnboardedId = ClientIdMetadataService.computeId(neverOnboardedUrl);
+        String neverOnboardedDn = "inum=" + neverOnboardedId + ",ou=clients,o=jans";
+
+        when(clientService.buildClientDn(expiredId)).thenReturn(expiredDn);
+        when(clientService.getClientByDn(expiredDn)).thenReturn(persistedClient);
+        when(clientService.buildClientDn(neverOnboardedId)).thenReturn(neverOnboardedDn);
+        when(clientService.getClientByDn(neverOnboardedDn)).thenReturn(null);
+
+        Set<Client> result = clientIdMetadataService.resolveClientsForLogout(Arrays.asList(expiredButOnboardedUrl, neverOnboardedUrl));
+
+        assertEquals(1, result.size());
+        assertEquals(expiredButOnboardedUrl, result.iterator().next().getClientId());
+    }
+
+    @Test
+    public void resolveClientsForLogout_whenNullCollection_shouldReturnEmptySet() {
+        Set<Client> result = clientIdMetadataService.resolveClientsForLogout(null);
+        assertTrue(result.isEmpty());
     }
 
     // ==================== isCimdClientId Tests ====================
@@ -363,6 +613,12 @@ public class ClientIdMetadataServiceTest {
     public void isPrivateAddress_with172Network_shouldReturnTrue() throws Exception {
         InetAddress privateIp = InetAddress.getByName("172.16.0.1");
         assertTrue(clientIdMetadataService.isPrivateAddress(privateIp));
+    }
+
+    @Test
+    public void isPrivateAddress_withNat64LocalUsePrefix_shouldReturnTrue() throws Exception {
+        InetAddress localUseNat64 = InetAddress.getByName("64:ff9b:1::1");
+        assertTrue(clientIdMetadataService.isPrivateAddress(localUseNat64));
     }
 
     @Test
@@ -770,6 +1026,40 @@ public class ClientIdMetadataServiceTest {
     }
 
     @Test
+    public void validateClientIdUrl_whenExplicitlyWhitelisted_shouldNotCheckPrivateIp() {
+        when(uriService.isExplicitlyWhitelisted(anyString())).thenReturn(true);
+
+        clientIdMetadataService.validateClientIdUrl("https://127.0.0.1/client");
+
+        verify(clientIdMetadataService, never()).validateNotPrivateIp(anyString());
+    }
+
+    @Test
+    public void validateClientIdUrl_whenNotExplicitlyWhitelisted_shouldCheckPrivateIp() {
+        when(uriService.isExplicitlyWhitelisted(anyString())).thenReturn(false);
+        doNothing().when(clientIdMetadataService).validateNotPrivateIp(anyString());
+
+        clientIdMetadataService.validateClientIdUrl("https://127.0.0.1/client");
+
+        verify(clientIdMetadataService).validateNotPrivateIp("127.0.0.1");
+    }
+
+    @Test
+    public void validateClientIdUrl_withRealUriServiceAndEmptyWhiteList_privateHost_shouldThrowBadRequest() throws Exception {
+        UriService realUriService = new UriService();
+        setField(realUriService, "appConfiguration", appConfiguration);
+        setField(clientIdMetadataService, "uriService", realUriService);
+        when(appConfiguration.getExternalUriWhiteList()).thenReturn(new ArrayList<>());
+
+        try {
+            clientIdMetadataService.validateClientIdUrl("https://127.0.0.1/client");
+            fail("Should have thrown WebApplicationException");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
+    }
+
+    @Test
     public void validateClientIdUrl_withFragment_shouldThrowBadRequest() {
         try {
             clientIdMetadataService.validateClientIdUrl("https://example.com/client#section");
@@ -1135,5 +1425,11 @@ public class ClientIdMetadataServiceTest {
         } catch (WebApplicationException e) {
             assertEquals(400, e.getResponse().getStatus());
         }
+    }
+
+    private static void setField(Object target, String fieldName, Object value) throws Exception {
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
     }
 }

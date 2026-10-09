@@ -862,6 +862,27 @@
       "tag": "lock_telemetry"
     },
     {
+      "permission": "https://jans.io/oauth/lock/trace.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "lock_trace"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/trace.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "lock_trace"
+    },
+    {
+      "permission": "https://jans.io/oauth/lock/trace.admin",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "lock_trace"
+    },
+    {
       "permission": "https://jans.io/oauth/config/token.readonly",
       "description": "",
       "defaultPermissionInToken": false,
@@ -906,6 +927,13 @@
     {
       "tag": "security",
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/security.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
+    },
+    {
+      "tag": "security",
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/security.delete",
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false
@@ -972,13 +1000,35 @@
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false
+    },
+    {
+      "permission": "https://jans.io/oauth/config/fido2-metrics.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "fido2"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/metric.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "metric"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/fido2.admin",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "fido2"
     }
   ],
   "rolePermissionMapping": [
     {
       "role": "admin",
       "permissions": [
-      "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/security.delete",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write",
         "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.delete",
         "https://jans.io/oauth/config/attributes.readonly",
@@ -1105,6 +1155,9 @@
         "https://jans.io/oauth/lock/log.write",
         "https://jans.io/oauth/lock/telemetry.readonly",
         "https://jans.io/oauth/lock/telemetry.write",
+        "https://jans.io/oauth/lock/trace.write",
+        "https://jans.io/oauth/lock/trace.readonly",
+        "https://jans.io/oauth/lock/trace.admin",
         "https://jans.io/oauth/config/token.readonly",
         "https://jans.io/oauth/config/token.write",
         "https://jans.io/oauth/config/token.delete",
@@ -1115,7 +1168,10 @@
         "https://jans.io/oauth/config/ssa.write",
         "https://jans.io/oauth/config/uma.readonly",
         "https://jans.io/oauth/config/uma.write",
-        "https://jans.io/oauth/config/uma.admin"
+        "https://jans.io/oauth/config/uma.admin",
+        "https://jans.io/oauth/config/fido2-metrics.readonly",
+        "https://jans.io/oauth/config/fido2.admin",
+        "https://jans.io/oauth/config/metric.readonly"
       ]
     }
   ]

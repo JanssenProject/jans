@@ -43,7 +43,7 @@ impl FromStr for LogLevel {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
+        match s.to_uppercase().as_str() {
             "FATAL" => Ok(LogLevel::FATAL),
             "ERROR" => Ok(LogLevel::ERROR),
             "WARN" => Ok(LogLevel::WARN),

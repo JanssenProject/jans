@@ -117,7 +117,6 @@ if no_tui:
     config_cli.main()
     sys.exit()
 
-import prompt_toolkit
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.application import Application, get_app_session
 from prompt_toolkit.application.current import get_app
@@ -152,13 +151,13 @@ from prompt_toolkit.widgets import (
     TextArea
 )
 from collections import OrderedDict
-from typing import Any, Optional, Sequence, Union
+from typing import Any, Optional, Sequence
 from prompt_toolkit.key_binding.key_processor import KeyPressEvent
 from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText
-from typing import TypeVar, Callable
+from typing import Callable
 from prompt_toolkit.widgets import Button, Dialog, Label
-from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
+from prompt_toolkit.mouse_events import MouseEventType
 from prompt_toolkit.keys import Keys
 
 from cli_style import style
@@ -215,7 +214,7 @@ class JansCliApp(Application):
         self.pbar_text = ""
         self.progressing_text = ""
         self.mouse_float = True
-        self.browse_path = '/'
+        self.browse_path = str(Path.home())
         self.app_configuration = {}
         self.current_page = None
         self.jans_help = get_help_with()
@@ -480,8 +479,8 @@ class JansCliApp(Application):
 
                     self.start_progressing()
                     try:
-                        response = await self.loop.run_in_executor(self.executor, self.cli_object.get_jwt_access_token,
-                                                                   result)
+                        await self.loop.run_in_executor(self.executor, self.cli_object.get_jwt_access_token,
+                                                        result)
                     except Exception as e:
                         self.stop_progressing()
                         err_dialog = JansGDialog(self, title=_("Error!"), body=HSplit([Label(str(e))]))
@@ -544,12 +543,12 @@ class JansCliApp(Application):
     def jans_creds_dialog(self, *params: Any) -> None:
         body = HSplit([
             self.getTitledText(_("OP Hostname"), name='jans_host', value=config_cli.host or '',
-                               jans_help=_("FQN name of Jannsen Config Api Server"),
+                               jans_help=_("FQN name of Janssen Config Api Server"),
                                style=cli_style.edit_text_required),
             self.getTitledText(_("Client ID"), name='jca_client_id', value=config_cli.client_id or '',
-                               jans_help=_("Jannsen Config Api Client ID"), style=cli_style.edit_text_required),
+                               jans_help=_("Janssen Config Api Client ID"), style=cli_style.edit_text_required),
             self.getTitledText(_("Client Secret"), name='jca_client_secret', value=config_cli.client_secret or '',
-                               password=True, jans_help=_("Jannsen Config Api Client Secret"),
+                               password=True, jans_help=_("Janssen Config Api Client Secret"),
                                style=cli_style.edit_text_required),
             self.getTitledText(_("Logging Directory"), name='log_dir', value=config_cli.log_dir or '',
                                jans_help=_("Logging Directory"), style=cli_style.edit_text),
@@ -662,8 +661,8 @@ class JansCliApp(Application):
                         self.root_layout.floats.append(mouse_float_container)
                         self.mouse_cord = (x, y)
                         self.mouse_float = False
-                except Exception:
-                    pass
+                except Exception as e:
+                    self.logger.debug("Mouse menu error: %s", e)
 
         elif mouse_click == "LEFT" and mouse_event == MouseEventType.MOUSE_DOWN and self.mouse_float == False:
             try:
@@ -680,8 +679,8 @@ class JansCliApp(Application):
                         elif self.mouse_select == mouse_operations.Cut.name:
                             data = self.current_buffer.copy_selection(True)
                             self.clipboard.set_data(data)
-            except Exception:
-                pass
+            except Exception as e:
+                self.logger.debug("Mouse clipboard error: %s", e)
 
         if self.layout.container.floats:
             try:
@@ -742,7 +741,7 @@ class JansCliApp(Application):
                     self.layout.container.floats.remove(self.layout.container.floats[0])
                     self.layout.focus(self.center_frame)
         except Exception as e:
-            pass
+            self.logger.debug("Escape handling error: %s", e)
 
     def get_help_from_schema(
             self,
@@ -752,6 +751,7 @@ class JansCliApp(Application):
         for prop in schema.get('properties', {}):
             if prop == jans_name:
                 return schema['properties'][jans_name].get('description', '')
+        return ''
 
     def getTitledText(
             self,
@@ -993,6 +993,7 @@ class JansCliApp(Application):
         for plugin in self._plugins:
             if plugin.pid == pid:
                 return plugin
+        return None
 
 
     def stay_in_config_menu(self, dialog=None):
@@ -1155,6 +1156,13 @@ class JansCliApp(Application):
             if hasattr(self, 'cli_object'):
                 self.cli_object.set_logging()
 
+    def accept_upload_path(self, path: str) -> Optional[str]:
+        try:
+            return self.cli_object.resolve_user_file(path)
+        except ValueError as e:
+            self.show_message(_(common_strings.error), str(e))
+            return None
+
     def show_message(
             self,
             title: AnyFormattedText,
@@ -1198,7 +1206,7 @@ application = JansCliApp()
 
 def run():
     with patch_stdout(application):
-        result = application.run()
+        application.run()
     print("See you next time.")
 
 

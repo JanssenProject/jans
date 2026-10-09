@@ -145,6 +145,66 @@ for policy in &policies {
 }
 ```
 
+### Annotation Lookup
+
+These methods resolve the Cedar annotations (`@key("value")`) of specific policies by ID. The typical use is reading the annotations of the policies that determined an authorization decision: pass the policy IDs from the diagnostics.
+
+Policy IDs that are not present in the policy store are silently skipped. Resolve annotations promptly after the authorization call: a concurrent policy-store refresh may swap the store, in which case IDs from the previous store that no longer resolve are dropped from the result.
+
+- `annotations_map(policy_ids)`
+
+    Merges the annotations of the given policies into a single map of annotation key to value.
+
+    **Lossy:** if the same annotation key appears on several policies, one value wins arbitrarily. Use `annotation_values` or `annotations_by_policy` when duplicates matter.
+
+- `annotation_values(policy_ids, key)`
+
+    Returns every value of the annotation `key` across the given policies, preserving duplicates. Returns an empty list when no policy carries the key.
+
+- `annotations_by_policy(policy_ids)`
+
+    Returns the annotations of each given policy grouped by policy ID, the loss-free companion to `annotations_map`.
+
+In Rust the methods take any iterator of `&PolicyId` (re-exported as `cedarling::PolicyId`); in Python and JavaScript they take a list/array of policy ID strings.
+
+#### Example (Rust)
+
+```rust
+let result = cedarling.authorize_unsigned(request).await?;
+let reason: Vec<_> = result.response.diagnostics().reason().collect();
+
+// e.g. { "redirect": "/upgrade", "tier": "premium" }
+let merged = cedarling.annotations_map(reason.iter().copied());
+
+// e.g. ["/upgrade"]
+let redirects = cedarling.annotation_values(reason.iter().copied(), "redirect");
+
+// e.g. { "policy_id": { "redirect": "/upgrade", "tier": "premium" } }
+let by_policy = cedarling.annotations_by_policy(reason.iter().copied());
+```
+
+#### Example (Python)
+
+```python
+result = cedarling.authorize_unsigned(request)
+reason = list(result.response.diagnostics.reason)
+
+merged = cedarling.annotations_map(reason)
+redirects = cedarling.annotation_values(reason, "redirect")
+by_policy = cedarling.annotations_by_policy(reason)
+```
+
+#### Example (JavaScript)
+
+```javascript
+const result = await cedarling.authorizeUnsigned(JSON.stringify(request));
+const reason = result.response.diagnostics.reason;
+
+const merged = cedarling.annotationsMap(reason);
+const redirects = cedarling.annotationValues(reason, "redirect");
+const byPolicy = cedarling.annotationsByPolicy(reason);
+```
+
 ### Authz Result
 
 The following methods are called on the result obtained from the authorization call to view and analyze results, reasons and possible errors.
@@ -308,6 +368,38 @@ The Context Data API allows you to push external data into the Cedarling evaluat
   - `memory_alert_threshold`: Memory usage threshold percentage (from config)
   - `memory_alert_triggered`: Whether memory usage exceeds the alert threshold
 
+### Drain Metrics
+
+- `drain_metrics()`
+
+  Destructive read: returns a `MetricsSnapshot` with `policy_stats`,
+  `error_counters`, `operational_stats`, and the elapsed interval, then
+  resets the counters for the next interval.
+
+  Only available when `CEDARLING_METRICS_COLLECTION` is `enabled` at bootstrap
+  and no Lock telemetry ticker owns the collector. Returns a `LockTelemetry`
+  error whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+  server has no telemetry endpoint and metrics are not shipped anywhere: the
+  ticker is spawned based on the interval alone.
+
+  The interval is reported as each language's own duration type, so its name
+  and precision differ by binding:
+
+  | Binding | Field | Type |
+  |---------|-------|------|
+  | Rust | `interval` | `std::time::Duration` |
+  | Python | `interval` | `datetime.timedelta` |
+  | Kotlin | `interval` | `java.time.Duration` |
+  | Swift | `interval` | `TimeInterval` |
+  | Go | `Interval` | `time.Duration` |
+  | JavaScript / WASM | `interval_secs` | `Number`, fractional seconds |
+
+  Every binding reports the interval with sub-second precision. Serializing the
+  Rust snapshot yields fractional seconds under an `interval_secs` key.
+
+  The interval shipped to the Lock server is separate: the telemetry ticker
+  reports whole seconds, so sub-second precision is local to the binding.
+
 ### Schema Requirements
 
 To use the Context Data API, your Cedar schema must include a `data` field in the action's context. You must explicitly define the expected structure of the data — Cedar does not support arbitrary/untyped records.
@@ -371,6 +463,18 @@ permit(
 ```
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data without requiring policy changes.
+
+## Policy Store ID
+
+- `policy_store_id()`
+
+  Returns the ID of the currently published policy store, or none when the
+  store carries no ID. The value is an opaque string and must not be parsed.
+
+  The method name follows each binding's conventions (`policyStoreId` in
+  Kotlin/Swift/Java/JavaScript, `PolicyStoreID` in Go,
+  `cedarling_get_policy_store_id` in C); the return is empty or absent when
+  unset.
 
 ## Trusted Issuer Loading Info
 

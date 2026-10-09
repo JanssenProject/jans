@@ -10,16 +10,13 @@ import static io.jans.scim.model.scim2.Constants.USER_EXT_SCHEMA_DESCRIPTION;
 import static io.jans.scim.model.scim2.Constants.USER_EXT_SCHEMA_ID;
 import static io.jans.scim.model.scim2.Constants.USER_EXT_SCHEMA_NAME;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.enterprise.event.*;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -32,6 +29,10 @@ import io.jans.scim.model.scim2.user.UserResource;
 import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.service.AttributeService;
 import io.jans.model.attribute.AttributeDataType;
+import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.event.Scheduled;
+import io.jans.service.timer.event.TimerEvent;
+import io.jans.service.timer.schedule.TimerSchedule;
 
 import org.slf4j.Logger;
 
@@ -46,28 +47,32 @@ public class ExtensionService {
 
     @Inject
     private AttributeService attributeService;
+    
+    @Inject
+    private Event<TimerEvent> timerEvent;
+    
+    private List<JansAttribute> markedAttributes;
+    
+    private AtomicBoolean isActive;
 
     public List<Extension> getResourceExtensions(Class<? extends BaseScimResource> cls) {
 
         List<Extension> list = new ArrayList<>();
         try {
-            // Currently support one extension only for User Resource
+            // Currently support only one extension (User Resource)
             if (cls.equals(UserResource.class)) {
 
                 Map<String, ExtensionField> fields = new HashMap<>();
 
-                for (JansAttribute attribute : attributeService.getSCIMRelatedAttributes()) {
-                    if (Optional.ofNullable(attribute.getScimCustomAttr()).orElse(false)) {
-                        // first non-null check is needed because certain entries do not have the multivalue attribute set
+                for (JansAttribute attribute: markedAttributes) {
+                    
+                    ExtensionField field = new ExtensionField();
+                    field.setDescription(attribute.getDescription());
+                    field.setType(attribute.getDataType());
+                    field.setMultiValued(Optional.ofNullable(attribute.getOxMultiValuedAttribute()).orElse(false));
+                    field.setName(attribute.getName());
 
-                        ExtensionField field = new ExtensionField();
-                        field.setDescription(attribute.getDescription());
-                        field.setType(attribute.getDataType());
-                        field.setMultiValued(Optional.ofNullable(attribute.getOxMultiValuedAttribute()).orElse(false));
-                        field.setName(attribute.getName());
-
-                        fields.put(attribute.getName(), field);
-                    }
+                    fields.put(attribute.getName(), field);
                 }
 
                 String uri = appConfiguration.getUserExtensionSchemaURI();
@@ -217,5 +222,31 @@ public class ExtensionService {
         }
         return field;
     }
+    
+    @Asynchronous
+    public void updateMarkedAttributes(@Observes @Scheduled UpdateScimExtendedAttributesEvent event) {
+        
+        if (!isActive.compareAndSet(false, true)) return;
 
+        try {
+            log.trace("Reloading list of SCIM extended attributes");
+            markedAttributes = attributeService.getSCIMRelatedAttributes();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            isActive.set(false);
+        }
+
+    }
+    
+    @PostConstruct
+    private void init() {
+        
+        isActive = new AtomicBoolean(false);
+        updateMarkedAttributes(null);
+        timerEvent.fire(new TimerEvent(new TimerSchedule(30, 90),
+                new UpdateScimExtendedAttributesEvent(), Scheduled.Literal.INSTANCE));
+
+    }
+    
 }

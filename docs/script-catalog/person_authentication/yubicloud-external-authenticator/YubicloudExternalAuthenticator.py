@@ -8,9 +8,7 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import UserService
-from io.jans.util import StringHelper
 
-import java
 
 import urllib2
 import urllib

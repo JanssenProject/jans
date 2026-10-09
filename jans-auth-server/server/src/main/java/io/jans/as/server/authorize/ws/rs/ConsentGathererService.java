@@ -16,7 +16,7 @@ import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.service.AuthorizeService;
-import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.ClientIdMetadataService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalConsentGatheringService;
 import io.jans.as.server.service.external.context.ConsentGatheringContext;
@@ -75,7 +75,7 @@ public class ConsentGathererService {
     private AuthorizeService authorizeService;
 
     @Inject
-    private ClientService clientService;
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Inject
     private SessionIdService sessionIdService;
@@ -133,7 +133,7 @@ public class ConsentGathererService {
             return consentScriptByAcr;
         }
 
-        final List<String> consentGatheringScripts = clientService.getClient(clientId).getAttributes().getConsentGatheringScripts();
+        final List<String> consentGatheringScripts = clientIdMetadataService.resolveClient(clientId).getAttributes().getConsentGatheringScripts();
         final List<CustomScriptConfiguration> scripts = external.getCustomScriptConfigurationsByDns(consentGatheringScripts);
         if (!scripts.isEmpty()) {
             final CustomScriptConfiguration script = Collections.max(scripts, Comparator.comparingInt(CustomScriptConfiguration::getLevel)); // flow supports single script, thus taking the one with higher level

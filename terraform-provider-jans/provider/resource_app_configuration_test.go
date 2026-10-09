@@ -50,6 +50,26 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 			{"code", "token"},
 			{"code", "id_token"},
 		},
+		CookieSameSite:                             "strict",
+		DisableExternalLoggerConfiguration:         true,
+		IdJagLifetime:                              3600,
+		IdJagIssueRefreshToken:                     true,
+		AuthorizationResponseIssParameterSupported: true,
+		SpiffeBundleMaxResponseSize:                1024,
+		SpiffeBundleConnectTimeoutMs:               5000,
+		SpiffeBundleReadTimeoutMs:                  5000,
+		SpiffeTrustDomains: []jans.SpiffeTrustDomainConfiguration{
+			{
+				TrustDomain:                  "example.org",
+				BundleEndpointUrl:            "https://example.org/bundle",
+				BundleCacheLifetimeInMinutes: 30,
+			},
+		},
+		IdJagTrustedIdpIssuers: []jans.TrustedIssuerConfig{
+			{
+				AutomaticallyGrantedScopes: []string{"openid"},
+			},
+		},
 	}
 
 	if err := toSchemaResource(data, authConfig); err != nil {
@@ -63,8 +83,8 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(patches) != 6 {
-		t.Errorf("Got %d patches, expected 6", len(patches))
+	if len(patches) != 16 {
+		t.Errorf("Got %d patches, expected 16", len(patches))
 	}
 
 	if err := fromSchemaResource(data, &newConfig); err != nil {
@@ -73,6 +93,43 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 
 	if diff := cmp.Diff(authConfig, newConfig); diff != "" {
 		t.Errorf("Got different config after mapping: %s", diff)
+	}
+}
+
+func TestResourceRateLimitConfig_Mapping(t *testing.T) {
+
+	res := resourceAppConfiguration()
+	data := res.Data(nil)
+
+	cfg := jans.AppConfiguration{
+		RateLimitConfiguration: jans.RateLimitConfig{
+			RateLoggingEnabled: true,
+			RateLimitRules: []jans.RateLimitRule{
+				{
+					Path:            "/jans-auth/restv1/token",
+					Methods:         []string{"POST"},
+					RequestCount:    100,
+					PeriodInSeconds: 60,
+					WellFormed:      true,
+					KeyExtractors: []jans.KeyExtractor{
+						{Source: "header", ParameterNames: []string{"X-Client-Id"}, WellFormed: true},
+					},
+				},
+			},
+		},
+	}
+
+	if err := toSchemaResource(data, cfg); err != nil {
+		t.Fatal(err)
+	}
+
+	newCfg := jans.AppConfiguration{}
+	if err := fromSchemaResource(data, &newCfg); err != nil {
+		t.Fatal(err)
+	}
+
+	if diff := cmp.Diff(cfg.RateLimitConfiguration, newCfg.RateLimitConfiguration); diff != "" {
+		t.Errorf("rate limit config mismatch after round-trip: %s", diff)
 	}
 }
 
@@ -116,11 +173,11 @@ func testAccResourceCheckAppConfigurationImport(states []*terraform.InstanceStat
 			return err
 		}
 
-		if err := checkAttribute(is, "claims_parameter_supported", "false"); err != nil {
+		if err := checkAttribute(is, "claims_parameter_supported", "true"); err != nil {
 			return err
 		}
 
-		if err := checkAttribute(is, "dynamic_registration_expiration_time", "-1"); err != nil {
+		if err := checkAttribute(is, "dynamic_registration_expiration_time", "86400"); err != nil {
 			return err
 		}
 

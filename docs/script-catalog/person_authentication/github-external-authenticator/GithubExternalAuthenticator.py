@@ -4,7 +4,6 @@
 #
 
 from io.jans.as.common.model.common import User
-from io.jans.as.model.jwt import Jwt
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.common.service.common import UserService
 from io.jans.as.server.service.net import HttpService
@@ -17,12 +16,12 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
 from io.jans.jsf2.service import FacesService
-from java.util import Arrays, UUID
+from java.util import Arrays
 
 import json
 import sys
-import datetime
 import urllib
+from java.lang import Throwable
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -37,7 +36,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             creds = json.loads(f.read())
             print creds
-        except:
+        except (Exception, Throwable):
             print "GitHub: Initialization. Failed to load creds from file:", github_creds_file
             print "Exception: ", sys.exc_info()[1]
             return False
@@ -81,6 +80,7 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
+        foundUser = None
         if step == 1:
             # Get Access Token
             tokenResponse = self.getToken(requestParameters)

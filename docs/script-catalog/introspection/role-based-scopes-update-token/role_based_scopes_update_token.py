@@ -9,13 +9,11 @@ from io.jans.as.model.jwt import Jwt
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.model.crypto import AuthCryptoProvider
 from io.jans.orm import PersistenceEntryManager
-from io.jans.model.custom.script.type.introspection import IntrospectionType
 from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.model.config.adminui import AdminConf
-from io.jans.as.common.model.session import SessionId
 from org.json import JSONObject
-from java.lang import String
-from com.google.common.collect import Sets
+from java.lang import String, System
+from java.util import HashSet
 from io.jans.model.custom.script.type.token import UpdateTokenType
 from jakarta.ws.rs import BadRequestException
 
@@ -59,83 +57,154 @@ class UpdateToken(UpdateTokenType):
         try:
             if context.getGrant().getAuthorizationGrantType().toString() != 'client_credentials':
                 return True
-            scopes = Sets.newHashSet()
+
+            scopes = HashSet()
+            entryManager = CdiUtil.bean(PersistenceEntryManager)
+            adminConf = AdminConf()
+            adminUIConfig = entryManager.find(adminConf.getClass(), "ou=admin-ui,ou=configuration,o=jans")
+
             # Getting user-info-jwt
             ujwt = context.getHttpRequest().getParameter("ujwt")
             if not ujwt:
                 print "UJWT is empty or null. Only the default scopes will be added to the token."
-                entryManager = CdiUtil.bean(PersistenceEntryManager)
-
-                adminConf = AdminConf()
-                adminUIConfig = entryManager.find(adminConf.getClass(), "ou=admin-ui,ou=configuration,o=jans")
-                permissions = adminUIConfig.getDynamic().getPermissions()
-
-                for ele in permissions:
-                    if ele.getDefaultPermissionInToken() is not None and ele.getDefaultPermissionInToken():
-                        scopes.add(ele.getPermission())
-
+                self.addDefaultScopes(adminUIConfig, scopes)
                 context.overwriteAccessTokenScopes(accessToken, scopes)
                 return True
 
-            # Parse jwt
+            # Parse and validate jwt
             userInfoJwt = Jwt.parse(ujwt)
+            self.validateSignature(userInfoJwt)
 
-            configObj = CdiUtil.bean(ConfigurationFactory)
-            jwksObj = configObj.getWebKeysConfiguration()
-            jwks = JSONObject(jwksObj)
+            jwtClaims = userInfoJwt.getClaims()
+            self.validateAudience(context, jwtClaims, adminUIConfig)
+            self.validateExpiration(jwtClaims)
+            self.validateUserInum(jwtClaims)
 
-            # Validate JWT
-            if userInfoJwt.getHeader().getSignatureAlgorithm().getAlgorithm() == None:
-                print "Error: Unsigned JWT not allowed. The User-Info JWT is not valid"
-                raise BadRequestException("Unsigned JWT not allowed. The User-Info JWT is not valid")
-            authCryptoProvider = AuthCryptoProvider()
-            validJwt = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), jwks, None, userInfoJwt.getHeader().getSignatureAlgorithm())
+            jansAdminUIRoleClaim = jwtClaims.getClaim("jansAdminUIRole")
+            if jansAdminUIRoleClaim is None:
+                print "Exception occured. The `jansAdminUIRole` claim is missing in user-info JWT."
+                raise BadRequestException("Exception occured. The `jansAdminUIRole` claim is missing in user-info JWT.")
 
-            if validJwt == True:
-                # Get claims from parsed JWT
-                jwtClaims = userInfoJwt.getClaims()
-                jansAdminUIRole = list(jwtClaims.getClaim("jansAdminUIRole"))
-                # fetch role-scope mapping from database
-                try:
-                    entryManager = CdiUtil.bean(PersistenceEntryManager)
-                    adminConf = AdminConf()
-                    adminUIConfig = entryManager.find(adminConf.getClass(), "ou=admin-ui,ou=configuration,o=jans")
-                    roleScopeMapping = adminUIConfig.getDynamic().getRolePermissionMapping()
+            jansAdminUIRole = list(jansAdminUIRoleClaim)
+            scopes = self.resolveScopes(context, adminUIConfig, jansAdminUIRole, scopes)
 
-                    for ele in roleScopeMapping:
-                        if ele.getRole() in jansAdminUIRole:
-                            for scope in ele.getPermissions():
-                                if not scope in scopes:
-                                    scopes.add(scope)
-
-                    permissionTag = context.getHttpRequest().getParameter("permission_tag")
-                    permissions = adminUIConfig.getDynamic().getPermissions()
-
-                    if permissionTag is not None:
-                        print "The request has tags : {}".format(permissionTag)
-                        permissionTagArr = permissionTag.split()
-                        scopesWithMatchingTags = self.filterScopesMatchingWithTags(permissionTagArr, permissions)
-                        scopes = self.createScopeListMatchingWithTags(scopesWithMatchingTags, scopes)
-
-
-                except Exception as e:
-                    print "Error:  Failed to fetch/parse Admin UI roleScopeMapping from DB"
-                    print e
-
-                print "Following scopes will be added in api token: {}".format(scopes)
-            else:
-                print "Error:  The User-Info JWT is not valid"
-                raise BadRequestException("The User-Info JWT is not valid")
-
+            print "Following scopes will be added in api token: {}".format(scopes)
             context.overwriteAccessTokenScopes(accessToken, scopes)
+
         except BadRequestException:
             print "Handling BadRequestException"
             return False
         except Exception as e:
-                print "Exception occured. Unable to resolve role/scope mapping."
-                print e
-                return False
+            print "Exception occured. Unable to resolve role/scope mapping."
+            print e
+            return False
         return True
+
+    def addDefaultScopes(self, adminUIConfig, scopes):
+        permissions = adminUIConfig.getDynamic().getPermissions()
+        for ele in permissions:
+            if ele.getDefaultPermissionInToken() is not None and ele.getDefaultPermissionInToken():
+                scopes.add(ele.getPermission())
+
+    def validateSignature(self, userInfoJwt):
+        if userInfoJwt.getHeader().getSignatureAlgorithm().getAlgorithm() is None:
+            print "Exception occured. Unsigned JWT not allowed. The User-Info JWT is not valid"
+            raise BadRequestException("Unsigned JWT not allowed. The User-Info JWT is not valid")
+
+        configObj = CdiUtil.bean(ConfigurationFactory)
+        jwks = JSONObject(configObj.getWebKeysConfiguration())
+        authCryptoProvider = AuthCryptoProvider()
+        validJwt = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), jwks, None, userInfoJwt.getHeader().getSignatureAlgorithm())
+        if not validJwt:
+            print "Exception occured. The User-Info JWT is not valid"
+            raise BadRequestException("The User-Info JWT is not valid")
+
+
+
+    def validateAudience(self, context, jwtClaims, adminUIConfig):
+        aud = jwtClaims.getClaim("aud")
+
+        if aud is None:
+            print "Exception occurred. The User-Info JWT does not contain the required aud claim"
+            raise BadRequestException(
+                "The User-Info JWT does not contain the required aud claim"
+            )
+
+        clientId = None
+
+        mainSettings = adminUIConfig.getMainSettings()
+        if mainSettings is not None:
+            oidcConfig = mainSettings.getOidcConfig()
+            if oidcConfig is not None:
+                auiWebClient = oidcConfig.getAuiWebClient()
+                if auiWebClient is not None:
+                    # The Client ID of the Admin UI Authentication client is used
+                    # to validate the audience (aud) claim in the User-Info JWT.
+                    clientId = auiWebClient.getClientId()
+
+        # The client ID is taken from the client that generated the token.
+        # This works when the application uses the same client for both
+        # authentication and accessing the Config API (e.g. TUI).
+        contextClientId = context.getClient().getClientId()
+
+        # The JWT 'aud' claim can be either a single string or a list of strings.
+        audiences = [aud] if isinstance(aud, String) else aud
+
+        # Add only configured client IDs.
+        expectedAudiences = []
+
+        if clientId is not None:
+            expectedAudiences.append(clientId)
+
+        if contextClientId is not None:
+            expectedAudiences.append(contextClientId)
+
+        # Validation succeeds if at least one expected audience
+        # is present in the JWT 'aud' claim.
+        if not any(expectedAudience in audiences for expectedAudience in expectedAudiences):
+            print "Exception occurred. The User-Info JWT aud {} does not match any expected client ID {}".format(
+                audiences, expectedAudiences
+            )
+            raise BadRequestException(
+                "The User-Info JWT audience does not match the client"
+            )
+
+
+    def validateExpiration(self, jwtClaims):
+        exp = jwtClaims.getClaimAsLong("exp")
+        if exp is None:
+            raise BadRequestException("The User-Info JWT does not contain the required exp claim")
+        if System.currentTimeMillis() / 1000 >= exp:
+            print "Exception occured. The User-Info JWT has expired"
+            raise BadRequestException("The User-Info JWT has expired")
+
+    def validateUserInum(self, jwtClaims):
+        userInum = jwtClaims.getClaim("inum")
+        if userInum is None:
+            print "Exception occured. The User-Info JWT does not contain the required (user) inum claim"
+            raise BadRequestException("The User-Info JWT does not contain the required (user) inum claim")
+        return userInum
+
+    def resolveScopes(self, context, adminUIConfig, jansAdminUIRole, scopes):
+        try:
+            roleScopeMapping = adminUIConfig.getDynamic().getRolePermissionMapping()
+            for ele in roleScopeMapping:
+                if ele.getRole() in jansAdminUIRole:
+                    for scope in ele.getPermissions():
+                        scopes.add(scope)
+
+            permissionTag = context.getHttpRequest().getParameter("permission_tag")
+            permissions = adminUIConfig.getDynamic().getPermissions()
+
+            if permissionTag is not None:
+                print "The request has tags : {}".format(permissionTag)
+                permissionTagArr = permissionTag.split()
+                scopesWithMatchingTags = self.filterScopesMatchingWithTags(permissionTagArr, permissions)
+                scopes = self.createScopeListMatchingWithTags(scopesWithMatchingTags, scopes)
+        except Exception as e:
+            print "Exception occured. Failed to fetch/parse Admin UI roleScopeMapping from DB"
+            print e
+        return scopes
 
     # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
     def getRefreshTokenLifetimeInSeconds(self, context):

@@ -152,7 +152,7 @@ Select the deployment method that best fits your environment and requirements.
     **For Testing and Development Only**
     
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL "" main
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh && chmod u+x start_janssen_aio_demo.sh && sudo bash start_janssen_aio_demo.sh demoexample.jans.io MYSQL "" <VM_IP>
     ```
     
     [Complete Docker Setup Guide](janssen-server/install/docker-install/quick-start.md)
@@ -175,13 +175,13 @@ Set up your identity platform with the configuration tools.
 === "TUI (Terminal User Interface)"
 
     ```bash
-    sudo /opt/jans/bin/jans-tui.py
+    sudo /opt/jans/jans-cli/jans_cli_tui.py
     ```
 
 === "Command Line"
 
     ```bash
-    sudo /opt/jans/bin/jans-cli.py
+    /opt/jans/jans-cli/config-cli.py
     ```
 
 === "Terraform"

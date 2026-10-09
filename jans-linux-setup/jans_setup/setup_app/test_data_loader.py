@@ -1,22 +1,14 @@
 import os
-import sys
-import glob
-import time
 import json
 import socket
-import urllib.request
-import base64
 import shutil
 
-from setup_app import paths
 from setup_app import static
 from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
-from setup_app.utils.ldif_utils import myLdifParser, schema2json
-from setup_app.pylib.schema import ObjectClass
-from setup_app.pylib.ldif4.ldif import LDIFWriter
+from setup_app.utils.ldif_utils import schema2json
 from setup_app.pylib.jproperties import Properties
 
 class TestDataLoader(BaseInstaller, SetupUtils):
@@ -28,9 +20,10 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.needdb = True
         self.app_type = static.AppType.APPLICATION
         self.install_type = static.InstallOption.OPTONAL
-        self.install_var = 'loadTestData'
+        self.install_var = 'load_test_data'
         self.register_progess()
-        self.template_base = os.path.join(Config.templateFolder, 'test')
+        self.template_base = os.path.join(Config.template_folder, 'test')
+        self.schema_file = os.path.join(Config.install_dir, 'schema/jans_test_schema.json')
 
     def enable_cusom_scripts(self):
         self.logIt("Enabling custom scripts")
@@ -70,6 +63,33 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.dbUtils.set_jans_auth_conf_dynamic({'agamaConfiguration': agama_config})
         self.dbUtils.enable_script('BADA-BADA')
 
+    def create_tables(self):
+        self.dbUtils.read_jans_schema(others=[self.schema_file])
+        base.current_app.RDBMInstaller.create_tables([self.schema_file])
+        self.dbUtils.rdm_automapper(True)
+
+    def copy_ssl_public_cert(self):
+        # copy postgresql cert file to output directory
+        output_dir = os.path.join(Config.output_dir, 'test/jans-orm/conf')
+        if Config.rdbm_type == 'pgsql':
+            ssl_public_cert_path = Config.postgresql_ca_crt_fn
+            target = os.path.join(output_dir, 'postgresql.crt')
+            self.copyFile(ssl_public_cert_path, target)
+        else:
+            _, data_dir = self.dbUtils.exec_raw_sql_cmd("SHOW VARIABLES LIKE 'datadir'")
+            _, ssl_ca_fn = self.dbUtils.exec_raw_sql_cmd("SHOW VARIABLES LIKE 'ssl_ca'")
+            ssl_ca_fn_path = os.path.join(data_dir, ssl_ca_fn)
+            self.run([Config.cmd_keytool,
+                '-importcert',
+                '-noprompt',
+                '-alias', 'mysql-ca',
+                '-file', ssl_ca_fn_path,
+                '-keystore', os.path.join(output_dir, 'mysql.p12'),
+                '-storetype', 'PKCS12',
+                '-storepass', 'changeit'
+                  ])
+
+
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
         self.logIt("Re-binding database")
@@ -79,7 +99,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         socket.setdefaulttimeout(3)
         try:
             socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 443))
-        except:
+        except Exception:
             self.logIt("Failed to connect 8.8.8.8:443.", True)
             print("Test data loader needs internet connection. Giving up ...")
             return
@@ -97,33 +117,33 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         Config.pbar.progress(self.service_name, "Rendering templates", False)
         self.logIt("Rendering test templates")
 
-        Config.templateRenderingDict['config_jans_auth_test_ldap'] = '# Not available'
+        Config.template_rendering_dict['config_jans_auth_test_ldap'] = '# Not available'
 
         config_jans_auth_test_properties = self.fomatWithDict(
             'server.name=%(hostname)s\nconfig.oxauth.issuer=http://localhost:80\nconfig.oxauth.contextPath=http://localhost:80\nconfig.oxauth.salt=%(encode_salt)s\nconfig.persistence.type=%(persistence_type)s\n\n',
-            self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
+            self.merge_dicts(Config.__dict__, Config.template_rendering_dict)
             )
 
         if Config.rdbm_type in ('mysql', 'pgsql'):
             if Config.rdbm_type == 'mysql':
-                Config.templateRenderingDict['rdbm_schema_name'] = Config.rdbm_db
-                Config.templateRenderingDict['rdbm_name_str'] = Config.rdbm_type
+                Config.template_rendering_dict['rdbm_schema_name'] = Config.rdbm_db
+                Config.template_rendering_dict['rdbm_name_str'] = Config.rdbm_type
             else:
-                Config.templateRenderingDict['rdbm_schema_name'] = 'public'
-                Config.templateRenderingDict['rdbm_name_str'] = 'postgresql'
+                Config.template_rendering_dict['rdbm_schema_name'] = 'public'
+                Config.template_rendering_dict['rdbm_name_str'] = 'postgresql'
 
             template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-sql.properties.nrnd'))
-            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.template_rendering_dict))
             config_jans_auth_test_properties += '\n#sql\n' +  rendered_text
 
             self.logIt("Adding custom attributs and indexes")
 
             schema2json(
-                    os.path.join(Config.templateFolder, 'test/jans-auth/schema/102-jans-auth_test.ldif'),
+                    os.path.join(Config.template_folder, 'test/jans-auth/schema/102-jans-auth_test.ldif'),
                     os.path.join(Config.output_dir, 'test/jans-auth/schema/')
                     )
             schema2json(
-                    os.path.join(Config.templateFolder, 'test/scim-client/schema/103-scim_test.ldif'),
+                    os.path.join(Config.template_folder, 'test/scim-client/schema/103-scim_test.ldif'),
                     os.path.join(Config.output_dir, 'test/scim-client/schema/'),
                     )
 
@@ -154,6 +174,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             self.dbUtils.read_jans_schema(others=jans_schema_json_files)
             base.current_app.RDBMInstaller.create_tables(jans_schema_json_files)
             self.dbUtils.rdm_automapper(force=True)
+            self.create_tables()
 
         self.writeFile(
             os.path.join(Config.output_dir, 'test/jans-auth/server/config-jans-auth-test.properties'),
@@ -163,6 +184,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         ignoredirs = [
                 os.path.join(self.template_base, 'jans-config-api'),
                 os.path.join(self.template_base, 'jans-fido2'),
+                os.path.join(self.template_base, 'jans-lock'),
                 ]
 
         self.render_templates_folder(self.template_base, ignoredirs=ignoredirs)
@@ -243,8 +265,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'idTokenSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'accessTokenSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'requestObjectSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
-                                    'softwareStatementValidationClaimName': 'jwks_uri',
-                                    'softwareStatementValidationType': 'jwks_uri',
+                                    'softwareStatementValidationClaimName': 'jwks',
+                                    'softwareStatementValidationType': 'jwks',
                                     'umaGrantAccessIfNoPolicies': True,
                                     'rejectJwtWithNoneAlg': False,
                                     'removeRefreshTokensForClientOnLogout': True,
@@ -257,36 +279,15 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'tokenEndpointAuthMethodsSupported': [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth', 'self_signed_tls_client_auth', 'none' ],
                                     'sessionIdRequestParameterEnabled': True,
                                     'skipRefreshTokenDuringRefreshing': False,
-                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list', 'logout_status_jwt', 'access_evaluation'],
+                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list', 'logout_status_jwt', 'access_evaluation', 'identity_assertion_authz_grant', 'client_id_metadata_document'],
                                     'loggingLevel': 'TRACE',
                                     }
 
-        if Config.get('config_patch_creds'):
-            data = None
-            datajs = None
-            patch_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'protected/jans-auth/jans-auth-test-config-patch.json')
-            req = urllib.request.Request(patch_url)
-            credentials = Config.get('config_patch_creds')
-            encoded_credentials = base64.b64encode(credentials.encode('ascii'))
-            req.add_header('Authorization', 'Basic %s' % encoded_credentials.decode("ascii"))
-            self.logIt("Retreiving auto test ciba patch from " + patch_url)
-
-            try:
-                resp = urllib.request.urlopen(req)
-                data = resp.read()
-                self.logIt("Auto test ciba patch retreived")
-            except:
-                self.logIt("Can't retreive auto test ciba patch", True)
-
-            if data:
-                try:
-                    datajs = json.loads(data.decode())
-                except:
-                    self.logIt("Can't decode json for auto test ciba patch", True)
-
-            if datajs:
-                jans_auth_conf_dynamic_changes.update(datajs)
-                self.logIt("jans_auth_conf_dynamic was updated with auto test ciba patch")
+        # Whitelist this host for sector_identifier_uri / request_uri loop-back fetches, preserving
+        # any entries already configured (merge + dedupe + sort) rather than overwriting them.
+        _, existing_auth_conf = self.dbUtils.get_jans_auth_conf_dynamic()
+        existing_whitelist = existing_auth_conf.get('externalUriWhiteList') or []
+        jans_auth_conf_dynamic_changes['externalUriWhiteList'] = sorted(set(existing_whitelist) | {Config.hostname})
 
         self.dbUtils.set_jans_auth_conf_dynamic(jans_auth_conf_dynamic_changes)
 
@@ -309,6 +310,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.chown(super_gluu_creds_fn, Config.jetty_user, Config.root_user)
 
         Config.pbar.progress(self.service_name, "Restarting Services", False)
+
+        self.copy_ssl_public_cert()
 
         # Disable token binding module
         if base.os_name in ('ubuntu18', 'ubuntu20'):

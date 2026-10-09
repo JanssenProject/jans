@@ -5,8 +5,8 @@
 
 use cedarling::{
     AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
-    EntityData, InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, TokenInput,
+    EntityData, HttpClientConfig, InitCedarlingError, JwtConfig, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, TokenInput,
 };
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
@@ -103,6 +103,7 @@ async fn prepare_cedarling_with_jwt_validation(
             source: cedarling::PolicyStoreSource::Yaml(
                 serde_yaml_ng::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
+            ..Default::default()
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -116,6 +117,7 @@ async fn prepare_cedarling_with_jwt_validation(
         max_base64_size: None,
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await

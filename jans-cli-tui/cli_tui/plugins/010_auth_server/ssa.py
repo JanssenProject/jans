@@ -1,4 +1,3 @@
-import os
 import copy
 import json
 import time
@@ -7,24 +6,22 @@ import asyncio
 
 from typing import Any
 from datetime import datetime
-from functools import partial
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit
 from prompt_toolkit.layout.containers import DynamicContainer, Window
-from prompt_toolkit.widgets import Button, Label, Checkbox, RadioList, Dialog, TextArea
+from prompt_toolkit.widgets import Button, Label, Checkbox, RadioList, Dialog
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
 
 from cli import config_cli
 from utils.multi_lang import _
-from utils.utils import DialogUtils, fromisoformat
+from utils.utils import DialogUtils
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.jans_label_container import JansLabelContainer
 from wui_components.jans_date_picker import DateSelectWidget
 
 
@@ -140,7 +137,7 @@ class SSA(DialogUtils):
         self.app.show_jans_dialog(templatesDialog)
 
 
-    def update_ssa_container(self, start_index=0, search_str=''):
+    def update_ssa_container(self, start_index=0, search_str='', *, display_no_matching=True):
 
         self.working_container.clear()
         data_display = []
@@ -160,7 +157,7 @@ class SSA(DialogUtils):
                         '{:02d}/{:02d}/{}'.format(dt_object.day, dt_object.month, str(dt_object.year))
                     ))
 
-        if not data_display:
+        if not data_display and display_no_matching:
             self.app.show_message(_("Oops"), _(common_strings.no_matching_result), tobefocused = self.main_container)
             return
 
@@ -170,7 +167,7 @@ class SSA(DialogUtils):
 
         self.app.layout.focus(self.working_container)
 
-    def get_ssa(self, search_str=''):
+    def get_ssa(self, search_str='', display_no_matching=True):
         async def coroutine():
             cli_args = {'operation_id': 'get-ssa', 'cli_object': self.cli_object}
             self.app.start_progressing(_("Retreiving ssa..."))
@@ -178,7 +175,7 @@ class SSA(DialogUtils):
             self.app.stop_progressing()
             self.data = response.json()
             self.working_container.all_data = self.data
-            self.update_ssa_container(search_str=search_str)
+            self.update_ssa_container(search_str=search_str, display_no_matching=display_no_matching)
 
         asyncio.ensure_future(coroutine())
 
@@ -351,6 +348,19 @@ class SSA(DialogUtils):
 
         self.app.show_jans_dialog(dialog)
 
+
+    def check_one_time_rotate(self, me):
+
+        if me.window.jans_name == 'one_time_use':
+            check_widget = self.rotate_checkbox
+        else:
+            check_widget = self.one_time_use_checkbox
+
+        if me.checked and check_widget.me.checked:
+            check_widget.me.checked = False
+
+
+
     def edit_ssa_dialog(self, data=None):
 
         # check if SSA flag is enabled
@@ -455,6 +465,26 @@ class SSA(DialogUtils):
                 max_height=3
                 )
 
+        one_time_use = bool(data.get('one_time_use', False))
+        rotate_ssa = bool(data.get('rotate_ssa', False)) and not one_time_use
+
+        self.one_time_use_checkbox = self.app.getTitledCheckBox(
+                                _("One Time Use"),
+                                name='one_time_use',
+                                checked=one_time_use,
+                                style=cli_style.check_box,
+                                on_selection_changed=self.check_one_time_rotate
+                            )
+
+        self.rotate_checkbox = self.app.getTitledCheckBox(
+                                _("Rotate SSA"),
+                                name='rotate_ssa',
+                                checked=rotate_ssa,
+                                style=cli_style.check_box,
+                                on_selection_changed=self.check_one_time_rotate
+                            )
+
+
         body_widgets = [
 
                 self.app.getTitledText(
@@ -511,19 +541,8 @@ class SSA(DialogUtils):
                             height=5, width=D(),
                             ),
 
-                self.app.getTitledCheckBox(
-                            _("One Time Use"),
-                            name='one_time_use',
-                            checked=data.get('one_time_use', False),
-                            style=cli_style.check_box
-                            ),
-
-                self.app.getTitledCheckBox(
-                            _("Rotate SSA"),
-                            name='rotate_ssa',
-                            checked=data.get('rotate_ssa', False),
-                            style=cli_style.check_box
-                            ),
+                            self.one_time_use_checkbox,
+                            self.rotate_checkbox,
 
                 VSplit([
                     Label(expiration_label + ': ', width=len(expiration_label)+2, style=cli_style.titled_text),
@@ -603,7 +622,7 @@ class SSA(DialogUtils):
         def do_delete_ssa(result):
             async def coroutine():
                 await self.delete_ssa_coroutine(jti)
-                self.get_ssa()
+                self.get_ssa(display_no_matching=False)
                 close_dialog = kwargs.get('close_dialog')
                 if close_dialog:
                     close_dialog.future.set_result(True)

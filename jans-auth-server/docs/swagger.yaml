@@ -60,6 +60,109 @@ paths:
                     type: string
                   details:
                     type: string
+  /.well-known/oauth-authorization-server:
+    get:
+      tags:
+        - OAuth Authorization Server Metadata
+      summary: Gets OAuth 2.0 Authorization Server Metadata.
+      description: Gets OAuth 2.0 Authorization Server Metadata as defined by RFC 8414. Response content is the same document served at /.well-known/openid-configuration (OpenID Connect Discovery is a superset of RFC 8414 metadata), including additional non-standard members.
+      operationId: oauth-authorization-server
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: OAuth 2.0 Authorization Server Metadata
+                required:
+                  - issuer
+                  - response_types_supported
+                properties:
+                  issuer:
+                    type: string
+                    description: "URL using the https scheme that uniquely identifies the authorization server."
+                  authorization_endpoint:
+                    type: string
+                    description: "URL of the authorization server's authorization endpoint."
+                  token_endpoint:
+                    type: string
+                    description: "URL of the authorization server's token endpoint."
+                  jwks_uri:
+                    type: string
+                    description: "URL of the authorization server's JWK Set document."
+                  registration_endpoint:
+                    type: string
+                    description: "URL of the authorization server's dynamic client registration endpoint."
+                  scopes_supported:
+                    type: array
+                    description: Array of scope values supported by this authorization server.
+                    items:
+                      type: string
+                  response_types_supported:
+                    type: array
+                    description: Array of response_type values supported by this authorization server.
+                    items:
+                      type: string
+                  response_modes_supported:
+                    type: array
+                    description: Array of response_mode values supported by this authorization server.
+                    items:
+                      type: string
+                  grant_types_supported:
+                    type: array
+                    description: Array of grant_type values supported by this authorization server.
+                    items:
+                      type: string
+                  token_endpoint_auth_methods_supported:
+                    type: array
+                    description: Array of client authentication methods supported by the token endpoint.
+                    items:
+                      type: string
+                  service_documentation:
+                    type: string
+                    description: "URL of a page containing human-readable information for developers."
+                  ui_locales_supported:
+                    type: array
+                    description: Array of languages and scripts supported for the user interface.
+                    items:
+                      type: string
+                  op_policy_uri:
+                    type: string
+                    description: "URL of a page with policy information about data usage."
+                  op_tos_uri:
+                    type: string
+                    description: "URL of a page with terms of service."
+                  revocation_endpoint:
+                    type: string
+                    description: "URL of the authorization server's token revocation endpoint."
+                  introspection_endpoint:
+                    type: string
+                    description: "URL of the authorization server's token introspection endpoint."
+                  code_challenge_methods_supported:
+                    type: array
+                    description: Array of PKCE code_challenge_method values supported by this authorization server.
+                    items:
+                      type: string
+        500:
+          description: Error during request processing endpoint.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string
   /restv1/evaluation:
     post:
       tags:
@@ -877,13 +980,11 @@ paths:
       description: The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.
       operationId: get_clientinfo
       parameters:
-        - name: access_token
-          in: query
-          schema:
-            type: string
-            description: Client-specific access token.
         - name: Authorization
           in: header
+          required: true
+          description: 'Bearer access token, e.g. "Authorization: Bearer <access_token>". Sending the access token as a
+            query parameter is not supported.'
           schema:
             type: string
       responses:
@@ -1060,6 +1161,20 @@ paths:
                     description: Array of string. Each string represents supported type of authorization details.
                     items:
                       type: string
+                  identity_chaining_requested_token_types_supported:
+                    type: array
+                    description: Array of token type URIs that the AS supports as requested_token_type in a token exchange request when the IDENTITY_ASSERTION_AUTHZ_GRANT feature is enabled. Contains urn:ietf:params:oauth:token-type:id-jag when ID-JAG is enabled.
+                    items:
+                      type: string
+                    example:
+                      - urn:ietf:params:oauth:token-type:id-jag
+                  authorization_grant_profiles_supported:
+                    type: array
+                    description: Array of grant profile URIs supported by this AS as Resource AS. Contains urn:ietf:params:oauth:grant-profile:id-jag when ID-JAG is enabled.
+                    items:
+                      type: string
+                    example:
+                      - urn:ietf:params:oauth:grant-profile:id-jag
         500:
           $ref: '#/components/responses/InternalServerError'
   /restv1/introspection:
@@ -1632,6 +1747,16 @@ paths:
                   type: string
                   description: An string representation of the expected subject distinguished name of the certificate,
                     which the OAuth client will use in mutual TLS authentication.
+                spiffe_id:
+                  type: string
+                  description: The SPIFFE ID of the client (e.g. spiffe://example.org/my-oauth-client), used by
+                    SPIFFE-based client authentication (draft-ietf-oauth-spiffe-client-auth). May have a trailing
+                    "/*" for path-segment prefix matching against presented SVIDs.
+                spiffe_bundle_endpoint:
+                  type: string
+                  description: URL of the SPIFFE Bundle Endpoint for the client's trust domain, per
+                    draft-ietf-oauth-spiffe-client-auth. Informational only - the authorization server validates
+                    SVIDs against its own admin-configured trust bundle mapping, not this client-supplied value.
                 allow_spontaneous_scopes:
                   type: boolean
                   description: Specifies whether to allow spontaneous scopes for client. The default value is false.
@@ -1772,6 +1897,11 @@ paths:
                 token_exchange_script_dns:
                   type: array
                   description: Token Exchange script dns
+                  items:
+                    type: string
+                id_jag_script_dns:
+                  type: array
+                  description: Identity Assertion (ID-JAG) script dns
                   items:
                     type: string
                 consent_gathering_script_dns:
@@ -2108,6 +2238,16 @@ paths:
                   type: string
                   description: An string representation of the expected subject distinguished name of the certificate,
                     which the OAuth client will use in mutual TLS authentication.
+                spiffe_id:
+                  type: string
+                  description: The SPIFFE ID of the client (e.g. spiffe://example.org/my-oauth-client), used by
+                    SPIFFE-based client authentication (draft-ietf-oauth-spiffe-client-auth). May have a trailing
+                    "/*" for path-segment prefix matching against presented SVIDs.
+                spiffe_bundle_endpoint:
+                  type: string
+                  description: URL of the SPIFFE Bundle Endpoint for the client's trust domain, per
+                    draft-ietf-oauth-spiffe-client-auth. Informational only - the authorization server validates
+                    SVIDs against its own admin-configured trust bundle mapping, not this client-supplied value.
                 allow_spontaneous_scopes:
                   type: boolean
                   description: Specifies whether to allow spontaneous scopes for client. The default value is false.
@@ -2233,6 +2373,11 @@ paths:
                 token_exchange_script_dns:
                   type: array
                   description: Token Exchange script dns
+                  items:
+                    type: string
+                id_jag_script_dns:
+                  type: array
+                  description: Identity Assertion (ID-JAG) script dns
                   items:
                     type: string
                 consent_gathering_script_dns:
@@ -2561,6 +2706,16 @@ paths:
                     type: string
                     description: An string representation of the expected subject distinguished name of the certificate,
                       which the OAuth client will use in mutual TLS authentication.
+                  spiffe_id:
+                    type: string
+                    description: The SPIFFE ID of the client (e.g. spiffe://example.org/my-oauth-client), used by
+                      SPIFFE-based client authentication (draft-ietf-oauth-spiffe-client-auth). May have a trailing
+                      "/*" for path-segment prefix matching against presented SVIDs.
+                  spiffe_bundle_endpoint:
+                    type: string
+                    description: URL of the SPIFFE Bundle Endpoint for the client's trust domain, per
+                      draft-ietf-oauth-spiffe-client-auth. Informational only - the authorization server validates
+                      SVIDs against its own admin-configured trust bundle mapping, not this client-supplied value.
                   allow_spontaneous_scopes:
                     type: boolean
                     description: Specifies whether to allow spontaneous scopes for client. The default value is false.
@@ -3038,7 +3193,7 @@ paths:
                     type: string
                 assertion:
                   type: string
-                  description: Assertion.
+                  description: Assertion JWT. Used with grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer (e.g. ID-JAG bearer grant).
                 refresh_token:
                   type: string
                   description: Refresh token.
@@ -3061,6 +3216,27 @@ paths:
                   type: string
                 rpt:
                   type: string
+                subject_token:
+                  type: string
+                  description: Security token representing the identity of the party on behalf of whom the request is being made. Used with grant_type=urn:ietf:params:oauth:grant-type:token-exchange.
+                subject_token_type:
+                  type: string
+                  description: Identifier for the type of subject_token. For example urn:ietf:params:oauth:token-type:id_token, urn:ietf:params:oauth:token-type:saml2, or urn:ietf:params:oauth:token-type:refresh_token.
+                  example: urn:ietf:params:oauth:token-type:id_token
+                requested_token_type:
+                  type: string
+                  description: Identifier for the type of the requested security token. For example urn:ietf:params:oauth:token-type:id-jag or urn:ietf:params:oauth:token-type:txn-token.
+                  example: urn:ietf:params:oauth:token-type:id-jag
+                audience:
+                  type: string
+                  description: The logical name of the target service or resource where the client intends to use the requested security token. Used with grant_type=urn:ietf:params:oauth:grant-type:token-exchange.
+                actor_token:
+                  type: string
+                  description: Security token representing the actor. Used in delegation scenarios with grant_type=urn:ietf:params:oauth:grant-type:token-exchange.
+                actor_token_type:
+                  type: string
+                  description: Identifier for the type of actor_token.
+                  example: urn:x-oath:params:oauth:token-type:device-secret
       responses:
         200:
           description: OK
@@ -3094,6 +3270,10 @@ paths:
                       type: string
                   id_token:
                     type: string
+                  issued_token_type:
+                    type: string
+                    description: Identifier for the type of the issued token. Present in token exchange responses. For example urn:ietf:params:oauth:token-type:id-jag or urn:ietf:params:oauth:token-type:txn-token.
+                    example: urn:ietf:params:oauth:token-type:id-jag
         400:
           description: Invalid parameters provided to endpoint.
           content:
@@ -4269,14 +4449,11 @@ paths:
       description: Returns Claims about the authenticated End-User.
       operationId: get-userinfo
       parameters:
-        - name: access_token
-          in: query
-          required: true
-          description: OAuth 2.0 Access Token.
-          schema:
-            type: string
         - name: Authorization
           in: header
+          required: true
+          description: 'Bearer access token, e.g. "Authorization: Bearer <access_token>". Sending the access token as a
+            query parameter is not supported.'
           schema:
             type: string
       responses:
@@ -4658,7 +4835,6 @@ paths:
                 - software_roles
                 - grant_types
                 - one_time_use
-                - rotate_ssa
               type: object
               properties:
                 org_id:
@@ -4694,12 +4870,12 @@ paths:
                     - client_credentials
                 one_time_use:
                   type: boolean
-                  description: Defined whether the SSA will be used only once or can be used multiple times.
+                  description: Defined whether the SSA will be used only once or can be used multiple times. Cannot be `true` at the same time as `rotate_ssa`.
                   default: true
                 rotate_ssa:
                   type: boolean
-                  description: TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.
-                  default: true
+                  description: TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. Cannot be `true` at the same time as `one_time_use`.
+                  default: false
                 lifetime:
                   type: integer
                   description: SSA lifetime in seconds.

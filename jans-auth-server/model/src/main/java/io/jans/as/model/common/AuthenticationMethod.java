@@ -62,6 +62,14 @@ public enum AuthenticationMethod {
     SELF_SIGNED_TLS_CLIENT_AUTH("self_signed_tls_client_auth"),
 
     /**
+     * Indicates that client authentication to the authorization server will occur using a SPIFFE
+     * JWT-SVID presented as a {@code client_assertion} of type
+     * {@code urn:ietf:params:oauth:client-assertion-type:jwt-spiffe}, per
+     * draft-ietf-oauth-spiffe-client-auth.
+     */
+    SPIFFE_JWT("spiffe_jwt"),
+
+    /**
      * The Client does not authenticate itself at the Token Endpoint, either because it uses only the Implicit Flow
      * (and so does not use the Token Endpoint) or because it is a Public Client with no Client Secret or other
      * authentication mechanism.

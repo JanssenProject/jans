@@ -167,6 +167,20 @@ public enum SignatureAlgorithm {
     }
 
     /**
+     * Returns the Coordinate Byte Length for the Signature algorithm.
+     *
+     */
+    public int getCoordinateByteLength() {
+      switch (this) {
+          case ES256: case ES256K: return 32;  // P-256 / secp256k1: 256-bit field → 32 bytes
+          case ES384: return 48;               // P-384: 384-bit field → 48 bytes
+          case ES512: return 66;               // P-521: ceil(521/8) = 66 bytes
+          default: throw new IllegalArgumentException(
+              "Coordinate byte length not defined for non-EC algorithm: " + this);
+      }
+    }
+
+    /**
      * Returns a string representation of the object. In this case the parameter name.
      *
      * @return The string representation of the object.

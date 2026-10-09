@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.jans.lock.model.app.audit.AuditActionType;
-import io.jans.lock.model.app.audit.AuditLogEntry;
+import io.jans.core.cedarling.model.AuditActionType;
+import io.jans.core.cedarling.model.AuditLogEntry;
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.config.ConfigurationService;
@@ -92,8 +92,8 @@ public class WellKnownConfiguration extends HttpServlet {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Override
-	public void doGet(@Parameter(hidden = true) HttpServletRequest request, @Parameter(hidden = true) HttpServletResponse response) throws IOException {
-		processRequest(request, response);
+	public void doGet(@Parameter(hidden = true) HttpServletRequest request, @Parameter(hidden = true) HttpServletResponse response) {
+		safeProcessRequest(request, response);
 	}
 
     /**
@@ -104,8 +104,16 @@ public class WellKnownConfiguration extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        processRequest(request, response);
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        safeProcessRequest(request, response);
+    }
+
+    private void safeProcessRequest(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            processRequest(request, response);
+        } catch (IOException ex) {
+            log.debug("I/O error while processing configuration request", ex);
+        }
     }
 
     /**

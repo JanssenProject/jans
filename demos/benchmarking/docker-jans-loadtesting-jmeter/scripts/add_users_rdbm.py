@@ -40,6 +40,11 @@ sql_db = os.environ.get("RDBMS_DB", "jans")
 sql_user = os.environ.get("RDBMS_USER", "jans")
 sql_password = os.environ.get("RDBMS_PASSWORD", "")
 
+user_status = os.environ.get("USER_STATUS", "jansStatus")
+user_objectclass = os.environ.get("USER_OBJECTCLASS", "jansPerson")
+user_parent_dn = os.environ.get("USER_PARENT_DN", "ou=people,o=jans")
+load_users_parallel_job = os.environ.get("LOAD_USERS_PARALLEL_JOB", "-1")
+
 if db_type == 'pgsql':
     qchar = '"'
     schar = '\''
@@ -73,7 +78,7 @@ def connect():
         return conn, cur
     else:
         logger.error(f"Could not connect to backend {db_type}")
-        SystemExit(1)
+        raise SystemExit(1)
 
 
 def split_interval(start, end, num_of_parts):
@@ -94,7 +99,7 @@ def make_secret(password):
     sha.update(salt)
     digest_ = sha.digest()
     b64encoded = base64.b64encode(digest_ + salt).decode('utf-8')
-    encrypted_password = '{{SSHA}}{0}'.format(b64encoded)
+    encrypted_password = '{{SSHA}}{0}'.format(b64encoded)  # // # gitleaks:allow
     return encrypted_password
 
 
@@ -110,18 +115,18 @@ def load_users(interval):
         inum = str(uuid.uuid4()).upper()
         name = user_id_prefix + str(int(start))
         sn = user_id_prefix + '_sn' + str(int(start))
-        dn = 'inum={},ou=people,o=jans'.format(inum)
+        dn = 'inum={},{}'.format(inum, user_parent_dn)
         username = name
         cn = name + ' ' + sn
         attributes = (
             ('doc_id', inum),
             ('dn', dn),
-            ('objectClass', 'jansPerson'),
+            ('objectClass', user_objectclass),
             ('cn', cn),
             ('sn', sn),
             ('uid', username),
             ('inum', inum),
-            ('jansStatus', 'active'),
+            (user_status, 'active'),
             ('userPassword', make_secret('topsecret' + str(int(start)))),
             ('mail', username + '@jans.io'),
             ('displayName', cn),
@@ -130,8 +135,9 @@ def load_users(interval):
 
         sql_attribs = ['{0}{1}{0}'.format(qchar, a[0]) for a in attributes]
         sql_vals = ['{0}{1}{0}'.format(schar, a[1]) for a in attributes]
-        sql_cmd = 'INSERT INTO {0}jansPerson{0} ({1}) values ({2})'.format(qchar, ','.join(sql_attribs),
-                                                                           ','.join(sql_vals))
+        sql_cmd = 'INSERT INTO {0}{1}{0} ({2}) values ({3})'.format(
+            qchar, user_objectclass, ','.join(sql_attribs), ','.join(sql_vals)
+        )
         sql_cmds.append(sql_cmd)
         start += 1
     conn, cur = connect()
@@ -140,7 +146,7 @@ def load_users(interval):
             cur.execute(cmd)
             conn.commit()
         except Exception as e:
-            logger.error(f"{cmd} did not execute!")
+            logger.error("INSERT statement did not execute!")
             logger.error(e)
     conn.close()
     logger.info("-------------------")
@@ -152,7 +158,7 @@ def load_users(interval):
 def main():
     user_numbers_intervals = split_interval(user_number_starting_point, user_number_ending_point,
                                             user_split_parallel_threads)
-    results = Parallel(n_jobs=-1, backend="multiprocessing")(
+    Parallel(n_jobs=load_users_parallel_job, backend="multiprocessing")(
         map(delayed(load_users), user_numbers_intervals))
 
 

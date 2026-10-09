@@ -3,17 +3,12 @@ import sys
 import time
 import zipfile
 import inspect
-import base64
 import shutil
-import re
-import requests
-import zipfile
 import site
 
 from pathlib import Path
 
 from setup_app import paths
-from setup_app import static
 from setup_app.utils import base
 from setup_app.static import InstallTypes, AppType, InstallOption
 from setup_app.config import Config
@@ -34,11 +29,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
         try:
             if not Config.installed_instance:
                 txt += 'hostname'.ljust(name_sep) + Config.hostname.rjust(state_sep) + "\n"
-                txt += 'orgName'.ljust(name_sep) + Config.orgName.rjust(state_sep) + "\n"
+                txt += 'org_name'.ljust(name_sep) + Config.org_name.rjust(state_sep) + "\n"
                 txt += 'os'.ljust(name_sep) + Config.os_type.rjust(state_sep) + "\n"
                 txt += 'city'.ljust(name_sep) + Config.city.rjust(state_sep) + "\n"
                 txt += 'state'.ljust(name_sep) + Config.state.rjust(state_sep) + "\n"
-                txt += 'countryCode'.ljust(name_sep) + Config.countryCode.rjust(state_sep) + "\n"
+                txt += 'country_code'.ljust(name_sep) + Config.country_code.rjust(state_sep) + "\n"
                 txt += 'Applications max ram (MB)'.ljust(name_sep) + str(Config.application_max_ram).rjust(state_sep) + "\n"
 
                 bc = []
@@ -106,7 +101,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         #Download jans-auth-client-jar-with-dependencies
         if not os.path.exists(Config.non_setup_properties['jans_auth_client_jar_fn']):
-            jans_auth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['jans_version'])
+            jans_auth_client_jar_url = base.determine_jans_artifact_url('maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['jans_version'])
             self.logIt("Downloading {}".format(os.path.basename(jans_auth_client_jar_url)))
             base.download(jans_auth_client_jar_url, Config.non_setup_properties['jans_auth_client_jar_fn'])
 
@@ -133,8 +128,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
         self.customiseSystem()
-        if not base.snap:
-            self.createGroup('jans')
+        self.createGroup('jans')
         self.makeFolders()
 
         # set systemd start timeout to 5 mins
@@ -145,56 +139,55 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         systemd_conf = []
 
-        for l in open(systemd_conf_fn):
-            tl = l.strip('#').strip()
-            if tl.startswith('DefaultTimeoutStartSec'):
-                systemd_conf.append('DefaultTimeoutStartSec=300s\n')
-            else:
-                systemd_conf.append(l)
+        with open(systemd_conf_fn) as f:
+            for l in f:
+                tl = l.strip('#').strip()
+                if tl.startswith('DefaultTimeoutStartSec'):
+                    systemd_conf.append('DefaultTimeoutStartSec=300s\n')
+                else:
+                    systemd_conf.append(l)
 
         self.writeFile(systemd_conf_fn, ''.join(systemd_conf))
 
 
     def makeFolders(self):
         # Create these folder on all instances
-        for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
-                        Config.jansOptPythonFolder, Config.configFolder, Config.certFolder,
+        for folder in (Config.jansOptFolder, Config.jans_opt_bin_folder, Config.jans_opt_system_folder,
+                        Config.jans_opt_python_folder, Config.config_folder, Config.certFolder,
                         Config.output_dir, Config.os_default, os.path.join(Config.jansOptFolder, 'scripts')):
 
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
 
-        if not base.snap:
-            self.run([paths.cmd_chown, '-R', 'root:jans', Config.certFolder])
-            self.run([paths.cmd_chmod, '551', Config.certFolder])
-            self.run([paths.cmd_chmod, 'ga+w', "/tmp"]) # Allow write to /tmp
+        self.run([paths.cmd_chown, '-R', 'root:jans', Config.certFolder])
+        self.run([paths.cmd_chmod, '551', Config.certFolder])
 
-        self.chown(Config.jansOptBinFolder, user=Config.root_user, group=Config.jetty_user)
+        self.chown(Config.jans_opt_bin_folder, user=Config.root_user, group=Config.jetty_user)
 
 
     def customiseSystem(self):
-        if not base.snap:
-            if Config.os_initdaemon == 'init':
-                system_profile_update = Config.system_profile_update_init
-            else:
-                system_profile_update = Config.system_profile_update_systemd
 
-            # Render customized part
-            self.renderTemplate(system_profile_update)
-            renderedSystemProfile = self.readFile(system_profile_update)
+        if Config.os_initdaemon == 'init':
+            system_profile_update = Config.system_profile_update_init
+        else:
+            system_profile_update = Config.system_profile_update_systemd
 
-            # Read source file
-            currentSystemProfile = self.readFile(Config.sysemProfile)
+        # Render customized part
+        self.renderTemplate(system_profile_update)
+        renderedSystemProfile = self.readFile(system_profile_update)
 
-            if not 'Added by Jans' in currentSystemProfile:
+        # Read source file
+        currentSystemProfile = self.readFile(Config.sysemProfile)
 
-                # Write merged file
-                self.backupFile(Config.sysemProfile)
-                resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
-                self.writeFile(Config.sysemProfile, resultSystemProfile)
+        if not 'Added by Jans' in currentSystemProfile:
 
-                # Fix new file permissions
-                self.run([paths.cmd_chmod, '644', Config.sysemProfile])
+            # Write merged file
+            self.backupFile(Config.sysemProfile)
+            resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
+            self.writeFile(Config.sysemProfile, resultSystemProfile)
+
+            # Fix new file permissions
+            self.run([paths.cmd_chmod, '644', Config.sysemProfile])
 
     def make_salt(self):
         if base.argsp.encode_salt:
@@ -209,7 +202,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         try:
             salt_text = 'encodeSalt = {}'.format(Config.encode_salt)
             self.writeFile(Config.salt_fn, salt_text)
-        except:
+        except Exception:
             self.logIt("Error writing salt", True, True)
 
     def render_templates(self, templates=None):
@@ -221,7 +214,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         for fullPath in templates:
             try:
                 self.renderTemplate(fullPath)
-            except:
+            except Exception:
                 self.logIt("Error writing template %s" % fullPath, True)
 
 
@@ -230,15 +223,15 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         try:
             self.renderTemplate(Config.ldif_configuration)
-        except:
+        except Exception:
             self.logIt("Error writing template", True)
 
 
     def render_test_templates(self):
         self.logIt("Rendering test templates")
 
-        testTepmplatesFolder = os.path.join(self.templateFolder, 'test')
-        self.render_templates_folder(testTepmplatesFolder)
+        test_templates_folder = os.path.join(Config.template_folder, 'test')
+        self.render_templates_folder(test_templates_folder)
 
     def setup_init_scripts(self):
         self.logIt("Setting up init scripts")
@@ -248,63 +241,51 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     script_name = os.path.split(init_file)[-1]
                     self.copyFile(init_file, "/etc/init.d")
                     self.run([paths.cmd_chmod, "755", "/etc/init.d/%s" % script_name])
-                except:
+                except Exception:
                     self.logIt("Error copying script file %s to /etc/init.d" % init_file)
 
 
     def copy_scripts(self):
         self.logIt("Copying script files")
 
-        for script in Config.jansScriptFiles:
-            self.copyFile(script, Config.jansOptBinFolder)
+        for script in Config.jans_script_files:
+            self.copyFile(script, Config.jans_opt_bin_folder)
             self.run([paths.cmd_chmod, '+x', script])
 
         # scripts that can be executed by user jetty
-        jetty_user_scripts = (Config.jansScriptFiles[2], Config.jansScriptFiles[3])
+        jetty_user_scripts = (Config.jans_script_files[2], Config.jans_script_files[3])
         for script in jetty_user_scripts:
-            script_fn = os.path.join(Config.jansOptBinFolder, os.path.basename(script))
+            script_fn = os.path.join(Config.jans_opt_bin_folder, os.path.basename(script))
             self.chown(script_fn, user=Config.root_user, group=Config.jetty_user)
             self.run([paths.cmd_chmod, '0750', script_fn])
 
         self.logIt("Rendering encode.py")
-        encode_script = self.readFile(os.path.join(Config.templateFolder, 'encode.py'))
-        encode_script = encode_script % self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
-        self.writeFile(os.path.join(Config.jansOptBinFolder, 'encode.py'), encode_script)
-        self.run(['cp', '-f', os.path.join(Config.install_dir, 'setup_app/pylib/pyDes.py'), Config.jansOptBinFolder])
+        encode_script = self.readFile(os.path.join(Config.template_folder, 'encode.py'))
+        encode_script = encode_script % self.merge_dicts(Config.__dict__, Config.template_rendering_dict)
+        self.writeFile(os.path.join(Config.jans_opt_bin_folder, 'encode.py'), encode_script)
+        self.run(['cp', '-f', os.path.join(Config.install_dir, 'setup_app/pylib/pyDes.py'), Config.jans_opt_bin_folder])
 
         self.logIt("Error rendering encode script", True)
 
-        super_gluu_lisence_renewer_fn = os.path.join(Config.staticFolder, 'scripts', 'super_gluu_license_renewer.py')
+        super_gluu_lisence_renewer_fn = os.path.join(Config.static_folder, 'scripts', 'super_gluu_license_renewer.py')
 
-        if base.snap:
-            target_fn = os.path.join(Config.jansOptBinFolder, 'super_gluu_lisence_renewer.py')
-            self.run(['cp', '-f', super_gluu_lisence_renewer_fn, target_fn])
 
-        else:
-            target_fn = '/etc/cron.daily/super_gluu_lisence_renewer'
-            self.run(['cp', '-f', super_gluu_lisence_renewer_fn, target_fn])
-            self.run([paths.cmd_chown, 'root:root', target_fn])
-            self.run([paths.cmd_chmod, '+x', target_fn])
+        target_fn = '/etc/cron.daily/super_gluu_lisence_renewer'
+        self.run(['cp', '-f', super_gluu_lisence_renewer_fn, target_fn])
+        self.run([paths.cmd_chown, 'root:root', target_fn])
+        self.run([paths.cmd_chmod, '+x', target_fn])
 
-            print_version_s = 'printVersion.py'
-            show_version_s = 'show_version.py'
-            print_version_scr_fn = os.path.join(Config.install_dir, f'setup_app/utils/{print_version_s}')
-            self.run(['cp', '-f', print_version_scr_fn , Config.jansOptFolder])
-            target_fn = os.path.join(Config.jansOptFolder, print_version_s)
-            self.run([paths.cmd_ln, '-s', target_fn, os.path.join(Config.jansOptBinFolder, show_version_s)])
-            self.chown(target_fn, Config.jetty_user, Config.root_user)
-            self.run([paths.cmd_chmod, '0550', target_fn])
+        print_version_s = 'printVersion.py'
+        show_version_s = 'show_version.py'
+        print_version_scr_fn = os.path.join(Config.install_dir, f'setup_app/utils/{print_version_s}')
+        self.run(['cp', '-f', print_version_scr_fn , Config.jansOptFolder])
+        target_fn = os.path.join(Config.jansOptFolder, print_version_s)
+        self.run([paths.cmd_ln, '-s', target_fn, os.path.join(Config.jans_opt_bin_folder, show_version_s)])
+        self.chown(target_fn, Config.jetty_user, Config.root_user)
+        self.run([paths.cmd_chmod, '0550', target_fn])
 
-        for scr in Path(Config.jansOptBinFolder).glob('*'):
+        for scr in Path(Config.jans_opt_bin_folder).glob('*'):
             scr_path = scr.as_posix()
-            if base.snap and scr_path.endswith('.py'):
-                scr_content = self.readFile(scr_path).splitlines()
-                first_line = '#!' + paths.cmd_py3
-                if scr_content[0].startswith('#!'):
-                    scr_content[0] = first_line
-                else:
-                    scr_content.insert(0, first_line)
-                self.writeFile(scr_path, '\n'.join(scr_content), backup=False)
             if scr.name in [show_version_s] + [os.path.basename(_) for _ in jetty_user_scripts]:
                 continue
             self.run([paths.cmd_chmod, '700', scr_path])
@@ -313,8 +294,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
         self.run([
                 paths.cmd_ln, '-s',
                 os.path.join(
-                    Config.jansOptBinFolder,
-                    os.path.basename(Config.jansScriptFiles[1])
+                    Config.jans_opt_bin_folder,
+                    os.path.basename(Config.jans_script_files[1])
                 ),
                 '/usr/sbin'
                 ])
@@ -360,7 +341,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.appendLine(f'{apache_user}     hard nofile     262144', conf_fn)
             self.appendLine('jetty      soft nofile     131072', conf_fn)
             self.appendLine('jetty      hard nofile     262144', conf_fn)
-        except:
+        except Exception:
             self.logIt("Could not set limits.")
 
 
@@ -379,7 +360,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         os.makedirs(dest_dir)
                     self.backupFile(output_fn, dest_fn)
                     shutil.copyfile(output_fn, dest_fn)
-                except:
+                except Exception:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
 
 
@@ -473,53 +454,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         self.run_service_command('start', 'rsyslog')
         self.run_service_command('enable', 'rsyslog')
 
-
-        if base.snap:
-            #write post-install.py script
-            self.logIt("Writing snap-post-setup.py", pbar='post-setup')
-            post_setup_script = self.readFile(os.path.join(Config.templateFolder, 'snap-post-setup.py'))
-
-            for key, val in (('{{SNAP_NAME}}', os.environ['SNAP_NAME']),
-                             ('{{SNAP_PY3}}', paths.cmd_py3),
-                             ('{{SNAP}}', base.snap),
-                             ('{{SNAP_COMMON}}', base.snap_common)
-                             ):
-
-                post_setup_script = post_setup_script.replace(key, val)
-
-            post_setup_script_fn = os.path.join(Config.install_dir, 'snap-post-setup.py')
-            with open(post_setup_script_fn, 'w') as w:
-                w.write(post_setup_script)
-            self.run([paths.cmd_chmod, '+x', post_setup_script_fn])
-
-            if not Config.installed_instance:
-                Config.post_messages.insert(0, "Please execute:\nsudo " + post_setup_script_fn)
-
-            self.logIt("Setting permissions", pbar='post-setup')
-
-            for crt_fn in Path(os.path.join(base.snap_common, 'etc/certs')).glob('*'):
-                self.run([paths.cmd_chmod, '0600', crt_fn.as_posix()])
-
-            for spath in ('jans', 'etc/jans/conf'):
-                for gpath in Path(os.path.join(base.snap_common, spath)).rglob('*'):
-                    if ('node_modules' in gpath.as_posix()) or ('jans/bin' in gpath.as_posix()) or ('jetty/temp' in gpath.as_posix()):
-                        continue
-                    chm_mode = '0755' if os.path.isdir(gpath.as_posix()) else '0600'
-                    self.run([paths.cmd_chmod, chm_mode, gpath.as_posix()])
-
-            self.add_yacron_job(
-                    command = os.path.join(Config.jansOptBinFolder, 'super_gluu_lisence_renewer.py'), 
-                    schedule = '0 2 * * *', # everyday at 2 am
-                    name='super-gluu-license-renewer', 
-                    args={'captureStderr': True}
-                    )
-
-            self.restart('yacron')
-
-            self.writeFile(os.path.join(base.snap_common, 'etc/hosts.jans'), Config.ip + '\t' + Config.hostname)
-
-        else:
-            self.secure_files()
+        self.secure_files()
 
         #enable scripts
         self.enable_scripts(base.argsp.enable_script)
@@ -658,10 +593,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
         for i, service in enumerate(service_listr):
             order_var_str = 'order_{}_service'.format(service[0].replace('-','_'))
             if service[0] == 'jans-auth':
-                Config.templateRenderingDict[order_var_str] = Config.backend_service
+                Config.template_rendering_dict[order_var_str] = Config.backend_service
                 continue
             for sservice in (service_listr[i+1:]):
                 if Config.get(sservice[1]):
-                    Config.templateRenderingDict[order_var_str] = sservice[0]+'.service'
+                    Config.template_rendering_dict[order_var_str] = sservice[0]+'.service'
                     break
 

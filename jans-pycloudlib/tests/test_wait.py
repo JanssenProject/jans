@@ -1,5 +1,4 @@
 import json
-from dataclasses import dataclass
 from unittest.mock import patch
 
 import pytest

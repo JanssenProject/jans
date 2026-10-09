@@ -25,6 +25,7 @@
 use std::fs;
 #[cfg(not(target_arch = "wasm32"))]
 use std::io::Read;
+use std::io::Write;
 
 use serde_json::json;
 #[cfg(not(target_arch = "wasm32"))]
@@ -35,7 +36,7 @@ use zip::read::ZipArchive;
 
 use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
 
-use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
+use crate::tests::utils::cedarling_util::{get_cedarling_with_callback, get_config};
 use crate::tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request};
 use crate::{
     BootstrapConfig, Cedarling, DataStoreConfig, EntityData, PolicyStoreConfig, PolicyStoreSource,
@@ -231,6 +232,7 @@ fn create_jwt_cedarling_config_with_loader(
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_store_source,
+            ..Default::default()
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -242,11 +244,14 @@ fn create_jwt_cedarling_config_with_loader(
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
+            strict_schema_validation: true,
+            ..Default::default()
         },
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: crate::HttpClientConfig::default(),
     }
 }
 
@@ -259,46 +264,35 @@ fn create_jwt_trusted_issuer_json(oidc_endpoint: &str) -> String {
         "configuration_endpoint": "{oidc_endpoint}",
         "token_metadata": {{
             "access_token": {{
-                "entity_type_name": "Jans::Access_token",
-                "principal_mapping": ["Jans::Workload"]
+                "entity_type_name": "Jans::Access_token"
             }},
             "id_token": {{
                 "entity_type_name": "Jans::Id_token"
             }},
             "userinfo_token": {{
-                "entity_type_name": "Jans::Userinfo_token",
-                "user_id": "sub",
-                "role_mapping": "role"
+                "entity_type_name": "Jans::Userinfo_token"
             }}
         }}
     }}"#
     )
 }
 
-/// Creates a trusted issuer JSON with a custom issuer ID.
-fn create_jwt_trusted_issuer_json_with_id(issuer_id: &str, oidc_endpoint: &str) -> String {
-    format!(
-        r#"{{
-        "id": "{issuer_id}",
+/// Creates a trusted issuer JSON with a custom issuer ID and token metadata.
+fn create_jwt_trusted_issuer_json_with_id(
+    issuer_id: &str,
+    oidc_endpoint: &str,
+    token_metadata: &str,
+) -> String {
+    let token_metadata: serde_json::Value =
+        serde_json::from_str(token_metadata).expect("token_metadata must be valid JSON");
+    let value = json!({
+        "id": issuer_id,
         "name": "Jans",
         "description": "Test issuer for JWT validation",
-        "configuration_endpoint": "{oidc_endpoint}",
-        "token_metadata": {{
-            "access_token": {{
-                "entity_type_name": "Jans::Access_token",
-                "principal_mapping": ["Jans::Workload"]
-            }},
-            "id_token": {{
-                "entity_type_name": "Jans::Id_token"
-            }},
-            "userinfo_token": {{
-                "entity_type_name": "Jans::Userinfo_token",
-                "user_id": "sub",
-                "role_mapping": "role"
-            }}
-        }}
-    }}"#
-    )
+        "configuration_endpoint": oidc_endpoint,
+        "token_metadata": token_metadata
+    });
+    serde_json::to_string(&value).expect("fixture serialization should not fail")
 }
 
 // Schema that works with JWT-based authorization
@@ -479,6 +473,144 @@ permit(
     assert!(failed_ids.is_empty());
 }
 
+/// Test that `Cedarling::policy_store_id()` returns the store ID for
+/// directory and `.cjar` sources.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_directory_and_cjar() {
+    let builder = create_authz_policy_store_builder();
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+    let from_dir = get_cedarling_from_directory(temp_dir.path().to_path_buf()).await;
+    assert_eq!(
+        from_dir.policy_store_id(),
+        Some("a1b2c3d4e5f6a7b8".to_string()),
+        "directory store should report builder ID"
+    );
+
+    let cjar_dir = TempDir::new().expect("Failed to create temp directory");
+    let cjar_path = cjar_dir.path().join("test_policy_store.cjar");
+    fs::write(&cjar_path, &archive).expect("Failed to write archive file");
+    let from_cjar = get_cedarling_from_cjar_file(cjar_path).await;
+    assert_eq!(
+        from_cjar.policy_store_id(),
+        Some("a1b2c3d4e5f6a7b8".to_string()),
+        ".cjar store should report builder ID"
+    );
+}
+
+/// Test that a legacy YAML store reports the `policy_stores` map key.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_legacy_yaml() {
+    use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
+    let yaml = r#"
+cedar_version: "4.0.0"
+policy_stores:
+  legacy-test-key:
+    name: Test Store
+    policies: {}
+"#;
+    let cedarling = get_cedarling_with_callback(PolicyStoreSource::Yaml(yaml.to_string()), |cfg| {
+        cfg.authorization_config.strict_schema_validation = false;
+    })
+    .await;
+    assert_eq!(
+        cedarling.policy_store_id(),
+        Some("legacy-test-key".to_string()),
+        "legacy store should report map key"
+    );
+}
+
+/// Test that a new-format store without an ID reports `None`.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_missing_returns_none() {
+    let mut builder = create_authz_policy_store_builder();
+    builder.extra_files.insert(
+        "metadata.json".to_string(),
+        r#"{"cedar_version":"4.4.0","policy_store":{"name":"Integration Test Policy Store","version":"1.0.0"}}"#.to_string(),
+    );
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+    let cedarling = get_cedarling_from_directory(temp_dir.path().to_path_buf()).await;
+    assert_eq!(
+        cedarling.policy_store_id(),
+        None,
+        "store without metadata id should report None"
+    );
+}
+
+/// Test that hot-swapping `Authz` updates the reported ID.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_hot_reload_updates() {
+    let builder_a = create_authz_policy_store_builder();
+    let archive_a = builder_a
+        .build_archive()
+        .expect("Failed to build test archive");
+    let dir_a = extract_archive_to_temp_dir(&archive_a);
+    let a = get_cedarling_from_directory(dir_a.path().to_path_buf()).await;
+
+    let mut builder_b = create_authz_policy_store_builder();
+    builder_b.id = "b1b2c3d4e5f6a7b8".to_string();
+    let archive_b = builder_b
+        .build_archive()
+        .expect("Failed to build test archive");
+    let dir_b = extract_archive_to_temp_dir(&archive_b);
+    let b = get_cedarling_from_directory(dir_b.path().to_path_buf()).await;
+
+    assert_eq!(
+        a.policy_store_id(),
+        Some("a1b2c3d4e5f6a7b8".to_string()),
+        "first store should report its own ID"
+    );
+    a.authz.store(b.authz.load_full());
+    assert_eq!(
+        a.policy_store_id(),
+        Some("b1b2c3d4e5f6a7b8".to_string()),
+        "after swap first should report second ID"
+    );
+}
+
+/// Test that a malformed new-format ID fails to load.
+/// Validator unit tests already cover `InvalidPolicyStoreId` at the
+/// `MetadataValidator` level; this covers the `Cedarling::new` surface.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_malformed_fails_to_load() {
+    use crate::InitCedarlingError;
+    use crate::common::policy_store::errors::ValidationError;
+    use crate::init::policy_store::PolicyStoreLoadError;
+    use crate::init::service_config::ServiceConfigError;
+    use crate::tests::utils::cedarling_util::get_config;
+
+    let mut builder = create_authz_policy_store_builder();
+    builder.id = "not-hex!".to_string();
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+    let config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
+    let Err(err) = Cedarling::new(&config).await else {
+        panic!("malformed ID should fail to load")
+    };
+    assert!(
+        matches!(
+            err,
+            InitCedarlingError::ServiceConfig(ServiceConfigError::PolicyStore(
+                PolicyStoreLoadError::Validation(ValidationError::InvalidPolicyStoreId { .. })
+            ))
+        ),
+        "expected InvalidPolicyStoreId, got: {err:?}"
+    );
+}
+
 /// Test that the `TrustedIssuerLoadingInfo` trait correctly tracks failed issuers on `Cedarling`.
 #[test]
 #[cfg(not(target_arch = "wasm32"))]
@@ -492,8 +624,16 @@ async fn test_trusted_issuer_loading_info_failed_issuer() {
         .expect("Failed to create working mock server");
     let working_issuer_url = working_mock_server.issuer();
     let working_oidc_endpoint = format!("{working_issuer_url}/.well-known/openid-configuration");
-    let working_issuer_json =
-        create_jwt_trusted_issuer_json_with_id("working_issuer", &working_oidc_endpoint);
+    // Disjoint entity types per issuer: the global-uniqueness invariant rejects
+    // two issuers claiming the same Cedar entity type.
+    let working_issuer_json = create_jwt_trusted_issuer_json_with_id(
+        "working_issuer",
+        &working_oidc_endpoint,
+        r#"{
+            "access_token": { "entity_type_name": "Jans::Access_token" },
+            "id_token": { "entity_type_name": "Jans::Id_token" }
+        }"#,
+    );
 
     // Create a failing mock server that returns 500 for OIDC config
     let failing_mock_server = MockServer::new_with_failing_oidc()
@@ -501,8 +641,13 @@ async fn test_trusted_issuer_loading_info_failed_issuer() {
         .expect("Failed to create failing mock server");
     let failing_issuer_url = failing_mock_server.issuer();
     let failing_oidc_endpoint = format!("{failing_issuer_url}/.well-known/openid-configuration");
-    let failing_issuer_json =
-        create_jwt_trusted_issuer_json_with_id("failing_issuer", &failing_oidc_endpoint);
+    let failing_issuer_json = create_jwt_trusted_issuer_json_with_id(
+        "failing_issuer",
+        &failing_oidc_endpoint,
+        r#"{
+            "userinfo_token": { "entity_type_name": "Jans::Userinfo_token" }
+        }"#,
+    );
 
     // Build the policy store with both working and failing trusted issuers
     let builder = PolicyStoreTestBuilder::new("a1b2c3d4e5f6a7b8")
@@ -809,9 +954,16 @@ permit(
     let archive_path = temp_dir.path().join("multi_template.cjar");
     fs::write(&archive_path, &archive).expect("Failed to write archive file");
 
-    let loaded = crate::load_policy_store(&crate::PolicyStoreConfig {
-        source: crate::PolicyStoreSource::CjarFile(archive_path),
-    })
+    let http_client = crate::http::HttpClient::new(crate::HttpClientConfig::default())
+        .expect("Should create HttpClient");
+    let loaded = crate::init::policy_store::load_policy_store(
+        &crate::PolicyStoreConfig {
+            source: crate::PolicyStoreSource::CjarFile(archive_path),
+            ..Default::default()
+        },
+        &http_client,
+        true,
+    )
     .await
     .expect("Loading .cjar with a multi-template file should succeed");
 
@@ -1208,8 +1360,53 @@ async fn test_cjar_url_handles_http_error() {
 ///
 /// This tests the `load_policy_store_archive_bytes` function which is the
 /// underlying mechanism used by `CjarUrl` and is WASM-compatible.
+/// `CEDARLING_POLICY_STORE_MAX_FILE_SIZE` must reach the archive loader, not
+/// just the `ArchiveVfs::from_buffer` call site. A store that loads fine at the
+/// default cap must be rejected once the configured cap drops below it.
+#[test]
+async fn test_configured_max_file_size_reaches_archive_loader() {
+    let archive_bytes = create_authz_policy_store_builder()
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let http_client = crate::http::HttpClient::new(crate::HttpClientConfig::default())
+        .expect("Should create HttpClient");
+
+    crate::init::policy_store::load_policy_store(
+        &crate::PolicyStoreConfig {
+            source: PolicyStoreSource::ArchiveBytes(archive_bytes.clone()),
+            ..Default::default()
+        },
+        &http_client,
+        true,
+    )
+    .await
+    .expect("The archive must load at the default 10 MB cap");
+
+    // `LoadedPolicyStore` isn't `Debug`, so match rather than `expect_err`.
+    let result = crate::init::policy_store::load_policy_store(
+        &crate::PolicyStoreConfig {
+            source: PolicyStoreSource::ArchiveBytes(archive_bytes),
+            max_file_size: 16,
+            ..Default::default()
+        },
+        &http_client,
+        true,
+    )
+    .await;
+
+    match result {
+        Ok(_) => panic!("The same archive must be rejected once the cap drops to 16 bytes"),
+        Err(err) => assert!(
+            err.to_string().contains("maximum decompressed entry size"),
+            "error should name the entry-size cap, got: {err}"
+        ),
+    }
+}
+
 #[test]
 async fn test_load_policy_store_archive_bytes_directly() {
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
     use crate::common::policy_store::loader::load_policy_store_archive_bytes;
 
     // Build archive bytes
@@ -1219,7 +1416,7 @@ async fn test_load_policy_store_archive_bytes_directly() {
         .expect("Failed to build test archive");
 
     // Load directly using the bytes loader
-    let loaded = load_policy_store_archive_bytes(&archive_bytes)
+    let loaded = load_policy_store_archive_bytes(&archive_bytes, true, ArchiveLimits::default())
         .expect("Should load policy store from bytes");
 
     // Verify the loaded policy store
@@ -1252,11 +1449,12 @@ async fn test_load_policy_store_archive_bytes_directly() {
 /// Test that invalid archive bytes are rejected.
 #[test]
 async fn test_load_policy_store_archive_bytes_invalid() {
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
     use crate::common::policy_store::loader::load_policy_store_archive_bytes;
 
     // Try to load invalid bytes
     let invalid_bytes = vec![0x00, 0x01, 0x02, 0x03];
-    let err = load_policy_store_archive_bytes(&invalid_bytes)
+    let err = load_policy_store_archive_bytes(&invalid_bytes, true, ArchiveLimits::default())
         .expect_err("Should fail to load invalid archive bytes");
 
     // Verify the error is an Archive error (invalid zip format)
@@ -1267,4 +1465,167 @@ async fn test_load_policy_store_archive_bytes_invalid() {
         ),
         "Expected Archive error for invalid bytes, got: {err:?}"
     );
+}
+
+#[test]
+async fn test_load_from_uri_detects_archive() {
+    use mockito::Server;
+
+    let builder = create_authz_policy_store_builder();
+    let archive_bytes = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let mut server = Server::new_async().await;
+    let mock = server
+        .mock("GET", "/policy-store")
+        .with_status(200)
+        .with_header("content-type", "application/octet-stream")
+        .with_body(archive_bytes)
+        .create_async()
+        .await;
+
+    let uri = format!("{}/policy-store", server.url());
+    let cedarling = get_cedarling_with_callback(PolicyStoreSource::Uri(uri), |_| {}).await;
+
+    mock.assert_async().await;
+
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        Some(
+            create_test_principal(
+                "TestApp::User",
+                "user1",
+                json!({"name": "Test User", "user_type": "admin"}),
+            )
+            .expect("Failed to create principal"),
+        ),
+        create_test_principal(
+            "TestApp::Resource",
+            "resource1",
+            json!({"name": "Test Resource"}),
+        )
+        .expect("Failed to create resource"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("Authorization should succeed");
+
+    assert!(
+        result.decision,
+        "Read action should be allowed when loading archive via Uri"
+    );
+}
+
+// ============================================================================
+// No-Schema / Strict Validation Tests
+// ============================================================================
+
+/// Helper: build a `.cjar` archive without a schema file (only metadata + policies).
+fn build_archive_without_schema(id: &str, name: &str) -> Vec<u8> {
+    // ID must be valid hex 8-64 chars
+    assert!(
+        id.len() >= 8 && id.len() <= 64 && id.chars().all(|c| c.is_ascii_hexdigit()),
+        "test archive id must be hex 8-64 chars, got: {id}"
+    );
+    let mut buf = Vec::new();
+    {
+        let cursor = std::io::Cursor::new(&mut buf);
+        let mut zip = zip::ZipWriter::new(cursor);
+        let opts = <zip::write::FileOptions<zip::write::ExtendedFileOptions>>::default()
+            .compression_method(zip::CompressionMethod::Deflated);
+
+        zip.start_file("metadata.json", opts.clone()).unwrap();
+        write!(
+            zip,
+            r#"{{"cedar_version":"4.4.0","policy_store":{{"id":"{id}","name":"{name}","version":"1.0.0"}}}}"#
+        )
+        .unwrap();
+
+        zip.start_file("policies/allow.cedar", opts).unwrap();
+        zip.write_all(b"@id(\"allow-all\")\npermit(principal, action, resource);")
+            .unwrap();
+
+        zip.finish().unwrap();
+    }
+    buf
+}
+
+/// Directory without a schema + strict=false should succeed (schemaless mode).
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_load_directory_without_schema_strict_false_succeeds() {
+    let archive = build_archive_without_schema("deadbeef12345678", "No Schema Dir");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
+        |config| {
+            config.authorization_config.strict_schema_validation = false;
+        },
+    )
+    .await;
+
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        Some(
+            create_test_principal("TestApp::User", "user1", json!({"name": "Test User"}))
+                .expect("principal should build"),
+        ),
+        create_test_principal("TestApp::Resource", "res1", json!({}))
+            .expect("resource should build"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("authorization should succeed without schema");
+    assert!(result.decision, "allow-all should permit");
+}
+
+/// Directory without a schema + strict=true should fail init.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_load_directory_without_schema_strict_true_fails() {
+    let archive = build_archive_without_schema("deadbeef87654321", "No Schema Dir Strict");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+
+    let mut config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
+    config.authorization_config.strict_schema_validation = true;
+
+    let result = Cedarling::new(&config).await;
+    assert!(
+        result.is_err(),
+        "Expected init to fail: strict_schema_validation=true but policy store has no schema (directory)"
+    );
+}
+
+/// Archive without a schema + strict=false should succeed (schemaless mode).
+#[test]
+async fn test_archive_without_schema_strict_false_succeeds() {
+    let archive_bytes = build_archive_without_schema("deadbeefaaaabbbb", "No Schema Archive");
+
+    let cedarling =
+        get_cedarling_with_callback(PolicyStoreSource::ArchiveBytes(archive_bytes), |config| {
+            config.authorization_config.strict_schema_validation = false;
+        })
+        .await;
+
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        Some(
+            create_test_principal("TestApp::User", "user1", json!({"name": "Test User"}))
+                .expect("principal should build"),
+        ),
+        create_test_principal("TestApp::Resource", "res1", json!({}))
+            .expect("resource should build"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("authorization should succeed without schema");
+    assert!(result.decision, "allow-all should permit");
 }

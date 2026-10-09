@@ -1,0 +1,122 @@
+# github-actions-example-composite.yml — GitHub Actions workflow using the
+# reusable tf-jwt-authz composite action for Cedarling-OPA JWT authorization.
+#
+# This is the simplified version of github-actions-example.yml.
+# Instead of manually fetching the OIDC token and calling tf_authz_jwt.sh,
+# each Terraform step delegates to the composite action at
+# jans-cedarling/cedarling_opa/demo/terraform-jwt/.github/actions/tf-jwt-authz,
+# which encapsulates:
+#   1. Fetching the GitHub OIDC token
+#   2. Querying the Cedarling-OPA server
+#   3. Running Terraform only when the Cedar policies allow it
+#
+# Prerequisites:
+#   1. An opa-cedarling server reachable from the runner (self-hosted or via a
+#      sidecar/service container). Point OPA_URL at it.
+#   2. The terraform-jwt demo policy store loaded into the server.
+#   3. `permissions: id-token: write` on each job — GitHub sets
+#      ACTIONS_ID_TOKEN_REQUEST_URL and ACTIONS_ID_TOKEN_REQUEST_TOKEN
+#      automatically once this permission is granted.
+#
+# Repository variables used:
+#   OPA_URL      — base URL of the opa-cedarling server
+#   TF_WORKSPACE — target workspace for the plan job (staging/production jobs
+#                  hard-code their workspace)
+
+name: Terraform CI (JWT-authorized, composite action)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Plan (allowed on any branch from the trusted repo) ────────────────────
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # Required for the composite action to fetch the OIDC token
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: terraform -chdir=jans-cedarling/cedarling_opa/demo/terraform-jwt init
+
+      - name: Terraform plan (JWT-authorized)
+        uses: JanssenProject/jans/jans-cedarling/cedarling_opa/demo/terraform-jwt/.github/actions/tf-jwt-authz@main
+        with:
+          opa_url: ${{ vars.OPA_URL || 'http://opa-service:8181' }}
+          workspace: ${{ vars.TF_WORKSPACE || 'staging' }}
+          terraform_command: plan
+          terraform_working_directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
+
+  # ── Apply to staging (allowed from main branch) ───────────────────────────
+  terraform-apply-staging:
+    name: Terraform Apply — staging
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: terraform -chdir=jans-cedarling/cedarling_opa/demo/terraform-jwt init
+
+      - name: Terraform apply — staging (JWT-authorized)
+        uses: JanssenProject/jans/jans-cedarling/cedarling_opa/demo/terraform-jwt/.github/actions/tf-jwt-authz@main
+        with:
+          opa_url: ${{ vars.OPA_URL || 'http://opa-service:8181' }}
+          workspace: staging
+          terraform_command: apply -auto-approve
+          terraform_working_directory: jans-cedarling/cedarling_opa/demo/terraform-jwt
+
+  # ── Apply to production (requires GitHub Environment approval) ────────────
+  terraform-apply-production:
+    name: Terraform Apply — production
+    runs-on: ubuntu-latest
+    needs: terraform-apply-staging
+    if: github.ref == 'refs/heads/main'
+    # The "production" environment requires manual approval from designated
+    # reviewers (configured in GitHub Settings → Environments → production).
+    # GitHub injects `environment: "production"` into the OIDC token only after
+    # the approval gate passes. The Cedar policy ci-permit-apply-prod-via-environment
+    # checks for this claim, so the cryptographic proof of human approval is
+    # embedded in the JWT that Cedarling validates.
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: terraform -chdir=jans-cedarling/cedarling_opa/demo/terraform-jwt init
+
+      - name: Terraform apply — production (JWT-authorized + Environment approval)
+        uses: JanssenProject/jans/jans-cedarling/cedarling_opa/demo/terraform-jwt/.github/actions/tf-jwt-authz@main
+        with:
+          opa_url: ${{ vars.OPA_URL || 'http://opa-service:8181' }}
+          workspace: production
+          terraform_command: apply -auto-approve
+          terraform_working_directory: jans-cedarling/cedarling_opa/demo/terraform-jwt

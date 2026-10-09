@@ -1,0 +1,18 @@
+Flow com.acme.basic.club_application1
+    Basepath ""
+
+data = { interests: [ "Coding", "Music", "Dancing", "Cooking" ] }
+regData = RRF "application.ftlh" data
+
+// Not enough or too much interests selected?
+When regData.interest is null
+    data = { msg: "You have no interest at all!" }
+    RRF "rejected.ftlh" data
+    Finish false
+Otherwise
+    When regData.interest.length is 4
+        data = { msg: "Seems you have too much interests..." }
+        RRF "rejected.ftlh" data
+        Finish false
+    Otherwise
+        Finish true

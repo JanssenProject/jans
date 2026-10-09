@@ -4,9 +4,15 @@ version = "0.1.0"
 edition = "2021"
 description = "HTTP utils that Cedarling uses internally"
 license = "Apache-2.0"
+publish = true
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
 reqwest = { workspace = true }
 tokio = { workspace = true }
+
+[dev-dependencies]
+mockito = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt"] }

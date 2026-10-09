@@ -1,0 +1,11 @@
+{
+  "cedar_version": "4.4.0",
+  "policy_store": {
+    "id": "ae448b88b228201d7bdaa271b9f3ceb4",
+    "name": "Terraform Authorization Policies",
+    "description": "Cedar policies for gating Terraform operations (plan/apply/destroy) by role and workspace environment",
+    "version": "1.0.0",
+    "created_date": "2026-04-23T00:00:00Z",
+    "updated_date": "2026-04-23T00:00:00Z"
+  }
+}

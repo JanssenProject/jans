@@ -6,13 +6,12 @@ tags:
 ---
 
 # Cedarling OPA Plugin
-A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) that integrates with Cedarling, allowing users to perform Cedar-based authorization in OPA workflows.
+A policy evaluation plugin for [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) that integrates with Cedarling, allowing users to perform Cedar-based authorization in OPA workflows. In addition, the plugin provides the [AuthZen](https://openid.net/specs/authorization-api-1_0.html#access-evaluation-api) access evaluation functionality.
 
 ## Functionality
 
 1. The OPA binary reads rego files and a configuration file containing bootstrap properties and initializes a Cedarling instance accordingly. Then the binary starts in server mode.
 1. The user may then send queries to the OPA server over HTTP. OPA will call the Cedarling instance's authorization methods and return responses.
-
 ```mermaid
 sequenceDiagram
     participant Client
@@ -40,6 +39,15 @@ sequenceDiagram
     Rego-->>OPA: decision object
 
     OPA-->>Client: Response
+```
+1. For AuthZen access evaluation functionality, the user may call endpoints directly following the AuthZen specification.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant OPA
+    Client->>OPA: POST /access/v1/evaluation {"subject": {...}, "action": {...}, "resource": {...}}
+    OPA->>Client: {"decision": true}
 ```
 
 ## Rego functions
@@ -130,11 +138,137 @@ default allow := false
 result := cedarling.opa.authorize_multi_issuer(input)
 
 allow if {
-	result.decision == true
+        result.decision == true
 }
 
 deny_reasons := result.reasons
 ```
+
+## AuthZen functionality
+
+The plugin provides the following endpoints:
+
+- `/.well-known/authzen-configuration` - AuthZen metadata endpoint
+- `/access/v1/evaluation` - Access evaluation endpoint
+- `/access/v1/evaluations` - Multiple access evaluation endpoint
+
+To use these endpoints, the user needs to provide information for cedarling to build the entities, either for unsigned or multi-issuer authorization. The cedarling subject and resource needs to be supplied in JSON format via the `properties` field of the AuthZen [subject](https://openid.net/specs/authorization-api-1_0.html#name-subject) and [resource](https://openid.net/specs/authorization-api-1_0.html#name-resource) types respectively. The action string can be sent in the `name` field of the [action](https://openid.net/specs/authorization-api-1_0.html#name-action) type. The context can be sent directly as-is, corresponding to the [context](https://openid.net/specs/authorization-api-1_0.html#name-context) type.
+
+An example of an AuthZen request for multi-issuer authorization:
+
+```json title="AuthZen evaluation payload"
+{
+  "subject": {
+    "type": "Tokens",
+    "id": "ID",
+    "properties": {
+      "tokens": [
+        {
+          "mapping": "Jans::Userinfo_token",
+          "payload": "ey...AZgA"
+        }
+      ]
+    }
+  },
+  "resource": {
+    "type": "Application",
+    "id": "",
+    "properties": {
+      "cedar_entity_mapping": {
+        "entity_type": "Jans::Application",
+        "id": "some_id"
+      },
+      "app_id": "application_id",
+      "name": "Some Application",
+      "url": {
+        "host": "jans.test",
+        "path": "/protected-endpoint",
+        "protocol": "http"
+      }
+    }
+  },
+  "action": {
+    "name": "Jans::Action::\"Read\""
+  },
+  "context": {
+    "device_health": [
+      "Healthy"
+    ],
+    "fraud_indicators": [
+      "Allowed"
+    ],
+    "geolocation": [
+      "America"
+    ],
+    "network": "127.0.0.1",
+    "network_type": "Local",
+    "operating_system": "Linux",
+    "user_agent": "Linux",
+    "current_time": 1
+  }
+}
+```
+
+The same method is used for unsigned authorization. Each entity has to be provided in JSON format in the properties field. For example:
+
+```json title="AuthZen unsigned evaluation payload"
+{
+  "subject": {
+    "type": "Entities",
+    "id": "ID",
+    "properties": {
+      "cedar_entity_mapping": {
+        "entity_type": "Jans::User",
+        "id": "random_id"
+      },
+      "role": [
+        "admin"
+      ],
+      "country": "US",
+      "sub": "random_sub"
+    }
+  },
+  "resource": {
+    "type": "Application",
+    "id": "",
+    "properties": {
+      "cedar_entity_mapping": {
+        "entity_type": "Jans::Application",
+        "id": "some_id"
+      },
+      "app_id": "application_id",
+      "name": "Some Application",
+      "url": {
+        "host": "jans.test",
+        "path": "/protected-endpoint",
+        "protocol": "http"
+      }
+    }
+  },
+  "action": {
+    "name": "Jans::Action::\"Update\""
+  },
+  "context": {
+    "device_health": [
+      "Healthy"
+    ],
+    "fraud_indicators": [
+      "Allowed"
+    ],
+    "geolocation": [
+      "America"
+    ],
+    "network": "127.0.0.1",
+    "network_type": "Local",
+    "operating_system": "Linux",
+    "user_agent": "Linux",
+    "current_time": 1
+  }
+}
+```
+
+!!! note
+    Following AuthZen specification, any errors during authorization will result in a false decision, and error details will be provided in the context field of the response.
 
 ## Building
 
@@ -148,7 +282,7 @@ deny_reasons := result.reasons
 
 Required:
 
-- Go 1.25+
+- Go 1.26+
 - Rust toolchain 1.95+
 
 Optional:
@@ -224,7 +358,7 @@ default allow := false
 result := cedarling.opa.authorize_multi_issuer(input)
 
 allow if {
-	result.decision == true
+        result.decision == true
 }
 
 deny_reasons := result.reasons
@@ -301,6 +435,13 @@ And we get a response:
   }
 }
 ```
+
+## Use Cases
+
+The following examples show end-to-end uses of the Cedarling-OPA plugin with realistic authorization models:
+
+- [Gating Terraform with Cedarling-OPA](./terraform-authz.md) — role-based control over `terraform plan / apply / destroy` across dev, staging, and production workspaces, enforced by a shell wrapper before any cloud change is made.
+- [Terraform Authorization with GitHub Actions OIDC JWTs](./terraform-authz-jwt.md) — CI/CD-first variant using `authorize_multi_issuer`; Cedarling validates GitHub OIDC tokens and evaluates Cedar policies that check JWT claims (`repository`, `ref`, `environment`) to gate Terraform operations with no service-account secrets.
 
 ## Docker
 A Dockerfile is provided to allow building a docker image embedded with the bootstrap configuration and rego files. To build and run this image:

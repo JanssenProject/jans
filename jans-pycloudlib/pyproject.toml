@@ -2,7 +2,7 @@
 requires = [
     # The minimum setuptools version is specific to the PEP 517 backend,
     # and may be stricter than the version required in `setup.cfg`
-    "setuptools>=78.1.1",
+    "setuptools>=83.0.0",
     "wheel>=0.46.2",
 ]
 build-backend = "setuptools.build_meta"
@@ -30,13 +30,17 @@ classifiers = [
     "Programming Language :: Python :: 3.12"
 ]
 dependencies = [
-    # handle CVE-2025-50181 and CVE-2025-50182
-    "urllib3>=2.5.0",
+    # handle CVE-2025-50181, CVE-2025-50182, GHSA-mf9v-mfxr-j63j, GHSA-qccp-gfcp-xxvc
+    "urllib3>=2.8.0",
+
+    # pulled in by requests; handle CVE-2026-45409, GHSA-65pc-fj4g-8rjx
+    "idna>=3.15",
 
     "requests>=2.22.0",
     "python-consul>=1.0.1",
     "hvac>=0.7.0",
-    "kubernetes>=11.0",
+    # don't use v36 until patches available
+    "kubernetes>=11.0,<36.0",
 
     # the ldap3 library is not removed for the following reasons:
     #
@@ -49,12 +53,12 @@ dependencies = [
 
     "backoff>=2.1.2",
     "docker>=3.7.2",
-    "cryptography>=46.0.5",
+    "cryptography>=50.0.0",
     "google-cloud-secret-manager>=2.2.0",
     "pymysql>=1.0.2",
     "sqlalchemy>=2.0",
     "psycopg2>=2.8.6",
-    "Click>=6.7",
+    "Click>=8.3.3",
     "ldif>=4.1.1",
 
     # handle CVE-2022-36087

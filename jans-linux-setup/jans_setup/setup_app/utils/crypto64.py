@@ -1,4 +1,5 @@
 import os
+import ipaddress
 import re
 import base64
 import json
@@ -32,21 +33,26 @@ class Crypto64:
         return encoded_pw.decode('utf-8')
 
     def unobscure(self, data=""):
-        engine = triple_des(Config.encode_salt, ECB, pad=None, padmode=PAD_PKCS5)
         cipher = triple_des(Config.encode_salt)
         decrypted = cipher.decrypt(base64.b64decode(data), padmode=PAD_PKCS5)
         return decrypted.decode('utf-8')
+
+    @staticmethod
+    def is_ip_address(value):
+        try:
+            ipaddress.ip_address(value)
+            return True
+        except ValueError:
+            return False
 
     def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None, truststore_pw='changeit', cert_dir=None):
         if not cert_dir:
             cert_dir = Config.certFolder
         self.logIt('Generating Certificate for %s' % suffix)
-        key_with_password = '%s/%s.key.orig' % (cert_dir, suffix)
+        key_with_password = '%s/%s.key.orig' % (cert_dir, suffix)  # // # gitleaks:allow
         key = os.path.join(cert_dir, suffix) + '.key'
         csr = os.path.join(cert_dir, suffix) + '.csr'
         public_certificate = os.path.join(cert_dir, suffix) + '.crt'
-        if not truststore_fn:
-            truststore_fn = Config.defaultTrustStoreFN
 
         self.run([paths.cmd_openssl,
                   'genrsa',
@@ -68,7 +74,7 @@ class Crypto64:
                   ])
 
         certCn = cn
-        if certCn == None:
+        if certCn is None:
             certCn = Config.hostname
 
         self.run([paths.cmd_openssl,
@@ -79,8 +85,12 @@ class Crypto64:
                   '-out',
                   csr,
                   '-subj',
-                  '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (Config.countryCode, Config.state, Config.city, Config.orgName, certCn, Config.admin_email)
+                  '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (Config.country_code, Config.state, Config.city, Config.org_name, certCn, Config.admin_email)
                   ])
+        san_type = 'IP' if self.is_ip_address(certCn) else 'DNS'
+        san_fn = csr + '.ext'
+        with open(san_fn, 'w') as w:
+            w.write('subjectAltName={}:{}\n'.format(san_type, certCn))
         self.run([paths.cmd_openssl,
                   'x509',
                   '-req',
@@ -90,22 +100,25 @@ class Crypto64:
                   csr,
                   '-signkey',
                   key,
+                  '-extfile',
+                  san_fn,
                   '-out',
                   public_certificate
                   ])
+        os.remove(san_fn)
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key_with_password])
         self.run([paths.cmd_chmod, '700', key_with_password])
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key])
         self.run([paths.cmd_chmod, '700', key])
 
-        self.import_cert_into_keystore(cert_fn=public_certificate, alias=f'{Config.hostname}_{suffix}')
+        self.import_cert_into_keystore(cert_fn=public_certificate, alias=f'{Config.hostname}_{suffix}', truststore_fn=truststore_fn, truststore_pw=truststore_pw)
 
         return key, csr, public_certificate
 
 
     def import_cert_into_keystore(self, cert_fn, alias, truststore_fn=None, truststore_pw='changeit'):
         if not truststore_fn:
-            truststore_fn = Config.defaultTrustStoreFN
+            truststore_fn = Config.default_trust_store_fn
 
         self.run([
                 Config.cmd_keytool,
@@ -128,6 +141,8 @@ class Crypto64:
 
         ca_key_fn = os.path.join(cert_dir, ca_suffix+'.key')
         ca_crt_fn = os.path.join(cert_dir, ca_suffix+'.crt')
+        setattr(Config, ca_suffix+'_ca_key_fn', ca_key_fn)
+        setattr(Config, ca_suffix+'_ca_crt_fn', ca_crt_fn)
 
         self.run([paths.cmd_openssl, 'req',
                   '-newkey', 'rsa:2048', '-nodes',
@@ -137,7 +152,7 @@ class Crypto64:
                   '-days', '3650',
                   '-outform', 'PEM',
                   '-out', ca_crt_fn,
-                  '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.countryCode, Config.state, Config.city, Config.orgName, Config.hostname, Config.admin_email)
+                  '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.country_code, Config.state, Config.city, Config.org_name, Config.hostname, Config.admin_email)
                   ])
 
         return ca_key_fn, ca_crt_fn
@@ -157,7 +172,7 @@ class Crypto64:
         self.run([paths.cmd_openssl, 'req', '-new',
             '-key', key_fn,
             '-out', csr_fn,
-            '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.countryCode, Config.state, Config.city, Config.orgName, cn, Config.admin_email)
+            '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.country_code, Config.state, Config.city, Config.org_name, cn, Config.admin_email)
             ])
 
         crt_fn = os.path.join(out_dir, fn_suffix+'.crt')
@@ -176,8 +191,8 @@ class Crypto64:
 
     def prepare_base64_extension_scripts(self, extensions=[]):
         self.logIt("Preparing scripts")
-        # Remove extensionFolder when all scripts are moved to script_catalog_dir
-        for path_ in (Config.extensionFolder, Config.script_catalog_dir):
+        # Remove extension_folder when all scripts are moved to script_catalog_dir
+        for path_ in (Config.extension_folder, Config.script_catalog_dir):
             extension_path = Path(path_)
             for ep in extension_path.glob("**/*"):
                 if ep.is_file() and ep.suffix.lower() in ['.py', '.java']:
@@ -190,7 +205,7 @@ class Crypto64:
 
                     # Prepare key for dictionary
                     base64_script_file = self.generate_base64_file(ep.as_posix(), 1)
-                    Config.templateRenderingDict[extension_script_name] = base64_script_file
+                    Config.template_rendering_dict[extension_script_name] = base64_script_file
 
 
     def generate_base64_file(self, fn, num_spaces=0):
@@ -199,7 +214,7 @@ class Crypto64:
         try:
             plain_file_text = self.readFile(fn, rmode='rb')
             plain_file_b64encoded_text = base64.b64encode(plain_file_text).decode('utf-8').strip()
-        except:
+        except Exception:
             self.logIt("Error loading file", True)
 
         if num_spaces > 0:
@@ -247,13 +262,13 @@ class Crypto64:
     def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
         self.logIt("Generating Jans Auth OpenID Connect keys")
 
-        if dn_name == None:
+        if dn_name is None:
             dn_name = Config.default_openid_jks_dn_name
 
-        if key_algs == None:
+        if key_algs is None:
             key_algs = Config.default_sig_key_algs
 
-        if key_expiration == None:
+        if key_expiration is None:
             key_expiration = Config.default_key_expiration
 
         if not enc_keys:
@@ -279,6 +294,7 @@ class Crypto64:
 
         if output:
             return output.splitlines()
+        return None
 
     def export_openid_key(self, jks_path, jks_pwd, cert_alias, cert_path):
         self.logIt("Exporting Jans Auth OpenID Connect keys")
@@ -314,7 +330,7 @@ class Crypto64:
             self.run([Config.cmd_chown, 'jetty:jetty', fn])
             self.run([Config.cmd_chmod, '600', fn])
             self.logIt("Wrote jans Auth OpenID Connect key to %s" % fn)
-        except:
+        except Exception:
             self.logIt("Error writing command : %s" % fn, True)
 
 
@@ -341,22 +357,20 @@ class Crypto64:
                 Config.encoded_cb_password = self.obscure(Config.cb_password)
             if Config.get('opendj_p12_pass'):
                 Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
-        except:
+        except Exception:
             self.logIt("Error encoding passwords", True, True)
 
     def encode_test_passwords(self):
         self.logIt("Encoding test passwords")
         hostname = Config.hostname.split('.')[0]
 
-        test_client_ids = []
-
-        for tmp_str in list(Config.templateRenderingDict.keys()):
+        for tmp_str in list(Config.template_rendering_dict.keys()):
             if re.match(r'(.*?)test_client_(\d*)_inum', tmp_str):
                 cli_prefix = tmp_str.strip('_inum')
                 cli_pw_var = cli_prefix +'_pw'
-                if not cli_pw_var in Config.templateRenderingDict:
-                    Config.templateRenderingDict[cli_pw_var] = Config.templateRenderingDict[tmp_str] + '-' + hostname
-                    Config.templateRenderingDict[cli_prefix + '_encoded_pw'] = self.obscure(Config.templateRenderingDict[cli_pw_var])
+                if cli_pw_var not in Config.template_rendering_dict:
+                    Config.template_rendering_dict[cli_pw_var] = Config.template_rendering_dict[tmp_str] + '-' + hostname
+                    Config.template_rendering_dict[cli_prefix + '_encoded_pw'] = self.obscure(Config.template_rendering_dict[cli_pw_var])
 
     def get_server_certificate(self, host):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

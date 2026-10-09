@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import contextlib
 import sys
 
 if '--version' in sys.argv:
@@ -7,7 +8,6 @@ if '--version' in sys.argv:
     sys.exit()
 
 import os
-import time
 import json
 import shutil
 import socket
@@ -18,13 +18,13 @@ disk = os.environ.get('SNAP_COMMON', '/')
 
 try:
     loadavg = os. getloadavg()
-except:
+except Exception:
     loadavg = (0,0,0)
 
 try:
     du=shutil.disk_usage(disk)
     free_disk_space = '{}%'.format(round((du.free/du.total) * 100, 1))
-except:
+except Exception:
     free_disk_space = '0%'
 
 swapsize = 1
@@ -35,7 +35,7 @@ uptime = 0
 ip_addr = ''
 hostname = ''
 
-try:
+with contextlib.suppress(Exception):
     with open('/proc/meminfo') as f:
         for l in f:
             if l.startswith('SwapTotal'):
@@ -46,27 +46,20 @@ try:
                 memorysize = int(l.split(':')[1].split()[0]) / 1024.0
             elif l.startswith('MemAvailable'):
                 memoryfree = int(l.split(':')[1].split()[0]) / 1024.0
-except:
-    pass
 
-try:
+with contextlib.suppress(Exception):
     with open('/proc/uptime') as f:
         uptime = int(float(f.read().strip().split()[0]))
-except:
-    pass
 
 try:
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.connect(("8.8.8.8", 80))
     ip_addr = sock.getsockname()[0]
     sock.close()
-except:
-    try:
+except Exception:
+    with contextlib.suppress(Exception):
         net_if_list = socket.if_nameindex()
 
-        for netif in net_if_list[:]:
-            if netif[0] == 'lo':
-                net_if_list
         for netif in net_if_list:
             if netif[1].startswith('enp') or netif[1].startswith('eth'):
                 iface = netif[1]
@@ -82,16 +75,12 @@ except:
         ip = struct.unpack('16sH2x4s8x', res)[2]
         ip_addr = socket.inet_ntoa(ip)
         sock.close()
-    except:
-        pass
 
 try:
     hostname = socket.gethostbyaddr(ip_addr)[0]
-except:
-    try:
+except Exception:
+    with contextlib.suppress(Exception):
         hostname = socket.gethostname()
-    except:
-        pass
 
 if swapsize == 0:
     swapsize = 1
@@ -110,7 +99,7 @@ elif d == 1:
 else:
     day_s = '{} days, '.format(d)
 
-uptime_s = '{}{}:{:02d}'.format(day_s, h, m, s)
+uptime_s = '{}{}:{:02d}'.format(day_s, h, m)
 
 if '-j' in sys.argv:
     data = {

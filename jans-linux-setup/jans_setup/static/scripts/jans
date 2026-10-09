@@ -106,7 +106,7 @@ def get_hostname():
                         return server_name
 
     print("Can't determine server name")
-    sys.exit()
+    raise SystemExit()
 
 def info():
     hostname = get_hostname()

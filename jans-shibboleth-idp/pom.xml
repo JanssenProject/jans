@@ -65,14 +65,14 @@
 
     <repositories>
         <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+        </repository>
+        <repository>
             <id>shibboleth</id>
             <name>Shibboleth Maven Repository</name>
             <url>https://build.shibboleth.net/maven/releases/</url>
-        </repository>
-        <repository>
-            <id>jans</id>
-            <name>Janssen Maven Repository</name>
-            <url>https://jenkins.jans.io/maven/</url>
         </repository>
     </repositories>
 

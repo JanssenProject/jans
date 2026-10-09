@@ -7,9 +7,6 @@
 #    4. Allow/Deny searches
 #
 from io.jans.model.custom.script.type.scim import ScimType
-from io.jans.scim.ws.rs.scim2 import BaseScimWebService
-
-import json
 
 class ScimEventHandler(ScimType):
 
@@ -30,7 +27,7 @@ class ScimEventHandler(ScimType):
     def createUser(self, user, configurationAttributes):
         return True
 
-    def updateUser(self, user, configur ationAttributes):
+    def updateUser(self, user, configurationAttributes):
         return True
 
     def deleteUser(self, user, configurationAttributes):

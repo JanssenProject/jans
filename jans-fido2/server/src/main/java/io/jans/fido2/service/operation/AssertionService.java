@@ -7,7 +7,10 @@
 package io.jans.fido2.service.operation;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -15,8 +18,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
 import io.jans.fido2.exception.Fido2CompromisedDevice;
@@ -31,9 +34,14 @@ import io.jans.fido2.model.assertion.Response;
 import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.audit.LockAuditEvent;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.service.trust.NativeFailureDiagnostics;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.audit.LockAuditEventCollector;
+import io.jans.fido2.service.app.AbandonedCeremonyPolicy;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.shared.MetricService;
@@ -56,6 +64,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
 
 /**
@@ -67,6 +76,9 @@ import jakarta.ws.rs.core.Context;
 
 @ApplicationScoped
 public class AssertionService {
+
+	/** Reads the {@code {status, errorMessage}} envelope off a rejection. Stateless and thread-safe. */
+	private static final ObjectMapper ERROR_ENVELOPE_MAPPER = new ObjectMapper();
 
 	@Inject
 	private Logger log;
@@ -104,7 +116,13 @@ public class AssertionService {
 	@Inject
 	private MetricService metricService;
 
-	@Context
+	@Inject
+	private LockAuditEventCollector lockAuditEventCollector;
+
+	// @Context is only honoured for JAX-RS components; this is a plain CDI bean,
+	// so the request has to come from the CDI built-in request-scoped bean instead.
+	// Only valid on the request thread - never dereference it from an async task.
+	@Inject
 	private HttpServletRequest httpRequest;
 	@Context
 	private HttpServletResponse httpResponse;
@@ -114,7 +132,16 @@ public class AssertionService {
 	 * userVerification, origin, extensions, timeout
 	 */
 	public AssertionOptionsResponse options(AssertionOptions assertionOptions) {
-		log.debug("Assertion options {}", CommonUtilService.toJsonNode(assertionOptions));
+		// Only the payload itself is mandatory here. An absent username is legitimate -
+		// it is how usernameless (discoverable credential) authentication is requested,
+		// and it is handled further down by falling back to allowCredentials.
+		if (assertionOptions == null) {
+			throw errorResponseFactory.invalidRequest("Assertion options are mandatory");
+		}
+
+		if (log.isDebugEnabled()) {
+			log.debug("Assertion options {}", CommonUtilService.toJsonNode(assertionOptions));
+		}
 
 		// Start timing for metrics collection
 		long startTime = System.currentTimeMillis();
@@ -122,14 +149,13 @@ public class AssertionService {
 		// Apply external custom scripts
 		ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(
 				CommonUtilService.toJsonNode(assertionOptions), httpRequest, httpResponse);
-		boolean externalInterceptContext = externalFido2InterceptionService.authenticateAssertionStart(
+		externalFido2InterceptionService.authenticateAssertionStart(
 				CommonUtilService.toJsonNode(assertionOptions), externalFido2InterceptionContext);
 
 		// Verify request parameters
-		String username = assertionOptions.getUsername();// commonVerifiers.verifyThatFieldString(params, "username");
+		String username = assertionOptions.getUsername();
 
 		// Create result object
-		// ObjectNode optionsResponseNode = dataMapperService.createObjectNode();
 		AssertionOptionsResponse assertionOptionsResponse = new AssertionOptionsResponse();
 
 		// Put userVerification
@@ -149,7 +175,7 @@ public class AssertionService {
 		log.debug("Put rpId {}", origin);
 
 		// Put allowCredentials
-		if (username != null && StringHelper.isNotEmpty(username)) {
+		if (StringHelper.isNotEmpty(username)) {
 			Pair<List<PublicKeyCredentialDescriptor>, String> allowedCredentialsPair = prepareAllowedCredentials(origin,
 					username);
 			List<PublicKeyCredentialDescriptor> allowedCredentials = allowedCredentialsPair.getLeft();
@@ -159,13 +185,13 @@ public class AssertionService {
 					metricService.recordPasskeyFallback(username, Fido2MetricsConstants.FALLBACK_METHOD_PASSWORD, 
 							"No registered passkeys found for user");
 				} catch (Exception e) {
-					log.debug("Failed to record fallback metrics for KEYS_NOT_FOUND: {}", e.getMessage());
+					log.debug("Failed to record fallback metrics for KEYS_NOT_FOUND", e);
 				}
 				throw errorResponseFactory.badRequestException(AssertionErrorResponseType.KEYS_NOT_FOUND,
 						"Can't find associated key(s). Username: " + username);
 			}
 			assertionOptionsResponse.setAllowCredentials(allowedCredentials);
-			allowedCredentials.stream().forEach(ele -> log.debug("Put allowedCredentials {}", ele.toString()));
+			allowedCredentials.stream().forEach(ele -> log.debug("Put allowedCredentials {}", ele));
 			log.debug("Put allowedCredentials {}", allowedCredentials);
 
 		} else
@@ -175,19 +201,18 @@ public class AssertionService {
 		}
 
 		// in case of conditional UI, timeout has to be large.
-		if (username != null && StringHelper.isNotEmpty(username)) {
+		if (StringHelper.isNotEmpty(username)) {
 			// Put timeout
 			long timeout = commonVerifiers.verifyTimeout(assertionOptions.getTimeout());
 			assertionOptionsResponse.setTimeout(timeout);
 			log.debug("Put timeout {}", timeout);
 		}
-		/*
-		 * else { assertionOptionsResponse.setTimeout(60000l); }
-		 */
 		// Copy extensions
 		if (assertionOptions.getExtensions() != null) {
 			assertionOptionsResponse.setExtensions(assertionOptions.getExtensions());
-			log.debug("Put extensions {}", assertionOptions.getExtensions());
+			if (log.isDebugEnabled()) {
+				log.debug("Put extensions {}", assertionOptions.getExtensions());
+			}
 		}
 
 		Fido2AuthenticationData entity = new Fido2AuthenticationData();
@@ -209,8 +234,7 @@ public class AssertionService {
 		}
 
 		// Set expiration
-		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
-		authenticationEntity.setExpiration(unfinishedRequestExpiration);
+		authenticationEntity.setExpiration(pendingCeremonyRetention());
 
 		authenticationPersistenceService.save(authenticationEntity);
 
@@ -220,18 +244,26 @@ public class AssertionService {
 
 		// Record metrics for authentication attempt
 		try {
-			metricService.recordPasskeyAuthenticationAttempt(username, httpRequest, startTime);
+			metricService.recordPasskeyAuthenticationAttempt(username, httpRequest, startTime, assertionOptions.getTelemetry());
 		} catch (Exception e) {
-			log.debug("Failed to record authentication attempt metrics: {}", e.getMessage());
+			log.debug("Failed to record authentication attempt metrics", e);
 		}
 
-		log.debug("assertionOptionsResponse :" + assertionOptionsResponse);
+		log.debug("assertionOptionsResponse :{}", assertionOptionsResponse);
+		// FIDO2 conformance requires the success envelope on the options response.
+		assertionOptionsResponse.setStatus("ok");
+		assertionOptionsResponse.setErrorMessage("");
+
 		return assertionOptionsResponse;
 	}
 
-	public AsserOptGenerateResponse generateOptions(AssertionOptionsGenerate assertionOptionsGenerate)
-			throws JsonProcessingException {
-		log.debug("Generate assertion options: {}", CommonUtilService.toJsonNode(assertionOptionsGenerate));
+	public AsserOptGenerateResponse generateOptions(AssertionOptionsGenerate assertionOptionsGenerate) {
+		if (log.isDebugEnabled()) {
+			log.debug("Generate assertion options: {}", CommonUtilService.toJsonNode(assertionOptionsGenerate));
+		}
+
+		// Start timing for metrics collection
+		long startTime = System.currentTimeMillis();
 
 		// Create result object
 		AsserOptGenerateResponse asserOptGenerateResponse = new AsserOptGenerateResponse();
@@ -283,35 +315,79 @@ public class AssertionService {
 		}
 
 		// Set expiration
-		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
-		authenticationEntity.setExpiration(unfinishedRequestExpiration);
+		authenticationEntity.setExpiration(pendingCeremonyRetention());
 
 		authenticationPersistenceService.save(authenticationEntity);
+
+		// Record metrics for authentication attempt. A conditional-UI ceremony is an authentication
+		// attempt like any other; without this it was absent from the attempt count while still being
+		// able to produce a terminal outcome, so any rate computed against attempts was overstated for
+		// deployments that use conditional UI. The username is deliberately null — no user is known at
+		// this point, which is the defining property of a usernameless ceremony.
+		try {
+			// AssertionOptionsGenerate (the conditional-UI/discoverable-credential request) carries no
+			// telemetry field — only AssertionOptions does (#14607's scope) — so this attempt is
+			// recorded without it, not silently dropped.
+			metricService.recordPasskeyAuthenticationAttempt(null, httpRequest, startTime, null);
+		} catch (Exception e) {
+			log.debug("Failed to record authentication attempt metrics", e);
+		}
 
 		return asserOptGenerateResponse;
 	}
 
 	public AttestationOrAssertionResponse verify(AssertionResult assertionResult) {
-		log.debug("authenticateResponse verify {}", CommonUtilService.toJsonNode(assertionResult));
+		if (log.isDebugEnabled()) {
+			log.debug("authenticateResponse verify {}", CommonUtilService.toJsonNode(assertionResult));
+		}
 
 		// Start timing for metrics collection
 		long startTime = System.currentTimeMillis();
 		String username = null;
 		String authenticatorType = null;
+		// Declared outside the try so the failure path can mark the ceremony it belongs to. It stays
+		// null for failures raised before the challenge resolves to an entry, which is why
+		// markAssertionFailed tolerates a null entry.
+		Fido2AuthenticationEntry authenticationEntity = null;
+		// Declared outside the try for the same reason as registrationData in AttestationService: a
+		// failure raised after the credential lookup should still carry its rpId/credentialId into the
+		// audit event, not discard it just because the outcome was an exception.
+		Fido2RegistrationData registrationData = null;
+		// The audit event must record the origin actually verified for this ceremony (the raw
+		// clientData origin, scheme/port and all), not authenticationData.getOrigin() — that field
+		// holds the RP hostname captured at options-generation time, which verifyDomain() only ever
+		// compares against, never overwrites. Stays null until domain verification actually succeeds,
+		// so a domain-mismatch failure never reports an origin as if it had been accepted.
+		String clientOrigin = null;
+		// Declared outside the try so a DENY event raised after this resolves (e.g. the registration
+		// lookup below fails) still carries the credential ID the client actually asserted, instead of
+		// silently dropping it just because registrationData never got resolved.
+		String keyId = null;
+		// authenticationData.getStatus() alone is not proof that THIS invocation persisted it: a replay
+		// of an already-authenticated ceremony is rejected by verifyCeremonyIsStillOpen() below while
+		// the entity's status is still `authenticated` from the ORIGINAL call, which would otherwise
+		// report ALLOW for a request that was actually denied. Set only once
+		// authenticationPersistenceService.update() below has itself returned.
+		boolean persistedAsAuthenticated = false;
 
 		try {
 		// Apply external custom scripts
 		ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(
 				CommonUtilService.toJsonNode(assertionResult), httpRequest, httpResponse);
-		boolean externalInterceptContext = externalFido2InterceptionService
+		externalFido2InterceptionService
 				.verifyAssertionStart(CommonUtilService.toJsonNode(assertionResult), externalFido2InterceptionContext);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(assertionResult);
 		commonVerifiers.verifyAssertionType(assertionResult.getType());
-		commonVerifiers.verifyNullOrEmptyString(assertionResult.getRawId());
+		String rawId = commonVerifiers.verifyNullOrEmptyString(assertionResult.getRawId());
 
-		String keyId = commonVerifiers.verifyNullOrEmptyString(assertionResult.getId());
+		keyId = commonVerifiers.verifyNullOrEmptyString(assertionResult.getId());
+
+		// FIDO2 conformance: rawId and id must reference the same credential.
+		if (!rawId.equals(keyId)) {
+			throw errorResponseFactory.invalidRequest("rawId does not match id");
+		}
 
 		// Get response
 		Response response = assertionResult.getResponse();
@@ -320,26 +396,61 @@ public class AssertionService {
 		}
 		// Verify client data
 		JsonNode clientJsonNode = commonVerifiers.verifyClientJSON(response.getClientDataJSON());
+		// FIDO2 conformance: assertion clientData.type must be exactly "webauthn.get".
+		commonVerifiers.verifyClientJSONTypeIsGet(clientJsonNode);
 
 		// Get challenge
 		String challenge = commonVerifiers.getChallenge(clientJsonNode);
 
 		// Find authentication entry
-		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.findByChallenge(challenge)
+		authenticationEntity = authenticationPersistenceService.findByChallenge(challenge)
 				.parallelStream().findFirst().orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Can't find associated assertion request by challenge '%s'", challenge)));
 		Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
-		log.debug("Fido2AuthenticationData: " + authenticationData.toString());
+
+		// Attribute the ceremony as early as it is known. Without this, every failure raised before
+		// the registration lookup below is recorded against a null username. Conditional-UI
+		// ceremonies legitimately have none, and are resolved by the registration lookup instead.
+		username = authenticationData.getUsername();
+
+		// FIDO2 conformance: explicitly compare the clientData challenge to the issued challenge
+		// instead of relying solely on the DB lookup above.
+		String issuedChallenge = authenticationData.getChallenge();
+		if (issuedChallenge == null || !issuedChallenge.equals(challenge)) {
+			throw errorResponseFactory.invalidRequest("Challenge in clientData does not match the issued challenge");
+		}
+
+		// Ordered after the conformance challenge comparison so that a mismatched challenge is still
+		// reported as such rather than being masked by the state of whichever ceremony it resolved to.
+		verifyCeremonyIsStillOpen(authenticationEntity, authenticationData);
+
+		log.debug("Fido2AuthenticationData: {}", authenticationData);
 		// Verify domain
 		domainVerifier.verifyDomain(authenticationData.getOrigin(), clientJsonNode);
+		clientOrigin = clientJsonNode.get("origin").asText();
 
 		// Find registered public key
+		final String resolvedKeyId = keyId;
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService
 				.findByPublicKeyId(keyId, authenticationEntity.getRpId()).orElseThrow(() -> new Fido2RuntimeException(
-						String.format("Couldn't find the key by PublicKeyId '%s'", keyId)));
-		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
-		log.debug("Fido2RegistrationEntry" + registrationEntry);
-		log.debug("registrationData" + registrationData);
+						String.format("Couldn't find the key by PublicKeyId '%s'", resolvedKeyId)));
+		registrationData = registrationEntry.getRegistrationData();
+		log.debug("Fido2RegistrationEntry {}", registrationEntry);
+		log.debug("registrationData {}", registrationData);
+
+		// FIDO2 conformance: when a username-scoped ceremony issued allowCredentials, the asserted
+		// credential must belong to that user (i.e. be within the issued allowCredentials set).
+		String issuedUsername = authenticationData.getUsername();
+		if (StringHelper.isNotEmpty(issuedUsername) && !issuedUsername.equals(registrationData.getUsername())) {
+			throw errorResponseFactory.invalidRequest(
+					"Asserted credential is not among the allowed credentials for this ceremony");
+		}
+
+		// FIDO2 conformance: when present, userHandle must map to the credential owner.
+		String userHandle = response.getUserHandle();
+		if (StringHelper.isNotEmpty(userHandle) && !userHandle.equals(registrationData.getUserId())) {
+			throw errorResponseFactory.invalidRequest("userHandle does not match the credential owner");
+		}
 
 		// Set username and authenticator type for metrics
 		username = registrationData.getUsername();
@@ -361,13 +472,16 @@ public class AssertionService {
 		authenticationEntity.setExpiration(authenticationHistoryExpiration);
 
 		authenticationPersistenceService.update(authenticationEntity);
+		persistedAsAuthenticated = true;
 
 		// Store actual counter value in separate attribute. Note: Fido2 not update
 		// initial value in Fido2RegistrationData to minimize DB updates
 		registrationEntry.setCounter(registrationData.getCounter());
 		registrationPersistenceService.update(registrationEntry);
 
-		log.debug("registrationEntry.getUserInum() : " + registrationEntry.getUserInum());
+		if (log.isDebugEnabled()) {
+			log.debug("registrationEntry.getUserInum() : {}", registrationEntry.getUserInum());
+		}
 		// If SessionStateId is not empty update session
 		String sessionStateId = authenticationEntity.getSessionStateId();
 		if (StringHelper.isNotEmpty(sessionStateId)) {
@@ -395,19 +509,191 @@ public class AssertionService {
 				externalFido2InterceptionContext);
 
 		// Record metrics for successful authentication
-		recordAuthenticationSuccessMetrics(registrationData.getUsername(), httpRequest, startTime, authenticatorType);
+		recordAuthenticationSuccessMetrics(registrationData.getUsername(), httpRequest, startTime, authenticatorType, assertionResult.getTelemetry());
+
+		lockAuditEventCollector.collect(buildAuthenticationAuditEvent(registrationData.getUsername(),
+				authenticationEntity.getRpId(), keyId, clientOrigin, authenticatorType, null));
 
 		return assertionResultResponse;
-		
+
 		} catch (Exception e) {
+			// Give the ceremony a terminal status. Done before the metrics calls below because those
+			// are dispatched asynchronously, whereas this has to complete on the request thread.
+			markAssertionFailed(authenticationEntity, e);
+
 			// Record metrics for failed authentication
-			recordAuthenticationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
-			
+			recordAuthenticationFailureMetrics(username, httpRequest, startTime, e, authenticatorType,
+					assertionResult != null ? assertionResult.getTelemetry() : null);
+
 			// Track fallback event for specific error types that might cause users to switch methods
 			recordFallbackForError(username, e);
-			
+
+			// A failure here can still mean the ceremony was already committed as `authenticated` by
+			// THIS invocation (e.g. an external interception script throwing after the persistence
+			// update and session commit above) — markAssertionFailed() already refuses to overwrite a
+			// non-pending status for exactly this reason, so the audit event must agree with what was
+			// actually persisted rather than reporting a DENY that never happened. Trusts
+			// persistedAsAuthenticated, not authenticationData.getStatus(), since a rejected replay of
+			// an already-authenticated ceremony (verifyCeremonyIsStillOpen() above) would otherwise see
+			// that same `authenticated` status — left over from the ORIGINAL call — and misreport ALLOW
+			// for a request that was actually denied.
+			String rpId = authenticationEntity != null ? authenticationEntity.getRpId() : null;
+			Exception auditFailure = persistedAsAuthenticated ? null : e;
+			lockAuditEventCollector.collect(buildAuthenticationAuditEvent(username, rpId, keyId, clientOrigin, authenticatorType, auditFailure));
+
 			// Re-throw the original exception
 			throw e;
+		}
+	}
+
+	/**
+	 * Maps an authentication outcome onto the Lock Server audit-event wire shape. Package-visible so a
+	 * test can drive it directly without standing up {@code verify()}'s full dependency graph.
+	 * <p>
+	 * Mirrors {@code AttestationService#buildRegistrationAuditEvent}'s shape and privacy decision
+	 * (only the exception's class name is recorded, never its message), with differences learned from
+	 * review on both sides:
+	 * <ul>
+	 * <li>{@code rpId} and {@code credentialId} are their own parameters rather than read off a
+	 * {@code Fido2RegistrationData}. That lookup can itself fail (wrong/unknown credential), and both
+	 * values are already known before it even runs — {@code rpId} from the resolved
+	 * {@code authenticationEntity}, {@code credentialId} from the client-asserted {@code keyId} — so a
+	 * DENY event for that failure still carries them instead of losing them just because the lookup
+	 * that would have produced a {@code Fido2RegistrationData} never succeeded.</li>
+	 * <li>{@code origin} is its own parameter rather than read off {@code registrationData}. A
+	 * credential can be registered at one permitted origin of an RP and used from a different
+	 * permitted origin later — {@code registrationData.getOrigin()} describes where it was
+	 * <em>registered</em>, not where <em>this</em> assertion actually happened. It is also not
+	 * {@code authenticationData.getOrigin()}, which only ever holds the RP hostname captured at
+	 * options-generation time and is never replaced by {@code domainVerifier.verifyDomain()} — that
+	 * method compares the raw clientData origin's host against it but discards the rest (scheme,
+	 * port). The caller instead passes the raw clientData {@code origin} field itself, captured right
+	 * after domain verification succeeds, so it is {@code null} for any failure raised before that
+	 * point rather than misreporting a domain that was never actually accepted.</li>
+	 * <li>{@code failure} being {@code null} covers both a genuine success and a failure raised after
+	 * the ceremony was already persisted as {@code authenticated} by <em>this</em> invocation — both
+	 * are represented as ALLOW, since both are what actually happened; see the
+	 * "persistedAsAuthenticated" flag in {@code verify()}'s catch block, which is deliberately not
+	 * derived from {@code authenticationData.getStatus()} alone (a rejected replay of an
+	 * already-authenticated ceremony would otherwise misreport ALLOW for a request that was actually
+	 * denied).</li>
+	 * </ul>
+	 */
+	LockAuditEvent buildAuthenticationAuditEvent(String username, String rpId, String credentialId, String origin,
+			String authenticatorType, Exception failure) {
+		LockAuditEvent event = new LockAuditEvent();
+		event.setEventTime(new Date());
+		event.setService("fido2");
+		event.setEventType("fido2_authentication");
+		event.setAction("authenticate");
+		event.setPrincipalId(username);
+
+		Map<String, String> context = new HashMap<>();
+		if (rpId != null) {
+			context.put("rpId", rpId);
+		}
+		if (credentialId != null) {
+			context.put("credentialId", credentialId);
+		}
+		if (origin != null) {
+			context.put("origin", origin);
+		}
+		if (authenticatorType != null) {
+			context.put("authenticatorAttachment", authenticatorType);
+		}
+
+		if (failure == null) {
+			event.setSeverityLevel("info");
+			event.setDecisionResult("ALLOW");
+		} else {
+			event.setSeverityLevel("warning");
+			event.setDecisionResult("DENY");
+			context.put("failureReason", failure.getClass().getSimpleName());
+		}
+		event.setContextInformation(context);
+
+		return event;
+	}
+
+	private int pendingCeremonyRetention() {
+		return AbandonedCeremonyPolicy.pendingCeremonyRetention(appConfiguration.getFido2Configuration());
+	}
+
+	/**
+	 * Rejects a ceremony that is no longer open to being completed.
+	 * <p>
+	 * Two conditions close a ceremony, and both have to be checked here rather than inferred:
+	 * <ul>
+	 * <li><b>It already reached a terminal status.</b> A challenge is single-use. Without this, a retry
+	 * after a rejected assertion could carry the row from {@code failed} back to {@code authenticated}
+	 * while leaving the stale error reason on it, and a replay could repeat the completion side effects
+	 * — updating the signature counter and the session — on a ceremony that was already resolved.</li>
+	 * <li><b>It outlived its window.</b> Previously the window was only enforced as a side effect of the
+	 * cleaner having removed the row, so a ceremony could outlive its stated window by up to one clean
+	 * interval. Now that pending rows are deliberately retained past it so the sweep can claim them,
+	 * enforcing it against the issue time is what stops that grace becoming extra time to authenticate.</li>
+	 * </ul>
+	 */
+	private void verifyCeremonyIsStillOpen(Fido2AuthenticationEntry authenticationEntity,
+			Fido2AuthenticationData authenticationData) {
+		if (authenticationData.getStatus() != Fido2AuthenticationStatus.pending) {
+			throw errorResponseFactory.invalidRequest("Assertion ceremony is no longer open");
+		}
+
+		Date issuedAt = authenticationEntity.getCreationDate();
+		if (issuedAt == null) {
+			return;
+		}
+
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+		// Compared in milliseconds: truncating to whole seconds would accept a ceremony up to a second
+		// past the configured window.
+		long elapsedMillis = System.currentTimeMillis() - issuedAt.getTime();
+		if (elapsedMillis > unfinishedRequestExpiration * 1000L) {
+			throw errorResponseFactory.invalidRequest("Assertion ceremony has expired");
+		}
+	}
+
+	/**
+	 * Records a rejected assertion on the ceremony it belongs to.
+	 * <p>
+	 * Without this the entry is left at {@code pending} and deleted unlabelled when the
+	 * unfinished-request window lapses, even though a {@code FIDO2_AUTHENTICATION_FAILURE} metric was
+	 * written for the same event — so the database and the metrics store disagreed about it.
+	 *
+	 * @param authenticationEntity the ceremony being verified, or null when the failure was raised
+	 *        before the challenge resolved to one
+	 * @param error the exception that rejected the assertion
+	 */
+	private void markAssertionFailed(Fido2AuthenticationEntry authenticationEntity, Exception error) {
+		if (authenticationEntity == null) {
+			return;
+		}
+
+		try {
+			Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
+
+			// Only a ceremony still in flight can be rejected. Anything already terminal was resolved
+			// by an earlier request, and a late failure must not overwrite that outcome.
+			if (authenticationData.getStatus() != Fido2AuthenticationStatus.pending) {
+				return;
+			}
+
+			String errorReason = resolveErrorReason(error);
+			authenticationData.setStatus(Fido2AuthenticationStatus.failed);
+			authenticationData.setErrorReason(errorReason);
+			authenticationData.setErrorCategory(metricService.categorizeError(errorReason));
+
+			// Promote off the short unfinished-request window: the ceremony is over, and a failure is
+			// worth keeping for as long as the successes it is compared against.
+			int authenticationHistoryExpiration = appConfiguration.getFido2Configuration()
+					.getAuthenticationHistoryExpiration();
+			authenticationEntity.setExpiration(authenticationHistoryExpiration);
+
+			authenticationPersistenceService.update(authenticationEntity);
+		} catch (Exception persistenceError) {
+			// Bookkeeping must never mask the rejection that is about to be re-thrown to the client.
+			log.warn("Failed to mark assertion ceremony as failed: {}", persistenceError.getMessage());
 		}
 	}
 
@@ -416,8 +702,11 @@ public class AssertionService {
 
 		List<Fido2RegistrationEntry> existingFido2Registrations;
 
-		// TODO: incase of a bug, this the second argument should have been null, see
-		// old code to understand
+		// origin is already the normalized rpId (hostname only, scheme stripped) produced
+		// by CommonVerifiers.verifyRpDomain → networkService.getHost. Registration stores
+		// the same normalized value in jansApp via entity.setRpId(origin), so the filter
+		// is consistent on both sides. Passing null would leak credential IDs across RPs
+		// and corrupt the U2F applicationId picked up at line 448.
 		existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, origin);
 
 		// f.getRegistrationData().getAttenstationRequest() null check is added to
@@ -428,8 +717,10 @@ public class AssertionService {
 				.collect(Collectors.toList());
 
 		List<PublicKeyCredentialDescriptor> allowedFido2Keys = new ArrayList<>(allowedFido2Registrations.size());
-		allowedFido2Registrations.forEach((f) -> {
-			log.debug("attestation request:" + f.getRegistrationData().getAttestationRequest());
+		allowedFido2Registrations.forEach(f -> {
+			if (log.isDebugEnabled()) {
+				log.debug("attestation request:{}", f.getRegistrationData().getAttestationRequest());
+			}
 
 			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor();
 			descriptor.setTransports(f.getRegistrationData().getTransports());
@@ -443,8 +734,11 @@ public class AssertionService {
 				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getRpId())).findAny();
 		String applicationId = null;
 
-		// applicationId should not be sent incase of pure fido2
-		applicationId = fidoRegistration.get().getRegistrationData().getRpId();
+		// applicationId should not be sent incase of pure fido2. Guard the Optional so an absent
+		// match yields a clean response instead of a NoSuchElementException surfaced as HTTP 500.
+		if (fidoRegistration.isPresent()) {
+			applicationId = fidoRegistration.get().getRegistrationData().getRpId();
+		}
 
 		return Pair.of(allowedFido2Keys, applicationId);
 	}
@@ -452,25 +746,75 @@ public class AssertionService {
 	/**
 	 * Record authentication success metrics
 	 */
-	private void recordAuthenticationSuccessMetrics(String username, HttpServletRequest httpRequest, 
-													long startTime, String authenticatorType) {
+	private void recordAuthenticationSuccessMetrics(String username, HttpServletRequest httpRequest,
+													long startTime, String authenticatorType, NativeClientTelemetry telemetry) {
 		try {
-			metricService.recordPasskeyAuthenticationSuccess(username, httpRequest, startTime, authenticatorType);
+			metricService.recordPasskeyAuthenticationSuccess(username, httpRequest, startTime, authenticatorType, telemetry);
 		} catch (Exception e) {
-			log.debug("Failed to record authentication success metrics: {}", e.getMessage());
+			log.debug("Failed to record authentication success metrics", e);
 		}
 	}
-	
+
 	/**
 	 * Record authentication failure metrics
 	 */
-	private void recordAuthenticationFailureMetrics(String username, HttpServletRequest httpRequest, 
-													long startTime, Exception error, String authenticatorType) {
+	private void recordAuthenticationFailureMetrics(String username, HttpServletRequest httpRequest,
+													long startTime, Exception error, String authenticatorType,
+													NativeClientTelemetry telemetry) {
 		try {
-			String errorReason = error.getMessage() != null ? error.getMessage() : "Unknown error";
-			metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
+			metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, resolveErrorReason(error), authenticatorType, telemetry);
 		} catch (Exception metricsException) {
-			log.debug("Failed to record authentication failure metrics: {}", metricsException.getMessage());
+			log.debug("Failed to record authentication failure metrics", metricsException);
+		}
+	}
+
+	/**
+	 * The reason string recorded for a rejection. Shared by the metric and the entry so the two
+	 * cannot describe the same failure differently.
+	 */
+	private static String resolveErrorReason(Exception error) {
+		// A native-failure rejection is recorded under its diagnostic code instead of the raw
+		// message, so failures can be counted by cause rather than by wording — mirrors how
+		// AttestationService.recordRegistrationFailureMetrics() treats a trust rejection. The
+		// original message stays in the log (verifyRpIdHash() logs it before throwing), so the
+		// substitution loses no detail.
+		String nativeFailureCode = NativeFailureDiagnostics.resolveCode(error);
+		if (nativeFailureCode != null) {
+			return nativeFailureCode;
+		}
+
+		String reason = extractFido2ErrorMessage(error);
+		if (reason == null) {
+			reason = error.getMessage();
+		}
+		return reason != null ? reason : "Unknown error";
+	}
+
+	/**
+	 * The specific reason carried in a FIDO2 rejection's response envelope.
+	 * <p>
+	 * Every rejection raised through {@link ErrorResponseFactory} is a {@code WebApplicationException}
+	 * built from a {@code Response}, and such an exception's {@code getMessage()} is only the generic
+	 * status line — "HTTP 400 Bad Request" — for all of them alike. Reading the reason out of the
+	 * {@code {status, errorMessage}} entity is what keeps a stale challenge distinguishable from an
+	 * unknown credential once the failure is recorded.
+	 *
+	 * @return the reason, or null when this is not a FIDO2 envelope and the caller should fall back
+	 */
+	private static String extractFido2ErrorMessage(Exception error) {
+		if (!(error instanceof WebApplicationException)) {
+			return null;
+		}
+		try {
+			Object entity = ((WebApplicationException) error).getResponse().getEntity();
+			if (!(entity instanceof String)) {
+				return null;
+			}
+			JsonNode errorMessage = ERROR_ENVELOPE_MAPPER.readTree((String) entity).get("errorMessage");
+			return errorMessage != null && errorMessage.isTextual() ? errorMessage.asText() : null;
+		} catch (Exception parseError) {
+			// Not a FIDO2 envelope, or unreadable. The caller falls back to the exception message.
+			return null;
 		}
 	}
 	
@@ -511,7 +855,7 @@ public class AssertionService {
 				log.debug("Recorded fallback event for user {}: {} - {}", username, fallbackMethod, reason);
 			}
 		} catch (Exception e) {
-			log.debug("Failed to record fallback metrics: {}", e.getMessage());
+			log.debug("Failed to record fallback metrics", e);
 		}
 	}
 

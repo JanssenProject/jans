@@ -28,7 +28,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.httpdCertFn = os.path.join(Config.certFolder, 'httpd.crt')
 
 
-        self.templates_folder = os.path.join(Config.templateFolder, 'apache')
+        self.templates_folder = os.path.join(Config.template_folder, 'apache')
         self.output_folder = os.path.join(Config.output_dir, 'apache')
 
         self.apache2_conf = os.path.join(self.output_folder, 'httpd.conf')
@@ -61,8 +61,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
         self.writeFile(os.path.join(self.server_root, 'index.html'), 'OK')
 
-        if base.snap:
-            icons_conf_fn = '/etc/apache2/mods-available/alias.conf'
+        icons_conf_fn = None
         if base.os_type == 'suse':
             icons_conf_fn = '/etc/apache2/default-server.conf'
         elif base.clone_type == 'deb':

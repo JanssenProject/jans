@@ -8,15 +8,13 @@
 
 from java.util import Arrays, Date
 from java.io import IOException
-from java.lang import Enum
+from java.lang import Enum, Throwable
 
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService
-from io.jans.as.server.service import UserService
 from io.jans.as.server.util import ServerUtil
-from io.jans.util import ArrayHelper
 from io.jans.util import StringHelper
 from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
@@ -25,7 +23,7 @@ from org.jsmpp import InvalidResponseException, PDUException
 from org.jsmpp.bean import Alphabet, BindType, ESMClass, GeneralDataCoding, MessageClass, NumberingPlanIndicator, RegisteredDelivery, SMSCDeliveryReceipt, TypeOfNumber
 from org.jsmpp.extra import NegativeResponseException, ResponseTimeoutException
 from org.jsmpp.session import BindParameter, SMPPSession
-from org.jsmpp.util import AbsoluteTimeFormatter, TimeFormatter
+from org.jsmpp.util import AbsoluteTimeFormatter
 import random
 
 
@@ -235,7 +233,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         facesMessages = CdiUtil.bean(FacesMessages)
@@ -243,8 +240,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
         session_attributes = self.identity.getSessionId().getSessionAttributes()
         form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
-
-        print("SMPP form_response_passcode: {}".format(str(form_passcode)))
 
         if step == 1:
             print("SMPP Step 1 Password Authentication")
@@ -264,7 +259,7 @@ class PersonAuthentication(PersonAuthenticationType):
             foundUser = None
             try:
                 foundUser = authenticationService.getAuthenticatedUser()
-            except:
+            except (Exception, Throwable):
                 print("SMPP Error retrieving user {} from LDAP".format(user_name))
                 return False
 
@@ -303,7 +298,6 @@ class PersonAuthentication(PersonAuthenticationType):
             # Retrieve the session attribute
             print("SMPP Step 2 SMS/OTP Authentication")
             code = session_attributes.get("code")
-            print("SMPP Code: {}".format(str(code)))
 
             if code is None:
                 print("SMPP Failed to find previously sent code")
@@ -314,15 +308,15 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             if len(form_passcode) != 6:
-                print("SMPP Passcode from response is not 6 digits: {}".format(form_passcode))
+                print("SMPP Passcode from response is not 6 digits")
                 return False
 
             if form_passcode == code:
                 print("SMPP SUCCESS! User entered the same code!")
                 return True
 
-            print("SMPP failed, user entered the wrong code! {} != {}".format(form_passcode, code))
-            facesMessages.add(facesMessage.SEVERITY_ERROR, "Incorrect SMS code, please try again.")
+            print("SMPP failed, user entered the wrong code!")
+            facesMessages.add(FacesMessage.SEVERITY_ERROR, "Incorrect SMS code, please try again.")
             return False
 
         print("SMPP ERROR: step param not found or != (1|2)")
@@ -415,7 +409,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     0,
                     code
                 )
-                print("SMPP Message '{}' sent to #{} with message id {}".format(code, number, message_id))
+                print("SMPP Message sent with message id {}".format(message_id))
                 status = True
             except PDUException as e:
                 print("SMPP Invalid PDU parameter: {}".format(e))

@@ -3,10 +3,9 @@ import sys
 import uuid
 import argparse
 
-from setup_app import static, paths
+from setup_app import static
 from setup_app.version import __version__
 from setup_app.utils import base
-from setup_app.config import Config
 
 OPENBANKING_PROFILE = 'openbanking'
 PROFILE = os.environ.get('JANS_PROFILE')
@@ -60,7 +59,7 @@ parser.add_argument('--force-download', help="Force downloading files", action='
 parser.add_argument('--download-exit', help="Download files and exits", action='store_true')
 parser.add_argument('-jans-app-version', help="Version for Jannses applications")
 parser.add_argument('-jans-build', help="Buid version for Janssen applications")
-parser.add_argument('-setup-branch', help="Jannsen setup github branch", default='main')
+parser.add_argument('-setup-branch', help="Janssen setup GitHub branch", default='main')
 
 parser.add_argument('--disable-config-api-security', help="Turn off oauth2 security validation for jans-config-api", action='store_true')
 parser.add_argument('--cli-test-client', help="Use config api test client for CLI", action='store_true')
@@ -141,7 +140,7 @@ def get_parser():
     if getattr(argsp, 'test_client_id', None):
         try:
             uuid.UUID(argsp.test_client_id)
-        except:
+        except Exception:
             sys.stderr.write("{}-test-client-id should be in UUID format{}\n".format(static.colors.DANGER, static.colors.ENDC))
             sys.stderr.flush()
             sys.exit(2)

@@ -18,25 +18,20 @@ import jarray
 import json
 import sys
 from com.google.common.io import BaseEncoding
-from com.lochbridge.oath.otp import HOTP
-from com.lochbridge.oath.otp import HOTPValidator
-from com.lochbridge.oath.otp import HmacShaAlgorithm
-from com.lochbridge.oath.otp import TOTP
-from com.lochbridge.oath.otp.keyprovisioning import OTPAuthURIBuilder
-from com.lochbridge.oath.otp.keyprovisioning import OTPKey
-from com.lochbridge.oath.otp.keyprovisioning.OTPKey import OTPType
+from com.bastiaanjansen.otp import HMACAlgorithm
+from com.bastiaanjansen.otp import HOTPGenerator
+from com.bastiaanjansen.otp import TOTPGenerator
 from java.security import SecureRandom
+from java.time import Duration
 from java.util import Arrays
-from java.util.concurrent import TimeUnit
 from io.jans.jsf2.message import FacesMessages
-from io.jans.jsf2.service import FacesService
-from jakarta.faces.context import FacesContext
 from io.jans.as.server.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService, UserService, SessionIdService
 from io.jans.util import StringHelper
+from java.lang import Throwable
 
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -110,7 +105,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        authenticationService = CdiUtil.bean(AuthenticationService)
 
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
@@ -120,7 +114,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             print "OTP. Authenticate for step 1"
             authenticated_user = self.processBasicAuthentication(credentials)
-            if authenticated_user == None:
+            if authenticated_user is None:
                 return False
 
             otp_auth_method = "authenticate"
@@ -148,7 +142,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            if user == None:
+            if user is None:
                 print "OTP. Authenticate for step 2. Failed to determine user name"
                 return False
 
@@ -183,7 +177,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            if user == None:
+            if user is None:
                 print "OTP. Authenticate for step 2. Failed to determine user name"
                 return False
 
@@ -205,7 +199,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-        credentials = identity.getCredentials()
 
         self.setRequestScopedParameters(identity)
 
@@ -226,7 +219,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if otp_auth_method == 'enroll':
                 authenticationService = CdiUtil.bean(AuthenticationService)
                 user = authenticationService.getAuthenticatedUser()
-                if user == None:
+                if user is None:
                     print "OTP. Prepare for step 2. Failed to load user enty"
                     return False
 
@@ -315,7 +308,7 @@ class PersonAuthentication(PersonAuthenticationType):
         f = open(otp_conf_file, 'r')
         try:
             otpConfiguration = json.loads(f.read())
-        except:
+        except (Exception, Throwable):
             print "OTP. Load OTP configuration. Failed to load configuration from file:", otp_conf_file
             return False
         finally:
@@ -330,16 +323,16 @@ class PersonAuthentication(PersonAuthenticationType):
             hmacShaAlgorithmType = None
 
             if StringHelper.equalsIgnoreCase(hmacShaAlgorithm, "sha1"):
-                hmacShaAlgorithmType = HmacShaAlgorithm.HMAC_SHA_1
+                hmacShaAlgorithmType = HMACAlgorithm.SHA1
             elif StringHelper.equalsIgnoreCase(hmacShaAlgorithm, "sha256"):
-                hmacShaAlgorithmType = HmacShaAlgorithm.HMAC_SHA_256
+                hmacShaAlgorithmType = HMACAlgorithm.SHA256
             elif StringHelper.equalsIgnoreCase(hmacShaAlgorithm, "sha512"):
-                hmacShaAlgorithmType = HmacShaAlgorithm.HMAC_SHA_512
+                hmacShaAlgorithmType = HMACAlgorithm.SHA512
             else:
                 print "OTP. Load OTP configuration. Invalid TOTP HMAC SHA algorithm: '%s'" % hmacShaAlgorithm
 
             self.totpConfiguration["hmacShaAlgorithmType"] = hmacShaAlgorithmType
-        except:
+        except (Exception, Throwable):
             print "OTP. Load OTP configuration. Invalid configuration file '%s' format. Exception: '%s'" % (otp_conf_file, sys.exc_info()[1])
             return False
 
@@ -347,7 +340,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
@@ -361,7 +353,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
 
         find_user_by_uid = authenticationService.getAuthenticatedUser()
-        if find_user_by_uid == None:
+        if find_user_by_uid is None:
             print "OTP. Process basic authentication. Failed to find user '%s'" % user_name
             return None
 
@@ -372,12 +364,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
         userService = CdiUtil.bean(UserService)
         user = userService.getUser(user_name, "oxExternalUid")
-        if user == None:
+        if user is None:
             print "OTP. Find enrollments. Failed to find user"
             return result
 
         user_custom_ext_attribute = userService.getCustomAttribute(user, "oxExternalUid")
-        if user_custom_ext_attribute == None:
+        if user_custom_ext_attribute is None:
             return result
 
         otp_prefix = "%s:" % self.otpType
@@ -397,7 +389,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def validateSessionId(self, identity):
         session = CdiUtil.bean(SessionIdService).getSessionId()
-        if session == None:
+        if session is None:
             print "OTP. Validate session id. Failed to determine session_id"
             return False
 
@@ -424,7 +416,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if otp_auth_method == "enroll":
             # Get key from session
             otp_secret_key_encoded = identity.getWorkingParameter("otp_secret_key")
-            if otp_secret_key_encoded == None:
+            if otp_secret_key_encoded is None:
                 print "OTP. Process OTP authentication. OTP secret key is invalid"
                 return False
 
@@ -519,30 +511,32 @@ class PersonAuthentication(PersonAuthenticationType):
     def generateHotpKey(self, secretKey, movingFactor):
         digits = self.hotpConfiguration["digits"]
 
-        hotp = HOTP.key(secretKey).digits(digits).movingFactor(movingFactor).build()
+        hotp = HOTPGenerator.Builder(secretKey).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
 
-        return hotp.value()
+        return hotp.generate(movingFactor)
 
     def validateHotpKey(self, secretKey, movingFactor, totpKey):
         lookAheadWindow = self.hotpConfiguration["lookAheadWindow"]
         digits = self.hotpConfiguration["digits"]
 
-        htopValidationResult = HOTPValidator.lookAheadWindow(lookAheadWindow).validate(secretKey, movingFactor, digits, totpKey)
-        if htopValidationResult.isValid():
-            return { "result": True, "movingFactor": htopValidationResult.getNewMovingFactor() }
+        hotp = HOTPGenerator.Builder(secretKey).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
+        # otp-java's verify(code, counter) checks a single counter; iterate the
+        # look-ahead window so we can return the matched counter as the new
+        # moving factor (lochbridge's HOTPValidationResult.getNewMovingFactor()).
+        counter = movingFactor
+        while counter <= movingFactor + lookAheadWindow:
+            if hotp.verify(totpKey, counter):
+                return { "result": True, "movingFactor": counter + 1 }
+            counter += 1
 
         return { "result": False, "movingFactor": None }
 
     def generateHotpSecretKeyUri(self, secretKey, issuer, userDisplayName):
         digits = self.hotpConfiguration["digits"]
 
-        secretKeyBase32 = self.toBase32(secretKey)
-        otpKey = OTPKey(secretKeyBase32, OTPType.HOTP)
-        label = issuer + " %s" % userDisplayName
+        hotp = HOTPGenerator.Builder(secretKey).withPasswordLength(digits).withAlgorithm(HMACAlgorithm.SHA1).build()
 
-        otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).build()
-
-        return otpAuthURI.toUriString()
+        return hotp.getURI(0, issuer, userDisplayName).toString()
 
     # TOTP methods
     def generateSecretTotpKey(self):
@@ -550,14 +544,21 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return self.generateSecretKey(keyLength)
 
-    def generateTotpKey(self, secretKey):
+    def buildTotpGenerator(self, secretKey):
         digits = self.totpConfiguration["digits"]
         timeStep = self.totpConfiguration["timeStep"]
         hmacShaAlgorithmType = self.totpConfiguration["hmacShaAlgorithmType"]
 
-        totp = TOTP.key(secretKey).digits(digits).timeStep(TimeUnit.SECONDS.toMillis(timeStep)).hmacSha(hmacShaAlgorithmType).build()
+        # otp-java sets password length + algorithm on the wrapped HOTP generator
+        # via a Consumer; Jython coerces this function to that interface.
+        def configure(builder):
+            builder.withPasswordLength(digits)
+            builder.withAlgorithm(hmacShaAlgorithmType)
 
-        return totp.value()
+        return TOTPGenerator.Builder(secretKey).withHOTPGenerator(configure).withPeriod(Duration.ofSeconds(timeStep)).build()
+
+    def generateTotpKey(self, secretKey):
+        return self.buildTotpGenerator(secretKey).now()
 
     def validateTotpKey(self, secretKey, totpKey, user_name):
         localTotpKey = self.generateTotpKey(secretKey)
@@ -593,16 +594,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return user_cached_OTP
 
     def generateTotpSecretKeyUri(self, secretKey, issuer, userDisplayName):
-        digits = self.totpConfiguration["digits"]
-        timeStep = self.totpConfiguration["timeStep"]
-
-        secretKeyBase32 = self.toBase32(secretKey)
-        otpKey = OTPKey(secretKeyBase32, OTPType.TOTP)
-        label = issuer + " %s" % userDisplayName
-
-        otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).timeStep(TimeUnit.SECONDS.toMillis(timeStep)).build()
-
-        return otpAuthURI.toUriString()
+        return self.buildTotpGenerator(secretKey).getURI(issuer, userDisplayName).toString()
 
     # Utility methods
     def toBase32(self, bytes):

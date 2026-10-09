@@ -1,0 +1,11 @@
+{
+  "cedar_version": "4.4.0",
+  "policy_store": {
+    "id": "0f1239660df95ccee5749251e973acc7",
+    "name": "Terraform JWT Authorization Policies",
+    "description": "Cedar policies for gating Terraform CI operations using GitHub Actions OIDC JWTs. Policies check JWT claims such as repository name and Git ref to determine whether plan/apply/destroy is permitted.",
+    "version": "1.0.0",
+    "created_date": "2026-04-23T00:00:00Z",
+    "updated_date": "2026-04-23T00:00:00Z"
+  }
+}

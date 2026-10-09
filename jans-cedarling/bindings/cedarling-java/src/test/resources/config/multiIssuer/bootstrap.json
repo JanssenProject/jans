@@ -1,0 +1,10 @@
+{
+  "CEDARLING_APPLICATION_NAME": "TestApp",
+  "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
+  "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+  "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+  "CEDARLING_LOG_LEVEL": "DEBUG",
+  "CEDARLING_LOG_TYPE": "memory",
+  "CEDARLING_LOG_TTL": 120,
+  "CEDARLING_POLICY_STORE_LOCAL_FN": "<will_be_dynamically_updated_at_runtime>"
+}

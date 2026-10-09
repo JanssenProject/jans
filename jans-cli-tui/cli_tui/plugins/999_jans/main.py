@@ -126,7 +126,7 @@ class Plugin(DialogUtils):
                 version_msgs.append(HTML("\n"))
 
             self.app.show_message(
-                _("Jannsen Application Versions"),
+                _("Janssen Application Versions"),
                 merge_formatted_text(version_msgs),
                 tobefocused=self.app.center_container
                 )
@@ -141,7 +141,7 @@ class Plugin(DialogUtils):
         try:
             response = config_cli.session.get(
                 url=open_id_url,
-                verify=False if config_cli.args.noverify else True,
+                verify=config_cli.ssl_verify_setting(),
                 timeout=30,
                 )
             response.raise_for_status()
@@ -158,8 +158,11 @@ class Plugin(DialogUtils):
         if not jwks_uri:
             raise SSAError(_("jwks_uri is not found in OpenID Configuration"))
 
-        if config_cli.args.noverify:
+        verify = config_cli.ssl_verify_setting()
+        if verify is False:
             ssl_context = ssl._create_unverified_context()
+        elif isinstance(verify, str):
+            ssl_context = ssl.create_default_context(cafile=verify)
         else:
             ssl_context = ssl.create_default_context()
 
@@ -226,7 +229,7 @@ class Plugin(DialogUtils):
                     url=f'{issuer_url}/jans-auth/restv1/register',
                     data=json.dumps(client_creation_data),
                     headers={'Content-Type': 'application/json'},
-                    verify=False if config_cli.args.noverify else True,
+                    verify=config_cli.ssl_verify_setting(),
                     timeout=30,
                 ),
             )

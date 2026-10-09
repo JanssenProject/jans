@@ -1,4 +1,4 @@
-from typing import Any, Optional, Sequence, Callable
+from typing import Optional, Sequence, Callable
 
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit,\
@@ -8,7 +8,6 @@ from prompt_toolkit.widgets import Button, Label, TextArea, Frame
 from prompt_toolkit.widgets import Button, Dialog, CheckboxList
 
 from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.widgets.base import RadioList
 from prompt_toolkit.formatted_text import AnyFormattedText
 
@@ -17,7 +16,6 @@ from utils.static import DialogResult, cli_style
 from utils.utils import DialogUtils, common_data
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_label_container import JansLabelContainer
 from wui_components.jans_label_widget import JansLabelWidget
 
@@ -71,6 +69,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         for attribute in common_data.jans_attributes:
             if attribute['dn'] == dn:
                 return [attribute['dn'], attribute.get('displayName') or attribute.get('claimName')]
+        return None
 
     def save(self) -> None:
         """method to invoked when saving the dialog (Save button is pressed)
@@ -299,17 +298,8 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         )
 
         self.alt_tabs['dynamic'] = HSplit([
-
                         self.dynamic_scope_scripts_widget,
-                        self.app.getTitledText(
-                                _("Claims"),
-                                name='claims',
-                                value='\n'.join(self.data.get('claims', [])),
-                                height=3, 
-                                jans_help=self.app.get_help_from_schema(self.schema, 'claims'),
-                                style=cli_style.edit_text
-                                ),
-
+                        self.claims_container,
                         ],width=D(),
                     )
 
@@ -386,6 +376,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         for dn_, name_ in self.claims_container.entries:
             if dn_ == dn:
                 return True
+        return None
 
     def add_claim(self):
 

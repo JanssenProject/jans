@@ -25,6 +25,12 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
     ```
     Use `make android BUILD_TYPE=release` or `make android BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
   
-3. We have included a sample android app using Cedarling UniFFI binding for making authorisation decisions. Open the `./bindings/cedarling_uniffi/androidApp` project on Android Studio and run the project on simulator.
+3. We have included a sample android app using Cedarling UniFFI binding for making authorisation decisions. Open the `./bindings/cedarling_uniffi/androidApp` project on Android Studio.
+
+4. Press ctrl key twice on Android Studio to open Run Anything dialog.
+
+5. Enter `gradle wrapper --gradle-version 8.7` and press enter key. This will generate gradle wrapper at `{jans_monorep_path}/jans-cedarling/bindings/cedarling_uniffi/androidApp/gradle/wrapper`.
+
+6. Run the project on simulator.
 
 <div style="position: relative; padding-bottom: 104.75728155339806%; height: 0;"><iframe src="https://www.loom.com/embed/463de78bd3174f2ca7d2b2f2fb2915cd?sid=01bd3481-857f-4981-9414-e81852fa3079" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>

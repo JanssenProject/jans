@@ -8,6 +8,7 @@ package io.jans.as.server.model.registration;
 
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
@@ -18,14 +19,15 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.util.Pair;
+import io.jans.as.model.util.SpiffeIdUtil;
 import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
+import io.jans.as.server.service.net.SectorIdentifierUriService;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +58,9 @@ public class RegisterParamsValidator {
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
+    @Inject
+    private SectorIdentifierUriService sectorIdentifierUriService;
 
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
@@ -293,6 +298,53 @@ public class RegisterParamsValidator {
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter authorization_encrypted_response_enc is not valid.");
         }
+
+        validateSpiffe(registerRequest);
+    }
+
+    /**
+     * Validates the `spiffe_id`/`spiffe_bundle_endpoint` client metadata, per
+     * draft-ietf-oauth-spiffe-client-auth. Rejects the request outright if either is present
+     * while the feature is disabled, so operators don't end up with silently-ignored metadata.
+     */
+    public void validateSpiffe(RegisterRequest registerRequest) {
+        final boolean spiffeMetadataPresent = StringUtils.isNotBlank(registerRequest.getSpiffeId())
+                || StringUtils.isNotBlank(registerRequest.getSpiffeBundleEndpoint());
+        if (!spiffeMetadataPresent) {
+            return;
+        }
+
+        if (!appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)) {
+            log.debug("spiffe_id/spiffe_bundle_endpoint were provided but SPIFFE_CLIENT_AUTH feature flag is disabled.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "SPIFFE-based client authentication is not enabled on this server.");
+        }
+
+        if (StringUtils.isBlank(registerRequest.getSpiffeId())) {
+            log.debug("Parameter spiffe_bundle_endpoint was provided without spiffe_id.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter spiffe_id is required when SPIFFE client metadata is provided.");
+        }
+
+        if (!SpiffeIdUtil.isValidRegisteredSpiffeId(registerRequest.getSpiffeId())) {
+            log.debug("Parameter spiffe_id is not a valid SPIFFE ID: {}", registerRequest.getSpiffeId());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter spiffe_id is not a valid SPIFFE ID.");
+        }
+
+        final String bundleEndpoint = registerRequest.getSpiffeBundleEndpoint();
+        if (StringUtils.isNotBlank(bundleEndpoint)) {
+            try {
+                final URI uri = new URI(bundleEndpoint);
+                if (!HTTPS.equalsIgnoreCase(uri.getScheme()) || StringUtils.isBlank(uri.getHost())) {
+                    throw new URISyntaxException(bundleEndpoint, "must be an https URL");
+                }
+            } catch (URISyntaxException e) {
+                log.debug("Parameter spiffe_bundle_endpoint is not a valid https URL: {}", bundleEndpoint);
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                        RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter spiffe_bundle_endpoint is not a valid https URL.");
+            }
+        }
     }
 
     /**
@@ -405,33 +457,25 @@ public class RegisterParamsValidator {
         // Validate Sector Identifier URL
         boolean noRedirectUriInSectorIdentifierUri = false;
         if (valid && StringUtils.isNotBlank(sectorIdentifierUrl)) {
-            try {
-                URI uri = new URI(sectorIdentifierUrl);
-                if (!HTTPS.equalsIgnoreCase(uri.getScheme())) {
-                    valid = false;
-                }
-
-                jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
-                String entity = null;
+            if (!sectorIdentifierUriService.isAllowedSectorIdentifierUri(sectorIdentifierUrl)) {
+                valid = false;
+                noRedirectUriInSectorIdentifierUri = true;
+            } else {
                 try {
-                    Response clientResponse = clientRequest.target(sectorIdentifierUrl).request().buildGet().invoke();
-                    int status = clientResponse.getStatus();
-
-                    if (status == 200) {
-                        entity = clientResponse.readEntity(String.class);
-
+                    String entity = sectorIdentifierUriService.fetchSectorIdentifierContent(sectorIdentifierUrl);
+                    if (StringUtils.isNotBlank(entity)) {
                         JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
                         valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
+                    } else {
+                        valid = false;
                     }
+                } catch (Exception e) {
+                    log.debug(e.getMessage(), e);
+                    valid = false;
                 } finally {
-                    clientRequest.close();
-                }
-            } catch (Exception e) {
-                log.debug(e.getMessage(), e);
-                valid = false;
-            } finally {
-                if (!valid) {
-                    noRedirectUriInSectorIdentifierUri = true;
+                    if (!valid) {
+                        noRedirectUriInSectorIdentifierUri = true;
+                    }
                 }
             }
         }

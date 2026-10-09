@@ -1,0 +1,11 @@
+@id("AdminCanReadAndWrite")
+permit (
+  principal,
+  action in [Jans::Action::"Read",
+  Jans::Action::"Write"],
+  resource in Jans::Application::"dashboard"
+) when {
+    context has tokens.jans_userinfo_token &&
+    context.tokens.jans_userinfo_token.hasTag("role") &&
+    context.tokens.jans_userinfo_token.getTag("role").contains("admin")
+};

@@ -17,8 +17,8 @@ use std::time::Duration;
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, DataApi, DataStoreConfig, EntityData,
-    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
-    RequestUnsigned,
+    HttpClientConfig, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, RequestUnsigned,
 };
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use serde::Deserialize;
@@ -94,6 +94,7 @@ static BSCONFIG: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
     },
     policy_store_config: PolicyStoreConfig {
         source: PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
+        ..Default::default()
     },
     jwt_config: JwtConfig::new_without_validation(),
     authorization_config: AuthorizationConfig::default(),
@@ -101,6 +102,7 @@ static BSCONFIG: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
     max_base64_size: None,
     max_default_entities: None,
     data_store_config: DataStoreConfig::default(),
+    http_client_config: HttpClientConfig::default(),
 });
 
 static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
@@ -111,6 +113,7 @@ static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| B
     },
     policy_store_config: PolicyStoreConfig {
         source: PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA.to_string()),
+        ..Default::default()
     },
     jwt_config: JwtConfig::new_without_validation(),
     authorization_config: AuthorizationConfig::default(),
@@ -118,6 +121,7 @@ static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| B
     max_base64_size: None,
     max_default_entities: None,
     data_store_config: DataStoreConfig::default(),
+    http_client_config: HttpClientConfig::default(),
 });
 
 // =============================================================================

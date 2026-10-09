@@ -60,6 +60,7 @@
 //!   This is done through the [`status_list`] crate for the implementation.
 //! - [x] JWK rotation: A per-issuer background task periodically re-fetches JWKS
 
+mod custom_token;
 mod decode;
 mod error;
 mod http_utils;
@@ -76,10 +77,12 @@ mod validation;
 
 pub(crate) mod test_utils;
 
+pub(crate) use custom_token::{CustomIssuerIndex, CustomIssuerIndexError};
+pub use custom_token::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
 pub(crate) use decode::*;
 pub(crate) use error::*;
 pub use loading_info::TrustedIssuerLoadingInfo;
-pub(crate) use token::{Token, TokenClaims};
+pub(crate) use token::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer};
 pub(crate) use token_cache::TokenCache;
 pub(crate) use validation::{TrustedIssuerError, ValidateJwtError};
 
@@ -92,17 +95,20 @@ use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 
+use self::http_utils::{GetFromUrl, OpenIdConfig};
+use crate::http::HttpClient;
 use crate::log::Logger;
 use chrono::Utc;
-use http_utils::{GetFromUrl, OpenIdConfig};
 use issuer_index::IssuerIndex;
 use key_service::KeyService;
 use loading_state::TrustedIssuerLoadingState;
 use log_entry::JwtLogEntry;
+use smol_str::SmolStr;
 use status_list::{JwtStatus, JwtStatusError, StatusListCache};
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use tokio::sync::Notify;
 use tokio_util::sync::CancellationToken;
 use trusted_issuers_loader::TrustedIssuerLoader;
@@ -110,6 +116,40 @@ use validation::{
     JwtValidator, JwtValidatorCache, OwnedValidatorInfo, TokenKind, TrustedIssuerValidator,
     ValidatedJwt, ValidatorInfo, validate_required_claims,
 };
+
+/// A JWT whose mapping no trusted issuer declares. Never returned to the caller: the
+/// token is dropped and this only feeds the log and metrics.
+#[derive(Debug, thiserror::Error)]
+#[error("no trusted issuer declares a token for the mapping '{0}'")]
+pub(crate) struct UnknownTokenMapping(String);
+
+#[allow(clippy::cast_possible_truncation)]
+pub(crate) fn parse_numeric_date(value: &serde_json::Value) -> Option<i64> {
+    if let Some(i) = value.as_i64() {
+        return Some(i);
+    }
+    if let Some(f) = value.as_f64() {
+        return f.is_finite().then(|| f.floor() as i64);
+    }
+    value
+        .as_str()
+        .and_then(|s| s.trim().parse::<f64>().ok())
+        .filter(|f| f.is_finite())
+        .map(|f| f.floor() as i64)
+}
+
+/// Entity type -> token key index, built from the full config so it doesn't depend on
+/// async loading. `validate_trusted_issuers_config` rejects duplicate entity types before
+/// `JwtService` is built, so every entity type maps to exactly one token key.
+fn index_token_keys_by_entity_type(
+    trusted_issuers: &HashMap<String, TrustedIssuer>,
+) -> HashMap<String, String> {
+    trusted_issuers
+        .values()
+        .flat_map(|issuer| &issuer.token_metadata)
+        .map(|(token_key, metadata)| (metadata.entity_type_name.clone(), token_key.clone()))
+        .collect()
+}
 
 /// Handles JWT validation
 pub(crate) struct JwtService {
@@ -125,6 +165,9 @@ pub(crate) struct JwtService {
     /// Cancellation token to stop all background JWKS refresh tasks on drop
     jwks_cancel_token: CancellationToken,
     metrics: Arc<MetricsCollector>,
+    /// Reverse lookup from a token's Cedar entity type name to its
+    /// `token_metadata` key, e.g. `Dolphin::Access_Token` -> `access_token`.
+    token_keys_by_entity_type: HashMap<String, String>,
 }
 
 struct IssuerConfig {
@@ -133,6 +176,13 @@ struct IssuerConfig {
     policy: Arc<TrustedIssuer>,
     /// The [`OpenIdConfig`] loaded from the IDP's `/.well-known/openid-configuration` endpoint
     openid_config: Option<OpenIdConfig>,
+}
+
+struct TokenCallCtx<'a> {
+    token: &'a TokenInput,
+    index: usize,
+    now: chrono::DateTime<Utc>,
+    seen_combinations: &'a mut HashSet<(SmolStr, SmolStr)>,
 }
 
 impl JwtService {
@@ -153,10 +203,20 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
         metrics: Arc<MetricsCollector>,
+        http_client: HttpClient,
     ) -> Result<Self, JwtServiceInitError> {
         if jwt_config.jwt_sig_validation && jwt_config.signature_algorithms_supported.is_empty() {
             return Err(JwtServiceInitError::NoSupportedAlgorithms);
         }
+
+        // Apply field-level invariants once here so the bootstrap deserializer is
+        // not the only line of defense - programmatic callers that build a
+        // `JwtConfig` directly cannot otherwise reach the normalization.
+        let mut jwt_config = jwt_config.clone();
+        jwt_config.normalize();
+        let jwt_config = &jwt_config;
+
+        warn_if_jwt_validation_disabled(jwt_config, logger.as_ref());
 
         let status_lists = StatusListCache::default();
         let issuer_configs = Arc::new(IssuerIndex::new());
@@ -172,6 +232,7 @@ impl JwtService {
         );
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
+        let token_keys_by_entity_type = index_token_keys_by_entity_type(&trusted_issuers);
         let loading_state = Arc::new(TrustedIssuerLoadingState::new(trusted_issuers.len()));
 
         let jwks_refresh_notifiers = Arc::new(Mutex::new(HashMap::new()));
@@ -186,6 +247,7 @@ impl JwtService {
             token_cache: token_cache.clone(),
             logger: logger.clone(),
             loading_state: loading_state.clone(),
+            http_client,
             jwks_refresh_notifiers: jwks_refresh_notifiers.clone(),
             jwks_cancel_token: jwks_cancel_token.clone(),
         };
@@ -194,6 +256,20 @@ impl JwtService {
 
         // Create TrustedIssuerValidator for advanced validation scenarios
         let trusted_issuer_validator = TrustedIssuerValidator::new(trusted_issuers);
+
+        {
+            let cache = token_cache.clone();
+            let cancel = jwks_cancel_token.clone();
+            crate::http::spawn_task(async move {
+                loop {
+                    tokio::select! {
+                        () = crate::async_sleep::sleep(std::time::Duration::from_secs(30)) => {},
+                        () = cancel.cancelled() => { break; },
+                    }
+                    cache.clear_expired();
+                }
+            });
+        }
 
         Ok(Self {
             validators,
@@ -206,6 +282,7 @@ impl JwtService {
             jwks_refresh_notifiers,
             jwks_cancel_token,
             metrics,
+            token_keys_by_entity_type,
         })
     }
 
@@ -234,20 +311,15 @@ impl JwtService {
             token_kind: token_kind.clone(),
             algorithm: decoded_jwt.header.alg,
         };
-        let validator: Arc<std::sync::RwLock<JwtValidator>> =
-            self.validators
-                .get(&validator_key)
-                .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
+        let validator: Arc<JwtValidator> = self
+            .validators
+            .get(&validator_key)
+            .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
 
         // validate JWT
         // NOTE: the JWT will be validated depending on the validator's settings that
         // was set on initialization
-        let mut validated_jwt = {
-            validator
-                .read()
-                .expect("acquire JwtValidator read lock")
-                .validate_jwt(jwt, decoding_key)?
-        };
+        let mut validated_jwt = validator.validate_jwt(jwt, decoding_key)?;
 
         // Use TrustedIssuerValidator to find and validate against trusted issuer
         // This implements Requirement 5: "WHEN processing JWT tokens THEN the Cedarling
@@ -290,7 +362,9 @@ impl JwtService {
             // Get the token type name from token_kind (skip for StatusList tokens)
             let token_type: Option<&str> = match &token_kind {
                 TokenKind::AuthzRequestInput(name) => Some(*name),
-                TokenKind::AuthorizeMultiIssuer(name) => Some(name),
+                TokenKind::AuthorizeMultiIssuer(name) | TokenKind::AuthorizeCustom(name) => {
+                    Some(name)
+                },
                 TokenKind::StatusList => None, // Skip required claims validation for status list tokens
             };
 
@@ -329,6 +403,11 @@ impl JwtService {
         Ok(validated_jwt)
     }
 
+    /// Flush cached custom-token verdicts, leaving JWT cache entries intact.
+    pub(crate) fn clear_custom_token_cache(&self) {
+        self.token_cache.clear_custom_tokens();
+    }
+
     /// Validate multiple tokens from different issuers
     ///
     /// This method validates JWT tokens from multiple issuers, checking for:
@@ -337,9 +416,12 @@ impl JwtService {
     /// - Non-deterministic token detection (duplicate issuer+type combinations)
     ///
     /// Returns a result containing validated tokens or detailed error information.
-    pub(crate) fn validate_multi_issuer_tokens(
+    pub(crate) async fn validate_multi_issuer_tokens(
         &self,
         tokens: &[TokenInput],
+        custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
+        custom_issuers: &CustomIssuerIndex,
+        custom_timeout: Option<Duration>,
     ) -> Result<HashMap<String, Arc<Token>>, MultiIssuerValidationError> {
         if tokens.is_empty() {
             return Err(MultiIssuerValidationError::EmptyTokenArray);
@@ -347,9 +429,6 @@ impl JwtService {
 
         let mut validated_tokens = HashMap::new();
         let mut seen_combinations = HashSet::new();
-
-        // clear expired tokens from cache
-        self.token_cache.clear_expired();
 
         let now = Utc::now();
 
@@ -365,83 +444,37 @@ impl JwtService {
                 continue;
             }
 
-            // Find the corresponding token metadata key for the entity type name
-            let token_type = self.find_token_metadata_key(&token.mapping);
-
-            let token_kind = TokenKind::AuthorizeMultiIssuer(token_type);
             // Create Token with the mapping as the name
             let token_name = token.mapping.clone();
 
-            if let Some(cedar_token) = self.token_cache.find(&token_kind, &token.payload) {
-                validated_tokens.insert(token_name, cedar_token);
+            // Custom-token dispatch: a mapping that routes to a custom issuer is
+            // never handled by the JWT path.
+            //
+            // DEBT: this seam belongs in `Authz::multi_issuer_setup`, which would
+            // split the input into custom and JWT tokens and leave `JwtService`
+            // JWT-only. It is not a pure move: two pieces of state the custom path
+            // borrows live in here and would have to come along.
+            //   - `seen_combinations` spans both branches, so the duplicate
+            //     (issuer, mapping) check has to move up with it or custom and JWT
+            //     tokens stop conflicting with each other.
+            //   - `token_cache` is owned by `JwtService` and used by the custom path
+            //     for `process` memoization, so it has to be shared or split.
+            // Worth its own PR with those two covered by tests, not a drive-by.
+            let mut ctx = TokenCallCtx {
+                token,
+                index,
+                now,
+                seen_combinations: &mut seen_combinations,
+            };
+            let result = if custom_issuers.mapping_is_custom(&token.mapping) {
+                self.handle_custom_token(custom_processor, custom_issuers, custom_timeout, &mut ctx)
+                    .await?
             } else {
-                // Validate JWT using existing single token validation
-                match self.validate_single_token(&token_kind, &token.payload) {
-                    Ok(validated_jwt) => {
-                        self.metrics.record_jwt_validation(true);
-                        // Extract issuer for non-deterministic check
-                        let issuer = validated_jwt
-                            .claims
-                            .get("iss")
-                            .and_then(|iss| iss.as_str())
-                            .ok_or(MultiIssuerValidationError::MissingIssuer)?;
+                self.validate_jwt_token(&mut ctx)?
+            };
 
-                        // Check for non-deterministic tokens (graceful validation)
-                        let combination = format!("{}:{}", issuer, token.mapping);
-                        if seen_combinations.insert(combination.clone()) {
-                            // Convert ValidatedJwt to Token
-                            let claims =
-                                serde_json::from_value::<TokenClaims>(validated_jwt.claims)
-                                    .map_err(|err| {
-                                        if let Some(logger) = &self.logger {
-                                            logger.log_any(JwtLogEntry::new(
-                                                format!(
-                                                    "failed to deserialize token claims: {err}"
-                                                ),
-                                                Some(LogLevel::ERROR),
-                                            ));
-                                        }
-                                        MultiIssuerValidationError::TokenValidationFailed
-                                    })?;
-
-                            let cedar_token = Arc::new(Token::new(
-                                &token_name,
-                                claims,
-                                validated_jwt.trusted_iss,
-                            ));
-
-                            self.token_cache.save(
-                                &token_kind,
-                                &token.payload,
-                                cedar_token.clone(),
-                                now,
-                            );
-
-                            validated_tokens.insert(token_name, cedar_token);
-                        } else {
-                            // Log warning but continue processing
-                            if let Some(logger) = &self.logger {
-                                logger.log_any(JwtLogEntry::new(
-                                format!(
-                                    "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
-                                    token.mapping, issuer
-                                ),
-                                Some(LogLevel::WARN),
-                            ));
-                            }
-                        }
-                    },
-                    Err(err) => {
-                        self.metrics.record_jwt_validation(false);
-                        if let Some(logger) = &self.logger {
-                            logger.log_any(JwtLogEntry::new(
-                                format!("Token validation failed at index {index}: {err}"),
-                                Some(LogLevel::WARN),
-                            ));
-                        }
-                        self.metrics.record_error(&err);
-                    },
-                }
+            if let Some(cedar_token) = result {
+                validated_tokens.insert(token_name, cedar_token);
             }
         }
 
@@ -458,6 +491,308 @@ impl JwtService {
         }
 
         Ok(validated_tokens)
+    }
+
+    /// Dispatch a single token input whose mapping routes to a custom issuer.
+    ///
+    /// Returns `Ok(None)` when the token is dropped (no processor, duplicate, or
+    /// non-required failure) and `Err` only when the failure is fail-closed.
+    async fn handle_custom_token(
+        &self,
+        custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
+        custom_issuers: &CustomIssuerIndex,
+        custom_timeout: Option<Duration>,
+        ctx: &mut TokenCallCtx<'_>,
+    ) -> Result<Option<Arc<Token>>, MultiIssuerValidationError> {
+        let Some(processor) = custom_processor else {
+            let err = MultiIssuerValidationError::CustomToken(
+                CustomTokenError::NoProcessorRegistered(ctx.token.mapping.clone()),
+            );
+            // Record only on the skip-and-continue path
+            if custom_issuers.mapping_required(&ctx.token.mapping) {
+                return Err(err);
+            }
+            self.metrics.record_error(&err);
+            if let Some(logger) = &self.logger {
+                logger.log_any(JwtLogEntry::new(
+                    format!("Custom token dropped at index {}: {err}", ctx.index),
+                    Some(LogLevel::WARN),
+                ));
+            }
+            return Ok(None);
+        };
+
+        if let Ok((issuer, _)) = custom_issuers.resolve(&ctx.token.mapping) {
+            let combination = (
+                SmolStr::from(issuer.issuer_id.as_str()),
+                SmolStr::from(ctx.token.mapping.as_str()),
+            );
+            if ctx.seen_combinations.contains(&combination) {
+                if let Some(logger) = &self.logger {
+                    logger.log_any(JwtLogEntry::new(
+                        format!(
+                            "Non-deterministic custom token detected: type '{}' (duplicate found, skipping before processing)",
+                            ctx.token.mapping
+                        ),
+                        Some(LogLevel::WARN),
+                    ));
+                }
+                return Ok(None);
+            }
+        }
+
+        match self
+            .process_custom_token(
+                processor,
+                custom_issuers,
+                ctx.token,
+                custom_timeout,
+                ctx.now,
+            )
+            .await
+        {
+            Ok(cedar_token) => {
+                let issuer = cedar_token
+                    .extract_normalized_issuer()
+                    .map(|i| SmolStr::from(i.as_str()))
+                    .unwrap_or_default();
+                let combination = (issuer, SmolStr::from(ctx.token.mapping.as_str()));
+                if ctx.seen_combinations.insert(combination) {
+                    Ok(Some(cedar_token))
+                } else if let Some(logger) = &self.logger {
+                    logger.log_any(JwtLogEntry::new(
+                        format!(
+                            "Non-deterministic custom token detected: type '{}' (duplicate found, skipping)",
+                            ctx.token.mapping
+                        ),
+                        Some(LogLevel::WARN),
+                    ));
+                    Ok(None)
+                } else {
+                    Ok(None)
+                }
+            },
+            Err(err) => {
+                // Fail-closed for a `required` custom issuer; otherwise skip
+                // and continue, logging timeout vs. processor error distinctly.
+                // Record only on the skip path the fail-closed `return Err` is
+                // recorded once by `multi_issuer_setup`'s `inspect_err`.
+                if custom_issuers.mapping_required(&ctx.token.mapping) {
+                    return Err(err);
+                }
+                self.metrics.record_error(&err);
+                if let Some(logger) = &self.logger {
+                    let reason = if matches!(
+                        err,
+                        MultiIssuerValidationError::CustomToken(CustomTokenError::Timeout(_))
+                    ) {
+                        "timeout"
+                    } else {
+                        "processor error"
+                    };
+                    logger.log_any(JwtLogEntry::new(
+                        format!(
+                            "Custom token dropped at index {} ({reason}): {err}",
+                            ctx.index
+                        ),
+                        Some(LogLevel::WARN),
+                    ));
+                }
+                Ok(None)
+            },
+        }
+    }
+
+    /// Validate a single JWT token input via the cache or single-token validation.
+    ///
+    /// Returns `Ok(None)` when the token is dropped (duplicate or validation
+    /// failure); issuer/claim errors abort the whole batch as before.
+    fn validate_jwt_token(
+        &self,
+        ctx: &mut TokenCallCtx<'_>,
+    ) -> Result<Option<Arc<Token>>, MultiIssuerValidationError> {
+        let Some(token_key) = self.token_keys_by_entity_type.get(&ctx.token.mapping) else {
+            let err = UnknownTokenMapping(ctx.token.mapping.clone());
+            self.metrics.record_error(&err);
+            if let Some(logger) = &self.logger {
+                logger.log_any(JwtLogEntry::new(
+                    format!("Token dropped at index {}: {err}", ctx.index),
+                    Some(LogLevel::WARN),
+                ));
+            }
+            return Ok(None);
+        };
+        let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(token_key));
+
+        if let Some(cedar_token) = self.token_cache.find(&token_kind, &ctx.token.payload) {
+            return Ok(Some(cedar_token));
+        }
+
+        // Validate JWT using existing single token validation
+        match self.validate_single_token(&token_kind, &ctx.token.payload) {
+            Ok(validated_jwt) => {
+                self.metrics.record_jwt_validation(true);
+                // Extract issuer for non-deterministic check
+                let issuer = validated_jwt
+                    .claims
+                    .get("iss")
+                    .and_then(|iss| iss.as_str())
+                    .ok_or(MultiIssuerValidationError::MissingIssuer)?;
+
+                // Check for non-deterministic tokens (graceful validation)
+                let combination = (
+                    SmolStr::from(issuer),
+                    SmolStr::from(ctx.token.mapping.as_str()),
+                );
+                if ctx.seen_combinations.insert(combination) {
+                    // Convert ValidatedJwt to Token
+                    let claims = TokenClaims::try_from(validated_jwt.claims)
+                        .map_err(MultiIssuerValidationError::InvalidClaims)?;
+
+                    let cedar_token = Arc::new(Token::new(
+                        &ctx.token.mapping,
+                        claims,
+                        validated_jwt.trusted_iss.map(TokenIssuer::Jwt),
+                    ));
+
+                    self.token_cache.save(
+                        &token_kind,
+                        &ctx.token.payload,
+                        cedar_token.clone(),
+                        ctx.now,
+                    );
+
+                    Ok(Some(cedar_token))
+                } else {
+                    // Log warning but continue processing
+                    if let Some(logger) = &self.logger {
+                        logger.log_any(JwtLogEntry::new(
+                            format!(
+                                "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
+                                ctx.token.mapping, issuer
+                            ),
+                            Some(LogLevel::WARN),
+                        ));
+                    }
+                    Ok(None)
+                }
+            },
+            Err(err) => {
+                self.metrics.record_jwt_validation(false);
+                if let Some(logger) = &self.logger {
+                    logger.log_any(JwtLogEntry::new(
+                        format!("Token validation failed at index {}: {err}", ctx.index),
+                        Some(LogLevel::WARN),
+                    ));
+                }
+                self.metrics.record_error(&err);
+                Ok(None)
+            },
+        }
+    }
+
+    /// Process a single custom (non-JWT) token via the registered processor.
+    ///
+    /// Resolves the custom issuer, enforces required claims, and caches the result
+    /// unless the processor opts out. Serves a still-valid cached result on hit.
+    ///
+    /// DEBT: lives in `JwtService` for a minimal v1 diff; see the note at the
+    /// dispatch site in [`validate_multi_issuer_tokens`](Self::validate_multi_issuer_tokens)
+    /// for what moving this seam up to `Authz` would take.
+    async fn process_custom_token(
+        &self,
+        processor: &Arc<dyn CustomTokenProcessor>,
+        custom_issuers: &CustomIssuerIndex,
+        input: &TokenInput,
+        timeout: Option<Duration>,
+        now: chrono::DateTime<Utc>,
+    ) -> Result<Arc<Token>, MultiIssuerValidationError> {
+        let token_kind = TokenKind::AuthorizeCustom(Cow::Borrowed(input.mapping.as_str()));
+
+        // Serve a still-valid cached result if present.
+        if let Some(cached) = self.token_cache.find(&token_kind, &input.payload) {
+            return Ok(cached);
+        }
+
+        let started = Utc::now();
+        let outcome: Result<Arc<Token>, MultiIssuerValidationError> = async {
+            let process_fut = processor.process(&input.mapping, &input.payload);
+            let processed = match timeout {
+                None => process_fut.await?,
+                Some(dur) => {
+                    tokio::select! {
+                        res = process_fut => res?,
+                        () = crate::async_sleep::sleep(dur) => {
+                            return Err(CustomTokenError::Timeout(dur).into());
+                        },
+                    }
+                },
+            };
+
+            if processed.token_id.is_empty() {
+                return Err(CustomTokenError::EmptyTokenId(input.mapping.clone()).into());
+            }
+
+            let (issuer, token_meta) = custom_issuers.resolve(&input.mapping)?;
+            for required in &token_meta.required_claims {
+                if !processed.claims.contains_key(required) {
+                    return Err(CustomTokenError::MissingRequiredClaim(required.clone()).into());
+                }
+            }
+
+            // Cedarling does not validate a custom payload, but it does honor the
+            // expiration the processor reported: the explicit `expiration` field, or an
+            // `exp` claim when the processor put it there instead. Without this the
+            // fresh path and the cache disagree — the cache refuses to store or serve an
+            // expired token, so an expired one would be accepted on every request via
+            // re-processing.
+            let expiration = processed
+                .expiration
+                .or_else(|| processed.claims.get("exp").and_then(parse_numeric_date));
+            if let Some(exp) = expiration.filter(|exp| *exp <= now.timestamp()) {
+                return Err(CustomTokenError::Expired {
+                    mapping: input.mapping.clone(),
+                    exp,
+                }
+                .into());
+            }
+
+            let meta = CustomTokenIssuerMeta {
+                issuer_id: issuer.issuer_id.clone(),
+                entity_type_name: Some(input.mapping.clone()),
+                token_id: processed.token_id.clone(),
+                expiration,
+            };
+            let cacheable = processed.cacheable;
+            let claims = TokenClaims::from(processed.claims);
+            let cedar_token = Arc::new(Token::new(
+                &input.mapping,
+                claims,
+                Some(TokenIssuer::Custom(meta)),
+            ));
+
+            if cacheable {
+                self.token_cache.save_with_expiration(
+                    &token_kind,
+                    &input.payload,
+                    cedar_token.clone(),
+                    now,
+                    expiration,
+                );
+            }
+
+            Ok(cedar_token)
+        }
+        .await;
+
+        let elapsed_us = Utc::now()
+            .signed_duration_since(started)
+            .num_microseconds()
+            .unwrap_or(i64::MAX);
+        self.metrics
+            .record_custom_token(outcome.is_ok(), elapsed_us);
+
+        outcome
     }
 
     /// Use the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
@@ -486,20 +821,6 @@ impl JwtService {
                 Some(LogLevel::INFO),
             ));
         }
-    }
-
-    /// Find the token metadata key for a given entity type name
-    /// e.g., "`Dolphin::Access_Token`" -> "`access_token`"
-    fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a str) -> Cow<'a, str> {
-        if let Some(token_key) = self
-            .issuer_configs
-            .find_token_metadata_key(entity_type_name)
-        {
-            return Cow::Owned(token_key);
-        }
-
-        // If not found, return the original mapping (fallback)
-        Cow::Borrowed(entity_type_name)
     }
 }
 
@@ -536,21 +857,629 @@ impl TrustedIssuerLoadingInfo for JwtService {
     }
 }
 
+/// Emits a WARN log entry once per `JwtService::new` when either JWT signature
+/// or status validation has been explicitly disabled. The defaults are strict,
+/// so reaching this code means an operator opted out.
+fn warn_if_jwt_validation_disabled(jwt_config: &JwtConfig, logger: Option<&Logger>) {
+    if !jwt_config.jwt_sig_validation {
+        logger.log_any(JwtLogEntry::new(
+            "JWT signature validation is disabled (CEDARLING_JWT_SIG_VALIDATION=disabled); \
+             tokens are accepted without cryptographic verification"
+                .to_string(),
+            Some(LogLevel::WARN),
+        ));
+    }
+
+    if !jwt_config.jwt_status_validation {
+        logger.log_any(JwtLogEntry::new(
+            "JWT status validation is disabled (CEDARLING_JWT_STATUS_VALIDATION=disabled); \
+             revoked tokens may continue to be accepted"
+                .to_string(),
+            Some(LogLevel::WARN),
+        ));
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::JwtService;
     use super::TrustedIssuerLoadingInfo;
+    use super::index_token_keys_by_entity_type;
     use super::test_utils::*;
+    use super::{CustomIssuerIndex, CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
-    use crate::authz::metrics::MetricsCollector;
+    use crate::authz::metrics::{MetricsCollector, MetricsMode};
     use crate::authz::request::TokenInput;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::common::policy_store::TrustedIssuer;
+    use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata};
+    use crate::http::HttpClient;
+    use crate::http::HttpClientConfig;
+    use async_trait::async_trait;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
     use std::sync::Arc;
+    use std::sync::LazyLock;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::time::Duration;
     use tokio::test;
+    use url::Url;
+
+    /// Build a trusted issuer from `(token_key, entity_type_name)` pairs.
+    fn issuer_with_tokens(name: &str, tokens: &[(&str, &str)]) -> TrustedIssuer {
+        TrustedIssuer::new(
+            name.to_string(),
+            String::new(),
+            Url::parse(&format!(
+                "https://{name}.test/.well-known/openid-configuration"
+            ))
+            .expect("test oidc endpoint should parse"),
+            tokens
+                .iter()
+                .map(|(token_key, entity_type_name)| {
+                    (
+                        (*token_key).to_string(),
+                        TokenEntityMetadata::builder()
+                            .entity_type_name((*entity_type_name).to_string())
+                            .build(),
+                    )
+                })
+                .collect(),
+        )
+    }
+
+    /// Token keys repeat across issuers (every issuer has an `access_token`), so
+    /// each entity type must resolve to the key of its own issuer.
+    #[test]
+    async fn index_resolves_entity_types_across_issuers() {
+        let issuers = HashMap::from([
+            (
+                "jans".to_string(),
+                issuer_with_tokens(
+                    "jans",
+                    &[
+                        ("access_token", "Jans::Access_Token"),
+                        ("id_token", "Jans::Id_Token"),
+                    ],
+                ),
+            ),
+            (
+                "acme".to_string(),
+                issuer_with_tokens("acme", &[("access_token", "Acme::Access_Token")]),
+            ),
+            (
+                "dolphin".to_string(),
+                issuer_with_tokens("dolphin", &[("dolphin_token", "Dolphin::Dolphin_Token")]),
+            ),
+        ]);
+
+        let index = index_token_keys_by_entity_type(&issuers);
+
+        for (entity_type_name, expected_key) in [
+            ("Jans::Access_Token", "access_token"),
+            ("Jans::Id_Token", "id_token"),
+            ("Acme::Access_Token", "access_token"),
+            ("Dolphin::Dolphin_Token", "dolphin_token"),
+        ] {
+            assert_eq!(
+                index.get(entity_type_name).map(String::as_str),
+                Some(expected_key),
+                "{entity_type_name} must resolve to its own issuer's token key"
+            );
+        }
+
+        assert_eq!(
+            index.get("Nope::Token"),
+            None,
+            "an entity type no issuer declares must not resolve"
+        );
+    }
+
+    static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+            max_response_size_bytes: None,
+        })
+        .expect("http client should be constructed")
+    });
+
+    enum StubBehavior {
+        Ok {
+            cacheable: bool,
+        },
+        /// Emits `sub` plus an `exp` claim at the given offset from now (seconds).
+        OkWithExp {
+            exp_offset_secs: i64,
+        },
+        /// Emits `sub` and reports expiration through `ProcessedTokenClaims`
+        /// instead of an `exp` claim.
+        OkWithExpirationField {
+            exp_offset_secs: i64,
+        },
+        Fail,
+        Slow,
+        SlowOk,
+    }
+
+    struct StubProcessor {
+        calls: Arc<AtomicUsize>,
+        behavior: StubBehavior,
+    }
+
+    #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+    #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
+    impl CustomTokenProcessor for StubProcessor {
+        async fn process(
+            &self,
+            mapping: &str,
+            _payload: &str,
+        ) -> Result<ProcessedTokenClaims, CustomTokenError> {
+            self.calls.fetch_add(1, Ordering::SeqCst);
+            match &self.behavior {
+                StubBehavior::Ok { cacheable } => {
+                    let mut claims = HashMap::new();
+                    claims.insert("sub".to_string(), json!("custom-sub"));
+                    Ok(ProcessedTokenClaims {
+                        claims,
+                        token_id: format!("cid-{mapping}"),
+                        expiration: None,
+                        cacheable: *cacheable,
+                    })
+                },
+                StubBehavior::OkWithExp { exp_offset_secs } => {
+                    let mut claims = HashMap::new();
+                    claims.insert("sub".to_string(), json!("custom-sub"));
+                    claims.insert(
+                        "exp".to_string(),
+                        json!(chrono::Utc::now().timestamp() + exp_offset_secs),
+                    );
+                    Ok(ProcessedTokenClaims::new(claims, "cid-exp"))
+                },
+                StubBehavior::OkWithExpirationField { exp_offset_secs } => {
+                    let mut claims = HashMap::new();
+                    claims.insert("sub".to_string(), json!("custom-sub"));
+                    let mut processed = ProcessedTokenClaims::new(claims, "cid-expiration");
+                    processed.expiration = Some(chrono::Utc::now().timestamp() + exp_offset_secs);
+                    Ok(processed)
+                },
+                StubBehavior::Fail => Err(CustomTokenError::Processing("boom".to_string())),
+                StubBehavior::Slow => {
+                    tokio::time::sleep(Duration::from_secs(10)).await;
+                    Ok(ProcessedTokenClaims::new(HashMap::new(), "slow"))
+                },
+                StubBehavior::SlowOk => {
+                    tokio::time::sleep(Duration::from_millis(30)).await;
+                    let mut claims = HashMap::new();
+                    claims.insert("sub".to_string(), json!("slow-ok"));
+                    Ok(ProcessedTokenClaims::new(claims, "slow-ok"))
+                },
+            }
+        }
+    }
+
+    /// Processor that fails for any mapping containing "Fail", succeeds otherwise.
+    struct DispatchProcessor;
+
+    #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+    #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
+    impl CustomTokenProcessor for DispatchProcessor {
+        async fn process(
+            &self,
+            mapping: &str,
+            _payload: &str,
+        ) -> Result<ProcessedTokenClaims, CustomTokenError> {
+            if mapping.contains("Fail") {
+                Err(CustomTokenError::Processing("boom".to_string()))
+            } else {
+                let mut claims = HashMap::new();
+                claims.insert("sub".to_string(), json!("ok"));
+                Ok(ProcessedTokenClaims::new(claims, "cid"))
+            }
+        }
+    }
+
+    #[test]
+    async fn parse_numeric_date_accepts_int_float_and_string() {
+        // Integer (the common case).
+        assert_eq!(
+            super::parse_numeric_date(&json!(1_700_000_000)),
+            Some(1_700_000_000)
+        );
+        // RFC 7519 permits non-integer NumericDate
+        assert_eq!(
+            super::parse_numeric_date(&json!(1_700_000_000.9)),
+            Some(1_700_000_000)
+        );
+        // Numeric string (upstream sometimes forwards it as text).
+        assert_eq!(
+            super::parse_numeric_date(&json!("1700000000")),
+            Some(1_700_000_000)
+        );
+        assert_eq!(
+            super::parse_numeric_date(&json!(" 1700000000.5 ")),
+            Some(1_700_000_000)
+        );
+    }
+
+    #[test]
+    async fn parse_numeric_date_rejects_non_finite_and_garbage() {
+        // Non-finite floats cannot round-trip through JSON literals, but a string
+        // that parses to one must not slip through, and neither must plain garbage.
+        assert_eq!(super::parse_numeric_date(&json!("inf")), None);
+        assert_eq!(super::parse_numeric_date(&json!("NaN")), None);
+        assert_eq!(super::parse_numeric_date(&json!("not-a-date")), None);
+        assert_eq!(super::parse_numeric_date(&json!(true)), None);
+        assert_eq!(super::parse_numeric_date(&json!(null)), None);
+    }
+
+    fn custom_index(entries: &[(&str, &str, bool)]) -> CustomIssuerIndex {
+        let mut m: HashMap<String, CustomIssuerMetadata> = HashMap::new();
+        for (name, mapping, required) in entries {
+            m.entry((*name).to_string())
+                .or_insert_with(|| CustomIssuerMetadata {
+                    tokens_mappings: HashMap::new(),
+                })
+                .tokens_mappings
+                .insert(
+                    (*mapping).to_string(),
+                    CustomTokenMetadata {
+                        required: *required,
+                        required_claims: HashSet::new(),
+                    },
+                );
+        }
+        CustomIssuerIndex::build(&m).expect("test custom issuer index should build")
+    }
+
+    async fn custom_only_service() -> JwtService {
+        JwtService::new(
+            &JwtConfig::new_without_validation(),
+            None,
+            None,
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
+        )
+        .await
+        .expect("custom-only JwtService should build")
+    }
+
+    #[test]
+    async fn custom_token_success_and_caches() {
+        let svc = custom_only_service().await;
+        let calls = Arc::new(AtomicUsize::new(0));
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: calls.clone(),
+            behavior: StubBehavior::Ok { cacheable: true },
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", false)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let out = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect("custom token should validate");
+        assert!(
+            out.contains_key("Acme::CustomToken"),
+            "validated output should contain the custom token under its mapping name"
+        );
+
+        // Second call is served from the token cache: processor not re-invoked.
+        svc.validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect("cached custom token should validate");
+        assert_eq!(
+            calls.load(Ordering::SeqCst),
+            1,
+            "a cacheable custom token must be processed only once; the second call should hit the token cache"
+        );
+    }
+
+    #[test]
+    async fn custom_token_not_cacheable_reinvokes() {
+        let svc = custom_only_service().await;
+        let calls = Arc::new(AtomicUsize::new(0));
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: calls.clone(),
+            behavior: StubBehavior::Ok { cacheable: false },
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", false)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        svc.validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect("first non-cacheable custom token should validate");
+        svc.validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect("second non-cacheable custom token should validate");
+        assert_eq!(
+            calls.load(Ordering::SeqCst),
+            2,
+            "a non-cacheable custom token must be re-processed on every call"
+        );
+    }
+
+    #[test]
+    async fn custom_token_required_failure_hard_errors() {
+        let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: Arc::new(AtomicUsize::new(0)),
+            behavior: StubBehavior::Fail,
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect_err("required custom token failure should hard-error");
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::Processing(_))
+            ),
+            "a failing required custom token should hard-error with the processor's error"
+        );
+    }
+
+    #[test]
+    async fn custom_token_non_required_failure_skips_and_keeps_others() {
+        let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(DispatchProcessor);
+        let index = custom_index(&[("FailIss", "Fail::T", false), ("OkIss", "Ok::T", false)]);
+        let tokens = vec![
+            TokenInput::new("Fail::T".to_string(), "p1".to_string()),
+            TokenInput::new("Ok::T".to_string(), "p2".to_string()),
+        ];
+
+        let out = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect("a non-required custom failure must not fail the whole request");
+        assert_eq!(
+            out.len(),
+            1,
+            "only the succeeding custom token should be kept; the failing one must be skipped"
+        );
+        assert!(
+            out.contains_key("Ok::T"),
+            "the output should contain the token from the succeeding custom issuer"
+        );
+    }
+
+    #[test]
+    async fn custom_token_timeout_produces_timeout_error() {
+        let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: Arc::new(AtomicUsize::new(0)),
+            behavior: StubBehavior::Slow,
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(
+                &tokens,
+                Some(&processor),
+                &index,
+                Some(Duration::from_millis(50)),
+            )
+            .await
+            .expect_err("slow processor should time out");
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::Timeout(_))
+            ),
+            "a slow custom processor past the deadline should surface as a Timeout error"
+        );
+    }
+
+    #[test]
+    async fn custom_token_missing_required_claim_errors() {
+        let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: Arc::new(AtomicUsize::new(0)),
+            // StubBehavior::Ok emits only `sub`, never `scope`.
+            behavior: StubBehavior::Ok { cacheable: true },
+        });
+        let mut m = HashMap::new();
+        m.insert(
+            "Acme".to_string(),
+            CustomIssuerMetadata {
+                tokens_mappings: HashMap::from([(
+                    "Acme::CustomToken".to_string(),
+                    CustomTokenMetadata {
+                        required: true,
+                        required_claims: HashSet::from(["scope".to_string()]),
+                    },
+                )]),
+            },
+        );
+        let index = CustomIssuerIndex::build(&m).expect("test custom issuer index should build");
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect_err("missing required claim should fail");
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::MissingRequiredClaim(ref c))
+                    if c == "scope"
+            ),
+            "expected MissingRequiredClaim(scope), got {err:?}"
+        );
+    }
+
+    #[test]
+    async fn custom_token_past_exp_errors() {
+        let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: Arc::new(AtomicUsize::new(0)),
+            behavior: StubBehavior::OkWithExp {
+                exp_offset_secs: -60,
+            },
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect_err("an already-expired custom token should be rejected");
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::Expired {
+                    ref mapping,
+                    ..
+                }) if mapping == "Acme::CustomToken"
+            ),
+            "expected Expired {{ mapping: Acme::CustomToken }}, got {err:?}"
+        );
+    }
+
+    #[test]
+    async fn custom_token_past_expiration_field_errors() {
+        let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: Arc::new(AtomicUsize::new(0)),
+            behavior: StubBehavior::OkWithExpirationField {
+                exp_offset_secs: -60,
+            },
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect_err("a past `expiration` should be rejected even without an exp claim");
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::Expired {
+                    ref mapping,
+                    ..
+                }) if mapping == "Acme::CustomToken"
+            ),
+            "expected Expired {{ mapping: Acme::CustomToken }}, got {err:?}"
+        );
+    }
+
+    #[test]
+    async fn custom_token_future_exp_is_accepted() {
+        let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: Arc::new(AtomicUsize::new(0)),
+            behavior: StubBehavior::OkWithExp {
+                exp_offset_secs: 3600,
+            },
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let validated = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect("a custom token whose exp is in the future should validate");
+        assert!(
+            validated.contains_key("Acme::CustomToken"),
+            "an unexpired custom token should reach the validated token map"
+        );
+    }
+
+    #[test]
+    async fn custom_token_no_processor_required_hard_errors() {
+        let svc = custom_only_service().await;
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(&tokens, None, &index, None)
+            .await
+            .expect_err("required custom mapping without a processor should hard-error");
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::NoProcessorRegistered(_))
+            ),
+            "expected NoProcessorRegistered, got {err:?}"
+        );
+    }
+
+    #[test]
+    async fn custom_token_no_processor_optional_skips() {
+        let svc = custom_only_service().await;
+        let index = custom_index(&[("Acme", "Acme::CustomToken", false)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(&tokens, None, &index, None)
+            .await
+            .expect_err("only token skipped -> no validated tokens");
+        assert!(
+            matches!(err, MultiIssuerValidationError::TokenValidationFailed),
+            "optional custom mapping without a processor should skip, got {err:?}"
+        );
+    }
+
+    #[test]
+    async fn custom_token_zero_timeout_runs_to_completion() {
+        let svc = custom_only_service().await;
+        let calls = Arc::new(AtomicUsize::new(0));
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: calls.clone(),
+            behavior: StubBehavior::SlowOk,
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let out = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect("no timeout -> slow processor completes");
+        assert!(out.contains_key("Acme::CustomToken"));
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
+    }
 
     #[test]
     async fn test_validate_multi_issuer_tokens_success() {
@@ -585,7 +1514,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -595,7 +1523,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Id_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -611,7 +1538,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -622,7 +1550,9 @@ mod test {
             TokenInput::new("Jans::Id_Token".to_string(), id_tkn),
         ];
 
-        let result = jwt_service.validate_multi_issuer_tokens(&tokens);
+        let result = jwt_service
+            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .await;
         assert!(result.is_ok());
 
         let validated_tokens = result.unwrap();
@@ -648,12 +1578,15 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
 
-        let result = jwt_service.validate_multi_issuer_tokens(&[]);
+        let result = jwt_service
+            .validate_multi_issuer_tokens(&[], None, &CustomIssuerIndex::default(), None)
+            .await;
         assert!(matches!(
             result,
             Err(MultiIssuerValidationError::EmptyTokenArray)
@@ -675,7 +1608,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -686,7 +1620,9 @@ mod test {
             TokenInput::new("Jans::Id_Token".to_string(), "also-invalid".to_string()),
         ];
 
-        let result = jwt_service.validate_multi_issuer_tokens(&tokens);
+        let result = jwt_service
+            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .await;
         assert!(matches!(
             result,
             Err(MultiIssuerValidationError::TokenValidationFailed)
@@ -715,7 +1651,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -726,7 +1661,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Id_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -743,7 +1677,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -754,7 +1689,9 @@ mod test {
             TokenInput::new("Jans::Id_Token".to_string(), "invalid-jwt".to_string()),
         ];
 
-        let result = jwt_service.validate_multi_issuer_tokens(&tokens);
+        let result = jwt_service
+            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .await;
         assert!(result.is_ok());
 
         let validated_tokens = result.unwrap();
@@ -793,7 +1730,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: "Jans::Access_Token".to_string(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
 
                 required_claims: HashSet::new(),
@@ -810,7 +1746,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
@@ -821,7 +1758,9 @@ mod test {
             TokenInput::new("Jans::Access_Token".to_string(), token_two), // Duplicate type from same issuer
         ];
 
-        let result = jwt_service.validate_multi_issuer_tokens(&tokens);
+        let result = jwt_service
+            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .await;
         assert!(result.is_ok());
 
         let validated_tokens = result.unwrap();
@@ -853,14 +1792,17 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");
 
         let tokens = vec![TokenInput::new("Jans::Access_Token".to_string(), token)];
 
-        let result = jwt_service.validate_multi_issuer_tokens(&tokens);
+        let result = jwt_service
+            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .await;
         assert!(matches!(
             result,
             Err(MultiIssuerValidationError::TokenValidationFailed)
@@ -880,7 +1822,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: mapping.clone(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -897,7 +1838,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("JwtService should initialize with trusted issuer metadata");
@@ -913,10 +1855,13 @@ mod test {
             .expect("Token signed with initial key should be generated");
 
         jwt_service
-            .validate_multi_issuer_tokens(&[TokenInput::new(
-                mapping.clone(),
-                token_before_rotation,
-            )])
+            .validate_multi_issuer_tokens(
+                &[TokenInput::new(mapping.clone(), token_before_rotation)],
+                None,
+                &CustomIssuerIndex::default(),
+                None,
+            )
+            .await
             .expect("Token signed with initial key should validate before key rotation");
 
         server
@@ -934,16 +1879,28 @@ mod test {
             .expect("Token signed with rotated key should be generated");
 
         jwt_service
-            .validate_multi_issuer_tokens(&[TokenInput::new(
-                mapping.clone(),
-                token_after_rotation.clone(),
-            )])
+            .validate_multi_issuer_tokens(
+                &[TokenInput::new(
+                    mapping.clone(),
+                    token_after_rotation.clone(),
+                )],
+                None,
+                &CustomIssuerIndex::default(),
+                None,
+            )
+            .await
             .expect_err("First call after rotation should fail");
 
         tokio::time::sleep(std::time::Duration::from_millis(200)).await;
 
         jwt_service
-            .validate_multi_issuer_tokens(&[TokenInput::new(mapping, token_after_rotation)])
+            .validate_multi_issuer_tokens(
+                &[TokenInput::new(mapping, token_after_rotation)],
+                None,
+                &CustomIssuerIndex::default(),
+                None,
+            )
+            .await
             .expect("Token signed with rotated key should validate after background JWKS refresh");
     }
 
@@ -960,7 +1917,6 @@ mod test {
             TokenEntityMetadata {
                 trusted: true,
                 entity_type_name: mapping.clone(),
-                principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
                 required_claims: HashSet::new(),
             },
@@ -977,7 +1933,8 @@ mod test {
             },
             Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("JwtService should initialize with trusted issuer metadata");
@@ -997,16 +1954,28 @@ mod test {
             .expect("Token signed with rotated key should be generated");
 
         jwt_service
-            .validate_multi_issuer_tokens(&[TokenInput::new(
-                mapping.clone(),
-                token_after_rotation.clone(),
-            )])
+            .validate_multi_issuer_tokens(
+                &[TokenInput::new(
+                    mapping.clone(),
+                    token_after_rotation.clone(),
+                )],
+                None,
+                &CustomIssuerIndex::default(),
+                None,
+            )
+            .await
             .expect_err("First call with rotated kid should fail (stale key)");
 
         tokio::time::sleep(std::time::Duration::from_millis(200)).await;
 
         jwt_service
-            .validate_multi_issuer_tokens(&[TokenInput::new(mapping, token_after_rotation)])
+            .validate_multi_issuer_tokens(
+                &[TokenInput::new(mapping, token_after_rotation)],
+                None,
+                &CustomIssuerIndex::default(),
+                None,
+            )
+            .await
             .expect(
                 "Validation should recover from unknown rotated kid after background JWKS refresh",
             );
@@ -1027,7 +1996,8 @@ mod test {
             },
             Some(HashMap::from([("Jans".into(), iss)])),
             None,
-            Arc::new(MetricsCollector::new(0)),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
         )
         .await
         .expect("Should create JwtService");

@@ -10,9 +10,9 @@
 #![cfg(not(target_family = "wasm"))]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, JwtConfig, LogConfig,
-    LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
-    log_config::StdOutLoggerMode,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, HttpClientConfig, JwtConfig,
+    LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
+    PolicyStoreSource, log_config::StdOutLoggerMode,
 };
 use std::env;
 
@@ -54,6 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+            ..Default::default()
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig::default(),
@@ -61,15 +62,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
+        http_client_config: HttpClientConfig::default(),
     })
     .await?;
 
     println!("Stage 1:");
     let logs_ids = cedarling.get_log_ids();
-    println!(
-        "Show results of get_logs(): returns a list of all log ids: {:?}",
-        &logs_ids
-    );
+    println!("Show results of get_logs(): returns a list of all log ids: {logs_ids:?}");
     println!("\n\nStage 2:\nShow result of get_log_by_id for each key.");
     for id in logs_ids {
         let entry = cedarling

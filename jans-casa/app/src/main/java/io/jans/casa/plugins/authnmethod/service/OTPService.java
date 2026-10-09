@@ -1,7 +1,6 @@
 package io.jans.casa.plugins.authnmethod.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.lochbridge.oath.otp.keyprovisioning.OTPKey;
 import io.jans.casa.core.model.PersonOTP;
 import io.jans.casa.core.pojo.OTPDevice;
 import io.jans.casa.misc.Utils;
@@ -189,7 +188,7 @@ public class OTPService extends BaseService {
 
     }
 
-    public IOTPAlgorithm getAlgorithmService(OTPKey.OTPType type) {
+    public IOTPAlgorithm getAlgorithmService(OTPType type) {
 
         switch (type) {
             case HOTP:                

@@ -5,19 +5,8 @@
 #
 #
 
-from io.jans.as.model.jwt import Jwt
-from io.jans.as.model.crypto import AuthCryptoProvider
-from io.jans.model.custom.script.conf import CustomScriptConfiguration
 from io.jans.model.custom.script.type.configapi import ConfigApiType
-from io.jans.orm import PersistenceEntryManager
-from io.jans.service.cdi.util import CdiUtil
-from io.jans.util import StringHelper, ArrayHelper
-from io.jans.configapi.model.configuration import ApiAppConfiguration
-
-from org.json import JSONObject
-from java.lang import String
-from jakarta.servlet.http import HttpServletRequest
-from jakarta.servlet.http import HttpServletResponse
+from io.jans.util import StringHelper
 
 
 class ConfigApiAuthorization(ConfigApiType):

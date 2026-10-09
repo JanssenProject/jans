@@ -5,18 +5,16 @@
 
 #[cfg(test)]
 mod archive_security_tests;
+pub(crate) mod custom_issuer_metadata;
 pub(crate) mod log_entry;
 #[cfg(test)]
 pub(crate) mod test_utils;
-mod token_entity_metadata;
+pub(crate) mod token_entity_metadata;
 
-use crate::common::{
-    default_entities::DefaultEntitiesWithWarns,
-    default_entities_limits::{DefaultEntitiesLimits, DefaultEntitiesLimitsError},
-    issuer_utils::IssClaim,
-};
+use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
 
 pub(crate) mod archive_handler;
+pub(crate) mod custom_issuer_parser;
 pub(crate) mod entity_parser;
 pub(crate) mod errors;
 pub(crate) mod issuer_parser;
@@ -26,16 +24,18 @@ pub(crate) mod manager;
 pub(crate) mod metadata;
 pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;
+#[cfg(feature = "tools")]
+pub(crate) mod validate;
 pub(crate) mod validator;
 pub(crate) mod vfs_adapter;
 
 use super::cedar_schema::CedarSchema;
-use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy};
-use semver::Version;
+use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy, PolicyId};
 use serde::Serialize;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, hash_map::Entry};
 use url::Url;
 
+pub(crate) use custom_issuer_metadata::{CustomIssuerMetadata, CustomTokenMetadata};
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export types used by init/policy_store.rs and external consumers
@@ -48,35 +48,36 @@ pub(crate) use metadata::PolicyStoreMetadata;
 /// which are parsed during deserialization.
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct PolicyStore {
+pub(crate) struct PolicyStore {
     /// version of policy store
     //
     // alias to support Agama lab format
-    pub version: Option<String>,
+    pub(crate) version: Option<String>,
 
-    /// Name is also name of namespace in `cedar-policy`
-    pub name: String,
+    /// Cedar schema (optional — `None` when strict schema validation is disabled)
+    pub(crate) schema: Option<CedarSchema>,
 
-    /// Description comment to policy store
-    pub description: Option<String>,
-
-    /// The cedar version to use when parsing the schema and policies.
-    pub cedar_version: Option<Version>,
-
-    /// Cedar schema
-    pub schema: CedarSchema,
+    /// Whether a schema source was present in the policy store source,
+    /// regardless of whether it was loaded (used for log messages).
+    pub(crate) schema_source_exists: bool,
 
     /// Cedar policy set
-    pub policies: PoliciesContainer,
+    pub(crate) policies: PoliciesContainer,
 
     /// An optional `HashMap` of trusted issuers.
     ///
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
-    pub trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+    pub(crate) trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+
+    /// Custom (non-JWT) issuers, keyed by issuer name. Tokens whose request
+    /// `mapping` matches a custom issuer's `entity_type_name` are validated by a
+    /// registered [`CustomTokenProcessor`](crate::CustomTokenProcessor) rather
+    /// than the JWT pipeline. Empty when no custom issuers are configured.
+    pub(crate) custom_issuers: HashMap<String, CustomIssuerMetadata>,
 
     /// Default entities for the policy store.
-    pub default_entities: DefaultEntitiesWithWarns,
+    pub(crate) default_entities: DefaultEntitiesWithWarns,
 }
 
 impl PolicyStore {
@@ -84,45 +85,75 @@ impl PolicyStore {
         self.version.as_deref().unwrap_or("undefined")
     }
 
-    /// Apply configuration limits to default entities
-    // TODO: add bootstrap configuration parameters and use it for check
-    pub fn apply_default_entities_limits(
-        &mut self,
-        max_entities: Option<usize>,
-        max_base64_size: Option<usize>,
-    ) -> Result<(), DefaultEntitiesLimitsError> {
-        let limits = DefaultEntitiesLimits {
-            max_entities: max_entities.unwrap_or(DefaultEntitiesLimits::DEFAULT_MAX_ENTITIES),
-            max_entity_size: max_base64_size
-                .unwrap_or(DefaultEntitiesLimits::DEFAULT_MAX_ENTITY_SIZE),
-        };
-        limits.validate_default_entities(self.default_entities.entities())
-    }
-
     pub(crate) fn validate_trusted_issuers(&self) -> Result<(), TrustedIssuersValidationError> {
-        // check if iss already present in other policy store
-        let mut oidc_to_trusted_issuer: HashMap<String, String> = HashMap::new();
-
-        for (issuer_name, trusted_issuer) in self.trusted_issuers.iter().flatten() {
-            let oidc_url = trusted_issuer.oidc_endpoint.to_string();
-            if let Some(_previous_issuer_name) = oidc_to_trusted_issuer.get(&oidc_url) {
-                return Err(TrustedIssuersValidationError {
-                    oidc_url: format!(
-                        "openid_configuration_endpoint: '{oidc_url}' is used for more than one issuer"
-                    ),
-                });
-            }
-            oidc_to_trusted_issuer.insert(oidc_url, issuer_name.to_owned());
-        }
-
-        Ok(())
+        validate_trusted_issuers_config(self.trusted_issuers.as_ref())
     }
 }
 
-#[derive(Debug, derive_more::Display, derive_more::Error)]
-#[display("openid_configuration_endpoint: '{oidc_url}' is used for more than one issuer")]
-pub struct TrustedIssuersValidationError {
-    oidc_url: String,
+/// The token (`token_metadata` key + issuer id) that first claimed a given entity
+/// type, used to report a later duplicate.
+#[derive(Clone, Copy)]
+struct EntityTypeBinding<'a> {
+    token_key: &'a str,
+    issuer_id: &'a str,
+}
+
+/// Validates the trusted-issuer configuration before any service is built from it.
+///
+/// Enforces that each Cedar entity type is owned by exactly one token.
+fn validate_trusted_issuers_config(
+    trusted_issuers: Option<&HashMap<String, TrustedIssuer>>,
+) -> Result<(), TrustedIssuersValidationError> {
+    let mut oidc_to_issuer: HashMap<String, &str> = HashMap::new();
+    let mut entity_type_owners: HashMap<&str, EntityTypeBinding> = HashMap::new();
+
+    for (issuer_id, trusted_issuer) in trusted_issuers.into_iter().flatten() {
+        let oidc_url = trusted_issuer.oidc_endpoint.to_string();
+        if oidc_to_issuer.insert(oidc_url.clone(), issuer_id).is_some() {
+            return Err(TrustedIssuersValidationError::DuplicateOidcEndpoint { oidc_url });
+        }
+
+        for (token_key, token_metadata) in &trusted_issuer.token_metadata {
+            let entity_type_name = token_metadata.entity_type_name.as_str();
+            match entity_type_owners.entry(entity_type_name) {
+                Entry::Vacant(entry) => {
+                    entry.insert(EntityTypeBinding {
+                        token_key,
+                        issuer_id,
+                    });
+                },
+                Entry::Occupied(entry) => {
+                    let first = entry.get();
+                    return Err(TrustedIssuersValidationError::DuplicateEntityType {
+                        entity_type_name: entity_type_name.to_string(),
+                        key_a: first.token_key.to_string(),
+                        issuer_a: first.issuer_id.to_string(),
+                        key_b: token_key.clone(),
+                        issuer_b: issuer_id.clone(),
+                    });
+                },
+            }
+        }
+    }
+
+    Ok(())
+}
+
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum TrustedIssuersValidationError {
+    #[error("openid_configuration_endpoint '{oidc_url}' is used by more than one issuer")]
+    DuplicateOidcEndpoint { oidc_url: String },
+    #[error(
+        "Entity type '{entity_type_name}' declared by conflicting tokens: \
+         key '{key_a}' (issuer '{issuer_a}') and key '{key_b}' (issuer '{issuer_b}')"
+    )]
+    DuplicateEntityType {
+        entity_type_name: String,
+        key_a: String,
+        issuer_a: String,
+        key_b: String,
+        issuer_b: String,
+    },
 }
 
 /// Wrapper around [`PolicyStore`] to have access to it and ID of policy store.
@@ -130,7 +161,8 @@ pub struct TrustedIssuersValidationError {
 /// When loaded from the new directory/archive format, includes optional metadata
 /// containing version, description, and other policy store information.
 #[derive(Clone, derive_more::Deref)]
-pub struct PolicyStoreWithID {
+#[cfg_attr(test, derive(Debug))]
+pub(crate) struct PolicyStoreWithID {
     /// ID of policy store
     pub(crate) id: String,
     /// Policy store value
@@ -146,7 +178,7 @@ pub struct PolicyStoreWithID {
 /// This struct includes the issuer's name, description, and the `OpenID` configuration endpoint
 /// for discovering issuer-related information.
 #[derive(Debug, Clone, PartialEq)]
-pub struct TrustedIssuer {
+pub(crate) struct TrustedIssuer {
     /// The name of the trusted issuer.
     /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
     pub(crate) name: String,
@@ -226,7 +258,7 @@ impl TrustedIssuer {
 
 /// Container for compiled Cedar policies and their descriptions.
 #[derive(Debug, Clone)]
-pub struct PoliciesContainer {
+pub(crate) struct PoliciesContainer {
     /// Policy descriptions by ID
     descriptions: HashMap<String, String>,
     /// Compiled `cedar_policy` Policy set
@@ -252,8 +284,19 @@ impl PartialEq for PoliciesContainer {
 }
 
 impl PoliciesContainer {
+    #[cfg(feature = "tools")]
+    pub(crate) fn all_policy_metadata(&self) -> Vec<PolicyMetadata> {
+        self.policy_set
+            .policies()
+            .map(PolicyMetadata::from_policy)
+            .collect()
+    }
+
     /// Create a new `PoliciesContainer` from a policy set and description map.
-    pub fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
+    pub(crate) fn new(
+        policy_set: cedar_policy::PolicySet,
+        descriptions: HashMap<String, String>,
+    ) -> Self {
         Self {
             descriptions,
             policy_set,
@@ -261,7 +304,7 @@ impl PoliciesContainer {
     }
 
     /// Create an empty `PoliciesContainer` with the given policy set.
-    pub fn new_empty(policy_set: cedar_policy::PolicySet) -> Self {
+    pub(crate) fn new_empty(policy_set: cedar_policy::PolicySet) -> Self {
         Self {
             policy_set,
             descriptions: HashMap::new(),
@@ -269,12 +312,12 @@ impl PoliciesContainer {
     }
 
     /// Get [`cedar_policy::PolicySet`]
-    pub fn get_set(&self) -> &cedar_policy::PolicySet {
+    pub(crate) fn get_set(&self) -> &cedar_policy::PolicySet {
         &self.policy_set
     }
 
     /// Get policy description based on id of policy
-    pub fn get_policy_description(&self, id: &str) -> Option<&str> {
+    pub(crate) fn get_policy_description(&self, id: &str) -> Option<&str> {
         self.descriptions.get(id).map(String::as_str)
     }
 
@@ -284,7 +327,7 @@ impl PoliciesContainer {
     /// Filtering is scope-level only: policies with `when`/`unless` conditions
     /// may still not apply at evaluation time. The returned set is a superset
     /// of truly applicable policies.
-    pub fn get_matching_policies(
+    pub(crate) fn get_matching_policies(
         &self,
         principal_entity_type_names: &HashSet<EntityTypeName>,
         action_uids: &HashSet<EntityUid>,
@@ -298,6 +341,61 @@ impl PoliciesContainer {
                     && matches_resource(policy, resource_entity_type_names)
             })
             .map(PolicyMetadata::from_policy)
+            .collect()
+    }
+
+    /// Merge the annotations of the given policies into a single map.
+    ///
+    /// Lossy: if the same annotation key appears on several policies, one value
+    /// wins arbitrarily (iteration order is undefined). Use [`Self::annotation_values`]
+    /// or [`Self::annotations_by_policy`] when duplicates matter.
+    /// IDs not present in the policy set are silently skipped.
+    pub(crate) fn annotations_map<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, String> {
+        ids.into_iter()
+            .filter_map(|id| self.policy_set.policy(id))
+            .flat_map(Policy::annotations)
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect()
+    }
+
+    /// Collect every value of the annotation `key` across the given policies.
+    ///
+    /// Duplicates are preserved; IDs not present in the policy set are silently skipped.
+    pub(crate) fn annotation_values<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+        key: &str,
+    ) -> Vec<String> {
+        ids.into_iter()
+            .filter_map(|id| self.policy_set.policy(id))
+            .flat_map(Policy::annotations)
+            .filter(|(k, _)| *k == key)
+            .map(|(_, v)| v.to_string())
+            .collect()
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID.
+    ///
+    /// Loss-free companion to [`Self::annotations_map`]. IDs not present in the
+    /// policy set are silently skipped.
+    pub(crate) fn annotations_by_policy<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        ids.into_iter()
+            .filter_map(|id| self.policy_set.policy(id))
+            .map(|policy| {
+                (
+                    policy.id().to_string(),
+                    policy
+                        .annotations()
+                        .map(|(k, v)| (k.to_string(), v.to_string()))
+                        .collect(),
+                )
+            })
             .collect()
     }
 }
@@ -382,6 +480,79 @@ fn matches_resource(policy: &Policy, resource_types: &HashSet<EntityTypeName>) -
         ResourceConstraint::Is(type_name) | ResourceConstraint::IsIn(type_name, _) => {
             resource_types.contains(&type_name)
         },
+    }
+}
+
+/// Checks whether byte content looks like a JSON document (object or array),
+/// used only to report legacy JSON policy stores with a precise error.
+pub(crate) fn is_json_bytes(bytes: &[u8]) -> bool {
+    bytes
+        .iter()
+        .find(|b| !b.is_ascii_whitespace())
+        .is_some_and(|b| *b == b'{' || *b == b'[')
+}
+
+/// Checks whether text content looks like a JSON document (object or array),
+/// used only to report legacy JSON policy stores with a precise error.
+#[inline]
+pub(crate) fn is_json_content(content: &str) -> bool {
+    is_json_bytes(content.as_bytes())
+}
+
+#[cfg(test)]
+mod json_content_detection_tests {
+    use super::{is_json_bytes, is_json_content};
+
+    #[test]
+    fn test_is_json_content_detects_json() {
+        assert!(
+            is_json_content(r#"{"cedar_version": "v4.0.0"}"#),
+            "pure JSON object should be detected as JSON"
+        );
+        assert!(
+            is_json_content(r#"[{"id": "1"}]"#),
+            "pure JSON array should be detected as JSON"
+        );
+        assert!(
+            is_json_content("  \n\t  {\n  \"key\": \"value\"\n}"),
+            "whitespace-prefixed JSON should be detected as JSON"
+        );
+        assert!(
+            is_json_bytes(b"  {\"key\": \"value\"}"),
+            "raw bytes should be detected as JSON"
+        );
+    }
+
+    #[test]
+    fn test_is_json_content_allows_valid_yaml() {
+        assert!(
+            !is_json_content("cedar_version: v4.0.0\npolicies:\n  allow: true"),
+            "valid YAML should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("# leading comment\ncedar_version: v4.0.0"),
+            "commented YAML should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("---\ncedar_version: v4.0.0"),
+            "document-marker YAML should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("cedar_version: v4.0.0\npolicies: { allow: true }"),
+            "YAML with nested flow mapping should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content(""),
+            "empty string should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("   \n\t  \n"),
+            "whitespace-only string should not be detected as JSON"
+        );
+        assert!(
+            !is_json_bytes(b"\x00\x01\x02"),
+            "arbitrary binary should not be detected as JSON"
+        );
     }
 }
 
@@ -653,5 +824,272 @@ mod policy_metadata_tests {
         );
 
         assert_eq!(result.len(), 2);
+    }
+
+    fn annotated_container() -> PoliciesContainer {
+        make_container(&[
+            (
+                "upgrade",
+                r#"
+                @redirect("/upgrade")
+                @tier("premium")
+                permit(principal, action, resource);
+                "#,
+            ),
+            (
+                "trial",
+                r#"
+                @redirect("/trial")
+                @audit("true")
+                permit(principal, action, resource);
+                "#,
+            ),
+        ])
+    }
+
+    #[test]
+    fn annotations_map_merges_policies() {
+        let container = annotated_container();
+        let ids = [PolicyId::new("upgrade"), PolicyId::new("trial")];
+
+        let result = container.annotations_map(ids.iter());
+
+        // "redirect" collides across policies: one value survives, order undefined
+        assert_eq!(result.len(), 3);
+        assert!(["/upgrade", "/trial"].contains(&result["redirect"].as_str()));
+        assert_eq!(result["tier"], "premium");
+        assert_eq!(result["audit"], "true");
+    }
+
+    #[test]
+    fn annotations_map_skips_missing_ids() {
+        let container = annotated_container();
+        let ids = [PolicyId::new("upgrade"), PolicyId::new("no_such_policy")];
+
+        let result = container.annotations_map(ids.iter());
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(result["redirect"], "/upgrade");
+        assert_eq!(result["tier"], "premium");
+    }
+
+    #[test]
+    fn annotation_values_preserves_duplicates() {
+        let container = annotated_container();
+        let ids = [PolicyId::new("upgrade"), PolicyId::new("trial")];
+
+        let mut result = container.annotation_values(ids.iter(), "redirect");
+        result.sort();
+        assert_eq!(result, ["/trial", "/upgrade"]);
+
+        assert_eq!(container.annotation_values(ids.iter(), "audit"), ["true"]);
+        assert_eq!(
+            container.annotation_values(ids.iter(), "absent"),
+            [] as [std::string::String; 0]
+        );
+    }
+
+    #[test]
+    fn annotations_by_policy_groups_per_policy() {
+        let container = annotated_container();
+        let ids = [
+            PolicyId::new("upgrade"),
+            PolicyId::new("trial"),
+            PolicyId::new("no_such_policy"),
+        ];
+
+        let result = container.annotations_by_policy(ids.iter());
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(result["upgrade"]["redirect"], "/upgrade");
+        assert_eq!(result["upgrade"]["tier"], "premium");
+        assert_eq!(result["trial"]["redirect"], "/trial");
+        assert_eq!(result["trial"]["audit"], "true");
+    }
+
+    #[test]
+    fn annotations_of_unannotated_policy_are_empty() {
+        let container = make_container(&[("plain", "permit(principal, action, resource);")]);
+        let ids = [PolicyId::new("plain")];
+
+        assert!(container.annotations_map(ids.iter()).is_empty());
+        assert_eq!(
+            container.annotation_values(ids.iter(), "any"),
+            [] as [std::string::String; 0]
+        );
+
+        let by_policy = container.annotations_by_policy(ids.iter());
+        assert_eq!(by_policy.len(), 1);
+        assert!(by_policy["plain"].is_empty());
+    }
+}
+
+#[cfg(test)]
+mod validate_trusted_issuers_tests {
+    use super::*;
+
+    /// Builds a [`TrustedIssuer`] with `(token_metadata key, entity_type_name)` pairs.
+    fn issuer(oidc_endpoint: &str, token_metadata: &[(&str, &str)]) -> TrustedIssuer {
+        TrustedIssuer::new(
+            "Test".to_string(),
+            String::default(),
+            Url::parse(oidc_endpoint).expect("test oidc endpoint should be a valid url"),
+            token_metadata
+                .iter()
+                .map(|(key, entity_type_name)| {
+                    (
+                        (*key).to_string(),
+                        TokenEntityMetadata::builder()
+                            .entity_type_name((*entity_type_name).to_string())
+                            .build(),
+                    )
+                })
+                .collect(),
+        )
+    }
+
+    #[test]
+    fn accepts_distinct_entity_types_per_issuer_namespace() {
+        // The supported multi-issuer setup: each issuer owns its own entity types
+        // in its own namespace.
+        let issuers = HashMap::from([
+            (
+                "alpha".to_string(),
+                issuer(
+                    "https://idp.alpha.example/.well-known/openid-configuration",
+                    &[
+                        ("access_token", "Alpha::Access_token"),
+                        ("id_token", "Alpha::Id_token"),
+                    ],
+                ),
+            ),
+            (
+                "beta".to_string(),
+                issuer(
+                    "https://idp.beta.example/.well-known/openid-configuration",
+                    &[
+                        ("access_token", "Beta::Access_token"),
+                        ("id_token", "Beta::Id_token"),
+                    ],
+                ),
+            ),
+        ]);
+
+        assert!(
+            validate_trusted_issuers_config(Some(&issuers)).is_ok(),
+            "a distinct-per-namespace multi-issuer mapping is expected to be valid"
+        );
+    }
+
+    #[test]
+    fn rejects_entity_type_shared_across_issuers() {
+        // Same entity type under the same key: unbuildable once `iss` is declared,
+        // because the shared type can only name one issuer namespace.
+        let issuers = HashMap::from([
+            (
+                "alpha".to_string(),
+                issuer(
+                    "https://idp.alpha.example/.well-known/openid-configuration",
+                    &[("access_token", "Jans::Access_token")],
+                ),
+            ),
+            (
+                "beta".to_string(),
+                issuer(
+                    "https://idp.beta.example/.well-known/openid-configuration",
+                    &[("access_token", "Jans::Access_token")],
+                ),
+            ),
+        ]);
+
+        let err = validate_trusted_issuers_config(Some(&issuers))
+            .expect_err("an entity type shared across issuers must be rejected");
+        assert!(
+            matches!(
+                &err,
+                TrustedIssuersValidationError::DuplicateEntityType { entity_type_name, .. }
+                    if entity_type_name == "Jans::Access_token"
+            ),
+            "expected DuplicateEntityType for Jans::Access_token, got: {err}"
+        );
+    }
+
+    #[test]
+    fn rejects_entity_type_shared_across_issuers_with_different_keys() {
+        let issuers = HashMap::from([
+            (
+                "alpha".to_string(),
+                issuer(
+                    "https://idp.alpha.example/.well-known/openid-configuration",
+                    &[("access_token", "Jans::Access_token")],
+                ),
+            ),
+            (
+                "beta".to_string(),
+                issuer(
+                    "https://idp.beta.example/.well-known/openid-configuration",
+                    &[("at", "Jans::Access_token")],
+                ),
+            ),
+        ]);
+
+        let err = validate_trusted_issuers_config(Some(&issuers))
+            .expect_err("an entity type shared across issuers must be rejected");
+        assert!(
+            matches!(
+                &err,
+                TrustedIssuersValidationError::DuplicateEntityType { .. }
+            ),
+            "expected DuplicateEntityType, got: {err}"
+        );
+    }
+
+    #[test]
+    fn rejects_duplicate_entity_type_within_issuer() {
+        let issuers = HashMap::from([(
+            "alpha".to_string(),
+            issuer(
+                "https://idp.alpha.example/.well-known/openid-configuration",
+                &[
+                    ("access_token", "Jans::Access_token"),
+                    ("at", "Jans::Access_token"),
+                ],
+            ),
+        )]);
+
+        let err = validate_trusted_issuers_config(Some(&issuers))
+            .expect_err("two keys mapping to one entity type within an issuer must be rejected");
+        assert!(
+            matches!(
+                &err,
+                TrustedIssuersValidationError::DuplicateEntityType { .. }
+            ),
+            "expected DuplicateEntityType, got: {err}"
+        );
+    }
+
+    #[test]
+    fn rejects_duplicate_oidc_endpoint() {
+        let oidc = "https://idp.example/.well-known/openid-configuration";
+        let issuers = HashMap::from([
+            (
+                "alpha".to_string(),
+                issuer(oidc, &[("access_token", "Jans::Access_token")]),
+            ),
+            (
+                "beta".to_string(),
+                issuer(oidc, &[("access_token", "Jans::Access_token")]),
+            ),
+        ]);
+
+        let err = validate_trusted_issuers_config(Some(&issuers))
+            .expect_err("duplicate oidc endpoint must be rejected");
+        assert!(
+            matches!(
+                &err,
+                TrustedIssuersValidationError::DuplicateOidcEndpoint { .. }
+            ),
+            "expected TrustedIssuersValidationError::DuplicateOidcEndpoint, got: {err}"
+        );
     }
 }

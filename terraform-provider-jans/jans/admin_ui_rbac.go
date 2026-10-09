@@ -12,9 +12,11 @@ type AdminUIRole struct {
 }
 
 type AdminUIPermission struct {
-        Permission               string `schema:"permission" json:"permission,omitempty"`
-        Description              string `schema:"description" json:"description,omitempty"`
-        DefaultPermissionInToken bool   `schema:"default_permission_in_token" json:"defaultPermissionInToken,omitempty"`
+        Permission                   string `schema:"permission" json:"permission,omitempty"`
+        Description                  string `schema:"description" json:"description,omitempty"`
+        DefaultPermissionInToken     bool   `schema:"default_permission_in_token" json:"defaultPermissionInToken,omitempty"`
+        Tag                          string `schema:"tag" json:"tag,omitempty"`
+        EssentialPermissionInAdminUI bool   `schema:"essential_permission_in_admin_ui" json:"essentialPermissionInAdminUI,omitempty"`
 }
 
 type AdminUIRolePermissionMapping struct {
@@ -221,7 +223,7 @@ func (c *Client) DeleteAdminUIPermission(ctx context.Context, permissionID strin
                 return fmt.Errorf("failed to get token: %w", err)
         }
 
-        if err := c.deleteEntity(ctx, "/jans-config-api/admin-ui/adminUIPermissions/"+permissionID, token, scope, permission); err != nil {
+        if err := c.deleteEntity(ctx, "/jans-config-api/admin-ui/adminUIPermissions", token, scope, permission); err != nil {
                 return fmt.Errorf("delete request failed: %w", err)
         }
 

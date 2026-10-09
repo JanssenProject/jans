@@ -32,7 +32,7 @@ python3 /opt/jans/jans-setup/setup.py
 #### D. Publicly Discoverable DNS :
 - An Internet accessible (non-internal or localhost) Janssen Server with DNS pointing at the public Internet address of the server
 
-- If the Jannsen Server is using a self-signed certificate, `Trust All` **must** be enabled in Super Gluu (open the app, navigate to `Menu` > `Trust all (SSL)` and enable)
+- If the Janssen Server is using a self-signed certificate, `Trust All` **must** be enabled in Super Gluu (open the app, navigate to `Menu` > `Trust all (SSL)` and enable)
 
 !!! Note
     The Janssen Server and Super Gluu can work in the same network, without a DNS server hostname and with a self-signed certificate. There is only one limitation: both components should belong to the same network. Instead of assigning a hostname during Janssen Server installation, an IP address can be specified. In the Super Gluu mobile app, enable `Trust all (SSL)`.
@@ -289,4 +289,4 @@ A user's Super Gluu device(s) can be removed by a Janssen administrator by direc
 Now the old device is gone and the user can enroll a new device
 
 ### Device management using SCIM
-See the [SCIM documentation](../../../janssen-server/usermgmt/usermgmt-scim.md#fido-2-devices) on how to manage Super Gluu devices, using the SCIM [protocol].
+See the [SCIM documentation](../../../janssen-server/usermgmt/usermgmt-scim.md#fido2-devices) on how to manage Super Gluu devices, using the SCIM [protocol].

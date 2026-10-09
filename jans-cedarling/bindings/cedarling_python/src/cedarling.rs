@@ -10,10 +10,15 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 use crate::authorize::authorize_result::AuthorizeResult;
+use crate::authorize::batch_authorize_response::{
+    BatchAuthorizeMultiIssuerResponse, BatchAuthorizeUnsignedResponse,
+};
 use crate::authorize::entity_data::EntityData;
 use crate::authorize::errors::authorize_error_to_py;
 use crate::authorize::multi_issuer_authorize_result::MultiIssuerAuthorizeResult;
 use crate::authorize::policy_metadata::PolicyMetadata;
+use crate::authorize::request_batch_multi_issuer::BatchAuthorizeMultiIssuerRequest;
+use crate::authorize::request_batch_unsigned::BatchAuthorizeUnsignedRequest;
 use crate::authorize::request_multi_issuer::AuthorizeMultiIssuerRequest;
 use crate::authorize::request_unsigned::RequestUnsigned;
 use crate::authorize::token_input::TokenInput;
@@ -22,8 +27,10 @@ use crate::context_data_api::data_entry::DataEntry;
 use crate::context_data_api::data_store_stats::DataStoreStats;
 use crate::context_data_api::errors::data_error_to_py;
 use cedarling::DataApi;
+use cedarling::PolicyId;
 use cedarling::TrustedIssuerLoadingInfo;
 use serde_pyobject::{from_pyobject, to_pyobject};
+use std::collections::HashMap;
 use std::time::Duration;
 
 /// Cedarling
@@ -160,8 +167,29 @@ use std::time::Duration;
 ///
 ///     :returns: A DataStoreStats object
 ///     :raises DataErrorCtx: If the operation fails
+///
+/// .. method:: drain_metrics(self) -> MetricsSnapshot
+///
+///     Destructive read: returns the telemetry metrics snapshot and resets
+///     the counters for the next interval.
+///
+///     Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+///     Lock telemetry ticker owns the collector. Raises `ValueError` when
+///     Lock telemetry owns the collector, i.e. whenever
+///     `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+///     server has no telemetry endpoint. `interval` is a
+///     `datetime.timedelta` with sub-second precision.
+///
+///     :returns: A MetricsSnapshot object
+///     :raises ValueError: If metrics collection is disabled or owned by lock telemetry.
+///
+/// .. method:: policy_store_id(self) -> str | None
+///
+///     Returns the ID of the currently published policy store, if it carries one.
+///
+///     :returns: The store ID, or None when the store carries no ID.
 #[derive(Clone)]
-#[pyclass]
+#[pyclass(from_py_object)]
 pub struct Cedarling {
     inner: cedarling::blocking::Cedarling,
 }
@@ -198,6 +226,44 @@ impl Cedarling {
             .authorize_multi_issuer(request.borrow().to_cedarling()?)
             .map_err(authorize_error_to_py)?;
         Ok(cedarling_instance.into())
+    }
+
+    /// Authorize a batch of unsigned requests against one shared principal.
+    ///
+    /// Setup work (principal build + pushed-data snapshot) runs once and each
+    /// item is evaluated in input order. Returns a `BatchAuthorizeUnsignedResponse`
+    /// with `batch_id` and per-item results.
+    ///
+    /// Batch-level failures (validation, principal parse) raise; per-item
+    /// failures are returned as `BatchItemError` entries that callers must inspect.
+    fn authorize_unsigned_batch(
+        &self,
+        request: Bound<'_, BatchAuthorizeUnsignedRequest>,
+    ) -> Result<BatchAuthorizeUnsignedResponse, PyErr> {
+        let response = self
+            .inner
+            .authorize_unsigned_batch(request.borrow().to_cedarling()?)
+            .map_err(authorize_error_to_py)?;
+        Python::attach(|py| BatchAuthorizeUnsignedResponse::from_cedarling(py, response))
+    }
+
+    /// Authorize a batch of multi-issuer requests against one shared token set.
+    ///
+    /// Tokens are validated and token/issuer entities built once, then each
+    /// item is evaluated in input order. Returns a
+    /// `BatchAuthorizeMultiIssuerResponse` with `batch_id` and per-item results.
+    ///
+    /// Batch-level failures (validation, JWT verification, status-list refresh)
+    /// raise; per-item failures are returned as `BatchItemError` entries that callers must inspect.
+    fn authorize_multi_issuer_batch(
+        &self,
+        request: Bound<'_, BatchAuthorizeMultiIssuerRequest>,
+    ) -> Result<BatchAuthorizeMultiIssuerResponse, PyErr> {
+        let response = self
+            .inner
+            .authorize_multi_issuer_batch(request.borrow().to_cedarling()?)
+            .map_err(authorize_error_to_py)?;
+        Python::attach(|py| BatchAuthorizeMultiIssuerResponse::from_cedarling(py, response))
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -253,6 +319,47 @@ impl Cedarling {
             .get_matching_policies_multi_issuer(&tokens, &actions, &resources)
             .map_err(authorize_error_to_py)?;
         Ok(result.into_iter().map(|pm| pm.into()).collect())
+    }
+
+    /// Merge the annotations (`@key("value")`) of the given policies into a single dict.
+    ///
+    /// Intended for resolving the determining policies of an authorization decision:
+    /// pass `list(result.response.diagnostics.reason)`.
+    ///
+    /// Lossy: if the same annotation key appears on several policies, one value wins
+    /// arbitrarily. Use `annotation_values` / `annotations_by_policy` when duplicates
+    /// matter. Unknown policy IDs are silently skipped.
+    ///
+    /// :param policy_ids: List of policy ID strings.
+    /// :returns: A dict mapping annotation keys to values.
+    fn annotations_map(&self, policy_ids: Vec<String>) -> HashMap<String, String> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        self.inner.annotations_map(ids.iter())
+    }
+
+    /// Collect every value of the annotation `key` across the given policies,
+    /// preserving duplicates. Unknown policy IDs are silently skipped.
+    ///
+    /// :param policy_ids: List of policy ID strings.
+    /// :param key: The annotation key to look up.
+    /// :returns: A list of annotation values.
+    fn annotation_values(&self, policy_ids: Vec<String>, key: &str) -> Vec<String> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        self.inner.annotation_values(ids.iter(), key)
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID
+    /// the loss-free companion to `annotations_map`. Unknown policy IDs are
+    /// silently skipped.
+    ///
+    /// :param policy_ids: List of policy ID strings.
+    /// :returns: A dict mapping policy IDs to their annotation dicts.
+    fn annotations_by_policy(
+        &self,
+        policy_ids: Vec<String>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        self.inner.annotations_by_policy(ids.iter())
     }
 
     /// Return logs and remove them from the storage
@@ -428,6 +535,27 @@ impl Cedarling {
             .map_err(data_error_to_py)
     }
 
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval.
+    ///
+    /// Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+    /// Lock telemetry ticker owns the collector (raises `ValueError` when
+    /// Lock telemetry owns the collector, i.e. whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+    /// server has no telemetry endpoint). `interval` is a
+    /// `datetime.timedelta` with sub-second precision.
+    fn drain_metrics(&self) -> PyResult<MetricsSnapshot> {
+        self.inner
+            .drain_metrics()
+            .map(|snapshot| snapshot.into())
+            .map_err(|e| PyValueError::new_err(e.to_string()))
+    }
+
+    /// Returns the ID of the currently published policy store, if it carries one.
+    fn policy_store_id(&self) -> Option<String> {
+        self.inner.policy_store_id()
+    }
+
     /// Returns true if trusted issuer with the given policy-store id is loaded.
     fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
         self.inner.is_trusted_issuer_loaded_by_name(issuer_id)
@@ -456,6 +584,48 @@ impl Cedarling {
     /// Returns ids of trusted issuers that failed to load.
     fn failed_trusted_issuer_ids(&self) -> Vec<String> {
         self.inner.failed_trusted_issuer_ids().into_iter().collect()
+    }
+}
+
+/// MetricsSnapshot
+/// ================
+///
+/// Destructive read: telemetry metrics snapshot with per-policy stats, error
+/// counters, and operational counters for the current interval. Draining
+/// resets the counters, so use a single consumer.
+///
+/// Attributes
+/// ----------
+/// policy_stats : dict
+///     Per-policy evaluation counts (`policy_id`, `policy_id.allow`,
+///     `policy_id.deny`)
+/// error_counters : dict
+///     Classified error counters keyed by error metric key
+/// operational_stats : dict
+///     Operational counters and gauges (authorization, cache, JWT, data, lock)
+/// interval : datetime.timedelta
+///     Duration of the snapshot interval with sub-second precision.
+#[derive(Debug, Clone)]
+#[pyclass(get_all, from_py_object)]
+pub struct MetricsSnapshot {
+    /// Per-policy evaluation counts.
+    policy_stats: HashMap<String, i64>,
+    /// Classified error counters.
+    error_counters: HashMap<String, i64>,
+    /// Operational counters and gauges.
+    operational_stats: HashMap<String, i64>,
+    /// Duration of the snapshot interval with sub-second precision.
+    interval: Duration,
+}
+
+impl From<cedarling::MetricsSnapshot> for MetricsSnapshot {
+    fn from(value: cedarling::MetricsSnapshot) -> Self {
+        Self {
+            policy_stats: value.policy_stats,
+            error_counters: value.error_counters,
+            operational_stats: value.operational_stats,
+            interval: value.interval,
+        }
     }
 }
 

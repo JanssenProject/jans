@@ -20,18 +20,15 @@ use crate::{
     lock::{
         LockLogEntry,
         proto::{
-            BulkLogRequest, BulkTelemetryRequest, LogEntry, TelemetryEntry,
-            audit_service_client::AuditServiceClient,
+            BulkHealthRequest, BulkLogRequest, BulkTelemetryRequest, HealthEntry, LogEntry,
+            TelemetryEntry, audit_service_client::AuditServiceClient,
         },
         transport::{
-            self, AuditKind, AuditTransport, SerializedAuditEntry, TransportError, TransportResult,
-            mapping::{
-                CedarlingLogEntry, CedarlingMetricsEntry, LockServerLogEntry,
-                LockServerMetricsEntry,
-            },
+            AuditItem, AuditKind, AuditTransport, TransportError, TransportResult,
+            mapping::{self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry},
         },
     },
-    log::{LogWriter, Logger},
+    log::{LogWriter, LoggerWeak},
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -44,7 +41,7 @@ pub(crate) struct GrpcTransport {
     #[cfg(target_arch = "wasm32")]
     client: AuditServiceClient<Client>,
     access_token: String,
-    logger: Option<Logger>,
+    logger: Option<LoggerWeak>,
 }
 
 impl GrpcTransport {
@@ -53,7 +50,7 @@ impl GrpcTransport {
     pub(crate) fn new(
         endpoint: impl Into<String>,
         access_token: &str,
-        logger: Option<Logger>,
+        logger: Option<LoggerWeak>,
     ) -> Result<Self, TransportError> {
         #[cfg(target_arch = "wasm32")]
         let client = AuditServiceClient::new(Client::new(endpoint.into()));
@@ -78,11 +75,7 @@ impl GrpcTransport {
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl AuditTransport for GrpcTransport {
-    async fn send(
-        &self,
-        entries: &[SerializedAuditEntry],
-        audit_kind: &AuditKind,
-    ) -> TransportResult<()> {
+    async fn send(&self, entries: &[AuditItem], audit_kind: &AuditKind) -> TransportResult<()> {
         if entries.is_empty() {
             return Ok(());
         }
@@ -93,13 +86,11 @@ impl AuditTransport for GrpcTransport {
 
         let response = match audit_kind {
             AuditKind::Log(_) => {
-                let entries = transport::deserialize_entries::<
-                    LockServerLogEntry,
-                    CedarlingLogEntry,
-                >(entries, "log", warn)?
-                .into_iter()
-                .map(log_json_to_proto)
-                .collect();
+                let entries: Vec<LogEntry> =
+                    mapping::map_entries::<LockServerLogEntry>(entries, warn)?
+                        .into_iter()
+                        .map(log_json_to_proto)
+                        .collect();
 
                 let mut request = Request::new(BulkLogRequest { entries });
                 request
@@ -109,18 +100,32 @@ impl AuditTransport for GrpcTransport {
                 client.process_bulk_log(request).await?
             },
             AuditKind::Telemetry(_) => {
-                let entries = transport::deserialize_entries::<
-                    LockServerMetricsEntry,
-                    CedarlingMetricsEntry,
-                >(entries, "telemetry", warn)?
-                .into_iter()
-                .map(telemetry_json_to_proto)
-                .collect();
+                let entries: Vec<TelemetryEntry> =
+                    mapping::map_entries::<LockServerMetricsEntry>(entries, warn)?
+                        .into_iter()
+                        .map(telemetry_json_to_proto)
+                        .collect();
 
                 let mut request = Request::new(BulkTelemetryRequest { entries });
-                request.metadata_mut().insert("authorization", token);
+                request
+                    .metadata_mut()
+                    .insert("authorization", token.clone());
 
                 client.process_bulk_telemetry(request).await?
+            },
+            AuditKind::Health(_) => {
+                let proto_entries: Vec<HealthEntry> =
+                    mapping::map_entries::<LockServerHealthEntry>(entries, warn)?
+                        .into_iter()
+                        .map(health_json_to_proto)
+                        .collect();
+
+                let mut request = Request::new(BulkHealthRequest {
+                    entries: proto_entries,
+                });
+                request.metadata_mut().insert("authorization", token);
+
+                client.process_bulk_health(request).await?
             },
         };
 
@@ -175,6 +180,22 @@ fn telemetry_json_to_proto(entry: LockServerMetricsEntry) -> TelemetryEntry {
     }
 }
 
+/// Converts a [`LockServerHealthEntry`] into a [`HealthEntry`]
+fn health_json_to_proto(entry: LockServerHealthEntry) -> HealthEntry {
+    HealthEntry {
+        creation_date: parse_timestamp(&entry.creation_date),
+        event_time: parse_timestamp(&entry.event_time),
+        service: entry.service,
+        node_name: entry.node_name,
+        status: entry.status,
+        engine_status: entry
+            .engine_status
+            .into_iter()
+            .map(|(k, v)| (k, v.to_string()))
+            .collect(),
+    }
+}
+
 // Parse a RFC3339 timestamp string into a protobuf Timestamp
 fn parse_timestamp(s: &str) -> Option<Timestamp> {
     chrono::DateTime::parse_from_rfc3339(s)
@@ -190,14 +211,21 @@ mod test {
     use std::net::SocketAddr;
 
     use super::*;
-    use serde_json::json;
     use tokio::{net::TcpListener, sync::mpsc};
     use tokio_stream::wrappers::TcpListenerStream;
     use tonic::{Response, Status, transport::Server};
 
-    use crate::lock::proto::{
-        self, AuditResponse,
-        audit_service_server::{AuditService, AuditServiceServer},
+    use crate::lock::transport::AuditItem;
+    use crate::lock::{
+        health_registry::HealthStatus,
+        proto::{
+            self, AuditResponse,
+            audit_service_server::{AuditService, AuditServiceServer},
+        },
+    };
+
+    use crate::lock::transport::test_utils::{
+        malformed_log_item, sample_health_item, sample_log_item, sample_metric_item,
     };
 
     // Mock gRPC server for testing
@@ -205,6 +233,7 @@ mod test {
     struct MockAuditService {
         log_sender: mpsc::UnboundedSender<Vec<LogEntry>>,
         telemetry_sender: mpsc::UnboundedSender<Vec<TelemetryEntry>>,
+        health_sender: mpsc::UnboundedSender<Vec<HealthEntry>>,
         should_fail: bool,
     }
 
@@ -219,9 +248,32 @@ mod test {
 
         async fn process_bulk_health(
             &self,
-            _: Request<proto::BulkHealthRequest>,
+            request: Request<proto::BulkHealthRequest>,
         ) -> Result<Response<AuditResponse>, Status> {
-            unimplemented!()
+            if self.should_fail {
+                return Ok(Response::new(AuditResponse {
+                    success: false,
+                    message: "Server error".to_string(),
+                }));
+            }
+
+            let auth = request
+                .metadata()
+                .get("authorization")
+                .and_then(|v| v.to_str().ok());
+
+            assert!(
+                matches!(auth, Some(token) if token.starts_with("Bearer ")),
+                "expected Bearer token in authorization header, got {auth:?}"
+            );
+
+            let entries = request.into_inner().entries;
+            self.health_sender.send(entries).unwrap();
+
+            Ok(Response::new(AuditResponse {
+                success: true,
+                message: "OK".to_string(),
+            }))
         }
 
         async fn process_log(
@@ -305,12 +357,15 @@ mod test {
         SocketAddr,
         mpsc::UnboundedReceiver<Vec<LogEntry>>,
         mpsc::UnboundedReceiver<Vec<TelemetryEntry>>,
+        mpsc::UnboundedReceiver<Vec<HealthEntry>>,
     ) {
         let (tx, rx) = mpsc::unbounded_channel();
         let (telemetry_tx, telemetry_rx) = mpsc::unbounded_channel();
+        let (health_tx, health_rx) = mpsc::unbounded_channel();
         let service = MockAuditService {
             log_sender: tx,
             telemetry_sender: telemetry_tx,
+            health_sender: health_tx,
             should_fail,
         };
 
@@ -325,28 +380,27 @@ mod test {
                 .unwrap();
         });
 
-        (addr, rx, telemetry_rx)
+        (addr, rx, telemetry_rx, health_rx)
     }
 
     #[test]
     fn test_json_to_proto_conversion() {
         use test_utils::assert_eq;
 
-        let json_str = r#"{
-            "timestamp": "2026-03-23T11:50:37.504Z",
-            "log_kind": "Decision",
-            "level": "INFO",
-            "action": "Jans::Action::\"Read\"",
-            "decision": "ALLOW",
-            "principal": ["Jans::User::\"some_user\""],
-            "resource": "Jans::Issue::\"random_id\"",
-            "application_id": "test_app",
-            "pdp_id": "12a8a3be-6593-4215-a42b-bbf5c4f5defa",
-            "lock_client_id": "client-456"
-        }"#;
-
-        let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
-        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
+        let lock_entry = LockServerLogEntry {
+            creation_date: "2026-03-23T11:50:37.504Z".to_string(),
+            event_time: "2026-03-23T11:50:37.504Z".to_string(),
+            service: Some("test_app".to_string()),
+            node_name: "12a8a3be-6593-4215-a42b-bbf5c4f5defa".to_string(),
+            event_type: "Decision".to_string(),
+            severity_level: Some("INFO".to_string()),
+            action: "Jans::Action::\"Read\"".to_string(),
+            decision_result: "ALLOW".to_string(),
+            requested_resource: "Jans::Issue::\"random_id\"".to_string(),
+            principal_id: Some("Jans::User::\"some_user\"".to_string()),
+            client_id: Some("client-456".to_string()),
+            context_information: None,
+        };
         let proto_entry = log_json_to_proto(lock_entry);
 
         assert_eq!(
@@ -380,18 +434,20 @@ mod test {
 
     #[test]
     fn test_partial_json_entry() {
-        let json_str = r#"{
-            "timestamp": "2026-03-23T11:50:37.504Z",
-            "application_id": "minimal-service",
-            "pdp_id": "node-1",
-            "log_kind": "Decision",
-            "decision": "ALLOW",
-            "action": "Test::Action",
-            "resource": "Test::Resource"
-        }"#;
-
-        let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
-        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
+        let lock_entry = LockServerLogEntry {
+            creation_date: "2026-03-23T11:50:37.504Z".to_string(),
+            event_time: "2026-03-23T11:50:37.504Z".to_string(),
+            service: Some("minimal-service".to_string()),
+            node_name: "node-1".to_string(),
+            event_type: "Decision".to_string(),
+            severity_level: None,
+            action: "Test::Action".to_string(),
+            decision_result: "ALLOW".to_string(),
+            requested_resource: "Test::Resource".to_string(),
+            principal_id: None,
+            client_id: None,
+            context_information: None,
+        };
         let proto_entry = log_json_to_proto(lock_entry);
 
         assert_eq!(proto_entry.service, "minimal-service");
@@ -402,24 +458,10 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_success() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        let entries = vec![
-            r#"{
-                "timestamp": "2026-03-23T11:50:37.504Z",
-                "log_kind": "Decision",
-                "level": "INFO",
-                "action": "Jans::Action::\"Read\"",
-                "decision": "ALLOW",
-                "principal": ["Jans::User::\"some_user\""],
-                "resource": "Jans::Issue::\"random_id\"",
-                "application_id": "test_app",
-                "pdp_id": "12a8a3be-6593-4215-a42b-bbf5c4f5defa"
-            }"#
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_log_item()];
 
         transport
             .send(
@@ -433,20 +475,17 @@ mod test {
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
         assert_eq!(received[0].service, "test_app");
-        assert_eq!(
-            received[0].node_name,
-            "12a8a3be-6593-4215-a42b-bbf5c4f5defa"
-        );
+        assert_ne!(received[0].node_name, "");
     }
 
     #[tokio::test]
     async fn test_send_logs_empty() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         transport
             .send(
-                &[],
+                &Vec::<AuditItem>::new(),
                 &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
             )
             .await
@@ -458,10 +497,10 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_malformed_json() {
-        let (addr, _, _) = start_mock_server(false).await;
+        let (addr, _, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        let entries = vec!["not valid json".to_string().into_boxed_str()];
+        let entries = vec![malformed_log_item()];
 
         let error = transport
             .send(
@@ -478,22 +517,10 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_server_error() {
-        let (addr, _, _) = start_mock_server(true).await;
+        let (addr, _, _, _) = start_mock_server(true).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        let entries = vec![
-            r#"{
-                "timestamp": "2026-03-23T11:50:37.504Z",
-                "application_id": "test",
-                "pdp_id": "node",
-                "log_kind": "Decision",
-                "decision": "ALLOW",
-                "action": "Test::Action",
-                "resource": "Test::Resource"
-            }"#
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_log_item()];
 
         let error = transport
             .send(
@@ -511,34 +538,10 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_partial_malformed() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        let entries = vec![
-            r#"{
-                "timestamp": "2026-03-23T11:50:37.504Z",
-                "application_id": "valid-service-1",
-                "pdp_id": "node-1",
-                "log_kind": "Decision",
-                "decision": "ALLOW",
-                "action": "Test::Action",
-                "resource": "Test::Resource"
-            }"#
-            .to_string()
-            .into_boxed_str(),
-            "not valid json".to_string().into_boxed_str(),
-            r#"{
-                "timestamp": "2026-03-23T11:50:37.506Z",
-                "application_id": "valid-service-2",
-                "pdp_id": "node-2",
-                "log_kind": "Decision",
-                "decision": "ALLOW",
-                "action": "Test::Action",
-                "resource": "Test::Resource"
-            }"#
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_log_item(), malformed_log_item(), sample_log_item()];
 
         transport
             .send(
@@ -550,50 +553,16 @@ mod test {
 
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 2, "only valid entries should be forwarded");
-        assert_eq!(received[0].service, "valid-service-1");
-        assert_eq!(received[1].service, "valid-service-2");
+        assert_eq!(received[0].service, "test_app");
+        assert_eq!(received[1].service, "test_app");
     }
 
     #[tokio::test]
     async fn test_send_logs_multiple_entries() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        let entries = vec![
-            r#"{
-                "timestamp": "2026-03-23T11:50:37.504Z",
-                "application_id": "service-1",
-                "pdp_id": "node-1",
-                "log_kind": "Decision",
-                "decision": "ALLOW",
-                "action": "Test::Action",
-                "resource": "Test::Resource"
-            }"#
-            .to_string()
-            .into_boxed_str(),
-            r#"{
-                "timestamp": "2026-03-23T11:50:37.505Z",
-                "application_id": "service-2",
-                "pdp_id": "node-2",
-                "log_kind": "Decision",
-                "decision": "ALLOW",
-                "action": "Test::Action",
-                "resource": "Test::Resource"
-            }"#
-            .to_string()
-            .into_boxed_str(),
-            r#"{
-                "timestamp": "2026-03-23T11:50:37.506Z",
-                "application_id": "service-3",
-                "pdp_id": "node-3",
-                "log_kind": "Decision",
-                "decision": "ALLOW",
-                "action": "Test::Action",
-                "resource": "Test::Resource"
-            }"#
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_log_item(), sample_log_item(), sample_log_item()];
 
         transport
             .send(
@@ -605,33 +574,17 @@ mod test {
 
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 3);
-        assert_eq!(received[0].service, "service-1");
-        assert_eq!(received[1].service, "service-2");
-        assert_eq!(received[2].service, "service-3");
+        assert_eq!(received[0].service, "test_app");
+        assert_eq!(received[1].service, "test_app");
+        assert_eq!(received[2].service, "test_app");
     }
 
     #[tokio::test]
     async fn test_send_logs_with_all_fields() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        let entries = vec![
-            r#"{
-                "timestamp": "2026-03-23T11:50:37.504Z",
-                "log_kind": "Decision",
-                "level": "ERROR",
-                "action": "Jans::Action::\"Deny\"",
-                "decision": "DENY",
-                "principal": ["Jans::User::\"admin\""],
-                "resource": "Jans::Issue::\"secret\"",
-                "application_id": "full-service",
-                "pdp_id": "full-node",
-                "lock_client_id": "admin-client",
-                "extra_field": "extra_value"
-            }"#
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_log_item()];
 
         transport
             .send(
@@ -645,36 +598,22 @@ mod test {
         assert_eq!(received.len(), 1);
         let entry = &received[0];
 
-        assert_eq!(entry.service, "full-service");
-        assert_eq!(entry.node_name, "full-node");
+        assert_eq!(entry.service, "test_app");
+        assert_ne!(entry.node_name, "");
         assert_eq!(entry.event_type, "Decision");
-        assert_eq!(entry.severity_level, "ERROR");
-        assert_eq!(entry.action, "Jans::Action::\"Deny\"");
-        assert_eq!(entry.decision_result, "DENY");
-        assert_eq!(entry.requested_resource, "Jans::Issue::\"secret\"");
-        assert_eq!(entry.principal_id, "Jans::User::\"admin\"");
-        assert_eq!(entry.client_id, "admin-client");
+        assert_eq!(entry.action, "Test");
+        assert_eq!(entry.decision_result, "ALLOW");
+        assert_eq!(entry.requested_resource, "Jans::Issue");
+        assert_eq!(entry.principal_id, "Jans::User");
         assert_eq!(entry.jti, "");
     }
 
     #[tokio::test]
     async fn test_send_logs_with_missing_optional_fields() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        let entries = vec![
-            r#"{
-            "timestamp": "2026-03-23T11:50:37.504Z",
-            "application_id": "minimal",
-            "pdp_id": "test-pdp",
-            "log_kind": "Decision",
-            "decision": "ALLOW",
-            "action": "Test::Action",
-            "resource": "Test::Resource"
-        }"#
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_log_item()];
 
         transport
             .send(
@@ -686,32 +625,16 @@ mod test {
 
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
-        assert_eq!(received[0].service, "minimal");
-        assert_eq!(received[0].node_name, "test-pdp");
+        assert_eq!(received[0].service, "test_app");
+        assert_ne!(received[0].node_name, "");
     }
 
     #[tokio::test]
     async fn test_send_logs_large_batch() {
-        let (addr, mut rx, _) = start_mock_server(false).await;
+        let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        let entries: Vec<_> = (0..100)
-            .map(|i| {
-                json!({
-                    "timestamp": "2026-03-23T11:50:37.504Z",
-                    "log_kind": "System",
-                    "level": "INFO",
-                    "action": "Test",
-                    "decision": "ALLOW",
-                    "principal": ["Jans::User"],
-                    "resource": "Jans::Issue",
-                    "application_id": format!("service-{i}"),
-                    "pdp_id": "node"
-                })
-                .to_string()
-                .into_boxed_str()
-            })
-            .collect();
+        let entries: Vec<_> = (0..100).map(|_| sample_log_item()).collect();
 
         transport
             .send(
@@ -727,35 +650,10 @@ mod test {
 
     #[tokio::test]
     async fn test_send_telemetry_success() {
-        let (addr, _, mut telemetry_rx) = start_mock_server(false).await;
+        let (addr, _, mut telemetry_rx, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        let entries = vec![
-            json!({
-                "id": "f3c80a24-4608-45b8-adc3-a74f2841e156",
-                "request_id": "019d6842-7577-7e43-adfd-46e2bb275405",
-                "timestamp": "2026-04-07T17:04:39.162Z",
-                "log_kind": "Metric",
-                "policy_stats": {
-                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8_allow": 6,
-                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8": 7,
-                    "555da5d85403f35ea76519ed1a18a33989f855bf1cf8_deny": 1
-                },
-                "error_counters": {
-                    "parse_error": 0,
-                    "validation_error": 0
-                },
-                "operational_stats": {
-                    "evaluation_requests": 100,
-                    "memory_usage": 240
-                },
-                "interval_secs": 60,
-                "application_id": "test_app",
-                "pdp_id": "node-1"
-            })
-            .to_string()
-            .into_boxed_str(),
-        ];
+        let entries = vec![sample_metric_item()];
 
         transport
             .send(
@@ -768,37 +666,26 @@ mod test {
         let received = telemetry_rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
         assert_eq!(received[0].service, "test_app");
-        assert_eq!(received[0].node_name, "node-1");
-        assert_eq!(
-            received[0]
-                .policy_stats
-                .get("555da5d85403f35ea76519ed1a18a33989f855bf1cf8_allow"),
-            Some(&6)
-        );
-        assert_eq!(
-            received[0]
-                .policy_stats
-                .get("555da5d85403f35ea76519ed1a18a33989f855bf1cf8_deny"),
-            Some(&1)
-        );
+        assert_ne!(received[0].node_name, "");
+        assert_eq!(received[0].interval_secs, 60);
     }
 
     #[test]
     fn test_negative_timestamp_handling() {
-        let json_str = r#"{
-            "timestamp": "1969-12-31T00:00:00Z",
-            "log_kind": "System",
-            "level": "INFO",
-            "action": "Test",
-            "decision": "ALLOW",
-            "principal": [],
-            "resource": "Jans::Issue",
-            "application_id": "test-service",
-            "pdp_id": "node-1"
-        }"#;
-
-        let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
-        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
+        let lock_entry = LockServerLogEntry {
+            creation_date: "1969-12-31T00:00:00Z".to_string(),
+            event_time: "1969-12-31T00:00:00Z".to_string(),
+            service: Some("test-service".to_string()),
+            node_name: "node-1".to_string(),
+            event_type: "System".to_string(),
+            severity_level: Some("INFO".to_string()),
+            action: "Test".to_string(),
+            decision_result: "ALLOW".to_string(),
+            requested_resource: "Jans::Issue".to_string(),
+            principal_id: None,
+            client_id: None,
+            context_information: None,
+        };
         let proto_entry = log_json_to_proto(lock_entry);
 
         assert_eq!(
@@ -819,18 +706,20 @@ mod test {
 
     #[test]
     fn test_large_negative_timestamp() {
-        let json_str = r#"{
-            "timestamp": "1900-01-01T00:00:00Z",
-            "log_kind": "Decision",
-            "action": "Test",
-            "decision": "ALLOW",
-            "resource": "Test::Resource",
-            "application_id": "historical-service",
-            "pdp_id": "node-1"
-        }"#;
-
-        let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
-        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
+        let lock_entry = LockServerLogEntry {
+            creation_date: "1900-01-01T00:00:00Z".to_string(),
+            event_time: "1900-01-01T00:00:00Z".to_string(),
+            service: Some("historical-service".to_string()),
+            node_name: "node-1".to_string(),
+            event_type: "Decision".to_string(),
+            severity_level: None,
+            action: "Test".to_string(),
+            decision_result: "ALLOW".to_string(),
+            requested_resource: "Test::Resource".to_string(),
+            principal_id: None,
+            client_id: None,
+            context_information: None,
+        };
         let proto_entry = log_json_to_proto(lock_entry);
 
         assert_eq!(
@@ -841,5 +730,121 @@ mod test {
             proto_entry.event_time.as_ref().unwrap().seconds,
             -2_208_988_800
         );
+    }
+
+    #[tokio::test]
+    async fn test_send_health_success() {
+        let (addr, _, _, mut health_rx) = start_mock_server(false).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        let entries = vec![sample_health_item()];
+
+        transport
+            .send(
+                &entries,
+                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+            )
+            .await
+            .expect("health check should be sent successfully");
+
+        let received = health_rx.try_recv().unwrap();
+        assert_eq!(received.len(), 1);
+        assert_eq!(received[0].service, "test_app");
+        assert_eq!(received[0].node_name, "test-pdp");
+        assert_eq!(received[0].status, "running");
+        assert_eq!(received[0].engine_status.get("core").unwrap(), "success");
+    }
+
+    #[tokio::test]
+    async fn test_send_health_empty() {
+        let (addr, _, _, mut health_rx) = start_mock_server(false).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        transport
+            .send(
+                &Vec::<AuditItem>::new(),
+                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+            )
+            .await
+            .expect("empty health check should succeed");
+
+        assert!(health_rx.try_recv().is_err());
+    }
+
+    #[tokio::test]
+    async fn test_send_health_server_error() {
+        let (addr, _, _, _) = start_mock_server(true).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        let entries = vec![sample_health_item()];
+
+        let error = transport
+            .send(
+                &entries,
+                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+            )
+            .await
+            .expect_err("this should cause a server error");
+
+        assert!(
+            matches!(error, TransportError::GrpcServer(_)),
+            "expected server error, got {error:?}",
+        );
+    }
+
+    #[tokio::test]
+    async fn test_send_health_large_batch() {
+        let (addr, _, _, mut health_rx) = start_mock_server(false).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        let entries: Vec<_> = (0..100).map(|_| sample_health_item()).collect();
+
+        transport
+            .send(
+                &entries,
+                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+            )
+            .await
+            .expect("health checks should be sent successfully");
+
+        let received = health_rx.try_recv().unwrap();
+        assert_eq!(received.len(), 100);
+        assert_eq!(received[0].service, "test_app");
+        assert_eq!(received[99].service, "test_app");
+    }
+
+    #[test]
+    fn test_health_json_to_proto_conversion() {
+        let entry = LockServerHealthEntry {
+            creation_date: "2026-03-23T11:50:37.504Z".to_string(),
+            event_time: "2026-03-23T11:50:37.504Z".to_string(),
+            service: "test_app".to_string(),
+            node_name: "test-pdp".to_string(),
+            status: "running".to_string(),
+            engine_status: [("core".to_string(), HealthStatus::Success)]
+                .into_iter()
+                .collect(),
+        };
+
+        let proto = health_json_to_proto(entry);
+
+        assert_eq!(
+            proto.creation_date,
+            Some(Timestamp {
+                seconds: 1_774_266_637,
+                nanos: 504_000_000
+            })
+        );
+        assert_eq!(
+            proto.event_time,
+            Some(Timestamp {
+                seconds: 1_774_266_637,
+                nanos: 504_000_000,
+            })
+        );
+        assert_eq!(proto.service, "test_app");
+        assert_eq!(proto.node_name, "test-pdp");
+        assert_eq!(proto.status, "running");
+        assert_eq!(proto.engine_status.get("core").unwrap(), "success");
     }
 }

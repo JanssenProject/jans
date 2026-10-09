@@ -15,7 +15,7 @@ Jans Casa ("Casa") is a self-service web portal for end-users to manage authenti
 ## Source Code
 
 * <https://gluu.org/casa/>
-* <https://github.com/JanssenProject/jans/docker-jans-casa>
+* <https://github.com/JanssenProject/jans/tree/main/docker-jans-casa>
 
 ## Requirements
 
