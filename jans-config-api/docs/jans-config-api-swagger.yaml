@@ -16364,6 +16364,8 @@ components:
           type: array
           items:
             type: string
+        strictTokenRedirectUriValidation:
+          type: boolean
         legacyIdTokenClaims:
           type: boolean
         customHeadersWithAuthorizationResponse:

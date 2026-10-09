@@ -308,6 +308,7 @@ tags:
 | statusListIndexAllocationBlockSize | Specifies how many status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100. | [Details](#statuslistindexallocationblocksize) |
 | statusListResponseJwtLifetime | The status list response JWT lifetime (used to set exp claim in JWT). | [Details](#statuslistresponsejwtlifetime) |
 | statusListResponseJwtSignatureAlgorithm | The status list signature algorithm to sign response JWT. Defaults to RS256. | [Details](#statuslistresponsejwtsignaturealgorithm) |
+| strictTokenRedirectUriValidation | Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client. | [Details](#stricttokenredirecturivalidation) |
 | subjectIdentifiersPerClientSupported | A list of the subject identifiers supported per client | [Details](#subjectidentifiersperclientsupported) |
 | subjectTypesSupported | This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public. | [Details](#subjecttypessupported) |
 | tokenEndpoint | The token endpoint URL | [Details](#tokenendpoint) |
@@ -3029,6 +3030,15 @@ tags:
 - Required: No
 
 - Default value: None
+
+
+## strictTokenRedirectUriValidation
+
+- Description: Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client.
+
+- Required: No
+
+- Default value: true
 
 
 ## subjectIdentifiersPerClientSupported

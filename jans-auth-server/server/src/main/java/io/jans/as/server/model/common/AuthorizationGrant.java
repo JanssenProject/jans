@@ -216,6 +216,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         token.setCodeChallenge(getCodeChallenge());
         token.setCodeChallengeMethod(getCodeChallengeMethod());
         token.setClaims(getClaims());
+        token.getAttributes().setRedirectUri(getRedirectUri());
 
         final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
         if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
