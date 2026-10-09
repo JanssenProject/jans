@@ -141,6 +141,8 @@ pub(crate) fn load_policy_store_archive_bytes(
 pub(crate) struct LoadedPolicyStore {
     /// Raw `metadata.json` content; parsed by the matching format version.
     pub metadata_json: String,
+    /// Format version resolved from `metadata.json`, decided here only.
+    pub spec_version: formats::SelectedVersion,
     /// Parsed schema (optional — absent when running without schema)
     pub schema: Option<ParsedSchema>,
     /// Whether a schema source (schema.cedarschema or schemas/ dir) was present
@@ -297,8 +299,12 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         Ok(())
     }
 
-    /// Read `metadata.json` and check its spec version; full parsing depends on that version.
-    fn load_metadata(&self, dir: &str) -> Result<String, PolicyStoreError> {
+    /// Read `metadata.json` and resolve its spec version; the version-specific
+    /// parse happens later, driven by that result.
+    fn load_metadata(
+        &self,
+        dir: &str,
+    ) -> Result<(String, formats::SelectedVersion), PolicyStoreError> {
         let metadata_path = Self::join_path(dir, "metadata.json");
         let bytes = self.vfs.read_file(&metadata_path).map_err(|source| {
             PolicyStoreError::FileReadError {
@@ -312,8 +318,9 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
         })?;
 
-        formats::check_spec_version(&content).map_err(PolicyStoreError::Validation)?;
-        Ok(content)
+        let spec_version =
+            formats::select_version(&content).map_err(PolicyStoreError::Validation)?;
+        Ok((content, spec_version))
     }
 
     /// Resolve where the schema lives (or that it's absent), without any I/O
@@ -731,7 +738,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         let schema_source = self.resolve_schema_source(dir);
         let schema_source_exists = schema_source.exists();
 
-        let metadata_json = self.load_metadata(dir)?;
+        let (metadata_json, spec_version) = self.load_metadata(dir)?;
         let schema = if strict {
             match &schema_source {
                 SchemaSource::None {
@@ -758,6 +765,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
         Ok(LoadedPolicyStore {
             metadata_json,
+            spec_version,
             schema,
             schema_source_exists,
             policies,

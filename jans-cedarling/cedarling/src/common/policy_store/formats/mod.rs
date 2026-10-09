@@ -106,13 +106,24 @@ enum FormatVersion {
     V1,
 }
 
+/// The format version a store resolved to, decided once by the loader.
+///
+/// Fields stay private so [`select_version`] is the only way to build one.
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct SelectedVersion {
+    /// What `metadata.json` declared; `None` when the field is absent.
+    declared: Option<u32>,
+    /// The version the store is read as.
+    spec_version: u32,
+    format: FormatVersion,
+}
+
 /// Picks the parser for `metadata.json`, failing closed outside
 /// `MIN_SUPPORTED_FORMAT_VERSION..=CURRENT_FORMAT_VERSION`.
 ///
-/// Returns the declared version (if any) alongside the selected one.
-fn select_version(
-    metadata_json: &str,
-) -> Result<(Option<u32>, u32, FormatVersion), ValidationError> {
+/// Called by the loader so an unsupported store fails with a version error
+/// rather than a schema or policy error, and so nothing re-decides later.
+pub(crate) fn select_version(metadata_json: &str) -> Result<SelectedVersion, ValidationError> {
     let declared = probe_spec_version(metadata_json)?;
     let spec_version = declared.unwrap_or(MIN_SUPPORTED_FORMAT_VERSION);
 
@@ -132,15 +143,11 @@ fn select_version(
             });
         },
     };
-    Ok((declared, spec_version, version))
-}
-
-/// Checks that `metadata.json` is JSON with a supported spec version.
-///
-/// Run by the loader before anything else is parsed, so an unsupported store
-/// fails with a version error rather than a schema or policy error.
-pub(crate) fn check_spec_version(metadata_json: &str) -> Result<(), ValidationError> {
-    select_version(metadata_json).map(|_| ())
+    Ok(SelectedVersion {
+        declared,
+        spec_version,
+        format: version,
+    })
 }
 
 fn warnings_for(declared: Option<u32>) -> Vec<PolicyStoreWarning> {
@@ -167,9 +174,13 @@ pub(crate) fn parse_policy_store(
     loaded: LoadedPolicyStore,
     strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, ParseStoreError> {
-    let (declared, spec_version, version) = select_version(&loaded.metadata_json)?;
+    let SelectedVersion {
+        declared,
+        spec_version,
+        format,
+    } = loaded.spec_version;
 
-    let doc = match version {
+    let doc = match format {
         FormatVersion::V0 => migration::v0_to_v1::migrate(v0::parse(loaded)?),
         FormatVersion::V1 => v1::parse(loaded)?,
     };
@@ -204,8 +215,11 @@ mod tests {
         )
     }
 
+    /// A loaded store whose version the loader has already resolved.
     fn loaded(metadata_json: &str) -> LoadedPolicyStore {
         LoadedPolicyStore {
+            spec_version: select_version(metadata_json)
+                .expect("test metadata should declare a supported version"),
             metadata_json: metadata_json.to_string(),
             schema: None,
             schema_source_exists: false,
@@ -264,11 +278,13 @@ mod tests {
         }
     }
 
+    /// The loader resolves the version, so an unsupported store is rejected
+    /// there rather than after the schema and policies have been read.
     #[test]
-    fn check_spec_version_fails_closed_before_parsing() {
-        check_spec_version(V0_METADATA).expect("a store without a version is supported");
-        let err = check_spec_version(&metadata_with_version("99"))
-            .expect_err("an unsupported version must be rejected by the early check");
+    fn select_version_fails_closed_before_parsing() {
+        select_version(V0_METADATA).expect("a store without a version is supported");
+        let err = select_version(&metadata_with_version("99"))
+            .expect_err("an unsupported version must be rejected when it is resolved");
         assert!(
             matches!(err, ValidationError::SpecVersionTooNew { found: 99, .. }),
             "expected SpecVersionTooNew, got: {err:?}"
@@ -385,17 +401,14 @@ mod tests {
 
     #[test]
     fn newer_version_fails_closed() {
-        let err = parse_policy_store(
-            loaded(&metadata_with_version(
-                &(CURRENT_FORMAT_VERSION + 1).to_string(),
-            )),
-            false,
-        )
+        let err = select_version(&metadata_with_version(
+            &(CURRENT_FORMAT_VERSION + 1).to_string(),
+        ))
         .expect_err("a version newer than CURRENT must be rejected");
         assert!(
             matches!(
                 err,
-                ParseStoreError::Validation(ValidationError::SpecVersionTooNew { found, max })
+                ValidationError::SpecVersionTooNew { found, max }
                     if found == CURRENT_FORMAT_VERSION + 1 && max == CURRENT_FORMAT_VERSION
             ),
             "expected SpecVersionTooNew, got: {err:?}"
@@ -418,13 +431,10 @@ mod tests {
 
     #[test]
     fn malformed_metadata_reports_parse_error() {
-        let err = parse_policy_store(loaded("{ not json"), false)
-            .expect_err("malformed metadata.json must be rejected");
+        let err =
+            select_version("{ not json").expect_err("malformed metadata.json must be rejected");
         assert!(
-            matches!(
-                err,
-                ParseStoreError::Validation(ValidationError::MetadataJsonParseFailed { .. })
-            ),
+            matches!(err, ValidationError::MetadataJsonParseFailed { .. }),
             "expected MetadataJsonParseFailed, got: {err:?}"
         );
     }

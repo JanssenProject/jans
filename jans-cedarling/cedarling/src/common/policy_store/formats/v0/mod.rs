@@ -36,6 +36,7 @@ pub(crate) struct PolicyStoreDoc {
 pub(crate) fn parse(loaded: LoadedPolicyStore) -> Result<PolicyStoreDoc, ParseStoreError> {
     let LoadedPolicyStore {
         metadata_json,
+        spec_version: _,
         schema,
         schema_source_exists,
         policies,
@@ -89,12 +90,14 @@ mod tests {
     /// file parses with v0 semantics, including the frozen `jti` default.
     #[test]
     fn golden_store_parses() {
-        let loaded = LoadedPolicyStore {
-            metadata_json: r#"{
+        let metadata_json = r#"{
                 "cedar_version": "4.4.0",
                 "policy_store": { "id": "abc123def456", "name": "Golden v0", "version": "1.0.0" }
-            }"#
-            .to_string(),
+            }"#;
+        let loaded = LoadedPolicyStore {
+            spec_version: crate::common::policy_store::formats::select_version(metadata_json)
+                .expect("a store without the field resolves to the baseline"),
+            metadata_json: metadata_json.to_string(),
             schema: None,
             schema_source_exists: false,
             policies: vec![PolicyFile {

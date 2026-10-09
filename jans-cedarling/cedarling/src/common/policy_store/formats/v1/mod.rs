@@ -40,6 +40,7 @@ pub(crate) struct PolicyStoreDoc {
 pub(crate) fn parse(loaded: LoadedPolicyStore) -> Result<PolicyStoreDoc, ParseStoreError> {
     let LoadedPolicyStore {
         metadata_json,
+        spec_version: _,
         schema,
         schema_source_exists,
         policies,
@@ -159,6 +160,8 @@ mod tests {
         custom_issuers: Vec<CustomIssuerFile>,
     ) -> LoadedPolicyStore {
         LoadedPolicyStore {
+            spec_version: crate::common::policy_store::formats::select_version(METADATA)
+                .expect("the golden fixture declares a supported version"),
             metadata_json: METADATA.to_string(),
             schema: None,
             schema_source_exists: false,
