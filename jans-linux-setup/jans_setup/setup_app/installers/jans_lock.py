@@ -178,6 +178,7 @@ class JansLockInstaller(JettyInstaller):
             self.logIt(warning)
             if Config.installed_instance:
                 print(warning)
+            self.bind_test_client_to_trace()
             return
 
         self.logIt("Loding Jans Lock test data")
