@@ -5,11 +5,8 @@
 #
 
 from io.jans.model.custom.script.type.scope import DynamicScopeType
-from io.jans.as.server.service import UserService
-from io.jans.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList
+from java.util import Arrays
 
-import java
 
 class DynamicScope(DynamicScopeType):
     def __init__(self, currentTimeMillis):
@@ -33,9 +30,6 @@ class DynamicScope(DynamicScopeType):
     def update(self, dynamicScopeContext, configurationAttributes):
         print "Dynamic scope. Update method"
 
-        dynamicScopes = dynamicScopeContext.getDynamicScopes()
-        authorizationGrant = dynamicScopeContext.getAuthorizationGrant()
-        user = dynamicScopeContext.getUser()
         jsonWebResponse = dynamicScopeContext.getJsonWebResponse()
         claims = jsonWebResponse.getClaims()
 

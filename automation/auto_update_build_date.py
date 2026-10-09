@@ -14,7 +14,6 @@ def should_update_build(last_build, new_build):
 
 def update_image(image, source_url_env, build_date_env):
     dfparser = DockerfileParser(f'./{image}')
-    version = dfparser.labels["org.opencontainers.image.version"]
     try:
         base_url = os.path.dirname(dfparser.envs[source_url_env])
         pkg_url = os.path.basename(dfparser.envs[source_url_env])
@@ -24,7 +23,7 @@ def update_image(image, source_url_env, build_date_env):
     session = HTMLSession()
     req = session.get(base_url)
     if not req.ok:
-        return
+        return None
 
     new_build = req.html.xpath(
         f"//a[contains(@href, '{pkg_url}')]/../following-sibling::td",
@@ -37,6 +36,7 @@ def update_image(image, source_url_env, build_date_env):
         dfparser.envs[build_date_env] = new_build
     else:
         print(f"No updates found for {image} {build_date_env}")
+    return None
 
 
 def main():

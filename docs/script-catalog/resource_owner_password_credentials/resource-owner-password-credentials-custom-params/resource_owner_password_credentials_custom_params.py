@@ -7,14 +7,12 @@
 
 from io.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
 from io.jans.as.server.service import AuthenticationService, SessionIdService
-from io.jans.as.model.common import SessionIdState
 from io.jans.as.server.security import Identity
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.model.authorize import AuthorizeRequestParam
 from io.jans.as.model.config import Constants
 from io.jans.util import StringHelper
-from java.lang import String
-from java.util import Date, HashMap
+from java.util import HashMap
 
 class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     def __init__(self, currentTimeMillis):

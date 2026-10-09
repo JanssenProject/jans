@@ -1,7 +1,7 @@
 function fillAnswer(name, choices, nameText, text) {
     
     let queries = [ "input[type='radio']", "input[type='checkbox']" ]
-    for (q of queries) {
+    for (let q of queries) {
         let elems = document.querySelectorAll(q)
 
         for (let el of elems) {
@@ -16,7 +16,7 @@ function fillAnswer(name, choices, nameText, text) {
         }
     }
     
-    elems = document.getElementsByName(nameText)
+    let elems = document.getElementsByName(nameText)
     if (elems && elems.length > 0) {
         console.log("Autofilling form control " + nameText)
         elems[0].value = text

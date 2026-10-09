@@ -11,15 +11,7 @@ from io.jans.orm import PersistenceEntryManager
 from io.jans.model.custom.script.type.introspection import IntrospectionType
 from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.model.config.adminui import AdminConf
-from java.net import HttpURLConnection, URL
-from org.json import JSONArray, JSONObject
-from java.lang import String
-from java.io import BufferedReader, InputStreamReader
-from java.lang import System
-try:
-    import json
-except ImportError:
-    import simplejson as json
+from org.json import JSONObject
 
 
 class Introspection(IntrospectionType):
@@ -92,7 +84,7 @@ class Introspection(IntrospectionType):
 
                 print "Following scopes will be added in api token: {}".format(scopes)
 
-            responseAsJsonObject.accumulate("scope", scopes)
+                responseAsJsonObject.accumulate("scope", scopes)
         except Exception as e:
                 print "Exception occured. Unable to resolve role/scope mapping."
                 print e

@@ -1,13 +1,13 @@
+import contextlib
 from functools import partial
 
-from prompt_toolkit.widgets import Button, Dialog, Label
+from prompt_toolkit.widgets import Button, Dialog
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.layout.dimension import D
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence
 from prompt_toolkit.layout.containers import (
     AnyContainer,
 )
-from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText
 from utils.multi_lang import _
 
@@ -48,10 +48,8 @@ class JansMessageDialog:
             if self.me in app.root_layout.floats:
                 app.root_layout.floats.remove(self.me)
 
-            try:
+            with contextlib.suppress(Exception):
                 app.layout.focus(self.focus_on_exit)
-            except:
-                pass
 
         blist = []
 

@@ -3,10 +3,9 @@ import sys
 import uuid
 import argparse
 
-from setup_app import static, paths
+from setup_app import static
 from setup_app.version import __version__
 from setup_app.utils import base
-from setup_app.config import Config
 
 OPENBANKING_PROFILE = 'openbanking'
 PROFILE = os.environ.get('JANS_PROFILE')
@@ -141,7 +140,7 @@ def get_parser():
     if getattr(argsp, 'test_client_id', None):
         try:
             uuid.UUID(argsp.test_client_id)
-        except:
+        except Exception:
             sys.stderr.write("{}-test-client-id should be in UUID format{}\n".format(static.colors.DANGER, static.colors.ENDC))
             sys.stderr.flush()
             sys.exit(2)

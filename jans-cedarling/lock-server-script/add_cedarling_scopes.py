@@ -79,7 +79,6 @@ class ClientRegistration(ClientRegistrationType):
 
     def updateClient(self, context):
         print "Cedarling Client registration. UpdateClient method"
-        pass
 
     def getApiVersion(self):
         return 11

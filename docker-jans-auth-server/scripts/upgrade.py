@@ -24,6 +24,9 @@ logger = logging.getLogger("jans-auth")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
+# mirrors LOCK_TEST_CLIENT_ID in docker-jans-persistence-loader/scripts/test_data_setup.py
+LOCK_TEST_CLIENT_ID = "2202.A7C3-5E19"
+
 
 def _transform_lock_dynamic_config(conf, manager):
     should_update = False
@@ -104,6 +107,17 @@ def _transform_lock_dynamic_config(conf, manager):
     if conf["protectionMode"] == "CEDARLING":
         conf["protectionMode"] = "cedarling"
         should_update = True
+
+    # lock config is created after persistence-loader imports test data, so bind the test client here
+    if as_boolean(os.environ.get("CN_PERSISTENCE_LOAD_TEST_DATA", "false")):
+        bindings = conf["traceConfiguration"].setdefault("clientDomainBindings", [])
+        if not any(binding.get("clientId") == LOCK_TEST_CLIENT_ID for binding in bindings):
+            bindings.append({
+                "clientId": LOCK_TEST_CLIENT_ID,
+                "evidenceDomainId": "default",
+                "allowedProducerIds": ["*"],
+            })
+            should_update = True
 
     # return modified config (if any) and update flag
     return conf, should_update

@@ -14,7 +14,6 @@ from prompt_toolkit.layout.containers import (
 )
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import (
-    Box,
     Button,
     Label,
     Dialog,
@@ -47,10 +46,6 @@ from attributes import Attributes
 from sessions import Sessions
 
 
-from prompt_toolkit.widgets import (
-    HorizontalLine,
-    VerticalLine,
-)
 QUESTION_TEMP = "\n {} ?"
 
 class Plugin(DialogUtils):

@@ -13,7 +13,6 @@ import httplib
 import urllib
 import json
 
-import java
 
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -102,6 +101,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return attributes_map
         except Exception, err:
             print("AzureAD: Exception inside prepareAttributesMapping " + str(err))
+        return None
 
     def prepareForStep(self, configuration_attributes, request_parameters, step):
         if step == 1:
