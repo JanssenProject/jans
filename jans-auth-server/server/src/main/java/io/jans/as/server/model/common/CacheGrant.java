@@ -37,6 +37,7 @@ public class CacheGrant implements Serializable {
     private String nonce;
     private String codeChallenge;
     private String codeChallengeMethod;
+    private String redirectUri;
     private String claims;
     private String deviceCode;
 
@@ -72,6 +73,7 @@ public class CacheGrant implements Serializable {
         acrValues = grant.getAcrValues();
         codeChallenge = grant.getCodeChallenge();
         codeChallengeMethod = grant.getCodeChallengeMethod();
+        redirectUri = grant.getRedirectUri();
         claims = grant.getClaims();
         sessionDn = grant.getSessionDn();
         isAuthorizationChallenge = grant.isAuthorizationChallenge();
@@ -219,6 +221,14 @@ public class CacheGrant implements Serializable {
         this.codeChallenge = codeChallenge;
     }
 
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+    }
+
     public String getCodeChallengeMethod() {
         return codeChallengeMethod;
     }
@@ -262,6 +272,7 @@ public class CacheGrant implements Serializable {
         grant.setSessionDn(sessionDn);
         grant.setCodeChallenge(codeChallenge);
         grant.setCodeChallengeMethod(codeChallengeMethod);
+        grant.setRedirectUri(redirectUri);
         grant.setAcrValues(acrValues);
         grant.setNonce(nonce);
         grant.setClaims(claims);
