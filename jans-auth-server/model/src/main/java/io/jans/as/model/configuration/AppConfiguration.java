@@ -720,8 +720,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This list specified which client redirection URIs are black-listed")
     private List<String> clientBlackList;
 
-    @DocProperty(description = "Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is false which means that redirect_uri at Token Endpoint must only be registered for the client.", defaultValue = "false")
-    private Boolean strictTokenRedirectUriValidation = false;
+    @DocProperty(description = "Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client.", defaultValue = "true")
+    private Boolean strictTokenRedirectUriValidation = true;
 
     @DocProperty(description = "Choose whether to include claims in ID tokens")
     private Boolean legacyIdTokenClaims;

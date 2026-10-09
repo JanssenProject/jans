@@ -472,13 +472,43 @@ public class TokenRestWebServiceValidatorTest {
     }
 
     @Test
-    public void validateRedirectUri_whenGrantRedirectUriIsBlankAndStrict_shouldPass() {
+    public void validateRedirectUri_whenGrantRedirectUriIsBlankAndStrict_shouldFailAndInvokeOnFailure() {
         final Client client = new Client();
         final AuthorizationCodeGrant grant = grantWithRedirectUri(null);
+        final AtomicBoolean onFailureCalled = new AtomicBoolean(false);
         when(redirectionUriService.validateRedirectionUri(client, "https://rp.example.org/cb")).thenReturn("https://rp.example.org/cb");
         when(appConfiguration.getStrictTokenRedirectUriValidation()).thenReturn(true);
 
+        try {
+            validator.validateRedirectUri(grant, client, "https://rp.example.org/cb", AUDIT_LOG, g -> onFailureCalled.set(true));
+            fail("Grant without stored redirect_uri is accepted in strict mode.");
+        } catch (WebApplicationException e) {
+            assertTrue(onFailureCalled.get());
+        }
+    }
+
+    @Test
+    public void validateRedirectUri_whenGrantRedirectUriIsBlankAndNotStrict_shouldPass() {
+        final Client client = new Client();
+        final AuthorizationCodeGrant grant = grantWithRedirectUri(null);
+        when(redirectionUriService.validateRedirectionUri(client, "https://rp.example.org/cb")).thenReturn("https://rp.example.org/cb");
+        when(appConfiguration.getStrictTokenRedirectUriValidation()).thenReturn(false);
+
         validator.validateRedirectUri(grant, client, "https://rp.example.org/cb", AUDIT_LOG, null);
+    }
+
+    @Test
+    public void validateRedirectUri_whenSubmittedRedirectUriIsEmptyAndStrict_shouldFailAndInvokeOnFailure() {
+        final AuthorizationCodeGrant grant = grantWithRedirectUri("https://rp.example.org/cb");
+        final AtomicBoolean onFailureCalled = new AtomicBoolean(false);
+        when(appConfiguration.getStrictTokenRedirectUriValidation()).thenReturn(true);
+
+        try {
+            validator.validateRedirectUri(grant, new Client(), "", AUDIT_LOG, g -> onFailureCalled.set(true));
+            fail("Empty redirect_uri is accepted in strict mode.");
+        } catch (WebApplicationException e) {
+            assertTrue(onFailureCalled.get());
+        }
     }
 
     @Test

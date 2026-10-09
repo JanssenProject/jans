@@ -460,7 +460,7 @@ It returns all the information of the Jans Authorization server.
     "*.attacker.com/*"
   ],
   "legacyIdTokenClaims": false,
-  "strictTokenRedirectUriValidation": false,
+  "strictTokenRedirectUriValidation": true,
   "customHeadersWithAuthorizationResponse": true,
   "frontChannelLogoutSessionSupported": true,
   "loggingLevel": "INFO",

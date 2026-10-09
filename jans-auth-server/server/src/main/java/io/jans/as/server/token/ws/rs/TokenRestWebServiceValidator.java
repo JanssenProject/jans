@@ -182,6 +182,14 @@ public class TokenRestWebServiceValidator {
     }
 
     public void validateRedirectUri(AuthorizationGrant grant, Client client, String redirectUri, OAuth2AuditLog auditLog, Consumer<AuthorizationGrant> onFailure) {
+        final boolean strict = isTrue(appConfiguration.getStrictTokenRedirectUriValidation());
+        final String grantRedirectUri = grant.getRedirectUri();
+
+        if (strict && StringUtils.isBlank(redirectUri) && StringUtils.isNotBlank(grantRedirectUri)) {
+            log.debug("redirect_uri is not set at token request but present in authorization request. Grant's redirect_uri: '{}'", grantRedirectUri);
+            invalidRedirectUriGrant(grant, auditLog, onFailure, "redirect_uri does not match the value from the authorization request.");
+        }
+
         validateRedirectUri(redirectUri, auditLog);
 
         if (redirectionUriService.validateRedirectionUri(client, redirectUri) == null) {
@@ -189,9 +197,7 @@ public class TokenRestWebServiceValidator {
             invalidRedirectUriGrant(grant, auditLog, onFailure, "redirect_uri is not valid for the client.");
         }
 
-        final String grantRedirectUri = grant.getRedirectUri();
-        if (isTrue(appConfiguration.getStrictTokenRedirectUriValidation())
-                && StringUtils.isNotBlank(grantRedirectUri) && !grantRedirectUri.equals(redirectUri)) {
+        if (strict && (StringUtils.isBlank(grantRedirectUri) || !grantRedirectUri.equals(redirectUri))) {
             log.debug("redirect_uri does not match authorization request. Grant's redirect_uri: '{}', request's: '{}'", grantRedirectUri, redirectUri);
             invalidRedirectUriGrant(grant, auditLog, onFailure, "redirect_uri does not match the value from the authorization request.");
         }
