@@ -282,15 +282,14 @@ struct WarningDedup {
 impl WarningDedup {
     /// Records a freshly parsed store and returns the warnings to log now.
     ///
-    /// A store on a newer format version starts the set over, so the operator
-    /// sees the state of the new format; otherwise each distinct warning is
-    /// logged once.
+    /// Any change of format version starts the set over, including a rollback to
+    /// an older one, so suppression only lasts while the store stays put.
     fn take_new(
         &mut self,
         spec_version: Option<u32>,
         warnings: &[PolicyStoreWarning],
     ) -> Vec<PolicyStoreWarning> {
-        if spec_version > self.last_spec_version {
+        if spec_version != self.last_spec_version {
             self.logged.clear();
         }
         self.last_spec_version = spec_version;
@@ -908,18 +907,28 @@ mod tests {
         );
     }
 
+    /// An operator who rolls a store back to an outdated format should be told
+    /// again, so a version change in either direction clears the set.
     #[test]
-    fn warning_dedup_keeps_set_on_same_or_older_spec_version() {
+    fn warning_dedup_rewarns_after_a_rollback() {
         let mut dedup = WarningDedup::default();
-        dedup.take_new(Some(1), &[OUTDATED]);
-
+        assert_eq!(
+            dedup.take_new(Some(0), &[OUTDATED]),
+            vec![OUTDATED],
+            "the outdated store should warn the first time"
+        );
         assert!(
-            dedup.take_new(Some(0), &[OUTDATED]).is_empty(),
-            "rolling back to an older version must not reset the set"
+            dedup.take_new(Some(1), &[]).is_empty(),
+            "moving to the current version has nothing to warn about"
+        );
+        assert_eq!(
+            dedup.take_new(Some(0), &[OUTDATED]),
+            vec![OUTDATED],
+            "rolling back to the outdated format must warn again"
         );
         assert!(
             dedup.take_new(Some(0), &[OUTDATED]).is_empty(),
-            "staying on that older version must keep deduping"
+            "staying on that version must keep deduping"
         );
     }
 
