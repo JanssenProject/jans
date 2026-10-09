@@ -984,8 +984,8 @@ A dropped token no longer has to be recovered from the logs. Every
 is written to the decision-log entry for the request. Each entry identifies the
 caller's token by its input `mapping` and its zero-based `index` in the request
 `tokens` array, plus a claim-free `reason` and a non-empty `message` (the
-reason's human-readable text). In Python, `reason` is a `DropReason` enum
-call `.slug()` for the documented snake-case slug:
+reason's human-readable text). In Python, `reason` is a `DropReason` enum.
+Call `.slug()` for the documented snake-case slug:
 
 ```python
 result = cedarling.authorize_multi_issuer(request)
