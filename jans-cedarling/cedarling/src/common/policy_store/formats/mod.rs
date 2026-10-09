@@ -15,7 +15,11 @@ pub(crate) mod file_id;
 pub(crate) mod v0;
 pub(crate) mod v1;
 
+use std::borrow::Cow;
 use std::fmt;
+
+use serde::de::{IgnoredAny, MapAccess, Visitor};
+use serde::{Deserialize, Deserializer};
 
 use super::PolicyStoreWithID;
 use super::errors::ValidationError;
@@ -77,24 +81,70 @@ pub(crate) enum ParseStoreError {
     Conversion(#[from] ConversionError),
 }
 
-/// Reads `policy_store_spec_version`; `null` counts as missing.
+/// Reads only `policy_store_spec_version` out of `metadata.json`, skipping every
+/// other key, so no value tree is built for the rest of the file.
+struct SpecVersionProbe {
+    policy_store_spec_version: Option<SpecVersionField>,
+}
+
+impl<'de> Deserialize<'de> for SpecVersionProbe {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        deserializer.deserialize_map(SpecVersionProbeVisitor)
+    }
+}
+
+struct SpecVersionProbeVisitor;
+
+impl<'de> Visitor<'de> for SpecVersionProbeVisitor {
+    type Value = SpecVersionProbe;
+
+    fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("a metadata.json object")
+    }
+
+    fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
+        let mut policy_store_spec_version = None;
+        while let Some(key) = map.next_key::<Cow<'de, str>>()? {
+            if key == "policy_store_spec_version" {
+                // `Option` maps an explicit `null` to `None`, same as absent.
+                policy_store_spec_version = map.next_value()?;
+            } else {
+                map.next_value::<IgnoredAny>()?;
+            }
+        }
+        Ok(SpecVersionProbe {
+            policy_store_spec_version,
+        })
+    }
+}
+
+/// The field as written: a version we can dispatch on, or something we cannot.
 ///
-/// Only requires `metadata.json` to be a JSON object, so it works for every version.
+/// Serde validates the `u32` itself; the raw value is kept only to name it in
+/// the error.
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum SpecVersionField {
+    Supported(u32),
+    Unsupported(serde_json::Value),
+}
+
+/// Reads `policy_store_spec_version`; a missing field and an explicit `null`
+/// both mean "unversioned", which the caller resolves to the baseline.
 fn probe_spec_version(metadata_json: &str) -> Result<Option<u32>, ValidationError> {
-    let root: serde_json::Map<String, serde_json::Value> = serde_json::from_str(metadata_json)
-        .map_err(|e| ValidationError::MetadataJsonParseFailed {
+    let probe: SpecVersionProbe = serde_json::from_str(metadata_json).map_err(|source| {
+        ValidationError::MetadataJsonParseFailed {
             file: "metadata.json".to_string(),
-            source: e,
-        })?;
-    match root.get("policy_store_spec_version") {
-        None | Some(serde_json::Value::Null) => Ok(None),
-        Some(value) => value
-            .as_u64()
-            .and_then(|v| u32::try_from(v).ok())
-            .map(Some)
-            .ok_or_else(|| ValidationError::InvalidSpecVersion {
-                value: value.to_string(),
-            }),
+            source,
+        }
+    })?;
+
+    match probe.policy_store_spec_version {
+        None => Ok(None),
+        Some(SpecVersionField::Supported(version)) => Ok(Some(version)),
+        Some(SpecVersionField::Unsupported(value)) => Err(ValidationError::InvalidSpecVersion {
+            value: value.to_string(),
+        }),
     }
 }
 
@@ -267,6 +317,24 @@ mod tests {
         );
     }
 
+    /// Other keys are skipped rather than deserialized, including nested ones
+    /// and ones the version parser would later reject.
+    #[test]
+    fn probe_skips_every_other_key() {
+        let json = r#"{
+            "cedar_version": { "unexpected": ["shape", 1, null] },
+            "policy_store": "not an object either",
+            "policy_store_spec_version": 1,
+            "trailing": [[[1]]]
+        }"#;
+
+        assert_eq!(
+            probe_spec_version(json).expect("unrelated keys must not affect the probe"),
+            Some(1),
+            "the version should be read regardless of the other keys"
+        );
+    }
+
     #[test]
     fn probe_rejects_malformed_metadata() {
         for json in ["{ not json", "[]"] {
@@ -293,12 +361,12 @@ mod tests {
 
     #[test]
     fn probe_rejects_non_integer_versions() {
-        for value in [r#""2""#, "-1", "2.5", "4294967296", "[2]"] {
-            let err = probe_spec_version(&metadata_with_version(value))
+        for declared in [r#""2""#, "-1", "2.5", "4294967296", "[2]"] {
+            let err = probe_spec_version(&metadata_with_version(declared))
                 .expect_err("a non-integer version must be rejected");
             assert!(
-                matches!(err, ValidationError::InvalidSpecVersion { .. }),
-                "expected InvalidSpecVersion for {value}, got: {err:?}"
+                matches!(&err, ValidationError::InvalidSpecVersion { value } if value == declared),
+                "expected InvalidSpecVersion naming {declared}, got: {err:?}"
             );
         }
     }
