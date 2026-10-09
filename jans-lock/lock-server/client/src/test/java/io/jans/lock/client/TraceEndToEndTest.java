@@ -79,7 +79,11 @@ class TraceEndToEndTest extends BaseLockClientTest {
 	private final String traceExecutionId = "trace-e2e-exec-" + RUN_ID;
 	private final String executionAuthority = "spiffe://example.org/agent/trace-e2e-" + RUN_ID;
 
+	private static final String DEFAULT_API_BASE_PATH = "/jans-lock/api/v1";
+	private static final String HEALTH_ENDPOINT_SUFFIX = "/audit/health";
+
 	private HttpClient client;
+	private String apiBasePath;
 	private String adminToken;
 	private String writeToken;
 	private String readToken;
@@ -99,6 +103,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 				"No real server/TRACE client configured (-Dcfg=<profile> with trace.client.id/secret); skipping, see profiles/default/README.md");
 		if (client == null) {
 			client = newInsecureHttpClient();
+			apiBasePath = discoverApiBasePath();
 		}
 	}
 
@@ -320,6 +325,28 @@ class TraceEndToEndTest extends BaseLockClientTest {
 
 	// -- HTTP helpers -------------------------------------------------------------------------------
 
+	/**
+	 * Lock runs either standalone ({@code /jans-lock}) or embedded in jans-auth ({@code /jans-auth}),
+	 * so the API base path is taken from the well-known document rather than hardcoded.
+	 */
+	private String discoverApiBasePath() {
+		try {
+			HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl() + "/.well-known/lock-server-configuration"))
+					.GET().build();
+			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+			if (response.statusCode() == 200) {
+				String healthEndpoint = readTree(response).path("audit").path("health_endpoint").asText("");
+				String path = healthEndpoint.isEmpty() ? "" : URI.create(healthEndpoint).getPath();
+				if (path != null && path.endsWith(HEALTH_ENDPOINT_SUFFIX)) {
+					return path.substring(0, path.length() - HEALTH_ENDPOINT_SUFFIX.length());
+				}
+			}
+		} catch (Exception ex) {
+			// fall through to the default path
+		}
+		return DEFAULT_API_BASE_PATH;
+	}
+
 	private String getToken(String scope) throws Exception {
 		String body = "grant_type=client_credentials&scope=" + URLEncoder.encode(scope, StandardCharsets.UTF_8);
 		String basicAuth = Base64.getEncoder()
@@ -362,7 +389,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 	}
 
 	private HttpResponse<String> postJson(String path, String jsonBody, String token) throws Exception {
-		HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(baseUrl() + "/jans-lock/api/v1" + path))
+		HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(baseUrl() + apiBasePath + path))
 				.header("Content-Type", "application/json")
 				.POST(HttpRequest.BodyPublishers.ofString(jsonBody, StandardCharsets.UTF_8));
 		if (isPresent(token)) {
@@ -372,7 +399,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 	}
 
 	private HttpResponse<String> getJson(String pathWithQuery, String token) throws Exception {
-		HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(baseUrl() + "/jans-lock/api/v1" + pathWithQuery))
+		HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(baseUrl() + apiBasePath + pathWithQuery))
 				.GET();
 		if (isPresent(token)) {
 			builder.header("Authorization", "Bearer " + token);
