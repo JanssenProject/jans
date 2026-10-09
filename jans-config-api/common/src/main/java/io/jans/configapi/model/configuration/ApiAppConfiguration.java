@@ -24,6 +24,14 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Protection mode for the Lock server (OAuth or Cedarling)")
     private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
 
+    @DocProperty(description = "DB attribute name for storing user role", defaultValue = "jansAdminUIRole")
+    @Schema(description = "DB attribute name for storing user role")
+    private String userRoleAttributeName = "jansAdminUIRole";
+    
+    @DocProperty(description = "Substring text corresponding to `admin` role", defaultValue = "admin")
+    @Schema(description = "Substring text corresponding to `admin` role")
+    private String userAdminRoleNameSubstring = "admin";
+    
     @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `false`.")
     private boolean disableLoggerTimer;
     
@@ -159,6 +167,22 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setProtectionMode(LockProtectionMode protectionMode) {
         this.protectionMode = protectionMode;
+    }
+    
+    public String getUserRoleAttributeName() {
+        return userRoleAttributeName;
+    }
+
+    public void setUserRoleAttributeName(String userRoleAttributeName) {
+        this.userRoleAttributeName = userRoleAttributeName;
+    }
+
+    public String getUserAdminRoleNameSubstring() {
+        return userAdminRoleNameSubstring;
+    }
+
+    public void setUserAdminRoleNameSubstring(String userAdminRoleNameSubstring) {
+        this.userAdminRoleNameSubstring = userAdminRoleNameSubstring;
     }
 
     public boolean isDisableLoggerTimer() {
@@ -471,7 +495,8 @@ public class ApiAppConfiguration implements Configuration {
     @Override
     public String toString() {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
-                + " ,protectionMode=" + protectionMode + ", disableLoggerTimer=" + disableLoggerTimer
+                + " ,protectionMode=" + protectionMode + " ,userRoleAttributeName=" + userRoleAttributeName
+                + ", userAdminRoleNameSubstring=" + userAdminRoleNameSubstring + ", disableLoggerTimer=" + disableLoggerTimer
                 +" ,userRolePermissionValidationEnabled=" + userRolePermissionValidationEnabled
                 +" ,validateUserInumInIntrospectionFlag=" + validateUserInumInIntrospectionFlag
                 +" ,fetchUserRoleInIntrospectionFlag=" + fetchUserRoleInIntrospectionFlag

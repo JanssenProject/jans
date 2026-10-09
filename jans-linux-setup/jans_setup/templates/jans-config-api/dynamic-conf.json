@@ -3,6 +3,8 @@
   "configOauthEnabled": ${configOauthEnabled},
   "protectionMode": "oauth",
   "disableLoggerTimer": false,
+  "userRoleAttributeName": "jansAdminUIRole",
+  "userAdminRoleNameSubstring": "admin",
   "userPermissionValidationEnabled": true,
   "validateUserInumInIntrospectionFlag": true,
   "fetchUserDataInIntrospectionFlag": true,

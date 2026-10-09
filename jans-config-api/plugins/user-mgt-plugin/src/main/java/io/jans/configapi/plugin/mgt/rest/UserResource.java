@@ -8,7 +8,6 @@ import io.jans.configapi.core.model.exception.ApiApplicationException;
 import io.jans.configapi.core.util.ApiErrorResponse;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.rest.security.ScopeContext;
 import io.jans.configapi.plugin.mgt.model.user.CustomUser;
 import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.service.UserMgmtService;
@@ -83,9 +82,6 @@ public class UserResource extends BaseResource {
 
     @Inject
     UserMgmtService userMgmtSrv;
-
-    @Inject
-    ScopeContext scopeContext;
 
     /**
      * Retrieves a paged list of users matching the provided search, filter, and
@@ -798,7 +794,7 @@ public class UserResource extends BaseResource {
                     .append("} does not have super admin permission to fetch/modify user{").append(inumPathVariable)
                     .append("}");
 
-            logger.error("validateUserPermission - errMsg:{}", escapeLog(errMsg));
+            logger.error("validateUserPermission - errMsg:{}", errMsg);
 
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
@@ -815,12 +811,12 @@ public class UserResource extends BaseResource {
         }
 
         // Return if logged-in user is updating own profile
-        if (StringUtils.isNotBlank(candidateUserInum) && !loggedInUserInum.equals(candidateUserInum) && !isAdmin) {
+        if (StringUtils.isNotBlank(candidateUserInum) && !candidateUserInum.equals(loggedInUserInum) && !isAdmin) {
             StringBuilder errMsg = new StringBuilder("Logged-in user{").append(loggedInUserInum)
                     .append("} does not have super admin permission, to view/update details of {")
                     .append(candidateUserInum).append("}");
 
-            logger.error("validateUserPermission - candidateUserInum - errMsg:{}", escapeLog(errMsg));
+            logger.error("validateUserPermission - candidateUserInum - errMsg:{}", errMsg);
 
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
@@ -828,7 +824,7 @@ public class UserResource extends BaseResource {
     }
 
     private boolean isAdminUser(String loggedInUserInum, User loggedInUser, String httpRequestMethod,
-            HttpServletRequest servletRequest) throws ApiApplicationException {
+            HttpServletRequest servletRequest) {
         logger.info("loggedInUserInum:{}, loggedInUser:{}", loggedInUserInum, loggedInUser);
         boolean isAdmin = false;
 
@@ -837,13 +833,12 @@ public class UserResource extends BaseResource {
         }
 
         List<String> loggedInUserRoleList = authUtil.getUserRole(loggedInUser);
-        logger.info("loggedInUserInum:{}, loggedInUserRoleList:{}", loggedInUserInum, loggedInUserRoleList);
+        logger.info("loggedInUserInum:{}, loggedInUserRoleList:{}, authUtil.getUserAdminRoleNameSubstring():{}", loggedInUserInum, loggedInUserRoleList, authUtil.getUserAdminRoleNameSubstring());
 
         if (loggedInUserRoleList != null && !loggedInUserRoleList.isEmpty()) {
-            isAdmin = loggedInUserRoleList.stream().anyMatch((ele -> ele.contains("admin")));
+            isAdmin = loggedInUserRoleList.stream().anyMatch((ele -> ele.contains(authUtil.getUserAdminRoleNameSubstring())));
             logger.info("loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
             return isAdmin;
-
         }
 
         isAdmin = isAdminUser(loggedInUserInum, httpRequestMethod, servletRequest);
@@ -853,17 +848,19 @@ public class UserResource extends BaseResource {
     }
 
     private boolean isAdminUser(String loggedInUserInum, String httpRequestMethod, HttpServletRequest servletRequest) {
-        logger.info("  UserResource::isAdminUser() - loggedInUserInum:{}, httpRequestMethod:{}", loggedInUserInum,
-                httpRequestMethod);
+        logger.info("  UserResource::isAdminUser() - loggedInUserInum:{}, httpRequestMethod:{}, getContextScope(servletRequest):{}, getResourceScope(servletRequest):{}", loggedInUserInum,
+                httpRequestMethod, getContextScope(servletRequest), getResourceScope(servletRequest));
         boolean isAdmin = false;
 
         if (loggedInUserInum == null) {
             return isAdmin;
         }
 
-        isAdmin = authUtil.hasSuperAdminScope(getContextScope(servletRequest), httpRequestMethod);
-        logger.info("isAdminUser - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin,
-                getContextSubject(servletRequest));
+        isAdmin = authUtil.containsAnyElement(getContextScope(servletRequest), getResourceScope(servletRequest));
+        logger.info(
+                "isAdminUser - loggedInUserInum:{}, isAdmin:{},  getContextSubject(servletRequest):{}, getContextScope(servletRequest):{}, getResourceScope(servletRequest):{}",
+                loggedInUserInum, isAdmin, getContextSubject(servletRequest), getContextScope(servletRequest),
+                getResourceScope(servletRequest));
 
         return isAdmin;
     }
@@ -873,7 +870,15 @@ public class UserResource extends BaseResource {
         if (servletRequest == null) {
             return scopes;
         }
-        return AuthUtil.getStringList(servletRequest.getAttribute(ApiConstants.INTROSPECTION_SCOPES));
+        return AuthUtil.getListFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_SCOPES));
+    }
+
+    private List<String> getResourceScope(HttpServletRequest servletRequest) {
+        List<String> scopes = null;
+        if (servletRequest == null) {
+            return scopes;
+        }
+        return AuthUtil.getListFromObject(servletRequest.getAttribute(ApiConstants.RESOURCE_SCOPES));
     }
 
     private String getContextSubject(HttpServletRequest servletRequest) {
@@ -881,23 +886,18 @@ public class UserResource extends BaseResource {
         if (servletRequest == null) {
             return subject;
         }
-        return AuthUtil.getString(servletRequest.getAttribute(ApiConstants.INTROSPECTION_SUBJECT))
+        return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_SUBJECT))
                 .orElseThrow(() -> null);
     }
 
     private boolean isRolePermissionExemptClient(String inum) {
-
-        if (!authUtil.isUserRolePermissionValidationEnabled()) {
+        logger.debug(
+                " UserResource::isRolePermissionExemptClient() - inum:{}, StringUtils.isBlank(inum):{}, authUtil.isUserRolePermissionExcluded(inum):{}",
+                inum, StringUtils.isBlank(inum), authUtil.isUserRolePermissionExcluded(inum));
+        if (!authUtil.isUserRolePermissionValidationEnabled() || StringUtils.isBlank(inum)
+                || authUtil.isUserRolePermissionExcluded(inum)) {
             logger.debug(
-                    " UserResourceFilter - Skip validateUserRolePermission as authUtil.isUserRolePermissionValidationEnabled() not enabled");
-            return true;
-        }
-
-        if (StringUtils.isBlank(inum)) {
-            return true;
-        }
-
-        if (authUtil.isUserRolePermissionExcluded(inum)) {
+                    " UserResource::Skip validateUserRolePermission as authUtil.isUserRolePermissionValidationEnabled() not enabled OR blank inum OR UserRolePermissionExcluded is true ");
             return true;
         }
 

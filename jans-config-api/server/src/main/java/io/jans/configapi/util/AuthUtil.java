@@ -129,6 +129,14 @@ public class AuthUtil {
         return this.configurationFactory.getApiAppConfiguration().getPlugins();
     }
     
+    public String getUserRoleAttributeName() {
+        return this.configurationFactory.getApiAppConfiguration().getUserRoleAttributeName();
+    }
+    
+    public String getUserAdminRoleNameSubstring() {
+        return this.configurationFactory.getApiAppConfiguration().getUserAdminRoleNameSubstring();
+    }
+    
     public boolean isUserRolePermissionValidationEnabled() {
         return this.configurationFactory.getApiAppConfiguration().isUserRolePermissionValidationEnabled();
     }
@@ -449,7 +457,7 @@ public class AuthUtil {
     }
     
     public static List<String> getMethodSuperScopes(Method resourceMethod) {
-        log.info("Method Scopes for resourceMethod:{}", resourceMethod);
+        log.info("getMethodSuperScopes() - Get Scopes for resourceMethod:{}", resourceMethod);
         List<String> superScopes = null ;
         
         if(resourceMethod==null) {
@@ -463,7 +471,7 @@ public class AuthUtil {
             superScopes.addAll(Stream.of(methodAnnotation.superScopes()).collect(Collectors.toList()));
         }
         
-        log.info("Final Method Scopes for resourceMethod:{}, superScopes:{} ", resourceMethod, superScopes);
+        log.info("getMethodSuperScopes:() - Final Scopes for resourceMethod:{}, superScopes:{} ", resourceMethod, superScopes);
         return superScopes;
     }
 
@@ -508,6 +516,32 @@ public class AuthUtil {
             }
         }
         return null;
+    }
+    
+    public List<String> getClientScope(final String clientId) {
+        log.info("Get scopes of Client:{} ", clientId);
+        List<String> scopes = null;
+        
+        if(StringUtils.isBlank(clientId)) {
+            return scopes;
+        }
+        // Get Client
+        Client client = this.clientService.getClientByInum(clientId);
+        if (client == null) {
+            return scopes;
+        }
+
+        // Prepare scope array
+         String[] scopeArray = client.getScopes();
+        log.debug(" scope to be scopeArray - {} ", Arrays.asList(scopeArray));
+        if(scopeArray==null || scopeArray.length<=0) {
+            return scopes;
+        }
+        
+        // Assign scope
+        scopes =  Arrays.asList(client.getScopes());
+        log.debug(" Scope of clientId:{} is :{} ", clientId, scopes);
+        return scopes;
     }
 
     public void assignAllScope(final String clientId) {
@@ -767,30 +801,37 @@ public class AuthUtil {
         return getRequestedScopes(resourceInfo);
     }
 
-    public Set<String> getUserRolePermission(HttpHeaders httpHeaders) {
+    public List<String> getUserRolePermission(HttpHeaders httpHeaders) {
 
+        List<String> userPermissionList = new ArrayList<>();
         Set<String> userPermissionSet = null;
-        // Get user
+        
+        // Get userInum from header 
         String userInum = getUserInum(httpHeaders);
         log.info("userInum:{}", userInum);
 
-        // Get User details
+        // Get User details based on userInum
         User user = getUserByInum(userInum);
         log.info("userInum:{}, user:{}", userInum, user);
 
+        //Get user roles from DB
         List<String> userRoleList = getUserRole(user);
         log.info("userInum:{}, userRoleList:{}", userInum, userRoleList);
         if (userRoleList == null || userRoleList.isEmpty()) {
-            return userPermissionSet;
+            return userPermissionList;
         }
         log.info("userInum:{}, user:{}, userRoleList:{}", userInum, user, userRoleList);
 
+        //Fetch distinct permissions associated with role
         Set<String> safeSet = new HashSet<>(userRoleList);
         userPermissionSet = getUserPermission(safeSet);
+        if(userPermissionSet == null || userPermissionSet.isEmpty()) {
+            return userPermissionList;
+        }
+        userPermissionList = new ArrayList<>(userPermissionSet);        
+        log.info("userInum:{},userRole:{}, userPermissionSet:{}, userPermissionList:{}", userInum, userRoleList, userPermissionSet, userPermissionList);
 
-        log.info("userInum:{},userRole:{}, userPermissionSet:{}", userInum, userRoleList, userPermissionSet);
-
-        return userPermissionSet;
+        return userPermissionList;
     }
 
     public Set<String> getUserPermission(Set<String> userRoleSet) {
@@ -813,7 +854,7 @@ public class AuthUtil {
     }
 
     public List<String> getUserRole(User user) {
-        log.info("getUserRole user:{}", user);
+        log.info("getUserRole() - user:{}", user);
         List<String> userRoleList = null;
 
         if (user == null) {
@@ -825,13 +866,13 @@ public class AuthUtil {
             return userRoleList;
         }
 
-        userRoleList = getAttributeValueList(customAttributes, "jansAdminUIRole");
-        log.info(" user.getUserId():{}, jansAdminUIRole-userRoleList:{}", user.getUserId(), userRoleList);
+        userRoleList = getAttributeValueList(customAttributes, getUserRoleAttributeName());
+        log.info(" user.getUserId():{}, getUserRoleAttributeName():{}, userRoleList:{}", user.getUserId(), getUserRoleAttributeName(), userRoleList);
         if (userRoleList.isEmpty()) {
             return userRoleList;
         }
 
-        log.info(" user.getUserId():{}, userRoleList:{}", user.getUserId(), userRoleList);
+        log.info(" Returning user.getUserId():{}, userRoleList:{}", user.getUserId(), userRoleList);
         return userRoleList;
     }
 
@@ -926,7 +967,7 @@ public class AuthUtil {
                 .toList();         
     }
     
-    public static Optional<String> getString(Object raw) {
+    public static Optional<String> getStringFromObject(Object raw) {
         if (raw == null) {
             return Optional.empty();
         }
@@ -937,7 +978,7 @@ public class AuthUtil {
                 "Expected String, found " + raw.getClass().getName());
     }
 
-    public static List<String> getStringList(Object raw) {
+    public static List<String> getListFromObject(Object raw) {
         if (raw == null) {
             return Collections.emptyList();
         }

@@ -15694,19 +15694,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         userCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
+        userCanEdit:
+          type: boolean
         adminCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -16680,6 +16680,8 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16689,8 +16691,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17640,6 +17640,12 @@ components:
           enum:
           - oauth
           - cedarling
+        userRoleAttributeName:
+          type: string
+          description: DB attribute name for storing user role
+        userAdminRoleNameSubstring:
+          type: string
+          description: Substring text corresponding to `admin` role
         disableLoggerTimer:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
@@ -18704,10 +18710,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18718,6 +18720,10 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
