@@ -12,8 +12,8 @@
 
 pub(crate) mod datetime;
 pub(crate) mod file_id;
+pub(crate) mod v0;
 pub(crate) mod v1;
-pub(crate) mod v2;
 
 use std::fmt;
 
@@ -25,9 +25,10 @@ use super::migration;
 use super::schema_parser::ParsedSchema;
 
 /// Spec version that runtime types are built from.
-pub(crate) const CURRENT_FORMAT_VERSION: u32 = v2::SPEC_VERSION;
+pub(crate) const CURRENT_FORMAT_VERSION: u32 = v1::SPEC_VERSION;
 /// Oldest spec version this Cedarling still reads; also assumed when the field is missing.
-pub(crate) const MIN_SUPPORTED_FORMAT_VERSION: u32 = v1::SPEC_VERSION;
+/// v0 is the unversioned baseline that predates `policy_store_spec_version`.
+pub(crate) const MIN_SUPPORTED_FORMAT_VERSION: u32 = v0::SPEC_VERSION;
 
 /// Parts of a store whose format does not depend on the spec version.
 #[derive(Debug)]
@@ -101,8 +102,8 @@ fn probe_spec_version(metadata_json: &str) -> Result<Option<u32>, ValidationErro
 /// that maps numbers to version modules.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum FormatVersion {
+    V0,
     V1,
-    V2,
 }
 
 /// Picks the parser for `metadata.json`, failing closed outside
@@ -116,8 +117,8 @@ fn select_version(
     let spec_version = declared.unwrap_or(MIN_SUPPORTED_FORMAT_VERSION);
 
     let version = match spec_version {
+        v0::SPEC_VERSION => FormatVersion::V0,
         v1::SPEC_VERSION => FormatVersion::V1,
-        v2::SPEC_VERSION => FormatVersion::V2,
         found if found > CURRENT_FORMAT_VERSION => {
             return Err(ValidationError::SpecVersionTooNew {
                 found,
@@ -169,11 +170,11 @@ pub(crate) fn parse_policy_store(
     let (declared, spec_version, version) = select_version(&loaded.metadata_json)?;
 
     let doc = match version {
-        FormatVersion::V1 => migration::v1_to_v2::migrate(v1::parse(loaded)?),
-        FormatVersion::V2 => v2::parse(loaded)?,
+        FormatVersion::V0 => migration::v0_to_v1::migrate(v0::parse(loaded)?),
+        FormatVersion::V1 => v1::parse(loaded)?,
     };
 
-    let (store, metadata) = v2::into_runtime(doc, strict_schema_validation)?;
+    let (store, metadata) = v1::into_runtime(doc, strict_schema_validation)?;
 
     Ok(PolicyStoreWithID {
         id: metadata.policy_store.id.clone(),
@@ -188,7 +189,7 @@ pub(crate) fn parse_policy_store(
 mod tests {
     use super::*;
 
-    const V1_METADATA: &str = r#"{
+    const V0_METADATA: &str = r#"{
         "cedar_version": "4.4.0",
         "policy_store": { "id": "abc123def456", "name": "Test Store", "version": "1.0.0" }
     }"#;
@@ -236,12 +237,12 @@ mod tests {
     #[test]
     fn probe_reads_integer_versions() {
         assert_eq!(
-            probe_spec_version(&metadata_with_version("2")).expect("2 is a valid version"),
-            Some(2),
+            probe_spec_version(&metadata_with_version("1")).expect("1 is a valid version"),
+            Some(1),
             "an integer version should be returned as-is"
         );
         assert_eq!(
-            probe_spec_version(V1_METADATA).expect("missing version is valid"),
+            probe_spec_version(V0_METADATA).expect("missing version is valid"),
             None,
             "a missing field should read as None"
         );
@@ -265,7 +266,7 @@ mod tests {
 
     #[test]
     fn check_spec_version_fails_closed_before_parsing() {
-        check_spec_version(V1_METADATA).expect("a store without a version is supported");
+        check_spec_version(V0_METADATA).expect("a store without a version is supported");
         let err = check_spec_version(&metadata_with_version("99"))
             .expect_err("an unsupported version must be rejected by the early check");
         assert!(
@@ -288,7 +289,7 @@ mod tests {
 
     #[test]
     fn missing_version_parses_as_oldest_with_warning() {
-        let parsed = parse_policy_store(loaded(V1_METADATA), false)
+        let parsed = parse_policy_store(loaded(V0_METADATA), false)
             .expect("a store without a spec version should parse");
         assert_eq!(
             parsed.spec_version,
@@ -305,19 +306,21 @@ mod tests {
         );
     }
 
+    /// An explicit `0` names the unversioned baseline, so it is accepted and
+    /// warns just like a missing field.
     #[test]
-    fn explicit_old_version_parses_with_warning() {
-        let parsed = parse_policy_store(loaded(&metadata_with_version("1")), false)
-            .expect("an explicit v1 store should parse");
+    fn explicit_baseline_version_parses_with_warning() {
+        let parsed = parse_policy_store(loaded(&metadata_with_version("0")), false)
+            .expect("an explicit v0 store should parse");
         assert_eq!(
             parsed.spec_version,
-            Some(1),
+            Some(0),
             "declared version should be kept"
         );
         assert_eq!(
             parsed.warnings,
             vec![PolicyStoreWarning::OutdatedSpecVersion {
-                found: 1,
+                found: 0,
                 current: CURRENT_FORMAT_VERSION,
             }],
             "an older version should produce exactly one OutdatedSpecVersion warning"
@@ -345,14 +348,14 @@ mod tests {
 
     #[test]
     fn every_version_produces_the_same_runtime_store() {
-        let from_missing = parse_policy_store(loaded(V1_METADATA), false)
+        let from_missing = parse_policy_store(loaded(V0_METADATA), false)
             .expect("store without a version should parse");
+        let from_v0 = parse_policy_store(loaded(&metadata_with_version("0")), false)
+            .expect("v0 store should parse");
         let from_v1 = parse_policy_store(loaded(&metadata_with_version("1")), false)
             .expect("v1 store should parse");
-        let from_v2 = parse_policy_store(loaded(&metadata_with_version("2")), false)
-            .expect("v2 store should parse");
 
-        for (label, parsed) in [("v1", &from_v1), ("v2", &from_v2)] {
+        for (label, parsed) in [("v0", &from_v0), ("v1", &from_v1)] {
             assert_eq!(
                 parsed.store, from_missing.store,
                 "{label} should build the same runtime store as an unversioned one"
@@ -363,10 +366,10 @@ mod tests {
             );
         }
         assert_eq!(
-            from_v2.id, "abc123def456",
+            from_v1.id, "abc123def456",
             "id should come from policy_store.id"
         );
-        let issuers = from_v2
+        let issuers = from_v1
             .trusted_issuers
             .as_ref()
             .expect("trusted issuers should be present");
@@ -375,7 +378,7 @@ mod tests {
             "issuer id should be derived from the file name"
         );
         assert!(
-            from_v2.custom_issuers["acme"].tokens_mappings["Acme::Custom"].required,
+            from_v1.custom_issuers["acme"].tokens_mappings["Acme::Custom"].required,
             "custom issuer settings should reach the runtime store"
         );
     }
@@ -399,17 +402,17 @@ mod tests {
         );
     }
 
+    /// `SpecVersionTooOld` cannot be reached while `MIN_SUPPORTED` is 0, since no
+    /// `u32` is below it. Kept for the first bump that drops baseline support.
     #[test]
-    fn older_than_min_version_fails_closed() {
-        let err = parse_policy_store(loaded(&metadata_with_version("0")), false)
-            .expect_err("a version older than MIN_SUPPORTED must be rejected");
-        assert!(
-            matches!(
-                err,
-                ParseStoreError::Validation(ValidationError::SpecVersionTooOld { found: 0, min })
-                    if min == MIN_SUPPORTED_FORMAT_VERSION
-            ),
-            "expected SpecVersionTooOld, got: {err:?}"
+    fn too_old_version_reports_the_supported_floor() {
+        assert_eq!(MIN_SUPPORTED_FORMAT_VERSION, 0, "v0 is the baseline format");
+        let err = ValidationError::SpecVersionTooOld { found: 0, min: 1 };
+        assert_eq!(
+            err.to_string(),
+            "Unsupported policy store: policy_store_spec_version 0 is no longer supported; \
+             the oldest supported version is 1",
+            "the error should name both the rejected version and the floor"
         );
     }
 
@@ -430,22 +433,22 @@ mod tests {
     fn warning_text_is_stable() {
         assert_eq!(
             PolicyStoreWarning::MissingSpecVersion {
-                assumed: 1,
-                current: 2
+                assumed: 0,
+                current: 1
             }
             .to_string(),
             "policy store format is outdated: metadata.json has no policy_store_spec_version, \
-             so it was read as spec version 1; please update the policy store to spec version 2",
+             so it was read as spec version 0; please update the policy store to spec version 1",
             "the documented warning text must not drift"
         );
         assert_eq!(
             PolicyStoreWarning::OutdatedSpecVersion {
-                found: 1,
-                current: 2
+                found: 0,
+                current: 1
             }
             .to_string(),
-            "policy store format is outdated: policy_store_spec_version is 1; \
-             please update the policy store to spec version 2",
+            "policy store format is outdated: policy_store_spec_version is 0; \
+             please update the policy store to spec version 1",
             "the documented warning text must not drift"
         );
     }
@@ -454,17 +457,17 @@ mod tests {
     /// not import any version module.
     #[test]
     fn version_modules_are_isolated() {
+        let v0_sources = [
+            ("v0/mod.rs", include_str!("v0/mod.rs")),
+            ("v0/metadata.rs", include_str!("v0/metadata.rs")),
+            ("v0/trusted_issuer.rs", include_str!("v0/trusted_issuer.rs")),
+            ("v0/custom_issuer.rs", include_str!("v0/custom_issuer.rs")),
+        ];
         let v1_sources = [
             ("v1/mod.rs", include_str!("v1/mod.rs")),
             ("v1/metadata.rs", include_str!("v1/metadata.rs")),
             ("v1/trusted_issuer.rs", include_str!("v1/trusted_issuer.rs")),
             ("v1/custom_issuer.rs", include_str!("v1/custom_issuer.rs")),
-        ];
-        let v2_sources = [
-            ("v2/mod.rs", include_str!("v2/mod.rs")),
-            ("v2/metadata.rs", include_str!("v2/metadata.rs")),
-            ("v2/trusted_issuer.rs", include_str!("v2/trusted_issuer.rs")),
-            ("v2/custom_issuer.rs", include_str!("v2/custom_issuer.rs")),
         ];
         let runtime_sources = [
             ("policy_store.rs", include_str!("../../policy_store.rs")),
@@ -490,8 +493,8 @@ mod tests {
                 }
             }
         };
-        check(&v1_sources, &["v2::", "migration::"]);
-        check(&v2_sources, &["v1::", "migration::"]);
+        check(&v0_sources, &["v1::", "migration::"]);
+        check(&v1_sources, &["v0::", "migration::"]);
         check(&runtime_sources, &["formats::v", "migration::"]);
     }
 }

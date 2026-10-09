@@ -8,4 +8,4 @@
 //! Each `vN_to_vM` step depends only on its two version modules; older
 //! stores reach the current version by chaining steps.
 
-pub(crate) mod v1_to_v2;
+pub(crate) mod v0_to_v1;

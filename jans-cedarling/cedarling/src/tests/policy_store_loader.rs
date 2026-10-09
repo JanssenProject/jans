@@ -1672,7 +1672,7 @@ async fn test_missing_spec_version_is_logged_once_at_startup() {
 #[test]
 async fn test_current_spec_version_logs_no_warning() {
     let archive_bytes = create_authz_policy_store_builder()
-        .with_spec_version(2)
+        .with_spec_version(1)
         .build_archive()
         .expect("Failed to build test archive");
 

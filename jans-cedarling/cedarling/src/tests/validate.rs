@@ -217,7 +217,7 @@ fn archive_source(spec_version: Option<u32>) -> crate::PolicyStoreConfig {
 async fn test_validate_reports_outdated_spec_version_as_warning() {
     let http_client_config = crate::http::HttpClientConfig::default();
 
-    let report = Cedarling::validate_policy_store(&archive_source(Some(1)), &http_client_config)
+    let report = Cedarling::validate_policy_store(&archive_source(Some(0)), &http_client_config)
         .await
         .expect("infra layer ok");
 
@@ -233,7 +233,7 @@ async fn test_validate_reports_outdated_spec_version_as_warning() {
     assert!(
         report.warnings[0]
             .message
-            .contains("policy_store_spec_version is 1"),
+            .contains("policy_store_spec_version is 0"),
         "the warning should name the declared version, got: {}",
         report.warnings[0].message
     );
@@ -243,7 +243,7 @@ async fn test_validate_reports_outdated_spec_version_as_warning() {
 async fn test_validate_current_spec_version_has_no_warnings() {
     let http_client_config = crate::http::HttpClientConfig::default();
 
-    let report = Cedarling::validate_policy_store(&archive_source(Some(2)), &http_client_config)
+    let report = Cedarling::validate_policy_store(&archive_source(Some(1)), &http_client_config)
         .await
         .expect("infra layer ok");
 

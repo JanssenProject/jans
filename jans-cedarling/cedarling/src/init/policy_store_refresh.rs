@@ -868,12 +868,12 @@ mod tests {
     use std::collections::HashMap;
 
     const MISSING: PolicyStoreWarning = PolicyStoreWarning::MissingSpecVersion {
-        assumed: 1,
-        current: 2,
+        assumed: 0,
+        current: 1,
     };
     const OUTDATED: PolicyStoreWarning = PolicyStoreWarning::OutdatedSpecVersion {
-        found: 1,
-        current: 2,
+        found: 0,
+        current: 1,
     };
 
     #[test]
@@ -881,16 +881,16 @@ mod tests {
         let mut dedup = WarningDedup::default();
 
         assert_eq!(
-            dedup.take_new(Some(1), &[MISSING]),
+            dedup.take_new(Some(0), &[MISSING]),
             vec![MISSING],
             "a warning not seen before should be logged"
         );
         assert!(
-            dedup.take_new(Some(1), &[MISSING]).is_empty(),
+            dedup.take_new(Some(0), &[MISSING]).is_empty(),
             "a refresh landing on the same version must not re-log the same warning"
         );
         assert_eq!(
-            dedup.take_new(Some(1), &[MISSING, OUTDATED]),
+            dedup.take_new(Some(0), &[MISSING, OUTDATED]),
             vec![OUTDATED],
             "only the warning not seen before should be logged"
         );
@@ -899,10 +899,10 @@ mod tests {
     #[test]
     fn warning_dedup_resets_on_newer_spec_version() {
         let mut dedup = WarningDedup::default();
-        dedup.take_new(Some(1), &[OUTDATED]);
+        dedup.take_new(Some(0), &[OUTDATED]);
 
         assert_eq!(
-            dedup.take_new(Some(2), &[OUTDATED]),
+            dedup.take_new(Some(1), &[OUTDATED]),
             vec![OUTDATED],
             "a newer format version should clear the set so warnings are reported again"
         );
@@ -911,14 +911,14 @@ mod tests {
     #[test]
     fn warning_dedup_keeps_set_on_same_or_older_spec_version() {
         let mut dedup = WarningDedup::default();
-        dedup.take_new(Some(2), &[OUTDATED]);
+        dedup.take_new(Some(1), &[OUTDATED]);
 
         assert!(
-            dedup.take_new(Some(1), &[OUTDATED]).is_empty(),
+            dedup.take_new(Some(0), &[OUTDATED]).is_empty(),
             "rolling back to an older version must not reset the set"
         );
         assert!(
-            dedup.take_new(Some(1), &[OUTDATED]).is_empty(),
+            dedup.take_new(Some(0), &[OUTDATED]).is_empty(),
             "staying on that older version must keep deduping"
         );
     }
@@ -928,11 +928,11 @@ mod tests {
         // Bootstrap logged its warnings already, so the worker starts seeded.
         let mut dedup = WarningDedup {
             logged: HashSet::from([MISSING]),
-            last_spec_version: Some(1),
+            last_spec_version: Some(0),
         };
 
         assert!(
-            dedup.take_new(Some(1), &[MISSING]).is_empty(),
+            dedup.take_new(Some(0), &[MISSING]).is_empty(),
             "the first refresh must not repeat what bootstrap already logged"
         );
     }
@@ -942,7 +942,7 @@ mod tests {
         let mut dedup = WarningDedup::default();
 
         assert!(
-            dedup.take_new(Some(2), &[]).is_empty(),
+            dedup.take_new(Some(1), &[]).is_empty(),
             "a store with no warnings should log nothing"
         );
     }
