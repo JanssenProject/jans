@@ -50,7 +50,10 @@ pub(crate) fn parse(loaded: LoadedPolicyStore) -> Result<PolicyStoreDoc, ParseSt
     let mut parsed_issuers = Vec::with_capacity(trusted_issuers.len());
     for file in &trusted_issuers {
         let parsed = IssuerParser::parse_issuer(&file.content, &file.name).map_err(|e| {
-            ConversionError::IssuerConversion(format!("Failed to parse '{}': {}", file.name, e))
+            ConversionError::TrustedIssuerParse {
+                file: file.name.clone(),
+                source: Box::new(e),
+            }
         })?;
         parsed_issuers.extend(parsed);
     }
@@ -59,7 +62,7 @@ pub(crate) fn parse(loaded: LoadedPolicyStore) -> Result<PolicyStoreDoc, ParseSt
         .iter()
         .map(|file| {
             CustomIssuerParser::parse(&file.content, &file.name)
-                .map_err(ConversionError::IssuerConversion)
+                .map_err(ConversionError::CustomIssuerParse)
         })
         .collect::<Result<Vec<_>, _>>()?;
 

@@ -54,7 +54,10 @@ pub(crate) fn parse(loaded: LoadedPolicyStore) -> Result<PolicyStoreDoc, ParseSt
     let mut parsed_issuers = Vec::with_capacity(trusted_issuers.len());
     for file in &trusted_issuers {
         let parsed = IssuerParser::parse_issuer(&file.content, &file.name).map_err(|e| {
-            ConversionError::IssuerConversion(format!("Failed to parse '{}': {}", file.name, e))
+            ConversionError::TrustedIssuerParse {
+                file: file.name.clone(),
+                source: Box::new(e),
+            }
         })?;
         parsed_issuers.extend(parsed);
     }
@@ -63,7 +66,7 @@ pub(crate) fn parse(loaded: LoadedPolicyStore) -> Result<PolicyStoreDoc, ParseSt
         .iter()
         .map(|file| {
             CustomIssuerParser::parse(&file.content, &file.name)
-                .map_err(ConversionError::IssuerConversion)
+                .map_err(ConversionError::CustomIssuerParse)
         })
         .collect::<Result<Vec<_>, _>>()?;
 
@@ -108,8 +111,7 @@ fn trusted_issuers_into_runtime(
     if issuers.is_empty() {
         return Ok(None);
     }
-    IssuerParser::validate_issuers(&issuers)
-        .map_err(|errors| ConversionError::IssuerConversion(errors.join("; ")))?;
+    IssuerParser::validate_issuers(&issuers).map_err(ConversionError::TrustedIssuerValidation)?;
     Ok(Some(IssuerParser::create_issuer_map(issuers)))
 }
 
@@ -120,14 +122,14 @@ fn custom_issuers_into_runtime(
     if issuers.is_empty() {
         return Ok(HashMap::new());
     }
-    CustomIssuerParser::validate(&issuers)
-        .map_err(|errors| ConversionError::IssuerConversion(errors.join("; ")))?;
+    CustomIssuerParser::validate(&issuers).map_err(ConversionError::CustomIssuerValidation)?;
     Ok(CustomIssuerParser::create_map(issuers))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::common::policy_store::errors::{PolicyStoreError, TrustedIssuerValidateError};
     use crate::common::policy_store::loader::{CustomIssuerFile, IssuerFile, PolicyFile};
 
     const METADATA: &str = r#"{
@@ -243,10 +245,11 @@ mod tests {
         assert!(
             matches!(
                 &err,
-                ParseStoreError::Conversion(ConversionError::IssuerConversion(msg))
-                    if msg.contains("Dup") && msg.contains("a.json") && msg.contains("b.json")
+                ParseStoreError::Conversion(ConversionError::TrustedIssuerValidation(errors))
+                    if matches!(&errors[..], [TrustedIssuerValidateError::DuplicateId { id, first_file, second_file }]
+                        if id == "Dup" && first_file == "a.json" && second_file == "b.json")
             ),
-            "expected an IssuerConversion error naming the id and both files, got: {err:?}"
+            "expected one DuplicateId naming the id and both files, got: {err:?}"
         );
     }
 
@@ -263,10 +266,11 @@ mod tests {
         assert!(
             matches!(
                 &err,
-                ParseStoreError::Conversion(ConversionError::IssuerConversion(msg))
-                    if msg.starts_with("Failed to parse 'bad.json'")
+                ParseStoreError::Conversion(ConversionError::TrustedIssuerParse { file, source })
+                    if file == "bad.json"
+                        && matches!(**source, PolicyStoreError::JsonParsing { .. })
             ),
-            "expected an IssuerConversion error naming the file, got: {err:?}"
+            "expected TrustedIssuerParse naming the file, got: {err:?}"
         );
     }
 }

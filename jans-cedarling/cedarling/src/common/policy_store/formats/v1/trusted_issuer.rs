@@ -8,7 +8,9 @@
 //! This module provides functionality to parse and validate trusted issuer configuration files,
 //! ensuring they conform to the required schema with proper token metadata and required fields.
 
-use crate::common::policy_store::errors::{PolicyStoreError, TrustedIssuerErrorType};
+use crate::common::policy_store::errors::{
+    PolicyStoreError, TrustedIssuerErrorType, TrustedIssuerValidateError,
+};
 use crate::common::policy_store::formats::file_id::id_from_filename;
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
 use serde::Deserialize;
@@ -232,17 +234,20 @@ impl IssuerParser {
     }
 
     /// Validate a collection of parsed issuers for conflicts and completeness.
-    pub(crate) fn validate_issuers(issuers: &[ParsedIssuer]) -> Result<(), Vec<String>> {
+    pub(crate) fn validate_issuers(
+        issuers: &[ParsedIssuer],
+    ) -> Result<(), Vec<TrustedIssuerValidateError>> {
         let mut errors = Vec::new();
-        let mut seen_ids = HashMap::with_capacity(issuers.len());
+        let mut seen_ids: HashMap<String, String> = HashMap::with_capacity(issuers.len());
 
         for parsed in issuers {
             // Check for duplicate issuer IDs (only insert if not duplicate)
             if let Some(existing_file) = seen_ids.get(&parsed.id) {
-                errors.push(format!(
-                    "Duplicate issuer ID '{}' found in files '{}' and '{}'",
-                    parsed.id, existing_file, parsed.filename
-                ));
+                errors.push(TrustedIssuerValidateError::DuplicateId {
+                    id: parsed.id.clone(),
+                    first_file: existing_file.clone(),
+                    second_file: parsed.filename.clone(),
+                });
                 // Don't insert the duplicate - keep the first occurrence
             } else {
                 seen_ids.insert(parsed.id.clone(), parsed.filename.clone());
@@ -647,10 +652,9 @@ mod tests {
 
         assert_eq!(errors.len(), 1, "Expected exactly one duplicate error");
         assert!(
-            errors[0].contains("issuer1")
-                && errors[0].contains("file1.json")
-                && errors[0].contains("file2.json"),
-            "Error should reference issuer1, file1.json and file2.json, got: {}",
+            matches!(&errors[0], TrustedIssuerValidateError::DuplicateId { id, first_file, second_file }
+                if id == "issuer1" && first_file == "file1.json" && second_file == "file2.json"),
+            "expected DuplicateId naming the id and both files, got: {:?}",
             errors[0]
         );
     }

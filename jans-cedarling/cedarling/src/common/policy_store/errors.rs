@@ -7,7 +7,7 @@
 
 /// Cedar schema-specific errors.
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum CedarSchemaErrorType {
+pub enum CedarSchemaErrorType {
     /// Schema file is empty
     #[error("Schema file is empty")]
     EmptySchema,
@@ -23,7 +23,7 @@ pub(crate) enum CedarSchemaErrorType {
 
 /// Cedar entity-specific errors.
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum CedarEntityErrorType {
+pub enum CedarEntityErrorType {
     /// Failed to parse entity from JSON
     #[error("Failed to parse entity from JSON: {0}")]
     JsonParseError(String),
@@ -43,7 +43,7 @@ pub(crate) enum CedarEntityErrorType {
 
 /// Trusted issuer-specific errors.
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum TrustedIssuerErrorType {
+pub enum TrustedIssuerErrorType {
     /// Trusted issuer file is not a JSON object
     #[error("Trusted issuer file must be a JSON object")]
     NotAnObject,
@@ -74,7 +74,7 @@ pub(crate) enum TrustedIssuerErrorType {
 
 /// Errors that can occur during policy store operations.
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum PolicyStoreError {
+pub enum PolicyStoreError {
     /// IO error during file operations
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
@@ -154,7 +154,7 @@ pub(crate) enum PolicyStoreError {
 
 /// Details about Cedar parsing errors.
 #[derive(Debug, Clone, thiserror::Error)]
-pub(crate) enum CedarParseErrorDetail {
+pub enum CedarParseErrorDetail {
     /// Missing `@id()` annotation
     #[error("No @id() annotation found and could not derive ID from filename")]
     MissingIdAnnotation,
@@ -342,7 +342,7 @@ pub enum ValidationError {
 
 /// Errors related to archive (.cjar) handling.
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum ArchiveError {
+pub enum ArchiveError {
     /// Invalid file extension (expected .cjar)
     #[error("Invalid file extension: expected '{expected}', found '{found}'")]
     #[cfg(not(target_arch = "wasm32"))]
@@ -388,4 +388,50 @@ pub(crate) enum ArchiveError {
     #[cfg(target_arch = "wasm32")]
     #[error("Archive operations are not supported on this platform")]
     WasmUnsupported,
+}
+
+/// Failure parsing or validating a `custom-issuers/*.json` file.
+#[derive(Debug, thiserror::Error)]
+pub enum CustomIssuerParseError {
+    #[error("invalid JSON in '{file}': {source}")]
+    InvalidJson {
+        file: String,
+        #[source]
+        source: serde_json::Error,
+    },
+
+    #[error("custom issuer file '{file}' is not a JSON object")]
+    NotAnObject { file: String },
+
+    #[error("invalid custom issuer '{id}' in '{file}': {source}")]
+    InvalidBody {
+        id: String,
+        file: String,
+        #[source]
+        source: serde_json::Error,
+    },
+
+    #[error("custom issuer '{id}' in '{file}' declares no tokens")]
+    NoTokens { id: String, file: String },
+
+    #[error("custom issuer '{id}' in '{file}' has a token with an empty entity type name")]
+    EmptyEntityTypeName { id: String, file: String },
+
+    #[error("Duplicate custom issuer ID '{id}' found in files '{first_file}' and '{second_file}'")]
+    DuplicateId {
+        id: String,
+        first_file: String,
+        second_file: String,
+    },
+}
+
+/// Conflict between trusted issuers declared across files.
+#[derive(Debug, thiserror::Error)]
+pub enum TrustedIssuerValidateError {
+    #[error("Duplicate issuer ID '{id}' found in files '{first_file}' and '{second_file}'")]
+    DuplicateId {
+        id: String,
+        first_file: String,
+        second_file: String,
+    },
 }

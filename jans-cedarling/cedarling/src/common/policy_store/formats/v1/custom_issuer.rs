@@ -13,6 +13,7 @@
 
 use std::collections::{HashMap, HashSet};
 
+use crate::common::policy_store::errors::CustomIssuerParseError;
 use crate::common::policy_store::formats::file_id::id_from_filename;
 use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata};
 use serde::Deserialize;
@@ -71,13 +72,22 @@ impl CustomIssuerParser {
     ///
     /// Errors are returned as strings; the caller wraps them in
     /// [`ConversionError`](crate::common::policy_store::manager::ConversionError).
-    pub(crate) fn parse(content: &str, filename: &str) -> Result<ParsedCustomIssuer, String> {
-        let json: JsonValue = serde_json::from_str(content)
-            .map_err(|e| format!("invalid JSON in '{filename}': {e}"))?;
+    pub(crate) fn parse(
+        content: &str,
+        filename: &str,
+    ) -> Result<ParsedCustomIssuer, CustomIssuerParseError> {
+        let json: JsonValue = serde_json::from_str(content).map_err(|source| {
+            CustomIssuerParseError::InvalidJson {
+                file: filename.to_string(),
+                source,
+            }
+        })?;
 
         let obj = json
             .as_object()
-            .ok_or_else(|| format!("custom issuer file '{filename}' is not a JSON object"))?;
+            .ok_or_else(|| CustomIssuerParseError::NotAnObject {
+                file: filename.to_string(),
+            })?;
 
         // Resolve id from the "id" field, else derive from the filename.
         let id = obj.get("id").and_then(JsonValue::as_str).map_or_else(
@@ -90,18 +100,26 @@ impl CustomIssuerParser {
         // knob fails the load, and `id` is the one legitimately-extra key.
         let mut body = obj.clone();
         body.remove("id");
-        let meta: CustomIssuerDoc = serde_json::from_value(JsonValue::Object(body))
-            .map_err(|e| format!("invalid custom issuer '{id}' in '{filename}': {e}"))?;
+        let meta: CustomIssuerDoc =
+            serde_json::from_value(JsonValue::Object(body)).map_err(|source| {
+                CustomIssuerParseError::InvalidBody {
+                    id: id.clone(),
+                    file: filename.to_string(),
+                    source,
+                }
+            })?;
 
         if meta.tokens_mappings.is_empty() {
-            return Err(format!(
-                "custom issuer '{id}' in '{filename}' declares no tokens"
-            ));
+            return Err(CustomIssuerParseError::NoTokens {
+                id,
+                file: filename.to_string(),
+            });
         }
         if meta.tokens_mappings.keys().any(String::is_empty) {
-            return Err(format!(
-                "custom issuer '{id}' in '{filename}' has a token with an empty entity type name"
-            ));
+            return Err(CustomIssuerParseError::EmptyEntityTypeName {
+                id,
+                file: filename.to_string(),
+            });
         }
 
         Ok(ParsedCustomIssuer {
@@ -112,16 +130,19 @@ impl CustomIssuerParser {
     }
 
     /// Reject duplicate issuer ids across files.
-    pub(crate) fn validate(issuers: &[ParsedCustomIssuer]) -> Result<(), Vec<String>> {
+    pub(crate) fn validate(
+        issuers: &[ParsedCustomIssuer],
+    ) -> Result<(), Vec<CustomIssuerParseError>> {
         let mut errors = Vec::new();
         let mut seen: HashMap<&str, &str> = HashMap::with_capacity(issuers.len());
 
         for parsed in issuers {
             if let Some(existing_file) = seen.get(parsed.id.as_str()) {
-                errors.push(format!(
-                    "Duplicate custom issuer ID '{}' found in files '{}' and '{}'",
-                    parsed.id, existing_file, parsed.filename
-                ));
+                errors.push(CustomIssuerParseError::DuplicateId {
+                    id: parsed.id.clone(),
+                    first_file: (*existing_file).to_string(),
+                    second_file: parsed.filename.clone(),
+                });
             } else {
                 seen.insert(&parsed.id, &parsed.filename);
             }
@@ -252,22 +273,36 @@ mod tests {
     #[test]
     fn parse_missing_tokens_errors() {
         let content = r#"{ "id": "acme" }"#;
-        let err = CustomIssuerParser::parse(content, "bad.json").unwrap_err();
-        assert!(err.contains("tokens_mappings"), "got: {err}");
+        let err = CustomIssuerParser::parse(content, "bad.json")
+            .expect_err("an issuer without tokens_mappings must be rejected");
+        assert!(
+            matches!(&err, CustomIssuerParseError::InvalidBody { id, file, .. }
+                if id == "acme" && file == "bad.json"),
+            "expected InvalidBody naming the issuer and file, got: {err:?}"
+        );
     }
 
     #[test]
     fn parse_empty_tokens_errors() {
         let content = r#"{ "tokens_mappings": {} }"#;
-        let err = CustomIssuerParser::parse(content, "bad.json").unwrap_err();
-        assert!(err.contains("declares no tokens"), "got: {err}");
+        let err = CustomIssuerParser::parse(content, "bad.json")
+            .expect_err("an issuer declaring no tokens must be rejected");
+        assert!(
+            matches!(&err, CustomIssuerParseError::NoTokens { file, .. } if file == "bad.json"),
+            "expected NoTokens naming the file, got: {err:?}"
+        );
     }
 
     #[test]
     fn parse_empty_entity_type_name_errors() {
         let content = r#"{ "tokens_mappings": { "": {} } }"#;
-        let err = CustomIssuerParser::parse(content, "bad.json").unwrap_err();
-        assert!(err.contains("empty entity type name"), "got: {err}");
+        let err = CustomIssuerParser::parse(content, "bad.json")
+            .expect_err("an empty entity type name must be rejected");
+        assert!(
+            matches!(&err, CustomIssuerParseError::EmptyEntityTypeName { file, .. }
+                if file == "bad.json"),
+            "expected EmptyEntityTypeName naming the file, got: {err:?}"
+        );
     }
 
     #[test]
@@ -275,10 +310,12 @@ mod tests {
         let content = r#"{
             "tokens_mappings": { "Acme::CustomToken": { "requiredd": true } }
         }"#;
-        let err = CustomIssuerParser::parse(content, "acme.json").unwrap_err();
+        let err = CustomIssuerParser::parse(content, "acme.json")
+            .expect_err("a typo in an enforcement knob should fail the load");
         assert!(
-            err.contains("requiredd") || err.contains("unknown field"),
-            "a typo in an enforcement knob should fail the load, got: {err}"
+            matches!(&err, CustomIssuerParseError::InvalidBody { file, source, .. }
+                if file == "acme.json" && source.to_string().contains("requiredd")),
+            "expected InvalidBody naming the misspelled knob, got: {err:?}"
         );
     }
 
@@ -288,23 +325,33 @@ mod tests {
             "tokens_mappings": { "Acme::CustomToken": {} },
             "requireddd": true
         }"#;
-        let err = CustomIssuerParser::parse(content, "acme.json").unwrap_err();
+        let err = CustomIssuerParser::parse(content, "acme.json")
+            .expect_err("an unknown top-level issuer field should fail the load");
         assert!(
-            err.contains("requireddd") || err.contains("unknown field"),
-            "an unknown top-level issuer field should fail the load, got: {err}"
+            matches!(&err, CustomIssuerParseError::InvalidBody { file, source, .. }
+                if file == "acme.json" && source.to_string().contains("requireddd")),
+            "expected InvalidBody naming the unknown field, got: {err:?}"
         );
     }
 
     #[test]
     fn parse_invalid_json_errors() {
-        let err = CustomIssuerParser::parse("{ not json }", "bad.json").unwrap_err();
-        assert!(err.contains("invalid JSON"), "got: {err}");
+        let err = CustomIssuerParser::parse("{ not json }", "bad.json")
+            .expect_err("malformed JSON must be rejected");
+        assert!(
+            matches!(&err, CustomIssuerParseError::InvalidJson { file, .. } if file == "bad.json"),
+            "expected InvalidJson naming the file, got: {err:?}"
+        );
     }
 
     #[test]
     fn parse_non_object_errors() {
-        let err = CustomIssuerParser::parse("[]", "bad.json").unwrap_err();
-        assert!(err.contains("not a JSON object"), "got: {err}");
+        let err = CustomIssuerParser::parse("[]", "bad.json")
+            .expect_err("a non-object issuer file must be rejected");
+        assert!(
+            matches!(&err, CustomIssuerParseError::NotAnObject { file } if file == "bad.json"),
+            "expected NotAnObject naming the file, got: {err:?}"
+        );
     }
 
     #[test]
@@ -321,17 +368,17 @@ mod tests {
             )
             .unwrap(),
         ];
-        let errors = CustomIssuerParser::validate(&issuers).unwrap_err();
+        let errors = CustomIssuerParser::validate(&issuers)
+            .expect_err("two files sharing an id must be rejected");
         assert_eq!(
             errors.len(),
             1,
             "validate should report exactly one duplicate-id error for two files sharing id 'a'"
         );
         assert!(
-            errors[0].contains('a')
-                && errors[0].contains("f1.json")
-                && errors[0].contains("f2.json"),
-            "duplicate error should mention id 'a' and both source files 'f1.json' and 'f2.json', got: {}",
+            matches!(&errors[0], CustomIssuerParseError::DuplicateId { id, first_file, second_file }
+                if id == "a" && first_file == "f1.json" && second_file == "f2.json"),
+            "expected DuplicateId naming the id and both files, got: {:?}",
             errors[0]
         );
     }

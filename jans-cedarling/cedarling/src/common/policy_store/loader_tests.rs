@@ -9,7 +9,10 @@
 
 use super::super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::super::entity_parser::EntityParser;
-use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
+use super::super::errors::{
+    CedarParseErrorDetail, CustomIssuerParseError, PolicyStoreError, TrustedIssuerValidateError,
+    ValidationError,
+};
 use super::super::formats::v1::trusted_issuer::IssuerParser;
 use super::super::formats::{self, ParseStoreError};
 use super::super::manager::ConversionError;
@@ -1004,8 +1007,9 @@ fn test_load_custom_issuers_archive_vfs_duplicate_id_errors() {
     let err = formats::parse_policy_store(loaded, false)
         .expect_err("duplicate custom issuer ID should fail conversion");
     assert!(
-        matches!(&err, ParseStoreError::Conversion(ConversionError::IssuerConversion(msg)) if msg.contains("Duplicate custom issuer ID")),
-        "got: {err:?}"
+        matches!(&err, ParseStoreError::Conversion(ConversionError::CustomIssuerValidation(errors))
+            if matches!(&errors[..], [CustomIssuerParseError::DuplicateId { id, .. }] if id == "dup")),
+        "expected one DuplicateId for id 'dup', got: {err:?}"
     );
 }
 
@@ -1053,8 +1057,9 @@ fn test_load_custom_issuers_duplicate_id_errors() {
     let err = formats::parse_policy_store(loaded_directory, false)
         .expect_err("duplicate custom issuer id should fail conversion");
     assert!(
-        matches!(&err, ParseStoreError::Conversion(ConversionError::IssuerConversion(msg)) if msg.contains("Duplicate custom issuer ID")),
-        "got: {err:?}"
+        matches!(&err, ParseStoreError::Conversion(ConversionError::CustomIssuerValidation(errors))
+            if matches!(&errors[..], [CustomIssuerParseError::DuplicateId { id, .. }] if id == "dup")),
+        "expected one DuplicateId for id 'dup', got: {err:?}"
     );
 }
 
@@ -1219,11 +1224,15 @@ action "read" appliesTo {
     assert!(
         matches!(
             &err,
-            ParseStoreError::Conversion(ConversionError::IssuerConversion(msg))
-                if msg.contains("issuer1")
-                    && (msg.contains("file1.json") || msg.contains("file2.json"))
+            ParseStoreError::Conversion(ConversionError::TrustedIssuerValidation(errors))
+                if matches!(&errors[..], [TrustedIssuerValidateError::DuplicateId { id, first_file, second_file }]
+                    // Directory order is not guaranteed, so either file may be seen first.
+                    if id == "issuer1" && matches!(
+                        (first_file.as_str(), second_file.as_str()),
+                        ("file1.json", "file2.json") | ("file2.json", "file1.json")
+                    ))
         ),
-        "Error should mention the duplicate issuer ID 'issuer1' and its file, got: {err:?}"
+        "expected one DuplicateId naming issuer1 and both files, got: {err:?}"
     );
 }
 

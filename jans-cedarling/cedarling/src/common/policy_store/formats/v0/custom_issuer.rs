@@ -10,6 +10,7 @@
 
 use std::collections::{HashMap, HashSet};
 
+use crate::common::policy_store::errors::CustomIssuerParseError;
 use crate::common::policy_store::formats::file_id::id_from_filename;
 use serde::Deserialize;
 use serde_json::Value as JsonValue;
@@ -49,13 +50,22 @@ impl CustomIssuerParser {
     ///
     /// Errors are returned as strings; the caller wraps them in
     /// [`ConversionError`](crate::common::policy_store::manager::ConversionError).
-    pub(crate) fn parse(content: &str, filename: &str) -> Result<ParsedCustomIssuer, String> {
-        let json: JsonValue = serde_json::from_str(content)
-            .map_err(|e| format!("invalid JSON in '{filename}': {e}"))?;
+    pub(crate) fn parse(
+        content: &str,
+        filename: &str,
+    ) -> Result<ParsedCustomIssuer, CustomIssuerParseError> {
+        let json: JsonValue = serde_json::from_str(content).map_err(|source| {
+            CustomIssuerParseError::InvalidJson {
+                file: filename.to_string(),
+                source,
+            }
+        })?;
 
         let obj = json
             .as_object()
-            .ok_or_else(|| format!("custom issuer file '{filename}' is not a JSON object"))?;
+            .ok_or_else(|| CustomIssuerParseError::NotAnObject {
+                file: filename.to_string(),
+            })?;
 
         // Resolve id from the "id" field, else derive from the filename.
         let id = obj.get("id").and_then(JsonValue::as_str).map_or_else(
@@ -68,18 +78,26 @@ impl CustomIssuerParser {
         // knob fails the load, and `id` is the one legitimately-extra key.
         let mut body = obj.clone();
         body.remove("id");
-        let meta: CustomIssuerDoc = serde_json::from_value(JsonValue::Object(body))
-            .map_err(|e| format!("invalid custom issuer '{id}' in '{filename}': {e}"))?;
+        let meta: CustomIssuerDoc =
+            serde_json::from_value(JsonValue::Object(body)).map_err(|source| {
+                CustomIssuerParseError::InvalidBody {
+                    id: id.clone(),
+                    file: filename.to_string(),
+                    source,
+                }
+            })?;
 
         if meta.tokens_mappings.is_empty() {
-            return Err(format!(
-                "custom issuer '{id}' in '{filename}' declares no tokens"
-            ));
+            return Err(CustomIssuerParseError::NoTokens {
+                id,
+                file: filename.to_string(),
+            });
         }
         if meta.tokens_mappings.keys().any(String::is_empty) {
-            return Err(format!(
-                "custom issuer '{id}' in '{filename}' has a token with an empty entity type name"
-            ));
+            return Err(CustomIssuerParseError::EmptyEntityTypeName {
+                id,
+                file: filename.to_string(),
+            });
         }
 
         Ok(ParsedCustomIssuer {
@@ -123,8 +141,9 @@ mod tests {
         )
         .expect_err("a misspelled token setting must be rejected");
         assert!(
-            err.contains("requiredd"),
-            "error should name the field, got: {err}"
+            matches!(&err, CustomIssuerParseError::InvalidBody { file, source, .. }
+                if file == "acme.json" && source.to_string().contains("requiredd")),
+            "expected InvalidBody naming the misspelled field, got: {err:?}"
         );
     }
 }
