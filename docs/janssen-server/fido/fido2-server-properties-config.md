@@ -86,7 +86,7 @@ resolved, because this runs on the request path.
 > **The Authorization Server and Casa are callers too.** Neither is a browser-facing reverse proxy,
 > but both relay passkey ceremonies to FIDO2 and send the connecting address they observed on the
 > browser's request (`getRemoteAddr()`, not a browser-supplied header) as `X-Forwarded-For` on that
-> call — see [Request context on raw entries](passkey-telemetry.md#request-context-on-raw-entries).
+> call — see [Requests relayed by the Authorization Server and Casa](passkey-telemetry.md#requests-relayed-by-the-authorization-server-and-casa).
 > If `trustedProxyEnabled` is `true`, their addresses need to be in `trustedProxyIpRanges` as well,
 > the same as any other trusted hop, or their forwarded value is ignored in favor of the connecting
 > address.
