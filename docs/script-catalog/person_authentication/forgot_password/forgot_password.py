@@ -11,12 +11,9 @@ from io.jans.as.server.service import UserService
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.util import StringHelper
 from io.jans.as.server.util import ServerUtil
 from io.jans.as.common.service.common import ConfigurationService
 from io.jans.service import EncryptionService
-from io.jans.jsf2.message import FacesMessages
-from jakarta.faces.application import FacesMessage
 from io.jans.orm.exception import AuthenticationException
 
 #dealing with smtp server
@@ -36,9 +33,7 @@ import string
 # regex
 import re
 
-import urllib
 
-import java
 
 class EmailValidator():
     '''
@@ -88,6 +83,7 @@ class EmailSender():
         '''
        
         smtpconfig = CdiUtil.bean(ConfigurationService).getConfiguration().getSmtpConfiguration()
+        smtp_config = None
         
         if smtpconfig is None:
             print "Forgot Password - SMTP CONFIG DOESN'T EXIST - Please configure"
@@ -273,7 +269,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 try:
                     # Just trying to get the user by the uid
                     authenticationService = CdiUtil.bean(AuthenticationService)
-                    logged_in = authenticationService.authenticate(user_name, user_password)
+                    authenticationService.authenticate(user_name, user_password)
                     
                     print 'email_2FA user_name: ' + str(user_name)
                     
@@ -285,7 +281,6 @@ class PersonAuthentication(PersonAuthenticationType):
                         print user2
                         print "Forgot Password - User with e-mail %s found." % user2.getAttribute("mail")
                         email = user2.getAttribute("mail")
-                        uid = user2.getAttribute("uid")
 
                         # send token
                         # send email
@@ -314,7 +309,7 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             
             authenticationService = CdiUtil.bean(AuthenticationService)
-            logged_in = authenticationService.authenticate(user_name, user_password)
+            authenticationService.authenticate(user_name, user_password)
 
             # retrieves token typed by user
             input_token = ServerUtil.getFirstValue(requestParameters, "ResetTokenForm:inputToken")
@@ -323,7 +318,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
             token = identity.getWorkingParameter("token")
             print "Forgot Password - Retrieved token"
-            email = identity.getWorkingParameter("useremail")
             print "Forgot Password - Retrieved email" 
 
             # compares token sent and token entered by user
@@ -364,9 +358,10 @@ class PersonAuthentication(PersonAuthenticationType):
             authenticationService2 = CdiUtil.bean(AuthenticationService)
 
             print "Forgot Password - Trying to authenticate user..."
-            login = authenticationService2.authenticate(user_name, new_password)
+            authenticationService2.authenticate(user_name, new_password)
             
             return True
+        return None
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         
@@ -399,6 +394,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         else:
             print "Forgot Password - Custom Script Custom Property Incorrect, please check"
+        return None
 
 
     # The xhtml page to render upon each step of the flow
@@ -421,6 +417,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 3:
             if sf == "forgot_password":
                 return "/auth/forgot_password/newpassword.xhtml"
+        return None
 
     
     def getNextStep(self, configurationAttributes, requestParameters, step):

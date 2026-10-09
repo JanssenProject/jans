@@ -7,6 +7,7 @@
 from io.jans.model.custom.script.type.uma import UmaClaimsGatheringType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.uma.service import UmaPctService
+from java.lang import Throwable
 
 class UmaClaimsGathering(UmaClaimsGatheringType):
 
@@ -82,7 +83,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
             context.redirectToExternalUrl(authorizationUrl) # redirect to external url
             return False
         if step == 10 and context.isAuthenticated(): # example how to get session attribute if user is authenticated to same AS
-            arc = context.getConnectSessionAttributes().get("acr")
+            print("acr: " + str(context.getConnectSessionAttributes().get("acr")))
 
         return True
 
@@ -111,7 +112,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
                 context.setStep(stepsCount)
 
                 return "/uma2/sample/claims_resolved.xhtml"
-            except:
+            except (Exception, Throwable):
                 print "Exception occured. Unable to resolve pct from client."
 
         print "Claims not found in pct ..."

@@ -510,17 +510,17 @@ class Upgrade:
             attrs = json.loads(entry.attrs["jansAttrs"])
         except TypeError:
             attrs = entry.attrs["jansAttrs"]
-        finally:
-            if attrs["runIntrospectionScriptBeforeJwtCreation"] is True:
-                attrs["runIntrospectionScriptBeforeJwtCreation"] = False
-                should_update = True
-            if "inum=2D3E.5A04,ou=scripts,o=jans" not in attrs["updateTokenScriptDns"]:
-                attrs["updateTokenScriptDns"].append("inum=2D3E.5A04,ou=scripts,o=jans")
-                should_update = True
-            if "inum=A44E-4F3D,ou=scripts,o=jans" in attrs["introspectionScripts"]:
-                attrs["introspectionScripts"].remove("inum=A44E-4F3D,ou=scripts,o=jans")
-                should_update = True
-            entry.attrs["jansAttrs"] = json.dumps(attrs)
+
+        if attrs["runIntrospectionScriptBeforeJwtCreation"] is True:
+            attrs["runIntrospectionScriptBeforeJwtCreation"] = False
+            should_update = True
+        if "inum=2D3E.5A04,ou=scripts,o=jans" not in attrs["updateTokenScriptDns"]:
+            attrs["updateTokenScriptDns"].append("inum=2D3E.5A04,ou=scripts,o=jans")
+            should_update = True
+        if "inum=A44E-4F3D,ou=scripts,o=jans" in attrs["introspectionScripts"]:
+            attrs["introspectionScripts"].remove("inum=A44E-4F3D,ou=scripts,o=jans")
+            should_update = True
+        entry.attrs["jansAttrs"] = json.dumps(attrs)
 
         if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)

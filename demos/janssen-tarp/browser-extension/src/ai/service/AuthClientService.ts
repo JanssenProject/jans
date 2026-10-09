@@ -45,7 +45,7 @@ export default class AuthClientService {
           reject(chrome.runtime.lastError);
           return;
         }
-        let clientArr = []
+        let clientArr = [];
         if (!!result.oidcClients) {
           clientArr = result.oidcClients;
         }

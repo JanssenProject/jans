@@ -149,7 +149,6 @@ def test_policy_effect_enum_values():
     assert str(PolicyEffect.Permit) == "permit"
     assert str(PolicyEffect.Forbid) == "forbid"
     assert PolicyEffect.Permit != PolicyEffect.Forbid
-    assert PolicyEffect.Permit == PolicyEffect.Permit
 
 
 # --- Multi-issuer tests ---

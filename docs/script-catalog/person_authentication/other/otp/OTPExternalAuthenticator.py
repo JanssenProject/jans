@@ -25,14 +25,13 @@ from java.security import SecureRandom
 from java.time import Duration
 from java.util import Arrays
 from io.jans.jsf2.message import FacesMessages
-from io.jans.jsf2.service import FacesService
-from jakarta.faces.context import FacesContext
 from io.jans.as.server.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService, UserService, SessionIdService
 from io.jans.util import StringHelper
+from java.lang import Throwable
 
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -106,7 +105,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        authenticationService = CdiUtil.bean(AuthenticationService)
 
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
@@ -116,7 +114,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             print "OTP. Authenticate for step 1"
             authenticated_user = self.processBasicAuthentication(credentials)
-            if authenticated_user == None:
+            if authenticated_user is None:
                 return False
 
             otp_auth_method = "authenticate"
@@ -144,7 +142,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            if user == None:
+            if user is None:
                 print "OTP. Authenticate for step 2. Failed to determine user name"
                 return False
 
@@ -179,7 +177,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            if user == None:
+            if user is None:
                 print "OTP. Authenticate for step 2. Failed to determine user name"
                 return False
 
@@ -201,7 +199,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-        credentials = identity.getCredentials()
 
         self.setRequestScopedParameters(identity)
 
@@ -222,7 +219,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if otp_auth_method == 'enroll':
                 authenticationService = CdiUtil.bean(AuthenticationService)
                 user = authenticationService.getAuthenticatedUser()
-                if user == None:
+                if user is None:
                     print "OTP. Prepare for step 2. Failed to load user enty"
                     return False
 
@@ -311,7 +308,7 @@ class PersonAuthentication(PersonAuthenticationType):
         f = open(otp_conf_file, 'r')
         try:
             otpConfiguration = json.loads(f.read())
-        except:
+        except (Exception, Throwable):
             print "OTP. Load OTP configuration. Failed to load configuration from file:", otp_conf_file
             return False
         finally:
@@ -335,7 +332,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "OTP. Load OTP configuration. Invalid TOTP HMAC SHA algorithm: '%s'" % hmacShaAlgorithm
 
             self.totpConfiguration["hmacShaAlgorithmType"] = hmacShaAlgorithmType
-        except:
+        except (Exception, Throwable):
             print "OTP. Load OTP configuration. Invalid configuration file '%s' format. Exception: '%s'" % (otp_conf_file, sys.exc_info()[1])
             return False
 
@@ -343,7 +340,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
@@ -357,7 +353,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
 
         find_user_by_uid = authenticationService.getAuthenticatedUser()
-        if find_user_by_uid == None:
+        if find_user_by_uid is None:
             print "OTP. Process basic authentication. Failed to find user '%s'" % user_name
             return None
 
@@ -368,12 +364,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
         userService = CdiUtil.bean(UserService)
         user = userService.getUser(user_name, "oxExternalUid")
-        if user == None:
+        if user is None:
             print "OTP. Find enrollments. Failed to find user"
             return result
 
         user_custom_ext_attribute = userService.getCustomAttribute(user, "oxExternalUid")
-        if user_custom_ext_attribute == None:
+        if user_custom_ext_attribute is None:
             return result
 
         otp_prefix = "%s:" % self.otpType
@@ -393,7 +389,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def validateSessionId(self, identity):
         session = CdiUtil.bean(SessionIdService).getSessionId()
-        if session == None:
+        if session is None:
             print "OTP. Validate session id. Failed to determine session_id"
             return False
 
@@ -420,7 +416,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if otp_auth_method == "enroll":
             # Get key from session
             otp_secret_key_encoded = identity.getWorkingParameter("otp_secret_key")
-            if otp_secret_key_encoded == None:
+            if otp_secret_key_encoded is None:
                 print "OTP. Process OTP authentication. OTP secret key is invalid"
                 return False
 

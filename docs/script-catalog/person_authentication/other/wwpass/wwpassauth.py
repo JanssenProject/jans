@@ -17,7 +17,6 @@ from urlparse import urlparse
 import jarray
 from java.util import Arrays
 from java.security import SecureRandom
-import java
 
 from time import time
 

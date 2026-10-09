@@ -38,7 +38,6 @@ style = Style.from_dict(
         "script-navbar-bgcolor":"#2600ff",
         "script-checkbox":"green",
         "script-titledtext":"green",
-        "script-label":"blue",
         ### Styling for oauth plugin
         ## main
         "outh_maincontainer":"",  

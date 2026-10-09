@@ -8,7 +8,6 @@ import zipfile
 import shutil
 import time
 import ssl
-import json
 
 from urllib import request
 from pathlib import Path

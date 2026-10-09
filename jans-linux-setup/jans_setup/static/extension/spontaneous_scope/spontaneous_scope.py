@@ -6,7 +6,6 @@
 #
 
 from io.jans.model.custom.script.type.spontaneous import SpontaneousScopeType
-from java.lang import String
 
 class SpontaneousScope(SpontaneousScopeType):
     def __init__(self, currentTimeMillis):
