@@ -90,6 +90,7 @@ navigate via `Auth Server`->`Properties`.
 - [idTokenSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#idtokensigningalgvaluessupported)
 - [accessTokenSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#accesstokensigningalgvaluessupported)
 - [legacyIdTokenClaims](../../reference/json/properties/janssenauthserver-properties.md#legacyidtokenclaims)
+- [strictTokenRedirectUriValidation](../../reference/json/properties/janssenauthserver-properties.md#stricttokenredirecturivalidation)
 - [mtlsTokenEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlstokenendpoint)
 - [openidScopeBackwardCompatibility](../../reference/json/properties/janssenauthserver-properties.md#openidscopebackwardcompatibility)
 - [persistIdToken](../../reference/json/properties/janssenauthserver-properties.md#persistidtoken)
