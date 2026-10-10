@@ -4531,6 +4531,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#stricttokenredirecturivalidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        strictTokenRedirectUriValidation
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#subjectidentifiersperclientsupported" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -9066,6 +9077,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#stricttokenredirecturivalidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        strictTokenRedirectUriValidation
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#subjectidentifiersperclientsupported" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -11234,6 +11256,11 @@
 <td>statusListResponseJwtSignatureAlgorithm</td>
 <td>The status list signature algorithm to sign response JWT. Defaults to RS256.</td>
 <td><a href="#statuslistresponsejwtsignaturealgorithm">Details</a></td>
+</tr>
+<tr>
+<td>strictTokenRedirectUriValidation</td>
+<td>Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client.</td>
+<td><a href="#stricttokenredirecturivalidation">Details</a></td>
 </tr>
 <tr>
 <td>subjectIdentifiersPerClientSupported</td>
@@ -15008,6 +15035,18 @@
 <p>Default value: None</p>
 </li>
 </ul>
+<h2 id="stricttokenredirecturivalidation">strictTokenRedirectUriValidation<a class="headerlink" href="#stricttokenredirecturivalidation" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client.</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: true</p>
+</li>
+</ul>
 <h2 id="subjectidentifiersperclientsupported">subjectIdentifiersPerClientSupported<a class="headerlink" href="#subjectidentifiersperclientsupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
@@ -15532,7 +15571,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 05, 2026
+    October 09, 2026
   </span>
 
     

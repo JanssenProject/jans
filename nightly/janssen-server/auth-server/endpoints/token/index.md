@@ -59,7 +59,7 @@ sample response. Actual response can greatly vary in its contents based on reque
 ```
 
 More information about request and response of the token endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/post-token).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/post-token).
 
 ## Configuration Properties
 
@@ -83,6 +83,7 @@ navigate via `Auth Server`->`Properties`.
 - [idTokenSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#idtokensigningalgvaluessupported)
 - [accessTokenSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#accesstokensigningalgvaluessupported)
 - [legacyIdTokenClaims](../../reference/json/properties/janssenauthserver-properties.md#legacyidtokenclaims)
+- [strictTokenRedirectUriValidation](../../reference/json/properties/janssenauthserver-properties.md#stricttokenredirecturivalidation)
 - [mtlsTokenEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlstokenendpoint)
 - [openidScopeBackwardCompatibility](../../reference/json/properties/janssenauthserver-properties.md#openidscopebackwardcompatibility)
 - [persistIdToken](../../reference/json/properties/janssenauthserver-properties.md#persistidtoken)
