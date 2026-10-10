@@ -18,6 +18,7 @@ import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +32,7 @@ import org.slf4j.Logger;
 public class UserResourceFilter extends BaseFilter {
 
     protected static final String USER_INUM = "inum";
+    protected static final String PATH = "/configuser";
 
     @Inject
     Logger log;
@@ -39,7 +41,7 @@ public class UserResourceFilter extends BaseFilter {
     UriInfo info;
 
     @Context
-    HttpServletRequest request;
+    HttpServletRequest servletRequest;
 
     @Context
     private HttpHeaders httpHeaders;
@@ -60,7 +62,13 @@ public class UserResourceFilter extends BaseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.info("======================== Inside UserResourceFilter filter... ========================");
+            log.info(" Inside UserResourceFilter filter - info.getPath():{}, PATH:{}, method:{}", info.getPath(), PATH,
+                    requestContext.getMethod());
+
+            if (info.getPath() == null || !info.getPath().contains(PATH)) {
+                log.info(" Exiting as not User Management Endpoint!");
+                return;
+            }
 
             // Verify current UserRolePermission
             validateUserRolePermission(requestContext, resourceInfo, httpHeaders);
@@ -70,67 +78,91 @@ public class UserResourceFilter extends BaseFilter {
             if (ex instanceof WebApplicationException) {
                 status = ((WebApplicationException) ex).getResponse().getStatusInfo().toEnum();
             }
+            StringBuilder errMsg = new StringBuilder("UserResourceFilter - authorization failed for method:{")
+                    .append(requestContext.getMethod()).append("}, path:{").append(info.getPath())
+                    .append("}, errorMessage:{").append(ex.getMessage()).append("}");
 
-            log.error("UserResourceFilter - authorization failed for {} {}: {}", requestContext.getMethod(),
-                    info.getPath(), ex.getMessage(), ex);
-            abortWithUnauthorized(requestContext, status, ex.getMessage());
+            log.error(errMsg.toString());
+            abortWithUnauthorized(requestContext, status, errMsg.toString());
         }
     }
 
     private void validateUserRolePermission(ContainerRequestContext requestContext, ResourceInfo resourceInfo,
             HttpHeaders httpHeaders) {
 
-        // This authorization should be in addition to AuthorizationFilter authorization
+        log.info(
+                " UserResourceFilter::validateUserRolePermission() - authUtil.isUserRolePermissionValidationEnabled():{} {}",
+                authUtil.isUserRolePermissionValidationEnabled(), "");
+
+        // If user-role-permission validation is enabled
         if (!authUtil.isUserRolePermissionValidationEnabled()) {
+            log.debug(
+                    " UserResourceFilter::validateUserRolePermission() - Skip validateUserRolePermission as authUtil.isUserRolePermissionValidationEnabled() not enabled");
             return;
         }
 
-        IntrospectionResponse introspectionResponse = null;
-        if (authUtil.isValidateUserInumInIntrospectionFlag() || !getExcludedClients().isEmpty()) {
-            introspectionResponse = getIntrospectionResponse(requestContext);
-        }
-
-        if (isRolePermissionExemptClient(introspectionResponse)) {
-            return;
-        }
-
-        // For user mgt endpoint Header attribute `User-inum` is mandatory
-        String userInum = authUtil.getUserInum(httpHeaders);
-        if (StringUtils.isBlank(userInum)) {
-            throw new WebApplicationException("Header attribute `User-inum` missing",
-                    Response.status(Response.Status.BAD_REQUEST).build());
-        }
-
-        validateDataInIntrospectionResponse(introspectionResponse, userInum);
-
-        // Fetch current UserRolePermission of user using `User-inum` in httpHeaders
-        Set<String> userCurrentScopes = authUtil.getUserRolePermission(httpHeaders);
-        log.debug("userCurrentScopes:{}", userCurrentScopes);
-
-        // Find missing permission viz-a-viz scopes as defined in resourceInfo
+        // Find scopes as defined in resourceInfo
         Map<ProtectionScopeType, List<String>> resourceScopesByType = authUtil.getResourceScopesByType(resourceInfo);
-        log.debug("resourceScopesByType:{}", resourceScopesByType);
+        log.debug("UserResourceFilter - resourceScopesByType:{}", resourceScopesByType);
         if (resourceScopesByType == null || resourceScopesByType.isEmpty()) {
             return;
         }
+
+        log.info(
+                " UserResourceFilter - authUtil.isValidateUserInumInIntrospectionFlag():{}, !getExcludedClients().isEmpty():{}",
+                authUtil.isValidateUserInumInIntrospectionFlag(), !getExcludedClients().isEmpty());
+        // Fetch token introspectionResponse
+        IntrospectionResponse introspectionResponse = getIntrospectionResponse(requestContext);
+        log.info(" UserResourceFilter - Setting data in requestContext ");
+
+        // Set Data in request context
+        setDataInRequest(introspectionResponse, resourceScopesByType);
+
+        log.info(" UserResourceFilter - isRolePermissionExemptClient(introspectionResponse):{}",
+                isRolePermissionExemptClient(introspectionResponse));
+        // If user excluded from role-permission check then return
+        if (isRolePermissionExemptClient(introspectionResponse)) {
+            log.info(" UserResourceFilter - Skip validateUserRolePermission as isRolePermissionExemptClient ");
+            return;
+        }
+
+        // Fetch Header attribute `User-inum` which for role-permission validation
+        String userInum = authUtil.getUserInum(httpHeaders);
+        log.info(" UserResourceFilter - Header  userInum:{}", userInum);
+        if (StringUtils.isBlank(userInum)) {
+            log.info("Header attribute `User-inum` missing");
+        }
+
+        // validate IntrospectionResponse
+        log.debug(" UserResourceFilter - validateDataInIntrospectionResponse ");
+        validateDataInIntrospectionResponse(introspectionResponse, userInum);
+
+        // Fetch current UserRolePermission of user using `User-inum` in httpHeaders
+        List<String> currentScopes = getClientScopes(httpHeaders, introspectionResponse);
+        log.debug("UserResourceFilter - currentScopes:{}", currentScopes);
 
         List<String> resourceScopes = authUtil.getAllScopeList(resourceScopesByType);
         log.debug("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
 
         // For any missing scopes throw unauthorized error
-        List<String> safeList = new ArrayList<>(userCurrentScopes);
+        List<String> safeList = new ArrayList<>(currentScopes);
+
+        // Find missing permission viz-a-viz currentScopes in DB against defined in
+        // resourceInfo
         List<String> missingScopes = authUtil.findMissingScopes(resourceScopesByType, safeList);
-        log.info("missingScopes:{}", missingScopes);
+        log.debug("missingScopes:{}", missingScopes);
         if (missingScopes != null && !missingScopes.isEmpty()) {
-            log.error("Insufficient scopes!!! for new token as well - Required scope:{}, userCurrentScopes:{}",
-                    resourceScopes, userCurrentScopes);
-            throw new WebApplicationException(
-                    "Insufficient scopes!!! Required scope: " + resourceScopes + ", token scopes: " + missingScopes,
-                    Response.status(Response.Status.UNAUTHORIZED).build());
+            StringBuilder errMsg = new StringBuilder("Insufficient scopes!!! - Required scope:{").append(resourceScopes)
+                    .append("} , currentScopes:{").append(currentScopes).append("} , missingScopes:{")
+                    .append(missingScopes).append("}");
+
+            log.error("UserResourceFilter::validateUserRolePermission - errMsg:{}", errMsg);
+            throw new WebApplicationException(errMsg.toString(), Response.status(Response.Status.UNAUTHORIZED).build());
         }
     }
 
     private boolean isRolePermissionExemptClient(IntrospectionResponse introspectionResponse) {
+        log.info("Verify isRolePermissionExemptClient");
 
         if (introspectionResponse == null) {
             return false;
@@ -140,8 +172,7 @@ public class UserResourceFilter extends BaseFilter {
             return false;
         }
 
-        String tokenUserInum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(),
-                USER_INUM);
+        String tokenUserInum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
         if (StringUtils.isNotBlank(tokenUserInum)) {
             log.info("Client:{} is excluded from the user role-permission check but its token carries user:{}",
                     introspectionResponse.getClientId(), tokenUserInum);
@@ -158,7 +189,7 @@ public class UserResourceFilter extends BaseFilter {
     }
 
     private void validateDataInIntrospectionResponse(IntrospectionResponse introspectionResponse, String userInum) {
-
+        log.info(" Verify DataInIntrospectionResponse");
         // validate `User-inum` in Introspection response
         if (!authUtil.isValidateUserInumInIntrospectionFlag()) {
             return;
@@ -170,8 +201,8 @@ public class UserResourceFilter extends BaseFilter {
         }
 
         String inum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
-        log.debug("Header userInum :{} and  token Introspection inum:{}", userInum, inum);
-        if (StringUtils.isBlank(inum) || !inum.equalsIgnoreCase(userInum)) {
+        log.debug(" NEW Header userInum :{} and  token Introspection inum:{}", userInum, inum);
+        if (StringUtils.isNotBlank(inum) && !inum.equalsIgnoreCase(userInum)) {
             throw new WebApplicationException("Header attribute `User-inum` does not correspond to User token",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
@@ -190,5 +221,59 @@ public class UserResourceFilter extends BaseFilter {
         }
 
         return introspectionResponse;
+    }
+
+    private void setDataInRequest(IntrospectionResponse introspectionResponse,
+            Map<ProtectionScopeType, List<String>> resourceScopesByType) {
+        if (servletRequest == null || introspectionResponse == null) {
+            return;
+        }
+
+        String inum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
+        String clientId = introspectionResponse.getClientId();
+        String subject = introspectionResponse.getSubject();
+        List<String> introspectionTokenScopes = introspectionResponse.getScope();
+        List<String> resourceScopes = (resourceScopesByType == null) ? null
+                : resourceScopesByType.get(ProtectionScopeType.SUPER);
+        log.info(
+                "UserResourceFilter::setDataInRequest() - inum:{}, clientId:{}, subject:{}, introspectionTokenScopes:{}, resourceScopesByType:{}, resourceScopes:{}",
+                inum, clientId, subject, introspectionTokenScopes, resourceScopesByType, resourceScopes);
+
+        servletRequest.setAttribute(ApiConstants.INTROSPECTION_CLIENTID, clientId);
+        servletRequest.setAttribute(ApiConstants.INTROSPECTION_SUBJECT, subject);
+        servletRequest.setAttribute(ApiConstants.INTROSPECTION_INUM, inum);
+        servletRequest.setAttribute(ApiConstants.INTROSPECTION_SCOPES, introspectionTokenScopes);
+        servletRequest.setAttribute(ApiConstants.RESOURCE_SCOPES, resourceScopes);
+
+    }
+
+    private List<String> getClientScopes(HttpHeaders httpHeaders, IntrospectionResponse introspectionResponse) {
+        List<String> scopes = null;
+
+        try {
+
+            scopes = authUtil.getUserRolePermission(httpHeaders);
+            if (scopes != null && !scopes.isEmpty()) {
+                return scopes;
+            }
+            log.info(" User scope:{}", scopes);
+
+            // If user scope not found fetch client scope
+            if (introspectionResponse == null) {
+                return scopes;
+            }
+            String clientId = introspectionResponse.getClientId();
+            log.info(" Get scope for clientId:{}", clientId);
+            if (StringUtils.isBlank(clientId)) {
+                return scopes;
+            }
+            scopes = authUtil.getClientScope(clientId);
+            log.info(" scope of client:{} is:{}", clientId, scopes);
+        } catch (Exception ex) {
+            log.error(" Error while fetching scope is: ", ex);
+            return scopes;
+        }
+        return scopes;
+
     }
 }

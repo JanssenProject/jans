@@ -3,9 +3,11 @@
   "configOauthEnabled": ${configOauthEnabled},
   "protectionMode": "oauth",
   "disableLoggerTimer": false,
-  "userRolePermissionValidationEnabled": true,
+  "userRoleAttributeName": "jansAdminUIRole",
+  "userAdminRoleNameSubstring": "admin",
+  "userPermissionValidationEnabled": true,
   "validateUserInumInIntrospectionFlag": true,
-  "fetchUserRoleInIntrospectionFlag": true,
+  "fetchUserDataInIntrospectionFlag": true,
   "userRolePermissionExcludedClients": [],
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
@@ -26,6 +28,11 @@
   "loggingLayout": "text",
   "externalLoggerConfiguration": "",
   "maxCount": 200,
+  "superAdminScopes": [
+    "https://jans.io/oauth/config/read-all",
+    "https://jans.io/oauth/config/write-all",
+    "https://jans.io/oauth/config/delete-all"
+  ],
   "acrExclusionList": [
     "simple_password_auth"
   ],

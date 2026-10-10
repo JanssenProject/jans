@@ -15692,21 +15692,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        selected:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        whitePagesCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
+        adminCanView:
+          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        selected:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -17594,10 +17594,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -17642,6 +17642,12 @@ components:
           enum:
           - oauth
           - cedarling
+        userRoleAttributeName:
+          type: string
+          description: DB attribute name for storing user role
+        userAdminRoleNameSubstring:
+          type: string
+          description: Substring text corresponding to `nonadmin` role
         disableLoggerTimer:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
@@ -17744,6 +17750,12 @@ components:
         externalLoggerConfiguration:
           type: string
           description: The path to the external log4j2 logging configuration.
+        superAdminScopes:
+          type: array
+          description: List of Super Admin oAuth scopes.
+          items:
+            type: string
+            description: List of Super Admin oAuth scopes.
         disableJdkLogger:
           type: boolean
           description: Choose whether to disable JDK loggers.
@@ -18710,9 +18722,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object

@@ -5,6 +5,11 @@ package io.jans.configapi.test.filter;
  * Copyright (c) 2020, Janssen Project
  */
 
+<<<<<<< HEAD
+import io.jans.configapi.core.test.BaseTest;
+import io.jans.configapi.filters.SecurityResponseHeadersFilter;
+=======
+>>>>>>> c3bfe5541b1044b0de5b612b345913f2b827b97b
 
 
 import io.jans.configapi.filters.SecurityResponseHeadersFilter;

@@ -5,7 +5,12 @@
 	<artifactId>jans-config-api-server</artifactId>
 	<name>jans-config-api-server</name>
 	<packaging>war</packaging>
-
+	
+	<properties>
+		<maven.compiler.source>16</maven.compiler.source>
+		<maven.compiler.target>16</maven.compiler.target>
+	</properties>		
+		
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>

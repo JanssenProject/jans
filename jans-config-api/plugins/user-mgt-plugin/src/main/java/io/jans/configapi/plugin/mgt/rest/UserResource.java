@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.mgt.rest;
 
+import io.jans.as.model.common.IntrospectionResponse;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
 import io.jans.configapi.core.model.ApiError;
@@ -23,9 +24,11 @@ import io.jans.util.exception.InvalidAttributeException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -48,7 +51,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.Util.escapeLog;
-
 import org.apache.commons.lang3.StringUtils;
 
 @Path(Constants.CONFIG_USER)
@@ -65,6 +67,8 @@ public class UserResource extends BaseResource {
     private static final String INUM = "inum";
     private static final String USER_PLACEHOLDER = "user:{}";
     private static final String USER_UPDATE_FLAG_PLACEHOLDER = "user:{}, isUpdate:{}";
+    private static final StringBuilder USER_PERMISSION_ERROR_MSG = new StringBuilder("%s User")
+            .append(" does not have super admin permission to fetch/modify user{%s}");
 
     private class UserPagedResult extends PagedResult<CustomUser> {
     };
@@ -74,7 +78,7 @@ public class UserResource extends BaseResource {
 
     @Inject
     MgtUtil mgtUtil;
-    
+
     @Inject
     AuthUtil authUtil;
 
@@ -82,17 +86,23 @@ public class UserResource extends BaseResource {
     UserMgmtService userMgmtSrv;
 
     /**
-     * Retrieves a paged list of users matching the provided search, filter, and sort parameters.
+     * Retrieves a paged list of users matching the provided search, filter, and
+     * sort parameters.
      *
-     * @param limit maximum number of results to return
-     * @param pattern search pattern to match user entries
-     * @param startIndex 1-based index of the first result to return
-     * @param sortBy attribute used to order the returned results
-     * @param sortOrder sort direction; allowed values are "ascending" and "descending"
-     * @param fieldValuePair comma-separated field=value filters (e.g., "mail=abc@mail.com,jansStatus=true")
-     * @return a paged result containing matching CustomUser entries and paging metadata
-     * @throws IllegalAccessException if an error occurs accessing properties during conversion
-     * @throws InvocationTargetException if an invoked method or constructor during conversion throws an exception
+     * @param limit          maximum number of results to return
+     * @param pattern        search pattern to match user entries
+     * @param startIndex     1-based index of the first result to return
+     * @param sortBy         attribute used to order the returned results
+     * @param sortOrder      sort direction; allowed values are "ascending" and
+     *                       "descending"
+     * @param fieldValuePair comma-separated field=value filters (e.g.,
+     *                       "mail=abc@mail.com,jansStatus=true")
+     * @return a paged result containing matching CustomUser entries and paging
+     *         metadata
+     * @throws IllegalAccessException    if an error occurs accessing properties
+     *                                   during conversion
+     * @throws InvocationTargetException if an invoked method or constructor during
+     *                                   conversion throws an exception
      */
     @Operation(summary = "Gets list of users", description = "Gets list of users", operationId = "get-user", tags = {
             "Configuration – User Management" }, security = {
@@ -131,12 +141,15 @@ public class UserResource extends BaseResource {
     }
 
     /**
-     * Retrieve the user identified by its inum and return it as a CustomUser in the response.
+     * Retrieve the user identified by its inum and return it as a CustomUser in the
+     * response.
      *
      * @param inum the user's unique inum identifier
      * @return a Response whose entity is the matching CustomUser
-     * @throws IllegalAccessException   if a reflection access error occurs while converting the user
-     * @throws InvocationTargetException if a reflection invocation error occurs while converting the user
+     * @throws IllegalAccessException    if a reflection access error occurs while
+     *                                   converting the user
+     * @throws InvocationTargetException if a reflection invocation error occurs
+     *                                   while converting the user
      */
     @Operation(summary = "Get User by Inum", description = "Get User by Inum", operationId = "get-user-by-inum", tags = {
             "Configuration – User Management" }, security = {
@@ -154,7 +167,7 @@ public class UserResource extends BaseResource {
             ApiAccessConstants.USER_WRITE_ACCESS }, superScopes = { ApiAccessConstants.USER_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getUserByInum(
+    public Response getUserByInum(@Context HttpServletRequest servletRequest,
             @Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isInfoEnabled()) {
@@ -162,8 +175,9 @@ public class UserResource extends BaseResource {
         }
         CustomUser customUser = null;
         try {
+
             // validate user role-permission
-            validateUserPermission(inum, null);
+            validateUserPermission(inum, null, ApiConstants.READ_REQUEST, servletRequest);
 
             User user = userMgmtSrv.getUserBasedOnInum(inum);
             checkResourceNotNull(user, USER);
@@ -194,12 +208,17 @@ public class UserResource extends BaseResource {
     /**
      * Create a new user from the provided CustomUser payload.
      *
-     * @param customUser the CustomUser payload containing user attributes to persist
-     * @param removeNonLDAPAttributes if true, non‑LDAP attributes will be removed from the request before persisting
+     * @param customUser              the CustomUser payload containing user
+     *                                attributes to persist
+     * @param removeNonLDAPAttributes if true, non‑LDAP attributes will be removed
+     *                                from the request before persisting
      * @return the created CustomUser populated with persisted attributes
-     * @throws NoSuchMethodException if an expected method is not found during attribute mapping
-     * @throws IllegalAccessException if a reflective access error occurs while mapping attributes
-     * @throws InvocationTargetException if an invoked method throws an exception during attribute mapping
+     * @throws NoSuchMethodException     if an expected method is not found during
+     *                                   attribute mapping
+     * @throws IllegalAccessException    if a reflective access error occurs while
+     *                                   mapping attributes
+     * @throws InvocationTargetException if an invoked method throws an exception
+     *                                   during attribute mapping
      */
     @Operation(summary = "Create new User", description = "Create new User", operationId = "post-user", tags = {
             "Configuration – User Management" }, security = {
@@ -267,14 +286,21 @@ public class UserResource extends BaseResource {
     /**
      * Update an existing user from the provided CustomUser payload.
      *
-     * Applies validation, optional removal of non‑LDAP attributes, and persists the changes; the response contains the updated CustomUser.
+     * Applies validation, optional removal of non‑LDAP attributes, and persists the
+     * changes; the response contains the updated CustomUser.
      *
-     * @param customUser the CustomUser representation containing updated user fields
-     * @param removeNonLDAPAttributes if true, remove attributes that are not mapped to LDAP before processing
-     * @return a Response with status 200 OK containing the updated CustomUser as JSON
-     * @throws NoSuchMethodException if a required accessor/mutator method is not found while mapping attributes
-     * @throws IllegalAccessException if a reflection access error occurs while mapping attributes
-     * @throws InvocationTargetException if an invoked method throws an exception while mapping attributes
+     * @param customUser              the CustomUser representation containing
+     *                                updated user fields
+     * @param removeNonLDAPAttributes if true, remove attributes that are not mapped
+     *                                to LDAP before processing
+     * @return a Response with status 200 OK containing the updated CustomUser as
+     *         JSON
+     * @throws NoSuchMethodException     if a required accessor/mutator method is
+     *                                   not found while mapping attributes
+     * @throws IllegalAccessException    if a reflection access error occurs while
+     *                                   mapping attributes
+     * @throws InvocationTargetException if an invoked method throws an exception
+     *                                   while mapping attributes
      */
     @Operation(summary = "Update User", description = "Update User", operationId = "put-user", tags = {
             "Configuration – User Management" }, security = {
@@ -291,12 +317,12 @@ public class UserResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.USER_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    public Response updateUser(@Valid CustomUser customUser,
+    public Response updateUser(@Context HttpServletRequest servletRequest, @Valid CustomUser customUser,
             @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isInfoEnabled()) {
-            logger.info("User details to be updated - customUser:{}, removeNonLDAPAttributes:{}", escapeLog(customUser),
-                    removeNonLDAPAttributes);
+            logger.info("User details to be updated - customUser:{}, removeNonLDAPAttributes:{}, ",
+                    escapeLog(customUser), removeNonLDAPAttributes);
         }
 
         try {
@@ -304,7 +330,7 @@ public class UserResource extends BaseResource {
             User user = setUserAttributes(customUser);
 
             // validate user role-permission
-            validateUserPermission(null, user);
+            validateUserPermission(null, user, ApiConstants.WRITE_REQUEST, servletRequest);
 
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(user);
@@ -345,20 +371,28 @@ public class UserResource extends BaseResource {
     }
 
     /**
-     * Apply a user patch for the user identified by the given inum and return the patched CustomUser.
+     * Apply a user patch for the user identified by the given inum and return the
+     * patched CustomUser.
      *
-     * Attempts to load the existing user, optionally removes non-LDAP attributes from the request,
-     * applies the provided patch, excludes configured attributes from the result, and converts the
-     * updated record to a CustomUser for the response.
+     * Attempts to load the existing user, optionally removes non-LDAP attributes
+     * from the request, applies the provided patch, excludes configured attributes
+     * from the result, and converts the updated record to a CustomUser for the
+     * response.
      *
-     * @param inum the identifier of the user to patch
-     * @param userPatchRequest the patch operations to apply to the user
-     * @param removeNonLDAPAttributes when true, remove attributes that are not stored in LDAP from the request before patching
+     * @param inum                    the identifier of the user to patch
+     * @param userPatchRequest        the patch operations to apply to the user
+     * @param removeNonLDAPAttributes when true, remove attributes that are not
+     *                                stored in LDAP from the request before
+     *                                patching
      * @return the patched CustomUser
-     * @throws IllegalAccessException if an access error occurs while reflecting or copying attributes
-     * @throws InvocationTargetException if an invoked method throws an exception during attribute handling
-     * @throws JsonPatchException if the patch payload is invalid or cannot be applied
-     * @throws IOException if an I/O error occurs while processing the patch
+     * @throws IllegalAccessException    if an access error occurs while reflecting
+     *                                   or copying attributes
+     * @throws InvocationTargetException if an invoked method throws an exception
+     *                                   during attribute handling
+     * @throws JsonPatchException        if the patch payload is invalid or cannot
+     *                                   be applied
+     * @throws IOException               if an I/O error occurs while processing the
+     *                                   patch
      */
     @Operation(summary = "Patch user properties by Inum", description = "Patch user properties by Inum", operationId = "patch-user-by-inum", tags = {
             "Configuration – User Management" }, security = {
@@ -376,7 +410,7 @@ public class UserResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.USER_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchUser(
+    public Response patchUser(@Context HttpServletRequest servletRequest,
             @Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
             @NotNull UserPatchRequest userPatchRequest,
             @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
@@ -391,7 +425,8 @@ public class UserResource extends BaseResource {
             User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
 
             // validate user role-permission
-            validateUserPermission(inum, null);            
+            validateUserPermission(inum, existingUser, ApiConstants.WRITE_REQUEST, servletRequest);
+
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(existingUser);
             checkResourceNotNull(existingUser, USER);
@@ -457,7 +492,7 @@ public class UserResource extends BaseResource {
         }
 
         PagedResult<User> pagedResult = userMgmtSrv.searchUsers(searchReq);
-        if (logger.isTraceEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         }
 
@@ -524,7 +559,7 @@ public class UserResource extends BaseResource {
         }
     }
 
-    private String validateUserName(User user, boolean isUpdate)  {
+    private String validateUserName(User user, boolean isUpdate) {
         logger.info(USER_UPDATE_FLAG_PLACEHOLDER, user, isUpdate);
 
         String msg = null;
@@ -542,13 +577,12 @@ public class UserResource extends BaseResource {
 
         // name validation
         if (sameNameUser != null && !sameNameUser.isEmpty()) {
-            
+
             List<User> users = null;
             if (isUpdate) {
                 users = sameNameUser.stream().filter(e -> !e.getAttribute("inum").equalsIgnoreCase(inum))
                         .collect(Collectors.toList());
-            }
-            else {
+            } else {
                 users = sameNameUser.stream().filter(e -> e.getUserId().equalsIgnoreCase(name))
                         .collect(Collectors.toList());
             }
@@ -560,7 +594,7 @@ public class UserResource extends BaseResource {
         return msg;
     }
 
-    private String validateUserEmail(User user, boolean isUpdate)  {
+    private String validateUserEmail(User user, boolean isUpdate) {
         logger.info(USER_UPDATE_FLAG_PLACEHOLDER, user, isUpdate);
 
         String msg = null;
@@ -685,7 +719,8 @@ public class UserResource extends BaseResource {
     }
 
     private User ignoreCustomAttributes(User user, boolean removeNonLDAPAttributes) {
-        logger.info("validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
+        logger.info(
+                "validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
                 user, removeNonLDAPAttributes, user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(),
                 userMgmtSrv.isLDAP());
 
@@ -695,117 +730,193 @@ public class UserResource extends BaseResource {
 
         return user;
     }
-    
-    private void validateUserPermission(String inumPathVariable, User user) throws ApiApplicationException {
-        if(logger.isInfoEnabled()) {
-            logger.info("ValidateUserPermission - inumPathVariable:{}, user:{}", escapeLog(inumPathVariable), escapeLog(user));
+
+    private void validateUserPermission(String inumPathVariable, User user, String httpRequestMethod,
+            HttpServletRequest servletRequest) throws ApiApplicationException {
+        if (logger.isInfoEnabled()) {
+            logger.info(
+                    "UserResource::validateUserPermission() - inumPathVariable:{}, user:{}, httpRequestMethod:{}, authUtil.isUserRolePermissionValidationEnabled():{}",
+                    escapeLog(inumPathVariable), user, httpRequestMethod,
+                    authUtil.isUserRolePermissionValidationEnabled());
         }
 
-        HttpHeaders httpHeaders = getHttpHeaders();
-        if (httpHeaders == null) {
+        if (!authUtil.isUserRolePermissionValidationEnabled()) {
             return;
         }
-        String loggedInUserInum = authUtil.getUserInum(httpHeaders);    
 
-        if (StringUtils.isBlank(loggedInUserInum)) {
+        // Fetch Header attribute `User-inum` which for role-permission validation
+        String headerUserInum = authUtil.getUserInum(getHttpHeaders());
+        logger.info(" UserResource - Header headerUserInum:{}", headerUserInum);
+        if (StringUtils.isBlank(headerUserInum)) {
+            logger.info("Header attribute `User-inum` missing");
+        }
+
+        logger.info(
+                "UserResource::validateUserPermission() - headerUserInum:{}, isRolePermissionExemptClient(headerUserInum):{}",
+                headerUserInum, isRolePermissionExemptClient(headerUserInum));
+
+        // If user excluded from role-permission check then return
+        if (isRolePermissionExemptClient(headerUserInum)) {
             return;
         }
 
         // Return if logged-in user is updating own profile
-        if (StringUtils.isNotBlank(inumPathVariable) && loggedInUserInum.equals(inumPathVariable)) {
+        if (StringUtils.isNotBlank(headerUserInum) && StringUtils.isNotBlank(inumPathVariable)
+                && headerUserInum.equals(inumPathVariable)) {
             return;
         }
 
         // logged-in user updating other user profile - validate permission
-        validateUserPermission(loggedInUserInum, inumPathVariable, user);
+        validateUserPermission(headerUserInum, inumPathVariable, user, httpRequestMethod, servletRequest);
     }
 
-    private void validateUserPermission(String loggedInUserInum, String inumPathVariable, User candidateUser)
-            throws ApiApplicationException {
-
-        if(logger.isInfoEnabled()) {
-            logger.info("validateUserPermission - loggedInUserInum {}, inumPathVariable:{}, candidateUser:{}",
-                escapeLog(loggedInUserInum), escapeLog(inumPathVariable), escapeLog(candidateUser));
+    private void validateUserPermission(String headerUserInum, String inumPathVariable, User candidateUser,
+            String httpRequestMethod, HttpServletRequest servletRequest) throws ApiApplicationException {
+        if (logger.isInfoEnabled()) {
+            logger.info(
+                    "validateUserPermission - headerUserInum {}, inumPathVariable:{}, candidateUser:{}, httpRequestMethod:{}",
+                    escapeLog(headerUserInum), escapeLog(inumPathVariable), escapeLog(candidateUser),
+                    httpRequestMethod);
         }
+     
 
-        if (StringUtils.isBlank(loggedInUserInum) && candidateUser == null) {
-            return;
-        }
-
-        // Get User details
-        User loggedInUser = authUtil.getUserByInum(loggedInUserInum);
-        if (loggedInUser == null) {
-            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
-                            new StringBuilder("Logged-in user{").append(loggedInUserInum).append("} details missing")));
-        }
-
-        boolean isAdmin = isAdminUser(loggedInUserInum, loggedInUser);
-        if(logger.isInfoEnabled()) {
-            logger.info("validateUserPermission - loggedInUserInum:{}, isAdmin:{}", escapeLog(loggedInUserInum), isAdmin);
-        }
-
-        if (StringUtils.isNotBlank(inumPathVariable) && !isAdmin) {
-            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
-                            new StringBuilder("User{").append(loggedInUserInum)
-                                    .append("} does not have 'admin' role to fetch/modify user{")
-                                    .append(inumPathVariable).append("}")));
-        }
-
-        if(candidateUser == null) {
-            return;
+        //validation based on user inum header attribute
+        User loggedInUser = null;
+        if (StringUtils.isNotBlank(headerUserInum)) {
+            // Get User details
+           loggedInUser = authUtil.getUserByInum(headerUserInum);
+            if (loggedInUser == null) {
+                throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), String.format(
+                        ApiErrorResponse.GENERAL_ERROR.getDescription(),
+                        new StringBuilder("Logged-in user{").append(headerUserInum).append("} details not found")));
+            }
         }
         
+        //check if user has `admin` role or permission
+        boolean isAdmin = isAdminUser(headerUserInum, loggedInUser, httpRequestMethod, servletRequest);
+        logger.info("validateUserPermission - User isAdmin:{}", isAdmin);
+
+        //if updating others profile and does not have role/permission
+        if (StringUtils.isNotBlank(inumPathVariable) && !isAdmin) {
+            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), (headerUserInum!=null)? headerUserInum : "", inumPathVariable);
+            logger.error("validateUserPermission - errMsg:{}", errMsg);
+
+            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
+        }
+
+        //Validation for non inumPathVariable cases
+        if (candidateUser == null) {
+            return;
+        }
+
         String candidateUserInum = candidateUser.getAttribute("inum");
-        if(logger.isInfoEnabled()) {
-            logger.info("validateUserPermission - loggedInUserInum:{}, isAdmin:{}, candidateUserInum:{}", escapeLog(loggedInUserInum),
-                isAdmin, escapeLog(candidateUserInum));        
+        if (logger.isInfoEnabled()) {
+            logger.info("validateUserPermission - headerUserInum:{}, isAdmin:{}, candidateUserInum:{}",
+                    escapeLog(headerUserInum), isAdmin, escapeLog(candidateUserInum));
         }
 
         // Return if logged-in user is updating own profile
-        if (StringUtils.isNotBlank(candidateUserInum) && !loggedInUserInum.equals(candidateUserInum) && !isAdmin) {
-            StringBuilder errMsg = new StringBuilder("Logged-in user{").append(loggedInUserInum)
-                    .append("} has insufficient User role-permission, to view/update details of {")
-                    .append(inumPathVariable).append("}");
-            if(logger.isInfoEnabled()) {
-                logger.error("validateUserPermission - UNAUTHORIZED-insufficient-permission - errMsg:{}",escapeLog(errMsg));
-            }
+        if (StringUtils.isNotBlank(candidateUserInum) && candidateUserInum.equals(headerUserInum)){
+            return;
+        }
+                
+        // Return if logged-in user is updating other profile and is not admin
+        if (StringUtils.isNotBlank(candidateUserInum) && !isAdmin) {
+            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), (headerUserInum!=null)? headerUserInum : "", candidateUserInum);
+            logger.error("validateUserPermission - candidateUserInum - errMsg:{}", errMsg);
+
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
         }
     }
 
-    private boolean isAdminUser(String loggedInUserInum, User loggedInUser) throws ApiApplicationException {
-        logger.info("isAdminUser - loggedInUserInum:{}, loggedInUser:{}", loggedInUserInum, loggedInUser);
+    private boolean isAdminUser(String headerUserInum, User loggedInUser, String httpRequestMethod,
+            HttpServletRequest servletRequest) {
+        logger.info("headerUserInum:{}, loggedInUser:{}", headerUserInum, loggedInUser);
         boolean isAdmin = false;
 
-        if (loggedInUser == null) {
-            return isAdmin;
-        }
+        if (loggedInUser != null) {
+            // validation based role of user-inum header attribute
+            List<String> loggedInUserRoleList = authUtil.getUserRole(loggedInUser);
+            logger.info("headerUserInum:{}, loggedInUserRoleList:{}, authUtil.getUserAdminRoleNameSubstring():{}",
+                    headerUserInum, loggedInUserRoleList, authUtil.getUserAdminRoleNameSubstring());
 
-        List<String> loggedInUserRoleList = authUtil.getUserRole(loggedInUser);
-        if(logger.isDebugEnabled()) {
-            logger.debug("isAdminUser - loggedInUserInum:{}, loggedInUserRoleList:{}", escapeLog(loggedInUserInum),
-                loggedInUserRoleList);
-        }
-
-        if (loggedInUserRoleList == null || loggedInUserRoleList.isEmpty()) {
-            StringBuilder errMsg = new StringBuilder("User role-permission is missing for logged-in user {")
-                    .append(loggedInUserInum).append("}");
-            if(logger.isInfoEnabled()) {
-                logger.error("validateUserPermission - UNAUTHORIZED- missing-role - errMsg:{}", escapeLog(errMsg));
+            if (loggedInUserRoleList != null && !loggedInUserRoleList.isEmpty()) {
+                isAdmin = loggedInUserRoleList.stream()
+                        .anyMatch((ele -> ele.contains(authUtil.getUserAdminRoleNameSubstring())));
+                logger.info("headerUserInum:{}, isAdmin:{}", headerUserInum, isAdmin);
+                return isAdmin;
             }
-            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
-
         }
 
-        isAdmin = loggedInUserRoleList.stream().anyMatch((ele -> ele.equalsIgnoreCase("api-admin")));
-        if(logger.isInfoEnabled()){
-            logger.info("isAdminUser - loggedInUserInum:{}, isAdmin:{}", escapeLog(loggedInUserInum), isAdmin);
-        }
+        // check permission if loggedInUser is null or does not have `admin` role
+        isAdmin = isAdminUser(httpRequestMethod, servletRequest);
+        logger.info(" Final isAdmin - headerUserInum:{}, isAdmin:{}", headerUserInum, isAdmin);
+
         return isAdmin;
+    }
+
+    private boolean isAdminUser(String httpRequestMethod, HttpServletRequest servletRequest) {
+        logger.info(
+                "  UserResource::isAdminUser() - httpRequestMethod:{}, getContextScope(servletRequest):{}, getResourceScope(servletRequest):{}",
+                httpRequestMethod, getContextScope(servletRequest), getResourceScope(servletRequest));
+
+        boolean isAdmin = authUtil.containsAnyElement(getContextScope(servletRequest),
+                getResourceScope(servletRequest));
+        logger.info(
+                "isAdminUser - isAdmin:{}, getContextClientId(servletRequest):{}, getContextSubject(servletRequest):{}, getContextScope(servletRequest):{}, getResourceScope(servletRequest):{}",
+                isAdmin, getContextClientId(servletRequest), getContextSubject(servletRequest),
+                getContextScope(servletRequest), getResourceScope(servletRequest));
+
+        return isAdmin;
+    }
+
+    private List<String> getContextScope(HttpServletRequest servletRequest) {
+        List<String> scopes = null;
+        if (servletRequest == null) {
+            return scopes;
+        }
+        return AuthUtil.getListFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_SCOPES));
+    }
+
+    private List<String> getResourceScope(HttpServletRequest servletRequest) {
+        List<String> scopes = null;
+        if (servletRequest == null) {
+            return scopes;
+        }
+        return AuthUtil.getListFromObject(servletRequest.getAttribute(ApiConstants.RESOURCE_SCOPES));
+    }
+
+    private String getContextSubject(HttpServletRequest servletRequest) {
+        String subject = null;
+        if (servletRequest == null) {
+            return subject;
+        }
+        return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_SUBJECT))
+                .orElse(null);
+    }
+
+    private String getContextClientId(HttpServletRequest servletRequest) {
+        String subject = null;
+        if (servletRequest == null) {
+            return subject;
+        }
+        return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_CLIENTID))
+                .orElse(null);
+    }
+
+    private boolean isRolePermissionExemptClient(String inum) {
+        logger.debug(
+                " UserResource::isRolePermissionExemptClient() - inum:{}, StringUtils.isBlank(inum):{}, authUtil.isUserRolePermissionExcluded(inum):{}",
+                inum, StringUtils.isBlank(inum), authUtil.isUserRolePermissionExcluded(inum));
+        if (!authUtil.isUserRolePermissionValidationEnabled() || authUtil.isUserRolePermissionExcluded(inum)) {
+            logger.debug(
+                    " UserResource::Skip validateUserRolePermission as authUtil.isUserRolePermissionValidationEnabled() not enabled OR blank inum OR UserRolePermissionExcluded is true ");
+            return true;
+        }
+
+        return false;
     }
 
 }
