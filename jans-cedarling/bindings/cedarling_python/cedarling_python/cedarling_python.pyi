@@ -674,10 +674,32 @@ class AuthorizeMultiIssuerRequest:
     ) -> None: ...
 
 @final
+class DropReason:
+    InvalidInput: DropReason
+    JwtValidationFailed: DropReason
+    DuplicateToken: DropReason
+    DuplicateMapping: DropReason
+    NoProcessorRegistered: DropReason
+    CustomProcessingFailed: DropReason
+    CustomProcessingTimedOut: DropReason
+    EntityBuildFailed: DropReason
+    def slug(self) -> str: ...
+
+@final
+class DroppedToken:
+    mapping: str
+    index: int
+    reason: DropReason
+    detail: str
+    message: str
+    def __repr__(self) -> str: ...
+
+@final
 class MultiIssuerAuthorizeResult:
     def is_allowed(self) -> bool: ...
     def response(self) -> AuthorizeResultResponse: ...
     def request_id(self) -> str: ...
+    def dropped_tokens(self) -> List[DroppedToken]: ...
 
 @final
 class BatchItem:

@@ -877,6 +877,98 @@ async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_tok
     );
 }
 
+/// `droppedTokens()` must return plain objects: `reason` is `{kind, detail?,
+/// message}`, not an ES `Map`, so `reason.kind` reads directly and
+/// `JSON.stringify(reason)` is not `{}`.
+#[wasm_bindgen_test]
+async fn test_multi_issuer_dropped_tokens_are_plain_objects() {
+    use wasm_bindgen::JsCast;
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let valid_token = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+        "iss": "https://test.jans.org",
+        "token_type": "Bearer",
+        "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "acr": "basic",
+        "x5t#S256": "",
+        "scope": ["openid", "profile"],
+        "org_id": "some_long_id",
+        "auth_time": 1724830746,
+        "exp": 2000000000,
+        "iat": 1724832259,
+        "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+        "name": "Default Admin User",
+        "status": {
+            "status_list": {
+                "idx": 201,
+                "uri": "https://test.jans.org/jans-auth/restv1/status_list"
+            }
+        }
+    }));
+
+    let multi_issuer_request = AuthorizeMultiIssuerRequest {
+        tokens: vec![
+            TokenInput::new("Jans::Access_Token".to_string(), valid_token),
+            TokenInput::new("Invalid::Token".to_string(), "not-a-valid-jwt".to_string()),
+        ],
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        }))
+        .expect("Resource should be deserialized correctly"),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: Some(json!({})),
+    };
+    let request_str = serde_json::to_string(&multi_issuer_request)
+        .expect("Multi-issuer request should serialize to JSON");
+    let result = instance
+        .authorize_multi_issuer(&request_str)
+        .await
+        .expect("Should succeed gracefully when some tokens are invalid");
+
+    let js_dropped = result
+        .dropped_tokens()
+        .expect("droppedTokens should serialize to JS");
+    let arr = wasm_bindgen_futures::js_sys::Array::from(&js_dropped);
+    assert_eq!(arr.length(), 1, "one invalid token should be dropped");
+    let first = arr.get(0);
+    let reason =
+        Reflect::get(&first, &"reason".into()).expect("dropped entry should have a reason object");
+    assert!(
+        !reason.is_instance_of::<Map>(),
+        "reason must be a plain object, not a Map"
+    );
+    let kind = Reflect::get(&reason, &"kind".into())
+        .expect("reason should have kind")
+        .as_string()
+        .expect("reason.kind should be a string");
+    assert_eq!(
+        kind, "jwt_validation_failed",
+        "dropped invalid mapping should report jwt_validation_failed"
+    );
+    let json_str: String = wasm_bindgen_futures::js_sys::JSON::stringify(&reason)
+        .expect("JSON.stringify(reason) should succeed")
+        .into();
+    assert_ne!(
+        json_str, "{}",
+        "JSON.stringify(reason) must not be empty, got: {json_str}"
+    );
+}
+
 /// Test validation - empty token array (matches Rust test_validation_empty_token_array)
 #[wasm_bindgen_test]
 async fn test_multi_issuer_authorize_validation_empty_token_array() {

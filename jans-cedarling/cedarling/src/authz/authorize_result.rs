@@ -5,6 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use super::dropped_token::DroppedToken;
 use cedar_policy::Decision;
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
@@ -78,6 +79,17 @@ pub struct MultiIssuerAuthorizeResult {
 
     /// Request ID, generated per each request call, is used to get logs from memory logger
     pub request_id: String,
+
+    /// Tokens the caller supplied that were not used in this decision.
+    ///
+    /// Each entry identifies a dropped token by its input mapping and index
+    /// and carries a claim-free [`DropReason`](crate::DropReason) whose
+    /// serialized form always includes a non-empty `message` derived from the
+    /// reason's `Display`. The field is
+    /// omitted from the serialized form when empty, so a result with no drops
+    /// is wire-compatible with the previous shape.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub dropped_tokens: Vec<DroppedToken>,
 }
 
 /// Custom serializer for `cedar_policy::Response`
@@ -90,13 +102,18 @@ where
 
 impl MultiIssuerAuthorizeResult {
     /// Create a new `MultiIssuerAuthorizeResult`
-    pub(crate) fn new(response: cedar_policy::Response, request_id: Uuid) -> Self {
+    pub(crate) fn new(
+        response: cedar_policy::Response,
+        request_id: Uuid,
+        dropped_tokens: Vec<DroppedToken>,
+    ) -> Self {
         let decision = response.decision() == Decision::Allow;
 
         Self {
             response,
             decision,
             request_id: request_id.to_string(),
+            dropped_tokens,
         }
     }
 }

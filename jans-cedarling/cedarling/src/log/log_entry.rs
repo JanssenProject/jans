@@ -9,12 +9,11 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
 use std::hash::Hash;
-use std::sync::Arc;
 
 use super::LogLevel;
 use super::interface::{Indexed, Loggable};
+use crate::authz::DroppedToken;
 use crate::common::policy_store::PoliciesContainer;
-use crate::jwt::Token;
 use crate::lock::AuditPayload;
 use crate::log::loggable_fn::LoggableFn;
 use cedar_policy::EntityUid;
@@ -357,6 +356,12 @@ pub(crate) struct DecisionLogEntry {
     /// belonging to one batch.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub batch_id: Option<Uuid>,
+    /// Tokens dropped from a multi-issuer decision (claim-free; every reason
+    /// serializes a non-empty `message`). Absent from
+    /// the serialized entry when empty, so single-issuer and unsigned decision
+    /// logs are unchanged.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub dropped_tokens: Vec<DroppedToken>,
 }
 
 /// Telemetry log entry following the 3-map model.
@@ -632,10 +637,18 @@ impl Loggable for BaseLogEntry {
 pub(crate) struct LogTokensInfo(pub HashMap<String, HashMap<String, serde_json::Value>>);
 
 impl LogTokensInfo {
-    pub(crate) fn new(tokens: &HashMap<String, Arc<Token>>, decision_log_jwt_id: &str) -> Self {
+    pub(crate) fn new(
+        tokens: &HashMap<String, crate::jwt::ValidatedToken>,
+        decision_log_jwt_id: &str,
+    ) -> Self {
         let tokens_logging_info = tokens
             .iter()
-            .map(|(tkn_name, tkn)| (tkn_name.clone(), tkn.logging_info(decision_log_jwt_id)))
+            .map(|(tkn_name, entry)| {
+                (
+                    tkn_name.clone(),
+                    entry.token.logging_info(decision_log_jwt_id),
+                )
+            })
             .collect::<HashMap<String, HashMap<String, serde_json::Value>>>();
 
         Self(tokens_logging_info)

@@ -74,6 +74,69 @@ pub struct MultiIssuerAuthorizeResult {
     pub response: Response,
     pub decision: bool,
     pub request_id: String,
+    pub dropped_tokens: Vec<DroppedToken>,
+}
+
+/// Why a token was dropped. Mirrors [`core::DropReason`]; the conversion is
+/// exhaustive so a new core variant becomes a compile error here instead of
+/// a silent gap.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum DropReason {
+    InvalidInput,
+    JwtValidationFailed,
+    DuplicateToken,
+    DuplicateMapping,
+    NoProcessorRegistered,
+    CustomProcessingFailed,
+    CustomProcessingTimedOut,
+    EntityBuildFailed,
+}
+
+impl From<&core::DropReason> for DropReason {
+    fn from(value: &core::DropReason) -> Self {
+        match value {
+            core::DropReason::InvalidInput(_) => DropReason::InvalidInput,
+            core::DropReason::JwtValidationFailed => DropReason::JwtValidationFailed,
+            core::DropReason::DuplicateToken => DropReason::DuplicateToken,
+            core::DropReason::DuplicateMapping => DropReason::DuplicateMapping,
+            core::DropReason::NoProcessorRegistered => DropReason::NoProcessorRegistered,
+            core::DropReason::CustomProcessingFailed => DropReason::CustomProcessingFailed,
+            core::DropReason::CustomProcessingTimedOut => DropReason::CustomProcessingTimedOut,
+            core::DropReason::EntityBuildFailed => DropReason::EntityBuildFailed,
+        }
+    }
+}
+
+/// A token dropped during multi-issuer authorization, identified by its input
+/// `mapping` and zero-based `index`. `reason` is the drop reason enum;
+/// `detail` is the stable detail slug for `InvalidInput`
+/// (`"empty_mapping"` / `"empty_payload"`), empty otherwise.
+/// `message` carries the claim-free reason message and is
+/// non-empty for every reason.
+#[derive(Debug, uniffi::Record)]
+pub struct DroppedToken {
+    pub mapping: String,
+    // i64 (not u64) so the Kotlin/Java binding exposes a signed Long rather
+    // than a JVM-hostile ULong; usize casts fit trivially.
+    pub index: i64,
+    pub reason: DropReason,
+    pub detail: String,
+    pub message: String,
+}
+
+impl From<core::DroppedToken> for DroppedToken {
+    fn from(d: core::DroppedToken) -> Self {
+        let detail = d.reason.detail().unwrap_or_default().to_string();
+        let message = d.reason.message();
+        let reason = DropReason::from(&d.reason);
+        Self {
+            mapping: d.mapping,
+            index: d.index as i64,
+            reason,
+            detail,
+            message,
+        }
+    }
 }
 
 impl From<core::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult {
@@ -82,6 +145,7 @@ impl From<core::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult {
             response: result.response.into(),
             decision: result.decision,
             request_id: result.request_id,
+            dropped_tokens: result.dropped_tokens.into_iter().map(Into::into).collect(),
         }
     }
 }

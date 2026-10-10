@@ -39,11 +39,14 @@ pub enum MultiIssuerValidationError {
 }
 
 /// Error type for token input validation
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, thiserror::Error)]
+#[serde(rename_all = "snake_case")]
 pub enum TokenInputError {
+    /// The token mapping string was empty.
     #[error("Empty mapping string")]
     EmptyMapping,
 
+    /// The token payload was empty.
     #[error("Empty payload")]
     EmptyPayload,
 }

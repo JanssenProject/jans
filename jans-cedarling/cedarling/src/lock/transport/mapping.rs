@@ -271,6 +271,7 @@ mod test {
                 keys: vec!["extra_context".into()],
             }),
             batch_id: None,
+            dropped_tokens: Vec::new(),
         }
     }
 

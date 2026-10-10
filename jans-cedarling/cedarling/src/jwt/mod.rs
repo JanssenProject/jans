@@ -92,6 +92,7 @@ use crate::LogWriter;
 use crate::authz::MultiIssuerValidationError;
 use crate::authz::metrics::MetricsCollector;
 use crate::authz::request::TokenInput;
+use crate::authz::{DropReason, DroppedToken};
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 
@@ -182,7 +183,43 @@ struct TokenCallCtx<'a> {
     token: &'a TokenInput,
     index: usize,
     now: chrono::DateTime<Utc>,
-    seen_combinations: &'a mut HashSet<(SmolStr, SmolStr)>,
+    seen_combinations: &'a mut HashSet<SeenToken>,
+}
+
+/// Accepted `(issuer, mapping)` pair seen in the current multi-issuer request.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct SeenToken {
+    issuer: SmolStr,
+    mapping: SmolStr,
+}
+
+/// Outcome of dispatching a single multi-issuer token input: either a
+/// validated Cedar token or the claim-free reason it was dropped.
+enum TokenOutcome {
+    Validated(Arc<Token>),
+    Dropped(DropReason),
+}
+
+/// Result of [`JwtService::validate_multi_issuer_tokens`]: the validated tokens
+/// plus the drop metadata the caller threads into the authorization result and
+/// decision log. Access the fields explicitly (e.g. `result.tokens`).
+#[derive(Debug)]
+pub(crate) struct ValidatedMultiIssuerTokens {
+    /// Validated tokens keyed by their mapping (token name). Each entry carries
+    /// the token alongside its original request index so callers never need a
+    /// separate index lookup.
+    pub tokens: HashMap<String, ValidatedToken>,
+    /// Tokens dropped during validation.
+    pub dropped: Vec<DroppedToken>,
+}
+
+/// A validated token with its original request index.
+#[derive(Debug, Clone)]
+pub(crate) struct ValidatedToken {
+    /// Validated Cedar token.
+    pub token: Arc<Token>,
+    /// Zero-based position in the request's `tokens` array.
+    pub index: usize,
 }
 
 impl JwtService {
@@ -422,12 +459,13 @@ impl JwtService {
         custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
         custom_issuers: &CustomIssuerIndex,
         custom_timeout: Option<Duration>,
-    ) -> Result<HashMap<String, Arc<Token>>, MultiIssuerValidationError> {
+    ) -> Result<ValidatedMultiIssuerTokens, MultiIssuerValidationError> {
         if tokens.is_empty() {
             return Err(MultiIssuerValidationError::EmptyTokenArray);
         }
 
-        let mut validated_tokens = HashMap::new();
+        let mut validated_tokens: HashMap<String, ValidatedToken> = HashMap::new();
+        let mut dropped = Vec::new();
         let mut seen_combinations = HashSet::new();
 
         let now = Utc::now();
@@ -441,6 +479,11 @@ impl JwtService {
                         Some(LogLevel::WARN),
                     ));
                 }
+                dropped.push(DroppedToken::new(
+                    token.mapping.clone(),
+                    index,
+                    DropReason::InvalidInput(err),
+                ));
                 continue;
             }
 
@@ -473,8 +516,36 @@ impl JwtService {
                 self.validate_jwt_token(&mut ctx)?
             };
 
-            if let Some(cedar_token) = result {
-                validated_tokens.insert(token_name, cedar_token);
+            match result {
+                TokenOutcome::Validated(cedar_token) => {
+                    if let Some(prior) = validated_tokens.get(&token_name) {
+                        let prior_index = prior.index;
+                        if let Some(logger) = &self.logger {
+                            logger.log_any(JwtLogEntry::new(
+                                format!(
+                                    "Duplicate mapping detected: '{token_name}' \
+                                    at index {index} replaces index {prior_index} (last wins)"
+                                ),
+                                Some(LogLevel::WARN),
+                            ));
+                        }
+                        dropped.push(DroppedToken::new(
+                            token_name.clone(),
+                            prior_index,
+                            DropReason::DuplicateMapping,
+                        ));
+                    }
+                    validated_tokens.insert(
+                        token_name.clone(),
+                        ValidatedToken {
+                            token: cedar_token,
+                            index,
+                        },
+                    );
+                },
+                TokenOutcome::Dropped(reason) => {
+                    dropped.push(DroppedToken::new(token.mapping.clone(), index, reason));
+                },
             }
         }
 
@@ -490,20 +561,24 @@ impl JwtService {
             return Err(MultiIssuerValidationError::TokenValidationFailed);
         }
 
-        Ok(validated_tokens)
+        Ok(ValidatedMultiIssuerTokens {
+            tokens: validated_tokens,
+            dropped,
+        })
     }
 
     /// Dispatch a single token input whose mapping routes to a custom issuer.
     ///
-    /// Returns `Ok(None)` when the token is dropped (no processor, duplicate, or
-    /// non-required failure) and `Err` only when the failure is fail-closed.
+    /// Returns `TokenOutcome::Dropped` when the token is dropped (no processor,
+    /// duplicate, or non-required failure) and `Err` only when the failure is
+    /// fail-closed.
     async fn handle_custom_token(
         &self,
         custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
         custom_issuers: &CustomIssuerIndex,
         custom_timeout: Option<Duration>,
         ctx: &mut TokenCallCtx<'_>,
-    ) -> Result<Option<Arc<Token>>, MultiIssuerValidationError> {
+    ) -> Result<TokenOutcome, MultiIssuerValidationError> {
         let Some(processor) = custom_processor else {
             let err = MultiIssuerValidationError::CustomToken(
                 CustomTokenError::NoProcessorRegistered(ctx.token.mapping.clone()),
@@ -519,14 +594,14 @@ impl JwtService {
                     Some(LogLevel::WARN),
                 ));
             }
-            return Ok(None);
+            return Ok(TokenOutcome::Dropped(DropReason::NoProcessorRegistered));
         };
 
         if let Ok((issuer, _)) = custom_issuers.resolve(&ctx.token.mapping) {
-            let combination = (
-                SmolStr::from(issuer.issuer_id.as_str()),
-                SmolStr::from(ctx.token.mapping.as_str()),
-            );
+            let combination = SeenToken {
+                issuer: SmolStr::from(issuer.issuer_id.as_str()),
+                mapping: SmolStr::from(ctx.token.mapping.as_str()),
+            };
             if ctx.seen_combinations.contains(&combination) {
                 if let Some(logger) = &self.logger {
                     logger.log_any(JwtLogEntry::new(
@@ -537,7 +612,7 @@ impl JwtService {
                         Some(LogLevel::WARN),
                     ));
                 }
-                return Ok(None);
+                return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
             }
         }
 
@@ -556,20 +631,22 @@ impl JwtService {
                     .extract_normalized_issuer()
                     .map(|i| SmolStr::from(i.as_str()))
                     .unwrap_or_default();
-                let combination = (issuer, SmolStr::from(ctx.token.mapping.as_str()));
-                if ctx.seen_combinations.insert(combination) {
-                    Ok(Some(cedar_token))
-                } else if let Some(logger) = &self.logger {
-                    logger.log_any(JwtLogEntry::new(
-                        format!(
-                            "Non-deterministic custom token detected: type '{}' (duplicate found, skipping)",
-                            ctx.token.mapping
-                        ),
-                        Some(LogLevel::WARN),
-                    ));
-                    Ok(None)
+                if ctx.seen_combinations.insert(SeenToken {
+                    issuer,
+                    mapping: SmolStr::from(ctx.token.mapping.as_str()),
+                }) {
+                    Ok(TokenOutcome::Validated(cedar_token))
                 } else {
-                    Ok(None)
+                    if let Some(logger) = &self.logger {
+                        logger.log_any(JwtLogEntry::new(
+                            format!(
+                                "Non-deterministic custom token detected: type '{}' (duplicate found, skipping)",
+                                ctx.token.mapping
+                            ),
+                            Some(LogLevel::WARN),
+                        ));
+                    }
+                    Ok(TokenOutcome::Dropped(DropReason::DuplicateToken))
                 }
             },
             Err(err) => {
@@ -581,11 +658,12 @@ impl JwtService {
                     return Err(err);
                 }
                 self.metrics.record_error(&err);
+                let timed_out = matches!(
+                    err,
+                    MultiIssuerValidationError::CustomToken(CustomTokenError::Timeout(_))
+                );
                 if let Some(logger) = &self.logger {
-                    let reason = if matches!(
-                        err,
-                        MultiIssuerValidationError::CustomToken(CustomTokenError::Timeout(_))
-                    ) {
+                    let reason = if timed_out {
                         "timeout"
                     } else {
                         "processor error"
@@ -598,19 +676,25 @@ impl JwtService {
                         Some(LogLevel::WARN),
                     ));
                 }
-                Ok(None)
+                let reason = if timed_out {
+                    DropReason::CustomProcessingTimedOut
+                } else {
+                    DropReason::CustomProcessingFailed
+                };
+                Ok(TokenOutcome::Dropped(reason))
             },
         }
     }
 
     /// Validate a single JWT token input via the cache or single-token validation.
     ///
-    /// Returns `Ok(None)` when the token is dropped (duplicate or validation
-    /// failure); issuer/claim errors abort the whole batch as before.
+    /// Returns `TokenOutcome::Dropped` when the token is dropped (unknown
+    /// mapping, duplicate, or validation failure); issuer/claim errors abort
+    /// the whole batch as before.
     fn validate_jwt_token(
         &self,
         ctx: &mut TokenCallCtx<'_>,
-    ) -> Result<Option<Arc<Token>>, MultiIssuerValidationError> {
+    ) -> Result<TokenOutcome, MultiIssuerValidationError> {
         let Some(token_key) = self.token_keys_by_entity_type.get(&ctx.token.mapping) else {
             let err = UnknownTokenMapping(ctx.token.mapping.clone());
             self.metrics.record_error(&err);
@@ -620,12 +704,32 @@ impl JwtService {
                     Some(LogLevel::WARN),
                 ));
             }
-            return Ok(None);
+            return Ok(TokenOutcome::Dropped(DropReason::JwtValidationFailed));
         };
         let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(token_key));
 
         if let Some(cedar_token) = self.token_cache.find(&token_kind, &ctx.token.payload) {
-            return Ok(Some(cedar_token));
+            let issuer = cedar_token
+                .get_claim_val("iss")
+                .and_then(|iss| iss.as_str())
+                .ok_or(MultiIssuerValidationError::MissingIssuer)?;
+            let combination = SeenToken {
+                issuer: SmolStr::from(issuer),
+                mapping: SmolStr::from(ctx.token.mapping.as_str()),
+            };
+            if ctx.seen_combinations.insert(combination) {
+                return Ok(TokenOutcome::Validated(cedar_token));
+            }
+            if let Some(logger) = &self.logger {
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
+                        ctx.token.mapping, issuer
+                    ),
+                    Some(LogLevel::WARN),
+                ));
+            }
+            return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
         }
 
         // Validate JWT using existing single token validation
@@ -640,10 +744,10 @@ impl JwtService {
                     .ok_or(MultiIssuerValidationError::MissingIssuer)?;
 
                 // Check for non-deterministic tokens (graceful validation)
-                let combination = (
-                    SmolStr::from(issuer),
-                    SmolStr::from(ctx.token.mapping.as_str()),
-                );
+                let combination = SeenToken {
+                    issuer: SmolStr::from(issuer),
+                    mapping: SmolStr::from(ctx.token.mapping.as_str()),
+                };
                 if ctx.seen_combinations.insert(combination) {
                     // Convert ValidatedJwt to Token
                     let claims = TokenClaims::try_from(validated_jwt.claims)
@@ -662,7 +766,7 @@ impl JwtService {
                         ctx.now,
                     );
 
-                    Ok(Some(cedar_token))
+                    Ok(TokenOutcome::Validated(cedar_token))
                 } else {
                     // Log warning but continue processing
                     if let Some(logger) = &self.logger {
@@ -674,7 +778,7 @@ impl JwtService {
                             Some(LogLevel::WARN),
                         ));
                     }
-                    Ok(None)
+                    Ok(TokenOutcome::Dropped(DropReason::DuplicateToken))
                 }
             },
             Err(err) => {
@@ -686,7 +790,7 @@ impl JwtService {
                     ));
                 }
                 self.metrics.record_error(&err);
-                Ok(None)
+                Ok(TokenOutcome::Dropped(DropReason::JwtValidationFailed))
             },
         }
     }
@@ -1166,7 +1270,7 @@ mod test {
             .await
             .expect("custom token should validate");
         assert!(
-            out.contains_key("Acme::CustomToken"),
+            out.tokens.contains_key("Acme::CustomToken"),
             "validated output should contain the custom token under its mapping name"
         );
 
@@ -1249,12 +1353,12 @@ mod test {
             .await
             .expect("a non-required custom failure must not fail the whole request");
         assert_eq!(
-            out.len(),
+            out.tokens.len(),
             1,
             "only the succeeding custom token should be kept; the failing one must be skipped"
         );
         assert!(
-            out.contains_key("Ok::T"),
+            out.tokens.contains_key("Ok::T"),
             "the output should contain the token from the succeeding custom issuer"
         );
     }
@@ -1413,7 +1517,7 @@ mod test {
             .await
             .expect("a custom token whose exp is in the future should validate");
         assert!(
-            validated.contains_key("Acme::CustomToken"),
+            validated.tokens.contains_key("Acme::CustomToken"),
             "an unexpired custom token should reach the validated token map"
         );
     }
@@ -1477,7 +1581,7 @@ mod test {
             .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
             .await
             .expect("no timeout -> slow processor completes");
-        assert!(out.contains_key("Acme::CustomToken"));
+        assert!(out.tokens.contains_key("Acme::CustomToken"));
         assert_eq!(calls.load(Ordering::SeqCst), 1);
     }
 
@@ -1555,7 +1659,7 @@ mod test {
             .await;
         assert!(result.is_ok());
 
-        let validated_tokens = result.unwrap();
+        let validated_tokens = result.unwrap().tokens;
         assert_eq!(validated_tokens.len(), 2);
 
         // Verify the tokens have the correct mapping
@@ -1694,7 +1798,7 @@ mod test {
             .await;
         assert!(result.is_ok());
 
-        let validated_tokens = result.unwrap();
+        let validated_tokens = result.unwrap().tokens;
         assert_eq!(validated_tokens.len(), 1); // Only the valid token should be returned
     }
 
@@ -1763,7 +1867,7 @@ mod test {
             .await;
         assert!(result.is_ok());
 
-        let validated_tokens = result.unwrap();
+        let validated_tokens = result.unwrap().tokens;
         assert_eq!(validated_tokens.len(), 1); // Only the first token should be returned (graceful validation)
     }
 
