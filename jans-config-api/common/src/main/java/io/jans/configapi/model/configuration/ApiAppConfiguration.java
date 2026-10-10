@@ -28,9 +28,9 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "DB attribute name for storing user role")
     private String userRoleAttributeName = "jansAdminUIRole";
     
-    @DocProperty(description = "Substring text corresponding to `admin` role", defaultValue = "admin")
-    @Schema(description = "Substring text corresponding to `admin` role")
-    private String userAdminRoleNameSubstring = "admin";
+    @DocProperty(description = "Substring text corresponding to `admin` role", defaultValue = "nonadmin")
+    @Schema(description = "Substring text corresponding to `nonadmin` role")
+    private String userAdminRoleNameSubstring = "nonadmin";
     
     @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `false`.")
     private boolean disableLoggerTimer;

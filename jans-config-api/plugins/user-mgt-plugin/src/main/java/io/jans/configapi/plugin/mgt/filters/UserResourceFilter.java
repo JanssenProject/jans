@@ -62,7 +62,8 @@ public class UserResourceFilter extends BaseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.info(" Inside UserResourceFilter filter - info.getPath():{}, PATH:{}", info.getPath(), PATH);
+            log.info(" Inside UserResourceFilter filter - info.getPath():{}, PATH:{}, method:{}", info.getPath(), PATH,
+                    requestContext.getMethod());
 
             if (info.getPath() == null || !info.getPath().contains(PATH)) {
                 log.info(" Exiting as not User Management Endpoint!");
@@ -113,6 +114,7 @@ public class UserResourceFilter extends BaseFilter {
         // Fetch token introspectionResponse
         IntrospectionResponse introspectionResponse = getIntrospectionResponse(requestContext);
         log.info(" UserResourceFilter - Setting data in requestContext ");
+
         // Set Data in request context
         setDataInRequest(introspectionResponse, resourceScopesByType);
 
@@ -124,13 +126,11 @@ public class UserResourceFilter extends BaseFilter {
             return;
         }
 
-        // Fetch Header attribute `User-inum` which is mandatory for role-permission
-        // check
+        // Fetch Header attribute `User-inum` which for role-permission validation
         String userInum = authUtil.getUserInum(httpHeaders);
-        log.info(" UserResourceFilter - logged in user:{}", userInum);
+        log.info(" UserResourceFilter - Header  userInum:{}", userInum);
         if (StringUtils.isBlank(userInum)) {
-            log.error("Header attribute `User-inum` missing and hence returning");
-            return;
+            log.info("Header attribute `User-inum` missing");
         }
 
         // validate IntrospectionResponse
@@ -230,15 +230,18 @@ public class UserResourceFilter extends BaseFilter {
         }
 
         String inum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
+        String clientId = introspectionResponse.getClientId();
         String subject = introspectionResponse.getSubject();
         List<String> introspectionTokenScopes = introspectionResponse.getScope();
-        List<String> resourceScopes = (resourceScopesByType == null) ? null : resourceScopesByType.get(ProtectionScopeType.SUPER);
+        List<String> resourceScopes = (resourceScopesByType == null) ? null
+                : resourceScopesByType.get(ProtectionScopeType.SUPER);
         log.info(
-                "UserResourceFilter::setDataInRequest() - inum:{}, subject:{}, introspectionTokenScopes:{}, resourceScopesByType:{}, resourceScopes:{}",
-                inum, subject, introspectionTokenScopes, resourceScopesByType, resourceScopes);
+                "UserResourceFilter::setDataInRequest() - inum:{}, clientId:{}, subject:{}, introspectionTokenScopes:{}, resourceScopesByType:{}, resourceScopes:{}",
+                inum, clientId, subject, introspectionTokenScopes, resourceScopesByType, resourceScopes);
 
+        servletRequest.setAttribute(ApiConstants.INTROSPECTION_CLIENTID, clientId);
         servletRequest.setAttribute(ApiConstants.INTROSPECTION_SUBJECT, subject);
-        servletRequest.setAttribute(ApiConstants.INTROSPECTION_SCOPES, inum);
+        servletRequest.setAttribute(ApiConstants.INTROSPECTION_INUM, inum);
         servletRequest.setAttribute(ApiConstants.INTROSPECTION_SCOPES, introspectionTokenScopes);
         servletRequest.setAttribute(ApiConstants.RESOURCE_SCOPES, resourceScopes);
 
@@ -259,12 +262,13 @@ public class UserResourceFilter extends BaseFilter {
             if (introspectionResponse == null) {
                 return scopes;
             }
-            String subject = introspectionResponse.getSubject();
-            if (StringUtils.isBlank(subject)) {
+            String clientId = introspectionResponse.getClientId();
+            log.info(" Get scope for clientId:{}", clientId);
+            if (StringUtils.isBlank(clientId)) {
                 return scopes;
             }
-            scopes = authUtil.getClientScope(subject);
-            log.info(" scope of client:{} is:{}", subject, scopes);
+            scopes = authUtil.getClientScope(clientId);
+            log.info(" scope of client:{} is:{}", clientId, scopes);
         } catch (Exception ex) {
             log.error(" Error while fetching scope is: ", ex);
             return scopes;

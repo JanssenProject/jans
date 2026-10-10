@@ -15694,19 +15694,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16680,8 +16680,6 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16691,6 +16689,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17645,7 +17645,7 @@ components:
           description: DB attribute name for storing user role
         userAdminRoleNameSubstring:
           type: string
-          description: Substring text corresponding to `admin` role
+          description: Substring text corresponding to `nonadmin` role
         disableLoggerTimer:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
@@ -18720,9 +18720,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object

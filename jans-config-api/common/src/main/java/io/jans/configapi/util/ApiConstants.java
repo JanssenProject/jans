@@ -13,10 +13,14 @@ public class ApiConstants {
     public static final String READ_REQUEST = "READ";
     public static final String WRITE_REQUEST = "WRITE";
     public static final String DELETE_REQUEST = "DELETE";
-    public static final String INTROSPECTION_SUBJECT = "introspection.subject";
+
     public static final String INTROSPECTION_INUM = "introspection.inum";
+    public static final String INTROSPECTION_CLIENTID = "introspection.clientId";
+    public static final String INTROSPECTION_SUBJECT = "introspection.subject";
     public static final String INTROSPECTION_SCOPES  = "introspection.scopes";
     public static final String RESOURCE_SCOPES  = "resource.scopes";
+    public static final String CLIENT_DATA  = "client";
+    public static final String USER_DATA  = "user";
 
     public static final String BASE_API_URL = "/";
     public static final String SEPARATOR = "/";

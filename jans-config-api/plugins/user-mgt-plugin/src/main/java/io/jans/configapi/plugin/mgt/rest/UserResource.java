@@ -67,6 +67,8 @@ public class UserResource extends BaseResource {
     private static final String INUM = "inum";
     private static final String USER_PLACEHOLDER = "user:{}";
     private static final String USER_UPDATE_FLAG_PLACEHOLDER = "user:{}, isUpdate:{}";
+    private static final StringBuilder USER_PERMISSION_ERROR_MSG = new StringBuilder("%s - User")
+            .append(" does not have super admin permission to fetch/modify user{%s}");
 
     private class UserPagedResult extends PagedResult<CustomUser> {
     };
@@ -742,80 +744,87 @@ public class UserResource extends BaseResource {
             return;
         }
 
-        HttpHeaders httpHeaders = getHttpHeaders();
-        if (httpHeaders == null) {
-            return;
+        // Fetch Header attribute `User-inum` which for role-permission validation
+        String headerUserInum = authUtil.getUserInum(getHttpHeaders());
+        logger.info(" UserResource - Header headerUserInum:{}", headerUserInum);
+        if (StringUtils.isBlank(headerUserInum)) {
+            logger.info("Header attribute `User-inum` missing");
         }
 
-        String loggedInUserInum = authUtil.getUserInum(httpHeaders);
         logger.info(
-                "UserResource::validateUserPermission() - loggedInUserInum:{}, isRolePermissionExemptClient(loggedInUserInum):{}",
-                loggedInUserInum, isRolePermissionExemptClient(loggedInUserInum));
+                "UserResource::validateUserPermission() - headerUserInum:{}, isRolePermissionExemptClient(headerUserInum):{}",
+                headerUserInum, isRolePermissionExemptClient(headerUserInum));
 
-        if (StringUtils.isBlank(loggedInUserInum) || isRolePermissionExemptClient(loggedInUserInum)) {
+        // If user excluded from role-permission check then return
+        if (isRolePermissionExemptClient(headerUserInum)) {
             return;
         }
 
         // Return if logged-in user is updating own profile
-        if (StringUtils.isNotBlank(inumPathVariable) && loggedInUserInum.equals(inumPathVariable)) {
+        if (StringUtils.isNotBlank(headerUserInum) && StringUtils.isNotBlank(inumPathVariable)
+                && headerUserInum.equals(inumPathVariable)) {
             return;
         }
 
         // logged-in user updating other user profile - validate permission
-        validateUserPermission(loggedInUserInum, inumPathVariable, user, httpRequestMethod, servletRequest);
+        validateUserPermission(headerUserInum, inumPathVariable, user, httpRequestMethod, servletRequest);
     }
 
-    private void validateUserPermission(String loggedInUserInum, String inumPathVariable, User candidateUser,
+    private void validateUserPermission(String headerUserInum, String inumPathVariable, User candidateUser,
             String httpRequestMethod, HttpServletRequest servletRequest) throws ApiApplicationException {
         if (logger.isInfoEnabled()) {
             logger.info(
-                    "validateUserPermission - loggedInUserInum {}, inumPathVariable:{}, candidateUser:{}, httpRequestMethod:{}",
-                    escapeLog(loggedInUserInum), escapeLog(inumPathVariable), escapeLog(candidateUser),
+                    "validateUserPermission - headerUserInum {}, inumPathVariable:{}, candidateUser:{}, httpRequestMethod:{}",
+                    escapeLog(headerUserInum), escapeLog(inumPathVariable), escapeLog(candidateUser),
                     httpRequestMethod);
         }
+     
 
-        if (StringUtils.isBlank(loggedInUserInum) && candidateUser == null) {
-            return;
+        //validation based on user inum header attribute
+        User loggedInUser = null;
+        if (StringUtils.isNotBlank(headerUserInum)) {
+            // Get User details
+           loggedInUser = authUtil.getUserByInum(headerUserInum);
+            if (loggedInUser == null) {
+                throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), String.format(
+                        ApiErrorResponse.GENERAL_ERROR.getDescription(),
+                        new StringBuilder("Logged-in user{").append(headerUserInum).append("} details not found")));
+            }
         }
+        
+        //check if user has `admin` role or permission
+        boolean isAdmin = isAdminUser(headerUserInum, loggedInUser, httpRequestMethod, servletRequest);
+        logger.info("validateUserPermission - User isAdmin:{}", isAdmin);
 
-        // Get User details
-        User loggedInUser = authUtil.getUserByInum(loggedInUserInum);
-        if (loggedInUser == null) {
-            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
-                            new StringBuilder("Logged-in user{").append(loggedInUserInum).append("} details missing")));
-        }
-
-        boolean isAdmin = isAdminUser(loggedInUserInum, loggedInUser, httpRequestMethod, servletRequest);
-        logger.info("validateUserPermission - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
-
-        if (StringUtils.isNotBlank(inumPathVariable) && !isAdmin) {
-            StringBuilder errMsg = new StringBuilder("PathVariable User {").append(loggedInUserInum)
-                    .append("} does not have super admin permission to fetch/modify user{").append(inumPathVariable)
-                    .append("}");
-
+        //if logged-in user is updating others profile and does not have role/permission
+        if (StringUtils.isNotBlank(inumPathVariable) && StringUtils.isNotBlank(headerUserInum) && !headerUserInum.equals(inumPathVariable) && !isAdmin) {
+            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), headerUserInum, inumPathVariable);
             logger.error("validateUserPermission - errMsg:{}", errMsg);
 
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
         }
 
+        //Validation for non inumPathVariable cases
         if (candidateUser == null) {
             return;
         }
 
         String candidateUserInum = candidateUser.getAttribute("inum");
         if (logger.isInfoEnabled()) {
-            logger.info("validateUserPermission - loggedInUserInum:{}, isAdmin:{}, candidateUserInum:{}",
-                    escapeLog(loggedInUserInum), isAdmin, escapeLog(candidateUserInum));
+            logger.info("validateUserPermission - headerUserInum:{}, isAdmin:{}, candidateUserInum:{}",
+                    escapeLog(headerUserInum), isAdmin, escapeLog(candidateUserInum));
         }
 
         // Return if logged-in user is updating own profile
-        if (StringUtils.isNotBlank(candidateUserInum) && !candidateUserInum.equals(loggedInUserInum) && !isAdmin) {
-            StringBuilder errMsg = new StringBuilder("Logged-in user{").append(loggedInUserInum)
-                    .append("} does not have super admin permission, to view/update details of {")
-                    .append(candidateUserInum).append("}");
-
+        if (StringUtils.isNotBlank(candidateUserInum) && candidateUserInum.equals(headerUserInum)){
+            return;
+        }
+        
+        
+        // Return if logged-in user is updating other profile and is not admin
+        if (StringUtils.isNotBlank(candidateUserInum) && !candidateUserInum.equals(headerUserInum) && !isAdmin) {
+            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), headerUserInum, candidateUserInum);
             logger.error("validateUserPermission - candidateUserInum - errMsg:{}", errMsg);
 
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
@@ -823,44 +832,43 @@ public class UserResource extends BaseResource {
         }
     }
 
-    private boolean isAdminUser(String loggedInUserInum, User loggedInUser, String httpRequestMethod,
+    private boolean isAdminUser(String headerUserInum, User loggedInUser, String httpRequestMethod,
             HttpServletRequest servletRequest) {
-        logger.info("loggedInUserInum:{}, loggedInUser:{}", loggedInUserInum, loggedInUser);
+        logger.info("headerUserInum:{}, loggedInUser:{}", headerUserInum, loggedInUser);
         boolean isAdmin = false;
 
-        if (loggedInUser == null) {
-            return isAdmin;
+        if (loggedInUser != null) {
+            // validation based role of user-inum header attribute
+            List<String> loggedInUserRoleList = authUtil.getUserRole(loggedInUser);
+            logger.info("headerUserInum:{}, loggedInUserRoleList:{}, authUtil.getUserAdminRoleNameSubstring():{}",
+                    headerUserInum, loggedInUserRoleList, authUtil.getUserAdminRoleNameSubstring());
+
+            if (loggedInUserRoleList != null && !loggedInUserRoleList.isEmpty()) {
+                isAdmin = loggedInUserRoleList.stream()
+                        .anyMatch((ele -> ele.contains(authUtil.getUserAdminRoleNameSubstring())));
+                logger.info("headerUserInum:{}, isAdmin:{}", headerUserInum, isAdmin);
+                return isAdmin;
+            }
         }
 
-        List<String> loggedInUserRoleList = authUtil.getUserRole(loggedInUser);
-        logger.info("loggedInUserInum:{}, loggedInUserRoleList:{}, authUtil.getUserAdminRoleNameSubstring():{}", loggedInUserInum, loggedInUserRoleList, authUtil.getUserAdminRoleNameSubstring());
-
-        if (loggedInUserRoleList != null && !loggedInUserRoleList.isEmpty()) {
-            isAdmin = loggedInUserRoleList.stream().anyMatch((ele -> ele.contains(authUtil.getUserAdminRoleNameSubstring())));
-            logger.info("loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
-            return isAdmin;
-        }
-
-        isAdmin = isAdminUser(loggedInUserInum, httpRequestMethod, servletRequest);
-        logger.info(" Final isAdmin - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
+        // check permission if loggedInUser is null or does not have `admin` role
+        isAdmin = isAdminUser(httpRequestMethod, servletRequest);
+        logger.info(" Final isAdmin - headerUserInum:{}, isAdmin:{}", headerUserInum, isAdmin);
 
         return isAdmin;
     }
 
-    private boolean isAdminUser(String loggedInUserInum, String httpRequestMethod, HttpServletRequest servletRequest) {
-        logger.info("  UserResource::isAdminUser() - loggedInUserInum:{}, httpRequestMethod:{}, getContextScope(servletRequest):{}, getResourceScope(servletRequest):{}", loggedInUserInum,
-                httpRequestMethod, getContextScope(servletRequest), getResourceScope(servletRequest));
-        boolean isAdmin = false;
-
-        if (loggedInUserInum == null) {
-            return isAdmin;
-        }
-
-        isAdmin = authUtil.containsAnyElement(getContextScope(servletRequest), getResourceScope(servletRequest));
+    private boolean isAdminUser(String httpRequestMethod, HttpServletRequest servletRequest) {
         logger.info(
-                "isAdminUser - loggedInUserInum:{}, isAdmin:{},  getContextSubject(servletRequest):{}, getContextScope(servletRequest):{}, getResourceScope(servletRequest):{}",
-                loggedInUserInum, isAdmin, getContextSubject(servletRequest), getContextScope(servletRequest),
+                "  UserResource::isAdminUser() - httpRequestMethod:{}, getContextScope(servletRequest):{}, getResourceScope(servletRequest):{}",
+                httpRequestMethod, getContextScope(servletRequest), getResourceScope(servletRequest));
+
+        boolean isAdmin = authUtil.containsAnyElement(getContextScope(servletRequest),
                 getResourceScope(servletRequest));
+        logger.info(
+                "isAdminUser - isAdmin:{}, getContextClientId(servletRequest):{}, getContextSubject(servletRequest):{}, getContextScope(servletRequest):{}, getResourceScope(servletRequest):{}",
+                isAdmin, getContextClientId(servletRequest), getContextSubject(servletRequest),
+                getContextScope(servletRequest), getResourceScope(servletRequest));
 
         return isAdmin;
     }
@@ -890,19 +898,26 @@ public class UserResource extends BaseResource {
                 .orElseThrow(() -> null);
     }
 
+    private String getContextClientId(HttpServletRequest servletRequest) {
+        String subject = null;
+        if (servletRequest == null) {
+            return subject;
+        }
+        return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_CLIENTID))
+                .orElseThrow(() -> null);
+    }
+
     private boolean isRolePermissionExemptClient(String inum) {
         logger.debug(
                 " UserResource::isRolePermissionExemptClient() - inum:{}, StringUtils.isBlank(inum):{}, authUtil.isUserRolePermissionExcluded(inum):{}",
                 inum, StringUtils.isBlank(inum), authUtil.isUserRolePermissionExcluded(inum));
-        if (!authUtil.isUserRolePermissionValidationEnabled() || StringUtils.isBlank(inum)
-                || authUtil.isUserRolePermissionExcluded(inum)) {
+        if (!authUtil.isUserRolePermissionValidationEnabled() || authUtil.isUserRolePermissionExcluded(inum)) {
             logger.debug(
                     " UserResource::Skip validateUserRolePermission as authUtil.isUserRolePermissionValidationEnabled() not enabled OR blank inum OR UserRolePermissionExcluded is true ");
             return true;
         }
 
         return false;
-
     }
 
 }

@@ -533,15 +533,30 @@ public class AuthUtil {
 
         // Prepare scope array
          String[] scopeArray = client.getScopes();
-        log.debug(" scope to be scopeArray - {} ", Arrays.asList(scopeArray));
+        log.info(" scope to be scopeArray - {} ", Arrays.asList(scopeArray));
         if(scopeArray==null || scopeArray.length<=0) {
             return scopes;
         }
         
         // Assign scope
-        scopes =  Arrays.asList(client.getScopes());
-        log.debug(" Scope of clientId:{} is :{} ", clientId, scopes);
+        scopes = getScopeFromDn(scopeArray);
+        log.info(" Scope of clientId:{} is :{} ", clientId, scopes);
         return scopes;
+    }
+    
+    
+    public List<String> getScopeFromDn( String[] scopes) {
+        List<String> scopeList = null;
+        if (scopes != null && scopes.length>0) {
+            scopeList = new ArrayList<>();
+            for (String dn : scopes) {
+                Scope scope = this.scopeService.getScopeByDn(dn);
+                if(scope!=null) {
+                scopeList.add(scope.getId());
+                }
+            }
+        }
+        return scopeList;
     }
 
     public void assignAllScope(final String clientId) {
@@ -809,6 +824,9 @@ public class AuthUtil {
         // Get userInum from header 
         String userInum = getUserInum(httpHeaders);
         log.info("userInum:{}", userInum);
+        if(StringUtils.isBlank(userInum)) {
+            return userPermissionList; 
+        }
 
         // Get User details based on userInum
         User user = getUserByInum(userInum);
