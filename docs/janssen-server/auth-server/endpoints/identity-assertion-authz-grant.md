@@ -89,6 +89,36 @@ To restrict which IdPs can issue ID-JAGs accepted by this AS (Resource AS role):
 }
 ```
 
+### Verifying ID-JAGs issued by another server
+
+By default the ID-JAG signature is verified with this AS's own keys (same-instance deployments). For an ID-JAG issued by a different server (for example another Janssen/Gluu instance or Keycloak), configure the issuer's signing keys in its `idJagTrustedIdpIssuers` entry:
+
+| Field | Description |
+|---|---|
+| `jwks` | Inline JWKS (JSON string). Use for issuers not reachable from this AS. Takes precedence over `jwksUri`. |
+| `jwksUri` | `https` URL of the issuer's JWKS. Used when `jwks` is blank. Must be allowed by `externalUriWhiteList` if that is configured. |
+
+```json
+{
+  "idJagTrustedIdpIssuers": {
+    "https://idp.example.com": {
+      "jwksUri": "https://idp.example.com/jans-auth/restv1/jwks"
+    },
+    "https://keycloak.example.org/realms/lab": {
+      "jwks": "{\"keys\":[{\"kty\":\"RSA\",\"kid\":\"key-1\",\"alg\":\"RS256\",\"use\":\"sig\",\"n\":\"...\",\"e\":\"AQAB\"}]}"
+    }
+  }
+}
+```
+
+Behavior:
+
+- The signature key is selected by the JWT `kid`, from the keys of the issuer named in `iss`. The issuer must be in `idJagTrustedIdpIssuers` before any key is loaded.
+- Keys fetched from `jwksUri` are cached for 300 seconds. An unknown `kid` triggers a refetch, at most once per 30 seconds. A failed fetch is not retried for 30 seconds.
+- If `jwks` or `jwksUri` is configured but keys cannot be obtained, the ID-JAG is rejected. There is no fallback to this AS's own keys.
+- If neither field is set, this AS's own keys are used.
+- The same `TrustedIssuerConfig` type is used by `trustedSsaIssuers`; `jwks` and `jwksUri` are ignored there.
+
 ## Step 2: Token Exchange Request (IdP Role)
 
 The client sends a token exchange request to the IdP's `/token` endpoint:
@@ -171,11 +201,11 @@ grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
 **Validation performed by Resource AS:**
 
 1. JWT `typ` header = `"oauth-id-jag+jwt"`
-2. Signature verification
-3. `aud` matches this AS's issuer
-4. `client_id` matches the authenticated client
-5. `exp` has not passed
-6. `iss` is in `idJagTrustedIdpIssuers` (if configured)
+2. `iss` is in `idJagTrustedIdpIssuers` (if configured)
+3. Signature verification, using the trusted issuer's `jwks` or `jwksUri` keys when configured, otherwise this AS's own keys
+4. `aud` matches this AS's issuer
+5. `client_id` matches the authenticated client
+6. `exp` has not passed
 
 **Subject resolution order:** `sub` → `email` → `aud_sub` → empty user
 

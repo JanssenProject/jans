@@ -773,7 +773,7 @@ public class AppConfiguration implements Configuration {
     private Boolean rotateDeviceSecret = false;
 
     // Identity Assertion Authorization Grant (ID-JAG / Cross-App Access)
-    @DocProperty(description = "Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.", defaultValue = "empty")
+    @DocProperty(description = "Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used.", defaultValue = "empty")
     private Map<String, TrustedIssuerConfig> idJagTrustedIdpIssuers = new HashMap<>();
 
     @DocProperty(description = "Lifetime in seconds for ID-JAGs issued by this AS (IdP role).", defaultValue = "300")

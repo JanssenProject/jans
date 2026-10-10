@@ -16975,6 +16975,10 @@ components:
           type: array
           items:
             type: string
+        jwks:
+          type: string
+        jwksUri:
+          type: string
     PersistenceConfiguration:
       type: object
       properties:
