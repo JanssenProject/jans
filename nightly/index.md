@@ -135,7 +135,7 @@ Select the deployment method that best fits your environment and requirements.
 === "Kubernetes"
 
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
     ```
     
     [Complete Kubernetes Setup Guide](janssen-server/install/helm-install/README.md)
@@ -145,7 +145,7 @@ Select the deployment method that best fits your environment and requirements.
     **For Testing and Development Only**
     
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh && chmod u+x start_janssen_aio_demo.sh && sudo bash start_janssen_aio_demo.sh demoexample.jans.io MYSQL "" <VM_IP>
+    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/start_janssen_aio_demo.sh && chmod u+x start_janssen_aio_demo.sh && sudo bash start_janssen_aio_demo.sh demoexample.jans.io MYSQL "" <VM_IP>
     ```
     
     [Complete Docker Setup Guide](janssen-server/install/docker-install/quick-start.md)
@@ -155,7 +155,7 @@ Select the deployment method that best fits your environment and requirements.
     **For Testing and Development Only**
     
     ```bash
-    curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py > install.py
+    curl https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py > install.py
     sudo python3 install.py
     ```
     
