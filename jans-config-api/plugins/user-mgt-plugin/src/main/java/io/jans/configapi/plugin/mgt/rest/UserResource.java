@@ -67,7 +67,7 @@ public class UserResource extends BaseResource {
     private static final String INUM = "inum";
     private static final String USER_PLACEHOLDER = "user:{}";
     private static final String USER_UPDATE_FLAG_PLACEHOLDER = "user:{}, isUpdate:{}";
-    private static final StringBuilder USER_PERMISSION_ERROR_MSG = new StringBuilder("%s - User")
+    private static final StringBuilder USER_PERMISSION_ERROR_MSG = new StringBuilder("%s User")
             .append(" does not have super admin permission to fetch/modify user{%s}");
 
     private class UserPagedResult extends PagedResult<CustomUser> {
@@ -894,7 +894,7 @@ public class UserResource extends BaseResource {
             return subject;
         }
         return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_SUBJECT))
-                .orElseThrow(() -> null);
+                .orElse(null);
     }
 
     private String getContextClientId(HttpServletRequest servletRequest) {
@@ -903,7 +903,7 @@ public class UserResource extends BaseResource {
             return subject;
         }
         return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_CLIENTID))
-                .orElseThrow(() -> null);
+                .orElse(null);
     }
 
     private boolean isRolePermissionExemptClient(String inum) {

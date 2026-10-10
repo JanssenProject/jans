@@ -533,10 +533,10 @@ public class AuthUtil {
 
         // Prepare scope array
          String[] scopeArray = client.getScopes();
-        log.info(" scope to be scopeArray - {} ", Arrays.asList(scopeArray));
         if(scopeArray==null || scopeArray.length<=0) {
             return scopes;
         }
+        log.info(" scope to be scopeArray - {} ", Arrays.asList(scopeArray));
         
         // Assign scope
         scopes = getScopeFromDn(scopeArray);
