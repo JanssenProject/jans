@@ -27,6 +27,7 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.util.Date;
@@ -56,6 +57,9 @@ public class IdJagValidatorService {
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
+
+    @Inject
+    private IdJagIssuerJwksService issuerJwksService;
 
     @Inject
     private UserService userService;
@@ -89,8 +93,8 @@ public class IdJagValidatorService {
 
         try {
             verifyTypHeader(jwt, executionContext);
-            verifySignature(jwt, executionContext);
             verifyIssuer(jwt, executionContext);
+            verifySignature(jwt, executionContext);
             verifyAudience(jwt, executionContext);
             verifyClientId(jwt, client, executionContext);
             verifyExpiration(jwt, executionContext);
@@ -116,14 +120,26 @@ public class IdJagValidatorService {
     }
 
     private void verifySignature(Jwt jwt, ExecutionContext executionContext) throws CryptoProviderException, InvalidJwtException {
-        // Verify signature using AS's own crypto provider (for same-instance deployments)
-        // or using keys from a configured JWKS URI for external IdP AS.
-        // For now verify with server's local keys (cross-instance JWKS fetching is a future extension).
+        // Issuer is already checked against idJagTrustedIdpIssuers. Use the issuer's own keys (inline jwks,
+        // then jwksUri) when configured; otherwise verify with the server's local keys (same-instance).
+        final String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
+        final TrustedIssuerConfig issuerConfig = appConfiguration.getIdJagTrustedIdpIssuers().get(issuer);
+
+        JSONObject issuerJwks = null;
+        if (issuerJwksService.hasKeySource(issuerConfig)) {
+            issuerJwks = issuerJwksService.getJwks(issuerConfig, jwt.getHeader().getKeyId());
+            if (issuerJwks == null) {
+                final String msg = "Unable to obtain keys of ID-JAG issuer '" + issuer + "'.";
+                log.debug(msg);
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, msg), executionContext.getAuditLog()));
+            }
+        }
+
         final boolean validSignature = cryptoProvider.verifySignature(
                 jwt.getSigningInput(),
                 jwt.getEncodedSignature(),
                 jwt.getHeader().getKeyId(),
-                null,
+                issuerJwks,
                 null,
                 jwt.getHeader().getSignatureAlgorithm());
 
