@@ -6,7 +6,6 @@
 
 use std::collections::HashSet;
 
-use serde::Deserialize;
 use typed_builder::TypedBuilder;
 
 /// Structure for storing mapping JWT claims to `cedar-policy` custom defined types in the `schema`.
@@ -14,27 +13,20 @@ use typed_builder::TypedBuilder;
 /// An optional mapping of claims to their values. Each claim is represented
 /// by a key-value pair where the key is the claim name and the value is
 /// a `ClaimMapping` struct.
-#[derive(Debug, PartialEq, Clone, Deserialize, TypedBuilder)]
+#[derive(Debug, PartialEq, Clone, TypedBuilder)]
 pub(crate) struct TokenEntityMetadata {
     /// Indicates if the access token is trusted.
-    #[serde(default = "default_trusted")]
     #[builder(default = true)]
     pub(crate) trusted: bool,
     /// The Cedar entity name that represents this token
     pub(crate) entity_type_name: String,
     /// An optional string representing the principal identifier (e.g., `jti`).
-    #[serde(default = "default_token_id")]
     #[builder(default = default_token_id())]
     pub(crate) token_id: String,
     /// The claims in this Vec will be required on token validation and will be
     /// validated if it is a registered claim listed in [`RFC 7519, Section 4.1`] (<https://datatracker.ietf.org/doc/html/rfc7519#section-4.1>)
-    #[serde(default)]
     #[builder(default)]
     pub(crate) required_claims: HashSet<String>,
-}
-
-fn default_trusted() -> bool {
-    true
 }
 
 pub(crate) const DEFAULT_TKN_ID: &str = "jti";
@@ -83,83 +75,5 @@ impl TokenEntityMetadata {
             ]),
             entity_type_name: "Jans::Userinfo_token".into(),
         }
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::TokenEntityMetadata;
-    use serde_json::json;
-
-    /// Test deserialization of `TokenEntityMetadata` from JSON.
-    #[test]
-    fn can_parse_from_json() {
-        // Test case: Parsing from a minimal JSON object
-        let json = json!({
-            "entity_type_name": "Jans::Access_token",
-        });
-        let parsed = serde_json::from_value::<TokenEntityMetadata>(json)
-            .expect("Failed to parse an empty JSON object into TokenEntityMetadata");
-        assert_eq!(
-            parsed,
-            TokenEntityMetadata::builder()
-                .entity_type_name("Jans::Access_token".into())
-                .build(),
-            "Expected empty JSON to be parsed into default TokenEntityMetadata"
-        );
-
-        // Test case: Parsing JSON with specified `user_id` and `role_mapping`
-        let json = json!({
-            "entity_type_name": "Jans::Access_token",
-            "user_id": "sub",
-            "role_mapping": "",
-        });
-        let parsed = serde_json::from_value::<TokenEntityMetadata>(json).expect(
-            "Failed to parse JSON object with user_id and role_mapping into TokenEntityMetadata",
-        );
-        assert_eq!(
-            parsed,
-            TokenEntityMetadata::builder()
-                .entity_type_name("Jans::Access_token".into())
-                .build(),
-            "Expected JSON with user_id and empty role_mapping to be parsed into \
-             TokenEntityMetadata"
-        );
-    }
-
-    /// Test deserialization of `TokenEntityMetadata` from YAML.
-    #[test]
-    fn can_parse_from_yaml() {
-        // Test case: Parsing an empty YAML string
-        let yaml = "
-            entity_type_name: Jans::Access_token
-        ";
-        let parsed = serde_yaml_ng::from_str::<TokenEntityMetadata>(yaml)
-            .expect("Failed to parse an empty YAML object into TokenEntityMetadata");
-        assert_eq!(
-            parsed,
-            TokenEntityMetadata::builder()
-                .entity_type_name("Jans::Access_token".into())
-                .build(),
-            "Expected empty YAML to be parsed into default TokenEntityMetadata"
-        );
-
-        // Test case: Parsing YAML with specified `user_id` and `role_mapping`
-        let yaml = "
-            user_id: 'sub'
-            role_mapping: ''
-            entity_type_name: Jans::Access_token
-        ";
-        let parsed = serde_yaml_ng::from_str::<TokenEntityMetadata>(yaml).expect(
-            "Failed to parse YAML object with user_id and role_mapping into TokenEntityMetadata",
-        );
-        assert_eq!(
-            parsed,
-            TokenEntityMetadata::builder()
-                .entity_type_name("Jans::Access_token".into())
-                .build(),
-            "Expected YAML with user_id and empty role_mapping to be parsed into \
-             TokenEntityMetadata"
-        );
     }
 }

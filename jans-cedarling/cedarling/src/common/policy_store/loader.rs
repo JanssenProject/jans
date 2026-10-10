@@ -22,9 +22,8 @@ use std::path::Path;
 
 use super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::errors::{PolicyStoreError, ValidationError};
-use super::metadata::PolicyStoreMetadata;
+use super::formats;
 use super::schema_parser::{ParsedSchema, SchemaFile};
-use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
 
 /// Load a policy store from a directory path.
@@ -140,8 +139,10 @@ pub(crate) fn load_policy_store_archive_bytes(
 /// A loaded policy store with all its components.
 #[derive(Debug)]
 pub(crate) struct LoadedPolicyStore {
-    /// Policy store metadata
-    pub metadata: PolicyStoreMetadata,
+    /// Raw `metadata.json` content; parsed by the matching format version.
+    pub metadata_json: String,
+    /// Format version resolved from `metadata.json`, decided here only.
+    pub spec_version: formats::SelectedVersion,
     /// Parsed schema (optional — absent when running without schema)
     pub schema: Option<ParsedSchema>,
     /// Whether a schema source (schema.cedarschema or schemas/ dir) was present
@@ -298,8 +299,12 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         Ok(())
     }
 
-    /// Load metadata from metadata.json file.
-    fn load_metadata(&self, dir: &str) -> Result<PolicyStoreMetadata, PolicyStoreError> {
+    /// Read `metadata.json` and resolve its spec version; the version-specific
+    /// parse happens later, driven by that result.
+    fn load_metadata(
+        &self,
+        dir: &str,
+    ) -> Result<(String, formats::SelectedVersion), PolicyStoreError> {
         let metadata_path = Self::join_path(dir, "metadata.json");
         let bytes = self.vfs.read_file(&metadata_path).map_err(|source| {
             PolicyStoreError::FileReadError {
@@ -313,8 +318,9 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
         })?;
 
-        // Parse and validate metadata
-        MetadataValidator::parse_and_validate(&content).map_err(PolicyStoreError::Validation)
+        let spec_version =
+            formats::select_version(&content).map_err(PolicyStoreError::Validation)?;
+        Ok((content, spec_version))
     }
 
     /// Resolve where the schema lives (or that it's absent), without any I/O
@@ -732,7 +738,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         let schema_source = self.resolve_schema_source(dir);
         let schema_source_exists = schema_source.exists();
 
-        let metadata = self.load_metadata(dir)?;
+        let (metadata_json, spec_version) = self.load_metadata(dir)?;
         let schema = if strict {
             match &schema_source {
                 SchemaSource::None {
@@ -758,7 +764,8 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         let custom_issuers = self.load_custom_issuers(dir)?;
 
         Ok(LoadedPolicyStore {
-            metadata,
+            metadata_json,
+            spec_version,
             schema,
             schema_source_exists,
             policies,

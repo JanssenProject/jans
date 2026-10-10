@@ -8,31 +8,90 @@
 //! This module provides functionality to parse and validate trusted issuer configuration files,
 //! ensuring they conform to the required schema with proper token metadata and required fields.
 
-use super::errors::{PolicyStoreError, TrustedIssuerErrorType};
-use super::{TokenEntityMetadata, TrustedIssuer};
+use crate::common::policy_store::errors::{
+    PolicyStoreError, TrustedIssuerErrorType, TrustedIssuerValidateError,
+};
+use crate::common::policy_store::formats::file_id::id_from_filename;
+use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
+use serde::Deserialize;
 use serde_json::Value as JsonValue;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use url::Url;
+
+/// A `token_metadata` entry. Unknown keys are ignored, as in v0.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub(crate) struct TokenMetadataDoc {
+    #[serde(default = "default_trusted")]
+    pub(crate) trusted: bool,
+    pub(crate) entity_type_name: String,
+    #[serde(default = "default_token_id")]
+    pub(crate) token_id: String,
+    #[serde(default)]
+    pub(crate) required_claims: HashSet<String>,
+}
+
+fn default_trusted() -> bool {
+    true
+}
+
+// Frozen v1 default; independent of the runtime `DEFAULT_TKN_ID`.
+fn default_token_id() -> String {
+    "jti".to_string()
+}
+
+impl From<TokenMetadataDoc> for TokenEntityMetadata {
+    fn from(doc: TokenMetadataDoc) -> Self {
+        TokenEntityMetadata::builder()
+            .trusted(doc.trusted)
+            .entity_type_name(doc.entity_type_name)
+            .token_id(doc.token_id)
+            .required_claims(doc.required_claims)
+            .build()
+    }
+}
+
+/// One trusted issuer file body.
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct TrustedIssuerDoc {
+    pub(crate) name: String,
+    pub(crate) description: String,
+    pub(crate) oidc_endpoint: Url,
+    pub(crate) token_metadata: HashMap<String, TokenMetadataDoc>,
+}
+
+impl From<TrustedIssuerDoc> for TrustedIssuer {
+    fn from(doc: TrustedIssuerDoc) -> Self {
+        TrustedIssuer::new(
+            doc.name,
+            doc.description,
+            doc.oidc_endpoint,
+            doc.token_metadata
+                .into_iter()
+                .map(|(key, token)| (key, token.into()))
+                .collect(),
+        )
+    }
+}
 
 /// A parsed trusted issuer configuration with metadata.
 #[derive(Debug, Clone)]
-pub(super) struct ParsedIssuer {
+pub(crate) struct ParsedIssuer {
     /// The issuer name (used as key/id)
-    pub id: String,
+    pub(crate) id: String,
     /// The trusted issuer configuration
-    pub issuer: TrustedIssuer,
+    pub(crate) issuer: TrustedIssuerDoc,
     /// Source filename
-    pub filename: String,
+    pub(crate) filename: String,
 }
 
 /// Issuer parser for loading and validating trusted issuer configurations.
-pub(super) struct IssuerParser;
+pub(crate) struct IssuerParser;
 
 impl IssuerParser {
     /// Parse a trusted issuer configuration from JSON content.
     ///
     /// Validates the required fields and token metadata structure.
-    pub(super) fn parse_issuer(
+    pub(crate) fn parse_issuer(
         content: &str,
         filename: &str,
     ) -> Result<Vec<ParsedIssuer>, PolicyStoreError> {
@@ -51,18 +110,10 @@ impl IssuerParser {
             })?;
 
         // Get issuer ID from "id" field, or derive from filename
-        let issuer_id = obj
-            .get("id")
-            .and_then(|v| v.as_str())
-            .map(std::string::ToString::to_string)
-            .unwrap_or({
-                // Derive ID from filename (strip .json extension)
-                filename
-                    .strip_suffix(".json")
-                    .or_else(|| filename.strip_suffix(".JSON"))
-                    .unwrap_or(filename)
-                    .to_string()
-            });
+        let issuer_id = obj.get("id").and_then(|v| v.as_str()).map_or_else(
+            || id_from_filename(filename).to_string(),
+            std::string::ToString::to_string,
+        );
 
         // Validate required fields
         let name = obj.get("name").and_then(|v| v.as_str()).ok_or_else(|| {
@@ -109,7 +160,7 @@ impl IssuerParser {
             HashMap::new()
         };
 
-        let issuer = TrustedIssuer {
+        let issuer = TrustedIssuerDoc {
             name: name.to_string(),
             description: description.to_string(),
             oidc_endpoint,
@@ -128,7 +179,7 @@ impl IssuerParser {
         metadata_json: &JsonValue,
         issuer_id: &str,
         filename: &str,
-    ) -> Result<HashMap<String, TokenEntityMetadata>, PolicyStoreError> {
+    ) -> Result<HashMap<String, TokenMetadataDoc>, PolicyStoreError> {
         let metadata_obj =
             metadata_json
                 .as_object()
@@ -155,17 +206,15 @@ impl IssuerParser {
                 });
             }
 
-            // Deserialize the TokenEntityMetadata
-            let metadata: TokenEntityMetadata =
-                serde_json::from_value(token_config).map_err(|e| {
-                    PolicyStoreError::TrustedIssuerError {
-                        file: filename.to_string(),
-                        err: TrustedIssuerErrorType::MissingRequiredField {
-                            issuer_id: issuer_id.to_string(),
-                            field: format!("token_metadata.{token_type}: {e}"),
-                        },
-                    }
-                })?;
+            let metadata: TokenMetadataDoc = serde_json::from_value(token_config).map_err(|e| {
+                PolicyStoreError::TrustedIssuerError {
+                    file: filename.to_string(),
+                    err: TrustedIssuerErrorType::MissingRequiredField {
+                        issuer_id: issuer_id.to_string(),
+                        field: format!("token_metadata.{token_type}: {e}"),
+                    },
+                }
+            })?;
 
             // Validate required field: entity_type_name
             if metadata.entity_type_name.is_empty() {
@@ -185,17 +234,20 @@ impl IssuerParser {
     }
 
     /// Validate a collection of parsed issuers for conflicts and completeness.
-    pub(super) fn validate_issuers(issuers: &[ParsedIssuer]) -> Result<(), Vec<String>> {
+    pub(crate) fn validate_issuers(
+        issuers: &[ParsedIssuer],
+    ) -> Result<(), Vec<TrustedIssuerValidateError>> {
         let mut errors = Vec::new();
-        let mut seen_ids = HashMap::with_capacity(issuers.len());
+        let mut seen_ids: HashMap<String, String> = HashMap::with_capacity(issuers.len());
 
         for parsed in issuers {
             // Check for duplicate issuer IDs (only insert if not duplicate)
             if let Some(existing_file) = seen_ids.get(&parsed.id) {
-                errors.push(format!(
-                    "Duplicate issuer ID '{}' found in files '{}' and '{}'",
-                    parsed.id, existing_file, parsed.filename
-                ));
+                errors.push(TrustedIssuerValidateError::DuplicateId {
+                    id: parsed.id.clone(),
+                    first_file: existing_file.clone(),
+                    second_file: parsed.filename.clone(),
+                });
                 // Don't insert the duplicate - keep the first occurrence
             } else {
                 seen_ids.insert(parsed.id.clone(), parsed.filename.clone());
@@ -216,7 +268,7 @@ impl IssuerParser {
     }
 
     /// Create a consolidated map of all issuers.
-    pub(super) fn create_issuer_map(issuers: Vec<ParsedIssuer>) -> HashMap<String, TrustedIssuer> {
+    pub(crate) fn create_issuer_map(issuers: Vec<ParsedIssuer>) -> HashMap<String, TrustedIssuer> {
         let mut issuer_map = HashMap::with_capacity(issuers.len());
 
         for parsed in issuers {
@@ -225,7 +277,7 @@ impl IssuerParser {
             if let std::collections::hash_map::Entry::Vacant(e) =
                 issuer_map.entry(parsed.id.clone())
             {
-                e.insert(parsed.issuer);
+                e.insert(parsed.issuer.into());
             }
         }
 
@@ -237,6 +289,90 @@ impl IssuerParser {
 mod tests {
     use super::*;
 
+    fn token_doc(entity_type_name: &str) -> TokenMetadataDoc {
+        TokenMetadataDoc {
+            trusted: true,
+            entity_type_name: entity_type_name.to_string(),
+            token_id: "jti".to_string(),
+            required_claims: HashSet::new(),
+        }
+    }
+
+    /// Minimal `token_metadata` entries fall back to the v0 defaults, and
+    /// unknown keys such as `user_id` / `role_mapping` are ignored.
+    #[test]
+    fn token_metadata_doc_from_json() {
+        let expected = TokenMetadataDoc {
+            trusted: true,
+            entity_type_name: "Jans::Access_token".into(),
+            token_id: "jti".into(),
+            required_claims: HashSet::new(),
+        };
+
+        let parsed = serde_json::from_value::<TokenMetadataDoc>(serde_json::json!({
+            "entity_type_name": "Jans::Access_token",
+        }))
+        .expect("minimal JSON token metadata should parse");
+        assert_eq!(parsed, expected, "minimal JSON should use v0 defaults");
+
+        let parsed = serde_json::from_value::<TokenMetadataDoc>(serde_json::json!({
+            "entity_type_name": "Jans::Access_token",
+            "user_id": "sub",
+            "role_mapping": "",
+        }))
+        .expect("JSON token metadata with unknown keys should parse");
+        assert_eq!(parsed, expected, "unknown JSON keys should be ignored");
+    }
+
+    #[test]
+    fn token_metadata_doc_from_yaml() {
+        let expected = TokenMetadataDoc {
+            trusted: true,
+            entity_type_name: "Jans::Access_token".into(),
+            token_id: "jti".into(),
+            required_claims: HashSet::new(),
+        };
+
+        let parsed = serde_yaml_ng::from_str::<TokenMetadataDoc>(
+            "
+            entity_type_name: Jans::Access_token
+        ",
+        )
+        .expect("minimal YAML token metadata should parse");
+        assert_eq!(parsed, expected, "minimal YAML should use v0 defaults");
+
+        let parsed = serde_yaml_ng::from_str::<TokenMetadataDoc>(
+            "
+            user_id: 'sub'
+            role_mapping: ''
+            entity_type_name: Jans::Access_token
+        ",
+        )
+        .expect("YAML token metadata with unknown keys should parse");
+        assert_eq!(parsed, expected, "unknown YAML keys should be ignored");
+    }
+
+    #[test]
+    fn token_metadata_doc_converts_to_runtime() {
+        let doc = TokenMetadataDoc {
+            trusted: false,
+            entity_type_name: "Jans::Id_token".into(),
+            token_id: "sid".into(),
+            required_claims: HashSet::from(["iss".to_string()]),
+        };
+
+        assert_eq!(
+            TokenEntityMetadata::from(doc),
+            TokenEntityMetadata::builder()
+                .trusted(false)
+                .entity_type_name("Jans::Id_token".into())
+                .token_id("sid".into())
+                .required_claims(HashSet::from(["iss".to_string()]))
+                .build(),
+            "every TokenMetadataDoc field should map onto the runtime type"
+        );
+    }
+
     #[test]
     fn test_parse_issuer_with_id() {
         let content = r#"{
@@ -246,20 +382,22 @@ mod tests {
             "configuration_endpoint": "https://accounts.test.com/.well-known/openid-configuration"
         }"#;
 
-        let result = IssuerParser::parse_issuer(content, "issuer1.json");
-        assert!(result.is_ok(), "Should parse issuer with id");
-
-        let parsed = result.unwrap();
+        let parsed = IssuerParser::parse_issuer(content, "issuer1.json")
+            .expect("an issuer with an explicit id should parse");
         assert_eq!(parsed.len(), 1, "Should have 1 issuer");
-        assert_eq!(parsed[0].id, "3af079fa58a915a4d37a668fb874b7a25b70a37c03cf");
-        assert_eq!(parsed[0].issuer.name, "Test Issuer");
         assert_eq!(
-            parsed[0].issuer.description,
-            "A test OpenID Connect provider"
+            parsed[0].id, "3af079fa58a915a4d37a668fb874b7a25b70a37c03cf",
+            "the explicit id should win over the file name"
+        );
+        assert_eq!(parsed[0].issuer.name, "Test Issuer", "name mismatch");
+        assert_eq!(
+            parsed[0].issuer.description, "A test OpenID Connect provider",
+            "description mismatch"
         );
         assert_eq!(
             parsed[0].issuer.oidc_endpoint.as_str(),
-            "https://accounts.test.com/.well-known/openid-configuration"
+            "https://accounts.test.com/.well-known/openid-configuration",
+            "oidc endpoint mismatch"
         );
     }
 
@@ -271,13 +409,14 @@ mod tests {
             "configuration_endpoint": "https://accounts.test.com/.well-known/openid-configuration"
         }"#;
 
-        let result = IssuerParser::parse_issuer(content, "test-issuer.json");
-        assert!(result.is_ok(), "Should parse issuer without explicit id");
-
-        let parsed = result.unwrap();
+        let parsed = IssuerParser::parse_issuer(content, "test-issuer.json")
+            .expect("an issuer without an explicit id should parse");
         assert_eq!(parsed.len(), 1, "Should have 1 issuer");
-        assert_eq!(parsed[0].id, "test-issuer"); // Derived from filename
-        assert_eq!(parsed[0].issuer.name, "Test Issuer");
+        assert_eq!(
+            parsed[0].id, "test-issuer",
+            "the id should be derived from the file name"
+        );
+        assert_eq!(parsed[0].issuer.name, "Test Issuer", "name mismatch");
     }
 
     #[test]
@@ -299,16 +438,28 @@ mod tests {
             }
         }"#;
 
-        let result = IssuerParser::parse_issuer(content, "jans.json");
-        assert!(result.is_ok(), "Should parse issuer with token metadata");
+        let parsed = IssuerParser::parse_issuer(content, "jans.json")
+            .expect("an issuer with token metadata should parse");
+        assert_eq!(parsed.len(), 1, "Should have 1 issuer");
+        assert_eq!(
+            parsed[0].id, "abd948a5665f6050d6e3ba440bd33ec0884234163aa3",
+            "the explicit id should win over the file name"
+        );
+        assert_eq!(
+            parsed[0].issuer.token_metadata.len(),
+            2,
+            "both token_metadata entries should be parsed"
+        );
 
-        let parsed = result.unwrap();
-        assert_eq!(parsed.len(), 1);
-        assert_eq!(parsed[0].id, "abd948a5665f6050d6e3ba440bd33ec0884234163aa3");
-        assert_eq!(parsed[0].issuer.token_metadata.len(), 2);
-
-        let access_token = parsed[0].issuer.token_metadata.get("access_token").unwrap();
-        assert_eq!(access_token.entity_type_name, "Jans::access_token");
+        let access_token = parsed[0]
+            .issuer
+            .token_metadata
+            .get("access_token")
+            .expect("access_token metadata should be present");
+        assert_eq!(
+            access_token.entity_type_name, "Jans::access_token",
+            "entity_type_name mismatch"
+        );
     }
 
     #[test]
@@ -363,16 +514,12 @@ mod tests {
             "openid_configuration_endpoint": "https://accounts.test.com/.well-known/openid-configuration"
         }"#;
 
-        let result = IssuerParser::parse_issuer(content, "issuer2.json");
-        assert!(
-            result.is_ok(),
-            "Should parse with openid_configuration_endpoint"
-        );
-
-        let parsed = result.unwrap();
+        let parsed = IssuerParser::parse_issuer(content, "issuer2.json")
+            .expect("the canonical openid_configuration_endpoint key should parse");
         assert_eq!(
             parsed[0].issuer.oidc_endpoint.as_str(),
-            "https://accounts.test.com/.well-known/openid-configuration"
+            "https://accounts.test.com/.well-known/openid-configuration",
+            "oidc endpoint mismatch"
         );
     }
 
@@ -438,40 +585,40 @@ mod tests {
         let issuers = vec![
             ParsedIssuer {
                 id: "issuer1".to_string(),
-                issuer: TrustedIssuer {
+                issuer: TrustedIssuerDoc {
                     name: "Issuer 1".to_string(),
                     description: "First".to_string(),
                     oidc_endpoint: Url::parse(
                         "https://issuer1.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "access_token".to_string(),
-                        TokenEntityMetadata::access_token(),
+                        token_doc("Jans::Access_token"),
                     )]),
                 },
                 filename: "file1.json".to_string(),
             },
             ParsedIssuer {
                 id: "issuer2".to_string(),
-                issuer: TrustedIssuer {
+                issuer: TrustedIssuerDoc {
                     name: "Issuer 2".to_string(),
                     description: "Second".to_string(),
                     oidc_endpoint: Url::parse(
                         "https://issuer2.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "id_token".to_string(),
-                        TokenEntityMetadata::id_token(),
+                        token_doc("Jans::Id_token"),
                     )]),
                 },
                 filename: "file2.json".to_string(),
             },
         ];
 
-        let result = IssuerParser::validate_issuers(&issuers);
-        assert!(result.is_ok(), "Should have no validation errors");
+        IssuerParser::validate_issuers(&issuers)
+            .expect("distinct issuer ids should pass validation");
     }
 
     #[test]
@@ -479,32 +626,32 @@ mod tests {
         let issuers = vec![
             ParsedIssuer {
                 id: "issuer1".to_string(),
-                issuer: TrustedIssuer {
+                issuer: TrustedIssuerDoc {
                     name: "Issuer 1".to_string(),
                     description: "First".to_string(),
                     oidc_endpoint: Url::parse(
                         "https://issuer1.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "access_token".to_string(),
-                        TokenEntityMetadata::access_token(),
+                        token_doc("Jans::Access_token"),
                     )]),
                 },
                 filename: "file1.json".to_string(),
             },
             ParsedIssuer {
                 id: "issuer1".to_string(),
-                issuer: TrustedIssuer {
+                issuer: TrustedIssuerDoc {
                     name: "Issuer 1 Duplicate".to_string(),
                     description: "Duplicate".to_string(),
                     oidc_endpoint: Url::parse(
                         "https://issuer1.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "id_token".to_string(),
-                        TokenEntityMetadata::id_token(),
+                        token_doc("Jans::Id_token"),
                     )]),
                 },
                 filename: "file2.json".to_string(),
@@ -516,10 +663,9 @@ mod tests {
 
         assert_eq!(errors.len(), 1, "Expected exactly one duplicate error");
         assert!(
-            errors[0].contains("issuer1")
-                && errors[0].contains("file1.json")
-                && errors[0].contains("file2.json"),
-            "Error should reference issuer1, file1.json and file2.json, got: {}",
+            matches!(&errors[0], TrustedIssuerValidateError::DuplicateId { id, first_file, second_file }
+                if id == "issuer1" && first_file == "file1.json" && second_file == "file2.json"),
+            "expected DuplicateId naming the id and both files, got: {:?}",
             errors[0]
         );
     }
@@ -528,11 +674,11 @@ mod tests {
     fn test_validate_issuers_no_token_metadata() {
         let issuers = vec![ParsedIssuer {
             id: "issuer1".to_string(),
-            issuer: TrustedIssuer {
+            issuer: TrustedIssuerDoc {
                 name: "Issuer 1".to_string(),
                 description: "No tokens".to_string(),
                 oidc_endpoint: Url::parse("https://issuer1.com/.well-known/openid-configuration")
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                 token_metadata: HashMap::new(),
             },
             filename: "file1.json".to_string(),
@@ -548,32 +694,32 @@ mod tests {
         let issuers = vec![
             ParsedIssuer {
                 id: "issuer1".to_string(),
-                issuer: TrustedIssuer {
+                issuer: TrustedIssuerDoc {
                     name: "Issuer 1".to_string(),
                     description: "First".to_string(),
                     oidc_endpoint: Url::parse(
                         "https://issuer1.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "access_token".to_string(),
-                        TokenEntityMetadata::access_token(),
+                        token_doc("Jans::Access_token"),
                     )]),
                 },
                 filename: "file1.json".to_string(),
             },
             ParsedIssuer {
                 id: "issuer2".to_string(),
-                issuer: TrustedIssuer {
+                issuer: TrustedIssuerDoc {
                     name: "Issuer 2".to_string(),
                     description: "Second".to_string(),
                     oidc_endpoint: Url::parse(
                         "https://issuer2.com/.well-known/openid-configuration",
                     )
-                    .unwrap(),
+                    .expect("test oidc endpoint should be a valid url"),
                     token_metadata: HashMap::from([(
                         "id_token".to_string(),
-                        TokenEntityMetadata::id_token(),
+                        token_doc("Jans::Id_token"),
                     )]),
                 },
                 filename: "file2.json".to_string(),
@@ -582,8 +728,14 @@ mod tests {
 
         let map = IssuerParser::create_issuer_map(issuers);
 
-        assert_eq!(map.len(), 2);
-        assert!(map.contains_key("issuer1"));
-        assert!(map.contains_key("issuer2"));
+        assert_eq!(map.len(), 2, "both issuers should reach the map");
+        assert!(
+            map.contains_key("issuer1"),
+            "issuer1 should be keyed by its id"
+        );
+        assert!(
+            map.contains_key("issuer2"),
+            "issuer2 should be keyed by its id"
+        );
     }
 }

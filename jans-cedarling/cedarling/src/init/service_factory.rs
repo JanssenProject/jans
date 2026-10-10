@@ -96,6 +96,17 @@ impl<'a> ServiceFactory<'a> {
             );
         }
 
+        // Log policy store format warnings (e.g. outdated spec version) — once at startup.
+        for warn in &policy_store.warnings {
+            logger.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(warn.to_string()),
+            );
+        }
+
         // warn once at startup when strict schema validation is disabled
         if !self
             .bootstrap_config
