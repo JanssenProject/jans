@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.net.URI;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -29,7 +30,7 @@ public class IdJagIssuerJwksService {
 
     private static final long CACHE_TTL_MILLIS = TimeUnit.SECONDS.toMillis(300);
     private static final long REFETCH_MIN_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(30);
-    private static final String HTTPS_SCHEME_PREFIX = "https://";
+    private static final String HTTPS_SCHEME = "https";
 
     @Inject
     private Logger log;
@@ -71,18 +72,18 @@ public class IdJagIssuerJwksService {
     }
 
     private JSONObject getFromUri(String jwksUri, String keyId) {
-        if (!jwksUri.startsWith(HTTPS_SCHEME_PREFIX)) {
+        if (!isHttps(jwksUri)) {
             log.error("Trusted ID-JAG issuer jwksUri must use https: {}", jwksUri);
             return null;
         }
 
         final CacheEntry cached = cache.get(jwksUri);
-        if (isUsable(cached, keyId, System.currentTimeMillis())) {
+        if (isUsable(cached, keyId, now())) {
             return cached.jwks;
         }
 
         synchronized (fetchLocks.computeIfAbsent(jwksUri, k -> new Object())) {
-            final long now = System.currentTimeMillis();
+            final long now = now();
             final CacheEntry current = cache.get(jwksUri);
             if (isUsable(current, keyId, now)) {
                 return current.jwks;
@@ -91,15 +92,27 @@ public class IdJagIssuerJwksService {
             final JSONObject fetched = uriService.loadJson(jwksUri);
             if (fetched == null || !fetched.has("keys")) {
                 log.error("Unable to load jwks of trusted ID-JAG issuer from: {}", jwksUri);
-                if (current != null && current.jwks != null) {
-                    cache.put(jwksUri, new CacheEntry(current.jwks, now));
+                if (current != null && current.jwks != null && now - current.fetchedAt < CACHE_TTL_MILLIS) {
+                    cache.put(jwksUri, new CacheEntry(current.jwks, current.fetchedAt, now));
                     return current.jwks;
                 }
-                cache.put(jwksUri, new CacheEntry(null, now));
+                cache.put(jwksUri, new CacheEntry(null, now, now));
                 return null;
             }
-            cache.put(jwksUri, new CacheEntry(fetched, now));
+            cache.put(jwksUri, new CacheEntry(fetched, now, now));
             return fetched;
+        }
+    }
+
+    long now() {
+        return System.currentTimeMillis();
+    }
+
+    private static boolean isHttps(String uri) {
+        try {
+            return HTTPS_SCHEME.equalsIgnoreCase(URI.create(uri).getScheme());
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 
@@ -107,14 +120,14 @@ public class IdJagIssuerJwksService {
         if (entry == null) {
             return false;
         }
-        final long age = now - entry.fetchedAt;
+        final long sinceAttempt = now - entry.lastAttemptAt;
         if (entry.jwks == null) {
-            return age < REFETCH_MIN_INTERVAL_MILLIS;
+            return sinceAttempt < REFETCH_MIN_INTERVAL_MILLIS;
         }
-        if (age >= CACHE_TTL_MILLIS) {
+        if (now - entry.fetchedAt >= CACHE_TTL_MILLIS) {
             return false;
         }
-        return StringUtils.isBlank(keyId) || hasKey(entry.jwks, keyId) || age < REFETCH_MIN_INTERVAL_MILLIS;
+        return StringUtils.isBlank(keyId) || hasKey(entry.jwks, keyId) || sinceAttempt < REFETCH_MIN_INTERVAL_MILLIS;
     }
 
     private static boolean hasKey(JSONObject jwks, String keyId) {
@@ -134,10 +147,12 @@ public class IdJagIssuerJwksService {
     private static final class CacheEntry {
         private final JSONObject jwks;
         private final long fetchedAt;
+        private final long lastAttemptAt;
 
-        private CacheEntry(JSONObject jwks, long fetchedAt) {
+        private CacheEntry(JSONObject jwks, long fetchedAt, long lastAttemptAt) {
             this.jwks = jwks;
             this.fetchedAt = fetchedAt;
+            this.lastAttemptAt = lastAttemptAt;
         }
     }
 }

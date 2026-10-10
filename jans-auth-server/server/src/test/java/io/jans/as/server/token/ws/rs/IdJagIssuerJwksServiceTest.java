@@ -5,6 +5,7 @@ import io.jans.as.server.service.net.UriService;
 import org.json.JSONObject;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
@@ -23,6 +24,7 @@ public class IdJagIssuerJwksServiceTest {
     private static final String INLINE_JWKS = "{\"keys\":[{\"kid\":\"inline\"}]}";
     private static final String REMOTE_JWKS = "{\"keys\":[{\"kid\":\"remote\"}]}";
 
+    @Spy
     @InjectMocks
     private IdJagIssuerJwksService service;
 
@@ -137,6 +139,67 @@ public class IdJagIssuerJwksServiceTest {
 
         assertNotNull(result);
         verify(uriService, times(1)).loadJson(JWKS_URI);
+    }
+
+    @Test
+    public void getJwks_whenUriSchemeIsUpperCaseHttps_shouldFetch() {
+        when(uriService.loadJson("HTTPS://idp.example.com/jwks")).thenReturn(new JSONObject(REMOTE_JWKS));
+        TrustedIssuerConfig config = new TrustedIssuerConfig();
+        config.setJwksUri("HTTPS://idp.example.com/jwks");
+
+        assertNotNull(service.getJwks(config, "remote"));
+    }
+
+    @Test
+    public void getJwks_whenUriMalformed_shouldReturnNullWithoutFetching() {
+        TrustedIssuerConfig config = new TrustedIssuerConfig();
+        config.setJwksUri("https://idp example.com/jwks");
+
+        assertNull(service.getJwks(config, "kid"));
+        verifyNoInteractions(uriService);
+    }
+
+    @Test
+    public void getJwks_whenUnknownKidAfterRefetchInterval_shouldRefetch() {
+        when(uriService.loadJson(JWKS_URI)).thenReturn(new JSONObject(REMOTE_JWKS));
+        TrustedIssuerConfig config = new TrustedIssuerConfig();
+        config.setJwksUri(JWKS_URI);
+        doReturn(0L).when(service).now();
+        service.getJwks(config, "remote");
+
+        doReturn(31_000L).when(service).now();
+        service.getJwks(config, "rotated");
+
+        verify(uriService, times(2)).loadJson(JWKS_URI);
+    }
+
+    @Test
+    public void getJwks_whenRefetchFailsWithinTtl_shouldKeepStaleKeysWithoutRenewingTtl() {
+        when(uriService.loadJson(JWKS_URI)).thenReturn(new JSONObject(REMOTE_JWKS)).thenReturn(null);
+        TrustedIssuerConfig config = new TrustedIssuerConfig();
+        config.setJwksUri(JWKS_URI);
+        doReturn(0L).when(service).now();
+        service.getJwks(config, "remote");
+
+        doReturn(31_000L).when(service).now();
+        assertNotNull(service.getJwks(config, "rotated"));
+
+        doReturn(301_000L).when(service).now();
+        assertNull(service.getJwks(config, "remote"));
+    }
+
+    @Test
+    public void getJwks_whenCachedKeysExpired_shouldRefetch() {
+        when(uriService.loadJson(JWKS_URI)).thenReturn(new JSONObject(REMOTE_JWKS));
+        TrustedIssuerConfig config = new TrustedIssuerConfig();
+        config.setJwksUri(JWKS_URI);
+        doReturn(0L).when(service).now();
+        service.getJwks(config, "remote");
+
+        doReturn(301_000L).when(service).now();
+        service.getJwks(config, "remote");
+
+        verify(uriService, times(2)).loadJson(JWKS_URI);
     }
 
     @Test
