@@ -796,9 +796,9 @@ public class UserResource extends BaseResource {
         boolean isAdmin = isAdminUser(headerUserInum, loggedInUser, httpRequestMethod, servletRequest);
         logger.info("validateUserPermission - User isAdmin:{}", isAdmin);
 
-        //if logged-in user is updating others profile and does not have role/permission
-        if (StringUtils.isNotBlank(inumPathVariable) && StringUtils.isNotBlank(headerUserInum) && !headerUserInum.equals(inumPathVariable) && !isAdmin) {
-            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), headerUserInum, inumPathVariable);
+        //if updating others profile and does not have role/permission
+        if (StringUtils.isNotBlank(inumPathVariable) && !isAdmin) {
+            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), (headerUserInum!=null)? headerUserInum : "", inumPathVariable);
             logger.error("validateUserPermission - errMsg:{}", errMsg);
 
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
@@ -820,11 +820,10 @@ public class UserResource extends BaseResource {
         if (StringUtils.isNotBlank(candidateUserInum) && candidateUserInum.equals(headerUserInum)){
             return;
         }
-        
-        
+                
         // Return if logged-in user is updating other profile and is not admin
-        if (StringUtils.isNotBlank(candidateUserInum) && !candidateUserInum.equals(headerUserInum) && !isAdmin) {
-            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), headerUserInum, candidateUserInum);
+        if (StringUtils.isNotBlank(candidateUserInum) && !isAdmin) {
+            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), (headerUserInum!=null)? headerUserInum : "", candidateUserInum);
             logger.error("validateUserPermission - candidateUserInum - errMsg:{}", errMsg);
 
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
