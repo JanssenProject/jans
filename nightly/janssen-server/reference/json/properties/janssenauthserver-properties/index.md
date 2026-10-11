@@ -158,7 +158,7 @@
 | idGenerationEndpoint | ID Generation endpoint URL | [Details](#idgenerationendpoint) |
 | idJagIssueRefreshToken | Whether to issue refresh tokens after accepting an ID-JAG (Resource AS role). Spec recommends false. | [Details](#idjagissuerefreshtoken) |
 | idJagLifetime | Lifetime in seconds for ID-JAGs issued by this AS (IdP role). | [Details](#idjaglifetime) |
-| idJagTrustedIdpIssuers | Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. | [Details](#idjagtrustedidpissuers) |
+| idJagTrustedIdpIssuers | Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used. | [Details](#idjagtrustedidpissuers) |
 | idTokenEncryptionAlgValuesSupported | A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionalgvaluessupported) |
 | idTokenEncryptionEncValuesSupported | A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionencvaluessupported) |
 | idTokenFilterClaimsBasedOnAccessToken | Boolean value specifying whether idToken filters claims based on accessToken | [Details](#idtokenfilterclaimsbasedonaccesstoken) |
@@ -1748,7 +1748,7 @@
 
 ## idJagTrustedIdpIssuers
 
-- Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.
+- Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used.
 
 - Required: No
 
