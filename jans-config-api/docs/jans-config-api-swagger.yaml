@@ -15694,9 +15694,9 @@ components:
           type: string
         selected:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -16975,6 +16975,10 @@ components:
           type: array
           items:
             type: string
+        jwks:
+          type: string
+        jwksUri:
+          type: string
     PersistenceConfiguration:
       type: object
       properties:
@@ -18639,6 +18643,8 @@ components:
         statusListIndex:
           type: integer
           format: int32
+        redirectUri:
+          type: string
     TokenEntity:
       type: object
       properties:
