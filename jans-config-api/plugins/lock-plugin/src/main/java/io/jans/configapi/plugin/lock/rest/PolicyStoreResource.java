@@ -152,7 +152,7 @@ public class PolicyStoreResource extends BaseResource {
         cedarlingConfiguration.setPolicySources(policySources);
         lockConfigService.mergeLockConfig(conf);
         if (logger.isInfoEnabled()) {
-            logger.info("Registered Lock policy store source:{}, enabled:{}", escapeLog(policyStoreUri),
+            logger.info("Registered Lock policy store source:{}, enabled:{}", escapeLog(redactUri(policyStoreUri)),
                     policySource.isEnabled());
         }
 
@@ -190,7 +190,7 @@ public class PolicyStoreResource extends BaseResource {
         cedarlingConfiguration.setPolicySources(policySources);
         lockConfigService.mergeLockConfig(conf);
         if (logger.isInfoEnabled()) {
-            logger.info("Removed Lock policy store source:{}", escapeLog(policyStoreUri));
+            logger.info("Removed Lock policy store source:{}", escapeLog(redactUri(policyStoreUri)));
         }
         return Response.noContent().build();
     }
@@ -204,6 +204,20 @@ public class PolicyStoreResource extends BaseResource {
             return "https".equalsIgnoreCase(uri.getScheme()) && StringUtils.isNotBlank(uri.getHost());
         } catch (Exception ex) {
             return false;
+        }
+    }
+
+    static String redactUri(String value) {
+        try {
+            URI uri = new URI(value);
+            if (uri.getScheme() == null || uri.getHost() == null) {
+                return "<invalid uri>";
+            }
+            String port = uri.getPort() < 0 ? "" : ":" + uri.getPort();
+            String path = uri.getRawPath() == null ? "" : uri.getRawPath();
+            return uri.getScheme() + "://" + uri.getHost() + port + path;
+        } catch (Exception ex) {
+            return "<invalid uri>";
         }
     }
 

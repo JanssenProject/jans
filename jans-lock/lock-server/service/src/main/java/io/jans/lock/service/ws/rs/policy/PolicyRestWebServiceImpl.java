@@ -175,8 +175,12 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 			return false;
 		}
 
+		if ("*".equals(ifNoneMatch.trim())) {
+			return true;
+		}
+
 		List<String> tags = entityTags(ifNoneMatch);
-		return tags != null && tags.stream().anyMatch(tag -> "*".equals(tag) || bundleHash.equals(tag));
+		return tags != null && tags.contains(bundleHash);
 	}
 
 	private static List<String> entityTags(String header) {
