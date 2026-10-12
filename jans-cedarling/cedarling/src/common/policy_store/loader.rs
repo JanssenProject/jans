@@ -21,26 +21,26 @@
 //! # Blocking
 //!
 //! Every function here is synchronous and does blocking I/O and CPU work
-//! (unzipping, schema parsing). Callers on an async runtime run it off the
-//! executor together with the parse that follows, as one blocking task.
+//! (unzipping, parsing, building the runtime store). Callers on an async
+//! runtime run it off the executor as one blocking task.
 
 use std::path::Path;
 
 use super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::errors::{PolicyStoreError, ValidationError};
-use super::formats::{self, LoadedPolicyStore};
+use super::formats::{self, ParsedPolicyStore, ReadStoreError};
 use super::schema_parser::{ParsedSchema, SchemaFile};
 use super::vfs_adapter::VfsFileSystem;
 
-/// Load a policy store from a directory path.
+/// Read a policy store from a directory path.
 ///
 /// This function uses `PhysicalVfs` to read from the local filesystem.
 /// It is only available on native platforms (not WASM).
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn load_policy_store_directory(
+pub(crate) fn read_policy_store_directory(
     path: &Path,
     strict: bool,
-) -> Result<LoadedPolicyStore, PolicyStoreError> {
+) -> Result<ParsedPolicyStore, ReadStoreError> {
     let path_str = path
         .to_str()
         .ok_or_else(|| PolicyStoreError::PathNotFound {
@@ -48,74 +48,73 @@ pub(crate) fn load_policy_store_directory(
         })?;
 
     let vfs = super::vfs_adapter::PhysicalVfs::new();
-    load_from_vfs(&vfs, path_str, strict)
+    read_from_vfs(&vfs, path_str, strict)
 }
 
-/// Load a policy store from a directory path (WASM stub).
+/// Read a policy store from a directory path (WASM stub).
 ///
 /// Directory loading is not supported in WASM environments.
-/// Use `load_policy_store_archive_bytes` instead.
+/// Use `read_policy_store_archive_bytes` instead.
 #[cfg(target_arch = "wasm32")]
-pub(crate) fn load_policy_store_directory(
+pub(crate) fn read_policy_store_directory(
     _path: &Path,
     _strict: bool,
-) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    Err(super::errors::ArchiveError::WasmUnsupported.into())
+) -> Result<ParsedPolicyStore, ReadStoreError> {
+    Err(PolicyStoreError::from(super::errors::ArchiveError::WasmUnsupported).into())
 }
 
-/// Load a policy store from a Cedar Archive (.cjar) file.
+/// Read a policy store from a Cedar Archive (.cjar) file.
 ///
 /// This function uses `ArchiveVfs` to read from a zip archive.
 /// It is only available on native platforms (not WASM).
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn load_policy_store_archive(
+pub(crate) fn read_policy_store_archive(
     path: &Path,
     strict: bool,
     limits: ArchiveLimits,
-) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    let archive_vfs = ArchiveVfs::from_file(path, limits)?;
-    load_from_vfs(&archive_vfs, ".", strict)
+) -> Result<ParsedPolicyStore, ReadStoreError> {
+    let archive_vfs = ArchiveVfs::from_file(path, limits).map_err(PolicyStoreError::from)?;
+    read_from_vfs(&archive_vfs, ".", strict)
 }
 
-/// Load a policy store from a Cedar Archive (.cjar) file (WASM stub).
+/// Read a policy store from a Cedar Archive (.cjar) file (WASM stub).
 ///
 /// File-based archive loading is not supported in WASM environments.
-/// Use `load_policy_store_archive_bytes` instead.
+/// Use `read_policy_store_archive_bytes` instead.
 #[cfg(target_arch = "wasm32")]
-pub(crate) fn load_policy_store_archive(
+pub(crate) fn read_policy_store_archive(
     _path: &Path,
     _strict: bool,
     _limits: ArchiveLimits,
-) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    Err(super::errors::ArchiveError::WasmUnsupported.into())
+) -> Result<ParsedPolicyStore, ReadStoreError> {
+    Err(PolicyStoreError::from(super::errors::ArchiveError::WasmUnsupported).into())
 }
 
-/// Load a policy store from archive bytes.
+/// Read a policy store from archive bytes.
 ///
 /// Takes the bytes by value so the archive is read in place rather than
 /// copied. This function is useful for:
 /// - WASM environments where file system access is not available
 /// - Loading archives fetched from URLs
 /// - Loading archives from any byte source
-pub(crate) fn load_policy_store_archive_bytes(
+pub(crate) fn read_policy_store_archive_bytes(
     bytes: Vec<u8>,
     strict: bool,
     limits: ArchiveLimits,
-) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    let archive_vfs = ArchiveVfs::from_buffer(bytes, limits)?;
-    load_from_vfs(&archive_vfs, ".", strict)
+) -> Result<ParsedPolicyStore, ReadStoreError> {
+    let archive_vfs = ArchiveVfs::from_buffer(bytes, limits).map_err(PolicyStoreError::from)?;
+    read_from_vfs(&archive_vfs, ".", strict)
 }
 
-/// Load a policy store rooted at `dir` from any VFS backend.
-///
-/// Only `metadata.json` is read here; the store's spec version then decides
-/// where every other file lives (see [`formats::load`]).
-pub(super) fn load_from_vfs(
+/// Read a policy store rooted at `dir` from any VFS backend into its runtime
+/// form. The store's spec version decides where its files live and how they
+/// parse (see [`formats::read_policy_store`]).
+pub(super) fn read_from_vfs(
     vfs: &dyn VfsFileSystem,
     dir: &str,
     strict: bool,
-) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    formats::load(&StoreFs::open(vfs, dir)?, strict)
+) -> Result<ParsedPolicyStore, ReadStoreError> {
+    formats::read_policy_store(&StoreFs::open(vfs, dir)?, strict)
 }
 
 /// A policy or template file.

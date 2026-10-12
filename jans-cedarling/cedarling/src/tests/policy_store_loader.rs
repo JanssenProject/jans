@@ -17,7 +17,7 @@
 //! ## Platform Support
 //!
 //! - **Native platforms**: All tests run, including directory/file-based loading
-//! - **WASM**: Tests using `CjarUrl` and `load_policy_store_archive_bytes` work,
+//! - **WASM**: Tests using `CjarUrl` and `read_policy_store_archive_bytes` work,
 //!   as they don't require filesystem access. Directory and file-based tests are
 //!   skipped with `#[cfg(not(target_arch = "wasm32"))]`.
 
@@ -34,7 +34,7 @@ use tokio::test;
 #[cfg(not(target_arch = "wasm32"))]
 use zip::read::ZipArchive;
 
-use crate::common::policy_store::test_utils::{PolicyStoreTestBuilder, v0_files};
+use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
 
 use crate::log::interface::LogStorage;
 use crate::tests::utils::cedarling_util::{get_cedarling_with_callback, get_config};
@@ -1359,7 +1359,7 @@ async fn test_cjar_url_handles_http_error() {
 
 /// Test loading archive from bytes directly using the loader function.
 ///
-/// This tests the `load_policy_store_archive_bytes` function which is the
+/// This tests the `read_policy_store_archive_bytes` function which is the
 /// underlying mechanism used by `CjarUrl` and is WASM-compatible.
 /// `CEDARLING_POLICY_STORE_MAX_FILE_SIZE` must reach the archive loader, not
 /// just the `ArchiveVfs::from_buffer` call site. A store that loads fine at the
@@ -1406,9 +1406,9 @@ async fn test_configured_max_file_size_reaches_archive_loader() {
 }
 
 #[test]
-async fn test_load_policy_store_archive_bytes_directly() {
+async fn test_read_policy_store_archive_bytes_directly() {
     use crate::common::policy_store::archive_handler::ArchiveLimits;
-    use crate::common::policy_store::loader::load_policy_store_archive_bytes;
+    use crate::common::policy_store::loader::read_policy_store_archive_bytes;
 
     // Build archive bytes
     let builder = create_authz_policy_store_builder();
@@ -1416,64 +1416,58 @@ async fn test_load_policy_store_archive_bytes_directly() {
         .build_archive()
         .expect("Failed to build test archive");
 
-    // Load directly using the bytes loader
-    let loaded = load_policy_store_archive_bytes(archive_bytes, true, ArchiveLimits::default())
-        .expect("Should load policy store from bytes");
+    // Read directly using the bytes reader
+    let parsed = read_policy_store_archive_bytes(archive_bytes, true, ArchiveLimits::default())
+        .expect("Should read policy store from bytes");
 
-    // Verify the loaded policy store
-    let metadata: serde_json::Value = serde_json::from_str(&v0_files(&loaded).metadata_json)
-        .expect("metadata.json should be valid JSON");
+    // Verify the parsed policy store
     assert_eq!(
-        metadata["policy_store"]["id"], "a1b2c3d4e5f6a7b8",
+        parsed.store.id, "a1b2c3d4e5f6a7b8",
         "Policy store ID should match"
     );
+    let metadata = parsed
+        .store
+        .metadata
+        .as_ref()
+        .expect("a directory-format store should carry metadata");
     assert_eq!(
-        metadata["policy_store"]["name"], "Integration Test Policy Store",
+        metadata.policy_store.name, "Integration Test Policy Store",
         "Policy store name should match"
-    );
-    assert!(
-        !v0_files(&loaded).policies.is_empty(),
-        "Should have loaded at least one policy"
-    );
-    assert_eq!(
-        v0_files(&loaded).policies.len(),
-        2,
-        "Should have loaded 2 policies"
     );
 
     // Verify policy content
-    let policy_names: Vec<&str> = v0_files(&loaded)
-        .policies
-        .iter()
-        .map(|p| p.name.as_str())
-        .collect();
-    assert!(
-        policy_names.contains(&"allow-read.cedar"),
-        "Should have allow-read policy"
+    let policy_set = parsed.store.policies.get_set();
+    assert_eq!(
+        policy_set.num_of_policies(),
+        2,
+        "Should have read 2 policies"
     );
-    assert!(
-        policy_names.contains(&"deny-write-guest.cedar"),
-        "Should have deny-write-guest policy"
-    );
+    for id in ["allow-read", "deny-write-guest"] {
+        assert!(
+            policy_set
+                .policy(&cedar_policy::PolicyId::new(id))
+                .is_some(),
+            "Should have the {id} policy"
+        );
+    }
 }
 
 /// Test that invalid archive bytes are rejected.
 #[test]
-async fn test_load_policy_store_archive_bytes_invalid() {
+async fn test_read_policy_store_archive_bytes_invalid() {
     use crate::common::policy_store::archive_handler::ArchiveLimits;
-    use crate::common::policy_store::loader::load_policy_store_archive_bytes;
+    use crate::common::policy_store::errors::PolicyStoreError;
+    use crate::common::policy_store::formats::ReadStoreError;
+    use crate::common::policy_store::loader::read_policy_store_archive_bytes;
 
-    // Try to load invalid bytes
+    // Try to read invalid bytes
     let invalid_bytes = vec![0x00, 0x01, 0x02, 0x03];
-    let err = load_policy_store_archive_bytes(invalid_bytes, true, ArchiveLimits::default())
-        .expect_err("Should fail to load invalid archive bytes");
+    let err = read_policy_store_archive_bytes(invalid_bytes, true, ArchiveLimits::default())
+        .expect_err("Should fail to read invalid archive bytes");
 
     // Verify the error is an Archive error (invalid zip format)
     assert!(
-        matches!(
-            err,
-            crate::common::policy_store::errors::PolicyStoreError::Archive(_)
-        ),
+        matches!(err, ReadStoreError::Read(PolicyStoreError::Archive(_))),
         "Expected Archive error for invalid bytes, got: {err:?}"
     );
 }

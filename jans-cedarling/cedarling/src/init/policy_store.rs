@@ -10,7 +10,7 @@ use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStor
 use crate::common::policy_store::archive_handler::ArchiveLimits;
 use crate::common::policy_store::errors::{PolicyStoreError, ValidationError};
 use crate::common::policy_store::formats::{
-    self, FormatReport, ParseStoreError, ParsedPolicyStore,
+    FormatReport, ParseStoreError, ParsedPolicyStore, ReadStoreError,
 };
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
 use crate::common::policy_store::loader;
@@ -303,23 +303,12 @@ pub(crate) async fn parse_cjar_bytes(
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     read_store_offloaded(
         move || {
-            let loaded =
-                loader::load_policy_store_archive_bytes(bytes, strict_schema_validation, limits)
-                    .map_err(|e| map_policy_store_err(e, true))?;
-            convert_to_policy_store(loaded, strict_schema_validation)
+            loader::read_policy_store_archive_bytes(bytes, strict_schema_validation, limits)
+                .map_err(|e| map_read_err(e, true))
         },
         PolicyStoreLoadError::Archive,
     )
     .await
-}
-
-/// Converts a loaded directory/archive store into a [`PolicyStoreWithID`],
-/// dispatching on its `policy_store_spec_version`.
-fn convert_to_policy_store(
-    loaded: formats::LoadedPolicyStore,
-    strict_schema_validation: bool,
-) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
-    formats::parse_policy_store(loaded, strict_schema_validation).map_err(Into::into)
 }
 
 /// Runs a whole directory / `.cjar` store read off the async executor.
@@ -360,9 +349,8 @@ async fn load_policy_store_from_cjar_file(
     let path = path.to_path_buf();
     read_store_offloaded(
         move || {
-            let loaded = loader::load_policy_store_archive(&path, strict_schema_validation, limits)
-                .map_err(|e| map_policy_store_err(e, true))?;
-            convert_to_policy_store(loaded, strict_schema_validation)
+            loader::read_policy_store_archive(&path, strict_schema_validation, limits)
+                .map_err(|e| map_read_err(e, true))
         },
         PolicyStoreLoadError::Archive,
     )
@@ -378,7 +366,7 @@ fn load_policy_store_from_cjar_file(
     limits: ArchiveLimits,
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     // Call the loader stub function to ensure it's used and the error variant is constructed
-    match loader::load_policy_store_archive(path, strict_schema_validation, limits) {
+    match loader::read_policy_store_archive(path, strict_schema_validation, limits) {
         Err(e) => Err(PolicyStoreLoadError::Archive(format!(
             "Loading from file path is not supported in WASM. Use CjarUrl instead. Original error: {e}",
         ))),
@@ -433,9 +421,8 @@ async fn load_policy_store_from_directory(
     let path = path.to_path_buf();
     read_store_offloaded(
         move || {
-            let loaded = loader::load_policy_store_directory(&path, strict_schema_validation)
-                .map_err(|e| map_policy_store_err(e, false))?;
-            convert_to_policy_store(loaded, strict_schema_validation)
+            loader::read_policy_store_directory(&path, strict_schema_validation)
+                .map_err(|e| map_read_err(e, false))
         },
         PolicyStoreLoadError::Directory,
     )
@@ -450,7 +437,7 @@ fn load_policy_store_from_directory(
     strict_schema_validation: bool,
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     // Call the loader stub function to ensure it's used and the error variant is constructed
-    match loader::load_policy_store_directory(path, strict_schema_validation) {
+    match loader::read_policy_store_directory(path, strict_schema_validation) {
         Err(e) => Err(PolicyStoreLoadError::Directory(format!(
             "Loading from directory is not supported in WASM. Original error: {e}",
         ))),
@@ -458,25 +445,24 @@ fn load_policy_store_from_directory(
     }
 }
 
-impl From<ParseStoreError> for PolicyStoreLoadError {
-    fn from(e: ParseStoreError) -> Self {
-        match e {
-            ParseStoreError::Validation(e) => Self::Validation(e),
-            ParseStoreError::Conversion(e) => Self::Conversion(e),
-        }
-    }
-}
-
-fn map_policy_store_err(e: PolicyStoreError, is_archive: bool) -> PolicyStoreLoadError {
+/// Maps a failed directory / `.cjar` read; `is_archive` picks the variant for
+/// failures that are not about the store's content.
+fn map_read_err(e: ReadStoreError, is_archive: bool) -> PolicyStoreLoadError {
     match e {
-        PolicyStoreError::Validation(ve) => PolicyStoreLoadError::Validation(ve),
-        PolicyStoreError::CedarParsing { file, detail } => {
+        ReadStoreError::Read(PolicyStoreError::Validation(e))
+        | ReadStoreError::Parse(ParseStoreError::Validation(e)) => {
+            PolicyStoreLoadError::Validation(e)
+        },
+        ReadStoreError::Parse(ParseStoreError::Conversion(e)) => {
+            PolicyStoreLoadError::Conversion(e)
+        },
+        ReadStoreError::Read(PolicyStoreError::CedarParsing { file, detail }) => {
             PolicyStoreLoadError::InvalidStore(format!("Cedar parse error in {file}: {detail}"))
         },
-        PolicyStoreError::CedarSchemaError { file, err } => {
+        ReadStoreError::Read(PolicyStoreError::CedarSchemaError { file, err }) => {
             PolicyStoreLoadError::InvalidStore(format!("Cedar schema error in {file}: {err}"))
         },
-        _ => {
+        ReadStoreError::Read(e) => {
             if is_archive {
                 PolicyStoreLoadError::Archive(e.to_string())
             } else {

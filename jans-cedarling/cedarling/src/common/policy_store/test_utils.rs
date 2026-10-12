@@ -13,7 +13,9 @@
 //! - Performance testing utilities
 
 use super::errors::PolicyStoreError;
-use super::formats::{LoadedPolicyStore, VersionedFiles, v0};
+use super::formats::{self, v0};
+use super::loader::StoreFs;
+use super::vfs_adapter::VfsFileSystem;
 use std::collections::HashMap;
 use std::io::{Cursor, Write};
 use zip::write::{ExtendedFileOptions, FileOptions};
@@ -513,13 +515,14 @@ permit(
     builder
 }
 
-/// The files of a store loaded as v0. Loader fixtures declare no spec version,
-/// so they resolve to v0.
-pub(crate) fn v0_files(loaded: &LoadedPolicyStore) -> &v0::Files {
-    let VersionedFiles::V0(files) = loaded.files() else {
-        panic!("expected a store loaded as v0, got: {:?}", loaded.files());
-    };
-    files
+/// Reads a store through the v0 layout without parsing it, for tests of the
+/// layout. Loader fixtures declare no spec version, so they resolve to v0.
+pub(super) fn read_v0_files(
+    vfs: &dyn VfsFileSystem,
+    dir: &str,
+    strict: bool,
+) -> Result<v0::Files, PolicyStoreError> {
+    formats::read_v0_files(&StoreFs::open(vfs, dir)?, strict)
 }
 
 #[cfg(test)]
