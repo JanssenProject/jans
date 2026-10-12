@@ -70,7 +70,7 @@ pub(crate) struct CustomIssuerParser;
 impl CustomIssuerParser {
     /// Parse a single custom issuer configuration from JSON content.
     ///
-    /// Errors are returned as strings; the caller wraps them in
+    /// Failures are [`CustomIssuerParseError`]; the caller wraps them in
     /// [`ConversionError`](crate::common::policy_store::manager::ConversionError).
     pub(crate) fn parse(
         content: &str,
