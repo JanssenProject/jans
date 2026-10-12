@@ -337,12 +337,54 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/policy.readonly
+  /api/v1/policy/stores:
+    get:
+      tags:
+      - Lock - Policy
+      summary: List loaded policy store archives
+      description: "List loaded .cjar policy stores with version, source and bundle\
+        \ hash"
+      operationId: getPolicyStores
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    policy_store_id:
+                      type: string
+                    policy_store_name:
+                      type: string
+                    policy_store_version:
+                      type: string
+                    source_uri:
+                      type: string
+                    bundle_hash:
+                      type: string
+                    sigstore_bundle:
+                      type: boolean
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/policy.readonly
   /api/v1/policy/{uri}:
     get:
       tags:
       - Lock - Policy
       summary: Request policy data
-      description: Request policy data
+      description: "Request policy data. Returns legacy policy JSON, or the .cjar\
+        \ archive for archive sources (keyed by policy_store.id)"
       operationId: getPolicyByUri
       parameters:
       - name: uri
@@ -358,12 +400,56 @@ paths:
             application/json:
               schema:
                 type: string
+            application/zip:
+              schema:
+                type: string
+                description: Policy store archive (.cjar)
+                format: binary
         "400":
           description: Bad Request
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/policy.readonly
+  /api/v1/policy/{uri}/sigstore:
+    get:
+      tags:
+      - Lock - Policy
+      summary: Request policy store Sigstore bundle
+      description: Request the Sigstore bundle published next to a .cjar policy store
+        source
+      operationId: getPolicySigstoreBundle
+      parameters:
+      - name: uri
+        in: path
+        description: Policy store id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
         "401":
           description: Unauthorized
         "404":

@@ -171,6 +171,14 @@ impl LogStrategy {
             .cloned()
     }
 
+    pub(crate) fn policy_store_bearer_for(&self, uri: &str) -> Option<String> {
+        self.lock_service
+            .read()
+            .expect("obtain lock_service read lock")
+            .as_ref()
+            .and_then(|ls| ls.policy_store_bearer_for(uri))
+    }
+
     pub(crate) async fn shut_down(&self) {
         let lock = self
             .lock_service
