@@ -7,9 +7,8 @@ from io.jans.model.custom.script.type.client import ClientRegistrationType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.service import ScopeService
 from io.jans.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList, HashSet, Date, GregorianCalendar
+from java.util import HashSet, Date, GregorianCalendar
 
-import java
 
 class ClientRegistration(ClientRegistrationType):
     def __init__(self, currentTimeMillis):
@@ -29,7 +28,6 @@ class ClientRegistration(ClientRegistrationType):
     # Update client entry before persistent it
     # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/e083818272ac48813eca8525e94f7bd73a7a9f1b/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
     def createClient(self, context):
-        registerRequest = context.getRegisterRequest()
         configurationAttributes = context.getConfigurationAttibutes()
         client = context.getClient()
 
@@ -58,7 +56,6 @@ class ClientRegistration(ClientRegistrationType):
     # Update client entry before persistent it
     # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/e083818272ac48813eca8525e94f7bd73a7a9f1b/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
     def updateClient(self, context):
-        registerRequest = context.getRegisterRequest()
         configurationAttributes = context.getConfigurationAttibutes()
         client = context.getClient()
 
@@ -76,7 +73,7 @@ class ClientRegistration(ClientRegistrationType):
 
     def setClientScopes(self, client, requiredScopes):
         
-        if requiredScopes == None:
+        if requiredScopes is None:
             print "Casa client registration. No list of scopes was passed in script parameters"
             return
 

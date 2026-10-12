@@ -6,7 +6,7 @@
 
 import java
 import json
-from java.lang import StringBuilder
+from java.lang import StringBuilder, Throwable
 from jakarta.faces.context import FacesContext
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from jakarta.faces.application import FacesMessage
@@ -89,7 +89,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             self.attributesMapping = self.prepareAttributesMapping(saml_idp_attributes_mapping)
-            if self.attributesMapping == None:
+            if self.attributesMapping is None:
                 print "Asimba. Initialization. The attributes mapping isn't valid"
                 return False
 
@@ -185,7 +185,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Asimba. Authenticate for step 1"
 
             currentSamlConfiguration = self.getCurrentSamlConfiguration(self.samlConfiguration, configurationAttributes, requestParameters)
-            if (currentSamlConfiguration == None):
+            if (currentSamlConfiguration is None):
                 print "Asimba. Prepare for step 1. Client saml configuration is invalid"
                 return False
 
@@ -219,7 +219,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
             if saml_map_user:
                 saml_user_uid = self.getSamlNameId(samlResponse)
-                if saml_user_uid == None:
+                if saml_user_uid is None:
                     return False
 
                 # Use mapping to local IDP user
@@ -228,7 +228,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Check if the is user with specified saml_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
 
-                if find_user_by_uid == None:
+                if find_user_by_uid is None:
                     print "Asimba. Authenticate for step 1. Failed to find user"
                     print "Asimba. Authenticate for step 1. Setting count steps to 2"
                     identity.setWorkingParameter("saml_count_login_steps", 2)
@@ -255,7 +255,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 newUser = self.getMappedUser(configurationAttributes, requestParameters, saml_response_attributes)
 
                 saml_user_uid = self.getNameId(samlResponse, newUser)
-                if saml_user_uid == None:
+                if saml_user_uid is None:
                     return False
 
                 self.setDefaultUid(newUser, saml_user_uid)
@@ -266,7 +266,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 # Check if there is user with specified saml_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
-                if find_user_by_uid == None:
+                if find_user_by_uid is None:
                     # Auto user enrollment
                     print "Asimba. Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
 
@@ -308,7 +308,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 newUser = self.getMappedAllAttributesUser(saml_response_attributes)
 
                 saml_user_uid = self.getNameId(samlResponse, newUser)
-                if saml_user_uid == None:
+                if saml_user_uid is None:
                     return False
 
                 self.setDefaultUid(newUser, saml_user_uid)
@@ -318,7 +318,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 # Check if there is user with specified saml_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:%s" %  saml_user_uid)
-                if find_user_by_uid == None:
+                if find_user_by_uid is None:
                     # Auto user enrollment
                     print "Asimba. Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
 
@@ -356,14 +356,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 return post_login_result
             else:
-                if saml_user_uid == None:
+                if saml_user_uid is None:
                     return False
 
                 # Check if the is user with specified saml_user_uid
                 print "Asimba. Authenticate for step 1. Attempting to find user by uid: '%s'" % saml_user_uid
 
                 find_user_by_uid = userService.getUser(saml_user_uid)
-                if find_user_by_uid == None:
+                if find_user_by_uid is None:
                     print "Asimba. Authenticate for step 1. Failed to find user"
                     return False
 
@@ -386,7 +386,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Asimba. Authenticate for step 2"
 
             sessionAttributes = identity.getSessionId().getSessionAttributes()
-            if (sessionAttributes == None) or not sessionAttributes.containsKey("saml_user_uid"):
+            if (sessionAttributes is None) or not sessionAttributes.containsKey("saml_user_uid"):
                 print "Asimba. Authenticate for step 2. saml_user_uid is empty"
                 return False
 
@@ -409,10 +409,10 @@ class PersonAuthentication(PersonAuthenticationType):
             # Avoid mapping Saml account to more than one IDP account
             find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
 
-            if find_user_by_uid == None:
+            if find_user_by_uid is None:
                 # Add saml_user_uid to user one id UIDs
                 find_user_by_uid = userService.addUserAttribute(user_name, "oxExternalUid", "saml:%s" % saml_user_uid)
-                if find_user_by_uid == None:
+                if find_user_by_uid is None:
                     print "Asimba. Authenticate for step 2. Failed to update current user"
                     return False
 
@@ -435,8 +435,6 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        authenticationService = CdiUtil.bean(AuthenticationService)
-
         if (step == 1):
             print "Asimba. Prepare for step 1"
             
@@ -447,7 +445,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Asimba. Prepare for step 1. Prepared assertionConsumerServiceUrl: '%s'" % assertionConsumerServiceUrl
             
             currentSamlConfiguration = self.getCurrentSamlConfiguration(self.samlConfiguration, configurationAttributes, requestParameters)
-            if currentSamlConfiguration == None:
+            if currentSamlConfiguration is None:
                 print "Asimba. Prepare for step 1. Client saml configuration is invalid"
                 return False
 
@@ -503,7 +501,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def logout(self, configurationAttributes, requestParameters):
         return True
 
-    def isPassedStep1():
+    def isPassedStep1(self):
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
         user_name = credentials.getUsername()
@@ -518,7 +516,7 @@ class PersonAuthentication(PersonAuthenticationType):
         f = open(asimba_saml_certificate_file, 'r')
         try:
             asimba_saml_certificate = f.read()
-        except:
+        except (Exception, Throwable):
             print "Asimba. Failed to load certificate from file: '%s'" % asimba_saml_certificate_file
             return None
         finally:
@@ -532,7 +530,7 @@ class PersonAuthentication(PersonAuthenticationType):
             saml_client_configuration_attribute = configurationAttributes.get("saml_client_configuration_attribute").getValue2()
             print "Asimba. GetClientConfiguration. Using client attribute: '%s'" % saml_client_configuration_attribute
 
-            if requestParameters == None:
+            if requestParameters is None:
                 return None
 
             client_id = None
@@ -540,23 +538,23 @@ class PersonAuthentication(PersonAuthenticationType):
             if ArrayHelper.isNotEmpty(client_id_array) and StringHelper.isNotEmptyString(client_id_array[0]):
                 client_id = client_id_array[0]
 
-            if client_id == None:
+            if client_id is None:
                 identity = CdiUtil.bean(Identity)
-                if identity.getSessionId() != None:
+                if identity.getSessionId() is not None:
                     client_id = identity.getSessionId().getSessionAttributes().get("client_id")
 
-            if client_id == None:
+            if client_id is None:
                 print "Asimba. GetClientConfiguration. client_id is empty"
                 return None
 
             clientService = CdiUtil.bean(ClientService)
             client = clientService.getClient(client_id)
-            if client == None:
+            if client is None:
                 print "Asimba. GetClientConfiguration. Failed to find client '%s' in local LDAP" % client_id
                 return None
 
             saml_client_configuration = clientService.getCustomAttribute(client, saml_client_configuration_attribute)
-            if (saml_client_configuration == None) or StringHelper.isEmpty(saml_client_configuration.getValue()):
+            if (saml_client_configuration is None) or StringHelper.isEmpty(saml_client_configuration.getValue()):
                 print "Asimba. GetClientConfiguration. Client '%s' attribute '%s' is empty" % ( client_id, saml_client_configuration_attribute )
             else:
                 print "Asimba. GetClientConfiguration. Client '%s' attribute '%s' is '%s'" % ( client_id, saml_client_configuration_attribute, saml_client_configuration )
@@ -566,7 +564,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getCurrentSamlConfiguration(self, currentSamlConfiguration, configurationAttributes, requestParameters):
         saml_client_configuration = self.getClientConfiguration(configurationAttributes, requestParameters)
-        if saml_client_configuration == None:
+        if saml_client_configuration is None:
             return currentSamlConfiguration
         
         saml_client_configuration_value = json.loads(saml_client_configuration.getValue())
@@ -581,7 +579,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         clientSamlConfiguration = currentSamlConfiguration.clone()
         
-        if client_asimba_saml_certificate != None:
+        if client_asimba_saml_certificate is not None:
             clientSamlConfiguration.loadCertificateFromString(client_asimba_saml_certificate)
 
         client_asimba_entity_id = saml_client_configuration_value["asimba_entity_id"]
@@ -629,20 +627,20 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareCurrentAttributesMapping(self, currentAttributesMapping, configurationAttributes, requestParameters):
         saml_client_configuration = self.getClientConfiguration(configurationAttributes, requestParameters)
-        if saml_client_configuration == None:
+        if saml_client_configuration is None:
             return currentAttributesMapping
 
         saml_client_configuration_value = json.loads(saml_client_configuration.getValue())
 
         clientAttributesMapping = self.prepareAttributesMapping(saml_client_configuration_value["saml_idp_attributes_mapping"])
-        if clientAttributesMapping == None:
+        if clientAttributesMapping is None:
             print "Asimba. PrepareCurrentAttributesMapping. Client attributes mapping is invalid. Using default one"
             return currentAttributesMapping
 
         return clientAttributesMapping
 
     def samlExtensionPostLogin(self, configurationAttributes, user):
-        if self.samlExtensionModule == None:
+        if self.samlExtensionModule is None:
             return True
         try:
             post_login_result = self.samlExtensionModule.postLogin(configurationAttributes, user)
@@ -659,7 +657,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def checkUserUniqueness(self, user):
-        if self.userEnforceAttributesUniqueness == None:
+        if self.userEnforceAttributesUniqueness is None:
             return True
 
         userService = CdiUtil.bean(UserService)
@@ -672,7 +670,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         for userAttributeName in self.userEnforceAttributesUniqueness:
             attribute_values_list = user.getAttributeValues(userAttributeName)
-            if (attribute_values_list != None) and (attribute_values_list.size() > 0):
+            if (attribute_values_list is not None) and (attribute_values_list.size() > 0):
                 userToSearch.setAttribute(userAttributeName, attribute_values_list)
 
         users = userService.getUsersBySample(userToSearch, 1)
@@ -693,7 +691,7 @@ class PersonAuthentication(PersonAuthenticationType):
         newUser = User()
 
         # Set custom object classes
-        if self.userObjectClasses != None:
+        if self.userObjectClasses is not None:
             print "Asimba. Get mapped user. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
             newUser.setCustomObjectClasses(self.userObjectClasses)
 
@@ -705,12 +703,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Asimba. Get mapped user. Trying to map '%s' into '%s'" % (idpAttribute, localAttribute)
 
             localAttributeValue = saml_response_normalized_attributes.get(idpAttribute)
-            if localAttributeValue != None:
+            if localAttributeValue is not None:
                 if self.debugEnrollment:
                     print "Asimba. Get mapped user. Setting attribute '%s' value '%s'" % (localAttribute, localAttributeValue)
                 newUser.setAttribute(localAttribute, localAttributeValue)
             else:
-                if newUser.getAttribute(localAttribute) == None:
+                if newUser.getAttribute(localAttribute) is None:
                     newUser.setAttribute(localAttribute, ArrayList())
 
         return newUser
@@ -719,7 +717,7 @@ class PersonAuthentication(PersonAuthenticationType):
         user = User()
 
         # Set custom object classes
-        if self.userObjectClasses != None:
+        if self.userObjectClasses is not None:
             print "Asimba. Get mapped all attributes user. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
             user.setCustomObjectClasses(self.userObjectClasses)
 
@@ -729,14 +727,14 @@ class PersonAuthentication(PersonAuthenticationType):
         samlUriToAttributesMap = HashMap()
         for ldapAttribute in ldapAttributes:
             saml2Uri = ldapAttribute.getSaml2Uri()
-            if saml2Uri == None:
+            if saml2Uri is None:
                 saml2Uri = attributeService.getDefaultSaml2Uri(ldapAttribute.getName())
             samlUriToAttributesMap.put(saml2Uri, ldapAttribute.getName())
 
         customAttributes = ArrayList()
         for key in saml_response_attributes.keySet():
             ldapAttributeName = samlUriToAttributesMap.get(key)
-            if ldapAttributeName == None:
+            if ldapAttributeName is None:
                 print "Asimba. Get mapped all attributes user. Skipping saml attribute: '%s'" %  key
                 continue
 
@@ -771,7 +769,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return saml_response_name_id
 
     def generateNameUid(self, user):
-        if self.userEnforceAttributesUniqueness == None:
+        if self.userEnforceAttributesUniqueness is None:
             print "Asimba. Build local external uid. User enforce attributes uniqueness not specified"
             return None
         
@@ -782,7 +780,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 sb.append("!")
             first = False
             attribute_values_list = user.getAttributeValues(userAttributeName)
-            if (attribute_values_list != None) and (attribute_values_list.size() > 0):
+            if (attribute_values_list is not None) and (attribute_values_list.size() > 0):
                 first_attribute_value = attribute_values_list.get(0)
                 sb.append(first_attribute_value)
 

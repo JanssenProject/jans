@@ -2,24 +2,21 @@ import re
 import asyncio
 import json
 
-from typing import Optional, Sequence, Callable, Any
-from functools import partial
+from typing import Optional, Sequence
 
 from prompt_toolkit import HTML
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.containers import HSplit, VSplit,\
-    DynamicContainer, Window
+    DynamicContainer
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.widgets import Button, Label, CheckboxList, Dialog, TextArea
-from prompt_toolkit.eventloop import get_event_loop
 
 from utils.multi_lang import _
 from utils.static import DialogResult, common_strings
 from utils.utils import DialogUtils, common_data, check_email
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_label_widget import JansLabelWidget
 
 

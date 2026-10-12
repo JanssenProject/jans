@@ -97,6 +97,18 @@ public interface LdapOperationService extends PersistenceOperationService {
     boolean updateEntry(String dn, List<Modification> modifications) throws DuplicateEntryException, ConnectionException;
 
     /**
+     * Compare-and-swap update: same as {@link #updateEntry(String, List)} but the modify request
+     * also carries an RFC 4528 assertion control -- {@code (versionAttributeName=expectedVersionValue)}
+     * -- so the server itself rejects the modify (ASSERTION_FAILED) when the entry's current value
+     * no longer matches. Returns {@code false} for that case, same contract as a normal CAS miss.
+     *
+     * @throws io.jans.orm.exception.UnsupportedOperationException if the connected server does not
+     *         advertise the assertion control (OID 1.3.6.1.1.12)
+     */
+    boolean updateEntryWithVersion(String dn, List<Modification> modifications, String versionAttributeName,
+            Object expectedVersionValue) throws DuplicateEntryException, ConnectionException;
+
+    /**
      * Delete entry from the directory
      *
      * @param dn

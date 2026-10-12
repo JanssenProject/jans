@@ -15694,9 +15694,9 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -16364,6 +16364,8 @@ components:
           type: array
           items:
             type: string
+        strictTokenRedirectUriValidation:
+          type: boolean
         legacyIdTokenClaims:
           type: boolean
         customHeadersWithAuthorizationResponse:
@@ -17935,7 +17937,7 @@ components:
           description: Authorization token to access URI
         policyStoreUri:
           type: string
-          description: URI to policy store. Policy store can be either json/zip
+          description: URI to policy store. Policy store can be json, zip or a .cjar archive (served by Lock under its policy_store.id)
       description: List of Policy Sources
     SmtpConfiguration:
       type: object

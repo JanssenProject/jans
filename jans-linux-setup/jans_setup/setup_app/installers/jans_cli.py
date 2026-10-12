@@ -1,9 +1,5 @@
 import os
-import glob
-import re
 import configparser
-import tarfile
-import shutil
 import time
 
 from setup_app import paths
@@ -40,7 +36,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         self.jans_cli_install_dir = os.path.join(Config.jansOptFolder, 'jans-cli')
         self.config_ini_fn = config_dir.joinpath('jans-cli.ini')
         self.ldif_client = os.path.join(self.output_folder, 'client.ldif')
-        self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
+        self.templates_folder = os.path.join(Config.template_folder, self.service_name)
         self.pylib_dir = os.path.join(self.jans_cli_install_dir, 'cli', 'pylib')
 
         self.register_progess()
@@ -72,7 +68,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         gama_archiever_fn = 'gama-archieve-cli.py'
         self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, gama_archiever_fn)])
-        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, gama_archiever_fn), os.path.join(Config.jansOptBinFolder, gama_archiever_fn)])
+        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, gama_archiever_fn), os.path.join(Config.jans_opt_bin_folder, gama_archiever_fn)])
 
         #extract python libraries
         base.extract_from_zip(self.source_files[0][0], 'jwt', os.path.join(self.pylib_dir, 'jwt'))
@@ -104,6 +100,9 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         if not 'jans_host' in config['DEFAULT']:
             config['DEFAULT']['jans_host'] = Config.hostname
+
+        if 'ca_cert' not in config['DEFAULT']:
+            config['DEFAULT']['ca_cert'] = os.path.join(Config.certFolder, 'httpd.crt')
 
         for key_ in options:
             config['DEFAULT'][key_] = options[key_]

@@ -1,4 +1,3 @@
-import datetime
 
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
@@ -59,7 +58,7 @@ class PersonAuthentication(PersonAuthenticationType):
             find_user_by_uid = authenticationService.getAuthenticatedUser()
             user_expDate = find_user_by_uid.getAttribute("oxPasswordExpirationDate", False)
            
-            if user_expDate == None:
+            if user_expDate is None:
                 print "Basic (with password update). Authenticate for step 1. User has no oxPasswordExpirationDate date"
                 return False
 
@@ -80,14 +79,14 @@ class PersonAuthentication(PersonAuthenticationType):
         elif step == 2:
             print "Basic (with password update). Authenticate for step 2"
             user = authenticationService.getAuthenticatedUser()            
-            if user == None:
+            if user is None:
                 print "Basic (with password update). Authenticate for step 2. Failed to determine user name"
                 return False
 
             user_name = user.getUserId()
             find_user_by_uid = userService.getUser(user_name)
             newExpDate = identity.getWorkingParameter("expDate")
-            if find_user_by_uid == None:
+            if find_user_by_uid is None:
                 print "Basic (with password update). Authenticate for step 2. Failed to find user"
                 return False
             print "Basic (with password update). Authenticate for step 2"

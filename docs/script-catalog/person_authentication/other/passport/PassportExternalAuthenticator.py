@@ -12,7 +12,7 @@ from org.gluu.oxauth.model.configuration import AppConfiguration
 from org.gluu.oxauth.model.crypto import CryptoProviderFactory
 from org.gluu.oxauth.model.jwt import Jwt, JwtClaimName
 from org.gluu.oxauth.model.util import Base64Util
-from io.jans.as.server.service import AppInitializer, AuthenticationService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service.common import UserService, EncryptionService
 from io.jans.as.server.service.net import HttpService
 from io.jans.as.server.security import Identity
@@ -30,6 +30,7 @@ from jakarta.faces.context import FacesContext
 import json
 import sys
 import datetime
+from java.lang import Throwable
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -105,7 +106,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 (user_profile, jsonp) = self.getUserProfile(jwt)
-                if user_profile == None:
+                if user_profile is None:
                     return False
 
                 sessionAttributes = identity.getSessionId().getSessionAttributes()
@@ -143,7 +144,7 @@ class PersonAuthentication(PersonAuthenticationType):
             mail = ServerUtil.getFirstValue(requestParameters, "loginForm:email")
             jsonp = identity.getWorkingParameter("passport_user_profile")
 
-            if mail == None:
+            if mail is None:
                 self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email was missing in user profile")
             elif jsonp != None:
                 # Completion of profile takes place
@@ -154,6 +155,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "Passport. authenticate for step 2. Failed: expected mail value in HTTP request and json profile in session"
             return False
+        return None
 
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
@@ -189,14 +191,14 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Passport. prepareForStep. Found value in custom param of authorization request: %s" % paramValue
                     provider = self.getProviderFromJson(paramValue)
 
-                    if provider == None:
+                    if provider is None:
                         print "Passport. prepareForStep. A provider value could not be extracted from custom authorization request parameter"
                     elif not provider in self.registeredProviders:
                         print "Passport. prepareForStep. Provider '%s' not part of known configured IDPs/OPs" % provider
                     else:
                         url = self.getPassportRedirectUrl(provider)
 
-            if url == None:
+            if url is None:
                 print "Passport. prepareForStep. A page to manually select an identity provider will be shown"
             else:
                 facesService = CdiUtil.bean(FacesService)
@@ -255,28 +257,28 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def extensionInit(self, configurationAttributes):
 
-        if self.extensionModule == None:
+        if self.extensionModule is None:
             return None
         return self.extensionModule.init(configurationAttributes)
 
 
     def extensionAuthenticate(self, configurationAttributes, requestParameters, step):
 
-        if self.extensionModule == None:
+        if self.extensionModule is None:
             return None
         return self.extensionModule.authenticate(configurationAttributes, requestParameters, step)
 
 
     def extensionPrepareForStep(self, configurationAttributes, requestParameters, step):
 
-        if self.extensionModule == None:
+        if self.extensionModule is None:
             return None
         return self.extensionModule.prepareForStep(configurationAttributes, requestParameters, step)
 
 
     def extensionGetPageForStep(self, configurationAttributes, step):
 
-        if self.extensionModule == None:
+        if self.extensionModule is None:
             return None
         return self.extensionModule.getPageForStep(configurationAttributes, step)
 
@@ -290,7 +292,7 @@ class PersonAuthentication(PersonAuthenticationType):
             try:
                 module = __import__(moduleName)
                 return module
-            except:
+            except (Exception, Throwable):
                 print "Passport. loadExternalModule. Failed to load module %s" % moduleName
                 print "Exception: ", sys.exc_info()[1]
                 print "Passport. loadExternalModule. Flow will be driven entirely by routines of main passport script"
@@ -322,7 +324,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if StringHelper.isNotEmpty(prop):
                 customAuthzParameter = prop
 
-        if customAuthzParameter == None:
+        if customAuthzParameter is None:
             print "Passport. getCustomAuthzParameter. No custom param for OIDC authz request in script properties"
             print "Passport. getCustomAuthzParameter. Passport flow cannot be initiated by doing an OpenID connect authorization request"
         else:
@@ -389,7 +391,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Passport. parseProviderConfigs. Configured providers:", registeredProviders
             else:
                 print "Passport. parseProviderConfigs. No providers registered yet"
-        except:
+        except (Exception, Throwable):
             print "Passport. parseProviderConfigs. An error occurred while building the list of supported authentication providers", sys.exc_info()[1]
 
         self.registeredProviders = registeredProviders
@@ -402,7 +404,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             obj = json.loads(Base64Util.base64urldecodeToString(providerJson))
             provider = obj[self.providerKey]
-        except:
+        except (Exception, Throwable):
             print "Passport. getProviderFromJson. Could not parse provided Json string. Returning None"
 
         return provider
@@ -429,7 +431,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             tokenObj = json.loads(response)
             url = "/passport/auth/%s/%s" % (provider, tokenObj["token_"])
-        except:
+        except (Exception, Throwable):
             print "Passport. getPassportRedirectUrl. Error building redirect URL: ", sys.exc_info()[1]
 
         return url
@@ -450,7 +452,7 @@ class PersonAuthentication(PersonAuthenticationType):
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
             valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
                                                         None, None, jwt.getHeader().getSignatureAlgorithm())
-        except:
+        except (Exception, Throwable):
             print "Exception: ", sys.exc_info()[1]
 
         print "Passport. validSignature. Validation result was %s" % valid
@@ -464,7 +466,7 @@ class PersonAuthentication(PersonAuthenticationType):
             exp_date_timestamp = float(jwt_claims.getClaimAsString(JwtClaimName.EXPIRATION_TIME))
             exp_date = datetime.datetime.fromtimestamp(exp_date_timestamp)
             hasExpired = exp_date < datetime.datetime.now()
-        except:
+        except (Exception, Throwable):
             print "Exception: The JWT does not have '%s' attribute" % JwtClaimName.EXPIRATION_TIME
             return False
 
@@ -473,12 +475,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getUserProfile(self, jwt):
         jwt_claims = jwt.getClaims()
+        user_profile = None
         user_profile_json = None
 
         try:
             user_profile_json = CdiUtil.bean(EncryptionService).decrypt(jwt_claims.getClaimAsString("data"))
             user_profile = json.loads(user_profile_json)
-        except:
+        except (Exception, Throwable):
             print "Passport. getUserProfile. Problem obtaining user profile json representation"
 
         return (user_profile, user_profile_json)
@@ -510,7 +513,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 email = email[0]
                 user_profile["mail"] = [ email ]
 
-        if email == None and self.registeredProviders[provider]["requestForEmail"]:
+        if email is None and self.registeredProviders[provider]["requestForEmail"]:
             print "Passport. attemptAuthentication. Email was not received"
 
             if userByUid != None:
@@ -520,19 +523,19 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Passport. attemptAuthentication. Filling missing email value with %s" % email
                     user_profile["mail"] = [ email ]
 
-            if email == None:
+            if email is None:
                 # Store user profile in session and abort this routine
                 identity.setWorkingParameter("passport_user_profile", user_profile_json)
                 return True
 
-        userByMail = None if email == None else userService.getUserByAttribute("mail", email)
+        userByMail = None if email is None else userService.getUserByAttribute("mail", email)
 
         # Determine if we should add entry, update existing, or deny access
         doUpdate = False
         doAdd = False
         if userByUid != None:
             print "User with externalUid '%s' already exists" % externalUid
-            if userByMail == None:
+            if userByMail is None:
                 doUpdate = True
             else:
                 if userByMail.getUserId() == userByUid.getUserId():
@@ -541,12 +544,12 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Users with externalUid '%s' and mail '%s' are different. Access will be denied. Impersonation attempt?" % (externalUid, email)
                     self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email value corresponds to an already existing provisioned account")
         else:
-            if userByMail == None:
+            if userByMail is None:
                 doAdd = True
             elif self.registeredProviders[provider]["emailLinkingSafe"]:
 
                 tmpList = userByMail.getAttributeValues("oxExternalUid")
-                tmpList = ArrayList() if tmpList == None else ArrayList(tmpList)
+                tmpList = ArrayList() if tmpList is None else ArrayList(tmpList)
                 tmpList.add(externalUid)
                 userByMail.setAttribute("oxExternalUid", tmpList, True)
 
@@ -567,12 +570,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Passport. attemptAuthentication. Creating user %s" % externalUid
                 newUser = self.addUser(externalUid, user_profile, userService)
                 username = newUser.getUserId()
-        except:
+        except (Exception, Throwable):
             print "Exception: ", sys.exc_info()[1]
             print "Passport. attemptAuthentication. Authentication failed"
             return False
 
-        if username == None:
+        if username is None:
             print "Passport. attemptAuthentication. Authentication attempt was rejected"
             return False
         else:

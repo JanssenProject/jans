@@ -1612,6 +1612,17 @@ paths:
         - https://jans.io/oauth/config/read-all
 components:
   schemas:
+    AndroidApp:
+      type: object
+      properties:
+        packageName:
+          type: string
+        sha256CertFingerprints:
+          type: array
+          items:
+            type: string
+        distribution:
+          type: string
     AppConfiguration:
       type: object
       properties:
@@ -1740,6 +1751,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RequestedParty"
+    IosApp:
+      type: object
+      properties:
+        teamId:
+          type: string
+        bundleId:
+          type: string
     MetadataServer:
       type: object
       properties:
@@ -1756,6 +1774,14 @@ components:
           type: array
           items:
             type: string
+        androidApps:
+          type: array
+          items:
+            $ref: "#/components/schemas/AndroidApp"
+        iosApps:
+          type: array
+          items:
+            $ref: "#/components/schemas/IosApp"
         policy:
           $ref: "#/components/schemas/RequestedPartyPolicy"
     RequestedPartyPolicy:

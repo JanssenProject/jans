@@ -3,15 +3,10 @@
 import logging
 import logging.config
 import os
-import sys
 import time
-from pathlib import Path
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for
-from jans.pycloudlib.persistence import render_couchbase_properties
-from jans.pycloudlib.persistence import render_sql_properties
-from jans.pycloudlib.persistence import render_hybrid_properties
 
 from settings import LOGGING_CONFIG
 from shib_setup import ShibbolethSetup

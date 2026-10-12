@@ -7,20 +7,18 @@
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.server.service import AuthenticationService, AppInitializer
-from io.jans.as.common.service.common import UserService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import MetricService
 from io.jans.service import EncryptionService
 from io.jans.model.metric import MetricType
 from io.jans.util import StringHelper
-from io.jans.util import ArrayHelper
 from io.jans.orm.service import PersistanceFactoryService
 from io.jans.orm.ldap.impl import LdapEntryManagerFactory
 from io.jans.model.ldap import GluuLdapConfiguration
 from java.util import Arrays, Properties
 
-import java
 import json
+from java.lang import Throwable
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -35,7 +33,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
         authConfigurationFile = configurationAttributes.get("auth_configuration_file").getValue2()
         authConfiguration = self.loadAuthConfiguration(authConfigurationFile)
-        if (authConfiguration == None):
+        if (authConfiguration is None):
             print "Basic (multi auth conf). File with authentication configuration should be not empty"
             return False
         
@@ -44,7 +42,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         ldapExtendedEntryManagers = self.createLdapExtendedEntryManagers(authConfiguration)
-        if (ldapExtendedEntryManagers == None):
+        if (ldapExtendedEntryManagers is None):
             return False
         
         self.ldapExtendedEntryManagers = ldapExtendedEntryManagers
@@ -157,7 +155,7 @@ class PersonAuthentication(PersonAuthenticationType):
         f = open(authConfigurationFile, 'r')
         try:
             authConfiguration = json.loads(f.read())
-        except:
+        except (Exception, Throwable):
             print "Basic (multi auth conf). Load auth configuration. Failed to load authentication configuration from file:", authConfigurationFile
             return None
         finally:
@@ -166,7 +164,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return authConfiguration
 
     def validateAuthConfiguration(self, authConfiguration):
-        isValid = True
 
         if (not ("ldap_configuration" in authConfiguration)):
             print "Basic (multi auth conf). Validate auth configuration. There is no ldap_configuration section in configuration"
@@ -220,7 +217,6 @@ class PersonAuthentication(PersonAuthenticationType):
     def createLdapExtendedEntryManagers(self, authConfiguration):
         ldapExtendedConfigurations = self.createLdapExtendedConfigurations(authConfiguration)
         
-        appInitializer = CdiUtil.bean(AppInitializer)
         persistanceFactoryService = CdiUtil.bean(PersistanceFactoryService)
         ldapEntryManagerFactory = persistanceFactoryService.getPersistenceEntryManagerFactory(LdapEntryManagerFactory)
         persistenceType = ldapEntryManagerFactory.getPersistenceType()

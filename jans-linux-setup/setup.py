@@ -7,8 +7,6 @@ import codecs
 import os
 import re
 from setuptools import setup
-from setuptools.command.install import install
-from setuptools import find_packages
 
 
 def find_version(*file_paths):

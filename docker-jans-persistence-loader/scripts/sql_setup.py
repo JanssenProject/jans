@@ -87,19 +87,6 @@ class SQLBackend:
         for table, attr_mapping in table_columns.items():
             self.client.create_table(table, attr_mapping, "doc_id")
 
-        # for name, attr in attrs.items():
-        #     table = attr.get("sql", {}).get("add_table")
-        #     logger.info(name)
-        #     logger.info(table)
-        #     if not table:
-        #         continue
-
-        #     data_type = self.get_data_type(name, table)
-        #     col_def = f"{attr} {data_type}"
-
-        #     sql_cmd = f"ALTER TABLE {table} ADD {col_def};"
-        #     logger.info(sql_cmd)
-
     def get_index_fields(self, table_name):
         fields = self.sql_indexes.get(table_name, {}).get("fields", [])
         fields += self.sql_indexes["__common__"]["fields"]

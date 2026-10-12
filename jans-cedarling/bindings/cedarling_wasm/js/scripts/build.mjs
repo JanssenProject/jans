@@ -209,7 +209,7 @@ await Promise.all([
   mkdir(commonJsDeclarations, { recursive: true }),
 ]);
 
-const browser = await build({
+await build({
   entryPoints: [join(compiled, "index.js")],
   outfile: join(browserOutput, "index.js"),
   bundle: true,
@@ -224,7 +224,7 @@ const browser = await build({
   metafile: true,
 });
 
-const esm = await build({
+await build({
   entryPoints: [join(compiled, "node.js")],
   outfile: join(esmOutput, "index.js"),
   bundle: true,
@@ -237,7 +237,7 @@ const esm = await build({
   metafile: true,
 });
 
-const commonJs = await build({
+await build({
   entryPoints: [join(compiled, "cjs.js")],
   outfile: join(commonJsOutput, "index.cjs"),
   bundle: true,
@@ -266,7 +266,7 @@ const edge = await build({
   metafile: true,
 });
 
-const manual = await build({
+await build({
   entryPoints: [join(compiled, "manual.js")],
   outfile: join(manualOutput, "index.js"),
   bundle: true,

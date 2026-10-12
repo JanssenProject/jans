@@ -16,7 +16,7 @@ finished_char = '✓'
 try:
     with open(os.devnull, 'w') as w:
         w.write(phases[0])
-except:
+except Exception:
     phases = ('-', '\\', '|', '/')
     finished_char = '@'
 
@@ -42,7 +42,6 @@ class ShowProgress(Thread):
         current_service = 0
         phase_counter = 0
         data = {}
-        msg = ''
         last_completed = 0
         max_len = self.get_max_len()
 

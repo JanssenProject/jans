@@ -26,7 +26,7 @@ from cedarling_python import (
 from main.logger import logger
 from flask import Flask
 import typing as _t
-from main.domain.entities.authzen import CedarlingRequest, Decision, Resource, Context
+from main.domain.entities.authzen import CedarlingRequest, Decision, Resource
 
 DictType = _t.Dict[str, _t.Any]
 KEYS_LIST = ["access_token", "id_token", "userinfo_token"]
@@ -114,16 +114,21 @@ class CedarlingInstance:
             result_dict["context"] = {"id": "-1", "reason_admin": {"Exception": f"{e}"}}
             logger.info(f"Exception during cedarling authorize: {e}")
             return Decision(**result_dict)
+        request_id = None
+        policy_store_id = None
+        policy_store_version = None
         try:
             request_id = authorize_result.request_id()
-            tag = "Decision"
             decision_log = self._cedarling.get_logs_by_request_id_and_tag(
-                request_id, tag
+                request_id, "Decision"
             )
-            i = 1
-            for log in decision_log:
-                logger.info(f"Decision log {i}: {str(log)}")
-                i += 1
+            entry = next(
+                (log for log in decision_log if log.get("policystore_id")),
+                None,
+            )
+            if entry is not None:
+                policy_store_id = entry.get("policystore_id")
+                policy_store_version = entry.get("policystore_version")
         except Exception as e:
             logger.warning(f"Failed to retrieve logs: {e}")
         authorize_bool = authorize_result.is_allowed()
@@ -142,5 +147,11 @@ class CedarlingInstance:
                 }
             }
         logger.info(f"Cedarling evaluation result: {result_dict}")
+        if request_id is not None:
+            result_dict["context"]["request_id"] = request_id
+        if policy_store_id is not None:
+            result_dict["context"]["policy_store_id"] = str(policy_store_id)
+        if policy_store_version is not None:
+            result_dict["context"]["policy_store_version"] = str(policy_store_version)
         result = Decision(**result_dict)
         return result

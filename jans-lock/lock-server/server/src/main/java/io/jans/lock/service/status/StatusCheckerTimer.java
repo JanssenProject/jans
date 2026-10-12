@@ -138,7 +138,7 @@ public class StatusCheckerTimer {
             log.error("Failed to parse program {} output", PROGRAM_FACTER, ex);
             return facterData;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to read program {} output", PROGRAM_FACTER, e);
         }
         log.debug("Server status - facterData:{}", facterData);
         return facterData;

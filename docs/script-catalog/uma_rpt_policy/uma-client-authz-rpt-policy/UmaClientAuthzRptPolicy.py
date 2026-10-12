@@ -11,10 +11,8 @@
 from io.jans.as.model.uma import UmaConstants
 from io.jans.model.uma import ClaimDefinitionBuilder
 from io.jans.model.custom.script.type.uma import UmaRptPolicyType
-from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList, HashSet
-from java.lang import String
+from java.util import HashSet
 
 class UmaRptPolicy(UmaRptPolicyType):
 

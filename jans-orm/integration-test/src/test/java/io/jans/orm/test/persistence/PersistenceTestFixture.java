@@ -25,7 +25,7 @@ import io.jans.orm.util.properties.FileConfiguration;
  * as real Jans applications do: jans.base system property points to the profile
  * folder with conf/jans.properties, conf/jans-<type>.properties and conf/salt.
  *
- * @author Yuriy Movchan Date: 09/08/2026
+ * @author Yuriy Movchan
  */
 public final class PersistenceTestFixture {
 

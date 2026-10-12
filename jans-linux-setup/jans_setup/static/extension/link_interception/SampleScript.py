@@ -5,12 +5,8 @@
 #
 
 from io.jans.model.custom.script.type.user import LinkInterceptionType
-from io.jans.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList
-from io.jans.model import JansCustomAttribute
-from io.jans.model.custom.script.model.bind import BindCredentials
+from io.jans.util import StringHelper
 
-import java
 
 class LinkInterception(LinkInterceptionType):
     def __init__(self, currentTimeMillis):
@@ -41,8 +37,6 @@ class LinkInterception(LinkInterceptionType):
     #   return None (use password from configuration) or io.jans.model.custom.script.model.bind.BindCredentials
     def getBindCredentials(self, configId, configurationAttributes):
         print "Link Interception. GetBindCredentials method"
-#        if configId == "source":
-#            return BindCredentials("cn=Directory Manager", "password")
 
         return None
 

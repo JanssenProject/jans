@@ -403,7 +403,7 @@ impl RefreshSource {
         }
     }
 
-    fn url(&self) -> &str {
+    pub(crate) fn url(&self) -> &str {
         match self {
             Self::LockServer { url } | Self::CjarUrl { url } | Self::Uri { url } => url,
         }
@@ -443,14 +443,16 @@ impl Drop for PolicyStoreRefreshHandle {
 
 /// Snapshot of the bootstrap-load result that the refresh worker starts from:
 /// `body_hash` and `validators` let the very first periodic tick short-circuit,
-/// while `format` seeds the dedup set so bootstrap's warnings are not logged a
-/// second time. Carried as a small named struct
-/// rather than loose parameters so the spawn-site signature stays under the
-/// clippy `too_many_arguments` threshold without needing a `#[allow]` attribute.
+/// `format` seeds the dedup set so bootstrap's warnings are not logged a second
+/// time, and `policy_store_http_client` reuses the client the bootstrap fetch
+/// used. Carried as a small named struct rather than loose parameters so the
+/// spawn-site signature stays under the clippy `too_many_arguments` threshold
+/// without needing a `#[allow]` attribute.
 pub(crate) struct RefreshWorkerSeed {
     pub body_hash: Option<u64>,
     pub validators: CacheHeadersState,
     pub format: FormatReport,
+    pub policy_store_http_client: Option<HttpClient>,
 }
 
 /// Read-only worker context — handles and config that don't change between
