@@ -1,6 +1,7 @@
 package io.jans.lock.service.ws.rs.policy;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -179,8 +180,7 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 			return true;
 		}
 
-		List<String> tags = entityTags(ifNoneMatch);
-		return tags != null && tags.contains(bundleHash);
+		return entityTags(ifNoneMatch).contains(bundleHash);
 	}
 
 	private static List<String> entityTags(String header) {
@@ -196,7 +196,7 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 			int start = header.startsWith("W/", i) ? i + 2 : i;
 			int end = entityTagEnd(header, start);
 			if (end < 0) {
-				return null;
+				return Collections.emptyList();
 			}
 			tags.add(entityTagValue(header.substring(start, end).trim()));
 			i = end;
