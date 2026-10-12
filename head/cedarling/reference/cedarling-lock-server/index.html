@@ -1213,6 +1213,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#loading-policy-stores-from-lock-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Loading Policy Stores from Lock Server
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1479,6 +1490,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#loading-policy-stores-from-lock-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Loading Policy Stores from Lock Server
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1623,6 +1645,7 @@
 <li><code>https://jans.io/oauth/lock/log.write</code></li>
 <li><code>https://jans.io/oauth/lock/health.write</code></li>
 <li><code>https://jans.io/oauth/lock/telemetry.write</code></li>
+<li><code>https://jans.io/oauth/lock/policy.readonly</code> (to load policy stores from Lock Server)</li>
 </ul>
 </li>
 </ul>
@@ -1755,7 +1778,7 @@
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="p">{</span>
 <span class="w">                </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scope_list&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write https://jans.io/oauth/lock/policy.readonly&quot;</span><span class="p">,</span>
 <span class="w">                </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
 <span class="w">                </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;space-separated scopes that will be added by the script&quot;</span>
 <span class="w">        </span><span class="p">},</span>
@@ -1801,7 +1824,7 @@
 </code></pre></div>
 <p>A successful response will contain the following scopes:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write&quot;</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write https://jans.io/oauth/lock/policy.readonly&quot;</span>
 <span class="p">}</span>
 </code></pre></div>
 <blockquote>
@@ -1830,7 +1853,7 @@
 </tr>
 <tr>
 <td><code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code></td>
-<td>URI to fetch Lock Server metadata (<code>.well-known/lock-master-configuration</code>). Required if <code>CEDARLING_LOCK</code> is <code>enabled</code>.</td>
+<td>URI to fetch Lock Server metadata (<code>.well-known/lock-server-configuration</code>). Required if <code>CEDARLING_LOCK</code> is <code>enabled</code>.</td>
 <td>String</td>
 <td><code>""</code></td>
 </tr>
@@ -1902,6 +1925,9 @@
 </tr>
 </tbody>
 </table>
+<h2 id="loading-policy-stores-from-lock-server">Loading Policy Stores from Lock Server<a class="headerlink" href="#loading-policy-stores-from-lock-server" title="Permanent link">#</a></h2>
+<p>Lock Server can serve <code>.cjar</code> policy stores registered as policy sources, for example through the Config API <code>POST /jans-config-api/lock/policy-stores</code>. Lock serves each store at <code>/jans-lock/api/v1/policy/{policy_store_id}</code>.</p>
+<p>Point Cedarling at that URL with <code>CEDARLING_POLICY_STORE_URI</code> and enable Lock integration. When the URL has the same origin (scheme, host and port) as <code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code>, Cedarling sends its Lock access token with policy store requests, including periodic refresh. The URL must use <code>https</code> (plain <code>http</code> is accepted only for <code>localhost</code> and loopback addresses). The token needs the <code>https://jans.io/oauth/lock/policy.readonly</code> scope. Requests to other hosts never carry the token.</p>
 
 
   <nav class="md-tags" >
@@ -1944,7 +1970,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    May 26, 2026
+    October 12, 2026
   </span>
 
     
