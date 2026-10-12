@@ -23,7 +23,8 @@ use super::entity_parser::{EntityParser, ParsedEntity};
 use super::errors::{ArchiveError, PolicyStoreError, ValidationError};
 use super::formats::v1::trusted_issuer::IssuerParser;
 use super::formats::{ParseStoreError, parse_policy_store};
-use super::loader::DefaultPolicyStoreLoader;
+use super::loader::load_from_vfs;
+use super::test_utils::v0_files;
 use super::test_utils::{
     PolicyStoreTestBuilder, create_corrupted_archive, create_deep_nested_archive,
     create_path_traversal_archive, fixtures,
@@ -243,8 +244,7 @@ mod input_validation {
         let archive = builder.build_archive().unwrap();
 
         let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
-        let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".", true);
+        let result = load_from_vfs(&vfs, ".", true);
 
         let err = result.expect_err("Expected error for invalid metadata JSON");
         assert!(
@@ -262,10 +262,8 @@ mod input_validation {
         let archive = builder.build_archive().unwrap();
 
         let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
-        let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded_directory = loader
-            .load_directory(".", true)
-            .expect("metadata content is validated after loading");
+        let loaded_directory =
+            load_from_vfs(&vfs, ".", true).expect("metadata content is validated after loading");
         let result = parse_policy_store(loaded_directory, true);
 
         let err = result.expect_err("Expected error for invalid Cedar syntax");
@@ -284,13 +282,10 @@ mod input_validation {
 
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
-        let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded_directory = loader
-            .load_directory(".", true)
-            .expect("should load directory");
+        let loaded_directory = load_from_vfs(&vfs, ".", true).expect("should load directory");
 
         // Parse entities to trigger validation
-        let entity_file = loaded_directory
+        let entity_file = v0_files(&loaded_directory)
             .entities
             .first()
             .expect("Expected to find invalid entity JSON but none found");
@@ -308,13 +303,10 @@ mod input_validation {
         let archive = builder.build_archive().unwrap();
 
         let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
-        let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded_directory = loader
-            .load_directory(".", true)
-            .expect("should load directory");
+        let loaded_directory = load_from_vfs(&vfs, ".", true).expect("should load directory");
 
         // Parse issuers to trigger validation
-        let issuer_file = loaded_directory
+        let issuer_file = v0_files(&loaded_directory)
             .trusted_issuers
             .first()
             .expect("Expected to find invalid trusted issuer but none found");
@@ -332,14 +324,11 @@ mod input_validation {
         let archive = builder.build_archive().unwrap();
 
         let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
-        let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded_directory = loader
-            .load_directory(".", true)
-            .expect("should load directory");
+        let loaded_directory = load_from_vfs(&vfs, ".", true).expect("should load directory");
 
         // Parse all entities and detect duplicates
         let mut all_parsed_entities: Vec<ParsedEntity> = Vec::new();
-        for entity_file in &loaded_directory.entities {
+        for entity_file in &v0_files(&loaded_directory).entities {
             let parsed =
                 EntityParser::parse_entities(&entity_file.content, &entity_file.name, None)
                     .expect("should parse entities");
@@ -401,17 +390,15 @@ permit(principal, action, resource);"#,
 
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
-        let loader = DefaultPolicyStoreLoader::new(vfs);
 
         // Cedar allows special characters in @id() annotations within the policy content.
         // The loader is expected to accept such policies successfully.
-        let loaded_directory = loader
-            .load_directory(".", true)
+        let loaded_directory = load_from_vfs(&vfs, ".", true)
             .expect("Policy with special-character @id should load successfully");
 
         // Verify policy was loaded with the special character ID
         assert!(
-            !loaded_directory.policies.is_empty(),
+            !v0_files(&loaded_directory).policies.is_empty(),
             "Expected at least one policy to be loaded"
         );
     }
@@ -438,8 +425,7 @@ mod resource_exhaustion {
 
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
-        let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".", true);
+        let result = load_from_vfs(&vfs, ".", true);
 
         result.expect("Policy store with many policies should load successfully");
     }
@@ -463,10 +449,9 @@ when {{ {large_condition} }};"#
 
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
-        let loader = DefaultPolicyStoreLoader::new(vfs);
 
         // Large policies should be handled gracefully
-        let result = loader.load_directory(".", true);
+        let result = load_from_vfs(&vfs, ".", true);
 
         // Verify loading succeeds - Cedar can handle large policies
         result.expect("Large policy should load successfully");
@@ -497,8 +482,7 @@ when {{ {large_condition} }};"#
 
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
-        let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".", true);
+        let result = load_from_vfs(&vfs, ".", true);
 
         // Should handle deep hierarchy
         result.expect("Policy store with deeply nested entity hierarchy should load successfully");

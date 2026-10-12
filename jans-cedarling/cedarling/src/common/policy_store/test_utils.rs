@@ -13,6 +13,7 @@
 //! - Performance testing utilities
 
 use super::errors::PolicyStoreError;
+use super::formats::{LoadedPolicyStore, VersionedFiles, v0};
 use std::collections::HashMap;
 use std::io::{Cursor, Write};
 use zip::write::{ExtendedFileOptions, FileOptions};
@@ -510,6 +511,15 @@ permit(
     }
 
     builder
+}
+
+/// The files of a store loaded as v0. Loader fixtures declare no spec version,
+/// so they resolve to v0.
+pub(crate) fn v0_files(loaded: &LoadedPolicyStore) -> &v0::Files {
+    let VersionedFiles::V0(files) = loaded.files() else {
+        panic!("expected a store loaded as v0, got: {:?}", loaded.files());
+    };
+    files
 }
 
 #[cfg(test)]

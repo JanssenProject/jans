@@ -34,7 +34,7 @@ use tokio::test;
 #[cfg(not(target_arch = "wasm32"))]
 use zip::read::ZipArchive;
 
-use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
+use crate::common::policy_store::test_utils::{PolicyStoreTestBuilder, v0_files};
 
 use crate::log::interface::LogStorage;
 use crate::tests::utils::cedarling_util::{get_cedarling_with_callback, get_config};
@@ -1421,8 +1421,8 @@ async fn test_load_policy_store_archive_bytes_directly() {
         .expect("Should load policy store from bytes");
 
     // Verify the loaded policy store
-    let metadata: serde_json::Value =
-        serde_json::from_str(&loaded.metadata_json).expect("metadata.json should be valid JSON");
+    let metadata: serde_json::Value = serde_json::from_str(&v0_files(&loaded).metadata_json)
+        .expect("metadata.json should be valid JSON");
     assert_eq!(
         metadata["policy_store"]["id"], "a1b2c3d4e5f6a7b8",
         "Policy store ID should match"
@@ -1432,13 +1432,21 @@ async fn test_load_policy_store_archive_bytes_directly() {
         "Policy store name should match"
     );
     assert!(
-        !loaded.policies.is_empty(),
+        !v0_files(&loaded).policies.is_empty(),
         "Should have loaded at least one policy"
     );
-    assert_eq!(loaded.policies.len(), 2, "Should have loaded 2 policies");
+    assert_eq!(
+        v0_files(&loaded).policies.len(),
+        2,
+        "Should have loaded 2 policies"
+    );
 
     // Verify policy content
-    let policy_names: Vec<&str> = loaded.policies.iter().map(|p| p.name.as_str()).collect();
+    let policy_names: Vec<&str> = v0_files(&loaded)
+        .policies
+        .iter()
+        .map(|p| p.name.as_str())
+        .collect();
     assert!(
         policy_names.contains(&"allow-read.cedar"),
         "Should have allow-read policy"

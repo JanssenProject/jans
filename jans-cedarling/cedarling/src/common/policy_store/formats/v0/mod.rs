@@ -18,10 +18,69 @@ use metadata::MetadataDoc;
 use trusted_issuer::{IssuerParser, ParsedIssuer};
 
 use super::{ParseStoreError, StoreContent};
-use crate::common::policy_store::loader::LoadedPolicyStore;
+use crate::common::policy_store::errors::PolicyStoreError;
+use crate::common::policy_store::loader::{
+    CustomIssuerFile, EntityFile, IssuerFile, PolicyFile, StoreFs,
+};
 use crate::common::policy_store::manager::ConversionError;
+use crate::common::policy_store::schema_parser::ParsedSchema;
 
 pub(crate) const SPEC_VERSION: u32 = 0;
+
+// Where each part of a v0 store lives. Frozen with the version: a store laid
+// out differently is a new spec version, so these are never shared with or
+// edited for another version.
+const SCHEMA_FILE: &str = "schema.cedarschema";
+const SCHEMA_DIR: &str = "schemas";
+const POLICIES_DIR: &str = "policies";
+const TEMPLATES_DIR: &str = "templates";
+const ENTITIES_DIR: &str = "entities";
+const TRUSTED_ISSUERS_DIR: &str = "trusted-issuers";
+const CUSTOM_ISSUERS_DIR: &str = "custom-issuers";
+
+/// The raw files of a v0 store, read by the v0 layout.
+#[derive(Debug)]
+pub(crate) struct Files {
+    /// Raw `metadata.json` content.
+    pub(crate) metadata_json: String,
+    /// Parsed schema (optional — absent when running without schema)
+    pub(crate) schema: Option<ParsedSchema>,
+    /// Whether a schema source was present in the store, regardless of
+    /// whether it was loaded/parsed.
+    pub(crate) schema_source_exists: bool,
+    pub(crate) policies: Vec<PolicyFile>,
+    pub(crate) templates: Vec<PolicyFile>,
+    pub(crate) entities: Vec<EntityFile>,
+    pub(crate) trusted_issuers: Vec<IssuerFile>,
+    pub(crate) custom_issuers: Vec<CustomIssuerFile>,
+}
+
+/// Reads the files of a v0 store; `metadata_json` has already been read by
+/// the caller to pick this version.
+pub(super) fn load(
+    fs: &StoreFs<'_>,
+    metadata_json: String,
+    strict: bool,
+) -> Result<Files, PolicyStoreError> {
+    fs.require_dir(POLICIES_DIR)?;
+    let schema = fs.schema(SCHEMA_FILE, SCHEMA_DIR, strict)?;
+
+    Ok(Files {
+        metadata_json,
+        schema: schema.schema,
+        schema_source_exists: schema.source_exists,
+        policies: fs.cedar_files(POLICIES_DIR)?,
+        templates: fs.optional_cedar_files(TEMPLATES_DIR)?,
+        entities: fs
+            .optional_json_files(ENTITIES_DIR, |name, content| EntityFile { name, content })?,
+        trusted_issuers: fs.optional_json_files(TRUSTED_ISSUERS_DIR, |name, content| {
+            IssuerFile { name, content }
+        })?,
+        custom_issuers: fs.optional_json_files(CUSTOM_ISSUERS_DIR, |name, content| {
+            CustomIssuerFile { name, content }
+        })?,
+    })
+}
 
 /// A whole v0 store, parsed but not yet migrated.
 #[derive(Debug)]
@@ -33,10 +92,9 @@ pub(crate) struct PolicyStoreDoc {
 }
 
 /// Parses the version-specific files of a loaded v0 store.
-pub(crate) fn parse(loaded: LoadedPolicyStore) -> Result<PolicyStoreDoc, ParseStoreError> {
-    let LoadedPolicyStore {
+pub(crate) fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
+    let Files {
         metadata_json,
-        spec_version: _,
         schema,
         schema_source_exists,
         policies,
@@ -44,7 +102,7 @@ pub(crate) fn parse(loaded: LoadedPolicyStore) -> Result<PolicyStoreDoc, ParseSt
         entities,
         trusted_issuers,
         custom_issuers,
-    } = loaded;
+    } = files;
 
     let metadata = metadata::parse(&metadata_json)?;
 
@@ -84,7 +142,6 @@ pub(crate) fn parse(loaded: LoadedPolicyStore) -> Result<PolicyStoreDoc, ParseSt
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::common::policy_store::loader::{CustomIssuerFile, IssuerFile, PolicyFile};
 
     /// Golden v0 store: no `policy_store_spec_version`, and every version-specific
     /// file parses with v0 semantics, including the frozen `jti` default.
@@ -94,9 +151,7 @@ mod tests {
                 "cedar_version": "4.4.0",
                 "policy_store": { "id": "abc123def456", "name": "Golden v0", "version": "1.0.0" }
             }"#;
-        let loaded = LoadedPolicyStore {
-            spec_version: crate::common::policy_store::formats::select_version(metadata_json)
-                .expect("a store without the field resolves to the baseline"),
+        let loaded = Files {
             metadata_json: metadata_json.to_string(),
             schema: None,
             schema_source_exists: false,

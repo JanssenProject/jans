@@ -5,10 +5,16 @@
 
 //! Versioned on-disk formats of the directory / `.cjar` policy store.
 //!
-//! Each `vN` module owns the `Deserialize` structs for its version and must not
-//! import another version module. Older versions reach the current one through
-//! the `migration` chain, and only the current version converts into runtime
-//! types. Runtime types never reference `formats::vN`.
+//! Each `vN` module owns both its layout (where each file lives, read through
+//! [`StoreFs`]) and the `Deserialize` structs for its files, and must not import
+//! another version module. A released version's layout is frozen: a store laid
+//! out differently is a new spec version, so changing one version never breaks
+//! another. Only [`METADATA_FILE`] is shared, because it is read before the
+//! version is known.
+//!
+//! Older versions reach the current one through the `migration` chain, and
+//! only the current version converts into runtime types. Runtime types never
+//! reference `formats::vN`.
 
 pub(crate) mod datetime;
 pub(crate) mod file_id;
@@ -22,11 +28,17 @@ use serde::de::{IgnoredAny, MapAccess, Visitor};
 use serde::{Deserialize, Deserializer};
 
 use super::PolicyStoreWithID;
-use super::errors::ValidationError;
-use super::loader::{EntityFile, LoadedPolicyStore, PolicyFile};
+use super::errors::{PolicyStoreError, ValidationError};
+use super::loader::{EntityFile, PolicyFile, StoreFs};
 use super::manager::ConversionError;
 use super::migration;
 use super::schema_parser::ParsedSchema;
+
+/// Where every spec version keeps its metadata.
+///
+/// Read before the version is known, so unlike the rest of the layout it can
+/// never move.
+pub(super) const METADATA_FILE: &str = "metadata.json";
 
 /// Spec version that runtime types are built from.
 pub(crate) const CURRENT_FORMAT_VERSION: u32 = v1::SPEC_VERSION;
@@ -134,7 +146,7 @@ enum SpecVersionField {
 fn probe_spec_version(metadata_json: &str) -> Result<Option<u32>, ValidationError> {
     let probe: SpecVersionProbe = serde_json::from_str(metadata_json).map_err(|source| {
         ValidationError::MetadataJsonParseFailed {
-            file: "metadata.json".to_string(),
+            file: METADATA_FILE.to_string(),
             source,
         }
     })?;
@@ -148,36 +160,28 @@ fn probe_spec_version(metadata_json: &str) -> Result<Option<u32>, ValidationErro
     }
 }
 
-/// Supported spec versions; the dispatch table below is the only place
-/// that maps numbers to version modules.
+/// Supported spec versions; [`select_version`] is the only place that maps
+/// numbers to version modules.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum FormatVersion {
     V0,
     V1,
 }
 
-/// The format version a store resolved to, decided once by the loader.
-///
-/// Fields stay private so [`select_version`] is the only way to build one.
+/// The format version a store resolved to.
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct SelectedVersion {
+struct SelectedVersion {
     /// What `metadata.json` declared; `None` when the field is absent.
     declared: Option<u32>,
-    /// The version the store is read as.
-    spec_version: u32,
     format: FormatVersion,
 }
 
-/// Picks the parser for `metadata.json`, failing closed outside
+/// Picks the format for `metadata.json`, failing closed outside
 /// `MIN_SUPPORTED_FORMAT_VERSION..=CURRENT_FORMAT_VERSION`.
-///
-/// Called by the loader so an unsupported store fails with a version error
-/// rather than a schema or policy error, and so nothing re-decides later.
-pub(crate) fn select_version(metadata_json: &str) -> Result<SelectedVersion, ValidationError> {
+fn select_version(metadata_json: &str) -> Result<SelectedVersion, ValidationError> {
     let declared = probe_spec_version(metadata_json)?;
-    let spec_version = declared.unwrap_or(MIN_SUPPORTED_FORMAT_VERSION);
 
-    let version = match spec_version {
+    let format = match declared.unwrap_or(MIN_SUPPORTED_FORMAT_VERSION) {
         v0::SPEC_VERSION => FormatVersion::V0,
         v1::SPEC_VERSION => FormatVersion::V1,
         found if found > CURRENT_FORMAT_VERSION => {
@@ -193,11 +197,58 @@ pub(crate) fn select_version(metadata_json: &str) -> Result<SelectedVersion, Val
             });
         },
     };
-    Ok(SelectedVersion {
-        declared,
-        spec_version,
-        format: version,
-    })
+    Ok(SelectedVersion { declared, format })
+}
+
+/// A store's files, read by the layout of its spec version.
+///
+/// The variant is the resolved version, so files can only reach the parser of
+/// the layout that read them.
+#[derive(Debug)]
+pub(super) enum VersionedFiles {
+    V0(v0::Files),
+    V1(v1::Files),
+}
+
+impl VersionedFiles {
+    fn spec_version(&self) -> u32 {
+        match self {
+            Self::V0(_) => v0::SPEC_VERSION,
+            Self::V1(_) => v1::SPEC_VERSION,
+        }
+    }
+}
+
+/// A directory / `.cjar` store whose files have been read but not parsed.
+#[derive(Debug)]
+pub(crate) struct LoadedPolicyStore {
+    /// What `metadata.json` declared; `None` when the field is absent.
+    declared: Option<u32>,
+    files: VersionedFiles,
+}
+
+#[cfg(test)]
+impl LoadedPolicyStore {
+    pub(super) fn files(&self) -> &VersionedFiles {
+        &self.files
+    }
+}
+
+/// Reads a store: [`METADATA_FILE`] first, then everything else from where
+/// the declared spec version keeps it.
+///
+/// The version is resolved before any other file is touched, so an
+/// unsupported store fails with a version error rather than a layout, schema
+/// or policy error.
+pub(super) fn load(fs: &StoreFs<'_>, strict: bool) -> Result<LoadedPolicyStore, PolicyStoreError> {
+    let metadata_json = fs.read_required_file(METADATA_FILE)?;
+    let SelectedVersion { declared, format } = select_version(&metadata_json)?;
+
+    let files = match format {
+        FormatVersion::V0 => VersionedFiles::V0(v0::load(fs, metadata_json, strict)?),
+        FormatVersion::V1 => VersionedFiles::V1(v1::load(fs, metadata_json, strict)?),
+    };
+    Ok(LoadedPolicyStore { declared, files })
 }
 
 fn warnings_for(declared: Option<u32>) -> Vec<PolicyStoreWarning> {
@@ -243,15 +294,12 @@ pub(crate) fn parse_policy_store(
     loaded: LoadedPolicyStore,
     strict_schema_validation: bool,
 ) -> Result<ParsedPolicyStore, ParseStoreError> {
-    let SelectedVersion {
-        declared,
-        spec_version,
-        format,
-    } = loaded.spec_version;
+    let LoadedPolicyStore { declared, files } = loaded;
+    let spec_version = files.spec_version();
 
-    let doc = match format {
-        FormatVersion::V0 => migration::v0_to_v1::migrate(v0::parse(loaded)?),
-        FormatVersion::V1 => v1::parse(loaded)?,
+    let doc = match files {
+        VersionedFiles::V0(files) => migration::v0_to_v1::migrate(v0::parse(files)?),
+        VersionedFiles::V1(files) => v1::parse(files)?,
     };
 
     let (store, metadata) = v1::into_runtime(doc, strict_schema_validation)?;
@@ -272,6 +320,7 @@ pub(crate) fn parse_policy_store(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::common::policy_store::vfs_adapter::MemoryVfs;
 
     const V0_METADATA: &str = r#"{
         "cedar_version": "4.4.0",
@@ -288,37 +337,36 @@ mod tests {
         )
     }
 
-    /// A loaded store whose version the loader has already resolved.
+    /// A store with the given metadata in the layout shared by v0 and v1,
+    /// read through [`load`].
     fn loaded(metadata_json: &str) -> LoadedPolicyStore {
-        LoadedPolicyStore {
-            spec_version: select_version(metadata_json)
-                .expect("test metadata should declare a supported version"),
-            metadata_json: metadata_json.to_string(),
-            schema: None,
-            schema_source_exists: false,
-            policies: vec![PolicyFile {
-                name: "allow.cedar".to_string(),
-                content: "permit(principal, action, resource);".to_string(),
-            }],
-            templates: vec![],
-            entities: vec![],
-            trusted_issuers: vec![super::super::loader::IssuerFile {
-                name: "jans.json".to_string(),
-                content: r#"{
+        let vfs = MemoryVfs::new();
+        for (path, content) in [
+            (METADATA_FILE, metadata_json),
+            (
+                "policies/allow.cedar",
+                "permit(principal, action, resource);",
+            ),
+            (
+                "trusted-issuers/jans.json",
+                r#"{
                     "name": "Jans",
                     "openid_configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
                     "token_metadata": {
                         "access_token": { "entity_type_name": "Jans::Access_token" }
                     }
-                }"#
-                .to_string(),
-            }],
-            custom_issuers: vec![super::super::loader::CustomIssuerFile {
-                name: "acme.json".to_string(),
-                content: r#"{ "tokens_mappings": { "Acme::Custom": { "required": true } } }"#
-                    .to_string(),
-            }],
+                }"#,
+            ),
+            (
+                "custom-issuers/acme.json",
+                r#"{ "tokens_mappings": { "Acme::Custom": { "required": true } } }"#,
+            ),
+        ] {
+            vfs.create_file(path, content.as_bytes())
+                .expect("in-memory test file should be created");
         }
+        let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
+        load(&fs, false).expect("test metadata should declare a supported version")
     }
 
     #[test]
@@ -379,6 +427,26 @@ mod tests {
         assert!(
             matches!(err, ValidationError::SpecVersionTooNew { found: 99, .. }),
             "expected SpecVersionTooNew, got: {err:?}"
+        );
+    }
+
+    /// Only the metadata file is read before the version is known, so a store
+    /// of an unknown version fails on its version even when it lacks
+    /// directories that every known layout requires.
+    #[test]
+    fn load_resolves_version_before_reading_the_layout() {
+        let vfs = MemoryVfs::new();
+        vfs.create_file(METADATA_FILE, metadata_with_version("99").as_bytes())
+            .expect("in-memory metadata should be created");
+        let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
+
+        let err = load(&fs, true).expect_err("an unsupported version must be rejected");
+        assert!(
+            matches!(
+                err,
+                PolicyStoreError::Validation(ValidationError::SpecVersionTooNew { found: 99, .. })
+            ),
+            "expected SpecVersionTooNew rather than a missing-directory error, got: {err:?}"
         );
     }
 

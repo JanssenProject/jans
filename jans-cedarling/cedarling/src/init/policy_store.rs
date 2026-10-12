@@ -318,7 +318,7 @@ pub(crate) async fn parse_cjar_bytes(
 ///
 /// Synchronous so WASM (no `spawn_blocking`) can call it inline.
 fn convert_to_policy_store(
-    loaded: crate::common::policy_store::loader::LoadedPolicyStore,
+    loaded: formats::LoadedPolicyStore,
     strict_schema_validation: bool,
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     formats::parse_policy_store(loaded, strict_schema_validation).map_err(Into::into)
@@ -330,7 +330,7 @@ fn convert_to_policy_store(
 /// `panic_err` picks the error variant reported if the blocking task panics.
 #[cfg_attr(target_arch = "wasm32", allow(clippy::unused_async))]
 async fn convert_to_policy_store_offloaded(
-    loaded: crate::common::policy_store::loader::LoadedPolicyStore,
+    loaded: formats::LoadedPolicyStore,
     strict_schema_validation: bool,
     panic_err: fn(String) -> PolicyStoreLoadError,
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {

@@ -322,6 +322,12 @@ Each version below is a numbered entry of the specification. Any change to the
 policy store file format bumps `policy_store_spec_version` and adds its entry to
 this section in the same pull request.
 
+The directory layout is part of the file format. A spec version fixes where
+each file lives (`policies/`, `trusted-issuers/`, `schema.cedarschema` and so
+on), so moving, renaming, or merging files is also a new spec version. The one
+exception is `metadata.json`: Cedarling reads it before it knows the version, so
+it stays at the root of the store in every version.
+
 ### Version 0
 
 **Status:** supported, outdated. **Change type:** baseline.
