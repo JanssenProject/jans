@@ -175,42 +175,47 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 			return false;
 		}
 
+		List<String> tags = entityTags(ifNoneMatch);
+		return tags != null && tags.stream().anyMatch(tag -> "*".equals(tag) || bundleHash.equals(tag));
+	}
+
+	private static List<String> entityTags(String header) {
+		List<String> tags = new ArrayList<>();
 		int i = 0;
-		int length = ifNoneMatch.length();
-		while (i < length) {
-			char c = ifNoneMatch.charAt(i);
+		while (i < header.length()) {
+			char c = header.charAt(i);
 			if (c == ',' || Character.isWhitespace(c)) {
 				i++;
 				continue;
 			}
 
-			if (ifNoneMatch.startsWith("W/", i)) {
-				i += 2;
+			int start = header.startsWith("W/", i) ? i + 2 : i;
+			int end = entityTagEnd(header, start);
+			if (end < 0) {
+				return null;
 			}
-
-			String tag;
-			if (i < length && ifNoneMatch.charAt(i) == '"') {
-				int end = ifNoneMatch.indexOf('"', i + 1);
-				if (end < 0) {
-					return false;
-				}
-				tag = ifNoneMatch.substring(i + 1, end);
-				i = end + 1;
-			} else {
-				int end = ifNoneMatch.indexOf(',', i);
-				if (end < 0) {
-					end = length;
-				}
-				tag = ifNoneMatch.substring(i, end).trim();
-				i = end;
-			}
-
-			if ("*".equals(tag) || bundleHash.equals(tag)) {
-				return true;
-			}
+			tags.add(entityTagValue(header.substring(start, end).trim()));
+			i = end;
 		}
 
-		return false;
+		return tags;
+	}
+
+	private static int entityTagEnd(String header, int start) {
+		if (start < header.length() && header.charAt(start) == '"') {
+			int close = header.indexOf('"', start + 1);
+			return close < 0 ? -1 : close + 1;
+		}
+
+		int comma = header.indexOf(',', start);
+		return comma < 0 ? header.length() : comma;
+	}
+
+	private static String entityTagValue(String raw) {
+		if (raw.length() >= 2 && raw.startsWith("\"") && raw.endsWith("\"")) {
+			return raw.substring(1, raw.length() - 1);
+		}
+		return raw;
 	}
 
 }
