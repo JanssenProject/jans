@@ -26,6 +26,8 @@ class PolicyRestWebServiceImplTest {
 		assertFalse(PolicyRestWebServiceImpl.matchesIfNoneMatch("\"other," + HASH + ",suffix\"", HASH));
 		assertFalse(PolicyRestWebServiceImpl.matchesIfNoneMatch("\"unterminated", HASH));
 		assertFalse(PolicyRestWebServiceImpl.matchesIfNoneMatch("\"*\"", HASH));
+		assertFalse(PolicyRestWebServiceImpl.matchesIfNoneMatch(HASH, HASH));
+		assertFalse(PolicyRestWebServiceImpl.matchesIfNoneMatch("\"" + HASH + "\"x", HASH));
 	}
 
 }

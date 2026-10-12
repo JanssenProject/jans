@@ -198,7 +198,7 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 			if (end < 0) {
 				return Collections.emptyList();
 			}
-			tags.add(entityTagValue(header.substring(start, end).trim()));
+			tags.add(header.substring(start + 1, end - 1));
 			i = end;
 		}
 
@@ -206,20 +206,20 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 	}
 
 	private static int entityTagEnd(String header, int start) {
-		if (start < header.length() && header.charAt(start) == '"') {
-			int close = header.indexOf('"', start + 1);
-			return close < 0 ? -1 : close + 1;
+		if (start >= header.length() || header.charAt(start) != '"') {
+			return -1;
 		}
 
-		int comma = header.indexOf(',', start);
-		return comma < 0 ? header.length() : comma;
-	}
-
-	private static String entityTagValue(String raw) {
-		if (raw.length() >= 2 && raw.startsWith("\"") && raw.endsWith("\"")) {
-			return raw.substring(1, raw.length() - 1);
+		int close = header.indexOf('"', start + 1);
+		if (close < 0) {
+			return -1;
 		}
-		return raw;
+
+		int next = close + 1;
+		while (next < header.length() && Character.isWhitespace(header.charAt(next))) {
+			next++;
+		}
+		return next == header.length() || header.charAt(next) == ',' ? close + 1 : -1;
 	}
 
 }
