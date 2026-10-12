@@ -30,8 +30,8 @@ public class PolicySource {
     @Schema(description = "Authorization token to access URI")
     private String authorizationToken;
 
-	@DocProperty(description = "URI to policy store. Policy store can be either json/zip")
-	@Schema(description = "URI to policy store. Policy store can be either json/zip")
+	@DocProperty(description = "URI to policy store. Policy store can be json, zip or a .cjar archive (served by Lock under its policy_store.id)")
+	@Schema(description = "URI to policy store. Policy store can be json, zip or a .cjar archive (served by Lock under its policy_store.id)")
 	private String policyStoreUri;
 
 	public boolean isEnabled() {

@@ -526,19 +526,25 @@ async fn perform_bootstrap_load(
     config: &BootstrapConfig,
     log: &log::Logger,
 ) -> Result<(ServiceConfig, RefreshWorkerSeed), ServiceConfigError> {
-    let raw_load: Result<(http::HttpClient, LoadedPolicyStore), ServiceConfigError> = async {
+    type RawLoad = (
+        http::HttpClient,
+        Option<http::HttpClient>,
+        LoadedPolicyStore,
+    );
+    let raw_load: Result<RawLoad, ServiceConfigError> = async {
         let http_client = http::HttpClient::new(config.http_client_config)?;
+        let policy_store_http_client = policy_store_http_client(config, log)?;
         let loaded = load_policy_store(
             &config.policy_store_config,
-            &http_client,
+            policy_store_http_client.as_ref().unwrap_or(&http_client),
             config.authorization_config.strict_schema_validation,
         )
         .await?;
-        Ok((http_client, loaded))
+        Ok((http_client, policy_store_http_client, loaded))
     }
     .await;
 
-    let (http_client, loaded) = raw_load
+    let (http_client, policy_store_http_client, loaded) = raw_load
         .inspect(|_| {
             log.log_any(
                 LogEntry::new(BaseLogEntry::new_system_opt_request_id(
@@ -572,8 +578,34 @@ async fn perform_bootstrap_load(
         RefreshWorkerSeed {
             initial_body_hash: body_hash,
             initial_validators: validators,
+            policy_store_http_client,
         },
     ))
+}
+
+fn policy_store_http_client(
+    config: &BootstrapConfig,
+    log: &log::Logger,
+) -> Result<Option<http::HttpClient>, ServiceConfigError> {
+    let Some(source) = RefreshSource::from_policy_store_source(&config.policy_store_config.source)
+    else {
+        return Ok(None);
+    };
+    let Some(token) = log.policy_store_bearer_for(source.url()) else {
+        return Ok(None);
+    };
+    let Ok(mut auth_header) = reqwest::header::HeaderValue::from_str(&format!("Bearer {token}"))
+    else {
+        return Ok(None);
+    };
+    auth_header.set_sensitive(true);
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert(reqwest::header::AUTHORIZATION, auth_header);
+    let client = http::HttpClient::new_with_builder(
+        reqwest::Client::builder().default_headers(headers),
+        config.http_client_config,
+    )?;
+    Ok(Some(client))
 }
 
 /// Spawn the background policy-store refresh worker if the source is a remote
@@ -617,7 +649,9 @@ fn maybe_spawn_refresh_worker(
     let ctx = WorkerContext {
         source,
         interval_secs,
-        http_client: service_factory.http_client_for_refresh(),
+        http_client: seed
+            .policy_store_http_client
+            .unwrap_or_else(|| service_factory.http_client_for_refresh()),
         rebuilder,
         authz_swap,
         metrics,
