@@ -17,7 +17,7 @@ use custom_issuer::{CustomIssuerParser, ParsedCustomIssuer};
 use metadata::MetadataDoc;
 use trusted_issuer::{IssuerParser, ParsedIssuer};
 
-use super::{ParseStoreError, StoreContent};
+use super::{ParseStoreError, ReadStoreError, StoreContent};
 use crate::common::policy_store::errors::PolicyStoreError;
 use crate::common::policy_store::loader::{
     CustomIssuerFile, EntityFile, IssuerFile, PolicyFile, StoreFs,
@@ -55,8 +55,20 @@ pub(crate) struct Files {
     pub(crate) custom_issuers: Vec<CustomIssuerFile>,
 }
 
-/// Reads the files of a v0 store; `metadata_json` has already been read by
-/// the caller to pick this version.
+/// Reads a v0 store and parses its files; `metadata_json` has already been
+/// read by the caller to pick this version.
+pub(super) fn read(
+    fs: &StoreFs<'_>,
+    metadata_json: String,
+    strict: bool,
+) -> Result<PolicyStoreDoc, ReadStoreError> {
+    let files = load(fs, metadata_json, strict)?;
+    Ok(parse(files)?)
+}
+
+/// Reads the raw files of a v0 store from the v0 layout.
+///
+/// Visible to `formats` only for the tests of the v0 layout.
 pub(super) fn load(
     fs: &StoreFs<'_>,
     metadata_json: String,
@@ -91,8 +103,8 @@ pub(crate) struct PolicyStoreDoc {
     pub(crate) content: StoreContent,
 }
 
-/// Parses the version-specific files of a loaded v0 store.
-pub(crate) fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
+/// Parses the raw files of a v0 store.
+fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
     let Files {
         metadata_json,
         schema,

@@ -19,7 +19,7 @@ use custom_issuer::{CustomIssuerParser, ParsedCustomIssuer};
 use metadata::MetadataDoc;
 use trusted_issuer::{IssuerParser, ParsedIssuer};
 
-use super::{ParseStoreError, StoreContent};
+use super::{ParseStoreError, ReadStoreError, StoreContent};
 use crate::common::policy_store::errors::PolicyStoreError;
 use crate::common::policy_store::loader::{
     CustomIssuerFile, EntityFile, IssuerFile, PolicyFile, StoreFs,
@@ -44,28 +44,34 @@ const CUSTOM_ISSUERS_DIR: &str = "custom-issuers";
 
 /// The raw files of a v1 store, read by the v1 layout.
 #[derive(Debug)]
-pub(crate) struct Files {
+struct Files {
     /// Raw `metadata.json` content.
-    pub(crate) metadata_json: String,
+    metadata_json: String,
     /// Parsed schema (optional — absent when running without schema)
-    pub(crate) schema: Option<ParsedSchema>,
+    schema: Option<ParsedSchema>,
     /// Whether a schema source was present in the store, regardless of
     /// whether it was loaded/parsed.
-    pub(crate) schema_source_exists: bool,
-    pub(crate) policies: Vec<PolicyFile>,
-    pub(crate) templates: Vec<PolicyFile>,
-    pub(crate) entities: Vec<EntityFile>,
-    pub(crate) trusted_issuers: Vec<IssuerFile>,
-    pub(crate) custom_issuers: Vec<CustomIssuerFile>,
+    schema_source_exists: bool,
+    policies: Vec<PolicyFile>,
+    templates: Vec<PolicyFile>,
+    entities: Vec<EntityFile>,
+    trusted_issuers: Vec<IssuerFile>,
+    custom_issuers: Vec<CustomIssuerFile>,
 }
 
-/// Reads the files of a v1 store; `metadata_json` has already been read by
-/// the caller to pick this version.
-pub(super) fn load(
+/// Reads a v1 store and parses its files; `metadata_json` has already been
+/// read by the caller to pick this version.
+pub(super) fn read(
     fs: &StoreFs<'_>,
     metadata_json: String,
     strict: bool,
-) -> Result<Files, PolicyStoreError> {
+) -> Result<PolicyStoreDoc, ReadStoreError> {
+    let files = load(fs, metadata_json, strict)?;
+    Ok(parse(files)?)
+}
+
+/// Reads the raw files of a v1 store from the v1 layout.
+fn load(fs: &StoreFs<'_>, metadata_json: String, strict: bool) -> Result<Files, PolicyStoreError> {
     fs.require_dir(POLICIES_DIR)?;
     let schema = fs.schema(SCHEMA_FILE, SCHEMA_DIR, strict)?;
 
@@ -95,8 +101,8 @@ pub(crate) struct PolicyStoreDoc {
     pub(crate) content: StoreContent,
 }
 
-/// Parses the version-specific files of a loaded v1 store.
-pub(crate) fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
+/// Parses the raw files of a v1 store.
+fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
     let Files {
         metadata_json,
         schema,

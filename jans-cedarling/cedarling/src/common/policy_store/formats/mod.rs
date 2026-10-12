@@ -275,13 +275,9 @@ pub(super) fn read_policy_store(
 
     let doc = match selected.format {
         FormatVersion::V0 => {
-            let files = v0::load(fs, metadata_json, strict_schema_validation)?;
-            migration::v0_to_v1::migrate(v0::parse(files)?)
+            migration::v0_to_v1::migrate(v0::read(fs, metadata_json, strict_schema_validation)?)
         },
-        FormatVersion::V1 => {
-            let files = v1::load(fs, metadata_json, strict_schema_validation)?;
-            v1::parse(files)?
-        },
+        FormatVersion::V1 => v1::read(fs, metadata_json, strict_schema_validation)?,
     };
 
     let (store, metadata) = v1::into_runtime(doc, strict_schema_validation)?;
