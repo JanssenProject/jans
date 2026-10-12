@@ -9,7 +9,9 @@ use std::{fs, io};
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::archive_handler::ArchiveLimits;
 use crate::common::policy_store::errors::{PolicyStoreError, ValidationError};
-use crate::common::policy_store::formats::{self, ParseStoreError};
+use crate::common::policy_store::formats::{
+    self, FormatReport, ParseStoreError, ParsedPolicyStore,
+};
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
 use crate::common::policy_store::validator::MetadataValidator;
 use crate::common::policy_store::{ConversionError, PolicyStore, PolicyStoreWithID};
@@ -95,8 +97,6 @@ fn extract_first_policy_store(
                 id: k.to_owned(),
                 store,
                 metadata: Some(metadata),
-                spec_version: None,
-                warnings: Vec::new(),
             }
         })
         .next();
@@ -133,6 +133,8 @@ fn extract_first_policy_store(
 #[cfg_attr(test, derive(Debug))]
 pub(crate) struct LoadedPolicyStore {
     pub store: PolicyStoreWithID,
+    /// What the store's format reported; logged at bootstrap, then dropped.
+    pub format: FormatReport,
     pub body_hash: Option<u64>,
     pub validators: CacheHeadersState,
 }
@@ -181,37 +183,59 @@ pub(crate) async fn load_policy_store(
             process_legacy_agama_store(&agama_policy_store, strict_schema_validation)?
         },
         #[cfg(not(target_arch = "wasm32"))]
-        PolicyStoreSource::CjarFile(path) => LoadedPolicyStore {
-            store: load_policy_store_from_cjar_file(path, strict_schema_validation, limits).await?,
-            body_hash: None,
-            validators: CacheHeadersState::default(),
+        PolicyStoreSource::CjarFile(path) => {
+            let parsed =
+                load_policy_store_from_cjar_file(path, strict_schema_validation, limits).await?;
+            LoadedPolicyStore {
+                store: parsed.store,
+                format: parsed.format,
+                body_hash: None,
+                validators: CacheHeadersState::default(),
+            }
         },
         #[cfg(target_arch = "wasm32")]
-        PolicyStoreSource::CjarFile(path) => LoadedPolicyStore {
-            store: load_policy_store_from_cjar_file(path, strict_schema_validation, limits)?,
-            body_hash: None,
-            validators: CacheHeadersState::default(),
+        PolicyStoreSource::CjarFile(path) => {
+            let parsed = load_policy_store_from_cjar_file(path, strict_schema_validation, limits)?;
+            LoadedPolicyStore {
+                store: parsed.store,
+                format: parsed.format,
+                body_hash: None,
+                validators: CacheHeadersState::default(),
+            }
         },
         PolicyStoreSource::CjarUrl(url) => {
             load_policy_store_from_cjar_url(url, http_client, strict_schema_validation, limits)
                 .await?
         },
         #[cfg(not(target_arch = "wasm32"))]
-        PolicyStoreSource::Directory(path) => LoadedPolicyStore {
-            store: load_policy_store_from_directory(path, strict_schema_validation).await?,
-            body_hash: None,
-            validators: CacheHeadersState::default(),
+        PolicyStoreSource::Directory(path) => {
+            let parsed = load_policy_store_from_directory(path, strict_schema_validation).await?;
+            LoadedPolicyStore {
+                store: parsed.store,
+                format: parsed.format,
+                body_hash: None,
+                validators: CacheHeadersState::default(),
+            }
         },
         #[cfg(target_arch = "wasm32")]
-        PolicyStoreSource::Directory(path) => LoadedPolicyStore {
-            store: load_policy_store_from_directory(path, strict_schema_validation)?,
-            body_hash: None,
-            validators: CacheHeadersState::default(),
+        PolicyStoreSource::Directory(path) => {
+            let parsed = load_policy_store_from_directory(path, strict_schema_validation)?;
+            LoadedPolicyStore {
+                store: parsed.store,
+                format: parsed.format,
+                body_hash: None,
+                validators: CacheHeadersState::default(),
+            }
         },
-        PolicyStoreSource::ArchiveBytes(bytes) => LoadedPolicyStore {
-            store: load_policy_store_from_archive_bytes(bytes, strict_schema_validation, limits)?,
-            body_hash: None,
-            validators: CacheHeadersState::default(),
+        PolicyStoreSource::ArchiveBytes(bytes) => {
+            let parsed =
+                load_policy_store_from_archive_bytes(bytes, strict_schema_validation, limits)?;
+            LoadedPolicyStore {
+                store: parsed.store,
+                format: parsed.format,
+                body_hash: None,
+                validators: CacheHeadersState::default(),
+            }
         },
         PolicyStoreSource::Uri(uri) => {
             load_policy_store_from_uri(uri, http_client, strict_schema_validation, limits).await?
@@ -229,6 +253,7 @@ fn process_legacy_agama_store(
         .map_err(PolicyStoreLoadError::Validation)?;
     Ok(LoadedPolicyStore {
         store: extract_first_policy_store(agama_policy_store, strict_schema_validation)?,
+        format: FormatReport::default(),
         body_hash: None,
         validators: CacheHeadersState::default(),
     })
@@ -249,8 +274,10 @@ async fn load_policy_store_from_uri(
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
     if bytes.starts_with(&ZIP_MAGIC) {
+        let parsed = parse_cjar_bytes(&bytes, strict_schema_validation, limits).await?;
         return Ok(LoadedPolicyStore {
-            store: parse_cjar_bytes(&bytes, strict_schema_validation, limits).await?,
+            store: parsed.store,
+            format: parsed.format,
             body_hash: Some(body_hash),
             validators,
         });
@@ -270,7 +297,7 @@ pub(crate) async fn parse_cjar_bytes(
     bytes: &[u8],
     strict_schema_validation: bool,
     limits: ArchiveLimits,
-) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     let loaded = loader::load_policy_store_archive_bytes(bytes, strict_schema_validation, limits)
@@ -293,7 +320,7 @@ pub(crate) async fn parse_cjar_bytes(
 fn convert_to_policy_store(
     loaded: crate::common::policy_store::loader::LoadedPolicyStore,
     strict_schema_validation: bool,
-) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     formats::parse_policy_store(loaded, strict_schema_validation).map_err(Into::into)
 }
 
@@ -306,7 +333,7 @@ async fn convert_to_policy_store_offloaded(
     loaded: crate::common::policy_store::loader::LoadedPolicyStore,
     strict_schema_validation: bool,
     panic_err: fn(String) -> PolicyStoreLoadError,
-) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         tokio::task::spawn_blocking(move || {
@@ -328,7 +355,7 @@ async fn load_policy_store_from_cjar_file(
     path: &Path,
     strict_schema_validation: bool,
     limits: ArchiveLimits,
-) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     let loaded = loader::load_policy_store_archive(path, strict_schema_validation, limits)
@@ -350,7 +377,7 @@ fn load_policy_store_from_cjar_file(
     path: &Path,
     strict_schema_validation: bool,
     limits: ArchiveLimits,
-) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     // Call the loader stub function to ensure it's used and the error variant is constructed
@@ -396,7 +423,7 @@ async fn load_policy_store_from_cjar_url(
     let loaded = loader::load_policy_store_archive_bytes(&bytes, strict_schema_validation, limits)
         .map_err(|e| map_policy_store_err(e, true))?;
 
-    let store = convert_to_policy_store_offloaded(
+    let parsed = convert_to_policy_store_offloaded(
         loaded,
         strict_schema_validation,
         PolicyStoreLoadError::Archive,
@@ -404,7 +431,8 @@ async fn load_policy_store_from_cjar_url(
     .await?;
 
     Ok(LoadedPolicyStore {
-        store,
+        store: parsed.store,
+        format: parsed.format,
         body_hash: Some(body_hash),
         validators,
     })
@@ -415,7 +443,7 @@ async fn load_policy_store_from_cjar_url(
 async fn load_policy_store_from_directory(
     path: &Path,
     strict_schema_validation: bool,
-) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     let loaded = loader::load_policy_store_directory(path, strict_schema_validation)
@@ -436,7 +464,7 @@ async fn load_policy_store_from_directory(
 fn load_policy_store_from_directory(
     path: &Path,
     strict_schema_validation: bool,
-) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     // Call the loader stub function to ensure it's used and the error variant is constructed
@@ -460,7 +488,7 @@ fn load_policy_store_from_archive_bytes(
     bytes: &[u8],
     strict_schema_validation: bool,
     limits: ArchiveLimits,
-) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     // Load from bytes (works in both native and WASM)

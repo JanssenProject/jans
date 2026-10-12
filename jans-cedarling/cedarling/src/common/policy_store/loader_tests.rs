@@ -837,7 +837,8 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
 
     // Build the runtime store and check the issuer map
     let store = formats::parse_policy_store(loaded_directory, false)
-        .expect("store with two issuers should parse");
+        .expect("store with two issuers should parse")
+        .store;
     let issuer_map = store
         .trusted_issuers
         .as_ref()
@@ -882,8 +883,9 @@ fn test_load_custom_issuers_end_to_end() {
 
     // Manager half: convert wires it into PolicyStore.custom_issuers.
     // strict=false so the assertion does not depend on a schema being present.
-    let store =
-        formats::parse_policy_store(loaded_directory, false).expect("conversion should succeed");
+    let store = formats::parse_policy_store(loaded_directory, false)
+        .expect("conversion should succeed")
+        .store;
     let acme = store
         .custom_issuers
         .get("acme")
@@ -959,7 +961,8 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
     );
 
     let store = formats::parse_policy_store(loaded_directory, false)
-        .expect("parse_policy_store should succeed");
+        .expect("parse_policy_store should succeed")
+        .store;
     let acme = store
         .custom_issuers
         .get("acme")
@@ -981,7 +984,8 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
     );
 
     let store2 = formats::parse_policy_store(loaded2, false)
-        .expect("parse_policy_store (archive_bytes) should succeed");
+        .expect("parse_policy_store (archive_bytes) should succeed")
+        .store;
     assert!(
         store2.custom_issuers.contains_key("acme"),
         "acme issuer must survive round-trip through archive_bytes loader"
@@ -1398,8 +1402,9 @@ fn test_complete_policy_store_with_issuers() {
     assert_eq!(entity_store.iter().count(), 1);
     assert_ne!(format!("{:?}", parsed_schema.get_schema()), "");
 
-    let store =
-        formats::parse_policy_store(loaded_directory, false).expect("complete store should parse");
+    let store = formats::parse_policy_store(loaded_directory, false)
+        .expect("complete store should parse")
+        .store;
     let issuer_map = store
         .trusted_issuers
         .as_ref()
@@ -2316,7 +2321,8 @@ fn test_load_schema_from_schemas_dir_shared_namespace_full_pipeline() {
         .expect("Should load directory with shared namespace schemas");
 
     let policy_store = formats::parse_policy_store(result, false)
-        .expect("parse_policy_store should succeed with shared namespaces across files");
+        .expect("parse_policy_store should succeed with shared namespaces across files")
+        .store;
 
     let cedar_schema = policy_store
         .schema
@@ -2391,7 +2397,8 @@ fn test_archive_shared_namespace_full_pipeline() {
         .expect("Should load archive with shared namespace schemas");
 
     let policy_store = formats::parse_policy_store(result, false)
-        .expect("parse_policy_store should succeed for archive with shared namespaces");
+        .expect("parse_policy_store should succeed for archive with shared namespaces")
+        .store;
 
     let cedar_schema = policy_store
         .schema

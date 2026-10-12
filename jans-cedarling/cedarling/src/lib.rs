@@ -561,11 +561,21 @@ async fn perform_bootstrap_load(
 
     let LoadedPolicyStore {
         store: policy_store,
+        format,
         body_hash,
         validators,
     } = loaded;
-    let spec_version = policy_store.spec_version;
-    let warnings = policy_store.warnings.clone();
+
+    for warning in &format.warnings {
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(warning.to_string()),
+        );
+    }
+
     Ok((
         ServiceConfig {
             policy_store,
@@ -574,8 +584,7 @@ async fn perform_bootstrap_load(
         RefreshWorkerSeed {
             body_hash,
             validators,
-            spec_version,
-            warnings,
+            format,
         },
     ))
 }
@@ -628,8 +637,7 @@ fn maybe_spawn_refresh_worker(
         log,
         initial_body_hash: seed.body_hash,
         initial_validators: seed.validators,
-        initial_spec_version: seed.spec_version,
-        initial_warnings: seed.warnings,
+        initial_format: seed.format,
         strict_schema_validation: config.authorization_config.strict_schema_validation,
         archive_limits: config.policy_store_config.archive_limits(),
     };
@@ -1022,7 +1030,7 @@ impl Cedarling {
                 };
 
                 let warnings = loaded
-                    .store
+                    .format
                     .warnings
                     .iter()
                     .map(|warning| Diagnostic {

@@ -216,6 +216,25 @@ fn warnings_for(declared: Option<u32>) -> Vec<PolicyStoreWarning> {
     }
 }
 
+/// What parsing reported about a store's format.
+///
+/// Kept beside the store rather than inside it: the caller logs this and drops
+/// it, so nothing format-related reaches the runtime.
+#[derive(Debug, Clone, Default)]
+pub(crate) struct FormatReport {
+    /// Version the store was read as; `None` for Agama YAML, which is unversioned.
+    pub(crate) spec_version: Option<u32>,
+    /// Non-fatal findings, for the caller to log.
+    pub(crate) warnings: Vec<PolicyStoreWarning>,
+}
+
+/// A parsed store and what its format reported. Only `store` reaches the runtime.
+#[cfg_attr(test, derive(Debug))]
+pub(crate) struct ParsedPolicyStore {
+    pub(crate) store: PolicyStoreWithID,
+    pub(crate) format: FormatReport,
+}
+
 /// Parses a loaded directory / `.cjar` store into its runtime form.
 ///
 /// Older versions are migrated step by step; only the current version
@@ -223,7 +242,7 @@ fn warnings_for(declared: Option<u32>) -> Vec<PolicyStoreWarning> {
 pub(crate) fn parse_policy_store(
     loaded: LoadedPolicyStore,
     strict_schema_validation: bool,
-) -> Result<PolicyStoreWithID, ParseStoreError> {
+) -> Result<ParsedPolicyStore, ParseStoreError> {
     let SelectedVersion {
         declared,
         spec_version,
@@ -237,12 +256,16 @@ pub(crate) fn parse_policy_store(
 
     let (store, metadata) = v1::into_runtime(doc, strict_schema_validation)?;
 
-    Ok(PolicyStoreWithID {
-        id: metadata.policy_store.id.clone(),
-        store,
-        metadata: Some(metadata),
-        spec_version: Some(spec_version),
-        warnings: warnings_for(declared),
+    Ok(ParsedPolicyStore {
+        store: PolicyStoreWithID {
+            id: metadata.policy_store.id.clone(),
+            store,
+            metadata: Some(metadata),
+        },
+        format: FormatReport {
+            spec_version: Some(spec_version),
+            warnings: warnings_for(declared),
+        },
     })
 }
 
@@ -376,12 +399,12 @@ mod tests {
         let parsed = parse_policy_store(loaded(V0_METADATA), false)
             .expect("a store without a spec version should parse");
         assert_eq!(
-            parsed.spec_version,
+            parsed.format.spec_version,
             Some(MIN_SUPPORTED_FORMAT_VERSION),
             "a missing version should be read as the oldest supported one"
         );
         assert_eq!(
-            parsed.warnings,
+            parsed.format.warnings,
             vec![PolicyStoreWarning::MissingSpecVersion {
                 assumed: MIN_SUPPORTED_FORMAT_VERSION,
                 current: CURRENT_FORMAT_VERSION,
@@ -397,12 +420,12 @@ mod tests {
         let parsed = parse_policy_store(loaded(&metadata_with_version("0")), false)
             .expect("an explicit v0 store should parse");
         assert_eq!(
-            parsed.spec_version,
+            parsed.format.spec_version,
             Some(0),
             "declared version should be kept"
         );
         assert_eq!(
-            parsed.warnings,
+            parsed.format.warnings,
             vec![PolicyStoreWarning::OutdatedSpecVersion {
                 found: 0,
                 current: CURRENT_FORMAT_VERSION,
@@ -419,14 +442,14 @@ mod tests {
         )
         .expect("a current-version store should parse");
         assert_eq!(
-            parsed.spec_version,
+            parsed.format.spec_version,
             Some(CURRENT_FORMAT_VERSION),
             "declared version should be kept"
         );
         assert!(
-            parsed.warnings.is_empty(),
+            parsed.format.warnings.is_empty(),
             "a current-version store should not warn, got: {:?}",
-            parsed.warnings
+            parsed.format.warnings
         );
     }
 
@@ -441,19 +464,20 @@ mod tests {
 
         for (label, parsed) in [("v0", &from_v0), ("v1", &from_v1)] {
             assert_eq!(
-                parsed.store, from_missing.store,
+                parsed.store.store, from_missing.store.store,
                 "{label} should build the same runtime store as an unversioned one"
             );
             assert_eq!(
-                parsed.metadata, from_missing.metadata,
+                parsed.store.metadata, from_missing.store.metadata,
                 "{label} should build the same runtime metadata as an unversioned one"
             );
         }
         assert_eq!(
-            from_v1.id, "abc123def456",
+            from_v1.store.id, "abc123def456",
             "id should come from policy_store.id"
         );
         let issuers = from_v1
+            .store
             .trusted_issuers
             .as_ref()
             .expect("trusted issuers should be present");
@@ -462,7 +486,7 @@ mod tests {
             "issuer id should be derived from the file name"
         );
         assert!(
-            from_v1.custom_issuers["acme"].tokens_mappings["Acme::Custom"].required,
+            from_v1.store.custom_issuers["acme"].tokens_mappings["Acme::Custom"].required,
             "custom issuer settings should reach the runtime store"
         );
     }

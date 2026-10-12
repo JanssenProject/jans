@@ -34,7 +34,7 @@ use crate::authz::Authz;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
 use crate::common::policy_store::archive_handler::ArchiveLimits;
-use crate::common::policy_store::formats::PolicyStoreWarning;
+use crate::common::policy_store::formats::{FormatReport, ParsedPolicyStore, PolicyStoreWarning};
 use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::context_data_api::DataStore;
 use crate::http::cache_headers::CacheHeadersState;
@@ -280,20 +280,25 @@ struct WarningDedup {
 }
 
 impl WarningDedup {
+    /// Starts from what bootstrap already logged, so the first refresh is quiet.
+    fn seeded(format: &FormatReport) -> Self {
+        Self {
+            logged: format.warnings.iter().copied().collect(),
+            last_spec_version: format.spec_version,
+        }
+    }
+
     /// Records a freshly parsed store and returns the warnings to log now.
     ///
     /// Any change of format version starts the set over, including a rollback to
     /// an older one, so suppression only lasts while the store stays put.
-    fn take_new(
-        &mut self,
-        spec_version: Option<u32>,
-        warnings: &[PolicyStoreWarning],
-    ) -> Vec<PolicyStoreWarning> {
-        if spec_version != self.last_spec_version {
+    fn take_new(&mut self, format: &FormatReport) -> Vec<PolicyStoreWarning> {
+        if format.spec_version != self.last_spec_version {
             self.logged.clear();
         }
-        self.last_spec_version = spec_version;
-        warnings
+        self.last_spec_version = format.spec_version;
+        format
+            .warnings
             .iter()
             .filter(|warning| self.logged.insert(**warning))
             .copied()
@@ -409,7 +414,7 @@ impl RefreshSource {
         bytes: &[u8],
         strict_schema_validation: bool,
         limits: ArchiveLimits,
-    ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+    ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
         if bytes.starts_with(&ZIP_MAGIC) {
             return parse_cjar_bytes(bytes, strict_schema_validation, limits).await;
         }
@@ -438,15 +443,14 @@ impl Drop for PolicyStoreRefreshHandle {
 
 /// Snapshot of the bootstrap-load result that the refresh worker starts from:
 /// `body_hash` and `validators` let the very first periodic tick short-circuit,
-/// while `spec_version` and `warnings` seed the dedup set so bootstrap's format
-/// warnings are not logged a second time. Carried as a small named struct
+/// while `format` seeds the dedup set so bootstrap's warnings are not logged a
+/// second time. Carried as a small named struct
 /// rather than loose parameters so the spawn-site signature stays under the
 /// clippy `too_many_arguments` threshold without needing a `#[allow]` attribute.
 pub(crate) struct RefreshWorkerSeed {
     pub body_hash: Option<u64>,
     pub validators: CacheHeadersState,
-    pub spec_version: Option<u32>,
-    pub warnings: Vec<PolicyStoreWarning>,
+    pub format: FormatReport,
 }
 
 /// Read-only worker context — handles and config that don't change between
@@ -473,11 +477,9 @@ pub(crate) struct WorkerContext {
     /// `304` back with zero body bytes downloaded — the optimal first-tick
     /// path. Empty for non-URL sources.
     pub(crate) initial_validators: CacheHeadersState,
-    /// Format spec version and warnings of the store loaded at bootstrap.
-    /// Bootstrap already logged those warnings, so they seed the worker's
-    /// dedup set and are not repeated on the first refresh.
-    pub(crate) initial_spec_version: Option<u32>,
-    pub(crate) initial_warnings: Vec<PolicyStoreWarning>,
+    /// What the bootstrap store's format reported. Bootstrap already logged it,
+    /// so it seeds the dedup set and is not repeated on the first refresh.
+    pub(crate) initial_format: FormatReport,
     /// Forwarded from `BootstrapConfig.authorization_config` so each refresh
     /// tick enforces the same "schema must be present" invariant the
     /// bootstrap load did. Without this, a refresh against a store that
@@ -508,10 +510,7 @@ async fn run_worker(ctx: WorkerContext, shutdown_rx: oneshot::Receiver<()>) {
     let mut state = RefreshState {
         last_body_hash: ctx.initial_body_hash,
         validators: ctx.initial_validators.clone(),
-        warnings: WarningDedup {
-            logged: ctx.initial_warnings.iter().copied().collect(),
-            last_spec_version: ctx.initial_spec_version,
-        },
+        warnings: WarningDedup::seeded(&ctx.initial_format),
         ..RefreshState::default()
     };
     let mut shutdown_rx = shutdown_rx;
@@ -732,10 +731,7 @@ async fn parse_swap_and_record(
     // Report format warnings before the rebuild: they describe the fetched
     // store, which the operator must fix regardless of whether the rebuild
     // that follows succeeds.
-    for warning in state
-        .warnings
-        .take_new(parsed.spec_version, &parsed.warnings)
-    {
+    for warning in state.warnings.take_new(&parsed.format) {
         ctx.log.log_any(
             LogEntry::new(BaseLogEntry::new_system_opt_request_id(
                 LogLevel::WARN,
@@ -749,10 +745,10 @@ async fn parse_swap_and_record(
     // `rebuild`. Used to refresh the `instance.policy_count` gauge after the
     // swap — otherwise the gauge would stay pinned to the bootstrap value
     // forever even though authorization decisions use the new set.
-    let new_policy_count = parsed.policies.get_set().num_of_policies();
+    let new_policy_count = parsed.store.policies.get_set().num_of_policies();
 
     let prior_authz = ctx.authz_swap.load_full();
-    let new_authz = match ctx.rebuilder.rebuild(parsed, &prior_authz).await {
+    let new_authz = match ctx.rebuilder.rebuild(parsed.store, &prior_authz).await {
         Ok(a) => a,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
@@ -875,21 +871,29 @@ mod tests {
         current: 1,
     };
 
+    /// A report as the parser would produce for a store on `spec_version`.
+    fn report(spec_version: u32, warnings: &[PolicyStoreWarning]) -> FormatReport {
+        FormatReport {
+            spec_version: Some(spec_version),
+            warnings: warnings.to_vec(),
+        }
+    }
+
     #[test]
     fn warning_dedup_logs_each_warning_once() {
         let mut dedup = WarningDedup::default();
 
         assert_eq!(
-            dedup.take_new(Some(0), &[MISSING]),
+            dedup.take_new(&report(0, &[MISSING])),
             vec![MISSING],
             "a warning not seen before should be logged"
         );
         assert!(
-            dedup.take_new(Some(0), &[MISSING]).is_empty(),
+            dedup.take_new(&report(0, &[MISSING])).is_empty(),
             "a refresh landing on the same version must not re-log the same warning"
         );
         assert_eq!(
-            dedup.take_new(Some(0), &[MISSING, OUTDATED]),
+            dedup.take_new(&report(0, &[MISSING, OUTDATED])),
             vec![OUTDATED],
             "only the warning not seen before should be logged"
         );
@@ -898,10 +902,10 @@ mod tests {
     #[test]
     fn warning_dedup_resets_on_newer_spec_version() {
         let mut dedup = WarningDedup::default();
-        dedup.take_new(Some(0), &[OUTDATED]);
+        dedup.take_new(&report(0, &[OUTDATED]));
 
         assert_eq!(
-            dedup.take_new(Some(1), &[OUTDATED]),
+            dedup.take_new(&report(1, &[OUTDATED])),
             vec![OUTDATED],
             "a newer format version should clear the set so warnings are reported again"
         );
@@ -913,21 +917,21 @@ mod tests {
     fn warning_dedup_rewarns_after_a_rollback() {
         let mut dedup = WarningDedup::default();
         assert_eq!(
-            dedup.take_new(Some(0), &[OUTDATED]),
+            dedup.take_new(&report(0, &[OUTDATED])),
             vec![OUTDATED],
             "the outdated store should warn the first time"
         );
         assert!(
-            dedup.take_new(Some(1), &[]).is_empty(),
+            dedup.take_new(&report(1, &[])).is_empty(),
             "moving to the current version has nothing to warn about"
         );
         assert_eq!(
-            dedup.take_new(Some(0), &[OUTDATED]),
+            dedup.take_new(&report(0, &[OUTDATED])),
             vec![OUTDATED],
             "rolling back to the outdated format must warn again"
         );
         assert!(
-            dedup.take_new(Some(0), &[OUTDATED]).is_empty(),
+            dedup.take_new(&report(0, &[OUTDATED])).is_empty(),
             "staying on that version must keep deduping"
         );
     }
@@ -935,13 +939,10 @@ mod tests {
     #[test]
     fn warning_dedup_seeded_from_bootstrap_does_not_relog() {
         // Bootstrap logged its warnings already, so the worker starts seeded.
-        let mut dedup = WarningDedup {
-            logged: HashSet::from([MISSING]),
-            last_spec_version: Some(0),
-        };
+        let mut dedup = WarningDedup::seeded(&report(0, &[MISSING]));
 
         assert!(
-            dedup.take_new(Some(0), &[MISSING]).is_empty(),
+            dedup.take_new(&report(0, &[MISSING])).is_empty(),
             "the first refresh must not repeat what bootstrap already logged"
         );
     }
@@ -951,7 +952,7 @@ mod tests {
         let mut dedup = WarningDedup::default();
 
         assert!(
-            dedup.take_new(Some(1), &[]).is_empty(),
+            dedup.take_new(&report(1, &[])).is_empty(),
             "a store with no warnings should log nothing"
         );
     }

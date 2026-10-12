@@ -171,10 +171,6 @@ pub(crate) struct PolicyStoreWithID {
     /// Optional metadata from new format policy stores.
     /// Contains `cedar_version`, `policy_store` info (name, version, description, etc.)
     pub(crate) metadata: Option<metadata::PolicyStoreMetadata>,
-    /// Spec version the store was read as (`None` for Agama YAML).
-    pub(crate) spec_version: Option<u32>,
-    /// Non-fatal findings from parsing, for the caller to log.
-    pub(crate) warnings: Vec<formats::PolicyStoreWarning>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
