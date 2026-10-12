@@ -1,5 +1,5 @@
 """
-Copyright (c) 2025, Gluu, Inc. 
+Copyright (c) 2025, Gluu, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import os
 
 import pytest
 from main.extensions import cedarling
+from unittest.mock import patch
 
 current_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -25,9 +26,40 @@ current_path = os.path.dirname(os.path.realpath(__file__))
 @pytest.fixture(autouse=True)
 def env_setup(monkeypatch):
     monkeypatch.setenv("APP_MODE", "testing")
-    monkeypatch.setenv("CEDARLING_BOOTSTRAP_CONFIG_FILE", os.path.join(current_path, "test_secrets", "cedarling_test_config.json"))
+    monkeypatch.setenv(
+        "CEDARLING_BOOTSTRAP_CONFIG_FILE",
+        os.path.join(current_path, "test_secrets", "cedarling_test_config.json"),
+    )
     monkeypatch.setattr(cedarling, "initialize_cedarling", lambda: None)
 
-@pytest.fixture(scope="function")
+
+@pytest.fixture
 def mock_cedarling(monkeypatch):
-    pass
+    monkeypatch.setattr(
+        cedarling,
+        "init_app",
+        lambda app: None,
+    )
+
+
+@pytest.fixture(scope="session")
+def app():
+    import os
+
+    from main.app import create_app
+
+    os.environ["APP_MODE"] = "testing"
+    os.environ["CEDARLING_BOOTSTRAP_CONFIG_FILE"] = os.path.join(
+        current_path, "test_secrets", "cedarling_test_config.json"
+    )
+    with patch.object(cedarling, "init_app", return_value=None):
+        app = create_app()
+    ctx = app.app_context()
+    ctx.push()
+    yield app
+    ctx.pop()
+
+
+@pytest.fixture(scope="session")
+def client(app):
+    return app.test_client()
