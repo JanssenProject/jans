@@ -43,10 +43,10 @@ public interface PolicyRestWebService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getPoliciesUriList();
 
-	@Operation(summary = "Request policy data", description = "Request policy data", tags = {
+	@Operation(summary = "Request policy data", description = "Request policy data. Returns legacy policy JSON, or the .cjar archive for archive sources (keyed by policy_store.id)", tags = {
 			"Lock - Policy" }, security = @SecurityRequirement(name = "oauth2", scopes = {
 					ApiAccessConstants.LOCK_POLICY_READ_ACCESS }))
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class, description = "PolicyFound"))),
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok", content = { @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class, description = "PolicyFound")), @Content(mediaType = "application/zip", schema = @Schema(type = "string", format = "binary", description = "Policy store archive (.cjar)")) }),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
@@ -54,7 +54,7 @@ public interface PolicyRestWebService {
 	@GET
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_POLICY_READ_ACCESS })
 	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id="lock_policy_get_by_id", path="/policy")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces({ MediaType.APPLICATION_JSON, "application/zip" })
     @Path(ApiAccessConstants.URI_PATH)
 	public Response getPolicyByUri(@Parameter(description = "Policy URI") @PathParam(ApiAccessConstants.URI) @NotNull String uri);
 

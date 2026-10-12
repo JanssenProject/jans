@@ -16,7 +16,9 @@
 
 package io.jans.core.cedarling.service.policy;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,6 +71,8 @@ public class PolicyDownloadService {
 	private static final int DEFAULT_INTERVAL = 30;
 
 	public static final MediaType APPLICATION_ZIP_TYPE = new MediaType("application", "zip");
+
+	public static final int MAX_ARCHIVE_BYTES = 16 * 1024 * 1024;
 
 	@Inject
 	private Logger log;
@@ -154,6 +158,9 @@ public class PolicyDownloadService {
 
 			for(LoadedPolicySource loadedPolicySource : loadedPolicySources) {
 				String policyStoreUri = loadedPolicySource.getPolicyStoreUri();
+				if (downloadedPolicies.contains(policyStoreUri)) {
+					log.warn("Policy '{}' from '{}' replaces a policy loaded from another source", policyStoreUri, loadedPolicySource.getSourceUri());
+				}
 
 				// Collect list of policyStoreUris
 				downloadedPolicies.add(policyStoreUri);
@@ -212,8 +219,9 @@ public class PolicyDownloadService {
                 if (responseMediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)
                         || responseMediaType.isCompatible(MediaType.TEXT_PLAIN_TYPE)) {
                     return loadJsonPolicyFromResponse(httpResponse, policyStoreUri);
-                } else if (responseMediaType.isCompatible(APPLICATION_ZIP_TYPE)) {
-                    return loadZipPoliciesFromResponse(httpResponse, policyStoreUri);
+                } else if (responseMediaType.isCompatible(APPLICATION_ZIP_TYPE)
+                        || responseMediaType.isCompatible(MediaType.APPLICATION_OCTET_STREAM_TYPE)) {
+                    return loadArchiveFromResponse(httpResponse, policyStoreUri);
                 }
             }
 
@@ -239,10 +247,44 @@ public class PolicyDownloadService {
 		return null;
 	}
 
-	private List<LoadedPolicySource> loadZipPoliciesFromResponse(HttpResponse httpResponse, String policyStoreUri) throws IOException {
+	private List<LoadedPolicySource> loadArchiveFromResponse(HttpResponse httpResponse, String policyStoreUri) throws IOException {
+		byte[] archive;
+		try (InputStream is = httpResponse.getEntity().getContent()) {
+			archive = is.readNBytes(MAX_ARCHIVE_BYTES + 1);
+		}
+
+		if (archive.length > MAX_ARCHIVE_BYTES) {
+			log.error("Policy archive from URI {} exceeds {} bytes", policyStoreUri, MAX_ARCHIVE_BYTES);
+			return Collections.emptyList();
+		}
+
+		String policyStoreId;
+		try {
+			policyStoreId = CjarArchive.readPolicyStoreId(archive, getMaxEntries(), objectMapper);
+		} catch (IllegalStateException ex) {
+			log.error("Rejected policy archive from URI {}: {}", policyStoreUri, ex.getMessage());
+			return Collections.emptyList();
+		}
+
+		if (policyStoreId == null) {
+			return loadZipPolicies(new ByteArrayInputStream(archive), policyStoreUri);
+		}
+
+		if (StringHelper.isEmpty(policyStoreId)) {
+			log.error("Policy store archive from URI {} has no policy_store.id in metadata.json", policyStoreUri);
+			return Collections.emptyList();
+		}
+
+		String bundleHash = CjarArchive.bundleHash(archive);
+		log.debug("End policy store archive load from: '{}', id: '{}', bundle hash: '{}'", policyStoreUri, policyStoreId, bundleHash);
+
+		return Arrays.asList(new LoadedPolicySource(policyStoreId, archive, bundleHash, policyStoreUri));
+	}
+
+	private List<LoadedPolicySource> loadZipPolicies(InputStream zipStream, String policyStoreUri) throws IOException {
 		List<LoadedPolicySource> result = new ArrayList<>();
 
-		try (ZipInputStream zis = new ZipInputStream(httpResponse.getEntity().getContent())) {
+		try (ZipInputStream zis = new ZipInputStream(zipStream)) {
 			ZipEntry ze;
 			int entriesCount = 0;
           
@@ -355,10 +397,24 @@ public class PolicyDownloadService {
 	public class LoadedPolicySource {
 		private final String policyStoreUri;
 		private final String policyJson;
+		private final byte[] archive;
+		private final String bundleHash;
+		private final String sourceUri;
 
 		public LoadedPolicySource(String policyStoreUri, String policyJson) {
+			this(policyStoreUri, policyJson, null, null, policyStoreUri);
+		}
+
+		public LoadedPolicySource(String policyStoreId, byte[] archive, String bundleHash, String sourceUri) {
+			this(policyStoreId, null, archive, bundleHash, sourceUri);
+		}
+
+		private LoadedPolicySource(String policyStoreUri, String policyJson, byte[] archive, String bundleHash, String sourceUri) {
 			this.policyStoreUri = policyStoreUri;
 			this.policyJson = policyJson;
+			this.archive = archive;
+			this.bundleHash = bundleHash;
+			this.sourceUri = sourceUri;
 		}
 
 		public String getPolicyJson() {
@@ -369,9 +425,26 @@ public class PolicyDownloadService {
 			return policyStoreUri;
 		}
 
+		public boolean isArchive() {
+			return archive != null;
+		}
+
+		public byte[] getArchive() {
+			return archive;
+		}
+
+		public String getBundleHash() {
+			return bundleHash;
+		}
+
+		public String getSourceUri() {
+			return sourceUri;
+		}
+
 		@Override
 		public String toString() {
-			return "LoadedPolicySource [policyJson=" + policyJson + ", policyStoreUri=" + policyStoreUri + "]";
+			return "LoadedPolicySource [policyStoreUri=" + policyStoreUri + ", sourceUri=" + sourceUri
+					+ ", bundleHash=" + bundleHash + ", policyJson=" + policyJson + "]";
 		}
 	}
 }

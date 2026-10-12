@@ -99,7 +99,12 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 	        	log.debug("Sending policy response for URI: {}", uri);
 	        }
 
-	        response = Response.ok().entity(policies.get(uri).getPolicyJson()).build();
+	        LoadedPolicySource policy = policies.get(uri);
+	        if (policy.isArchive()) {
+	        	response = Response.ok(policy.getArchive(), PolicyDownloadService.APPLICATION_ZIP_TYPE).tag(policy.getBundleHash()).build();
+	        } else {
+	        	response = Response.ok().entity(policy.getPolicyJson()).build();
+	        }
 
 	        return response;
         } finally {
