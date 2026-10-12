@@ -196,7 +196,12 @@ struct SeenToken {
 /// Outcome of dispatching a single multi-issuer token input: either a
 /// validated Cedar token or the claim-free reason it was dropped.
 enum TokenOutcome {
+    /// The token was validated successfully and produced a Cedar token.
     Validated(Arc<Token>),
+    /// The token was dropped without failing the whole request.
+    ///
+    /// Carries the [`DropReason`] recorded in the drop metadata; the token's
+    /// claims are intentionally not retained.
     Dropped(DropReason),
 }
 
