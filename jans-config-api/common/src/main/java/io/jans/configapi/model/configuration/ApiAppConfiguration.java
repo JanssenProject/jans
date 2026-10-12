@@ -26,11 +26,11 @@ public class ApiAppConfiguration implements Configuration {
 
     @DocProperty(description = "DB attribute name for storing user role", defaultValue = "jansAdminUIRole")
     @Schema(description = "DB attribute name for storing user role")
-    private String userRoleAttributeName = "jansAdminUIRole";
+    private String roleAttributeName = "jansAdminUIRole";
     
-    @DocProperty(description = "Substring text corresponding to `admin` role", defaultValue = "nonadmin")
-    @Schema(description = "Substring text corresponding to `nonadmin` role")
-    private String userAdminRoleNameSubstring = "nonadmin";
+    @DocProperty(description = " Role names corresponding to `admin` role")
+    @Schema(description = "Role names corresponding to `admin` role")
+    private List<String> adminRoleNames;
     
     @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `false`.")
     private boolean disableLoggerTimer;
@@ -169,20 +169,20 @@ public class ApiAppConfiguration implements Configuration {
         this.protectionMode = protectionMode;
     }
     
-    public String getUserRoleAttributeName() {
-        return userRoleAttributeName;
+    public String getRoleAttributeName() {
+        return roleAttributeName;
     }
 
-    public void setUserRoleAttributeName(String userRoleAttributeName) {
-        this.userRoleAttributeName = userRoleAttributeName;
+    public void setRoleAttributeName(String roleAttributeName) {
+        this.roleAttributeName = roleAttributeName;
     }
 
-    public String getUserAdminRoleNameSubstring() {
-        return userAdminRoleNameSubstring;
+    public List<String> getAdminRoleNames() {
+        return adminRoleNames;
     }
 
-    public void setUserAdminRoleNameSubstring(String userAdminRoleNameSubstring) {
-        this.userAdminRoleNameSubstring = userAdminRoleNameSubstring;
+    public void setAdminRoleNames(List<String> adminRoleNames) {
+        this.adminRoleNames = adminRoleNames;
     }
 
     public boolean isDisableLoggerTimer() {
@@ -495,8 +495,8 @@ public class ApiAppConfiguration implements Configuration {
     @Override
     public String toString() {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
-                + " ,protectionMode=" + protectionMode + " ,userRoleAttributeName=" + userRoleAttributeName
-                + ", userAdminRoleNameSubstring=" + userAdminRoleNameSubstring + ", disableLoggerTimer=" + disableLoggerTimer
+                + " ,protectionMode=" + protectionMode + " ,roleAttributeName=" + roleAttributeName
+                + ", adminRoleNames=" + adminRoleNames + ", disableLoggerTimer=" + disableLoggerTimer
                 +" ,userRolePermissionValidationEnabled=" + userRolePermissionValidationEnabled
                 +" ,validateUserInumInIntrospectionFlag=" + validateUserInumInIntrospectionFlag
                 +" ,fetchUserRoleInIntrospectionFlag=" + fetchUserRoleInIntrospectionFlag

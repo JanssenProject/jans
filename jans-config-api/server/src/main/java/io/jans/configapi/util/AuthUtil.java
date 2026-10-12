@@ -129,12 +129,12 @@ public class AuthUtil {
         return this.configurationFactory.getApiAppConfiguration().getPlugins();
     }
     
-    public String getUserRoleAttributeName() {
-        return this.configurationFactory.getApiAppConfiguration().getUserRoleAttributeName();
+    public String getRoleAttributeName() {
+        return this.configurationFactory.getApiAppConfiguration().getRoleAttributeName();
     }
     
-    public String getUserAdminRoleNameSubstring() {
-        return this.configurationFactory.getApiAppConfiguration().getUserAdminRoleNameSubstring();
+    public List<String> getAdminRoleNames() {
+        return this.configurationFactory.getApiAppConfiguration().getAdminRoleNames();
     }
     
     public boolean isUserRolePermissionValidationEnabled() {
@@ -161,8 +161,7 @@ public class AuthUtil {
         }else{
             return false;
         }
-    }
-    
+    }    
     
     public boolean isFetchUserRoleInIntrospectionFlag() {
         return this.configurationFactory.getApiAppConfiguration().isFetchUserRoleInIntrospectionFlag();
@@ -884,8 +883,8 @@ public class AuthUtil {
             return userRoleList;
         }
 
-        userRoleList = getAttributeValueList(customAttributes, getUserRoleAttributeName());
-        log.info(" user.getUserId():{}, getUserRoleAttributeName():{}, userRoleList:{}", user.getUserId(), getUserRoleAttributeName(), userRoleList);
+        userRoleList = getAttributeValueList(customAttributes, getRoleAttributeName());
+        log.info(" user.getUserId():{}, getRoleAttributeName():{}, userRoleList:{}", user.getUserId(), getRoleAttributeName(), userRoleList);
         if (userRoleList.isEmpty()) {
             return userRoleList;
         }
