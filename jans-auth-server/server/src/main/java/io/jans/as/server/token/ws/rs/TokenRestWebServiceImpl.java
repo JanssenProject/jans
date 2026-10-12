@@ -473,7 +473,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         // validate redirectUri only for Authorization Code Flow. For First-Party App redirect uri is blank. It is perfectly valid case.
         // redirect uri must be validated after grant is validated
         if (!authorizationCodeGrant.isAuthorizationChallenge()) {
-            tokenRestWebServiceValidator.validateRedirectUri(redirectUri, executionContext.getAuditLog());
+            tokenRestWebServiceValidator.validateRedirectUri(authorizationCodeGrant, client, redirectUri, executionContext.getAuditLog(), grant -> grantService.removeAllByAuthorizationCode(code));
         }
         tokenRestWebServiceValidator.validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog(), client);
         dPoPService.validateDpopThumprint(authorizationCodeGrant.getDpopJkt(), executionContext.getDpop());

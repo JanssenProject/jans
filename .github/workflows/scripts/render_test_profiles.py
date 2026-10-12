@@ -33,6 +33,8 @@ FIXED_CLIENT_INUMS = {
     "jans_fido2_test_client_2_inum": "FF81-2D39",
 }
 
+LOCK_TEST_CLIENT_ID = "2202.A7C3-5E19"
+
 
 def _env(name, required=True, default=None):
     value = os.environ.get(name, default)
@@ -84,6 +86,8 @@ def build_ctx():
         ctx[inum_var] = inum
         ctx[f"{prefix}_pw"] = f"{inum}-{host_label}"
 
+    ctx["lock_test_client_id"] = LOCK_TEST_CLIENT_ID
+    ctx["lock_test_client_pw"] = f"{LOCK_TEST_CLIENT_ID}-{host_label}"
     return ctx
 
 
@@ -155,6 +159,8 @@ def render():
          TEST_TEMPLATES / "scim-client" / "client" / "config-scim-test.properties"),
         ("jans-config-api/profiles", "config-api-test.properties",
          TEST_TEMPLATES / "jans-config-api" / "client" / "config-api-test.properties"),
+        ("jans-lock/lock-server/client/profiles", "config-jans-lock-test-data.properties",
+         TEST_TEMPLATES / "jans-lock" / "client" / "config-jans-lock-test-data.properties"),
     ]
     for prof_root, dest, template in templated:
         _write(REPO / prof_root / fqdn / dest, template.read_text(encoding="utf-8") % ctx)

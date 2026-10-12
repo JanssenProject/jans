@@ -166,7 +166,7 @@ tags:
 | idGenerationEndpoint | ID Generation endpoint URL | [Details](#idgenerationendpoint) |
 | idJagIssueRefreshToken | Whether to issue refresh tokens after accepting an ID-JAG (Resource AS role). Spec recommends false. | [Details](#idjagissuerefreshtoken) |
 | idJagLifetime | Lifetime in seconds for ID-JAGs issued by this AS (IdP role). | [Details](#idjaglifetime) |
-| idJagTrustedIdpIssuers | Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. | [Details](#idjagtrustedidpissuers) |
+| idJagTrustedIdpIssuers | Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used. | [Details](#idjagtrustedidpissuers) |
 | idTokenEncryptionAlgValuesSupported | A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionalgvaluessupported) |
 | idTokenEncryptionEncValuesSupported | A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionencvaluessupported) |
 | idTokenFilterClaimsBasedOnAccessToken | Boolean value specifying whether idToken filters claims based on accessToken | [Details](#idtokenfilterclaimsbasedonaccesstoken) |
@@ -308,6 +308,7 @@ tags:
 | statusListIndexAllocationBlockSize | Specifies how many status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100. | [Details](#statuslistindexallocationblocksize) |
 | statusListResponseJwtLifetime | The status list response JWT lifetime (used to set exp claim in JWT). | [Details](#statuslistresponsejwtlifetime) |
 | statusListResponseJwtSignatureAlgorithm | The status list signature algorithm to sign response JWT. Defaults to RS256. | [Details](#statuslistresponsejwtsignaturealgorithm) |
+| strictTokenRedirectUriValidation | Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client. | [Details](#stricttokenredirecturivalidation) |
 | subjectIdentifiersPerClientSupported | A list of the subject identifiers supported per client | [Details](#subjectidentifiersperclientsupported) |
 | subjectTypesSupported | This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public. | [Details](#subjecttypessupported) |
 | tokenEndpoint | The token endpoint URL | [Details](#tokenendpoint) |
@@ -1755,7 +1756,7 @@ tags:
 
 ## idJagTrustedIdpIssuers
 
-- Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.
+- Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used.
 
 - Required: No
 
@@ -3029,6 +3030,15 @@ tags:
 - Required: No
 
 - Default value: None
+
+
+## strictTokenRedirectUriValidation
+
+- Description: Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client.
+
+- Required: No
+
+- Default value: true
 
 
 ## subjectIdentifiersPerClientSupported

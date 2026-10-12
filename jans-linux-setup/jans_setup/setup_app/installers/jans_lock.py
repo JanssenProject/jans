@@ -6,7 +6,7 @@ import tempfile
 
 
 from setup_app.utils import base
-from setup_app.static import AppType, InstallOption
+from setup_app.static import AppType, InstallOption, SearchScopes
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.utils.ldif_utils import myLdifParser, create_client_ldif
@@ -178,6 +178,7 @@ class JansLockInstaller(JettyInstaller):
             self.logIt(warning)
             if Config.installed_instance:
                 print(warning)
+            self.bind_test_client_to_trace()
             return
 
         self.logIt("Loding Jans Lock test data")
@@ -185,3 +186,19 @@ class JansLockInstaller(JettyInstaller):
         self.render_templates_folder(os.path.join(Config.template_folder, 'test', self.service_name))
         ldif_fn = os.path.join(Config.output_dir, 'test', self.service_name, 'data/test-data.ldif')
         self.dbUtils.import_ldif([ldif_fn])
+        self.bind_test_client_to_trace()
+
+    def bind_test_client_to_trace(self):
+        dn = 'ou=jans-lock,ou=configuration,o=jans'
+        result = self.dbUtils.search(search_base=dn, search_filter='(objectClass=jansAppConf)', search_scope=SearchScopes.BASE)
+        if not result:
+            return
+
+        dynamic_conf = json.loads(result['jansConfDyn'])
+        bindings = dynamic_conf.setdefault('traceConfiguration', {}).setdefault('clientDomainBindings', [])
+        if any(binding.get('clientId') == Config.lock_test_client_id for binding in bindings):
+            return
+
+        bindings.append({'clientId': Config.lock_test_client_id, 'evidenceDomainId': 'default', 'allowedProducerIds': ['*']})
+        self.dbUtils.set_configuration('jansConfDyn', json.dumps(dynamic_conf, indent=2), dn)
+        self.dbUtils.set_configuration('jansRevision', str(int(result.get("jansRevision") or 0) + 1), dn)

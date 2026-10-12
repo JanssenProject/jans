@@ -54,6 +54,9 @@ dependencies = [
     "backoff>=2.1.2",
     "docker>=3.7.2",
     "cryptography>=50.0.0",
+
+    # conform to post-quantum cryptography support https://github.com/JanssenProject/jans/issues/15059
+    "grpcio>=1.83.0",
     "google-cloud-secret-manager>=2.2.0",
     "pymysql>=1.0.2",
     "sqlalchemy>=2.0",
