@@ -104,6 +104,25 @@ class CjarArchiveTest {
 	}
 
 	@Test
+	void rejectsArchiveOverUncompressedLimit() throws IOException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try (ZipOutputStream zos = new ZipOutputStream(out)) {
+			zos.putNextEntry(new ZipEntry("metadata.json"));
+			zos.write("{\"policy_store\":{\"id\":\"abc\"}}".getBytes(StandardCharsets.UTF_8));
+			zos.closeEntry();
+			zos.putNextEntry(new ZipEntry("policies/big.cedar"));
+			byte[] chunk = new byte[1024 * 1024];
+			for (long written = 0; written <= CjarArchive.MAX_TOTAL_UNCOMPRESSED_BYTES; written += chunk.length) {
+				zos.write(chunk);
+			}
+			zos.closeEntry();
+		}
+		byte[] archive = out.toByteArray();
+
+		assertThrows(IllegalStateException.class, () -> CjarArchive.readPolicyStoreMetadata(archive, 0, objectMapper));
+	}
+
+	@Test
 	void computesSha256BundleHash() {
 		assertEquals("sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
 				CjarArchive.bundleHash("abc".getBytes(StandardCharsets.UTF_8)));

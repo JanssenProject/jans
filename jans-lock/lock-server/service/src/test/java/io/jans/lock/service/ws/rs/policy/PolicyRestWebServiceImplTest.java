@@ -23,6 +23,8 @@ class PolicyRestWebServiceImplTest {
 		assertFalse(PolicyRestWebServiceImpl.matchesIfNoneMatch("", HASH));
 		assertFalse(PolicyRestWebServiceImpl.matchesIfNoneMatch("\"sha256:other\"", HASH));
 		assertFalse(PolicyRestWebServiceImpl.matchesIfNoneMatch("\"" + HASH + "\"", null));
+		assertFalse(PolicyRestWebServiceImpl.matchesIfNoneMatch("\"other," + HASH + ",suffix\"", HASH));
+		assertFalse(PolicyRestWebServiceImpl.matchesIfNoneMatch("\"unterminated", HASH));
 	}
 
 }

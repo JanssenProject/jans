@@ -33,6 +33,8 @@ public final class CjarArchive {
 
 	public static final int MAX_METADATA_BYTES = 1024 * 1024;
 
+	public static final long MAX_TOTAL_UNCOMPRESSED_BYTES = 100L * 1024 * 1024;
+
 	private static final char[] HEX = "0123456789abcdef".toCharArray();
 
 	private CjarArchive() {
@@ -40,6 +42,8 @@ public final class CjarArchive {
 
 	public static JsonNode readPolicyStoreMetadata(byte[] archive, int maxEntries, ObjectMapper objectMapper) throws IOException {
 		JsonNode policyStore = null;
+		long totalBytes = 0;
+		byte[] buffer = new byte[8192];
 		try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(archive))) {
 			ZipEntry ze;
 			int entriesCount = 0;
@@ -49,20 +53,31 @@ public final class CjarArchive {
 					throw new IllegalStateException("Archive contains too many files.");
 				}
 
-				if (policyStore != null || ze.isDirectory() || !METADATA_ENTRY.equals(ze.getName())) {
-					continue;
+				if (policyStore == null && !ze.isDirectory() && METADATA_ENTRY.equals(ze.getName())) {
+					byte[] metadataBytes = zis.readNBytes(MAX_METADATA_BYTES + 1);
+					if (metadataBytes.length > MAX_METADATA_BYTES) {
+						throw new IllegalStateException("Archive metadata.json is too large.");
+					}
+					totalBytes = addUncompressed(totalBytes, metadataBytes.length);
+					policyStore = parseMetadata(metadataBytes, objectMapper).path("policy_store");
 				}
 
-				byte[] metadataBytes = zis.readNBytes(MAX_METADATA_BYTES + 1);
-				if (metadataBytes.length > MAX_METADATA_BYTES) {
-					throw new IllegalStateException("Archive metadata.json is too large.");
+				int read;
+				while ((read = zis.read(buffer)) != -1) {
+					totalBytes = addUncompressed(totalBytes, read);
 				}
-
-				policyStore = parseMetadata(metadataBytes, objectMapper).path("policy_store");
 			}
 		}
 
 		return policyStore;
+	}
+
+	private static long addUncompressed(long totalBytes, int read) {
+		long total = totalBytes + read;
+		if (total > MAX_TOTAL_UNCOMPRESSED_BYTES) {
+			throw new IllegalStateException("Archive uncompressed size exceeds " + MAX_TOTAL_UNCOMPRESSED_BYTES + " bytes.");
+		}
+		return total;
 	}
 
 	private static JsonNode parseMetadata(byte[] metadataBytes, ObjectMapper objectMapper) {

@@ -187,7 +187,21 @@ impl std::fmt::Debug for LockAccessToken {
 
 fn bearer_for_origin(origin: &url::Origin, token: &LockAccessToken, uri: &str) -> Option<String> {
     let url = url::Url::parse(uri).ok()?;
-    (origin.is_tuple() && url.origin() == *origin).then(|| token.0.clone())
+    let secure = match url.scheme() {
+        "https" => true,
+        "http" => is_loopback_host(&url),
+        _ => false,
+    };
+    (secure && origin.is_tuple() && url.origin() == *origin).then(|| token.0.clone())
+}
+
+fn is_loopback_host(url: &url::Url) -> bool {
+    match url.host() {
+        Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
+        Some(url::Host::Ipv4(ip)) => ip.is_loopback(),
+        Some(url::Host::Ipv6(ip)) => ip.is_loopback(),
+        None => false,
+    }
 }
 
 /// Stores logs in a buffer then sends them to the lock server in the background
@@ -752,7 +766,8 @@ mod test {
                 &token,
                 "https://lock.example.org/jans-lock/api/v1/policy/abc"
             ),
-            Some("lock.access.token".to_string())
+            Some("lock.access.token".to_string()),
+            "same https origin should receive the token"
         );
         assert_eq!(
             bearer_for_origin(
@@ -760,7 +775,8 @@ mod test {
                 &token,
                 "https://github.com/org/repo/releases/download/v1/store.cjar"
             ),
-            None
+            None,
+            "other hosts must not receive the token"
         );
         assert_eq!(
             bearer_for_origin(
@@ -768,7 +784,8 @@ mod test {
                 &token,
                 "http://lock.example.org/jans-lock/api/v1/policy/abc"
             ),
-            None
+            None,
+            "a different scheme is a different origin"
         );
         assert_eq!(
             bearer_for_origin(
@@ -776,15 +793,55 @@ mod test {
                 &token,
                 "https://lock.example.org:8443/jans-lock/api/v1/policy/abc"
             ),
-            None
+            None,
+            "a different port is a different origin"
         );
-        assert_eq!(bearer_for_origin(&origin, &token, "not a url"), None);
+        assert_eq!(
+            bearer_for_origin(&origin, &token, "not a url"),
+            None,
+            "unparsable URIs must not receive the token"
+        );
+    }
+
+    #[test]
+    fn test_policy_store_bearer_requires_https_except_loopback() {
+        let token = LockAccessToken("lock.access.token".to_string());
+        let plain_origin =
+            url::Url::parse("http://lock.example.org/.well-known/lock-server-configuration")
+                .expect("valid url")
+                .origin();
+        assert_eq!(
+            bearer_for_origin(
+                &plain_origin,
+                &token,
+                "http://lock.example.org/jans-lock/api/v1/policy/abc"
+            ),
+            None,
+            "plaintext HTTP to a non-loopback host must not carry the token"
+        );
+
+        let loopback_origin =
+            url::Url::parse("http://127.0.0.1:8080/.well-known/lock-server-configuration")
+                .expect("valid url")
+                .origin();
+        assert_eq!(
+            bearer_for_origin(
+                &loopback_origin,
+                &token,
+                "http://127.0.0.1:8080/jans-lock/api/v1/policy/abc"
+            ),
+            Some("lock.access.token".to_string()),
+            "plaintext HTTP to a loopback Lock Server is allowed for local development"
+        );
     }
 
     #[test]
     fn test_lock_access_token_debug_is_redacted() {
         let token = LockAccessToken("lock.access.token".to_string());
-        assert!(!format!("{token:?}").contains("lock.access.token"));
+        assert!(
+            !format!("{token:?}").contains("lock.access.token"),
+            "Debug output must not expose the access token"
+        );
     }
 
     #[tokio::test]

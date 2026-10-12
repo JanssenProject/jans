@@ -175,14 +175,36 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 			return false;
 		}
 
-		for (String candidate : ifNoneMatch.split(",")) {
-			String tag = candidate.trim();
-			if (tag.startsWith("W/")) {
-				tag = tag.substring(2);
+		int i = 0;
+		int length = ifNoneMatch.length();
+		while (i < length) {
+			char c = ifNoneMatch.charAt(i);
+			if (c == ',' || Character.isWhitespace(c)) {
+				i++;
+				continue;
 			}
-			if (tag.length() >= 2 && tag.startsWith("\"") && tag.endsWith("\"")) {
-				tag = tag.substring(1, tag.length() - 1);
+
+			if (ifNoneMatch.startsWith("W/", i)) {
+				i += 2;
 			}
+
+			String tag;
+			if (i < length && ifNoneMatch.charAt(i) == '"') {
+				int end = ifNoneMatch.indexOf('"', i + 1);
+				if (end < 0) {
+					return false;
+				}
+				tag = ifNoneMatch.substring(i + 1, end);
+				i = end + 1;
+			} else {
+				int end = ifNoneMatch.indexOf(',', i);
+				if (end < 0) {
+					end = length;
+				}
+				tag = ifNoneMatch.substring(i, end).trim();
+				i = end;
+			}
+
 			if ("*".equals(tag) || bundleHash.equals(tag)) {
 				return true;
 			}
