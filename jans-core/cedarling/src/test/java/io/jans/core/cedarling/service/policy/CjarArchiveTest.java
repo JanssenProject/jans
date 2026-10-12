@@ -75,6 +75,35 @@ class CjarArchiveTest {
 	}
 
 	@Test
+	void rejectsTooManyEntriesAfterMetadata() throws IOException {
+		Map<String, String> entries = new LinkedHashMap<>();
+		entries.put("metadata.json", "{\"policy_store\":{\"id\":\"abc\"}}");
+		entries.put("a.cedar", "");
+		entries.put("b.cedar", "");
+		byte[] archive = zip(entries);
+
+		assertThrows(IllegalStateException.class, () -> CjarArchive.readPolicyStoreMetadata(archive, 2, objectMapper));
+	}
+
+	@Test
+	void rejectsMalformedMetadata() throws IOException {
+		Map<String, String> entries = new LinkedHashMap<>();
+		entries.put("metadata.json", "{not json");
+		byte[] archive = zip(entries);
+
+		assertThrows(IllegalStateException.class, () -> CjarArchive.readPolicyStoreMetadata(archive, 0, objectMapper));
+	}
+
+	@Test
+	void rejectsEmptyMetadata() throws IOException {
+		Map<String, String> entries = new LinkedHashMap<>();
+		entries.put("metadata.json", "");
+		byte[] archive = zip(entries);
+
+		assertThrows(IllegalStateException.class, () -> CjarArchive.readPolicyStoreMetadata(archive, 0, objectMapper));
+	}
+
+	@Test
 	void computesSha256BundleHash() {
 		assertEquals("sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
 				CjarArchive.bundleHash("abc".getBytes(StandardCharsets.UTF_8)));

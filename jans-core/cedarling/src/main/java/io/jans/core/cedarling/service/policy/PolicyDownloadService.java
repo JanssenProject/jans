@@ -307,6 +307,11 @@ public class PolicyDownloadService {
 				return null;
 			}
 
+			if (httpResponse.getEntity() == null) {
+				log.debug("Empty Sigstore bundle response from URI {}", bundleUri);
+				return null;
+			}
+
 			byte[] bundle;
 			try (InputStream is = httpResponse.getEntity().getContent()) {
 				bundle = is.readNBytes(MAX_SIGSTORE_BUNDLE_BYTES + 1);

@@ -20,6 +20,8 @@ import io.jans.util.StringHelper;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -103,7 +105,12 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 
 	        LoadedPolicySource policy = policies.get(uri);
 	        if (policy.isArchive()) {
-	        	response = Response.ok(policy.getArchive(), PolicyDownloadService.APPLICATION_ZIP_TYPE).tag(policy.getBundleHash()).build();
+	        	EntityTag entityTag = new EntityTag(policy.getBundleHash());
+	        	if (matchesIfNoneMatch(getHttpRequest().getHeader(HttpHeaders.IF_NONE_MATCH), policy.getBundleHash())) {
+	        		response = Response.notModified(entityTag).build();
+	        	} else {
+	        		response = Response.ok(policy.getArchive(), PolicyDownloadService.APPLICATION_ZIP_TYPE).tag(entityTag).build();
+	        	}
 	        } else {
 	        	response = Response.ok().entity(policy.getPolicyJson()).build();
 	        }
@@ -161,6 +168,27 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
         } finally {
             applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
         }
+	}
+
+	static boolean matchesIfNoneMatch(String ifNoneMatch, String bundleHash) {
+		if (StringHelper.isEmpty(ifNoneMatch) || StringHelper.isEmpty(bundleHash)) {
+			return false;
+		}
+
+		for (String candidate : ifNoneMatch.split(",")) {
+			String tag = candidate.trim();
+			if (tag.startsWith("W/")) {
+				tag = tag.substring(2);
+			}
+			if (tag.length() >= 2 && tag.startsWith("\"") && tag.endsWith("\"")) {
+				tag = tag.substring(1, tag.length() - 1);
+			}
+			if ("*".equals(tag) || bundleHash.equals(tag)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

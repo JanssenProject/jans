@@ -23,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -38,6 +39,7 @@ public final class CjarArchive {
 	}
 
 	public static JsonNode readPolicyStoreMetadata(byte[] archive, int maxEntries, ObjectMapper objectMapper) throws IOException {
+		JsonNode policyStore = null;
 		try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(archive))) {
 			ZipEntry ze;
 			int entriesCount = 0;
@@ -47,7 +49,7 @@ public final class CjarArchive {
 					throw new IllegalStateException("Archive contains too many files.");
 				}
 
-				if (ze.isDirectory() || !METADATA_ENTRY.equals(ze.getName())) {
+				if (policyStore != null || ze.isDirectory() || !METADATA_ENTRY.equals(ze.getName())) {
 					continue;
 				}
 
@@ -56,11 +58,28 @@ public final class CjarArchive {
 					throw new IllegalStateException("Archive metadata.json is too large.");
 				}
 
-				return objectMapper.readTree(metadataBytes).path("policy_store");
+				policyStore = parseMetadata(metadataBytes, objectMapper).path("policy_store");
 			}
 		}
 
-		return null;
+		return policyStore;
+	}
+
+	private static JsonNode parseMetadata(byte[] metadataBytes, ObjectMapper objectMapper) {
+		JsonNode metadata;
+		try {
+			metadata = objectMapper.readTree(metadataBytes);
+		} catch (JsonProcessingException ex) {
+			throw new IllegalStateException("Archive metadata.json is not valid JSON.", ex);
+		} catch (IOException ex) {
+			throw new IllegalStateException("Archive metadata.json could not be read.", ex);
+		}
+
+		if (metadata == null || !metadata.isObject()) {
+			throw new IllegalStateException("Archive metadata.json is empty or not a JSON object.");
+		}
+
+		return metadata;
 	}
 
 	public static String text(JsonNode node, String field) {
