@@ -15696,17 +15696,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanEdit:
-          type: boolean
         userCanView:
-          type: boolean
-        adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16364,8 +16364,6 @@ components:
           type: array
           items:
             type: string
-        strictTokenRedirectUriValidation:
-          type: boolean
         legacyIdTokenClaims:
           type: boolean
         customHeadersWithAuthorizationResponse:
@@ -18725,9 +18723,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object
