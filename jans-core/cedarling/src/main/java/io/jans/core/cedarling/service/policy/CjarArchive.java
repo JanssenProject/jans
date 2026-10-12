@@ -37,7 +37,7 @@ public final class CjarArchive {
 	private CjarArchive() {
 	}
 
-	public static String readPolicyStoreId(byte[] archive, int maxEntries, ObjectMapper objectMapper) throws IOException {
+	public static JsonNode readPolicyStoreMetadata(byte[] archive, int maxEntries, ObjectMapper objectMapper) throws IOException {
 		try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(archive))) {
 			ZipEntry ze;
 			int entriesCount = 0;
@@ -56,12 +56,16 @@ public final class CjarArchive {
 					throw new IllegalStateException("Archive metadata.json is too large.");
 				}
 
-				JsonNode id = objectMapper.readTree(metadataBytes).path("policy_store").path("id");
-				return id.isTextual() ? id.asText() : "";
+				return objectMapper.readTree(metadataBytes).path("policy_store");
 			}
 		}
 
 		return null;
+	}
+
+	public static String text(JsonNode node, String field) {
+		JsonNode value = node.path(field);
+		return value.isTextual() ? value.asText() : null;
 	}
 
 	public static String bundleHash(byte[] archive) {

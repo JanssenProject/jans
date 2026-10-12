@@ -14,6 +14,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 class CjarArchiveTest {
@@ -33,20 +34,24 @@ class CjarArchiveTest {
 	}
 
 	@Test
-	void readsPolicyStoreIdFromRootMetadata() throws IOException {
+	void readsPolicyStoreFromRootMetadata() throws IOException {
 		Map<String, String> entries = new LinkedHashMap<>();
 		entries.put("policies/allow.cedar", "permit(principal, action, resource);");
-		entries.put("metadata.json", "{\"cedar_version\":\"4.4.0\",\"policy_store\":{\"id\":\"abc123def456\",\"version\":\"1.0.0\"}}");
+		entries.put("metadata.json", "{\"cedar_version\":\"4.4.0\",\"policy_store\":{\"id\":\"abc123def456\",\"name\":\"store\",\"version\":\"1.0.0\"}}");
 
-		assertEquals("abc123def456", CjarArchive.readPolicyStoreId(zip(entries), 0, objectMapper));
+		JsonNode policyStore = CjarArchive.readPolicyStoreMetadata(zip(entries), 0, objectMapper);
+
+		assertEquals("abc123def456", CjarArchive.text(policyStore, "id"));
+		assertEquals("store", CjarArchive.text(policyStore, "name"));
+		assertEquals("1.0.0", CjarArchive.text(policyStore, "version"));
 	}
 
 	@Test
-	void returnsEmptyIdWhenMetadataHasNoId() throws IOException {
+	void returnsNullIdWhenMetadataHasNoId() throws IOException {
 		Map<String, String> entries = new LinkedHashMap<>();
 		entries.put("metadata.json", "{\"cedar_version\":\"4.4.0\",\"policy_store\":{}}");
 
-		assertEquals("", CjarArchive.readPolicyStoreId(zip(entries), 0, objectMapper));
+		assertNull(CjarArchive.text(CjarArchive.readPolicyStoreMetadata(zip(entries), 0, objectMapper), "id"));
 	}
 
 	@Test
@@ -55,7 +60,7 @@ class CjarArchiveTest {
 		entries.put("store.json", "{\"cedar_version\":\"v4.0.0\",\"policy_stores\":{}}");
 		entries.put("nested/metadata.json", "{}");
 
-		assertNull(CjarArchive.readPolicyStoreId(zip(entries), 0, objectMapper));
+		assertNull(CjarArchive.readPolicyStoreMetadata(zip(entries), 0, objectMapper));
 	}
 
 	@Test
@@ -66,7 +71,7 @@ class CjarArchiveTest {
 		entries.put("metadata.json", "{}");
 		byte[] archive = zip(entries);
 
-		assertThrows(IllegalStateException.class, () -> CjarArchive.readPolicyStoreId(archive, 2, objectMapper));
+		assertThrows(IllegalStateException.class, () -> CjarArchive.readPolicyStoreMetadata(archive, 2, objectMapper));
 	}
 
 	@Test

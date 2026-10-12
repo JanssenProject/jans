@@ -58,4 +58,31 @@ public interface PolicyRestWebService {
     @Path(ApiAccessConstants.URI_PATH)
 	public Response getPolicyByUri(@Parameter(description = "Policy URI") @PathParam(ApiAccessConstants.URI) @NotNull String uri);
 
+	@Operation(summary = "List loaded policy store archives", description = "List loaded .cjar policy stores with version, source and bundle hash", tags = {
+			"Lock - Policy" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+					ApiAccessConstants.LOCK_POLICY_READ_ACCESS }))
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class, description = "PolicyStores"))),
+			@ApiResponse(responseCode = "401", description = "Unauthorized"),
+			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
+	@GET
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_POLICY_READ_ACCESS })
+	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id="lock_policy_list", path="/policy")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/stores")
+	public Response getPolicyStores();
+
+	@Operation(summary = "Request policy store Sigstore bundle", description = "Request the Sigstore bundle published next to a .cjar policy store source", tags = {
+			"Lock - Policy" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+					ApiAccessConstants.LOCK_POLICY_READ_ACCESS }))
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class, description = "SigstoreBundle"))),
+			@ApiResponse(responseCode = "401", description = "Unauthorized"),
+			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
+			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
+	@GET
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_POLICY_READ_ACCESS })
+	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id="lock_policy_get_by_id", path="/policy")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path(ApiAccessConstants.URI_PATH + "/sigstore")
+	public Response getPolicySigstoreBundle(@Parameter(description = "Policy store id") @PathParam(ApiAccessConstants.URI) @NotNull String uri);
+
 }
