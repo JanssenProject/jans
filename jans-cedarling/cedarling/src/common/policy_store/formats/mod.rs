@@ -21,6 +21,11 @@ pub(crate) mod file_id;
 pub(crate) mod v0;
 pub(crate) mod v1;
 
+/// The current spec version: the only one that converts into runtime types,
+/// and the one every older version migrates to. Bumping the version points
+/// this at the new module.
+pub(super) use v1 as current;
+
 use std::borrow::Cow;
 use std::fmt;
 
@@ -31,7 +36,7 @@ use super::PolicyStoreWithID;
 use super::errors::{PolicyStoreError, ValidationError};
 use super::loader::{EntityFile, PolicyFile, StoreFs};
 use super::manager::ConversionError;
-use super::migration;
+use super::migration::IntoCurrent;
 use super::schema_parser::ParsedSchema;
 
 /// Where every spec version keeps its metadata.
@@ -41,7 +46,7 @@ use super::schema_parser::ParsedSchema;
 pub(super) const METADATA_FILE: &str = "metadata.json";
 
 /// Spec version that runtime types are built from.
-pub(crate) const CURRENT_FORMAT_VERSION: u32 = v1::SPEC_VERSION;
+pub(crate) const CURRENT_FORMAT_VERSION: u32 = current::SPEC_VERSION;
 /// Oldest spec version this Cedarling still reads; also assumed when the field is missing.
 /// v0 is the unversioned baseline that predates `policy_store_spec_version`.
 pub(crate) const MIN_SUPPORTED_FORMAT_VERSION: u32 = v0::SPEC_VERSION;
@@ -274,13 +279,11 @@ pub(super) fn read_policy_store(
     let (metadata_json, selected) = read_metadata(fs)?;
 
     let doc = match selected.format {
-        FormatVersion::V0 => {
-            migration::v0_to_v1::migrate(v0::read(fs, metadata_json, strict_schema_validation)?)
-        },
-        FormatVersion::V1 => v1::read(fs, metadata_json, strict_schema_validation)?,
+        FormatVersion::V0 => v0::read(fs, metadata_json, strict_schema_validation)?.into_current(),
+        FormatVersion::V1 => v1::read(fs, metadata_json, strict_schema_validation)?.into_current(),
     };
 
-    let (store, metadata) = v1::into_runtime(doc, strict_schema_validation)?;
+    let (store, metadata) = current::into_runtime(doc, strict_schema_validation)?;
 
     Ok(ParsedPolicyStore {
         store: PolicyStoreWithID {
@@ -545,6 +548,20 @@ mod tests {
         );
     }
 
+    /// `select_version` maps numbers to modules with a `match` on `u32`, which
+    /// the compiler cannot check for gaps; this does.
+    #[test]
+    fn every_supported_version_is_selectable() {
+        for version in MIN_SUPPORTED_FORMAT_VERSION..=CURRENT_FORMAT_VERSION {
+            let selected = select_version(&metadata_with_version(&version.to_string()))
+                .unwrap_or_else(|err| panic!("version {version} should be selectable: {err:?}"));
+            assert_eq!(
+                selected.spec_version, version,
+                "version {version} should be read as itself"
+            );
+        }
+    }
+
     #[test]
     fn newer_version_fails_closed() {
         let err = select_version(&metadata_with_version(
@@ -652,8 +669,8 @@ mod tests {
                 }
             }
         };
-        check(&v0_sources, &["v1::", "migration::"]);
-        check(&v1_sources, &["v0::", "migration::"]);
+        check(&v0_sources, &["v1::", "current::", "migration::"]);
+        check(&v1_sources, &["v0::", "current::", "migration::"]);
         check(&runtime_sources, &["formats::v", "migration::"]);
     }
 }

@@ -9,23 +9,28 @@
 //! copied field by field. Nothing is lost: v0 already ignores unknown keys at
 //! parse time, exactly as v1 does.
 
+use super::Upgrade;
 use crate::common::policy_store::formats::{v0, v1};
 
 /// Migrates a whole v0 store to v1.
-pub(crate) fn migrate(doc: v0::PolicyStoreDoc) -> v1::PolicyStoreDoc {
-    v1::PolicyStoreDoc {
-        metadata: migrate_metadata(doc.metadata),
-        trusted_issuers: doc
-            .trusted_issuers
-            .into_iter()
-            .map(migrate_trusted_issuer)
-            .collect(),
-        custom_issuers: doc
-            .custom_issuers
-            .into_iter()
-            .map(migrate_custom_issuer)
-            .collect(),
-        content: doc.content,
+impl Upgrade for v0::PolicyStoreDoc {
+    type Next = v1::PolicyStoreDoc;
+
+    fn upgrade(self) -> v1::PolicyStoreDoc {
+        v1::PolicyStoreDoc {
+            metadata: migrate_metadata(self.metadata),
+            trusted_issuers: self
+                .trusted_issuers
+                .into_iter()
+                .map(migrate_trusted_issuer)
+                .collect(),
+            custom_issuers: self
+                .custom_issuers
+                .into_iter()
+                .map(migrate_custom_issuer)
+                .collect(),
+            content: self.content,
+        }
     }
 }
 
@@ -235,7 +240,7 @@ mod tests {
 
     #[test]
     fn whole_store_migrates_every_component() {
-        let migrated = migrate(v0::PolicyStoreDoc {
+        let migrated = v0::PolicyStoreDoc {
             metadata: v0_metadata(),
             trusted_issuers: vec![v0_issuer()],
             custom_issuers: vec![v0_custom_issuer()],
@@ -246,7 +251,8 @@ mod tests {
                 templates: vec![],
                 entities: vec![],
             },
-        });
+        }
+        .upgrade();
 
         assert_eq!(
             migrated.metadata,

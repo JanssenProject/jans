@@ -5,7 +5,48 @@
 
 //! In-memory migration between adjacent policy store formats.
 //!
-//! Each `vN_to_vM` step depends only on its two version modules; older
-//! stores reach the current version by chaining steps.
+//! Each `vN_to_vM` step implements [`Upgrade`] for the older version's doc and
+//! depends only on its two version modules. [`IntoCurrent`] chains the steps,
+//! so every supported version reaches the current one without a hand-written
+//! path per version, and a missing step fails to compile where that version
+//! is dispatched.
 
 pub(crate) mod v0_to_v1;
+
+use crate::common::policy_store::formats::current;
+
+/// The doc of the current spec version, the only one that converts into
+/// runtime types.
+pub(super) type CurrentDoc = current::PolicyStoreDoc;
+
+/// One migration step, from a spec version's doc to the next version's.
+///
+/// Written by hand for each step: how fields map between two versions is a
+/// decision, not something to derive.
+pub(super) trait Upgrade {
+    type Next;
+
+    fn upgrade(self) -> Self::Next;
+}
+
+/// Brings the doc of any supported spec version up to [`CurrentDoc`] by
+/// applying each [`Upgrade`] step in turn.
+pub(super) trait IntoCurrent {
+    fn into_current(self) -> CurrentDoc;
+}
+
+impl IntoCurrent for CurrentDoc {
+    fn into_current(self) -> CurrentDoc {
+        self
+    }
+}
+
+impl<T> IntoCurrent for T
+where
+    T: Upgrade,
+    T::Next: IntoCurrent,
+{
+    fn into_current(self) -> CurrentDoc {
+        self.upgrade().into_current()
+    }
+}
