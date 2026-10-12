@@ -40,6 +40,15 @@ import io.jans.lock.service.trace.model.TokenRef;
  */
 public interface TraceStore {
 
+	/**
+	 * {@link TraceStorageException#getReason()} value used when {@link #updateRecordFlags} loses a
+	 * compare-and-swap race against the expected version (design decision D-9, TRACE CAS MVP task
+	 * 11). {@link io.jans.lock.service.trace.correlation.TraceCorrelationService} is the only
+	 * caller that special-cases this reason for retry; any other reason keeps the pre-existing
+	 * log-and-swallow behavior.
+	 */
+	String VERSION_CONFLICT_REASON = "version_conflict";
+
 	// -- records ------------------------------------------------------------------------------
 
 	/**
@@ -51,13 +60,17 @@ public interface TraceStore {
 
 	/**
 	 * Replaces the three mutable correlation flags ({@code coverageGap}, {@code chainLinkFailure},
-	 * {@code equivocation}) on the record identified by {@code id}; {@code late} is fixed at
-	 * ingestion and is never changed here (design §10, T-1, design decision D-9).
+	 * {@code equivocation}) on the record identified by {@code id}, succeeding only if the record's
+	 * currently stored version still equals {@code expectedVersion} (design §10, T-1, design
+	 * decisions D-9, CAS MVP D-3); {@code late} is fixed at ingestion and is never changed here.
 	 *
-	 * @return {@code true} if a matching record was found and updated, {@code false} otherwise
-	 * @throws TraceStorageException on a persistence failure
+	 * @return {@code true} if a matching record was found and updated, {@code false} if no record
+	 *         with this identity exists
+	 * @throws TraceStorageException on a persistence failure, including a lost compare-and-swap
+	 *                                race ({@link #VERSION_CONFLICT_REASON})
 	 */
-	boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags) throws TraceStorageException;
+	boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags, long expectedVersion)
+			throws TraceStorageException;
 
 	Optional<StoredTraceRecord> findRecord(RecordIdentity id);
 
