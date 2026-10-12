@@ -7,6 +7,7 @@ import io.jans.core.cedarling.model.CedarlingConfiguration;
 import io.jans.core.cedarling.model.LockProtectionMode;
 import io.jans.doc.annotation.DocProperty;
 
+import java.util.Arrays;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,9 +29,9 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "DB attribute name for storing user role")
     private String roleAttributeName = "jansAdminUIRole";
     
-    @DocProperty(description = " Role names corresponding to `admin` role")
+    @DocProperty(description = " Role names corresponding to `admin` role", defaultValue = "[`admin`, `api-admin`]")
     @Schema(description = "Role names corresponding to `admin` role")
-    private List<String> adminRoleNames;
+    private List<String> adminRoleNames = Arrays.asList("admin", "api-admin");
     
     @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `false`.")
     private boolean disableLoggerTimer;

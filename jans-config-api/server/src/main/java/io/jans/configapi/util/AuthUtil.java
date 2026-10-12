@@ -973,17 +973,6 @@ public class AuthUtil {
         return sw.toString();
     }
     
-    public static List<String> getListFromRawObject(Object rawObject){
-        return Optional.ofNullable(rawObject)
-                .filter(List.class::isInstance)
-                .map(List.class::cast)
-                .orElse(Collections.emptyList())
-                .stream()
-                .filter(String.class::isInstance)
-                .map(String.class::cast)
-                .toList();         
-    }
-    
     public static Optional<String> getStringFromObject(Object raw) {
         if (raw == null) {
             return Optional.empty();
@@ -994,8 +983,6 @@ public class AuthUtil {
         throw new IllegalStateException(
                 "Expected String, found " + raw.getClass().getName());
     }
-
-    
     
     public static List<String> getListFromObject(Object raw) {
         if (raw == null) {

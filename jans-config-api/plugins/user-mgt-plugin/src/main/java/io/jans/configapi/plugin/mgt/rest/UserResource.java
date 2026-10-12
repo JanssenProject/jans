@@ -767,10 +767,8 @@ public class UserResource extends BaseResource {
         }
 
         // Return if user is updating own profile
-        if (StringUtils.isNotBlank(userInum)
-                && ((userInum.equals(headerUserInum)) || (userInum.equals(this.getContextClientId(servletRequest))))) {
-            logger.info(
-                    "UserResource::validateUserPermission() user is updating own profile :{}", userInum);
+        if (StringUtils.isNotBlank(userInum) && userInum.equals(this.getContextClientId(servletRequest))) {
+            logger.info("UserResource::validateUserPermission() user is updating own profile :{}", userInum);
             return;
         }
 
@@ -826,13 +824,15 @@ public class UserResource extends BaseResource {
             // check if `admin-role
             if (loggedInUserRoleList != null && !loggedInUserRoleList.isEmpty()) {
                 isAdmin = authUtil.containsAnyElement(loggedInUserRoleList, authUtil.getAdminRoleNames());
-                logger.info("headerUserInum:{}, isAdmin:{}", headerUserInum, isAdmin);
-                return isAdmin;
             }
         }
 
+        logger.info("headerUserInum:{}, isAdmin:{}", headerUserInum, isAdmin);
+        
         // check permission if loggedInUser is null or does not have `admin` role
-        isAdmin = userHasAdminScope(httpRequestMethod, servletRequest);
+       if(!isAdmin) {
+           isAdmin = userHasAdminScope(httpRequestMethod, servletRequest);
+       }
         logger.info(" Final isAdmin - headerUserInum:{}, isAdmin:{}", headerUserInum, isAdmin);
 
         return isAdmin;
