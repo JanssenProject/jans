@@ -176,6 +176,20 @@ struct WorkerSenderAndHandle {
     handle: crate::http::JoinHandle<()>,
 }
 
+#[derive(Clone)]
+pub(crate) struct LockAccessToken(String);
+
+impl std::fmt::Debug for LockAccessToken {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("LockAccessToken([REDACTED])")
+    }
+}
+
+fn bearer_for_origin(origin: &url::Origin, token: &LockAccessToken, uri: &str) -> Option<String> {
+    let url = url::Url::parse(uri).ok()?;
+    (origin.is_tuple() && url.origin() == *origin).then(|| token.0.clone())
+}
+
 /// Stores logs in a buffer then sends them to the lock server in the background
 #[derive(Debug)]
 pub(crate) struct LockService {
@@ -186,12 +200,18 @@ pub(crate) struct LockService {
     health_registry: Option<HealthRegistry>,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
+    lock_origin: url::Origin,
+    access_token: LockAccessToken,
 }
 
 impl LockService {
     /// Returns the shared health registry for registering subsystem health checks.
     pub(crate) fn health_registry(&self) -> Option<&HealthRegistry> {
         self.health_registry.as_ref()
+    }
+
+    pub(crate) fn policy_store_bearer_for(&self, uri: &str) -> Option<String> {
+        bearer_for_origin(&self.lock_origin, &self.access_token, uri)
     }
 }
 
@@ -323,6 +343,8 @@ impl LockService {
             health_registry,
             logger,
             cancel_tkn,
+            lock_origin: bootstrap_conf.config_uri.origin(),
+            access_token: LockAccessToken(access_token),
         })
     }
 
@@ -714,6 +736,55 @@ mod test {
 
         // Check if logs were sent
         log_endpoint.assert();
+    }
+
+    #[test]
+    fn test_policy_store_bearer_only_for_lock_origin() {
+        let origin =
+            url::Url::parse("https://lock.example.org/.well-known/lock-server-configuration")
+                .expect("valid url")
+                .origin();
+        let token = LockAccessToken("lock.access.token".to_string());
+
+        assert_eq!(
+            bearer_for_origin(
+                &origin,
+                &token,
+                "https://lock.example.org/jans-lock/api/v1/policy/abc"
+            ),
+            Some("lock.access.token".to_string())
+        );
+        assert_eq!(
+            bearer_for_origin(
+                &origin,
+                &token,
+                "https://github.com/org/repo/releases/download/v1/store.cjar"
+            ),
+            None
+        );
+        assert_eq!(
+            bearer_for_origin(
+                &origin,
+                &token,
+                "http://lock.example.org/jans-lock/api/v1/policy/abc"
+            ),
+            None
+        );
+        assert_eq!(
+            bearer_for_origin(
+                &origin,
+                &token,
+                "https://lock.example.org:8443/jans-lock/api/v1/policy/abc"
+            ),
+            None
+        );
+        assert_eq!(bearer_for_origin(&origin, &token, "not a url"), None);
+    }
+
+    #[test]
+    fn test_lock_access_token_debug_is_redacted() {
+        let token = LockAccessToken("lock.access.token".to_string());
+        assert!(!format!("{token:?}").contains("lock.access.token"));
     }
 
     #[tokio::test]
