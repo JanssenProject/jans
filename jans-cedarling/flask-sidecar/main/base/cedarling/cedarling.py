@@ -114,6 +114,7 @@ class CedarlingInstance:
             result_dict["context"] = {"id": "-1", "reason_admin": {"Exception": f"{e}"}}
             logger.info(f"Exception during cedarling authorize: {e}")
             return Decision(**result_dict)
+        request_id = None
         policy_store_id = None
         policy_store_version = None
         bundle_hash = None
@@ -145,7 +146,8 @@ class CedarlingInstance:
                 }
             }
         logger.info(f"Cedarling evaluation result: {result_dict}")
-        result_dict["context"]["request_id"] = request_id
+        if request_id is not None:
+            result_dict["context"]["request_id"] = request_id
         if policy_store_id is not None:
             result_dict["context"]["policy_store_id"] = str(policy_store_id)
         if policy_store_version is not None:
