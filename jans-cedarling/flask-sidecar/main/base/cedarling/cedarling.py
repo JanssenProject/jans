@@ -117,17 +117,18 @@ class CedarlingInstance:
         request_id = None
         policy_store_id = None
         policy_store_version = None
-        bundle_hash = None
         try:
             request_id = authorize_result.request_id()
             decision_log = self._cedarling.get_logs_by_request_id_and_tag(
                 request_id, "Decision"
             )
-            if len(decision_log) > 0:
-                log = decision_log[0]
-                policy_store_id = log.get("policystore_id", None)
-                policy_store_version = log.get("policystore_version", None)
-                bundle_hash = log.get("bundle_hash", None)
+            entry = next(
+                (log for log in decision_log if log.get("policystore_id")),
+                None,
+            )
+            if entry is not None:
+                policy_store_id = entry.get("policystore_id")
+                policy_store_version = entry.get("policystore_version")
         except Exception as e:
             logger.warning(f"Failed to retrieve logs: {e}")
         authorize_bool = authorize_result.is_allowed()
@@ -152,7 +153,5 @@ class CedarlingInstance:
             result_dict["context"]["policy_store_id"] = str(policy_store_id)
         if policy_store_version is not None:
             result_dict["context"]["policy_store_version"] = str(policy_store_version)
-        if bundle_hash is not None:
-            result_dict["context"]["bundle_hash"] = str(bundle_hash)
         result = Decision(**result_dict)
         return result

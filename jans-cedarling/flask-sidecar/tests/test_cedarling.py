@@ -26,7 +26,10 @@ def test_authorize_returns_policy_store_details():
     authorize_result = MagicMock()
     authorize_result.request_id.return_value = "req-1"
     authorize_result.is_allowed.return_value = True
-    logs = [{"policystore_id": "abc", "policystore_version": "1.0.0", "bundle_hash": "sha256:00"}]
+    logs = [
+        {"policystore_id": "", "policystore_version": ""},
+        {"policystore_id": "abc", "policystore_version": "1.0.0"},
+    ]
 
     decision = make_instance(authorize_result, logs).authorize(make_request())
 
@@ -35,7 +38,6 @@ def test_authorize_returns_policy_store_details():
         "request_id": "req-1",
         "policy_store_id": "abc",
         "policy_store_version": "1.0.0",
-        "bundle_hash": "sha256:00",
     }
 
 
@@ -48,3 +50,13 @@ def test_authorize_returns_decision_when_request_id_fails():
 
     assert decision.decision is False
     assert "request_id" not in decision.context
+
+
+def test_authorize_without_policy_store_details():
+    authorize_result = MagicMock()
+    authorize_result.request_id.return_value = "req-2"
+    authorize_result.is_allowed.return_value = True
+
+    decision = make_instance(authorize_result, [{"decision": "ALLOW"}]).authorize(make_request())
+
+    assert decision.context == {"request_id": "req-2"}
