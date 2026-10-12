@@ -988,25 +988,27 @@ public class AuthUtil {
         if (raw == null) {
             return Optional.empty();
         }
-        if (raw instanceof String s) {
-            return Optional.of(s);
+        if (raw instanceof String) {
+            return Optional.of((String) raw);
         }
         throw new IllegalStateException(
                 "Expected String, found " + raw.getClass().getName());
     }
 
+    
+    
     public static List<String> getListFromObject(Object raw) {
         if (raw == null) {
             return Collections.emptyList();
         }
 
-        if (!(raw instanceof List<?> rawList)) {
+        if (!(raw instanceof List<?>)) {
             throw new IllegalStateException(
                     "Expected List, found " + raw.getClass().getName());
         }
 
-        // Verify every element is actually a String before the cast —
-        // type erasure can't check this for you.
+        List<?> rawList = (List<?>) raw;
+
         for (Object element : rawList) {
             if (!(element instanceof String)) {
                 throw new IllegalStateException(
@@ -1015,7 +1017,7 @@ public class AuthUtil {
             }
         }
 
-        @SuppressWarnings("unchecked") // safe: every element verified above
+        @SuppressWarnings("unchecked")
         List<String> result = (List<String>) rawList;
         return Collections.unmodifiableList(result);
     }
