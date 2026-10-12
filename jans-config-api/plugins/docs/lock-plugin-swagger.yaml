@@ -551,6 +551,111 @@ paths:
         - https://jans.io/oauth/lock/write-all
       - oauth2:
         - https://jans.io/oauth/config/write-all
+  /lock/policy-stores:
+    get:
+      tags:
+      - Lock - Policy Stores
+      summary: Lists Lock policy store sources
+      description: "Lists policy store sources registered in Lock configuration\
+        \ and, when the token grants https://jans.io/oauth/lock/policy.readonly,\
+        \ the .cjar stores currently loaded by Lock with version and bundle hash"
+      operationId: get-lock-policy-stores
+      parameters:
+      - name: Authorization
+        in: header
+        description: Authorization header forwarded to Lock
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonNode"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock-config.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+    post:
+      tags:
+      - Lock - Policy Stores
+      summary: Registers a Lock policy store source
+      description: Adds or updates a .cjar or JSON policy store source in Lock configuration.
+        Lock loads it on the next policy refresh
+      operationId: post-lock-policy-store
+      requestBody:
+        description: Policy store source
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicySource"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PolicySource"
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+    delete:
+      tags:
+      - Lock - Policy Stores
+      summary: Removes a Lock policy store source
+      description: Removes a policy store source from Lock configuration
+      operationId: delete-lock-policy-store
+      parameters:
+      - name: policyStoreUri
+        in: query
+        description: Policy store source URI
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/lockStat:
     get:
       tags:
