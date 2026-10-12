@@ -58,9 +58,9 @@ public class PolicyRestWebServiceImpl extends BaseResource implements PolicyRest
 	
 	        Map<String, LoadedPolicySource> policies = policyDownloadService.getLoadedPolicies();
 	
-	        List<String> uris = new ArrayList<String>(policies.keySet());
+	        List<String> uris = new ArrayList<>(policies.keySet());
 	
-	        if (uris.size() == 0) {
+	        if (uris.isEmpty()) {
 	        	throw errorResponseFactory.notFoundException(CommonErrorResponseType.NOT_FOUND_ERROR, "There is no policies loaded.");
 	        }
 	
