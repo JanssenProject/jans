@@ -365,7 +365,7 @@ impl RefreshSource {
         }
     }
 
-    fn url(&self) -> &str {
+    pub(crate) fn url(&self) -> &str {
         match self {
             Self::LockServer { url } | Self::CjarUrl { url } | Self::Uri { url } => url,
         }
@@ -411,6 +411,7 @@ impl Drop for PolicyStoreRefreshHandle {
 pub(crate) struct RefreshWorkerSeed {
     pub initial_body_hash: Option<u64>,
     pub initial_validators: CacheHeadersState,
+    pub policy_store_http_client: Option<crate::http::HttpClient>,
 }
 
 /// Read-only worker context — handles and config that don't change between

@@ -21,7 +21,8 @@ import java.util.Set;
 
         tags = { @Tag(name = "Lock - Configuration"),
                  @Tag(name = "Lock - Audit"),
-                 @Tag(name = "Lock - Statistics")
+                 @Tag(name = "Lock - Statistics"),
+                 @Tag(name = "Lock - Policy Stores")
                  },
 
         servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
@@ -55,6 +56,7 @@ public class ApiApplication extends Application {
         classes.add(LockConfigResource.class);
         classes.add(AuditResource.class);
         classes.add(LockStatResource.class);
+        classes.add(PolicyStoreResource.class);
 
         return classes;
     }
