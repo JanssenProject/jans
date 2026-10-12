@@ -999,7 +999,7 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
     assert!(token.required);
     assert!(token.required_claims.contains("sub"));
 
-    let loaded2 = load_policy_store_archive_bytes(&archive_bytes, true, ArchiveLimits::default())
+    let loaded2 = load_policy_store_archive_bytes(archive_bytes, true, ArchiveLimits::default())
         .expect("load_policy_store_archive_bytes should succeed");
 
     assert_eq!(
@@ -1030,7 +1030,7 @@ fn test_load_custom_issuers_archive_vfs_duplicate_id_errors() {
         ),
     ]);
 
-    let loaded = load_policy_store_archive_bytes(&archive_bytes, true, ArchiveLimits::default())
+    let loaded = load_policy_store_archive_bytes(archive_bytes, true, ArchiveLimits::default())
         .expect("load should succeed — dedup is detected at convert time");
 
     let err = formats::parse_policy_store(loaded, false)

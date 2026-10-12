@@ -17,6 +17,12 @@
 //! - Works in WASM (no temp file extraction needed)
 //! - Is efficient (reads files on-demand from archive)
 //! - Is secure (no temp file cleanup concerns)
+//!
+//! # Blocking
+//!
+//! Every function here is synchronous and does blocking I/O and CPU work
+//! (unzipping, schema parsing). Callers on an async runtime run it off the
+//! executor together with the parse that follows, as one blocking task.
 
 use std::path::Path;
 
@@ -31,7 +37,7 @@ use super::vfs_adapter::VfsFileSystem;
 /// This function uses `PhysicalVfs` to read from the local filesystem.
 /// It is only available on native platforms (not WASM).
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) async fn load_policy_store_directory(
+pub(crate) fn load_policy_store_directory(
     path: &Path,
     strict: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
@@ -39,24 +45,10 @@ pub(crate) async fn load_policy_store_directory(
         .to_str()
         .ok_or_else(|| PolicyStoreError::PathNotFound {
             path: path.display().to_string(),
-        })?
-        .to_string();
+        })?;
 
-    // Offload blocking I/O operations to a blocking thread pool to avoid blocking the async runtime.
-    // `load_from_vfs` is intentionally synchronous because it performs blocking filesystem I/O.
-    // Using `spawn_blocking` ensures these operations don't block the async executor.
-    tokio::task::spawn_blocking(move || {
-        let vfs = super::vfs_adapter::PhysicalVfs::new();
-        load_from_vfs(&vfs, &path_str, strict)
-    })
-    .await
-    .map_err(|e| {
-        // If the blocking task panicked, convert to an IO error.
-        // This should be rare and typically indicates a bug in the loader code.
-        PolicyStoreError::Io(std::io::Error::other(format!(
-            "Blocking task panicked: {e}"
-        )))
-    })?
+    let vfs = super::vfs_adapter::PhysicalVfs::new();
+    load_from_vfs(&vfs, path_str, strict)
 }
 
 /// Load a policy store from a directory path (WASM stub).
@@ -76,29 +68,13 @@ pub(crate) fn load_policy_store_directory(
 /// This function uses `ArchiveVfs` to read from a zip archive.
 /// It is only available on native platforms (not WASM).
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) async fn load_policy_store_archive(
+pub(crate) fn load_policy_store_archive(
     path: &Path,
     strict: bool,
     limits: ArchiveLimits,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    let path = path.to_path_buf();
-
-    // Offload blocking I/O operations to a blocking thread pool to avoid blocking the async runtime.
-    // `load_from_vfs` is intentionally synchronous because it performs blocking filesystem I/O
-    // (reading from zip archive). Using `spawn_blocking` ensures these operations don't block
-    // the async executor.
-    tokio::task::spawn_blocking(move || {
-        let archive_vfs = ArchiveVfs::from_file(&path, limits)?;
-        load_from_vfs(&archive_vfs, ".", strict)
-    })
-    .await
-    .map_err(|e| {
-        // If the blocking task panicked, convert to an IO error.
-        // This should be rare and typically indicates a bug in the loader code.
-        PolicyStoreError::Io(std::io::Error::other(format!(
-            "Blocking task panicked: {e}"
-        )))
-    })?
+    let archive_vfs = ArchiveVfs::from_file(path, limits)?;
+    load_from_vfs(&archive_vfs, ".", strict)
 }
 
 /// Load a policy store from a Cedar Archive (.cjar) file (WASM stub).
@@ -116,16 +92,17 @@ pub(crate) fn load_policy_store_archive(
 
 /// Load a policy store from archive bytes.
 ///
-/// This function is useful for:
+/// Takes the bytes by value so the archive is read in place rather than
+/// copied. This function is useful for:
 /// - WASM environments where file system access is not available
 /// - Loading archives fetched from URLs
 /// - Loading archives from any byte source
 pub(crate) fn load_policy_store_archive_bytes(
-    bytes: &[u8],
+    bytes: Vec<u8>,
     strict: bool,
     limits: ArchiveLimits,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    let archive_vfs = ArchiveVfs::from_buffer(bytes.to_owned(), limits)?;
+    let archive_vfs = ArchiveVfs::from_buffer(bytes, limits)?;
     load_from_vfs(&archive_vfs, ".", strict)
 }
 

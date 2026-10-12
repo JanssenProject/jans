@@ -411,14 +411,14 @@ impl RefreshSource {
 
     async fn parse(
         &self,
-        bytes: &[u8],
+        bytes: Vec<u8>,
         strict_schema_validation: bool,
         limits: ArchiveLimits,
     ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
         if bytes.starts_with(&ZIP_MAGIC) {
             return parse_cjar_bytes(bytes, strict_schema_validation, limits).await;
         }
-        if crate::common::policy_store::is_json_bytes(bytes) {
+        if crate::common::policy_store::is_json_bytes(&bytes) {
             return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
         }
         Err(PolicyStoreLoadError::Archive(
@@ -711,7 +711,7 @@ async fn parse_swap_and_record(
     let start = Utc::now();
     let parsed = match ctx
         .source
-        .parse(&bytes, ctx.strict_schema_validation, ctx.archive_limits)
+        .parse(bytes, ctx.strict_schema_validation, ctx.archive_limits)
         .await
     {
         Ok(p) => p,

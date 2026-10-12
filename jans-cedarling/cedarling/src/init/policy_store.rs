@@ -13,6 +13,7 @@ use crate::common::policy_store::formats::{
     self, FormatReport, ParseStoreError, ParsedPolicyStore,
 };
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
+use crate::common::policy_store::loader;
 use crate::common::policy_store::validator::MetadataValidator;
 use crate::common::policy_store::{ConversionError, PolicyStore, PolicyStoreWithID};
 use crate::http::cache_headers::CacheHeadersState;
@@ -228,8 +229,8 @@ pub(crate) async fn load_policy_store(
             }
         },
         PolicyStoreSource::ArchiveBytes(bytes) => {
-            let parsed =
-                load_policy_store_from_archive_bytes(bytes, strict_schema_validation, limits)?;
+            // The config keeps its bytes, so the read takes a copy it can own.
+            let parsed = parse_cjar_bytes(bytes.clone(), strict_schema_validation, limits).await?;
             LoadedPolicyStore {
                 store: parsed.store,
                 format: parsed.format,
@@ -274,7 +275,7 @@ async fn load_policy_store_from_uri(
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
     if bytes.starts_with(&ZIP_MAGIC) {
-        let parsed = parse_cjar_bytes(&bytes, strict_schema_validation, limits).await?;
+        let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
         return Ok(LoadedPolicyStore {
             store: parsed.store,
             format: parsed.format,
@@ -292,22 +293,21 @@ async fn load_policy_store_from_uri(
     ))
 }
 
-/// Parses already-fetched `.cjar` archive bytes into a [`PolicyStoreWithID`].
+/// Parses `.cjar` archive bytes, fetched or supplied, into a [`PolicyStoreWithID`].
+///
+/// Takes the bytes by value so the archive is read in place rather than copied.
 pub(crate) async fn parse_cjar_bytes(
-    bytes: &[u8],
+    bytes: Vec<u8>,
     strict_schema_validation: bool,
     limits: ArchiveLimits,
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
-    use crate::common::policy_store::loader;
-
-    let loaded = loader::load_policy_store_archive_bytes(bytes, strict_schema_validation, limits)
-        .map_err(|e| {
-        PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}"))
-    })?;
-
-    convert_to_policy_store_offloaded(
-        loaded,
-        strict_schema_validation,
+    read_store_offloaded(
+        move || {
+            let loaded =
+                loader::load_policy_store_archive_bytes(bytes, strict_schema_validation, limits)
+                    .map_err(|e| map_policy_store_err(e, true))?;
+            convert_to_policy_store(loaded, strict_schema_validation)
+        },
         PolicyStoreLoadError::Archive,
     )
     .await
@@ -315,8 +315,6 @@ pub(crate) async fn parse_cjar_bytes(
 
 /// Converts a loaded directory/archive store into a [`PolicyStoreWithID`],
 /// dispatching on its `policy_store_spec_version`.
-///
-/// Synchronous so WASM (no `spawn_blocking`) can call it inline.
 fn convert_to_policy_store(
     loaded: formats::LoadedPolicyStore,
     strict_schema_validation: bool,
@@ -324,28 +322,31 @@ fn convert_to_policy_store(
     formats::parse_policy_store(loaded, strict_schema_validation).map_err(Into::into)
 }
 
-/// Runs [`convert_to_policy_store`] on a blocking thread on native, since schema
-/// parsing is CPU-heavy; WASM is single-threaded and runs it inline.
+/// Runs a whole directory / `.cjar` store read off the async executor.
+///
+/// Once the path or bytes are in hand, everything left is blocking I/O or CPU
+/// work: unzipping, reading files, parsing the schema and policies, building
+/// the runtime store. Running it as one blocking task keeps a large store from
+/// stalling a runtime worker, which matters most for background refreshes that
+/// share the runtime with authorization requests. WASM is single-threaded and
+/// runs it inline.
 ///
 /// `panic_err` picks the error variant reported if the blocking task panics.
 #[cfg_attr(target_arch = "wasm32", allow(clippy::unused_async))]
-async fn convert_to_policy_store_offloaded(
-    loaded: formats::LoadedPolicyStore,
-    strict_schema_validation: bool,
+async fn read_store_offloaded(
+    read: impl FnOnce() -> Result<ParsedPolicyStore, PolicyStoreLoadError> + Send + 'static,
     panic_err: fn(String) -> PolicyStoreLoadError,
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     #[cfg(not(target_arch = "wasm32"))]
     {
-        tokio::task::spawn_blocking(move || {
-            convert_to_policy_store(loaded, strict_schema_validation)
-        })
-        .await
-        .map_err(|e| panic_err(format!("Conversion task panicked: {e}")))?
+        tokio::task::spawn_blocking(read)
+            .await
+            .map_err(|e| panic_err(format!("Policy store read task panicked: {e}")))?
     }
     #[cfg(target_arch = "wasm32")]
     {
         let _ = panic_err;
-        convert_to_policy_store(loaded, strict_schema_validation)
+        read()
     }
 }
 
@@ -356,15 +357,13 @@ async fn load_policy_store_from_cjar_file(
     strict_schema_validation: bool,
     limits: ArchiveLimits,
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
-    use crate::common::policy_store::loader;
-
-    let loaded = loader::load_policy_store_archive(path, strict_schema_validation, limits)
-        .await
-        .map_err(|e| map_policy_store_err(e, true))?;
-
-    convert_to_policy_store_offloaded(
-        loaded,
-        strict_schema_validation,
+    let path = path.to_path_buf();
+    read_store_offloaded(
+        move || {
+            let loaded = loader::load_policy_store_archive(&path, strict_schema_validation, limits)
+                .map_err(|e| map_policy_store_err(e, true))?;
+            convert_to_policy_store(loaded, strict_schema_validation)
+        },
         PolicyStoreLoadError::Archive,
     )
     .await
@@ -378,8 +377,6 @@ fn load_policy_store_from_cjar_file(
     strict_schema_validation: bool,
     limits: ArchiveLimits,
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
-    use crate::common::policy_store::loader;
-
     // Call the loader stub function to ensure it's used and the error variant is constructed
     match loader::load_policy_store_archive(path, strict_schema_validation, limits) {
         Err(e) => Err(PolicyStoreLoadError::Archive(format!(
@@ -392,17 +389,14 @@ fn load_policy_store_from_cjar_file(
 /// Loads the policy store from a Cedar Archive (.cjar) URL.
 ///
 /// Fetches the archive via HTTP (capturing response headers for the
-/// `validators` seed and body bytes for the `body_hash` seed), loads it via
-/// `load_policy_store_archive_bytes`, and converts it to the runtime
-/// [`PolicyStoreWithID`].
+/// `validators` seed and body bytes for the `body_hash` seed), then parses it
+/// via [`parse_cjar_bytes`].
 async fn load_policy_store_from_cjar_url(
     url: &str,
     http_client: &HttpClient,
     strict_schema_validation: bool,
     limits: ArchiveLimits,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
-    use crate::common::policy_store::loader;
-
     // Fetch via `get_with_retry` to capture response headers (for the refresh
     // worker's initial `validators` seed) alongside the body bytes (for the
     // `last_body_hash` seed).
@@ -420,15 +414,7 @@ async fn load_policy_store_from_cjar_url(
 
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
-    let loaded = loader::load_policy_store_archive_bytes(&bytes, strict_schema_validation, limits)
-        .map_err(|e| map_policy_store_err(e, true))?;
-
-    let parsed = convert_to_policy_store_offloaded(
-        loaded,
-        strict_schema_validation,
-        PolicyStoreLoadError::Archive,
-    )
-    .await?;
+    let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
 
     Ok(LoadedPolicyStore {
         store: parsed.store,
@@ -444,15 +430,13 @@ async fn load_policy_store_from_directory(
     path: &Path,
     strict_schema_validation: bool,
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
-    use crate::common::policy_store::loader;
-
-    let loaded = loader::load_policy_store_directory(path, strict_schema_validation)
-        .await
-        .map_err(|e| map_policy_store_err(e, false))?;
-
-    convert_to_policy_store_offloaded(
-        loaded,
-        strict_schema_validation,
+    let path = path.to_path_buf();
+    read_store_offloaded(
+        move || {
+            let loaded = loader::load_policy_store_directory(&path, strict_schema_validation)
+                .map_err(|e| map_policy_store_err(e, false))?;
+            convert_to_policy_store(loaded, strict_schema_validation)
+        },
         PolicyStoreLoadError::Directory,
     )
     .await
@@ -465,8 +449,6 @@ fn load_policy_store_from_directory(
     path: &Path,
     strict_schema_validation: bool,
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
-    use crate::common::policy_store::loader;
-
     // Call the loader stub function to ensure it's used and the error variant is constructed
     match loader::load_policy_store_directory(path, strict_schema_validation) {
         Err(e) => Err(PolicyStoreLoadError::Directory(format!(
@@ -474,28 +456,6 @@ fn load_policy_store_from_directory(
         ))),
         Ok(_) => unreachable!("WASM stub should always return an error"),
     }
-}
-
-/// Loads the policy store directly from archive bytes.
-///
-/// This is useful for:
-/// - WASM environments with custom fetch logic (e.g., auth headers)
-/// - Embedding archives in applications
-/// - Loading from non-standard sources (databases, S3, etc.)
-///
-/// Works on all platforms including WASM.
-fn load_policy_store_from_archive_bytes(
-    bytes: &[u8],
-    strict_schema_validation: bool,
-    limits: ArchiveLimits,
-) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
-    use crate::common::policy_store::loader;
-
-    // Load from bytes (works in both native and WASM)
-    let loaded = loader::load_policy_store_archive_bytes(bytes, strict_schema_validation, limits)
-        .map_err(|e| map_policy_store_err(e, true))?;
-
-    convert_to_policy_store(loaded, strict_schema_validation)
 }
 
 impl From<ParseStoreError> for PolicyStoreLoadError {
@@ -534,7 +494,10 @@ mod test {
     use mockito::Server;
     use serde_json::json;
 
-    use super::{extract_first_policy_store, load_policy_store};
+    use super::{
+        PolicyStoreLoadError, extract_first_policy_store, load_policy_store, read_store_offloaded,
+    };
+    use crate::common::policy_store::errors::ValidationError;
     use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
     use crate::{
         PolicyStoreConfig, PolicyStoreSource,
@@ -944,5 +907,93 @@ mod test {
         .expect("Should load policy store from URI with octet-stream content-type");
 
         mock_endpoint.assert();
+    }
+
+    /// A `.cjar` served from a URI reports a broken store as the typed error,
+    /// the same as `CjarUrl` does, rather than as a generic archive failure.
+    #[tokio::test]
+    async fn uri_archive_reports_typed_validation_errors() {
+        let mut mock_server = Server::new_async().await;
+
+        let archive_bytes = fixtures::minimal_valid()
+            .with_spec_version(99)
+            .build_archive()
+            .expect("Should build test archive");
+
+        let mock_endpoint = mock_server
+            .mock("GET", "/policy-store")
+            .with_status(200)
+            .with_body(archive_bytes)
+            .expect(1)
+            .create();
+
+        let uri = format!("{}/policy-store", mock_server.url());
+
+        let err = load_policy_store(
+            &PolicyStoreConfig {
+                source: PolicyStoreSource::Uri(uri),
+                ..Default::default()
+            },
+            &HTTP_CLIENT,
+            false,
+        )
+        .await
+        .expect_err("a store with an unsupported spec version must be rejected");
+
+        assert!(
+            matches!(
+                err,
+                PolicyStoreLoadError::Validation(ValidationError::SpecVersionTooNew {
+                    found: 99,
+                    ..
+                })
+            ),
+            "expected a typed SpecVersionTooNew, got: {err:?}"
+        );
+        mock_endpoint.assert();
+    }
+
+    /// The whole read runs on a blocking thread, never on the async thread
+    /// that awaits it.
+    #[tokio::test]
+    async fn store_read_runs_off_the_awaiting_thread() {
+        let awaiting = std::thread::current().id();
+        let (tx, rx) = std::sync::mpsc::channel();
+
+        let err = read_store_offloaded(
+            move || {
+                tx.send(std::thread::current().id())
+                    .expect("the receiver outlives the read");
+                Err(PolicyStoreLoadError::Archive("probe".to_string()))
+            },
+            PolicyStoreLoadError::Archive,
+        )
+        .await
+        .expect_err("the probe read returns an error");
+
+        assert!(
+            matches!(&err, PolicyStoreLoadError::Archive(msg) if msg == "probe"),
+            "the read's own result should come back unchanged, got: {err:?}"
+        );
+        let reading = rx.recv().expect("the read should have run");
+        assert_ne!(
+            reading, awaiting,
+            "the read must not run on the thread that awaits it"
+        );
+    }
+
+    #[tokio::test]
+    async fn store_read_panic_is_reported_as_the_given_error() {
+        let err = read_store_offloaded(
+            || -> Result<_, PolicyStoreLoadError> { panic!("injected read panic") },
+            PolicyStoreLoadError::Directory,
+        )
+        .await
+        .expect_err("a panicking read must be reported as an error");
+
+        assert!(
+            matches!(&err, PolicyStoreLoadError::Directory(msg) if msg.contains("panicked")),
+            "expected the panic as a Directory error, got: {err:?}"
+        );
     }
 }
