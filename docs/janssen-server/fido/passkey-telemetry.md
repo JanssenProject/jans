@@ -176,6 +176,41 @@ Beyond the outcome itself, each raw entry records where the operation came from:
     strips any client-supplied value; otherwise the recorded address can be spoofed by the
     caller.
 
+!!! note "The browser never calls FIDO2 directly"
+    A passkey ceremony's actual HTTP client is the Authorization Server (via an Agama flow or the
+    person-authentication interception script) or Casa — the browser talks to one of those, and
+    they relay attestation/assertion calls to FIDO2 over a plain service-to-service connection.
+    Without anything forwarding the browser's own connection details on that hop, `ipAddress`
+    records the relay's own address on every entry, `userAgent` records the relay's HTTP client
+    library (e.g. `Apache-HttpClient/4.5.14`), and `deviceInfo`'s parsed fields fall back to
+    `UNKNOWN` accordingly, since there's no real browser user agent to parse.
+
+    Both relays therefore pass what they observed on the browser's request to FIDO2: the
+    connecting address (the servlet request's `getRemoteAddr()`), sent as `X-Forwarded-For`, and the
+    browser's `User-Agent`. They never copy a raw `X-Forwarded-For` header from the incoming request.
+    Jetty may, however, derive `getRemoteAddr()` from such a header: in the Janssen container images
+    its `forwarded` module is enabled, so when Apache or nginx fronts the Authorization Server or
+    Casa and sets `X-Forwarded-For`, the connecting address already resolves to the real browser IP.
+    If a different proxy sits in front of a relay and Jetty is not set up to trust it, the address
+    FIDO2 records is that proxy's, not the browser's — `trustedProxyIpRanges` cannot recover an
+    address the relay never forwarded.
+
+    Forwarding requires the FIDO2 endpoint to be `https://` (plain `http://` is only accepted for a
+    loopback host), because the end user's address and user agent are not sent in clear text. For a
+    non-loopback `http://` endpoint the person-authentication interception script logs a warning and
+    calls FIDO2 without the context, so the entry records the relay as described above. Casa's
+    passkey enrollment and the Agama `FidoValidator` do not fall back: the call fails before it is
+    sent, so use an `https://` FIDO2 endpoint with them.
+
+    On the FIDO2 side, if `trustedProxyEnabled` is `true`, add the Authorization Server's and Casa's
+    own addresses to `trustedProxyIpRanges` (see
+    [Client IP in metrics](fido2-server-properties-config.md#client-ip-in-metrics)) so the forwarded
+    value is honored. If `trustedProxyEnabled` is left unset, it is already honored with no
+    configuration — that default trusts `X-Forwarded-For` from *any* caller, not only the two
+    relays, which is the same pre-existing exposure the setting itself warns about. `userAgent`
+    carries no equivalent trust setting: whatever the relay sends is recorded as-is, the same as
+    it always was for a direct caller.
+
 ### Internal diagnostic codes
 
 For some failure causes, `errorReason` carries an internal `JFS_*` code instead of a free-text

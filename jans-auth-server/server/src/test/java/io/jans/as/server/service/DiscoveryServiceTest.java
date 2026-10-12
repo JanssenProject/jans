@@ -107,6 +107,19 @@ public class DiscoveryServiceTest {
     }
 
     @Test
+    public void process_whenCalled_shouldReturnCodeChallengeMethodsSupported() {
+        lenient().when(appConfiguration.isFeatureEnabled(any())).thenReturn(false);
+        lenient().when(appConfiguration.getEndSessionEndpoint()).thenReturn("https://as.com/end_session");
+
+        final JSONObject json = discoveryService.process();
+
+        assertTrue(json.has(ConfigurationResponseClaim.CODE_CHALLENGE_METHODS_SUPPORTED));
+        final List<String> codeChallengeMethods = new ArrayList<>();
+        json.getJSONArray(ConfigurationResponseClaim.CODE_CHALLENGE_METHODS_SUPPORTED).forEach(item -> codeChallengeMethods.add((String) item));
+        assertTrue(codeChallengeMethods.contains("S256"));
+    }
+
+    @Test
     public void getAcrValuesList_whenCalled_shouldContainInternalAuthnAlias() {
         final List<String> acrValuesList = DiscoveryService.getAcrValuesList(new ArrayList<>());
         assertTrue(acrValuesList.contains("simple_password_auth"));

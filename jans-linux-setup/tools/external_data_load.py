@@ -63,7 +63,6 @@ cur_path = Path(os.path.dirname(os.path.realpath(__file__)))
 setup_dir = cur_path.parent.joinpath('jans_setup').as_posix()
 sys.path.append(setup_dir)
 
-from setup_app import static
 from setup_app.utils import base
 base.current_app.profile = 'jans'
 sys.path.insert(0, base.pylib_dir)
@@ -74,7 +73,6 @@ paths.LOG_FILE = os.path.join(paths.LOG_DIR, 'external-data-loader.log')
 paths.LOG_ERROR_FILE = os.path.join(paths.LOG_DIR, 'external-data-loader-error.log')
 paths.LOG_OS_CHANGES_FILE = os.path.join(paths.LOG_DIR, 'external-data-loader-os-changes.log')
 
-from setup_app import static
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.db_utils import dbUtils
@@ -82,7 +80,7 @@ from setup_app.utils.db_utils import dbUtils
 Config.init(paths.INSTALL_DIR)
 SetupUtils.init()
 
-Config.templateRenderingDict.update(other_argsp)
+Config.template_rendering_dict.update(other_argsp)
 Config.rdbm_type = 'mysql'
 Config.rdbm_host = argsp.rdbm_host
 Config.rdbm_port = argsp.rdbm_port

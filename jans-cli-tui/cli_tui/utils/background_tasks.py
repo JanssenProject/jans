@@ -2,7 +2,6 @@ import json
 from prompt_toolkit.eventloop import get_event_loop
 
 from utils.utils import common_data
-from utils.static import common_strings
 from utils.multi_lang import _
 
 common_data.background_tasks_feeds['attributes'] = []

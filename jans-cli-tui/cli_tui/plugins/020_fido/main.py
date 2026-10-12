@@ -49,7 +49,6 @@ class Plugin(DialogUtils):
         """This method for editing the requested party
         """
         title = _("Enter Request Party Properties")
-        schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/RequestedParty')
         try:
             policy_schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/RequestedPartyPolicy')
         except Exception:
@@ -112,7 +111,7 @@ class Plugin(DialogUtils):
             result = await self.app.show_dialog_as_float(dialog)
             try:
                 self.app.layout.focus(focused_before)
-            except:
+            except Exception:
                 self.app.stop_progressing()
                 self.app.layout.focus(self.app.center_frame)
 
@@ -174,7 +173,6 @@ class Plugin(DialogUtils):
                                 ])
 
 
-        static_schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/Fido2Configuration')
         static_schema = {}
 
         requested_parties_title = _("Requested Parties")

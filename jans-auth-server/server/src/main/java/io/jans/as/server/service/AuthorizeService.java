@@ -280,6 +280,7 @@ public class AuthorizeService {
             }
             if (sessionAttribute.containsKey(DeviceAuthorizationService.SESSION_USER_CODE)) {
                 processDeviceAuthDeniedResponse(sessionAttribute);
+                deviceAuthorizationService.removeUserCodeFromSession(session);
             }
 
             if (responseMode == ResponseMode.JWT) {

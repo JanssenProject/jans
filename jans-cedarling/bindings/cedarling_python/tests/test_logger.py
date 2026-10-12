@@ -6,6 +6,7 @@
 from cedarling_python import Cedarling, EntityData, RequestUnsigned
 from config import load_bootstrap_config, TEST_FILES_PATH
 from os.path import join
+import pytest
 
 POLICY_STORE_LOCATION = join(TEST_FILES_PATH, "policy-store_ok_2.yaml")
 
@@ -22,13 +23,8 @@ RESOURCE = EntityData.from_dict({
 # In python unit tests we not cover all possible scenarios, but most common.
 
 def test_invalid_log_config():
-    try:
-        # when we set invalid log configuration it should raise ValueError
+    with pytest.raises(ValueError):
         load_bootstrap_config(log_type="String")
-    except ValueError:
-        pass
-    else:
-        assert False, "ValueError was not raised when setting invalid log_type"
 
 
 def test_memory_logger():

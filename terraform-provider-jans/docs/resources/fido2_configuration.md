@@ -100,6 +100,11 @@ Optional:
 - `disable_metadata_service` (Boolean) Boolean value indicating whether the MDS download should be omitted.
 - `enterprise_attestation` (Boolean) Whether authenticators have been enabled for use in a specific protected environment.
 - `hints` (List of String) Hints to the relying party. Possible values are security-key, client-device and hybrid.
+- `lock_audit_client_id` (String) Client id used to authenticate when forwarding Lock audit events.
+- `lock_audit_client_password` (String, Sensitive) Client password used to authenticate when forwarding Lock audit events.
+- `lock_audit_enabled` (Boolean) Boolean value specifying whether Lock audit event forwarding is enabled.
+- `lock_audit_endpoint` (String) Endpoint URL that Lock audit events are forwarded to.
+- `lock_audit_flush_interval` (Number) Interval in seconds between Lock audit event flushes.
 - `mds_certs_folder` (String) MDS TOC root certificates folder.
 - `mds_download_startup_retries` (Number) Number of times the MDS TOC download is retried at server startup when the TOC blob is missing.
 - `mds_download_startup_retry_interval` (Number) Delay in seconds between MDS TOC download retries at server startup.
@@ -112,6 +117,15 @@ Optional:
 - `unfinished_request_expiration` (Number) Expiration time in seconds for pending enrollment/authentication requests
 - `user_auto_enrollment` (Boolean) Allow to enroll users on enrollment/authentication requests.
 
+<a id="nestedblock--fido2_configuration--metadata_servers"></a>
+### Nested Schema for `fido2_configuration.metadata_servers`
+
+Optional:
+
+- `root_cert` (String) Root certificate of the metadata server.
+- `url` (String) URL of the metadata server.
+
+
 <a id="nestedblock--fido2_configuration--requested_parties"></a>
 ### Nested Schema for `fido2_configuration.requested_parties`
 
@@ -121,19 +135,9 @@ Optional:
 - `name` (String) Name of the requested party.
 - `policy` (Block List, Max: 1) Per-relying-party assurance policy. Omitted falls back to the global configuration. (see [below for nested schema](#nestedblock--fido2_configuration--requested_parties--policy))
 
-
 <a id="nestedblock--fido2_configuration--requested_parties--policy"></a>
 ### Nested Schema for `fido2_configuration.requested_parties.policy`
 
 Optional:
 
 - `attestation_mode` (String) Attestation mode for this relying party. Possible values are disabled, monitor and enforced.
-
-
-<a id="nestedblock--fido2_configuration--metadata_servers"></a>
-### Nested Schema for `fido2_configuration.metadata_servers`
-
-Optional:
-
-- `root_cert` (String) Root certificate of the metadata server.
-- `url` (String) URL of the metadata server.

@@ -15,20 +15,13 @@ from io.jans.as.server.service import AuthenticationService, UserService
 from io.jans.orm import PersistenceEntryManager
 from io.jans.config import GluuConfiguration
 from io.jans.util import StringHelper
-from java.math import BigInteger
-from java.security import SecureRandom
-import java
-import sys
-import json
 from java.util import UUID
 from io.jans.as.model.jws import ECDSASigner;
 from io.jans.as.model.jws import RSASigner;
 from io.jans.as.model.jwt import Jwt;
-from io.jans.as.model.crypto.signature import ECDSAPublicKey;
-from io.jans.as.model.crypto.signature import RSAPublicKey;
 from io.jans.as.client import JwkClient;
 from io.jans.as.model.crypto.signature import AlgorithmFamily;
-from java.util import Collections, HashMap, HashSet, ArrayList, Arrays, Date
+from java.util import ArrayList, Arrays
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -90,8 +83,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     foundUser.setAttribute(self.getLocalPrimaryKey(),apple_id)
 
                     userService = CdiUtil.bean(UserService)
-                    result = userService.addUser(foundUser, True)
-                    foundUser = self.findUserByAppleId(apple_id)
+                    userService.addUser(foundUser, True)
 
 
                 logged_in = authenticationService.authenticate(apple_id)

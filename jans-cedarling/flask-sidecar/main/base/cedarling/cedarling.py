@@ -26,7 +26,7 @@ from cedarling_python import (
 from main.logger import logger
 from flask import Flask
 import typing as _t
-from main.domain.entities.authzen import CedarlingRequest, Decision, Resource, Context
+from main.domain.entities.authzen import CedarlingRequest, Decision, Resource
 
 DictType = _t.Dict[str, _t.Any]
 KEYS_LIST = ["access_token", "id_token", "userinfo_token"]

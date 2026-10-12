@@ -177,7 +177,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value true encrypts request object", defaultValue = "false")
     private Boolean requireRequestObjectEncryption = false;
 
-    @DocProperty(description = "Boolean value true check for Proof Key for Code Exchange (PKCE). Required unconditionally for the authorization code grant per OAuth 2.1.", defaultValue = "true")
+    @DocProperty(description = "Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled.", defaultValue = "true")
     private Boolean requirePkce = true;
 
     @DocProperty(description = "Boolean value true allow all value for revoke endpoint", defaultValue = "false")
@@ -720,6 +720,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This list specified which client redirection URIs are black-listed")
     private List<String> clientBlackList;
 
+    @DocProperty(description = "Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client.", defaultValue = "true")
+    private Boolean strictTokenRedirectUriValidation = true;
+
     @DocProperty(description = "Choose whether to include claims in ID tokens")
     private Boolean legacyIdTokenClaims;
 
@@ -770,7 +773,7 @@ public class AppConfiguration implements Configuration {
     private Boolean rotateDeviceSecret = false;
 
     // Identity Assertion Authorization Grant (ID-JAG / Cross-App Access)
-    @DocProperty(description = "Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.", defaultValue = "empty")
+    @DocProperty(description = "Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used.", defaultValue = "empty")
     private Map<String, TrustedIssuerConfig> idJagTrustedIdpIssuers = new HashMap<>();
 
     @DocProperty(description = "Lifetime in seconds for ID-JAGs issued by this AS (IdP role).", defaultValue = "300")
@@ -3161,6 +3164,14 @@ public class AppConfiguration implements Configuration {
 
     public void setClientBlackList(List<String> clientBlackList) {
         this.clientBlackList = clientBlackList;
+    }
+
+    public Boolean getStrictTokenRedirectUriValidation() {
+        return strictTokenRedirectUriValidation;
+    }
+
+    public void setStrictTokenRedirectUriValidation(Boolean strictTokenRedirectUriValidation) {
+        this.strictTokenRedirectUriValidation = strictTokenRedirectUriValidation;
     }
 
     public Boolean getLegacyIdTokenClaims() {

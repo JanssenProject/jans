@@ -91,12 +91,12 @@
         },
         "+": function() {
             return Array.prototype.reduce.call(arguments, function(a, b) {
-                return parseFloat(a, 10) + parseFloat(b, 10);
+                return parseFloat(a) + parseFloat(b);
             }, 0);
         },
         "*": function() {
             return Array.prototype.reduce.call(arguments, function(a, b) {
-                return parseFloat(a, 10) * parseFloat(b, 10);
+                return parseFloat(a) * parseFloat(b);
             });
         },
         "-": function(a, b) {

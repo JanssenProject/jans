@@ -17,10 +17,42 @@ prepare_dirs() {
     mkdir -p "$demo_volumes_dir"
 }
 
+extract_fqdn() {
+    cert="$demo_templates_dir/web_https.crt"
+
+    # SAN DNS names (preferred)
+    san=$(openssl x509 -in "$cert" -noout -ext subjectAltName 2>/dev/null \
+        | grep -o 'DNS:[^,]*' \
+        | sed 's/DNS://')
+
+    # CN (fallback, deprecated by browsers/RFC 6125)
+    cn=$(openssl x509 -in "$cert" -noout -subject -nameopt multiline 2>/dev/null \
+        | awk -F' = ' '/commonName/ {print $2}')
+
+    if [[ -n "$san" ]]; then
+        echo "$san"
+    else
+        echo "$cn"
+    fi
+}
+
 prepare_certs() {
     echo "[I] Generating self-signed certificates"
 
     fqdn=$1
+
+    if [[ -f "$demo_templates_dir/web_https.crt" ]]; then
+        old_fqdn="$(extract_fqdn)"
+
+        # compare FQDNs; if user-defined FQDN is different with the one from existing cert file, probably
+        # cert and key are stale and need to re-generate new ones; a typical scenario is after changing
+        # the FQDN using cloudtools change-fqdn command
+        if ! grep -Fqx -- "$fqdn" <<< "$old_fqdn"; then
+            for old_file in web_https.key web_https.crt web_https.csr; do
+                rm -f "${demo_templates_dir}/${old_file}"
+            done
+        fi
+    fi
 
     if [[ ! -f "$demo_templates_dir/ca.key" ]]; then
         openssl genrsa -out "$demo_templates_dir/ca.key" 4096
@@ -256,7 +288,7 @@ services:
       - "127.0.0.1:8200:8200"
 
   traefik:
-    image: traefik:v3.6.1
+    image: traefik:v3.6.1@sha256:fd5932c796f7e2db9fd6bff485ef693d53797f0ee8ad03dc68aa424ea6f21958
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"

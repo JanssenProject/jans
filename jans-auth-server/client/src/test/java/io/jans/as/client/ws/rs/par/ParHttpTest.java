@@ -31,6 +31,7 @@ public class ParHttpTest extends BaseTest {
 
     private RegisterResponse registerResponse;
     private ParResponse parResponse;
+    private String codeVerifier;
 
     @Parameters({"redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
@@ -45,6 +46,7 @@ public class ParHttpTest extends BaseTest {
         AssertBuilder.registerResponse(registerResponse).created().check();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes, redirectUri, nonce);
+        codeVerifier = authorizationRequest.generateAndSetCodeChallengeWithMethod().getCodeVerifier();
         ParRequest parRequest = new ParRequest(authorizationRequest);
         parRequest.setNbf((int) (System.currentTimeMillis() / 1000L));
         parRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
@@ -68,6 +70,7 @@ public class ParHttpTest extends BaseTest {
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        tokenRequest.setCodeVerifier(codeVerifier);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(registerResponse.getClientId());
         tokenRequest.setAuthPassword(registerResponse.getClientSecret());

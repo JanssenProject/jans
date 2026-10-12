@@ -7,7 +7,6 @@ from io.jans.model.custom.script.type.introspection import IntrospectionType
 from io.jans.as.server.model.common import AuthorizationGrantList
 from io.jans.as.server.service import SessionIdService
 from io.jans.service.cdi.util import CdiUtil
-from java.lang import String
 
 class Introspection(IntrospectionType):
     def __init__(self, currentTimeMillis):
@@ -58,7 +57,7 @@ class Introspection(IntrospectionType):
 
             sessionIdService = CdiUtil.bean(SessionIdService)
             session = sessionIdService.getSessionByDn(sessionDn, False)
-            if sessionDn is None:
+            if session is None:
                 print "Github. Introspection. Failed to load session '%s'" % sessionDn
                 return False
 

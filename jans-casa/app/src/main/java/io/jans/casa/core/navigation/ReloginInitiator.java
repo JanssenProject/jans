@@ -1,5 +1,6 @@
 package io.jans.casa.core.navigation;
 
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +26,12 @@ public class ReloginInitiator implements Initiator {
         try {
             logger.info("Forcing re-login");
             List<String> acrs = Collections.singletonList(ConfigurationHandler.AGAMA_FLOW_ACR);
-            Pair<String, String> pair = Utils.managedBean(OIDCFlowService.class).getAuthnRequestUrl(acrs, "login");
+            CodeVerifier codeVerifier = new CodeVerifier();
+            Pair<String, String> pair = Utils.managedBean(OIDCFlowService.class).getAuthnRequestUrl(acrs, "login", codeVerifier);
 
-            Utils.managedBean(AuthFlowContext.class).setState(pair.getY());
+            AuthFlowContext flowContext = Utils.managedBean(AuthFlowContext.class);
+            flowContext.setState(pair.getY());
+            flowContext.setCodeVerifier(codeVerifier.getValue());
             WebUtils.execRedirect(pair.getX());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

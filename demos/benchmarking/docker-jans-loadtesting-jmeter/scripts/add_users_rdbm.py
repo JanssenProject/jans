@@ -78,7 +78,7 @@ def connect():
         return conn, cur
     else:
         logger.error(f"Could not connect to backend {db_type}")
-        SystemExit(1)
+        raise SystemExit(1)
 
 
 def split_interval(start, end, num_of_parts):
@@ -99,7 +99,7 @@ def make_secret(password):
     sha.update(salt)
     digest_ = sha.digest()
     b64encoded = base64.b64encode(digest_ + salt).decode('utf-8')
-    encrypted_password = '{{SSHA}}{0}'.format(b64encoded)
+    encrypted_password = '{{SSHA}}{0}'.format(b64encoded)  # // # gitleaks:allow
     return encrypted_password
 
 
@@ -146,7 +146,7 @@ def load_users(interval):
             cur.execute(cmd)
             conn.commit()
         except Exception as e:
-            logger.error(f"{cmd} did not execute!")
+            logger.error("INSERT statement did not execute!")
             logger.error(e)
     conn.close()
     logger.info("-------------------")
@@ -158,7 +158,7 @@ def load_users(interval):
 def main():
     user_numbers_intervals = split_interval(user_number_starting_point, user_number_ending_point,
                                             user_split_parallel_threads)
-    results = Parallel(n_jobs=load_users_parallel_job, backend="multiprocessing")(
+    Parallel(n_jobs=load_users_parallel_job, backend="multiprocessing")(
         map(delayed(load_users), user_numbers_intervals))
 
 

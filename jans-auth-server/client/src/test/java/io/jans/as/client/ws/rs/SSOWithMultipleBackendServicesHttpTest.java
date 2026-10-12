@@ -86,7 +86,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         // Get the access token
         TokenClient tokenClient1 = new TokenClient(tokenEndpoint);
-        TokenResponse tokenResponse1 = tokenClient1.execAuthorizationCode(code1, redirectUri, clientId, clientSecret);
+        TokenResponse tokenResponse1 = tokenClient1.execAuthorizationCode(code1, redirectUri, clientId, clientSecret, codeVerifier(code1));
 
         showClient(tokenClient1);
         AssertBuilder.tokenResponse(tokenResponse1)
@@ -127,7 +127,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
-        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec();
+        AuthorizationResponse authorizationResponse2 = execAuthorize(authorizeClient2);
 
         showClient(authorizeClient2);
         assertEquals(authorizationResponse2.getStatus(), 302, "Unexpected response code: " + authorizationResponse2.getStatus());
@@ -148,7 +148,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         // Get the access token
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
-        TokenResponse tokenResponse2 = tokenClient2.execAuthorizationCode(code2, redirectUri, clientId, clientSecret);
+        TokenResponse tokenResponse2 = tokenClient2.execAuthorizationCode(code2, redirectUri, clientId, clientSecret, codeVerifier(code2));
 
         showClient(tokenClient2);
         assertEquals(tokenResponse2.getStatus(), 200, "Unexpected response code: " + tokenResponse2.getStatus());
@@ -229,6 +229,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         TokenRequest tokenRequest1 = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest1.setCode(authorizationCode1);
+        applyCodeVerifier(tokenRequest1);
         tokenRequest1.setRedirectUri(redirectUri);
         tokenRequest1.setAuthUsername(clientId);
         tokenRequest1.setAuthPassword(clientSecret);
@@ -260,7 +261,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
-        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec();
+        AuthorizationResponse authorizationResponse2 = execAuthorize(authorizeClient2);
 
         showClient(authorizeClient2);
         assertEquals(authorizationResponse2.getStatus(), 302, "Unexpected response code: " + authorizationResponse2.getStatus());
@@ -274,6 +275,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         TokenRequest tokenRequest2 = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest2.setCode(authorizationCode2);
+        applyCodeVerifier(tokenRequest2);
         tokenRequest2.setRedirectUri(redirectUri);
         tokenRequest2.setAuthUsername(clientId);
         tokenRequest2.setAuthPassword(clientSecret);
@@ -308,7 +310,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient3 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient3.setRequest(authorizationRequest3);
-        AuthorizationResponse authorizationResponse3 = authorizeClient3.exec();
+        AuthorizationResponse authorizationResponse3 = execAuthorize(authorizeClient3);
 
         showClient(authorizeClient3);
         assertEquals(authorizationResponse3.getStatus(), 302, "Unexpected response code: " + authorizationResponse3.getStatus());
@@ -322,6 +324,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         TokenRequest tokenRequest3 = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest3.setCode(authorizationCode3);
+        applyCodeVerifier(tokenRequest3);
         tokenRequest3.setRedirectUri(redirectUri);
         tokenRequest3.setAuthUsername(clientId);
         tokenRequest3.setAuthPassword(clientSecret);

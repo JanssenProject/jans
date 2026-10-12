@@ -1612,6 +1612,17 @@ paths:
         - https://jans.io/oauth/config/read-all
 components:
   schemas:
+    AndroidApp:
+      type: object
+      properties:
+        packageName:
+          type: string
+        sha256CertFingerprints:
+          type: array
+          items:
+            type: string
+        distribution:
+          type: string
     AppConfiguration:
       type: object
       properties:
@@ -1740,6 +1751,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RequestedParty"
+    IosApp:
+      type: object
+      properties:
+        teamId:
+          type: string
+        bundleId:
+          type: string
     MetadataServer:
       type: object
       properties:
@@ -1756,6 +1774,14 @@ components:
           type: array
           items:
             type: string
+        androidApps:
+          type: array
+          items:
+            $ref: "#/components/schemas/AndroidApp"
+        iosApps:
+          type: array
+          items:
+            $ref: "#/components/schemas/IosApp"
         policy:
           $ref: "#/components/schemas/RequestedPartyPolicy"
     RequestedPartyPolicy:
@@ -1786,12 +1812,12 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        period:
-          type: string
         metricsData:
           type: object
           additionalProperties:
             type: object
+        period:
+          type: string
         registrationAttempts:
           type: integer
           format: int64
@@ -1901,6 +1927,8 @@ components:
           type: string
         deviceInfo:
           $ref: "#/components/schemas/DeviceInfo"
+        nativeClientTelemetry:
+          $ref: "#/components/schemas/NativeClientTelemetry"
         errorReason:
           type: string
         errorCategory:
@@ -1914,6 +1942,8 @@ components:
         ipAddress:
           type: string
         sessionId:
+          type: string
+        clientCorrelationId:
           type: string
         nodeId:
           type: string
@@ -1941,6 +1971,35 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Fido2MetricsEntry"
+    NativeClientTelemetry:
+      type: object
+      properties:
+        client_correlation_id:
+          type: string
+        platform:
+          type: string
+        native_api:
+          type: string
+        os_version:
+          type: string
+        play_services_version:
+          type: string
+        device_manufacturer:
+          type: string
+        device_model:
+          type: string
+        credential_provider:
+          type: string
+        is_device_secure:
+          type: boolean
+        flow_context:
+          type: string
+        app_version:
+          type: string
+        distribution_channel:
+          type: string
+        last_client_error_code:
+          type: string
     ApiError:
       type: object
       properties:

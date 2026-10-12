@@ -6,6 +6,7 @@
 
 package io.jans.lock.service.trace.error;
 
+import io.jans.as.model.error.IErrorType;
 import io.jans.lock.model.error.CommonErrorResponseType;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.TraceErrorResponseType;
@@ -62,6 +63,64 @@ public final class TraceErrors {
 
 		return errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR,
 				CommonErrorResponseType.UNKNOWN_ERROR, ex.getClass().getSimpleName());
+	}
+
+	/**
+	 * Classifies a TRACE-pipeline runtime exception into {@code (type, reason)} without building a
+	 * {@link WebApplicationException} or logging, for callers that embed the structured error body
+	 * inside a larger response rather than throwing it (TRACE MVP D-16, bulk ingestion per-item
+	 * results). Uses the same mapping {@link #toWebApplicationException} applies.
+	 *
+	 * @param ex any runtime exception; one not raised by the TRACE packages classifies as
+	 *           {@link CommonErrorResponseType#UNKNOWN_ERROR}
+	 */
+	public static Classification classify(RuntimeException ex) {
+		if (ex instanceof TraceValidationException) {
+			TraceValidationException e = (TraceValidationException) ex;
+			return new Classification(e.getErrorId(), e.getReason());
+		}
+
+		if (ex instanceof TraceConflictException) {
+			TraceConflictException e = (TraceConflictException) ex;
+			return new Classification(e.getErrorId(), e.getReason());
+		}
+
+		if (ex instanceof TraceStorageException) {
+			TraceStorageException e = (TraceStorageException) ex;
+			return new Classification(TraceErrorResponseType.STORAGE_FAILURE, e.getReason());
+		}
+
+		if (ex instanceof TraceCryptoException) {
+			TraceCryptoException e = (TraceCryptoException) ex;
+			TraceErrorResponseType type = TraceCryptoException.REASON_CRYPTO_UNAVAILABLE.equals(e.getReason())
+					? TraceErrorResponseType.CRYPTO_UNAVAILABLE
+					: TraceErrorResponseType.INVALID_KEY;
+			return new Classification(type, e.getReason());
+		}
+
+		return new Classification(CommonErrorResponseType.UNKNOWN_ERROR, ex.getClass().getSimpleName());
+	}
+
+	/** The {@code (error id, reason)} pair {@link #classify} extracts from a runtime exception. */
+	public static final class Classification {
+
+		private final IErrorType type;
+
+		private final String reason;
+
+		private Classification(IErrorType type, String reason) {
+			this.type = type;
+			this.reason = reason;
+		}
+
+		public IErrorType getType() {
+			return type;
+		}
+
+		public String getReason() {
+			return reason;
+		}
+
 	}
 
 }

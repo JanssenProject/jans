@@ -72,6 +72,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private String nonce;
     private String codeChallenge;
     private String codeChallengeMethod;
+    private String redirectUri;
     private String claims;
     private String dpopJkt;
     private String referenceId;
@@ -199,6 +200,14 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     public void setCodeChallenge(String codeChallenge) {
         this.codeChallenge = codeChallenge;
+    }
+
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
     }
 
     public String getCodeChallengeMethod() {

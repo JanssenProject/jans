@@ -54,7 +54,7 @@ Kubernetes: `>=v1.23.0-0`
 | gateway.name | string | `"jans-gateway"` | The name of the Gateway resource to be created |
 | gateway.tlsSecretName | string | `"tls-certificate"` | Secret containing the TLS certificate for the Gateway |
 | nameOverride | string | `""` |  |
-| routes | object | `{"annotations":{},"authServerEnabled":true,"authzenConfigEnabled":true,"casaEnabled":false,"configApiEnabled":true,"deviceCodeEnabled":true,"fido2ConfigEnabled":false,"fido2Enabled":false,"fido2WebauthnEnabled":false,"firebaseMessagingEnabled":true,"labels":{},"lockAuditEnabled":false,"lockConfigEnabled":false,"openidConfigEnabled":true,"scimConfigEnabled":false,"scimEnabled":false,"uma2ConfigEnabled":true,"webfingerEnabled":true}` | Configuration for HTTPRoute and its related resources |
+| routes | object | `{"annotations":{},"authServerEnabled":true,"authzenConfigEnabled":true,"casaEnabled":false,"configApiEnabled":true,"deviceCodeEnabled":true,"fido2ConfigEnabled":false,"fido2Enabled":false,"fido2WebauthnEnabled":false,"firebaseMessagingEnabled":true,"labels":{},"lockAuditEnabled":false,"lockConfigEnabled":false,"oauthServerConfigEnabled":true,"openidConfigEnabled":true,"scimConfigEnabled":false,"scimEnabled":false,"uma2ConfigEnabled":true,"webfingerEnabled":true}` | Configuration for HTTPRoute and its related resources |
 | routes.annotations | object | `{}` | Specific annotations for the HTTPRoute resource |
 | routes.authServerEnabled | bool | `true` | Enable Auth server endpoints /jans-auth |
 | routes.authzenConfigEnabled | bool | `true` | Enable endpoint /.well-known/authzen-configuration |
@@ -68,6 +68,7 @@ Kubernetes: `>=v1.23.0-0`
 | routes.labels | object | `{}` | Specific labels for the HTTPRoute resource |
 | routes.lockAuditEnabled | bool | `false` | Enable gRPC endpoint /io.jans.lock.audit.AuditService (if enabled, global.auth-server.lockEnabled must be enabled) |
 | routes.lockConfigEnabled | bool | `false` | Enable endpoint /.well-known/lock-server-configuration (if enabled, global.auth-server.lockEnabled must be enabled) |
+| routes.oauthServerConfigEnabled | bool | `true` | Enable endpoint /.well-known/oauth-authorization-server |
 | routes.openidConfigEnabled | bool | `true` | Enable endpoint /.well-known/openid-configuration |
 | routes.scimConfigEnabled | bool | `false` | Enable endpoint /.well-known/scim-configuration |
 | routes.scimEnabled | bool | `false` | Enable SCIM endpoints /jans-scim |

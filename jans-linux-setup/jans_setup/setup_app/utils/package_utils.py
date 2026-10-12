@@ -30,11 +30,14 @@ class PackageUtils(SetupUtils):
             query_command = 'rpm -q {0}'
             check_text = 'is not installed'
 
+        else:
+            raise ValueError(f"Unsupported package type {base.clone_type}")
+
         return install_command, update_command, query_command, check_text
 
 
     def check_installed(self, package):
-        install_command, update_command, query_command, check_text = self.get_install_commands()
+        _, _, query_command, check_text = self.get_install_commands()
         sout, serr = self.run(query_command.format(package), shell=True, get_stderr=True)
         return not check_text in sout+serr
 
@@ -42,7 +45,7 @@ class PackageUtils(SetupUtils):
     def installNetPackage(self, packages):
         if base.clone_type == 'rpm' and base.os_type != 'suse':
             self.run(['yum', '-y', 'module', 'enable', 'mod_auth_openidc'])
-        install_command, update_command, query_command, check_text = self.get_install_commands()
+        install_command, _, _, _ = self.get_install_commands()
         self.run(install_command.format(packages), shell=True)
 
     def check_and_install_packages(self):
@@ -94,7 +97,7 @@ class PackageUtils(SetupUtils):
         for pypackage in package_list[os_type_version]['python']:
             try:
                 importlib.import_module(pypackage)
-            except:
+            except Exception:
                 package_list[os_type_version]['mandatory'] += ' ' + package_list[os_type_version]['python'][pypackage]
 
         for install_type in install_list:
@@ -151,7 +154,7 @@ class PackageUtils(SetupUtils):
 
     def installPackage(self, packageName, remote=False):
         base.logIt("Installing " + packageName)
-        install_command, update_command, query_command, check_text = self.get_install_commands()
+        install_command, _, _, _ = self.get_install_commands()
         if remote:
             output = self.run(install_command.format(packageName), shell=True)
         else:

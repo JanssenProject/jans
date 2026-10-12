@@ -85,7 +85,7 @@ public class Jackson {
         return isPresent;
     }
 
-    public static JsonPatch getJsonPatch(String patchAsString) throws JsonPatchException, IOException {
+    public static JsonPatch getJsonPatch(String patchAsString) throws IOException {
         return JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
     }
 
@@ -208,6 +208,10 @@ public class Jackson {
         String jsonString = objectMapper.writeValueAsString(obj);
         // Create JSONObject from the JSON string
         return new JSONObject(jsonString);
+    }
+    
+    public static JsonNode emptyObjectNode() {
+        return JacksonUtils.newMapper().createObjectNode();
     }
     
     /***** Helper Methods ******/

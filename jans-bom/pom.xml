@@ -30,7 +30,7 @@
 		<richfaces.version>4.5.19-gluu.Final</richfaces.version>
 		<weld.version>4.0.3.Final</weld.version>
 	
-		<org.omnifaces.omnifaces.version>4.0</org.omnifaces.omnifaces.version>
+		<org.omnifaces.omnifaces.version>4.7.14</org.omnifaces.omnifaces.version>
 		<org.glassfish.jakarta.json.version>2.0.1</org.glassfish.jakarta.json.version>
 		<org.hibernate.validator.version>7.0.5.Final</org.hibernate.validator.version>
 		<org.hibernate.validator.cdi.version>7.0.5.Final</org.hibernate.validator.cdi.version>
@@ -38,7 +38,7 @@
 		
 		<jakarta.ejb.api.version>4.0.1</jakarta.ejb.api.version>
 		<jakarta.mail.api.version>2.1.2</jakarta.mail.api.version>
-		<jakarta.mail.version>2.0.1</jakarta.mail.version>
+		<jakarta.mail.version>2.0.2</jakarta.mail.version>
 
 		<jakarta.websocket.api.version>2.1.0</jakarta.websocket.api.version>
 		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version>
@@ -48,17 +48,17 @@
 
 		<mysql.version>9.5.0</mysql.version>
 		<mysql-socket.version>1.27.1</mysql-socket.version>
-		<postgresql.version>42.7.8</postgresql.version>
+		<postgresql.version>42.7.13</postgresql.version>
 		<postgresql-socket.version>1.27.1</postgresql-socket.version>
 
-		<jackson.bom.version>2.22.1</jackson.bom.version>
-		<jackson.version>2.22.1</jackson.version>
-		<jackson.databind.version>2.22.1</jackson.databind.version>
-		<!-- Jackson 2.20+ dropped the patch segment from jackson-annotations (it ships as 2.22, not 2.22.1). -->
+		<jackson.bom.version>2.22.3</jackson.bom.version>
+		<jackson.version>2.22.3</jackson.version>
+		<jackson.databind.version>2.22.3</jackson.databind.version>
+		<!-- Jackson 2.20+ dropped the patch segment from jackson-annotations (it ships as 2.22, not 2.22.3). -->
 		<jackson.annotations.version>2.22</jackson.annotations.version>
 		<json.version>20231013</json.version>
 
-		<log4j.version>2.25.4</log4j.version>
+		<log4j.version>2.25.5</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
 
 		<guava.version>32.1.1-jre</guava.version>
@@ -66,7 +66,7 @@
 		<aws.sns.version>1.12.708</aws.sns.version>
 		<jackrabbit.version>2.22.2</jackrabbit.version>
 
-		<bc.version>1.79</bc.version>
+		<bc.version>1.86</bc.version>
 		<junit.version>5.11.4</junit.version>
 		<mockito.version>5.23.0</mockito.version>
 		<wiremock.version>4.0.0-beta.34</wiremock.version>
@@ -309,6 +309,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcutil-jdk18on</artifactId>
+				<version>${bc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcmail-jdk18on</artifactId>
 				<version>${bc.version}</version>
 			</dependency>
@@ -505,7 +510,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>3.18.0</version>
+				<version>3.20.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -525,12 +530,12 @@
    			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-configuration2</artifactId>
-				<version>2.11.0</version>
+				<version>2.15.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.12.0</version>
+				<version>1.15.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-collections</groupId>

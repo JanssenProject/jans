@@ -65,6 +65,7 @@ def get_formatted_str(v):
 def is_hidden(c):
     if args.hide and c in args.hide:
         return True
+    return False
 
 def print_result(result, k, heading):
 
@@ -120,7 +121,10 @@ def http_log():
 
     rdict = {}
 
-    for l in open(fn):
+    with open(fn) as f:
+        log_lines = f.readlines()
+
+    for l in log_lines:
         ls = l.strip().split(' - ')
         data = json.loads(ls[-1])
         if data.get('method') == 'GET':
@@ -144,7 +148,6 @@ def http_log():
     for path in rdict:
         data = rdict[path]
         n = len(data)
-        ssn = str(n).rjust(5)
         sn += n
         t = sum(data)
         st += t
@@ -173,7 +176,10 @@ def durations():
     operations = {}
     buckets = {}
 
-    for i, l in enumerate(open(fn)):
+    with open(fn) as f:
+        log_lines = f.readlines()
+
+    for i, l in enumerate(log_lines):
         ndash = l.find(' - ')
         la = l[ndash+3:]
         nsp = la.find(' ')

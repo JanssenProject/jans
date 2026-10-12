@@ -43,7 +43,7 @@ tags:
 | authorizationEncryptionEncValuesSupported | A list of the authorization encryption algorithms supported | [Details](#authorizationencryptionencvaluessupported) |
 | authorizationEndpoint | The authorization endpoint URL | [Details](#authorizationendpoint) |
 | authorizationRequestCustomAllowedParameters | This list details the allowed custom parameters for authorization requests | [Details](#authorizationrequestcustomallowedparameters) |
-| authorizationResponseIssParameterSupported | Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false. | [Details](#authorizationresponseissparametersupported) |
+| authorizationResponseIssParameterSupported | Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: true. | [Details](#authorizationresponseissparametersupported) |
 | authorizationSigningAlgValuesSupported | List of authorization signing algorithms supported by this OP | [Details](#authorizationsigningalgvaluessupported) |
 | backchannelAuthenticationEndpoint | Backchannel Authentication Endpoint | [Details](#backchannelauthenticationendpoint) |
 | backchannelAuthenticationRequestSigningAlgValuesSupported | Backchannel Authentication Request Signing Alg Values Supported | [Details](#backchannelauthenticationrequestsigningalgvaluessupported) |
@@ -166,7 +166,7 @@ tags:
 | idGenerationEndpoint | ID Generation endpoint URL | [Details](#idgenerationendpoint) |
 | idJagIssueRefreshToken | Whether to issue refresh tokens after accepting an ID-JAG (Resource AS role). Spec recommends false. | [Details](#idjagissuerefreshtoken) |
 | idJagLifetime | Lifetime in seconds for ID-JAGs issued by this AS (IdP role). | [Details](#idjaglifetime) |
-| idJagTrustedIdpIssuers | Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. | [Details](#idjagtrustedidpissuers) |
+| idJagTrustedIdpIssuers | Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used. | [Details](#idjagtrustedidpissuers) |
 | idTokenEncryptionAlgValuesSupported | A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionalgvaluessupported) |
 | idTokenEncryptionEncValuesSupported | A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionencvaluessupported) |
 | idTokenFilterClaimsBasedOnAccessToken | Boolean value specifying whether idToken filters claims based on accessToken | [Details](#idtokenfilterclaimsbasedonaccesstoken) |
@@ -264,7 +264,7 @@ tags:
 | requestUriHashVerificationEnabled | Boolean value specifying whether the OP supports use of the request_uri hash verification | [Details](#requesturihashverificationenabled) |
 | requestUriParameterSupported | Boolean value specifying whether the OP supports use of the request_uri parameter | [Details](#requesturiparametersupported) |
 | requirePar | Boolean value to indicate of Pushed Authorisation Request(PAR)is required | [Details](#requirepar) |
-| requirePkce | Boolean value true check for Proof Key for Code Exchange (PKCE) | [Details](#requirepkce) |
+| requirePkce | Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled. | [Details](#requirepkce) |
 | requireRequestObjectEncryption | Boolean value true encrypts request object | [Details](#requirerequestobjectencryption) |
 | requireRequestUriRegistration | Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter | [Details](#requirerequesturiregistration) |
 | responseModesSupported | This list details which OAuth 2.0 response modes are supported by this OP | [Details](#responsemodessupported) |
@@ -308,6 +308,7 @@ tags:
 | statusListIndexAllocationBlockSize | Specifies how many status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100. | [Details](#statuslistindexallocationblocksize) |
 | statusListResponseJwtLifetime | The status list response JWT lifetime (used to set exp claim in JWT). | [Details](#statuslistresponsejwtlifetime) |
 | statusListResponseJwtSignatureAlgorithm | The status list signature algorithm to sign response JWT. Defaults to RS256. | [Details](#statuslistresponsejwtsignaturealgorithm) |
+| strictTokenRedirectUriValidation | Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client. | [Details](#stricttokenredirecturivalidation) |
 | subjectIdentifiersPerClientSupported | A list of the subject identifiers supported per client | [Details](#subjectidentifiersperclientsupported) |
 | subjectTypesSupported | This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public. | [Details](#subjecttypessupported) |
 | tokenEndpoint | The token endpoint URL | [Details](#tokenendpoint) |
@@ -648,11 +649,11 @@ tags:
 
 ## authorizationResponseIssParameterSupported
 
-- Description: Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.
+- Description: Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: true.
 
 - Required: No
 
-- Default value: false
+- Default value: true
 
 
 ## authorizationSigningAlgValuesSupported
@@ -1755,7 +1756,7 @@ tags:
 
 ## idJagTrustedIdpIssuers
 
-- Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.
+- Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used.
 
 - Required: No
 
@@ -2637,11 +2638,11 @@ tags:
 
 ## requirePkce
 
-- Description: Boolean value true check for Proof Key for Code Exchange (PKCE)
+- Description: Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled.
 
 - Required: No
 
-- Default value: false
+- Default value: true
 
 
 ## requireRequestObjectEncryption
@@ -3029,6 +3030,15 @@ tags:
 - Required: No
 
 - Default value: None
+
+
+## strictTokenRedirectUriValidation
+
+- Description: Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client.
+
+- Required: No
+
+- Default value: true
 
 
 ## subjectIdentifiersPerClientSupported

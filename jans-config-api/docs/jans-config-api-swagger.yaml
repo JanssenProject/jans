@@ -15694,6 +15694,12 @@ components:
           type: string
         selected:
           type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
@@ -15701,12 +15707,6 @@ components:
         userCanView:
           type: boolean
         userCanEdit:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -16364,6 +16364,8 @@ components:
           type: array
           items:
             type: string
+        strictTokenRedirectUriValidation:
+          type: boolean
         legacyIdTokenClaims:
           type: boolean
         customHeadersWithAuthorizationResponse:

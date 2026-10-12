@@ -5,13 +5,8 @@ from typing import Optional
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.styles import Style
-from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
-from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.widgets import Label, TextArea
-from prompt_toolkit.layout.containers import Window, VSplit, HSplit, DynamicContainer, AnyContainer
-from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.formatted_text import HTML, merge_formatted_text
+from prompt_toolkit.layout.containers import VSplit, HSplit, DynamicContainer
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
 

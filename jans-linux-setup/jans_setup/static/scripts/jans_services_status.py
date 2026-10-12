@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import contextlib
 import os
 import sys
 import json
@@ -25,7 +26,7 @@ HEALTH_ENDPOINTS = {
 services_status = {}
 
 def get_endpint_data(endpoint, status_code_only=False):
-    try:
+    with contextlib.suppress(Exception):
         response = requests.get(endpoint)
         if response.status_code == 200:
             if status_code_only:
@@ -33,8 +34,6 @@ def get_endpint_data(endpoint, status_code_only=False):
             if response.text.lower() == 'ok':
                 return {'status': 'ok'}
             return response.json()
-    except Exception as _:
-        pass
     return {'status': 'downn'}
 
 

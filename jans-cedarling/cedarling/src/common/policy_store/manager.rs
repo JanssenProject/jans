@@ -393,7 +393,7 @@ mod tests {
         let cedar_schema = result.unwrap();
         // Verify schema has expected entity types
         let entity_types: Vec<_> = cedar_schema.schema.entity_types().collect();
-        assert!(!entity_types.is_empty());
+        assert_ne!(entity_types, [] as [&cedar_policy::EntityTypeName; 0]);
     }
 
     #[test]

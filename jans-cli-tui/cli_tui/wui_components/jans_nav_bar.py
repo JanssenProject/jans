@@ -1,9 +1,8 @@
+import contextlib
 import re
-import os 
 
-from typing import TypeVar, Callable, Optional, Sequence, Union
+from typing import Callable, Optional
 
-from prompt_toolkit.key_binding.key_processor import KeyPressEvent
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 from prompt_toolkit.layout.containers import Window
@@ -76,12 +75,11 @@ class JansNavBar():
             re_search = shortcut_re.search(entry[1])
             if re_search and re_search.group(1).lower() == ev.data:
                 view.cur_navbar_selection = i
-                try: 
+                with contextlib.suppress(Exception):
                     self.myparent.layout.focus(view.nav_window)
-                except:
-                    pass
                 view._set_selection()
                 return True
+        return None
 
 
 
@@ -93,17 +91,14 @@ class JansNavBar():
         if not self._set_tab_for_view(self.myparent.nav_bar, ev):
         # then set sub navbar
             cur_plugin = self.myparent.nav_bar.cur_navbar_selection
-            try: ## i couldnt access the plugin content from here
+            with contextlib.suppress(Exception):
                 cur_view = self.myparent._plugins[cur_plugin].nav_bar
                 self._set_tab_for_view(cur_view, ev)
-            except:
-                pass
 
     def add_key_binding(
         self, 
         shorcut_key:str,
         )-> None:
-        r = os.urandom(3).hex()
         for binding in self.myparent.bindings.bindings:
             if len(binding.keys) == 2 and binding.keys[0].value == 'escape' and binding.keys[1].lower() == shorcut_key:
                 return
@@ -144,8 +139,6 @@ class JansNavBar():
         """
 
         result = []
-        nitems = len(self.navbar_entries)
-        total_text_lenght = 0
         rows = []
         row = []
         screen_width = self.myparent.output.get_size().columns

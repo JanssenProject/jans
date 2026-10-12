@@ -3,8 +3,7 @@
 #
 # Author: Yuriy Movchan, Madhumita Subramaniam
 #
-from java.net import URLDecoder, URLEncoder
-from java.lang import System
+from java.lang import Throwable
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.fido2.client import Fido2ClientFactory
 from io.jans.as.server.security import Identity
@@ -22,10 +21,7 @@ from io.jans.fido2.model.assertion import AssertionOptions
 from io.jans.fido2.model.attestation import AttestationOptions
 from io.jans.fido2.model.assertion import AssertionResult
 from io.jans.fido2.model.attestation import AttestationResult
-from io.jans.jsf2.message import FacesMessages
-from io.jans.jsf2.service import FacesService
 from jakarta.faces.context import FacesContext
-from jakarta.faces.application import FacesMessage
 from com.fasterxml.jackson.databind import ObjectMapper
 from io.jans.as.model.util import Base64Util
 
@@ -92,7 +88,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 
                 identity.setWorkingParameter("conditionalUI", "true")
                 auth_method = ServerUtil.getFirstValue(requestParameters, "authMethod")
-                if auth_method == None:
+                if auth_method is None:
                     print ("Fido2. Authenticate for step 1. authMethod is empty")
                     return False
 
@@ -119,7 +115,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 user_password = credentials.getPassword()
                 if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password) :
                         
-                    userService = CdiUtil.bean(UserService)
                     logged_in = authenticationService.authenticate(user_name, user_password)
             
             print ("logged_in : %s " % logged_in)
@@ -132,18 +127,18 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Fido2. Authenticate for step 2"
             
             token_response = ServerUtil.getFirstValue(requestParameters, "tokenResponse")
-            if token_response == None:
+            if token_response is None:
                 print "Fido2. Authenticate for step 2. tokenResponse is empty"
                 return False
 
             auth_method = ServerUtil.getFirstValue(requestParameters, "authMethod")
-            if auth_method == None:
+            if auth_method is None:
                 print "Fido2. Authenticate for step 2. authMethod is empty"
                 return False
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            if user == None:
+            if user is None:
                 print "Fido2. Prepare for step 2. Failed to determine user name"
                 return False
 
@@ -153,7 +148,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 assertionResult = mapper.readValue(token_response, AssertionResult)
 
                 assertionStatus = assertionService.verify(assertionResult)
-                authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
+                assertionStatus.readEntity(java.lang.String)
                 print "Fido2. Authenticate for step 2. assertionStatus.getStatus() : %s" % assertionStatus.getStatus()
                 if assertionStatus.getStatus() != Response.Status.OK.getStatusCode():
                     print "Fido2. Authenticate for step 2. Get invalid authentication status from Fido2 server"
@@ -180,8 +175,6 @@ class PersonAuthentication(PersonAuthenticationType):
             else:
                 print "Fido2. Prepare for step 2. Authentication method is invalid"
                 return False
-
-            return False
         else:
             return False
 
@@ -212,13 +205,13 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Fido2. Prepare for step 2"
 
             session = CdiUtil.bean(SessionIdService).getSessionId()
-            if session == None:
+            if session is None:
                 print "Fido2. Prepare for step 2. Failed to determine session_id"
                 return False
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            if user == None:
+            if user is None:
                 print "Fido2. Prepare for step 2. Failed to determine user name"
                 return False
 
@@ -285,7 +278,6 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             return "/auth/fido2/login.xhtml"
         elif step == 2:
-            identity = CdiUtil.bean(Identity)
             return "/auth/fido2/passkeys.xhtml"
             
         return ""
@@ -301,13 +293,13 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def getMetaDataConfiguration(self):
-        if self.metaDataConfiguration != None:
+        if self.metaDataConfiguration is not None:
             return self.metaDataConfiguration
 
         self.metaDataLoaderLock.lock()
         try:
             # Make sure that another thread not loaded configuration already
-            if self.metaDataConfiguration != None:
+            if self.metaDataConfiguration is not None:
                 return self.metaDataConfiguration
 
             print "Fido2. Initialization. Downloading Fido2 metadata"
@@ -329,7 +321,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Attempting to load metadata: %d" % attempt
         finally:
             self.metaDataLoaderLock.unlock()
-
+        return None
 
     def getForwardedContext(self):
         # Forwards the Auth Server's own directly-observed remote address, never the caller-supplied
@@ -338,7 +330,7 @@ class PersonAuthentication(PersonAuthenticationType):
         # would let an external caller spoof the address FIDO2 records. The browser's real
         # User-Agent is passed straight through, since it carries no equivalent trust question.
         httpRequest = ServerUtil.getRequestOrNull()
-        if httpRequest == None:
+        if httpRequest is None:
             return (None, None)
         return (httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"))
 
@@ -371,14 +363,14 @@ class PersonAuthentication(PersonAuthenticationType):
         coo =  None
         httpRequest = ServerUtil.getRequestOrNull()
         
-        if httpRequest != None:
+        if httpRequest is not None:
             cookies = httpRequest.getCookies()
-            if cookies != None:
+            if cookies is not None:
                 for cookie in cookies:
                     if cookie.getName() == "allowList":
                        coo = cookie
 
-        if coo == None:
+        if coo is None:
             print "Passkeys. getCookie. No cookie found"
         else:
             print "Passkeys. getCookie. Found cookie"
@@ -391,7 +383,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     value = parsed
                 else:
                     print "Passkeys. getCookie. Unexpected cookie shape, dropping cookie..."
-            except:
+            except (Exception, Throwable):
                 print "Passkeys. getCookie. Unparsable value, dropping cookie..."
                 value = []
 
@@ -408,10 +400,10 @@ class PersonAuthentication(PersonAuthenticationType):
             cookie_header = "allowList=%s; Path=/; Max-Age=%d; Secure; HttpOnly; SameSite=Lax" % (value, max_age)
 
             response = self.getHttpResponse()
-            if response != None:
+            if response is not None:
                 print "Passkeys. persistCookie. Adding cookie to response"
                 response.addHeader("Set-Cookie", cookie_header)
-        except:
+        except (Exception, Throwable):
             print "Passkeys. persistCookie. Exception: ", sys.exc_info()[1]
             
             
@@ -432,6 +424,6 @@ class PersonAuthentication(PersonAuthenticationType):
     def getHttpResponse(self):
         try:
             return FacesContext.getCurrentInstance().getExternalContext().getResponse()
-        except:
+        except (Exception, Throwable):
             print "Passkeys.  Error accessing HTTP response object: ", sys.exc_info()[1]
             return None

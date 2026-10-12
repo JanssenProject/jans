@@ -16,6 +16,7 @@ from io.jans.as.server.service.net import HttpService
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper
 from io.jans.jsf2.service import FacesService
+from java.lang import Throwable
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -94,7 +95,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         try:
             http_service_response = httpService.executeGet(self.http_client, self.cas_validation_uri)
-        except:
+        except (Exception, Throwable):
             print "CAS2. isValidAuthenticationMethod. Exception: ", sys.exc_info()[1]
             return False
 
@@ -111,7 +112,7 @@ class PersonAuthentication(PersonAuthenticationType):
         finally:
             http_service_response.closeConnection()
 
-        if (validation_response_string == None) or (validation_response_string.find(self.cas_validation_pattern) == -1):
+        if (validation_response_string is None) or (validation_response_string.find(self.cas_validation_pattern) == -1):
             print "CAS2. isValidAuthenticationMethod. Get invalid login page from CAS2 server:"
             return False
 
@@ -177,7 +178,7 @@ class PersonAuthentication(PersonAuthenticationType):
             cas2_user_uid = self.parse_tag(validation_content, "cas:user")
             print "CAS2. Authenticate for step 1. cas2_user_uid: ", cas2_user_uid
             
-            if (cas2_auth_failure != None) or (cas2_user_uid == None):
+            if (cas2_auth_failure is not None) or (cas2_user_uid is None):
                 print "CAS2. Authenticate for step 1. Ticket is invalid"
                 return False
 
@@ -187,7 +188,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Check if the is user with specified cas2_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "cas2:" + cas2_user_uid)
 
-                if find_user_by_uid == None:
+                if find_user_by_uid is None:
                     print "CAS2. Authenticate for step 1. Failed to find user"
                     print "CAS2. Authenticate for step 1. Setting count steps to 2"
                     identity.setWorkingParameter("cas2_count_login_steps", 2)
@@ -208,7 +209,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 # Check if there is user with specified cas2_user_uid
                 find_user_by_uid = userService.getUser(cas2_user_uid)
-                if find_user_by_uid == None:
+                if find_user_by_uid is None:
                     print "CAS2. Authenticate for step 1. Failed to find user"
                     return False
 
@@ -247,10 +248,10 @@ class PersonAuthentication(PersonAuthenticationType):
             # Avoid mapping CAS2 account to more than one IDP account
             find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "cas2:" + cas2_user_uid)
 
-            if find_user_by_uid == None:
+            if find_user_by_uid is None:
                 # Add cas2_user_uid to user one id UIDs
                 find_user_by_uid = userService.addUserAttribute(user_name, "oxExternalUid", "cas2:" + cas2_user_uid)
-                if find_user_by_uid == None:
+                if find_user_by_uid is None:
                     print "CAS2. Authenticate for step 2. Failed to update current user"
                     return False
 
@@ -311,7 +312,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return 2
 
     def getPageForStep(self, configurationAttributes, step):
-        identity = CdiUtil.bean(Identity)
         if step == 1:
             return "/auth/cas2/cas2login.xhtml"
         return "/auth/cas2/cas2postlogin.xhtml"

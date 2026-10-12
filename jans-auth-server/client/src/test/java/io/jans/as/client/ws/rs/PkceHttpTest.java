@@ -92,6 +92,7 @@ public class PkceHttpTest extends BaseTest {
         // 5. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(registerResponse.getClientId());
         tokenRequest.setAuthPassword(registerResponse.getClientSecret());
@@ -155,6 +156,7 @@ public class PkceHttpTest extends BaseTest {
         // 4. Get Access Token with invalid code verifier
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(registerResponse.getClientId());
         tokenRequest.setAuthPassword(registerResponse.getClientSecret());

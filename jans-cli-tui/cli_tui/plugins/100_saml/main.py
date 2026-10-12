@@ -1,24 +1,18 @@
 import copy
 import asyncio
-import urllib.request
 from collections import OrderedDict
-from typing import Any, Optional
+from typing import Any
 
 import prompt_toolkit
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
-    VSplit, Window, HorizontalAlign, ConditionalContainer, FormattedTextControl
-from prompt_toolkit.filters import Condition
+    VSplit, Window, HorizontalAlign
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Label, Box, Dialog
+from prompt_toolkit.widgets import Button, Label, Box
 from prompt_toolkit.application import Application
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_vetrical_nav import JansVerticalNav
-from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.jans_spinner import Spinner
-from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
-from wui_components.jans_label_container import JansLabelContainer
 
 from edit_tr_dialog import EditTRDialog
 from edit_identity_provider_dialog import EditIdentityProvideDialog

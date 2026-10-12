@@ -76,6 +76,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             // 3. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
@@ -112,6 +113,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             // 5. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
@@ -149,6 +151,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             // 7. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
@@ -185,6 +188,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             // 9. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
@@ -217,7 +221,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
             authorizeClient.setRequest(authorizationRequest);
 
-            AuthorizationResponse authorizationResponse = authorizeClient.exec();
+            AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
             AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
@@ -226,6 +230,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             // 11. Get Access Token
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
@@ -291,6 +296,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             // 3. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
@@ -328,6 +334,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             // 5. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
@@ -365,6 +372,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             // 7. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
@@ -402,6 +410,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             // 9. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
+            applyCodeVerifier(tokenRequest);
             tokenRequest.setRedirectUri(redirectUri);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
@@ -465,6 +474,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);

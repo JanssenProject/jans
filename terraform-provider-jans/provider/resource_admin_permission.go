@@ -36,6 +36,16 @@ func resourceAdminUIPermission() *schema.Resource {
 				Optional:    true,
 				Description: "Permission description",
 			},
+			"tag": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Permission tag",
+			},
+			"essential_permission_in_admin_ui": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether the permission is essential in the AdminUI.",
+			},
 		},
 	}
 }

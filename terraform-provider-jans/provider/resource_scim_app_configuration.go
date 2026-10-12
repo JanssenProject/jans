@@ -130,6 +130,16 @@ func resourceScimAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Specifies maximum payload size of bulk operations.",
 			},
+			"disable_external_logger_configuration": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to ignore the external log4j2 logging configuration.",
+			},
+			"skip_defined_password_validation": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to skip the defined password validation.",
+			},
 		},
 	}
 }

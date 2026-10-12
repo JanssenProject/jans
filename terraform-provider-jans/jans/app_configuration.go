@@ -101,6 +101,13 @@ type TrustedIssuerConfig struct {
 	AutomaticallyGrantedScopes []string `schema:"automatically_granted_scopes" json:"automatically_granted_scopes"`
 }
 
+// SpiffeTrustDomainConfiguration represents a single SPIFFE trust domain bundle source.
+type SpiffeTrustDomainConfiguration struct {
+	TrustDomain                  string `schema:"trust_domain" json:"trustDomain"`
+	BundleEndpointUrl            string `schema:"bundle_endpoint_url" json:"bundleEndpointUrl"`
+	BundleCacheLifetimeInMinutes int    `schema:"bundle_cache_lifetime_in_minutes" json:"bundleCacheLifetimeInMinutes"`
+}
+
 type LockMessageConfig struct {
 	EnableIDTokenMessages  bool   `schema:"enable_id_token_messages" json:"enableIDTokenMessages"`
 	IDTokenMessagesChannel string `schema:"id_token_messages_channel" json:"idTokenMessagesChannel"`
@@ -267,7 +274,7 @@ type AppConfiguration struct {
 	JansOpenIDConnectVersion                                  string                                `schema:"jans_open_id_connect_version" json:"jansOpenIdConnectVersion"`
 	JansID                                                    string                                `schema:"jans_id" json:"jansId"`
 	TrustedClientEnabled                                      bool                                  `schema:"trusted_client_enabled" json:"trustedClientEnabled"`
-	SkipAuthorizationForOpenIDScopeAndPairwiseID              bool                                  `schema:"skip_authorization_for_open_id_scope_and_pairwise_id" json:"skipAuthorizationForOpenIDScopeAndPairwiseID"`
+	SkipAuthorizationForOpenIDScopeAndPairwiseID              bool                                  `schema:"skip_authorization_for_open_id_scope_and_pairwise_id" json:"skipAuthorizationForOpenIdScopeAndPairwiseId"`
 	DynamicRegistrationExpirationTime                         int                                   `schema:"dynamic_registration_expiration_time" json:"dynamicRegistrationExpirationTime"`
 	DynamicRegistrationCustomAttributes                       []string                              `schema:"dynamic_registration_custom_attributes" json:"dynamicRegistrationCustomAttributes"`
 	DynamicRegistrationDefaultCustomAttributes                map[string]string                     `schema:"dynamic_registration_default_custom_attributes" json:"dynamicRegistrationDefaultCustomAttributes"`
@@ -379,7 +386,7 @@ type AppConfiguration struct {
 	DcrForbidExpirationTimeInRequest                          bool                                  `schema:"dcr_forbid_expiration_time_in_request" json:"dcrForbidExpirationTimeInRequest"`
 	DcrSignatureValidationEnabled                             bool                                  `schema:"dcr_signature_validation_enabled" json:"dcrSignatureValidationEnabled"`
 	DcrSignatureValidationSharedSecret                        string                                `schema:"dcr_signature_validation_shared_secret" json:"dcrSignatureValidationSharedSecret"`
-	DcrSignatureValidationSoftwareStatementJwksUriClaim       string                                `schema:"dcr_signature_validation_software_statement_jwks_uri_claim" json:"dcrSignatureValidationSoftwareStatementJwksUriClaim"`
+	DcrSignatureValidationSoftwareStatementJwksUriClaim       string                                `schema:"dcr_signature_validation_software_statement_jwks_uri_claim" json:"dcrSignatureValidationSoftwareStatementJwksURIClaim"`
 	DcrSignatureValidationSoftwareStatementJwksClaim          string                                `schema:"dcr_signature_validation_software_statement_jwks_claim" json:"dcrSignatureValidationSoftwareStatementJwksClaim"`
 	DcrSignatureValidationJwks                                string                                `schema:"dcr_signature_validation_jwks" json:"dcrSignatureValidationJwks"`
 	DcrSignatureValidationJwksUri                             string                                `schema:"dcr_signature_validation_jwks_uri" json:"dcrSignatureValidationJwksUri"`
@@ -466,6 +473,16 @@ type AppConfiguration struct {
 	LogoutStatusJwtSigningAlgValuesSupported                  []string                              `schema:"logout_status_jwt_signing_alg_values_supported" json:"logoutStatusJwtSigningAlgValuesSupported"`
 	RunAllUpdateTokenScripts                                  bool                                  `schema:"run_all_update_token_scripts" json:"runAllUpdateTokenScripts"`
 	SessionIdUserClaimsInAttributes                           []string                              `schema:"session_id_user_claims_in_attributes" json:"sessionIdUserClaimsInAttributes"`
+	CookieSameSite                                            string                                `schema:"cookie_same_site" json:"cookieSameSite"`
+	DisableExternalLoggerConfiguration                        bool                                  `schema:"disable_external_logger_configuration" json:"disableExternalLoggerConfiguration"`
+	IdJagLifetime                                             int                                   `schema:"id_jag_lifetime" json:"idJagLifetime"`
+	IdJagIssueRefreshToken                                    bool                                  `schema:"id_jag_issue_refresh_token" json:"idJagIssueRefreshToken"`
+	AuthorizationResponseIssParameterSupported                bool                                  `schema:"authorization_response_iss_parameter_supported" json:"authorizationResponseIssParameterSupported"`
+	SpiffeBundleMaxResponseSize                               int                                   `schema:"spiffe_bundle_max_response_size" json:"spiffeBundleMaxResponseSize"`
+	SpiffeBundleConnectTimeoutMs                              int                                   `schema:"spiffe_bundle_connect_timeout_ms" json:"spiffeBundleConnectTimeoutMs"`
+	SpiffeBundleReadTimeoutMs                                 int                                   `schema:"spiffe_bundle_read_timeout_ms" json:"spiffeBundleReadTimeoutMs"`
+	SpiffeTrustDomains                                        []SpiffeTrustDomainConfiguration      `schema:"spiffe_trust_domains" json:"spiffeTrustDomains"`
+	IdJagTrustedIdpIssuers                                    []TrustedIssuerConfig                 `schema:"id_jag_trusted_idp_issuers" json:"idJagTrustedIdpIssuers"`
 }
 
 // GetAppConfiguration returns all Janssen authorization server configuration

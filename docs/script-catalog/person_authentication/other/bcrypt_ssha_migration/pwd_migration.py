@@ -12,7 +12,6 @@ from io.jans.util import StringHelper
 from io.jans.as.server.service import UserService
 from io.jans.util.security import BCrypt
 
-import java
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -70,7 +69,6 @@ class PersonAuthentication(PersonAuthenticationType):
                     if char == '}':
                         break    
                     password_schema = password_schema + char
-                print("Password Schema is: " + password_schema)
 
                 # OpenDJ's SSHA(512)
                 if 'SSHA' in password_schema:
@@ -92,9 +90,6 @@ class PersonAuthentication(PersonAuthenticationType):
                     challenge = challenge.split("$")[3].strip()
                     stored = hashed_stored_pass.split("$")[3].strip()
 
-                    print("Challenge Salt+Hash: " + challenge)
-                    print("Stored Salt+Hash:    " + stored)
-
                     # Compare the hashses and update hash if there is a match.
                     if challenge in stored:
 
@@ -102,7 +97,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         # Therefore we update the users password to the backend's password schema by passing it to OpenDJ
                         print("Updating hash..")
                         user.setAttribute("userPassword",user_password)
-                        user = userService.updateUser(user)
+                        userService.updateUser(user)
                         print("Logging in..")
 
                         # Returns True
@@ -111,7 +106,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Catch unknown schema types and output to oxauth_script.log
                 # This script can be expanded to include other password schemas.
                 else:
-                    print("Unrecognized algorithm: " + password_schema)
+                    print("Unrecognized password algorithm")
 
             # If there is no match, logged_in will still be False and authentication will fail.
             if (not logged_in):

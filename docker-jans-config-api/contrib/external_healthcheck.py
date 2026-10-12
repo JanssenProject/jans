@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 import json
 
-import requests
+# suppress post-quantum cryptography warnings emitted by google libs;
+# this ensure the output of this entrypoint is purely JSON string
+# @TODO: remove the filter after https://github.com/JanssenProject/jans/issues/15059 is resolved
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="google")
 
-from jans.pycloudlib import get_manager
+import requests  # noqa: E402
+
+from jans.pycloudlib import get_manager  # noqa: E402
 
 
 def poll_healthchecks(manager):

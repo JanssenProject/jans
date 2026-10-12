@@ -1,10 +1,6 @@
 import os
-import glob
-import shutil
 
-from setup_app import paths
 from setup_app.utils import base
-from setup_app.utils.package_utils import packageUtils
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
@@ -27,7 +23,7 @@ class JansLinkInstaller(JettyInstaller):
         self.register_progess()
 
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
-        self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
+        self.templates_folder = os.path.join(Config.template_folder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
         self.config_json_fn = os.path.join(self.templates_folder, 'jans-link-config.json')
         self.static_config_json_fn = os.path.join(self.templates_folder, 'jans-link-static-config.json')
@@ -42,13 +38,13 @@ class JansLinkInstaller(JettyInstaller):
     def render_import_templates(self):
         self.logIt("Preparing base64 encodings configuration files")
         self.renderTemplateInOut(self.config_json_fn, self.templates_folder, self.output_folder)
-        Config.templateRenderingDict['jans_link_config_base64'] = self.generate_base64_ldap_file(
+        Config.template_rendering_dict['jans_link_config_base64'] = self.generate_base64_ldap_file(
                 os.path.join(
                     self.output_folder,
                     os.path.basename(self.config_json_fn)
                 )
             )
-        Config.templateRenderingDict['jans_link_static_conf_base64'] = self.generate_base64_ldap_file(self.static_config_json_fn)
+        Config.template_rendering_dict['jans_link_static_conf_base64'] = self.generate_base64_ldap_file(self.static_config_json_fn)
 
         self.renderTemplateInOut(self.ldif_config_fn, self.templates_folder, self.output_folder)
 

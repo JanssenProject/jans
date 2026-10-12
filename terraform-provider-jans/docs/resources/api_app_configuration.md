@@ -121,7 +121,6 @@ Optional:
 - `max_entries` (Number) Maximum number of entries in the policy store file.
 - `policy_sources` (Block List) List of policy sources. (see [below for nested schema](#nestedblock--cedarling_configuration--policy_sources))
 
-
 <a id="nestedblock--cedarling_configuration--policy_sources"></a>
 ### Nested Schema for `cedarling_configuration.policy_sources`
 
@@ -130,6 +129,7 @@ Optional:
 - `authorization_token` (String, Sensitive) Authorization token used to access the policy store URI. Declaring a policy source without this attribute clears the token stored on the server.
 - `enabled` (Boolean) Specify if the policy source is enabled.
 - `policy_store_uri` (String) URI of the policy store. The store can be either json or zip.
+
 
 
 <a id="nestedblock--cors_configuration_filters"></a>

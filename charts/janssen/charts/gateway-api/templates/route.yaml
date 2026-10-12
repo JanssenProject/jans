@@ -26,6 +26,7 @@
 {{- $uma2ConfigEnabled := or .Values.routes.uma2ConfigEnabled (index .Values.global "auth-server" "ingress" "uma2ConfigEnabled") -}}
 {{- $webfingerEnabled := or .Values.routes.webfingerEnabled (index .Values.global "auth-server" "ingress" "webfingerEnabled") -}}
 {{- $authzenConfigEnabled := or .Values.routes.authzenConfigEnabled (index .Values.global "auth-server" "ingress" "authzenConfigEnabled") -}}
+{{- $oauthServerConfigEnabled := .Values.routes.oauthServerConfigEnabled -}}
 {{- $lockConfigEnabled := or .Values.routes.lockConfigEnabled (index .Values.global "auth-server" "ingress" "lockConfigEnabled") -}}
 {{- $lockAuditEnabled := or .Values.routes.lockAuditEnabled (index .Values.global "auth-server" "ingress" "lockAuditEnabled") -}}
 {{- $casaEnabled := or .Values.routes.casaEnabled .Values.global.casa.ingress.casaEnabled -}}
@@ -164,6 +165,21 @@ spec:
         path:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/restv1/authzen-configuration
+    backendRefs:
+    - name: {{ $authSvc }}
+      port: 8080
+  {{- end }}
+  {{- if $oauthServerConfigEnabled }}
+  - matches:
+    - path:
+        type: Exact
+        value: /.well-known/oauth-authorization-server
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplaceFullPath
+          replaceFullPath: /jans-auth/restv1/oauth-authorization-server
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080

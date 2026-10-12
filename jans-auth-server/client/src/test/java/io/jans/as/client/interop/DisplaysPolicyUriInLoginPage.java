@@ -60,7 +60,7 @@ public class DisplaysPolicyUriInLoginPage extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
         authorizationRequest.setState(state);
 
-        String authorizationRequestUrl = getAuthorizationEndpoint() + "?" + authorizationRequest.getQueryString();
+        String authorizationRequestUrl = authorizationRequestUrl(getAuthorizationEndpoint(), authorizationRequest);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(getAuthorizationEndpoint());
         authorizeClient.setRequest(authorizationRequest);

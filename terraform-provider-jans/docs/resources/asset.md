@@ -33,7 +33,6 @@ resource "jans_asset" "example" {
 
 ### Optional
 
-- `alias` (String) The Jans alias of the document.
 - `base_dn` (String) The base DN of the document.
 - `creation_date` (String) The creation date of the document.
 - `description` (String) The description of the document.
@@ -43,8 +42,8 @@ resource "jans_asset" "example" {
 - `file_name` (String) The file name of the document.
 - `file_path` (String) The Jans file path of the document.
 - `inum` (String) The inum of the document.
-- `level` (String) The Jans level of the document.
-- `revision` (String) The Jans revision of the document.
+- `level` (Number) The Jans level of the document.
+- `revision` (Number) The Jans revision of the document.
 - `service` (String) The Jans service of the document.
 
 ### Read-Only

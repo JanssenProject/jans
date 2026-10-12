@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
+import org.testng.ISuite;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
@@ -52,9 +53,13 @@ public class BaseTest {
     protected String accessToken;
 
     @BeforeSuite
-    public void initTestSuite(ITestContext context) {
+    public void initTestSuite() {
+        
+        // Programmatically access the context and suite without injecting it
+        ITestContext context = org.testng.Reporter.getCurrentTestResult().getTestContext();
+        ISuite suite = context.getSuite();
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
-        log.info("Invoked initTestSuite propertiesFile '{}'", propertiesFile);
+        log.info("Invoked initTestSuite propertiesFile:{}, suite:{}", propertiesFile, suite);
         propertiesMap = context.getSuite().getXmlSuite().getParameters();
         log.info("End initTestSuite propertiesMap: {}", propertiesMap);
     }
