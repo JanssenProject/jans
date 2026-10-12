@@ -151,8 +151,10 @@ public class PolicyStoreResource extends BaseResource {
 
         cedarlingConfiguration.setPolicySources(policySources);
         lockConfigService.mergeLockConfig(conf);
-        logger.info("Registered Lock policy store source:{}, enabled:{}", escapeLog(policyStoreUri),
-                policySource.isEnabled());
+        if (logger.isInfoEnabled()) {
+            logger.info("Registered Lock policy store source:{}, enabled:{}", escapeLog(policyStoreUri),
+                    policySource.isEnabled());
+        }
 
         PolicySource response = new PolicySource();
         response.setPolicyStoreUri(policyStoreUri);
@@ -187,7 +189,9 @@ public class PolicyStoreResource extends BaseResource {
 
         cedarlingConfiguration.setPolicySources(policySources);
         lockConfigService.mergeLockConfig(conf);
-        logger.info("Removed Lock policy store source:{}", escapeLog(policyStoreUri));
+        if (logger.isInfoEnabled()) {
+            logger.info("Removed Lock policy store source:{}", escapeLog(policyStoreUri));
+        }
         return Response.noContent().build();
     }
 
