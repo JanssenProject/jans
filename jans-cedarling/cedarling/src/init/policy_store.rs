@@ -29,7 +29,7 @@ pub enum PolicyStoreLoadError {
     LegacyJsonNotSupported,
     /// Failed to parse policy store from YAML string.
     #[error("failed to parse the policy store from policy_store yaml: {0}")]
-    ParseYaml(#[from] serde_yaml_ng::Error),
+    ParseYaml(#[from] serde_saphyr::Error),
     /// Failed to fetch the policy store from the lock server.
     #[error("failed to fetch the policy store from the lock server")]
     FetchFromLockServer(#[from] HttpClientError),
@@ -154,7 +154,7 @@ pub(crate) async fn load_policy_store(
             if crate::common::policy_store::is_json_content(policy_yaml) {
                 return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
             }
-            let agama_policy_store = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(policy_yaml)
+            let agama_policy_store = serde_saphyr::from_str::<LegacyAgamaPolicyStore>(policy_yaml)
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
             process_legacy_agama_store(&agama_policy_store, strict_schema_validation)?
         },
@@ -173,9 +173,8 @@ pub(crate) async fn load_policy_store(
             if crate::common::policy_store::is_json_content(&policy_yaml) {
                 return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
             }
-            let agama_policy_store =
-                serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)
-                    .map_err(PolicyStoreLoadError::ParseYaml)?;
+            let agama_policy_store = serde_saphyr::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)
+                .map_err(PolicyStoreLoadError::ParseYaml)?;
             process_legacy_agama_store(&agama_policy_store, strict_schema_validation)?
         },
         #[cfg(not(target_arch = "wasm32"))]
