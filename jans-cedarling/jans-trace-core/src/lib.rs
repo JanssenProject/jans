@@ -17,6 +17,10 @@
 // avoids Python-style doc sections). Same choice as `cedarling/src/lib.rs`.
 #![allow(clippy::missing_errors_doc)]
 
+mod canonical;
+mod json;
 mod limits;
 
+pub use canonical::{CanonicalizeError, canonicalize_json};
+pub use json::JsonError;
 pub use limits::{Limits, SizeLimitExceeded};
