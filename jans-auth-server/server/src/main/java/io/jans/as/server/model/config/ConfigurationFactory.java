@@ -144,6 +144,7 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
     private AppConfiguration conf;
     private StaticConfiguration staticConf;
     private WebKeysConfiguration jwks;
+    private boolean jwksFetchPending = false;
     private ErrorResponseFactory errorResponseFactory;
     private String cryptoConfigurationSalt;
 
@@ -257,7 +258,7 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
             return;
         }
 
-        if (!isRevisionIncreased()) {
+        if (!jwksFetchPending && !isRevisionIncreased()) {
             return;
         }
 
@@ -474,7 +475,7 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
         }
     }
 
-    private void initWebKeys(Conf conf) {
+    void initWebKeys(Conf conf) {
         final String jwksUri = conf.getDynamic().getJwksUri();
         if (jwksUri.startsWith(conf.getDynamic().getIssuer())) {
             if (conf.getWebKeys() != null) {
@@ -486,13 +487,32 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
         }
 
         // external jwks
-        final JSONObject keys = JwtUtil.getJSONWebKeys(jwksUri);
+        final JSONObject keys = fetchExternalWebKeys(jwksUri);
         log.trace("Downloaded external keys from {}, keys: {}", jwksUri, keys);
+
+        if (keys == null || !keys.has("keys")) {
+            if (!conf.getDynamic().getAllowStartupOnJwksUriFetchFailure()) {
+                throw new IllegalStateException("Unable to fetch external jwks from jwksUri: " + jwksUri
+                        + ". Set allowStartupOnJwksUriFetchFailure=true to start without it.");
+            }
+
+            log.error("Unable to fetch external jwks from jwksUri: {}. Continue because allowStartupOnJwksUriFetchFailure=true, will retry on next configuration check.", jwksUri);
+            jwksFetchPending = true;
+            if (jwks == null) {
+                jwks = new WebKeysConfiguration();
+            }
+            return;
+        }
 
         final JSONWebKeySet keySet = JSONWebKeySet.fromJSONObject(keys);
 
         jwks = new WebKeysConfiguration();
         jwks.setKeys(keySet.getKeys());
+        jwksFetchPending = false;
+    }
+
+    JSONObject fetchExternalWebKeys(String jwksUri) {
+        return JwtUtil.getJSONWebKeys(jwksUri);
     }
 
     private void generateWebKeys() {
