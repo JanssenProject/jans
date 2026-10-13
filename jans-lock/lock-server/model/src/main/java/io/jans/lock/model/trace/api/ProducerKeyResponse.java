@@ -6,6 +6,7 @@
 
 package io.jans.lock.model.trace.api;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,7 +29,7 @@ public class ProducerKeyResponse {
 	private String evidenceDomainId;
 
 	@JsonProperty("producer_id")
-	@Schema(description = "Producer id, name/semver", example = "cedarling-fleet-1/1.0.0")
+	@Schema(description = "Opaque stable producer id", example = "cedarling-fleet-1")
 	private String producerId;
 
 	@JsonProperty("kid")
@@ -38,6 +39,10 @@ public class ProducerKeyResponse {
 	@JsonProperty("public_key_jwk")
 	@Schema(description = "RFC 8037 OKP Ed25519 JWK (kty/crv/x only)", example = "{\"kty\":\"OKP\",\"crv\":\"Ed25519\",\"x\":\"...\"}")
 	private Map<String, String> publicKeyJwk;
+
+	@JsonProperty("authorized_event_kinds")
+	@Schema(description = "Event kinds the key may sign", example = "[\"AUTHORIZATION_DECISION\"]")
+	private List<String> authorizedEventKinds;
 
 	@JsonProperty("valid_from")
 	@Schema(description = "RFC 3339 timestamp the key becomes valid", example = "2026-01-01T00:00:00Z")
@@ -89,6 +94,14 @@ public class ProducerKeyResponse {
 
 	public void setPublicKeyJwk(Map<String, String> publicKeyJwk) {
 		this.publicKeyJwk = publicKeyJwk;
+	}
+
+	public List<String> getAuthorizedEventKinds() {
+		return authorizedEventKinds;
+	}
+
+	public void setAuthorizedEventKinds(List<String> authorizedEventKinds) {
+		this.authorizedEventKinds = authorizedEventKinds;
 	}
 
 	public String getValidFrom() {

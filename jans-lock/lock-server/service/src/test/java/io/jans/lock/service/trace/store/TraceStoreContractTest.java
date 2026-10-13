@@ -67,7 +67,7 @@ public abstract class TraceStoreContractTest {
 
 	protected StoredTraceRecord newRecord(String producerId, String recordId, String execAuthority, String execId,
 			String chainProducerId, String chainInstanceId, String chainId, long seq, long receiptSeq,
-			List<String> capabilityIds, List<TokenRef> tokenRefs) {
+			List<TokenRef> tokenRefs) {
 		RecordIdentity identity = new RecordIdentity(DOMAIN, producerId, recordId);
 		ExecutionIdentity execution = new ExecutionIdentity(DOMAIN, execAuthority, execId);
 		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, chainProducerId, chainInstanceId, chainId);
@@ -77,14 +77,14 @@ public abstract class TraceStoreContractTest {
 				receiptSeq, 2000L + receiptSeq, TraceConstants.ZERO_HASH, "sha256:" + String.format("%064d", receiptSeq));
 		IngestionFlags flags = new IngestionFlags(false, false, false, false);
 		return new StoredTraceRecord(identity, "{\"trace\":{}}", "sha256:" + String.format("%064d", receiptSeq),
-				verification, receipt, flags, execution, chainPosition, TraceConstants.ZERO_HASH, capabilityIds,
+				verification, receipt, flags, execution, chainPosition, TraceConstants.ZERO_HASH,
 				tokenRefs, TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 3000L + receiptSeq, 0L);
 	}
 
 	protected StoredTraceRecord newRecord(String producerId, String recordId, String execAuthority, String execId,
 			long seq, long receiptSeq) {
 		return newRecord(producerId, recordId, execAuthority, execId, producerId, "instance-1", "chain-1", seq,
-				receiptSeq, Collections.emptyList(), Collections.emptyList());
+				receiptSeq, Collections.emptyList());
 	}
 
 	protected TraceReceiptEntry newReceiptRow(long seq, long receivedAtMs, String producerId, String recordId,
@@ -116,6 +116,7 @@ public abstract class TraceStoreContractTest {
 		entity.setProducerId(producerId);
 		entity.setKid(kid);
 		entity.setPublicKeyJwk(jwk);
+		entity.setAuthorizedEventKinds(Arrays.asList("AUTHORIZATION_DECISION", "RUNTIME_EFFECT"));
 		entity.setValidFrom(new Date(100L));
 		entity.setRegisteredBy("client-1");
 		entity.setCreationDate(new Date(100L));
@@ -307,34 +308,22 @@ public abstract class TraceStoreContractTest {
 		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "producer-1", "instance-1", "chain-1");
 		ChainPosition position = new ChainPosition(chainIdentity, 1L);
 		store.insertRecord(newRecord("producer-1", "record-a", "authority-1", "exec-a", "producer-1", "instance-1",
-				"chain-1", 1L, 1L, Collections.emptyList(), Collections.emptyList()));
+				"chain-1", 1L, 1L, Collections.emptyList()));
 		store.insertRecord(newRecord("producer-1", "record-b", "authority-1", "exec-b", "producer-1", "instance-1",
-				"chain-1", 1L, 2L, Collections.emptyList(), Collections.emptyList()));
+				"chain-1", 1L, 2L, Collections.emptyList()));
 
 		List<StoredTraceRecord> found = store.findRecordsByChainPosition(position);
 
 		assertEquals(2, found.size());
 	}
 
-	// -- records: capability / token lookups ------------------------------------------------------
-
-	@Test
-	void testFindRecordsByCapability_matchesByDerivedKeyNotRawEquality() throws Exception {
-		store.insertRecord(newRecord("producer-1", "record-1", "authority-1", "exec-1", "producer-1", "instance-1",
-				"chain-1", 1L, 1L, Arrays.asList("cap-1", "cap-2"), Collections.emptyList()));
-		store.insertRecord(newRecord("producer-1", "record-2", "authority-1", "exec-2", "producer-1", "instance-1",
-				"chain-1", 2L, 2L, Arrays.asList("cap-2"), Collections.emptyList()));
-
-		List<StoredTraceRecord> found = store.findRecordsByCapability(DOMAIN, "cap-2");
-
-		assertEquals(2, found.size());
-	}
+	// -- records: token lookups ------------------------------------------------------
 
 	@Test
 	void testFindRecordsByToken_jtiReference_matchesRegardlessOfTokenType() throws Exception {
 		TokenRef stored = new TokenRef("issuer-1", "access_token", "jti-1", null);
 		store.insertRecord(newRecord("producer-1", "record-1", "authority-1", "exec-1", "producer-1", "instance-1",
-				"chain-1", 1L, 1L, Collections.emptyList(), Arrays.asList(stored)));
+				"chain-1", 1L, 1L, Arrays.asList(stored)));
 
 		TokenRef search = new TokenRef("issuer-1", "refresh_token", "jti-1", null);
 		List<StoredTraceRecord> found = store.findRecordsByToken(DOMAIN, search);
@@ -492,6 +481,7 @@ public abstract class TraceStoreContractTest {
 
 		assertTrue(found.isPresent());
 		assertEquals("kid-1", found.get().getKid());
+		assertEquals(Arrays.asList("AUTHORIZATION_DECISION", "RUNTIME_EFFECT"), found.get().getAuthorizedEventKinds());
 		assertFalse(found.get().getRevokedAtMs() != null);
 	}
 

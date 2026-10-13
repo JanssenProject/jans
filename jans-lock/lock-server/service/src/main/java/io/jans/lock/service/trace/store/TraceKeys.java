@@ -69,11 +69,6 @@ public final class TraceKeys {
 				chain.getProducerChainId(), Long.toString(position.getSequenceNumber()));
 	}
 
-	/** Key type {@code cap}: {@code (domain, capability_id)}. */
-	public static String capabilityKey(String domainId, String capabilityId) {
-		return key("cap", domainId, capabilityId);
-	}
-
 	/**
 	 * Key type {@code tok}: {@code (domain, issuer, "jti", jti)} when the reference carries a
 	 * {@code jti}, otherwise {@code (domain, issuer, "fp", fingerprint)}. The literal discriminator

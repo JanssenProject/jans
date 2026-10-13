@@ -17,9 +17,11 @@ import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 
 /**
- * Validates {@code AUTHORIZATION_DECISION} records (design §7.2): a PDP decision, requiring a
- * complete {@code trace.policy} block and {@code trace.runtime.pdp_id}, in addition to the
- * {@code outcome} and non-empty {@code capability_ids[]} common to decision/invocation events.
+ * Validates {@code AUTHORIZATION_DECISION} records (design §7.1, §7.2, decision D-20): a PDP
+ * decision signing exactly one of a singular {@code decision} or a batch {@code decisions[]} of
+ * capability facts ({@code action}, {@code resource_type}, {@code outcome}; no resource id and no
+ * record-level outcome), a {@code trace.subject.workload_id}, a complete {@code trace.policy}
+ * block and {@code trace.runtime.pdp_id}.
  *
  * @author Yuriy Movchan
  */
@@ -43,10 +45,9 @@ public final class AuthorizationDecisionValidator implements EventKindValidator 
 		JsonNode trace = assertion.getRoot().get("trace");
 		JsonNode event = trace.get("event");
 
-		EventKindValidationSupport.requireEnum(event, "outcome", "trace.event.outcome",
+		EventKindValidationSupport.requireWorkloadSubject(trace);
+		EventKindValidationSupport.requireCapabilityFacts(event, "decision", "decisions", "decision_id",
 				EventKindValidationSupport.DECISION_OUTCOMES);
-		List<String> capabilityIds = EventKindValidationSupport.requireCapabilityIds(event,
-				"trace.event.capability_ids");
 
 		JsonNode policy = EventKindValidationSupport.requireObject(trace, "policy", "trace.policy");
 		EventKindValidationSupport.requireNonEmptyString(policy, "policy_store_id", "trace.policy.policy_store_id",
@@ -71,7 +72,6 @@ public final class AuthorizationDecisionValidator implements EventKindValidator 
 
 		List<TokenRef> tokenRefs = EventKindValidationSupport.extractTokens(event, "trace.event.tokens");
 
-		out.capabilityIds(capabilityIds);
 		out.tokenRefs(tokenRefs);
 	}
 

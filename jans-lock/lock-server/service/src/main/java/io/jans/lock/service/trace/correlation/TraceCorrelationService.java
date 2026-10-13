@@ -17,6 +17,7 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.trace.config.ChainRegistrationMode;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.model.ChainIdentity;
@@ -69,6 +70,9 @@ public class TraceCorrelationService {
 	@Inject
 	private AppConfiguration appConfiguration;
 
+	/** Last unknown {@code chainRegistrationMode} value already reported, so it is logged once. */
+	private volatile String warnedChainRegistrationMode;
+
 	/**
 	 * @throws io.jans.lock.service.trace.error.TraceValidationException {@code chain_not_registered}
 	 *         (design decision D-5) or {@code invalid_genesis} (design decision D-5)
@@ -83,7 +87,12 @@ public class TraceCorrelationService {
 		long sequenceNumber = producerChain.getSequenceNumber();
 		ChainPosition position = new ChainPosition(chainIdentity, sequenceNumber);
 
-		chainRegistry.requireRegistered(chainIdentity);
+		if (chainRegistrationMode() == ChainRegistrationMode.FIRST_OBSERVED) {
+			chainRegistry.requireRegisteredOrObserveGenesis(chainIdentity, sequenceNumber,
+					producerChain.getPrevRecordHash(), ctx.getClientId(), ctx.getReceivedAtMs());
+		} else {
+			chainRegistry.requireRegistered(chainIdentity);
+		}
 		chainRegistry.checkGenesis(sequenceNumber, producerChain.getPrevRecordHash());
 
 		List<StoredTraceRecord> predecessors = sequenceNumber > 1
@@ -109,12 +118,24 @@ public class TraceCorrelationService {
 		ExecutionIdentity execution = new ExecutionIdentity(domainId, inputs.getExecutionAuthority(),
 				inputs.getTraceExecutionId());
 
-		List<String> capabilityKeys = dedupKeys(inputs.getCapabilityIds(),
-				capabilityId -> TraceKeys.capabilityKey(domainId, capabilityId));
 		List<String> tokenKeys = dedupKeys(inputs.getTokenRefs(), token -> TraceKeys.tokenKey(domainId, token));
 
-		return new CorrelationPlan(flags, position, execution, capabilityKeys, tokenKeys, equivocationPeers,
+		return new CorrelationPlan(flags, position, execution, tokenKeys, equivocationPeers,
 				successors, inputs.getWarnings());
+	}
+
+	private ChainRegistrationMode chainRegistrationMode() {
+		String configured = appConfiguration.getTraceConfiguration().getChainRegistrationMode();
+		ChainRegistrationMode mode = ChainRegistrationMode.fromString(configured);
+		if (mode != null) {
+			return mode;
+		}
+		if (!configured.equals(warnedChainRegistrationMode)) {
+			warnedChainRegistrationMode = configured;
+			log.warn("Unknown TRACE chainRegistrationMode '{}', treating as {}", configured,
+					ChainRegistrationMode.PRE_REGISTERED);
+		}
+		return ChainRegistrationMode.PRE_REGISTERED;
 	}
 
 	/**

@@ -64,7 +64,6 @@ public class OrmTraceStore implements TraceStore {
 	private static final String ATTR_EXEC_ID = "jansTraceExecId";
 	private static final String ATTR_EXEC_AUTHORITY = "jansTraceExecAuthority";
 	private static final String ATTR_CHAIN_POS_KEY = "jansTraceChainPosKey";
-	private static final String ATTR_CAP_KEYS = "jansTraceCapKeys";
 	private static final String ATTR_TOKEN_KEYS = "jansTraceTokenKeys";
 	private static final String ATTR_RECEIPT_SEQ = "jansTraceReceiptSeq";
 	private static final String ATTR_RECEIPT_HASH = "jansTraceReceiptHash";
@@ -248,14 +247,6 @@ public class OrmTraceStore implements TraceStore {
 		Filter filter = Filter.createANDFilter(
 				Filter.createEqualityFilter(ATTR_DOMAIN_ID, position.getChainIdentity().getDomainId()),
 				Filter.createEqualityFilter(ATTR_CHAIN_POS_KEY, key));
-		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
-	}
-
-	@Override
-	public List<StoredTraceRecord> findRecordsByCapability(String domainId, String capabilityId) {
-		String key = TraceKeys.capabilityKey(domainId, capabilityId);
-		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
-				Filter.createEqualityFilter(ATTR_CAP_KEYS, key).multiValued());
 		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
 	}
 

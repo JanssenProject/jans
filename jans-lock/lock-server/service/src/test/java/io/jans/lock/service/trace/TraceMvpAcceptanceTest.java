@@ -12,7 +12,16 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.ByteArrayInputStream;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,21 +31,34 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.as.model.error.DefaultErrorResponse;
+import io.jans.as.model.error.IErrorType;
+import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
+import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.trace.canon.CanonicalHashes;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.error.TraceValidationException;
+import io.jans.lock.service.trace.identity.EvidenceDomainResolver;
+import io.jans.lock.service.trace.identity.SubmitterIdentity;
+import io.jans.lock.service.trace.identity.SubmitterIdentityService;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.ingest.AcceptanceResult;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
+import io.jans.lock.service.trace.model.VerificationResult;
+import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
 import io.jans.lock.service.trace.retrieve.TraceRetrievalService;
 import io.jans.lock.service.trace.testkit.TraceRecordBuilder;
 import io.jans.lock.service.trace.testkit.TraceTestHarness;
 import io.jans.lock.service.trace.testkit.TraceTestKeys;
+import io.jans.lock.service.ws.rs.trace.TraceRestWebServiceImpl;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 /**
  * MVP acceptance suite (design §15): one test method per numbered criterion, each quoting the §15
@@ -57,7 +79,7 @@ class TraceMvpAcceptanceTest {
 
 	private static final String OTHER_DOMAIN = "domain-2";
 
-	private static final String PRODUCER = "cedarling-fleet-1/1.0.0";
+	private static final String PRODUCER = "cedarling-fleet-1";
 
 	private static final String KID = "cedarling-fleet-1-2026-01";
 
@@ -65,7 +87,7 @@ class TraceMvpAcceptanceTest {
 
 	private static final String CHAIN = "chain-01JABC9Z0K";
 
-	private static final String GW_PRODUCER = "gateway-fleet-1/2.0.0";
+	private static final String GW_PRODUCER = "gateway-fleet-1";
 
 	private static final String GW_KID = "gateway-fleet-1-2026-01";
 
@@ -76,8 +98,6 @@ class TraceMvpAcceptanceTest {
 	private static final String EXECUTION_AUTHORITY = "spiffe://example.org/agent/planner";
 
 	private static final String TRACE_EXECUTION_ID = "exec-01JABCXYZQK8P5N9F2C7R3T4V6";
-
-	private static final String CAPABILITY_ID = "invoke:payment-authorization";
 
 	private static final String TOKEN_ISSUER = "https://accounts.example.org";
 
@@ -161,8 +181,159 @@ class TraceMvpAcceptanceTest {
 		assertEquals(json, stored.getAssertionRaw());
 		assertEquals(result.getContentDigest(), stored.getContentDigest());
 		assertEquals(1, harness.store().findRecordsByExecution(stored.getExecution(), 0, 100).size());
-		assertEquals(1, harness.store().findRecordsByCapability(DOMAIN, CAPABILITY_ID).size());
 		assertEquals(1, harness.store().snapshot().size());
+	}
+
+	// -- task 24: stable producer identity -------------------------------------------------------
+
+	@Test
+	void stableProducerId_legacyNameSemverProducer_stillAccepted() {
+		String legacyProducer = PRODUCER + "/1.0.0";
+		KeyPair keyPair = harness.registerKey(DOMAIN, legacyProducer, KID);
+		harness.registerChain(DOMAIN, legacyProducer, INSTANCE, CHAIN);
+		String recordId = TraceRecordBuilder.freshRecordId();
+		String json = TraceRecordBuilder.authorizationDecision().producer(legacyProducer).recordId(recordId)
+				.genesis().sign(keyPair.getPrivate());
+
+		AcceptanceResult result = harness.ingest(json, ctx());
+
+		assertTrue(result.isAccepted());
+		assertEquals(legacyProducer, result.getProducerId());
+		assertEquals(legacyProducer, harness.getRecord(DOMAIN, recordId, legacyProducer).getIdentity().getProducerId());
+	}
+
+	@Test
+	void stableProducerId_producerVersionPresent_storedUnchangedInAssertion() {
+		KeyPair keyPair = registerPrimary();
+		String recordId = TraceRecordBuilder.freshRecordId();
+		String json = TraceRecordBuilder.authorizationDecision().recordId(recordId).genesis()
+				.withField("1.4.2+build.7", "producer_version").sign(keyPair.getPrivate());
+
+		AcceptanceResult result = harness.ingest(json, ctx());
+
+		assertTrue(result.isAccepted());
+		StoredTraceRecord stored = harness.getRecord(DOMAIN, recordId, PRODUCER);
+		assertEquals(json, stored.getAssertionRaw());
+		assertEquals("1.4.2+build.7", readTree(stored.getAssertionRaw()).get("producer_version").textValue());
+	}
+
+	@Test
+	void stableProducerId_producerVersionNotString_rejectedInvalidAssertion() {
+		KeyPair keyPair = registerPrimary();
+		String json = TraceRecordBuilder.authorizationDecision().recordId(TraceRecordBuilder.freshRecordId())
+				.genesis().withField(7L, "producer_version").sign(keyPair.getPrivate());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> harness.ingest(json, ctx()));
+
+		assertEquals(TraceErrorResponseType.INVALID_ASSERTION, ex.getErrorId());
+		assertEquals("type:producer_version", ex.getReason());
+	}
+
+	// -- criterion 15 --------------------------------------------------------------------------
+
+	/**
+	 * §15.15: a record whose {@code event_kind} is outside the signing key's authorized set is
+	 * rejected exactly like an unknown key, and nothing about it is stored or indexed.
+	 */
+	@Test
+	void criterion15_eventKindOutsideKeyScope_rejectedAsUnknownKeyAndNeverRetrievable() {
+		KeyPair keyPair = harness.registerKey(DOMAIN, PRODUCER, KID, List.of("AUTHORIZATION_DECISION"));
+		harness.registerChain(DOMAIN, PRODUCER, INSTANCE, CHAIN);
+
+		String allowedRecordId = TraceRecordBuilder.freshRecordId();
+		String allowedJson = TraceRecordBuilder.authorizationDecision().recordId(allowedRecordId).genesis()
+				.sign(keyPair.getPrivate());
+		assertTrue(harness.ingest(allowedJson, ctx()).isAccepted());
+
+		String deniedRecordId = TraceRecordBuilder.freshRecordId();
+		String deniedJson = TraceRecordBuilder.capabilityInvoked().producer(PRODUCER).kid(KID)
+				.producerInstanceId(INSTANCE).producerChainId(CHAIN).recordId(deniedRecordId).sequenceNumber(2L)
+				.sign(keyPair.getPrivate());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> harness.ingest(deniedJson, ctx()));
+
+		assertEquals(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY, ex.getErrorId());
+		assertEquals("event_kind_not_authorized", ex.getReason());
+		assertThrows(TraceValidationException.class, () -> harness.getRecord(DOMAIN, deniedRecordId, PRODUCER));
+		assertEquals(1, harness.store().snapshot().size());
+		assertTrue(harness.getRecord(DOMAIN, allowedRecordId, PRODUCER).getIdentity().getRecordId()
+				.equals(allowedRecordId));
+	}
+
+	// -- criterion 16 --------------------------------------------------------------------------
+
+	/**
+	 * §15.16: the stored verification block records the exact key and the admission decision at
+	 * ingestion, and a later revocation or expiry never changes it.
+	 */
+	@Test
+	void criterion16_verificationBlock_unchangedAfterRevocation() {
+		KeyPair keyPair = registerPrimary();
+		String recordId = TraceRecordBuilder.freshRecordId();
+		String json = TraceRecordBuilder.authorizationDecision().recordId(recordId).genesis()
+				.sign(keyPair.getPrivate());
+		harness.ingest(json, ctx());
+
+		VerificationResult first = harness.getRecord(DOMAIN, recordId, PRODUCER).getVerification();
+		assertTrue(first.isSignatureValid());
+		assertEquals(KID, first.getKeyId());
+		assertEquals(Boolean.TRUE, first.getKeyAuthorized());
+		assertEquals(Ed25519PublicKeys.thumbprint(TraceTestKeys.toJwk(keyPair.getPublic())),
+				first.getKeyThumbprint());
+
+		harness.revokeKey(DOMAIN, PRODUCER, KID, harness.now());
+		harness.setNow(harness.now() + 10_000L);
+
+		VerificationResult afterRevocation = harness.getRecord(DOMAIN, recordId, PRODUCER).getVerification();
+		assertEquals(first, afterRevocation);
+	}
+
+	@Test
+	void criterion16_verificationBlock_unchangedAfterValidUntilPasses() {
+		long validUntil = harness.now() + 60_000L;
+		KeyPair keyPair = harness.registerKey(DOMAIN, PRODUCER, KID, 0L, validUntil);
+		harness.registerChain(DOMAIN, PRODUCER, INSTANCE, CHAIN);
+		String recordId = TraceRecordBuilder.freshRecordId();
+		String json = TraceRecordBuilder.authorizationDecision().recordId(recordId).genesis()
+				.sign(keyPair.getPrivate());
+		harness.ingest(json, ctx());
+		VerificationResult first = harness.getRecord(DOMAIN, recordId, PRODUCER).getVerification();
+
+		harness.setNow(validUntil + 1L);
+
+		assertEquals(first, harness.getRecord(DOMAIN, recordId, PRODUCER).getVerification());
+		assertEquals(Boolean.TRUE, first.getKeyAuthorized());
+	}
+
+	@Test
+	void criterion16_sameKidInTwoProducersAndDomains_differentThumbprints_stablePerKey() {
+		KeyPair primary = registerPrimary();
+		KeyPair otherProducerSameKid = harness.registerKey(DOMAIN, GW_PRODUCER, KID);
+		harness.registerChain(DOMAIN, GW_PRODUCER, GW_INSTANCE, GW_CHAIN);
+		KeyPair otherDomainSameKid = harness.registerKey(OTHER_DOMAIN, PRODUCER, KID);
+		harness.registerChain(OTHER_DOMAIN, PRODUCER, INSTANCE, CHAIN);
+
+		String primaryId = TraceRecordBuilder.freshRecordId();
+		harness.ingest(TraceRecordBuilder.authorizationDecision().recordId(primaryId).genesis()
+				.sign(primary.getPrivate()), ctx());
+		String gatewayId = TraceRecordBuilder.freshRecordId();
+		harness.ingest(TraceRecordBuilder.authorizationDecision().producer(GW_PRODUCER).kid(KID).recordId(gatewayId)
+				.producerInstanceId(GW_INSTANCE).producerChainId(GW_CHAIN).genesis()
+				.sign(otherProducerSameKid.getPrivate()), ctx());
+		String otherDomainId = TraceRecordBuilder.freshRecordId();
+		harness.ingest(TraceRecordBuilder.authorizationDecision().recordId(otherDomainId).genesis()
+				.sign(otherDomainSameKid.getPrivate()), harness.ctx(OTHER_DOMAIN));
+
+		String t1 = harness.getRecord(DOMAIN, primaryId, PRODUCER).getVerification().getKeyThumbprint();
+		String t2 = harness.getRecord(DOMAIN, gatewayId, GW_PRODUCER).getVerification().getKeyThumbprint();
+		String t3 = harness.getRecord(OTHER_DOMAIN, otherDomainId, PRODUCER).getVerification().getKeyThumbprint();
+
+		assertNotEquals(t1, t2);
+		assertNotEquals(t1, t3);
+		assertNotEquals(t2, t3);
+		assertEquals(t1, harness.getRecord(DOMAIN, primaryId, PRODUCER).getVerification().getKeyThumbprint());
 	}
 
 	// -- criterion 2 ----------------------------------------------------------------------------
@@ -190,7 +361,7 @@ class TraceMvpAcceptanceTest {
 
 		String mismatchRecordId = TraceRecordBuilder.freshRecordId();
 		String mismatchJson = TraceRecordBuilder.authorizationDecision().recordId(mismatchRecordId).genesis()
-				.withField("other-producer/9.9.9", "producer").sign(wrongKeyPair.getPrivate());
+				.withField("other-producer", "producer").sign(wrongKeyPair.getPrivate());
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
 				() -> harness.ingest(mismatchJson, ctx()));
 		assertEquals(TraceErrorResponseType.PRODUCER_MISMATCH, ex.getErrorId());
@@ -201,7 +372,6 @@ class TraceMvpAcceptanceTest {
 		assertThrows(TraceValidationException.class, () -> harness.getRecord(DOMAIN, recordId, PRODUCER));
 		ExecutionIdentity exec = new ExecutionIdentity(DOMAIN, EXECUTION_AUTHORITY, TRACE_EXECUTION_ID);
 		assertTrue(harness.store().findRecordsByExecution(exec, 0, 100).isEmpty());
-		assertTrue(harness.store().findRecordsByCapability(DOMAIN, CAPABILITY_ID).isEmpty());
 		TokenRef token = new TokenRef(TOKEN_ISSUER, "access_token", TOKEN_JTI, null);
 		assertTrue(harness.store().findRecordsByToken(DOMAIN, token).isEmpty());
 	}
@@ -472,7 +642,6 @@ class TraceMvpAcceptanceTest {
 		assertTrue(harness.store().snapshot().isEmpty());
 		assertNotEquals(TraceReceiptState.COMMITTED,
 				harness.store().findReceipt(DOMAIN, 1L).orElseThrow().getReceiptStateEnum());
-		assertTrue(harness.store().findRecordsByCapability(DOMAIN, CAPABILITY_ID).isEmpty());
 		assertTrue(harness.verifyDomain(DOMAIN).isOk());
 	}
 
@@ -519,7 +688,7 @@ class TraceMvpAcceptanceTest {
 				() -> harness.getRecord(DOMAIN, sharedRecordId, null));
 		assertEquals(TraceErrorResponseType.AMBIGUOUS_IDENTIFIER, recordEx.getErrorId());
 
-		String effectProducer = "effect-observer-1/1.0.0";
+		String effectProducer = "effect-observer-1";
 		KeyPair keyPairEffect = harness.registerKey(DOMAIN, effectProducer, "effect-observer-1-2026-01");
 		harness.registerChain(DOMAIN, effectProducer, "effect-observer-001", "chain-03JABC9Z0K");
 		String otherAuthority = "spiffe://example.org/agent/other-planner";
@@ -529,6 +698,285 @@ class TraceMvpAcceptanceTest {
 		TraceConflictException executionEx = assertThrows(TraceConflictException.class,
 				() -> harness.getExecution(DOMAIN, TRACE_EXECUTION_ID, null, 0, 100));
 		assertEquals(TraceErrorResponseType.AMBIGUOUS_IDENTIFIER, executionEx.getErrorId());
+	}
+
+	// -- criterion 17 (bulk) -----------------------------------------------------------------------
+
+	private TraceRestWebServiceImpl bulkEndpoint() {
+		AppConfiguration appConfiguration = mock(AppConfiguration.class);
+		when(appConfiguration.getTraceConfiguration()).thenReturn(harness.traceConfiguration());
+
+		SubmitterIdentity identity = new SubmitterIdentity(TraceTestHarness.DEFAULT_CLIENT_ID, true);
+		SubmitterIdentityService identityService = mock(SubmitterIdentityService.class);
+		when(identityService.resolve(any())).thenReturn(identity);
+		EvidenceDomainResolver domainResolver = mock(EvidenceDomainResolver.class);
+		when(domainResolver.resolve(identity)).thenReturn(ctx());
+
+		ErrorResponseFactory errorFactory = mock(ErrorResponseFactory.class);
+		when(errorFactory.buildErrorResponse(any(IErrorType.class), anyString())).thenAnswer(inv -> {
+			IErrorType type = inv.getArgument(0);
+			DefaultErrorResponse body = new DefaultErrorResponse();
+			body.setType(type);
+			body.setErrorDescription(type.getParameter());
+			body.setReason(inv.getArgument(1));
+			return body;
+		});
+		when(errorFactory.traceException(any(TraceErrorResponseType.class), anyString())).thenAnswer(inv -> {
+			TraceErrorResponseType type = inv.getArgument(0);
+			ObjectNode body = MAPPER.createObjectNode();
+			body.put("error", type.getParameter());
+			body.put("reason", (String) inv.getArgument(1));
+			return new WebApplicationException(Response.status(type.httpStatus()).entity(body).build());
+		});
+		when(errorFactory.traceException(any(TraceErrorResponseType.class), anyString(), any())).thenAnswer(inv -> {
+			TraceErrorResponseType type = inv.getArgument(0);
+			ObjectNode body = MAPPER.createObjectNode();
+			body.put("error", type.getParameter());
+			body.put("reason", (String) inv.getArgument(1));
+			return new WebApplicationException(Response.status(type.httpStatus()).entity(body).build());
+		});
+
+		TraceRestWebServiceImpl impl = new TraceRestWebServiceImpl();
+		setField(impl, "log", org.slf4j.LoggerFactory.getLogger(TraceRestWebServiceImpl.class));
+		setField(impl, "appConfiguration", appConfiguration);
+		setField(impl, "errorResponseFactory", errorFactory);
+		setField(impl, "submitterIdentityService", identityService);
+		setField(impl, "evidenceDomainResolver", domainResolver);
+		setField(impl, "ingestionService", harness.ingestionService());
+		setField(impl, "applicationAuditLogger", mock(ApplicationAuditLogger.class));
+		return impl;
+	}
+
+	private static void setField(Object target, String name, Object value) {
+		try {
+			Field field = target.getClass().getDeclaredField(name);
+			field.setAccessible(true);
+			field.set(target, value);
+		} catch (ReflectiveOperationException ex) {
+			throw new IllegalStateException(ex);
+		}
+	}
+
+	private static JsonNode submitBulk(TraceRestWebServiceImpl endpoint, String arrayJson, int expectedStatus) {
+		Response response = endpoint.submitBulkRecords(
+				new ByteArrayInputStream(arrayJson.getBytes(StandardCharsets.UTF_8)), null, null);
+		assertEquals(expectedStatus, response.getStatus());
+		return MAPPER.valueToTree(response.getEntity());
+	}
+
+	/**
+	 * §15.17: "A POST /api/v1/audit/trace/bulk batch with a mix of valid and invalid records accepts
+	 * every valid record and rejects every invalid one on its own merits, each with its own
+	 * per-record result and receipt; one record's failure never rejects an independently-valid record
+	 * in the same batch ..."
+	 */
+	@Test
+	void criterion17_bulkValidAndInvalidFromOneProducer_eachOnItsOwnMerits() {
+		KeyPair keyPair = registerPrimary();
+		KeyPair wrongKeyPair = TraceTestKeys.generateKeyPair();
+
+		String id1 = TraceRecordBuilder.freshRecordId();
+		String json1 = TraceRecordBuilder.authorizationDecision().recordId(id1).genesis().sign(keyPair.getPrivate());
+		String badId = TraceRecordBuilder.freshRecordId();
+		String badJson = TraceRecordBuilder.authorizationDecision().recordId(badId).sequenceNumber(2)
+				.prevRecordHash(contentDigestOf(json1)).sign(wrongKeyPair.getPrivate());
+		String id3 = TraceRecordBuilder.freshRecordId();
+		String json3 = TraceRecordBuilder.authorizationDecision().recordId(id3).sequenceNumber(2)
+				.prevRecordHash(contentDigestOf(json1)).sign(keyPair.getPrivate());
+		String batch = "[" + json1 + "," + badJson + "," + json3 + "]";
+
+		TraceRestWebServiceImpl endpoint = bulkEndpoint();
+		JsonNode results = submitBulk(endpoint, batch, 207).get("results");
+
+		assertEquals(3, results.size());
+		JsonNode first = results.get(0);
+		assertTrue(first.get("accepted").booleanValue());
+		assertEquals(0, first.get("index").intValue());
+		assertEquals(PRODUCER, first.get("producer_id").textValue());
+		assertEquals(id1, first.get("record_id").textValue());
+		assertEquals(1L, first.get("receipt_sequence").longValue());
+		// DEFAULT_NOW_MS has a zero millisecond part: the fraction must still carry three digits
+		assertEquals("2023-11-14T22:13:21.000Z", first.get("received_at").textValue());
+		assertFalse(first.get("idempotent_replay").booleanValue());
+
+		JsonNode rejected = results.get(1);
+		assertFalse(rejected.get("accepted").booleanValue());
+		assertEquals(1, rejected.get("index").intValue());
+		assertEquals(PRODUCER, rejected.get("producer_id").textValue());
+		assertEquals(badId, rejected.get("record_id").textValue());
+		assertEquals("invalid_signature", rejected.get("error").get("error").textValue());
+		assertFalse(rejected.has("receipt_sequence"));
+
+		JsonNode third = results.get(2);
+		assertTrue(third.get("accepted").booleanValue());
+		assertEquals(id3, third.get("record_id").textValue());
+		assertEquals(2L, third.get("receipt_sequence").longValue());
+
+		assertEquals(2, harness.store().snapshot().size());
+		assertThrows(TraceValidationException.class, () -> harness.getRecord(DOMAIN, badId, PRODUCER));
+		assertEquals(json1, harness.getRecord(DOMAIN, id1, PRODUCER).getAssertionRaw());
+		assertEquals(json3, harness.getRecord(DOMAIN, id3, PRODUCER).getAssertionRaw());
+
+		JsonNode replay = submitBulk(endpoint, batch, 207).get("results");
+		assertTrue(replay.get(0).get("idempotent_replay").booleanValue());
+		assertEquals(1L, replay.get(0).get("receipt_sequence").longValue());
+		assertFalse(replay.get(1).get("accepted").booleanValue());
+		assertTrue(replay.get(2).get("idempotent_replay").booleanValue());
+		assertEquals(2L, replay.get(2).get("receipt_sequence").longValue());
+		assertEquals(2, harness.store().snapshot().size());
+	}
+
+	/**
+	 * §15.17: "... and a batch mixing producers is rejected at the envelope level."
+	 */
+	@Test
+	void criterion17_bulkMixingProducers_rejectedAtEnvelopeNothingStored() {
+		KeyPair primaryKey = registerPrimary();
+		KeyPair gatewayKey = registerGateway();
+		String primaryId = TraceRecordBuilder.freshRecordId();
+		String gatewayId = TraceRecordBuilder.freshRecordId();
+		String primaryJson = TraceRecordBuilder.authorizationDecision().recordId(primaryId).genesis()
+				.sign(primaryKey.getPrivate());
+		String gatewayJson = TraceRecordBuilder.capabilityInvoked().recordId(gatewayId).genesis()
+				.sign(gatewayKey.getPrivate());
+
+		TraceRestWebServiceImpl endpoint = bulkEndpoint();
+		WebApplicationException ex = assertThrows(WebApplicationException.class, () -> endpoint
+				.submitBulkRecords(new ByteArrayInputStream(
+						("[" + primaryJson + "," + gatewayJson + "]").getBytes(StandardCharsets.UTF_8)), null, null));
+
+		assertEquals(400, ex.getResponse().getStatus());
+		JsonNode body = MAPPER.valueToTree(ex.getResponse().getEntity());
+		assertEquals("invalid_request", body.get("error").textValue());
+		assertEquals("bulk_mixed_producers", body.get("reason").textValue());
+
+		assertTrue(harness.store().snapshot().isEmpty());
+		assertNeverRetrievable(primaryId);
+		assertThrows(TraceValidationException.class, () -> harness.getRecord(DOMAIN, gatewayId, GW_PRODUCER));
+
+		AcceptanceResult next = harness.ingest(TraceRecordBuilder.authorizationDecision().genesis()
+				.sign(primaryKey.getPrivate()), ctx());
+		assertEquals(1L, next.getReceiptSequence());
+	}
+
+	// -- task 30: chain registration modes and multi-chain instances -----------------------------
+
+	private static final String SECOND_CHAIN = "chain-03JABC9Z0K";
+
+	@Test
+	void chainRegistrationMode_firstObserved_genesisOpensChainAndSecondChainStaysUnregistered() {
+		harness.traceConfiguration().setChainRegistrationMode("FIRST_OBSERVED");
+		KeyPair keyPair = harness.registerKey(DOMAIN, PRODUCER, KID);
+		String genesisJson = TraceRecordBuilder.authorizationDecision().genesis().sign(keyPair.getPrivate());
+
+		AcceptanceResult accepted = harness.ingest(genesisJson, ctx());
+
+		assertTrue(accepted.isAccepted());
+		List<io.jans.lock.model.trace.entity.TraceChainEntry> chains = harness.store().findChains(DOMAIN, PRODUCER);
+		assertEquals(1, chains.size());
+		assertEquals(CHAIN, chains.get(0).getProducerChainId());
+		assertEquals("first_observed_genesis", chains.get(0).getGenesisKind());
+		assertEquals(TraceTestHarness.DEFAULT_CLIENT_ID, chains.get(0).getRegisteredBy());
+
+		String otherChainSeq2 = TraceRecordBuilder.authorizationDecision().producerChainId(SECOND_CHAIN)
+				.sequenceNumber(2).prevRecordHash(contentDigestOf(genesisJson)).sign(keyPair.getPrivate());
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> harness.ingest(otherChainSeq2, ctx()));
+		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
+		assertEquals(1, harness.store().findChains(DOMAIN, PRODUCER).size());
+	}
+
+	@Test
+	void chainRegistrationMode_firstObserved_replayedGenesisIsIdempotentAndModeSwitchKeepsRows() {
+		harness.traceConfiguration().setChainRegistrationMode("FIRST_OBSERVED");
+		KeyPair keyPair = harness.registerKey(DOMAIN, PRODUCER, KID);
+		String genesisJson = TraceRecordBuilder.authorizationDecision().genesis().sign(keyPair.getPrivate());
+		harness.ingest(genesisJson, ctx());
+
+		harness.traceConfiguration().setChainRegistrationMode("PRE_REGISTERED");
+
+		assertTrue(harness.ingest(genesisJson, ctx()).isIdempotentReplay());
+		String next = TraceRecordBuilder.authorizationDecision().sequenceNumber(2)
+				.prevRecordHash(contentDigestOf(genesisJson)).sign(keyPair.getPrivate());
+		assertTrue(harness.ingest(next, ctx()).isAccepted(), "the existing chain row stays registered");
+		assertEquals("first_observed_genesis", harness.store().findChains(DOMAIN, PRODUCER).get(0).getGenesisKind());
+		String otherChainGenesis = TraceRecordBuilder.authorizationDecision().producerChainId(SECOND_CHAIN).genesis()
+				.sign(keyPair.getPrivate());
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> harness.ingest(otherChainGenesis, ctx()));
+		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
+	}
+
+	@Test
+	void chainRegistrationMode_defaultPreRegistered_adminChainsListPreRegisteredGenesis() {
+		registerPrimary();
+
+		List<io.jans.lock.model.trace.entity.TraceChainEntry> chains = harness.store().findChains(DOMAIN, PRODUCER);
+
+		assertEquals(1, chains.size());
+		assertEquals("pre_registered_genesis", chains.get(0).getGenesisKind());
+		assertEquals("PRE_REGISTERED", harness.traceConfiguration().getChainRegistrationMode());
+	}
+
+	@Test
+	void chainLink_arbitraryObject_acceptedAndReturnedUnchanged() throws Exception {
+		KeyPair keyPair = registerPrimary();
+		JsonNode chainLink = MAPPER.readTree(
+				"{\"opaque\":[1,{\"x\":null}],\"kind\":\"anything\",\"nested\":{\"a\":true}}");
+		String recordId = TraceRecordBuilder.freshRecordId();
+		String json = TraceRecordBuilder.authorizationDecision().recordId(recordId).genesis()
+				.withField(chainLink, "producer_chain", "chain_link").sign(keyPair.getPrivate());
+
+		AcceptanceResult result = harness.ingest(json, ctx());
+
+		assertTrue(result.isAccepted());
+		StoredTraceRecord stored = harness.getRecord(DOMAIN, recordId, PRODUCER);
+		assertEquals(json, stored.getAssertionRaw());
+		assertEquals(chainLink, MAPPER.readTree(stored.getAssertionRaw()).at("/producer_chain/chain_link"));
+	}
+
+	@Test
+	void multiChain_singleAndBulkSubmissionsInterleavedAcrossTwoChains_independentAndOrdered() {
+		KeyPair keyPair = registerPrimary();
+		harness.registerChain(DOMAIN, PRODUCER, INSTANCE, SECOND_CHAIN);
+
+		String a1 = TraceRecordBuilder.authorizationDecision().genesis().sign(keyPair.getPrivate());
+		String b1 = TraceRecordBuilder.authorizationDecision().producerChainId(SECOND_CHAIN).genesis()
+				.sign(keyPair.getPrivate());
+		String a2 = TraceRecordBuilder.authorizationDecision().sequenceNumber(2).prevRecordHash(contentDigestOf(a1))
+				.sign(keyPair.getPrivate());
+		// chain B position 3 skips position 2 inside the batch
+		String b2 = TraceRecordBuilder.authorizationDecision().producerChainId(SECOND_CHAIN).sequenceNumber(2)
+				.prevRecordHash(contentDigestOf(b1)).sign(keyPair.getPrivate());
+		String b3 = TraceRecordBuilder.authorizationDecision().producerChainId(SECOND_CHAIN).sequenceNumber(3)
+				.prevRecordHash(contentDigestOf(b2)).sign(keyPair.getPrivate());
+		String a3 = TraceRecordBuilder.authorizationDecision().sequenceNumber(3).prevRecordHash(contentDigestOf(a2))
+				.sign(keyPair.getPrivate());
+
+		AcceptanceResult singleA1 = harness.ingest(a1, ctx());
+		AcceptanceResult singleB1 = harness.ingest(b1, ctx());
+		JsonNode results = submitBulk(bulkEndpoint(), "[" + a2 + "," + b3 + "," + a3 + "]", 207).get("results");
+
+		assertEquals(1L, singleA1.getReceiptSequence());
+		assertEquals(2L, singleB1.getReceiptSequence());
+		assertFalse(singleA1.isCoverageGapFlag());
+		assertFalse(singleB1.isCoverageGapFlag());
+		assertTrue(results.get(0).get("accepted").booleanValue());
+		assertFalse(results.get(0).get("coverage_gap_flag").booleanValue());
+		assertTrue(results.get(1).get("accepted").booleanValue());
+		assertTrue(results.get(1).get("coverage_gap_flag").booleanValue(), "chain B position 2 is missing");
+		assertTrue(results.get(2).get("accepted").booleanValue());
+		assertFalse(results.get(2).get("coverage_gap_flag").booleanValue(), "chain A is unaffected");
+		assertEquals(3L, results.get(0).get("receipt_sequence").longValue());
+		assertEquals(4L, results.get(1).get("receipt_sequence").longValue());
+		assertEquals(5L, results.get(2).get("receipt_sequence").longValue());
+
+		AcceptanceResult lateB2 = harness.ingest(b2, ctx());
+		assertFalse(lateB2.isCoverageGapFlag());
+		assertEquals(6L, lateB2.getReceiptSequence());
+		assertFalse(harness.getRecord(DOMAIN, results.get(1).get("record_id").textValue(), PRODUCER).getFlags()
+				.isCoverageGap());
+		assertTrue(harness.verifyDomain(DOMAIN).isOk());
 	}
 
 }

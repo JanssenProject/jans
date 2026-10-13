@@ -91,7 +91,7 @@ RUN set -e \
     done
 
 # Download jans-lock JARs to _lock_libs (conditionally copied via Python script when lock is enabled)
-RUN wget -nv https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
+RUN wget -nv ${CN_RELEASE_DOWNLOAD_URL}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
     && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/_lock_libs \
     && rm -f /tmp/lock-svc-deps.zip
 

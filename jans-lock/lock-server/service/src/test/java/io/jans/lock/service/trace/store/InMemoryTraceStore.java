@@ -253,16 +253,6 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
-	public List<StoredTraceRecord> findRecordsByCapability(String domainId, String capabilityId) {
-		String targetKey = TraceKeys.capabilityKey(domainId, capabilityId);
-		return recordsByKey.values().stream()
-				.filter(r -> r.getIdentity().getDomainId().equals(domainId) && r.getCapabilityIds().stream()
-						.anyMatch(cap -> TraceKeys.capabilityKey(domainId, cap).equals(targetKey)))
-				.sorted(Comparator.comparingLong(r -> r.getReceipt().getReceiptSequence())).map(StoredTraceRecord::copy)
-				.collect(Collectors.toList());
-	}
-
-	@Override
 	public List<StoredTraceRecord> findRecordsByToken(String domainId, TokenRef token) {
 		String targetKey = TraceKeys.tokenKey(domainId, token);
 		return recordsByKey.values().stream()
@@ -431,6 +421,7 @@ public class InMemoryTraceStore implements TraceStore {
 		copy.setProducerInstanceId(source.getProducerInstanceId());
 		copy.setProducerChainId(source.getProducerChainId());
 		copy.setRegisteredBy(source.getRegisteredBy());
+		copy.setGenesisKind(source.getGenesisKind());
 		copy.setCreationDate(source.getCreationDate());
 		return copy;
 	}
@@ -444,6 +435,8 @@ public class InMemoryTraceStore implements TraceStore {
 		copy.setKid(source.getKid());
 		Map<String, String> jwk = source.getPublicKeyJwk();
 		copy.setPublicKeyJwk(jwk == null ? null : new LinkedHashMap<>(jwk));
+		List<String> kinds = source.getAuthorizedEventKinds();
+		copy.setAuthorizedEventKinds(kinds == null ? null : new ArrayList<>(kinds));
 		copy.setValidFrom(source.getValidFrom());
 		copy.setValidUntil(source.getValidUntil());
 		copy.setRevokedAt(source.getRevokedAt());

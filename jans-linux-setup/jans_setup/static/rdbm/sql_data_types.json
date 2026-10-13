@@ -990,6 +990,16 @@
       "type": "VARCHAR"
     }
   },
+  "jansTraceGenesisKind": {
+    "mysql": {
+      "size": 32,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 32,
+      "type": "VARCHAR"
+    }
+  },
   "jansTraceReceiptState": {
     "mysql": {
       "size": 16,

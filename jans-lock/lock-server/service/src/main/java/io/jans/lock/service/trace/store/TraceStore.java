@@ -98,8 +98,6 @@ public interface TraceStore {
 	 */
 	List<StoredTraceRecord> findRecordsByChainPosition(ChainPosition position);
 
-	List<StoredTraceRecord> findRecordsByCapability(String domainId, String capabilityId);
-
 	List<StoredTraceRecord> findRecordsByToken(String domainId, TokenRef token);
 
 	long countRecords(String domainId);

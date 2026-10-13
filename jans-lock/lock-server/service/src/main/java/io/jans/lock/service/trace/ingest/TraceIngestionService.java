@@ -135,7 +135,7 @@ public class TraceIngestionService {
 		return new StoredTraceRecord(verified.getIdentity(), verified.getParsed().getRawText(),
 				verified.getContentDigest(), verified.getVerification(), receipt, plan.getFlags(),
 				plan.getExecution(), plan.getPosition(), verified.getInputs().getChainPosition().getPrevRecordHash(),
-				verified.getInputs().getCapabilityIds(), verified.getInputs().getTokenRefs(),
+				verified.getInputs().getTokenRefs(),
 				verified.getInputs().getEventKind(), verified.getInputs().getSignedAt(), ctx.getNodeId(),
 				ctx.getReceivedAtMs(), 0L);
 	}

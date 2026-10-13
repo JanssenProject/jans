@@ -272,10 +272,12 @@ verification. See [TRACE Evidence](./trace.md) for the feature description and A
 | `maxArrayLength` | integer | `256` | Maximum accepted JSON array length in a TRACE assertion. |
 | `maxObjectMembers` | integer | `256` | Maximum accepted JSON object member count in a TRACE assertion. |
 | `receiptAllocationRetryLimit` | integer | `8` | Maximum retries when allocating the next receipt-chain sequence number under multi-node contention. |
+| `correlationRetryLimit` | integer | `3` | Maximum retries when a neighbor-flag update after a record insert hits a version conflict. After the limit Lock logs a warning and gives up on that update; the request still succeeds. |
 | `receiptRepairIntervalSeconds` | integer | `300` | Interval between runs of the receipt repair timer, which settles stale `PENDING` receipts. |
 | `pendingReceiptTimeoutSeconds` | integer | `120` | Seconds a `PENDING` receipt may remain unresolved before the repair timer marks it `COMMITTED` or `VOID`. |
 | `maxBulkRecords` | integer | `100` | Maximum number of assertions accepted in one `POST /audit/trace/bulk` request. |
 | `maxBulkRequestBytes` | integer | `4194304` | Maximum total body size, in bytes, buffered for one `POST /audit/trace/bulk` request. Independent of `maxRequestBytes`/`maxBulkRecords`, and always clamped to 16777216 regardless of configuration. |
+| `chainRegistrationMode` | string | `PRE_REGISTERED` | How producer chains come to exist. `PRE_REGISTERED`: a chain must be registered through the admin API before its records are accepted. `FIRST_OBSERVED`: a record with `sequence_number` 1 and the all-zero `prev_record_hash` on an unregistered chain registers the chain, after the key, event-kind and signature checks pass. Any other record on an unregistered chain is still rejected with `chain_not_registered`. A value that is not a mode name is treated as `PRE_REGISTERED` and logged once at `WARN`. Changing the mode affects only later submissions; existing chains are not rewritten. |
 
 Every numeric limit above falls back to its default when configured with a value `<= 0`.
 

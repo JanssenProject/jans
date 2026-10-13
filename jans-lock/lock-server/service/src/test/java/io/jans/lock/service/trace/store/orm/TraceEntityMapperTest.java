@@ -8,6 +8,7 @@ package io.jans.lock.service.trace.store.orm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
@@ -16,6 +17,7 @@ import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 import io.jans.lock.model.trace.entity.TraceRecordEntry;
+import io.jans.lock.model.trace.entity.TraceVerification;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.ChainIdentity;
@@ -31,7 +33,7 @@ import io.jans.lock.service.trace.store.TraceKeys;
 
 /**
  * Tests for {@link TraceEntityMapper}: the record round trip (including the assertion re-parse that
- * recovers {@code producer_instance_id}/{@code producer_chain_id}, capability ids and token
+ * recovers {@code producer_instance_id}/{@code producer_chain_id} and token
  * references — see task 13's design decision on entity-to-record mapping) and the
  * null-Boolean-flag convention. Receipts, chains and producer keys need no mapper test: since the
  * collapse of their store value types onto the jans-orm entities, {@code TraceStore} exposes those
@@ -50,15 +52,18 @@ class TraceEntityMapperTest {
 			+ "\"producer_chain_id\":\"chain-1\",\"sequence_number\":7}}";
 
 	private static StoredTraceRecord newRecord(String assertion) {
+		return newRecord(assertion, new VerificationResult(true, "kid-1", 1000L, "Ed25519"));
+	}
+
+	private static StoredTraceRecord newRecord(String assertion, VerificationResult verification) {
 		RecordIdentity identity = new RecordIdentity(DOMAIN, "producer-1", "record-1");
 		ExecutionIdentity execution = new ExecutionIdentity(DOMAIN, "authority-1", "exec-1");
 		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "producer-1", "instance-1", "chain-1");
 		ChainPosition chainPosition = new ChainPosition(chainIdentity, 7L);
-		VerificationResult verification = new VerificationResult(true, "kid-1", 1000L, "Ed25519");
 		ReceiptEntry receipt = new ReceiptEntry(42L, 5000L, TraceConstants.ZERO_HASH, "sha256:" + "1".repeat(64));
 		IngestionFlags flags = new IngestionFlags(true, false, true, false);
 		return new StoredTraceRecord(identity, assertion, "sha256:" + "2".repeat(64), verification, receipt, flags,
-				execution, chainPosition, TraceConstants.ZERO_HASH, Arrays.asList("cap-1", "cap-2"),
+				execution, chainPosition, TraceConstants.ZERO_HASH,
 				Collections.singletonList(new TokenRef("https://issuer.example.org", "access_token", "jti-1", null)),
 				TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 9000L, 7L);
 	}
@@ -76,7 +81,6 @@ class TraceEntityMapperTest {
 		assertEquals(record.getExecution(), roundTripped.getExecution());
 		assertEquals(record.getChainPosition().getChainIdentity(), roundTripped.getChainPosition().getChainIdentity());
 		assertEquals(record.getChainPosition().getSequenceNumber(), roundTripped.getChainPosition().getSequenceNumber());
-		assertEquals(record.getCapabilityIds(), roundTripped.getCapabilityIds());
 		assertEquals(record.getTokenRefs(), roundTripped.getTokenRefs());
 		assertEquals(record.getEventKind(), roundTripped.getEventKind());
 		assertEquals(record.getSignedAt(), roundTripped.getSignedAt());
@@ -88,6 +92,38 @@ class TraceEntityMapperTest {
 	}
 
 	@Test
+	void testToEntity_verificationBlockWithThumbprintAndKeyAuthorized_roundTrips() {
+		VerificationResult verification = new VerificationResult(true, "kid-1", 1000L, "Ed25519",
+				"sha256:" + "a".repeat(64), Boolean.TRUE);
+		StoredTraceRecord record = newRecord(ASSERTION, verification);
+
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans");
+		StoredTraceRecord roundTripped = TraceEntityMapper.toStoredTraceRecord(entity);
+
+		assertEquals("sha256:" + "a".repeat(64), entity.getVerification().getKeyThumbprint());
+		assertEquals(Boolean.TRUE, entity.getVerification().getKeyAuthorized());
+		assertEquals(verification, roundTripped.getVerification());
+	}
+
+	@Test
+	void testToStoredTraceRecord_legacyVerificationWithoutNewMembers_mapsWithNulls() {
+		StoredTraceRecord record = newRecord(ASSERTION);
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans");
+		TraceVerification legacy = new TraceVerification();
+		legacy.setSignatureValid(true);
+		legacy.setKeyId("kid-1");
+		legacy.setVerifiedAtMs(1000L);
+		legacy.setAlgorithm("Ed25519");
+		entity.setVerification(legacy);
+
+		VerificationResult mapped = TraceEntityMapper.toStoredTraceRecord(entity).getVerification();
+
+		assertNull(mapped.getKeyThumbprint());
+		assertNull(mapped.getKeyAuthorized());
+		assertEquals("kid-1", mapped.getKeyId());
+	}
+
+	@Test
 	void testToEntity_computesHashedKeysFromRawValues() {
 		StoredTraceRecord record = newRecord(ASSERTION);
 
@@ -96,8 +132,7 @@ class TraceEntityMapperTest {
 		assertEquals(TraceKeys.recordKey(record.getIdentity()), entity.getId());
 		assertEquals(TraceKeys.chainKey(record.getChainPosition().getChainIdentity()), entity.getChainKey());
 		assertEquals(TraceKeys.chainPositionKey(record.getChainPosition()), entity.getChainPosKey());
-		assertEquals(Arrays.asList(TraceKeys.capabilityKey(DOMAIN, "cap-1"), TraceKeys.capabilityKey(DOMAIN, "cap-2")),
-				entity.getCapKeys());
+		assertEquals(Arrays.asList(TraceKeys.tokenKey(DOMAIN, record.getTokenRefs().get(0))), entity.getTokenKeys());
 	}
 
 	@Test
