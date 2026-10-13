@@ -164,7 +164,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // The core takes the record as JSON text, never as a parsed tree. How the producer
     // builds it does not matter, nor does formatting: the core canonicalizes before signing.
-    let record_text: String = serde_json::to_string(&serde_json::json!({
+    let record_json: String = serde_json::to_string(&serde_json::json!({
         "producer": "cedarling-fleet-1",
         "kid": "key-2026-01",
         "record_id": "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41",
@@ -173,7 +173,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }))?;
 
     // Strict parse: identity members present, no `signature` yet, signed size within limits.
-    let unsigned: UnsignedAssertion = UnsignedAssertion::parse(&record_text, &limits)?;
+    let unsigned: UnsignedAssertion = UnsignedAssertion::parse(&record_json, &limits)?;
 
     // Sign: the result holds the canonical JSON of the whole record, signature included.
     let signed: SignedAssertion = unsigned.sign(&signer)?;

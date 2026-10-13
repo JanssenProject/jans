@@ -285,7 +285,7 @@ fn jcs_order(a: &str, b: &str) -> std::cmp::Ordering {
 }
 
 /// Why `UnsignedAssertion::parse` rejected its input.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum ParseUnsignedAssertionError {
     #[error(transparent)]
     SizeLimitExceeded(#[from] SizeLimitError),

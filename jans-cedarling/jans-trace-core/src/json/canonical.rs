@@ -10,12 +10,12 @@ use std::fmt::Write as _;
 use serde_json::Value;
 use thiserror::Error;
 
-use crate::json::{JsonError, parse_strict};
+use crate::json::{JsonError, NonCanonicalCause, NonCanonicalReason, parse_strict};
 use crate::limits::LimitKind;
 use crate::{Limits, SizeLimitError};
 
 /// Why `canonicalize_json` rejected its input.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum CanonicalizeError {
     #[error(transparent)]
     SizeLimitExceeded(#[from] SizeLimitError),
@@ -42,9 +42,8 @@ pub fn canonicalize_json(input: &str, limits: &Limits) -> Result<String, Canonic
 
 pub(crate) fn canonicalize_value(value: &Value, limits: &Limits) -> Result<String, JsonError> {
     // The canonicalizer refuses only values outside the JCS model; strict parsing already
-    // rejects those, so this maps an unreachable case to its honest meaning, not a panic.
-    let text =
-        serde_json_canonicalizer::to_string(value).map_err(|_| JsonError::NonCanonicalizable)?;
+    // rejects those, so this branch is not expected to run. It reports, not panics.
+    let text = serde_json_canonicalizer::to_string(value).map_err(|e| canonicalizer_refused(&e))?;
     // JCS can lengthen numbers (`1e20` becomes 21 digits), so the input bound is not enough.
     if text.len() > limits.max_canonical_bytes() {
         return Err(JsonError::LimitExceeded(SizeLimitError::new(
@@ -53,6 +52,13 @@ pub(crate) fn canonicalize_value(value: &Value, limits: &Limits) -> Result<Strin
         )));
     }
     Ok(text)
+}
+
+/// Keeps the canonicalizer's message, so `{err}` says why it refused.
+fn canonicalizer_refused(error: &serde_json::Error) -> JsonError {
+    JsonError::NonCanonicalizable(NonCanonicalReason(NonCanonicalCause::Canonicalizer(
+        error.to_string(),
+    )))
 }
 
 /// Appends the RFC 8785 form of a JSON string (§3.2.2.2, the ECMAScript `JSON.stringify`
@@ -81,8 +87,8 @@ pub(crate) fn write_jcs_string(out: &mut String, text: &str) {
 
 #[cfg(test)]
 mod tests {
-    use super::{CanonicalizeError, canonicalize_json, write_jcs_string};
-    use crate::json::JsonError;
+    use super::{CanonicalizeError, canonicalize_json, canonicalizer_refused, write_jcs_string};
+    use crate::json::{JsonError, NonCanonicalCause, NonCanonicalReason};
     use crate::limits::LimitKind;
     use crate::{Limits, SizeLimitError};
 
@@ -150,11 +156,45 @@ mod tests {
         ] {
             let err = canonicalize(input)
                 .expect_err("integer outside +/-(2^53-1) would be silently rounded by JCS");
-            assert!(
-                matches!(err, CanonicalizeError::Json(JsonError::NonCanonicalizable)),
-                "expected NonCanonicalizable for {input:?}, got {err:?}"
+            assert_eq!(
+                err,
+                CanonicalizeError::Json(JsonError::NonCanonicalizable(NonCanonicalReason(
+                    NonCanonicalCause::UnsafeInteger
+                ))),
+                "reason for {input:?}"
             );
         }
+    }
+
+    #[test]
+    fn non_canonicalizable_display_names_the_reason_without_the_value() {
+        let err = canonicalize("[9007199254740992]").expect_err("unsafe integer");
+        assert_eq!(
+            err.to_string(),
+            "JSON value cannot be canonicalized without changing it: an integer is outside \
+             +/-(2^53-1), which JCS cannot write exactly",
+            "`{{err}}` names the rule, never the record's number"
+        );
+    }
+
+    #[test]
+    fn a_canonicalizer_refusal_keeps_the_canonicalizer_message() {
+        let refusal = serde_json::from_str::<serde_json::Value>("x")
+            .expect_err("stands in for an error the canonicalizer would return");
+        let message = refusal.to_string();
+        let err = canonicalizer_refused(&refusal);
+        assert_eq!(
+            err,
+            JsonError::NonCanonicalizable(NonCanonicalReason(NonCanonicalCause::Canonicalizer(
+                message.clone()
+            ))),
+            "the message is kept, not discarded"
+        );
+        assert_eq!(
+            err.to_string(),
+            format!("JSON value cannot be canonicalized without changing it: {message}"),
+            "`{{err}}` shows the canonicalizer's own message"
+        );
     }
 
     #[test]
@@ -205,7 +245,10 @@ mod tests {
         let cases = [
             (JsonError::Invalid { line: 1, column: 1 }, "INVALID_JSON"),
             (JsonError::DuplicateMember, "DUPLICATE_MEMBER"),
-            (JsonError::NonCanonicalizable, "NON_CANONICALIZABLE_JSON"),
+            (
+                JsonError::NonCanonicalizable(NonCanonicalReason(NonCanonicalCause::UnsafeInteger)),
+                "NON_CANONICALIZABLE_JSON",
+            ),
         ];
         for (error, code) in cases {
             assert_eq!(error.code(), code, "stable code for {error:?}");

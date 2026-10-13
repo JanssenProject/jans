@@ -26,8 +26,8 @@ mod canonical;
 pub use canonical::{CanonicalizeError, canonicalize_json};
 pub(crate) use canonical::{canonicalize_value, write_jcs_string};
 
-/// Why bytes are not strict JSON. Embedded in the error of every function that parses JSON.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+/// Why text is not strict JSON. Embedded in the error of every function that parses JSON.
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum JsonError {
     #[error("invalid JSON at line {line}, column {column}")]
     Invalid { line: usize, column: usize },
@@ -35,8 +35,8 @@ pub enum JsonError {
     DuplicateMember,
     /// Valid JSON that RFC 8785 / I-JSON cannot represent exactly, such as an integer
     /// beyond +/-(2^53-1).
-    #[error("JSON value cannot be canonicalized without changing it")]
-    NonCanonicalizable,
+    #[error("JSON value cannot be canonicalized without changing it: {0}")]
+    NonCanonicalizable(NonCanonicalReason),
     /// Nesting, member count, element count, string length or canonical size is above the
     /// caller's `Limits`.
     #[error(transparent)]
@@ -49,10 +49,26 @@ impl JsonError {
         match self {
             Self::Invalid { .. } => "INVALID_JSON",
             Self::DuplicateMember => "DUPLICATE_MEMBER",
-            Self::NonCanonicalizable => "NON_CANONICALIZABLE_JSON",
+            Self::NonCanonicalizable(_) => "NON_CANONICALIZABLE_JSON",
             Self::LimitExceeded(e) => e.code(),
         }
     }
+}
+
+/// Why a value has no exact canonical form. Shown through `Display` only; it names the rule,
+/// never the record's value.
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
+#[error("{0}")]
+pub struct NonCanonicalReason(NonCanonicalCause);
+
+/// Private, so the canonicalizer's error type never becomes part of the public API.
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
+enum NonCanonicalCause {
+    #[error("an integer is outside +/-(2^53-1), which JCS cannot write exactly")]
+    UnsafeInteger,
+    /// The canonicalizer's own message; its messages are fixed texts without input values.
+    #[error("{0}")]
+    Canonicalizer(String),
 }
 
 /// Largest integer an IEEE-754 double reproduces exactly.
@@ -141,14 +157,22 @@ impl<'de> Visitor<'de> for StrictSeed<'_> {
 
     fn visit_u64<E: de::Error>(self, v: u64) -> Result<Value, E> {
         if v > MAX_SAFE_INTEGER {
-            return Err(self.reject(JsonError::NonCanonicalizable));
+            return Err(
+                self.reject(JsonError::NonCanonicalizable(NonCanonicalReason(
+                    NonCanonicalCause::UnsafeInteger,
+                ))),
+            );
         }
         Ok(Value::Number(v.into()))
     }
 
     fn visit_i64<E: de::Error>(self, v: i64) -> Result<Value, E> {
         if v.unsigned_abs() > MAX_SAFE_INTEGER {
-            return Err(self.reject(JsonError::NonCanonicalizable));
+            return Err(
+                self.reject(JsonError::NonCanonicalizable(NonCanonicalReason(
+                    NonCanonicalCause::UnsafeInteger,
+                ))),
+            );
         }
         Ok(Value::Number(v.into()))
     }

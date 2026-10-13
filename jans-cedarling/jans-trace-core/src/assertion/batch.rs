@@ -66,7 +66,7 @@ pub fn batch_body(records: &[SignedAssertion], limits: &Limits) -> Result<String
 
 /// Why `parse_batch` rejected the body as a whole. Per-record failures are not here: they are
 /// the inner results.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum ParseBatchError {
     #[error(transparent)]
     SizeLimitExceeded(#[from] SizeLimitError),
