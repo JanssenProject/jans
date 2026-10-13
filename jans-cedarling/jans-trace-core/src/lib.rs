@@ -17,12 +17,17 @@
 // avoids Python-style doc sections). Same choice as `cedarling/src/lib.rs`.
 #![allow(clippy::missing_errors_doc)]
 
+mod assertion;
 mod canonical;
 mod digest;
 mod json;
 mod limits;
 mod signature;
 
+pub use assertion::{
+    ContentDigestError, SignError, SigningInputError, assertion_signing_input,
+    compute_content_digest, sign_assertion,
+};
 pub use canonical::{CanonicalizeError, canonicalize_json};
 pub use digest::{Digest, ParseDigestError};
 pub use json::JsonError;
