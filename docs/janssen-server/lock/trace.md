@@ -423,8 +423,6 @@ Producer order, Lock receipt order, and causal relationships are separate things
 
 A node that stops between steps leaves a `PENDING` claim. The repair timer settles claims older than `pendingReceiptTimeoutSeconds`: `COMMITTED` if the record exists, otherwise `VOID`. `VOID` entries keep the chain dense and verifiable, because the receipt state is not part of the receipt hash. A claim without a record is never returned by any API.
 
-**Couchbase is not supported.** TRACE relies on the database refusing a duplicate primary key. A Couchbase insert in the Lock persistence layer is an upsert and cannot enforce that. Use a relational database (MySQL or PostgreSQL). Lock does not currently check the backend at startup, so confirm the deployment's database before enabling TRACE.
-
 **Request size and column size.** `maxRequestBytes` limits the size of one request body. The stored assertion is kept as text in a `MEDIUMTEXT` column on MySQL and a `TEXT` column on PostgreSQL. Keep `maxRequestBytes` and the per-record limit inside the bulk path well below the size of that column type for your database, and raise the limits only after checking it. Many TRACE identifiers are stored in `VARCHAR` columns of fixed width, which Lock's validation keeps the values within.
 
 **Time.** Lock uses `received_at` for receipt order and treats `signed_at` as a producer claim. Keep node clocks synchronized.
@@ -436,7 +434,6 @@ The current release does not implement:
 - gRPC transport for TRACE (REST only);
 - a quarantine store for rejected records: rejected records are not stored;
 - Lock-side management through the config-api Lock plugin and the Jans CLI/TUI;
-- Couchbase support;
 - settlement assessments or Lock-signed settlement receipts;
 - execution completeness or assurance profiles;
 - lineage checkpoints or claims of complete producer history;
