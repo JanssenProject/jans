@@ -33,8 +33,6 @@ public final class CorrelationPlan {
 
 	private final ExecutionIdentity execution;
 
-	private final List<String> capabilityKeys;
-
 	private final List<String> tokenKeys;
 
 	private final List<RecordIdentity> equivocationPeers;
@@ -44,12 +42,11 @@ public final class CorrelationPlan {
 	private final List<String> warnings;
 
 	public CorrelationPlan(IngestionFlags flags, ChainPosition position, ExecutionIdentity execution,
-			List<String> capabilityKeys, List<String> tokenKeys, List<RecordIdentity> equivocationPeers,
+			List<String> tokenKeys, List<RecordIdentity> equivocationPeers,
 			List<StoredTraceRecord> successors, List<String> warnings) {
 		this.flags = new IngestionFlags(Objects.requireNonNull(flags, "flags"));
 		this.position = Objects.requireNonNull(position, "position");
 		this.execution = Objects.requireNonNull(execution, "execution");
-		this.capabilityKeys = unmodifiable(capabilityKeys);
 		this.tokenKeys = unmodifiable(tokenKeys);
 		this.equivocationPeers = unmodifiable(equivocationPeers);
 		this.successors = unmodifiable(successors);
@@ -69,14 +66,6 @@ public final class CorrelationPlan {
 
 	public ExecutionIdentity getExecution() {
 		return execution;
-	}
-
-	/**
-	 * @return the {@code key("cap", …)} values for this record's capability ids, deduplicated with
-	 *         order preserved; never {@code null}
-	 */
-	public List<String> getCapabilityKeys() {
-		return capabilityKeys;
 	}
 
 	/**
@@ -117,7 +106,7 @@ public final class CorrelationPlan {
 	@Override
 	public String toString() {
 		return "CorrelationPlan [flags=" + flags + ", position=" + position + ", execution=" + execution
-				+ ", capabilityKeys=" + capabilityKeys + ", tokenKeys=" + tokenKeys + ", equivocationPeers="
+				 + ", tokenKeys=" + tokenKeys + ", equivocationPeers="
 				+ equivocationPeers + ", successors=" + successors.size() + ", warnings=" + warnings + "]";
 	}
 

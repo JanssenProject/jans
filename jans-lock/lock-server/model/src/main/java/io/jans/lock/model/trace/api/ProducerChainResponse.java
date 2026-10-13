@@ -25,7 +25,7 @@ public class ProducerChainResponse {
 	private String evidenceDomainId;
 
 	@JsonProperty("producer_id")
-	@Schema(description = "Producer id, name/semver", example = "cedarling-fleet-1/1.0.0")
+	@Schema(description = "Opaque stable producer id", example = "cedarling-fleet-1")
 	private String producerId;
 
 	@JsonProperty("producer_instance_id")
@@ -39,6 +39,11 @@ public class ProducerChainResponse {
 	@JsonProperty("registered_by")
 	@Schema(description = "Client id that registered the chain", example = "2200.abcd")
 	private String registeredBy;
+
+	@JsonProperty("genesis_kind")
+	@Schema(description = "How the chain came to exist: registered through the admin API, or registered by the first genesis record Lock observed", allowableValues = {
+			"pre_registered_genesis", "first_observed_genesis" }, example = "pre_registered_genesis")
+	private String genesisKind;
 
 	@JsonProperty("created_at")
 	@Schema(description = "RFC 3339 timestamp the chain was registered", example = "2026-01-01T00:00:00Z")
@@ -82,6 +87,14 @@ public class ProducerChainResponse {
 
 	public void setRegisteredBy(String registeredBy) {
 		this.registeredBy = registeredBy;
+	}
+
+	public String getGenesisKind() {
+		return genesisKind;
+	}
+
+	public void setGenesisKind(String genesisKind) {
+		this.genesisKind = genesisKind;
 	}
 
 	public String getCreatedAt() {

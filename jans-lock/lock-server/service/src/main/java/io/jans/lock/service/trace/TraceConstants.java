@@ -36,15 +36,20 @@ public final class TraceConstants {
 	public static final Pattern HASH_PATTERN = Pattern.compile("^" + Pattern.quote(HASH_PREFIX) + "[0-9a-f]{64}$");
 
 	/**
-	 * Producer id format {@code name/semver} (design D-6/§7.1): a name of up to 128 characters,
-	 * then a SemVer 2.0.0 version: {@code major.minor.patch}, an optional {@code -prerelease} and an
-	 * optional {@code +build} suffix, each a dot-separated list of {@code [0-9A-Za-z-]} identifiers,
-	 * in that order (so {@code name/1.0.0-alpha+001} is valid). Shared by assertion validation and
-	 * by producer-key and producer-chain registration, so a registered producer id can always
-	 * appear in a signed assertion.
+	 * Opaque stable producer id (design D-17): 1 to 255 ASCII characters, starting with a letter or
+	 * digit, then letters, digits and {@code . _ : / -}. Lock does not interpret the value, never
+	 * normalizes it and compares it byte-for-byte; software version travels separately in the
+	 * signed {@code producer_version} member. Shared by assertion validation and by producer-key and
+	 * producer-chain registration, so a registered producer id can always appear in a signed
+	 * assertion.
 	 */
-	public static final Pattern PRODUCER_PATTERN = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}"
-			+ "/[0-9]+\\.[0-9]+\\.[0-9]+" + "(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?" + "(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$");
+	public static final Pattern PRODUCER_PATTERN = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9._:/-]{0,254}$");
+
+	/** Name of the optional top-level signed member that carries the producer software version. */
+	public static final String PRODUCER_VERSION_FIELD = "producer_version";
+
+	/** Maximum length of the {@code producer_version} member. */
+	public static final int MAX_PRODUCER_VERSION_LENGTH = 255;
 
 	/** {@code trace.event_kind}: an authorization decision by a PDP such as Cedarling. */
 	public static final String EVENT_KIND_AUTHORIZATION_DECISION = "AUTHORIZATION_DECISION";

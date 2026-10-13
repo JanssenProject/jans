@@ -1,5 +1,5 @@
 {
-  "producer": "effect-observer-1/1.0.0",
+  "producer": "effect-observer-1",
   "kid": "effect-observer-1-2026-01",
   "record_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
   "trace": {
@@ -18,7 +18,7 @@
     }
   },
   "producer_chain": {
-    "producer_id": "effect-observer-1/1.0.0",
+    "producer_id": "effect-observer-1",
     "producer_instance_id": "effect-observer-001",
     "producer_chain_id": "chain-03JABC9Z0K",
     "sequence_number": 1,
@@ -26,7 +26,7 @@
   },
   "parent_record_ids": [
     {
-      "producer_id": "gateway-fleet-1/2.0.0",
+      "producer_id": "gateway-fleet-1",
       "record_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "relationship_type": "produced_effect"
     }

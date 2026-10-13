@@ -10,7 +10,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -23,6 +28,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,6 +38,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.model.trace.entity.TraceChainEntry;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
@@ -79,7 +86,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 	private static final String REGISTERED_BY = "2200.admin";
 
 	/** The {@code capabilityInvoked} fixture's producer-chain identity. */
-	private static final String PRODUCER = "gateway-fleet-1/2.0.0";
+	private static final String PRODUCER = "gateway-fleet-1";
 
 	private static final String INSTANCE = "gateway-001";
 
@@ -213,6 +220,106 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
 	}
 
+	// -- plan: chain registration mode (task 30, design D-23) -------------------------------------
+
+	@Test
+	void testPlan_FirstObservedGenesisOnUnregisteredChain_RegistersChainAndPlans() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
+
+		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
+
+		assertFalse(plan.getFlags().isCoverageGap());
+		TraceChainEntry chain = store.findChain(chainIdentity()).orElseThrow();
+		assertEquals(TraceChainEntry.GENESIS_KIND_FIRST_OBSERVED, chain.getGenesisKind());
+		assertEquals(CLIENT_ID, chain.getRegisteredBy());
+		assertEquals(RECEIVED_AT_MS, chain.getRegisteredAtMs());
+	}
+
+	@Test
+	void testPlan_FirstObservedModeIsCaseInsensitive() {
+		traceConfiguration.setChainRegistrationMode(" first_observed ");
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
+
+		service.plan(buildVerified(json, context()), context());
+
+		assertTrue(store.findChain(chainIdentity()).isPresent());
+	}
+
+	@Test
+	void testPlan_FirstObservedNonGenesisOnUnregisteredChain_ChainNotRegistered() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).sequenceNumber(2)
+				.prevRecordHash(digest("1")).unsignedJson();
+		VerifiedAssertion verified = buildVerified(json, context());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.plan(verified, context()));
+
+		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
+		assertFalse(store.findChain(chainIdentity()).isPresent());
+	}
+
+	@Test
+	void testPlan_FirstObservedGenesisWithoutSentinel_InvalidGenesisNothingRegistered() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).sequenceNumber(1)
+				.prevRecordHash(digest("1")).unsignedJson();
+		VerifiedAssertion verified = buildVerified(json, context());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.plan(verified, context()));
+
+		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
+		assertFalse(store.findChain(chainIdentity()).isPresent());
+	}
+
+	@Test
+	void testPlan_UnknownModeValue_TreatedAsPreRegisteredAndWarnedOnce() {
+		Logger log = mock(Logger.class);
+		setField(service, "log", log);
+		traceConfiguration.setChainRegistrationMode("SOMETHING_ELSE");
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
+		VerifiedAssertion verified = buildVerified(json, context());
+
+		for (int i = 0; i < 2; i++) {
+			TraceValidationException ex = assertThrows(TraceValidationException.class,
+					() -> service.plan(verified, context()));
+			assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
+		}
+
+		assertFalse(store.findChain(chainIdentity()).isPresent());
+		verify(log, times(1)).warn(anyString(), eq("SOMETHING_ELSE"), any());
+	}
+
+	@Test
+	void testPlan_DefaultModeUnregisteredGenesis_ChainNotRegisteredNothingRegistered() {
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
+		VerifiedAssertion verified = buildVerified(json, context());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.plan(verified, context()));
+
+		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
+		assertFalse(store.findChain(chainIdentity()).isPresent());
+	}
+
+	@Test
+	void testPlan_ChainLinkMember_PassesValidationUnchanged() throws IOException {
+		registerChain();
+		ObjectNode root = (ObjectNode) MAPPER.readTree(
+				SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson());
+		ObjectNode chainLink = ((ObjectNode) root.get("producer_chain")).putObject("chain_link");
+		chainLink.put("opaque", "anything");
+		chainLink.putArray("list").add(1).add("two");
+		String json = MAPPER.writeValueAsString(root);
+
+		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
+
+		assertFalse(plan.getFlags().isCoverageGap());
+		assertFalse(plan.getFlags().isChainLinkFailure());
+	}
+
 	// -- plan: predecessor / coverage gap / chain-link failure -------------------------------------
 
 	@Test
@@ -306,17 +413,6 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 	}
 
 	// -- plan: index projection ---------------------------------------------------------------------
-
-	@Test
-	void testPlan_CapabilityKeys_ComputedViaTraceKeys() {
-		registerChain();
-		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
-
-		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
-
-		assertEquals(Collections.singletonList(TraceKeys.capabilityKey(DOMAIN, "invoke:payment-authorization")),
-				plan.getCapabilityKeys());
-	}
 
 	@Test
 	void testPlan_TwoTokenRefsSameJtiDifferentIssuer_TwoDistinctTokenKeys() throws IOException {

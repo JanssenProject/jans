@@ -276,6 +276,7 @@ verification.
 | `pendingReceiptTimeoutSeconds` | integer | `120` | Seconds a `PENDING` receipt may remain unresolved before the repair timer marks it `COMMITTED` or `VOID`. |
 | `maxBulkRecords` | integer | `100` | Maximum number of assertions accepted in one `POST /audit/trace/bulk` request. |
 | `maxBulkRequestBytes` | integer | `4194304` | Maximum total body size, in bytes, buffered for one `POST /audit/trace/bulk` request. Independent of `maxRequestBytes`/`maxBulkRecords`, and always clamped to 16777216 regardless of configuration. |
+| `chainRegistrationMode` | string | `PRE_REGISTERED` | How producer chains come to exist. `PRE_REGISTERED`: a chain must be registered through the admin API before its records are accepted. `FIRST_OBSERVED`: a record with `sequence_number` 1 and the all-zero `prev_record_hash` on an unregistered chain registers the chain, after the key, event-kind and signature checks pass. Any other record on an unregistered chain is still rejected with `chain_not_registered`. A value that is not a mode name is treated as `PRE_REGISTERED` and logged once at `WARN`. Changing the mode affects only later submissions; existing chains are not rewritten. |
 
 Every numeric limit above falls back to its default when configured with a value `<= 0`.
 

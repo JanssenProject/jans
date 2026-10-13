@@ -44,8 +44,6 @@ public final class StoredTraceRecord {
 
 	private final String prevRecordHash;
 
-	private final List<String> capabilityIds;
-
 	private final List<TokenRef> tokenRefs;
 
 	private final String eventKind;
@@ -58,7 +56,7 @@ public final class StoredTraceRecord {
 
 	public StoredTraceRecord(RecordIdentity identity, String assertionRaw, String contentDigest,
 			VerificationResult verification, ReceiptEntry receipt, IngestionFlags flags, ExecutionIdentity execution,
-			ChainPosition chainPosition, String prevRecordHash, List<String> capabilityIds, List<TokenRef> tokenRefs,
+			ChainPosition chainPosition, String prevRecordHash, List<TokenRef> tokenRefs,
 			String eventKind, long signedAt, String nodeId, long createdAtMs) {
 		this.identity = Objects.requireNonNull(identity, "identity");
 		this.assertionRaw = Objects.requireNonNull(assertionRaw, "assertionRaw");
@@ -69,8 +67,6 @@ public final class StoredTraceRecord {
 		this.execution = Objects.requireNonNull(execution, "execution");
 		this.chainPosition = Objects.requireNonNull(chainPosition, "chainPosition");
 		this.prevRecordHash = Objects.requireNonNull(prevRecordHash, "prevRecordHash");
-		this.capabilityIds = capabilityIds == null ? Collections.emptyList()
-				: Collections.unmodifiableList(new ArrayList<>(capabilityIds));
 		this.tokenRefs = tokenRefs == null ? Collections.emptyList()
 				: Collections.unmodifiableList(new ArrayList<>(tokenRefs));
 		this.eventKind = Objects.requireNonNull(eventKind, "eventKind");
@@ -121,13 +117,6 @@ public final class StoredTraceRecord {
 	/**
 	 * @return an unmodifiable list, never {@code null}
 	 */
-	public List<String> getCapabilityIds() {
-		return capabilityIds;
-	}
-
-	/**
-	 * @return an unmodifiable list, never {@code null}
-	 */
 	public List<TokenRef> getTokenRefs() {
 		return tokenRefs;
 	}
@@ -154,7 +143,7 @@ public final class StoredTraceRecord {
 	 */
 	public StoredTraceRecord copy() {
 		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verification, receipt, flags, execution,
-				chainPosition, prevRecordHash, capabilityIds, tokenRefs, eventKind, signedAt, nodeId, createdAtMs);
+				chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs);
 	}
 
 	/**
@@ -163,7 +152,7 @@ public final class StoredTraceRecord {
 	 */
 	public StoredTraceRecord withFlags(IngestionFlags newFlags) {
 		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verification, receipt, newFlags,
-				execution, chainPosition, prevRecordHash, capabilityIds, tokenRefs, eventKind, signedAt, nodeId,
+				execution, chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId,
 				createdAtMs);
 	}
 

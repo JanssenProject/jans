@@ -64,13 +64,13 @@ class EvidenceDomainResolverTest extends BaseLockServiceTest {
 	void testResolve_ExplicitBinding_WinsOverDefault() {
 		traceConfiguration.setDefaultEvidenceDomainId("default-domain");
 		traceConfiguration.setClientDomainBindings(
-				Collections.singletonList(binding("client-1", "domain-a", "prod-x/1.0.0")));
+				Collections.singletonList(binding("client-1", "domain-a", "prod-x")));
 
 		TraceRequestContext ctx = resolver.resolve(new SubmitterIdentity("client-1", true));
 
 		assertEquals("client-1", ctx.getClientId());
 		assertEquals("domain-a", ctx.getEvidenceDomainId());
-		assertEquals(Collections.singletonList("prod-x/1.0.0"), ctx.getAllowedProducerIds());
+		assertEquals(Collections.singletonList("prod-x"), ctx.getAllowedProducerIds());
 		assertEquals(NODE_ID, ctx.getNodeId());
 	}
 

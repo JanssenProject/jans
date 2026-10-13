@@ -99,4 +99,27 @@ public class TraceEntityAnnotationsTest {
                 fieldNames);
     }
 
+    @Test
+    public void testVerification_newMembers_serializedWhenSetAndLegacyJsonDeserializesWithNulls() throws Exception {
+        TraceVerification verification = new TraceVerification();
+        verification.setSignatureValid(true);
+        verification.setKeyId("kid-1");
+        verification.setVerifiedAtMs(1_700_000_000_000L);
+        verification.setAlgorithm("Ed25519");
+        verification.setKeyThumbprint("sha256:" + "a".repeat(64));
+        verification.setKeyAuthorized(Boolean.TRUE);
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.valueToTree(verification);
+
+        assertEquals("sha256:" + "a".repeat(64), node.get("key_thumbprint").asText());
+        assertEquals(true, node.get("key_authorized").asBoolean());
+
+        TraceVerification legacy = mapper.readValue(
+                "{\"signature_valid\":true,\"key_id\":\"kid-1\",\"verified_at\":1,\"algorithm\":\"Ed25519\"}",
+                TraceVerification.class);
+        assertEquals(null, legacy.getKeyThumbprint());
+        assertEquals(null, legacy.getKeyAuthorized());
+    }
+
 }

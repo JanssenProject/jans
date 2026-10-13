@@ -41,7 +41,7 @@ import io.jans.orm.search.filter.Filter;
  * on a duplicate DN, exactly like SQL), {@code find} (throwing when the DN is absent), {@code merge},
  * {@code findEntries}, {@code findPagedEntries} and {@code countEntries} — evaluating
  * {@code AND}/{@code OR}/{@code EQUALITY} (including the {@code multiValued()} marker used for
- * {@code jansTraceCapKeys}/{@code jansTraceTokenKeys}) and {@code LESS_OR_EQUAL} filters by
+ * {@code jansTraceTokenKeys}) and {@code LESS_OR_EQUAL} filters by
  * reflecting on each entity's {@code @AttributeName} fields, and applying the entity's
  * {@code @DataEntry} default sort before any {@code limit}, as the SQL backend does.
  *

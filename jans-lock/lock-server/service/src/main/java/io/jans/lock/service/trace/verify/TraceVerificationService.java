@@ -45,6 +45,7 @@ import jakarta.inject.Inject;
  * known only now;</li>
  * <li>§7.2/§7.3 event-kind validation ({@link EventKindValidatorRegistry});</li>
  * <li>key resolution with validity evaluation at {@code ctx.receivedAtMs} (decision D-4);</li>
+ * <li>event-kind scope of the key (decision D-18), before any signature work;</li>
  * <li>Ed25519 verification over {@code JCS(assertion without "signature")} (decision D-13);</li>
  * <li>content digest over {@code JCS(full assertion)}.</li>
  * </ol>
@@ -131,6 +132,9 @@ public class TraceVerificationService {
 		ProducerKeyRegistry.ResolvedKey key = keyRegistry.resolveForVerification(ctx.getEvidenceDomainId(),
 				parsed.getProducer(), parsed.getKid(), ctx.getReceivedAtMs());
 
+		// 6b. The key must be authorized for this event kind (D-18); no crypto has run yet.
+		keyRegistry.requireEventKindAuthorized(key, parsed.getEventKind());
+
 		// 7. Signature over JCS(assertion minus "signature") (D-13).
 		byte[] signature;
 		try {
@@ -161,8 +165,11 @@ public class TraceVerificationService {
 		}
 
 		// 9. Assemble. verified_at is the same instant the key validity was evaluated at (D-4).
+		// Every admission check passed above (a failing record is rejected, never stored), so
+		// key_authorized is true; both new members are computed here once and never again on read (D-19).
+		String keyThumbprint = Ed25519PublicKeys.thumbprint(key.getKey().getPublicKeyJwk());
 		VerificationResult verification = new VerificationResult(true, key.getKey().getKid(), ctx.getReceivedAtMs(),
-				Ed25519PublicKeys.ALGORITHM);
+				Ed25519PublicKeys.ALGORITHM, keyThumbprint, Boolean.TRUE);
 		RecordIdentity identity = new RecordIdentity(ctx.getEvidenceDomainId(), parsed.getProducer(),
 				parsed.getRecordId());
 

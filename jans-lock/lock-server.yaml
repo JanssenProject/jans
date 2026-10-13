@@ -337,47 +337,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/policy.readonly
-  /api/v1/policy/stores:
-    get:
-      tags:
-      - Lock - Policy
-      summary: List loaded policy store archives
-      description: "List loaded .cjar policy stores with version, source and bundle\
-        \ hash"
-      operationId: getPolicyStores
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    policy_store_id:
-                      type: string
-                    policy_store_name:
-                      type: string
-                    policy_store_version:
-                      type: string
-                    source_uri:
-                      type: string
-                    bundle_hash:
-                      type: string
-                    sigstore_bundle:
-                      type: boolean
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/policy.readonly
   /api/v1/policy/{uri}:
     get:
       tags:
@@ -458,6 +417,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/policy.readonly
+  /api/v1/policy/stores:
+    get:
+      tags:
+      - Lock - Policy
+      summary: List loaded policy store archives
+      description: "List loaded .cjar policy stores with version, source and bundle\
+        \ hash"
+      operationId: getPolicyStores
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: PolicyStore
+        "401":
+          description: Unauthorized
         "500":
           description: InternalServerError
           content:
@@ -937,7 +925,8 @@ paths:
       - Lock - Audit Trace
       summary: Submit a batch of TRACE evidence records
       description: "Verify and ingest a JSON array of signed TRACE assertions, continuing\
-        \ past per-item failures (design decision D-16)"
+        \ past per-item failures. One producer per batch (design §11.2, decisions\
+        \ D-16 and D-22)"
       operationId: submitBulkRecords
       requestBody:
         description: "JSON array of TRACE assertions (design §7 shape, each)"
@@ -948,8 +937,8 @@ paths:
               items:
                 type: object
       responses:
-        "202":
-          description: Accepted (per-item outcomes in the body)
+        "207":
+          description: Multi-Status (per-item outcomes in the body)
           content:
             application/json:
               schema:
@@ -1245,8 +1234,8 @@ components:
           example: default
         producer_id:
           type: string
-          description: "Producer id, name/semver"
-          example: cedarling-fleet-1/1.0.0
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
         producer_instance_id:
           type: string
           description: Producer instance id
@@ -1259,6 +1248,14 @@ components:
           type: string
           description: Client id that registered the chain
           example: 2200.abcd
+        genesis_kind:
+          type: string
+          description: "How the chain came to exist: registered through the admin\
+            \ API, or registered by the first genesis record Lock observed"
+          example: pre_registered_genesis
+          enum:
+          - pre_registered_genesis
+          - first_observed_genesis
         created_at:
           type: string
           description: RFC 3339 timestamp the chain was registered
@@ -1282,8 +1279,8 @@ components:
           example: default
         producer_id:
           type: string
-          description: "Producer id, name/semver"
-          example: cedarling-fleet-1/1.0.0
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
         kid:
           type: string
           description: Key id
@@ -1299,6 +1296,15 @@ components:
             kty: OKP
             crv: Ed25519
             x: '...'
+        authorized_event_kinds:
+          type: array
+          description: Event kinds the key may sign
+          example:
+          - AUTHORIZATION_DECISION
+          items:
+            type: string
+            description: Event kinds the key may sign
+            example: "[\"AUTHORIZATION_DECISION\"]"
         valid_from:
           type: string
           description: RFC 3339 timestamp the key becomes valid
@@ -1325,8 +1331,8 @@ components:
       properties:
         producer_id:
           type: string
-          description: "Producer id, name/semver"
-          example: cedarling-fleet-1/1.0.0
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
         producer_instance_id:
           type: string
           description: Producer instance id
@@ -1341,8 +1347,8 @@ components:
       properties:
         producer_id:
           type: string
-          description: "Producer id, name/semver"
-          example: cedarling-fleet-1/1.0.0
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
         kid:
           type: string
           description: Key id
@@ -1358,6 +1364,23 @@ components:
             kty: OKP
             crv: Ed25519
             x: '...'
+        authorized_event_kinds:
+          type: array
+          description: "Event kinds the key may sign; required, non-empty, no duplicates"
+          example:
+          - AUTHORIZATION_DECISION
+          items:
+            type: string
+            description: "Event kinds the key may sign; required, non-empty, no duplicates"
+            example: "[\"AUTHORIZATION_DECISION\"]"
+            enum:
+            - AUTHORIZATION_DECISION
+            - CAPABILITY_INVOKED
+            - RUNTIME_EFFECT
+          enum:
+          - AUTHORIZATION_DECISION
+          - CAPABILITY_INVOKED
+          - RUNTIME_EFFECT
         valid_from:
           type: string
           description: RFC 3339 timestamp the key becomes valid
@@ -1372,8 +1395,8 @@ components:
       properties:
         producer_id:
           type: string
-          description: "Producer id, name/semver"
-          example: cedarling-fleet-1/1.0.0
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
         kid:
           type: string
           description: Key id
@@ -1448,8 +1471,8 @@ components:
       properties:
         producer_id:
           type: string
-          description: "Producer id, name/semver"
-          example: cedarling-fleet-1/1.0.0
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
         record_id:
           type: string
           description: Signed record id
@@ -1476,10 +1499,20 @@ components:
           type: string
           description: kid of the key the record was verified against
           example: key-1
+        key_thumbprint:
+          type: string
+          description: "RFC 7638 thumbprint of the key the record was verified against,\
+            \ sha256:<hex>; absent on records stored before it was recorded"
+          example: sha256:90facafea9b1556698540f70c0117a22ea37bd5cf3ed3c47093c1707282b4b89
+        key_authorized:
+          type: boolean
+          description: "True when the key existed, was valid and unrevoked at ingestion,\
+            \ was registered for the producer and authorized for the event kind; absent\
+            \ on records stored before it was recorded"
         verified_at:
           type: string
           description: RFC 3339 UTC timestamp verification was performed at
-          example: 2026-06-11T00:41:02Z
+          example: 2026-06-11T00:41:02.123Z
         algorithm:
           type: string
           description: Signature algorithm
@@ -1501,6 +1534,75 @@ components:
             \ is enabled"
           example: missing:trace.signed_at
       description: Structured TRACE error response
+    TraceBulkIngestionResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          description: "One entry per submitted array element, in request order"
+          items:
+            $ref: "#/components/schemas/TraceBulkResultEntry"
+      description: TRACE bulk ingestion response
+    TraceBulkResultEntry:
+      type: object
+      properties:
+        index:
+          type: integer
+          description: Position of this assertion in the submitted array
+          format: int32
+          example: 0
+        accepted:
+          type: boolean
+          description: True when this item was verified and ingested
+        producer_id:
+          type: string
+          description: Opaque stable producer id. Always present when accepted; present
+            when rejected only if the element carried a readable top-level string
+            producer
+          example: cedarling-fleet-1
+        record_id:
+          type: string
+          description: Signed record id. Always present when accepted; present when
+            rejected only if the element carried a readable top-level string record_id
+          example: 9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41
+        content_digest:
+          type: string
+          description: "Present when accepted: sha256:<hex> digest of the full signed\
+            \ assertion"
+          example: sha256:abc123...
+        receipt_sequence:
+          type: integer
+          description: "Present when accepted: position in the domain's receipt chain"
+          format: int64
+          example: 108422
+        received_at:
+          type: string
+          description: "Present when accepted: RFC 3339 UTC timestamp Lock received\
+            \ the record"
+          example: 2026-06-11T00:41:02.123Z
+        idempotent_replay:
+          type: boolean
+          description: "Present when accepted: true when this identity already existed\
+            \ with the same content digest"
+        coverage_gap_flag:
+          type: boolean
+          description: "Present when accepted: true when this record's predecessor\
+            \ in its producer chain is missing"
+        chain_link_failure_flag:
+          type: boolean
+          description: "Present when accepted: true when this record's prev_record_hash\
+            \ does not match its predecessor"
+        equivocation_flag:
+          type: boolean
+          description: "Present when accepted: true when another record already occupies\
+            \ this producer-chain position"
+        late_flag:
+          type: boolean
+          description: "Present when accepted: true when the record arrived after\
+            \ the configured lateness threshold"
+        error:
+          $ref: "#/components/schemas/TraceErrorResponse"
+      description: One item's outcome within a TRACE bulk ingestion response
     TraceAcceptanceResponse:
       type: object
       properties:
@@ -1510,8 +1612,8 @@ components:
           example: true
         producer_id:
           type: string
-          description: "Producer id, name/semver"
-          example: cedarling-fleet-1/1.0.0
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
         record_id:
           type: string
           description: Signed record id
@@ -1550,31 +1652,6 @@ components:
           description: True when the record arrived after the configured lateness
             threshold
       description: TRACE record acceptance response
-    TraceBulkIngestionResponse:
-      type: object
-      properties:
-        results:
-          type: array
-          description: "One entry per submitted array element, in request order"
-          items:
-            $ref: "#/components/schemas/TraceBulkResultEntry"
-      description: TRACE bulk ingestion response
-    TraceBulkResultEntry:
-      type: object
-      properties:
-        index:
-          type: integer
-          description: Position of this assertion in the submitted array
-          format: int32
-          example: 0
-        accepted:
-          type: boolean
-          description: True when this item was verified and ingested
-        record:
-          $ref: "#/components/schemas/TraceAcceptanceResponse"
-        error:
-          $ref: "#/components/schemas/TraceErrorResponse"
-      description: One item's outcome within a TRACE bulk ingestion response
   securitySchemes:
     oauth2:
       type: oauth2

@@ -100,7 +100,7 @@ class TraceAssertionParserTest {
 
 		assertEquals(fixture, result.getRawText());
 		ObjectNode root = result.getRoot();
-		assertEquals("cedarling-fleet-1/1.0.0", root.get("producer").textValue());
+		assertEquals("cedarling-fleet-1", root.get("producer").textValue());
 		assertTrue(root.get("trace").isObject());
 		assertTrue(root.get("parent_record_ids").isArray());
 	}

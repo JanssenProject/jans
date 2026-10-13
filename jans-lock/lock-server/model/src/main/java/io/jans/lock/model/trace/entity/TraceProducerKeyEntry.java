@@ -8,6 +8,7 @@ package io.jans.lock.model.trace.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -44,6 +45,9 @@ public class TraceProducerKeyEntry extends BaseEntry implements Serializable {
     @JsonObject
     @AttributeName(name = "jansTracePublicKeyJwk", ignoreDuringUpdate = true)
     private Map<String, String> publicKeyJwk;
+
+    @AttributeName(name = "jansTraceAuthorizedEventKinds", ignoreDuringUpdate = true)
+    private List<String> authorizedEventKinds;
 
     @AttributeName(name = "jansTraceValidFrom", ignoreDuringUpdate = true)
     private Date validFrom;
@@ -98,6 +102,14 @@ public class TraceProducerKeyEntry extends BaseEntry implements Serializable {
 
     public void setPublicKeyJwk(Map<String, String> publicKeyJwk) {
         this.publicKeyJwk = publicKeyJwk;
+    }
+
+    public List<String> getAuthorizedEventKinds() {
+        return authorizedEventKinds;
+    }
+
+    public void setAuthorizedEventKinds(List<String> authorizedEventKinds) {
+        this.authorizedEventKinds = authorizedEventKinds;
     }
 
     public Date getValidFrom() {
@@ -187,21 +199,22 @@ public class TraceProducerKeyEntry extends BaseEntry implements Serializable {
         TraceProducerKeyEntry that = (TraceProducerKeyEntry) o;
         return Objects.equals(id, that.id) && Objects.equals(domainId, that.domainId)
                 && Objects.equals(producerId, that.producerId) && Objects.equals(kid, that.kid)
-                && Objects.equals(publicKeyJwk, that.publicKeyJwk) && Objects.equals(validFrom, that.validFrom)
+                && Objects.equals(publicKeyJwk, that.publicKeyJwk)
+                && Objects.equals(authorizedEventKinds, that.authorizedEventKinds) && Objects.equals(validFrom, that.validFrom)
                 && Objects.equals(validUntil, that.validUntil) && Objects.equals(revokedAt, that.revokedAt)
                 && Objects.equals(registeredBy, that.registeredBy) && Objects.equals(creationDate, that.creationDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, domainId, producerId, kid, publicKeyJwk, validFrom, validUntil, revokedAt,
+        return Objects.hash(id, domainId, producerId, kid, publicKeyJwk, authorizedEventKinds, validFrom, validUntil, revokedAt,
                 registeredBy, creationDate);
     }
 
     @Override
     public String toString() {
         return "TraceProducerKeyEntry [id=" + id + ", domainId=" + domainId + ", producerId=" + producerId + ", kid="
-                + kid + ", validFrom=" + validFrom + ", validUntil=" + validUntil + ", revokedAt=" + revokedAt
+                + kid + ", authorizedEventKinds=" + authorizedEventKinds + ", validFrom=" + validFrom + ", validUntil=" + validUntil + ", revokedAt=" + revokedAt
                 + ", registeredBy=" + registeredBy + ", creationDate=" + creationDate + "]";
     }
 

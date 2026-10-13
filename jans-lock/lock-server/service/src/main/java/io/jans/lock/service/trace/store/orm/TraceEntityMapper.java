@@ -42,9 +42,9 @@ import io.jans.lock.service.trace.store.TraceKeys;
  * value-type-for-every-row design, approved 2026; see the TRACE MVP task notes).
  *
  * <p>{@code TraceRecordEntry} (T-1) only carries <em>hashed</em> keys for the producer chain
- * identity, capability ids and token references ({@code jansTraceChainKey}, {@code jansTraceCapKeys},
- * {@code jansTraceTokenKeys}) — it never stores {@code producer_instance_id}, {@code
- * producer_chain_id}, the raw capability ids or the raw token references as separate attributes.
+ * identity and token references ({@code jansTraceChainKey}, {@code jansTraceTokenKeys}) — it
+ * never stores {@code producer_instance_id}, {@code producer_chain_id} or the raw token references
+ * as separate attributes.
  * On the read path ({@link #toStoredTraceRecord(TraceRecordEntry)}) those raw values are recovered
  * by re-parsing the verbatim {@code jansTraceAssertion} text, consistent with the design's
  * "assertion is the source of truth, retrieval re-parses it" principle (design D-13). This is a
@@ -83,9 +83,6 @@ final class TraceEntityMapper {
 		entity.setChainPosKey(TraceKeys.chainPositionKey(chainPosition));
 		entity.setSeqNum(chainPosition.getSequenceNumber());
 		entity.setPrevRecordHash(record.getPrevRecordHash());
-		entity.setCapKeys(record.getCapabilityIds().stream()
-				.map(capabilityId -> TraceKeys.capabilityKey(identity.getDomainId(), capabilityId))
-				.collect(Collectors.toList()));
 		entity.setTokenKeys(record.getTokenRefs().stream()
 				.map(tokenRef -> TraceKeys.tokenKey(identity.getDomainId(), tokenRef)).collect(Collectors.toList()));
 		entity.setAssertion(record.getAssertionRaw());
@@ -116,7 +113,6 @@ final class TraceEntityMapper {
 		ChainIdentity chainIdentity = extractChainIdentity(assertionRoot, entity.getDomainId(),
 				entity.getProducerId(), key);
 		ChainPosition chainPosition = new ChainPosition(chainIdentity, nvl(entity.getSeqNum()));
-		List<String> capabilityIds = extractCapabilityIds(assertionRoot);
 		List<TokenRef> tokenRefs = extractTokenRefs(assertionRoot);
 
 		VerificationResult verification = toVerificationResult(entity.getVerification());
@@ -128,7 +124,7 @@ final class TraceEntityMapper {
 		long createdAtMs = entity.getCreationDate() == null ? 0L : entity.getCreationDate().getTime();
 
 		return new StoredTraceRecord(identity, entity.getAssertion(), entity.getContentDigest(), verification,
-				receipt, flags, execution, chainPosition, entity.getPrevRecordHash(), capabilityIds, tokenRefs,
+				receipt, flags, execution, chainPosition, entity.getPrevRecordHash(), tokenRefs,
 				entity.getEventKind(), nvl(entity.getSignedAt()), entity.getNodeId(), createdAtMs);
 	}
 
@@ -138,12 +134,14 @@ final class TraceEntityMapper {
 		pojo.setKeyId(verification.getKeyId());
 		pojo.setVerifiedAtMs(verification.getVerifiedAtMs());
 		pojo.setAlgorithm(verification.getAlgorithm());
+		pojo.setKeyThumbprint(verification.getKeyThumbprint());
+		pojo.setKeyAuthorized(verification.getKeyAuthorized());
 		return pojo;
 	}
 
 	private static VerificationResult toVerificationResult(TraceVerification pojo) {
 		return new VerificationResult(pojo.isSignatureValid(), pojo.getKeyId(), pojo.getVerifiedAtMs(),
-				pojo.getAlgorithm());
+				pojo.getAlgorithm(), pojo.getKeyThumbprint(), pojo.getKeyAuthorized());
 	}
 
 	private static JsonNode parseAssertion(String assertionText, String key) {
@@ -170,21 +168,6 @@ final class TraceEntityMapper {
 					+ " is missing required field producer_chain." + field);
 		}
 		return node.textValue();
-	}
-
-	private static List<String> extractCapabilityIds(JsonNode assertionRoot) {
-		JsonNode capabilityIdsNode = assertionRoot.path("trace").path("event").path("capability_ids");
-		if (!capabilityIdsNode.isArray()) {
-			return Collections.emptyList();
-		}
-		List<String> result = new ArrayList<>(capabilityIdsNode.size());
-		for (JsonNode entry : capabilityIdsNode) {
-			JsonNode idNode = entry.path("capability_id");
-			if (idNode.isTextual()) {
-				result.add(idNode.textValue());
-			}
-		}
-		return Collections.unmodifiableList(result);
 	}
 
 	private static List<TokenRef> extractTokenRefs(JsonNode assertionRoot) {

@@ -15,6 +15,7 @@ tags:
 | baseDN | Entry Base distinguished name (DN) that identifies the starting point of a search | [Details](#basedn) |
 | baseEndpoint | Lock base endpoint URL | [Details](#baseendpoint) |
 | cedarlingConfiguration | Cedarling configuration | [Details](#cedarlingconfiguration) |
+| chainRegistrationMode | How producer chains come to exist: PRE_REGISTERED (admin API only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers it); an unknown value is treated as PRE_REGISTERED | [Details](#chainregistrationmode) |
 | cleanServiceBatchChunkSize | Each clean up iteration fetches chunk of expired data per base dn and removes it from storage | [Details](#cleanservicebatchchunksize) |
 | cleanServiceInterval | Time interval for the Clean Service in seconds | [Details](#cleanserviceinterval) |
 | clientDomainBindings | OAuth client to evidence-domain bindings | [Details](#clientdomainbindings) |
@@ -102,6 +103,15 @@ tags:
 - Required: No
 
 - Default value: None
+
+
+## chainRegistrationMode
+
+- Description: How producer chains come to exist: PRE_REGISTERED (admin API only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers it); an unknown value is treated as PRE_REGISTERED
+
+- Required: No
+
+- Default value: PRE_REGISTERED
 
 
 ## cleanServiceBatchChunkSize

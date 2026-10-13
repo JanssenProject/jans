@@ -8,6 +8,7 @@ package io.jans.lock.service.trace.crypto;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -227,6 +228,52 @@ class Ed25519PublicKeysTest {
 		PublicKey rebuilt = Ed25519PublicKeys.fromJwk(Ed25519TestKeys.toJwk(original));
 
 		assertArrayEquals(original.getEncoded(), rebuilt.getEncoded());
+	}
+
+	// -- thumbprint (D-19) --------------------------------------------------------------------
+
+	/** RFC 8037 Appendix A.3: SHA-256 of the canonical thumbprint input, in hex (verified against the RFC text). */
+	private static final String RFC8037_THUMBPRINT_HEX = "90facafea9b1556698540f70c0117a22ea37bd5cf3ed3c47093c1707282b4b89";
+
+	@Test
+	void testThumbprint_rfc8037KnownAnswer_matches() {
+		assertEquals("sha256:" + RFC8037_THUMBPRINT_HEX, Ed25519PublicKeys.thumbprint(validJwk()));
+	}
+
+	@Test
+	void testThumbprint_extraJwkMembers_doNotChangeResult() {
+		Map<String, String> jwk = validJwk();
+		jwk.put("kid", "k1");
+		jwk.put("use", "sig");
+		jwk.put("d", RFC8037_D);
+
+		assertEquals("sha256:" + RFC8037_THUMBPRINT_HEX, Ed25519PublicKeys.thumbprint(jwk));
+	}
+
+	@Test
+	void testThumbprint_differentKeys_differ() {
+		Map<String, String> other = Ed25519TestKeys.toJwk(Ed25519TestKeys.generateKeyPair().getPublic());
+
+		assertNotEquals(Ed25519PublicKeys.thumbprint(validJwk()), Ed25519PublicKeys.thumbprint(other));
+		assertEquals(Ed25519PublicKeys.thumbprint(other), Ed25519PublicKeys.thumbprint(other));
+	}
+
+	@Test
+	void testThumbprint_missingOrMalformedX_throwsTraceCryptoException() {
+		Map<String, String> noX = validJwk();
+		noX.remove("x");
+		assertEquals(TraceCryptoException.REASON_JWK_FORMAT,
+				assertThrows(TraceCryptoException.class, () -> Ed25519PublicKeys.thumbprint(noX)).getReason());
+		assertEquals(TraceCryptoException.REASON_JWK_FORMAT,
+				assertThrows(TraceCryptoException.class, () -> Ed25519PublicKeys.thumbprint(null)).getReason());
+
+		for (String badX : new String[] { "", "short", RFC8037_X + "=", RFC8037_X + "\"}", "a\"b" + RFC8037_X }) {
+			Map<String, String> jwk = validJwk();
+			jwk.put("x", badX);
+			assertEquals(TraceCryptoException.REASON_JWK_X_ENCODING,
+					assertThrows(TraceCryptoException.class, () -> Ed25519PublicKeys.thumbprint(jwk)).getReason(),
+					badX);
+		}
 	}
 
 	private static Map<String, String> validJwk() {

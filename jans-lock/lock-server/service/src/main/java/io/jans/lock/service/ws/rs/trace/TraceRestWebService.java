@@ -70,12 +70,12 @@ public interface TraceRestWebService {
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_write", path = "/audit/trace")
 	Response submitRecord(InputStream body, @Context HttpServletRequest request, @Context SecurityContext sec);
 
-	@Operation(summary = "Submit a batch of TRACE evidence records", description = "Verify and ingest a JSON array of signed TRACE assertions, continuing past per-item failures (design decision D-16)", tags = {
+	@Operation(summary = "Submit a batch of TRACE evidence records", description = "Verify and ingest a JSON array of signed TRACE assertions, continuing past per-item failures. One producer per batch (design §11.2, decisions D-16 and D-22)", tags = {
 			"Lock - Audit Trace" }, security = @SecurityRequirement(name = "oauth2", scopes = {
 					ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS }))
 	@RequestBody(description = "JSON array of TRACE assertions (design §7 shape, each)", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(type = "object"))))
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "202", description = "Accepted (per-item outcomes in the body)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceBulkIngestionResponse.class))),
+			@ApiResponse(responseCode = "207", description = "Multi-Status (per-item outcomes in the body)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceBulkIngestionResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
 			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),

@@ -4951,19 +4951,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "TRACE capability keys referenced by the record",
-      "equality": "caseExactMatch",
-      "names": [
-        "jansTraceCapKeys"
-      ],
-      "oid": "jansAttr",
-      "multivalued": true,
-      "rdbm_json_column": true,
-      "substr": "caseExactSubStringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "TRACE token keys referenced by the record",
       "equality": "caseExactMatch",
       "names": [
@@ -5166,6 +5153,30 @@
         "jansTraceRegisteredBy"
       ],
       "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE chain genesis kind: pre_registered_genesis or first_observed_genesis",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceGenesisKind"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE event kinds a producer key may sign",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceAuthorizedEventKinds"
+      ],
+      "oid": "jansAttr",
+      "multivalued": true,
+      "rdbm_json_column": true,
       "substr": "caseExactSubStringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
@@ -6956,7 +6967,6 @@
         "jansTraceChainPosKey",
         "jansTraceSeqNum",
         "jansTracePrevRecordHash",
-        "jansTraceCapKeys",
         "jansTraceTokenKeys",
         "jansTraceAssertion",
         "jansTraceContentDigest",
@@ -7024,6 +7034,7 @@
         "jansTraceProducerInstanceId",
         "jansTraceProducerChainId",
         "jansTraceRegisteredBy",
+        "jansTraceGenesisKind",
         "creationDate"
       ],
       "must": [
@@ -7046,6 +7057,7 @@
         "jansTraceProducerId",
         "jansTraceKid",
         "jansTracePublicKeyJwk",
+        "jansTraceAuthorizedEventKinds",
         "jansTraceValidFrom",
         "jansTraceValidUntil",
         "jansTraceRevokedAt",

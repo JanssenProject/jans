@@ -122,6 +122,8 @@ public class CommonAssertionValidator {
 					"producer_chain_mismatch");
 		}
 
+		validateProducerVersion(root);
+
 		List<ParsedAssertion.ParentRecordId> parentRecordIds = parseParentRecordIds(root);
 
 		String signature = requireNonEmptyString(root, "signature", "signature", null);
@@ -149,6 +151,22 @@ public class CommonAssertionValidator {
 				producerChainId, sequenceNumber, prevRecordHash));
 		assertion.setParentRecordIds(parentRecordIds);
 		assertion.setSignature(signature);
+	}
+
+	private void validateProducerVersion(ObjectNode root) {
+		if (!root.has(TraceConstants.PRODUCER_VERSION_FIELD)) {
+			return;
+		}
+		JsonNode node = root.get(TraceConstants.PRODUCER_VERSION_FIELD);
+		if (!node.isTextual()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"type:" + TraceConstants.PRODUCER_VERSION_FIELD);
+		}
+		int length = node.textValue().length();
+		if (length < 1 || length > TraceConstants.MAX_PRODUCER_VERSION_LENGTH) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"length:" + TraceConstants.PRODUCER_VERSION_FIELD);
+		}
 	}
 
 	private void rejectDomainField(ObjectNode root) {

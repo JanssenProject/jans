@@ -59,7 +59,7 @@ class InMemoryTraceStoreTest extends TraceStoreContractTest {
 				"sha256:" + String.format("%064d", seq));
 		return new StoredTraceRecord(identity, "{\"trace\":{}}", "sha256:" + String.format("%064d", seq), verification,
 				receipt, new IngestionFlags(false, false, false, false), execution, chainPosition,
-				TraceConstants.ZERO_HASH, java.util.Collections.emptyList(), java.util.Collections.emptyList(),
+				TraceConstants.ZERO_HASH, java.util.Collections.emptyList(),
 				TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 3000L + seq);
 	}
 

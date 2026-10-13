@@ -374,6 +374,10 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		body.put("kid", kid);
 		var jwk = body.putObject("public_key_jwk");
 		key.publicJwk().forEach(jwk::put);
+		var kinds = body.putArray("authorized_event_kinds");
+		kinds.add("AUTHORIZATION_DECISION");
+		kinds.add("CAPABILITY_INVOKED");
+		kinds.add("RUNTIME_EFFECT");
 		body.put("valid_from", "2020-01-01T00:00:00Z");
 		body.putNull("valid_until");
 		return postJson("/audit/trace/admin/producer-keys", body.toString(), adminToken);

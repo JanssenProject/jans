@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,9 +26,10 @@ import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.TokenRef;
 
 /**
- * Field-level checks shared by more than one {@link EventKindValidator}: the {@code {capability_id,
- * outcome}} list shape used by {@code AUTHORIZATION_DECISION} and {@code CAPABILITY_INVOKED}
- * (design §7.2), and the {@code tokens[]} shape common to every kind (design §7.3).
+ * Field-level checks shared by more than one {@link EventKindValidator}: the {@code decision} /
+ * {@code invocation} fact shapes used by {@code AUTHORIZATION_DECISION} and
+ * {@code CAPABILITY_INVOKED} (design §7.2), the {@code trace.subject} rules (design §7.1), and the
+ * {@code tokens[]} shape common to every kind (design §7.3).
  *
  * @author Yuriy Movchan
  */
@@ -36,7 +38,13 @@ final class EventKindValidationSupport {
 	static final Set<String> DECISION_OUTCOMES = Collections
 			.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("ALLOW", "DENY")));
 
-	private static final int MAX_CAPABILITY_ID_LENGTH = 512;
+	private static final int MAX_FACT_TEXT_LENGTH = 512;
+
+	private static final int MAX_FACT_ID_LENGTH = 256;
+
+	private static final int MAX_INVOCATION_OUTCOME_LENGTH = 64;
+
+	private static final int MAX_SUBJECT_ID_LENGTH = 255;
 
 	private static final int MAX_TOKEN_TYPE_LENGTH = 64;
 
@@ -136,32 +144,137 @@ final class EventKindValidationSupport {
 	}
 
 	/**
-	 * Validates a non-empty {@code capability_ids[]} array of {@code {capability_id, outcome}}
-	 * entries (design §7.2) and returns the {@code capability_id} values, deduplicated with order
-	 * preserved.
+	 * Validates the signed capability <em>facts</em> of a decision or invocation event (design §7.2,
+	 * decision D-20): exactly one of a singular object {@code singular} or a non-empty array
+	 * {@code plural} of entries. Every fact carries {@code action} and {@code resource_type}
+	 * (non-empty, at most {@value #MAX_FACT_TEXT_LENGTH} characters) and an {@code outcome}; plural
+	 * entries also carry a unique {@code idField}. A {@code resource_id} member is forbidden (the
+	 * facts name a resource <em>type</em>, never an instance). The record-level
+	 * {@code trace.event.outcome} and the removed {@code capability_ids} are forbidden, because the
+	 * outcome lives in the facts and Lock does not resolve capability ids.
+	 *
+	 * <p>Nothing is returned or stored: the facts remain in the signed assertion only (D-21).
+	 *
+	 * @param decisionOutcomes the closed outcome vocabulary, or {@code null} for a free outcome of
+	 *        at most {@value #MAX_INVOCATION_OUTCOME_LENGTH} characters
 	 */
-	static List<String> requireCapabilityIds(JsonNode event, String basePath) {
-		JsonNode node = requireField(event, "capability_ids", basePath);
-		if (!node.isArray()) {
-			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + basePath);
+	static void requireCapabilityFacts(JsonNode event, String singular, String plural, String idField,
+			Set<String> decisionOutcomes) {
+		forbidField(event, "capability_ids", "trace.event.capability_ids");
+		forbidField(event, "outcome", "trace.event.outcome");
+
+		boolean hasSingular = present(event, singular);
+		boolean hasPlural = present(event, plural);
+		if (hasSingular && hasPlural) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"forbidden:trace.event." + plural);
 		}
-		if (node.size() == 0) {
-			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "empty:" + basePath);
+		if (!hasSingular && !hasPlural) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"missing:trace.event." + singular);
 		}
-		Set<String> dedup = new LinkedHashSet<>();
-		for (int i = 0; i < node.size(); i++) {
-			JsonNode entry = node.get(i);
-			String entryPath = basePath + "[" + i + "]";
+
+		if (hasSingular) {
+			String path = "trace.event." + singular;
+			JsonNode fact = event.get(singular);
+			if (!fact.isObject()) {
+				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + path);
+			}
+			validateFact(fact, path, decisionOutcomes);
+			return;
+		}
+
+		String path = "trace.event." + plural;
+		JsonNode entries = event.get(plural);
+		if (!entries.isArray()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + path);
+		}
+		if (entries.size() == 0) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "empty:" + path);
+		}
+		Set<String> seenIds = new HashSet<>();
+		for (int i = 0; i < entries.size(); i++) {
+			JsonNode entry = entries.get(i);
+			String entryPath = path + "[" + i + "]";
 			if (!entry.isObject()) {
 				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
 						"type:" + entryPath);
 			}
-			String capabilityId = requireNonEmptyString(entry, "capability_id", entryPath + ".capability_id",
-					MAX_CAPABILITY_ID_LENGTH);
-			requireEnum(entry, "outcome", entryPath + ".outcome", DECISION_OUTCOMES);
-			dedup.add(capabilityId);
+			String id = requireNonEmptyString(entry, idField, entryPath + "." + idField, MAX_FACT_ID_LENGTH);
+			validateFact(entry, entryPath, decisionOutcomes);
+			if (!seenIds.add(id)) {
+				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+						"duplicate:" + entryPath + "." + idField);
+			}
 		}
-		return new ArrayList<>(dedup);
+	}
+
+	private static boolean present(JsonNode parent, String field) {
+		JsonNode node = parent.get(field);
+		return node != null && !node.isNull();
+	}
+
+	private static void validateFact(JsonNode fact, String path, Set<String> decisionOutcomes) {
+		forbidField(fact, "resource_id", path + ".resource_id");
+		requireNonEmptyString(fact, "action", path + ".action", MAX_FACT_TEXT_LENGTH);
+		requireNonEmptyString(fact, "resource_type", path + ".resource_type", MAX_FACT_TEXT_LENGTH);
+		if (decisionOutcomes != null) {
+			requireEnum(fact, "outcome", path + ".outcome", decisionOutcomes);
+		} else {
+			requireNonEmptyString(fact, "outcome", path + ".outcome", MAX_INVOCATION_OUTCOME_LENGTH);
+		}
+	}
+
+	/**
+	 * {@code trace.subject} for event kinds that identify the acting workload (design §7.1):
+	 * {@code workload_id} is required, {@code workload_instance_id} optional. An absent subject is
+	 * reported as the missing {@code workload_id}.
+	 */
+	static void requireWorkloadSubject(JsonNode trace) {
+		JsonNode subject = trace.get("subject");
+		if (subject == null || subject.isNull()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"missing:trace.subject.workload_id");
+		}
+		if (!subject.isObject()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:trace.subject");
+		}
+		requireNonEmptyString(subject, "workload_id", "trace.subject.workload_id", MAX_SUBJECT_ID_LENGTH);
+		optionalBoundedString(subject, "workload_instance_id", "trace.subject.workload_instance_id",
+				MAX_SUBJECT_ID_LENGTH);
+	}
+
+	/**
+	 * {@code trace.subject} for event kinds where the subject is optional (design §7.1): validated
+	 * only when present.
+	 */
+	static void validateOptionalSubject(JsonNode trace) {
+		JsonNode subject = trace.get("subject");
+		if (subject == null || subject.isNull()) {
+			return;
+		}
+		if (!subject.isObject()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:trace.subject");
+		}
+		JsonNode workloadId = subject.get("workload_id");
+		if (workloadId != null && !workloadId.isNull()) {
+			requireNonEmptyString(subject, "workload_id", "trace.subject.workload_id", MAX_SUBJECT_ID_LENGTH);
+		}
+		optionalBoundedString(subject, "workload_instance_id", "trace.subject.workload_instance_id",
+				MAX_SUBJECT_ID_LENGTH);
+	}
+
+	private static void optionalBoundedString(JsonNode parent, String field, String path, int maxLength) {
+		JsonNode node = parent.get(field);
+		if (node == null || node.isNull()) {
+			return;
+		}
+		if (!node.isTextual()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + path);
+		}
+		if (node.textValue().length() > maxLength) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "length:" + path);
+		}
 	}
 
 	/**
