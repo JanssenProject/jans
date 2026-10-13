@@ -246,7 +246,7 @@ lock.server.log.jwt.status.file=/opt/jans/lock-server/logs/lock_server_jwt_statu
 The `traceConfiguration` block of the Lock Server dynamic configuration (`jansConfDyn`) controls
 the TRACE evidence-ingestion feature: which OAuth clients may submit or read evidence for which
 evidence domain, lateness policy, and request limits enforced before any cryptographic
-verification.
+verification. See [TRACE Evidence](./trace.md) for the feature description and API.
 
 | Property | Type | Default | Meaning |
 |---|---|---|---|

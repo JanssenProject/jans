@@ -218,6 +218,7 @@ Janssen Project is a Linux Foundation-hosted platform for building identity and 
 - [Upgrade](https://docs.jans.io/head/janssen-server/kubernetes-ops/upgrade/index.md)
 - [Lock](https://docs.jans.io/head/janssen-server/lock/index.md)
 - [Lock Server](https://docs.jans.io/head/janssen-server/lock/lock-server/index.md)
+- [TRACE Evidence](https://docs.jans.io/head/janssen-server/lock/trace/index.md)
 - [Application Portal](https://docs.jans.io/head/janssen-server/planning/application-portal/index.md)
 - [Benchmarking](https://docs.jans.io/head/janssen-server/planning/benchmarking/index.md)
 - [Caching](https://docs.jans.io/head/janssen-server/planning/caching/index.md)
