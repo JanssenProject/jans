@@ -3761,6 +3761,12 @@ verification. See <a href=".././trace/">TRACE Evidence</a> for the feature descr
 <td>Maximum retries when allocating the next receipt-chain sequence number under multi-node contention.</td>
 </tr>
 <tr>
+<td><code>correlationRetryLimit</code></td>
+<td>integer</td>
+<td><code>3</code></td>
+<td>Maximum retries when a neighbor-flag update after a record insert hits a version conflict. After the limit Lock logs a warning and gives up on that update; the request still succeeds.</td>
+</tr>
+<tr>
 <td><code>receiptRepairIntervalSeconds</code></td>
 <td>integer</td>
 <td><code>300</code></td>
@@ -3783,6 +3789,12 @@ verification. See <a href=".././trace/">TRACE Evidence</a> for the feature descr
 <td>integer</td>
 <td><code>4194304</code></td>
 <td>Maximum total body size, in bytes, buffered for one <code>POST /audit/trace/bulk</code> request. Independent of <code>maxRequestBytes</code>/<code>maxBulkRecords</code>, and always clamped to 16777216 regardless of configuration.</td>
+</tr>
+<tr>
+<td><code>chainRegistrationMode</code></td>
+<td>string</td>
+<td><code>PRE_REGISTERED</code></td>
+<td>How producer chains come to exist. <code>PRE_REGISTERED</code>: a chain must be registered through the admin API before its records are accepted. <code>FIRST_OBSERVED</code>: a record with <code>sequence_number</code> 1 and the all-zero <code>prev_record_hash</code> on an unregistered chain registers the chain, after the key, event-kind and signature checks pass. Any other record on an unregistered chain is still rejected with <code>chain_not_registered</code>. A value that is not a mode name is treated as <code>PRE_REGISTERED</code> and logged once at <code>WARN</code>. Changing the mode affects only later submissions; existing chains are not rewritten.</td>
 </tr>
 </tbody>
 </table>

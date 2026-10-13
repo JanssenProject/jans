@@ -1668,6 +1668,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#chain-registration-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Chain registration modes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#list-keys-and-chains" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1700,6 +1711,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Single record
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-kinds" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Event kinds
       </span>
     </span>
   </a>
@@ -1744,6 +1766,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Error catalog
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canonical-propagation-wire-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Canonical propagation wire profile
       </span>
     </span>
   </a>
@@ -2207,6 +2240,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#chain-registration-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Chain registration modes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#list-keys-and-chains" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2239,6 +2283,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Single record
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-kinds" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Event kinds
       </span>
     </span>
   </a>
@@ -2283,6 +2338,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Error catalog
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canonical-propagation-wire-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Canonical propagation wire profile
       </span>
     </span>
   </a>
@@ -2671,13 +2737,15 @@
 <span class="w">    </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;clientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2200.00000000-0000-0000-0000-000000000000&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;evidenceDomainId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;allowedProducerIds&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;cedarling-fleet-1/1.0.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;gateway-fleet-1/2.0.0&quot;</span><span class="p">]</span>
+<span class="w">      </span><span class="nt">&quot;allowedProducerIds&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;cedarling-fleet-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;gateway-fleet-1&quot;</span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;latenessThresholdSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;maxRequestBytes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">262144</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;maxBulkRecords&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;maxBulkRequestBytes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4194304</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;correlationRetryLimit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;chainRegistrationMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PRE_REGISTERED&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;receiptAllocationRetryLimit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;receiptRepairIntervalSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;pendingReceiptTimeoutSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span>
@@ -2687,6 +2755,8 @@
 <p><strong>Forwarding.</strong> A client may submit a record only if the binding's <code>allowedProducerIds</code> contains the signed <code>producer</code> string exactly, or contains <code>"*"</code>. Otherwise the request fails with <code>403 producer_not_allowed</code>.</p>
 <p><strong>Limits.</strong> Lock applies the request limits (<code>maxRequestBytes</code>, <code>maxJsonDepth</code>, <code>maxStringLength</code>, <code>maxArrayLength</code>, <code>maxObjectMembers</code>) before any cryptographic work. A request over a limit fails with <code>400 invalid_request</code>. For bulk requests, <code>maxBulkRecords</code> bounds the array length and <code>maxBulkRequestBytes</code> bounds the whole body (always clamped to 16 MiB). <code>maxRequestBytes</code> still bounds each record in the batch.</p>
 <p><strong>Lateness.</strong> A record is flagged <code>late_flag: true</code> when Lock receives it more than <code>latenessThresholdSeconds</code> after its <code>signed_at</code>. Lateness alone never rejects a record. A <code>signed_at</code> that is more than <code>latenessThresholdSeconds</code> in the future is rejected with <code>invalid_assertion</code> (<code>signed_at_in_future</code>).</p>
+<p><strong>Neighbor-update retries.</strong> After a record is stored, Lock updates derived flags on neighboring records. Each update is a compare-and-swap write against the neighbor's version. On a version conflict, Lock re-reads the neighbor, recomputes the flag from its current state and retries, up to <code>correlationRetryLimit</code> times. When the budget is exhausted Lock logs a warning and gives up on that update. It never fails the request.</p>
+<p><strong>Chain registration mode.</strong> <code>chainRegistrationMode</code> is <code>PRE_REGISTERED</code> (default) or <code>FIRST_OBSERVED</code>. See <a href="#chain-registration-modes">Chain registration modes</a>. A value that is not one of the two names is treated as <code>PRE_REGISTERED</code> and logged once at <code>WARN</code>.</p>
 <p><strong>Timers.</strong> The receipt repair timer runs every <code>receiptRepairIntervalSeconds</code>. It settles receipt claims that stayed <code>PENDING</code> longer than <code>pendingReceiptTimeoutSeconds</code> (see <a href="#deployment-constraints">Deployment constraints</a>). Setting <code>enabled</code> to <code>false</code> makes every TRACE endpoint return a structured <code>invalid_request</code> error with reason <code>trace_disabled</code> and stops the timer.</p>
 <h2 id="registering-producer-keys-and-chains">Registering producer keys and chains<a class="headerlink" href="#registering-producer-keys-and-chains" title="Permanent link">#</a></h2>
 <p>Lock accepts a producer key only through the admin API. It never accepts a public key because it accompanied a record. Possession of a signing key does not let the holder define its own producer identity. Registration, in the administrator's evidence domain, grants the authority.</p>
@@ -2702,46 +2772,113 @@
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/admin/producer-keys&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;producer_id&quot;: &quot;cedarling-fleet-1/1.0.0&quot;,</span>
+<span class="s1">    &quot;producer_id&quot;: &quot;cedarling-fleet-1&quot;,</span>
 <span class="s1">    &quot;kid&quot;: &quot;cedarling-fleet-1-2026-01&quot;,</span>
 <span class="s1">    &quot;public_key_jwk&quot;: { &quot;kty&quot;: &quot;OKP&quot;, &quot;crv&quot;: &quot;Ed25519&quot;, &quot;x&quot;: &quot;&lt;base64url public key, 32 bytes&gt;&quot; },</span>
+<span class="s1">    &quot;authorized_event_kinds&quot;: [&quot;AUTHORIZATION_DECISION&quot;],</span>
 <span class="s1">    &quot;valid_from&quot;: &quot;2026-01-01T00:00:00Z&quot;,</span>
 <span class="s1">    &quot;valid_until&quot;: null</span>
 <span class="s1">  }&#39;</span>
 </code></pre></div>
-<p>The response is <code>201</code> with the stored key, including <code>evidence_domain_id</code> and <code>revoked_at: null</code>. Registering the same <code>(producer_id, kid)</code> again returns <code>409 key_already_exists</code>. Keys are create-only: rotate by registering a new <code>kid</code>, and retire a key by revoking it. A JWK that is not <code>{kty: OKP, crv: Ed25519}</code> with a 32-byte <code>x</code>, or dates that do not parse, return <code>400 invalid_key</code>.</p>
-<p>A key verifies a record only when, at verification time, <code>valid_from</code> has passed, <code>valid_until</code> is unset or in the future, and <code>revoked_at</code> is unset or in the future. Otherwise the record is rejected with <code>400 key_not_valid</code>. The verification result stored with each record names the exact <code>kid</code> used and the time of verification. A later revocation never changes it.</p>
+<p><code>producer_id</code> is the stable logical producer identifier, for example <code>cedarling-fleet-1</code>. It is not a <code>name/semver</code> string. Software version and build travel as separate signed metadata (see <a href="#single-record">Single record</a>), so a software upgrade does not force a new producer identity, key or chain. The identifier is 1 to 255 characters, starts with a letter or digit, and then uses letters, digits and <code>. _ : / -</code>. Lock compares it byte for byte and never normalizes it.</p>
+<p><code>authorized_event_kinds</code> is required. It is a non-empty list of <code>AUTHORIZATION_DECISION</code>, <code>CAPABILITY_INVOKED</code> and <code>RUNTIME_EFFECT</code> without duplicates. A missing or empty list, an unknown kind or a duplicate returns <code>400 invalid_key</code> with reason <code>authorized_event_kinds</code>. The scope is immutable. To change it, register a new <code>kid</code>.</p>
+<p>The response is <code>201</code> with the stored key, including <code>evidence_domain_id</code>, <code>authorized_event_kinds</code> and <code>revoked_at: null</code>. Registering the same <code>(producer_id, kid)</code> again returns <code>409 key_already_exists</code>. Keys are create-only: rotate by registering a new <code>kid</code>, and retire a key by revoking it. A JWK that is not <code>{kty: OKP, crv: Ed25519}</code> with a 32-byte <code>x</code>, or dates that do not parse, return <code>400 invalid_key</code>.</p>
+<p>A key verifies a record only when, at verification time:</p>
+<ul>
+<li><code>valid_from</code> has passed, <code>valid_until</code> is unset or in the future, and <code>revoked_at</code> is unset or in the future. Otherwise Lock rejects the record with <code>400 key_not_valid</code>.</li>
+<li>The record's <code>trace.event_kind</code> is in the key's <code>authorized_event_kinds</code>. Otherwise Lock rejects the record with <code>400 unknown_producer_key</code> and reason <code>event_kind_not_authorized</code>, exactly as for an unknown key. Nothing is stored or indexed. This check runs before any signature work.</li>
+</ul>
+<p>A key row that was stored before <code>authorized_event_kinds</code> existed authorizes no event kinds. Such a producer must register a new <code>kid</code>.</p>
+<p>The verification result stored with each record names the exact <code>kid</code>, the key thumbprint and the time of verification (see <a href="#retrieval">Retrieval</a>). A later revocation, expiry or change to the key never changes it.</p>
 <h3 id="revoke-a-key">Revoke a key<a class="headerlink" href="#revoke-a-key" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/admin/producer-keys/revoke&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{ &quot;producer_id&quot;: &quot;cedarling-fleet-1/1.0.0&quot;, &quot;kid&quot;: &quot;cedarling-fleet-1-2026-01&quot; }&#39;</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{ &quot;producer_id&quot;: &quot;cedarling-fleet-1&quot;, &quot;kid&quot;: &quot;cedarling-fleet-1-2026-01&quot; }&#39;</span>
 </code></pre></div>
 <p>The response is <code>200</code> with the key and its <code>revoked_at</code>. Revoking an already revoked key is idempotent. An unknown key returns <code>404 record_not_found</code>.</p>
 <h3 id="register-a-producer-chain">Register a producer chain<a class="headerlink" href="#register-a-producer-chain" title="Permanent link">#</a></h3>
-<p>Every record belongs to a producer chain, and the chain must be registered before the producer's first record. The model is <code>producer_id</code> → <code>producer_instance_id</code> → one or more <code>producer_chain_id</code> values.</p>
+<p>Every record belongs to a producer chain. With the default <code>PRE_REGISTERED</code> mode the chain must be registered before the producer's first record. The model is <code>producer_id</code> → <code>producer_instance_id</code> → one or more <code>producer_chain_id</code> values.</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/admin/producer-chains&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;producer_id&quot;: &quot;cedarling-fleet-1/1.0.0&quot;,</span>
+<span class="s1">    &quot;producer_id&quot;: &quot;cedarling-fleet-1&quot;,</span>
 <span class="s1">    &quot;producer_instance_id&quot;: &quot;cedarling-001&quot;,</span>
 <span class="s1">    &quot;producer_chain_id&quot;: &quot;chain-01JABC9Z0K&quot;</span>
 <span class="s1">  }&#39;</span>
 </code></pre></div>
-<p>The response is <code>201</code>. A duplicate returns <code>409 chain_already_exists</code>. A record whose chain is not registered is rejected with <code>400 chain_not_registered</code>, at every sequence position.</p>
+<p>The response is <code>201</code> and includes <code>"genesis_kind": "pre_registered_genesis"</code>. A duplicate returns <code>409 chain_already_exists</code>. In <code>PRE_REGISTERED</code> mode a record whose chain is not registered is rejected with <code>400 chain_not_registered</code>, at every sequence position.</p>
+<p>One producer instance can own several chains at once: register each <code>producer_chain_id</code> separately. Chains are independent. Each has its own sequence numbers, its own gap, link and equivocation findings, and its own <code>prev_record_hash</code> links. Records of different chains can be interleaved in any order, in single or bulk submissions, and a batch can span several chains of the same producer. The Lock receipt sequence still increases per evidence domain across all chains.</p>
+<h3 id="chain-registration-modes">Chain registration modes<a class="headerlink" href="#chain-registration-modes" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PRE_REGISTERED</code> (default)</td>
+<td>A chain exists only after an administrator registers it. A record on an unregistered chain is rejected with <code>400 chain_not_registered</code>.</td>
+</tr>
+<tr>
+<td><code>FIRST_OBSERVED</code></td>
+<td>A genesis record (<code>sequence_number</code> 1 with <code>prev_record_hash</code> set to the all-zero sentinel) on an unregistered chain registers the chain. Registration happens after the key, event-kind scope and signature checks succeeded, and before the record is stored. <code>registered_by</code> is the submitting client. Chains registered through the admin API keep working as before.</td>
+</tr>
+</tbody>
+</table>
+<p>In <code>FIRST_OBSERVED</code> mode:</p>
+<ul>
+<li>A record that fails any admission check (schema, forwarding, key, key validity, event-kind scope, signature) never registers a chain.</li>
+<li>Any other record on an unregistered chain is still rejected with <code>400 chain_not_registered</code>. This includes a producer that restarted mid-chain, or records that arrive out of order before the genesis record. Lock does not register a chain from a non-genesis record.</li>
+<li>A genesis position without the sentinel, or the sentinel at a non-genesis position, is still <code>400 invalid_genesis</code>.</li>
+<li>If two genesis records for one chain arrive at the same time, both are accepted: one registers the chain and the other finds it registered.</li>
+<li>Changing the mode affects only later submissions. Lock does not change existing chain registrations.</li>
+</ul>
+<p>The chain list shows how each chain came to exist in <code>genesis_kind</code>: <code>pre_registered_genesis</code> for chains registered through the admin API (and for chains stored before this field existed), or <code>first_observed_genesis</code> for chains opened by a genesis record. A <code>first_observed_genesis</code> chain only says that the first genesis record Lock saw for that chain opened it. It says nothing about earlier producer history, and Lock does not claim to hold a complete history of the chain.</p>
+<p><strong>Producer deployment patterns.</strong> Keys identify trusted producers, chains identify independently sequenced record streams, and versions describe software. They are different identifiers. How a producer holds its key and chain state varies:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Key and chain state</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Embedded or server Cedarling</td>
+<td>The host supplies the key and keeps durable chain state.</td>
+</tr>
+<tr>
+<td>Sidecar Cedarling</td>
+<td>The sidecar owns the key and one or more chain writers.</td>
+</tr>
+<tr>
+<td>Ephemeral pod</td>
+<td>Uses a fleet or workload-provisioned key and opens a <code>first_observed_genesis</code> chain for that pod or writer.</td>
+</tr>
+<tr>
+<td>WASM Cedarling</td>
+<td>Should return the assertion to a trusted host for signing. A key held in a browser gives weaker producer assurance.</td>
+</tr>
+</tbody>
+</table>
+<p>Restarting a producer does not by itself mean a new chain. A producer that durably retained its <code>producer_chain_id</code>, last <code>sequence_number</code> and previous record hash should continue its existing chain. A new chain is needed when that state is unavailable, when a new independently sequenced writer is created, or when the producer rotates deliberately. Lock only checks the records it receives. The signed <code>chain_link</code> member can reference the previous chain head, and Lock records it without validating it.</p>
 <h3 id="list-keys-and-chains">List keys and chains<a class="headerlink" href="#list-keys-and-chains" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/admin/producer-keys?producer_id=cedarling-fleet-1%2F1.0.0&quot;</span><span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/admin/producer-keys?producer_id=cedarling-fleet-1&quot;</span><span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span>
 curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/admin/producer-chains&quot;</span><span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span>
 </code></pre></div>
-<p>Both return <code>200</code>, with <code>{ "keys": [...] }</code> and <code>{ "chains": [...] }</code>. The <code>producer_id</code> filter is optional.</p>
+<p>Both return <code>200</code>, with <code>{ "keys": [...] }</code> and <code>{ "chains": [...] }</code>. The <code>producer_id</code> filter is optional. Each chain entry carries <code>evidence_domain_id</code>, <code>producer_id</code>, <code>producer_instance_id</code>, <code>producer_chain_id</code>, <code>registered_by</code>, <code>genesis_kind</code> and <code>created_at</code>.</p>
 <h2 id="submitting-records">Submitting records<a class="headerlink" href="#submitting-records" title="Permanent link">#</a></h2>
 <h3 id="single-record">Single record<a class="headerlink" href="#single-record" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="err">POST /jans-lock/api/v1/audit/trace</span>
-<span class="err">Authorization: Bearer &lt;access-token with trace.write&gt;</span>
+<span class="err">Authorization: Bearer &lt;access token with trace.write&gt;</span>
 <span class="err">Content-Type: application/json</span>
 </code></pre></div>
-<p>The body is the complete signed assertion. This release accepts this shape:</p>
+<p>The body is the complete signed assertion. For an <code>AUTHORIZATION_DECISION</code> it looks like this:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;producer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1/1.0.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;producer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;producer_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.4.2&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1-2026-01&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;trace&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -2750,12 +2887,16 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <span class="w">    </span><span class="nt">&quot;signed_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1781138542</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;trace_execution_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exec-01JABCXYZQK8P5N9F2C7R3T4V6&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;execution_authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spiffe://example.org/agent/planner&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;workload_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spiffe://example.org/agent/planner&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;workload_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spiffe://example.org/agent/planner&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;workload_instance_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;04bbe9ef-a853-417c-a2b8-5328b62936e2&quot;</span>
+<span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;event&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;outcome&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;capability_ids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;capability_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;invoke:payment-authorization&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;outcome&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="w"> </span><span class="p">}</span>
-<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Action::\&quot;Pay\&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;resource_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Payment&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;outcome&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span>
+<span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.example.org&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;access_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9c9f2e77-9a3e-4b62-9a2a-2f6e6e2a9f3e&quot;</span><span class="w"> </span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
@@ -2770,7 +2911,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <span class="w">    </span><span class="nt">&quot;runtime&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;pdp_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-001&quot;</span><span class="w"> </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;producer_chain&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;producer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1/1.0.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;producer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;producer_instance_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-001&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;producer_chain_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chain-01JABC9Z0K&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;sequence_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
@@ -2782,13 +2923,50 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 </code></pre></div>
 <p>Key points:</p>
 <ul>
-<li><code>producer</code> must equal <code>producer_chain.producer_id</code> byte for byte, and <code>kid</code> is part of the signed content.</li>
+<li><code>producer</code> is the stable logical producer identifier. It must equal <code>producer_chain.producer_id</code> byte for byte. <code>kid</code> is part of the signed content. <code>producer_version</code>, when present, is a string of 1 to 255 characters. It is signed and stored unchanged, and Lock does not interpret it.</li>
 <li><code>record_id</code> is a producer-generated UUID or ULID. Record identity is <code>(evidence domain, producer, record_id)</code>, so two producers can use the same <code>record_id</code>.</li>
-<li><code>trace_execution_id</code> and <code>execution_authority</code> are required and travel together. Lock correlates records by them. Lock neither creates them nor authorizes the execution.</li>
+<li><code>trace_execution_id</code> and <code>execution_authority</code> are required and travel together. Lock correlates records by them. Lock neither creates them nor authorizes the execution. They are different from <code>subject.workload_id</code>: the authority scopes the execution identifier, and the workload is the subject that takes part in it.</li>
+<li><code>trace.subject.workload_id</code> is required (non-empty string, at most 255 characters) for <code>AUTHORIZATION_DECISION</code> and <code>CAPABILITY_INVOKED</code>. <code>workload_instance_id</code> is optional. For <code>RUNTIME_EFFECT</code> the subject is optional and is validated when present.</li>
+<li>Producers sign capability <em>facts</em>, not a governance label. An <code>AUTHORIZATION_DECISION</code> carries a singular <code>decision</code> and a <code>CAPABILITY_INVOKED</code> carries a singular <code>invocation</code>. Each has <code>action</code> and <code>resource_type</code> (the Cedar action and resource type, never a resource id) and an <code>outcome</code>. See <a href="#event-kinds">Event kinds</a>. Lock does not resolve capability ids.</li>
 <li><code>tokens[]</code> holds references only: <code>issuer</code>, <code>token_type</code>, and either <code>jti</code> or <code>fingerprint</code>. Never send a raw bearer token. Lock rejects material that looks like a JWT. Token identity is <code>(domain, issuer, jti)</code>, never a bare <code>jti</code>.</li>
-<li><code>event_kind</code> is one of <code>AUTHORIZATION_DECISION</code>, <code>CAPABILITY_INVOKED</code>, <code>RUNTIME_EFFECT</code>. Each kind has its own required <code>trace.event</code> fields, and fields that contradict the kind are rejected.</li>
+<li><code>producer_chain</code> can carry an optional <code>chain_link</code> member. Lock keeps it unchanged inside the signed assertion, returns it unchanged on retrieval, and does not validate or interpret it.</li>
 <li>The first record of a chain has <code>sequence_number</code> 1 and <code>prev_record_hash</code> set to <code>sha256:</code> followed by 64 zeros. Any other record needs the previous record's <code>content_digest</code> in <code>prev_record_hash</code>.</li>
 </ul>
+<h3 id="event-kinds">Event kinds<a class="headerlink" href="#event-kinds" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Event kind</th>
+<th>Producer</th>
+<th>Required event data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AUTHORIZATION_DECISION</code></td>
+<td>Cedarling or another PDP</td>
+<td>Exactly one of a singular <code>trace.event.decision</code> <code>{action, resource_type, outcome}</code> or <code>trace.event.decisions[]</code>. A complete <code>trace.policy</code> block. <code>trace.runtime.pdp_id</code>. <code>trace.subject.workload_id</code>.</td>
+</tr>
+<tr>
+<td><code>CAPABILITY_INVOKED</code></td>
+<td>PEP, agent gateway or tool gateway</td>
+<td>Exactly one of a singular <code>trace.event.invocation</code> <code>{action, resource_type, outcome}</code> or <code>trace.event.invocations[]</code>. <code>trace.event.enforcement_point_id</code>. <code>trace.subject.workload_id</code>. <code>trace.policy</code> is not allowed.</td>
+</tr>
+<tr>
+<td><code>RUNTIME_EFFECT</code></td>
+<td>Target system or trusted observer</td>
+<td><code>trace.event.outcome</code>. It carries no <code>decision</code>, <code>decisions</code>, <code>invocation</code> or <code>invocations</code>. It normally has a <code>produced_effect</code> parent in <code>parent_record_ids</code>. Lock accepts it without one and notes a warning at debug level.</td>
+</tr>
+</tbody>
+</table>
+<p>Rules for the capability facts:</p>
+<ul>
+<li><code>action</code> and <code>resource_type</code> are non-empty strings of at most 512 characters.</li>
+<li>For <code>AUTHORIZATION_DECISION</code>, <code>outcome</code> is <code>ALLOW</code> or <code>DENY</code>. For <code>CAPABILITY_INVOKED</code>, <code>outcome</code> is a non-empty string of at most 64 characters.</li>
+<li>An atomic batch evaluation can use the plural form instead. Each entry carries a <code>decision_id</code> or <code>invocation_id</code> (non-empty, at most 256 characters, unique within the array) and repeats <code>action</code>, <code>resource_type</code> and <code>outcome</code>. The record-level <code>trace.event.outcome</code> is not allowed in either form.</li>
+<li>Both the singular and the plural member in one record, <code>capability_ids</code> anywhere, and a <code>resource_id</code> inside a fact are rejected with <code>400 invalid_assertion</code> (reason such as <code>forbidden:trace.event.capability_ids</code>).</li>
+</ul>
+<p>Lock validates the schema for the declared kind and rejects fields that contradict it. Lock does not infer that an authorization caused an invocation because their timestamps are close. Producers state causal relationships in <code>parent_record_ids</code>.</p>
 <h3 id="signature-scope-and-digest-scope">Signature scope and digest scope<a class="headerlink" href="#signature-scope-and-digest-scope" title="Permanent link">#</a></h3>
 <p>The two scopes are intentionally different:</p>
 <table>
@@ -2813,7 +2991,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <h3 id="response">Response<a class="headerlink" href="#response" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;accepted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;producer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1/1.0.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;producer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;content_digest&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;receipt_sequence&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">108422</span><span class="p">,</span>
@@ -2825,7 +3003,8 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <span class="w">  </span><span class="nt">&quot;late_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><code>202 Accepted</code> means the record was verified and durably stored. Lock verifies in a fixed order: OAuth check, domain derivation, JSON structure and limits, forwarding check, key resolution, signature verification, digest, then the idempotency, chain, and equivocation checks. A record that fails verification never enters storage or any retrieval index.</p>
+<p><code>202 Accepted</code> means the record was verified and durably stored. Lock verifies in a fixed order: OAuth check, domain derivation, JSON structure and limits, forwarding check, key resolution (validity window, then event-kind scope), signature verification, digest, then the idempotency, chain, and equivocation checks. A record that fails verification never enters storage or any retrieval index.</p>
+<p><code>received_at</code> is an RFC 3339 UTC timestamp with exactly three fractional digits and a <code>Z</code> suffix, for example <code>2026-06-11T00:41:02.123Z</code>. The receipt and verification timestamps in API output (<code>received_at</code>, <code>verified_at</code>) use this form. Timestamps in the admin API (<code>created_at</code>, <code>revoked_at</code>) are RFC 3339 UTC and may omit a zero fraction.</p>
 <table>
 <thead>
 <tr>
@@ -2857,16 +3036,33 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 </tbody>
 </table>
 <h3 id="bulk-submission">Bulk submission<a class="headerlink" href="#bulk-submission" title="Permanent link">#</a></h3>
-<p><code>POST /jans-lock/api/v1/audit/trace/bulk</code> takes a JSON array of assertions, each in the single-record shape, with the same <code>trace.write</code> scope. Every element is processed as an independent single submission, in array order, and one element's failure never rejects the others. Resubmitting a whole array is safe: records that were already committed replay idempotently.</p>
-<p>The response is <code>202</code> once the request-level checks pass, whatever the per-item results:</p>
+<p><code>POST /jans-lock/api/v1/audit/trace/bulk</code> takes a JSON array of assertions, each in the single-record shape, with the same <code>trace.write</code> scope. A high-throughput producer such as Cedarling can use it instead of one request per record.</p>
+<ul>
+<li><strong>One producer per batch.</strong> Every element must carry the same signed <code>producer</code>. A batch that mixes producers is rejected as a whole with <code>400 invalid_request</code> and reason <code>bulk_mixed_producers</code>, and nothing is ingested. Elements without a readable <code>producer</code> are not counted and fail on their own.</li>
+<li><strong>Per record, not all or nothing.</strong> Every element is processed as an independent single submission, in array order. One element's failure never rejects the others. Replay, conflict, gap and equivocation behavior is per record and identical to the single-record path.</li>
+<li><strong>Several chains in one batch.</strong> Records in one batch can advance several <code>producer_chain_id</code> chains of the producer. Each chain is checked on its own.</li>
+<li>Resubmitting a whole array is safe: records that were already committed replay idempotently.</li>
+</ul>
+<p>A processed batch returns <code>207 Multi-Status</code>, whatever the per-item results. Accepted entries carry the single-record acceptance members inline. Rejected entries carry the error:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;accepted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;record&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;accepted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;receipt_sequence&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">108422</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;...&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;same body as the single-record response&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;accepted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;invalid_signature&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;error_description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;signature_mismatch&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;accepted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;producer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;content_digest&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;receipt_sequence&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">108422</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;received_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-11T00:41:02.123Z&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;idempotent_replay&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;coverage_gap_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;chain_link_failure_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;equivocation_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;late_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;accepted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;producer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1b2c3d4e-0000-4000-8000-000000000000&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;invalid_signature&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;error_description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;signature_mismatch&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Request-level failures return an ordinary structured error and no <code>results</code>: malformed JSON, a body that is not an array, an empty array, more than <code>maxBulkRecords</code> elements, or a body over <code>maxBulkRequestBytes</code>. Receipt sequences are allocated in array order but are not guaranteed to be contiguous within a batch, because a rejected item claims no receipt.</p>
+<p><code>index</code> is the position in the submitted array, and <code>results</code> keeps request order. <code>record_id</code> and <code>producer_id</code> are present on a rejected entry when they could be read. The error ids are the ones in the <a href="#error-catalog">error catalog</a>.</p>
+<p>Request-level failures return an ordinary structured error with a real HTTP status and no <code>results</code>: malformed JSON, a body that is not an array (<code>not_array</code>), an empty array (<code>empty_bulk_records</code>), more than <code>maxBulkRecords</code> elements (<code>max_bulk_records_exceeded</code>), a body over <code>maxBulkRequestBytes</code> (<code>bulk_body_too_large</code>), mixed producers (<code>bulk_mixed_producers</code>), TRACE disabled, and <code>client_not_bound</code>. Receipt sequences are allocated in array order but are not guaranteed to be contiguous within a batch, because a rejected item claims no receipt.</p>
 <h3 id="error-catalog">Error catalog<a class="headerlink" href="#error-catalog" title="Permanent link">#</a></h3>
 <p>Errors use the structured body <code>{"error": "&lt;id&gt;", "error_description": "&lt;text&gt;", "reason": "&lt;detail&gt;"}</code>. The <code>reason</code> member appears when error reasons are enabled and names the offending field or check. OAuth failures (<code>401</code>, <code>403</code> from the protection layer) come from Lock's standard filters and are not part of this table.</p>
 <table>
@@ -2881,7 +3077,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <tr>
 <td><code>invalid_request</code></td>
 <td>400</td>
-<td>Malformed JSON, a limit exceeded, an unreadable body, bad query parameters, or TRACE disabled (<code>trace_disabled</code>).</td>
+<td>Malformed JSON, a limit exceeded, an unreadable body, bad query parameters, TRACE disabled (<code>trace_disabled</code>), or a bulk envelope problem such as <code>bulk_mixed_producers</code> (see <a href="#bulk-submission">Bulk submission</a>).</td>
 </tr>
 <tr>
 <td><code>invalid_assertion</code></td>
@@ -2906,7 +3102,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <tr>
 <td><code>unknown_producer_key</code></td>
 <td>400</td>
-<td>No registered key for the domain, producer, and <code>kid</code>.</td>
+<td>No registered key for the domain, producer, and <code>kid</code>, or the record's <code>event_kind</code> is outside the key's <code>authorized_event_kinds</code> (reason <code>event_kind_not_authorized</code>).</td>
 </tr>
 <tr>
 <td><code>key_not_valid</code></td>
@@ -2971,7 +3167,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <tr>
 <td><code>invalid_key</code></td>
 <td>400</td>
-<td>Admin: the JWK is not a 32-byte Ed25519 OKP key, or the dates are invalid.</td>
+<td>Admin: the JWK is not a 32-byte Ed25519 OKP key, the dates are invalid, or <code>authorized_event_kinds</code> is missing, empty, unknown or duplicated.</td>
 </tr>
 <tr>
 <td><code>storage_failure</code></td>
@@ -2985,10 +3181,56 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 </tr>
 </tbody>
 </table>
+<h3 id="canonical-propagation-wire-profile">Canonical propagation wire profile<a class="headerlink" href="#canonical-propagation-wire-profile" title="Permanent link">#</a></h3>
+<p>This table is informational. It fixes one mapping for the base correlation fields so that independently written producers stay correlatable. <strong>Lock does not read these headers, baggage keys or token claims.</strong> Lock only reads the signed <code>trace_execution_id</code>, <code>execution_authority</code> and <code>subject</code> members of the assertion. A host, sidecar, PEP or gateway translates the carrier into the producer's input.</p>
+<table>
+<thead>
+<tr>
+<th>TRACE field</th>
+<th>HTTP header</th>
+<th>OTel baggage key</th>
+<th>Token claim</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>trace_execution_id</code></td>
+<td><code>Audit-Trace-ID</code></td>
+<td><code>audit.trace_id</code></td>
+<td><code>https://jans.io/trace/execution_id</code></td>
+</tr>
+<tr>
+<td><code>execution_authority</code></td>
+<td><code>Audit-Execution-Authority</code></td>
+<td><code>audit.execution_authority</code></td>
+<td><code>https://jans.io/trace/execution_authority</code></td>
+</tr>
+<tr>
+<td><code>workload_id</code></td>
+<td><code>Audit-Workload-ID</code></td>
+<td><code>audit.workload_id</code></td>
+<td><code>https://jans.io/trace/workload_id</code></td>
+</tr>
+<tr>
+<td><code>workload_instance_id</code></td>
+<td><code>Audit-Workload-Instance-ID</code></td>
+<td><code>audit.workload_instance_id</code></td>
+<td><code>https://jans.io/trace/workload_instance_id</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>trace_execution_id</code> and <code>execution_authority</code> always travel together.</li>
+<li>Cedarling receives normalized values through its authorization API. It does not parse headers, tokens or baggage.</li>
+<li>Unsigned headers and baggage are correlation hints, not authoritative claims. A trusted ingress component should validate or replace externally supplied values instead of forwarding them.</li>
+<li>Signed token claims bind more strongly, but their issuer and signature must still be validated.</li>
+<li>When carriers disagree, the precedence is: validated token claim, then trusted ingress or host input, then unsigned header, then OTel baggage. The conflict should be recorded and not silently resolved.</li>
+</ul>
+<p>The component that creates the governed unit of work (an agent runtime, a gateway, a PEP, an application host or a scheduler) creates the identifier pair and propagates it. Neither Cedarling nor Lock generates it.</p>
 <h2 id="retrieval">Retrieval<a class="headerlink" href="#retrieval" title="Permanent link">#</a></h2>
 <p>Both endpoints need the <code>trace.readonly</code> scope and read only the caller's evidence domain.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># One record. producer_id should be supplied.</span>
-curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/records/9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41?producer_id=cedarling-fleet-1%2F1.0.0&quot;</span><span class="w"> </span><span class="se">\</span>
+curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/records/9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41?producer_id=cedarling-fleet-1&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$READ_TOKEN</span><span class="s2">&quot;</span>
 
 <span class="c1"># The direct records of one execution. execution_authority should be supplied.</span>
@@ -2997,15 +3239,17 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 </code></pre></div>
 <p>A record response has three separate parts:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;producer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1/1.0.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;producer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;assertion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;...&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;the producer-signed record&quot;</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;content_digest&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;verification&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;signature_valid&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;key_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1-2026-01&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;verified_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-11T00:41:02Z&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ed25519&quot;</span>
+<span class="w">    </span><span class="nt">&quot;key_thumbprint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;verified_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-11T00:41:02.123Z&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ed25519&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;key_authorized&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;ingestion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;receipt_sequence&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">108422</span><span class="p">,</span>
@@ -3021,7 +3265,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 </code></pre></div>
 <ul>
 <li><code>assertion</code> is stored as the text received and never modified. The API returns it as a JSON value that is semantically identical to what the producer sent. Lock never adds resolved claims, status, or receipt data to it.</li>
-<li><code>verification</code> records the admission decision Lock made at <code>verified_at</code>. It is not recomputed from the current key registry.</li>
+<li><code>verification</code> records the admission decision Lock made at <code>verified_at</code>. It is written once at ingestion and never recomputed from the current key registry. <code>key_thumbprint</code> pins the exact key, independently of the non-unique <code>kid</code> selector: it is <code>sha256:</code> plus the lowercase hex SHA-256 of the RFC 7638 required-members JSON of the key (<code>{"crv":"Ed25519","kty":"OKP","x":"&lt;x&gt;"}</code>). <code>key_authorized</code> is a single boolean. It states that the key existed, was inside its validity window, was not revoked, was registered for the <code>producer_id</code> and was authorized for the record's <code>event_kind</code>. Every stored record has <code>key_authorized: true</code>, because a record that fails any admission check is rejected and never stored. Later revocation, expiry or re-scoping of the key never rewrites these values. Records stored before these two members existed omit them.</li>
 <li><code>ingestion</code> is Lock-derived metadata.</li>
 </ul>
 <p>If <code>producer_id</code> (or <code>execution_authority</code>) is omitted and the bare identifier matches more than one producer (or authority) in the domain, Lock returns <code>409 ambiguous_identifier</code>. It never guesses.</p>
@@ -3069,7 +3313,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <li><code>prev_receipt_hash</code>: the hash of the preceding receipt entry.</li>
 <li><code>receipt_hash</code>: the hash of this entry.</li>
 </ul>
-<p>The receipt hash binds <code>evidence_domain_id</code>, <code>receipt_sequence</code>, <code>received_at</code>, <code>producer_id</code>, <code>record_id</code>, <code>content_digest</code>, and <code>prev_receipt_hash</code>. The hash input is the JCS canonical form of those seven members, and <code>received_at</code> enters the hash as an integer number of epoch milliseconds. The first entry in a domain uses the all-zero sentinel as its <code>prev_receipt_hash</code>.</p>
+<p>The receipt hash binds <code>evidence_domain_id</code>, <code>receipt_sequence</code>, <code>received_at</code>, <code>producer_id</code>, <code>record_id</code>, <code>content_digest</code>, and <code>prev_receipt_hash</code>. The hash input is the JCS canonical form of those seven members. <code>received_at</code> enters the hash as a JSON string in the RFC 3339 form with three fractional digits and <code>Z</code> (<code>2026-06-11T00:41:02.123Z</code>), and <code>receipt_sequence</code> as a JSON integer. A value shown without milliseconds would not reproduce the receipt hash. The first entry in a domain uses the all-zero sentinel as its <code>prev_receipt_hash</code>.</p>
 <p>A verifier can walk the receipts by sequence, recompute each hash, and check each committed entry against the stored record. This makes local insertion, deletion, and rewriting detectable.</p>
 <div class="admonition warning">
 <p class="admonition-title">What the receipt chain does not protect against</p>
@@ -3094,12 +3338,15 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <li>Lock-side management through the config-api Lock plugin and the Jans CLI/TUI;</li>
 <li>settlement assessments or Lock-signed settlement receipts;</li>
 <li>execution completeness or assurance profiles;</li>
-<li>lineage checkpoints or claims of complete producer history;</li>
+<li>lineage checkpoints, <code>chain_link</code> validation, or claims of complete producer history;</li>
 <li>signed receipt checkpoints or external transparency anchoring;</li>
 <li>Evidence Packet export;</li>
 <li>delegation non-expansion analysis and authorization-transition reconstruction;</li>
 <li>user-intent and approval records;</li>
 <li>operation-binding commitments, including proof-of-possession binding;</li>
+<li>capability resolution (deriving a <code>capability_id</code> from the signed action and resource type) and a capability index. The signed facts stay in the stored assertion, so the index can be added later without re-emitting records;</li>
+<li>the Producer-Key Authorization Statement and per-measurement-point key scoping (Lock enforces <code>authorized_event_kinds</code> against its live registry);</li>
+<li>the WIMSE agent identifier profile, credential metadata on <code>tokens[]</code> and the <code>workload_authentication</code> record;</li>
 <li>token-claim enrichment, current-state resolution, and token-exchange lineage;</li>
 <li>attestation assessment or trust tiers;</li>
 <li>cross-domain correlation or import;</li>
