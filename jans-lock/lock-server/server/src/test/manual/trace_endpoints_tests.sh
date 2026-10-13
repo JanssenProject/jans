@@ -133,6 +133,10 @@ elif cmd == "tamper-signature":
     sys.stdout.write(json.dumps(doc, separators=(",", ":"), ensure_ascii=False))
 elif cmd == "sha256":
     print("sha256:" + hashlib.sha256(sys.argv[2].encode("utf-8")).hexdigest())
+elif cmd == "one-day-ago":
+    import datetime
+    t = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1)
+    print(t.strftime("%Y-%m-%dT%H:%M:%SZ"))
 elif cmd == "uuid":
     import uuid
     print(uuid.uuid4())
@@ -173,7 +177,7 @@ http() {
     printf 'header = "Authorization: Bearer %s"\n' "$token" >"$cfg"
     auth=(-K "$cfg")
   fi
-  HTTP_STATUS="$(curl "${CURL_BASE[@]}" -o "$out" -w '%{http_code}' -X "$method" "${auth[@]}" "$@" "$url")" || HTTP_STATUS="000"
+  HTTP_STATUS="$(curl "${CURL_BASE[@]}" -o "$out" -w '%{http_code}' -X "$method" ${auth[@]+"${auth[@]}"} "$@" "$url")" || HTTP_STATUS="000"
   rm -f "$cfg"
   HTTP_BODY="$(cat "$out" 2>/dev/null || true)"
 }
@@ -331,7 +335,7 @@ echo -e "\n2. Admin: register producer keys and chains\n"
 
 PUB_PDP="$(py gen "$WORK/pdp.key")"
 PUB_PEP="$(py gen "$WORK/pep.key")"
-VALID_FROM="$(date -u -d '1 day ago' +%Y-%m-%dT%H:%M:%SZ)"
+VALID_FROM="$(py one-day-ago)"
 
 key_body() { # PRODUCER KID PUBLIC_X
   jq -n --arg p "$1" --arg k "$2" --arg x "$3" --arg vf "$VALID_FROM" \
