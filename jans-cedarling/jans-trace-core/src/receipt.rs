@@ -299,9 +299,9 @@ impl ReceiptCommitment {
     }
 
     /// Checks that this receipt names `previous_receipt_hash`, the current chain head (or
-    /// `Digest::GENESIS` for an empty chain), and returns its own hash: the next head. Only
-    /// the hash is compared; with the previous receipt at hand, `verify_successor` checks
-    /// the whole link.
+    /// `Digest::GENESIS` for an empty chain), and returns its own hash: the next head. This
+    /// is the ingest check, where Lock knows only the head hash; to audit a stored chain, walk
+    /// it with `ChainHead`, which also checks the evidence domain and the sequence.
     pub fn verify_link(&self, previous_receipt_hash: &Digest) -> Result<Digest, ReceiptLinkError> {
         let named = self.position.prev_receipt_hash;
         if named != *previous_receipt_hash {
@@ -312,25 +312,6 @@ impl ReceiptCommitment {
             .into());
         }
         Ok(self.receipt_hash())
-    }
-
-    /// Checks that this receipt directly follows `previous` in the same chain: same evidence
-    /// domain, the next sequence, and `previous`'s hash as predecessor. Returns its own hash,
-    /// the next head. A genesis receipt has no predecessor; check it with `verify_link`
-    /// against `Digest::GENESIS`.
-    pub fn verify_successor(&self, previous: &Self) -> Result<Digest, ReceiptLinkError> {
-        if self.evidence_domain_id != previous.evidence_domain_id {
-            return Err(LinkReason::OtherDomain.into());
-        }
-        let (sequence, previous_sequence) = (self.position.sequence, previous.position.sequence);
-        if previous_sequence.checked_add(1) != Some(sequence) {
-            return Err(LinkReason::NotNextSequence {
-                sequence,
-                previous: previous_sequence,
-            }
-            .into());
-        }
-        self.verify_link(&previous.receipt_hash())
     }
 
     /// JCS by hand: the member names are fixed and listed here in JCS order, and every value
@@ -374,6 +355,120 @@ impl ReceiptCommitment {
 enum Member<'a> {
     Text(&'a str),
     Integer(u64),
+}
+
+/// The end of an evidence-domain chain verified so far: only the last sequence and hash,
+/// because each receipt's hash already covers every receipt before it. A walk starts from
+/// `empty`, so the first receipt must be the genesis receipt, or from `resume` with a head
+/// saved earlier.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ChainHead {
+    evidence_domain_id: String,
+    sequence: u64,
+    hash: Digest,
+}
+
+impl ChainHead {
+    /// A chain with no receipts: sequence 0 and the genesis sentinel, so the next receipt
+    /// must be sequence 1 naming `Digest::GENESIS`.
+    #[must_use]
+    pub const fn empty(evidence_domain_id: String) -> Self {
+        Self {
+            evidence_domain_id,
+            sequence: 0,
+            hash: Digest::GENESIS,
+        }
+    }
+
+    /// Continues a walk from a head saved after an earlier one. Trusts that state: whoever
+    /// can change it can skip every receipt before it, so keep it where the operator of the
+    /// audited chain cannot write. Refuses only pairs no walk produces.
+    pub fn resume(
+        evidence_domain_id: String,
+        sequence: u64,
+        hash: Digest,
+    ) -> Result<Self, ChainHeadError> {
+        if sequence > MAX_SAFE_INTEGER {
+            return Err(HeadReason::SequenceOutOfRange(sequence).into());
+        }
+        match (sequence == 0, hash == Digest::GENESIS) {
+            (true, false) => Err(HeadReason::EmptyWithHash.into()),
+            (false, true) => Err(HeadReason::SentinelAsHash.into()),
+            _ => Ok(Self {
+                evidence_domain_id,
+                sequence,
+                hash,
+            }),
+        }
+    }
+
+    /// Checks that `receipt` continues this chain (same evidence domain, the next sequence,
+    /// this head's hash as predecessor) and returns the head after it.
+    pub fn append(&self, receipt: &ReceiptCommitment) -> Result<Self, ReceiptLinkError> {
+        if receipt.evidence_domain_id != self.evidence_domain_id {
+            return Err(LinkReason::OtherDomain.into());
+        }
+        let sequence = receipt.position.sequence;
+        if self.sequence.checked_add(1) != Some(sequence) {
+            return Err(LinkReason::NotNextSequence {
+                sequence,
+                previous: self.sequence,
+            }
+            .into());
+        }
+        Ok(Self {
+            evidence_domain_id: self.evidence_domain_id.clone(),
+            sequence,
+            hash: receipt.verify_link(&self.hash)?,
+        })
+    }
+
+    #[must_use]
+    pub fn evidence_domain_id(&self) -> &str {
+        &self.evidence_domain_id
+    }
+
+    /// 0 while the chain is empty.
+    #[must_use]
+    pub const fn sequence(&self) -> u64 {
+        self.sequence
+    }
+
+    /// `Digest::GENESIS` while the chain is empty.
+    #[must_use]
+    pub const fn hash(&self) -> Digest {
+        self.hash
+    }
+}
+
+/// Saved chain-head values that no walk produces.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+#[error("saved chain head is not valid: {reason}")]
+pub struct ChainHeadError {
+    reason: HeadReason,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+enum HeadReason {
+    #[error("sequence {0} is outside 0..=2^53-1")]
+    SequenceOutOfRange(u64),
+    #[error("sequence 0 must carry the genesis sentinel")]
+    EmptyWithHash,
+    #[error("only sequence 0 may carry the genesis sentinel")]
+    SentinelAsHash,
+}
+
+impl From<HeadReason> for ChainHeadError {
+    fn from(reason: HeadReason) -> Self {
+        Self { reason }
+    }
+}
+
+impl ChainHeadError {
+    #[must_use]
+    pub const fn code(&self) -> &'static str {
+        "INVALID_RECEIPT"
+    }
 }
 
 /// Stored receipt values that no verified record produces.
@@ -515,9 +610,9 @@ fn days_from_civil(year: u64, month: u64, day: u64) -> Option<u64> {
 #[cfg(test)]
 mod tests {
     use super::{
-        LinkReason, ParseReceivedAtError, ReceiptCommitment, ReceiptLinkError, ReceiptPosition,
-        ReceiptPositionError, ReceivedAt, ReceivedAtRangeError, StoredReceipt, StoredReceiptError,
-        StoredReceiptReason,
+        ChainHead, ChainHeadError, HeadReason, LinkReason, ParseReceivedAtError, ReceiptCommitment,
+        ReceiptLinkError, ReceiptPosition, ReceiptPositionError, ReceivedAt, ReceivedAtRangeError,
+        StoredReceipt, StoredReceiptError, StoredReceiptReason,
     };
     use crate::Digest;
 
@@ -807,43 +902,161 @@ mod tests {
     }
 
     #[test]
-    fn a_successor_links_to_the_previous_receipt_of_its_chain() {
+    fn a_chain_head_walks_a_chain_from_genesis() {
         let first = genesis_receipt();
         let second = commitment(StoredReceipt {
             position: position(2, first.receipt_hash()),
             ..stored()
         });
+        let empty = ChainHead::empty("domain-1".to_owned());
         assert_eq!(
-            second.verify_successor(&first),
-            Ok(second.receipt_hash()),
-            "same domain, next sequence, predecessor hash: returns the new head"
+            (empty.sequence(), empty.hash()),
+            (0, Digest::GENESIS),
+            "an empty chain expects sequence 1 naming the genesis sentinel"
+        );
+        let head = empty
+            .append(&first)
+            .and_then(|head| head.append(&second))
+            .expect("genesis then its successor");
+        assert_eq!(
+            (head.evidence_domain_id(), head.sequence(), head.hash()),
+            ("domain-1", 2, second.receipt_hash()),
+            "the head is the last receipt's sequence and hash"
         );
     }
 
-    struct SuccessorCase {
+    #[test]
+    fn a_saved_head_resumes_the_walk() {
+        let first = genesis_receipt();
+        let second = commitment(StoredReceipt {
+            position: position(2, first.receipt_hash()),
+            ..stored()
+        });
+        let walked = ChainHead::empty("domain-1".to_owned())
+            .append(&first)
+            .expect("genesis starts the chain");
+        let resumed = ChainHead::resume(
+            walked.evidence_domain_id().to_owned(),
+            walked.sequence(),
+            walked
+                .hash()
+                .to_string()
+                .parse()
+                .expect("saved hash text parses"),
+        )
+        .expect("a head from a walk resumes");
+        assert_eq!(resumed, walked, "the saved values rebuild the same head");
+        assert_eq!(
+            resumed.append(&second),
+            walked.append(&second),
+            "the walk continues exactly as without saving"
+        );
+        assert_eq!(
+            ChainHead::resume("domain-1".to_owned(), 0, Digest::GENESIS),
+            Ok(ChainHead::empty("domain-1".to_owned())),
+            "sequence 0 with the sentinel is the empty chain"
+        );
+    }
+
+    struct ResumeCase {
         name: &'static str,
-        current: ReceiptCommitment,
+        sequence: u64,
+        hash: Digest,
+        reason: HeadReason,
+    }
+
+    #[test]
+    fn resume_refuses_heads_no_walk_produces() {
+        let cases = [
+            ResumeCase {
+                name: "an empty chain with a hash",
+                sequence: 0,
+                hash: Digest::sha256(b"receipt"),
+                reason: HeadReason::EmptyWithHash,
+            },
+            ResumeCase {
+                name: "a receipt hash equal to the sentinel",
+                sequence: 3,
+                hash: Digest::GENESIS,
+                reason: HeadReason::SentinelAsHash,
+            },
+            ResumeCase {
+                name: "a sequence above 2^53-1",
+                sequence: MAX_SAFE_INTEGER + 1,
+                hash: Digest::sha256(b"receipt"),
+                reason: HeadReason::SequenceOutOfRange(MAX_SAFE_INTEGER + 1),
+            },
+        ];
+        for case in cases {
+            assert_eq!(
+                ChainHead::resume("domain-1".to_owned(), case.sequence, case.hash),
+                Err(ChainHeadError {
+                    reason: case.reason
+                }),
+                "{} is refused with its reason",
+                case.name
+            );
+        }
+        let err = ChainHead::resume("domain-1".to_owned(), 0, Digest::sha256(b"receipt"))
+            .expect_err("empty chain with a hash");
+        assert_eq!(
+            (err.to_string().as_str(), err.code()),
+            (
+                "saved chain head is not valid: sequence 0 must carry the genesis sentinel",
+                "INVALID_RECEIPT"
+            ),
+            "`{err}` explains the reason under the receipt code"
+        );
+    }
+
+    struct AppendCase {
+        name: &'static str,
+        head: ChainHead,
+        receipt: ReceiptCommitment,
         reason: LinkReason,
     }
 
     #[test]
-    fn a_successor_must_continue_the_same_chain() {
+    fn a_chain_head_refuses_a_receipt_that_does_not_continue_it() {
         let first = genesis_receipt();
         let first_hash = first.receipt_hash();
+        let after_first = ChainHead::empty("domain-1".to_owned())
+            .append(&first)
+            .expect("genesis starts the chain");
         let other = Digest::sha256(b"not the previous receipt");
         let cases = [
-            SuccessorCase {
+            AppendCase {
+                name: "a first receipt that is not genesis",
+                head: ChainHead::empty("domain-1".to_owned()),
+                receipt: commitment(StoredReceipt {
+                    position: position(2, first_hash),
+                    ..stored()
+                }),
+                reason: LinkReason::NotNextSequence {
+                    sequence: 2,
+                    previous: 0,
+                },
+            },
+            AppendCase {
+                name: "a genesis receipt of another domain",
+                head: ChainHead::empty("domain-2".to_owned()),
+                receipt: genesis_receipt(),
+                reason: LinkReason::OtherDomain,
+            },
+            AppendCase {
                 name: "another evidence domain",
-                current: commitment(StoredReceipt {
+                head: after_first.clone(),
+                receipt: commitment(StoredReceipt {
                     evidence_domain_id: "domain-2".to_owned(),
                     position: position(2, first_hash),
                     ..stored()
                 }),
                 reason: LinkReason::OtherDomain,
             },
-            SuccessorCase {
+            AppendCase {
                 name: "a skipped sequence",
-                current: commitment(StoredReceipt {
+                head: after_first.clone(),
+                receipt: commitment(StoredReceipt {
                     position: position(5, first_hash),
                     ..stored()
                 }),
@@ -852,17 +1065,19 @@ mod tests {
                     previous: 1,
                 },
             },
-            SuccessorCase {
+            AppendCase {
                 name: "a second genesis",
-                current: genesis_receipt(),
+                head: after_first.clone(),
+                receipt: genesis_receipt(),
                 reason: LinkReason::NotNextSequence {
                     sequence: 1,
                     previous: 1,
                 },
             },
-            SuccessorCase {
+            AppendCase {
                 name: "another predecessor hash",
-                current: commitment(StoredReceipt {
+                head: after_first,
+                receipt: commitment(StoredReceipt {
                     position: position(2, other),
                     ..stored()
                 }),
@@ -874,7 +1089,7 @@ mod tests {
         ];
         for case in cases {
             assert_eq!(
-                case.current.verify_successor(&first),
+                case.head.append(&case.receipt),
                 Err(ReceiptLinkError::from(case.reason)),
                 "{} is a link mismatch with its reason",
                 case.name
