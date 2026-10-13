@@ -32,9 +32,9 @@ impl Limits {
         self.max_input_bytes
     }
 
-    pub(crate) fn check_input(self, input: &[u8]) -> Result<(), SizeLimitExceeded> {
+    pub(crate) fn check_input(self, input: &[u8]) -> Result<(), SizeLimitError> {
         if input.len() > self.max_input_bytes {
-            return Err(SizeLimitExceeded {
+            return Err(SizeLimitError {
                 limit: self.max_input_bytes,
             });
         }
@@ -53,11 +53,11 @@ impl Default for Limits {
 /// Input is larger than the caller's limit.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
 #[error("input exceeds the {limit}-byte limit")]
-pub struct SizeLimitExceeded {
+pub struct SizeLimitError {
     limit: usize,
 }
 
-impl SizeLimitExceeded {
+impl SizeLimitError {
     #[must_use]
     pub const fn limit(&self) -> usize {
         self.limit
@@ -71,7 +71,7 @@ impl SizeLimitExceeded {
 
 #[cfg(test)]
 mod tests {
-    use super::{Limits, SizeLimitExceeded};
+    use super::{Limits, SizeLimitError};
 
     #[test]
     fn default_matches_lock_record_limit() {
@@ -93,7 +93,7 @@ mod tests {
             .expect_err("input above the limit is rejected");
         assert_eq!(
             err,
-            SizeLimitExceeded { limit: 3 },
+            SizeLimitError { limit: 3 },
             "error reports the configured limit"
         );
     }
@@ -101,7 +101,7 @@ mod tests {
     #[test]
     fn code_is_stable() {
         assert_eq!(
-            SizeLimitExceeded { limit: 1 }.code(),
+            SizeLimitError { limit: 1 }.code(),
             "SIZE_LIMIT_EXCEEDED",
             "stable code from core design §10"
         );

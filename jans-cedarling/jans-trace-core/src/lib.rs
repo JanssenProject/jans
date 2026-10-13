@@ -24,9 +24,7 @@ mod limits;
 mod signature;
 
 pub use canonical::{CanonicalizeError, canonicalize_json};
-pub use digest::{Digest, InvalidDigest};
+pub use digest::{Digest, ParseDigestError};
 pub use json::JsonError;
-pub use limits::{Limits, SizeLimitExceeded};
-pub use signature::{
-    Ed25519Signer, InvalidSignatureEncoding, SignatureValue, SignerError, TraceSigner,
-};
+pub use limits::{Limits, SizeLimitError};
+pub use signature::{Ed25519Signer, ParseSignatureError, SignatureValue, SignerError, TraceSigner};

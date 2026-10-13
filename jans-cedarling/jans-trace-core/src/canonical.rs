@@ -9,13 +9,13 @@ use serde_json::Value;
 use thiserror::Error;
 
 use crate::json::{JsonError, parse_strict};
-use crate::{Limits, SizeLimitExceeded};
+use crate::{Limits, SizeLimitError};
 
 /// Why `canonicalize_json` rejected its input.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
 pub enum CanonicalizeError {
     #[error(transparent)]
-    SizeLimitExceeded(#[from] SizeLimitExceeded),
+    SizeLimitExceeded(#[from] SizeLimitError),
     #[error(transparent)]
     Json(#[from] JsonError),
 }

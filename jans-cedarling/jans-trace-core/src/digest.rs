@@ -20,9 +20,9 @@ pub struct Digest([u8; 32]);
 /// Text is not `sha256:` followed by 64 lowercase hex characters.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
 #[error("digest is not `sha256:` followed by 64 lowercase hex characters")]
-pub struct InvalidDigest;
+pub struct ParseDigestError;
 
-impl InvalidDigest {
+impl ParseDigestError {
     #[must_use]
     pub const fn code(&self) -> &'static str {
         "INVALID_DIGEST"
@@ -54,12 +54,15 @@ impl fmt::Display for Digest {
 }
 
 impl FromStr for Digest {
-    type Err = InvalidDigest;
+    type Err = ParseDigestError;
 
     fn from_str(text: &str) -> Result<Self, Self::Err> {
-        let hex = text.strip_prefix(PREFIX).ok_or(InvalidDigest)?.as_bytes();
+        let hex = text
+            .strip_prefix(PREFIX)
+            .ok_or(ParseDigestError)?
+            .as_bytes();
         if hex.len() != 64 {
-            return Err(InvalidDigest);
+            return Err(ParseDigestError);
         }
         // Length is checked above, so the remainder is empty.
         let (pairs, _) = hex.as_chunks::<2>();
@@ -71,17 +74,17 @@ impl FromStr for Digest {
     }
 }
 
-fn lower_hex_value(c: u8) -> Result<u8, InvalidDigest> {
+fn lower_hex_value(c: u8) -> Result<u8, ParseDigestError> {
     match c {
         b'0'..=b'9' => Ok(c - b'0'),
         b'a'..=b'f' => Ok(c - b'a' + 10),
-        _ => Err(InvalidDigest),
+        _ => Err(ParseDigestError),
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{Digest, InvalidDigest};
+    use super::{Digest, ParseDigestError};
 
     const EMPTY_SHA256: &str =
         "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
@@ -119,7 +122,10 @@ mod tests {
             let err = text
                 .parse::<Digest>()
                 .expect_err("malformed digest text must be rejected");
-            assert_eq!(err, InvalidDigest, "expected InvalidDigest for {text:?}");
+            assert_eq!(
+                err, ParseDigestError,
+                "expected ParseDigestError for {text:?}"
+            );
         }
     }
 
@@ -140,7 +146,7 @@ mod tests {
     #[test]
     fn code_is_stable() {
         assert_eq!(
-            InvalidDigest.code(),
+            ParseDigestError.code(),
             "INVALID_DIGEST",
             "stable code from core design §10"
         );

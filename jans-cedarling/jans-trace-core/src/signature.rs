@@ -16,9 +16,9 @@ use thiserror::Error;
 /// Text is not the unpadded base64url form of exactly 64 bytes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
 #[error("signature is not unpadded base64url of 64 bytes")]
-pub struct InvalidSignatureEncoding;
+pub struct ParseSignatureError;
 
-impl InvalidSignatureEncoding {
+impl ParseSignatureError {
     #[must_use]
     pub const fn code(&self) -> &'static str {
         "INVALID_SIGNATURE_ENCODING"
@@ -60,17 +60,14 @@ impl fmt::Display for SignatureValue {
 }
 
 impl FromStr for SignatureValue {
-    type Err = InvalidSignatureEncoding;
+    type Err = ParseSignatureError;
 
     /// Accepts only the canonical encoding, so one signature has exactly one text form.
     fn from_str(text: &str) -> Result<Self, Self::Err> {
         let bytes = URL_SAFE_NO_PAD
             .decode(text)
-            .map_err(|_| InvalidSignatureEncoding)?;
-        bytes
-            .try_into()
-            .map(Self)
-            .map_err(|_| InvalidSignatureEncoding)
+            .map_err(|_| ParseSignatureError)?;
+        bytes.try_into().map(Self).map_err(|_| ParseSignatureError)
     }
 }
 
@@ -126,9 +123,7 @@ impl TraceSigner for Ed25519Signer {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        Ed25519Signer, InvalidSignatureEncoding, SignatureValue, SignerError, TraceSigner,
-    };
+    use super::{Ed25519Signer, ParseSignatureError, SignatureValue, SignerError, TraceSigner};
 
     struct Rfc8032Case {
         secret: &'static str,
@@ -227,8 +222,8 @@ mod tests {
         for (name, text) in cases {
             let err = text.parse::<SignatureValue>().expect_err(name);
             assert_eq!(
-                err, InvalidSignatureEncoding,
-                "expected InvalidSignatureEncoding for {name}"
+                err, ParseSignatureError,
+                "expected ParseSignatureError for {name}"
             );
         }
     }
@@ -236,7 +231,7 @@ mod tests {
     #[test]
     fn codes_are_stable() {
         assert_eq!(
-            InvalidSignatureEncoding.code(),
+            ParseSignatureError.code(),
             "INVALID_SIGNATURE_ENCODING",
             "stable code from core design §10"
         );
