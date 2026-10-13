@@ -171,8 +171,8 @@ impl PolicyStoreManager {
     /// - `policy_set: cedar_policy::PolicySet` (includes both policies and templates)
     /// - `raw_policy_info: HashMap<String, RawPolicy>` (for descriptions)
     fn convert_policies_and_templates(
-        policy_files: &[super::loader::PolicyFile],
-        template_files: &[super::loader::PolicyFile],
+        policy_files: &[super::loader::StoreFile],
+        template_files: &[super::loader::StoreFile],
     ) -> Result<PoliciesContainer, ConversionError> {
         if policy_files.is_empty() && template_files.is_empty() {
             // Return empty policy set
@@ -233,7 +233,7 @@ impl PolicyStoreManager {
     /// * `entity_files` - The entity files to convert
     /// * `logger` - Optional logger for hierarchy warnings
     fn convert_entities(
-        entity_files: &[super::loader::EntityFile],
+        entity_files: &[super::loader::StoreFile],
         logger: Option<&Logger>,
     ) -> Result<Option<HashMap<String, serde_json::Value>>, ConversionError> {
         if entity_files.is_empty() {
@@ -302,7 +302,7 @@ impl PolicyStoreManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::common::policy_store::loader::{EntityFile, PolicyFile};
+    use crate::common::policy_store::loader::StoreFile;
 
     fn parse_schema(content: &str) -> ParsedSchema {
         ParsedSchema::parse(content, "schema.cedarschema").expect("test schema should parse")
@@ -348,16 +348,16 @@ mod tests {
     #[test]
     fn test_convert_policies_valid() {
         let policy_files = vec![
-            PolicyFile {
+            StoreFile {
                 name: "allow.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             },
-            PolicyFile {
+            StoreFile {
                 name: "deny.cedar".to_string(),
                 content: "forbid(principal, action, resource);".to_string(),
             },
         ];
-        let template_files: Vec<PolicyFile> = vec![];
+        let template_files: Vec<StoreFile> = vec![];
 
         let result =
             PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files);
@@ -373,11 +373,11 @@ mod tests {
 
     #[test]
     fn test_convert_policies_with_templates() {
-        let policy_files = vec![PolicyFile {
+        let policy_files = vec![StoreFile {
             name: "allow.cedar".to_string(),
             content: "permit(principal, action, resource);".to_string(),
         }];
-        let template_files = vec![PolicyFile {
+        let template_files = vec![StoreFile {
             name: "template.cedar".to_string(),
             content: "permit(principal == ?principal, action, resource);".to_string(),
         }];
@@ -399,7 +399,7 @@ mod tests {
         // A single policy file with two @id-annotated policies, and a single
         // template file with two @id-annotated templates. Exercises the full
         // parser -> manager pipeline (same path cjar/directory loading uses).
-        let policy_files = vec![PolicyFile {
+        let policy_files = vec![StoreFile {
             name: "combined.cedar".to_string(),
             content: concat!(
                 "@id(\"p1\") permit(principal, action, resource);\n",
@@ -407,7 +407,7 @@ mod tests {
             )
             .to_string(),
         }];
-        let template_files = vec![PolicyFile {
+        let template_files = vec![StoreFile {
             name: "tpls.cedar".to_string(),
             content: concat!(
                 "@id(\"t1\") permit(principal == ?principal, action, resource);\n",
@@ -436,8 +436,8 @@ mod tests {
 
     #[test]
     fn test_convert_policies_empty() {
-        let policy_files: Vec<PolicyFile> = vec![];
-        let template_files: Vec<PolicyFile> = vec![];
+        let policy_files: Vec<StoreFile> = vec![];
+        let template_files: Vec<StoreFile> = vec![];
         let result =
             PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files);
         assert!(result.is_ok());
@@ -448,11 +448,11 @@ mod tests {
 
     #[test]
     fn test_convert_policies_invalid() {
-        let policy_files = vec![PolicyFile {
+        let policy_files = vec![StoreFile {
             name: "invalid.cedar".to_string(),
             content: "this is not valid cedar policy".to_string(),
         }];
-        let template_files: Vec<PolicyFile> = vec![];
+        let template_files: Vec<StoreFile> = vec![];
 
         let result =
             PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files);
@@ -465,7 +465,7 @@ mod tests {
 
     #[test]
     fn test_convert_entities_valid() {
-        let entity_files = vec![EntityFile {
+        let entity_files = vec![StoreFile {
             name: "users.json".to_string(),
             content: r#"[
         {
@@ -492,7 +492,7 @@ mod tests {
 
     #[test]
     fn test_convert_entities_empty() {
-        let entity_files: Vec<EntityFile> = vec![];
+        let entity_files: Vec<StoreFile> = vec![];
         let result = PolicyStoreManager::convert_entities(&entity_files, None);
         assert!(result.is_ok());
         assert!(result.unwrap().is_none());
@@ -503,7 +503,7 @@ mod tests {
         let content = StoreContent {
             schema: None,
             schema_source_exists: false,
-            policies: vec![PolicyFile {
+            policies: vec![StoreFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             }],
@@ -536,7 +536,7 @@ mod tests {
         let content = StoreContent {
             schema: Some(schema),
             schema_source_exists: true,
-            policies: vec![PolicyFile {
+            policies: vec![StoreFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             }],
@@ -568,7 +568,7 @@ mod tests {
         let content = StoreContent {
             schema: Some(schema),
             schema_source_exists: true,
-            policies: vec![PolicyFile {
+            policies: vec![StoreFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             }],
@@ -602,12 +602,12 @@ mod tests {
         let content = StoreContent {
             schema: Some(schema),
             schema_source_exists: true,
-            policies: vec![PolicyFile {
+            policies: vec![StoreFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             }],
             templates: vec![],
-            entities: vec![EntityFile {
+            entities: vec![StoreFile {
                 name: "users.json".to_string(),
                 content:
                     r#"[{"uid": {"type": "User", "id": "alice"}, "attrs": {}, "parents": []}]"#

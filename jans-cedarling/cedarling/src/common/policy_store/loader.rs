@@ -117,39 +117,15 @@ pub(super) fn read_from_vfs(
     formats::read_policy_store(&StoreFs::open(vfs, dir)?, strict)
 }
 
-/// A policy or template file.
+/// One file read from a store: a policy, template, entity or issuer file.
+///
+/// All four are a name plus text; the directory a file came from is what gives
+/// it meaning, so they share one type rather than four identical ones.
 #[derive(Debug, Clone)]
-pub(crate) struct PolicyFile {
-    /// File name
+pub(crate) struct StoreFile {
+    /// File name, without the directory it was read from.
     pub name: String,
-    /// File content
-    pub content: String,
-}
-
-/// An entity definition file.
-#[derive(Debug, Clone)]
-pub(crate) struct EntityFile {
-    /// File name
-    pub name: String,
-    /// JSON content
-    pub content: String,
-}
-
-/// A trusted issuer configuration file.
-#[derive(Debug, Clone)]
-pub(crate) struct IssuerFile {
-    /// File name
-    pub name: String,
-    /// JSON content
-    pub content: String,
-}
-
-/// A custom (non-JWT) issuer configuration file.
-#[derive(Debug, Clone)]
-pub(crate) struct CustomIssuerFile {
-    /// File name
-    pub name: String,
-    /// JSON content
+    /// File content as UTF-8 text.
     pub content: String,
 }
 
@@ -293,7 +269,7 @@ impl<'a> StoreFs<'a> {
 
     /// Reads every `.cedar` file under a directory the store must contain,
     /// recursively.
-    pub(super) fn cedar_files(&self, relative: &str) -> Result<Vec<PolicyFile>, PolicyStoreError> {
+    pub(super) fn cedar_files(&self, relative: &str) -> Result<Vec<StoreFile>, PolicyStoreError> {
         let mut files = Vec::new();
         self.load_cedar_files_recursive(&self.path(relative), &mut files, 0)?;
         Ok(files)
@@ -304,7 +280,7 @@ impl<'a> StoreFs<'a> {
     pub(super) fn optional_cedar_files(
         &self,
         relative: &str,
-    ) -> Result<Vec<PolicyFile>, PolicyStoreError> {
+    ) -> Result<Vec<StoreFile>, PolicyStoreError> {
         if !self.vfs.exists(&self.path(relative)) {
             return Ok(Vec::new());
         }
@@ -312,12 +288,11 @@ impl<'a> StoreFs<'a> {
     }
 
     /// Reads every `.json` file directly in a directory, if the store has it;
-    /// subdirectories are skipped. `make` wraps each file in its typed form.
-    pub(super) fn optional_json_files<F>(
+    /// subdirectories are skipped.
+    pub(super) fn optional_json_files(
         &self,
         relative: &str,
-        make: impl Fn(String, String) -> F,
-    ) -> Result<Vec<F>, PolicyStoreError> {
+    ) -> Result<Vec<StoreFile>, PolicyStoreError> {
         let dir = self.path(relative);
         if !self.vfs.exists(&dir) {
             return Ok(Vec::new());
@@ -338,7 +313,10 @@ impl<'a> StoreFs<'a> {
             }
             Self::check_extension(&entry, ".json")?;
             let content = self.read_text(&entry.path)?;
-            files.push(make(entry.name, content));
+            files.push(StoreFile {
+                name: entry.name,
+                content,
+            });
         }
 
         Ok(files)
@@ -499,7 +477,7 @@ impl<'a> StoreFs<'a> {
     fn load_cedar_files_recursive(
         &self,
         dir: &str,
-        files: &mut Vec<PolicyFile>,
+        files: &mut Vec<StoreFile>,
         depth: usize,
     ) -> Result<(), PolicyStoreError> {
         if depth > Self::MAX_RECURSION_DEPTH {
@@ -523,7 +501,7 @@ impl<'a> StoreFs<'a> {
             } else {
                 Self::check_extension(&entry, ".cedar")?;
                 let content = self.read_text(&entry.path)?;
-                files.push(PolicyFile {
+                files.push(StoreFile {
                     name: entry.name,
                     content,
                 });

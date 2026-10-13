@@ -34,7 +34,7 @@ use serde::{Deserialize, Deserializer};
 
 use super::PolicyStoreWithID;
 use super::errors::{PolicyStoreError, ValidationError};
-use super::loader::{EntityFile, PolicyFile, StoreFs};
+use super::loader::{StoreFile, StoreFs};
 use super::manager::ConversionError;
 use super::migration::IntoCurrent;
 use super::schema_parser::ParsedSchema;
@@ -56,9 +56,9 @@ pub(crate) const MIN_SUPPORTED_FORMAT_VERSION: u32 = v0::SPEC_VERSION;
 pub(crate) struct StoreContent {
     pub(crate) schema: Option<ParsedSchema>,
     pub(crate) schema_source_exists: bool,
-    pub(crate) policies: Vec<PolicyFile>,
-    pub(crate) templates: Vec<PolicyFile>,
-    pub(crate) entities: Vec<EntityFile>,
+    pub(crate) policies: Vec<StoreFile>,
+    pub(crate) templates: Vec<StoreFile>,
+    pub(crate) entities: Vec<StoreFile>,
 }
 
 /// Non-fatal findings from parsing a store; logged by the caller.

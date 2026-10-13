@@ -21,9 +21,7 @@ use trusted_issuer::{IssuerParser, ParsedIssuer};
 
 use super::{ParseStoreError, ReadStoreError, StoreContent};
 use crate::common::policy_store::errors::PolicyStoreError;
-use crate::common::policy_store::loader::{
-    CustomIssuerFile, EntityFile, IssuerFile, PolicyFile, StoreFs,
-};
+use crate::common::policy_store::loader::{StoreFile, StoreFs};
 use crate::common::policy_store::manager::{ConversionError, PolicyStoreManager};
 use crate::common::policy_store::metadata::PolicyStoreMetadata;
 use crate::common::policy_store::schema_parser::ParsedSchema;
@@ -52,11 +50,11 @@ struct Files {
     /// Whether a schema source was present in the store, regardless of
     /// whether it was loaded/parsed.
     schema_source_exists: bool,
-    policies: Vec<PolicyFile>,
-    templates: Vec<PolicyFile>,
-    entities: Vec<EntityFile>,
-    trusted_issuers: Vec<IssuerFile>,
-    custom_issuers: Vec<CustomIssuerFile>,
+    policies: Vec<StoreFile>,
+    templates: Vec<StoreFile>,
+    entities: Vec<StoreFile>,
+    trusted_issuers: Vec<StoreFile>,
+    custom_issuers: Vec<StoreFile>,
 }
 
 /// Reads a v1 store and parses its files; `metadata_json` has already been
@@ -81,14 +79,9 @@ fn load(fs: &StoreFs<'_>, metadata_json: String, strict: bool) -> Result<Files, 
         schema_source_exists: schema.source_exists,
         policies: fs.cedar_files(POLICIES_DIR)?,
         templates: fs.optional_cedar_files(TEMPLATES_DIR)?,
-        entities: fs
-            .optional_json_files(ENTITIES_DIR, |name, content| EntityFile { name, content })?,
-        trusted_issuers: fs.optional_json_files(TRUSTED_ISSUERS_DIR, |name, content| {
-            IssuerFile { name, content }
-        })?,
-        custom_issuers: fs.optional_json_files(CUSTOM_ISSUERS_DIR, |name, content| {
-            CustomIssuerFile { name, content }
-        })?,
+        entities: fs.optional_json_files(ENTITIES_DIR)?,
+        trusted_issuers: fs.optional_json_files(TRUSTED_ISSUERS_DIR)?,
+        custom_issuers: fs.optional_json_files(CUSTOM_ISSUERS_DIR)?,
     })
 }
 
@@ -200,8 +193,8 @@ mod tests {
         "policy_store": { "id": "abc123def456", "name": "Golden v1", "version": "1.0.0" }
     }"#;
 
-    fn issuer_file(name: &str, id: &str) -> IssuerFile {
-        IssuerFile {
+    fn issuer_file(name: &str, id: &str) -> StoreFile {
+        StoreFile {
             name: name.to_string(),
             content: format!(
                 r#"{{
@@ -216,12 +209,12 @@ mod tests {
         }
     }
 
-    fn loaded(trusted_issuers: Vec<IssuerFile>, custom_issuers: Vec<CustomIssuerFile>) -> Files {
+    fn loaded(trusted_issuers: Vec<StoreFile>, custom_issuers: Vec<StoreFile>) -> Files {
         Files {
             metadata_json: METADATA.to_string(),
             schema: None,
             schema_source_exists: false,
-            policies: vec![PolicyFile {
+            policies: vec![StoreFile {
                 name: "allow.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             }],
@@ -237,7 +230,7 @@ mod tests {
     fn golden_store_converts_to_runtime() {
         let doc = parse(loaded(
             vec![issuer_file("a.json", "Alpha")],
-            vec![CustomIssuerFile {
+            vec![StoreFile {
                 name: "acme.json".to_string(),
                 content:
                     r#"{ "tokens_mappings": { "Acme::Custom": { "required_claims": ["sub"] } } }"#
@@ -315,7 +308,7 @@ mod tests {
     #[test]
     fn invalid_issuer_file_is_reported_with_file_name() {
         let err = parse(loaded(
-            vec![IssuerFile {
+            vec![StoreFile {
                 name: "bad.json".to_string(),
                 content: "{ not json".to_string(),
             }],

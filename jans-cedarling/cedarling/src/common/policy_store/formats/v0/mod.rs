@@ -19,9 +19,7 @@ use trusted_issuer::{IssuerParser, ParsedIssuer};
 
 use super::{ParseStoreError, ReadStoreError, StoreContent};
 use crate::common::policy_store::errors::PolicyStoreError;
-use crate::common::policy_store::loader::{
-    CustomIssuerFile, EntityFile, IssuerFile, PolicyFile, StoreFs,
-};
+use crate::common::policy_store::loader::{StoreFile, StoreFs};
 use crate::common::policy_store::manager::ConversionError;
 use crate::common::policy_store::schema_parser::ParsedSchema;
 
@@ -48,11 +46,11 @@ pub(crate) struct Files {
     /// Whether a schema source was present in the store, regardless of
     /// whether it was loaded/parsed.
     pub(crate) schema_source_exists: bool,
-    pub(crate) policies: Vec<PolicyFile>,
-    pub(crate) templates: Vec<PolicyFile>,
-    pub(crate) entities: Vec<EntityFile>,
-    pub(crate) trusted_issuers: Vec<IssuerFile>,
-    pub(crate) custom_issuers: Vec<CustomIssuerFile>,
+    pub(crate) policies: Vec<StoreFile>,
+    pub(crate) templates: Vec<StoreFile>,
+    pub(crate) entities: Vec<StoreFile>,
+    pub(crate) trusted_issuers: Vec<StoreFile>,
+    pub(crate) custom_issuers: Vec<StoreFile>,
 }
 
 /// Reads a v0 store and parses its files; `metadata_json` has already been
@@ -83,14 +81,9 @@ pub(super) fn load(
         schema_source_exists: schema.source_exists,
         policies: fs.cedar_files(POLICIES_DIR)?,
         templates: fs.optional_cedar_files(TEMPLATES_DIR)?,
-        entities: fs
-            .optional_json_files(ENTITIES_DIR, |name, content| EntityFile { name, content })?,
-        trusted_issuers: fs.optional_json_files(TRUSTED_ISSUERS_DIR, |name, content| {
-            IssuerFile { name, content }
-        })?,
-        custom_issuers: fs.optional_json_files(CUSTOM_ISSUERS_DIR, |name, content| {
-            CustomIssuerFile { name, content }
-        })?,
+        entities: fs.optional_json_files(ENTITIES_DIR)?,
+        trusted_issuers: fs.optional_json_files(TRUSTED_ISSUERS_DIR)?,
+        custom_issuers: fs.optional_json_files(CUSTOM_ISSUERS_DIR)?,
     })
 }
 
@@ -167,13 +160,13 @@ mod tests {
             metadata_json: metadata_json.to_string(),
             schema: None,
             schema_source_exists: false,
-            policies: vec![PolicyFile {
+            policies: vec![StoreFile {
                 name: "allow.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             }],
             templates: vec![],
             entities: vec![],
-            trusted_issuers: vec![IssuerFile {
+            trusted_issuers: vec![StoreFile {
                 name: "jans.json".to_string(),
                 content: r#"{
                     "name": "Jans Server",
@@ -185,7 +178,7 @@ mod tests {
                 }"#
                 .to_string(),
             }],
-            custom_issuers: vec![CustomIssuerFile {
+            custom_issuers: vec![StoreFile {
                 name: "acme.json".to_string(),
                 content:
                     r#"{ "tokens_mappings": { "Acme::Custom": { "required_claims": ["sub"] } } }"#

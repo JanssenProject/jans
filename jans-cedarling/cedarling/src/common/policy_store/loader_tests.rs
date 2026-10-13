@@ -78,7 +78,7 @@ impl VfsFileSystem for ErrorInjectorVfs {
 
 /// Parse and validate Cedar policies from loaded policy files.
 fn parse_policies(
-    policy_files: &[PolicyFile],
+    policy_files: &[StoreFile],
 ) -> Result<Vec<policy_parser::ParsedPolicy>, PolicyStoreError> {
     let mut parsed_policies = Vec::new();
     for file in policy_files {
@@ -90,7 +90,7 @@ fn parse_policies(
 
 /// Parse and validate Cedar templates from loaded template files.
 fn parse_templates(
-    template_files: &[PolicyFile],
+    template_files: &[StoreFile],
 ) -> Result<Vec<policy_parser::ParsedTemplate>, PolicyStoreError> {
     let mut parsed_templates = Vec::new();
     for file in template_files {
@@ -397,11 +397,11 @@ fn test_load_directory_invalid_json() {
 #[test]
 fn test_parse_policies_success() {
     let policy_files = vec![
-        PolicyFile {
+        StoreFile {
             name: "policy1.cedar".to_string(),
             content: r"permit(principal, action, resource);".to_string(),
         },
-        PolicyFile {
+        StoreFile {
             name: "policy2.cedar".to_string(),
             content: r"forbid(principal, action, resource);".to_string(),
         },
@@ -418,7 +418,7 @@ fn test_parse_policies_success() {
 
 #[test]
 fn test_parse_policies_with_id_annotation() {
-    let policy_files = vec![PolicyFile {
+    let policy_files = vec![StoreFile {
         name: "my_policy.cedar".to_string(),
         content: r#"
             // @id("custom-id-123")
@@ -439,7 +439,7 @@ fn test_parse_policies_with_id_annotation() {
 
 #[test]
 fn test_parse_policies_invalid_syntax() {
-    let policy_files = vec![PolicyFile {
+    let policy_files = vec![StoreFile {
         name: "invalid.cedar".to_string(),
         content: "this is not valid cedar syntax".to_string(),
     }];
@@ -459,7 +459,7 @@ fn test_parse_policies_invalid_syntax() {
 
 #[test]
 fn test_parse_templates_success() {
-    let template_files = vec![PolicyFile {
+    let template_files = vec![StoreFile {
         name: "template1.cedar".to_string(),
         content: r"permit(principal == ?principal, action, resource);".to_string(),
     }];
@@ -474,17 +474,17 @@ fn test_parse_templates_success() {
 #[test]
 fn test_create_policy_set_integration() {
     let policy_files = vec![
-        PolicyFile {
+        StoreFile {
             name: "allow.cedar".to_string(),
             content: r"permit(principal, action, resource);".to_string(),
         },
-        PolicyFile {
+        StoreFile {
             name: "deny.cedar".to_string(),
             content: r"forbid(principal, action, resource);".to_string(),
         },
     ];
 
-    let template_files = vec![PolicyFile {
+    let template_files = vec![StoreFile {
         name: "user_template.cedar".to_string(),
         content: r"permit(principal == ?principal, action, resource);".to_string(),
     }];
