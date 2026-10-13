@@ -130,12 +130,14 @@ public class TraceIngestionService {
 			ReceiptClaim claim) {
 		ReceiptEntry receipt = new ReceiptEntry(claim.getSeq(), claim.getReceivedAtMs(), claim.getPrevReceiptHash(),
 				claim.getReceiptHash());
+		// version=0: not yet persisted; the store assigns the real initial version on insert
+		// (design decision D-2), and afterInsert() always re-reads the row before any CAS write.
 		return new StoredTraceRecord(verified.getIdentity(), verified.getParsed().getRawText(),
 				verified.getContentDigest(), verified.getVerification(), receipt, plan.getFlags(),
 				plan.getExecution(), plan.getPosition(), verified.getInputs().getChainPosition().getPrevRecordHash(),
 				verified.getInputs().getCapabilityIds(), verified.getInputs().getTokenRefs(),
 				verified.getInputs().getEventKind(), verified.getInputs().getSignedAt(), ctx.getNodeId(),
-				ctx.getReceivedAtMs());
+				ctx.getReceivedAtMs(), 0L);
 	}
 
 	private void logAcceptance(StoredTraceRecord record, boolean replay) {

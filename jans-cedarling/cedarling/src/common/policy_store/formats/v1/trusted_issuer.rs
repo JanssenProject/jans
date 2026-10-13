@@ -342,7 +342,7 @@ mod tests {
             required_claims: HashSet::new(),
         };
 
-        let parsed = serde_yaml_ng::from_str::<TokenMetadataDoc>(
+        let parsed = serde_saphyr::from_str::<TokenMetadataDoc>(
             "
             entity_type_name: Jans::Access_token
         ",
@@ -350,7 +350,7 @@ mod tests {
         .expect("minimal YAML token metadata should parse");
         assert_eq!(parsed, expected, "minimal YAML should use v0 defaults");
 
-        let parsed = serde_yaml_ng::from_str::<TokenMetadataDoc>(
+        let parsed = serde_saphyr::from_str::<TokenMetadataDoc>(
             "
             user_id: 'sub'
             role_mapping: ''
