@@ -17,9 +17,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +44,8 @@ import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.model.ChainIdentity;
+import io.jans.lock.service.trace.model.ChainPosition;
+import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -437,6 +444,78 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertTrue(store.findRecord(new RecordIdentity(DOMAIN, PRODUCER, recordId2)).get().getFlags().isEquivocation());
 	}
 
+	// -- afterInsert: peer landing between plan() and insert (acceptance criterion 2, D-9 re-query) --
+
+	@Test
+	void testAfterInsert_PeerInsertedBetweenPlanAndInsert_BothRowsFlaggedViaReQuery() throws DuplicateEntryException {
+		registerChain();
+
+		String recordId1 = recordId();
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId1).genesis().unsignedJson();
+		VerifiedAssertion verified1 = buildVerified(json, context());
+		CorrelationPlan plan1 = service.plan(verified1, context());
+		assertFalse(plan1.getFlags().isEquivocation(), "store is empty when record1 is planned");
+
+		// A peer lands at the same chain position after plan() but before this node's own
+		// insertRecord() -- plan1's pre-insert snapshot never saw it (acceptance criterion 2).
+		String peerRecordId = recordId();
+		StoredTraceRecord peer = insertRecord(peerRecordId, digest("1"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+
+		StoredTraceRecord stored1 = insertRecord(recordId1, verified1.getContentDigest(), 1L,
+				TraceConstants.ZERO_HASH, plan1.getFlags());
+
+		service.afterInsert(stored1, plan1);
+
+		assertTrue(store.findRecord(stored1.getIdentity()).get().getFlags().isEquivocation(),
+				"the just-inserted row's own equivocation flag must also be corrected");
+		assertTrue(store.findRecord(peer.getIdentity()).get().getFlags().isEquivocation());
+	}
+
+	// -- afterInsert: concurrent updates to the same peer, no lost update (acceptance criterion 1) ---
+
+	@Test
+	void testAfterInsert_ConcurrentUpdatesToSamePeer_BothSucceedViaRetry_NoLostUpdate() throws Exception {
+		registerChain();
+		String peerRecordId = recordId();
+		StoredTraceRecord peer = insertRecord(peerRecordId, digest("1"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+		RecordIdentity peerIdentity = peer.getIdentity();
+
+		String insertedId1 = recordId();
+		String insertedId2 = recordId();
+		StoredTraceRecord inserted1 = insertRecord(insertedId1, digest("2"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+		StoredTraceRecord inserted2 = insertRecord(insertedId2, digest("3"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+
+		ChainPosition position = new ChainPosition(chainIdentity(), 1L);
+		ExecutionIdentity execution = new ExecutionIdentity(DOMAIN, "authority-1", "exec-1");
+		CorrelationPlan plan1 = new CorrelationPlan(new IngestionFlags(false, false, false, false), position,
+				execution, Collections.emptyList(), Collections.emptyList(), Collections.singletonList(peerIdentity),
+				Collections.emptyList(), Collections.emptyList());
+		CorrelationPlan plan2 = new CorrelationPlan(new IngestionFlags(false, false, false, false), position,
+				execution, Collections.emptyList(), Collections.emptyList(), Collections.singletonList(peerIdentity),
+				Collections.emptyList(), Collections.emptyList());
+
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		try {
+			List<Future<?>> futures = new ArrayList<>();
+			futures.add(executor.submit(() -> service.afterInsert(inserted1, plan1)));
+			futures.add(executor.submit(() -> service.afterInsert(inserted2, plan2)));
+			executor.shutdown();
+			assertTrue(executor.awaitTermination(10, TimeUnit.SECONDS));
+			for (Future<?> future : futures) {
+				future.get();
+			}
+		} finally {
+			executor.shutdownNow();
+		}
+
+		assertTrue(store.findRecord(peerIdentity).get().getFlags().isEquivocation(),
+				"neither concurrent writer's correction may be lost to the other");
+	}
+
 	// -- afterInsert: best-effort, never propagates a neighbor-update failure (gotcha) ----------------
 
 	@Test
@@ -484,12 +563,12 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		}
 
 		@Override
-		public boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags) {
+		public boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags, long expectedVersion) {
 			if (!thrown && failingIdentity.equals(id)) {
 				thrown = true;
 				throw new TraceStorageException("test_forced_failure", "forced for test");
 			}
-			return delegate.updateRecordFlags(id, flags);
+			return delegate.updateRecordFlags(id, flags, expectedVersion);
 		}
 
 		@Override

@@ -17,6 +17,7 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
@@ -38,14 +39,18 @@ import jakarta.inject.Inject;
  * Computes the producer-chain checks, ingestion flags and index projection for a verified record
  * before it is stored, and, once the store confirms the insert, updates the derived flags on
  * neighboring rows (design §8, §12 table rows for missing/wrong predecessor, equivocation and
- * lateness, §13; design decisions D-5, D-6, D-9, D-11).
+ * lateness, §13; design decisions D-5, D-6, D-9, D-11; TRACE CAS MVP task 11).
  *
  * <p>{@link #plan} never touches the store for writes; {@link #afterInsert} is the only method
- * that mutates other rows, and it does so best-effort and idempotently (design decision D-9): a
- * failure updating one neighbor is logged (identities only) and never fails the request, and
- * {@code afterInsert} may race with another node's {@code afterInsert} for the same neighbor —
- * last writer wins, which is acceptable because the flags are recomputable from the stored rows
- * at any time.
+ * that mutates other rows, and it does so best-effort (design decision D-9): a failure updating
+ * one neighbor is logged (identities only) and never fails the request. Each neighbor write goes
+ * through {@link TraceStore#updateRecordFlags}'s compare-and-swap, keyed off the version last
+ * observed on that row; a lost race ({@link TraceStore#VERSION_CONFLICT_REASON}) re-reads the row
+ * fresh, recomputes the flag(s) from that fresh state and retries, bounded by
+ * {@code traceConfiguration.correlationRetryLimit} (default 3) — this supersedes the "last writer
+ * wins" text in lock.mvp's own design decision D-9 for the three mutable flags. Exhausting the
+ * retry budget is logged at WARN and the update is given up on, same as any other best-effort
+ * failure here.
  *
  * @author Yuriy Movchan
  */
@@ -114,8 +119,13 @@ public class TraceCorrelationService {
 
 	/**
 	 * Updates the equivocation peers and the successor at {@code sequence_number + 1} after
-	 * {@code inserted} became visible in the store (design decision D-9). Best-effort: a failure
-	 * updating one neighbor is logged and does not propagate.
+	 * {@code inserted} became visible in the store (design decision D-9), then re-queries the
+	 * insert's own chain position: {@link #plan} computed {@code equivocationPeers} from a
+	 * pre-insert snapshot, so a peer that landed at the same position between this node's
+	 * {@code plan()} and its own {@code insertRecord()} would otherwise never be flagged, and
+	 * neither would {@code inserted}'s own {@code equivocation} (computed against that same stale
+	 * snapshot). Best-effort throughout: a failure updating one neighbor is logged and does not
+	 * propagate.
 	 */
 	public void afterInsert(StoredTraceRecord inserted, CorrelationPlan plan) {
 		for (RecordIdentity peerId : plan.getEquivocationPeers()) {
@@ -124,33 +134,38 @@ public class TraceCorrelationService {
 		for (StoredTraceRecord successor : plan.getSuccessors()) {
 			updateSuccessor(inserted, successor.getIdentity());
 		}
-	}
 
-	private void updatePeer(RecordIdentity insertedId, RecordIdentity peerId) {
-		try {
-			Optional<StoredTraceRecord> current = store.findRecord(peerId);
-			if (!current.isPresent()) {
-				return;
+		Set<RecordIdentity> knownPeers = new LinkedHashSet<>(plan.getEquivocationPeers());
+		boolean newPeerFound = false;
+		for (StoredTraceRecord row : store.findRecordsByChainPosition(plan.getPosition())) {
+			RecordIdentity rowId = row.getIdentity();
+			if (rowId.equals(inserted.getIdentity()) || knownPeers.contains(rowId)) {
+				continue;
 			}
-			IngestionFlags flags = current.get().getFlags();
-			if (!flags.isEquivocation()) {
-				flags.setEquivocation(true);
-				store.updateRecordFlags(peerId, flags);
-			}
-		} catch (RuntimeException ex) {
-			log.error("TRACE correlation afterInsert failed to flag equivocation peer: inserted={}, peer={}",
-					insertedId, peerId, ex);
+			newPeerFound = true;
+			updatePeer(inserted.getIdentity(), rowId);
+		}
+		if (newPeerFound) {
+			// inserted's own equivocation flag was computed against the same stale snapshot that
+			// missed this peer, so it needs the same correction, via the same CAS path.
+			updatePeer(inserted.getIdentity(), inserted.getIdentity());
 		}
 	}
 
-	private void updateSuccessor(StoredTraceRecord inserted, RecordIdentity successorId) {
-		try {
-			Optional<StoredTraceRecord> current = store.findRecord(successorId);
-			if (!current.isPresent()) {
-				return;
+	private void updatePeer(RecordIdentity insertedId, RecordIdentity peerId) {
+		updateFlags(peerId, record -> {
+			IngestionFlags flags = record.getFlags();
+			if (flags.isEquivocation()) {
+				return null;
 			}
-			StoredTraceRecord successor = current.get();
-			IngestionFlags flags = successor.getFlags();
+			flags.setEquivocation(true);
+			return flags;
+		}, "flag equivocation peer", insertedId);
+	}
+
+	private void updateSuccessor(StoredTraceRecord inserted, RecordIdentity successorId) {
+		updateFlags(successorId, record -> {
+			IngestionFlags flags = record.getFlags();
 			boolean changed = false;
 			if (flags.isCoverageGap()) {
 				flags.setCoverageGap(false);
@@ -158,16 +173,60 @@ public class TraceCorrelationService {
 			}
 			// design §8: chainLinkFailure is never self-clearing, only ever set here.
 			if (!flags.isChainLinkFailure()
-					&& ProducerChainRules.successorLinkBroken(successor.getPrevRecordHash(), inserted.getContentDigest())) {
+					&& ProducerChainRules.successorLinkBroken(record.getPrevRecordHash(), inserted.getContentDigest())) {
 				flags.setChainLinkFailure(true);
 				changed = true;
 			}
-			if (changed) {
-				store.updateRecordFlags(successorId, flags);
+			return changed ? flags : null;
+		}, "update successor", inserted.getIdentity());
+	}
+
+	/**
+	 * Shared retry-on-version-conflict logic for a single neighbor write (design decision D-9).
+	 * {@code mutator} recomputes the flags to write from the current {@link StoredTraceRecord} (the
+	 * initial read, or a fresh re-read after a lost CAS race), returning {@code null} when nothing
+	 * needs to change (so no write is attempted). A {@link TraceStorageException} whose reason is
+	 * not {@link TraceStore#VERSION_CONFLICT_REASON}, or any other {@link RuntimeException}, is
+	 * logged at ERROR and swallowed (today's best-effort contract, unchanged); exhausting the retry
+	 * budget on a genuine version conflict is logged at WARN instead, per D-9.
+	 */
+	private void updateFlags(RecordIdentity targetId, Function<StoredTraceRecord, IngestionFlags> mutator,
+			String action, RecordIdentity insertedId) {
+		try {
+			Optional<StoredTraceRecord> current = store.findRecord(targetId);
+			if (!current.isPresent()) {
+				return;
+			}
+			StoredTraceRecord record = current.get();
+			int retryLimit = appConfiguration.getTraceConfiguration().getCorrelationRetryLimit();
+			for (int attempt = 0; attempt <= retryLimit; attempt++) {
+				IngestionFlags newFlags = mutator.apply(record);
+				if (newFlags == null) {
+					return;
+				}
+				try {
+					store.updateRecordFlags(targetId, newFlags, record.getVersion());
+					return;
+				} catch (TraceStorageException ex) {
+					if (!TraceStore.VERSION_CONFLICT_REASON.equals(ex.getReason())) {
+						throw ex;
+					}
+					if (attempt == retryLimit) {
+						log.warn(
+								"TRACE correlation afterInsert exhausted {} retries to {} (version conflict): inserted={}, target={}",
+								retryLimit, action, insertedId, targetId);
+						return;
+					}
+					Optional<StoredTraceRecord> refreshed = store.findRecord(targetId);
+					if (!refreshed.isPresent()) {
+						return;
+					}
+					record = refreshed.get();
+				}
 			}
 		} catch (RuntimeException ex) {
-			log.error("TRACE correlation afterInsert failed to update successor: inserted={}, successor={}",
-					inserted.getIdentity(), successorId, ex);
+			log.error("TRACE correlation afterInsert failed to {}: inserted={}, target={}", action, insertedId,
+					targetId, ex);
 		}
 	}
 
