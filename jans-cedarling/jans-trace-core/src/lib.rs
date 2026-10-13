@@ -25,6 +25,7 @@ mod json;
 mod key;
 mod limits;
 mod signature;
+mod verify;
 
 pub use assertion::{
     ContentDigestError, SignError, SigningInputError, assertion_signing_input,
@@ -38,4 +39,8 @@ pub use key::{JwkError, PublicKey, PublicKeyError};
 pub use limits::{Limits, SizeLimitError};
 pub use signature::{
     Ed25519Signer, ParseSignatureError, PrivateKeyError, SignatureValue, SignerError, TraceSigner,
+};
+pub use verify::{
+    AssertionIdentity, IdentityError, VerificationContext, VerifiedAssertion, VerifyError,
+    parse_assertion_identity, verify_assertion,
 };

@@ -147,13 +147,6 @@ impl PublicKey {
     }
 
     /// Strict verification: rejects non-canonical and small-order signature components.
-    #[cfg_attr(
-        not(test),
-        expect(
-            dead_code,
-            reason = "`verify_assertion`, the first caller, is not written yet"
-        )
-    )]
     pub(crate) fn verify(&self, message: &[u8], signature: &SignatureValue) -> bool {
         self.0
             .verify_strict(message, &Signature::from_bytes(signature.as_bytes()))
