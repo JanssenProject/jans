@@ -70,8 +70,10 @@ public class ConfigurationFactoryTest {
     @Test
     public void initWebKeys_whenJwksUriChangesAndNewFetchFails_shouldNotKeepKeysOfPreviousUri() {
         final String newJwksUri = "https://other.example.org/jwks";
-        doReturn(new JSONObject("{\"keys\":[]}")).when(configurationFactory).fetchExternalWebKeys(JWKS_URI);
+        doReturn(new JSONObject("{\"keys\":[{\"kid\":\"old-kid\",\"kty\":\"RSA\",\"use\":\"sig\",\"alg\":\"RS256\"}]}"))
+                .when(configurationFactory).fetchExternalWebKeys(JWKS_URI);
         configurationFactory.initWebKeys(conf(true));
+        assertEquals(configurationFactory.getWebKeysConfiguration().getKeys().size(), 1);
         final Object previous = configurationFactory.getWebKeysConfiguration();
 
         doReturn(null).when(configurationFactory).fetchExternalWebKeys(newJwksUri);
