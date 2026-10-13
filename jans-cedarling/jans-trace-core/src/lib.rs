@@ -3,52 +3,22 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Deterministic TRACE cryptography shared by producers (Cedarling, embedded PEPs) and Lock.
-//!
-//! One implementation of strict JSON, RFC 8785 canonicalization, Ed25519 signatures and
-//! SHA-256 content digests, so a record signed in Rust verifies byte-for-byte anywhere.
-//! The crate performs no I/O and holds no state.
-//!
-//! Each function has its own error type listing only the failures it can produce; every
-//! error exposes `code()`, the stable identifier bindings rely on.
-
+#![doc = include_str!("../README.md")]
 #![forbid(unsafe_code)]
 // Each error type documents its own variants; `# Errors` sections would repeat them (AGENTS.md
 // avoids Python-style doc sections). Same choice as `cedarling/src/lib.rs`.
 #![allow(clippy::missing_errors_doc)]
 
-mod assertion;
-mod canonical;
+pub mod assertion;
 mod digest;
-mod inputs;
-mod json;
-mod key;
+pub mod inputs;
+pub mod json;
+pub mod key;
 mod limits;
-mod receipt;
-mod self_test;
-mod signature;
-mod verify;
+pub mod receipt;
+pub mod self_test;
+pub mod signature;
 
-pub use assertion::{
-    ContentDigestError, SignError, SigningInputError, assertion_signing_input,
-    compute_content_digest, sign_assertion,
-};
-pub use canonical::{CanonicalizeError, canonicalize_json};
+// Shared by every module, so they live at the root instead of `digest::Digest`.
 pub use digest::{Digest, ParseDigestError};
-pub use inputs::{compute_bundle_hash, token_fingerprint};
-pub use json::JsonError;
-pub use key::{JwkError, PublicKey, PublicKeyError};
 pub use limits::{Limits, SizeLimitError};
-pub use receipt::{
-    ASSERTION_PROFILE, FormatReceivedAtError, InvalidReceiptError, RECEIPT_PROFILE,
-    ReceiptCommitment, ReceiptError, ReceiptLinkError, compute_receipt_hash, format_received_at,
-    verify_receipt_link,
-};
-pub use self_test::{SelfTestError, self_test};
-pub use signature::{
-    Ed25519Signer, ParseSignatureError, PrivateKeyError, SignatureValue, SignerError, TraceSigner,
-};
-pub use verify::{
-    AssertionIdentity, IdentityError, VerificationContext, VerifiedAssertion, VerifyError,
-    parse_assertion_identity, verify_assertion,
-};

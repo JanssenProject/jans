@@ -9,8 +9,7 @@
 use serde_json::{Map, Value};
 use thiserror::Error;
 
-use crate::canonical::canonicalize_value;
-use crate::json::JsonError;
+use crate::json::{JsonError, canonicalize_value};
 use crate::{Digest, Limits};
 
 pub const RECEIPT_PROFILE: &str = "tag:jans.io,2026:lock-trace-receipt-v1";

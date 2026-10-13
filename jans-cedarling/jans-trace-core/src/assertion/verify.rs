@@ -4,14 +4,15 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 //! Lock-side assertion checks: identity before key lookup, then signature verification
-//! (core design §6.3–§6.5, §8; notes 13 §2).
+//! (core design §6.3–§6.5, §8).
 
 use serde_json::{Map, Value};
 use thiserror::Error;
 
-use crate::canonical::canonicalize_value;
-use crate::json::{JsonError, parse_strict};
-use crate::{Digest, Limits, ParseSignatureError, PublicKey, SignatureValue, SizeLimitError};
+use crate::json::{JsonError, canonicalize_value, parse_strict};
+use crate::key::PublicKey;
+use crate::signature::{ParseSignatureError, SignatureValue};
+use crate::{Digest, Limits, SizeLimitError};
 
 const SIGNATURE: &str = "signature";
 
@@ -222,12 +223,12 @@ mod tests {
         IdentityError, VerificationContext, VerifiedAssertion, VerifyError,
         parse_assertion_identity, verify_assertion,
     };
+    use crate::assertion::{assertion_signing_input, compute_content_digest, sign_assertion};
+    use crate::json::{JsonError, canonicalize_json};
+    use crate::key::PublicKey;
     use crate::limits::LimitKind;
-    use crate::{
-        Digest, Ed25519Signer, JsonError, Limits, ParseSignatureError, PublicKey, SignatureValue,
-        SizeLimitError, assertion_signing_input, canonicalize_json, compute_content_digest,
-        sign_assertion,
-    };
+    use crate::signature::{Ed25519Signer, ParseSignatureError, SignatureValue};
+    use crate::{Digest, Limits, SizeLimitError};
 
     const PRODUCER: &str = "cedarling-fleet-1";
     const KID: &str = "key-2026-01";

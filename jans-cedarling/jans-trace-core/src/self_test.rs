@@ -10,10 +10,11 @@ use std::fmt;
 
 use thiserror::Error;
 
-use crate::{
-    Digest, Ed25519Signer, Limits, PublicKey, RECEIPT_PROFILE, ReceiptCommitment, SignatureValue,
-    TraceSigner, canonicalize_json, compute_receipt_hash,
-};
+use crate::json::canonicalize_json;
+use crate::key::PublicKey;
+use crate::receipt::{RECEIPT_PROFILE, ReceiptCommitment, compute_receipt_hash};
+use crate::signature::{Ed25519Signer, SignatureValue, TraceSigner};
+use crate::{Digest, Limits};
 
 /// A known answer differed. `Display` names the failed algorithms, so the operator sees
 /// which part of the build or platform is broken; the host fails closed either way.

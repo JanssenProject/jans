@@ -56,8 +56,9 @@ pub(crate) fn canonicalize_value(value: &Value, limits: &Limits) -> Result<Vec<u
 #[cfg(test)]
 mod tests {
     use super::{CanonicalizeError, canonicalize_json};
+    use crate::json::JsonError;
     use crate::limits::LimitKind;
-    use crate::{JsonError, Limits, SizeLimitError};
+    use crate::{Limits, SizeLimitError};
 
     fn canonicalize(input: &[u8]) -> Result<Vec<u8>, CanonicalizeError> {
         canonicalize_json(input, &Limits::default())

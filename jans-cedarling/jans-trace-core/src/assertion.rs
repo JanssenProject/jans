@@ -3,16 +3,22 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Producer-side assertion operations: signing input, signature, content digest
-//! (core design §6.3, §6.5, §8.1).
+//! TRACE assertions on both sides of the wire (core design §6.3–§6.5, §8): the producer
+//! signs its record and fingerprints it; Lock reads the identity to select a key, then
+//! verifies the signature and gets the same fingerprint.
 
 use serde_json::Value;
 use thiserror::Error;
 
-use crate::canonical::canonicalize_value;
-use crate::json::{JsonError, parse_strict};
-use crate::{
-    Digest, Limits, ParseSignatureError, SignatureValue, SignerError, SizeLimitError, TraceSigner,
+use crate::json::{JsonError, canonicalize_value, parse_strict};
+use crate::signature::{ParseSignatureError, SignatureValue, SignerError, TraceSigner};
+use crate::{Digest, Limits, SizeLimitError};
+
+mod verify;
+
+pub use verify::{
+    AssertionIdentity, IdentityError, VerificationContext, VerifiedAssertion, VerifyError,
+    parse_assertion_identity, verify_assertion,
 };
 
 const SIGNATURE: &str = "signature";
@@ -170,10 +176,11 @@ mod tests {
         ContentDigestError, SignError, SigningInputError, assertion_signing_input,
         compute_content_digest, sign_assertion,
     };
-    use crate::{
-        Digest, Ed25519Signer, JsonError, Limits, ParseSignatureError, SignatureValue, SignerError,
-        TraceSigner, canonicalize_json,
+    use crate::json::{JsonError, canonicalize_json};
+    use crate::signature::{
+        Ed25519Signer, ParseSignatureError, SignatureValue, SignerError, TraceSigner,
     };
+    use crate::{Digest, Limits};
 
     const KID: &str = "key-2026-01";
 

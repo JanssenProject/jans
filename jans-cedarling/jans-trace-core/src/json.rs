@@ -3,7 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Strict JSON for cryptographic input (core design §6.2, §11).
+//! RFC 8785 canonicalization and the strict JSON rules every function in this crate applies
+//! to its input (core design §6.1, §6.2, §11).
 //!
 //! `serde_json` silently keeps the last duplicate member and stores large integers exactly,
 //! while JCS consumers read numbers as IEEE-754 doubles. Either would let two parties sign
@@ -19,6 +20,11 @@ use thiserror::Error;
 
 use crate::limits::LimitKind;
 use crate::{Limits, SizeLimitError};
+
+mod canonical;
+
+pub(crate) use canonical::canonicalize_value;
+pub use canonical::{CanonicalizeError, canonicalize_json};
 
 /// Why bytes are not strict JSON. Embedded in the error of every function that parses JSON.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]

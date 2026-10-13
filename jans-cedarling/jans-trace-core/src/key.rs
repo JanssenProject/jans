@@ -13,7 +13,8 @@ use serde_json::Value;
 use thiserror::Error;
 
 use crate::json::{JsonError, parse_strict};
-use crate::{Digest, Limits, SignatureValue};
+use crate::signature::SignatureValue;
+use crate::{Digest, Limits};
 
 /// Bytes or JWK do not describe a usable Ed25519 public key. `Display` includes the reason;
 /// a public key is not secret, but the reason still names members and lengths, not values.
@@ -161,7 +162,8 @@ mod tests {
     use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 
     use super::{JwkError, PublicKey, PublicKeyError, PublicKeyReason};
-    use crate::{Ed25519Signer, JsonError, SignatureValue, TraceSigner};
+    use crate::json::JsonError;
+    use crate::signature::{Ed25519Signer, SignatureValue, TraceSigner};
 
     /// RFC 8037 A.2 public key (the RFC 8032 TEST 1 key).
     const X: &str = "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo";

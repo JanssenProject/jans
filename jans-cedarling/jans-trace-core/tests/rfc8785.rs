@@ -27,7 +27,7 @@ fn reference_vectors_match_byte_for_byte() {
             .expect("reference input is readable");
         let expected = fs::read(dir.join("output").join(format!("{case}.json")))
             .expect("reference output is readable");
-        let actual = jans_trace_core::canonicalize_json(&input, &Limits::default())
+        let actual = jans_trace_core::json::canonicalize_json(&input, &Limits::default())
             .expect("reference input canonicalizes");
         assert_eq!(
             actual,
