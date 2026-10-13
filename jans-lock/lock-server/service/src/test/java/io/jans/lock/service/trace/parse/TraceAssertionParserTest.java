@@ -207,6 +207,24 @@ class TraceAssertionParserTest {
 	}
 
 	@Test
+	void testParse_unrepresentableIntegerInExtension_rejected() {
+		String body = "{\"trace\":{\"event\":{\"observation_count\":9007199254740993}}}";
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> parser.parse(utf8(body)));
+
+		assertEquals(TraceValidationException.ERROR_INVALID_REQUEST, ex.getErrorId());
+		assertEquals("not_canonicalizable", ex.getReason());
+	}
+
+	@Test
+	void testParse_largestSafeIntegerInExtension_accepted() {
+		String body = "{\"trace\":{\"event\":{\"observation_count\":9007199254740991}}}";
+
+		assertEquals(9007199254740991L,
+				parser.parse(utf8(body)).getRoot().path("trace").path("event").path("observation_count").longValue());
+	}
+
+	@Test
 	void testParse_trailingContent_rejected() {
 		String body = "{}{}";
 

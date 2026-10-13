@@ -7,6 +7,7 @@
 package io.jans.lock.service.trace.canon;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -40,10 +41,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * number handling):
  * <ul>
  * <li>Integral nodes ({@code IntNode}, {@code ShortNode}, {@code LongNode}, {@code BigIntegerNode})
- * are serialized as their exact decimal digits, also outside the IEEE-754 safe range
- * (|v| &gt; 2^53-1) where ECMAScript would round to the nearest double. {@code long} values never
- * reach 1e21, so exponent form never applies to them; a {@code BigIntegerNode} at or above 1e21 is
- * still emitted as plain digits.</li>
+ * use ECMAScript number formatting. Integers whose formatted decimal value changes are rejected;
+ * stable integers retain the same canonical bytes when reparsed. Exponent form starts at 1e21.</li>
  * <li>{@code DoubleNode} and {@code FloatNode} use the ES6 algorithm on their double value.</li>
  * <li>{@code DecimalNode} (only produced when {@code USE_BIG_DECIMAL_FOR_FLOATS} is enabled) is
  * converted with {@link BigDecimal#doubleValue()} first. This is lossy for values with more than
@@ -220,12 +219,10 @@ public final class JcsCanonicalizer {
 		switch (node.numberType()) {
 		case INT:
 		case LONG:
-			// Exact digits; a long can never reach 1e21, so ES6 would print the same digits
-			// for |v| <= 2^53-1 and we deliberately keep exact digits above it.
-			out.append(node.longValue());
+			serializeInteger(BigInteger.valueOf(node.longValue()), out);
 			break;
 		case BIG_INTEGER:
-			out.append(node.bigIntegerValue().toString());
+			serializeInteger(node.bigIntegerValue(), out);
 			break;
 		case FLOAT:
 		case DOUBLE:
@@ -237,6 +234,18 @@ public final class JcsCanonicalizer {
 		default:
 			throw new JcsException("Unsupported number type for canonicalization: " + node.numberType());
 		}
+	}
+
+	private static void serializeInteger(BigInteger integer, StringBuilder out) {
+		double value = integer.doubleValue();
+		if (!Double.isFinite(value)) {
+			throw new JcsException("Integer outside IEEE-754 range");
+		}
+		String formatted = formatDouble(value);
+		if (!new BigDecimal(formatted).toBigIntegerExact().equals(integer)) {
+			throw new JcsException("Integer changes under JCS serialization");
+		}
+		out.append(formatted);
 	}
 
 	/**
