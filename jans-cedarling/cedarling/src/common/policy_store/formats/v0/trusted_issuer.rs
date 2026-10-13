@@ -248,7 +248,7 @@ mod tests {
 
     #[test]
     fn token_metadata_doc_from_yaml() {
-        let parsed = serde_yaml_ng::from_str::<TokenMetadataDoc>(
+        let parsed = serde_saphyr::from_str::<TokenMetadataDoc>(
             "
             user_id: 'sub'
             role_mapping: ''

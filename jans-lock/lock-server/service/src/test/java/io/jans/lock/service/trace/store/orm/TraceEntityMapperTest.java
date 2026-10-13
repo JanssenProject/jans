@@ -60,7 +60,7 @@ class TraceEntityMapperTest {
 		return new StoredTraceRecord(identity, assertion, "sha256:" + "2".repeat(64), verification, receipt, flags,
 				execution, chainPosition, TraceConstants.ZERO_HASH, Arrays.asList("cap-1", "cap-2"),
 				Collections.singletonList(new TokenRef("https://issuer.example.org", "access_token", "jti-1", null)),
-				TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 9000L);
+				TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 9000L, 7L);
 	}
 
 	@Test
@@ -84,6 +84,7 @@ class TraceEntityMapperTest {
 		assertEquals(record.getCreatedAtMs(), roundTripped.getCreatedAtMs());
 		assertEquals(record.getVerification(), roundTripped.getVerification());
 		assertEquals(record.getFlags(), roundTripped.getFlags());
+		assertEquals(record.getVersion(), roundTripped.getVersion());
 	}
 
 	@Test
