@@ -1,5 +1,5 @@
 mcp>=1.28.1
-ollama>=0.5.12
+ollama>=0.6.3
 python-dotenv>=1.2.2
 
 # not directly required; pulled in by mcp. 0.0.31 clears the multipart DoS,
