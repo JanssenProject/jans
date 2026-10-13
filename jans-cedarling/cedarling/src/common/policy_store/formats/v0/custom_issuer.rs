@@ -73,6 +73,14 @@ impl CustomIssuerParser {
             std::string::ToString::to_string,
         );
 
+        // Reachable from an explicit `"id": ""` and from a file named only
+        // `.json`; an empty id would key the issuer map on "".
+        if id.is_empty() {
+            return Err(CustomIssuerParseError::EmptyId {
+                file: filename.to_string(),
+            });
+        }
+
         // Drop the out-of-band `id` (consumed above) before deserializing:
         // `CustomIssuerDoc` denies unknown fields so a misspelled enforcement
         // knob fails the load, and `id` is the one legitimately-extra key.
@@ -144,6 +152,30 @@ mod tests {
             matches!(&err, CustomIssuerParseError::InvalidBody { file, source, .. }
                 if file == "acme.json" && source.to_string().contains("requiredd")),
             "expected InvalidBody naming the misspelled field, got: {err:?}"
+        );
+    }
+    /// A file named only `.json` leaves nothing to derive an id from.
+    #[test]
+    fn parse_rejects_id_derived_from_bare_extension() {
+        let err = CustomIssuerParser::parse(
+            r#"{ "tokens_mappings": { "Acme::CustomToken": {} } }"#,
+            ".json",
+        )
+        .expect_err("a file named only '.json' must be rejected");
+        assert!(
+            matches!(&err, CustomIssuerParseError::EmptyId { file } if file == ".json"),
+            "expected EmptyId naming the file, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn parse_rejects_explicit_empty_id() {
+        let content = r#"{ "id": "", "tokens_mappings": { "Acme::CustomToken": {} } }"#;
+        let err = CustomIssuerParser::parse(content, "acme.json")
+            .expect_err("an explicit empty id must be rejected");
+        assert!(
+            matches!(&err, CustomIssuerParseError::EmptyId { file } if file == "acme.json"),
+            "expected EmptyId naming the file, got: {err:?}"
         );
     }
 }

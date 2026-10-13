@@ -48,6 +48,10 @@ pub enum TrustedIssuerErrorType {
     #[error("Trusted issuer file must be a JSON object")]
     NotAnObject,
 
+    /// Issuer id resolved to an empty string
+    #[error("Issuer id is empty: set \"id\", or give the file a name before `.json`")]
+    EmptyIssuerId,
+
     /// Missing required field in issuer configuration
     #[error("Issuer '{issuer_id}': missing required field '{field}'")]
     MissingRequiredField { issuer_id: String, field: String },
@@ -402,6 +406,11 @@ pub enum CustomIssuerParseError {
 
     #[error("custom issuer file '{file}' is not a JSON object")]
     NotAnObject { file: String },
+
+    #[error(
+        "custom issuer id in '{file}' is empty: set \"id\", or give the file a name before `.json`"
+    )]
+    EmptyId { file: String },
 
     #[error("invalid custom issuer '{id}' in '{file}': {source}")]
     InvalidBody {

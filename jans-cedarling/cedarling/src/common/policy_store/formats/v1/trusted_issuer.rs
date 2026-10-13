@@ -115,6 +115,15 @@ impl IssuerParser {
             std::string::ToString::to_string,
         );
 
+        // Reachable from an explicit `"id": ""` and from a file named only
+        // `.json`; an empty id would key the issuer map on "".
+        if issuer_id.is_empty() {
+            return Err(PolicyStoreError::TrustedIssuerError {
+                file: filename.to_string(),
+                err: TrustedIssuerErrorType::EmptyIssuerId,
+            });
+        }
+
         // Validate required fields
         let name = obj.get("name").and_then(|v| v.as_str()).ok_or_else(|| {
             PolicyStoreError::TrustedIssuerError {
@@ -736,6 +745,47 @@ mod tests {
         assert!(
             map.contains_key("issuer2"),
             "issuer2 should be keyed by its id"
+        );
+    }
+    /// A file named only `.json` leaves nothing to derive an id from.
+    #[test]
+    fn parse_rejects_id_derived_from_bare_extension() {
+        let content = r#"{
+            "name": "Test Issuer",
+            "openid_configuration_endpoint": "https://test.com/.well-known/openid-configuration"
+        }"#;
+        let err = IssuerParser::parse_issuer(content, ".json")
+            .expect_err("a file named only '.json' must be rejected");
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::TrustedIssuerError {
+                    file,
+                    err: TrustedIssuerErrorType::EmptyIssuerId
+                } if file == ".json"
+            ),
+            "expected EmptyIssuerId naming the file, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn parse_rejects_explicit_empty_id() {
+        let content = r#"{
+            "id": "",
+            "name": "Test Issuer",
+            "openid_configuration_endpoint": "https://test.com/.well-known/openid-configuration"
+        }"#;
+        let err = IssuerParser::parse_issuer(content, "issuer.json")
+            .expect_err("an explicit empty id must be rejected");
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::TrustedIssuerError {
+                    file,
+                    err: TrustedIssuerErrorType::EmptyIssuerId
+                } if file == "issuer.json"
+            ),
+            "expected EmptyIssuerId naming the file, got: {err:?}"
         );
     }
 }
