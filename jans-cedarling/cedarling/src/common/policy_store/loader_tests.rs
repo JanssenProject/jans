@@ -14,7 +14,7 @@ use super::super::errors::{
     ValidationError,
 };
 use super::super::formats::v1::trusted_issuer::IssuerParser;
-use super::super::formats::{ParseStoreError, ReadStoreError, v0};
+use super::super::formats::{ParseStoreError, ReadStoreError};
 use super::super::manager::ConversionError;
 use super::super::policy_parser;
 use super::super::test_utils::read_v0_files;
@@ -1073,7 +1073,7 @@ fn test_load_custom_issuers_duplicate_id_errors() {
 }
 
 /// The raw `metadata.json` the loader read, as JSON.
-fn raw_metadata(files: &v0::Files) -> serde_json::Value {
+fn raw_metadata(files: &formats::Files) -> serde_json::Value {
     serde_json::from_str(&files.metadata_json).expect("metadata.json should be valid JSON")
 }
 

@@ -13,7 +13,7 @@
 //! - Performance testing utilities
 
 use super::errors::PolicyStoreError;
-use super::formats::{self, v0};
+use super::formats::{self};
 use super::loader::StoreFs;
 use super::vfs_adapter::VfsFileSystem;
 use std::collections::HashMap;
@@ -521,7 +521,7 @@ pub(super) fn read_v0_files(
     vfs: &dyn VfsFileSystem,
     dir: &str,
     strict: bool,
-) -> Result<v0::Files, PolicyStoreError> {
+) -> Result<formats::Files, PolicyStoreError> {
     formats::read_v0_files(&StoreFs::open(vfs, dir)?, strict)
 }
 

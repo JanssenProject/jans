@@ -19,43 +19,26 @@ use custom_issuer::{CustomIssuerParser, ParsedCustomIssuer};
 use metadata::MetadataDoc;
 use trusted_issuer::{IssuerParser, ParsedIssuer};
 
-use super::{ParseStoreError, ReadStoreError, StoreContent};
-use crate::common::policy_store::errors::PolicyStoreError;
-use crate::common::policy_store::loader::{StoreFile, StoreFs};
+use super::{Files, Layout, ParseStoreError, ReadStoreError, StoreContent};
+use crate::common::policy_store::loader::StoreFs;
 use crate::common::policy_store::manager::{ConversionError, PolicyStoreManager};
 use crate::common::policy_store::metadata::PolicyStoreMetadata;
-use crate::common::policy_store::schema_parser::ParsedSchema;
 use crate::common::policy_store::{CustomIssuerMetadata, PolicyStore, TrustedIssuer};
 
 pub(crate) const SPEC_VERSION: u32 = 1;
 
 // Where each part of a v1 store lives. Frozen with the version: a store laid
-// out differently is a new spec version, so these are never shared with or
+// out differently is a new spec version, so this is never shared with or
 // edited for another version.
-const SCHEMA_FILE: &str = "schema.cedarschema";
-const SCHEMA_DIR: &str = "schemas";
-const POLICIES_DIR: &str = "policies";
-const TEMPLATES_DIR: &str = "templates";
-const ENTITIES_DIR: &str = "entities";
-const TRUSTED_ISSUERS_DIR: &str = "trusted-issuers";
-const CUSTOM_ISSUERS_DIR: &str = "custom-issuers";
-
-/// The raw files of a v1 store, read by the v1 layout.
-#[derive(Debug)]
-struct Files {
-    /// Raw `metadata.json` content.
-    metadata_json: String,
-    /// Parsed schema (optional — absent when running without schema)
-    schema: Option<ParsedSchema>,
-    /// Whether a schema source was present in the store, regardless of
-    /// whether it was loaded/parsed.
-    schema_source_exists: bool,
-    policies: Vec<StoreFile>,
-    templates: Vec<StoreFile>,
-    entities: Vec<StoreFile>,
-    trusted_issuers: Vec<StoreFile>,
-    custom_issuers: Vec<StoreFile>,
-}
+const LAYOUT: Layout = Layout {
+    schema_file: "schema.cedarschema",
+    schema_dir: "schemas",
+    policies_dir: "policies",
+    templates_dir: "templates",
+    entities_dir: "entities",
+    trusted_issuers_dir: "trusted-issuers",
+    custom_issuers_dir: "custom-issuers",
+};
 
 /// Reads a v1 store and parses its files; `metadata_json` has already been
 /// read by the caller to pick this version.
@@ -64,25 +47,8 @@ pub(super) fn read(
     metadata_json: String,
     strict: bool,
 ) -> Result<PolicyStoreDoc, ReadStoreError> {
-    let files = load(fs, metadata_json, strict)?;
+    let files = super::read_files(fs, &LAYOUT, metadata_json, strict)?;
     Ok(parse(files)?)
-}
-
-/// Reads the raw files of a v1 store from the v1 layout.
-fn load(fs: &StoreFs<'_>, metadata_json: String, strict: bool) -> Result<Files, PolicyStoreError> {
-    fs.require_dir(POLICIES_DIR)?;
-    let schema = fs.schema(SCHEMA_FILE, SCHEMA_DIR, strict)?;
-
-    Ok(Files {
-        metadata_json,
-        schema: schema.schema,
-        schema_source_exists: schema.source_exists,
-        policies: fs.cedar_files(POLICIES_DIR)?,
-        templates: fs.optional_cedar_files(TEMPLATES_DIR)?,
-        entities: fs.optional_json_files(ENTITIES_DIR)?,
-        trusted_issuers: fs.optional_json_files(TRUSTED_ISSUERS_DIR)?,
-        custom_issuers: fs.optional_json_files(CUSTOM_ISSUERS_DIR)?,
-    })
 }
 
 /// A whole v1 store, parsed but not yet converted into runtime types.
@@ -186,6 +152,7 @@ fn custom_issuers_into_runtime(
 mod tests {
     use super::*;
     use crate::common::policy_store::errors::{PolicyStoreError, TrustedIssuerValidateError};
+    use crate::common::policy_store::loader::StoreFile;
 
     const METADATA: &str = r#"{
         "policy_store_spec_version": 1,

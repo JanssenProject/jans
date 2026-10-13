@@ -5,12 +5,13 @@
 
 //! Versioned on-disk formats of the directory / `.cjar` policy store.
 //!
-//! Each `vN` module owns both its layout (where each file lives, read through
-//! [`StoreFs`]) and the `Deserialize` structs for its files, and must not import
-//! another version module. A released version's layout is frozen: a store laid
-//! out differently is a new spec version, so changing one version never breaks
-//! another. Only [`METADATA_FILE`] is shared, because it is read before the
-//! version is known.
+//! Each `vN` module declares its layout as a [`Layout`] constant and owns the
+//! `Deserialize` structs for its files, and must not import another version
+//! module. A released version's layout is frozen: a store laid out differently
+//! is a new spec version, so changing one version never breaks another. Reading
+//! that layout does not vary between versions, so [`read_files`] is shared.
+//! Only [`METADATA_FILE`] is fixed for every version, because it is read before
+//! the version is known.
 //!
 //! Older versions reach the current one through the `migration` chain, and
 //! only the current version converts into runtime types. Runtime types never
@@ -50,6 +51,59 @@ pub(crate) const CURRENT_FORMAT_VERSION: u32 = current::SPEC_VERSION;
 /// Oldest spec version this Cedarling still reads; also assumed when the field is missing.
 /// v0 is the unversioned baseline that predates `policy_store_spec_version`.
 pub(crate) const MIN_SUPPORTED_FORMAT_VERSION: u32 = v0::SPEC_VERSION;
+
+/// Where a spec version keeps each part of a store.
+///
+/// A version owns one of these as a constant, which is what freezes its layout:
+/// a store laid out differently is a new spec version. The reading itself does
+/// not vary, so every version shares [`read_files`].
+pub(super) struct Layout {
+    pub(super) schema_file: &'static str,
+    pub(super) schema_dir: &'static str,
+    pub(super) policies_dir: &'static str,
+    pub(super) templates_dir: &'static str,
+    pub(super) entities_dir: &'static str,
+    pub(super) trusted_issuers_dir: &'static str,
+    pub(super) custom_issuers_dir: &'static str,
+}
+
+/// The raw files of a store, read from a version's [`Layout`].
+#[derive(Debug)]
+pub(super) struct Files {
+    /// Raw `metadata.json` content, already read to pick the version.
+    pub(super) metadata_json: String,
+    /// Parsed schema; absent when running without one.
+    pub(super) schema: Option<ParsedSchema>,
+    /// Whether a schema source was present, regardless of whether it loaded.
+    pub(super) schema_source_exists: bool,
+    pub(super) policies: Vec<StoreFile>,
+    pub(super) templates: Vec<StoreFile>,
+    pub(super) entities: Vec<StoreFile>,
+    pub(super) trusted_issuers: Vec<StoreFile>,
+    pub(super) custom_issuers: Vec<StoreFile>,
+}
+
+/// Reads a store's files from the layout its version declares.
+pub(super) fn read_files(
+    fs: &StoreFs<'_>,
+    layout: &Layout,
+    metadata_json: String,
+    strict: bool,
+) -> Result<Files, PolicyStoreError> {
+    fs.require_dir(layout.policies_dir)?;
+    let schema = fs.schema(layout.schema_file, layout.schema_dir, strict)?;
+
+    Ok(Files {
+        metadata_json,
+        schema: schema.schema,
+        schema_source_exists: schema.source_exists,
+        policies: fs.cedar_files(layout.policies_dir)?,
+        templates: fs.optional_cedar_files(layout.templates_dir)?,
+        entities: fs.optional_json_files(layout.entities_dir)?,
+        trusted_issuers: fs.optional_json_files(layout.trusted_issuers_dir)?,
+        custom_issuers: fs.optional_json_files(layout.custom_issuers_dir)?,
+    })
+}
 
 /// Parts of a store whose format does not depend on the spec version.
 #[derive(Debug)]
@@ -302,14 +356,14 @@ pub(super) fn read_policy_store(
 /// v0 layout. Runs the same metadata and version checks as
 /// [`read_policy_store`].
 #[cfg(test)]
-pub(super) fn read_v0_files(fs: &StoreFs<'_>, strict: bool) -> Result<v0::Files, PolicyStoreError> {
+pub(super) fn read_v0_files(fs: &StoreFs<'_>, strict: bool) -> Result<Files, PolicyStoreError> {
     let (metadata_json, selected) = read_metadata(fs)?;
     assert_eq!(
         selected.format,
         FormatVersion::V0,
         "test fixtures for the v0 layout must resolve to v0"
     );
-    v0::load(fs, metadata_json, strict)
+    v0::files(fs, metadata_json, strict)
 }
 
 #[cfg(test)]

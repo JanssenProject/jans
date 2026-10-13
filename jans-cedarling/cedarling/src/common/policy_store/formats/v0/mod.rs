@@ -17,40 +17,36 @@ use custom_issuer::{CustomIssuerParser, ParsedCustomIssuer};
 use metadata::MetadataDoc;
 use trusted_issuer::{IssuerParser, ParsedIssuer};
 
-use super::{ParseStoreError, ReadStoreError, StoreContent};
+use super::{Files, Layout, ParseStoreError, ReadStoreError, StoreContent};
+#[cfg(test)]
 use crate::common::policy_store::errors::PolicyStoreError;
-use crate::common::policy_store::loader::{StoreFile, StoreFs};
+use crate::common::policy_store::loader::StoreFs;
 use crate::common::policy_store::manager::ConversionError;
-use crate::common::policy_store::schema_parser::ParsedSchema;
 
 pub(crate) const SPEC_VERSION: u32 = 0;
 
 // Where each part of a v0 store lives. Frozen with the version: a store laid
-// out differently is a new spec version, so these are never shared with or
+// out differently is a new spec version, so this is never shared with or
 // edited for another version.
-const SCHEMA_FILE: &str = "schema.cedarschema";
-const SCHEMA_DIR: &str = "schemas";
-const POLICIES_DIR: &str = "policies";
-const TEMPLATES_DIR: &str = "templates";
-const ENTITIES_DIR: &str = "entities";
-const TRUSTED_ISSUERS_DIR: &str = "trusted-issuers";
-const CUSTOM_ISSUERS_DIR: &str = "custom-issuers";
+const LAYOUT: Layout = Layout {
+    schema_file: "schema.cedarschema",
+    schema_dir: "schemas",
+    policies_dir: "policies",
+    templates_dir: "templates",
+    entities_dir: "entities",
+    trusted_issuers_dir: "trusted-issuers",
+    custom_issuers_dir: "custom-issuers",
+};
 
-/// The raw files of a v0 store, read by the v0 layout.
-#[derive(Debug)]
-pub(crate) struct Files {
-    /// Raw `metadata.json` content.
-    pub(crate) metadata_json: String,
-    /// Parsed schema (optional — absent when running without schema)
-    pub(crate) schema: Option<ParsedSchema>,
-    /// Whether a schema source was present in the store, regardless of
-    /// whether it was loaded/parsed.
-    pub(crate) schema_source_exists: bool,
-    pub(crate) policies: Vec<StoreFile>,
-    pub(crate) templates: Vec<StoreFile>,
-    pub(crate) entities: Vec<StoreFile>,
-    pub(crate) trusted_issuers: Vec<StoreFile>,
-    pub(crate) custom_issuers: Vec<StoreFile>,
+/// Reads the raw files of a v0 store through the shared reader, for tests of
+/// the v0 layout. Test-only, so the layout stays private in a release build.
+#[cfg(test)]
+pub(super) fn files(
+    fs: &StoreFs<'_>,
+    metadata_json: String,
+    strict: bool,
+) -> Result<Files, PolicyStoreError> {
+    super::read_files(fs, &LAYOUT, metadata_json, strict)
 }
 
 /// Reads a v0 store and parses its files; `metadata_json` has already been
@@ -60,31 +56,8 @@ pub(super) fn read(
     metadata_json: String,
     strict: bool,
 ) -> Result<PolicyStoreDoc, ReadStoreError> {
-    let files = load(fs, metadata_json, strict)?;
+    let files = super::read_files(fs, &LAYOUT, metadata_json, strict)?;
     Ok(parse(files)?)
-}
-
-/// Reads the raw files of a v0 store from the v0 layout.
-///
-/// Visible to `formats` only for the tests of the v0 layout.
-pub(super) fn load(
-    fs: &StoreFs<'_>,
-    metadata_json: String,
-    strict: bool,
-) -> Result<Files, PolicyStoreError> {
-    fs.require_dir(POLICIES_DIR)?;
-    let schema = fs.schema(SCHEMA_FILE, SCHEMA_DIR, strict)?;
-
-    Ok(Files {
-        metadata_json,
-        schema: schema.schema,
-        schema_source_exists: schema.source_exists,
-        policies: fs.cedar_files(POLICIES_DIR)?,
-        templates: fs.optional_cedar_files(TEMPLATES_DIR)?,
-        entities: fs.optional_json_files(ENTITIES_DIR)?,
-        trusted_issuers: fs.optional_json_files(TRUSTED_ISSUERS_DIR)?,
-        custom_issuers: fs.optional_json_files(CUSTOM_ISSUERS_DIR)?,
-    })
 }
 
 /// A whole v0 store, parsed but not yet migrated.
@@ -147,6 +120,7 @@ fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::common::policy_store::loader::StoreFile;
 
     /// Golden v0 store: no `policy_store_spec_version`, and every version-specific
     /// file parses with v0 semantics, including the frozen `jti` default.
