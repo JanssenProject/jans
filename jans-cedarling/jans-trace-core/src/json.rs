@@ -58,7 +58,7 @@ impl JsonError {
 /// Largest integer an IEEE-754 double reproduces exactly.
 const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
 
-pub(crate) fn parse_strict(input: &[u8], limits: &Limits) -> Result<Value, JsonError> {
+pub(crate) fn parse_strict(input: &str, limits: &Limits) -> Result<Value, JsonError> {
     let rejection = Cell::new(None);
     // `serde_json` errors carry only text, so our own rejections travel beside them.
     let to_json_error = |err: serde_json::Error| {
@@ -67,14 +67,14 @@ pub(crate) fn parse_strict(input: &[u8], limits: &Limits) -> Result<Value, JsonE
             column: err.column(),
         })
     };
-    let mut deserializer = serde_json::Deserializer::from_slice(input);
+    let mut deserializer = serde_json::Deserializer::from_str(input);
     let seed = StrictSeed {
         limits,
         depth: 0,
         rejection: &rejection,
     };
     let value = seed.deserialize(&mut deserializer).map_err(to_json_error)?;
-    // The trailing-data check `serde_json::from_slice` performs.
+    // The trailing-data check `serde_json::from_str` performs.
     deserializer.end().map_err(to_json_error)?;
     Ok(value)
 }

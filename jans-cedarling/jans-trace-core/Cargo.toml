@@ -9,7 +9,7 @@ description = "Deterministic TRACE cryptography: strict JSON, RFC 8785 JCS, Ed25
 [dependencies]
 thiserror = { workspace = true }
 serde = { workspace = true }
-serde_json = { workspace = true }
+serde_json = { workspace = true, features = ["raw_value"] }
 serde_json_canonicalizer = { workspace = true }
 sha2 = { workspace = true }
 base64 = { workspace = true, features = ["std"] }

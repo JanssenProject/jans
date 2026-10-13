@@ -23,16 +23,16 @@ const CASES: [&str; 6] = [
 fn reference_vectors_match_byte_for_byte() {
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/rfc8785");
     for case in CASES {
-        let input = fs::read(dir.join("input").join(format!("{case}.json")))
-            .expect("reference input is readable");
-        let expected = fs::read(dir.join("output").join(format!("{case}.json")))
-            .expect("reference output is readable");
+        let input = fs::read_to_string(dir.join("input").join(format!("{case}.json")))
+            .expect("reference input is readable UTF-8");
+        let expected = fs::read_to_string(dir.join("output").join(format!("{case}.json")))
+            .expect("reference output is readable UTF-8");
         let actual = jans_trace_core::json::canonicalize_json(&input, &Limits::default())
             .expect("reference input canonicalizes");
         assert_eq!(
             actual,
-            expected.trim_ascii_end(),
-            "canonical bytes for `{case}` differ from the RFC 8785 reference"
+            expected.trim_end(),
+            "canonical text for `{case}` differ from the RFC 8785 reference"
         );
     }
 }

@@ -75,8 +75,6 @@ pub struct PrivateKeyError {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
 enum PrivateKeyReason {
     #[error("{0}")]
-    NotUtf8(std::str::Utf8Error),
-    #[error("{0}")]
     Pkcs8(ed25519_dalek::pkcs8::Error),
 }
 
@@ -153,12 +151,9 @@ impl Ed25519Signer {
     }
 
     /// Loads the key format `openssl genpkey -algorithm ed25519` writes (decision R20).
-    /// Takes bytes, not a path: reading the file is the host's job.
-    pub fn from_pkcs8_pem(kid: impl Into<String>, pem: &[u8]) -> Result<Self, PrivateKeyError> {
-        let text = std::str::from_utf8(pem).map_err(|e| PrivateKeyError {
-            reason: PrivateKeyReason::NotUtf8(e),
-        })?;
-        let key = SigningKey::from_pkcs8_pem(text).map_err(|e| PrivateKeyError {
+    /// Takes the PEM text, not a path: reading the file is the host's job.
+    pub fn from_pkcs8_pem(kid: impl Into<String>, pem: &str) -> Result<Self, PrivateKeyError> {
+        let key = SigningKey::from_pkcs8_pem(pem).map_err(|e| PrivateKeyError {
             reason: PrivateKeyReason::Pkcs8(e),
         })?;
         Ok(Self {
@@ -196,7 +191,7 @@ impl TraceSigner for Ed25519Signer {
 mod tests {
     use base64::DecodeError;
     use ed25519_dalek::pkcs8::spki::der::{self, pem};
-    use ed25519_dalek::pkcs8::{self, spki};
+    use ed25519_dalek::pkcs8::{self, DecodePrivateKey as _, spki};
 
     use super::{
         Ed25519Signer, ParseSignatureError, PrivateKeyReason, SignatureEncodingReason,
@@ -336,13 +331,12 @@ mod tests {
             "`{{err}}` alone tells the operator what is wrong"
         );
 
-        let not_utf8 = vec![0xFF, 0xFE];
-        let utf8 = std::str::from_utf8(&not_utf8).expect_err("0xFF is never valid UTF-8");
-        let key_err =
-            Ed25519Signer::from_pkcs8_pem("k", &not_utf8).expect_err("not UTF-8, not PEM");
+        let pem_err = ed25519_dalek::SigningKey::from_pkcs8_pem("not a key")
+            .expect_err("plain text is not PEM");
+        let key_err = Ed25519Signer::from_pkcs8_pem("k", "not a key").expect_err("not PEM");
         assert_eq!(
             key_err.to_string(),
-            format!("private key is not an unencrypted PKCS#8 PEM Ed25519 key: {utf8}"),
+            format!("private key is not an unencrypted PKCS#8 PEM Ed25519 key: {pem_err}"),
             "`{{err}}` alone tells the operator what is wrong"
         );
 
@@ -376,7 +370,7 @@ mod tests {
 
     #[test]
     fn loads_unencrypted_pkcs8_pem() {
-        let signer = Ed25519Signer::from_pkcs8_pem("key-2026-01", TEST_1_PEM.as_bytes())
+        let signer = Ed25519Signer::from_pkcs8_pem("key-2026-01", TEST_1_PEM)
             .expect("openssl-written Ed25519 key loads");
         assert_eq!(signer.kid(), "key-2026-01", "kid comes from the caller");
         assert_eq!(
@@ -401,7 +395,7 @@ mod tests {
 
     struct KeyCase<'a> {
         name: &'static str,
-        pem: Vec<u8>,
+        pem: String,
         reason_matches: &'a dyn Fn(&PrivateKeyReason) -> bool,
     }
 
@@ -418,47 +412,40 @@ mod tests {
                 spki::Error::OidUnknown { oid }
             )) if *oid == x25519)
         };
-        let not_utf8 = |r: &PrivateKeyReason| matches!(r, PrivateKeyReason::NotUtf8(e) if e.valid_up_to() == 0);
         let cases = [
             KeyCase {
                 name: "encrypted label",
                 pem: format!(
                     "-----BEGIN ENCRYPTED PRIVATE KEY-----\n{body}\n-----END ENCRYPTED PRIVATE KEY-----\n"
-                )
-                .into_bytes(),
+                ),
                 reason_matches: &wrong_label,
             },
             KeyCase {
                 name: "public key",
-                pem: b"-----BEGIN PUBLIC KEY-----\n\
+                pem: "-----BEGIN PUBLIC KEY-----\n\
                   MCowBQYDK2VwAyEA11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=\n\
                   -----END PUBLIC KEY-----\n"
-                    .to_vec(),
+                    .to_owned(),
                 reason_matches: &wrong_label,
             },
             // TEST 1 secret under the X25519 OID (1.3.101.110): valid PKCS#8, wrong algorithm.
             KeyCase {
                 name: "X25519 key",
-                pem: b"-----BEGIN PRIVATE KEY-----\n\
+                pem: "-----BEGIN PRIVATE KEY-----\n\
                   MC4CAQAwBQYDK2VuBCIEIJ1hsZ3v/VpguoRK9JLsLMREScVpezJpGXA7rAMcrn9g\n\
                   -----END PRIVATE KEY-----\n"
-                    .to_vec(),
+                    .to_owned(),
                 reason_matches: &wrong_algorithm,
             },
             KeyCase {
                 name: "not PEM",
-                pem: b"not a key".to_vec(),
+                pem: "not a key".to_owned(),
                 reason_matches: &not_pem,
             },
             KeyCase {
                 name: "empty",
-                pem: Vec::new(),
+                pem: String::new(),
                 reason_matches: &not_pem,
-            },
-            KeyCase {
-                name: "not UTF-8",
-                pem: vec![0xFF, 0xFE],
-                reason_matches: &not_utf8,
             },
         ];
         for case in cases {
@@ -475,7 +462,7 @@ mod tests {
     #[test]
     fn private_key_code_is_stable() {
         assert_eq!(
-            Ed25519Signer::from_pkcs8_pem("k", b"")
+            Ed25519Signer::from_pkcs8_pem("k", "")
                 .expect_err("empty input is not a key")
                 .code(),
             "INVALID_PRIVATE_KEY",

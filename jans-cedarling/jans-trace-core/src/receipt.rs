@@ -232,7 +232,7 @@ impl ReceiptCommitment {
     /// `sha256(JCS(commitment))`; the hash is not part of its own input (core design §7.2).
     #[must_use]
     pub fn receipt_hash(&self) -> Digest {
-        Digest::sha256(&self.canonical_bytes())
+        Digest::sha256(self.canonical_text().as_bytes())
     }
 
     /// Checks that this receipt names `previous_receipt_hash`, the current chain head (or
@@ -250,7 +250,7 @@ impl ReceiptCommitment {
 
     /// JCS by hand: the member names are fixed and listed here in JCS order, and every value
     /// is a string or a safe integer, so no step can fail.
-    fn canonical_bytes(&self) -> Vec<u8> {
+    fn canonical_text(&self) -> String {
         let members: [(&str, Member<'_>); 8] = [
             (
                 "content_digest",
@@ -267,21 +267,21 @@ impl ReceiptCommitment {
             ("received_at", Member::Text(self.received_at.as_str())),
             ("record_id", Member::Text(&self.record_id)),
         ];
-        let mut out = Vec::with_capacity(512);
-        out.push(b'{');
+        let mut out = String::with_capacity(512);
+        out.push('{');
         for (index, (name, value)) in members.iter().enumerate() {
             if index > 0 {
-                out.push(b',');
+                out.push(',');
             }
             write_jcs_string(&mut out, name);
-            out.push(b':');
+            out.push(':');
             match value {
                 Member::Text(text) => write_jcs_string(&mut out, text),
                 // JCS writes a safe integer as its plain decimal digits.
-                Member::Integer(number) => out.extend_from_slice(number.to_string().as_bytes()),
+                Member::Integer(number) => out.push_str(&number.to_string()),
             }
         }
-        out.push(b'}');
+        out.push('}');
         out
     }
 }
@@ -430,7 +430,7 @@ mod tests {
         use crate::signature::Ed25519Signer;
 
         let signer = Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32]);
-        let unsigned = br#"{"producer":"cedarling-fleet-1","kid":"key-2026-01","record_id":"r-1"}"#;
+        let unsigned = r#"{"producer":"cedarling-fleet-1","kid":"key-2026-01","record_id":"r-1"}"#;
         let verified = UnsignedAssertion::parse(unsigned, &Limits::default())
             .expect("record is well formed")
             .sign(&signer)

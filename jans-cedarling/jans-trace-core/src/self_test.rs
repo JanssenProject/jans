@@ -105,8 +105,8 @@ fn evaluate(failed: &[Check]) -> Result<(), SelfTestError> {
 }
 
 fn check_canonicalization() -> bool {
-    canonicalize_json(r#"{"b":[1.0,"é"],"a":1e30}"#.as_bytes(), &Limits::default())
-        .is_ok_and(|bytes| bytes == "{\"a\":1e+30,\"b\":[1,\"é\"]}".as_bytes())
+    canonicalize_json(r#"{"b":[1.0,"é"],"a":1e30}"#, &Limits::default())
+        .is_ok_and(|text| text == "{\"a\":1e+30,\"b\":[1,\"é\"]}")
 }
 
 fn check_sha256() -> bool {

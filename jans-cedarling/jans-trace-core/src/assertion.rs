@@ -18,8 +18,10 @@ use crate::limits::LimitKind;
 use crate::signature::{ParseSignatureError, SignatureValue, SignerError, TraceSigner};
 use crate::{Digest, Limits, SizeLimitError};
 
+mod batch;
 mod verify;
 
+pub use batch::{ParseBatchError, batch_body, parse_batch};
 pub use verify::{VerificationContext, VerifiedAssertion, VerifyError};
 
 const SIGNATURE: &str = "signature";
@@ -82,13 +84,13 @@ enum BadIdentity {
 pub struct UnsignedAssertion {
     identity: AssertionIdentity,
     members: CanonicalMembers,
-    signing_input: Vec<u8>,
+    signing_input: String,
 }
 
 impl UnsignedAssertion {
     /// Also checks that the signed record will fit `limits`, so a record Lock would refuse
     /// for its size fails here, before it is signed and sent.
-    pub fn parse(assertion: &[u8], limits: &Limits) -> Result<Self, ParseUnsignedAssertionError> {
+    pub fn parse(assertion: &str, limits: &Limits) -> Result<Self, ParseUnsignedAssertionError> {
         limits.check_input(assertion)?;
         let Value::Object(members) = parse_strict(assertion, limits)? else {
             return Err(ParseUnsignedAssertionError::NotAnObject);
@@ -120,14 +122,14 @@ impl UnsignedAssertion {
         &self.identity
     }
 
-    /// The bytes the signature covers: JCS of the record (core design §6.3).
+    /// The text the signature covers: JCS of the record (core design §6.3).
     #[must_use]
-    pub fn signing_input(&self) -> &[u8] {
+    pub fn signing_input(&self) -> &str {
         &self.signing_input
     }
 
     /// The signed record is the JCS form of the whole assertion, signature included, so the
-    /// producer sends exactly the bytes `content_digest` covers.
+    /// producer sends exactly the text `content_digest` covers.
     pub fn sign(&self, signer: &dyn TraceSigner) -> Result<SignedAssertion, SignError> {
         if self.identity.kid != signer.kid() {
             return Err(SignError::KidMismatch {
@@ -135,11 +137,11 @@ impl UnsignedAssertion {
                 signer: signer.kid().to_owned(),
             });
         }
-        let signature = SignatureValue::from_bytes(signer.sign(&self.signing_input)?);
-        let bytes = self.members.write(Some(&signature));
+        let signature = SignatureValue::from_bytes(signer.sign(self.signing_input.as_bytes())?);
+        let text = self.members.write(Some(&signature));
         Ok(SignedAssertion {
-            content_digest: Digest::sha256(&bytes),
-            bytes,
+            content_digest: Digest::sha256(text.as_bytes()),
+            text,
             identity: self.identity.clone(),
             signature,
             signing_input: self.signing_input.clone(),
@@ -147,22 +149,22 @@ impl UnsignedAssertion {
     }
 }
 
-/// A record with a well-formed top-level `signature`, not yet verified. Holds the bytes it
-/// was parsed from (or the canonical bytes `sign` produced): those are what Lock stores, and
+/// A record with a well-formed top-level `signature`, not yet verified. Holds the text it
+/// was parsed from (or the canonical text `sign` produced): that is what Lock stores, and
 /// there is deliberately no way to serialize the record again.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SignedAssertion {
-    bytes: Vec<u8>,
+    text: String,
     identity: AssertionIdentity,
     signature: SignatureValue,
-    signing_input: Vec<u8>,
+    signing_input: String,
     content_digest: Digest,
 }
 
 impl SignedAssertion {
-    /// Parses untrusted bytes once; identity, signature encoding, signing input and
+    /// Parses an untrusted record once; identity, signature encoding, signing input and
     /// `content_digest` are all known afterwards.
-    pub fn parse(assertion: &[u8], limits: &Limits) -> Result<Self, ParseSignedAssertionError> {
+    pub fn parse(assertion: &str, limits: &Limits) -> Result<Self, ParseSignedAssertionError> {
         limits.check_input(assertion)?;
         let Value::Object(mut members) = parse_strict(assertion, limits)? else {
             return Err(ParseSignedAssertionError::NotAnObject);
@@ -184,18 +186,18 @@ impl SignedAssertion {
             .into());
         }
         Ok(Self {
-            bytes: assertion.to_vec(),
+            text: assertion.to_owned(),
             identity,
             signature,
             signing_input: members.write(None),
-            content_digest: Digest::sha256(&canonical),
+            content_digest: Digest::sha256(canonical.as_bytes()),
         })
     }
 
     /// The record exactly as received or as `sign` produced it.
     #[must_use]
-    pub fn as_bytes(&self) -> &[u8] {
-        &self.bytes
+    pub fn as_str(&self) -> &str {
+        &self.text
     }
 
     #[must_use]
@@ -211,7 +213,7 @@ impl SignedAssertion {
     /// JCS of the record without its top-level `signature`, for tooling that compares what
     /// was signed.
     #[must_use]
-    pub fn signing_input(&self) -> &[u8] {
+    pub fn signing_input(&self) -> &str {
         &self.signing_input
     }
 
@@ -225,17 +227,17 @@ impl SignedAssertion {
 /// Top-level members in JCS order, each already written as `"name":value`. Built once
 /// while parsing, so writing the record with or without a signature cannot fail.
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct CanonicalMembers(Vec<(String, Vec<u8>)>);
+struct CanonicalMembers(Vec<(String, String)>);
 
 impl CanonicalMembers {
     fn new(members: Map<String, Value>) -> Result<Self, JsonError> {
         let mut written = members
             .into_iter()
             .map(|(name, value)| {
-                let mut member = Vec::new();
+                let mut member = String::new();
                 write_jcs_string(&mut member, &name);
-                member.push(b':');
-                member.extend(canonicalize_value(&value, &Limits::UNBOUNDED)?);
+                member.push(':');
+                member.push_str(&canonicalize_value(&value, &Limits::UNBOUNDED)?);
                 Ok((name, member))
             })
             .collect::<Result<Vec<_>, JsonError>>()?;
@@ -244,22 +246,21 @@ impl CanonicalMembers {
     }
 
     /// The JCS object, with the top-level `signature` member inserted in order when given.
-    fn write(&self, signature: Option<&SignatureValue>) -> Vec<u8> {
+    fn write(&self, signature: Option<&SignatureValue>) -> String {
         let signature_member = signature.map(|value| {
-            let mut member = Vec::with_capacity(SIGNATURE_MEMBER_BYTES);
+            let mut member = String::with_capacity(SIGNATURE_MEMBER_BYTES);
             write_jcs_string(&mut member, SIGNATURE);
-            member.push(b':');
+            member.push(':');
             write_jcs_string(&mut member, &value.to_string());
             member
         });
         let mut pending = signature_member.as_deref();
-        let mut out = Vec::new();
-        out.push(b'{');
-        let push = |out: &mut Vec<u8>, member: &[u8]| {
+        let mut out = String::from("{");
+        let push = |out: &mut String, member: &str| {
             if out.len() > 1 {
-                out.push(b',');
+                out.push(',');
             }
-            out.extend_from_slice(member);
+            out.push_str(member);
         };
         for (name, member) in &self.0 {
             if let Some(signature) = pending
@@ -273,7 +274,7 @@ impl CanonicalMembers {
         if let Some(signature) = pending {
             push(&mut out, signature);
         }
-        out.push(b'}');
+        out.push('}');
         out
     }
 }
@@ -438,12 +439,11 @@ mod tests {
     }
 
     fn unsigned(text: &str) -> UnsignedAssertion {
-        UnsignedAssertion::parse(text.as_bytes(), &Limits::default())
-            .expect("test assertion is well formed")
+        UnsignedAssertion::parse(text, &Limits::default()).expect("test assertion is well formed")
     }
 
-    fn canonical(text: &str) -> Vec<u8> {
-        canonicalize_json(text.as_bytes(), &Limits::default()).expect("test input canonicalizes")
+    fn canonical(text: &str) -> String {
+        canonicalize_json(text, &Limits::default()).expect("test input canonicalizes")
     }
 
     /// Appends a top-level `"signature": <raw_json>` member to an assertion object.
@@ -471,7 +471,7 @@ mod tests {
             .expect("in-memory signer signs");
         let key = VerifyingKey::from_bytes(&signer().public_key_bytes()).expect("valid key");
         key.verify_strict(
-            &canonical(UNSIGNED),
+            canonical(UNSIGNED).as_bytes(),
             &Signature::from_bytes(signed.signature().as_bytes()),
         )
         .expect("signature covers JCS of the assertion without `signature`");
@@ -487,13 +487,13 @@ mod tests {
             &format!("\"{}\"", signed.signature()),
         ));
         assert_eq!(
-            signed.as_bytes(),
+            signed.as_str(),
             expected,
             "sign produces the canonical record"
         );
         assert_eq!(
             signed.content_digest(),
-            Digest::sha256(&expected),
+            Digest::sha256(expected.as_bytes()),
             "content digest covers the signature too"
         );
         assert_eq!(
@@ -510,7 +510,7 @@ mod tests {
 
     #[test]
     fn formatting_does_not_change_the_signature() {
-        let compact = String::from_utf8(canonical(UNSIGNED)).expect("canonical JSON is UTF-8");
+        let compact = canonical(UNSIGNED);
         let pretty = unsigned(UNSIGNED)
             .sign(&signer())
             .expect("pretty input signs");
@@ -532,15 +532,15 @@ mod tests {
         let signed = unsigned(record).sign(&signer()).expect("record signs");
         assert_eq!(signed.signing_input(), canonical(record), "signing input");
         assert_eq!(
-            signed.as_bytes(),
+            signed.as_str(),
             canonical(&with_signature(
                 record,
                 &format!("\"{}\"", signed.signature())
             )),
             "signed record"
         );
-        let parsed = SignedAssertion::parse(signed.as_bytes(), &Limits::default())
-            .expect("own record parses");
+        let parsed =
+            SignedAssertion::parse(signed.as_str(), &Limits::default()).expect("own record parses");
         assert_eq!(
             parsed, signed,
             "parsing the produced bytes gives the same record"
@@ -548,22 +548,18 @@ mod tests {
     }
 
     #[test]
-    fn parsing_a_received_record_keeps_its_bytes() {
+    fn parsing_a_received_record_keeps_its_text() {
         let produced = unsigned(UNSIGNED).sign(&signer()).expect("record signs");
         let pretty = with_signature(UNSIGNED, &format!("\"{}\"", produced.signature()));
-        let received = SignedAssertion::parse(pretty.as_bytes(), &Limits::default())
-            .expect("pretty record parses");
-        assert_eq!(
-            received.as_bytes(),
-            pretty.as_bytes(),
-            "original bytes are stored"
-        );
+        let received =
+            SignedAssertion::parse(&pretty, &Limits::default()).expect("pretty record parses");
+        assert_eq!(received.as_str(), pretty, "the original text is stored");
         assert_eq!(
             received.content_digest(),
             produced.content_digest(),
             "formatting does not change the content digest"
         );
-        let text = String::from_utf8(received.signing_input().to_vec()).expect("UTF-8");
+        let text = received.signing_input();
         assert!(
             text.contains(r#""signature":"nested stays signed""#)
                 && !text.contains(&produced.signature().to_string()),
@@ -616,7 +612,7 @@ mod tests {
         ];
         for case in cases {
             assert_eq!(
-                UnsignedAssertion::parse(case.input.as_bytes(), &Limits::default()),
+                UnsignedAssertion::parse(&case.input, &Limits::default()),
                 Err(case.error),
                 "reason for {}",
                 case.name
@@ -629,7 +625,7 @@ mod tests {
         let signed_len = unsigned(UNSIGNED)
             .sign(&signer())
             .expect("record signs")
-            .as_bytes()
+            .as_str()
             .len();
         for (limits, kind) in [
             (
@@ -646,7 +642,7 @@ mod tests {
                 "the unsigned input alone fits, so the projection is what fails"
             );
             assert_eq!(
-                UnsignedAssertion::parse(UNSIGNED.as_bytes(), &limits),
+                UnsignedAssertion::parse(UNSIGNED, &limits),
                 Err(ParseUnsignedAssertionError::SizeLimitExceeded(
                     SizeLimitError::new(kind, signed_len - 1)
                 )),
@@ -656,7 +652,7 @@ mod tests {
         let exact = Limits::default()
             .with_max_input_bytes(signed_len)
             .with_max_canonical_bytes(signed_len);
-        UnsignedAssertion::parse(UNSIGNED.as_bytes(), &exact)
+        UnsignedAssertion::parse(UNSIGNED, &exact)
             .expect("a signed record of exactly the limit is accepted");
     }
 
@@ -761,7 +757,7 @@ mod tests {
         ];
         for case in cases {
             assert_eq!(
-                SignedAssertion::parse(case.input.as_bytes(), &Limits::default()),
+                SignedAssertion::parse(&case.input, &Limits::default()),
                 Err(case.error),
                 "reason for {}",
                 case.name
@@ -776,7 +772,7 @@ mod tests {
         let input_limit = pretty.len() - 1;
         assert_eq!(
             SignedAssertion::parse(
-                pretty.as_bytes(),
+                &pretty,
                 &Limits::default().with_max_input_bytes(input_limit)
             ),
             Err(ParseSignedAssertionError::SizeLimitExceeded(
@@ -792,7 +788,7 @@ mod tests {
         let canonical_limit = grows.len() - 50;
         assert_eq!(
             SignedAssertion::parse(
-                grows.as_bytes(),
+                &grows,
                 &Limits::default().with_max_canonical_bytes(canonical_limit)
             ),
             Err(ParseSignedAssertionError::SizeLimitExceeded(

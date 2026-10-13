@@ -23,9 +23,9 @@ It does:
 It does not:
 
 - read files, open sockets, read the clock, use randomness or keep state. Every function
-  takes bytes or values and returns values; the host owns I/O, time, keys on disk and
+  takes JSON text or values and returns values; the host owns I/O, time, keys on disk and
   chain state;
-- validate the full TRACE schema. It checks only what each function needs (bytes,
+- validate the full TRACE schema. It checks only what each function needs (JSON syntax,
   identity members, signature, receipt fields). Lock validates meaning: schema per event
   kind, key registry, producer-chain gaps and equivocation;
 - choose sequence numbers or chain heads. Producers and Lock assign them; this crate
@@ -38,8 +38,9 @@ Holding a value proves its checks passed, so later steps do not repeat them and 
 fail on them.
 
 ```text
-bytes -- UnsignedAssertion::parse --> UnsignedAssertion -- sign --> SignedAssertion
-bytes -- SignedAssertion::parse --> SignedAssertion -- verify --> VerifiedAssertion
+text -- UnsignedAssertion::parse --> UnsignedAssertion -- sign --> SignedAssertion
+text -- SignedAssertion::parse --> SignedAssertion -- verify --> VerifiedAssertion
+bulk body -- parse_batch --> one SignedAssertion (or its error) per record
 VerifiedAssertion + ReceiptPosition + ReceivedAt --> ReceiptCommitment --> receipt hash
 ```
 
@@ -47,9 +48,9 @@ VerifiedAssertion + ReceiptPosition + ReceivedAt --> ReceiptCommitment --> recei
   `kid` and `record_id`, no top-level `signature`, and a signed form that will still fit
   the limits.
 - `SignedAssertion`: the same identity rules, plus a top-level `signature` that is unpadded
-  base64url of 64 bytes. It keeps the bytes it was parsed from (or the canonical bytes
+  base64url of 64 bytes. It keeps the text it was parsed from (or the canonical text
   `sign` produced), its signing input and its `content_digest`. It cannot be serialized
-  again, so the stored bytes are always the received bytes.
+  again, so the stored text is always the received text.
 - `VerifiedAssertion`: only `SignedAssertion::verify` creates it. Receipts are built from it.
 - `ReceivedAt`: only `YYYY-MM-DDTHH:MM:SS.sssZ` text for a real instant.
   `ReceiptPosition`: sequence 1 with the genesis sentinel, or sequence 2..=2^53−1 with a
@@ -61,8 +62,8 @@ VerifiedAssertion + ReceiptPosition + ReceivedAt --> ReceiptCommitment --> recei
 
 At startup:
 
-1. `signature::Ed25519Signer::from_pkcs8_pem(kid, pem_bytes)` loads the key that
-   `openssl genpkey -algorithm ed25519` writes. The host reads the file; this takes bytes.
+1. `signature::Ed25519Signer::from_pkcs8_pem(kid, pem_text)` loads the key that
+   `openssl genpkey -algorithm ed25519` writes. The host reads the file; this takes text.
    HSM and KMS keys implement `signature::TraceSigner` instead.
 2. `inputs::compute_bundle_hash(cjar_bytes)` on every policy-store (re)load gives
    `bundle_hash`: SHA-256 of the `.cjar` exactly as received.
@@ -73,27 +74,32 @@ For every record:
    `prev_record_hash` is the previous record's `content_digest`, or `Digest::GENESIS` for
    the first record of a chain. For a token without `jti`, put
    `inputs::token_fingerprint(token_bytes)` in the record.
-2. `assertion::UnsignedAssertion::parse(bytes, &limits)`. Use the limits Lock enforces: a
+2. `assertion::UnsignedAssertion::parse(json_text, &limits)`. Use the limits Lock enforces: a
    record Lock would refuse for its size fails here, before it is signed.
-3. `unsigned.sign(&signer)` returns a `SignedAssertion`. Its `as_bytes()` is the JCS form
+3. `unsigned.sign(&signer)` returns a `SignedAssertion`. Its `as_str()` is the JCS form
    of the whole record, signature included; there is nothing to insert by hand. It fails
    only if the record's `kid` differs from the signer's or the signer fails.
 4. Keep `signed.content_digest()` as the next `prev_record_hash`.
-5. Send `signed.as_bytes()`. On retry, resend the same bytes; never re-sign.
+5. Send records with `assertion::batch_body(&records, &limits)`: their own text joined into
+   the array Lock's bulk endpoint takes, refused if the batch is above Lock's limits. On
+   retry, resend the same body; never re-sign.
 
 ### Lock: register a producer key
 
-`key::PublicKey::from_jwk(jwk_bytes)` parses an OKP Ed25519 JWK (RFC 8037). It rejects
+`key::PublicKey::from_jwk(jwk_text)` parses an OKP Ed25519 JWK (RFC 8037). It rejects
 other key types, a padded or wrong-length `x`, a JWK with `d` (a private key) and weak
 (small-order) keys. `PublicKey::thumbprint()` gives the RFC 7638 thumbprint as
 `sha256:<hex>`. Parse once at registration and keep the `PublicKey`.
 
 ### Lock: ingest a record
 
-1. `assertion::SignedAssertion::parse(body_bytes, &limits)` parses the request bytes once.
-   `identity()` gives `producer`, `kid` and `record_id` to look up the key. Do not read
-   them with another JSON parser first: strict parsing rejects duplicate members, so after
-   it succeeds any reader sees the same values.
+1. `assertion::parse_batch(body_text, &limits)` splits the bulk request body and parses
+   each record once; for the single-record endpoint use `SignedAssertion::parse`. Pass the
+   body as received and do not parse it with another JSON library first: that library
+   would merge duplicate members inside a record before the strict parser sees them, and
+   the record's original text would be lost. A body error (not an array, broken JSON, too
+   many records, too large) rejects the batch; every record has its own result.
+   `identity()` gives `producer`, `kid` and `record_id` to look up the key.
 2. `signed.verify(&VerificationContext { expected_producer, expected_kid, public_key })`
    with the registered key and the producer and `kid` it is registered under. It returns
    a `VerifiedAssertion`.
@@ -106,8 +112,8 @@ other key types, a padded or wrong-length `x`, a JWK with `d` (a private key) an
    `commitment.verify_link(&head_hash)` checks that it names the current head (or
    `Digest::GENESIS`) and returns its hash, the new head.
 
-Store `signed.as_bytes()`, the original bytes. Never re-serialize an assertion from a
-parsed tree: canonical bytes cannot reproduce the original form.
+Store `signed.as_str()`, the original text. Never re-serialize an assertion from a parsed
+tree: canonical text cannot reproduce the original form.
 
 ### Lock: startup
 
@@ -118,7 +124,7 @@ hash on the machine and binary that actually run. If it fails, disable TRACE ing
 ### Tooling and audit
 
 - Rebuild what a producer signed: `SignedAssertion::parse(..)?.signing_input()`.
-- Canonicalize any JSON: `json::canonicalize_json(bytes, &limits)`.
+- Canonicalize any JSON: `json::canonicalize_json(text, &limits)`.
 - Re-verify a receipt chain: rebuild each stored receipt with `ReceivedAt::from_str`,
   `ReceiptPosition::new` and the stored fields, then walk the chain from
   `Digest::GENESIS` with `commitment.verify_link(&previous_hash)`. Insertion, deletion or
@@ -127,9 +133,11 @@ hash on the machine and binary that actually run. If it fails, disable TRACE ing
 
 ### Calling from other languages
 
-Every input is bytes: UTF-8 JSON without a byte-order mark. Pass the bytes as received;
-converting them to a string and back can change them (a platform default charset, a
-replaced lone surrogate, Unicode normalization), and the signature would no longer match.
+Every JSON input is text (`&str`), so invalid UTF-8 cannot reach the core; bindings take a
+string, and their toolkit does the UTF-8 conversion. Read an HTTP body as UTF-8 and pass
+the text unchanged: do not parse it and serialize it again, and do not normalize Unicode.
+A string that holds a lone surrogate (only code can produce one) cannot round-trip through
+UTF-8, so such a record fails verification rather than passing silently.
 
 ## Example
 
@@ -138,8 +146,8 @@ out. In real code the annotations are optional.
 
 ```rust
 use jans_trace_core::assertion::{
-    AssertionIdentity, SignedAssertion, UnsignedAssertion, VerificationContext,
-    VerifiedAssertion,
+    AssertionIdentity, ParseSignedAssertionError, SignedAssertion, UnsignedAssertion,
+    VerificationContext, VerifiedAssertion, batch_body, parse_batch,
 };
 use jans_trace_core::key::PublicKey;
 use jans_trace_core::receipt::{ReceiptCommitment, ReceiptPosition, ReceivedAt};
@@ -154,10 +162,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // A fixed secret is for examples only; load real keys with `from_pkcs8_pem`.
     let signer: Ed25519Signer = Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32]);
 
-    // The core takes the record as raw JSON bytes (UTF-8), never as a parsed tree. How the
-    // producer builds them does not matter, nor does formatting: the core canonicalizes
-    // before signing.
-    let record_bytes: Vec<u8> = serde_json::to_vec(&serde_json::json!({
+    // The core takes the record as JSON text, never as a parsed tree. How the producer
+    // builds it does not matter, nor does formatting: the core canonicalizes before signing.
+    let record_text: String = serde_json::to_string(&serde_json::json!({
         "producer": "cedarling-fleet-1",
         "kid": "key-2026-01",
         "record_id": "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41",
@@ -166,24 +173,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }))?;
 
     // Strict parse: identity members present, no `signature` yet, signed size within limits.
-    let unsigned: UnsignedAssertion = UnsignedAssertion::parse(&record_bytes, &limits)?;
+    let unsigned: UnsignedAssertion = UnsignedAssertion::parse(&record_text, &limits)?;
 
     // Sign: the result holds the canonical JSON of the whole record, signature included.
     let signed: SignedAssertion = unsigned.sign(&signer)?;
 
-    // These exact bytes go on the wire to Lock.
-    let wire_bytes: &[u8] = signed.as_bytes();
+    // The bulk body Lock receives: the records' own text joined into an array.
+    let body: String = batch_body(std::slice::from_ref(&signed), &limits)?;
 
     // Keep it as the next record's `prev_record_hash`.
     let content_digest: Digest = signed.content_digest();
 
     // ---- Lock ----
 
-    // Parse the request body once; the identity selects the registered key.
-    let received: SignedAssertion = SignedAssertion::parse(wire_bytes, &limits)?;
+    // Split the request body and parse each record once; the identity selects the key.
+    let mut records: Vec<Result<SignedAssertion, ParseSignedAssertionError>> =
+        parse_batch(&body, &limits)?;
+    let received: SignedAssertion = records.remove(0)?;
     let identity: &AssertionIdentity = received.identity();
 
-    // Normally `PublicKey::from_jwk(registered_jwk_bytes)` at key registration.
+    // Normally `PublicKey::from_jwk(registered_jwk_text)` at key registration.
     let public_key: PublicKey = PublicKey::from_bytes(&signer.public_key_bytes())?;
 
     let context: VerificationContext = VerificationContext {
@@ -215,7 +224,7 @@ Shared types live at the crate root: `Digest` (`sha256:<hex>`, strict `FromStr`,
 
 | Module | Items | Who calls it |
 |---|---|---|
-| `assertion` | `UnsignedAssertion` (`parse`, `sign`), `SignedAssertion` (`parse`, `verify`, `as_bytes`, `content_digest`, `signing_input`), `VerifiedAssertion`, `VerificationContext`, `AssertionIdentity` | producers parse and sign; Lock parses and verifies; tooling reads signing input |
+| `assertion` | `UnsignedAssertion` (`parse`, `sign`), `SignedAssertion` (`parse`, `verify`, `as_str`, `content_digest`, `signing_input`), `parse_batch`, `batch_body`, `VerifiedAssertion`, `VerificationContext`, `AssertionIdentity` | producers parse, sign and build bulk bodies; Lock splits bulk bodies, parses and verifies; tooling reads signing input |
 | `signature` | `TraceSigner`, `Ed25519Signer` (`from_pkcs8_pem`, `from_secret_bytes`, `public_key_bytes`), `SignatureValue` | producers |
 | `key` | `PublicKey` (`from_jwk`, `from_bytes`, `to_bytes`, `thumbprint`) | Lock key registry, tooling |
 | `receipt` | `ReceivedAt`, `ReceiptPosition`, `ReceiptCommitment` (`for_assertion`, `receipt_hash`, `verify_link`), `RECEIPT_PROFILE`, `ASSERTION_PROFILE` | Lock, auditors |
@@ -240,12 +249,14 @@ can change each one with `with_max_*`. Keep Lock's own API limits equal or lower
 | Elements per array | 1024 |
 | Bytes per string | 64 KiB |
 | Canonical output bytes | 512 KiB |
+| Bulk body bytes | 8 MiB |
+| Records per bulk body | 500 |
 
 Limits are checked while parsing, so a hostile document is never fully built.
 
 ## Strict JSON
 
-Rejected everywhere: invalid UTF-8, lone surrogate escapes, a byte-order mark, trailing data, duplicate member
+Rejected everywhere: lone surrogate escapes, a byte-order mark, trailing data, duplicate member
 names at any depth, and integers outside ±(2^53−1). JCS writes numbers as IEEE-754
 doubles, so a larger integer would silently change between signer and verifier.
 
@@ -275,6 +286,7 @@ signatures or record content.
 | `RECEIPT_LINK_MISMATCH` | Receipt does not name the expected predecessor. |
 | `SIGNER_FAILURE` | The signer failed; carries no detail, so HSM data never leaks. |
 | `SELF_TEST_FAILED` | A known answer differed. Not in the core design. |
+| `INVALID_BATCH` | A bulk body is valid JSON but not an array. Not in the core design. |
 
 ## Profiles
 

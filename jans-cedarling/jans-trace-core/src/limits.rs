@@ -19,6 +19,8 @@ pub struct Limits {
     array_elements: usize,
     string_bytes: usize,
     canonical_bytes: usize,
+    batch_bytes: usize,
+    batch_records: usize,
 }
 
 impl Limits {
@@ -31,6 +33,8 @@ impl Limits {
         array_elements: usize::MAX,
         string_bytes: usize::MAX,
         canonical_bytes: usize::MAX,
+        batch_bytes: usize::MAX,
+        batch_records: usize::MAX,
     };
 
     #[must_use]
@@ -71,6 +75,19 @@ impl Limits {
         self
     }
 
+    /// Bound on a whole bulk request body, checked before it is parsed.
+    #[must_use]
+    pub const fn with_max_batch_bytes(mut self, max_batch_bytes: usize) -> Self {
+        self.batch_bytes = max_batch_bytes;
+        self
+    }
+
+    #[must_use]
+    pub const fn with_max_batch_records(mut self, max_batch_records: usize) -> Self {
+        self.batch_records = max_batch_records;
+        self
+    }
+
     #[must_use]
     pub const fn max_input_bytes(&self) -> usize {
         self.input_bytes
@@ -101,7 +118,17 @@ impl Limits {
         self.canonical_bytes
     }
 
-    pub(crate) fn check_input(self, input: &[u8]) -> Result<(), SizeLimitError> {
+    #[must_use]
+    pub const fn max_batch_bytes(&self) -> usize {
+        self.batch_bytes
+    }
+
+    #[must_use]
+    pub const fn max_batch_records(&self) -> usize {
+        self.batch_records
+    }
+
+    pub(crate) fn check_input(self, input: &str) -> Result<(), SizeLimitError> {
         if input.len() > self.input_bytes {
             return Err(SizeLimitError::new(LimitKind::InputBytes, self.input_bytes));
         }
@@ -110,7 +137,8 @@ impl Limits {
 }
 
 impl Default for Limits {
-    /// Decision R16: generous MVP values; Lock's record limit for the input size.
+    /// Decision R16: generous MVP values; Lock's record limit for the input size. Batch bounds
+    /// are the values proposed to Lock (500 records, 8 MiB) until Lock confirms its own.
     fn default() -> Self {
         Self {
             input_bytes: 256 * 1024,
@@ -119,6 +147,8 @@ impl Default for Limits {
             array_elements: 1024,
             string_bytes: 64 * 1024,
             canonical_bytes: 512 * 1024,
+            batch_bytes: 8 * 1024 * 1024,
+            batch_records: 500,
         }
     }
 }
@@ -147,6 +177,10 @@ pub(crate) enum LimitKind {
     StringBytes,
     #[error("canonical output size in bytes")]
     CanonicalBytes,
+    #[error("batch body size in bytes")]
+    BatchBytes,
+    #[error("records in one batch")]
+    BatchRecords,
 }
 
 impl SizeLimitError {
@@ -178,6 +212,8 @@ mod tests {
             (LimitKind::ArrayElements, "elements in one JSON array"),
             (LimitKind::StringBytes, "bytes in one JSON string"),
             (LimitKind::CanonicalBytes, "canonical output size in bytes"),
+            (LimitKind::BatchBytes, "batch body size in bytes"),
+            (LimitKind::BatchRecords, "records in one batch"),
         ];
         for (kind, what) in cases {
             assert_eq!(
@@ -186,6 +222,27 @@ mod tests {
                 "`{{err}}` names the limit for {kind:?}"
             );
         }
+    }
+
+    #[test]
+    fn batch_defaults_are_the_values_proposed_to_lock() {
+        let limits = Limits::default();
+        assert_eq!(
+            limits.max_batch_records(),
+            500,
+            "batch record count proposed in 13 §9"
+        );
+        assert_eq!(
+            limits.max_batch_bytes(),
+            8 * 1024 * 1024,
+            "batch body size proposed in 13 §9"
+        );
+        let custom = limits.with_max_batch_records(3).with_max_batch_bytes(10);
+        assert_eq!(
+            (custom.max_batch_records(), custom.max_batch_bytes()),
+            (3, 10),
+            "both batch bounds are configurable"
+        );
     }
 
     #[test]
@@ -201,10 +258,10 @@ mod tests {
     fn accepts_input_at_the_limit_and_rejects_above_it() {
         let limits = Limits::default().with_max_input_bytes(3);
         limits
-            .check_input(b"[1]")
+            .check_input("[1]")
             .expect("input of exactly the limit is accepted");
         let err = limits
-            .check_input(b"[10]")
+            .check_input("[10]")
             .expect_err("input above the limit is rejected");
         assert_eq!(
             err,

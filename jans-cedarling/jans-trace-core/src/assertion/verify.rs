@@ -64,14 +64,14 @@ impl SignedAssertion {
         }
         if !context
             .public_key
-            .verify(&self.signing_input, &self.signature)
+            .verify(self.signing_input.as_bytes(), &self.signature)
         {
             return Err(VerifyError::SignatureInvalid);
         }
         Ok(VerifiedAssertion {
             identity: self.identity.clone(),
             content_digest: self.content_digest,
-            signature_input_sha256: Digest::sha256(&self.signing_input),
+            signature_input_sha256: Digest::sha256(self.signing_input.as_bytes()),
         })
     }
 }
@@ -128,7 +128,7 @@ mod tests {
     }
 
     fn sign(unsigned: &str) -> SignedAssertion {
-        UnsignedAssertion::parse(unsigned.as_bytes(), &Limits::default())
+        UnsignedAssertion::parse(unsigned, &Limits::default())
             .expect("test assertion is well formed")
             .sign(&signer())
             .expect("in-memory signer signs")
@@ -144,8 +144,7 @@ mod tests {
     }
 
     fn received(bytes: &str) -> SignedAssertion {
-        SignedAssertion::parse(bytes.as_bytes(), &Limits::default())
-            .expect("received record is well formed")
+        SignedAssertion::parse(bytes, &Limits::default()).expect("received record is well formed")
     }
 
     fn context(producer: &str, kid: &str, key: PublicKey) -> VerificationContext {
@@ -178,7 +177,7 @@ mod tests {
         );
         assert_eq!(
             verified.signature_input_sha256(),
-            Digest::sha256(signed.signing_input()),
+            Digest::sha256(signed.signing_input().as_bytes()),
             "digest of the exact bytes that were verified"
         );
     }
@@ -193,9 +192,8 @@ mod tests {
             produced.content_digest(),
             "formatting does not change the content digest"
         );
-        let canonical =
-            received(std::str::from_utf8(produced.as_bytes()).expect("canonical JSON is UTF-8"));
-        verify(&canonical).expect("the producer's canonical bytes verify as received");
+        let canonical = received(produced.as_str());
+        verify(&canonical).expect("the producer's canonical text verifies as received");
     }
 
     struct ForgeryCase {

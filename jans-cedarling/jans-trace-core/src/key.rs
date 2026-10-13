@@ -106,7 +106,7 @@ impl PublicKey {
 
     /// Parses `{"kty":"OKP","crv":"Ed25519","x":"…"}`. Takes no `Limits`: the JWK comes
     /// from Lock's registry configuration, not from a client.
-    pub fn from_jwk(jwk: &[u8]) -> Result<Self, JwkError> {
+    pub fn from_jwk(jwk: &str) -> Result<Self, JwkError> {
         let Value::Object(members) = parse_strict(jwk, &Limits::UNBOUNDED)? else {
             return Err(PublicKeyReason::NotAnObject.into());
         };
@@ -168,8 +168,8 @@ mod tests {
     /// RFC 8037 A.2 public key (the RFC 8032 TEST 1 key).
     const X: &str = "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo";
 
-    fn jwk(members: &str) -> Vec<u8> {
-        format!("{{{members}}}").into_bytes()
+    fn jwk(members: &str) -> String {
+        format!("{{{members}}}")
     }
 
     fn rfc8037_key() -> PublicKey {
@@ -236,7 +236,7 @@ mod tests {
 
     struct JwkCase {
         name: &'static str,
-        jwk: Vec<u8>,
+        jwk: String,
         reason: PublicKeyReason,
     }
 
@@ -245,7 +245,7 @@ mod tests {
         let cases = [
             JwkCase {
                 name: "array",
-                jwk: b"[]".to_vec(),
+                jwk: "[]".to_owned(),
                 reason: PublicKeyReason::NotAnObject,
             },
             JwkCase {
