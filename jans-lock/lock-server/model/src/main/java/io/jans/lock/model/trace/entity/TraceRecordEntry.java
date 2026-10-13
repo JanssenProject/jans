@@ -15,6 +15,7 @@ import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.Version;
 import io.jans.orm.model.base.BaseEntry;
 
 /**
@@ -115,6 +116,10 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
 
     @AttributeName(name = "jansTraceNodeId", ignoreDuringUpdate = true)
     private String nodeId;
+
+    @Version
+    @AttributeName(name = "jansVersion", ignoreDuringUpdate = true)
+    private Long version;
 
     @AttributeName(name = "creationDate", ignoreDuringUpdate = true)
     private Date creationDate;
@@ -343,6 +348,14 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
         this.nodeId = nodeId;
     }
 
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public Date getCreationDate() {
         return creationDate;
     }
@@ -375,7 +388,8 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 && Objects.equals(receiptHash, that.receiptHash) && Objects.equals(coverageGap, that.coverageGap)
                 && Objects.equals(chainLinkFailure, that.chainLinkFailure)
                 && Objects.equals(equivocation, that.equivocation) && Objects.equals(late, that.late)
-                && Objects.equals(nodeId, that.nodeId) && Objects.equals(creationDate, that.creationDate);
+                && Objects.equals(nodeId, that.nodeId) && Objects.equals(version, that.version)
+                && Objects.equals(creationDate, that.creationDate);
     }
 
     @Override
@@ -383,7 +397,7 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
         return Objects.hash(id, domainId, producerId, recordId, eventKind, signedAt, execKey, execId, execAuthority,
                 chainKey, chainPosKey, seqNum, prevRecordHash, capKeys, tokenKeys, assertion, contentDigest,
                 verification, receiptSeq, receivedAt, receivedAtMs, prevReceiptHash, receiptHash, coverageGap,
-                chainLinkFailure, equivocation, late, nodeId, creationDate);
+                chainLinkFailure, equivocation, late, nodeId, version, creationDate);
     }
 
     @Override
@@ -396,8 +410,8 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 + ", verification=" + verification + ", receiptSeq=" + receiptSeq + ", receivedAt=" + receivedAt
                 + ", receivedAtMs=" + receivedAtMs + ", prevReceiptHash=" + prevReceiptHash + ", receiptHash="
                 + receiptHash + ", coverageGap=" + coverageGap + ", chainLinkFailure=" + chainLinkFailure
-                + ", equivocation=" + equivocation + ", late=" + late + ", nodeId=" + nodeId + ", creationDate="
-                + creationDate + "]";
+                + ", equivocation=" + equivocation + ", late=" + late + ", nodeId=" + nodeId + ", version=" + version
+                + ", creationDate=" + creationDate + "]";
     }
 
 }
