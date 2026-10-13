@@ -432,7 +432,7 @@ public class UserResource extends BaseResource {
 
             // validate user role-permission
             String candidateUserInum = existingUser.getAttribute("inum");
-            validateUserPermission(inum, ApiConstants.WRITE_REQUEST, servletRequest);
+            validateUserPermission(candidateUserInum, ApiConstants.WRITE_REQUEST, servletRequest);
 
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(existingUser);
@@ -767,7 +767,7 @@ public class UserResource extends BaseResource {
         }
 
         // Return if user is updating own profile
-        if (StringUtils.isNotBlank(userInum) && userInum.equals(this.getContextClientId(servletRequest))) {
+        if (StringUtils.isNotBlank(userInum) && userInum.equals(this.getContextInum(servletRequest)) ) {
             logger.info("UserResource::validateUserPermission() user is updating own profile :{}", userInum);
             return;
         }
@@ -884,6 +884,15 @@ public class UserResource extends BaseResource {
             return subject;
         }
         return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_CLIENTID))
+                .orElse(null);
+    }
+    
+    private String getContextInum(HttpServletRequest servletRequest) {
+        String subject = null;
+        if (servletRequest == null) {
+            return subject;
+        }
+        return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_INUM))
                 .orElse(null);
     }
 
