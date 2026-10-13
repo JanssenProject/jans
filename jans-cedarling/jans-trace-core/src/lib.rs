@@ -25,6 +25,7 @@ mod json;
 mod key;
 mod limits;
 mod receipt;
+mod self_test;
 mod signature;
 mod verify;
 
@@ -43,6 +44,7 @@ pub use receipt::{
     ReceiptCommitment, ReceiptError, ReceiptLinkError, compute_receipt_hash, format_received_at,
     verify_receipt_link,
 };
+pub use self_test::{SelfTestError, self_test};
 pub use signature::{
     Ed25519Signer, ParseSignatureError, PrivateKeyError, SignatureValue, SignerError, TraceSigner,
 };
