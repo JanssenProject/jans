@@ -1377,6 +1377,10 @@ components:
             - AUTHORIZATION_DECISION
             - CAPABILITY_INVOKED
             - RUNTIME_EFFECT
+          enum:
+          - AUTHORIZATION_DECISION
+          - CAPABILITY_INVOKED
+          - RUNTIME_EFFECT
         valid_from:
           type: string
           description: RFC 3339 timestamp the key becomes valid
