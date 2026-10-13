@@ -17,10 +17,29 @@ const PREFIX: &str = "sha256:";
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Digest([u8; 32]);
 
-/// Text is not `sha256:` followed by 64 lowercase hex characters.
+/// Text is not `sha256:` followed by 64 lowercase hex characters. `Display` includes the
+/// reason; a digest is public, so naming the offending character is safe.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
-#[error("digest is not `sha256:` followed by 64 lowercase hex characters")]
-pub struct ParseDigestError;
+#[error("digest is not `sha256:` followed by 64 lowercase hex characters: {reason}")]
+pub struct ParseDigestError {
+    reason: DigestReason,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+enum DigestReason {
+    #[error("text does not start with `sha256:`")]
+    MissingPrefix,
+    #[error("{0} hex characters after the prefix, expected 64")]
+    WrongLength(usize),
+    #[error("byte 0x{byte:02x} at offset {offset} is not a lowercase hex digit")]
+    NotLowerHex { offset: usize, byte: u8 },
+}
+
+impl From<DigestReason> for ParseDigestError {
+    fn from(reason: DigestReason) -> Self {
+        Self { reason }
+    }
+}
 
 impl ParseDigestError {
     #[must_use]
@@ -59,32 +78,34 @@ impl FromStr for Digest {
     fn from_str(text: &str) -> Result<Self, Self::Err> {
         let hex = text
             .strip_prefix(PREFIX)
-            .ok_or(ParseDigestError)?
+            .ok_or(DigestReason::MissingPrefix)?
             .as_bytes();
         if hex.len() != 64 {
-            return Err(ParseDigestError);
+            return Err(DigestReason::WrongLength(hex.len()).into());
         }
         // Length is checked above, so the remainder is empty.
         let (pairs, _) = hex.as_chunks::<2>();
         let mut bytes = [0u8; 32];
-        for (byte, [hi, lo]) in bytes.iter_mut().zip(pairs) {
-            *byte = (lower_hex_value(*hi)? << 4) | lower_hex_value(*lo)?;
+        for (index, (byte, [hi, lo])) in bytes.iter_mut().zip(pairs).enumerate() {
+            let offset = PREFIX.len() + 2 * index;
+            *byte = (lower_hex_value(*hi, offset)? << 4) | lower_hex_value(*lo, offset + 1)?;
         }
         Ok(Self(bytes))
     }
 }
 
-fn lower_hex_value(c: u8) -> Result<u8, ParseDigestError> {
+/// `offset` is the position of `c` in the whole digest text, for the error.
+fn lower_hex_value(c: u8, offset: usize) -> Result<u8, DigestReason> {
     match c {
         b'0'..=b'9' => Ok(c - b'0'),
         b'a'..=b'f' => Ok(c - b'a' + 10),
-        _ => Err(ParseDigestError),
+        _ => Err(DigestReason::NotLowerHex { offset, byte: c }),
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{Digest, ParseDigestError};
+    use super::{Digest, DigestReason, ParseDigestError};
 
     const EMPTY_SHA256: &str =
         "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
@@ -106,27 +127,52 @@ mod tests {
     }
 
     #[test]
-    fn rejects_malformed_text() {
+    fn rejects_malformed_text_with_its_reason() {
         let hex = &EMPTY_SHA256["sha256:".len()..];
         let cases = [
-            String::new(),
-            "sha256:".to_owned(),
-            hex.to_owned(),
-            format!("sha512:{hex}"),
-            format!("sha256:{}", hex.to_uppercase()),
-            format!("sha256:{}", &hex[1..]),
-            format!("sha256:{hex}0"),
-            format!("sha256:{}", "g".repeat(64)),
+            (String::new(), DigestReason::MissingPrefix),
+            ("sha256:".to_owned(), DigestReason::WrongLength(0)),
+            (hex.to_owned(), DigestReason::MissingPrefix),
+            (format!("sha512:{hex}"), DigestReason::MissingPrefix),
+            (
+                format!("sha256:{}", hex.to_uppercase()),
+                DigestReason::NotLowerHex {
+                    offset: 7,
+                    byte: b'E',
+                },
+            ),
+            (
+                format!("sha256:{}", &hex[1..]),
+                DigestReason::WrongLength(63),
+            ),
+            (format!("sha256:{hex}0"), DigestReason::WrongLength(65)),
+            (
+                format!("sha256:{}g", &hex[..63]),
+                DigestReason::NotLowerHex {
+                    offset: 70,
+                    byte: b'g',
+                },
+            ),
         ];
-        for text in cases {
+        for (text, reason) in cases {
             let err = text
                 .parse::<Digest>()
                 .expect_err("malformed digest text must be rejected");
-            assert_eq!(
-                err, ParseDigestError,
-                "expected ParseDigestError for {text:?}"
-            );
+            assert_eq!(err, ParseDigestError { reason }, "reason for {text:?}");
         }
+    }
+
+    #[test]
+    fn display_carries_the_reason() {
+        let err = "sha256:abc"
+            .parse::<Digest>()
+            .expect_err("3 hex characters are not a SHA-256 digest");
+        assert_eq!(
+            err.to_string(),
+            "digest is not `sha256:` followed by 64 lowercase hex characters: \
+             3 hex characters after the prefix, expected 64",
+            "`{{err}}` alone tells the operator what is wrong"
+        );
     }
 
     #[test]
@@ -146,7 +192,7 @@ mod tests {
     #[test]
     fn code_is_stable() {
         assert_eq!(
-            ParseDigestError.code(),
+            "x".parse::<Digest>().expect_err("not a digest").code(),
             "INVALID_DIGEST",
             "stable code from core design §10"
         );

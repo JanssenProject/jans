@@ -9,6 +9,7 @@ use serde_json::Value;
 use thiserror::Error;
 
 use crate::json::{JsonError, parse_strict};
+use crate::limits::LimitKind;
 use crate::{Limits, SizeLimitError};
 
 /// Why `canonicalize_json` rejected its input.
@@ -45,6 +46,7 @@ pub(crate) fn canonicalize_value(value: &Value, limits: &Limits) -> Result<Vec<u
     // JCS can lengthen numbers (`1e20` becomes 21 digits), so the input bound is not enough.
     if bytes.len() > limits.max_canonical_bytes() {
         return Err(JsonError::LimitExceeded(SizeLimitError::new(
+            LimitKind::CanonicalBytes,
             limits.max_canonical_bytes(),
         )));
     }
@@ -54,6 +56,7 @@ pub(crate) fn canonicalize_value(value: &Value, limits: &Limits) -> Result<Vec<u
 #[cfg(test)]
 mod tests {
     use super::{CanonicalizeError, canonicalize_json};
+    use crate::limits::LimitKind;
     use crate::{JsonError, Limits, SizeLimitError};
 
     fn canonicalize(input: &[u8]) -> Result<Vec<u8>, CanonicalizeError> {
@@ -146,8 +149,11 @@ mod tests {
         let err = canonicalize_json(b"{{{{", &Limits::default().with_max_input_bytes(3))
             .expect_err("oversized input must be rejected without parsing");
         assert!(
-            matches!(err, CanonicalizeError::SizeLimitExceeded(e) if e.limit() == 3),
-            "expected SizeLimitExceeded with limit 3, got {err:?}"
+            err == CanonicalizeError::SizeLimitExceeded(SizeLimitError::new(
+                LimitKind::InputBytes,
+                3
+            )),
+            "expected the input-size limit of 3, got {err:?}"
         );
     }
 
@@ -168,13 +174,14 @@ mod tests {
         }
     }
 
-    /// Canonicalizes `input` under `limits` and returns the limit reported by the rejection.
-    fn rejected_limit(name: &str, input: &[u8], limits: Limits) -> usize {
+    /// Asserts that `input` under `limits` is rejected by exactly `expected`.
+    fn assert_rejected(name: &str, input: &[u8], limits: Limits, expected: SizeLimitError) {
         let err = canonicalize_json(input, &limits).expect_err(name);
-        let CanonicalizeError::Json(JsonError::LimitExceeded(e)) = err else {
-            panic!("expected Json(LimitExceeded) for {name}, got {err:?}");
-        };
-        e.limit()
+        assert_eq!(
+            err,
+            CanonicalizeError::Json(JsonError::LimitExceeded(expected)),
+            "rejection for {name}"
+        );
     }
 
     struct LimitCase {
@@ -182,7 +189,7 @@ mod tests {
         limits: Limits,
         accepted: &'static [u8],
         rejected: &'static [u8],
-        limit: usize,
+        expected: SizeLimitError,
     }
 
     #[test]
@@ -194,42 +201,42 @@ mod tests {
                 limits: defaults.with_max_depth(2),
                 accepted: b"[[1]]",
                 rejected: b"[[[1]]]",
-                limit: 2,
+                expected: SizeLimitError::new(LimitKind::Depth, 2),
             },
             LimitCase {
                 name: "object depth",
                 limits: defaults.with_max_depth(2),
                 accepted: br#"{"a":{}}"#,
                 rejected: br#"{"a":{"b":{}}}"#,
-                limit: 2,
+                expected: SizeLimitError::new(LimitKind::Depth, 2),
             },
             LimitCase {
                 name: "members",
                 limits: defaults.with_max_object_members(1),
                 accepted: br#"{"a":1}"#,
                 rejected: br#"{"a":1,"b":2}"#,
-                limit: 1,
+                expected: SizeLimitError::new(LimitKind::ObjectMembers, 1),
             },
             LimitCase {
                 name: "elements",
                 limits: defaults.with_max_array_elements(2),
                 accepted: b"[1,2]",
                 rejected: b"[1,2,3]",
-                limit: 2,
+                expected: SizeLimitError::new(LimitKind::ArrayElements, 2),
             },
             LimitCase {
                 name: "string value",
                 limits: defaults.with_max_string_bytes(3),
                 accepted: br#"["abc"]"#,
                 rejected: br#"["abcd"]"#,
-                limit: 3,
+                expected: SizeLimitError::new(LimitKind::StringBytes, 3),
             },
             LimitCase {
                 name: "member name",
                 limits: defaults.with_max_string_bytes(3),
                 accepted: br#"{"abc":1}"#,
                 rejected: br#"{"abcd":1}"#,
-                limit: 3,
+                expected: SizeLimitError::new(LimitKind::StringBytes, 3),
             },
             // Two-byte UTF-8 characters: the bound counts bytes, not characters.
             LimitCase {
@@ -237,17 +244,12 @@ mod tests {
                 limits: defaults.with_max_string_bytes(3),
                 accepted: "[\"é\"]".as_bytes(),
                 rejected: "[\"éé\"]".as_bytes(),
-                limit: 3,
+                expected: SizeLimitError::new(LimitKind::StringBytes, 3),
             },
         ];
         for case in cases {
             canonicalize_json(case.accepted, &case.limits).expect(case.name);
-            assert_eq!(
-                rejected_limit(case.name, case.rejected, case.limits),
-                case.limit,
-                "reported limit for {}",
-                case.name
-            );
+            assert_rejected(case.name, case.rejected, case.limits, case.expected);
         }
     }
 
@@ -256,17 +258,18 @@ mod tests {
         // 6 input bytes become `[100000000000000000000]`, 23 canonical bytes.
         let limits = Limits::default().with_max_canonical_bytes(10);
         canonicalize_json(b"[1]", &limits).expect("short canonical output is accepted");
-        assert_eq!(
-            rejected_limit("expanded number", b"[1e20]", limits),
-            10,
-            "canonical output above the bound is rejected"
+        assert_rejected(
+            "expanded number",
+            b"[1e20]",
+            limits,
+            SizeLimitError::new(LimitKind::CanonicalBytes, 10),
         );
     }
 
     #[test]
     fn limit_code_is_size_limit_exceeded() {
         assert_eq!(
-            JsonError::LimitExceeded(SizeLimitError::new(1)).code(),
+            JsonError::LimitExceeded(SizeLimitError::new(LimitKind::Depth, 1)).code(),
             "SIZE_LIMIT_EXCEEDED",
             "structural limits share the size-limit code from core design §10"
         );

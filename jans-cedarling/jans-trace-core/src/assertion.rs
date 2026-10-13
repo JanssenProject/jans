@@ -76,7 +76,7 @@ impl SignError {
 }
 
 /// Why `compute_content_digest` rejected its input.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum ContentDigestError {
     #[error(transparent)]
     SizeLimitExceeded(#[from] SizeLimitError),
@@ -156,7 +156,7 @@ pub fn compute_content_digest(
         Some(Value::String(text)) => {
             text.parse::<SignatureValue>()?;
         },
-        Some(_) => return Err(ParseSignatureError.into()),
+        Some(_) => return Err(ParseSignatureError::not_a_string().into()),
     }
     let canonical = canonicalize_value(&Value::Object(members), limits)?;
     Ok(Digest::sha256(&canonical))
@@ -171,8 +171,8 @@ mod tests {
         compute_content_digest, sign_assertion,
     };
     use crate::{
-        Digest, Ed25519Signer, JsonError, Limits, SignatureValue, SignerError, TraceSigner,
-        canonicalize_json,
+        Digest, Ed25519Signer, JsonError, Limits, ParseSignatureError, SignatureValue, SignerError,
+        TraceSigner, canonicalize_json,
     };
 
     const KID: &str = "key-2026-01";
@@ -387,13 +387,20 @@ mod tests {
             "expected MissingSignature, got {err:?}"
         );
 
-        for raw in [r#""AAAA""#, "5"] {
+        let too_short = "AAAA"
+            .parse::<SignatureValue>()
+            .expect_err("3 bytes are not a signature");
+        for (raw, reason) in [
+            (r#""AAAA""#, too_short),
+            ("5", ParseSignatureError::not_a_string()),
+        ] {
             let input = with_signature(UNSIGNED, raw);
             let err = content_digest(input.as_bytes())
                 .expect_err("signature must be 64 bytes of unpadded base64url");
-            assert!(
-                matches!(err, ContentDigestError::InvalidSignatureEncoding(_)),
-                "expected InvalidSignatureEncoding for signature {raw}, got {err:?}"
+            assert_eq!(
+                err,
+                ContentDigestError::InvalidSignatureEncoding(reason),
+                "reason for signature {raw}"
             );
         }
     }

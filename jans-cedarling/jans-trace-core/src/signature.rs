@@ -14,12 +14,35 @@ use ed25519_dalek::pkcs8::DecodePrivateKey as _;
 use ed25519_dalek::{Signer as _, SigningKey};
 use thiserror::Error;
 
-/// Text is not the unpadded base64url form of exactly 64 bytes.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
-#[error("signature is not unpadded base64url of 64 bytes")]
-pub struct ParseSignatureError;
+/// Text is not the unpadded base64url form of exactly 64 bytes. `Display` includes the
+/// reason, so it is not repeated through `Error::source`.
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
+#[error("signature is not unpadded base64url of 64 bytes: {reason}")]
+pub struct ParseSignatureError {
+    reason: SignatureEncodingReason,
+}
+
+/// Private, so dependency error types never become part of the public API. Dependency
+/// errors are shown through `Display` only: their messages already include their own
+/// causes.
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
+enum SignatureEncodingReason {
+    #[error("signature member is not a JSON string")]
+    NotAString,
+    #[error("{0}")]
+    Base64(base64::DecodeError),
+    #[error("decoded signature is {0} bytes, expected 64")]
+    WrongLength(usize),
+}
 
 impl ParseSignatureError {
+    /// For a `signature` member that holds a non-string JSON value.
+    pub(crate) const fn not_a_string() -> Self {
+        Self {
+            reason: SignatureEncodingReason::NotAString,
+        }
+    }
+
     #[must_use]
     pub const fn code(&self) -> &'static str {
         "INVALID_SIGNATURE_ENCODING"
@@ -39,11 +62,23 @@ impl SignerError {
     }
 }
 
-/// Bytes are not an unencrypted PKCS#8 PEM Ed25519 private key (RFC 8410). Carries no
-/// detail, so no part of the key text travels with it.
+/// Bytes are not an unencrypted PKCS#8 PEM Ed25519 private key (RFC 8410). The reason in
+/// `Display` names PEM labels, OIDs and positions, never key bytes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
-#[error("private key is not an unencrypted PKCS#8 PEM Ed25519 key")]
-pub struct PrivateKeyError;
+#[error("private key is not an unencrypted PKCS#8 PEM Ed25519 key: {reason}")]
+pub struct PrivateKeyError {
+    reason: PrivateKeyReason,
+}
+
+/// Private, so dependency error types never become part of the public API. Shown through
+/// `Display` only, as for `SignatureEncodingReason`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+enum PrivateKeyReason {
+    #[error("{0}")]
+    NotUtf8(std::str::Utf8Error),
+    #[error("{0}")]
+    Pkcs8(ed25519_dalek::pkcs8::Error),
+}
 
 impl PrivateKeyError {
     #[must_use]
@@ -80,8 +115,15 @@ impl FromStr for SignatureValue {
     fn from_str(text: &str) -> Result<Self, Self::Err> {
         let bytes = URL_SAFE_NO_PAD
             .decode(text)
-            .map_err(|_| ParseSignatureError)?;
-        bytes.try_into().map(Self).map_err(|_| ParseSignatureError)
+            .map_err(|e| ParseSignatureError {
+                reason: SignatureEncodingReason::Base64(e),
+            })?;
+        bytes
+            .try_into()
+            .map(Self)
+            .map_err(|bytes: Vec<u8>| ParseSignatureError {
+                reason: SignatureEncodingReason::WrongLength(bytes.len()),
+            })
     }
 }
 
@@ -113,8 +155,12 @@ impl Ed25519Signer {
     /// Loads the key format `openssl genpkey -algorithm ed25519` writes (decision R20).
     /// Takes bytes, not a path: reading the file is the host's job.
     pub fn from_pkcs8_pem(kid: impl Into<String>, pem: &[u8]) -> Result<Self, PrivateKeyError> {
-        let text = std::str::from_utf8(pem).map_err(|_| PrivateKeyError)?;
-        let key = SigningKey::from_pkcs8_pem(text).map_err(|_| PrivateKeyError)?;
+        let text = std::str::from_utf8(pem).map_err(|e| PrivateKeyError {
+            reason: PrivateKeyReason::NotUtf8(e),
+        })?;
+        let key = SigningKey::from_pkcs8_pem(text).map_err(|e| PrivateKeyError {
+            reason: PrivateKeyReason::Pkcs8(e),
+        })?;
         Ok(Self {
             kid: kid.into(),
             key,
@@ -148,9 +194,13 @@ impl TraceSigner for Ed25519Signer {
 
 #[cfg(test)]
 mod tests {
+    use base64::DecodeError;
+    use ed25519_dalek::pkcs8::spki::der::{self, pem};
+    use ed25519_dalek::pkcs8::{self, spki};
+
     use super::{
-        Ed25519Signer, ParseSignatureError, PrivateKeyError, SignatureValue, SignerError,
-        TraceSigner,
+        Ed25519Signer, ParseSignatureError, PrivateKeyReason, SignatureEncodingReason,
+        SignatureValue, SignerError, TraceSigner,
     };
 
     struct Rfc8032Case {
@@ -234,32 +284,81 @@ mod tests {
     }
 
     #[test]
-    fn rejects_non_canonical_signature_text() {
+    fn rejects_non_canonical_signature_text_with_its_reason() {
         let valid = SignatureValue::from_bytes([0xFB; 64]).to_string();
         let cases = [
-            ("padded", format!("{valid}==")),
+            (
+                "padded",
+                format!("{valid}=="),
+                SignatureEncodingReason::Base64(DecodeError::InvalidPadding),
+            ),
             (
                 "standard alphabet",
                 valid.replace('-', "+").replace('_', "/"),
+                SignatureEncodingReason::Base64(DecodeError::InvalidByte(0, b'+')),
             ),
-            ("truncated", valid[..85].to_owned()),
-            ("66 bytes", format!("{valid}AA")),
-            ("empty", String::new()),
-            ("not base64", "!".repeat(86)),
+            (
+                "truncated",
+                valid[..85].to_owned(),
+                SignatureEncodingReason::Base64(DecodeError::InvalidLength(85)),
+            ),
+            (
+                "66 bytes",
+                format!("{valid}AA"),
+                SignatureEncodingReason::WrongLength(66),
+            ),
+            (
+                "empty",
+                String::new(),
+                SignatureEncodingReason::WrongLength(0),
+            ),
+            (
+                "not base64",
+                "!".repeat(86),
+                SignatureEncodingReason::Base64(DecodeError::InvalidByte(0, b'!')),
+            ),
         ];
-        for (name, text) in cases {
+        for (name, text, reason) in cases {
             let err = text.parse::<SignatureValue>().expect_err(name);
-            assert_eq!(
-                err, ParseSignatureError,
-                "expected ParseSignatureError for {name}"
-            );
+            assert_eq!(err, ParseSignatureError { reason }, "reason for {name}");
         }
+    }
+
+    #[test]
+    fn display_carries_the_reason_once() {
+        let signature_err = format!("{}AA", SignatureValue::from_bytes([0xFB; 64]))
+            .parse::<SignatureValue>()
+            .expect_err("66 bytes are not an Ed25519 signature");
+        assert_eq!(
+            signature_err.to_string(),
+            "signature is not unpadded base64url of 64 bytes: \
+             decoded signature is 66 bytes, expected 64",
+            "`{{err}}` alone tells the operator what is wrong"
+        );
+
+        let not_utf8 = vec![0xFF, 0xFE];
+        let utf8 = std::str::from_utf8(&not_utf8).expect_err("0xFF is never valid UTF-8");
+        let key_err =
+            Ed25519Signer::from_pkcs8_pem("k", &not_utf8).expect_err("not UTF-8, not PEM");
+        assert_eq!(
+            key_err.to_string(),
+            format!("private key is not an unencrypted PKCS#8 PEM Ed25519 key: {utf8}"),
+            "`{{err}}` alone tells the operator what is wrong"
+        );
+
+        assert!(
+            std::error::Error::source(&signature_err).is_none()
+                && std::error::Error::source(&key_err).is_none(),
+            "the reason is already in Display, so a source chain would print it twice"
+        );
     }
 
     #[test]
     fn codes_are_stable() {
         assert_eq!(
-            ParseSignatureError.code(),
+            "!".parse::<SignatureValue>()
+                .expect_err("not base64url")
+                .code(),
             "INVALID_SIGNATURE_ENCODING",
             "stable code from core design §10"
         );
@@ -295,38 +394,90 @@ mod tests {
         );
     }
 
+    fn is_pem_error(reason: &PrivateKeyReason, expected: fn(&pem::Error) -> bool) -> bool {
+        matches!(reason, PrivateKeyReason::Pkcs8(pkcs8::Error::Asn1(e))
+            if matches!(e.kind(), der::ErrorKind::Pem(pem) if expected(&pem)))
+    }
+
+    struct KeyCase<'a> {
+        name: &'static str,
+        pem: Vec<u8>,
+        reason_matches: &'a dyn Fn(&PrivateKeyReason) -> bool,
+    }
+
     #[test]
-    fn rejects_anything_but_an_unencrypted_ed25519_private_key() {
+    fn rejects_anything_but_an_unencrypted_ed25519_private_key_with_its_reason() {
         let body = "MC4CAQAwBQYDK2VwBCIEIJ1hsZ3v/VpguoRK9JLsLMREScVpezJpGXA7rAMcrn9g";
-        let cases: [(&str, Vec<u8>); 5] = [
-            (
-                "encrypted label",
-                format!(
+        let wrong_label = |r: &PrivateKeyReason| {
+            is_pem_error(r, |e| matches!(e, pem::Error::UnexpectedTypeLabel { .. }))
+        };
+        let not_pem = |r: &PrivateKeyReason| is_pem_error(r, |e| matches!(e, pem::Error::Preamble));
+        let x25519 = pkcs8::ObjectIdentifier::new_unwrap("1.3.101.110");
+        let wrong_algorithm = |r: &PrivateKeyReason| {
+            matches!(r, PrivateKeyReason::Pkcs8(pkcs8::Error::PublicKey(
+                spki::Error::OidUnknown { oid }
+            )) if *oid == x25519)
+        };
+        let not_utf8 = |r: &PrivateKeyReason| matches!(r, PrivateKeyReason::NotUtf8(e) if e.valid_up_to() == 0);
+        let cases = [
+            KeyCase {
+                name: "encrypted label",
+                pem: format!(
                     "-----BEGIN ENCRYPTED PRIVATE KEY-----\n{body}\n-----END ENCRYPTED PRIVATE KEY-----\n"
                 )
                 .into_bytes(),
-            ),
-            (
-                "public key",
-                b"-----BEGIN PUBLIC KEY-----\n\
+                reason_matches: &wrong_label,
+            },
+            KeyCase {
+                name: "public key",
+                pem: b"-----BEGIN PUBLIC KEY-----\n\
                   MCowBQYDK2VwAyEA11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=\n\
                   -----END PUBLIC KEY-----\n"
                     .to_vec(),
-            ),
-            ("not PEM", b"not a key".to_vec()),
-            ("empty", Vec::new()),
-            ("not UTF-8", vec![0xFF, 0xFE]),
+                reason_matches: &wrong_label,
+            },
+            // TEST 1 secret under the X25519 OID (1.3.101.110): valid PKCS#8, wrong algorithm.
+            KeyCase {
+                name: "X25519 key",
+                pem: b"-----BEGIN PRIVATE KEY-----\n\
+                  MC4CAQAwBQYDK2VuBCIEIJ1hsZ3v/VpguoRK9JLsLMREScVpezJpGXA7rAMcrn9g\n\
+                  -----END PRIVATE KEY-----\n"
+                    .to_vec(),
+                reason_matches: &wrong_algorithm,
+            },
+            KeyCase {
+                name: "not PEM",
+                pem: b"not a key".to_vec(),
+                reason_matches: &not_pem,
+            },
+            KeyCase {
+                name: "empty",
+                pem: Vec::new(),
+                reason_matches: &not_pem,
+            },
+            KeyCase {
+                name: "not UTF-8",
+                pem: vec![0xFF, 0xFE],
+                reason_matches: &not_utf8,
+            },
         ];
-        for (name, pem) in cases {
-            let err = Ed25519Signer::from_pkcs8_pem("k", &pem).expect_err(name);
-            assert_eq!(err, PrivateKeyError, "expected PrivateKeyError for {name}");
+        for case in cases {
+            let err = Ed25519Signer::from_pkcs8_pem("k", &case.pem).expect_err(case.name);
+            assert!(
+                (case.reason_matches)(&err.reason),
+                "unexpected reason for {}: {:?}",
+                case.name,
+                err.reason
+            );
         }
     }
 
     #[test]
     fn private_key_code_is_stable() {
         assert_eq!(
-            PrivateKeyError.code(),
+            Ed25519Signer::from_pkcs8_pem("k", b"")
+                .expect_err("empty input is not a key")
+                .code(),
             "INVALID_PRIVATE_KEY",
             "our code, not in §10"
         );

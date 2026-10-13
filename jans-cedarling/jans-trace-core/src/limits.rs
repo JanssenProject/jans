@@ -103,7 +103,7 @@ impl Limits {
 
     pub(crate) fn check_input(self, input: &[u8]) -> Result<(), SizeLimitError> {
         if input.len() > self.input_bytes {
-            return Err(SizeLimitError::new(self.input_bytes));
+            return Err(SizeLimitError::new(LimitKind::InputBytes, self.input_bytes));
         }
         Ok(())
     }
@@ -123,16 +123,35 @@ impl Default for Limits {
     }
 }
 
-/// Input breaks one of the caller's limits.
+/// Input breaks one of the caller's limits. `Display` names which one; the code is the same
+/// for all of them (core design §10).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
-#[error("input exceeds the configured limit of {limit}")]
+#[error("{kind} exceeds the configured limit of {limit}")]
 pub struct SizeLimitError {
+    kind: LimitKind,
     limit: usize,
 }
 
+/// Which bound of `Limits` was exceeded.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+pub(crate) enum LimitKind {
+    #[error("input size in bytes")]
+    InputBytes,
+    #[error("JSON nesting depth")]
+    Depth,
+    #[error("members in one JSON object")]
+    ObjectMembers,
+    #[error("elements in one JSON array")]
+    ArrayElements,
+    #[error("bytes in one JSON string")]
+    StringBytes,
+    #[error("canonical output size in bytes")]
+    CanonicalBytes,
+}
+
 impl SizeLimitError {
-    pub(crate) const fn new(limit: usize) -> Self {
-        Self { limit }
+    pub(crate) const fn new(kind: LimitKind, limit: usize) -> Self {
+        Self { kind, limit }
     }
 
     #[must_use]
@@ -148,7 +167,26 @@ impl SizeLimitError {
 
 #[cfg(test)]
 mod tests {
-    use super::{Limits, SizeLimitError};
+    use super::{LimitKind, Limits, SizeLimitError};
+
+    #[test]
+    fn display_names_the_limit() {
+        let cases = [
+            (LimitKind::InputBytes, "input size in bytes"),
+            (LimitKind::Depth, "JSON nesting depth"),
+            (LimitKind::ObjectMembers, "members in one JSON object"),
+            (LimitKind::ArrayElements, "elements in one JSON array"),
+            (LimitKind::StringBytes, "bytes in one JSON string"),
+            (LimitKind::CanonicalBytes, "canonical output size in bytes"),
+        ];
+        for (kind, what) in cases {
+            assert_eq!(
+                SizeLimitError::new(kind, 7).to_string(),
+                format!("{what} exceeds the configured limit of 7"),
+                "`{{err}}` names the limit for {kind:?}"
+            );
+        }
+    }
 
     #[test]
     fn default_matches_lock_record_limit() {
@@ -170,15 +208,15 @@ mod tests {
             .expect_err("input above the limit is rejected");
         assert_eq!(
             err,
-            SizeLimitError { limit: 3 },
-            "error reports the configured limit"
+            SizeLimitError::new(LimitKind::InputBytes, 3),
+            "error reports which limit and its configured value"
         );
     }
 
     #[test]
     fn code_is_stable() {
         assert_eq!(
-            SizeLimitError { limit: 1 }.code(),
+            SizeLimitError::new(LimitKind::Depth, 1).code(),
             "SIZE_LIMIT_EXCEEDED",
             "stable code from core design §10"
         );

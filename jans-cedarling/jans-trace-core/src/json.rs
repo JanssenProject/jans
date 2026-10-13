@@ -10,12 +10,14 @@
 //! or verify different values from the same bytes, so both are rejected here. Structural
 //! limits are checked while parsing, so a hostile document is never fully built.
 
+use std::cell::Cell;
 use std::fmt;
 
 use serde::de::{self, DeserializeSeed, Deserializer, MapAccess, SeqAccess, Visitor};
 use serde_json::{Map, Number, Value};
 use thiserror::Error;
 
+use crate::limits::LimitKind;
 use crate::{Limits, SizeLimitError};
 
 /// Why bytes are not strict JSON. Embedded in the error of every function that parses JSON.
@@ -50,50 +52,25 @@ impl JsonError {
 /// Largest integer an IEEE-754 double reproduces exactly.
 const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
 
-// Markers let `map_error` recover our own rejections from `serde_json::Error`.
-const DUPLICATE_MEMBER: &str = "jans-trace-core: duplicate member";
-const UNSAFE_INTEGER: &str = "jans-trace-core: unsafe integer";
-const LIMIT_EXCEEDED: &str = "jans-trace-core: limit ";
-
 pub(crate) fn parse_strict(input: &[u8], limits: &Limits) -> Result<Value, JsonError> {
-    let mut deserializer = serde_json::Deserializer::from_slice(input);
-    let value = StrictSeed { limits, depth: 0 }
-        .deserialize(&mut deserializer)
-        .map_err(|err| map_error(&err))?;
-    // The trailing-data check `serde_json::from_slice` performs.
-    deserializer.end().map_err(|err| map_error(&err))?;
-    Ok(value)
-}
-
-fn map_error(err: &serde_json::Error) -> JsonError {
-    let message = err.to_string();
-    if message.starts_with(DUPLICATE_MEMBER) {
-        JsonError::DuplicateMember
-    } else if message.starts_with(UNSAFE_INTEGER) {
-        JsonError::NonCanonicalizable
-    } else if let Some(limit) = message
-        .strip_prefix(LIMIT_EXCEEDED)
-        .and_then(leading_number)
-    {
-        JsonError::LimitExceeded(SizeLimitError::new(limit))
-    } else {
-        JsonError::Invalid {
+    let rejection = Cell::new(None);
+    // `serde_json` errors carry only text, so our own rejections travel beside them.
+    let to_json_error = |err: serde_json::Error| {
+        rejection.take().unwrap_or(JsonError::Invalid {
             line: err.line(),
             column: err.column(),
-        }
-    }
-}
-
-/// `serde_json` appends ` at line L column C`, so only the leading digits are the limit.
-fn leading_number(text: &str) -> Option<usize> {
-    let end = text
-        .find(|c: char| !c.is_ascii_digit())
-        .unwrap_or(text.len());
-    text[..end].parse().ok()
-}
-
-fn limit_exceeded<E: de::Error>(limit: usize) -> E {
-    E::custom(format_args!("{LIMIT_EXCEEDED}{limit}"))
+        })
+    };
+    let mut deserializer = serde_json::Deserializer::from_slice(input);
+    let seed = StrictSeed {
+        limits,
+        depth: 0,
+        rejection: &rejection,
+    };
+    let value = seed.deserialize(&mut deserializer).map_err(to_json_error)?;
+    // The trailing-data check `serde_json::from_slice` performs.
+    deserializer.end().map_err(to_json_error)?;
+    Ok(value)
 }
 
 /// Parses one value; `depth` counts the containers around it.
@@ -101,21 +78,33 @@ fn limit_exceeded<E: de::Error>(limit: usize) -> E {
 struct StrictSeed<'l> {
     limits: &'l Limits,
     depth: usize,
+    /// Where a rejection stores its typed reason; `parse_strict` reads it back.
+    rejection: &'l Cell<Option<JsonError>>,
 }
 
 impl StrictSeed<'_> {
+    /// Records the typed reason and stops `serde_json`.
+    fn reject<E: de::Error>(self, error: JsonError) -> E {
+        self.rejection.set(Some(error));
+        E::custom("rejected by jans-trace-core strict JSON rules")
+    }
+
+    fn limit_exceeded<E: de::Error>(self, kind: LimitKind, limit: usize) -> E {
+        self.reject(JsonError::LimitExceeded(SizeLimitError::new(kind, limit)))
+    }
+
     /// Seed for the members of a container that opens at this position.
     fn enter<E: de::Error>(self) -> Result<Self, E> {
         let depth = self.depth + 1;
         if depth > self.limits.max_depth() {
-            return Err(limit_exceeded(self.limits.max_depth()));
+            return Err(self.limit_exceeded(LimitKind::Depth, self.limits.max_depth()));
         }
         Ok(Self { depth, ..self })
     }
 
     fn check_string<E: de::Error>(self, text: &str) -> Result<(), E> {
         if text.len() > self.limits.max_string_bytes() {
-            return Err(limit_exceeded(self.limits.max_string_bytes()));
+            return Err(self.limit_exceeded(LimitKind::StringBytes, self.limits.max_string_bytes()));
         }
         Ok(())
     }
@@ -146,14 +135,14 @@ impl<'de> Visitor<'de> for StrictSeed<'_> {
 
     fn visit_u64<E: de::Error>(self, v: u64) -> Result<Value, E> {
         if v > MAX_SAFE_INTEGER {
-            return Err(E::custom(UNSAFE_INTEGER));
+            return Err(self.reject(JsonError::NonCanonicalizable));
         }
         Ok(Value::Number(v.into()))
     }
 
     fn visit_i64<E: de::Error>(self, v: i64) -> Result<Value, E> {
         if v.unsigned_abs() > MAX_SAFE_INTEGER {
-            return Err(E::custom(UNSAFE_INTEGER));
+            return Err(self.reject(JsonError::NonCanonicalizable));
         }
         Ok(Value::Number(v.into()))
     }
@@ -180,7 +169,9 @@ impl<'de> Visitor<'de> for StrictSeed<'_> {
         let mut items = Vec::new();
         while let Some(item) = seq.next_element_seed(child)? {
             if items.len() == self.limits.max_array_elements() {
-                return Err(limit_exceeded(self.limits.max_array_elements()));
+                return Err(
+                    self.limit_exceeded(LimitKind::ArrayElements, self.limits.max_array_elements())
+                );
             }
             items.push(item);
         }
@@ -193,10 +184,12 @@ impl<'de> Visitor<'de> for StrictSeed<'_> {
         while let Some(key) = map.next_key::<String>()? {
             self.check_string::<A::Error>(&key)?;
             if members.contains_key(&key) {
-                return Err(de::Error::custom(DUPLICATE_MEMBER));
+                return Err(self.reject(JsonError::DuplicateMember));
             }
             if members.len() == self.limits.max_object_members() {
-                return Err(limit_exceeded(self.limits.max_object_members()));
+                return Err(
+                    self.limit_exceeded(LimitKind::ObjectMembers, self.limits.max_object_members())
+                );
             }
             let value = map.next_value_seed(child)?;
             members.insert(key, value);
