@@ -24,6 +24,7 @@ mod inputs;
 mod json;
 mod key;
 mod limits;
+mod receipt;
 mod signature;
 mod verify;
 
@@ -37,6 +38,11 @@ pub use inputs::{compute_bundle_hash, token_fingerprint};
 pub use json::JsonError;
 pub use key::{JwkError, PublicKey, PublicKeyError};
 pub use limits::{Limits, SizeLimitError};
+pub use receipt::{
+    ASSERTION_PROFILE, FormatReceivedAtError, InvalidReceiptError, RECEIPT_PROFILE,
+    ReceiptCommitment, ReceiptError, ReceiptLinkError, compute_receipt_hash, format_received_at,
+    verify_receipt_link,
+};
 pub use signature::{
     Ed25519Signer, ParseSignatureError, PrivateKeyError, SignatureValue, SignerError, TraceSigner,
 };
