@@ -117,7 +117,7 @@ impl StrictSeed<'_> {
 
     /// Seed for the members of a container that opens at this position.
     fn enter<E: de::Error>(self) -> Result<Self, E> {
-        let depth = self.depth + 1;
+        let depth = self.depth.saturating_add(1);
         if depth > self.limits.max_depth() {
             return Err(self.limit_exceeded(LimitKind::Depth, self.limits.max_depth()));
         }
