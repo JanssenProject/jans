@@ -84,6 +84,12 @@ public class BaseResource {
             throw new BadRequestException(getMissingAttributeError(attributeName));
         }
     }
+    
+    public static void checkNotNull(List<String> attributeList) {
+        if (attributeList!=null && !attributeList.isEmpty()) {
+            throw new BadRequestException(getMissingAttributeError(attributeList));
+        }
+    }
 
     public static void checkNotNull(String[] attributes, String attributeName) {
         if (attributes == null || attributes.length <= 0) {
@@ -175,6 +181,13 @@ public class BaseResource {
         ApiError error = new ApiError.ErrorBuilder().withCode(MISSING_ATTRIBUTE_CODE)
                 .withMessage(MISSING_ATTRIBUTE_MESSAGE)
                 .andDescription("The attribute " + attributeName + " is required for this operation").build();
+        return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
+    }
+    
+    protected static Response getMissingAttributeError(List<String> attributeNameList) {
+        ApiError error = new ApiError.ErrorBuilder().withCode(MISSING_ATTRIBUTE_CODE)
+                .withMessage(MISSING_ATTRIBUTE_MESSAGE)
+                .andDescription(String.join(", ", attributeNameList)  + " - attribute required for this operation").build();
         return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
     }
 
