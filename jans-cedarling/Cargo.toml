@@ -4,6 +4,7 @@ members = [
     "bindings/*",
     "cedarling",
     "cedarling-cli",
+    "jans-trace-core",
     "sigstore-verifier",
     "test_utils",
 ]

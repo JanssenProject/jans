@@ -1,0 +1,13 @@
+[package]
+name = "jans-trace-core"
+version = "0.0.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+description = "Deterministic TRACE cryptography: strict JSON, RFC 8785 JCS, Ed25519, SHA-256 digests"
+
+[dependencies]
+thiserror = { workspace = true }
+
+[lints]
+workspace = true
