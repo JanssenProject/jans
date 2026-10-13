@@ -13,6 +13,7 @@
       "workload_instance_id": "04bbe9ef-a853-417c-a2b8-5328b62936e2"
     },
     "event": {
+<<<<<<< HEAD:jans-lock/lock-server/service/src/test/resources/trace/assertions/authorization_decision_batch_valid.json
       "decisions": [
         {
           "decision_id": "d-1",
@@ -27,6 +28,13 @@
           "outcome": "DENY"
         }
       ],
+=======
+      "decision": {
+        "action": "Acme::Action::\"Pay\"",
+        "resource_type": "Acme::Payment",
+        "outcome": "ALLOW"
+      },
+>>>>>>> main:jans-lock/lock-server/service/src/test/resources/trace/negative/missing_producer_chain_producer_id.json
       "tokens": [
         {
           "issuer": "https://accounts.example.org",
