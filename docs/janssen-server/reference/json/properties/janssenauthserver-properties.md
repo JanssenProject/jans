@@ -28,6 +28,7 @@ tags:
 | allowPostLogoutRedirectWithoutValidation | Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property) | [Details](#allowpostlogoutredirectwithoutvalidation) |
 | allowRevokeForOtherClients | Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint | [Details](#allowrevokeforotherclients) |
 | allowSpontaneousScopes | Specifies whether to allow spontaneous scopes | [Details](#allowspontaneousscopes) |
+| allowStartupOnJwksUriFetchFailure | Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails. | [Details](#allowstartuponjwksurifetchfailure) |
 | applyXFrameOptionsHeaderIfUriContainsAny | Add X-Frame-Options header to response if any string in the list is contained by request uri. | [Details](#applyxframeoptionsheaderifuricontainsany) |
 | archivedJwkLifetimeInSeconds | Archived JWK lifetime in seconds | [Details](#archivedjwklifetimeinseconds) |
 | archivedJwksUri | URL of the OP's Archived JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP | [Details](#archivedjwksuri) |
@@ -510,6 +511,15 @@ tags:
 - Required: No
 
 - Default value: None
+
+
+## allowStartupOnJwksUriFetchFailure
+
+- Description: Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails.
+
+- Required: No
+
+- Default value: false
 
 
 ## applyXFrameOptionsHeaderIfUriContainsAny

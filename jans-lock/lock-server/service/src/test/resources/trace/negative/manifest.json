@@ -180,29 +180,14 @@
     "reason": "invalid:trace.policy.bundle_hash"
   },
   {
-    "file": "ad_outcome_invalid.json",
+    "file": "ad_decision_outcome_invalid.json",
     "errorId": "invalid_assertion",
-    "reason": "invalid:trace.event.outcome"
+    "reason": "invalid:trace.event.decision.outcome"
   },
   {
     "file": "ad_missing_runtime_pdp_id.json",
     "errorId": "invalid_assertion",
     "reason": "missing:trace.runtime.pdp_id"
-  },
-  {
-    "file": "capability_ids_empty.json",
-    "errorId": "invalid_assertion",
-    "reason": "empty:trace.event.capability_ids"
-  },
-  {
-    "file": "capability_ids_entry_invalid_outcome.json",
-    "errorId": "invalid_assertion",
-    "reason": "invalid:trace.event.capability_ids[0].outcome"
-  },
-  {
-    "file": "capability_id_too_long.json",
-    "errorId": "invalid_assertion",
-    "reason": "length:trace.event.capability_ids[0].capability_id"
   },
   {
     "file": "ci_with_policy_forbidden.json",
@@ -215,9 +200,9 @@
     "reason": "missing:trace.event.enforcement_point_id"
   },
   {
-    "file": "ci_outcome_too_long.json",
+    "file": "ci_invocation_outcome_too_long.json",
     "errorId": "invalid_assertion",
-    "reason": "length:trace.event.outcome"
+    "reason": "length:trace.event.invocation.outcome"
   },
   {
     "file": "re_with_capability_ids_forbidden.json",
@@ -263,5 +248,215 @@
     "file": "tokens_raw_jwt_as_jti.json",
     "errorId": "invalid_assertion",
     "reason": "raw_token_material"
+  },
+  {
+    "file": "ad_decision_action_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.event.decision.action"
+  },
+  {
+    "file": "ad_decision_missing_action.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.event.decision.action"
+  },
+  {
+    "file": "ad_decision_resource_id_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.decision.resource_id"
+  },
+  {
+    "file": "ad_decision_with_record_outcome.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.outcome"
+  },
+  {
+    "file": "ad_decision_not_object.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.event.decision"
+  },
+  {
+    "file": "ad_missing_decision.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.event.decision"
+  },
+  {
+    "file": "ad_decision_and_decisions.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.decisions"
+  },
+  {
+    "file": "ad_decisions_empty.json",
+    "errorId": "invalid_assertion",
+    "reason": "empty:trace.event.decisions"
+  },
+  {
+    "file": "ad_decisions_not_array.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.event.decisions"
+  },
+  {
+    "file": "ad_decisions_entry_invalid_outcome.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.event.decisions[0].outcome"
+  },
+  {
+    "file": "ad_decisions_entry_missing_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.event.decisions[0].decision_id"
+  },
+  {
+    "file": "ad_decisions_entry_id_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.event.decisions[0].decision_id"
+  },
+  {
+    "file": "ad_decisions_duplicate_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "duplicate:trace.event.decisions[1].decision_id"
+  },
+  {
+    "file": "ad_decisions_with_record_outcome.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.outcome"
+  },
+  {
+    "file": "ad_decisions_entry_resource_id_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.decisions[0].resource_id"
+  },
+  {
+    "file": "ad_with_capability_ids_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.capability_ids"
+  },
+  {
+    "file": "ad_missing_workload_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.subject.workload_id"
+  },
+  {
+    "file": "ad_missing_subject.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.subject.workload_id"
+  },
+  {
+    "file": "ad_subject_not_object.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.subject"
+  },
+  {
+    "file": "ad_workload_id_empty.json",
+    "errorId": "invalid_assertion",
+    "reason": "empty:trace.subject.workload_id"
+  },
+  {
+    "file": "ad_workload_id_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.subject.workload_id"
+  },
+  {
+    "file": "ad_workload_instance_id_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.subject.workload_instance_id"
+  },
+  {
+    "file": "ad_workload_instance_id_not_string.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.subject.workload_instance_id"
+  },
+  {
+    "file": "ci_invocation_action_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.event.invocation.action"
+  },
+  {
+    "file": "ci_invocation_resource_id_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.invocation.resource_id"
+  },
+  {
+    "file": "ci_invocation_with_record_outcome.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.outcome"
+  },
+  {
+    "file": "ci_missing_invocation.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.event.invocation"
+  },
+  {
+    "file": "ci_invocation_and_invocations.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.invocations"
+  },
+  {
+    "file": "ci_invocations_empty.json",
+    "errorId": "invalid_assertion",
+    "reason": "empty:trace.event.invocations"
+  },
+  {
+    "file": "ci_invocations_entry_missing_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.event.invocations[0].invocation_id"
+  },
+  {
+    "file": "ci_invocations_duplicate_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "duplicate:trace.event.invocations[1].invocation_id"
+  },
+  {
+    "file": "ci_invocations_with_record_outcome.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.outcome"
+  },
+  {
+    "file": "ci_with_capability_ids_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.capability_ids"
+  },
+  {
+    "file": "ci_missing_workload_id.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.subject.workload_id"
+  },
+  {
+    "file": "ci_missing_subject.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.subject.workload_id"
+  },
+  {
+    "file": "re_with_decision_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.decision"
+  },
+  {
+    "file": "re_with_decisions_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.decisions"
+  },
+  {
+    "file": "re_with_invocation_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.invocation"
+  },
+  {
+    "file": "re_with_invocations_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.invocations"
+  },
+  {
+    "file": "re_subject_workload_id_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.subject.workload_id"
+  },
+  {
+    "file": "re_subject_workload_instance_id_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.subject.workload_instance_id"
+  },
+  {
+    "file": "re_subject_not_object.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.subject"
   }
 ]
