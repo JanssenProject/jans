@@ -550,6 +550,7 @@ nav:
     - Lock:
       - Lock: janssen-server/lock/README.md
       - Lock Server: janssen-server/lock/lock-server.md
+      - TRACE Evidence: janssen-server/lock/trace.md
 
   # ====================
   # 9. PRODUCT, RELEASES & SUPPORT
