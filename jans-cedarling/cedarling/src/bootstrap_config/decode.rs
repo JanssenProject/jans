@@ -359,7 +359,7 @@ mod tests {
             "CEDARLING_POLICY_STORE_MAX_FILE_SIZE: 512\n",
         );
         let raw: BootstrapConfigRaw =
-            serde_yaml_ng::from_str(yaml).expect("YAML bootstrap config should deserialize");
+            serde_saphyr::from_str(yaml).expect("YAML bootstrap config should deserialize");
         let from_yaml = BootstrapConfig::try_from(raw).expect("YAML config should decode");
         assert_eq!(
             from_yaml.policy_store_config.max_file_size, 512,
