@@ -18,9 +18,11 @@
 #![allow(clippy::missing_errors_doc)]
 
 mod canonical;
+mod digest;
 mod json;
 mod limits;
 
 pub use canonical::{CanonicalizeError, canonicalize_json};
+pub use digest::{Digest, InvalidDigest};
 pub use json::JsonError;
 pub use limits::{Limits, SizeLimitExceeded};
