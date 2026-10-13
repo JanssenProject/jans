@@ -23,6 +23,8 @@ import static org.testng.Assert.expectThrows;
 public class ConfigurationFactoryTest {
 
     private static final String JWKS_URI = "https://ext.example.org/jwks";
+    private static final String RSA_JWK = "{\"kid\":\"old-kid\",\"kty\":\"RSA\",\"use\":\"sig\",\"alg\":\"RS256\",\"e\":\"AQAB\","
+            + "\"n\":\"0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw\"}";
 
     @Mock
     private Logger log;
@@ -70,8 +72,7 @@ public class ConfigurationFactoryTest {
     @Test
     public void initWebKeys_whenJwksUriChangesAndNewFetchFails_shouldNotKeepKeysOfPreviousUri() {
         final String newJwksUri = "https://other.example.org/jwks";
-        doReturn(new JSONObject("{\"keys\":[{\"kid\":\"old-kid\",\"kty\":\"RSA\",\"use\":\"sig\",\"alg\":\"RS256\"}]}"))
-                .when(configurationFactory).fetchExternalWebKeys(JWKS_URI);
+        doReturn(new JSONObject("{\"keys\":[" + RSA_JWK + "]}")).when(configurationFactory).fetchExternalWebKeys(JWKS_URI);
         configurationFactory.initWebKeys(conf(true));
         assertEquals(configurationFactory.getWebKeysConfiguration().getKeys().size(), 1);
         final Object previous = configurationFactory.getWebKeysConfiguration();
