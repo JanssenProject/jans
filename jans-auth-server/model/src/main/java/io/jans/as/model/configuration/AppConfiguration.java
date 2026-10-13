@@ -843,6 +843,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to remove Refresh Tokens on logout. Default value is true", defaultValue = "true")
     private Boolean removeRefreshTokensForClientOnLogout = true;
 
+    @DocProperty(description = "Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails.", defaultValue = "false")
+    private Boolean allowStartupOnJwksUriFetchFailure = false;
+
     @DocProperty(description = "Boolean value specifying whether to skip refreshing tokens on refreshing", defaultValue = "false")
     private Boolean skipRefreshTokenDuringRefreshing = false;
 
@@ -1697,6 +1700,15 @@ public class AppConfiguration implements Configuration {
 
     public void setAllowEndSessionWithUnmatchedSid(Boolean allowEndSessionWithUnmatchedSid) {
         this.allowEndSessionWithUnmatchedSid = allowEndSessionWithUnmatchedSid;
+    }
+
+    public Boolean getAllowStartupOnJwksUriFetchFailure() {
+        if (allowStartupOnJwksUriFetchFailure == null) allowStartupOnJwksUriFetchFailure = false;
+        return allowStartupOnJwksUriFetchFailure;
+    }
+
+    public void setAllowStartupOnJwksUriFetchFailure(Boolean allowStartupOnJwksUriFetchFailure) {
+        this.allowStartupOnJwksUriFetchFailure = allowStartupOnJwksUriFetchFailure;
     }
 
     public Boolean getRemoveRefreshTokensForClientOnLogout() {

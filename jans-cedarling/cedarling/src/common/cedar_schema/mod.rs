@@ -31,14 +31,14 @@ mod tests {
     #[test]
     fn test_read_ok() {
         static POLICY_STORE_RAW: &str = include_str!("../../../../test_files/policy-store_ok.yaml");
-        serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
+        serde_saphyr::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
             .expect("failed to deserialize policy-store_ok.yaml into LegacyAgamaPolicyStore");
     }
 
     #[test]
     fn test_agama_ok() {
         static POLICY_STORE_RAW: &str = include_str!("../../../../test_files/agama-store.yaml");
-        serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
+        serde_saphyr::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
             .expect("failed to deserialize agama-store.yaml into LegacyAgamaPolicyStore");
     }
 
@@ -46,7 +46,7 @@ mod tests {
     fn test_readable_yaml_ok() {
         static YAML_POLICY_STORE: &str =
             include_str!("../../../../test_files/policy-store_readable.yaml");
-        serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE)
+        serde_saphyr::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE)
             .expect("failed to deserialize policy-store_readable.yaml into LegacyAgamaPolicyStore");
     }
 }

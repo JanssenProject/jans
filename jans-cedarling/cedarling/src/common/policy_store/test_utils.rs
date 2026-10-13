@@ -13,6 +13,9 @@
 //! - Performance testing utilities
 
 use super::errors::PolicyStoreError;
+use super::formats::{self};
+use super::loader::StoreFs;
+use super::vfs_adapter::VfsFileSystem;
 use std::collections::HashMap;
 use std::io::{Cursor, Write};
 use zip::write::{ExtendedFileOptions, FileOptions};
@@ -30,6 +33,8 @@ pub(crate) struct PolicyStoreTestBuilder {
     pub cedar_version: String,
     /// Description
     pub description: Option<String>,
+    /// `policy_store_spec_version`; omitted from metadata.json when `None`
+    pub spec_version: Option<u32>,
     /// Schema content (Cedar schema format)
     pub schema: String,
     /// Policies: filename -> content
@@ -59,6 +64,7 @@ impl PolicyStoreTestBuilder {
             version: "1.0.0".to_string(),
             cedar_version: "4.4.0".to_string(),
             description: None,
+            spec_version: None,
             schema: Self::default_schema(),
             policies: HashMap::new(),
             templates: HashMap::new(),
@@ -104,6 +110,12 @@ impl PolicyStoreTestBuilder {
     /// Set the description.
     pub(crate) fn with_description(mut self, desc: impl Into<String>) -> Self {
         self.description = Some(desc.into());
+        self
+    }
+
+    /// Set `policy_store_spec_version` in metadata.json.
+    pub(crate) fn with_spec_version(mut self, spec_version: u32) -> Self {
+        self.spec_version = Some(spec_version);
         self
     }
 
@@ -180,6 +192,10 @@ impl PolicyStoreTestBuilder {
 
         if let Some(desc) = &self.description {
             metadata["policy_store"]["description"] = serde_json::Value::String(desc.clone());
+        }
+
+        if let Some(spec_version) = self.spec_version {
+            metadata["policy_store_spec_version"] = spec_version.into();
         }
 
         serde_json::to_string_pretty(&metadata).unwrap()
@@ -497,6 +513,16 @@ permit(
     }
 
     builder
+}
+
+/// Reads a store through the v0 layout without parsing it, for tests of the
+/// layout. Loader fixtures declare no spec version, so they resolve to v0.
+pub(super) fn read_v0_files(
+    vfs: &dyn VfsFileSystem,
+    dir: &str,
+    strict: bool,
+) -> Result<formats::Files, PolicyStoreError> {
+    formats::read_v0_files(&StoreFs::open(vfs, dir)?, strict)
 }
 
 #[cfg(test)]

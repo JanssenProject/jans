@@ -28,6 +28,7 @@ import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
+import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
@@ -77,7 +78,7 @@ public abstract class TraceStoreContractTest {
 		IngestionFlags flags = new IngestionFlags(false, false, false, false);
 		return new StoredTraceRecord(identity, "{\"trace\":{}}", "sha256:" + String.format("%064d", receiptSeq),
 				verification, receipt, flags, execution, chainPosition, TraceConstants.ZERO_HASH, capabilityIds,
-				tokenRefs, TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 3000L + receiptSeq);
+				tokenRefs, TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 3000L + receiptSeq, 0L);
 	}
 
 	protected StoredTraceRecord newRecord(String producerId, String recordId, String execAuthority, String execId,
@@ -185,7 +186,7 @@ public abstract class TraceStoreContractTest {
 		store.insertRecord(record);
 
 		IngestionFlags newFlags = new IngestionFlags(true, true, true, true);
-		boolean updated = store.updateRecordFlags(record.getIdentity(), newFlags);
+		boolean updated = store.updateRecordFlags(record.getIdentity(), newFlags, record.getVersion());
 
 		assertTrue(updated);
 		StoredTraceRecord found = store.findRecord(record.getIdentity()).get();
@@ -202,9 +203,42 @@ public abstract class TraceStoreContractTest {
 	@Test
 	void testUpdateRecordFlags_unknownIdentity_returnsFalse() throws Exception {
 		boolean updated = store.updateRecordFlags(new RecordIdentity(DOMAIN, "nope", "nope"),
-				new IngestionFlags(true, true, true, true));
+				new IngestionFlags(true, true, true, true), 0L);
 
 		assertFalse(updated);
+	}
+
+	// -- records: optimistic-concurrency version (design decision D-9, TRACE CAS MVP task 11) ----
+
+	@Test
+	void testUpdateRecordFlags_matchingVersion_succeedsAndIncrementsVersion() throws Exception {
+		StoredTraceRecord record = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
+		store.insertRecord(record);
+		long initialVersion = store.findRecord(record.getIdentity()).get().getVersion();
+
+		boolean updated = store.updateRecordFlags(record.getIdentity(), new IngestionFlags(true, false, false, false),
+				initialVersion);
+
+		assertTrue(updated);
+		assertEquals(initialVersion + 1, store.findRecord(record.getIdentity()).get().getVersion());
+	}
+
+	@Test
+	void testUpdateRecordFlags_staleVersion_throwsVersionConflictReason() throws Exception {
+		StoredTraceRecord record = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
+		store.insertRecord(record);
+		long initialVersion = store.findRecord(record.getIdentity()).get().getVersion();
+		// Advance the stored version once so the caller's expectation below is stale.
+		store.updateRecordFlags(record.getIdentity(), new IngestionFlags(true, false, false, false), initialVersion);
+
+		TraceStorageException ex = assertThrows(TraceStorageException.class,
+				() -> store.updateRecordFlags(record.getIdentity(), new IngestionFlags(false, true, false, false),
+						initialVersion));
+
+		assertEquals(TraceStore.VERSION_CONFLICT_REASON, ex.getReason());
+		// The losing writer's flags must never have been applied.
+		assertTrue(store.findRecord(record.getIdentity()).get().getFlags().isCoverageGap());
+		assertFalse(store.findRecord(record.getIdentity()).get().getFlags().isChainLinkFailure());
 	}
 
 	// -- records: execution ordering -----------------------------------------------------------

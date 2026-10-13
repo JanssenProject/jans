@@ -56,10 +56,12 @@ public final class StoredTraceRecord {
 
 	private final long createdAtMs;
 
+	private final long version;
+
 	public StoredTraceRecord(RecordIdentity identity, String assertionRaw, String contentDigest,
 			VerificationResult verification, ReceiptEntry receipt, IngestionFlags flags, ExecutionIdentity execution,
 			ChainPosition chainPosition, String prevRecordHash, List<String> capabilityIds, List<TokenRef> tokenRefs,
-			String eventKind, long signedAt, String nodeId, long createdAtMs) {
+			String eventKind, long signedAt, String nodeId, long createdAtMs, long version) {
 		this.identity = Objects.requireNonNull(identity, "identity");
 		this.assertionRaw = Objects.requireNonNull(assertionRaw, "assertionRaw");
 		this.contentDigest = Objects.requireNonNull(contentDigest, "contentDigest");
@@ -77,6 +79,7 @@ public final class StoredTraceRecord {
 		this.signedAt = signedAt;
 		this.nodeId = Objects.requireNonNull(nodeId, "nodeId");
 		this.createdAtMs = createdAtMs;
+		this.version = version;
 	}
 
 	public RecordIdentity getIdentity() {
@@ -149,22 +152,33 @@ public final class StoredTraceRecord {
 	}
 
 	/**
+	 * @return the record's optimistic-concurrency version, as last observed by the store (design
+	 *         decision D-9); used by {@link io.jans.lock.service.trace.store.TraceStore#updateRecordFlags}
+	 *         callers to assert the expected value for a compare-and-swap write
+	 */
+	public long getVersion() {
+		return version;
+	}
+
+	/**
 	 * @return an independent deep copy of this record (defensive copy of the mutable
 	 *         {@link IngestionFlags} and the two lists; everything else is already immutable)
 	 */
 	public StoredTraceRecord copy() {
 		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verification, receipt, flags, execution,
-				chainPosition, prevRecordHash, capabilityIds, tokenRefs, eventKind, signedAt, nodeId, createdAtMs);
+				chainPosition, prevRecordHash, capabilityIds, tokenRefs, eventKind, signedAt, nodeId, createdAtMs,
+				version);
 	}
 
 	/**
-	 * @return an independent copy of this record with {@link #getFlags()} replaced; used by the
-	 *         store to apply {@code updateRecordFlags} without a full re-construction call site
+	 * @return an independent copy of this record with {@link #getFlags()} and {@link #getVersion()}
+	 *         replaced; used by the store to apply {@code updateRecordFlags} without a full
+	 *         re-construction call site
 	 */
-	public StoredTraceRecord withFlags(IngestionFlags newFlags) {
+	public StoredTraceRecord withFlags(IngestionFlags newFlags, long newVersion) {
 		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verification, receipt, newFlags,
 				execution, chainPosition, prevRecordHash, capabilityIds, tokenRefs, eventKind, signedAt, nodeId,
-				createdAtMs);
+				createdAtMs, newVersion);
 	}
 
 	@Override
@@ -189,7 +203,7 @@ public final class StoredTraceRecord {
 		return "StoredTraceRecord [identity=" + identity + ", contentDigest=" + contentDigest + ", receipt="
 				+ receipt + ", flags=" + flags + ", execution=" + execution + ", chainPosition=" + chainPosition
 				+ ", eventKind=" + eventKind + ", signedAt=" + signedAt + ", nodeId=" + nodeId + ", createdAtMs="
-				+ createdAtMs + "]";
+				+ createdAtMs + ", version=" + version + "]";
 	}
 
 }
