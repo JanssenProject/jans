@@ -104,7 +104,7 @@ pub mod bindings {
     pub use crate::http::spawn_task;
     pub use crate::sparkv;
     pub use serde_json;
-    pub use serde_yaml_ng;
+    pub use serde_saphyr;
 }
 
 /// Errors that can occur during initialization Cedarling.
