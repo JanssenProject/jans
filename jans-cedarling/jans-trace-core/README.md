@@ -130,9 +130,10 @@ hash on the machine and binary that actually run. If it fails, disable TRACE ing
 - Canonicalize any JSON: `json::canonicalize_json(text, &limits)`.
 - Re-verify a receipt chain: rebuild each stored receipt with
   `ReceiptCommitment::from_stored`, filling `StoredReceipt` with `ReceivedAt::from_str`,
-  `ReceiptPosition::new`, `Digest::from_str` and the stored ids, then walk the chain from
-  `Digest::GENESIS` with `commitment.verify_link(&previous_hash)`. Insertion, deletion or
-  rewriting of an entry breaks the walk. Without signed checkpoints this does not protect
+  `ReceiptPosition::new`, `Digest::from_str` and the stored ids, then walk the chain:
+  `first.verify_link(&Digest::GENESIS)`, and `current.verify_successor(&previous)` for
+  every later receipt, which also checks the evidence domain and that the sequence is the
+  next one. Insertion, deletion or rewriting of an entry breaks the walk. Without signed checkpoints this does not protect
   against an operator who rewrites the whole chain.
 
 ### Calling from other languages
@@ -231,7 +232,7 @@ Shared types live at the crate root: `Digest` (`sha256:<hex>`, strict `FromStr`,
 | `assertion` | `UnsignedAssertion` (`parse`, `sign`), `SignedAssertion` (`parse`, `verify`, `as_str`, `content_digest`, `signing_input`), `parse_batch`, `batch_body`, `VerifiedAssertion`, `VerificationContext`, `AssertionIdentity` | producers parse, sign and build bulk bodies; Lock splits bulk bodies, parses and verifies; tooling reads signing input |
 | `signature` | `TraceSigner`, `Ed25519Signer` (`from_pkcs8_pem`, `from_secret_bytes`, `public_key_bytes`), `SignatureValue` | producers |
 | `key` | `PublicKey` (`from_jwk`, `from_bytes`, `to_bytes`, `thumbprint`) | Lock key registry, tooling |
-| `receipt` | `ReceivedAt`, `ReceiptPosition`, `ReceiptCommitment` (`for_assertion`, `from_stored`, field accessors, `receipt_hash`, `verify_link`), `StoredReceipt`, `RECEIPT_PROFILE`, `ASSERTION_PROFILE` | Lock, auditors |
+| `receipt` | `ReceivedAt`, `ReceiptPosition`, `ReceiptCommitment` (`for_assertion`, `from_stored`, field accessors, `receipt_hash`, `verify_link`, `verify_successor`), `StoredReceipt`, `RECEIPT_PROFILE`, `ASSERTION_PROFILE` | Lock, auditors |
 | `inputs` | `compute_bundle_hash`, `token_fingerprint` | producers (PEPs too), Lock later |
 | `json` | `canonicalize_json`, `JsonError` | tooling; `JsonError` appears inside other errors |
 | `self_test` | `self_test` | Lock at startup |
@@ -287,7 +288,7 @@ signatures or record content.
 | `INVALID_PRIVATE_KEY` | Not an unencrypted PKCS#8 PEM Ed25519 key. Not in the core design. |
 | `INVALID_DIGEST` | Text is not `sha256:` plus 64 lowercase hex digits. |
 | `INVALID_RECEIPT` | `received_at` text or sequence and predecessor break the v1 profile, a clock reading is after year 9999, or a stored receipt has an empty `producer_id` / `record_id`. |
-| `RECEIPT_LINK_MISMATCH` | Receipt does not name the expected predecessor. |
+| `RECEIPT_LINK_MISMATCH` | Receipt does not name the expected predecessor; with `verify_successor`, also another evidence domain or a sequence that is not the next one. |
 | `SIGNER_FAILURE` | The signer failed; carries no detail, so HSM data never leaks. |
 | `SELF_TEST_FAILED` | A known answer differed. Not in the core design. |
 | `INVALID_BATCH` | A bulk body is valid JSON but not an array. Not in the core design. |

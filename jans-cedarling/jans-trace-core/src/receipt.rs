@@ -299,16 +299,38 @@ impl ReceiptCommitment {
     }
 
     /// Checks that this receipt names `previous_receipt_hash`, the current chain head (or
-    /// `Digest::GENESIS` for an empty chain), and returns its own hash: the next head.
+    /// `Digest::GENESIS` for an empty chain), and returns its own hash: the next head. Only
+    /// the hash is compared; with the previous receipt at hand, `verify_successor` checks
+    /// the whole link.
     pub fn verify_link(&self, previous_receipt_hash: &Digest) -> Result<Digest, ReceiptLinkError> {
         let named = self.position.prev_receipt_hash;
         if named != *previous_receipt_hash {
-            return Err(ReceiptLinkError {
+            return Err(LinkReason::Predecessor {
                 named,
                 expected: *previous_receipt_hash,
-            });
+            }
+            .into());
         }
         Ok(self.receipt_hash())
+    }
+
+    /// Checks that this receipt directly follows `previous` in the same chain: same evidence
+    /// domain, the next sequence, and `previous`'s hash as predecessor. Returns its own hash,
+    /// the next head. A genesis receipt has no predecessor; check it with `verify_link`
+    /// against `Digest::GENESIS`.
+    pub fn verify_successor(&self, previous: &Self) -> Result<Digest, ReceiptLinkError> {
+        if self.evidence_domain_id != previous.evidence_domain_id {
+            return Err(LinkReason::OtherDomain.into());
+        }
+        let (sequence, previous_sequence) = (self.position.sequence, previous.position.sequence);
+        if previous_sequence.checked_add(1) != Some(sequence) {
+            return Err(LinkReason::NotNextSequence {
+                sequence,
+                previous: previous_sequence,
+            }
+            .into());
+        }
+        self.verify_link(&previous.receipt_hash())
     }
 
     /// JCS by hand: the member names are fixed and listed here in JCS order, and every value
@@ -382,13 +404,28 @@ impl StoredReceiptError {
     }
 }
 
-/// The receipt names another predecessor than the current chain head. Digests are public,
-/// so both are shown.
+/// The receipt does not continue the chain it is checked against. Digests and sequences
+/// are public, so they are shown; evidence-domain ids are not.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
-#[error("receipt names predecessor {named}, but the chain head is {expected}")]
+#[error("receipt does not link to its predecessor: {reason}")]
 pub struct ReceiptLinkError {
-    named: Digest,
-    expected: Digest,
+    reason: LinkReason,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+enum LinkReason {
+    #[error("it names {named}, but the previous receipt hash is {expected}")]
+    Predecessor { named: Digest, expected: Digest },
+    #[error("it belongs to another evidence domain")]
+    OtherDomain,
+    #[error("sequence {sequence} does not follow {previous}")]
+    NotNextSequence { sequence: u64, previous: u64 },
+}
+
+impl From<LinkReason> for ReceiptLinkError {
+    fn from(reason: LinkReason) -> Self {
+        Self { reason }
+    }
 }
 
 impl ReceiptLinkError {
@@ -478,7 +515,7 @@ fn days_from_civil(year: u64, month: u64, day: u64) -> Option<u64> {
 #[cfg(test)]
 mod tests {
     use super::{
-        ParseReceivedAtError, ReceiptCommitment, ReceiptLinkError, ReceiptPosition,
+        LinkReason, ParseReceivedAtError, ReceiptCommitment, ReceiptLinkError, ReceiptPosition,
         ReceiptPositionError, ReceivedAt, ReceivedAtRangeError, StoredReceipt, StoredReceiptError,
         StoredReceiptReason,
     };
@@ -753,20 +790,138 @@ mod tests {
         let head = Digest::sha256(b"not the head");
         assert_eq!(
             second.verify_link(&head),
-            Err(ReceiptLinkError {
+            Err(ReceiptLinkError::from(LinkReason::Predecessor {
                 named: first_hash,
                 expected: head,
-            }),
+            })),
             "a receipt naming another predecessor is a link mismatch"
         );
         assert_eq!(
             genesis_receipt().verify_link(&first_hash),
-            Err(ReceiptLinkError {
+            Err(ReceiptLinkError::from(LinkReason::Predecessor {
                 named: Digest::GENESIS,
                 expected: first_hash,
-            }),
+            })),
             "a genesis receipt cannot follow an existing head"
         );
+    }
+
+    #[test]
+    fn a_successor_links_to_the_previous_receipt_of_its_chain() {
+        let first = genesis_receipt();
+        let second = commitment(StoredReceipt {
+            position: position(2, first.receipt_hash()),
+            ..stored()
+        });
+        assert_eq!(
+            second.verify_successor(&first),
+            Ok(second.receipt_hash()),
+            "same domain, next sequence, predecessor hash: returns the new head"
+        );
+    }
+
+    struct SuccessorCase {
+        name: &'static str,
+        current: ReceiptCommitment,
+        reason: LinkReason,
+    }
+
+    #[test]
+    fn a_successor_must_continue_the_same_chain() {
+        let first = genesis_receipt();
+        let first_hash = first.receipt_hash();
+        let other = Digest::sha256(b"not the previous receipt");
+        let cases = [
+            SuccessorCase {
+                name: "another evidence domain",
+                current: commitment(StoredReceipt {
+                    evidence_domain_id: "domain-2".to_owned(),
+                    position: position(2, first_hash),
+                    ..stored()
+                }),
+                reason: LinkReason::OtherDomain,
+            },
+            SuccessorCase {
+                name: "a skipped sequence",
+                current: commitment(StoredReceipt {
+                    position: position(5, first_hash),
+                    ..stored()
+                }),
+                reason: LinkReason::NotNextSequence {
+                    sequence: 5,
+                    previous: 1,
+                },
+            },
+            SuccessorCase {
+                name: "a second genesis",
+                current: genesis_receipt(),
+                reason: LinkReason::NotNextSequence {
+                    sequence: 1,
+                    previous: 1,
+                },
+            },
+            SuccessorCase {
+                name: "another predecessor hash",
+                current: commitment(StoredReceipt {
+                    position: position(2, other),
+                    ..stored()
+                }),
+                reason: LinkReason::Predecessor {
+                    named: other,
+                    expected: first_hash,
+                },
+            },
+        ];
+        for case in cases {
+            assert_eq!(
+                case.current.verify_successor(&first),
+                Err(ReceiptLinkError::from(case.reason)),
+                "{} is a link mismatch with its reason",
+                case.name
+            );
+        }
+    }
+
+    struct LinkDisplayCase {
+        reason: LinkReason,
+        text: String,
+    }
+
+    #[test]
+    fn link_error_display_names_the_break() {
+        let named = Digest::sha256(b"named");
+        let expected = Digest::sha256(b"expected");
+        let cases = [
+            LinkDisplayCase {
+                reason: LinkReason::Predecessor { named, expected },
+                text: format!(
+                    "receipt does not link to its predecessor: it names {named}, but the \
+                     previous receipt hash is {expected}"
+                ),
+            },
+            LinkDisplayCase {
+                reason: LinkReason::OtherDomain,
+                text: "receipt does not link to its predecessor: it belongs to another evidence \
+                       domain"
+                    .to_owned(),
+            },
+            LinkDisplayCase {
+                reason: LinkReason::NotNextSequence {
+                    sequence: 5,
+                    previous: 1,
+                },
+                text: "receipt does not link to its predecessor: sequence 5 does not follow 1"
+                    .to_owned(),
+            },
+        ];
+        for case in cases {
+            assert_eq!(
+                ReceiptLinkError::from(case.reason).to_string(),
+                case.text,
+                "`{{err}}` explains {:?}",
+                case.reason
+            );
+        }
     }
 
     #[test]
