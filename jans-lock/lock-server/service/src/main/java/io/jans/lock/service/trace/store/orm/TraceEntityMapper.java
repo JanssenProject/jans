@@ -98,6 +98,7 @@ final class TraceEntityMapper {
 		entity.setEquivocation(flags.isEquivocation());
 		entity.setLate(flags.isLate());
 		entity.setNodeId(record.getNodeId());
+		entity.setVersion(record.getVersion());
 		entity.setCreationDate(new Date(record.getCreatedAtMs()));
 		return entity;
 	}
@@ -124,8 +125,9 @@ final class TraceEntityMapper {
 		long createdAtMs = entity.getCreationDate() == null ? 0L : entity.getCreationDate().getTime();
 
 		return new StoredTraceRecord(identity, entity.getAssertion(), entity.getContentDigest(), verification,
-				receipt, flags, execution, chainPosition, entity.getPrevRecordHash(), tokenRefs,
-				entity.getEventKind(), nvl(entity.getSignedAt()), entity.getNodeId(), createdAtMs);
+				receipt, flags, execution, chainPosition, entity.getPrevRecordHash(), capabilityIds, tokenRefs,
+				entity.getEventKind(), nvl(entity.getSignedAt()), entity.getNodeId(), createdAtMs,
+				nvl(entity.getVersion()));
 	}
 
 	private static TraceVerification toVerificationPojo(VerificationResult verification) {

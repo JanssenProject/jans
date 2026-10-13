@@ -80,6 +80,8 @@ public final class StoredTraceRecordFactory {
 
 	private boolean late;
 
+	private long version;
+
 	private StoredTraceRecordFactory() {
 	}
 
@@ -217,6 +219,11 @@ public final class StoredTraceRecordFactory {
 		return this;
 	}
 
+	public StoredTraceRecordFactory version(long version) {
+		this.version = version;
+		return this;
+	}
+
 	public StoredTraceRecord build() {
 		if (recordId == null) {
 			throw new IllegalStateException("recordId must be set");
@@ -235,8 +242,8 @@ public final class StoredTraceRecordFactory {
 		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late);
 
 		return new StoredTraceRecord(identity, "{\"trace\":{}}", contentDigest, verification, receipt, flags,
-				execution, chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId,
-				createdAtMs);
+				execution, chainPosition, prevRecordHash, capabilityIds, tokenRefs, eventKind, signedAt, nodeId,
+				createdAtMs, version);
 	}
 
 }

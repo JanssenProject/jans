@@ -70,6 +70,40 @@ fn default_token_id() -> String {
     "jti".to_string()
 }
 
+/// Agama-format custom issuer; mirrors the runtime `CustomIssuerMetadata`.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct LegacyCustomIssuerMetadata {
+    pub(crate) tokens_mappings: HashMap<String, LegacyCustomTokenMetadata>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct LegacyCustomTokenMetadata {
+    #[serde(default)]
+    pub(crate) required: bool,
+    #[serde(default)]
+    pub(crate) required_claims: HashSet<String>,
+}
+
+impl From<LegacyCustomIssuerMetadata> for super::CustomIssuerMetadata {
+    fn from(v: LegacyCustomIssuerMetadata) -> Self {
+        Self {
+            tokens_mappings: v
+                .tokens_mappings
+                .into_iter()
+                .map(|(mapping, token)| {
+                    let token = super::CustomTokenMetadata {
+                        required: token.required,
+                        required_claims: token.required_claims,
+                    };
+                    (mapping, token)
+                })
+                .collect(),
+        }
+    }
+}
+
 impl From<LegacyTokenEntityMetadata> for super::TokenEntityMetadata {
     fn from(v: LegacyTokenEntityMetadata) -> Self {
         super::TokenEntityMetadata::builder()
@@ -450,7 +484,7 @@ pub(crate) struct LegacyPolicyStore {
     pub schema: Option<LegacyCedarSchema>,
     pub policies: LegacyPoliciesContainer,
     pub trusted_issuers: Option<HashMap<String, LegacyTrustedIssuer>>,
-    pub custom_issuers: Option<HashMap<String, super::CustomIssuerMetadata>>,
+    pub custom_issuers: Option<HashMap<String, LegacyCustomIssuerMetadata>>,
     pub default_entities: LegacyDefaultEntitiesWithWarns,
 }
 
@@ -515,7 +549,7 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
                 .get("custom_issuers")
                 .filter(|v| !v.is_null())
                 .map(|v| {
-                    HashMap::<String, super::CustomIssuerMetadata>::deserialize(v).map_err(|e| {
+                    HashMap::<String, LegacyCustomIssuerMetadata>::deserialize(v).map_err(|e| {
                         de::Error::custom(format!("error parsing custom issuers: {e}"))
                     })
                 })
@@ -546,7 +580,12 @@ impl From<LegacyPolicyStore> for super::PolicyStore {
             trusted_issuers: v
                 .trusted_issuers
                 .map(|issuers| issuers.into_iter().map(|(k, v)| (k, v.into())).collect()),
-            custom_issuers: v.custom_issuers.unwrap_or_default(),
+            custom_issuers: v
+                .custom_issuers
+                .unwrap_or_default()
+                .into_iter()
+                .map(|(k, v)| (k, v.into()))
+                .collect(),
             default_entities: v.default_entities.into(),
         }
     }

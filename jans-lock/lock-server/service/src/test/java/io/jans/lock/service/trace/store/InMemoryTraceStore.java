@@ -187,19 +187,29 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
-	public boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags) throws TraceStorageException {
+	public boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags, long expectedVersion)
+			throws TraceStorageException {
 		String key = TraceKeys.recordKey(id);
 		StoredTraceRecord[] holder = new StoredTraceRecord[1];
+		boolean[] versionConflict = new boolean[1];
 		recordsByKey.computeIfPresent(key, (k, existing) -> {
+			if (existing.getVersion() != expectedVersion) {
+				versionConflict[0] = true;
+				return existing;
+			}
 			IngestionFlags updated = existing.getFlags();
 			updated.setCoverageGap(flags.isCoverageGap());
 			updated.setChainLinkFailure(flags.isChainLinkFailure());
 			updated.setEquivocation(flags.isEquivocation());
 			// jansTraceLate is fixed at ingestion (design §10, T-1); never overwritten here.
-			StoredTraceRecord replacement = existing.withFlags(updated);
+			StoredTraceRecord replacement = existing.withFlags(updated, existing.getVersion() + 1);
 			holder[0] = replacement;
 			return replacement;
 		});
+		if (versionConflict[0]) {
+			throw new TraceStorageException(VERSION_CONFLICT_REASON,
+					"Version mismatch updating record flags for " + key);
+		}
 		return holder[0] != null;
 	}
 

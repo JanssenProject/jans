@@ -30,6 +30,7 @@ public class TraceConfiguration {
     public static final int DEFAULT_MAX_ARRAY_LENGTH = 256;
     public static final int DEFAULT_MAX_OBJECT_MEMBERS = 256;
     public static final int DEFAULT_RECEIPT_ALLOCATION_RETRY_LIMIT = 8;
+    public static final int DEFAULT_CORRELATION_RETRY_LIMIT = 3;
     public static final int DEFAULT_RECEIPT_REPAIR_INTERVAL_SECONDS = 300;
     public static final int DEFAULT_PENDING_RECEIPT_TIMEOUT_SECONDS = 120;
     public static final int DEFAULT_MAX_BULK_RECORDS = 100;
@@ -79,6 +80,10 @@ public class TraceConfiguration {
     @DocProperty(description = "Maximum retries when allocating a receipt-chain sequence number", defaultValue = "8")
     @Schema(description = "Maximum retries when allocating a receipt-chain sequence number")
     private int receiptAllocationRetryLimit = DEFAULT_RECEIPT_ALLOCATION_RETRY_LIMIT;
+
+    @DocProperty(description = "Maximum retries when a correlation neighbor update hits a version conflict", defaultValue = "3")
+    @Schema(description = "Maximum retries when a correlation neighbor update hits a version conflict")
+    private int correlationRetryLimit = DEFAULT_CORRELATION_RETRY_LIMIT;
 
     @DocProperty(description = "Interval in seconds between receipt repair timer runs", defaultValue = "300")
     @Schema(description = "Interval in seconds between receipt repair timer runs")
@@ -180,6 +185,14 @@ public class TraceConfiguration {
         this.receiptAllocationRetryLimit = receiptAllocationRetryLimit;
     }
 
+    public int getCorrelationRetryLimit() {
+        return correlationRetryLimit > 0 ? correlationRetryLimit : DEFAULT_CORRELATION_RETRY_LIMIT;
+    }
+
+    public void setCorrelationRetryLimit(int correlationRetryLimit) {
+        this.correlationRetryLimit = correlationRetryLimit;
+    }
+
     public int getReceiptRepairIntervalSeconds() {
         return receiptRepairIntervalSeconds > 0 ? receiptRepairIntervalSeconds
                 : DEFAULT_RECEIPT_REPAIR_INTERVAL_SECONDS;
@@ -238,6 +251,7 @@ public class TraceConfiguration {
                 + getMaxJsonDepth() + ", maxStringLength=" + getMaxStringLength() + ", maxArrayLength="
                 + getMaxArrayLength() + ", maxObjectMembers=" + getMaxObjectMembers()
                 + ", receiptAllocationRetryLimit=" + getReceiptAllocationRetryLimit()
+                + ", correlationRetryLimit=" + getCorrelationRetryLimit()
                 + ", receiptRepairIntervalSeconds=" + getReceiptRepairIntervalSeconds()
                 + ", pendingReceiptTimeoutSeconds=" + getPendingReceiptTimeoutSeconds() + ", maxBulkRecords="
                 + getMaxBulkRecords() + ", maxBulkRequestBytes=" + getMaxBulkRequestBytes()

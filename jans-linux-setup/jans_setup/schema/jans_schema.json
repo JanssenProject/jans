@@ -6981,6 +6981,7 @@
         "jansTraceEquivocation",
         "jansTraceLate",
         "jansTraceNodeId",
+        "jansVersion",
         "creationDate"
       ],
       "must": [
@@ -7011,6 +7012,7 @@
         "jansTraceReceiptHash",
         "jansTraceReceiptState",
         "jansTraceNodeId",
+        "jansVersion",
         "creationDate"
       ],
       "must": [
@@ -7062,6 +7064,7 @@
         "jansTraceValidUntil",
         "jansTraceRevokedAt",
         "jansTraceRegisteredBy",
+        "jansVersion",
         "creationDate"
       ],
       "must": [

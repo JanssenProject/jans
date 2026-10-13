@@ -32,7 +32,7 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
     let content = fs::read_to_string(&test_file_path)
         .with_context(|| format!("failed to read test file: {}", test_file_path.display()))?;
 
-    let test_file: TestFile = serde_yaml_ng::from_str(&content)
+    let test_file: TestFile = serde_saphyr::from_str(&content)
         .with_context(|| format!("failed to parse YAML in {}", test_file_path.display()))?;
 
     if test_file.tests.is_empty() {

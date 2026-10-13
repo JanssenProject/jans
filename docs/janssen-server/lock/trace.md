@@ -197,6 +197,7 @@ In `FIRST_OBSERVED` mode:
 The chain list shows how each chain came to exist in `genesis_kind`: `pre_registered_genesis` for chains registered through the admin API (and for chains stored before this field existed), or `first_observed_genesis` for chains opened by a genesis record. A `first_observed_genesis` chain only says that the first genesis record Lock saw for that chain opened it. It says nothing about earlier producer history, and Lock does not claim to hold a complete history of the chain.
 
 Restarting a producer does not by itself mean a new chain. Whether a restarted producer continues its chain or opens a new one is the producer's decision. Lock only checks the records it receives.
+The response is `201`. A duplicate returns `409 chain_already_exists`. A record whose chain is not registered is rejected with `400 chain_not_registered`, at every sequence position.
 
 ### List keys and chains
 

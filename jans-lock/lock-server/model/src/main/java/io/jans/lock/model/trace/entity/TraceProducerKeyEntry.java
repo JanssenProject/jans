@@ -16,6 +16,7 @@ import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.Version;
 import io.jans.orm.model.base.BaseEntry;
 
 /**
@@ -60,6 +61,10 @@ public class TraceProducerKeyEntry extends BaseEntry implements Serializable {
 
     @AttributeName(name = "jansTraceRegisteredBy", ignoreDuringUpdate = true)
     private String registeredBy;
+
+    @Version
+    @AttributeName(name = "jansVersion", ignoreDuringUpdate = true)
+    private Long version;
 
     @AttributeName(name = "creationDate", ignoreDuringUpdate = true)
     private Date creationDate;
@@ -144,6 +149,14 @@ public class TraceProducerKeyEntry extends BaseEntry implements Serializable {
         this.registeredBy = registeredBy;
     }
 
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public Date getCreationDate() {
         return creationDate;
     }
@@ -202,20 +215,21 @@ public class TraceProducerKeyEntry extends BaseEntry implements Serializable {
                 && Objects.equals(publicKeyJwk, that.publicKeyJwk)
                 && Objects.equals(authorizedEventKinds, that.authorizedEventKinds) && Objects.equals(validFrom, that.validFrom)
                 && Objects.equals(validUntil, that.validUntil) && Objects.equals(revokedAt, that.revokedAt)
-                && Objects.equals(registeredBy, that.registeredBy) && Objects.equals(creationDate, that.creationDate);
+                && Objects.equals(registeredBy, that.registeredBy) && Objects.equals(version, that.version)
+                && Objects.equals(creationDate, that.creationDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, domainId, producerId, kid, publicKeyJwk, authorizedEventKinds, validFrom, validUntil, revokedAt,
-                registeredBy, creationDate);
+        return Objects.hash(id, domainId, producerId, kid, publicKeyJwk, validFrom, validUntil, revokedAt,
+                registeredBy, version, creationDate);
     }
 
     @Override
     public String toString() {
         return "TraceProducerKeyEntry [id=" + id + ", domainId=" + domainId + ", producerId=" + producerId + ", kid="
-                + kid + ", authorizedEventKinds=" + authorizedEventKinds + ", validFrom=" + validFrom + ", validUntil=" + validUntil + ", revokedAt=" + revokedAt
-                + ", registeredBy=" + registeredBy + ", creationDate=" + creationDate + "]";
+                + kid + ", validFrom=" + validFrom + ", validUntil=" + validUntil + ", revokedAt=" + revokedAt
+                + ", registeredBy=" + registeredBy + ", version=" + version + ", creationDate=" + creationDate + "]";
     }
 
 }
