@@ -35,6 +35,12 @@ pub(super) trait IntoCurrent {
     fn into_current(self) -> CurrentDoc;
 }
 
+/// The chain ends at the current version.
+///
+/// This impl and the blanket one below would overlap if [`CurrentDoc`] ever
+/// implemented [`Upgrade`]. It cannot: the current version is the newest, so
+/// there is no version to upgrade it to. Each bump moves both the `Upgrade`
+/// impl and this one forward together.
 impl IntoCurrent for CurrentDoc {
     fn into_current(self) -> CurrentDoc {
         self
