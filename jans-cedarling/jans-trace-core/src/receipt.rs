@@ -197,9 +197,22 @@ impl ReceiptPositionError {
 }
 
 /// The closed v1 field set hashed into a receipt (core design §7.1). Every field is already
-/// valid by its type, so any value hashes.
+/// valid by its type, so any value hashes. Fields are private: once built, a commitment
+/// cannot be changed to name another record than the one it was built for.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReceiptCommitment {
+    evidence_domain_id: String,
+    position: ReceiptPosition,
+    received_at: ReceivedAt,
+    producer_id: String,
+    record_id: String,
+    content_digest: Digest,
+}
+
+/// A receipt as Lock stored it, read back for an audit. Nothing here was verified in this
+/// call; named fields keep the three ids from being swapped by position.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct StoredReceipt {
     pub evidence_domain_id: String,
     pub position: ReceiptPosition,
     pub received_at: ReceivedAt,
@@ -209,6 +222,56 @@ pub struct ReceiptCommitment {
 }
 
 impl ReceiptCommitment {
+    /// Rebuilds a commitment from stored values, for re-hashing and re-linking a chain.
+    /// Refuses values `for_assertion` can never produce; fallible so later v1 checks do not
+    /// change the signature.
+    pub fn from_stored(stored: StoredReceipt) -> Result<Self, StoredReceiptError> {
+        if stored.producer_id.is_empty() {
+            return Err(StoredReceiptReason::EmptyProducerId.into());
+        }
+        if stored.record_id.is_empty() {
+            return Err(StoredReceiptReason::EmptyRecordId.into());
+        }
+        Ok(Self {
+            evidence_domain_id: stored.evidence_domain_id,
+            position: stored.position,
+            received_at: stored.received_at,
+            producer_id: stored.producer_id,
+            record_id: stored.record_id,
+            content_digest: stored.content_digest,
+        })
+    }
+
+    #[must_use]
+    pub fn evidence_domain_id(&self) -> &str {
+        &self.evidence_domain_id
+    }
+
+    #[must_use]
+    pub const fn position(&self) -> ReceiptPosition {
+        self.position
+    }
+
+    #[must_use]
+    pub const fn received_at(&self) -> &ReceivedAt {
+        &self.received_at
+    }
+
+    #[must_use]
+    pub fn producer_id(&self) -> &str {
+        &self.producer_id
+    }
+
+    #[must_use]
+    pub fn record_id(&self) -> &str {
+        &self.record_id
+    }
+
+    #[must_use]
+    pub const fn content_digest(&self) -> Digest {
+        self.content_digest
+    }
+
     /// The commitment Lock appends for a record it just verified: producer, record id and
     /// content digest come from the verification, so a receipt cannot name a record that was
     /// not checked.
@@ -289,6 +352,34 @@ impl ReceiptCommitment {
 enum Member<'a> {
     Text(&'a str),
     Integer(u64),
+}
+
+/// Stored receipt values that no verified record produces.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+#[error("stored receipt is not valid: {reason}")]
+pub struct StoredReceiptError {
+    reason: StoredReceiptReason,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+enum StoredReceiptReason {
+    #[error("producer_id is empty")]
+    EmptyProducerId,
+    #[error("record_id is empty")]
+    EmptyRecordId,
+}
+
+impl From<StoredReceiptReason> for StoredReceiptError {
+    fn from(reason: StoredReceiptReason) -> Self {
+        Self { reason }
+    }
+}
+
+impl StoredReceiptError {
+    #[must_use]
+    pub const fn code(&self) -> &'static str {
+        "INVALID_RECEIPT"
+    }
 }
 
 /// The receipt names another predecessor than the current chain head. Digests are public,
@@ -388,7 +479,8 @@ fn days_from_civil(year: u64, month: u64, day: u64) -> Option<u64> {
 mod tests {
     use super::{
         ParseReceivedAtError, ReceiptCommitment, ReceiptLinkError, ReceiptPosition,
-        ReceiptPositionError, ReceivedAt, ReceivedAtRangeError,
+        ReceiptPositionError, ReceivedAt, ReceivedAtRangeError, StoredReceipt, StoredReceiptError,
+        StoredReceiptReason,
     };
     use crate::Digest;
 
@@ -398,8 +490,8 @@ mod tests {
         text.parse().expect("test timestamp is normalized")
     }
 
-    fn genesis_receipt() -> ReceiptCommitment {
-        ReceiptCommitment {
+    fn stored() -> StoredReceipt {
+        StoredReceipt {
             evidence_domain_id: "domain-1".to_owned(),
             position: ReceiptPosition::GENESIS,
             received_at: received_at("2026-09-17T20:15:32.123Z"),
@@ -407,6 +499,14 @@ mod tests {
             record_id: "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41".to_owned(),
             content_digest: Digest::sha256(b"record"),
         }
+    }
+
+    fn commitment(stored: StoredReceipt) -> ReceiptCommitment {
+        ReceiptCommitment::from_stored(stored).expect("test receipt has non-empty ids")
+    }
+
+    fn genesis_receipt() -> ReceiptCommitment {
+        commitment(stored())
     }
 
     fn position(sequence: u64, prev_receipt_hash: Digest) -> ReceiptPosition {
@@ -442,40 +542,40 @@ mod tests {
                     .expect("signer key is valid"),
             })
             .expect("own record verifies");
-        let commitment = ReceiptCommitment::for_assertion(
+        let receipt = ReceiptCommitment::for_assertion(
             "domain-1".to_owned(),
             ReceiptPosition::GENESIS,
             received_at("2026-09-17T20:15:32.123Z"),
             &verified,
         );
         assert_eq!(
-            commitment,
-            ReceiptCommitment {
+            receipt,
+            commitment(StoredReceipt {
                 evidence_domain_id: "domain-1".to_owned(),
                 position: ReceiptPosition::GENESIS,
                 received_at: received_at("2026-09-17T20:15:32.123Z"),
                 producer_id: "cedarling-fleet-1".to_owned(),
                 record_id: "r-1".to_owned(),
                 content_digest: verified.content_digest(),
-            },
+            }),
             "producer, record id and content digest come from the verified record"
         );
     }
 
     #[test]
     fn hashes_non_ascii_fields_like_the_canonicalizer() {
-        let receipt = ReceiptCommitment {
+        let receipt = commitment(StoredReceipt {
             evidence_domain_id: "domaine-é\u{1F600}\"\\\n".to_owned(),
-            ..genesis_receipt()
-        };
+            ..stored()
+        });
         let expected = serde_json_canonicalizer::to_vec(&serde_json::json!({
             "receipt_profile": super::RECEIPT_PROFILE,
-            "evidence_domain_id": receipt.evidence_domain_id,
+            "evidence_domain_id": receipt.evidence_domain_id(),
             "receipt_sequence": 1,
-            "received_at": receipt.received_at.as_str(),
-            "producer_id": receipt.producer_id,
-            "record_id": receipt.record_id,
-            "content_digest": receipt.content_digest.to_string(),
+            "received_at": receipt.received_at().as_str(),
+            "producer_id": receipt.producer_id(),
+            "record_id": receipt.record_id(),
+            "content_digest": receipt.content_digest().to_string(),
             "prev_receipt_hash": Digest::GENESIS.to_string(),
         }))
         .expect("receipt commitment canonicalizes");
@@ -498,45 +598,45 @@ mod tests {
         let cases = [
             FieldCase {
                 name: "evidence_domain_id",
-                receipt: ReceiptCommitment {
+                receipt: commitment(StoredReceipt {
                     evidence_domain_id: "domain-2".to_owned(),
-                    ..base.clone()
-                },
+                    ..stored()
+                }),
             },
             FieldCase {
                 name: "received_at",
-                receipt: ReceiptCommitment {
+                receipt: commitment(StoredReceipt {
                     received_at: received_at("2026-09-17T20:15:32.124Z"),
-                    ..base.clone()
-                },
+                    ..stored()
+                }),
             },
             FieldCase {
                 name: "producer_id",
-                receipt: ReceiptCommitment {
+                receipt: commitment(StoredReceipt {
                     producer_id: "cedarling-fleet-2".to_owned(),
-                    ..base.clone()
-                },
+                    ..stored()
+                }),
             },
             FieldCase {
                 name: "record_id",
-                receipt: ReceiptCommitment {
+                receipt: commitment(StoredReceipt {
                     record_id: "other".to_owned(),
-                    ..base.clone()
-                },
+                    ..stored()
+                }),
             },
             FieldCase {
                 name: "content_digest",
-                receipt: ReceiptCommitment {
+                receipt: commitment(StoredReceipt {
                     content_digest: Digest::sha256(b"other"),
-                    ..base.clone()
-                },
+                    ..stored()
+                }),
             },
             FieldCase {
                 name: "position",
-                receipt: ReceiptCommitment {
+                receipt: commitment(StoredReceipt {
                     position: position(2, Digest::sha256(b"first receipt")),
-                    ..base.clone()
-                },
+                    ..stored()
+                }),
             },
         ];
         for case in cases {
@@ -550,6 +650,87 @@ mod tests {
     }
 
     #[test]
+    fn stored_values_come_back_unchanged() {
+        let position = position(2, Digest::sha256(b"first receipt"));
+        let receipt = commitment(StoredReceipt {
+            position,
+            ..stored()
+        });
+        let stored = stored();
+        assert_eq!(
+            (
+                receipt.evidence_domain_id(),
+                receipt.position(),
+                receipt.received_at(),
+                receipt.producer_id(),
+                receipt.record_id(),
+                receipt.content_digest(),
+            ),
+            (
+                stored.evidence_domain_id.as_str(),
+                position,
+                &stored.received_at,
+                stored.producer_id.as_str(),
+                stored.record_id.as_str(),
+                stored.content_digest,
+            ),
+            "each accessor returns the stored value it was built from"
+        );
+    }
+
+    struct StoredCase {
+        name: &'static str,
+        stored: StoredReceipt,
+        reason: StoredReceiptReason,
+    }
+
+    #[test]
+    fn from_stored_rejects_ids_a_verified_record_never_has() {
+        let cases = [
+            StoredCase {
+                name: "empty producer_id",
+                stored: StoredReceipt {
+                    producer_id: String::new(),
+                    ..stored()
+                },
+                reason: StoredReceiptReason::EmptyProducerId,
+            },
+            StoredCase {
+                name: "empty record_id",
+                stored: StoredReceipt {
+                    record_id: String::new(),
+                    ..stored()
+                },
+                reason: StoredReceiptReason::EmptyRecordId,
+            },
+        ];
+        for case in cases {
+            assert_eq!(
+                ReceiptCommitment::from_stored(case.stored),
+                Err(StoredReceiptError {
+                    reason: case.reason
+                }),
+                "{} is refused with its reason",
+                case.name
+            );
+        }
+    }
+
+    #[test]
+    fn stored_receipt_error_names_the_empty_member() {
+        let err = ReceiptCommitment::from_stored(StoredReceipt {
+            record_id: String::new(),
+            ..stored()
+        })
+        .expect_err("empty record_id is refused");
+        assert_eq!(
+            err.to_string(),
+            "stored receipt is not valid: record_id is empty",
+            "`{err}` names the member"
+        );
+    }
+
+    #[test]
     fn links_a_chain_and_detects_a_wrong_predecessor() {
         let first = genesis_receipt();
         let first_hash = first
@@ -560,10 +741,10 @@ mod tests {
             first.receipt_hash(),
             "link check returns the hash"
         );
-        let second = ReceiptCommitment {
+        let second = commitment(StoredReceipt {
             position: position(2, first_hash),
-            ..first
-        };
+            ..stored()
+        });
         let second_hash = second
             .verify_link(&first_hash)
             .expect("second links to first");
@@ -591,10 +772,10 @@ mod tests {
     #[test]
     fn evidence_domains_start_independent_chains() {
         let domain_1 = genesis_receipt();
-        let domain_2 = ReceiptCommitment {
+        let domain_2 = commitment(StoredReceipt {
             evidence_domain_id: "domain-2".to_owned(),
-            ..genesis_receipt()
-        };
+            ..stored()
+        });
         assert_ne!(
             domain_1
                 .verify_link(&Digest::GENESIS)
@@ -873,6 +1054,15 @@ mod tests {
                 actual: ReceiptPosition::new(0, Digest::GENESIS)
                     .expect_err("zero")
                     .code(),
+                expected: "INVALID_RECEIPT",
+            },
+            CodeCase {
+                actual: ReceiptCommitment::from_stored(StoredReceipt {
+                    producer_id: String::new(),
+                    ..stored()
+                })
+                .expect_err("empty producer")
+                .code(),
                 expected: "INVALID_RECEIPT",
             },
             CodeCase {

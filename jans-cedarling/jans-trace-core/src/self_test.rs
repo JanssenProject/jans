@@ -12,7 +12,7 @@ use thiserror::Error;
 
 use crate::json::canonicalize_json;
 use crate::key::PublicKey;
-use crate::receipt::{ReceiptCommitment, ReceiptPosition};
+use crate::receipt::{ReceiptCommitment, ReceiptPosition, StoredReceipt};
 use crate::signature::{Ed25519Signer, SignatureValue, TraceSigner};
 use crate::{Digest, Limits};
 
@@ -129,13 +129,15 @@ fn check_receipt_hash() -> bool {
     let Ok(received_at) = "2026-09-17T20:15:32.123Z".parse() else {
         return false;
     };
-    let receipt = ReceiptCommitment {
+    let Ok(receipt) = ReceiptCommitment::from_stored(StoredReceipt {
         evidence_domain_id: "domain-1".to_owned(),
         position: ReceiptPosition::GENESIS,
         received_at,
         producer_id: "cedarling-fleet-1".to_owned(),
         record_id: "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41".to_owned(),
         content_digest: Digest::sha256(b"record"),
+    }) else {
+        return false;
     };
     receipt.receipt_hash().to_string()
         == "sha256:6f46f99849a5a88987dfdc81ce9b2c65aafc64f3e4a687fc78e93f38d1523908"
