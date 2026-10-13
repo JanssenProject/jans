@@ -152,7 +152,6 @@ fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
 /// Converts a v1 store into the runtime store and its metadata.
 pub(crate) fn into_runtime(
     doc: PolicyStoreDoc,
-    strict_schema_validation: bool,
 ) -> Result<(PolicyStore, PolicyStoreMetadata), ParseStoreError> {
     let metadata = metadata::into_runtime(doc.metadata)?;
     let trusted_issuers = trusted_issuers_into_runtime(doc.trusted_issuers)?;
@@ -163,7 +162,6 @@ pub(crate) fn into_runtime(
         metadata.policy_store.version.clone(),
         trusted_issuers,
         custom_issuers,
-        strict_schema_validation,
     )?;
 
     Ok((store, metadata))
@@ -252,7 +250,7 @@ mod tests {
             "spec version should be read from metadata.json"
         );
 
-        let (store, metadata) = into_runtime(doc, false).expect("golden v1 store should convert");
+        let (store, metadata) = into_runtime(doc).expect("golden v1 store should convert");
         assert_eq!(
             metadata.policy_store.name, "Golden v1",
             "metadata name mismatch"
@@ -283,7 +281,7 @@ mod tests {
     #[test]
     fn no_issuers_convert_to_empty_runtime_fields() {
         let doc = parse(loaded(vec![], vec![])).expect("store without issuers should parse");
-        let (store, _) = into_runtime(doc, false).expect("store without issuers should convert");
+        let (store, _) = into_runtime(doc).expect("store without issuers should convert");
         assert!(
             store.trusted_issuers.is_none(),
             "no trusted issuer files should leave trusted_issuers unset"
@@ -302,7 +300,7 @@ mod tests {
         ))
         .expect("each issuer file is valid on its own");
 
-        let err = into_runtime(doc, false).expect_err("duplicate issuer ids must be rejected");
+        let err = into_runtime(doc).expect_err("duplicate issuer ids must be rejected");
         assert!(
             matches!(
                 &err,

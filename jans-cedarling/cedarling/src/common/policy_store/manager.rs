@@ -88,25 +88,19 @@ impl PolicyStoreManager {
     /// Builds the runtime `PolicyStore` from version-agnostic content plus the
     /// issuers already converted by the current format version.
     ///
-    /// When `strict_schema_validation` is `true`, a missing schema causes an error.
-    /// When `false`, missing schema is allowed (schemaless mode).
+    /// A missing schema is accepted here: whether one is required is decided
+    /// when the store is read, which fails with `MissingSchemaSource`.
     pub(crate) fn build(
         content: &StoreContent,
         version: String,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         custom_issuers: HashMap<String, CustomIssuerMetadata>,
-        strict_schema_validation: bool,
     ) -> Result<PolicyStore, ConversionError> {
-        // 1. Convert schema (now optional)
-        let cedar_schema = match &content.schema {
-            Some(parsed_schema) => Some(Self::convert_parsed_schema(parsed_schema)?),
-            None if strict_schema_validation => {
-                return Err(ConversionError::SchemaConversion(
-                    "missing required schema in policy store".to_string(),
-                ));
-            },
-            None => None,
-        };
+        let cedar_schema = content
+            .schema
+            .as_ref()
+            .map(Self::convert_parsed_schema)
+            .transpose()?;
 
         // 2. Convert policies and templates into a single PoliciesContainer
         let policies_container =
@@ -505,7 +499,7 @@ mod tests {
     }
 
     #[test]
-    fn test_build_without_schema_strict_true_errors() {
+    fn test_build_without_schema_succeeds() {
         let content = StoreContent {
             schema: None,
             schema_source_exists: false,
@@ -517,34 +511,9 @@ mod tests {
             entities: vec![],
         };
 
-        let result =
-            PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new(), true);
-        let err = result.expect_err(
-            "Expected error when strict_schema_validation is true but schema is missing",
-        );
-        assert!(
-            matches!(&err, ConversionError::SchemaConversion(msg) if msg.contains("missing required schema")),
-            "Expected SchemaConversion error about missing schema, got: {err:?}"
-        );
-    }
-
-    #[test]
-    fn test_build_without_schema_strict_false_succeeds() {
-        let content = StoreContent {
-            schema: None,
-            schema_source_exists: false,
-            policies: vec![PolicyFile {
-                name: "test.cedar".to_string(),
-                content: "permit(principal, action, resource);".to_string(),
-            }],
-            templates: vec![],
-            entities: vec![],
-        };
-
-        let result =
-            PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new(), false);
-        let store = result
-            .expect("Should succeed when strict_schema_validation is false even without schema");
+        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new());
+        let store =
+            result.expect("a schemaless store should build; strictness is checked when reading");
         assert!(
             store.schema.is_none(),
             "schema should be None when no schema was loaded"
@@ -552,7 +521,7 @@ mod tests {
     }
 
     #[test]
-    fn test_build_with_schema_strict_false_succeeds() {
+    fn test_build_with_schema_succeeds() {
         let schema = parse_schema(
             r#"
         namespace TestApp {
@@ -575,10 +544,8 @@ mod tests {
             entities: vec![],
         };
 
-        let result =
-            PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new(), false);
-        let store =
-            result.expect("Should succeed with schema even when strict_schema_validation is false");
+        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new());
+        let store = result.expect("a store with a schema should build");
         assert!(
             store.schema.is_some(),
             "schema should be Some when schema content was provided"
@@ -609,8 +576,7 @@ mod tests {
             entities: vec![],
         };
 
-        let result =
-            PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new(), true);
+        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new());
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
@@ -650,13 +616,8 @@ mod tests {
         };
 
         let issuers = HashMap::from([("main".to_string(), TrustedIssuer::default())]);
-        let result = PolicyStoreManager::build(
-            &content,
-            "1.0.0".to_string(),
-            Some(issuers),
-            HashMap::new(),
-            true,
-        );
+        let result =
+            PolicyStoreManager::build(&content, "1.0.0".to_string(), Some(issuers), HashMap::new());
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();

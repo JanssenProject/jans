@@ -283,7 +283,7 @@ pub(super) fn read_policy_store(
         FormatVersion::V1 => v1::read(fs, metadata_json, strict_schema_validation)?.into_current(),
     };
 
-    let (store, metadata) = current::into_runtime(doc, strict_schema_validation)?;
+    let (store, metadata) = current::into_runtime(doc)?;
 
     Ok(ParsedPolicyStore {
         store: PolicyStoreWithID {

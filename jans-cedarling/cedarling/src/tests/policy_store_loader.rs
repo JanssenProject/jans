@@ -1594,16 +1594,28 @@ async fn test_load_directory_without_schema_strict_false_succeeds() {
 #[test]
 #[cfg(not(target_arch = "wasm32"))]
 async fn test_load_directory_without_schema_strict_true_fails() {
+    use crate::InitCedarlingError;
+    use crate::common::policy_store::errors::ValidationError;
+    use crate::init::policy_store::PolicyStoreLoadError;
+    use crate::init::service_config::ServiceConfigError;
+
     let archive = build_archive_without_schema("deadbeef87654321", "No Schema Dir Strict");
     let temp_dir = extract_archive_to_temp_dir(&archive);
 
     let mut config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
     config.authorization_config.strict_schema_validation = true;
 
-    let result = Cedarling::new(&config).await;
+    let Err(err) = Cedarling::new(&config).await else {
+        panic!("strict_schema_validation=true with no schema should fail to load")
+    };
     assert!(
-        result.is_err(),
-        "Expected init to fail: strict_schema_validation=true but policy store has no schema (directory)"
+        matches!(
+            err,
+            InitCedarlingError::ServiceConfig(ServiceConfigError::PolicyStore(
+                PolicyStoreLoadError::Validation(ValidationError::MissingSchemaSource { .. })
+            ))
+        ),
+        "expected MissingSchemaSource, got: {err:?}"
     );
 }
 
