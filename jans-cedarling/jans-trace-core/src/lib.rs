@@ -20,6 +20,7 @@
 mod assertion;
 mod canonical;
 mod digest;
+mod inputs;
 mod json;
 mod limits;
 mod signature;
@@ -30,6 +31,7 @@ pub use assertion::{
 };
 pub use canonical::{CanonicalizeError, canonicalize_json};
 pub use digest::{Digest, ParseDigestError};
+pub use inputs::{compute_bundle_hash, token_fingerprint};
 pub use json::JsonError;
 pub use limits::{Limits, SizeLimitError};
 pub use signature::{Ed25519Signer, ParseSignatureError, SignatureValue, SignerError, TraceSigner};
