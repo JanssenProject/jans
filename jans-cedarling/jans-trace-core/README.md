@@ -133,45 +133,76 @@ replaced lone surrogate, Unicode normalization), and the signature would no long
 
 ## Example
 
+Every variable is annotated with its type, so each step shows what goes in and what comes
+out. In real code the annotations are optional.
+
 ```rust
-use jans_trace_core::Digest;
-use jans_trace_core::Limits;
-use jans_trace_core::assertion::{SignedAssertion, UnsignedAssertion, VerificationContext};
+use jans_trace_core::assertion::{
+    AssertionIdentity, SignedAssertion, UnsignedAssertion, VerificationContext,
+    VerifiedAssertion,
+};
 use jans_trace_core::key::PublicKey;
 use jans_trace_core::receipt::{ReceiptCommitment, ReceiptPosition, ReceivedAt};
 use jans_trace_core::signature::Ed25519Signer;
+use jans_trace_core::{Digest, Limits};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let limits = Limits::default();
+    let limits: Limits = Limits::default();
 
-    // Producer. A fixed secret is for examples only; load real keys with `from_pkcs8_pem`.
-    let signer = Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32]);
-    let record = serde_json::json!({
+    // ---- Producer (Cedarling) ----
+
+    // A fixed secret is for examples only; load real keys with `from_pkcs8_pem`.
+    let signer: Ed25519Signer = Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32]);
+
+    // The core takes the record as raw JSON bytes (UTF-8), never as a parsed tree. How the
+    // producer builds them does not matter, nor does formatting: the core canonicalizes
+    // before signing.
+    let record_bytes: Vec<u8> = serde_json::to_vec(&serde_json::json!({
         "producer": "cedarling-fleet-1",
         "kid": "key-2026-01",
         "record_id": "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41",
         "producer_chain": { "sequence_number": 1, "prev_record_hash": Digest::GENESIS.to_string() },
         "trace": { "event_kind": "AUTHORIZATION_DECISION" },
-    });
-    let signed = UnsignedAssertion::parse(&serde_json::to_vec(&record)?, &limits)?.sign(&signer)?;
-    let wire_bytes = signed.as_bytes();
+    }))?;
 
-    // Lock. The key normally comes from `PublicKey::from_jwk` at registration.
-    let received = SignedAssertion::parse(wire_bytes, &limits)?;
-    let verified = received.verify(&VerificationContext {
-        expected_producer: received.identity().producer().to_owned(),
-        expected_kid: received.identity().kid().to_owned(),
-        public_key: PublicKey::from_bytes(&signer.public_key_bytes())?,
-    })?;
-    assert_eq!(verified.content_digest(), signed.content_digest());
+    // Strict parse: identity members present, no `signature` yet, signed size within limits.
+    let unsigned: UnsignedAssertion = UnsignedAssertion::parse(&record_bytes, &limits)?;
 
-    let commitment = ReceiptCommitment::for_assertion(
+    // Sign: the result holds the canonical JSON of the whole record, signature included.
+    let signed: SignedAssertion = unsigned.sign(&signer)?;
+
+    // These exact bytes go on the wire to Lock.
+    let wire_bytes: &[u8] = signed.as_bytes();
+
+    // Keep it as the next record's `prev_record_hash`.
+    let content_digest: Digest = signed.content_digest();
+
+    // ---- Lock ----
+
+    // Parse the request body once; the identity selects the registered key.
+    let received: SignedAssertion = SignedAssertion::parse(wire_bytes, &limits)?;
+    let identity: &AssertionIdentity = received.identity();
+
+    // Normally `PublicKey::from_jwk(registered_jwk_bytes)` at key registration.
+    let public_key: PublicKey = PublicKey::from_bytes(&signer.public_key_bytes())?;
+
+    let context: VerificationContext = VerificationContext {
+        expected_producer: identity.producer().to_owned(),
+        expected_kid: identity.kid().to_owned(),
+        public_key,
+    };
+    let verified: VerifiedAssertion = received.verify(&context)?;
+    assert_eq!(verified.content_digest(), content_digest);
+
+    // Receipt: the first entry of an empty evidence domain links to the genesis sentinel.
+    let received_at: ReceivedAt = ReceivedAt::from_unix_millis(1_789_676_132_123)?;
+    let commitment: ReceiptCommitment = ReceiptCommitment::for_assertion(
         "domain-1".to_owned(),
         ReceiptPosition::GENESIS,
-        ReceivedAt::from_unix_millis(1_789_676_132_123)?,
+        received_at,
         &verified,
     );
-    let chain_head = commitment.verify_link(&Digest::GENESIS)?;
+    let chain_head: Digest = commitment.verify_link(&Digest::GENESIS)?;
     assert_ne!(chain_head, Digest::GENESIS);
     Ok(())
 }
