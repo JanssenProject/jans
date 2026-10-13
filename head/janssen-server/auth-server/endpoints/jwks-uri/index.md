@@ -30,6 +30,16 @@ navigate via `Auth Server`->`Properties`.
 - [jwksUri](../../reference/json/properties/janssenauthserver-properties.md#jwksuri)
 - [jwksAlgorithmsSupported](../../reference/json/properties/janssenauthserver-properties.md#jwksalgorithmssupported)
 - [mtlsJwksUri](../../reference/json/properties/janssenauthserver-properties.md#mtlsjwksuri)
+- [allowStartupOnJwksUriFetchFailure](../../reference/json/properties/janssenauthserver-properties.md#allowstartuponjwksurifetchfailure)
+
+## External JWKS URI
+
+If `jwksUri` does not start with the server `issuer`, Janssen Server downloads the keys from that external URL when
+configuration loads. By default, startup fails if the download fails (network error, TLS handshake failure, invalid
+response). Set `allowStartupOnJwksUriFetchFailure` to `true` to start anyway. The server then runs without keys, logs an
+error, and retries the download every configuration check interval (30 seconds) until it succeeds. While keys are
+missing, operations that need server keys fail. Keep the default `false` unless the external JWKS host can be
+unavailable at startup.
 
 ## Want to contribute?
 

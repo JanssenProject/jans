@@ -6793,6 +6793,16 @@ navigate via `Auth Server`->`Properties`.
 - [jwksUri](../../reference/json/properties/janssenauthserver-properties.md#jwksuri)
 - [jwksAlgorithmsSupported](../../reference/json/properties/janssenauthserver-properties.md#jwksalgorithmssupported)
 - [mtlsJwksUri](../../reference/json/properties/janssenauthserver-properties.md#mtlsjwksuri)
+- [allowStartupOnJwksUriFetchFailure](../../reference/json/properties/janssenauthserver-properties.md#allowstartuponjwksurifetchfailure)
+
+## External JWKS URI
+
+If `jwksUri` does not start with the server `issuer`, Janssen Server downloads the keys from that external URL when
+configuration loads. By default, startup fails if the download fails (network error, TLS handshake failure, invalid
+response). Set `allowStartupOnJwksUriFetchFailure` to `true` to start anyway. The server then runs without keys, logs an
+error, and retries the download every configuration check interval (30 seconds) until it succeeds. While keys are
+missing, operations that need server keys fail. Keep the default `false` unless the external JWKS host can be
+unavailable at startup.
 
 ## Want to contribute?
 
@@ -44592,6 +44602,7 @@ If you’d like to contribute to this document, get started with the [Contributi
 | allowPostLogoutRedirectWithoutValidation | Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property) | [Details](#allowpostlogoutredirectwithoutvalidation) |
 | allowRevokeForOtherClients | Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint | [Details](#allowrevokeforotherclients) |
 | allowSpontaneousScopes | Specifies whether to allow spontaneous scopes | [Details](#allowspontaneousscopes) |
+| allowStartupOnJwksUriFetchFailure | Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails. | [Details](#allowstartuponjwksurifetchfailure) |
 | applyXFrameOptionsHeaderIfUriContainsAny | Add X-Frame-Options header to response if any string in the list is contained by request uri. | [Details](#applyxframeoptionsheaderifuricontainsany) |
 | archivedJwkLifetimeInSeconds | Archived JWK lifetime in seconds | [Details](#archivedjwklifetimeinseconds) |
 | archivedJwksUri | URL of the OP's Archived JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP | [Details](#archivedjwksuri) |
@@ -45074,6 +45085,15 @@ If you’d like to contribute to this document, get started with the [Contributi
 - Required: No
 
 - Default value: None
+
+
+## allowStartupOnJwksUriFetchFailure
+
+- Description: Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails.
+
+- Required: No
+
+- Default value: false
 
 
 ## applyXFrameOptionsHeaderIfUriContainsAny
