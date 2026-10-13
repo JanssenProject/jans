@@ -1115,6 +1115,11 @@ components:
           type: integer
           description: Maximum retries when allocating a receipt-chain sequence number
           format: int32
+        correlationRetryLimit:
+          type: integer
+          description: Maximum retries when a correlation neighbor update hits a version
+            conflict
+          format: int32
         receiptRepairIntervalSeconds:
           type: integer
           description: Interval in seconds between receipt repair timer runs
@@ -1123,6 +1128,16 @@ components:
           type: integer
           description: Seconds a PENDING receipt may stay unresolved before the repair
             timer settles it
+          format: int32
+        maxBulkRecords:
+          type: integer
+          description: Maximum number of assertions accepted in one POST /audit/trace/bulk
+            request
+          format: int32
+        maxBulkRequestBytes:
+          type: integer
+          description: "Maximum total body size, in bytes, buffered for one POST /audit/trace/bulk\
+            \ request; clamped to 16777216 regardless of this value"
           format: int32
       description: TRACE evidence ingestion configuration
     JsonPatch:
