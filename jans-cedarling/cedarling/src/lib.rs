@@ -567,17 +567,30 @@ async fn perform_bootstrap_load(
 
     let LoadedPolicyStore {
         store: policy_store,
+        format,
         body_hash,
         validators,
     } = loaded;
+
+    for warning in &format.warnings {
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(warning.to_string()),
+        );
+    }
+
     Ok((
         ServiceConfig {
             policy_store,
             http_client,
         },
         RefreshWorkerSeed {
-            initial_body_hash: body_hash,
-            initial_validators: validators,
+            body_hash,
+            validators,
+            format,
             policy_store_http_client,
         },
     ))
@@ -656,8 +669,9 @@ fn maybe_spawn_refresh_worker(
         authz_swap,
         metrics,
         log,
-        initial_body_hash: seed.initial_body_hash,
-        initial_validators: seed.initial_validators,
+        initial_body_hash: seed.body_hash,
+        initial_validators: seed.validators,
+        initial_format: seed.format,
         strict_schema_validation: config.authorization_config.strict_schema_validation,
         archive_limits: config.policy_store_config.archive_limits(),
     };
@@ -962,6 +976,7 @@ impl Cedarling {
                                 reason: "metadata check failed".into(),
                             },
                             metadata: LevelResult::Failed { errors: vec![diag] },
+                            warnings: Vec::new(),
                         })
                     },
                     _ if is_parse => {
@@ -979,6 +994,7 @@ impl Cedarling {
                             metadata: LevelResult::Skipped {
                                 reason: "parse failed".into(),
                             },
+                            warnings: Vec::new(),
                         })
                     },
                     _ => Err(ValidateInfraError::Io(std::io::Error::other(err_str))),
@@ -1015,54 +1031,55 @@ impl Cedarling {
                 };
 
                 // Metadata Level
-                // Legacy YAML sources synthesize `metadata: Some(..)` with the
-                // user-chosen `policy_stores` key as `id`, so matching on
-                // `Option` cannot distinguish strict vs legacy. Branch on
-                // `config.source` instead; every other source keeps strict
-                // `MetadataValidator` checks.
-                let metadata_res = if matches!(
-                    &config.source,
-                    PolicyStoreSource::Yaml(_) | PolicyStoreSource::FileYaml(_)
-                ) {
-                    match crate::common::policy_store::validator::validate_legacy_metadata(
-                        &loaded.store.store,
-                    ) {
-                        Ok(()) => LevelResult::Ok,
-                        Err(e) => LevelResult::Failed {
-                            errors: vec![Diagnostic {
-                                file: "<inline>".into(),
-                                line: None,
-                                column: None,
-                                message: e.to_string(),
-                            }],
-                        },
-                    }
-                } else {
-                    match &loaded.store.metadata {
-                        Some(metadata) => {
-                            use crate::common::policy_store::validator::MetadataValidator;
-                            match MetadataValidator::validate(metadata) {
-                                Ok(()) => LevelResult::Ok,
-                                Err(e) => LevelResult::Failed {
-                                    errors: vec![Diagnostic {
-                                        file: "<metadata>".into(),
-                                        line: None,
-                                        column: None,
-                                        message: e.to_string(),
-                                    }],
-                                },
-                            }
-                        },
-                        None => LevelResult::Skipped {
-                            reason: "no metadata present".into(),
-                        },
-                    }
+                // Agama YAML uses the user-chosen `policy_stores` key as `id`, which need not be
+                // hex, so clear it to skip only that check; every other metadata rule still applies.
+                let metadata_res = match &loaded.store.metadata {
+                    Some(metadata) => {
+                        use crate::common::policy_store::validator::MetadataValidator;
+                        let result = if matches!(
+                            &config.source,
+                            PolicyStoreSource::Yaml(_) | PolicyStoreSource::FileYaml(_)
+                        ) {
+                            let mut metadata = metadata.clone();
+                            metadata.policy_store.id.clear();
+                            MetadataValidator::validate(&metadata)
+                        } else {
+                            MetadataValidator::validate(metadata)
+                        };
+                        match result {
+                            Ok(()) => LevelResult::Ok,
+                            Err(e) => LevelResult::Failed {
+                                errors: vec![Diagnostic {
+                                    file: "<metadata>".into(),
+                                    line: None,
+                                    column: None,
+                                    message: e.to_string(),
+                                }],
+                            },
+                        }
+                    },
+                    None => LevelResult::Skipped {
+                        reason: "no metadata present".into(),
+                    },
                 };
+
+                let warnings = loaded
+                    .format
+                    .warnings
+                    .iter()
+                    .map(|warning| Diagnostic {
+                        file: "metadata.json".into(),
+                        line: None,
+                        column: None,
+                        message: warning.to_string(),
+                    })
+                    .collect();
 
                 Ok(ValidationReport {
                     parse: LevelResult::Ok,
                     schema: schema_res,
                     metadata: metadata_res,
+                    warnings,
                 })
             },
         }

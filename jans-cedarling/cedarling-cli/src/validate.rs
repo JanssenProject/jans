@@ -31,6 +31,14 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
     print_level("parse", &report.parse);
     print_level("schema", &report.schema);
     print_level("metadata", &report.metadata);
+    for warning in &report.warnings {
+        println!(
+            "  {} {}: {}",
+            "warning:".yellow(),
+            warning.file,
+            warning.message
+        );
+    }
 
     let skips = [&report.parse, &report.schema, &report.metadata]
         .iter()

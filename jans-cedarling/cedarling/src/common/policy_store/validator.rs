@@ -137,21 +137,6 @@ impl MetadataValidator {
 
         Ok(())
     }
-
-    /// Parse and validate metadata from JSON string.
-    pub(super) fn parse_and_validate(json: &str) -> Result<PolicyStoreMetadata, ValidationError> {
-        // Parse JSON
-        let metadata: PolicyStoreMetadata =
-            serde_json::from_str(json).map_err(|e| ValidationError::MetadataJsonParseFailed {
-                file: "metadata.json".to_string(),
-                source: e,
-            })?;
-
-        // Validate
-        Self::validate(&metadata)?;
-
-        Ok(metadata)
-    }
 }
 
 /// Accessor methods for policy store metadata.
@@ -215,17 +200,6 @@ impl PolicyStoreMetadata {
 
         Ok(false)
     }
-}
-
-/// Run metadata sanity checks on a legacy YAML/JSON policy store.
-#[cfg(feature = "tools")]
-pub(crate) fn validate_legacy_metadata(
-    store: &crate::common::policy_store::PolicyStore,
-) -> Result<(), ValidationError> {
-    if let Some(version) = &store.version {
-        MetadataValidator::validate_cedar_version(version)?;
-    }
-    Ok(())
 }
 
 #[cfg(test)]
@@ -513,70 +487,6 @@ mod tests {
             matches!(err, ValidationError::InvalidTimestampOrdering),
             "Expected InvalidTimestampOrdering, got: {err:?}"
         );
-    }
-
-    #[test]
-    fn test_parse_and_validate_valid_json() {
-        let json = r#"{
-            "cedar_version": "4.4.0",
-            "policy_store": {
-                "id": "abc123def456",
-                "name": "Test Store",
-                "version": "1.0.0"
-            }
-        }"#;
-
-        let result = MetadataValidator::parse_and_validate(json);
-        assert!(result.is_ok());
-        let metadata = result.unwrap();
-        assert_eq!(metadata.cedar_version, "4.4.0");
-        assert_eq!(metadata.policy_store.name, "Test Store");
-    }
-
-    #[test]
-    fn test_parse_and_validate_invalid_json() {
-        let json = r"{ invalid json }";
-
-        let result = MetadataValidator::parse_and_validate(json);
-        let err = result.expect_err("Should fail on invalid JSON");
-        assert!(matches!(
-            err,
-            ValidationError::MetadataJsonParseFailed { .. }
-        ));
-    }
-
-    #[test]
-    fn test_parse_and_validate_missing_required_field() {
-        // Missing the 'name' field entirely - should fail during JSON deserialization
-        let json = r#"{
-            "cedar_version": "4.4.0",
-            "policy_store": {
-                "id": "abc123def456"
-            }
-        }"#;
-
-        let result = MetadataValidator::parse_and_validate(json);
-        let err = result.expect_err("Should fail on missing required field");
-        assert!(matches!(
-            err,
-            ValidationError::MetadataJsonParseFailed { .. }
-        ));
-    }
-
-    #[test]
-    fn test_parse_and_validate_empty_name_validation() {
-        // Empty name field - should pass JSON parsing but fail validation
-        let json = r#"{
-            "cedar_version": "4.4.0",
-            "policy_store": {
-                "id": "abc123def456",
-                "name": ""
-            }
-        }"#;
-
-        let result = MetadataValidator::parse_and_validate(json);
-        let err = result.expect_err("Should fail on empty name validation");
-        assert!(matches!(err, ValidationError::EmptyPolicyStoreName));
     }
 
     #[test]
