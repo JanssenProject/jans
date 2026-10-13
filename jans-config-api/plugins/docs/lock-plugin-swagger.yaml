@@ -16,6 +16,7 @@ tags:
 - name: Lock - Configuration
 - name: Lock - Audit
 - name: Lock - Statistics
+- name: Lock - Policy Stores
 paths:
   /lock/audit/health/search:
     get:
@@ -551,14 +552,71 @@ paths:
         - https://jans.io/oauth/lock/write-all
       - oauth2:
         - https://jans.io/oauth/config/write-all
+  /lock/lockStat:
+    get:
+      tags:
+      - Statistics
+      summary: Provides basic statistic
+      description: Provides basic statistic
+      operationId: get-lock-stat
+      parameters:
+      - name: Authorization
+        in: header
+        description: Authorization code
+        schema:
+          type: string
+      - name: month
+        in: query
+        description: Month for which the stat report is to be fetched. The parameter
+          is mandatory if start_month and end_month parameters are not present.
+        schema:
+          type: string
+      - name: start-month
+        in: query
+        description: Start-Month for which the stat report is to be fetched
+        schema:
+          type: string
+      - name: end-month
+        in: query
+        description: End-Month for which the stat report is to be fetched
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: Report format
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JsonNode"
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+        - jans_stat
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/policy-stores:
     get:
       tags:
       - Lock - Policy Stores
       summary: Lists Lock policy store sources
-      description: "Lists policy store sources registered in Lock configuration\
-        \ and, when the token grants https://jans.io/oauth/lock/policy.readonly,\
-        \ the .cjar stores currently loaded by Lock with version and bundle hash"
+      description: "Lists policy store sources registered in Lock configuration and,\
+        \ when the token grants https://jans.io/oauth/lock/policy.readonly, the .cjar\
+        \ stores currently loaded by Lock with version and bundle hash"
       operationId: get-lock-policy-stores
       parameters:
       - name: Authorization
@@ -654,63 +712,6 @@ paths:
         - https://jans.io/oauth/config/lock.admin
       - oauth2:
         - https://jans.io/oauth/lock/write-all
-      - oauth2:
-        - https://jans.io/oauth/config/write-all
-  /lock/lockStat:
-    get:
-      tags:
-      - Statistics
-      summary: Provides basic statistic
-      description: Provides basic statistic
-      operationId: get-lock-stat
-      parameters:
-      - name: Authorization
-        in: header
-        description: Authorization code
-        schema:
-          type: string
-      - name: month
-        in: query
-        description: Month for which the stat report is to be fetched. The parameter
-          is mandatory if start_month and end_month parameters are not present.
-        schema:
-          type: string
-      - name: start-month
-        in: query
-        description: Start-Month for which the stat report is to be fetched
-        schema:
-          type: string
-      - name: end-month
-        in: query
-        description: End-Month for which the stat report is to be fetched
-        schema:
-          type: string
-      - name: format
-        in: query
-        description: Report format
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Stats
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/JsonNode"
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/read-all
-        - jans_stat
-      - oauth2:
-        - https://jans.io/oauth/config/lock.admin
-      - oauth2:
-        - https://jans.io/oauth/config/read-all
       - oauth2:
         - https://jans.io/oauth/config/write-all
 components:
@@ -1050,8 +1051,7 @@ components:
           description: Authorization token to access URI
         policyStoreUri:
           type: string
-          description: URI to policy store. Policy store can be json, zip or a .cjar archive (served by Lock under its policy_store.id)
-      description: List of Policy Sources
+          description: URI to policy store. Policy store can be either json/zip
     TraceClientDomainBinding:
       type: object
       properties:
@@ -1114,6 +1114,11 @@ components:
         receiptAllocationRetryLimit:
           type: integer
           description: Maximum retries when allocating a receipt-chain sequence number
+          format: int32
+        correlationRetryLimit:
+          type: integer
+          description: Maximum retries when a correlation neighbor update hits a version
+            conflict
           format: int32
         receiptRepairIntervalSeconds:
           type: integer
