@@ -12,7 +12,6 @@
       "workload_id": "spiffe://example.org/agent/planner"
     },
     "event": {
-<<<<<<< HEAD:jans-lock/lock-server/service/src/test/resources/trace/assertions/capability_invoked_batch_valid.json
       "invocations": [
         {
           "invocation_id": "i-1",
@@ -27,13 +26,6 @@
           "outcome": "FAILED"
         }
       ],
-=======
-      "invocation": {
-        "action": "Acme::Action::\"Pay\"",
-        "resource_type": "Acme::Payment",
-        "outcome": "INVOKED"
-      },
->>>>>>> main:jans-lock/lock-server/service/src/test/resources/trace/negative/ci_with_policy_forbidden.json
       "enforcement_point_id": "gateway-001",
       "tokens": [
         {
