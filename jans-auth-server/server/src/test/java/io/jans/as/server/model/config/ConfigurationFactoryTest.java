@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 import static org.mockito.Mockito.doReturn;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
@@ -67,6 +68,20 @@ public class ConfigurationFactoryTest {
     }
 
     @Test
+    public void initWebKeys_whenJwksUriChangesAndNewFetchFails_shouldNotKeepKeysOfPreviousUri() {
+        final String newJwksUri = "https://other.example.org/jwks";
+        doReturn(new JSONObject("{\"keys\":[]}")).when(configurationFactory).fetchExternalWebKeys(JWKS_URI);
+        configurationFactory.initWebKeys(conf(true));
+        final Object previous = configurationFactory.getWebKeysConfiguration();
+
+        doReturn(null).when(configurationFactory).fetchExternalWebKeys(newJwksUri);
+        configurationFactory.initWebKeys(conf(true, newJwksUri));
+
+        assertNotSame(configurationFactory.getWebKeysConfiguration(), previous);
+        assertTrue(configurationFactory.getWebKeysConfiguration().getKeys().isEmpty());
+    }
+
+    @Test
     public void initWebKeys_whenExternalFetchSucceeds_shouldLoadKeys() {
         doReturn(new JSONObject("{\"keys\":[]}")).when(configurationFactory).fetchExternalWebKeys(JWKS_URI);
 
@@ -77,9 +92,13 @@ public class ConfigurationFactoryTest {
     }
 
     private static Conf conf(boolean allowStartupOnJwksUriFetchFailure) {
+        return conf(allowStartupOnJwksUriFetchFailure, JWKS_URI);
+    }
+
+    private static Conf conf(boolean allowStartupOnJwksUriFetchFailure, String jwksUri) {
         final AppConfiguration appConfiguration = new AppConfiguration();
         appConfiguration.setIssuer("https://as.example.org");
-        appConfiguration.setJwksUri(JWKS_URI);
+        appConfiguration.setJwksUri(jwksUri);
         appConfiguration.setAllowStartupOnJwksUriFetchFailure(allowStartupOnJwksUriFetchFailure);
 
         final Conf conf = new Conf();

@@ -145,6 +145,7 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
     private StaticConfiguration staticConf;
     private WebKeysConfiguration jwks;
     private boolean jwksFetchPending = false;
+    private String jwksSourceUri;
     private ErrorResponseFactory errorResponseFactory;
     private String cryptoConfigurationSalt;
 
@@ -483,6 +484,8 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
             } else {
                 generateWebKeys();
             }
+            jwksFetchPending = false;
+            jwksSourceUri = null;
             return;
         }
 
@@ -498,8 +501,9 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 
             log.error("Unable to fetch external jwks from jwksUri: {}. Continue because allowStartupOnJwksUriFetchFailure=true, will retry on next configuration check.", jwksUri);
             jwksFetchPending = true;
-            if (jwks == null) {
+            if (jwks == null || !jwksUri.equals(jwksSourceUri)) {
                 jwks = new WebKeysConfiguration();
+                jwksSourceUri = jwksUri;
             }
             return;
         }
@@ -509,6 +513,7 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
         jwks = new WebKeysConfiguration();
         jwks.setKeys(keySet.getKeys());
         jwksFetchPending = false;
+        jwksSourceUri = jwksUri;
     }
 
     JSONObject fetchExternalWebKeys(String jwksUri) {
