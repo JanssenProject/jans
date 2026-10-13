@@ -242,8 +242,7 @@ public final class StoredTraceRecordFactory {
 		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late);
 
 		return new StoredTraceRecord(identity, "{\"trace\":{}}", contentDigest, verification, receipt, flags,
-				execution, chainPosition, prevRecordHash, capabilityIds, tokenRefs, eventKind, signedAt, nodeId,
-				createdAtMs, version);
+				execution, chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs, version);
 	}
 
 }

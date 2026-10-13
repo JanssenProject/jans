@@ -17,6 +17,7 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.trace.config.ChainRegistrationMode;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.model.ChainIdentity;

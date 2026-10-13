@@ -588,11 +588,11 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		ChainPosition position = new ChainPosition(chainIdentity(), 1L);
 		ExecutionIdentity execution = new ExecutionIdentity(DOMAIN, "authority-1", "exec-1");
 		CorrelationPlan plan1 = new CorrelationPlan(new IngestionFlags(false, false, false, false), position,
-				execution, Collections.emptyList(), Collections.emptyList(), Collections.singletonList(peerIdentity),
-				Collections.emptyList(), Collections.emptyList());
+				execution, Collections.emptyList(), Collections.singletonList(peerIdentity), Collections.emptyList(),
+				Collections.emptyList());
 		CorrelationPlan plan2 = new CorrelationPlan(new IngestionFlags(false, false, false, false), position,
-				execution, Collections.emptyList(), Collections.emptyList(), Collections.singletonList(peerIdentity),
-				Collections.emptyList(), Collections.emptyList());
+				execution, Collections.emptyList(), Collections.singletonList(peerIdentity), Collections.emptyList(),
+				Collections.emptyList());
 
 		ExecutorService executor = Executors.newFixedThreadPool(2);
 		try {

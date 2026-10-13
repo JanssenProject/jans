@@ -22,6 +22,7 @@ tags:
 | clientId | Lock Client ID | [Details](#clientid) |
 | clientId | OAuth client id bound to the evidence domain | [Details](#clientid) |
 | clientPassword | Lock client password | [Details](#clientpassword) |
+| correlationRetryLimit | Maximum retries when a correlation neighbor update hits a version conflict | [Details](#correlationretrylimit) |
 | defaultEvidenceDomainId | Evidence domain id used when a submitting client has no explicit binding | [Details](#defaultevidencedomainid) |
 | disableExternalLoggerConfiguration | Choose whether to disable external log4j configuration override | [Details](#disableexternalloggerconfiguration) |
 | disableJdkLogger | Choose whether to disable JDK loggers | [Details](#disablejdklogger) |
@@ -166,6 +167,15 @@ tags:
 - Required: No
 
 - Default value: None
+
+
+## correlationRetryLimit
+
+- Description: Maximum retries when a correlation neighbor update hits a version conflict
+
+- Required: No
+
+- Default value: 3
 
 
 ## defaultEvidenceDomainId

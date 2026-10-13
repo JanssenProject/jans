@@ -175,7 +175,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "cedarling-fleet-1", "instance-1", "chain-1");
 		ChainPosition chainPosition = new ChainPosition(chainIdentity, 1L);
 		return new StoredTraceRecord(identity, "{}", "sha256:" + "2".repeat(64), verification, receipt, flags,
-				execution, chainPosition, "sha256:" + "0".repeat(64), List.of(), List.of(), "AUTHORIZATION_DECISION",
+				execution, chainPosition, "sha256:" + "0".repeat(64), List.of(), "AUTHORIZATION_DECISION",
 				4000L, "node-1", 5000L, 0L);
 	}
 

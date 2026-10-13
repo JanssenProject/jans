@@ -77,7 +77,7 @@ public abstract class TraceStoreContractTest {
 				receiptSeq, 2000L + receiptSeq, TraceConstants.ZERO_HASH, "sha256:" + String.format("%064d", receiptSeq));
 		IngestionFlags flags = new IngestionFlags(false, false, false, false);
 		return new StoredTraceRecord(identity, "{\"trace\":{}}", "sha256:" + String.format("%064d", receiptSeq),
-				verification, receipt, flags, execution, chainPosition, TraceConstants.ZERO_HASH, capabilityIds,
+				verification, receipt, flags, execution, chainPosition, TraceConstants.ZERO_HASH,
 				tokenRefs, TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 3000L + receiptSeq, 0L);
 	}
 

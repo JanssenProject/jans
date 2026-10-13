@@ -55,7 +55,7 @@ class OrmTraceStoreTest extends TraceStoreContractTest {
 		IngestionFlags flags = new IngestionFlags(false, false, false, false);
 		String assertion = buildAssertion(chainProducerId, chainInstanceId, chainId, seq, tokenRefs);
 		return new StoredTraceRecord(identity, assertion, "sha256:" + String.format("%064d", receiptSeq), verification,
-				receipt, flags, execution, chainPosition, TraceConstants.ZERO_HASH, capabilityIds, tokenRefs,
+				receipt, flags, execution, chainPosition, TraceConstants.ZERO_HASH, tokenRefs,
 				TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 3000L + receiptSeq, 0L);
 	}
 
