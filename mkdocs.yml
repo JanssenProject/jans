@@ -332,7 +332,9 @@ nav:
       - Overview: janssen-server/config-guide/custom-scripts-config.md
       - Interception Scripts:
         - Interception Scripts: janssen-server/developer/scripts/README.md
-        - Application Session: script-catalog/application_session/application-session.md
+        - Application Session:
+          - Application Session: script-catalog/application_session/application-session.md
+          - Jans Session Audit: script-catalog/application_session/jans-session-audit/jans-session-audit.md
         - Authorization Challenge: script-catalog/authorization_challenge/authorization-challenge.md
         - Authorization Detail: script-catalog/authz_detail/authz-detail.md
         - CIBA End User Notification: script-catalog/ciba/ciba.md
