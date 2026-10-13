@@ -10,6 +10,7 @@ use std::str::FromStr;
 
 use base64::Engine as _;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use ed25519_dalek::pkcs8::DecodePrivateKey as _;
 use ed25519_dalek::{Signer as _, SigningKey};
 use thiserror::Error;
 
@@ -35,6 +36,19 @@ impl SignerError {
     #[must_use]
     pub const fn code(&self) -> &'static str {
         "SIGNER_FAILURE"
+    }
+}
+
+/// Bytes are not an unencrypted PKCS#8 PEM Ed25519 private key (RFC 8410). Carries no
+/// detail, so no part of the key text travels with it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+#[error("private key is not an unencrypted PKCS#8 PEM Ed25519 key")]
+pub struct PrivateKeyError;
+
+impl PrivateKeyError {
+    #[must_use]
+    pub const fn code(&self) -> &'static str {
+        "INVALID_PRIVATE_KEY"
     }
 }
 
@@ -96,6 +110,17 @@ impl Ed25519Signer {
         }
     }
 
+    /// Loads the key format `openssl genpkey -algorithm ed25519` writes (decision R20).
+    /// Takes bytes, not a path: reading the file is the host's job.
+    pub fn from_pkcs8_pem(kid: impl Into<String>, pem: &[u8]) -> Result<Self, PrivateKeyError> {
+        let text = std::str::from_utf8(pem).map_err(|_| PrivateKeyError)?;
+        let key = SigningKey::from_pkcs8_pem(text).map_err(|_| PrivateKeyError)?;
+        Ok(Self {
+            kid: kid.into(),
+            key,
+        })
+    }
+
     #[must_use]
     pub fn public_key_bytes(&self) -> [u8; 32] {
         self.key.verifying_key().to_bytes()
@@ -123,7 +148,10 @@ impl TraceSigner for Ed25519Signer {
 
 #[cfg(test)]
 mod tests {
-    use super::{Ed25519Signer, ParseSignatureError, SignatureValue, SignerError, TraceSigner};
+    use super::{
+        Ed25519Signer, ParseSignatureError, PrivateKeyError, SignatureValue, SignerError,
+        TraceSigner,
+    };
 
     struct Rfc8032Case {
         secret: &'static str,
@@ -239,6 +267,68 @@ mod tests {
             SignerError.code(),
             "SIGNER_FAILURE",
             "stable code from core design §10"
+        );
+    }
+
+    /// RFC 8032 TEST 1 secret as written by `openssl pkey` (RFC 8410 PKCS#8 v1).
+    const TEST_1_PEM: &str = "-----BEGIN PRIVATE KEY-----\n\
+        MC4CAQAwBQYDK2VwBCIEIJ1hsZ3v/VpguoRK9JLsLMREScVpezJpGXA7rAMcrn9g\n\
+        -----END PRIVATE KEY-----\n";
+
+    #[test]
+    fn loads_unencrypted_pkcs8_pem() {
+        let signer = Ed25519Signer::from_pkcs8_pem("key-2026-01", TEST_1_PEM.as_bytes())
+            .expect("openssl-written Ed25519 key loads");
+        assert_eq!(signer.kid(), "key-2026-01", "kid comes from the caller");
+        assert_eq!(
+            hex::encode(signer.public_key_bytes()),
+            TEST_1.public,
+            "same key as RFC 8032 TEST 1"
+        );
+        let signature = signer
+            .sign(TEST_1.message)
+            .expect("in-memory signer cannot fail");
+        assert_eq!(
+            hex::encode(signature),
+            TEST_1.signature,
+            "signs like RFC 8032 TEST 1"
+        );
+    }
+
+    #[test]
+    fn rejects_anything_but_an_unencrypted_ed25519_private_key() {
+        let body = "MC4CAQAwBQYDK2VwBCIEIJ1hsZ3v/VpguoRK9JLsLMREScVpezJpGXA7rAMcrn9g";
+        let cases: [(&str, Vec<u8>); 5] = [
+            (
+                "encrypted label",
+                format!(
+                    "-----BEGIN ENCRYPTED PRIVATE KEY-----\n{body}\n-----END ENCRYPTED PRIVATE KEY-----\n"
+                )
+                .into_bytes(),
+            ),
+            (
+                "public key",
+                b"-----BEGIN PUBLIC KEY-----\n\
+                  MCowBQYDK2VwAyEA11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=\n\
+                  -----END PUBLIC KEY-----\n"
+                    .to_vec(),
+            ),
+            ("not PEM", b"not a key".to_vec()),
+            ("empty", Vec::new()),
+            ("not UTF-8", vec![0xFF, 0xFE]),
+        ];
+        for (name, pem) in cases {
+            let err = Ed25519Signer::from_pkcs8_pem("k", &pem).expect_err(name);
+            assert_eq!(err, PrivateKeyError, "expected PrivateKeyError for {name}");
+        }
+    }
+
+    #[test]
+    fn private_key_code_is_stable() {
+        assert_eq!(
+            PrivateKeyError.code(),
+            "INVALID_PRIVATE_KEY",
+            "our code, not in §10"
         );
     }
 }

@@ -34,4 +34,6 @@ pub use digest::{Digest, ParseDigestError};
 pub use inputs::{compute_bundle_hash, token_fingerprint};
 pub use json::JsonError;
 pub use limits::{Limits, SizeLimitError};
-pub use signature::{Ed25519Signer, ParseSignatureError, SignatureValue, SignerError, TraceSigner};
+pub use signature::{
+    Ed25519Signer, ParseSignatureError, PrivateKeyError, SignatureValue, SignerError, TraceSigner,
+};
