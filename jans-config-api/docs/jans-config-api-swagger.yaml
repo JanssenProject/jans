@@ -16411,8 +16411,6 @@ components:
           format: int32
         idJagIssueRefreshToken:
           type: boolean
-        allowStartupOnJwksUriFetchFailure:
-          type: boolean
         returnDeviceSecretFromAuthzEndpoint:
           type: boolean
         dcrForbidExpirationTimeInRequest:
