@@ -15694,19 +15694,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         userCanEdit:
-          type: boolean
-        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -16682,6 +16682,8 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16691,8 +16693,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17646,6 +17646,10 @@ components:
           enum:
           - oauth
           - cedarling
+        disableLoggerTimer:
+          type: boolean
+          description: Flag to enable/disable timer to dynamically reflect log configuration
+            changes. Default value `false`.
         roleAttributeName:
           type: string
           description: DB attribute name for storing user role
@@ -17655,11 +17659,7 @@ components:
           items:
             type: string
             description: Role names corresponding to `admin` role
-        disableLoggerTimer:
-          type: boolean
-          description: Flag to enable/disable timer to dynamically reflect log configuration
-            changes. Default value `false`.
-        userRolePermissionValidationEnabled:
+        userPermissionValidationEnabled:
           type: boolean
           description: Flag to enable/disable User Role-Permission mapping check while
             authentication. Default value `true`.
@@ -17667,7 +17667,7 @@ components:
           type: boolean
           description: Flag to enable/disable validating `User-inum` in Introspection
             response. Default value `true`.
-        fetchUserRoleInIntrospectionFlag:
+        fetchUserDataInIntrospectionFlag:
           type: boolean
           description: Flag to enable/disable to get user-role in Introspection response.
             Default value `true`.
@@ -17956,7 +17956,7 @@ components:
           description: Authorization token to access URI
         policyStoreUri:
           type: string
-          description: URI to policy store. Policy store can be json, zip or a .cjar archive (served by Lock under its policy_store.id)
+          description: URI to policy store. Policy store can be either json/zip
       description: List of Policy Sources
     SmtpConfiguration:
       type: object
@@ -18729,9 +18729,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

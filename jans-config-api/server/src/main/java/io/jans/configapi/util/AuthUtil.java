@@ -137,8 +137,8 @@ public class AuthUtil {
         return this.configurationFactory.getApiAppConfiguration().getAdminRoleNames();
     }
     
-    public boolean isUserRolePermissionValidationEnabled() {
-        return this.configurationFactory.getApiAppConfiguration().isUserRolePermissionValidationEnabled();
+    public boolean isUserPermissionValidationEnabled() {
+        return this.configurationFactory.getApiAppConfiguration().isUserPermissionValidationEnabled();
     }
 
     public boolean isValidateUserInumInIntrospectionFlag() {
@@ -163,8 +163,8 @@ public class AuthUtil {
         }
     }    
     
-    public boolean isFetchUserRoleInIntrospectionFlag() {
-        return this.configurationFactory.getApiAppConfiguration().isFetchUserRoleInIntrospectionFlag();
+    public boolean isFetchUserDataInIntrospectionFlag() {
+        return this.configurationFactory.getApiAppConfiguration().isFetchUserDataInIntrospectionFlag();
     }
     
     public List<String> getSuperAdminScopes() {
@@ -176,7 +176,7 @@ public class AuthUtil {
         if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
             return readScope;
         }
-        return getSuperAdminScopes().stream().filter(scope -> scope.contains("read")).findFirst().orElse(null);
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/read-all")).findFirst().orElse(null);
     }
 
     public String getSuperAdminWriteScope() {
@@ -184,7 +184,7 @@ public class AuthUtil {
         if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
             return writeScope;
         }
-        return getSuperAdminScopes().stream().filter(scope -> scope.contains("write")).findFirst().orElse(null);
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/write-all")).findFirst().orElse(null);
     }
 
     public String getSuperAdminDeleteScope() {
@@ -192,7 +192,7 @@ public class AuthUtil {
         if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
             return deleteScope;
         }
-        return getSuperAdminScopes().stream().filter(scope -> scope.contains("delete")).findFirst().orElse(null);
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/delete-all")).findFirst().orElse(null);
     }
 
     public boolean hasSuperAdminReadScope(List<String> userScopes) {
@@ -944,14 +944,20 @@ public class AuthUtil {
     }
 
     public IntrospectionResponse getIntrospectionResponse(String token) {
+        IntrospectionResponse introspectionResponse = null;
+        if(StringUtils.isBlank(token)) {
+            return introspectionResponse;
+        }
         try {
-            return openIdService.getIntrospectionResponse(token,
+            introspectionResponse = openIdService.getIntrospectionResponse(token,
                     token.substring("Bearer".length()).trim(), this.getAuthIssuerUrl());
+            log.debug("introspectionResponse:{}", introspectionResponse);
         } catch (JsonProcessingException ex) {
             log.error("AuthUtil::getIntrospectionResponse() - Error while token Introspection token:{}, exception:{} ", token, ex);
             throw new WebApplicationException("AuthUtil::getIntrospectionResponse - Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
+        return introspectionResponse;
     }
 
     public String getJsonNodeKeyValue(JsonNode jsonNode, String key) {

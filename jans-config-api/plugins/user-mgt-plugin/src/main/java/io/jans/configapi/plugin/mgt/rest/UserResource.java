@@ -742,11 +742,11 @@ public class UserResource extends BaseResource {
             throws ApiApplicationException {
         if (logger.isInfoEnabled()) {
             logger.info(
-                    "UserResource::validateUserPermission() - userInum:{}, httpRequestMethod:{}, authUtil.isUserRolePermissionValidationEnabled():{}",
-                    escapeLog(userInum), httpRequestMethod, authUtil.isUserRolePermissionValidationEnabled());
+                    "UserResource::validateUserPermission() - userInum:{}, httpRequestMethod:{}, authUtil.isUserPermissionValidationEnabled():{}",
+                    escapeLog(userInum), httpRequestMethod, authUtil.isUserPermissionValidationEnabled());
         }
 
-        if (!authUtil.isUserRolePermissionValidationEnabled()) {
+        if (!authUtil.isUserPermissionValidationEnabled()) {
             return;
         }
 
@@ -891,9 +891,9 @@ public class UserResource extends BaseResource {
         logger.debug(
                 " UserResource::isRolePermissionExemptClient() - inum:{}, StringUtils.isBlank(inum):{}, authUtil.isUserRolePermissionExcluded(inum):{}",
                 inum, StringUtils.isBlank(inum), authUtil.isUserRolePermissionExcluded(inum));
-        if (!authUtil.isUserRolePermissionValidationEnabled() || authUtil.isUserRolePermissionExcluded(inum)) {
+        if (!authUtil.isUserPermissionValidationEnabled() || authUtil.isUserRolePermissionExcluded(inum)) {
             logger.debug(
-                    " UserResource::Skip validateUserRolePermission as authUtil.isUserRolePermissionValidationEnabled() not enabled OR blank inum OR UserRolePermissionExcluded is true ");
+                    " UserResource::Skip validateUserRolePermission as authUtil.isUserPermissionValidationEnabled() not enabled OR blank inum OR UserRolePermissionExcluded is true ");
             return true;
         }
 

@@ -1786,20 +1786,10 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        registrationFailures:
-          type: integer
-          format: int64
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccessRate:
+        authenticationSuccessRate:
           type: number
           format: double
-        authenticationSuccessRate:
+        registrationAvgDuration:
           type: number
           format: double
         authenticationAvgDuration:
@@ -1808,33 +1798,43 @@ components:
         authenticationFailures:
           type: integer
           format: int64
-        registrationAvgDuration:
+        registrationSuccessRate:
           type: number
           format: double
-        authenticationSuccesses:
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        registrationAttempts:
+          type: integer
+          format: int64
+        registrationSuccesses:
           type: integer
           format: int64
         authenticationAttempts:
           type: integer
           format: int64
-        registrationSuccesses:
+        registrationFailures:
+          type: integer
+          format: int64
+        authenticationSuccesses:
           type: integer
           format: int64
         metricsData:
           type: object
           additionalProperties:
             type: object
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
         fallbackEvents:
           type: integer
           format: int64
         period:
           type: string
         deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        errorCounts:
           type: object
           additionalProperties:
             type: integer

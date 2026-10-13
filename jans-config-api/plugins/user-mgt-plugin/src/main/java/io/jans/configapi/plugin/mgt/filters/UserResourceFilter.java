@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.mgt.filters;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.core.filter.BaseFilter;
 import io.jans.configapi.core.util.ProtectionScopeType;
@@ -62,8 +63,10 @@ public class UserResourceFilter extends BaseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.info(" Inside UserResourceFilter filter - info.getPath():{}, PATH:{}, method:{}", info.getPath(), PATH,
-                    requestContext.getMethod());
+            if (log.isInfoEnabled()) {
+                log.info(" Inside UserResourceFilter filter - info.getPath():{}, PATH:{}, method:{}",
+                        escapeLog(info.getPath()), PATH, escapeLog(requestContext.getMethod()));
+            }
 
             if (info.getPath() == null || !info.getPath().contains(PATH)) {
                 log.info(" Exiting as not User Management Endpoint!");
@@ -91,13 +94,13 @@ public class UserResourceFilter extends BaseFilter {
             HttpHeaders httpHeaders) {
 
         log.info(
-                " UserResourceFilter::validateUserRolePermission() - authUtil.isUserRolePermissionValidationEnabled():{} {}",
-                authUtil.isUserRolePermissionValidationEnabled(), "");
+                " UserResourceFilter::validateUserRolePermission() - authUtil.isUserPermissionValidationEnabled():{} {}",
+                authUtil.isUserPermissionValidationEnabled(), "");
 
         // If user-role-permission validation is enabled
-        if (!authUtil.isUserRolePermissionValidationEnabled()) {
+        if (!authUtil.isUserPermissionValidationEnabled()) {
             log.debug(
-                    " UserResourceFilter::validateUserRolePermission() - Skip validateUserRolePermission as authUtil.isUserRolePermissionValidationEnabled() not enabled");
+                    " UserResourceFilter::validateUserRolePermission() - Skip validateUserRolePermission as authUtil.isUserPermissionValidationEnabled() not enabled");
             return;
         }
 

@@ -25,6 +25,9 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Protection mode for the Lock server (OAuth or Cedarling)")
     private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
 
+    @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `false`.")
+    private boolean disableLoggerTimer;
+    
     @DocProperty(description = "DB attribute name for storing user role", defaultValue = "jansAdminUIRole")
     @Schema(description = "DB attribute name for storing user role")
     private String roleAttributeName = "jansAdminUIRole";
@@ -33,17 +36,14 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Role names corresponding to `admin` role")
     private List<String> adminRoleNames = Arrays.asList("admin", "api-admin");
     
-    @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `false`.")
-    private boolean disableLoggerTimer;
-    
     @Schema(description = "Flag to enable/disable User Role-Permission mapping check while authentication. Default value `true`.")
-    private boolean userRolePermissionValidationEnabled = true;
+    private boolean userPermissionValidationEnabled = true;
     
     @Schema(description = "Flag to enable/disable validating `User-inum` in Introspection response. Default value `true`.")
     private boolean validateUserInumInIntrospectionFlag = true;
         
     @Schema(description = "Flag to enable/disable to get user-role in Introspection response. Default value `true`.")
-    private boolean fetchUserRoleInIntrospectionFlag = true;
+    private boolean fetchUserDataInIntrospectionFlag = true;
 
     @Schema(description = "Client IDs exempt from the User Role-Permission mapping check. Only honoured for tokens that carry no user, so a user token is always checked. Empty by default.")
     private List<String> userRolePermissionExcludedClients;
@@ -194,12 +194,12 @@ public class ApiAppConfiguration implements Configuration {
         this.disableLoggerTimer = disableLoggerTimer;
     }
     
-    public boolean isUserRolePermissionValidationEnabled() {
-        return userRolePermissionValidationEnabled;
+    public boolean isUserPermissionValidationEnabled() {
+        return userPermissionValidationEnabled;
     }
 
-    public void setUserRolePermissionValidationEnabled(boolean userRolePermissionValidationEnabled) {
-        this.userRolePermissionValidationEnabled = userRolePermissionValidationEnabled;
+    public void setUserPermissionValidationEnabled(boolean userPermissionValidationEnabled) {
+        this.userPermissionValidationEnabled = userPermissionValidationEnabled;
     }
     
     public boolean isValidateUserInumInIntrospectionFlag() {
@@ -210,12 +210,12 @@ public class ApiAppConfiguration implements Configuration {
         this.validateUserInumInIntrospectionFlag = validateUserInumInIntrospectionFlag;
     }
     
-    public boolean isFetchUserRoleInIntrospectionFlag() {
-        return fetchUserRoleInIntrospectionFlag;
+    public boolean isFetchUserDataInIntrospectionFlag() {
+        return fetchUserDataInIntrospectionFlag;
     }
 
-    public void setFetchUserRoleInIntrospectionFlag(boolean fetchUserRoleInIntrospectionFlag) {
-        this.fetchUserRoleInIntrospectionFlag = fetchUserRoleInIntrospectionFlag;
+    public void setFetchUserDataInIntrospectionFlag(boolean fetchUserDataInIntrospectionFlag) {
+        this.fetchUserDataInIntrospectionFlag = fetchUserDataInIntrospectionFlag;
     }
 
     public List<String> getUserRolePermissionExcludedClients() {
@@ -498,9 +498,9 @@ public class ApiAppConfiguration implements Configuration {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
                 + " ,protectionMode=" + protectionMode + " ,roleAttributeName=" + roleAttributeName
                 + ", adminRoleNames=" + adminRoleNames + ", disableLoggerTimer=" + disableLoggerTimer
-                +" ,userRolePermissionValidationEnabled=" + userRolePermissionValidationEnabled
+                +" ,userPermissionValidationEnabled=" + userPermissionValidationEnabled
                 +" ,validateUserInumInIntrospectionFlag=" + validateUserInumInIntrospectionFlag
-                +" ,fetchUserRoleInIntrospectionFlag=" + fetchUserRoleInIntrospectionFlag
+                +" ,fetchUserDataInIntrospectionFlag=" + fetchUserDataInIntrospectionFlag
                 +" ,userRolePermissionExcludedClients=" + userRolePermissionExcludedClients
                 + ", disableAuditLogger=" + disableAuditLogger + ", customAttributeValidationEnabled="
                 + customAttributeValidationEnabled + ", acrValidationEnabled=" + acrValidationEnabled
