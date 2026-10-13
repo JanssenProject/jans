@@ -110,11 +110,11 @@ pub fn assertion_signing_input(
     limits: &Limits,
 ) -> Result<Vec<u8>, SigningInputError> {
     limits.check_input(assertion)?;
-    let Value::Object(mut members) = parse_strict(assertion)? else {
+    let Value::Object(mut members) = parse_strict(assertion, limits)? else {
         return Err(SigningInputError::NotAnObject);
     };
     members.remove(SIGNATURE);
-    Ok(canonicalize_value(&Value::Object(members))?)
+    Ok(canonicalize_value(&Value::Object(members), limits)?)
 }
 
 /// Signs an unsigned assertion. The caller inserts the result as the top-level `signature`;
@@ -125,7 +125,7 @@ pub fn sign_assertion(
     unsigned_assertion: &[u8],
     signer: &dyn TraceSigner,
 ) -> Result<SignatureValue, SignError> {
-    let Value::Object(members) = parse_strict(unsigned_assertion)? else {
+    let Value::Object(members) = parse_strict(unsigned_assertion, &Limits::UNBOUNDED)? else {
         return Err(SignError::NotAnObject);
     };
     if members.contains_key(SIGNATURE) {
@@ -137,7 +137,7 @@ pub fn sign_assertion(
     if kid != signer.kid() {
         return Err(SignError::KidMismatch);
     }
-    let input = canonicalize_value(&Value::Object(members))?;
+    let input = canonicalize_value(&Value::Object(members), &Limits::UNBOUNDED)?;
     Ok(SignatureValue::from_bytes(signer.sign(&input)?))
 }
 
@@ -148,7 +148,7 @@ pub fn compute_content_digest(
     limits: &Limits,
 ) -> Result<Digest, ContentDigestError> {
     limits.check_input(signed_assertion)?;
-    let Value::Object(members) = parse_strict(signed_assertion)? else {
+    let Value::Object(members) = parse_strict(signed_assertion, limits)? else {
         return Err(ContentDigestError::NotAnObject);
     };
     match members.get(SIGNATURE) {
@@ -158,7 +158,7 @@ pub fn compute_content_digest(
         },
         Some(_) => return Err(ParseSignatureError.into()),
     }
-    let canonical = canonicalize_value(&Value::Object(members))?;
+    let canonical = canonicalize_value(&Value::Object(members), limits)?;
     Ok(Digest::sha256(&canonical))
 }
 
@@ -443,5 +443,14 @@ mod tests {
         for (actual, expected) in cases {
             assert_eq!(actual, expected, "stable code from core design §10");
         }
+    }
+
+    #[test]
+    fn sign_is_not_bound_by_untrusted_input_limits() {
+        // A string above the default 64 KiB bound is the producer's own data, not an attack.
+        let long = "x".repeat(70 * 1024);
+        let input = format!(r#"{{"kid":"key-2026-01","trace":{{"note":"{long}"}}}}"#);
+        sign_assertion(input.as_bytes(), &signer())
+            .expect("signing applies no untrusted-input limits");
     }
 }

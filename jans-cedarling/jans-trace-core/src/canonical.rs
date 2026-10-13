@@ -33,20 +33,28 @@ impl CanonicalizeError {
 /// Returns the RFC 8785 canonical bytes of `input` after strict validation.
 pub fn canonicalize_json(input: &[u8], limits: &Limits) -> Result<Vec<u8>, CanonicalizeError> {
     limits.check_input(input)?;
-    let value = parse_strict(input)?;
-    Ok(canonicalize_value(&value)?)
+    let value = parse_strict(input, limits)?;
+    Ok(canonicalize_value(&value, limits)?)
 }
 
-pub(crate) fn canonicalize_value(value: &Value) -> Result<Vec<u8>, JsonError> {
+pub(crate) fn canonicalize_value(value: &Value, limits: &Limits) -> Result<Vec<u8>, JsonError> {
     // The canonicalizer refuses only values outside the JCS model; strict parsing already
     // rejects those, so this maps an unreachable case to its honest meaning, not a panic.
-    serde_json_canonicalizer::to_vec(value).map_err(|_| JsonError::NonCanonicalizable)
+    let bytes =
+        serde_json_canonicalizer::to_vec(value).map_err(|_| JsonError::NonCanonicalizable)?;
+    // JCS can lengthen numbers (`1e20` becomes 21 digits), so the input bound is not enough.
+    if bytes.len() > limits.max_canonical_bytes() {
+        return Err(JsonError::LimitExceeded(SizeLimitError::new(
+            limits.max_canonical_bytes(),
+        )));
+    }
+    Ok(bytes)
 }
 
 #[cfg(test)]
 mod tests {
     use super::{CanonicalizeError, canonicalize_json};
-    use crate::{JsonError, Limits};
+    use crate::{JsonError, Limits, SizeLimitError};
 
     fn canonicalize(input: &[u8]) -> Result<Vec<u8>, CanonicalizeError> {
         canonicalize_json(input, &Limits::default())
@@ -158,5 +166,109 @@ mod tests {
                 "wrapping keeps the code"
             );
         }
+    }
+
+    /// Canonicalizes `input` under `limits` and returns the limit reported by the rejection.
+    fn rejected_limit(name: &str, input: &[u8], limits: Limits) -> usize {
+        let err = canonicalize_json(input, &limits).expect_err(name);
+        let CanonicalizeError::Json(JsonError::LimitExceeded(e)) = err else {
+            panic!("expected Json(LimitExceeded) for {name}, got {err:?}");
+        };
+        e.limit()
+    }
+
+    struct LimitCase {
+        name: &'static str,
+        limits: Limits,
+        accepted: &'static [u8],
+        rejected: &'static [u8],
+        limit: usize,
+    }
+
+    #[test]
+    fn structural_limits_accept_the_bound_and_reject_beyond_it() {
+        let defaults = Limits::default();
+        let cases = [
+            LimitCase {
+                name: "depth",
+                limits: defaults.with_max_depth(2),
+                accepted: b"[[1]]",
+                rejected: b"[[[1]]]",
+                limit: 2,
+            },
+            LimitCase {
+                name: "object depth",
+                limits: defaults.with_max_depth(2),
+                accepted: br#"{"a":{}}"#,
+                rejected: br#"{"a":{"b":{}}}"#,
+                limit: 2,
+            },
+            LimitCase {
+                name: "members",
+                limits: defaults.with_max_object_members(1),
+                accepted: br#"{"a":1}"#,
+                rejected: br#"{"a":1,"b":2}"#,
+                limit: 1,
+            },
+            LimitCase {
+                name: "elements",
+                limits: defaults.with_max_array_elements(2),
+                accepted: b"[1,2]",
+                rejected: b"[1,2,3]",
+                limit: 2,
+            },
+            LimitCase {
+                name: "string value",
+                limits: defaults.with_max_string_bytes(3),
+                accepted: br#"["abc"]"#,
+                rejected: br#"["abcd"]"#,
+                limit: 3,
+            },
+            LimitCase {
+                name: "member name",
+                limits: defaults.with_max_string_bytes(3),
+                accepted: br#"{"abc":1}"#,
+                rejected: br#"{"abcd":1}"#,
+                limit: 3,
+            },
+            // Two-byte UTF-8 characters: the bound counts bytes, not characters.
+            LimitCase {
+                name: "string bytes",
+                limits: defaults.with_max_string_bytes(3),
+                accepted: "[\"é\"]".as_bytes(),
+                rejected: "[\"éé\"]".as_bytes(),
+                limit: 3,
+            },
+        ];
+        for case in cases {
+            canonicalize_json(case.accepted, &case.limits).expect(case.name);
+            assert_eq!(
+                rejected_limit(case.name, case.rejected, case.limits),
+                case.limit,
+                "reported limit for {}",
+                case.name
+            );
+        }
+    }
+
+    #[test]
+    fn canonical_output_limit_catches_number_expansion() {
+        // 6 input bytes become `[100000000000000000000]`, 23 canonical bytes.
+        let limits = Limits::default().with_max_canonical_bytes(10);
+        canonicalize_json(b"[1]", &limits).expect("short canonical output is accepted");
+        assert_eq!(
+            rejected_limit("expanded number", b"[1e20]", limits),
+            10,
+            "canonical output above the bound is rejected"
+        );
+    }
+
+    #[test]
+    fn limit_code_is_size_limit_exceeded() {
+        assert_eq!(
+            JsonError::LimitExceeded(SizeLimitError::new(1)).code(),
+            "SIZE_LIMIT_EXCEEDED",
+            "structural limits share the size-limit code from core design §10"
+        );
     }
 }
