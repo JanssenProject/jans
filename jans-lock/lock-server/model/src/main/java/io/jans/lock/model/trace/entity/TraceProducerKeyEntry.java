@@ -221,8 +221,8 @@ public class TraceProducerKeyEntry extends BaseEntry implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, domainId, producerId, kid, publicKeyJwk, validFrom, validUntil, revokedAt,
-                registeredBy, version, creationDate);
+        return Objects.hash(id, domainId, producerId, kid, publicKeyJwk, authorizedEventKinds, validFrom, validUntil,
+                revokedAt, registeredBy, version, creationDate);
     }
 
     @Override
