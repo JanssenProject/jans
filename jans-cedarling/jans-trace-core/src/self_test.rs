@@ -12,7 +12,7 @@ use thiserror::Error;
 
 use crate::json::canonicalize_json;
 use crate::key::PublicKey;
-use crate::receipt::{RECEIPT_PROFILE, ReceiptCommitment, compute_receipt_hash};
+use crate::receipt::{ReceiptCommitment, ReceiptPosition};
 use crate::signature::{Ed25519Signer, SignatureValue, TraceSigner};
 use crate::{Digest, Limits};
 
@@ -126,21 +126,19 @@ fn check_ed25519() -> bool {
 }
 
 fn check_receipt_hash() -> bool {
-    let content = Digest::sha256(b"record");
-    let receipt = ReceiptCommitment {
-        receipt_profile: RECEIPT_PROFILE,
-        evidence_domain_id: "domain-1",
-        receipt_sequence: 1,
-        received_at: "2026-09-17T20:15:32.123Z",
-        producer_id: "cedarling-fleet-1",
-        record_id: "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41",
-        content_digest: &content,
-        prev_receipt_hash: &Digest::GENESIS,
+    let Ok(received_at) = "2026-09-17T20:15:32.123Z".parse() else {
+        return false;
     };
-    compute_receipt_hash(&receipt).is_ok_and(|hash| {
-        hash.to_string()
-            == "sha256:6f46f99849a5a88987dfdc81ce9b2c65aafc64f3e4a687fc78e93f38d1523908"
-    })
+    let receipt = ReceiptCommitment {
+        evidence_domain_id: "domain-1".to_owned(),
+        position: ReceiptPosition::GENESIS,
+        received_at,
+        producer_id: "cedarling-fleet-1".to_owned(),
+        record_id: "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41".to_owned(),
+        content_digest: Digest::sha256(b"record"),
+    };
+    receipt.receipt_hash().to_string()
+        == "sha256:6f46f99849a5a88987dfdc81ce9b2c65aafc64f3e4a687fc78e93f38d1523908"
 }
 
 #[cfg(test)]

@@ -53,9 +53,35 @@ pub(crate) fn canonicalize_value(value: &Value, limits: &Limits) -> Result<Vec<u
     Ok(bytes)
 }
 
+/// Appends the RFC 8785 form of a JSON string (§3.2.2.2, the ECMAScript `JSON.stringify`
+/// rules). Infallible, unlike the canonicalizer, so values built from already validated
+/// parts hash without an error path; tests compare it with the canonicalizer.
+pub(crate) fn write_jcs_string(out: &mut Vec<u8>, text: &str) {
+    out.push(b'"');
+    for character in text.chars() {
+        match character {
+            '"' => out.extend_from_slice(br#"\""#),
+            '\\' => out.extend_from_slice(br"\\"),
+            '\u{8}' => out.extend_from_slice(br"\b"),
+            '\t' => out.extend_from_slice(br"\t"),
+            '\n' => out.extend_from_slice(br"\n"),
+            '\u{c}' => out.extend_from_slice(br"\f"),
+            '\r' => out.extend_from_slice(br"\r"),
+            control if u32::from(control) < 0x20 => {
+                out.extend_from_slice(format!("\\u{:04x}", u32::from(control)).as_bytes());
+            },
+            other => {
+                let mut buffer = [0u8; 4];
+                out.extend_from_slice(other.encode_utf8(&mut buffer).as_bytes());
+            },
+        }
+    }
+    out.push(b'"');
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{CanonicalizeError, canonicalize_json};
+    use super::{CanonicalizeError, canonicalize_json, write_jcs_string};
     use crate::json::JsonError;
     use crate::limits::LimitKind;
     use crate::{Limits, SizeLimitError};
@@ -67,6 +93,26 @@ mod tests {
     fn canonical_text(input: &[u8]) -> String {
         let bytes = canonicalize(input).expect("input is valid strict JSON");
         String::from_utf8(bytes).expect("canonical JSON is UTF-8")
+    }
+
+    #[test]
+    fn string_writer_matches_the_canonicalizer_for_every_code_point() {
+        let astral = ['\u{10000}', '\u{1F600}', '\u{10FFFF}'];
+        let characters = (0..=0xFFFF_u32).filter_map(char::from_u32).chain(astral);
+        for character in characters {
+            let text = format!("a{character}b");
+            let expected =
+                serde_json_canonicalizer::to_vec(&serde_json::Value::String(text.clone()))
+                    .expect("strings always canonicalize");
+            let mut actual = Vec::new();
+            write_jcs_string(&mut actual, &text);
+            assert_eq!(
+                actual,
+                expected,
+                "JCS form of U+{:04X}",
+                u32::from(character)
+            );
+        }
     }
 
     #[test]

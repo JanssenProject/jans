@@ -31,6 +31,30 @@ It does not:
 - choose sequence numbers or chain heads. Producers and Lock assign them; this crate
   hashes and checks what they supply.
 
+## States
+
+The API is a small set of types, each reached only by parsing or by the previous step.
+Holding a value proves its checks passed, so later steps do not repeat them and cannot
+fail on them.
+
+```text
+bytes -- UnsignedAssertion::parse --> UnsignedAssertion -- sign --> SignedAssertion
+bytes -- SignedAssertion::parse --> SignedAssertion -- verify --> VerifiedAssertion
+VerifiedAssertion + ReceiptPosition + ReceivedAt --> ReceiptCommitment --> receipt hash
+```
+
+- `UnsignedAssertion`: strict JSON within the limits, an object with non-empty `producer`,
+  `kid` and `record_id`, no top-level `signature`, and a signed form that will still fit
+  the limits.
+- `SignedAssertion`: the same identity rules, plus a top-level `signature` that is unpadded
+  base64url of 64 bytes. It keeps the bytes it was parsed from (or the canonical bytes
+  `sign` produced), its signing input and its `content_digest`. It cannot be serialized
+  again, so the stored bytes are always the received bytes.
+- `VerifiedAssertion`: only `SignedAssertion::verify` creates it. Receipts are built from it.
+- `ReceivedAt`: only `YYYY-MM-DDTHH:MM:SS.sssZ` text for a real instant.
+  `ReceiptPosition`: sequence 1 with the genesis sentinel, or sequence 2..=2^53−1 with a
+  real predecessor. With both, a `ReceiptCommitment` always hashes.
+
 ## Use cases
 
 ### Producer: Cedarling signs a decision record
@@ -45,16 +69,17 @@ At startup:
 
 For every record:
 
-1. Build the unsigned assertion. Producer chain: `sequence_number` is the previous one
-   plus 1, `prev_record_hash` is the previous record's `content_digest`, or
-   `Digest::GENESIS` for the first record of a chain. For a token without `jti`, put
+1. Build the record's JSON. Producer chain: `sequence_number` is the previous one plus 1,
+   `prev_record_hash` is the previous record's `content_digest`, or `Digest::GENESIS` for
+   the first record of a chain. For a token without `jti`, put
    `inputs::token_fingerprint(token_bytes)` in the record.
-2. `assertion::sign_assertion(unsigned, &signer)` returns the signature. It fails if the
-   record already has a `signature` or its `kid` differs from the signer's.
-3. Insert it as the top-level `"signature"` member. The crate never edits your JSON.
-4. `assertion::compute_content_digest(signed, &limits)` gives the record's fingerprint;
-   keep it as the next `prev_record_hash`.
-5. Send the signed bytes. On retry, resend the same bytes; never re-sign.
+2. `assertion::UnsignedAssertion::parse(bytes, &limits)`. Use the limits Lock enforces: a
+   record Lock would refuse for its size fails here, before it is signed.
+3. `unsigned.sign(&signer)` returns a `SignedAssertion`. Its `as_bytes()` is the JCS form
+   of the whole record, signature included; there is nothing to insert by hand. It fails
+   only if the record's `kid` differs from the signer's or the signer fails.
+4. Keep `signed.content_digest()` as the next `prev_record_hash`.
+5. Send `signed.as_bytes()`. On retry, resend the same bytes; never re-sign.
 
 ### Lock: register a producer key
 
@@ -65,23 +90,24 @@ other key types, a padded or wrong-length `x`, a JWK with `d` (a private key) an
 
 ### Lock: ingest a record
 
-1. `assertion::parse_assertion_identity(bytes, &limits)` reads `producer`, `kid` and
-   `record_id` from strictly parsed bytes, to look up the key. Do not read them with
-   another JSON parser first: strict parsing rejects duplicate members, so after it
-   succeeds any reader sees the same values.
-2. `assertion::verify_assertion(bytes, &context, &limits)` checks that the signed
-   `producer` and `kid` equal the ones used for the key lookup and verifies the
-   signature. It returns the identity and `content_digest`.
+1. `assertion::SignedAssertion::parse(body_bytes, &limits)` parses the request bytes once.
+   `identity()` gives `producer`, `kid` and `record_id` to look up the key. Do not read
+   them with another JSON parser first: strict parsing rejects duplicate members, so after
+   it succeeds any reader sees the same values.
+2. `signed.verify(&VerificationContext { expected_producer, expected_kid, public_key })`
+   with the registered key and the producer and `kid` it is registered under. It returns
+   a `VerifiedAssertion`.
 3. Producer-chain checks are Lock's: compare `prev_record_hash` (parse it with
    `str::parse::<Digest>()`) with the stored `content_digest` of the previous position.
-4. Receipt chain, inside the same database transaction that locks the chain head:
-   `receipt::format_received_at(unix_millis)` formats Lock's clock reading, then
-   `receipt::verify_receipt_link(&head_hash, &commitment)` validates the commitment,
-   checks that it names the current head and returns its hash, the new head. The first
-   receipt of an evidence domain uses `receipt_sequence = 1` and `Digest::GENESIS`.
+4. Receipt chain, inside the database transaction that locks the chain head:
+   `receipt::ReceivedAt::from_unix_millis(now)`, `ReceiptPosition::GENESIS` for an empty
+   evidence domain or `ReceiptPosition::new(head_sequence + 1, head_hash)`, then
+   `ReceiptCommitment::for_assertion(domain, position, received_at, &verified)`.
+   `commitment.verify_link(&head_hash)` checks that it names the current head (or
+   `Digest::GENESIS`) and returns its hash, the new head.
 
-Store and return the original bytes. Never re-serialize an assertion from a parsed tree:
-canonical bytes cannot reproduce the original form.
+Store `signed.as_bytes()`, the original bytes. Never re-serialize an assertion from a
+parsed tree: canonical bytes cannot reproduce the original form.
 
 ### Lock: startup
 
@@ -91,67 +117,61 @@ hash on the machine and binary that actually run. If it fails, disable TRACE ing
 
 ### Tooling and audit
 
-- Rebuild what a producer signed: `assertion::assertion_signing_input(bytes, &limits)`.
+- Rebuild what a producer signed: `SignedAssertion::parse(..)?.signing_input()`.
 - Canonicalize any JSON: `json::canonicalize_json(bytes, &limits)`.
-- Re-verify a receipt chain: walk it from `Digest::GENESIS`, calling
-  `receipt::verify_receipt_link(&previous_hash, &receipt)` for each entry. Insertion,
-  deletion or rewriting of an entry breaks the walk. Without signed checkpoints this does
-  not protect against an operator who rewrites the whole chain.
+- Re-verify a receipt chain: rebuild each stored receipt with `ReceivedAt::from_str`,
+  `ReceiptPosition::new` and the stored fields, then walk the chain from
+  `Digest::GENESIS` with `commitment.verify_link(&previous_hash)`. Insertion, deletion or
+  rewriting of an entry breaks the walk. Without signed checkpoints this does not protect
+  against an operator who rewrites the whole chain.
+
+### Calling from other languages
+
+Every input is bytes: UTF-8 JSON without a byte-order mark. Pass the bytes as received;
+converting them to a string and back can change them (a platform default charset, a
+replaced lone surrogate, Unicode normalization), and the signature would no longer match.
 
 ## Example
 
 ```rust
-use jans_trace_core::assertion::{
-    VerificationContext, compute_content_digest, parse_assertion_identity, sign_assertion,
-    verify_assertion,
-};
+use jans_trace_core::Digest;
+use jans_trace_core::Limits;
+use jans_trace_core::assertion::{SignedAssertion, UnsignedAssertion, VerificationContext};
 use jans_trace_core::key::PublicKey;
-use jans_trace_core::receipt::{
-    RECEIPT_PROFILE, ReceiptCommitment, format_received_at, verify_receipt_link,
-};
+use jans_trace_core::receipt::{ReceiptCommitment, ReceiptPosition, ReceivedAt};
 use jans_trace_core::signature::Ed25519Signer;
-use jans_trace_core::{Digest, Limits};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let limits = Limits::default();
 
     // Producer. A fixed secret is for examples only; load real keys with `from_pkcs8_pem`.
     let signer = Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32]);
-    let mut record = serde_json::json!({
+    let record = serde_json::json!({
         "producer": "cedarling-fleet-1",
         "kid": "key-2026-01",
         "record_id": "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41",
         "producer_chain": { "sequence_number": 1, "prev_record_hash": Digest::GENESIS.to_string() },
         "trace": { "event_kind": "AUTHORIZATION_DECISION" },
     });
-    let signature = sign_assertion(&serde_json::to_vec(&record)?, &signer)?;
-    record["signature"] = signature.to_string().into();
-    let signed = serde_json::to_vec(&record)?;
-    let content_digest = compute_content_digest(&signed, &limits)?;
+    let signed = UnsignedAssertion::parse(&serde_json::to_vec(&record)?, &limits)?.sign(&signer)?;
+    let wire_bytes = signed.as_bytes();
 
     // Lock. The key normally comes from `PublicKey::from_jwk` at registration.
-    let key = PublicKey::from_bytes(&signer.public_key_bytes())?;
-    let identity = parse_assertion_identity(&signed, &limits)?;
-    let context = VerificationContext {
-        expected_producer: &identity.producer,
-        expected_kid: &identity.kid,
-        public_key: &key,
-    };
-    let verified = verify_assertion(&signed, &context, &limits)?;
-    assert_eq!(verified.content_digest, content_digest);
+    let received = SignedAssertion::parse(wire_bytes, &limits)?;
+    let verified = received.verify(&VerificationContext {
+        expected_producer: received.identity().producer().to_owned(),
+        expected_kid: received.identity().kid().to_owned(),
+        public_key: PublicKey::from_bytes(&signer.public_key_bytes())?,
+    })?;
+    assert_eq!(verified.content_digest(), signed.content_digest());
 
-    let received_at = format_received_at(1_789_676_132_123)?;
-    let receipt = ReceiptCommitment {
-        receipt_profile: RECEIPT_PROFILE,
-        evidence_domain_id: "domain-1",
-        receipt_sequence: 1,
-        received_at: &received_at,
-        producer_id: &verified.producer,
-        record_id: &verified.record_id,
-        content_digest: &verified.content_digest,
-        prev_receipt_hash: &Digest::GENESIS,
-    };
-    let chain_head = verify_receipt_link(&Digest::GENESIS, &receipt)?;
+    let commitment = ReceiptCommitment::for_assertion(
+        "domain-1".to_owned(),
+        ReceiptPosition::GENESIS,
+        ReceivedAt::from_unix_millis(1_789_676_132_123)?,
+        &verified,
+    );
+    let chain_head = commitment.verify_link(&Digest::GENESIS)?;
     assert_ne!(chain_head, Digest::GENESIS);
     Ok(())
 }
@@ -164,21 +184,21 @@ Shared types live at the crate root: `Digest` (`sha256:<hex>`, strict `FromStr`,
 
 | Module | Items | Who calls it |
 |---|---|---|
-| `assertion` | `sign_assertion`, `compute_content_digest`, `assertion_signing_input`, `parse_assertion_identity`, `verify_assertion`, `VerificationContext`, `AssertionIdentity`, `VerifiedAssertion` | producers sign and digest; Lock reads identity and verifies; tooling rebuilds signing input |
+| `assertion` | `UnsignedAssertion` (`parse`, `sign`), `SignedAssertion` (`parse`, `verify`, `as_bytes`, `content_digest`, `signing_input`), `VerifiedAssertion`, `VerificationContext`, `AssertionIdentity` | producers parse and sign; Lock parses and verifies; tooling reads signing input |
 | `signature` | `TraceSigner`, `Ed25519Signer` (`from_pkcs8_pem`, `from_secret_bytes`, `public_key_bytes`), `SignatureValue` | producers |
 | `key` | `PublicKey` (`from_jwk`, `from_bytes`, `to_bytes`, `thumbprint`) | Lock key registry, tooling |
-| `receipt` | `ReceiptCommitment`, `compute_receipt_hash`, `verify_receipt_link`, `format_received_at`, `RECEIPT_PROFILE`, `ASSERTION_PROFILE` | Lock, auditors |
+| `receipt` | `ReceivedAt`, `ReceiptPosition`, `ReceiptCommitment` (`for_assertion`, `receipt_hash`, `verify_link`), `RECEIPT_PROFILE`, `ASSERTION_PROFILE` | Lock, auditors |
 | `inputs` | `compute_bundle_hash`, `token_fingerprint` | producers (PEPs too), Lock later |
 | `json` | `canonicalize_json`, `JsonError` | tooling; `JsonError` appears inside other errors |
 | `self_test` | `self_test` | Lock at startup |
 
-Each function has its own error type with only the failures it can return, next to the
-function in its module.
+Each operation has its own error type with only the failures it can return, next to it in
+its module.
 
 ## Limits
 
-Functions that read untrusted bytes take `&Limits`. `sign_assertion` does not: its input
-is the producer's own record. `Limits::default()` holds generous MVP values; the caller
+Every parse takes `&Limits`. `UnsignedAssertion::parse` also checks that the signed record
+it will produce fits them, so producers find size problems before Lock does. `Limits::default()` holds generous MVP values; the caller
 can change each one with `with_max_*`. Keep Lock's own API limits equal or lower.
 
 | Limit | Default |
@@ -212,15 +232,15 @@ signatures or record content.
 | `SIZE_LIMIT_EXCEEDED` | Input breaks one of the `Limits`; `Display` names which. |
 | `INVALID_ASSERTION_SHAPE` | Not an object, or `producer` / `kid` / `record_id` missing or empty. |
 | `MISSING_SIGNATURE` | No top-level `signature`. |
-| `SIGNATURE_ALREADY_PRESENT` | `sign_assertion` got a record that is already signed. |
+| `SIGNATURE_ALREADY_PRESENT` | `UnsignedAssertion::parse` got a record that is already signed. |
 | `INVALID_SIGNATURE_ENCODING` | `signature` is not unpadded base64url of 64 bytes. |
 | `SIGNATURE_INVALID` | Ed25519 verification failed. |
 | `PRODUCER_MISMATCH` | Signed `producer` differs from the expected one. |
-| `KID_MISMATCH` | Signed `kid` differs from the selected key (or from the signer's). |
+| `KID_MISMATCH` | Signed `kid` differs from the selected key, or the record's `kid` from the signer's. |
 | `INVALID_PUBLIC_KEY` | JWK or key bytes do not describe a usable Ed25519 public key. |
 | `INVALID_PRIVATE_KEY` | Not an unencrypted PKCS#8 PEM Ed25519 key. Not in the core design. |
 | `INVALID_DIGEST` | Text is not `sha256:` plus 64 lowercase hex digits. |
-| `INVALID_RECEIPT` | Receipt breaks the v1 profile (profile, sequence, `received_at`, genesis), or `format_received_at` got a time after year 9999. |
+| `INVALID_RECEIPT` | `received_at` text or sequence and predecessor break the v1 profile, or a clock reading is after year 9999. |
 | `RECEIPT_LINK_MISMATCH` | Receipt does not name the expected predecessor. |
 | `SIGNER_FAILURE` | The signer failed; carries no detail, so HSM data never leaks. |
 | `SELF_TEST_FAILED` | A known answer differed. Not in the core design. |

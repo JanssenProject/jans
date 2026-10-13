@@ -3,103 +3,87 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Lock-side assertion checks: identity before key lookup, then signature verification
-//! (core design §6.3–§6.5, §8).
+//! Lock-side verification of a parsed `SignedAssertion` (core design §6.3, §8).
 
-use serde_json::{Map, Value};
 use thiserror::Error;
 
-use crate::json::{JsonError, canonicalize_value, parse_strict};
+use super::{AssertionIdentity, SignedAssertion};
+use crate::Digest;
 use crate::key::PublicKey;
-use crate::signature::{ParseSignatureError, SignatureValue};
-use crate::{Digest, Limits, SizeLimitError};
 
-const SIGNATURE: &str = "signature";
-
-/// One code for every rejection of the assertion's common structure (core design §10).
-const INVALID_ASSERTION_SHAPE: &str = "INVALID_ASSERTION_SHAPE";
-
-/// The members Lock needs to select a key, read from strictly parsed bytes.
+/// The registered key Lock selected by the record's identity, with the `producer` and `kid`
+/// it is registered under. The signed members must equal them (core design §6.3).
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AssertionIdentity {
-    pub producer: String,
-    pub kid: String,
-    pub record_id: String,
+pub struct VerificationContext {
+    pub expected_producer: String,
+    pub expected_kid: String,
+    pub public_key: PublicKey,
 }
 
-/// What Lock needs after a successful verification.
+/// A record whose signature verified under the expected key. Only `SignedAssertion::verify`
+/// creates one, so holding it proves the check happened; Lock builds receipts from it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VerifiedAssertion {
-    pub producer: String,
-    pub kid: String,
-    pub record_id: String,
-    /// SHA-256 of the exact bytes the signature covers; lets tooling compare signing inputs.
-    pub signature_input_sha256: Digest,
-    pub content_digest: Digest,
+    identity: AssertionIdentity,
+    content_digest: Digest,
+    signature_input_sha256: Digest,
 }
 
-/// The values Lock used to select the key. The signed members must equal them.
-#[derive(Debug, Clone, Copy)]
-pub struct VerificationContext<'a> {
-    pub expected_producer: &'a str,
-    pub expected_kid: &'a str,
-    pub public_key: &'a PublicKey,
-}
-
-/// Why `parse_assertion_identity` rejected its input.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
-pub enum IdentityError {
-    #[error(transparent)]
-    SizeLimitExceeded(#[from] SizeLimitError),
-    #[error(transparent)]
-    Json(#[from] JsonError),
-    #[error("assertion is not a JSON object")]
-    NotAnObject,
-    #[error("assertion has no non-empty string `producer`")]
-    InvalidProducer,
-    #[error("assertion has no non-empty string `kid`")]
-    InvalidKid,
-    #[error("assertion has no non-empty string `record_id`")]
-    InvalidRecordId,
-}
-
-impl IdentityError {
+impl VerifiedAssertion {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        match self {
-            Self::SizeLimitExceeded(e) => e.code(),
-            Self::Json(e) => e.code(),
-            Self::NotAnObject
-            | Self::InvalidProducer
-            | Self::InvalidKid
-            | Self::InvalidRecordId => INVALID_ASSERTION_SHAPE,
-        }
+    pub fn identity(&self) -> &AssertionIdentity {
+        &self.identity
+    }
+
+    #[must_use]
+    pub fn content_digest(&self) -> Digest {
+        self.content_digest
+    }
+
+    /// SHA-256 of the exact bytes the signature covers; lets tooling compare signing inputs.
+    #[must_use]
+    pub fn signature_input_sha256(&self) -> Digest {
+        self.signature_input_sha256
     }
 }
 
-/// Why `verify_assertion` rejected its input.
+impl SignedAssertion {
+    /// Cheap identity checks run before the signature check.
+    pub fn verify(&self, context: &VerificationContext) -> Result<VerifiedAssertion, VerifyError> {
+        if self.identity.producer != context.expected_producer {
+            return Err(VerifyError::ProducerMismatch {
+                signed: self.identity.producer.clone(),
+                expected: context.expected_producer.clone(),
+            });
+        }
+        if self.identity.kid != context.expected_kid {
+            return Err(VerifyError::KidMismatch {
+                signed: self.identity.kid.clone(),
+                expected: context.expected_kid.clone(),
+            });
+        }
+        if !context
+            .public_key
+            .verify(&self.signing_input, &self.signature)
+        {
+            return Err(VerifyError::SignatureInvalid);
+        }
+        Ok(VerifiedAssertion {
+            identity: self.identity.clone(),
+            content_digest: self.content_digest,
+            signature_input_sha256: Digest::sha256(&self.signing_input),
+        })
+    }
+}
+
+/// Why `SignedAssertion::verify` rejected the record. Producer and `kid` are public
+/// identifiers, so both values are shown.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum VerifyError {
-    #[error(transparent)]
-    SizeLimitExceeded(#[from] SizeLimitError),
-    #[error(transparent)]
-    Json(#[from] JsonError),
-    #[error("assertion is not a JSON object")]
-    NotAnObject,
-    #[error("assertion has no non-empty string `producer`")]
-    InvalidProducer,
-    #[error("assertion has no non-empty string `kid`")]
-    InvalidKid,
-    #[error("assertion has no non-empty string `record_id`")]
-    InvalidRecordId,
-    #[error("assertion has no top-level signature")]
-    MissingSignature,
-    #[error(transparent)]
-    InvalidSignatureEncoding(#[from] ParseSignatureError),
-    #[error("signed producer differs from the expected producer")]
-    ProducerMismatch,
-    #[error("signed kid differs from the selected key")]
-    KidMismatch,
+    #[error("signed producer `{signed}` differs from the expected producer `{expected}`")]
+    ProducerMismatch { signed: String, expected: String },
+    #[error("signed kid `{signed}` differs from the selected key `{expected}`")]
+    KidMismatch { signed: String, expected: String },
     #[error("Ed25519 signature does not verify")]
     SignatureInvalid,
 }
@@ -108,127 +92,20 @@ impl VerifyError {
     #[must_use]
     pub const fn code(&self) -> &'static str {
         match self {
-            Self::SizeLimitExceeded(e) => e.code(),
-            Self::Json(e) => e.code(),
-            Self::NotAnObject
-            | Self::InvalidProducer
-            | Self::InvalidKid
-            | Self::InvalidRecordId => INVALID_ASSERTION_SHAPE,
-            Self::MissingSignature => "MISSING_SIGNATURE",
-            Self::InvalidSignatureEncoding(e) => e.code(),
-            Self::ProducerMismatch => "PRODUCER_MISMATCH",
-            Self::KidMismatch => "KID_MISMATCH",
+            Self::ProducerMismatch { .. } => "PRODUCER_MISMATCH",
+            Self::KidMismatch { .. } => "KID_MISMATCH",
             Self::SignatureInvalid => "SIGNATURE_INVALID",
         }
     }
 }
 
-/// Which identity member is absent or not a non-empty string.
-enum BadIdentity {
-    Producer,
-    Kid,
-    RecordId,
-}
-
-impl From<BadIdentity> for IdentityError {
-    fn from(bad: BadIdentity) -> Self {
-        match bad {
-            BadIdentity::Producer => Self::InvalidProducer,
-            BadIdentity::Kid => Self::InvalidKid,
-            BadIdentity::RecordId => Self::InvalidRecordId,
-        }
-    }
-}
-
-impl From<BadIdentity> for VerifyError {
-    fn from(bad: BadIdentity) -> Self {
-        match bad {
-            BadIdentity::Producer => Self::InvalidProducer,
-            BadIdentity::Kid => Self::InvalidKid,
-            BadIdentity::RecordId => Self::InvalidRecordId,
-        }
-    }
-}
-
-fn read_identity(members: &Map<String, Value>) -> Result<AssertionIdentity, BadIdentity> {
-    let text = |name: &str, bad: BadIdentity| match members.get(name) {
-        Some(Value::String(value)) if !value.is_empty() => Ok(value.clone()),
-        _ => Err(bad),
-    };
-    Ok(AssertionIdentity {
-        producer: text("producer", BadIdentity::Producer)?,
-        kid: text("kid", BadIdentity::Kid)?,
-        record_id: text("record_id", BadIdentity::RecordId)?,
-    })
-}
-
-/// Reads `producer`, `kid` and `record_id` so Lock can select the key before verifying.
-/// Strict parsing proves the bytes free of duplicates, so any other reader sees the same
-/// values afterwards.
-pub fn parse_assertion_identity(
-    assertion: &[u8],
-    limits: &Limits,
-) -> Result<AssertionIdentity, IdentityError> {
-    limits.check_input(assertion)?;
-    let Value::Object(members) = parse_strict(assertion, limits)? else {
-        return Err(IdentityError::NotAnObject);
-    };
-    Ok(read_identity(&members)?)
-}
-
-/// Verifies the producer signature against the key Lock selected and returns the identity
-/// and `content_digest` Lock stores.
-pub fn verify_assertion(
-    signed_assertion: &[u8],
-    context: &VerificationContext<'_>,
-    limits: &Limits,
-) -> Result<VerifiedAssertion, VerifyError> {
-    limits.check_input(signed_assertion)?;
-    let Value::Object(mut members) = parse_strict(signed_assertion, limits)? else {
-        return Err(VerifyError::NotAnObject);
-    };
-    let identity = read_identity(&members)?;
-    let signature = match members.get(SIGNATURE) {
-        None => return Err(VerifyError::MissingSignature),
-        Some(Value::String(text)) => text.parse::<SignatureValue>()?,
-        Some(_) => return Err(ParseSignatureError::not_a_string().into()),
-    };
-    if identity.producer != context.expected_producer {
-        return Err(VerifyError::ProducerMismatch);
-    }
-    if identity.kid != context.expected_kid {
-        return Err(VerifyError::KidMismatch);
-    }
-    let content_digest = Digest::sha256(&canonicalize_value(
-        &Value::Object(members.clone()),
-        limits,
-    )?);
-    members.remove(SIGNATURE);
-    let signing_input = canonicalize_value(&Value::Object(members), limits)?;
-    if !context.public_key.verify(&signing_input, &signature) {
-        return Err(VerifyError::SignatureInvalid);
-    }
-    Ok(VerifiedAssertion {
-        producer: identity.producer,
-        kid: identity.kid,
-        record_id: identity.record_id,
-        signature_input_sha256: Digest::sha256(&signing_input),
-        content_digest,
-    })
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{
-        IdentityError, VerificationContext, VerifiedAssertion, VerifyError,
-        parse_assertion_identity, verify_assertion,
-    };
-    use crate::assertion::{assertion_signing_input, compute_content_digest, sign_assertion};
-    use crate::json::{JsonError, canonicalize_json};
+    use super::{VerificationContext, VerifiedAssertion, VerifyError};
+    use crate::assertion::{SignedAssertion, UnsignedAssertion};
     use crate::key::PublicKey;
-    use crate::limits::LimitKind;
-    use crate::signature::{Ed25519Signer, ParseSignatureError, SignatureValue};
-    use crate::{Digest, Limits, SizeLimitError};
+    use crate::signature::Ed25519Signer;
+    use crate::{Digest, Limits};
 
     const PRODUCER: &str = "cedarling-fleet-1";
     const KID: &str = "key-2026-01";
@@ -250,131 +127,138 @@ mod tests {
         PublicKey::from_bytes(&signer().public_key_bytes()).expect("signer key is valid")
     }
 
-    /// Appends a top-level `"signature": <raw_json>` member to an assertion object.
-    fn with_signature(assertion: &str, raw_json: &str) -> String {
+    fn sign(unsigned: &str) -> SignedAssertion {
+        UnsignedAssertion::parse(unsigned.as_bytes(), &Limits::default())
+            .expect("test assertion is well formed")
+            .sign(&signer())
+            .expect("in-memory signer signs")
+    }
+
+    /// Appends a top-level `"signature": "<value>"` member to a pretty-printed assertion.
+    fn with_signature(assertion: &str, signature: &str) -> String {
         let body = assertion
             .trim_end()
             .strip_suffix('}')
             .expect("test assertion is a JSON object");
-        format!(r#"{body}, "signature": {raw_json}}}"#)
+        format!(r#"{body}, "signature": "{signature}"}}"#)
     }
 
-    fn sign(unsigned: &str) -> String {
-        let signature =
-            sign_assertion(unsigned.as_bytes(), &signer()).expect("well-formed assertion signs");
-        with_signature(unsigned, &format!("\"{signature}\""))
+    fn received(bytes: &str) -> SignedAssertion {
+        SignedAssertion::parse(bytes.as_bytes(), &Limits::default())
+            .expect("received record is well formed")
     }
 
-    fn verify(signed: &str) -> Result<VerifiedAssertion, VerifyError> {
-        verify_as(signed, PRODUCER, KID, &public_key())
-    }
-
-    fn verify_as(
-        signed: &str,
-        producer: &str,
-        kid: &str,
-        key: &PublicKey,
-    ) -> Result<VerifiedAssertion, VerifyError> {
-        let context = VerificationContext {
-            expected_producer: producer,
-            expected_kid: kid,
+    fn context(producer: &str, kid: &str, key: PublicKey) -> VerificationContext {
+        VerificationContext {
+            expected_producer: producer.to_owned(),
+            expected_kid: kid.to_owned(),
             public_key: key,
-        };
-        verify_assertion(signed.as_bytes(), &context, &Limits::default())
+        }
+    }
+
+    fn verify(signed: &SignedAssertion) -> Result<VerifiedAssertion, VerifyError> {
+        signed.verify(&context(PRODUCER, KID, public_key()))
     }
 
     #[test]
-    fn verifies_own_signature_and_reports_digests() {
+    fn verifies_own_signed_record_and_reports_digests() {
         let signed = sign(UNSIGNED);
         let verified = verify(&signed).expect("own signature verifies");
-        assert_eq!(verified.producer, PRODUCER, "signed producer");
-        assert_eq!(verified.kid, KID, "signed kid");
-        assert_eq!(verified.record_id, RECORD_ID, "signed record id");
+        assert_eq!(verified.identity().producer(), PRODUCER, "signed producer");
+        assert_eq!(verified.identity().kid(), KID, "signed kid");
         assert_eq!(
-            verified.content_digest,
-            compute_content_digest(signed.as_bytes(), &Limits::default())
-                .expect("signed assertion digests"),
-            "same content digest the producer computes"
+            verified.identity().record_id(),
+            RECORD_ID,
+            "signed record id"
         );
-        let input = assertion_signing_input(signed.as_bytes(), &Limits::default())
-            .expect("signing input builds");
         assert_eq!(
-            verified.signature_input_sha256,
-            Digest::sha256(&input),
+            verified.content_digest(),
+            signed.content_digest(),
+            "same content digest the producer computed"
+        );
+        assert_eq!(
+            verified.signature_input_sha256(),
+            Digest::sha256(signed.signing_input()),
             "digest of the exact bytes that were verified"
         );
     }
 
     #[test]
-    fn reformatted_assertion_still_verifies() {
-        let signed = sign(UNSIGNED);
-        let compact = canonicalize_json(signed.as_bytes(), &Limits::default())
-            .expect("signed assertion canonicalizes");
-        let compact = String::from_utf8(compact).expect("canonical JSON is UTF-8");
-        let verified = verify(&compact).expect("formatting is outside the signature");
+    fn verifies_received_bytes_in_any_formatting() {
+        let produced = sign(UNSIGNED);
+        let pretty = received(&with_signature(UNSIGNED, &produced.signature().to_string()));
+        let verified = verify(&pretty).expect("formatting is outside the signature");
         assert_eq!(
-            verified.content_digest,
-            verify(&signed).expect("original verifies").content_digest,
+            verified.content_digest(),
+            produced.content_digest(),
             "formatting does not change the content digest"
         );
+        let canonical =
+            received(std::str::from_utf8(produced.as_bytes()).expect("canonical JSON is UTF-8"));
+        verify(&canonical).expect("the producer's canonical bytes verify as received");
     }
 
     struct ForgeryCase {
         name: &'static str,
-        assertion: String,
+        assertion: SignedAssertion,
         key: PublicKey,
     }
 
     #[test]
     fn rejects_mutated_or_foreign_signatures() {
-        let signed = sign(UNSIGNED);
+        let produced = sign(UNSIGNED);
+        let signature = produced.signature().to_string();
+        let pretty = with_signature(UNSIGNED, &signature);
         let other_key = PublicKey::from_bytes(
             &Ed25519Signer::from_secret_bytes(KID, &[8; 32]).public_key_bytes(),
         )
         .expect("other key is valid");
-        let foreign = {
-            let other = sign(&UNSIGNED.replace("AUTHORIZATION_DECISION", "CAPABILITY_INVOKED"));
-            let signature = other
-                .rsplit_once("\"signature\": ")
-                .expect("signed test assertion ends with its signature")
-                .1
-                .trim_end_matches('}');
-            with_signature(UNSIGNED, signature)
-        };
+        let foreign = sign(&UNSIGNED.replace("AUTHORIZATION_DECISION", "CAPABILITY_INVOKED"))
+            .signature()
+            .to_string();
         let cases = [
             ForgeryCase {
                 name: "signed field changed",
-                assertion: signed.replace("AUTHORIZATION_DECISION", "AUTHORIZATION_DECISIOM"),
+                assertion: received(
+                    &pretty.replace("AUTHORIZATION_DECISION", "AUTHORIZATION_DECISIOM"),
+                ),
                 key: public_key(),
             },
             ForgeryCase {
                 name: "nested signature changed",
-                assertion: signed.replace("nested stays signed", "nested stays signeD"),
+                assertion: received(&pretty.replace("nested stays signed", "nested stays signeD")),
                 key: public_key(),
             },
             ForgeryCase {
                 name: "sequence changed",
-                assertion: signed.replace("\"sequence_number\": 1", "\"sequence_number\": 2"),
+                assertion: received(
+                    &pretty.replace("\"sequence_number\": 1", "\"sequence_number\": 2"),
+                ),
                 key: public_key(),
             },
             ForgeryCase {
                 name: "signature from another assertion",
-                assertion: foreign,
+                assertion: received(&with_signature(UNSIGNED, &foreign)),
                 key: public_key(),
             },
             ForgeryCase {
                 name: "other key",
-                assertion: signed.clone(),
+                assertion: produced.clone(),
                 key: other_key,
             },
         ];
         for case in cases {
             assert!(
-                case.assertion != signed || case.key != public_key(),
-                "{} differs from the original in bytes or key",
+                case.assertion.signing_input() != produced.signing_input()
+                    || case.assertion.signature() != produced.signature()
+                    || case.key != public_key(),
+                "{} differs from the original",
                 case.name
             );
-            let err = verify_as(&case.assertion, PRODUCER, KID, &case.key).expect_err(case.name);
+            let err = case
+                .assertion
+                .verify(&context(PRODUCER, KID, case.key))
+                .expect_err(case.name);
             assert_eq!(
                 err,
                 VerifyError::SignatureInvalid,
@@ -387,204 +271,66 @@ mod tests {
     #[test]
     fn rejects_identity_other_than_expected() {
         let signed = sign(UNSIGNED);
-        let err = verify_as(&signed, "cedarling-fleet-2", KID, &public_key())
-            .expect_err("record of another producer");
-        assert_eq!(err, VerifyError::ProducerMismatch, "producer is checked");
-        let err = verify_as(&signed, PRODUCER, "key-other", &public_key())
-            .expect_err("record signed under another kid");
-        assert_eq!(err, VerifyError::KidMismatch, "kid is checked");
-    }
-
-    #[test]
-    fn rejects_missing_or_malformed_signature() {
-        let err = verify(UNSIGNED).expect_err("unsigned record");
-        assert_eq!(err, VerifyError::MissingSignature, "no top-level signature");
-
-        let err = verify(&with_signature(UNSIGNED, r#""AAAA""#)).expect_err("3-byte signature");
         assert_eq!(
-            err,
-            VerifyError::InvalidSignatureEncoding(
-                "AAAA"
-                    .parse::<SignatureValue>()
-                    .expect_err("3 bytes are not a signature")
-            ),
-            "signature text is parsed with its reason"
+            signed.verify(&context("cedarling-fleet-2", KID, public_key())),
+            Err(VerifyError::ProducerMismatch {
+                signed: PRODUCER.to_owned(),
+                expected: "cedarling-fleet-2".to_owned(),
+            }),
+            "producer is checked"
         );
-
-        let err = verify(&with_signature(UNSIGNED, "5")).expect_err("numeric signature");
         assert_eq!(
-            err,
-            VerifyError::InvalidSignatureEncoding(ParseSignatureError::not_a_string()),
-            "a non-string signature is an encoding error"
+            signed.verify(&context(PRODUCER, "key-other", public_key())),
+            Err(VerifyError::KidMismatch {
+                signed: KID.to_owned(),
+                expected: "key-other".to_owned(),
+            }),
+            "kid is checked"
         );
     }
 
     #[test]
-    fn duplicate_kid_is_rejected_before_any_key_is_used() {
-        // A non-strict reader could take the first `kid` and the verifier the second.
-        let input = UNSIGNED.replace(
-            "\"kid\": \"key-2026-01\",",
-            "\"kid\": \"key-2026-01\", \"kid\": \"key-other\",",
-        );
-        let err = parse_assertion_identity(input.as_bytes(), &Limits::default())
-            .expect_err("duplicate kid is ambiguous");
+    fn display_names_both_values_of_a_mismatch() {
+        let err = sign(UNSIGNED)
+            .verify(&context(PRODUCER, "key-other", public_key()))
+            .expect_err("kid differs");
         assert_eq!(
-            err,
-            IdentityError::Json(JsonError::DuplicateMember),
-            "identity rejects the duplicate"
-        );
-        let err = verify(&with_signature(&input, r#""AAAA""#)).expect_err("duplicate kid");
-        assert_eq!(
-            err,
-            VerifyError::Json(JsonError::DuplicateMember),
-            "verify rejects the duplicate before the signature"
-        );
-    }
-
-    #[test]
-    fn identity_reads_signed_and_unsigned_records_without_checking_the_signature() {
-        for input in [
-            UNSIGNED.to_owned(),
-            with_signature(UNSIGNED, r#""not checked here""#),
-        ] {
-            let identity = parse_assertion_identity(input.as_bytes(), &Limits::default())
-                .expect("identity members are well formed");
-            assert_eq!(
-                (
-                    identity.producer.as_str(),
-                    identity.kid.as_str(),
-                    identity.record_id.as_str()
-                ),
-                (PRODUCER, KID, RECORD_ID),
-                "identity members as signed"
-            );
-        }
-    }
-
-    struct ShapeCase {
-        name: &'static str,
-        input: String,
-        identity_error: IdentityError,
-        verify_error: VerifyError,
-    }
-
-    #[test]
-    fn identity_members_must_be_non_empty_strings() {
-        let cases = [
-            ShapeCase {
-                name: "producer missing",
-                input: UNSIGNED.replace("\"producer\": \"cedarling-fleet-1\",", ""),
-                identity_error: IdentityError::InvalidProducer,
-                verify_error: VerifyError::InvalidProducer,
-            },
-            ShapeCase {
-                name: "producer empty",
-                input: UNSIGNED.replace("cedarling-fleet-1", ""),
-                identity_error: IdentityError::InvalidProducer,
-                verify_error: VerifyError::InvalidProducer,
-            },
-            ShapeCase {
-                name: "kid number",
-                input: UNSIGNED.replace("\"key-2026-01\"", "7"),
-                identity_error: IdentityError::InvalidKid,
-                verify_error: VerifyError::InvalidKid,
-            },
-            ShapeCase {
-                name: "record_id missing",
-                input: UNSIGNED.replace(&format!("\"record_id\": \"{RECORD_ID}\","), ""),
-                identity_error: IdentityError::InvalidRecordId,
-                verify_error: VerifyError::InvalidRecordId,
-            },
-        ];
-        for case in cases {
-            assert_ne!(case.input, UNSIGNED, "{} changes the input", case.name);
-            let err = parse_assertion_identity(case.input.as_bytes(), &Limits::default())
-                .expect_err(case.name);
-            assert_eq!(err, case.identity_error, "identity: {}", case.name);
-            let err = verify(&with_signature(&case.input, r#""AAAA""#)).expect_err(case.name);
-            assert_eq!(err, case.verify_error, "verify: {}", case.name);
-        }
-    }
-
-    #[test]
-    fn assertion_must_be_an_object() {
-        let err = parse_assertion_identity(b"[]", &Limits::default()).expect_err("array");
-        assert_eq!(err, IdentityError::NotAnObject, "identity: array");
-        let err = verify("[]").expect_err("array");
-        assert_eq!(err, VerifyError::NotAnObject, "verify: array");
-    }
-
-    #[test]
-    fn untrusted_input_limits_apply() {
-        let signed = sign(UNSIGNED);
-        let limit = signed.len() - 1;
-        let limits = Limits::default().with_max_input_bytes(limit);
-        let expected = SizeLimitError::new(LimitKind::InputBytes, limit);
-        let err =
-            parse_assertion_identity(signed.as_bytes(), &limits).expect_err("above the limit");
-        assert_eq!(
-            err,
-            IdentityError::SizeLimitExceeded(expected),
-            "identity: input size"
-        );
-        let context = VerificationContext {
-            expected_producer: PRODUCER,
-            expected_kid: KID,
-            public_key: &public_key(),
-        };
-        let err =
-            verify_assertion(signed.as_bytes(), &context, &limits).expect_err("above the limit");
-        assert_eq!(
-            err,
-            VerifyError::SizeLimitExceeded(expected),
-            "verify: input size"
+            err.to_string(),
+            "signed kid `key-2026-01` differs from the selected key `key-other`",
+            "`{{err}}` alone tells the operator what is wrong"
         );
     }
 
     struct CodeCase {
-        actual: &'static str,
+        error: VerifyError,
         expected: &'static str,
     }
 
     #[test]
     fn codes_are_stable() {
+        let mismatch = |name: &str| (name.to_owned(), "other".to_owned());
+        let (signed, expected) = mismatch("x");
         let cases = [
             CodeCase {
-                actual: VerifyError::SignatureInvalid.code(),
+                error: VerifyError::SignatureInvalid,
                 expected: "SIGNATURE_INVALID",
             },
             CodeCase {
-                actual: VerifyError::ProducerMismatch.code(),
+                error: VerifyError::ProducerMismatch {
+                    signed: signed.clone(),
+                    expected: expected.clone(),
+                },
                 expected: "PRODUCER_MISMATCH",
             },
             CodeCase {
-                actual: VerifyError::KidMismatch.code(),
+                error: VerifyError::KidMismatch { signed, expected },
                 expected: "KID_MISMATCH",
-            },
-            CodeCase {
-                actual: VerifyError::MissingSignature.code(),
-                expected: "MISSING_SIGNATURE",
-            },
-            CodeCase {
-                actual: VerifyError::NotAnObject.code(),
-                expected: "INVALID_ASSERTION_SHAPE",
-            },
-            CodeCase {
-                actual: VerifyError::InvalidKid.code(),
-                expected: "INVALID_ASSERTION_SHAPE",
-            },
-            CodeCase {
-                actual: IdentityError::InvalidRecordId.code(),
-                expected: "INVALID_ASSERTION_SHAPE",
-            },
-            CodeCase {
-                actual: IdentityError::Json(JsonError::DuplicateMember).code(),
-                expected: "DUPLICATE_MEMBER",
             },
         ];
         for case in cases {
             assert_eq!(
-                case.actual, case.expected,
+                case.error.code(),
+                case.expected,
                 "stable code from core design §10"
             );
         }

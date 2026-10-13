@@ -23,8 +23,8 @@ use crate::{Limits, SizeLimitError};
 
 mod canonical;
 
-pub(crate) use canonical::canonicalize_value;
 pub use canonical::{CanonicalizeError, canonicalize_json};
+pub(crate) use canonical::{canonicalize_value, write_jcs_string};
 
 /// Why bytes are not strict JSON. Embedded in the error of every function that parses JSON.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
