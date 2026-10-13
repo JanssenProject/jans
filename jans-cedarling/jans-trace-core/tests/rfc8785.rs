@@ -19,20 +19,52 @@ const CASES: [&str; 6] = [
     "weird",
 ];
 
+/// `values` holds `1E30`, outside the +/-(2^53-1) every TRACE number must fit.
+const OUT_OF_PROFILE: &str = "values";
+
+fn read(dir: &str, case: &str) -> String {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/rfc8785")
+        .join(dir)
+        .join(format!("{case}.json"));
+    fs::read_to_string(path).expect("reference file is readable UTF-8")
+}
+
 #[test]
-fn reference_vectors_match_byte_for_byte() {
-    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/rfc8785");
+fn canonicalizer_matches_the_reference_byte_for_byte() {
     for case in CASES {
-        let input = fs::read_to_string(dir.join("input").join(format!("{case}.json")))
-            .expect("reference input is readable UTF-8");
-        let expected = fs::read_to_string(dir.join("output").join(format!("{case}.json")))
-            .expect("reference output is readable UTF-8");
-        let actual = jans_trace_core::json::canonicalize_json(&input, &Limits::default())
-            .expect("reference input canonicalizes");
+        let value: serde_json::Value =
+            serde_json::from_str(&read("input", case)).expect("reference input is JSON");
         assert_eq!(
-            actual,
-            expected.trim_end(),
-            "canonical text for `{case}` differ from the RFC 8785 reference"
+            serde_json_canonicalizer::to_string(&value).expect("reference input canonicalizes"),
+            read("output", case).trim_end(),
+            "canonical text for `{case}` differs from the RFC 8785 reference"
         );
+    }
+}
+
+#[test]
+fn strict_canonicalization_matches_the_reference_inside_the_profile() {
+    for case in CASES {
+        let actual =
+            jans_trace_core::json::canonicalize_json(&read("input", case), &Limits::default());
+        if case == OUT_OF_PROFILE {
+            let err = actual.expect_err("1E30 is outside +/-(2^53-1)");
+            assert_eq!(
+                (err.code(), err.to_string().as_str()),
+                (
+                    "NON_CANONICALIZABLE_JSON",
+                    "JSON value cannot be canonicalized without changing it: a number is \
+                     outside +/-(2^53-1), the range every JSON reader keeps exact"
+                ),
+                "`{case}` is refused for its out-of-range number"
+            );
+        } else {
+            assert_eq!(
+                actual.expect("reference input canonicalizes"),
+                read("output", case).trim_end(),
+                "canonical text for `{case}` differs from the RFC 8785 reference"
+            );
+        }
     }
 }

@@ -266,8 +266,14 @@ Limits are checked while parsing, so a hostile document is never fully built.
 ## Strict JSON
 
 Rejected everywhere: lone surrogate escapes, a byte-order mark, trailing data, duplicate member
-names at any depth, and integers outside ±(2^53−1). JCS writes numbers as IEEE-754
-doubles, so a larger integer would silently change between signer and verifier.
+names at any depth, and every number outside ±(2^53−1), however it is written
+(`9007199254740992`, `9007199254740993.0`, `1e30`). JCS writes numbers as IEEE-754
+doubles, so a larger value could be signed as another one than a reader of the stored text
+sees: `9007199254740993.0` would sign as `…992`, while Jackson keeps the integer
+`9007199254740993` exact. This is stricter than JCS, which accepts any double; TRACE
+records need no larger numbers, and producers that do send them as strings. Inside the
+range a fraction is written as its nearest double, as every JSON reader reads it
+(`1.00000000000000001` signs as `1`).
 
 ## Error codes
 
@@ -279,7 +285,7 @@ signatures or record content.
 |---|---|
 | `INVALID_JSON` | Not valid JSON (with line and column). |
 | `DUPLICATE_MEMBER` | An object repeats a member name. |
-| `NON_CANONICALIZABLE_JSON` | Valid JSON that JCS cannot represent exactly, such as a large integer. |
+| `NON_CANONICALIZABLE_JSON` | Valid JSON outside the profile, such as a number outside ±(2^53−1). |
 | `SIZE_LIMIT_EXCEEDED` | Input breaks one of the `Limits`; `Display` names which. |
 | `INVALID_ASSERTION_SHAPE` | Not an object, or `producer` / `kid` / `record_id` missing or empty. |
 | `MISSING_SIGNATURE` | No top-level `signature`. |

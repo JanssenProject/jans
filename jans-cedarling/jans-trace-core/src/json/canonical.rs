@@ -44,7 +44,7 @@ pub(crate) fn canonicalize_value(value: &Value, limits: &Limits) -> Result<Strin
     // The canonicalizer refuses only values outside the JCS model; strict parsing already
     // rejects those, so this branch is not expected to run. It reports, not panics.
     let text = serde_json_canonicalizer::to_string(value).map_err(|e| canonicalizer_refused(&e))?;
-    // JCS can lengthen numbers (`1e20` becomes 21 digits), so the input bound is not enough.
+    // JCS can lengthen numbers (`1e15` becomes 16 digits), so the input bound is not enough.
     if text.len() > limits.max_canonical_bytes() {
         return Err(JsonError::LimitExceeded(SizeLimitError::new(
             LimitKind::CanonicalBytes,
@@ -132,8 +132,8 @@ mod tests {
     #[test]
     fn formats_numbers_like_ecmascript() {
         assert_eq!(
-            canonical_text("[1.0, -0, 1e30, 0.000001, 1e-7]"),
-            "[1,0,1e+30,0.000001,1e-7]",
+            canonical_text("[1.0, -0, 1e15, 0.000001, 1e-7]"),
+            "[1,0,1000000000000000,0.000001,1e-7]",
             "numbers follow the RFC 8785 / ECMAScript serialization"
         );
     }
@@ -153,15 +153,58 @@ mod tests {
             "[9007199254740992]",
             "[-9007199254740992]",
             "{\"n\":18446744073709551615}",
+            "[9007199254740993.0]",
+            "[9.007199254740993e15]",
+            "[9007199254740991.6]",
+            "[1e30]",
+            "[-1e30]",
         ] {
             let err = canonicalize(input)
                 .expect_err("integer outside +/-(2^53-1) would be silently rounded by JCS");
             assert_eq!(
                 err,
                 CanonicalizeError::Json(JsonError::NonCanonicalizable(NonCanonicalReason(
-                    NonCanonicalCause::UnsafeInteger
+                    NonCanonicalCause::OutOfSafeRange
                 ))),
                 "reason for {input:?}"
+            );
+        }
+    }
+
+    struct NumberCase {
+        input: &'static str,
+        canonical: &'static str,
+    }
+
+    /// Inside +/-(2^53-1) a fraction or exponent is written as its nearest double, which is what
+    /// Jackson, JavaScript and Python read too (RFC 8785 §3.2.2.3). Expected values come from
+    /// Node's `JSON.stringify(JSON.parse(input))`.
+    #[test]
+    fn fractions_and_exponents_in_range_round_like_every_double_reader() {
+        let cases = [
+            NumberCase {
+                input: "[9007199254740991.0]",
+                canonical: "[9007199254740991]",
+            },
+            NumberCase {
+                input: "[9.007199254740991e15]",
+                canonical: "[9007199254740991]",
+            },
+            NumberCase {
+                input: "[-9007199254740991.4]",
+                canonical: "[-9007199254740991]",
+            },
+            NumberCase {
+                input: "[1.00000000000000001]",
+                canonical: "[1]",
+            },
+        ];
+        for case in cases {
+            assert_eq!(
+                canonical_text(case.input),
+                case.canonical,
+                "{} is accepted and written as its nearest double",
+                case.input
             );
         }
     }
@@ -171,8 +214,8 @@ mod tests {
         let err = canonicalize("[9007199254740992]").expect_err("unsafe integer");
         assert_eq!(
             err.to_string(),
-            "JSON value cannot be canonicalized without changing it: an integer is outside \
-             +/-(2^53-1), which JCS cannot write exactly",
+            "JSON value cannot be canonicalized without changing it: a number is outside \
+             +/-(2^53-1), the range every JSON reader keeps exact",
             "`{{err}}` names the rule, never the record's number"
         );
     }
@@ -246,7 +289,9 @@ mod tests {
             (JsonError::Invalid { line: 1, column: 1 }, "INVALID_JSON"),
             (JsonError::DuplicateMember, "DUPLICATE_MEMBER"),
             (
-                JsonError::NonCanonicalizable(NonCanonicalReason(NonCanonicalCause::UnsafeInteger)),
+                JsonError::NonCanonicalizable(NonCanonicalReason(
+                    NonCanonicalCause::OutOfSafeRange,
+                )),
                 "NON_CANONICALIZABLE_JSON",
             ),
         ];
@@ -341,12 +386,12 @@ mod tests {
 
     #[test]
     fn canonical_output_limit_catches_number_expansion() {
-        // 6 input bytes become `[100000000000000000000]`, 23 canonical bytes.
+        // 6 input bytes become `[1000000000000000]`, 18 canonical bytes.
         let limits = Limits::default().with_max_canonical_bytes(10);
         canonicalize_json("[1]", &limits).expect("short canonical output is accepted");
         assert_rejected(
             "expanded number",
-            "[1e20]",
+            "[1e15]",
             limits,
             SizeLimitError::new(LimitKind::CanonicalBytes, 10),
         );

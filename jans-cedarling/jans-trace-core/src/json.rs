@@ -64,8 +64,8 @@ pub struct NonCanonicalReason(NonCanonicalCause);
 /// Private, so the canonicalizer's error type never becomes part of the public API.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 enum NonCanonicalCause {
-    #[error("an integer is outside +/-(2^53-1), which JCS cannot write exactly")]
-    UnsafeInteger,
+    #[error("a number is outside +/-(2^53-1), the range every JSON reader keeps exact")]
+    OutOfSafeRange,
     /// The canonicalizer's own message; its messages are fixed texts without input values.
     #[error("{0}")]
     Canonicalizer(String),
@@ -73,6 +73,9 @@ enum NonCanonicalCause {
 
 /// Largest integer an IEEE-754 double reproduces exactly.
 const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
+
+/// `MAX_SAFE_INTEGER` as a double; exact, because it is below 2^53.
+const MAX_SAFE_DOUBLE: f64 = 9_007_199_254_740_991.0;
 
 pub(crate) fn parse_strict(input: &str, limits: &Limits) -> Result<Value, JsonError> {
     let rejection = Cell::new(None);
@@ -109,6 +112,12 @@ impl StrictSeed<'_> {
     fn reject<E: de::Error>(self, error: JsonError) -> E {
         self.rejection.set(Some(error));
         E::custom("rejected by jans-trace-core strict JSON rules")
+    }
+
+    fn out_of_safe_range<E: de::Error>(self) -> E {
+        self.reject(JsonError::NonCanonicalizable(NonCanonicalReason(
+            NonCanonicalCause::OutOfSafeRange,
+        )))
     }
 
     fn limit_exceeded<E: de::Error>(self, kind: LimitKind, limit: usize) -> E {
@@ -157,28 +166,26 @@ impl<'de> Visitor<'de> for StrictSeed<'_> {
 
     fn visit_u64<E: de::Error>(self, v: u64) -> Result<Value, E> {
         if v > MAX_SAFE_INTEGER {
-            return Err(
-                self.reject(JsonError::NonCanonicalizable(NonCanonicalReason(
-                    NonCanonicalCause::UnsafeInteger,
-                ))),
-            );
+            return Err(self.out_of_safe_range());
         }
         Ok(Value::Number(v.into()))
     }
 
     fn visit_i64<E: de::Error>(self, v: i64) -> Result<Value, E> {
         if v.unsigned_abs() > MAX_SAFE_INTEGER {
-            return Err(
-                self.reject(JsonError::NonCanonicalizable(NonCanonicalReason(
-                    NonCanonicalCause::UnsafeInteger,
-                ))),
-            );
+            return Err(self.out_of_safe_range());
         }
         Ok(Value::Number(v.into()))
     }
 
     fn visit_f64<E: de::Error>(self, v: f64) -> Result<Value, E> {
-        // JSON text cannot spell NaN or infinity, so this only guards against misuse.
+        // The same bound as for integers, whatever the spelling: `9007199254740993.0` arrives
+        // here already rounded to 2^53, so only a bound on the value catches it, and one rule
+        // for every number is simpler for producers than integers and fractions apart.
+        if v.abs() > MAX_SAFE_DOUBLE {
+            return Err(self.out_of_safe_range());
+        }
+        // JSON text cannot spell NaN or infinity, so the error only guards against misuse.
         Number::from_f64(v)
             .map(Value::Number)
             .ok_or_else(|| E::custom("non-finite number"))

@@ -177,7 +177,7 @@ impl SignedAssertion {
         };
         let members = CanonicalMembers::new(members)?;
         let canonical = members.write(Some(&signature));
-        // JCS can lengthen numbers (`1e20` becomes 21 digits), so the input bound is not enough.
+        // JCS can lengthen numbers (`1e15` becomes 16 digits), so the input bound is not enough.
         if canonical.len() > limits.max_canonical_bytes() {
             return Err(SizeLimitError::new(
                 LimitKind::CanonicalBytes,
@@ -528,7 +528,7 @@ mod tests {
         // UTF-16 order puts U+10000 (surrogates D800 DC00) before U+FB01; code point order
         // would not. Names next to "signature" check where the signature member goes.
         let record = r#"{"producer":"p","kid":"key-2026-01","record_id":"r",
-            "ﬁ":1,"𐀀":2,"sign":3,"signaturf":4,"Signature":5,"signaturd":6,"zz":[1.0,1e30]}"#;
+            "ﬁ":1,"𐀀":2,"sign":3,"signaturf":4,"Signature":5,"signaturd":6,"zz":[1.0,1e-7]}"#;
         let signed = unsigned(record).sign(&signer()).expect("record signs");
         assert_eq!(signed.signing_input(), canonical(record), "signing input");
         assert_eq!(
@@ -780,12 +780,12 @@ mod tests {
             )),
             "input above the limit"
         );
-        // `1e20` grows to 21 digits in JCS: within the input bound, beyond the canonical one.
+        // The canonical bound is checked on the JCS output, not on the input text.
         let grows = with_signature(
-            &UNSIGNED.replace("\"sequence_number\": 1", "\"sequence_number\": 1e20"),
+            &UNSIGNED.replace("\"sequence_number\": 1", "\"sequence_number\": 1e15"),
             &format!("\"{}\"", SignatureValue::from_bytes([0xFB; 64])),
         );
-        let canonical_limit = grows.len() - 50;
+        let canonical_limit = canonical(&grows).len() - 1;
         assert_eq!(
             SignedAssertion::parse(
                 &grows,
