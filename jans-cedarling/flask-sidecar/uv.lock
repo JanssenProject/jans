@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = "==3.11.*"
 
 [[package]]
@@ -120,6 +120,7 @@ wheels = [
 name = "flask-sidecar"
 version = "0.0.0"
 source = { editable = "." }
+default-groups = "all"
 dependencies = [
     { name = "cedarling-python" },
     { name = "flask" },
@@ -145,7 +146,7 @@ requires-dist = [
     { name = "cedarling-python", specifier = ">=0.0.4" },
     { name = "flask", specifier = ">=3.1.3,<4" },
     { name = "flask-cors", specifier = ">=6.0.0,<7" },
-    { name = "flask-smorest", specifier = ">=0.45.0,<0.46" },
+    { name = "flask-smorest", specifier = ">=0.46.0,<0.47" },
     { name = "gunicorn", specifier = ">=22.0.0,<23" },
     { name = "jinja2", specifier = ">=3.1.6,<4" },
     { name = "orjson", specifier = ">=3.11.5,<4" },
@@ -163,7 +164,7 @@ test = [
 
 [[package]]
 name = "flask-smorest"
-version = "0.45.0"
+version = "0.46.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apispec", extra = ["marshmallow"] },
@@ -172,9 +173,9 @@ dependencies = [
     { name = "webargs" },
     { name = "werkzeug" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/29/cc/ad32be9d2a2148000c4c845d234f12cee10d6ec9cc3724fe7a3ff9e93f99/flask_smorest-0.45.0.tar.gz", hash = "sha256:1490291a59e572be5c02e0a769589584180eceba65bc1949456760856b3e990b", size = 77686, upload-time = "2024-10-24T23:25:38.436Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/20/09/70074c15a9644a1def601b4fc78c114d4b2f4275310bc3476d1411da3003/flask_smorest-0.46.2.tar.gz", hash = "sha256:7d9099a37a5add415670d6904ae032eefc1d2ba2432f060d7c048c74fc655a80", size = 77421, upload-time = "2025-09-10T20:18:26.991Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/38/ff/bdfbb6a22550e8ad5fdcfa61c5c2ec2b5e0c1d1324466ff6511710b49cd6/flask_smorest-0.45.0-py3-none-any.whl", hash = "sha256:2b11c1e9de16b651291b963661011781d7bf0de28990d5469c05c84d000f101e", size = 32358, upload-time = "2024-10-24T23:25:36.955Z" },
+    { url = "https://files.pythonhosted.org/packages/5d/92/f5176b1bfc672c4d91c5ca70941c72e1e61bd28bce53037680c1e79be330/flask_smorest-0.46.2-py3-none-any.whl", hash = "sha256:caff5b95d575044f90854c70a218d4c05bc920e462fdca2c58c0dd48ce29946c", size = 32329, upload-time = "2025-09-10T20:18:25.58Z" },
 ]
 
 [[package]]
@@ -240,14 +241,11 @@ wheels = [
 
 [[package]]
 name = "marshmallow"
-version = "3.26.2"
+version = "4.3.1"
 source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "packaging" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/55/79/de6c16cc902f4fc372236926b0ce2ab7845268dcc30fb2fbb7f71b418631/marshmallow-3.26.2.tar.gz", hash = "sha256:bbe2adb5a03e6e3571b573f42527c6fe926e17467833660bebd11593ab8dfd57", size = 222095, upload-time = "2025-12-22T06:53:53.309Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4e/d7/611e68d57e6a903c29cb33b5afec0f93b4baecacc6c6c62e33cde9eb9dcb/marshmallow-4.3.1.tar.gz", hash = "sha256:fb6b8048af08d4ab061610d5b7d3696a7e4c95337dbda880edb9f95812cabc20", size = 218308, upload-time = "2026-08-08T14:27:29.517Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/be/2f/5108cb3ee4ba6501748c4908b908e55f42a5b66245b4cfe0c99326e1ef6e/marshmallow-3.26.2-py3-none-any.whl", hash = "sha256:013fa8a3c4c276c24d26d84ce934dc964e2aa794345a0f8c7e5a7191482c8a73", size = 50964, upload-time = "2025-12-22T06:53:51.801Z" },
+    { url = "https://files.pythonhosted.org/packages/43/57/4526ca0e214a3d158690e3393f6d547a2f8070f88d6388ab21d5b0aac8a1/marshmallow-4.3.1-py3-none-any.whl", hash = "sha256:e65accfbe277546df92ed7996a678c90e063e9a7c2a2f5e03f7d0b90e3768c42", size = 49219, upload-time = "2026-08-08T14:27:28.078Z" },
 ]
 
 [[package]]
