@@ -16,6 +16,7 @@ pub struct Limits(pub(crate) jans_trace_core::Limits);
 
 /// A limit the caller passed has no meaning.
 #[derive(Debug, Error, uniffi::Error)]
+#[uniffi(flat_error)]
 pub enum InvalidLimitError {
     #[error("a limit must not be negative, got {value}")]
     Negative { value: i64 },

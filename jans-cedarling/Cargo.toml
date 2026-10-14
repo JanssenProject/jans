@@ -8,7 +8,12 @@ members = [
     "sigstore-verifier",
     "test_utils",
 ]
-exclude = ["bindings/cedarling-java", "bindings/benchmarks", "custom-lints",]
+exclude = [
+    "bindings/benchmarks",
+    "bindings/cedarling-java",
+    "bindings/jans-trace-java",
+    "custom-lints",
+]
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
