@@ -32,7 +32,11 @@ public final class BlockedAddressClassifier {
             new Range("169.254.0.0", 16),     // link-local, cloud metadata
             new Range("172.16.0.0", 12),      // private
             new Range("192.0.0.0", 24),       // IETF protocol assignments
+            new Range("192.0.2.0", 24),       // documentation (TEST-NET-1)
             new Range("192.168.0.0", 16),     // private
+            new Range("198.18.0.0", 15),      // benchmarking
+            new Range("198.51.100.0", 24),    // documentation (TEST-NET-2)
+            new Range("203.0.113.0", 24),     // documentation (TEST-NET-3)
             new Range("224.0.0.0", 4),        // multicast
             new Range("240.0.0.0", 4));       // reserved, includes the 255.255.255.255 broadcast
 
