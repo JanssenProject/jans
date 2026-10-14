@@ -190,8 +190,8 @@ public final class ParsedAssertion {
 	}
 
 	/**
-	 * @return {@code JCS(assertion without the top-level "signature" field)}, UTF-8 encoded
-	 *; computed on first use and cached
+	 * @return {@code JCS(assertion without the top-level "signature" field)}, UTF-8 encoded;
+	 *         computed on first use and cached
 	 */
 	public byte[] signatureInput() {
 		if (signatureInput == null) {

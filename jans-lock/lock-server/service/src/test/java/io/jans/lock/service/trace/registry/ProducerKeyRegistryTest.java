@@ -35,7 +35,7 @@ import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 
 /**
- * Tests for {@link ProducerKeyRegistry}: the design decision D-4 validity matrix, create-only
+ * Tests for {@link ProducerKeyRegistry}: the key validity matrix, create-only
  * registration, idempotent revocation and the "stored key unusable" data-error path.
  */
 class ProducerKeyRegistryTest extends BaseLockServiceTest {
@@ -185,7 +185,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 		assertEquals(Long.valueOf(5000L), result.get().getRevokedAtMs());
 	}
 
-	// -- resolveForVerification: design decision D-4 validity matrix ----------------------------
+	// -- resolveForVerification: key validity matrix ----------------------------
 
 	@Test
 	void testResolveForVerification_UnknownKey_UnknownProducerKey() {

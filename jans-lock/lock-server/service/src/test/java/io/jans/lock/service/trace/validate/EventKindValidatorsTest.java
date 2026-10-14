@@ -192,8 +192,7 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	/**
-	 * Acceptance criterion 1, literally: task 08's own design §7 example fixture (not this task's
-	 * near-copy) validates as {@code AUTHORIZATION_DECISION} and yields the specified
+	 * The design §7 example fixture validates as {@code AUTHORIZATION_DECISION} and yields the specified
 	 * {@code TokenRef}.
 	 */
 	@Test

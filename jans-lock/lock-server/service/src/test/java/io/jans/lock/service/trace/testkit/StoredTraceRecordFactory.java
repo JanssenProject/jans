@@ -136,8 +136,7 @@ public final class StoredTraceRecordFactory {
 	}
 
 	/**
-	 * Convenience for a genesis row: {@code sequence_number = 1} and the zero-hash sentinel
-	 *.
+	 * Convenience for a genesis row: {@code sequence_number = 1} and the zero-hash sentinel.
 	 */
 	public StoredTraceRecordFactory genesis() {
 		sequenceNumber(1L);

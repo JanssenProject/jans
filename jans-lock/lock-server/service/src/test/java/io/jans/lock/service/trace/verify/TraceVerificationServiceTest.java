@@ -57,7 +57,7 @@ import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
 /**
  * Tests for {@link TraceVerificationService}: design §5 steps 3–6 wired with the real parser,
  * validators, canonicalizer and an {@link InMemoryTraceStore}-backed {@link ProducerKeyRegistry}.
- * Mocks are used only where the acceptance criteria require proving that a step did <em>not</em>
+ * Mocks are used only where a test must prove that a step did <em>not</em>
  * run.
  */
 class TraceVerificationServiceTest extends BaseLockServiceTest {
@@ -413,7 +413,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	}
 
 	/**
-	 * The D-13 content digest computed without {@code CanonicalHashes}: plain JDK SHA-256 over the
+	 * The content digest computed without {@code CanonicalHashes}: plain JDK SHA-256 over the
 	 * UTF-8 JCS form of the whole assertion, lower-case hex, {@code sha256:} prefix.
 	 */
 	private static String independentContentDigest(String json) throws Exception {

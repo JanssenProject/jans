@@ -70,7 +70,7 @@ import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Response;
 
 /**
- * Tests for {@link TraceRestWebServiceImpl} (TRACE MVP task 20 acceptance criteria): the 202 happy
+ * Tests for {@link TraceRestWebServiceImpl} the 202 happy
  * path and idempotent-replay path, the {@code record_conflict}/{@code client_not_bound}/validation/
  * {@code storage_failure}/disabled-feature error paths, the audit-logger call on every outcome, and
  * a fixture check of the interface's protection annotations.
@@ -526,7 +526,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		verify(applicationAuditLogger).log(any(), eq(false));
 	}
 
-	// -- annotation fixture check (task 20 "Tests" section, extended for D-16) ------------------------
+	// -- annotation fixture check ------------------------
 
 	@Test
 	void testInterfaceMethod_CarriesBothProtectionAnnotationsWithMatchingIdAndPath() throws Exception {

@@ -27,7 +27,7 @@ import io.jans.lock.service.trace.error.TraceValidationException;
 
 /**
  * Tests for {@link EvidenceDomainResolver}: binding precedence, the default-domain fallback, and
- * the fail-closed domain-id format check (design decision D-1, task 11 acceptance criteria).
+ * the fail-closed domain-id format check .
  */
 class EvidenceDomainResolverTest extends BaseLockServiceTest {
 

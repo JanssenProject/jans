@@ -42,13 +42,13 @@ import io.jans.lock.service.trace.crypto.StrictBase64Url;
  */
 public final class SignedAssertionFactory {
 
-	/** Task 09's design §7 {@code AUTHORIZATION_DECISION} example. */
+	/** The design §7 {@code AUTHORIZATION_DECISION} example. */
 	public static final String FIXTURE_AUTHORIZATION_DECISION = "authorization_decision_valid.json";
 
-	/** Task 09's design §7 {@code CAPABILITY_INVOKED} example. */
+	/** The design §7 {@code CAPABILITY_INVOKED} example. */
 	public static final String FIXTURE_CAPABILITY_INVOKED = "capability_invoked_valid.json";
 
-	/** Task 09's design §7 {@code RUNTIME_EFFECT} example. */
+	/** The design §7 {@code RUNTIME_EFFECT} example. */
 	public static final String FIXTURE_RUNTIME_EFFECT = "runtime_effect_valid.json";
 
 	private static final String FIXTURE_ROOT = "/trace/assertions/";
@@ -169,8 +169,7 @@ public final class SignedAssertionFactory {
 	}
 
 	/**
-	 * Convenience for genesis records: {@code sequence_number = 1} and the zero-hash sentinel
-	 *.
+	 * Convenience for genesis records: {@code sequence_number = 1} and the zero-hash sentinel.
 	 */
 	public SignedAssertionFactory genesis() {
 		sequenceNumber(1);
