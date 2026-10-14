@@ -68,3 +68,11 @@ limit_accessors! {
     with_max_batch_bytes, max_batch_bytes;
     with_max_batch_records, max_batch_records;
 }
+
+/// Variants are named after the core error codes.
+#[derive(Debug, Error, uniffi::Error)]
+#[uniffi(flat_error)]
+pub enum SizeLimitError {
+    #[error(transparent)]
+    SizeLimitExceeded(jans_trace_core::SizeLimitError),
+}

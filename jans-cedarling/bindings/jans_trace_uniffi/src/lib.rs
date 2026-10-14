@@ -9,6 +9,7 @@
 
 uniffi::setup_scaffolding!();
 
+mod assertion;
 mod digest;
 mod inputs;
 mod json;
