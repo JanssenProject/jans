@@ -153,5 +153,7 @@ class CedarlingInstance:
             result_dict["context"]["policy_store_id"] = str(policy_store_id)
         if policy_store_version is not None:
             result_dict["context"]["policy_store_version"] = str(policy_store_version)
+        if request.trace is not None:
+            result_dict["context"]["trace_execution_id"] = request.trace.trace_execution_id
         result = Decision(**result_dict)
         return result
