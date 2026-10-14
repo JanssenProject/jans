@@ -2586,6 +2586,7 @@ dependencies = [
  "jans-trace-core",
  "thiserror",
  "uniffi",
+ "zeroize",
 ]
 
 [[package]]

@@ -39,12 +39,42 @@ impl From<jans_trace_core::json::CanonicalizeError> for CanonicalizeError {
     fn from(error: jans_trace_core::json::CanonicalizeError) -> Self {
         use jans_trace_core::json::CanonicalizeError as Core;
         match &error {
-            Core::SizeLimitExceeded(_) | Core::Json(JsonError::LimitExceeded(_)) => {
-                Self::SizeLimitExceeded(error)
-            },
-            Core::Json(JsonError::Invalid { .. }) => Self::InvalidJson(error),
-            Core::Json(JsonError::DuplicateMember) => Self::DuplicateMember(error),
-            Core::Json(JsonError::NonCanonicalizable(_)) => Self::NonCanonicalizableJson(error),
+            Core::SizeLimitExceeded(_) => Self::SizeLimitExceeded(error),
+            Core::Json(json) => json_variant!(json, error),
         }
     }
 }
+
+/// The core code a `JsonError` stands for. Every binding error that embeds one has a variant
+/// per code, named after it; `json_variant!` picks it.
+pub(crate) enum JsonCode {
+    InvalidJson,
+    DuplicateMember,
+    NonCanonicalizableJson,
+    SizeLimitExceeded,
+}
+
+impl JsonCode {
+    pub(crate) const fn of(error: &JsonError) -> Self {
+        match error {
+            JsonError::Invalid { .. } => Self::InvalidJson,
+            JsonError::DuplicateMember => Self::DuplicateMember,
+            JsonError::NonCanonicalizable(_) => Self::NonCanonicalizableJson,
+            JsonError::LimitExceeded(_) => Self::SizeLimitExceeded,
+        }
+    }
+}
+
+/// Builds the variant of `Self` for the code of `$json`, carrying `$error`. Use inside a
+/// `From` impl of an error enum that has the four JSON variants.
+macro_rules! json_variant {
+    ($json:expr, $error:expr) => {
+        match $crate::json::JsonCode::of($json) {
+            $crate::json::JsonCode::InvalidJson => Self::InvalidJson($error),
+            $crate::json::JsonCode::DuplicateMember => Self::DuplicateMember($error),
+            $crate::json::JsonCode::NonCanonicalizableJson => Self::NonCanonicalizableJson($error),
+            $crate::json::JsonCode::SizeLimitExceeded => Self::SizeLimitExceeded($error),
+        }
+    };
+}
+pub(crate) use json_variant;

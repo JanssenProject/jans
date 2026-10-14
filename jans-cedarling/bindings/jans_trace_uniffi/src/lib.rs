@@ -12,5 +12,7 @@ uniffi::setup_scaffolding!();
 mod digest;
 mod inputs;
 mod json;
+mod key;
 mod limits;
 mod self_test;
+mod signature;
