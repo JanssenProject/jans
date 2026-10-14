@@ -17,7 +17,9 @@ def make_request():
     return CedarlingRequest(
         tokens=[],
         action='Jans::Action::"Read"',
-        resource=Resource(cedar_entity_mapping=EntityMapping(entity_type="Jans::Issue", id="1")),
+        resource=Resource(
+            cedar_entity_mapping=EntityMapping(entity_type="Jans::Issue", id="1")
+        ),
         context={},
     )
 
@@ -57,6 +59,8 @@ def test_authorize_without_policy_store_details():
     authorize_result.request_id.return_value = "req-2"
     authorize_result.is_allowed.return_value = True
 
-    decision = make_instance(authorize_result, [{"decision": "ALLOW"}]).authorize(make_request())
+    decision = make_instance(authorize_result, [{"decision": "ALLOW"}]).authorize(
+        make_request()
+    )
 
     assert decision.context == {"request_id": "req-2"}
