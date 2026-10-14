@@ -1081,6 +1081,12 @@ components:
           type: string
           description: Evidence domain id used when a submitting client has no explicit
             binding
+        defaultAllowedProducerIds:
+          type: array
+          description: Producer ids a client without an explicit binding may submit
+            records for in the default evidence domain; empty means none
+          items:
+            type: string
         clientDomainBindings:
           type: array
           description: OAuth client to evidence-domain bindings
@@ -1090,6 +1096,11 @@ components:
           type: integer
           description: Seconds after signed_at a record is accepted before being flagged
             late
+          format: int32
+        maxFutureSkewSeconds:
+          type: integer
+          description: Seconds a signed_at may be ahead of Lock's clock before the
+            record is rejected
           format: int32
         maxRequestBytes:
           type: integer

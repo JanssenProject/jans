@@ -264,8 +264,10 @@ verification. See [TRACE Evidence](./trace.md) for the feature description and A
 |---|---|---|---|
 | `enabled` | boolean | `true` | When `false`, every TRACE endpoint returns a structured `invalid_request` error and the receipt repair timer does not run. |
 | `defaultEvidenceDomainId` | string | `null` | Evidence domain used for a submitting/reading client that has no explicit entry in `clientDomainBindings`. |
+| `defaultAllowedProducerIds` | array | `[]` | Producer ids a client without a binding may submit records for in the default evidence domain. Empty means such a client can submit nothing (`producer_not_allowed`). Read and admin paths are unaffected. |
 | `clientDomainBindings` | array | `[]` | List of `{ clientId, evidenceDomainId, allowedProducerIds[] }` bindings. A client without a binding and without `defaultEvidenceDomainId` set is rejected with `client_not_bound`. `allowedProducerIds` may contain `"*"` to allow any producer. |
 | `latenessThresholdSeconds` | integer | `300` | Seconds after `signed_at` a record may still be accepted before it is flagged `late_flag: true`. |
+| `maxFutureSkewSeconds` | integer | `300` | Seconds `signed_at` may be ahead of Lock's clock. A later `signed_at` is rejected with `invalid_assertion` (`signed_at_in_future`). |
 | `maxRequestBytes` | integer | `262144` | Maximum accepted TRACE request body size, in bytes. |
 | `maxJsonDepth` | integer | `32` | Maximum accepted JSON nesting depth of a TRACE assertion. |
 | `maxStringLength` | integer | `8192` | Maximum accepted JSON string length (UTF-16 units) in a TRACE assertion. |

@@ -50,6 +50,8 @@ public final class StoredTraceRecordFactory {
 
 	private String prevRecordHash = TraceConstants.ZERO_HASH;
 
+	private String assertionRaw = "{\"trace\":{}}";
+
 	private String contentDigest;
 
 	private long receiptSequence = 1L;
@@ -141,6 +143,11 @@ public final class StoredTraceRecordFactory {
 	public StoredTraceRecordFactory genesis() {
 		sequenceNumber(1L);
 		return prevRecordHash(TraceConstants.ZERO_HASH);
+	}
+
+	public StoredTraceRecordFactory assertionRaw(String assertionRaw) {
+		this.assertionRaw = assertionRaw;
+		return this;
 	}
 
 	public StoredTraceRecordFactory contentDigest(String contentDigest) {
@@ -241,7 +248,7 @@ public final class StoredTraceRecordFactory {
 		ReceiptEntry receipt = new ReceiptEntry(receiptSequence, receivedAtMs, prevReceiptHash, receiptHash);
 		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late);
 
-		return new StoredTraceRecord(identity, "{\"trace\":{}}", contentDigest, verification, receipt, flags,
+		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verification, receipt, flags,
 				execution, chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs, version);
 	}
 

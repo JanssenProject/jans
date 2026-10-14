@@ -13,7 +13,7 @@
       "invocation": {
         "action": "Acme::Action::\"Pay\"",
         "resource_type": "Acme::Payment",
-        "outcome": "INVOKED"
+        "outcome": "SUCCESS"
       },
       "enforcement_point_id": "gateway-001",
       "tokens": [

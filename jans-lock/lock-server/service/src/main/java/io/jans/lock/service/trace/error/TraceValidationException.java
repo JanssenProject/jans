@@ -47,6 +47,9 @@ public class TraceValidationException extends RuntimeException {
 	/** {@code signature} is not a well-formed base64url-encoded 64-byte value. */
 	public static final TraceErrorResponseType ERROR_INVALID_SIGNATURE = TraceErrorResponseType.INVALID_SIGNATURE;
 
+	/** A genesis-only member such as {@code producer_chain.chain_link} appears on another record. */
+	public static final TraceErrorResponseType ERROR_INVALID_GENESIS = TraceErrorResponseType.INVALID_GENESIS;
+
 	private final TraceErrorResponseType errorId;
 
 	private final String reason;

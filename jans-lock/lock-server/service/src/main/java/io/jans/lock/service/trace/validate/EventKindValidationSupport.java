@@ -6,8 +6,6 @@
 
 package io.jans.lock.service.trace.validate;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +20,7 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.lock.service.trace.TraceConstants;
+import io.jans.lock.service.trace.TraceIssuers;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.TokenRef;
 
@@ -38,11 +37,12 @@ final class EventKindValidationSupport {
 	static final Set<String> DECISION_OUTCOMES = Collections
 			.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("ALLOW", "DENY")));
 
+	static final Set<String> INVOCATION_OUTCOMES = Collections
+			.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("SUCCESS", "FAILURE")));
+
 	private static final int MAX_FACT_TEXT_LENGTH = 512;
 
 	private static final int MAX_FACT_ID_LENGTH = 256;
-
-	private static final int MAX_INVOCATION_OUTCOME_LENGTH = 64;
 
 	private static final int MAX_SUBJECT_ID_LENGTH = 255;
 
@@ -135,6 +135,17 @@ final class EventKindValidationSupport {
 		}
 	}
 
+	/**
+	 * Validates the optional operation-binding digests of an event (GovOps profile §8): each
+	 * present member must be a {@code sha256:<64 lowercase hex>} string, the same rule as
+	 * {@code RUNTIME_EFFECT.result_digest}.
+	 */
+	static void optionalDigests(JsonNode event, String... fields) {
+		for (String field : fields) {
+			optionalHashString(event, field, "trace.event." + field);
+		}
+	}
+
 	static String requireEnum(JsonNode parent, String field, String path, Set<String> allowed) {
 		String value = requireNonEmptyString(parent, field, path, null);
 		if (!allowed.contains(value)) {
@@ -155,11 +166,11 @@ final class EventKindValidationSupport {
 	 *
 	 * <p>Nothing is returned or stored: the facts remain in the signed assertion only (D-21).
 	 *
-	 * @param decisionOutcomes the closed outcome vocabulary, or {@code null} for a free outcome of
-	 *        at most {@value #MAX_INVOCATION_OUTCOME_LENGTH} characters
+	 * @param outcomes the closed outcome vocabulary of the kind ({@link #DECISION_OUTCOMES} or
+	 *        {@link #INVOCATION_OUTCOMES})
 	 */
 	static void requireCapabilityFacts(JsonNode event, String singular, String plural, String idField,
-			Set<String> decisionOutcomes) {
+			Set<String> outcomes) {
 		forbidField(event, "capability_ids", "trace.event.capability_ids");
 		forbidField(event, "outcome", "trace.event.outcome");
 
@@ -180,7 +191,7 @@ final class EventKindValidationSupport {
 			if (!fact.isObject()) {
 				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + path);
 			}
-			validateFact(fact, path, decisionOutcomes);
+			validateFact(fact, path, outcomes);
 			return;
 		}
 
@@ -201,7 +212,7 @@ final class EventKindValidationSupport {
 						"type:" + entryPath);
 			}
 			String id = requireNonEmptyString(entry, idField, entryPath + "." + idField, MAX_FACT_ID_LENGTH);
-			validateFact(entry, entryPath, decisionOutcomes);
+			validateFact(entry, entryPath, outcomes);
 			if (!seenIds.add(id)) {
 				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
 						"duplicate:" + entryPath + "." + idField);
@@ -209,20 +220,16 @@ final class EventKindValidationSupport {
 		}
 	}
 
-	private static boolean present(JsonNode parent, String field) {
+	static boolean present(JsonNode parent, String field) {
 		JsonNode node = parent.get(field);
 		return node != null && !node.isNull();
 	}
 
-	private static void validateFact(JsonNode fact, String path, Set<String> decisionOutcomes) {
+	private static void validateFact(JsonNode fact, String path, Set<String> outcomes) {
 		forbidField(fact, "resource_id", path + ".resource_id");
 		requireNonEmptyString(fact, "action", path + ".action", MAX_FACT_TEXT_LENGTH);
 		requireNonEmptyString(fact, "resource_type", path + ".resource_type", MAX_FACT_TEXT_LENGTH);
-		if (decisionOutcomes != null) {
-			requireEnum(fact, "outcome", path + ".outcome", decisionOutcomes);
-		} else {
-			requireNonEmptyString(fact, "outcome", path + ".outcome", MAX_INVOCATION_OUTCOME_LENGTH);
-		}
+		requireEnum(fact, "outcome", path + ".outcome", outcomes);
 	}
 
 	/**
@@ -347,28 +354,11 @@ final class EventKindValidationSupport {
 		}
 	}
 
-	/**
-	 * Design §7.3: an absolute URI with scheme {@code https}, or {@code http} only when the host is
-	 * {@code localhost} (documented MVP relaxation for local/dev producers).
-	 */
+	/** Design §7.3: see {@link TraceIssuers#isValid(String)}. */
 	private static void validateIssuer(String issuer, String path) {
-		URI uri;
-		try {
-			uri = new URI(issuer);
-		} catch (URISyntaxException ex) {
+		if (!TraceIssuers.isValid(issuer)) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "invalid:" + path);
 		}
-		String scheme = uri.getScheme();
-		if (!uri.isAbsolute() || scheme == null || uri.isOpaque() || uri.getHost() == null) {
-			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "invalid:" + path);
-		}
-		if ("https".equalsIgnoreCase(scheme)) {
-			return;
-		}
-		if ("http".equalsIgnoreCase(scheme) && "localhost".equalsIgnoreCase(uri.getHost())) {
-			return;
-		}
-		throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "invalid:" + path);
 	}
 
 }
