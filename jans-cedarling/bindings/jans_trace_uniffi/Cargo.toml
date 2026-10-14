@@ -11,10 +11,10 @@ crate-type = ["cdylib"]
 name = "jans_trace_uniffi"
 
 [dependencies]
-jans-trace-core = { path = "../../jans-trace-core" }
+jans-trace-core = { workspace = true }
 thiserror = { workspace = true }
-uniffi = { version = "0.32.1", features = ["cli"] }
-zeroize = "1.9.0"
+uniffi = { workspace = true, features = ["cli"] }
+zeroize = { workspace = true }
 
 [lints]
 workspace = true
