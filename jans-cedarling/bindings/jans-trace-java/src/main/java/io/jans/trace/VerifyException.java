@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link SignedAssertion#verify}: {@link ErrorCode#PRODUCER_MISMATCH}, {@link ErrorCode#KID_MISMATCH} or {@link ErrorCode#SIGNATURE_INVALID}. */
 public final class VerifyException extends TraceException {
 

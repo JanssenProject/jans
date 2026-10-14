@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /**
  * Common parent of every failure this library reports. Each operation throws its own subclass,
  * which carries only the codes that operation can produce; catch this type to handle them all.
@@ -21,6 +23,11 @@ public abstract class TraceException extends Exception {
         this.code = code;
     }
 
+    /**
+     * The stable code, for the wire and for logs (Lock returns it verbatim in per-record bulk
+     * results). Handle a failure by its exception type, which says what the operation can
+     * produce; the code namespace is shared by the whole library.
+     */
     public ErrorCode code() {
         return code;
     }

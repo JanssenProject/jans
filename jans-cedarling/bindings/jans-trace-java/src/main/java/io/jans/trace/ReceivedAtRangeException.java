@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link ReceivedAt#fromUnixMillis} for a reading before 1970 or after 9999; the code is always {@link ErrorCode#INVALID_RECEIPT}. */
 public final class ReceivedAtRangeException extends TraceException {
 

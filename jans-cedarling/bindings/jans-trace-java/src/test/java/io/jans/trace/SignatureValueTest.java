@@ -9,6 +9,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
 
 import org.testng.annotations.Test;
+import io.jans.trace.uniffi.ErrorCode;
 
 public class SignatureValueTest {
 

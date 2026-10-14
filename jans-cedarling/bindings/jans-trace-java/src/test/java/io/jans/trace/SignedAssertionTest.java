@@ -10,6 +10,7 @@ import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 
 import org.testng.annotations.Test;
+import io.jans.trace.uniffi.ErrorCode;
 
 public class SignedAssertionTest {
 
@@ -57,6 +58,15 @@ public class SignedAssertionTest {
         assertVerifyRejected(Records.signed(),
                 new VerificationContext("other-producer", Records.KID, Records.publicKey()),
                 ErrorCode.PRODUCER_MISMATCH);
+    }
+
+    @Test
+    public void rejectionCarriesTheCoreMessage() throws TraceException {
+        VerifyException e = expectThrows(VerifyException.class, () -> Records.signed()
+                .verify(new VerificationContext("other-producer", Records.KID, Records.publicKey())));
+        assertEquals(e.getMessage(),
+                "signed producer `cedarling-fleet-1` differs from the expected producer `other-producer`",
+                "the message is the core's Display text");
     }
 
     @Test

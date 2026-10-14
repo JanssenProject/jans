@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /**
  * Thrown by {@link SelfTest#run}; the code is always {@link ErrorCode#SELF_TEST_FAILED} and the
  * message names the broken algorithms.

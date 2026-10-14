@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown when an {@link Ed25519Signer} cannot be built; the code is always {@link ErrorCode#INVALID_PRIVATE_KEY}. The message never contains key bytes. */
 public final class PrivateKeyException extends TraceException {
 

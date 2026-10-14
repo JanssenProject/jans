@@ -7,10 +7,13 @@ use std::fmt;
 use std::sync::Arc;
 
 use jans_trace_core::receipt as core;
-use thiserror::Error;
 
 use crate::assertion::VerifiedAssertion;
 use crate::digest::Digest;
+use crate::error_code::{
+    ChainHeadError, ParseReceivedAtError, ReceiptLinkError, ReceiptPositionError,
+    ReceivedAtRangeError, StoredReceiptError,
+};
 
 /// Profile id of Jans TRACE assertions.
 #[uniffi::export]
@@ -33,18 +36,18 @@ pub struct ReceivedAt(core::ReceivedAt);
 impl ReceivedAt {
     /// Formats Lock's clock reading.
     #[uniffi::constructor]
-    pub fn from_unix_millis(unix_millis: i64) -> Result<Arc<Self>, ReceivedAtRangeError> {
+    pub fn from_unix_millis(unix_millis: i64) -> Result<Arc<Self>, Arc<ReceivedAtRangeError>> {
         core::ReceivedAt::from_unix_millis(unix_millis)
             .map(|received_at| Arc::new(Self(received_at)))
-            .map_err(ReceivedAtRangeError::InvalidReceipt)
+            .map_err(ReceivedAtRangeError::wrap)
     }
 
     /// Only text that formats back unchanged, so dates like February 30 are rejected.
     #[uniffi::constructor]
-    pub fn parse(text: &str) -> Result<Arc<Self>, ParseReceivedAtError> {
+    pub fn parse(text: &str) -> Result<Arc<Self>, Arc<ParseReceivedAtError>> {
         text.parse()
             .map(|received_at| Arc::new(Self(received_at)))
-            .map_err(ParseReceivedAtError::InvalidReceipt)
+            .map_err(ParseReceivedAtError::wrap)
     }
 }
 
@@ -74,10 +77,10 @@ impl ReceiptPosition {
     pub fn of(
         sequence: i64,
         prev_receipt_hash: &Digest,
-    ) -> Result<Arc<Self>, ReceiptPositionError> {
+    ) -> Result<Arc<Self>, Arc<ReceiptPositionError>> {
         core::ReceiptPosition::new(sequence, prev_receipt_hash.0)
             .map(|position| Arc::new(Self(position)))
-            .map_err(ReceiptPositionError::InvalidReceipt)
+            .map_err(ReceiptPositionError::wrap)
     }
 
     pub fn sequence(&self) -> i64 {
@@ -126,7 +129,7 @@ impl ReceiptCommitment {
 
     /// Rebuilds a commitment from stored values, for re-hashing and re-linking a chain.
     #[uniffi::constructor]
-    pub fn from_stored(stored: StoredReceipt) -> Result<Arc<Self>, StoredReceiptError> {
+    pub fn from_stored(stored: StoredReceipt) -> Result<Arc<Self>, Arc<StoredReceiptError>> {
         core::ReceiptCommitment::from_stored(core::StoredReceipt {
             evidence_domain_id: stored.evidence_domain_id,
             position: stored.position.0,
@@ -136,7 +139,7 @@ impl ReceiptCommitment {
             content_digest: stored.content_digest.0,
         })
         .map(|commitment| Arc::new(Self(commitment)))
-        .map_err(StoredReceiptError::InvalidReceipt)
+        .map_err(StoredReceiptError::wrap)
     }
 
     pub fn evidence_domain_id(&self) -> String {
@@ -173,11 +176,11 @@ impl ReceiptCommitment {
     pub fn verify_link(
         &self,
         previous_receipt_hash: &Digest,
-    ) -> Result<Arc<Digest>, ReceiptLinkError> {
+    ) -> Result<Arc<Digest>, Arc<ReceiptLinkError>> {
         self.0
             .verify_link(&previous_receipt_hash.0)
             .map(|hash| Arc::new(Digest(hash)))
-            .map_err(ReceiptLinkError::ReceiptLinkMismatch)
+            .map_err(ReceiptLinkError::wrap)
     }
 }
 
@@ -200,18 +203,18 @@ impl ChainHead {
         evidence_domain_id: String,
         sequence: i64,
         hash: &Digest,
-    ) -> Result<Arc<Self>, ChainHeadError> {
+    ) -> Result<Arc<Self>, Arc<ChainHeadError>> {
         core::ChainHead::resume(evidence_domain_id, sequence, hash.0)
             .map(|head| Arc::new(Self(head)))
-            .map_err(ChainHeadError::InvalidReceipt)
+            .map_err(ChainHeadError::wrap)
     }
 
     /// Checks that `receipt` continues this chain and returns the head after it.
-    pub fn append(&self, receipt: &ReceiptCommitment) -> Result<Arc<Self>, ReceiptLinkError> {
+    pub fn append(&self, receipt: &ReceiptCommitment) -> Result<Arc<Self>, Arc<ReceiptLinkError>> {
         self.0
             .append(&receipt.0)
             .map(|head| Arc::new(Self(head)))
-            .map_err(ReceiptLinkError::ReceiptLinkMismatch)
+            .map_err(ReceiptLinkError::wrap)
     }
 
     pub fn evidence_domain_id(&self) -> String {
@@ -227,52 +230,4 @@ impl ChainHead {
     pub fn hash(&self) -> Arc<Digest> {
         Arc::new(Digest(self.0.hash()))
     }
-}
-
-/// Variants are named after the core error codes.
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum ReceivedAtRangeError {
-    #[error(transparent)]
-    InvalidReceipt(core::ReceivedAtRangeError),
-}
-
-/// Variants are named after the core error codes.
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum ParseReceivedAtError {
-    #[error(transparent)]
-    InvalidReceipt(core::ParseReceivedAtError),
-}
-
-/// Variants are named after the core error codes.
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum ReceiptPositionError {
-    #[error(transparent)]
-    InvalidReceipt(core::ReceiptPositionError),
-}
-
-/// Variants are named after the core error codes.
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum StoredReceiptError {
-    #[error(transparent)]
-    InvalidReceipt(core::StoredReceiptError),
-}
-
-/// Variants are named after the core error codes.
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum ChainHeadError {
-    #[error(transparent)]
-    InvalidReceipt(core::ChainHeadError),
-}
-
-/// Variants are named after the core error codes.
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum ReceiptLinkError {
-    #[error(transparent)]
-    ReceiptLinkMismatch(core::ReceiptLinkError),
 }

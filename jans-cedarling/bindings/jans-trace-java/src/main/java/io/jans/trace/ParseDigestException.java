@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link Digest#parse}; the code is always {@link ErrorCode#INVALID_DIGEST}. */
 public final class ParseDigestException extends TraceException {
 

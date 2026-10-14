@@ -30,7 +30,7 @@ public final class Ed25519Signer {
         try {
             return new Ed25519Signer(io.jans.trace.uniffi.Ed25519Signer.Companion.fromPkcs8Pem(kid, pem));
         } catch (io.jans.trace.uniffi.PrivateKeyException e) {
-            throw new PrivateKeyException(Errors.code(e), e.getMessage());
+            throw new PrivateKeyException(e.code(), e.toString());
         }
     }
 
@@ -41,7 +41,7 @@ public final class Ed25519Signer {
         try {
             return new Ed25519Signer(io.jans.trace.uniffi.Ed25519Signer.Companion.fromSecretBytes(kid, secret));
         } catch (io.jans.trace.uniffi.PrivateKeyException e) {
-            throw new PrivateKeyException(Errors.code(e), e.getMessage());
+            throw new PrivateKeyException(e.code(), e.toString());
         }
     }
 

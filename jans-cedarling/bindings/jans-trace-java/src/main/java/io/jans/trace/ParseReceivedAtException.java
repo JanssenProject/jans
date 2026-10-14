@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link ReceivedAt#parse}; the code is always {@link ErrorCode#INVALID_RECEIPT}. */
 public final class ParseReceivedAtException extends TraceException {
 

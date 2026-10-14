@@ -29,7 +29,7 @@ public final class PublicKey {
         try {
             return new PublicKey(io.jans.trace.uniffi.PublicKey.Companion.fromJwk(jwk.inner()));
         } catch (io.jans.trace.uniffi.JwkException e) {
-            throw new JwkException(Errors.code(e), e.getMessage());
+            throw new JwkException(e.code(), e.toString());
         }
     }
 
@@ -39,7 +39,7 @@ public final class PublicKey {
         try {
             return new PublicKey(io.jans.trace.uniffi.PublicKey.Companion.fromBytes(bytes));
         } catch (io.jans.trace.uniffi.PublicKeyException e) {
-            throw new PublicKeyException(Errors.code(e), e.getMessage());
+            throw new PublicKeyException(e.code(), e.toString());
         }
     }
 

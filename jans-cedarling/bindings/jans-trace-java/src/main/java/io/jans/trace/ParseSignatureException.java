@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link SignatureValue#parse}; the code is always {@link ErrorCode#INVALID_SIGNATURE_ENCODING}. */
 public final class ParseSignatureException extends TraceException {
 

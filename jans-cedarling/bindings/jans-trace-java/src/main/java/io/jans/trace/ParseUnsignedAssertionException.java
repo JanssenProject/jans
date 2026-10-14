@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link UnsignedAssertion#parse}: {@link ErrorCode#INVALID_JSON}, {@link ErrorCode#DUPLICATE_MEMBER}, {@link ErrorCode#NON_CANONICALIZABLE_JSON}, {@link ErrorCode#SIZE_LIMIT_EXCEEDED}, {@link ErrorCode#INVALID_ASSERTION_SHAPE} or {@link ErrorCode#SIGNATURE_ALREADY_PRESENT}. */
 public final class ParseUnsignedAssertionException extends TraceException {
 

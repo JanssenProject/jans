@@ -40,7 +40,7 @@ public final class ReceiptCommitment {
         try {
             return new ReceiptCommitment(io.jans.trace.uniffi.ReceiptCommitment.Companion.fromStored(stored.inner()));
         } catch (io.jans.trace.uniffi.StoredReceiptException e) {
-            throw new StoredReceiptException(Errors.code(e), e.getMessage());
+            throw new StoredReceiptException(e.code(), e.toString());
         }
     }
 
@@ -83,7 +83,7 @@ public final class ReceiptCommitment {
         try {
             return new Digest(inner.verifyLink(previousReceiptHash.inner()));
         } catch (io.jans.trace.uniffi.ReceiptLinkException e) {
-            throw new ReceiptLinkException(Errors.code(e), e.getMessage());
+            throw new ReceiptLinkException(e.code(), e.toString());
         }
     }
 

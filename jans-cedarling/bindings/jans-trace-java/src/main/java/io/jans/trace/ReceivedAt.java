@@ -24,7 +24,7 @@ public final class ReceivedAt {
         try {
             return new ReceivedAt(io.jans.trace.uniffi.ReceivedAt.Companion.fromUnixMillis(unixMillis));
         } catch (io.jans.trace.uniffi.ReceivedAtRangeException e) {
-            throw new ReceivedAtRangeException(Errors.code(e), e.getMessage());
+            throw new ReceivedAtRangeException(e.code(), e.toString());
         }
     }
 
@@ -34,7 +34,7 @@ public final class ReceivedAt {
         try {
             return new ReceivedAt(io.jans.trace.uniffi.ReceivedAt.Companion.parse(text));
         } catch (io.jans.trace.uniffi.ParseReceivedAtException e) {
-            throw new ParseReceivedAtException(Errors.code(e), e.getMessage());
+            throw new ParseReceivedAtException(e.code(), e.toString());
         }
     }
 

@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link SignedAssertion#parse} and {@link BatchRecord#get}: {@link ErrorCode#INVALID_JSON}, {@link ErrorCode#DUPLICATE_MEMBER}, {@link ErrorCode#NON_CANONICALIZABLE_JSON}, {@link ErrorCode#SIZE_LIMIT_EXCEEDED}, {@link ErrorCode#INVALID_ASSERTION_SHAPE}, {@link ErrorCode#MISSING_SIGNATURE} or {@link ErrorCode#INVALID_SIGNATURE_ENCODING}. */
 public final class ParseSignedAssertionException extends TraceException {
 

@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /**
  * One element of a bulk body: the parsed record, or why it was rejected. Lock answers every
  * element on its own, so a bad record never fails the others.
@@ -25,7 +27,7 @@ public final class BatchRecord {
         try {
             return new BatchRecord(new SignedAssertion(inner.assertion()), null, null);
         } catch (io.jans.trace.uniffi.ParseSignedAssertionException e) {
-            return new BatchRecord(null, Errors.code(e), e.getMessage());
+            return new BatchRecord(null, e.code(), e.toString());
         }
     }
 

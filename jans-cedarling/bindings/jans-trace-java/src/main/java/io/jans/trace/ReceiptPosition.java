@@ -33,7 +33,7 @@ public final class ReceiptPosition {
         try {
             return new ReceiptPosition(io.jans.trace.uniffi.ReceiptPosition.Companion.of(sequence, prevReceiptHash.inner()));
         } catch (io.jans.trace.uniffi.ReceiptPositionException e) {
-            throw new ReceiptPositionException(Errors.code(e), e.getMessage());
+            throw new ReceiptPositionException(e.code(), e.toString());
         }
     }
 

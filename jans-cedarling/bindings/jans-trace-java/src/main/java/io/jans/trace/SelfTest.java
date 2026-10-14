@@ -22,7 +22,7 @@ public final class SelfTest {
         try {
             Jans_trace_uniffiKt.selfTest();
         } catch (io.jans.trace.uniffi.SelfTestException e) {
-            throw new SelfTestException(Errors.code(e), e.getMessage());
+            throw new SelfTestException(e.code(), e.toString());
         }
     }
 }

@@ -37,7 +37,7 @@ public final class ChainHead {
         try {
             return new ChainHead(io.jans.trace.uniffi.ChainHead.Companion.resume(evidenceDomainId, sequence, hash.inner()));
         } catch (io.jans.trace.uniffi.ChainHeadException e) {
-            throw new ChainHeadException(Errors.code(e), e.getMessage());
+            throw new ChainHeadException(e.code(), e.toString());
         }
     }
 
@@ -47,7 +47,7 @@ public final class ChainHead {
         try {
             return new ChainHead(inner.append(receipt.inner()));
         } catch (io.jans.trace.uniffi.ReceiptLinkException e) {
-            throw new ReceiptLinkException(Errors.code(e), e.getMessage());
+            throw new ReceiptLinkException(e.code(), e.toString());
         }
     }
 

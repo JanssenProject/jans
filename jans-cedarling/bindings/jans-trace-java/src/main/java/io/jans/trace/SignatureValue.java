@@ -23,7 +23,7 @@ public final class SignatureValue {
         try {
             return new SignatureValue(io.jans.trace.uniffi.SignatureValue.Companion.parse(text));
         } catch (io.jans.trace.uniffi.ParseSignatureException e) {
-            throw new ParseSignatureException(Errors.code(e), e.getMessage());
+            throw new ParseSignatureException(e.code(), e.toString());
         }
     }
 

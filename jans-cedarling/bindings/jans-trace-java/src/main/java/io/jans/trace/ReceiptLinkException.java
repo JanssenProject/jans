@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link ReceiptCommitment#verifyLink} and {@link ChainHead#append}; the code is always {@link ErrorCode#RECEIPT_LINK_MISMATCH}. */
 public final class ReceiptLinkException extends TraceException {
 

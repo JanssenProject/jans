@@ -6,7 +6,7 @@
 use std::fmt;
 use std::sync::Arc;
 
-use thiserror::Error;
+use crate::error_code::ParseDigestError;
 
 /// SHA-256 digest in the TRACE text form `sha256:<64 lowercase hex>`.
 #[derive(Debug, PartialEq, Eq, Hash, uniffi::Object)]
@@ -17,10 +17,10 @@ pub struct Digest(pub(crate) jans_trace_core::Digest);
 impl Digest {
     /// Strict parse: anything but `sha256:` and 64 lowercase hex digits is rejected.
     #[uniffi::constructor]
-    pub fn parse(text: &str) -> Result<Arc<Self>, ParseDigestError> {
+    pub fn parse(text: &str) -> Result<Arc<Self>, Arc<ParseDigestError>> {
         text.parse()
             .map(|digest| Arc::new(Self(digest)))
-            .map_err(ParseDigestError::InvalidDigest)
+            .map_err(ParseDigestError::wrap)
     }
 
     /// The all-zero sentinel that precedes the first link of a producer or receipt chain.
@@ -38,11 +38,4 @@ impl fmt::Display for Digest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
-}
-
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum ParseDigestError {
-    #[error(transparent)]
-    InvalidDigest(jans_trace_core::ParseDigestError),
 }

@@ -30,7 +30,7 @@ public final class Batch {
         try {
             records = Jans_trace_uniffiKt.parseBatch(body.inner(), limits.inner());
         } catch (io.jans.trace.uniffi.ParseBatchException e) {
-            throw new ParseBatchException(Errors.code(e), e.getMessage());
+            throw new ParseBatchException(e.code(), e.toString());
         }
         List<BatchRecord> result = new ArrayList<>(records.size());
         for (io.jans.trace.uniffi.BatchRecord record : records) {
@@ -54,7 +54,7 @@ public final class Batch {
         try {
             return Jans_trace_uniffiKt.batchBody(inner, limits.inner());
         } catch (io.jans.trace.uniffi.SizeLimitException e) {
-            throw new SizeLimitException(Errors.code(e), e.getMessage());
+            throw new SizeLimitException(e.code(), e.toString());
         }
     }
 }

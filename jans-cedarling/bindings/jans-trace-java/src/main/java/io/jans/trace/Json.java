@@ -22,7 +22,7 @@ public final class Json {
         try {
             return Jans_trace_uniffiKt.canonicalizeJson(input.inner(), limits.inner());
         } catch (io.jans.trace.uniffi.CanonicalizeException e) {
-            throw new CanonicalizeException(Errors.code(e), e.getMessage());
+            throw new CanonicalizeException(e.code(), e.toString());
         }
     }
 }

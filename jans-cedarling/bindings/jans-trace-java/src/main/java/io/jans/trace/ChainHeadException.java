@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link ChainHead#resume}; the code is always {@link ErrorCode#INVALID_RECEIPT}. */
 public final class ChainHeadException extends TraceException {
 

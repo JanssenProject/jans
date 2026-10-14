@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link PublicKey#fromBytes}; the code is always {@link ErrorCode#INVALID_PUBLIC_KEY}. */
 public final class PublicKeyException extends TraceException {
 

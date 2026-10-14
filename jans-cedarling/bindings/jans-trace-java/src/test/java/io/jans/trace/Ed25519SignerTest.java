@@ -11,6 +11,7 @@ import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 
 import org.testng.annotations.Test;
+import io.jans.trace.uniffi.ErrorCode;
 
 public class Ed25519SignerTest {
 

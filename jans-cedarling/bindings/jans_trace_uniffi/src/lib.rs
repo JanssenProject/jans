@@ -11,6 +11,7 @@ uniffi::setup_scaffolding!();
 
 mod assertion;
 mod digest;
+mod error_code;
 mod inputs;
 mod json;
 mod key;

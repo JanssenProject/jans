@@ -6,12 +6,15 @@
 use std::sync::Arc;
 
 use jans_trace_core::assertion as core;
-use thiserror::Error;
 
 use crate::digest::Digest;
-use crate::json::{JsonBody, json_variant};
+use crate::error_code::{
+    ParseBatchError, ParseSignedAssertionError, ParseUnsignedAssertionError, SignError,
+    SizeLimitError, VerifyError,
+};
+use crate::json::JsonBody;
 use crate::key::PublicKey;
-use crate::limits::{Limits, SizeLimitError};
+use crate::limits::Limits;
 use crate::signature::{Ed25519Signer, SignatureValue};
 
 /// The members Lock selects a key by, read from strictly parsed bytes.
@@ -43,10 +46,10 @@ impl UnsignedAssertion {
     pub fn parse(
         assertion: &JsonBody,
         limits: &Limits,
-    ) -> Result<Arc<Self>, ParseUnsignedAssertionError> {
+    ) -> Result<Arc<Self>, Arc<ParseUnsignedAssertionError>> {
         core::UnsignedAssertion::parse(&assertion.value, &limits.0)
             .map(|unsigned| Arc::new(Self(unsigned)))
-            .map_err(Into::into)
+            .map_err(ParseUnsignedAssertionError::wrap)
     }
 
     pub fn identity(&self) -> AssertionIdentity {
@@ -59,11 +62,11 @@ impl UnsignedAssertion {
     }
 
     /// The signed record is the JCS form of the whole assertion, signature included.
-    pub fn sign(&self, signer: &Ed25519Signer) -> Result<Arc<SignedAssertion>, SignError> {
+    pub fn sign(&self, signer: &Ed25519Signer) -> Result<Arc<SignedAssertion>, Arc<SignError>> {
         self.0
             .sign(&signer.0)
             .map(|signed| Arc::new(SignedAssertion(Arc::new(signed))))
-            .map_err(Into::into)
+            .map_err(SignError::wrap)
     }
 }
 
@@ -78,10 +81,10 @@ impl SignedAssertion {
     pub fn parse(
         assertion: &JsonBody,
         limits: &Limits,
-    ) -> Result<Arc<Self>, ParseSignedAssertionError> {
+    ) -> Result<Arc<Self>, Arc<ParseSignedAssertionError>> {
         core::SignedAssertion::parse(&assertion.value, &limits.0)
             .map(|signed| Arc::new(Self(Arc::new(signed))))
-            .map_err(Into::into)
+            .map_err(ParseSignedAssertionError::wrap)
     }
 
     /// The record exactly as received or as `sign` produced it (core `as_str`). Store this;
@@ -111,7 +114,7 @@ impl SignedAssertion {
     pub fn verify(
         &self,
         context: VerificationContext,
-    ) -> Result<Arc<VerifiedAssertion>, VerifyError> {
+    ) -> Result<Arc<VerifiedAssertion>, Arc<VerifyError>> {
         let context = core::VerificationContext {
             expected_producer: context.expected_producer,
             expected_kid: context.expected_kid,
@@ -120,7 +123,7 @@ impl SignedAssertion {
         self.0
             .verify(&context)
             .map(|verified| Arc::new(VerifiedAssertion(verified)))
-            .map_err(Into::into)
+            .map_err(VerifyError::wrap)
     }
 }
 
@@ -159,10 +162,10 @@ pub struct BatchRecord(Result<Arc<core::SignedAssertion>, core::ParseSignedAsser
 
 #[uniffi::export]
 impl BatchRecord {
-    pub fn assertion(&self) -> Result<Arc<SignedAssertion>, ParseSignedAssertionError> {
+    pub fn assertion(&self) -> Result<Arc<SignedAssertion>, Arc<ParseSignedAssertionError>> {
         match &self.0 {
             Ok(signed) => Ok(Arc::new(SignedAssertion(Arc::clone(signed)))),
-            Err(error) => Err(error.clone().into()),
+            Err(error) => Err(ParseSignedAssertionError::wrap(error.clone())),
         }
     }
 }
@@ -173,8 +176,8 @@ impl BatchRecord {
 pub fn parse_batch(
     body: &JsonBody,
     limits: &Limits,
-) -> Result<Vec<Arc<BatchRecord>>, ParseBatchError> {
-    let records = core::parse_batch(&body.value, &limits.0)?;
+) -> Result<Vec<Arc<BatchRecord>>, Arc<ParseBatchError>> {
+    let records = core::parse_batch(&body.value, &limits.0).map_err(ParseBatchError::wrap)?;
     Ok(records
         .into_iter()
         .map(|record| Arc::new(BatchRecord(record.map(Arc::new))))
@@ -190,144 +193,8 @@ pub fn parse_batch(
 pub fn batch_body(
     records: Vec<Arc<SignedAssertion>>,
     limits: &Limits,
-) -> Result<String, SizeLimitError> {
+) -> Result<String, Arc<SizeLimitError>> {
     let shared: Vec<Arc<core::SignedAssertion>> =
         records.iter().map(|record| Arc::clone(&record.0)).collect();
-    core::batch_body(&shared, &limits.0).map_err(SizeLimitError::SizeLimitExceeded)
-}
-
-/// Variants are named after the core error codes.
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum ParseUnsignedAssertionError {
-    #[error(transparent)]
-    InvalidJson(core::ParseUnsignedAssertionError),
-    #[error(transparent)]
-    DuplicateMember(core::ParseUnsignedAssertionError),
-    #[error(transparent)]
-    NonCanonicalizableJson(core::ParseUnsignedAssertionError),
-    #[error(transparent)]
-    SizeLimitExceeded(core::ParseUnsignedAssertionError),
-    #[error(transparent)]
-    InvalidAssertionShape(core::ParseUnsignedAssertionError),
-    #[error(transparent)]
-    SignatureAlreadyPresent(core::ParseUnsignedAssertionError),
-}
-
-impl From<core::ParseUnsignedAssertionError> for ParseUnsignedAssertionError {
-    fn from(error: core::ParseUnsignedAssertionError) -> Self {
-        use core::ParseUnsignedAssertionError as Core;
-        match &error {
-            Core::SizeLimitExceeded(_) => Self::SizeLimitExceeded(error),
-            Core::Json(json) => json_variant!(json, error),
-            Core::NotAnObject
-            | Core::InvalidProducer
-            | Core::InvalidKid
-            | Core::InvalidRecordId => Self::InvalidAssertionShape(error),
-            Core::SignatureAlreadyPresent => Self::SignatureAlreadyPresent(error),
-        }
-    }
-}
-
-/// Variants are named after the core error codes.
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum SignError {
-    #[error(transparent)]
-    KidMismatch(core::SignError),
-    #[error(transparent)]
-    SignerFailure(core::SignError),
-}
-
-impl From<core::SignError> for SignError {
-    fn from(error: core::SignError) -> Self {
-        match &error {
-            core::SignError::KidMismatch { .. } => Self::KidMismatch(error),
-            core::SignError::Signer(_) => Self::SignerFailure(error),
-        }
-    }
-}
-
-/// Variants are named after the core error codes.
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum ParseSignedAssertionError {
-    #[error(transparent)]
-    InvalidJson(core::ParseSignedAssertionError),
-    #[error(transparent)]
-    DuplicateMember(core::ParseSignedAssertionError),
-    #[error(transparent)]
-    NonCanonicalizableJson(core::ParseSignedAssertionError),
-    #[error(transparent)]
-    SizeLimitExceeded(core::ParseSignedAssertionError),
-    #[error(transparent)]
-    InvalidAssertionShape(core::ParseSignedAssertionError),
-    #[error(transparent)]
-    MissingSignature(core::ParseSignedAssertionError),
-    #[error(transparent)]
-    InvalidSignatureEncoding(core::ParseSignedAssertionError),
-}
-
-impl From<core::ParseSignedAssertionError> for ParseSignedAssertionError {
-    fn from(error: core::ParseSignedAssertionError) -> Self {
-        use core::ParseSignedAssertionError as Core;
-        match &error {
-            Core::SizeLimitExceeded(_) => Self::SizeLimitExceeded(error),
-            Core::Json(json) => json_variant!(json, error),
-            Core::NotAnObject
-            | Core::InvalidProducer
-            | Core::InvalidKid
-            | Core::InvalidRecordId => Self::InvalidAssertionShape(error),
-            Core::MissingSignature => Self::MissingSignature(error),
-            Core::InvalidSignatureEncoding(_) => Self::InvalidSignatureEncoding(error),
-        }
-    }
-}
-
-/// Variants are named after the core error codes.
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum VerifyError {
-    #[error(transparent)]
-    ProducerMismatch(core::VerifyError),
-    #[error(transparent)]
-    KidMismatch(core::VerifyError),
-    #[error(transparent)]
-    SignatureInvalid(core::VerifyError),
-}
-
-impl From<core::VerifyError> for VerifyError {
-    fn from(error: core::VerifyError) -> Self {
-        match &error {
-            core::VerifyError::ProducerMismatch { .. } => Self::ProducerMismatch(error),
-            core::VerifyError::KidMismatch { .. } => Self::KidMismatch(error),
-            core::VerifyError::SignatureInvalid => Self::SignatureInvalid(error),
-        }
-    }
-}
-
-/// Variants are named after the core error codes.
-#[derive(Debug, Error, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum ParseBatchError {
-    #[error(transparent)]
-    InvalidJson(core::ParseBatchError),
-    #[error(transparent)]
-    DuplicateMember(core::ParseBatchError),
-    #[error(transparent)]
-    NonCanonicalizableJson(core::ParseBatchError),
-    #[error(transparent)]
-    SizeLimitExceeded(core::ParseBatchError),
-    #[error(transparent)]
-    InvalidBatch(core::ParseBatchError),
-}
-
-impl From<core::ParseBatchError> for ParseBatchError {
-    fn from(error: core::ParseBatchError) -> Self {
-        match &error {
-            core::ParseBatchError::SizeLimitExceeded(_) => Self::SizeLimitExceeded(error),
-            core::ParseBatchError::Json(json) => json_variant!(json, error),
-            core::ParseBatchError::NotAnArray => Self::InvalidBatch(error),
-        }
-    }
+    core::batch_body(&shared, &limits.0).map_err(SizeLimitError::wrap)
 }

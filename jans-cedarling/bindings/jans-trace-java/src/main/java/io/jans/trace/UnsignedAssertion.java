@@ -30,7 +30,7 @@ public final class UnsignedAssertion {
             return new UnsignedAssertion(
                     io.jans.trace.uniffi.UnsignedAssertion.Companion.parse(assertion.inner(), limits.inner()));
         } catch (io.jans.trace.uniffi.ParseUnsignedAssertionException e) {
-            throw new ParseUnsignedAssertionException(Errors.code(e), e.getMessage());
+            throw new ParseUnsignedAssertionException(e.code(), e.toString());
         }
     }
 
@@ -52,7 +52,7 @@ public final class UnsignedAssertion {
         try {
             return new SignedAssertion(inner.sign(signer.inner()));
         } catch (io.jans.trace.uniffi.SignException e) {
-            throw new SignException(Errors.code(e), e.getMessage());
+            throw new SignException(e.code(), e.toString());
         }
     }
 }

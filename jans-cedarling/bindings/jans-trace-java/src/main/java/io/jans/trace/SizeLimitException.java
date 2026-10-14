@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link Batch#body} when the batch is above the limits; the code is always {@link ErrorCode#SIZE_LIMIT_EXCEEDED}. */
 public final class SizeLimitException extends TraceException {
 

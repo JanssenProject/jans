@@ -5,6 +5,8 @@
 
 package io.jans.trace;
 
+import io.jans.trace.uniffi.ErrorCode;
+
 /** Thrown by {@link UnsignedAssertion#sign}: {@link ErrorCode#KID_MISMATCH} or {@link ErrorCode#SIGNER_FAILURE}. */
 public final class SignException extends TraceException {
 

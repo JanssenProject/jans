@@ -11,6 +11,7 @@ import static org.testng.Assert.expectThrows;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
+import io.jans.trace.uniffi.ErrorCode;
 
 public class JsonTest {
 

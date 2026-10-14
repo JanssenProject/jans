@@ -22,7 +22,7 @@ public final class Digest {
         try {
             return new Digest(io.jans.trace.uniffi.Digest.Companion.parse(text));
         } catch (io.jans.trace.uniffi.ParseDigestException e) {
-            throw new ParseDigestException(Errors.code(e), e.getMessage());
+            throw new ParseDigestException(e.code(), e.toString());
         }
     }
 
