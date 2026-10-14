@@ -34,7 +34,7 @@ import jakarta.inject.Inject;
 
 /**
  * Business-level service over {@link TraceStore} for producer-key lookup with validity evaluation
- * (design decision D-4) and key registration/revocation (design §6, T-4).
+ * and key registration/revocation (design §6).
  *
  * <p>The MVP does no caching: every {@link #resolveForVerification} call hits {@link TraceStore}
  * directly, so a revocation is visible on the very next request. The safe upgrade path, if the
@@ -82,7 +82,7 @@ public class ProducerKeyRegistry {
 
 	/**
 	 * Resolves the key that must verify a record's signature and evaluates its validity window at
-	 * {@code nowMs} (design decision D-4).
+	 * {@code nowMs}.
 	 *
 	 * @throws TraceValidationException {@code unknown_producer_key} when no key is registered for
 	 *                                  this {@code (domainId, producerId, kid)}, or when the stored
@@ -120,7 +120,7 @@ public class ProducerKeyRegistry {
 	}
 
 	/**
-	 * The single evaluation of a key's event-kind scope (design D-18): a key authorizes a record
+	 * The single evaluation of a key's event-kind scope: a key authorizes a record
 	 * only if the record's {@code event_kind} is in the key's registered set. A stored key without
 	 * the attribute (registered before the scope existed) authorizes nothing. Runs no crypto and
 	 * reveals no more than an unknown key does: the failure is {@code unknown_producer_key}.
@@ -137,7 +137,7 @@ public class ProducerKeyRegistry {
 	}
 
 	/**
-	 * Registers a new producer key. Keys are create-only (design decision D-4): rotation is
+	 * Registers a new producer key. Keys are create-only: rotation is
 	 * registering a new {@code kid}, retirement is {@link #revoke}; there is no update.
 	 *
 	 * @throws TraceCryptoException     if {@code jwk} is not a well-formed RFC 8037 Ed25519 OKP JWK

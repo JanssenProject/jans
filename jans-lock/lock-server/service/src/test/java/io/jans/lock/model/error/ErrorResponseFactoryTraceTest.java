@@ -27,8 +27,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
 /**
- * Tests for {@link ErrorResponseFactory}'s TRACE error family support (design decision D-10, task
- * 10). The fixture at {@code src/test/resources/trace/errors.json} is a copy of
+ * Tests for {@link ErrorResponseFactory}'s TRACE error family support. The fixture at {@code src/test/resources/trace/errors.json} is a copy of
  * {@code jans-linux-setup/jans_setup/templates/jans-lock/errors.json} (the setup template that
  * seeds {@code Conf.jansConfErrors}); keep the two in sync when the TRACE error catalog changes.
  */

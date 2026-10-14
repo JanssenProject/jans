@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A registered producer key as returned by the admin API. {@code public_key_jwk} only ever
- * echoes {@code kty}/{@code crv}/{@code x} (task 15: responses never include private material).
+ * echoes {@code kty}/{@code crv}/{@code x} (responses never include private material).
  *
  * @author Yuriy Movchan
  */

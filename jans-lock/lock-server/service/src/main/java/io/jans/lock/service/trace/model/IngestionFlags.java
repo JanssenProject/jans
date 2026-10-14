@@ -9,10 +9,10 @@ package io.jans.lock.service.trace.model;
 import java.util.Objects;
 
 /**
- * The four Lock-derived ingestion flags on a TRACE record (design §10, T-1). Unlike the other
+ * The four Lock-derived ingestion flags on a TRACE record (design §10). Unlike the other
  * store value types this class is a mutable, copy-able bag: {@code coverageGap},
  * {@code chainLinkFailure} and {@code equivocation} may be updated after ingestion by the
- * correlation service (design decision D-9); {@code late} is fixed at ingestion and the store
+ * correlation service; {@code late} is fixed at ingestion and the store
  * layer never changes it via {@code updateRecordFlags}.
  *
  * @author Yuriy Movchan

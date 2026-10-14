@@ -32,7 +32,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 
 /**
- * Tests the backend-agnostic duplicate-detection protocol (design decision D-8) in isolation, with
+ * Tests the backend-agnostic duplicate-detection protocol in isolation, with
  * a plain Mockito mock of {@link PersistenceEntryManager} rather than {@link FakeEntryManagerBehavior}:
  * {@code persist} throws a plain {@link EntryPersistenceException} — never
  * {@code io.jans.orm.exception.operation.DuplicateEntryException} in its cause chain, exactly as

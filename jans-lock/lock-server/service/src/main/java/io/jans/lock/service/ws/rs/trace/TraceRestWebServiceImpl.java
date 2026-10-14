@@ -72,12 +72,12 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
 /**
- * REST implementation for {@code POST /audit/trace} (design §11.1, TRACE MVP task 20) and for
+ * REST implementation for {@code POST /audit/trace} (design §11.1) and for
  * {@code GET /audit/trace/records/{record_id}} / {@code GET /audit/trace/executions/{trace_execution_id}}
- * (design §11.2, §11.3, TRACE MVP task 21): resolve the submitting client and its evidence domain
- * (task 11), hand the raw body to {@link TraceIngestionService} (task 19) for
- * verification/correlation/receipt-allocation/storage or read via {@link TraceRetrievalService}
- * (tasks 12, 21, 22), and map the outcome to the §11.1/§11.2/§11.3 response shapes. Every
+ * (design §11.2, §11.3): resolve the submitting client and its evidence domain,
+ * hand the raw body to {@link TraceIngestionService} for
+ * verification/correlation/receipt-allocation/storage or read via {@link TraceRetrievalService},
+ * and map the outcome to the §11.1/§11.2/§11.3 response shapes. Every
  * {@link RuntimeException} raised by the TRACE packages is translated to the structured error body
  * by {@link TraceErrors#toWebApplicationException}.
  *
@@ -300,15 +300,15 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		return request == null ? null : InetAddressUtility.getIpAddress(request);
 	}
 
-	// -- bulk ingestion (design decisions D-16, D-22) -----------------------------------------------------
+	// -- bulk ingestion -----------------------------------------------------
 
 	/**
 	 * Verifies and ingests one array element, never throwing: a failure of {@code ingestionService}
-	 * becomes a per-item {@code error} entry instead of aborting the batch (D-16 continue-on-error).
+	 * becomes a per-item {@code error} entry instead of aborting the batch (continue-on-error).
 	 *
 	 * @param elementRaw the element's exact source text, sliced by {@link #splitBulkElements}; fed
 	 *                   to the same ingestion pipeline a standalone submission would use, so
-	 *                   raw-evidence immutability and the D-13 digest/signature hold per item
+	 *                   raw-evidence immutability and the digest and signature checks hold per item
 	 * @param identifiers the identifiers pre-scanned from the element, echoed on a rejected entry
 	 */
 	private TraceBulkResultEntry ingestOne(int index, String elementRaw, ElementIdentifiers identifiers,
@@ -344,7 +344,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 
 	/**
 	 * Reads the top-level string {@code producer} and {@code record_id} of each element without
-	 * building a tree or re-serializing it (the element text itself is never altered, D-13). The
+	 * building a tree or re-serializing it (the element text itself is never altered). The
 	 * scan streams the element with the same nesting-depth, string-length and duplicate-key limits
 	 * the single-record parser applies, and skips elements longer than {@code maxRequestBytes}
 	 * characters (they fail on their own in the ingestion pipeline). An element that is not a JSON object, or
@@ -390,7 +390,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 
 	/**
 	 * Rejects the whole request when the batch names more than one distinct top-level
-	 * {@code producer} (design §11.2, D-22), before any element is ingested. Elements without a
+	 * {@code producer} (design §11.2), before any element is ingested. Elements without a
 	 * readable producer are not counted.
 	 */
 	private void requireSingleProducer(List<ElementIdentifiers> identifiers) {
@@ -437,7 +437,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 
 	/**
 	 * Splits a {@code POST /audit/trace/bulk} body into the exact source text of each top-level
-	 * array element (design decision D-16), so every element can be re-fed verbatim to the
+	 * array element, so every element can be re-fed verbatim to the
 	 * single-record pipeline. Whole-request failures only: not an array, wrong element count, body
 	 * too large, malformed JSON/UTF-8 &mdash; a structurally invalid individual element (e.g. not a
 	 * JSON object) is left for {@link #ingestOne} to report as that item's own error.

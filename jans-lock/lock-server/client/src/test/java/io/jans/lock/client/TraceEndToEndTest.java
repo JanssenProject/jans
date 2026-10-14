@@ -38,14 +38,12 @@ import io.jans.lock.client.trace.TraceAssertions.CapabilityInvoked;
 import io.jans.lock.client.trace.TraceSigningKey;
 
 /**
- * Manual end-to-end exercise of the TRACE API (design §7, §11; TRACE MVP task 23) against a real
- * deployed Lock Server, replacing the originally planned curl/python shell script with a JUnit 5
- * test that reuses the {@code -Dcfg=<profile>} client-profile mechanism
+ * Manual end-to-end exercise of the TRACE API (design §7, §11) against a real deployed Lock Server. It is a JUnit 5 test that reuses the {@code -Dcfg=<profile>} client-profile mechanism
  * ({@link BaseLockClientTest}) already reserved for this purpose (see
  * {@code profiles/default/README.md}). Skips itself entirely unless both a real server and a
  * TRACE-scoped client id/secret are configured ({@link #hasTraceClient()}).
  *
- * <p><b>Required client setup</b> (not automated here — see task 23's gotcha): the configured
+ * <p><b>Required client setup</b> (not automated here): the configured
  * client must hold all three TRACE scopes simultaneously ({@code trace.write},
  * {@code trace.readonly}, {@code trace.admin}), granted manually. The setup-generated Lock client
  * only receives scopes from {@code lock-plugin-swagger.yaml} (config-api plugin), not from
@@ -55,8 +53,7 @@ import io.jans.lock.client.trace.TraceSigningKey;
  * instance fields ({@link TestInstance.Lifecycle#PER_CLASS}): later scenarios build on records
  * accepted by earlier ones, the same way the sections of a manual script would.
  *
- * <p>Not covered: the optional "readonly token, second client, wrong domain → 404" scenario from
- * the original task — it needs a second OAuth client bound to a different evidence domain, which
+ * <p>Not covered: the optional "readonly token, second client, wrong domain → 404" scenario — it needs a second OAuth client bound to a different evidence domain, which
  * the single reserved {@code traceClientId} profile key does not provide.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -65,7 +62,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
-	/** Distinguishes identifiers across repeated runs so admin registration never collides (D-4: keys are create-only). */
+	/** Distinguishes identifiers across repeated runs so admin registration never collides (keys are create-only). */
 	private static final String RUN_ID = UUID.randomUUID().toString().substring(0, 8);
 
 	private final String producerA = "trace-e2e-a-" + RUN_ID + "/1.0.0";
@@ -259,8 +256,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 	@Test
 	@Order(11)
 	void writeWithReadonlyScopedTokenIsRejected() throws Exception {
-		// Exercises the same "TRACE API access control" check the task's wrong-scope (log.write)
-		// scenario targets, using the readonly token instead: the reserved TRACE client is granted
+		// Exercises the same "TRACE API access control" check a wrong-scope (log.write) request targets, using the readonly token instead: the reserved TRACE client is granted
 		// only the three trace.* scopes (see profiles/default/README.md), so trace.readonly used
 		// against the write endpoint is a scope the client genuinely holds, just not for this path.
 		HttpResponse<String> response = submitRecord(recordA_signedJson, readToken);

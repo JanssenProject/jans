@@ -36,18 +36,18 @@ import io.jans.lock.service.trace.testkit.TraceRecordBuilder;
 import io.jans.lock.service.trace.testkit.TraceTestHarness;
 
 /**
- * Task 22 deliverable 4: after a fixed-seed randomized sequence of 50 ingestions across two
+ * After a fixed-seed randomized sequence of 50 ingestions across two
  * domains and two producers per domain (forward chain positions in shuffled arrival order — which
  * routinely produces out-of-order chain positions — two replays, a same-identity conflict and one
  * forced storage failure), {@link io.jans.lock.service.trace.receipt.TraceReceiptChain#verifyDomain}
  * reports OK and dense for both domains.
  *
- * <p>The receipt chain (design §9, D-8) is keyed only by {@code (domainId, receipt_sequence)} and
+ * <p>The receipt chain (design §9) is keyed only by {@code (domainId, receipt_sequence)} and
  * is unaffected by producer-chain-level coverage gaps: neither a replay nor a same-identity
  * conflict ever claims a receipt — both are caught by {@code TraceIngestionService}'s
  * identity pre-check (before {@code TraceReceiptChain#claim}), the same short-circuit whether the
  * resubmitted content matches or not. Only the forced {@code insertRecord} failure reaches
- * allocation: it claims a receipt and then voids it (D-8 step 5; the cross-node
+ * allocation: it claims a receipt and then voids it (the cross-node
  * {@code DuplicateEntryException} race path voids the same way but is not exercised here, a single
  * JVM). So the receipt sequence stays exactly as dense as the number of distinct identities
  * attempted, regardless of producer-chain arrival order — which is what lets this test fully
@@ -147,7 +147,7 @@ class TraceChainIntegrityTest {
 		Collections.shuffle(forward, new Random(SEED));
 
 		// The last position of chainA0 is deliberately lost to a storage failure and never retried:
-		// receipt density does not depend on it (D-8 step 5 voids the claimed receipt either way).
+		// receipt density does not depend on it (a failed insert voids the claimed receipt either way).
 		String forcedFailureJson = chainA0.get(POSITIONS_PER_CHAIN - 1);
 
 		// Two replays, of earlier chainA1 and chainB1 positions: the identity pre-check short-circuits
@@ -202,7 +202,7 @@ class TraceChainIntegrityTest {
 		assertEquals(24, reportB.getHeadSequence());
 	}
 
-	// -- task 30: several chains of one producer instance ---------------------------------------
+	// -- several chains of one producer instance ---------------------------------------
 
 	private static final String SECOND_CHAIN = "chain-03JABC9Z0K";
 

@@ -24,7 +24,7 @@ import jakarta.inject.Inject;
 
 /**
  * Derives a TRACE request's evidence domain and forwarding allowlist from the already-resolved
- * submitting client (design decision D-1). The domain is <strong>always</strong> derived from the
+ * submitting client. The domain is <strong>always</strong> derived from the
  * client's configured binding, never from anything in the request body.
  *
  * @author Yuriy Movchan
@@ -36,7 +36,7 @@ public class EvidenceDomainResolver {
 
 	static final String REASON_INVALID_DOMAIN_ID = "invalid_domain_id";
 
-	/** Design decision D-1: {@code evidence_domain_id} is an opaque 1-64 char id. */
+	/** {@code evidence_domain_id} is an opaque id of 1 to 64 characters. */
 	private static final Pattern DOMAIN_ID_PATTERN = Pattern.compile("^[A-Za-z0-9._:-]{1,64}$");
 
 	@Inject
@@ -60,7 +60,7 @@ public class EvidenceDomainResolver {
 	 * @return the request context carrying the client's evidence domain and forwarding allowlist
 	 * @throws TraceValidationException {@code client_not_bound} (403) when the client has no
 	 *                                  binding and no usable default, or when the resolved domain
-	 *                                  id fails the format check (D-1 fails closed)
+	 *                                  id fails the format check (fails closed)
 	 */
 	public TraceRequestContext resolve(SubmitterIdentity identity) {
 		TraceConfiguration traceConfiguration = appConfiguration.getTraceConfiguration();

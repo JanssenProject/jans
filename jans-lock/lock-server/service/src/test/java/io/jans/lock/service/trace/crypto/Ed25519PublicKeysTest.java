@@ -230,7 +230,7 @@ class Ed25519PublicKeysTest {
 		assertArrayEquals(original.getEncoded(), rebuilt.getEncoded());
 	}
 
-	// -- thumbprint (D-19) --------------------------------------------------------------------
+	// -- thumbprint --------------------------------------------------------------------
 
 	/** RFC 8037 Appendix A.3: SHA-256 of the canonical thumbprint input, in hex (verified against the RFC text). */
 	private static final String RFC8037_THUMBPRINT_HEX = "90facafea9b1556698540f70c0117a22ea37bd5cf3ed3c47093c1707282b4b89";

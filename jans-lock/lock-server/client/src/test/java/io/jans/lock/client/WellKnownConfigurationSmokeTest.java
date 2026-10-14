@@ -23,8 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Smoke test proving the {@code -Dcfg=<profile>} test-profile mechanism end-to-end (task 22
- * out-of-scope follow-up): a plain, unauthenticated GET of
+ * Smoke test proving the {@code -Dcfg=<profile>} test-profile mechanism end-to-end: a plain, unauthenticated GET of
  * {@code /.well-known/lock-server-configuration} against whatever host the selected profile names.
  * Deliberately the smallest possible real request — this endpoint carries no
  * {@code @ProtectedApi}/{@code @ProtectedCedarlingApi} annotation (see

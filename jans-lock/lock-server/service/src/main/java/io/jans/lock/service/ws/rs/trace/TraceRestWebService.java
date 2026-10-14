@@ -40,22 +40,21 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
 /**
- * REST API for TRACE record ingestion and retrieval (design §11.1-§11.3, TRACE MVP tasks 20, 21,
- * and bulk ingestion decision D-16). Write endpoints require the {@code trace.write} scope, read
+ * REST API for TRACE record ingestion and retrieval (design §11.1-§11.3). Write endpoints require the {@code trace.write} scope, read
  * endpoints the {@code trace.readonly} scope; the evidence domain is always derived from the
- * authenticated client's binding (design decision D-1), never from the request body.
+ * authenticated client's binding, never from the request body.
  *
- * <p>Not exposed over gRPC (design decision D-15): no {@code grpcMethodName} is set.
+ * <p>Not exposed over gRPC: no {@code grpcMethodName} is set.
  *
  * @author Yuriy Movchan
  */
 @Path("/audit/trace")
 public interface TraceRestWebService {
 
-	@Operation(summary = "Submit a TRACE evidence record", description = "Verify and ingest a single signed TRACE assertion (design §7)", tags = {
+	@Operation(summary = "Submit a TRACE evidence record", description = "Verify and ingest a single signed TRACE assertion", tags = {
 			"Lock - Audit Trace" }, security = @SecurityRequirement(name = "oauth2", scopes = {
 					ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS }))
-	@RequestBody(description = "TRACE assertion (design §7)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "object")))
+	@RequestBody(description = "TRACE assertion", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "object")))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "202", description = "Accepted", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceAcceptanceResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
@@ -70,10 +69,10 @@ public interface TraceRestWebService {
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_write", path = "/audit/trace")
 	Response submitRecord(InputStream body, @Context HttpServletRequest request, @Context SecurityContext sec);
 
-	@Operation(summary = "Submit a batch of TRACE evidence records", description = "Verify and ingest a JSON array of signed TRACE assertions, continuing past per-item failures. One producer per batch (design §11.2, decisions D-16 and D-22)", tags = {
+	@Operation(summary = "Submit a batch of TRACE evidence records", description = "Verify and ingest a JSON array of signed TRACE assertions, continuing past per-item failures. One producer per batch", tags = {
 			"Lock - Audit Trace" }, security = @SecurityRequirement(name = "oauth2", scopes = {
 					ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS }))
-	@RequestBody(description = "JSON array of TRACE assertions (design §7 shape, each)", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(type = "object"))))
+	@RequestBody(description = "JSON array of TRACE assertions", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(type = "object"))))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "207", description = "Multi-Status (per-item outcomes in the body)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceBulkIngestionResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
@@ -88,7 +87,7 @@ public interface TraceRestWebService {
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_bulk_write", path = "/audit/trace/bulk")
 	Response submitBulkRecords(InputStream body, @Context HttpServletRequest request, @Context SecurityContext sec);
 
-	@Operation(summary = "Retrieve one TRACE record", description = "Domain-scoped retrieval of a stored envelope by record identity (design §11.2)", tags = {
+	@Operation(summary = "Retrieve one TRACE record", description = "Domain-scoped retrieval of a stored envelope by record identity", tags = {
 			"Lock - Audit Trace" }, security = @SecurityRequirement(name = "oauth2", scopes = {
 					ApiAccessConstants.LOCK_TRACE_READ_ACCESS }))
 	@ApiResponses(value = {
@@ -107,7 +106,7 @@ public interface TraceRestWebService {
 	Response getRecord(@PathParam("record_id") String recordId,
 			@Parameter(description = "Disambiguate a bare record_id used by more than one producer") @QueryParam("producer_id") String producerId);
 
-	@Operation(summary = "Retrieve one TRACE execution", description = "All direct records of an execution, ordered by receipt sequence (design §11.3)", tags = {
+	@Operation(summary = "Retrieve one TRACE execution", description = "All direct records of an execution, ordered by receipt sequence", tags = {
 			"Lock - Audit Trace" }, security = @SecurityRequirement(name = "oauth2", scopes = {
 					ApiAccessConstants.LOCK_TRACE_READ_ACCESS }))
 	@ApiResponses(value = {

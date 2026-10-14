@@ -12,9 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * The {@code ingestion} member of a TRACE record envelope (design §10, TRACE MVP task 21): the
- * receipt-chain position and the four Lock-derived flags (design decision D-9, eventually
- * consistent).
+ * The {@code ingestion} member of a TRACE record envelope (design §10): the
+ * receipt-chain position and the four Lock-derived flags (eventually consistent).
  *
  * @author Yuriy Movchan
  */
