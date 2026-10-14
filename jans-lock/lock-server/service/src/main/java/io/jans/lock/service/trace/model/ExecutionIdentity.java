@@ -10,7 +10,7 @@ import java.util.Objects;
 
 /**
  * A TRACE execution's external identity: {@code (evidence_domain_id, execution_authority,
- * trace_execution_id)} (key type {@code exec} in {@code TraceKeys}).
+ * trace_execution_id)} (design decision D-6, key type {@code exec}).
  *
  * @author Yuriy Movchan
  */

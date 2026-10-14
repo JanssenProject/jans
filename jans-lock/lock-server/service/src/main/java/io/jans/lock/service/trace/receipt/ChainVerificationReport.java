@@ -17,7 +17,8 @@ import io.jans.lock.model.trace.entity.TraceReceiptState;
  * receipt-chain position from sequence 1 up to the domain's head (or {@code maxEntries},
  * whichever is smaller), reporting density, hash recomputation, {@code prev} linkage and, for a
  * {@code COMMITTED}/{@code VOID} position, whether the matching record row exists with the
- * expected {@code content_digest} (the receipt state is not part of the receipt hash, so {@code VOID} entries keep the chain dense and verifiable).
+ * expected {@code content_digest} (design decision D-8, "state is not part of the receipt hash,
+ * so VOID tombstones keep the chain dense and verifiable").
  *
  * <p>Used by tests and the manual verification script; not part of any request path.
  *

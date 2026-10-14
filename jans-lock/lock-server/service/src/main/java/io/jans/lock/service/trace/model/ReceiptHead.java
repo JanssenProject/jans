@@ -10,7 +10,7 @@ import java.util.Objects;
 
 /**
  * The current head of a domain's receipt chain: the highest {@code receiptSequence} in any state
- * and its {@code receiptHash}, used to compute the next receipt's
+ * (design decision D-8 step 2) and its {@code receiptHash}, used to compute the next receipt's
  * {@code prev_receipt_hash}.
  *
  * @author Yuriy Movchan

@@ -12,7 +12,7 @@ import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.service.trace.error.TraceValidationException;
 
 /**
- * Enforces that a client may submit a record only if its binding's
+ * Enforces design decision D-3: a client may submit a record only if its binding's
  * {@code allowedProducerIds} contains the signed {@code producer} string byte-for-byte, or
  * contains {@code "*"}.
  *

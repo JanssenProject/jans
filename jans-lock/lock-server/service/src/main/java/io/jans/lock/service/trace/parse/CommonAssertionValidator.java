@@ -27,7 +27,7 @@ import jakarta.inject.Inject;
 /**
  * Validates the common fields every TRACE assertion must carry regardless of {@code event_kind}
  * (design §7.1) and fills in {@link ParsedAssertion}'s typed accessors. Event-kind-specific rules
- * (design §7.2) belong to the event-kind validators, not this class.
+ * (design §7.2) are task 09's job, not this class's.
  *
  * @author Yuriy Movchan
  */
