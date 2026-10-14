@@ -27,6 +27,7 @@ A Lock topology consists of three main software components:
 - **Health Monitoring**: Real-time health status from Cedarling clients
 - **Telemetry Data**: Performance metrics and usage statistics
 - **Compliance Support**: Structured audit logs for regulatory requirements
+- **TRACE Evidence**: Signed, tamper-evident records of governed agent actions, with execution correlation. See [TRACE Evidence](./trace.md)
 
 ### Flexible Deployment Options
 - **Standalone Deployment**: Independent web server for dedicated Lock Server instances
@@ -134,6 +135,7 @@ The Lock Server uses its own embedded Cedarling instance to make authorization d
 ## More Information
 
 - **[Lock Server Configuration and Operation](./lock-server.md)**: Detailed setup and management guide
+- **[TRACE Evidence](./trace.md)**: Signed evidence records, producer keys, receipt chain, and API
 - **[Cedarling Documentation](../../cedarling/README.md)**: Client-side authorization engine
 - **[Cedar Policy Language](https://docs.cedarpolicy.com/)**: Official Cedar documentation
 - **[OAuth 2.0 Integration](../auth-server/oauth-features/README.md)**: OAuth implementation details

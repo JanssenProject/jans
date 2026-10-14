@@ -126,3 +126,16 @@ Example of `false` case:
 ```
 
 In this example the evaluation was `DENY`, so the decision was false. Additional information is returned in the `context` field.
+
+### TRACE correlation
+
+Callers that take part in Lock TRACE can send the correlation fields as headers on `/cedarling/evaluation`:
+
+| Header | TRACE field |
+| --- | --- |
+| `Audit-Trace-ID` | `trace_execution_id` |
+| `Audit-Execution-Authority` | `execution_authority` |
+| `Audit-Workload-ID` | `workload_id` (optional) |
+| `Audit-Workload-Instance-ID` | `workload_instance_id` (optional) |
+
+`Audit-Trace-ID` and `Audit-Execution-Authority` must be sent together, otherwise the request is rejected with `400`. Each value is at most 255 characters. The component that owns the unit of work creates these values; the sidecar does not generate them. They do not take part in the Cedar evaluation. When present, `trace_execution_id` is returned in the response `context`.

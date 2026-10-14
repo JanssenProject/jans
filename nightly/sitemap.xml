@@ -1102,6 +1102,9 @@
         <loc>https://docs.jans.io/nightly/janssen-server/lock/lock-server/</loc>
       </url>
       <url>
+        <loc>https://docs.jans.io/nightly/janssen-server/lock/trace/</loc>
+      </url>
+      <url>
         <loc>https://docs.jans.io/nightly/CHANGELOG/</loc>
       </url>
       <url>

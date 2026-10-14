@@ -1157,6 +1157,78 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#policy-store-specification-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Policy store specification versions
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy store specification versions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#version-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Version 0
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Version 1
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unknown-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Unknown fields
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Warnings
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Errors
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#advanced-loading-from-bytes" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2047,6 +2119,78 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#policy-store-specification-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Policy store specification versions
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy store specification versions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#version-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Version 0
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Version 1
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unknown-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Unknown fields
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Warnings
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Errors
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#advanced-loading-from-bytes" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2641,6 +2785,7 @@
 <h4 id="metadatajson">metadata.json<a class="headerlink" href="#metadatajson" title="Permanent link">#</a></h4>
 <p>Contains policy store identification and versioning:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;policy_store_spec_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.4.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;policy_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123def456&quot;</span><span class="p">,</span>
@@ -2652,6 +2797,9 @@
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<p><code>policy_store_spec_version</code> declares which revision of the policy store file
+format the store is written in. See
+<a href="#policy-store-specification-versions">Policy store specification versions</a>.</p>
 <p>For <code>.cjar</code>/directory stores the ID comes from <code>metadata.json</code>. It must be
 hex (8-64 characters), otherwise loading fails with <code>InvalidPolicyStoreId</code>.
 It may be omitted, in which case the getter reports none.</p>
@@ -2824,6 +2972,127 @@ permit(
 <span class="nb">cd</span><span class="w"> </span>policy-store<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>zip<span class="w"> </span>-r<span class="w"> </span>../policy-store.cjar<span class="w"> </span>.
 </code></pre></div>
 <p><strong>Note:</strong> In WASM environments, only URL-based and inline string sources are available. Use <code>CEDARLING_POLICY_STORE_URI</code> with a <code>.cjar</code> URL or <code>initFromArchiveBytes()</code> for custom fetch scenarios.</p>
+<h2 id="policy-store-specification-versions">Policy store specification versions<a class="headerlink" href="#policy-store-specification-versions" title="Permanent link">#</a></h2>
+<p><code>metadata.json</code> carries <code>policy_store_spec_version</code>, an integer naming the
+revision of the <strong>file format</strong> a store is written in. It is distinct from the
+two other versions in the file: <code>policy_store.version</code> is your own content
+version, and <code>cedar_version</code> is the Cedar language version. Cedarling reads the
+spec version before anything else in the store, so an unsupported format fails
+with a version error instead of a confusing schema or policy error.</p>
+<p>The current version is <strong>1</strong>. The oldest version Cedarling still reads is <strong>0</strong>.</p>
+<table>
+<thead>
+<tr>
+<th><code>policy_store_spec_version</code></th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>omitted, or <code>null</code></td>
+<td>Read as version 0, migrated to the current version, with a warning</td>
+</tr>
+<tr>
+<td><code>0</code></td>
+<td>Read as version 0, migrated to the current version, with a warning</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>Read as version 1, no warning</td>
+</tr>
+<tr>
+<td><code>2</code> or higher</td>
+<td>Error: newer than this Cedarling supports</td>
+</tr>
+<tr>
+<td>not a non-negative integer (<code>"1"</code>, <code>-1</code>, <code>1.5</code>)</td>
+<td>Error</td>
+</tr>
+</tbody>
+</table>
+<p>Each version below is a numbered entry of the specification. Any change to the
+policy store file format bumps <code>policy_store_spec_version</code> and adds its entry to
+this section in the same pull request.</p>
+<p>The directory layout is part of the file format. A spec version fixes where
+each file lives (<code>policies/</code>, <code>trusted-issuers/</code>, <code>schema.cedarschema</code> and so
+on), so moving, renaming, or merging files is also a new spec version. The one
+exception is <code>metadata.json</code>: Cedarling reads it before it knows the version, so
+it stays at the root of the store in every version.</p>
+<h3 id="version-0">Version 0<a class="headerlink" href="#version-0" title="Permanent link">#</a></h3>
+<p><strong>Status:</strong> supported, outdated. <strong>Change type:</strong> baseline.</p>
+<p>The original directory-based and <code>.cjar</code> format. It predates
+<code>policy_store_spec_version</code>, so any store that omits the field is read as
+version 0. An explicit <code>0</code> means the same thing.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.4.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;policy_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123def456&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Application Policies&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="version-1">Version 1<a class="headerlink" href="#version-1" title="Permanent link">#</a></h3>
+<p><strong>Status:</strong> current. <strong>Change type:</strong> additive.</p>
+<p><strong>What changed:</strong> <code>metadata.json</code> gains the required <code>policy_store_spec_version</code>
+field. No other file changes.</p>
+<p><strong>Why:</strong> without a declared format version, Cedarling cannot tell which revision
+of the format a store follows, so a breaking change would be silently misread
+instead of migrated or rejected.</p>
+<p>Before (version 0):</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.4.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;policy_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123def456&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Application Policies&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>After (version 1):</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;policy_store_spec_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.4.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;policy_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123def456&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Application Policies&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Upgrading from version 0:</strong></p>
+<ol>
+<li>Add <code>"policy_store_spec_version": 1</code> at the root of <code>metadata.json</code>.</li>
+<li>No other file in the store needs to change.</li>
+<li>Run <code>cedarling-cli validate</code> against the store. It should pass with no
+   "outdated" warning.</li>
+</ol>
+<p>A version 0 store keeps loading, so upgrading is not urgent, but every load logs
+the warning below.</p>
+<h3 id="unknown-fields">Unknown fields<a class="headerlink" href="#unknown-fields" title="Permanent link">#</a></h3>
+<p>In every version, unknown keys in <code>metadata.json</code> and in trusted-issuer files are
+ignored, so a misspelled optional key is silently dropped rather than reported.
+Unknown keys in custom-issuer files are rejected with an error. Migrating a store
+from one version to the next keeps every field the older version recognizes.</p>
+<h3 id="warnings">Warnings<a class="headerlink" href="#warnings" title="Permanent link">#</a></h3>
+<p>Warnings are non-fatal: the store loads and is migrated to the current version
+in memory. Cedarling logs them once at startup at <code>WARN</code>, and the
+<code>cedarling-cli validate</code> report lists them as diagnostics that do not change
+whether validation passes. The background refresh worker de-duplicates them, so
+a periodic refresh of an outdated store does not repeat the same warning.</p>
+<p>When the field is missing:</p>
+<div class="highlight"><pre><span></span><code>policy store format is outdated: metadata.json has no policy_store_spec_version, so it was read as spec version 0; please update the policy store to spec version 1
+</code></pre></div>
+<p>When the field declares a supported but older version:</p>
+<div class="highlight"><pre><span></span><code>policy store format is outdated: policy_store_spec_version is 0; please update the policy store to spec version 1
+</code></pre></div>
+<h3 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">#</a></h3>
+<p>These fail closed — the store is not loaded.</p>
+<div class="highlight"><pre><span></span><code>Invalid metadata in file metadata.json: policy_store_spec_version must be a non-negative integer, got &lt;value&gt;
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>Unsupported policy store: policy_store_spec_version &lt;found&gt; is newer than the latest version this Cedarling supports (1); upgrade Cedarling
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>Unsupported policy store: policy_store_spec_version &lt;found&gt; is no longer supported; the oldest supported version is 0
+</code></pre></div>
+<p>The last error cannot occur while version 0 is still supported; it appears once a
+release drops support for the oldest version.</p>
 <h2 id="advanced-loading-from-bytes">Advanced: Loading from Bytes<a class="headerlink" href="#advanced-loading-from-bytes" title="Permanent link">#</a></h2>
 <p>For scenarios requiring custom fetch logic (e.g., auth headers), archive bytes can be loaded directly:</p>
 <ul>
@@ -3652,7 +3921,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 30, 2026
+    October 13, 2026
   </span>
 
     

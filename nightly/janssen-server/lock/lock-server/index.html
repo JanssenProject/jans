@@ -19,7 +19,7 @@
         <link rel="prev" href="../">
       
       
-        <link rel="next" href="../../../CHANGELOG/">
+        <link rel="next" href="../trace/">
       
       
         
@@ -1394,6 +1394,8 @@
       
         
       
+        
+      
     
     
     
@@ -2260,6 +2262,33 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../trace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  TRACE Evidence
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -3409,6 +3438,8 @@
       
         
       
+        
+      
     
     
     
@@ -3658,7 +3689,7 @@ tar<span class="w"> </span>-xzf<span class="w"> </span>lock-server.tar.gz
 <p>The <code>traceConfiguration</code> block of the Lock Server dynamic configuration (<code>jansConfDyn</code>) controls
 the TRACE evidence-ingestion feature: which OAuth clients may submit or read evidence for which
 evidence domain, lateness policy, and request limits enforced before any cryptographic
-verification.</p>
+verification. See <a href=".././trace/">TRACE Evidence</a> for the feature description and API.</p>
 <table>
 <thead>
 <tr>
@@ -3730,6 +3761,12 @@ verification.</p>
 <td>Maximum retries when allocating the next receipt-chain sequence number under multi-node contention.</td>
 </tr>
 <tr>
+<td><code>correlationRetryLimit</code></td>
+<td>integer</td>
+<td><code>3</code></td>
+<td>Maximum retries when a neighbor-flag update after a record insert hits a version conflict. After the limit Lock logs a warning and gives up on that update; the request still succeeds.</td>
+</tr>
+<tr>
 <td><code>receiptRepairIntervalSeconds</code></td>
 <td>integer</td>
 <td><code>300</code></td>
@@ -3752,6 +3789,12 @@ verification.</p>
 <td>integer</td>
 <td><code>4194304</code></td>
 <td>Maximum total body size, in bytes, buffered for one <code>POST /audit/trace/bulk</code> request. Independent of <code>maxRequestBytes</code>/<code>maxBulkRecords</code>, and always clamped to 16777216 regardless of configuration.</td>
+</tr>
+<tr>
+<td><code>chainRegistrationMode</code></td>
+<td>string</td>
+<td><code>PRE_REGISTERED</code></td>
+<td>How producer chains come to exist. <code>PRE_REGISTERED</code>: a chain must be registered through the admin API before its records are accepted. <code>FIRST_OBSERVED</code>: a record with <code>sequence_number</code> 1 and the all-zero <code>prev_record_hash</code> on an unregistered chain registers the chain, after the key, event-kind and signature checks pass. Any other record on an unregistered chain is still rejected with <code>chain_not_registered</code>. A value that is not a mode name is treated as <code>PRE_REGISTERED</code> and logged once at <code>WARN</code>. Changing the mode affects only later submissions; existing chains are not rewritten.</td>
 </tr>
 </tbody>
 </table>
@@ -4243,7 +4286,7 @@ tail<span class="w"> </span>-f<span class="w"> </span>/opt/jans/lock-server/logs
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 02, 2026
+    October 13, 2026
   </span>
 
     
