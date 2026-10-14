@@ -15700,9 +15700,9 @@ components:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -18719,8 +18719,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18731,6 +18729,8 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
         logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:

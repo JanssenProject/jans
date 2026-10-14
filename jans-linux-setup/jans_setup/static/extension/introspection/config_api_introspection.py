@@ -34,25 +34,19 @@ class Introspection(IntrospectionType):
     # responseAsJsonObject - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json
     # context is reference of io.jans.as.service.external.context.ExternalIntrospectionContext (in https://github.com/JanssenFederation/oxauth project, )
     def modifyResponse(self, responseAsJsonObject, context):
-        token = context.getHttpRequest().getParameter("token");
-	    print token;
+        token = context.getHttpRequest().getParameter("token")
         if token is None:
             print "Introspection. There is no token in request"
             return False
 
         authorizationGrantList = CdiUtil.bean(AuthorizationGrantList)
-		print authorizationGrantList;
         authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
-		print authorizationGrant;
         if authorizationGrant is None:
             print "Introspection. Failed to load authorization grant by token"
             return False
 
         # Put user_id into response
-		print authorizationGrant.getUser().getUserId();
-		print authorizationGrant.getUser().getDn();
         responseAsJsonObject.accumulate("user_id", authorizationGrant.getUser().getUserId())
-		responseAsJsonObject.accumulate("user_dn", authorizationGrant.getUser().getDn())
 
         # Put custom parameters into response
         sessionDn = authorizationGrant.getSessionDn();

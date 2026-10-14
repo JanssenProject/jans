@@ -767,7 +767,8 @@ public class UserResource extends BaseResource {
         }
 
         // Return if user is updating own profile
-        if (StringUtils.isNotBlank(userInum) && userInum.equals(this.getContextInum(servletRequest)) ) {
+        logger.info("UserResource::validateUserPermission() userInum :{}, this.getContextUserId(servletRequest):{}", userInum, this.getContextUserId(servletRequest));
+        if (StringUtils.isNotBlank(userInum) && userInum.equals(this.getContextUserId(servletRequest)) ) {
             logger.info("UserResource::validateUserPermission() user is updating own profile :{}", userInum);
             return;
         }
