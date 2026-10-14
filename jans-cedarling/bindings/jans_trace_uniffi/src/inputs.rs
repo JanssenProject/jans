@@ -19,12 +19,9 @@ pub fn compute_bundle_hash(archive: Vec<u8>) -> Arc<Digest> {
     )))
 }
 
-/// Identity of a token without `jti`: SHA-256 of the token exactly as received.
+/// Identity of a token without `jti`: SHA-256 of the UTF-8 text of the token exactly as
+/// received.
 #[uniffi::export]
-#[allow(
-    clippy::needless_pass_by_value,
-    reason = "UniFFI maps `Vec<u8>` to `byte[]`; `&[u8]` would become a `java.nio.ByteBuffer`"
-)]
-pub fn token_fingerprint(token: Vec<u8>) -> Arc<Digest> {
-    Arc::new(Digest(jans_trace_core::inputs::token_fingerprint(&token)))
+pub fn token_fingerprint(token: &str) -> Arc<Digest> {
+    Arc::new(Digest(jans_trace_core::inputs::token_fingerprint(token)))
 }

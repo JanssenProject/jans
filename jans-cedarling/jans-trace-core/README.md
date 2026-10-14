@@ -76,7 +76,7 @@ For every record:
 1. Build the record's JSON. Producer chain: `sequence_number` is the previous one plus 1,
    `prev_record_hash` is the previous record's `content_digest`, or `Digest::GENESIS` for
    the first record of a chain. For a token without `jti`, put
-   `inputs::token_fingerprint(token_bytes)` in the record.
+   `inputs::token_fingerprint(token_text)` in the record.
 2. `assertion::UnsignedAssertion::parse(json_text, &limits)`. Use the limits Lock enforces: a
    record Lock would refuse for its size fails here, before it is signed.
 3. `unsigned.sign(&signer)` returns a `SignedAssertion`. Its `as_str()` is the JCS form
