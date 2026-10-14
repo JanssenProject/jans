@@ -5,9 +5,10 @@ It is built as a `cdylib`; `uniffi-bindgen` generates Kotlin from it, and
 [`jans-trace-java`](../jans-trace-java/README.md) compiles that Kotlin under a Java API. Java
 code uses the Java API, never this crate's generated types directly.
 
-The crate only adapts types. Every check, every error message and every error code comes
-from the core; there is no logic here to test on its own, so the tests are the Java ones in
-`jans-trace-java`, which exercise this crate through the generated code.
+The crate adapts types. Every check, error message and error code comes from the core, except
+one check: a negative `Limits` value, which Java can pass and the core's `usize` cannot hold
+(`InvalidLimitError`). The tests are the Java ones in `jans-trace-java`; they exercise this
+crate through the generated code, the way Lock calls it.
 
 ## Build
 
