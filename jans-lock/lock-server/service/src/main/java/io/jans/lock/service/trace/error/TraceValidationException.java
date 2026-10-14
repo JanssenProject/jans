@@ -15,7 +15,7 @@ import io.jans.lock.service.trace.parse.TraceAssertionParser;
  * TRACE request fails bounded parsing or §7.1 common-field validation.
  *
  * <p>{@link #getErrorId()} carries the {@link TraceErrorResponseType} the structured error catalog
- * (task 10) maps to a status and JSON body; see {@code TraceErrors.toWebApplicationException}. The
+ * maps to a status and JSON body; see {@code TraceErrors.toWebApplicationException}. The
  * {@link #ERROR_*} constants here are the subset of {@link TraceErrorResponseType} values this
  * class's callers throw.
  *
@@ -38,7 +38,7 @@ public class TraceValidationException extends RuntimeException {
 	/** {@code trace.eat_profile} is not the supported TRACE profile. */
 	public static final TraceErrorResponseType ERROR_UNSUPPORTED_PROFILE = TraceErrorResponseType.UNSUPPORTED_PROFILE;
 
-	/** The body carries a top-level or {@code trace}-level {@code evidence_domain_id} (design D-1). */
+	/** The body carries a top-level or {@code trace}-level {@code evidence_domain_id}. */
 	public static final TraceErrorResponseType ERROR_DOMAIN_FIELD_FORBIDDEN = TraceErrorResponseType.DOMAIN_FIELD_FORBIDDEN;
 
 	/** {@code producer} does not equal {@code producer_chain.producer_id} byte-for-byte. */

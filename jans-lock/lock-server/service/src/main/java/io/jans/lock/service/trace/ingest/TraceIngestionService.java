@@ -34,9 +34,8 @@ import jakarta.inject.Inject;
 
 /**
  * Orchestrates design §5's full processing order (steps 1-9) for {@code POST /audit/trace}:
- * verification (task 16), the idempotency/conflict pre-check, correlation (task 17), receipt-chain
- * allocation (task 18) and the atomic insert that makes a record visible (design decision D-8, D-9,
- * §12 behavior table).
+ * verification, the idempotency/conflict pre-check, correlation, receipt-chain
+ * allocation and the atomic insert that makes a record visible (design §12 behavior table).
  *
  * <p>Verification, the pre-check and correlation planning never write anything, so any exception
  * from those steps (crypto unavailable, validation failure, forwarding, chain-registration,
@@ -131,7 +130,7 @@ public class TraceIngestionService {
 		ReceiptEntry receipt = new ReceiptEntry(claim.getSeq(), claim.getReceivedAtMs(), claim.getPrevReceiptHash(),
 				claim.getReceiptHash());
 		// version=0: not yet persisted; the store assigns the real initial version on insert
-		// (design decision D-2), and afterInsert() always re-reads the row before any CAS write.
+		//, and afterInsert() always re-reads the row before any CAS write.
 		return new StoredTraceRecord(verified.getIdentity(), verified.getParsed().getRawText(),
 				verified.getContentDigest(), verified.getVerification(), receipt, plan.getFlags(),
 				plan.getExecution(), plan.getPosition(), verified.getInputs().getChainPosition().getPrevRecordHash(),

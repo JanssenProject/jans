@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * TRACE evidence-ingestion configuration: evidence-domain bindings, lateness policy and request
- * limits (design references TRACE MVP design decisions D-1, D-3, D-11, D-12).
+ * limits .
  *
  * @author Yuriy Movchan
  */

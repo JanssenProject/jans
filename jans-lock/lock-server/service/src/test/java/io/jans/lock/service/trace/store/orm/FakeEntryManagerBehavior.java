@@ -88,7 +88,7 @@ final class FakeEntryManagerBehavior {
 			Map<String, Object> store = storeFor(entity.getClass());
 			if (store.containsKey(dn)) {
 				// SQL does not throw io.jans.orm.exception.operation.DuplicateEntryException; it
-				// wraps every persist failure in a plain EntryPersistenceException (design D-8).
+				// wraps every persist failure in a plain EntryPersistenceException.
 				throw new EntryPersistenceException("Duplicate entry: " + dn);
 			}
 			initVersionIfNeeded(entity);

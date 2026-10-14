@@ -36,8 +36,7 @@ import jakarta.ws.rs.core.Response;
 
 /**
  * Admin REST API for TRACE producer-key and producer-chain registration/listing/revocation
- * (design §6, §8, TRACE MVP task 15), scoped to the admin client's evidence domain (design
- * decision D-1). Every method requires the {@code trace.admin} scope.
+ * (design §6, §8), scoped to the admin client's evidence domain. Every method requires the {@code trace.admin} scope.
  *
  * <p>{@code producer_id} may contain {@code /}, so it is never carried in a path segment; every
  * identifier travels in the request body or as a query parameter.

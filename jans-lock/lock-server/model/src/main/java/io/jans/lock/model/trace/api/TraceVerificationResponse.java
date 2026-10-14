@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * The {@code verification} member of a TRACE record envelope (design §10, TRACE MVP task 21).
+ * The {@code verification} member of a TRACE record envelope (design §10).
  *
  * @author Yuriy Movchan
  */

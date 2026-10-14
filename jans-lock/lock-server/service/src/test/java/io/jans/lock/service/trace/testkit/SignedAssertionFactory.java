@@ -33,9 +33,9 @@ import io.jans.lock.service.trace.crypto.StrictBase64Url;
  * Test-only builder of signed TRACE assertions. Starts from one of the fixture templates under
  * {@code src/test/resources/trace/assertions/}, lets a test override or remove any field by path,
  * signs the result with a test private key over {@code JCS(assertion without "signature")}
- * (design D-13) and returns the JSON text a client would POST.
+ * and returns the JSON text a client would POST.
  *
- * <p>Shared by the verification (task 16), ingestion (task 19) and acceptance (task 22) tests.
+ * <p>Shared by the verification, ingestion and acceptance tests.
  *
  * <p>Path segments navigate object members; a segment that parses as an integer indexes an array,
  * e.g. {@code "trace", "event", "tokens", "0", "jti"}.
@@ -170,7 +170,7 @@ public final class SignedAssertionFactory {
 
 	/**
 	 * Convenience for genesis records: {@code sequence_number = 1} and the zero-hash sentinel
-	 * (decision D-5).
+	 *.
 	 */
 	public SignedAssertionFactory genesis() {
 		sequenceNumber(1);
@@ -187,7 +187,7 @@ public final class SignedAssertionFactory {
 	// -- signing ------------------------------------------------------------------------------------
 
 	/**
-	 * Signs {@code JCS(assertion without "signature")} (design D-13), stores the base64url
+	 * Signs {@code JCS(assertion without "signature")}, stores the base64url
 	 * signature in the tree and returns the compact JSON text.
 	 */
 	public String sign(PrivateKey privateKey) {

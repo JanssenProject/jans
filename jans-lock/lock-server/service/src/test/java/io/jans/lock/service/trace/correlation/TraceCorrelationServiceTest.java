@@ -201,7 +201,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		return MAPPER.writeValueAsString(root);
 	}
 
-	// -- plan: chain pre-registration and genesis (design decision D-5) ---------------------------
+	// -- plan: chain pre-registration and genesis ---------------------------
 
 	@Test
 	void testPlan_UnregisteredChain_ChainNotRegistered() {
@@ -227,7 +227,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
 	}
 
-	// -- plan: chain registration mode (task 30, design D-23) -------------------------------------
+	// -- plan: chain registration mode -------------------------------------
 
 	@Test
 	void testPlan_FirstObservedGenesisOnUnregisteredChain_RegistersChainAndPlans() {
@@ -384,7 +384,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertFalse(plan.getFlags().isChainLinkFailure());
 	}
 
-	// -- plan: equivocation (design decision D-9) --------------------------------------------------
+	// -- plan: equivocation --------------------------------------------------
 
 	@Test
 	void testPlan_EquivocationPeerAtSamePosition_FlaggedWithPeerIdentity() throws DuplicateEntryException {

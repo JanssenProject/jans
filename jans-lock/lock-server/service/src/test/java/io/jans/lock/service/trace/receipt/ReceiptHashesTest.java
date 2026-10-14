@@ -23,8 +23,7 @@ import io.jans.lock.service.trace.TraceConstants;
  * Known-vector test for {@link ReceiptHashes#receiptHash}: the expected hash below is computed
  * independently here, by hand-building the canonical JSON string (object members in ASCII key
  * order, exactly as RFC 8785/JCS would sort them) and hashing it with a raw {@link MessageDigest},
- * never through {@code JcsCanonicalizer}/{@code CanonicalHashes} (design §9, TRACE MVP design
- * decisions D-8, D-13).
+ * never through {@code JcsCanonicalizer}/{@code CanonicalHashes} (design §9).
  */
 class ReceiptHashesTest {
 

@@ -38,7 +38,7 @@ import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
 
 /**
- * An in-memory {@link TraceStore} used by every higher-level TRACE test (tasks 13, 17, 18, 19),
+ * An in-memory {@link TraceStore} used by every higher-level TRACE test,
  * and exercised directly by {@code TraceStoreContractTest}. Backed by {@link ConcurrentHashMap}s
  * keyed by the {@link TraceKeys} outputs, so the same collision-freedom guarantees apply as to a
  * real backend.
@@ -201,7 +201,7 @@ public class InMemoryTraceStore implements TraceStore {
 			updated.setCoverageGap(flags.isCoverageGap());
 			updated.setChainLinkFailure(flags.isChainLinkFailure());
 			updated.setEquivocation(flags.isEquivocation());
-			// jansTraceLate is fixed at ingestion (design §10, T-1); never overwritten here.
+			// jansTraceLate is fixed at ingestion (design §10); never overwritten here.
 			StoredTraceRecord replacement = existing.withFlags(updated, existing.getVersion() + 1);
 			holder[0] = replacement;
 			return replacement;

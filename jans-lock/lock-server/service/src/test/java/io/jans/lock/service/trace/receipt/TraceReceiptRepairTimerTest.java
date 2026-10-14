@@ -27,8 +27,7 @@ import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
  * Tests for {@link TraceReceiptRepairTimer#repairPendingReceipts()}, called directly (not through
  * the CDI timer event, per task 18's test requirement): a stale {@code PENDING} claim settles to
  * {@code COMMITTED} when its record row exists, to {@code VOID} otherwise, and a claim younger than
- * {@code pendingReceiptTimeoutSeconds} is left untouched (design §9, TRACE MVP design decision
- * D-8).
+ * {@code pendingReceiptTimeoutSeconds} is left untouched (design §9).
  */
 class TraceReceiptRepairTimerTest extends BaseLockServiceTest {
 

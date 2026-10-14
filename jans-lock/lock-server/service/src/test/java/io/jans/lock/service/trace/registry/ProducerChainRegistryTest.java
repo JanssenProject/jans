@@ -173,7 +173,7 @@ class ProducerChainRegistryTest extends BaseLockServiceTest {
 		assertTrue(filtered.get(0).getProducerId().equals(PRODUCER));
 	}
 
-	// -- register: genesis kind (task 30) -------------------------------------------------------------
+	// -- register: genesis kind -------------------------------------------------------------
 
 	@Test
 	void testRegister_AdminRegistration_GenesisKindPreRegistered() {
@@ -191,7 +191,7 @@ class ProducerChainRegistryTest extends BaseLockServiceTest {
 		assertEquals(TraceChainEntry.GENESIS_KIND_PRE_REGISTERED, legacy.getGenesisKind());
 	}
 
-	// -- requireRegisteredOrObserveGenesis (task 30) ---------------------------------------------------
+	// -- requireRegisteredOrObserveGenesis ---------------------------------------------------
 
 	@Test
 	void testObserveGenesis_UnregisteredGenesis_RegistersFirstObserved() {

@@ -287,7 +287,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		verify(submitterIdentityService, never()).resolve(any());
 	}
 
-	// -- submitBulkRecords (design decision D-16) -----------------------------------------------------
+	// -- submitBulkRecords -----------------------------------------------------
 
 	@Test
 	void testSubmitBulkRecords_AllAccepted_Returns207() {
@@ -541,7 +541,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		assertEquals(1, protectedApi.scopes().length);
 		assertEquals(ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS, protectedApi.scopes()[0]);
-		assertEquals("", protectedApi.grpcMethodName(), "TRACE write has no gRPC transport (D-15)");
+		assertEquals("", protectedApi.grpcMethodName(), "TRACE write has no gRPC transport");
 
 		assertEquals("Jans::Action::\"POST\"", cedarlingApi.action());
 		assertEquals("Jans::HTTP_Request", cedarlingApi.resource());
@@ -563,7 +563,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		assertEquals(1, protectedApi.scopes().length);
 		assertEquals(ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS, protectedApi.scopes()[0]);
-		assertEquals("", protectedApi.grpcMethodName(), "TRACE bulk write has no gRPC transport (D-15)");
+		assertEquals("", protectedApi.grpcMethodName(), "TRACE bulk write has no gRPC transport");
 
 		assertEquals("Jans::Action::\"POST\"", cedarlingApi.action());
 		assertEquals("Jans::HTTP_Request", cedarlingApi.resource());

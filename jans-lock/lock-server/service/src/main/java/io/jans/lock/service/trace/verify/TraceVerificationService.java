@@ -41,12 +41,12 @@ import jakarta.inject.Inject;
  * <li>{@link Ed25519Capability#requireAvailable()} — fail closed before reading the body;</li>
  * <li>bounded parse ({@link TraceAssertionParser});</li>
  * <li>§7.1 common validation ({@link CommonAssertionValidator});</li>
- * <li>forwarding check ({@link ForwardingPolicy}, decision D-3) — the signed {@code producer} is
+ * <li>forwarding check ({@link ForwardingPolicy}) — the signed {@code producer} is
  * known only now;</li>
  * <li>§7.2/§7.3 event-kind validation ({@link EventKindValidatorRegistry});</li>
- * <li>key resolution with validity evaluation at {@code ctx.receivedAtMs} (decision D-4);</li>
- * <li>event-kind scope of the key (decision D-18), before any signature work;</li>
- * <li>Ed25519 verification over {@code JCS(assertion without "signature")} (decision D-13);</li>
+ * <li>key resolution with validity evaluation at {@code ctx.receivedAtMs};</li>
+ * <li>event-kind scope of the key, before any signature work;</li>
+ * <li>Ed25519 verification over {@code JCS(assertion without "signature")};</li>
  * <li>content digest over {@code JCS(full assertion)}.</li>
  * </ol>
  *
@@ -116,26 +116,26 @@ public class TraceVerificationService {
 		// 1. Fail closed before touching the body.
 		capability.requireAvailable();
 
-		// 2. Bounded parse under the request limits (D-12).
+		// 2. Bounded parse under the request limits.
 		ParsedAssertion parsed = parser.parse(body);
 
 		// 3. §7.1 common fields.
 		commonValidator.validate(parsed);
 
-		// 4. Forwarding (D-3): the signed producer is known now.
+		// 4. Forwarding: the signed producer is known now.
 		ForwardingPolicy.check(ctx, parsed.getProducer());
 
 		// 5. §7.2/§7.3 per event kind.
 		CorrelationInputs inputs = eventKindRegistry.validate(parsed);
 
-		// 6. Key resolution and validity at the receipt instant (D-4).
+		// 6. Key resolution and validity at the receipt instant.
 		ProducerKeyRegistry.ResolvedKey key = keyRegistry.resolveForVerification(ctx.getEvidenceDomainId(),
 				parsed.getProducer(), parsed.getKid(), ctx.getReceivedAtMs());
 
-		// 6b. The key must be authorized for this event kind (D-18); no crypto has run yet.
+		// 6b. The key must be authorized for this event kind; no crypto has run yet.
 		keyRegistry.requireEventKindAuthorized(key, parsed.getEventKind());
 
-		// 7. Signature over JCS(assertion minus "signature") (D-13).
+		// 7. Signature over JCS(assertion minus "signature").
 		byte[] signature;
 		try {
 			signature = StrictBase64Url.decode(parsed.getSignature());
@@ -155,7 +155,7 @@ public class TraceVerificationService {
 			throw new TraceValidationException(TraceErrorResponseType.INVALID_SIGNATURE, REASON_SIGNATURE_MISMATCH);
 		}
 
-		// 8. Digest over JCS(full assertion) (D-13).
+		// 8. Digest over JCS(full assertion).
 		String contentDigest;
 		try {
 			contentDigest = parsed.contentDigest();
@@ -164,9 +164,9 @@ public class TraceVerificationService {
 					ex);
 		}
 
-		// 9. Assemble. verified_at is the same instant the key validity was evaluated at (D-4).
+		// 9. Assemble. verified_at is the same instant the key validity was evaluated at.
 		// Every admission check passed above (a failing record is rejected, never stored), so
-		// key_authorized is true; both new members are computed here once and never again on read (D-19).
+		// key_authorized is true; both new members are computed here once and never again on read.
 		String keyThumbprint = Ed25519PublicKeys.thumbprint(key.getKey().getPublicKeyJwk());
 		VerificationResult verification = new VerificationResult(true, key.getKey().getKid(), ctx.getReceivedAtMs(),
 				Ed25519PublicKeys.ALGORITHM, keyThumbprint, Boolean.TRUE);

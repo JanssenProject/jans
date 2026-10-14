@@ -26,8 +26,7 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 
 /**
- * Periodically settles stale {@code PENDING} receipt-chain allocation claims (design §9, TRACE
- * MVP design decision D-8): a claim with no matching record after
+ * Periodically settles stale {@code PENDING} receipt-chain allocation claims (design §9): a claim with no matching record after
  * {@code pendingReceiptTimeoutSeconds} almost certainly lost its node before step 5/6 of the
  * protocol completed, so it is resolved here instead of staying {@code PENDING} forever.
  *

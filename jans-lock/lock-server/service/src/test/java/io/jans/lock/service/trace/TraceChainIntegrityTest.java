@@ -42,7 +42,7 @@ import io.jans.lock.service.trace.testkit.TraceTestHarness;
  * forced storage failure), {@link io.jans.lock.service.trace.receipt.TraceReceiptChain#verifyDomain}
  * reports OK and dense for both domains.
  *
- * <p>The receipt chain (design §9, D-8) is keyed only by {@code (domainId, receipt_sequence)} and
+ * <p>The receipt chain (design §9) is keyed only by {@code (domainId, receipt_sequence)} and
  * is unaffected by producer-chain-level coverage gaps: neither a replay nor a same-identity
  * conflict ever claims a receipt — both are caught by {@code TraceIngestionService}'s
  * identity pre-check (before {@code TraceReceiptChain#claim}), the same short-circuit whether the

@@ -47,7 +47,7 @@ import io.jans.lock.service.trace.verify.TraceVerificationService;
  * Task 22 consolidated test harness: wires the real TRACE collaborators (parser, common/event-kind
  * validation, verification, correlation, receipt-chain allocation, ingestion, retrieval) around one
  * shared {@link InMemoryTraceStore} and a mutable {@link TraceConfiguration}, exactly the way
- * {@code TraceIngestionServiceTest} (task 19) wires them inline. Nothing here is mocked: every
+ * {@code TraceIngestionServiceTest} wires them inline. Nothing here is mocked: every
  * collaborator, including {@link AppConfiguration}, is a real instance.
  *
  * <p>Every "now" in the suite flows through {@link #setNow(long)}: it fixes
