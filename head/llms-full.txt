@@ -35642,8 +35642,10 @@ verification. See [TRACE Evidence](./trace.md) for the feature description and A
 |---|---|---|---|
 | `enabled` | boolean | `true` | When `false`, every TRACE endpoint returns a structured `invalid_request` error and the receipt repair timer does not run. |
 | `defaultEvidenceDomainId` | string | `null` | Evidence domain used for a submitting/reading client that has no explicit entry in `clientDomainBindings`. |
+| `defaultAllowedProducerIds` | array | `[]` | Producer ids a client without a binding may submit records for in the default evidence domain. Empty means such a client can submit nothing (`producer_not_allowed`). Read and admin paths are unaffected. |
 | `clientDomainBindings` | array | `[]` | List of `{ clientId, evidenceDomainId, allowedProducerIds[] }` bindings. A client without a binding and without `defaultEvidenceDomainId` set is rejected with `client_not_bound`. `allowedProducerIds` may contain `"*"` to allow any producer. |
 | `latenessThresholdSeconds` | integer | `300` | Seconds after `signed_at` a record may still be accepted before it is flagged `late_flag: true`. |
+| `maxFutureSkewSeconds` | integer | `300` | Seconds `signed_at` may be ahead of Lock's clock. A later `signed_at` is rejected with `invalid_assertion` (`signed_at_in_future`). |
 | `maxRequestBytes` | integer | `262144` | Maximum accepted TRACE request body size, in bytes. |
 | `maxJsonDepth` | integer | `32` | Maximum accepted JSON nesting depth of a TRACE assertion. |
 | `maxStringLength` | integer | `8192` | Maximum accepted JSON string length (UTF-16 units) in a TRACE assertion. |
@@ -36170,6 +36172,7 @@ An evidence domain is the isolation boundary inside one Lock deployment. Lock de
 - Producer keys, record identity, execution correlation, indexes, and retrieval are all scoped to the domain.
 - A key registered in one domain gives no authority in another. A producer that serves several domains needs an explicit registration in each.
 - Readers and administrators see only the domain their client is bound to. Lock never searches other domains.
+- A client with no `clientDomainBindings` entry falls back to `defaultEvidenceDomainId` only for its domain. It gets no forwarding permission: see "Default-domain fallback" under [Configuration](#configuration).
 - A request body that contains `evidence_domain_id` (top level or inside `trace`) is rejected with `domain_field_forbidden`.
 
 ## Configuration
@@ -36180,6 +36183,7 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
 "traceConfiguration": {
   "enabled": true,
   "defaultEvidenceDomainId": "default",
+  "defaultAllowedProducerIds": [],
   "clientDomainBindings": [
     {
       "clientId": "2200.00000000-0000-0000-0000-000000000000",
@@ -36188,6 +36192,7 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
     }
   ],
   "latenessThresholdSeconds": 300,
+  "maxFutureSkewSeconds": 300,
   "maxRequestBytes": 262144,
   "maxBulkRecords": 100,
   "maxBulkRequestBytes": 4194304,
@@ -36201,11 +36206,13 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
 
 **Client-to-domain bindings.** Lock resolves the domain for an authenticated `client_id` in this order: an explicit entry in `clientDomainBindings`, then `defaultEvidenceDomainId` if set, otherwise the request fails with `403 client_not_bound`. The same rule applies to submitters, readers, and administrators.
 
+**Default-domain fallback.** A client that falls back to `defaultEvidenceDomainId` has no forwarding permission of its own. Its allowlist is `defaultAllowedProducerIds` (default: empty), never `"*"`. With the default empty list, an unbound client can read and administer the default domain but cannot submit any record: every submission fails with `403 producer_not_allowed`. To let unbound clients submit for specific producers, list those producers in `defaultAllowedProducerIds`. To let a client forward for a producer other than itself, give the client an explicit `clientDomainBindings` entry.
+
 **Forwarding.** A client may submit a record only if the binding's `allowedProducerIds` contains the signed `producer` string exactly, or contains `"*"`. Otherwise the request fails with `403 producer_not_allowed`.
 
 **Limits.** Lock applies the request limits (`maxRequestBytes`, `maxJsonDepth`, `maxStringLength`, `maxArrayLength`, `maxObjectMembers`) before any cryptographic work. A request over a limit fails with `400 invalid_request`. For bulk requests, `maxBulkRecords` bounds the array length and `maxBulkRequestBytes` bounds the whole body (always clamped to 16 MiB). `maxRequestBytes` still bounds each record in the batch.
 
-**Lateness.** A record is flagged `late_flag: true` when Lock receives it more than `latenessThresholdSeconds` after its `signed_at`. Lateness alone never rejects a record. A `signed_at` that is more than `latenessThresholdSeconds` in the future is rejected with `invalid_assertion` (`signed_at_in_future`).
+**Lateness.** A record is flagged `late_flag: true` when Lock receives it more than `latenessThresholdSeconds` after its `signed_at`. Lateness alone never rejects a record. A `signed_at` that is more than `maxFutureSkewSeconds` ahead of Lock's clock is rejected with `invalid_assertion` (`signed_at_in_future`). The two properties are independent.
 
 **Neighbor-update retries.** After a record is stored, Lock updates derived flags on neighboring records. Each update is a compare-and-swap write against the neighbor's version. On a version conflict, Lock re-reads the neighbor, recomputes the flag from its current state and retries, up to `correlationRetryLimit` times. When the budget is exhausted Lock logs a warning and gives up on that update. It never fails the request.
 
@@ -36313,7 +36320,7 @@ The chain list shows how each chain came to exist in `genesis_kind`: `pre_regist
 | Ephemeral pod | Uses a fleet or workload-provisioned key and opens a `first_observed_genesis` chain for that pod or writer. |
 | WASM Cedarling | Should return the assertion to a trusted host for signing. A key held in a browser gives weaker producer assurance. |
 
-Restarting a producer does not by itself mean a new chain. A producer that durably retained its `producer_chain_id`, last `sequence_number` and previous record hash should continue its existing chain. A new chain is needed when that state is unavailable, when a new independently sequenced writer is created, or when the producer rotates deliberately. Lock only checks the records it receives. The signed `chain_link` member can reference the previous chain head, and Lock records it without validating it.
+Restarting a producer does not by itself mean a new chain. A producer that durably retained its `producer_chain_id`, last `sequence_number` and previous record hash should continue its existing chain. A new chain is needed when that state is unavailable, when a new independently sequenced writer is created, or when the producer rotates deliberately. Lock only checks the records it receives. The signed `chain_link` member can reference the previous chain head. Lock checks its shape and that only a genesis record carries it. Lock does not validate the link against the prior chain.
 
 ### List keys and chains
 
@@ -36391,22 +36398,41 @@ Key points:
 - `trace.subject.workload_id` is required (non-empty string, at most 255 characters) for `AUTHORIZATION_DECISION` and `CAPABILITY_INVOKED`. `workload_instance_id` is optional. For `RUNTIME_EFFECT` the subject is optional and is validated when present.
 - Producers sign capability *facts*, not a governance label. An `AUTHORIZATION_DECISION` carries a singular `decision` and a `CAPABILITY_INVOKED` carries a singular `invocation`. Each has `action` and `resource_type` (the Cedar action and resource type, never a resource id) and an `outcome`. See [Event kinds](#event-kinds). Lock does not resolve capability ids.
 - `tokens[]` holds references only: `issuer`, `token_type`, and either `jti` or `fingerprint`. Never send a raw bearer token. Lock rejects material that looks like a JWT. Token identity is `(domain, issuer, jti)`, never a bare `jti`.
-- `producer_chain` can carry an optional `chain_link` member. Lock keeps it unchanged inside the signed assertion, returns it unchanged on retrieval, and does not validate or interpret it.
+- A signed body must not carry a member that Lock derives or assigns itself. The reserved members are `cnf`, `content_digest`, `receipt_sequence`, `received_at`, `prev_receipt_hash`, `coverage_gap_flag`, `chain_link_failure_flag`, `equivocation_flag`, `late_flag`, `unattributed_flag`, `candidate_flag`, `key_resolved`, `key_temporally_valid`, `key_not_revoked`, `key_authorized_for_producer`, `producer_authorized_for_claim`, `key_thumbprint`, `key_authorization_ref`, `verified_at`, `trust_tier`, `capability_resolution`, `capability_id` and `capability_ids`. Lock checks the top level, `trace`, `trace.event` and each `decision` or `invocation` fact. A body that carries one is rejected with `400 invalid_assertion` and reason `forbidden:<path>` (for example `forbidden:cnf` or `forbidden:trace.trust_tier`). Lock never stores it. Lock resolves the verification key only from the producer key registry, never from a key in the body.
+- `producer_chain` can carry an optional `chain_link` member that references the previous chain head. It must be a JSON object, and only a genesis record (`sequence_number` 1) can carry it. On any other record Lock returns `400 invalid_genesis` with reason `chain_link_on_non_genesis`. Lock checks that `prev_producer_chain_id`, when present, is a non-empty string. It keeps the member unchanged inside the signed assertion, returns it unchanged on retrieval, and does not validate the link against the prior chain.
 - The first record of a chain has `sequence_number` 1 and `prev_record_hash` set to `sha256:` followed by 64 zeros. Any other record needs the previous record's `content_digest` in `prev_record_hash`.
+
+### Optional profile members
+
+Lock checks the JSON type of each optional member below when the producer signs it. A member of the wrong type returns `400 invalid_assertion` with reason `type:<path>`, `empty:<path>`, `length:<path>` or `invalid:<path>`, in the same way as the required members. A `null` value counts as absent. Lock does not interpret the values and stores them only inside the signed assertion.
+
+| Location | Member | Accepted shape |
+|---|---|---|
+| `trace` | `execution_epoch_id`, `previous_epoch_id`, `parent_execution_id` | Non-empty string of at most 255 characters. |
+| `trace` | `operation_ids` | Array of non-empty strings. |
+| `trace` | `session_id`, `session_issuer` | Non-empty strings. `session_issuer` is required when `session_id` is present (`missing:trace.session_issuer`) and follows the token issuer rule (`https`, or `http` for `localhost`). |
+| `trace` | `evidence_origin`, `measurement_point` | Non-empty strings. Lock does not restrict the values. |
+| `trace` | `recorder` | Object or string. |
+| `trace` | `attestation_ref` | Object. |
+| `trace` | `workload_authentication` | Object. The members `authentication_layer`, `method`, `authenticated_workload_id` and `proof_ref` are strings when present. |
+| `trace` | `model` | Object. The members `provider`, `model_id` and `version` are strings when present. |
+| `trace.subject` | `human_sponsor`, `delegating_org` | String or object. |
+| `trace.policy` | `enforcement_mode` | `enforce`, `advisory`, `silent` or `declared`. Checked wherever Lock validates `trace.policy`: always for `AUTHORIZATION_DECISION`, and when present for `CAPABILITY_INVOKED`. |
 
 ### Event kinds
 
 | Event kind | Producer | Required event data |
 |---|---|---|
 | `AUTHORIZATION_DECISION` | Cedarling or another PDP | Exactly one of a singular `trace.event.decision` `{action, resource_type, outcome}` or `trace.event.decisions[]`. A complete `trace.policy` block. `trace.runtime.pdp_id`. `trace.subject.workload_id`. |
-| `CAPABILITY_INVOKED` | PEP, agent gateway or tool gateway | Exactly one of a singular `trace.event.invocation` `{action, resource_type, outcome}` or `trace.event.invocations[]`. `trace.event.enforcement_point_id`. `trace.subject.workload_id`. `trace.policy` is not allowed. |
+| `CAPABILITY_INVOKED` | PEP, agent gateway or tool gateway | Exactly one of a singular `trace.event.invocation` `{action, resource_type, outcome}` or `trace.event.invocations[]`. `trace.event.enforcement_point_id`. `trace.subject.workload_id`. `trace.policy` is optional. When present, it must be complete, like a decision's. |
 | `RUNTIME_EFFECT` | Target system or trusted observer | `trace.event.outcome`. It carries no `decision`, `decisions`, `invocation` or `invocations`. It normally has a `produced_effect` parent in `parent_record_ids`. Lock accepts it without one and notes a warning at debug level. |
 
 Rules for the capability facts:
 
 - `action` and `resource_type` are non-empty strings of at most 512 characters.
-- For `AUTHORIZATION_DECISION`, `outcome` is `ALLOW` or `DENY`. For `CAPABILITY_INVOKED`, `outcome` is a non-empty string of at most 64 characters.
+- For `AUTHORIZATION_DECISION`, `outcome` is `ALLOW` or `DENY`. For `CAPABILITY_INVOKED`, `outcome` is `SUCCESS` or `FAILURE`. The vocabularies are distinct, so an invocation with `ALLOW` or a decision with `SUCCESS` returns `400 invalid_assertion` with reason `invalid:trace.event.invocation.outcome` (or `invalid:trace.event.decision.outcome`, or the indexed plural path such as `invalid:trace.event.invocations[0].outcome`).
 - An atomic batch evaluation can use the plural form instead. Each entry carries a `decision_id` or `invocation_id` (non-empty, at most 256 characters, unique within the array) and repeats `action`, `resource_type` and `outcome`. The record-level `trace.event.outcome` is not allowed in either form.
+- Operation-binding digests are optional members of `trace.event`: `request_digest`, `input_digest` and `tool_call_digest` on `AUTHORIZATION_DECISION`, and `request_digest`, `tool_call_digest` and `result_digest` on `CAPABILITY_INVOKED` (and `result_digest` on `RUNTIME_EFFECT`). A present digest is `sha256:` followed by 64 lowercase hex characters. Any other string returns `400 invalid_assertion` with reason `invalid:trace.event.<member>`, and a non-string value returns `type:trace.event.<member>`. Lock stores them in the signed assertion and does not interpret them. `trace.policy.bundle_hash` keeps its own rule, which also accepts other `algorithm:digest` forms.
 - Both the singular and the plural member in one record, `capability_ids` anywhere, and a `resource_id` inside a fact are rejected with `400 invalid_assertion` (reason such as `forbidden:trace.event.capability_ids`).
 
 Lock validates the schema for the declared kind and rejects fields that contradict it. Lock does not infer that an authorization caused an invocation because their timestamps are close. Producers state causal relationships in `parent_record_ids`.
@@ -36493,7 +36519,7 @@ Errors use the structured body `{"error": "<id>", "error_description": "<text>",
 | Error id | HTTP | When |
 |---|---|---|
 | `invalid_request` | 400 | Malformed JSON, a limit exceeded, an unreadable body, bad query parameters, TRACE disabled (`trace_disabled`), or a bulk envelope problem such as `bulk_mixed_producers` (see [Bulk submission](#bulk-submission)). |
-| `invalid_assertion` | 400 | A schema violation in the assertion. `reason` names the field. |
+| `invalid_assertion` | 400 | A schema violation in the assertion, or a member reserved for Lock such as `cnf` or `trust_tier` (reason `forbidden:<path>`). `reason` names the field. |
 | `unsupported_profile` | 400 | `trace.eat_profile` is not `tag:jans.io,2026:trace-v1`. |
 | `domain_field_forbidden` | 400 | The body contains `evidence_domain_id`. |
 | `producer_mismatch` | 400 | `producer` does not equal `producer_chain.producer_id`. |
@@ -36547,13 +36573,14 @@ curl -s "$API/executions/exec-01JABCXYZQK8P5N9F2C7R3T4V6?execution_authority=spi
   -H "Authorization: Bearer $READ_TOKEN"
 ```
 
-A record response has three separate parts:
+A record response has three separate parts: the assertion (in a parsed form and as exact text), the verification result and the ingestion metadata.
 
 ```json
 {
   "producer_id": "cedarling-fleet-1",
   "record_id": "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41",
   "assertion": { "...": "the producer-signed record" },
+  "assertion_raw": "{\"...\": \"the producer-signed record, exact text\"}",
   "content_digest": "sha256:...",
   "verification": {
     "signature_valid": true,
@@ -36568,6 +36595,7 @@ A record response has three separate parts:
     "received_at": "2026-06-11T00:41:02.123Z",
     "prev_receipt_hash": "sha256:...",
     "receipt_hash": "sha256:...",
+    "receipt_state": "COMMITTED",
     "coverage_gap_flag": false,
     "chain_link_failure_flag": false,
     "equivocation_flag": false,
@@ -36576,7 +36604,9 @@ A record response has three separate parts:
 }
 ```
 
-- `assertion` is stored as the text received and never modified. The API returns it as a JSON value that is semantically identical to what the producer sent. Lock never adds resolved claims, status, or receipt data to it.
+- `assertion_raw` is the exact accepted text: Lock stores the request body as received and returns it unchanged, byte for byte. Lock never adds resolved claims, status, or receipt data to it.
+- `assertion` is the same text parsed as a JSON value. It is a re-emission, so member order, whitespace and number formatting can differ from the signed bytes. Use it when you want structure and `assertion_raw` when you need the original text.
+- Both forms verify. The signature and `content_digest` are defined over the JCS (RFC 8785) form, and the JCS form of `assertion` and of `assertion_raw` is identical.
 - `verification` records the admission decision Lock made at `verified_at`. It is written once at ingestion and never recomputed from the current key registry. `key_thumbprint` pins the exact key, independently of the non-unique `kid` selector: it is `sha256:` plus the lowercase hex SHA-256 of the RFC 7638 required-members JSON of the key (`{"crv":"Ed25519","kty":"OKP","x":"<x>"}`). `key_authorized` is a single boolean. It states that the key existed, was inside its validity window, was not revoked, was registered for the `producer_id` and was authorized for the record's `event_kind`. Every stored record has `key_authorized: true`, because a record that fails any admission check is rejected and never stored. Later revocation, expiry or re-scoping of the key never rewrites these values. Records stored before these two members existed omit them.
 - `ingestion` is Lock-derived metadata.
 
@@ -36608,9 +36638,13 @@ For every accepted record Lock assigns, within the evidence domain:
 - `prev_receipt_hash`: the hash of the preceding receipt entry.
 - `receipt_hash`: the hash of this entry.
 
-The receipt hash binds `evidence_domain_id`, `receipt_sequence`, `received_at`, `producer_id`, `record_id`, `content_digest`, and `prev_receipt_hash`. The hash input is the JCS canonical form of those seven members. `received_at` enters the hash as a JSON string in the RFC 3339 form with three fractional digits and `Z` (`2026-06-11T00:41:02.123Z`), and `receipt_sequence` as a JSON integer. A value shown without milliseconds would not reproduce the receipt hash. The first entry in a domain uses the all-zero sentinel as its `prev_receipt_hash`.
+Every receipt entry has a state: `PENDING` while Lock stores the record, `COMMITTED` once the record is stored, and `VOID` if the record was never stored. The retrieval response carries the state of a record's receipt entry as `ingestion.receipt_state`. A stored record shows `COMMITTED`, or `PENDING` during the short window between storing the record and settling its claim. It never shows `VOID`.
+
+The receipt hash binds the receipt profile tag `receipt_profile` (`tag:jans.io,2026:lock-trace-receipt-v1`), `evidence_domain_id`, `receipt_sequence`, `received_at`, `producer_id`, `record_id`, `content_digest`, and `prev_receipt_hash`. The hash input is the JCS canonical form of those eight members. `receipt_profile` is a string constant in every hash input. A change to this member set needs a new profile tag. `received_at` enters the hash as a JSON string in the RFC 3339 form with three fractional digits and `Z` (`2026-06-11T00:41:02.123Z`), and `receipt_sequence` as a JSON integer. A value shown without milliseconds would not reproduce the receipt hash. The first entry in a domain uses the all-zero sentinel as its `prev_receipt_hash`.
 
 A verifier can walk the receipts by sequence, recompute each hash, and check each committed entry against the stored record. This makes local insertion, deletion, and rewriting detectable.
+
+A verifier must accept a `VOID` entry whose hash and `prev_receipt_hash` linkage verify and which has no stored record. A `VOID` entry is a chain position that Lock allocated and then abandoned. It is not a missing entry, and a verifier must not report it as a gap. A `VOID` entry that has a stored record is an inconsistency. The receipt state is not part of the receipt hash, so settling an entry never changes the hashes of the chain.
 
 !!! warning "What the receipt chain does not protect against"
 
@@ -36627,6 +36661,8 @@ Producer order, Lock receipt order, and causal relationships are separate things
 3. It stores the record, then marks the claim `COMMITTED`. If storing fails, it marks the claim `VOID`.
 
 A node that stops between steps leaves a `PENDING` claim. The repair timer settles claims older than `pendingReceiptTimeoutSeconds`: `COMMITTED` if the record exists, otherwise `VOID`. `VOID` entries keep the chain dense and verifiable, because the receipt state is not part of the receipt hash. A claim without a record is never returned by any API.
+
+The database ORM has no transactions, so storing the record and appending its receipt entry is not a single atomic write. A failed request leaves no stored record, no index entry, and no `COMMITTED` receipt entry. It can leave a `VOID` receipt entry at the allocated position, and a `PENDING` entry is visible between the claim and its settlement. After a node stops, a `PENDING` entry stays until the repair timer settles it. That takes up to `pendingReceiptTimeoutSeconds` plus `receiptRepairIntervalSeconds`. A `VOID` entry stays in the chain permanently, because the `prev_receipt_hash` of the next entry binds its hash.
 
 **Request size and column size.** `maxRequestBytes` limits the size of one request body. The stored assertion is kept as text in a `MEDIUMTEXT` column on MySQL and a `TEXT` column on PostgreSQL. Keep `maxRequestBytes` and the per-record limit inside the bulk path well below the size of that column type for your database, and raise the limits only after checking it. Many TRACE identifiers are stored in `VARCHAR` columns of fixed width, which Lock's validation keeps the values within.
 
@@ -48109,6 +48145,7 @@ If you’d like to contribute to this document, get started with the [Contributi
 | clientId | OAuth client id bound to the evidence domain | [Details](#clientid) |
 | clientPassword | Lock client password | [Details](#clientpassword) |
 | correlationRetryLimit | Maximum retries when a correlation neighbor update hits a version conflict | [Details](#correlationretrylimit) |
+| defaultAllowedProducerIds | Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none | [Details](#defaultallowedproducerids) |
 | defaultEvidenceDomainId | Evidence domain id used when a submitting client has no explicit binding | [Details](#defaultevidencedomainid) |
 | disableExternalLoggerConfiguration | Choose whether to disable external log4j configuration override | [Details](#disableexternalloggerconfiguration) |
 | disableJdkLogger | Choose whether to disable JDK loggers | [Details](#disablejdklogger) |
@@ -48124,6 +48161,7 @@ If you’d like to contribute to this document, get started with the [Contributi
 | maxArrayLength | Maximum accepted JSON array length in a TRACE assertion | [Details](#maxarraylength) |
 | maxBulkRecords | Maximum number of assertions accepted in one POST /audit/trace/bulk request | [Details](#maxbulkrecords) |
 | maxBulkRequestBytes | Maximum total body size, in bytes, buffered for one POST /audit/trace/bulk request; clamped to 16777216 regardless of this value | [Details](#maxbulkrequestbytes) |
+| maxFutureSkewSeconds | Seconds a signed_at may be ahead of Lock's clock before the record is rejected | [Details](#maxfutureskewseconds) |
 | maxJsonDepth | Maximum accepted JSON nesting depth of a TRACE assertion | [Details](#maxjsondepth) |
 | maxObjectMembers | Maximum accepted JSON object member count in a TRACE assertion | [Details](#maxobjectmembers) |
 | maxRequestBytes | Maximum accepted TRACE request body size in bytes | [Details](#maxrequestbytes) |
@@ -48264,6 +48302,15 @@ If you’d like to contribute to this document, get started with the [Contributi
 - Default value: 3
 
 
+## defaultAllowedProducerIds
+
+- Description: Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none
+
+- Required: No
+
+- Default value: None
+
+
 ## defaultEvidenceDomainId
 
 - Description: Evidence domain id used when a submitting client has no explicit binding
@@ -48397,6 +48444,15 @@ If you’d like to contribute to this document, get started with the [Contributi
 - Required: No
 
 - Default value: 4194304
+
+
+## maxFutureSkewSeconds
+
+- Description: Seconds a signed_at may be ahead of Lock's clock before the record is rejected
+
+- Required: No
+
+- Default value: 300
 
 
 ## maxJsonDepth

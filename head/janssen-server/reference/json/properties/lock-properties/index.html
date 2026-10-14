@@ -1504,6 +1504,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#defaultallowedproducerids" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        defaultAllowedProducerIds
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#defaultevidencedomainid" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1662,6 +1673,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         maxBulkRequestBytes
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maxfutureskewseconds" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        maxFutureSkewSeconds
       </span>
     </span>
   </a>
@@ -2763,6 +2785,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#defaultallowedproducerids" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        defaultAllowedProducerIds
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#defaultevidencedomainid" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2921,6 +2954,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         maxBulkRequestBytes
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maxfutureskewseconds" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        maxFutureSkewSeconds
       </span>
     </span>
   </a>
@@ -3475,6 +3519,11 @@
 <td><a href="#correlationretrylimit">Details</a></td>
 </tr>
 <tr>
+<td>defaultAllowedProducerIds</td>
+<td>Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none</td>
+<td><a href="#defaultallowedproducerids">Details</a></td>
+</tr>
+<tr>
 <td>defaultEvidenceDomainId</td>
 <td>Evidence domain id used when a submitting client has no explicit binding</td>
 <td><a href="#defaultevidencedomainid">Details</a></td>
@@ -3548,6 +3597,11 @@
 <td>maxBulkRequestBytes</td>
 <td>Maximum total body size, in bytes, buffered for one POST /audit/trace/bulk request; clamped to 16777216 regardless of this value</td>
 <td><a href="#maxbulkrequestbytes">Details</a></td>
+</tr>
+<tr>
+<td>maxFutureSkewSeconds</td>
+<td>Seconds a signed_at may be ahead of Lock's clock before the record is rejected</td>
+<td><a href="#maxfutureskewseconds">Details</a></td>
 </tr>
 <tr>
 <td>maxJsonDepth</td>
@@ -3812,6 +3866,18 @@
 <p>Default value: 3</p>
 </li>
 </ul>
+<h2 id="defaultallowedproducerids">defaultAllowedProducerIds<a class="headerlink" href="#defaultallowedproducerids" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: None</p>
+</li>
+</ul>
 <h2 id="defaultevidencedomainid">defaultEvidenceDomainId<a class="headerlink" href="#defaultevidencedomainid" title="Permanent link">#</a></h2>
 <ul>
 <li>
@@ -3990,6 +4056,18 @@
 </li>
 <li>
 <p>Default value: 4194304</p>
+</li>
+</ul>
+<h2 id="maxfutureskewseconds">maxFutureSkewSeconds<a class="headerlink" href="#maxfutureskewseconds" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Seconds a signed_at may be ahead of Lock's clock before the record is rejected</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 300</p>
 </li>
 </ul>
 <h2 id="maxjsondepth">maxJsonDepth<a class="headerlink" href="#maxjsondepth" title="Permanent link">#</a></h2>
@@ -4300,7 +4378,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 13, 2026
+    October 14, 2026
   </span>
 
     
