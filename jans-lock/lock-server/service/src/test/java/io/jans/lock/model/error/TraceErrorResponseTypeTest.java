@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import jakarta.ws.rs.core.Response.Status;
 
 /**
- * Tests for {@link TraceErrorResponseType} against the documented id/status table of the error catalog.
+ * Tests for {@link TraceErrorResponseType} against design decision D-10's id/status table.
  */
 class TraceErrorResponseTypeTest {
 

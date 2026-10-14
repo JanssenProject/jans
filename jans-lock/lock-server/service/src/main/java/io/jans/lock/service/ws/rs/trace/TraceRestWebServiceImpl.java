@@ -74,10 +74,10 @@ import jakarta.ws.rs.core.SecurityContext;
 /**
  * REST implementation for {@code POST /audit/trace} (design §11.1) and for
  * {@code GET /audit/trace/records/{record_id}} / {@code GET /audit/trace/executions/{trace_execution_id}}
- * (design §11.2, §11.3): resolve the submitting client and its evidence domain,
- * hand the raw body to {@link TraceIngestionService} for
- * verification/correlation/receipt-allocation/storage or read via {@link TraceRetrievalService},
- * and map the outcome to the §11.1/§11.2/§11.3 response shapes. Every
+ * (design §11.2, §11.3): resolve the submitting client and its evidence domain
+ *, hand the raw body to {@link TraceIngestionService} for
+ * verification/correlation/receipt-allocation/storage or read via {@link TraceRetrievalService}
+ *, and map the outcome to the §11.1/§11.2/§11.3 response shapes. Every
  * {@link RuntimeException} raised by the TRACE packages is translated to the structured error body
  * by {@link TraceErrors#toWebApplicationException}.
  *

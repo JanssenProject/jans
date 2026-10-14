@@ -28,7 +28,8 @@ import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Tests for {@link SubmitterIdentityService}: it reads the {@link AuthenticatedClient} the
- * protection filter recorded and maps every gap to {@code client_not_bound} (403), never a 500.
+ * protection filter recorded and maps every gap to {@code client_not_bound} (403), never a 500
+ *.
  */
 class SubmitterIdentityServiceTest extends BaseLockServiceTest {
 

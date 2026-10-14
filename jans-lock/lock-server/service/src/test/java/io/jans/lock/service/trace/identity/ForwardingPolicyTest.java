@@ -19,7 +19,7 @@ import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.service.trace.error.TraceValidationException;
 
 /**
- * Tests for {@link ForwardingPolicy}: the wildcard and exact-match rules.
+ * Tests for {@link ForwardingPolicy}: design decision D-3's wildcard and exact-match rules.
  */
 class ForwardingPolicyTest {
 

@@ -787,7 +787,7 @@ paths:
       tags:
       - Lock - Audit Trace
       summary: Retrieve one TRACE execution
-      description: "All direct records of an execution, ordered by receipt sequence"
+      description: All direct records of an execution, ordered by receipt sequence
       operationId: getExecution
       parameters:
       - name: trace_execution_id

@@ -20,7 +20,9 @@ import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.TokenRef;
 
 /**
- * Tests for {@link TraceKeys}: the composite-key function. Not run under TestNG: Surefire in {@code lock-server} silently skips TestNG classes, so JUnit 5 is used.
+ * Tests for {@link TraceKeys}: design decision D-6. Not run under TestNG — see the project note
+ * that Surefire in {@code lock-server} silently skips TestNG classes; JUnit 5 is used for every
+ * TRACE test in this series (established in task 02).
  */
 class TraceKeysTest {
 

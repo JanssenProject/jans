@@ -29,7 +29,8 @@ import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 
 /**
- * Tests for {@link ProducerChainRegistry}: pre-registration lookup, the genesis-hash matrix, and create-only chain registration.
+ * Tests for {@link ProducerChainRegistry}: pre-registration lookup, the design decision D-5
+ * genesis-hash matrix, and create-only chain registration.
  */
 class ProducerChainRegistryTest extends BaseLockServiceTest {
 
@@ -129,7 +130,7 @@ class ProducerChainRegistryTest extends BaseLockServiceTest {
 		assertEquals(TraceErrorResponseType.INVALID_REQUEST, ex.getErrorId());
 	}
 
-	// -- checkGenesis: genesis-hash matrix --------------------------------------------------
+	// -- checkGenesis: design decision D-5 matrix --------------------------------------------------
 
 	@Test
 	void testCheckGenesis_Seq1WithSentinel_Passes() {

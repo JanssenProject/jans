@@ -45,7 +45,8 @@ import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
 
 /**
  * Tests for {@link TraceReceiptChain}: sequential allocation and linkage, cross-node contention on
- * the same sequence, retry exhaustion, and the VOID-tombstone-then-continue case (design §9).
+ * the same sequence, retry exhaustion, and the VOID-tombstone-then-continue case (design §9, TRACE
+ * MVP design decision D-8; task 18 acceptance criteria).
  */
 class TraceReceiptChainTest extends BaseLockServiceTest {
 
@@ -200,7 +201,7 @@ class TraceReceiptChainTest extends BaseLockServiceTest {
 
 		ReceiptClaim claim2 = chain.claim(DOMAIN, PRODUCER, "rec-2", "rec-2-key", "sha256:" + digest('2'), 2_000L,
 				NODE_ID);
-		// No matching record row inserted for rec-2: the identity race's loser, voided.
+		// No matching record row inserted for rec-2: the identity race's loser, voided (D-8 step 5).
 		chain.voidClaim(DOMAIN, claim2.getSeq());
 
 		ReceiptClaim claim3 = chain.claim(DOMAIN, PRODUCER, "rec-3", "rec-3-key", "sha256:" + digest('3'), 3_000L,

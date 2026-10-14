@@ -115,7 +115,7 @@ public class InMemoryTraceStore implements TraceStore {
 	/**
 	 * Installs a barrier that {@link #insertReceipt(TraceReceiptEntry)} counts down and then waits
 	 * on (bounded by {@code timeout}) immediately before it becomes visible in the store, so a test
-	 * can line up two concurrent receipt-sequence claims. Pass
+	 * can line up two concurrent receipt-sequence claims (task 18 acceptance criteria). Pass
 	 * {@code null} to remove the barrier.
 	 */
 	public void setInsertReceiptBarrier(CountDownLatch latch, long timeout, TimeUnit unit) {

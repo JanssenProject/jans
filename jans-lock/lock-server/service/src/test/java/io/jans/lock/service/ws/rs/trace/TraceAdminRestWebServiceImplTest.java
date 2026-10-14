@@ -67,8 +67,9 @@ import jakarta.ws.rs.core.Response;
 
 /**
  * Tests for {@link TraceAdminRestWebServiceImpl}: the happy paths for all five admin operations,
- * the disabled-feature/unbound-client/duplicate/not-found error paths, and a fixture check that every {@link TraceAdminRestWebService} method carries both
- * protection annotations with matching {@code id}/{@code path}.
+ * the disabled-feature/unbound-client/duplicate/not-found error paths (task 15 acceptance
+ * criteria), and a fixture check that every {@link TraceAdminRestWebService} method carries both
+ * protection annotations with matching {@code id}/{@code path} (task 15's "Tests" section).
  */
 class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 
@@ -426,7 +427,7 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 		assertEquals("pre_registered_genesis", body.getChains().get(2).getGenesisKind());
 	}
 
-	// -- annotation fixture check ------------------------------------------
+	// -- annotation fixture check (task 15 "Tests" section) ------------------------------------------
 
 	@Test
 	void testInterfaceMethods_CarryBothProtectionAnnotationsWithMatchingIdAndPath() throws Exception {

@@ -67,7 +67,9 @@ import io.jans.lock.service.trace.verify.TraceVerificationService;
 
 /**
  * Tests for {@link TraceIngestionService}: orchestration of verification, correlation
- * and receipt-chain allocation into one atomic write protocol (design §5, §9, §12 behavior table), including the cross-thread race.
+ * and receipt-chain allocation into one atomic write protocol (design §5, §9,
+ * §12 behavior table; design decisions D-8, D-9; task 19 acceptance criteria 1, 3, 4, 5, 12 and the
+ * cross-thread race).
  *
  * <p>Every collaborator is real and wired by reflection ({@link #setField}) over one shared
  * {@link InMemoryTraceStore}, the same approach {@code TraceVerificationServiceTest},
@@ -408,7 +410,7 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		return chain;
 	}
 
-	// -- FIRST_OBSERVED chain registration -----------------------------
+	// -- task 30: FIRST_OBSERVED chain registration -----------------------------
 
 	@Test
 	void testIngest_FirstObservedGenesis_RegistersChainThenAccepts() {

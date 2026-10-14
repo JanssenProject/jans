@@ -264,7 +264,7 @@ public final class TraceAssertions {
 		}
 	}
 
-	/** @return {@code content_digest} (design §10): sha256 of the JCS form including {@code signature} */
+	/** @return {@code content_digest} (design §10/D-13): sha256 of the JCS form including {@code signature} */
 	public static String contentDigest(String signedJson) {
 		try {
 			JsonNode node = MAPPER.readTree(signedJson);

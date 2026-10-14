@@ -71,7 +71,8 @@ import io.jans.lock.service.trace.verify.VerifiedAssertion;
 
 /**
  * Tests for {@link TraceCorrelationService}: producer-chain pre-registration/genesis checks,
- * predecessor/peer/successor flag computation and the post-insert neighbor updates (design §8, §9).
+ * predecessor/peer/successor flag computation and the post-insert neighbor updates (design §8,
+ * §9, design decisions D-5, D-9, D-11; task 17 acceptance criteria).
  *
  * <p>{@link VerifiedAssertion}s are built with the real {@link TraceAssertionParser},
  * {@link CommonAssertionValidator} and {@link EventKindValidatorRegistry} over
@@ -431,7 +432,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertEquals(2, plan.getTokenKeys().size());
 	}
 
-	// -- plan: lateness wiring (exhaustive matrix in ProducerChainRulesTest) ---
+	// -- plan: lateness wiring (design decision D-11; exhaustive matrix in ProducerChainRulesTest) ---
 
 	@Test
 	void testPlan_SignedAtOlderThanConfiguredThreshold_LateTrue() {
@@ -459,7 +460,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertFalse(plan.getFlags().isLate());
 	}
 
-	// -- afterInsert: successor coverage-gap clearing and chain-link failure --
+	// -- afterInsert: successor coverage-gap clearing and chain-link failure (acceptance criterion 1) --
 
 	@Test
 	void testAfterInsert_OutOfOrderArrival_SuccessorCoverageGapClearedAndLinkFailureSetOnMismatch() throws DuplicateEntryException {
@@ -510,7 +511,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertFalse(successorAfter.getFlags().isChainLinkFailure());
 	}
 
-	// -- afterInsert: equivocation ------------------------------------------
+	// -- afterInsert: equivocation (acceptance criterion 3) ------------------------------------------
 
 	@Test
 	void testAfterInsert_Equivocation_BothRecordsFlaggedAfterSecondInsert() throws DuplicateEntryException {
@@ -539,7 +540,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertTrue(store.findRecord(new RecordIdentity(DOMAIN, PRODUCER, recordId2)).get().getFlags().isEquivocation());
 	}
 
-	// -- afterInsert: peer landing between plan() and insert (re-query of the chain position) --
+	// -- afterInsert: peer landing between plan() and insert (acceptance criterion 2, D-9 re-query) --
 
 	@Test
 	void testAfterInsert_PeerInsertedBetweenPlanAndInsert_BothRowsFlaggedViaReQuery() throws DuplicateEntryException {
@@ -552,7 +553,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertFalse(plan1.getFlags().isEquivocation(), "store is empty when record1 is planned");
 
 		// A peer lands at the same chain position after plan() but before this node's own
-		// insertRecord() -- plan1's pre-insert snapshot never saw it.
+		// insertRecord() -- plan1's pre-insert snapshot never saw it (acceptance criterion 2).
 		String peerRecordId = recordId();
 		StoredTraceRecord peer = insertRecord(peerRecordId, digest("1"), 1L, TraceConstants.ZERO_HASH,
 				new IngestionFlags(false, false, false, false));
@@ -567,7 +568,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertTrue(store.findRecord(peer.getIdentity()).get().getFlags().isEquivocation());
 	}
 
-	// -- afterInsert: concurrent updates to the same peer, no lost update ---
+	// -- afterInsert: concurrent updates to the same peer, no lost update (acceptance criterion 1) ---
 
 	@Test
 	void testAfterInsert_ConcurrentUpdatesToSamePeer_BothSucceedViaRetry_NoLostUpdate() throws Exception {
@@ -611,7 +612,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 				"neither concurrent writer's correction may be lost to the other");
 	}
 
-	// -- afterInsert: best-effort, never propagates a neighbor-update failure ----------------
+	// -- afterInsert: best-effort, never propagates a neighbor-update failure (gotcha) ----------------
 
 	@Test
 	void testAfterInsert_NeighborUpdateThrows_LoggedAndOtherNeighborStillUpdated() throws DuplicateEntryException {

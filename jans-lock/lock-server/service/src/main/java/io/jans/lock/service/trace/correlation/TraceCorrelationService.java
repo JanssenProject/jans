@@ -48,8 +48,8 @@ import jakarta.inject.Inject;
  * through {@link TraceStore#updateRecordFlags}'s compare-and-swap, keyed off the version last
  * observed on that row; a lost race ({@link TraceStore#VERSION_CONFLICT_REASON}) re-reads the row
  * fresh, recomputes the flag(s) from that fresh state and retries, bounded by
- * {@code traceConfiguration.correlationRetryLimit} (default 3), so a lost race never overwrites
- * another writer's flag change. Exhausting the retry budget is logged at WARN and the update is given up on, same as any other best-effort
+ * {@code traceConfiguration.correlationRetryLimit} (default 3) , so a lost race never overwrites another writer's flag change. Exhausting the
+ * retry budget is logged at WARN and the update is given up on, same as any other best-effort
  * failure here.
  *
  * @author Yuriy Movchan

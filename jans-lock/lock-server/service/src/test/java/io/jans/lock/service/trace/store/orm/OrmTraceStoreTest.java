@@ -23,7 +23,7 @@ import io.jans.lock.service.trace.store.TraceStoreContractTest;
 
 /**
  * Runs the shared {@link TraceStoreContractTest} suite against {@link OrmTraceStore}, backed by
- * {@link FakeEntryManagerBehavior} instead of a live database.
+ * {@link FakeEntryManagerBehavior} instead of a live database (task 13 acceptance criteria).
  *
  * <p>Overrides the record fixture only to give each record a realistic {@code assertion} body: the
  * base fixture's {@code {"trace":{}}} placeholder has no {@code producer_chain} or

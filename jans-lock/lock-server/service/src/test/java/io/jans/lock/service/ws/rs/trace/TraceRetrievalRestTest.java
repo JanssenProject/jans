@@ -54,7 +54,8 @@ import jakarta.ws.rs.core.Response;
 
 /**
  * Tests for {@link TraceRestWebServiceImpl#getRecord(String, String)} and
- * {@link TraceRestWebServiceImpl#getExecution(String, String, int, int)} domain-scoped retrieval, the bare-identifier ambiguity cases, paging
+ * {@link TraceRestWebServiceImpl#getExecution(String, String, int, int)} (TRACE MVP task 21
+ * acceptance criteria): domain-scoped retrieval, the bare-identifier ambiguity cases, paging
  * validation, and the audit-logger call on every outcome. Backed by {@link InMemoryTraceStore}
  * pre-populated via {@link StoredTraceRecordFactory}; identity/domain services are mocked to
  * return fixed contexts.

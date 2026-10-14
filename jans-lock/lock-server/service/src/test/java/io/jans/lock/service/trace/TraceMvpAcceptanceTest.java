@@ -184,7 +184,7 @@ class TraceMvpAcceptanceTest {
 		assertEquals(1, harness.store().snapshot().size());
 	}
 
-	// -- stable producer identity -------------------------------------------------------
+	// -- task 24: stable producer identity -------------------------------------------------------
 
 	@Test
 	void stableProducerId_legacyNameSemverProducer_stillAccepted() {
@@ -859,7 +859,7 @@ class TraceMvpAcceptanceTest {
 		assertEquals(1L, next.getReceiptSequence());
 	}
 
-	// -- chain registration modes and multi-chain instances -----------------------------
+	// -- task 30: chain registration modes and multi-chain instances -----------------------------
 
 	private static final String SECOND_CHAIN = "chain-03JABC9Z0K";
 

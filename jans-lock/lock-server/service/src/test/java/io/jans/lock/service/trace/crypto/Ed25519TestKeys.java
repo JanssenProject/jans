@@ -15,7 +15,8 @@ import java.util.Map;
 import io.jans.lock.service.trace.testkit.TraceTestKeys;
 
 /**
- * Delegates to {@link TraceTestKeys} (the consolidated test kit, moved to the {@code testkit} package). Kept only so existing call sites keep compiling.
+ * Delegates to {@link TraceTestKeys} (task 22 consolidated test kit, moved to the
+ * {@code testkit} package). Kept only so call sites from tasks 07/09/16/19 keep compiling.
  *
  * @deprecated use {@link TraceTestKeys} in new code.
  */
