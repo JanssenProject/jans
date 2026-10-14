@@ -2580,6 +2580,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "jans_trace_uniffi"
+version = "0.0.0"
+dependencies = [
+ "jans-trace-core",
+ "thiserror",
+ "uniffi",
+]
+
+[[package]]
 name = "jiff"
 version = "0.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
