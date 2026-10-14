@@ -535,9 +535,11 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		dto.setProducerId(record.getIdentity().getProducerId());
 		dto.setRecordId(record.getIdentity().getRecordId());
 		dto.setAssertion(parseAssertion(record.getAssertionRaw()));
+		dto.setAssertionRaw(record.getAssertionRaw());
 		dto.setContentDigest(record.getContentDigest());
 		dto.setVerification(toVerificationResponse(record.getVerification()));
-		dto.setIngestion(toIngestionResponse(record.getReceipt(), record.getFlags()));
+		dto.setIngestion(toIngestionResponse(record.getReceipt(), record.getFlags(),
+				retrievalService.findReceiptState(record)));
 		return dto;
 	}
 
@@ -552,12 +554,14 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		return dto;
 	}
 
-	private TraceIngestionResponse toIngestionResponse(ReceiptEntry receipt, IngestionFlags flags) {
+	private TraceIngestionResponse toIngestionResponse(ReceiptEntry receipt, IngestionFlags flags,
+			String receiptState) {
 		TraceIngestionResponse dto = new TraceIngestionResponse();
 		dto.setReceiptSequence(receipt.getReceiptSequence());
 		dto.setReceivedAt(TraceTime.formatMillis(receipt.getReceivedAtMs()));
 		dto.setPrevReceiptHash(receipt.getPrevReceiptHash());
 		dto.setReceiptHash(receipt.getReceiptHash());
+		dto.setReceiptState(receiptState);
 		dto.setCoverageGapFlag(flags.isCoverageGap());
 		dto.setChainLinkFailureFlag(flags.isChainLinkFailure());
 		dto.setEquivocationFlag(flags.isEquivocation());

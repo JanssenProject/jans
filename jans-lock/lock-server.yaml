@@ -1404,8 +1404,9 @@ components:
       description: Producer key revocation request
     JsonNode:
       type: object
-      description: "The complete producer-signed assertion, as received (design §\
-        7)"
+      description: "The complete producer-signed assertion as a parsed JSON value.\
+        \ A re-emission: member order, whitespace and number formatting can differ\
+        \ from the received text. Use assertion_raw for the exact text"
     TraceExecutionResponse:
       type: object
       properties:
@@ -1449,6 +1450,11 @@ components:
         receipt_hash:
           type: string
           description: sha256:<hex> hash of this receipt
+        receipt_state:
+          type: string
+          description: "State of this record's receipt entry: COMMITTED, or PENDING\
+            \ while the claim is not yet settled"
+          example: COMMITTED
         coverage_gap_flag:
           type: boolean
           description: True when this record's predecessor in its producer chain is
@@ -1479,6 +1485,10 @@ components:
           example: 9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41
         assertion:
           $ref: "#/components/schemas/JsonNode"
+        assertion_raw:
+          type: string
+          description: "The exact accepted assertion text, byte for byte as received.\
+            \ Verify the signature and content_digest over its JCS form"
         content_digest:
           type: string
           description: sha256:<hex> digest of the full signed assertion

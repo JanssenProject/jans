@@ -6,6 +6,7 @@
 
 package io.jans.lock.service.trace.identity;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -37,9 +38,6 @@ public class EvidenceDomainResolver {
 
 	/** Design decision D-1: {@code evidence_domain_id} is an opaque 1-64 char id. */
 	private static final Pattern DOMAIN_ID_PATTERN = Pattern.compile("^[A-Za-z0-9._:-]{1,64}$");
-
-	/** Used only when no explicit binding matches; D-1 fixes this to {@code ["*"]}. */
-	private static final List<String> WILDCARD_PRODUCERS = java.util.Collections.singletonList("*");
 
 	@Inject
 	private AppConfiguration appConfiguration;
@@ -76,7 +74,7 @@ public class EvidenceDomainResolver {
 			allowedProducerIds = binding.getAllowedProducerIds();
 		} else if (traceConfiguration != null && StringUtils.isNotBlank(traceConfiguration.getDefaultEvidenceDomainId())) {
 			evidenceDomainId = traceConfiguration.getDefaultEvidenceDomainId();
-			allowedProducerIds = WILDCARD_PRODUCERS;
+			allowedProducerIds = defaultAllowedProducerIds(traceConfiguration);
 		} else {
 			throw new TraceValidationException(TraceErrorResponseType.CLIENT_NOT_BOUND, REASON_NO_DOMAIN_BINDING);
 		}
@@ -87,6 +85,16 @@ public class EvidenceDomainResolver {
 
 		return new TraceRequestContext(identity.getClientId(), evidenceDomainId, allowedProducerIds,
 				System.currentTimeMillis(), nodeId);
+	}
+
+	/**
+	 * Forwarding allowlist for the default-domain fallback. An unset or empty list yields an empty
+	 * allowlist, so an unbound client can submit nothing ({@code producer_not_allowed}); the
+	 * fallback never grants the {@code "*"} wildcard on its own.
+	 */
+	private List<String> defaultAllowedProducerIds(TraceConfiguration traceConfiguration) {
+		List<String> configured = traceConfiguration.getDefaultAllowedProducerIds();
+		return configured == null ? Collections.emptyList() : configured;
 	}
 
 	private TraceClientDomainBinding findBinding(TraceConfiguration traceConfiguration, String clientId) {

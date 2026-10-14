@@ -320,7 +320,7 @@ class TraceChainIntegrityTest {
 
 			String canonical = "{\"content_digest\":\"" + stored.getContentDigest() + "\",\"evidence_domain_id\":\""
 					+ DOMAIN_A + "\",\"prev_receipt_hash\":\"" + prevReceiptHash + "\",\"producer_id\":\"" + PRODUCER
-					+ "\",\"receipt_sequence\":" + stored.getReceipt().getReceiptSequence() + ",\"received_at\":\""
+					+ "\",\"receipt_profile\":\"tag:jans.io,2026:lock-trace-receipt-v1\",\"receipt_sequence\":" + stored.getReceipt().getReceiptSequence() + ",\"received_at\":\""
 					+ receivedAt + "\",\"record_id\":\"" + result.getRecordId() + "\"}";
 			String expected = "sha256:" + sha256Hex(canonical);
 			assertEquals(expected, stored.getReceipt().getReceiptHash());

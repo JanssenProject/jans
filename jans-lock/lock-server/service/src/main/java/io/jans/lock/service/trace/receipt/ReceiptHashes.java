@@ -11,6 +11,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.TraceTime;
 import io.jans.lock.service.trace.canon.CanonicalHashes;
 
@@ -20,6 +21,7 @@ import io.jans.lock.service.trace.canon.CanonicalHashes;
  *
  * <pre>
  * receiptHash = "sha256:" + hex(SHA-256(JCS({
+ *     "receipt_profile":    "tag:jans.io,2026:lock-trace-receipt-v1",
  *     "evidence_domain_id": domainId,
  *     "receipt_sequence":   receiptSequence,   // JSON integer
  *     "received_at":        receivedAt,        // JSON string, RFC 3339 UTC, 3 fraction digits (D-24)
@@ -31,7 +33,7 @@ import io.jans.lock.service.trace.canon.CanonicalHashes;
  * </pre>
  *
  * Member order above does not matter to the result: JCS (RFC 8785) sorts object members by key
- * before serializing, so any verifier that builds the same seven members reproduces the same
+ * before serializing, so any verifier that builds the same eight members reproduces the same
  * hash regardless of construction order.
  *
  * @author Yuriy Movchan
@@ -53,6 +55,7 @@ public final class ReceiptHashes {
 		Objects.requireNonNull(prevReceiptHash, "prevReceiptHash");
 
 		ObjectNode node = JsonNodeFactory.instance.objectNode();
+		node.put("receipt_profile", TraceConstants.RECEIPT_PROFILE);
 		node.put("evidence_domain_id", domainId);
 		node.put("receipt_sequence", receiptSequence);
 		node.put("received_at", TraceTime.formatMillis(receivedAtMs));

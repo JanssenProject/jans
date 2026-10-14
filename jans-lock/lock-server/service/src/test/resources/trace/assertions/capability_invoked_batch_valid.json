@@ -17,13 +17,13 @@
           "invocation_id": "i-1",
           "action": "Acme::Action::\"Pay\"",
           "resource_type": "Acme::Payment",
-          "outcome": "INVOKED"
+          "outcome": "SUCCESS"
         },
         {
           "invocation_id": "i-2",
           "action": "Acme::Action::\"Pay\"",
           "resource_type": "Acme::Payment",
-          "outcome": "FAILED"
+          "outcome": "FAILURE"
         }
       ],
       "enforcement_point_id": "gateway-001",

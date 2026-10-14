@@ -17,7 +17,7 @@
           "invocation_id": "i-1",
           "action": "Acme::Action::\"Pay\"",
           "resource_type": "Acme::Payment",
-          "outcome": "INVOKED"
+          "outcome": "SUCCESS"
         }
       ],
       "enforcement_point_id": "gateway-001",
@@ -28,7 +28,7 @@
           "jti": "9c9f2e77-9a3e-4b62-9a2a-2f6e6e2a9f3e"
         }
       ],
-      "outcome": "INVOKED"
+      "outcome": "SUCCESS"
     }
   },
   "producer_chain": {
