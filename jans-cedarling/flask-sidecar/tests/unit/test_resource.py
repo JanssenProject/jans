@@ -4,6 +4,7 @@ from main.domain.usecases.cedarling_authorize_usecase import (
     CedarlingAuthorizeUseCase,
     CedarlingAuthorizeInputPort,
 )
+from main.domain.entities.authzen import Decision
 
 
 class TestResource:
@@ -80,5 +81,41 @@ class TestResource:
                     },
                 },
                 context=None,
+                trace_headers=None,
             )
+        )
+
+    def test_evaluation_passes_trace_headers(self, client, mock_execute):
+        mock_execute.return_value = Decision(True, {})
+
+        response = client.post(
+            "/cedarling/evaluation",
+            json={
+                "subject": {"type": "JWT", "id": "1", "properties": {"tokens": []}},
+                "action": {"name": "Read"},
+                "resource": {
+                    "type": "Issue",
+                    "id": "1",
+                    "properties": {
+                        "cedar_entity_mapping": {
+                            "entity_type": "Jans::Issue",
+                            "id": "1",
+                        }
+                    },
+                },
+                "context": {},
+            },
+            headers={
+                "Audit-Trace-ID": "exec-1",
+                "Audit-Execution-Authority": "spiffe://example.org/agent",
+            },
+        )
+
+        assert response.status_code == 200
+        input_port = mock_execute.call_args.args[0]
+        assert isinstance(input_port, CedarlingAuthorizeInputPort)
+        assert input_port.trace_headers["Audit-Trace-ID"] == "exec-1"
+        assert (
+            input_port.trace_headers["Audit-Execution-Authority"]
+            == "spiffe://example.org/agent"
         )

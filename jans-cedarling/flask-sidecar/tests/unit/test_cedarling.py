@@ -1,7 +1,12 @@
 from unittest.mock import MagicMock
 
 from main.base.cedarling.cedarling import CedarlingInstance
-from main.domain.entities.authzen import CedarlingRequest, EntityMapping, Resource
+from main.domain.entities.authzen import (
+    CedarlingRequest,
+    EntityMapping,
+    Resource,
+    TraceCorrelation,
+)
 
 
 def make_instance(authorize_result, logs=None):
@@ -64,3 +69,16 @@ def test_authorize_without_policy_store_details():
     )
 
     assert decision.context == {"request_id": "req-2"}
+
+
+def test_authorize_returns_trace_execution_id():
+    authorize_result = MagicMock()
+    authorize_result.request_id.return_value = "req-3"
+    authorize_result.is_allowed.return_value = True
+    request = make_request()
+    request.trace = TraceCorrelation("exec-1", "spiffe://example.org/agent")
+
+    decision = make_instance(authorize_result).authorize(request)
+
+    assert decision.context == {"request_id": "req-3", "trace_execution_id": "exec-1"}
+    assert request.context == {}
