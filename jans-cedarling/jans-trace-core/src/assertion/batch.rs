@@ -10,6 +10,7 @@
 //! record again would merge duplicate members before the strict parser could see them, and
 //! would lose the bytes Lock must store.
 
+use std::borrow::Borrow;
 use std::cell::Cell;
 use std::fmt;
 
@@ -40,7 +41,12 @@ pub fn parse_batch(
 
 /// The bulk body for `records`: their own text joined into an array, never serialized
 /// again. Refuses a batch above the limits Lock applies, so the producer splits it first.
-pub fn batch_body(records: &[SignedAssertion], limits: &Limits) -> Result<String, SizeLimitError> {
+/// Takes owned or shared records (`SignedAssertion`, `Arc<SignedAssertion>`, references), so
+/// a caller never copies records just to join them.
+pub fn batch_body<R: Borrow<SignedAssertion>>(
+    records: &[R],
+    limits: &Limits,
+) -> Result<String, SizeLimitError> {
     if records.len() > limits.max_batch_records() {
         return Err(SizeLimitError::new(
             LimitKind::BatchRecords,
@@ -52,7 +58,7 @@ pub fn batch_body(records: &[SignedAssertion], limits: &Limits) -> Result<String
         if index > 0 {
             body.push(',');
         }
-        body.push_str(record.as_str());
+        body.push_str(record.borrow().as_str());
     }
     body.push(']');
     if body.len() > limits.max_batch_bytes() {
@@ -150,6 +156,8 @@ impl<'de> Visitor<'de> for RecordsVisitor<'_> {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use super::{ParseBatchError, batch_body, parse_batch};
     use crate::assertion::{ParseSignedAssertionError, SignedAssertion, UnsignedAssertion};
     use crate::json::JsonError;
@@ -337,9 +345,20 @@ mod tests {
             "parse_batch reads back what batch_body wrote"
         );
         assert_eq!(
-            batch_body(&[], &Limits::default()),
+            batch_body::<SignedAssertion>(&[], &Limits::default()),
             Ok("[]".to_owned()),
             "an empty batch is an empty array"
+        );
+    }
+
+    #[test]
+    fn batch_body_takes_shared_records_without_copying_them() {
+        // Bindings hold records behind `Arc`; joining them must not need owned values.
+        let records = [Arc::new(record("r-1")), Arc::new(record("r-2"))];
+        assert_eq!(
+            batch_body(&records, &Limits::default()),
+            Ok(format!("[{},{}]", records[0].as_str(), records[1].as_str())),
+            "shared records are joined like owned ones"
         );
     }
 
