@@ -234,16 +234,20 @@ public class UserResourceFilter extends BaseFilter {
 
         String inum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
         String clientId = introspectionResponse.getClientId();
+        String userId = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), ApiConstants.INTROSPECTION_USER_ID);
+        String userDN = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), ApiConstants.INTROSPECTION_USER_DN);
         String subject = introspectionResponse.getSubject();
         List<String> introspectionTokenScopes = introspectionResponse.getScope();
         List<String> resourceScopes = (resourceScopesByType == null) ? null
                 : resourceScopesByType.get(ProtectionScopeType.SUPER);
         log.info(
-                "UserResourceFilter::setDataInRequest() - inum:{}, clientId:{}, subject:{}, introspectionTokenScopes:{}, resourceScopesByType:{}, resourceScopes:{}",
-                inum, clientId, subject, introspectionTokenScopes, resourceScopesByType, resourceScopes);
+                "UserResourceFilter::setDataInRequest() - inum:{}, clientId:{}, userId:{}, userDN:{}, subject:{}, introspectionTokenScopes:{}, resourceScopesByType:{}, resourceScopes:{}",
+                inum, clientId, userId, userDN, subject, introspectionTokenScopes, resourceScopesByType, resourceScopes);
 
         servletRequest.setAttribute(ApiConstants.INTROSPECTION_CLIENTID, clientId);
         servletRequest.setAttribute(ApiConstants.INTROSPECTION_SUBJECT, subject);
+        servletRequest.setAttribute(ApiConstants.INTROSPECTION_USER_ID, userId);
+        servletRequest.setAttribute(ApiConstants.INTROSPECTION_USER_DN, userDN);
         servletRequest.setAttribute(ApiConstants.INTROSPECTION_INUM, inum);
         servletRequest.setAttribute(ApiConstants.INTROSPECTION_SCOPES, introspectionTokenScopes);
         servletRequest.setAttribute(ApiConstants.RESOURCE_SCOPES, resourceScopes);

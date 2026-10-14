@@ -846,9 +846,9 @@ public class UserResource extends BaseResource {
         boolean hasAdminScope = authUtil.containsAnyElement(getContextScope(servletRequest),
                 getResourceScope(servletRequest));
         logger.info(
-                "userHasAdminScope - hasAdminScope:{}, getContextClientId(servletRequest):{}, getContextSubject(servletRequest):{}, getContextScope(servletRequest):{}, getResourceScope(servletRequest):{}",
+                "userHasAdminScope - hasAdminScope:{}, getContextClientId(servletRequest):{}, getContextSubject(servletRequest):{}, getContextScope(servletRequest):{}, getResourceScope(servletRequest):{}, getContextUserId(servletRequest):{}, getContextUserDn(servletRequest):{}",
                 hasAdminScope, getContextClientId(servletRequest), getContextSubject(servletRequest),
-                getContextScope(servletRequest), getResourceScope(servletRequest));
+                getContextScope(servletRequest), getResourceScope(servletRequest), getContextUserId(servletRequest), getContextUserDn(servletRequest));
 
         return hasAdminScope;
     }
@@ -896,6 +896,24 @@ public class UserResource extends BaseResource {
                 .orElse(null);
     }
 
+    private String getContextUserId(HttpServletRequest servletRequest) {
+        String subject = null;
+        if (servletRequest == null) {
+            return subject;
+        }
+        return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_USER_ID))
+                .orElse(null);
+    }
+    
+    private String getContextUserDn(HttpServletRequest servletRequest) {
+        String subject = null;
+        if (servletRequest == null) {
+            return subject;
+        }
+        return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_USER_DN))
+                .orElse(null);
+    }
+    
     private boolean isRolePermissionExemptClient(String inum) {
         logger.debug(
                 " UserResource::isRolePermissionExemptClient() - inum:{}, StringUtils.isBlank(inum):{}, authUtil.isUserRolePermissionExcluded(inum):{}",

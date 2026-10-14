@@ -15,6 +15,8 @@ public class ApiConstants {
     public static final String DELETE_REQUEST = "DELETE";
 
     public static final String INTROSPECTION_INUM = "introspection.inum";
+    public static final String INTROSPECTION_USER_ID = "user_id";
+    public static final String INTROSPECTION_USER_DN = "user_dn";
     public static final String INTROSPECTION_CLIENTID = "introspection.clientId";
     public static final String INTROSPECTION_SUBJECT = "introspection.subject";
     public static final String INTROSPECTION_SCOPES  = "introspection.scopes";
