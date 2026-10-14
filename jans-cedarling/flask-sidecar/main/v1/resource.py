@@ -23,6 +23,7 @@ from main.infrastructure.services.cedarling_authzen_service import (
     CedarlingAuthzenService,
 )
 from main.domain.usecases.cedarling_authorize_usecase import (
+    TRACE_HEADERS,
     CedarlingAuthorizeUseCase,
     CedarlingAuthorizeInputPort,
 )
@@ -47,6 +48,7 @@ class Evaluation(MethodView):
                 payload["action"],
                 payload["resource"],
                 payload["context"],
+                {name: request.headers.get(name) for name in TRACE_HEADERS},
             )
         )
 
