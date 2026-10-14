@@ -19,41 +19,38 @@ import os
 import pytest
 from main.extensions import cedarling
 from unittest.mock import patch
+import json
 
 current_path = os.path.dirname(os.path.realpath(__file__))
+BOOTSTRAP_CONFIG_FILE = os.path.join(current_path, "cedarling_test_config.json")
+POLICY_STORE_PATH = os.path.join(current_path, "policy-store-multi-issuer")
+
+
+@pytest.fixture(scope="session")
+def bootstrap_config_file(tmp_path_factory):
+    with open(BOOTSTRAP_CONFIG_FILE, "r") as f:
+        config = json.loads(f.read())
+    config["CEDARLING_POLICY_STORE_LOCAL_FN"] = POLICY_STORE_PATH
+    config_file = tmp_path_factory.mktemp("cedarling") / "cedarling_test_config.json"
+    with open(config_file, "w") as f:
+        f.write(json.dumps(config))
+    return config_file
 
 
 @pytest.fixture(autouse=True)
 def env_setup(monkeypatch):
     monkeypatch.setenv("APP_MODE", "testing")
-    monkeypatch.setenv(
-        "CEDARLING_BOOTSTRAP_CONFIG_FILE",
-        os.path.join(current_path, "test_secrets", "cedarling_test_config.json"),
-    )
-    monkeypatch.setattr(cedarling, "initialize_cedarling", lambda: None)
-
-
-@pytest.fixture
-def mock_cedarling(monkeypatch):
-    monkeypatch.setattr(
-        cedarling,
-        "init_app",
-        lambda app: None,
-    )
 
 
 @pytest.fixture(scope="session")
-def app():
+def app(bootstrap_config_file):
     import os
 
     from main.app import create_app
 
     os.environ["APP_MODE"] = "testing"
-    os.environ["CEDARLING_BOOTSTRAP_CONFIG_FILE"] = os.path.join(
-        current_path, "test_secrets", "cedarling_test_config.json"
-    )
-    with patch.object(cedarling, "init_app", return_value=None):
-        app = create_app()
+    os.environ["CEDARLING_BOOTSTRAP_CONFIG_FILE"] = str(bootstrap_config_file)
+    app = create_app()
     ctx = app.app_context()
     ctx.push()
     yield app
@@ -61,5 +58,5 @@ def app():
 
 
 @pytest.fixture(scope="session")
-def client(app):
-    return app.test_client()
+def cedarling_instance(app):
+    return app.extensions["cedarling_client"]

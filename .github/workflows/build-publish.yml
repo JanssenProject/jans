@@ -145,10 +145,22 @@ jobs:
         fi
         echo "Purging Maven package version '$TARGET' so the deploy can re-publish it."
 
+        # Package API sporadically returns truncated bodies ("unexpected end of
+        # JSON input"); retry so one glitch doesn't abort the nightly publish.
+        gh_api_retry() {
+          local n
+          for n in 1 2 3 4 5; do
+            gh api "$@" && return 0
+            echo "gh api $* failed (attempt $n), retrying" >&2
+            sleep $((n * 5))
+          done
+          return 1
+        }
+
         page=1
         services=""
         while true; do
-          response=$(gh api -H "Accept: application/vnd.github+json" \
+          response=$(gh_api_retry -H "Accept: application/vnd.github+json" \
             /orgs/JanssenProject/packages?package_type=maven\&per_page=100\&page=$page)
           names=$(echo "$response" | jq -r '.[].name')
           if [ -z "$names" ]; then
@@ -165,7 +177,7 @@ jobs:
           # --paginate walks every page: the target version buried under newer
           # release versions is missed by a first-page-only lookup, leaving it to
           # fail the later deploy with 409 Conflict.
-          versions=$(gh api --paginate -H "Accept: application/vnd.github+json" \
+          versions=$(gh_api_retry --paginate -H "Accept: application/vnd.github+json" \
             "/orgs/JanssenProject/packages/maven/${service}/versions" \
             --jq '.[] | "\(.id) \(.name)"')
           [ -z "$versions" ] && continue

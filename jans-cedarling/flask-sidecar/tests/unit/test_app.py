@@ -1,5 +1,5 @@
 """
-Copyright (c) 2025, Gluu, Inc. 
+Copyright (c) 2025, Gluu, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ test_app
 ~~~~~~~~
 This module consists of testcases for :module:`main.app` module.
 """
+
 import os
 
 import pytest
@@ -34,20 +35,12 @@ import pytest
 def test_create_app(mode):
     """Test factory function that creates Flask's app."""
     from main.app import create_app
+
     os.environ["APP_MODE"] = mode
     config = {
-        "testing": {
-            "debug": True,
-            "testing": True
-        },
-        "development": {
-            "debug": True,
-            "testing": False
-        },
-        "production": {
-            "debug": False,
-            "testing": False
-        }
+        "testing": {"debug": True, "testing": True},
+        "development": {"debug": True, "testing": False},
+        "production": {"debug": False, "testing": False},
     }
     loaded_config = config.get(mode, config.get("testing"))
     app = create_app()

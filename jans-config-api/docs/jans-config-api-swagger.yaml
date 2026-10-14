@@ -16975,6 +16975,10 @@ components:
           type: array
           items:
             type: string
+        jwks:
+          type: string
+        jwksUri:
+          type: string
     PersistenceConfiguration:
       type: object
       properties:
@@ -17937,7 +17941,8 @@ components:
           description: Authorization token to access URI
         policyStoreUri:
           type: string
-          description: URI to policy store. Policy store can be json, zip or a .cjar archive (served by Lock under its policy_store.id)
+          description: "URI to policy store. Policy store can be json, zip or a .cjar\
+            \ archive (served by Lock under its policy_store.id)"
       description: List of Policy Sources
     SmtpConfiguration:
       type: object
@@ -18639,6 +18644,8 @@ components:
         statusListIndex:
           type: integer
           format: int32
+        redirectUri:
+          type: string
     TokenEntity:
       type: object
       properties:
