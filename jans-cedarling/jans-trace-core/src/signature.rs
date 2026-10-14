@@ -64,8 +64,8 @@ impl SignerError {
     }
 }
 
-/// Input is not a usable Ed25519 private key: not an unencrypted PKCS#8 PEM key (RFC 8410), or
-/// a raw secret that is not 32 bytes. The reason in `Display` names PEM labels, OIDs, positions
+/// Input is not a usable Ed25519 private key: expected an unencrypted PKCS#8 PEM key (RFC 8410)
+/// or a raw 32-byte secret. The reason in `Display` names PEM labels, OIDs, positions
 /// and lengths, never key bytes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
 #[error("private key is not a usable Ed25519 key: {reason}")]
@@ -77,7 +77,7 @@ pub struct PrivateKeyError {
 /// `Display` only, as for `SignatureEncodingReason`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
 enum PrivateKeyReason {
-    #[error("not an unencrypted PKCS#8 PEM key: {0}")]
+    #[error("expected an unencrypted PKCS#8 PEM key: {0}")]
     Pkcs8(ed25519_dalek::pkcs8::Error),
     #[error("raw secret is {0} bytes, expected 32")]
     WrongLength(usize),
@@ -370,7 +370,7 @@ mod tests {
         assert_eq!(
             key_err.to_string(),
             format!(
-                "private key is not a usable Ed25519 key: not an unencrypted PKCS#8 PEM key: {pem_err}"
+                "private key is not a usable Ed25519 key: expected an unencrypted PKCS#8 PEM key: {pem_err}"
             ),
             "`{{err}}` alone tells the operator what is wrong"
         );
