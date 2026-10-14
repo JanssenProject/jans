@@ -142,6 +142,8 @@ hash on the machine and binary that actually run. If it fails, disable TRACE ing
 
 ### Calling from other languages
 
+Java: [`jans-trace-java`](../bindings/jans-trace-java/README.md).
+
 Every JSON input is text (`&str`), so invalid UTF-8 cannot reach the core; bindings take a
 string, and their toolkit does the UTF-8 conversion. Read an HTTP body as UTF-8 and pass
 the text unchanged: do not parse it and serialize it again, and do not normalize Unicode.
