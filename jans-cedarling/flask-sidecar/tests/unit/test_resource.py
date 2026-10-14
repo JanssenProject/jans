@@ -1,10 +1,10 @@
 import pytest
 from unittest.mock import patch
-from main.domain.entities.authzen import Decision
 from main.domain.usecases.cedarling_authorize_usecase import (
     CedarlingAuthorizeUseCase,
     CedarlingAuthorizeInputPort,
 )
+from main.domain.entities.authzen import Decision
 
 
 class TestResource:
@@ -42,6 +42,49 @@ class TestResource:
             "access_evaluation_v1_endpoint": "http://localhost/cedarling/evaluation"
         }
 
+    def test_invalid_payload(self, client, mock_execute):
+        sut = self.makeSUT(client, mock_execute)
+        response = self.make_request(sut, "/cedarling/evaluation", "POST", json={})
+        assert response.status_code == 422
+
+    def test_successful_request(self, client, mock_execute, mock_json_input):
+        mock_execute.return_value = {"context": {}, "decision": True}
+        sut = self.makeSUT(client, mock_execute)
+        response = self.make_request(
+            sut, "/cedarling/evaluation", "POST", json=mock_json_input
+        )
+        assert response.json == {"context": {}, "decision": True}
+        assert response.status_code == 200
+        mock_execute.assert_called_once_with(
+            CedarlingAuthorizeInputPort(
+                subject={
+                    "type_field": "JWT",
+                    "id": "random_id",
+                    "properties": {
+                        "tokens": [
+                            {
+                                "mapping": "Jans::Access_token",
+                                "payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30",
+                            }
+                        ]
+                    },
+                },
+                action={"name": 'Jans::Action::"GET"'},
+                resource={
+                    "type_field": "property",
+                    "id": "random_id",
+                    "properties": {
+                        "cedar_entity_mapping": {
+                            "entity_type": "Jans::Application",
+                            "id": "random_id",
+                        }
+                    },
+                },
+                context=None,
+                trace_headers=None,
+            )
+        )
+
     def test_evaluation_passes_trace_headers(self, client, mock_execute):
         mock_execute.return_value = Decision(True, {})
 
@@ -54,7 +97,10 @@ class TestResource:
                     "type": "Issue",
                     "id": "1",
                     "properties": {
-                        "cedar_entity_mapping": {"entity_type": "Jans::Issue", "id": "1"}
+                        "cedar_entity_mapping": {
+                            "entity_type": "Jans::Issue",
+                            "id": "1",
+                        }
                     },
                 },
                 "context": {},
