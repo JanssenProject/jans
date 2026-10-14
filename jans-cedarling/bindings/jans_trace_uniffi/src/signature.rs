@@ -22,7 +22,7 @@ impl Ed25519Signer {
     pub fn from_pkcs8_pem(kid: String, pem: &str) -> Result<Arc<Self>, PrivateKeyError> {
         jans_trace_core::signature::Ed25519Signer::from_pkcs8_pem(kid, pem)
             .map(|signer| Arc::new(Self(signer)))
-            .map_err(|e| PrivateKeyError::InvalidPrivateKey(PrivateKeyCause::Core(e)))
+            .map_err(PrivateKeyError::InvalidPrivateKey)
     }
 
     /// Raw 32-byte secret.
@@ -33,13 +33,9 @@ impl Ed25519Signer {
     )]
     pub fn from_secret_bytes(kid: String, secret: Vec<u8>) -> Result<Arc<Self>, PrivateKeyError> {
         let secret = Zeroizing::new(secret);
-        let bytes: Zeroizing<[u8; 32]> =
-            Zeroizing::new(secret.as_slice().try_into().map_err(|_| {
-                PrivateKeyError::InvalidPrivateKey(PrivateKeyCause::WrongLength(secret.len()))
-            })?);
-        Ok(Arc::new(Self(
-            jans_trace_core::signature::Ed25519Signer::from_secret_bytes(kid, &bytes),
-        )))
+        jans_trace_core::signature::Ed25519Signer::from_secret_bytes(kid, &secret)
+            .map(|signer| Arc::new(Self(signer)))
+            .map_err(PrivateKeyError::InvalidPrivateKey)
     }
 
     /// The `kid` Lock selects the verification key by; must equal the assertion `kid`.
@@ -57,16 +53,7 @@ impl Ed25519Signer {
 #[uniffi(flat_error)]
 pub enum PrivateKeyError {
     #[error(transparent)]
-    InvalidPrivateKey(PrivateKeyCause),
-}
-
-/// The core reason, or a secret the core never sees because it has the wrong length.
-#[derive(Debug, Error)]
-pub enum PrivateKeyCause {
-    #[error(transparent)]
-    Core(jans_trace_core::signature::PrivateKeyError),
-    #[error("private key is not a 32-byte Ed25519 secret: {0} bytes")]
-    WrongLength(usize),
+    InvalidPrivateKey(jans_trace_core::signature::PrivateKeyError),
 }
 
 /// A 64-byte Ed25519 signature as carried in the top-level `signature` member.

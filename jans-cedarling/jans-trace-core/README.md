@@ -169,7 +169,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ---- Producer (Cedarling) ----
 
     // A fixed secret is for examples only; load real keys with `from_pkcs8_pem`.
-    let signer: Ed25519Signer = Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32]);
+    let signer: Ed25519Signer = Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32])?;
 
     // The core takes the record as JSON text, never as a parsed tree. How the producer
     // builds it does not matter, nor does formatting: the core canonicalizes before signing.
@@ -295,7 +295,7 @@ signatures or record content.
 | `PRODUCER_MISMATCH` | Signed `producer` differs from the expected one. |
 | `KID_MISMATCH` | Signed `kid` differs from the selected key, or the record's `kid` from the signer's. |
 | `INVALID_PUBLIC_KEY` | JWK or key bytes do not describe a usable Ed25519 public key. |
-| `INVALID_PRIVATE_KEY` | Not an unencrypted PKCS#8 PEM Ed25519 key. Not in the core design. |
+| `INVALID_PRIVATE_KEY` | Not an unencrypted PKCS#8 PEM Ed25519 key, or a raw secret that is not 32 bytes. Not in the core design. |
 | `INVALID_DIGEST` | Text is not `sha256:` plus 64 lowercase hex digits. |
 | `INVALID_RECEIPT` | `received_at` text or sequence and predecessor break the v1 profile, a clock reading is after year 9999, a stored receipt has an empty `producer_id` / `record_id`, or a saved chain head pairs sequence 0 and the sentinel wrongly. |
 | `RECEIPT_LINK_MISMATCH` | Receipt does not name the expected predecessor; with `ChainHead::append`, also another evidence domain or a sequence that is not the next one. |

@@ -422,7 +422,7 @@ mod tests {
     }"#;
 
     fn signer() -> Ed25519Signer {
-        Ed25519Signer::from_secret_bytes(KID, &[7; 32])
+        Ed25519Signer::from_secret_bytes(KID, &[7; 32]).expect("test secret is 32 bytes")
     }
 
     /// Stands in for an HSM that is unreachable.
@@ -658,7 +658,8 @@ mod tests {
 
     #[test]
     fn sign_rejects_kid_that_differs_from_signer() {
-        let other = Ed25519Signer::from_secret_bytes("key-other", &[7; 32]);
+        let other = Ed25519Signer::from_secret_bytes("key-other", &[7; 32])
+            .expect("test secret is 32 bytes");
         assert_eq!(
             unsigned(UNSIGNED).sign(&other),
             Err(SignError::KidMismatch {

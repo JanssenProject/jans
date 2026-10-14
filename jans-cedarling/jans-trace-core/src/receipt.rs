@@ -27,10 +27,10 @@ pub const RECEIPT_PROFILE: &str = "tag:jans.io,2026:lock-trace-receipt-v1";
 pub const ASSERTION_PROFILE: &str = "tag:jans.io,2026:trace-v1";
 
 /// Largest integer JCS reproduces exactly (numbers are IEEE-754 doubles).
-const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
+const MAX_SAFE_INTEGER: i64 = (1 << 53) - 1;
 
 /// Last millisecond the `YYYY-…` format can express: 9999-12-31T23:59:59.999Z.
-const MAX_RECEIVED_AT_MILLIS: u64 = 253_402_300_799_999;
+const MAX_RECEIVED_AT_MILLIS: i64 = 253_402_300_799_999;
 
 const MILLIS_PER_DAY: u64 = 86_400_000;
 
@@ -40,18 +40,27 @@ const MILLIS_PER_DAY: u64 = 86_400_000;
 pub struct ReceivedAt(String);
 
 impl ReceivedAt {
-    /// Formats Lock's clock reading; the core has no clock of its own.
-    pub fn from_unix_millis(unix_millis: u64) -> Result<Self, ReceivedAtRangeError> {
+    /// Formats Lock's clock reading; the core has no clock of its own. Signed, as clocks and
+    /// databases store it, so a value before the epoch is rejected here and not by each caller.
+    pub fn from_unix_millis(unix_millis: i64) -> Result<Self, ReceivedAtRangeError> {
+        let Ok(millis) = u64::try_from(unix_millis) else {
+            return Err(RangeReason::BeforeEpoch(unix_millis).into());
+        };
         if unix_millis > MAX_RECEIVED_AT_MILLIS {
-            return Err(ReceivedAtRangeError { unix_millis });
+            return Err(RangeReason::AfterLast(unix_millis).into());
         }
+        Ok(Self::from_epoch_millis(millis))
+    }
+
+    /// `unix_millis` is at most `MAX_RECEIVED_AT_MILLIS`.
+    fn from_epoch_millis(unix_millis: u64) -> Self {
         let (year, month, day) = civil_from_days(unix_millis / MILLIS_PER_DAY);
         let of_day = unix_millis % MILLIS_PER_DAY;
         let (hour, minute) = (of_day / 3_600_000, of_day / 60_000 % 60);
         let (second, milli) = (of_day / 1000 % 60, of_day % 1000);
-        Ok(Self(format!(
+        Self(format!(
             "{year:04}-{month:02}-{day:02}T{hour:02}:{minute:02}:{second:02}.{milli:03}Z"
-        )))
+        ))
     }
 
     #[must_use]
@@ -73,8 +82,8 @@ impl FromStr for ReceivedAt {
     /// is accepted, which also rejects dates like February 30.
     fn from_str(text: &str) -> Result<Self, Self::Err> {
         let millis = parse_received_at_millis(text)?;
-        match Self::from_unix_millis(millis) {
-            Ok(value) if value.0 == text => Ok(value),
+        match i64::try_from(millis).map(Self::from_unix_millis) {
+            Ok(Ok(value)) if value.0 == text => Ok(value),
             _ => Err(ReceivedAtReason::NotAnInstant.into()),
         }
     }
@@ -109,11 +118,26 @@ impl ParseReceivedAtError {
     }
 }
 
-/// A clock reading after 9999-12-31T23:59:59.999Z, which the receipt format cannot express.
+/// A clock reading the receipt format cannot express: before 1970 or after
+/// 9999-12-31T23:59:59.999Z.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
-#[error("{unix_millis} ms is after 9999-12-31T23:59:59.999Z, the last receipt timestamp")]
+#[error("{reason}")]
 pub struct ReceivedAtRangeError {
-    unix_millis: u64,
+    reason: RangeReason,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+enum RangeReason {
+    #[error("{0} ms is before 1970-01-01T00:00:00.000Z, the first receipt timestamp")]
+    BeforeEpoch(i64),
+    #[error("{0} ms is after 9999-12-31T23:59:59.999Z, the last receipt timestamp")]
+    AfterLast(i64),
+}
+
+impl From<RangeReason> for ReceivedAtRangeError {
+    fn from(reason: RangeReason) -> Self {
+        Self { reason }
+    }
 }
 
 impl ReceivedAtRangeError {
@@ -127,7 +151,7 @@ impl ReceivedAtRangeError {
 /// and no other sequence does, so a chain can neither start without it nor restart midway.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ReceiptPosition {
-    sequence: u64,
+    sequence: i64,
     prev_receipt_hash: Digest,
 }
 
@@ -139,8 +163,9 @@ impl ReceiptPosition {
     };
 
     /// Sequence and predecessor exactly as Lock assigned or stored them. Lock allocates the
-    /// sequence (core design §7.4); this only refuses pairs outside the v1 chain.
-    pub fn new(sequence: u64, prev_receipt_hash: Digest) -> Result<Self, ReceiptPositionError> {
+    /// sequence (core design §7.4); this only refuses pairs outside the v1 chain. Signed, as
+    /// databases store it, so a negative value is rejected here and not by each caller.
+    pub fn new(sequence: i64, prev_receipt_hash: Digest) -> Result<Self, ReceiptPositionError> {
         if !(1..=MAX_SAFE_INTEGER).contains(&sequence) {
             return Err(PositionReason::SequenceOutOfRange(sequence).into());
         }
@@ -155,7 +180,7 @@ impl ReceiptPosition {
     }
 
     #[must_use]
-    pub const fn sequence(&self) -> u64 {
+    pub const fn sequence(&self) -> i64 {
         self.sequence
     }
 
@@ -176,7 +201,7 @@ pub struct ReceiptPositionError {
 enum PositionReason {
     /// Beyond 2^53-1 JCS would silently change the number.
     #[error("sequence {0} is outside 1..=2^53-1")]
-    SequenceOutOfRange(u64),
+    SequenceOutOfRange(i64),
     #[error("sequence 1 must name the genesis sentinel")]
     GenesisWithPredecessor,
     #[error("only sequence 1 may name the genesis sentinel")]
@@ -354,7 +379,7 @@ impl ReceiptCommitment {
 
 enum Member<'a> {
     Text(&'a str),
-    Integer(u64),
+    Integer(i64),
 }
 
 /// The end of an evidence-domain chain verified so far: only the last sequence and hash,
@@ -364,7 +389,7 @@ enum Member<'a> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChainHead {
     evidence_domain_id: String,
-    sequence: u64,
+    sequence: i64,
     hash: Digest,
 }
 
@@ -385,10 +410,10 @@ impl ChainHead {
     /// audited chain cannot write. Refuses only pairs no walk produces.
     pub fn resume(
         evidence_domain_id: String,
-        sequence: u64,
+        sequence: i64,
         hash: Digest,
     ) -> Result<Self, ChainHeadError> {
-        if sequence > MAX_SAFE_INTEGER {
+        if !(0..=MAX_SAFE_INTEGER).contains(&sequence) {
             return Err(HeadReason::SequenceOutOfRange(sequence).into());
         }
         match (sequence == 0, hash == Digest::GENESIS) {
@@ -430,7 +455,7 @@ impl ChainHead {
 
     /// 0 while the chain is empty.
     #[must_use]
-    pub const fn sequence(&self) -> u64 {
+    pub const fn sequence(&self) -> i64 {
         self.sequence
     }
 
@@ -451,7 +476,7 @@ pub struct ChainHeadError {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
 enum HeadReason {
     #[error("sequence {0} is outside 0..=2^53-1")]
-    SequenceOutOfRange(u64),
+    SequenceOutOfRange(i64),
     #[error("sequence 0 must carry the genesis sentinel")]
     EmptyWithHash,
     #[error("only sequence 0 may carry the genesis sentinel")]
@@ -514,7 +539,7 @@ enum LinkReason {
     #[error("it belongs to another evidence domain")]
     OtherDomain,
     #[error("sequence {sequence} does not follow {previous}")]
-    NotNextSequence { sequence: u64, previous: u64 },
+    NotNextSequence { sequence: i64, previous: i64 },
 }
 
 impl From<LinkReason> for ReceiptLinkError {
@@ -610,13 +635,13 @@ fn days_from_civil(year: u64, month: u64, day: u64) -> Option<u64> {
 #[cfg(test)]
 mod tests {
     use super::{
-        ChainHead, ChainHeadError, HeadReason, LinkReason, ParseReceivedAtError, ReceiptCommitment,
-        ReceiptLinkError, ReceiptPosition, ReceiptPositionError, ReceivedAt, ReceivedAtRangeError,
-        StoredReceipt, StoredReceiptError, StoredReceiptReason,
+        ChainHead, ChainHeadError, HeadReason, LinkReason, ParseReceivedAtError, RangeReason,
+        ReceiptCommitment, ReceiptLinkError, ReceiptPosition, ReceiptPositionError, ReceivedAt,
+        ReceivedAtRangeError, StoredReceipt, StoredReceiptError, StoredReceiptReason,
     };
     use crate::Digest;
 
-    const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
+    const MAX_SAFE_INTEGER: i64 = (1 << 53) - 1;
 
     fn received_at(text: &str) -> ReceivedAt {
         text.parse().expect("test timestamp is normalized")
@@ -641,7 +666,7 @@ mod tests {
         commitment(stored())
     }
 
-    fn position(sequence: u64, prev_receipt_hash: Digest) -> ReceiptPosition {
+    fn position(sequence: i64, prev_receipt_hash: Digest) -> ReceiptPosition {
         ReceiptPosition::new(sequence, prev_receipt_hash).expect("test position is valid")
     }
 
@@ -661,7 +686,8 @@ mod tests {
         use crate::key::PublicKey;
         use crate::signature::Ed25519Signer;
 
-        let signer = Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32]);
+        let signer = Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32])
+            .expect("test secret is 32 bytes");
         let unsigned = r#"{"producer":"cedarling-fleet-1","kid":"key-2026-01","record_id":"r-1"}"#;
         let verified = UnsignedAssertion::parse(unsigned, &Limits::default())
             .expect("record is well formed")
@@ -960,7 +986,7 @@ mod tests {
 
     struct ResumeCase {
         name: &'static str,
-        sequence: u64,
+        sequence: i64,
         hash: Digest,
         reason: HeadReason,
     }
@@ -985,6 +1011,12 @@ mod tests {
                 sequence: MAX_SAFE_INTEGER + 1,
                 hash: Digest::sha256(b"receipt"),
                 reason: HeadReason::SequenceOutOfRange(MAX_SAFE_INTEGER + 1),
+            },
+            ResumeCase {
+                name: "a negative sequence",
+                sequence: -1,
+                hash: Digest::sha256(b"receipt"),
+                reason: HeadReason::SequenceOutOfRange(-1),
             },
         ];
         for case in cases {
@@ -1179,7 +1211,7 @@ mod tests {
 
     struct PositionCase {
         name: &'static str,
-        sequence: u64,
+        sequence: i64,
         prev_receipt_hash: Digest,
         reason: super::PositionReason,
     }
@@ -1193,6 +1225,12 @@ mod tests {
                 sequence: 0,
                 prev_receipt_hash: Digest::GENESIS,
                 reason: super::PositionReason::SequenceOutOfRange(0),
+            },
+            PositionCase {
+                name: "negative sequence",
+                sequence: -1,
+                prev_receipt_hash: previous,
+                reason: super::PositionReason::SequenceOutOfRange(-1),
             },
             PositionCase {
                 name: "sequence beyond 2^53-1",
@@ -1333,7 +1371,7 @@ mod tests {
     }
 
     struct MillisCase {
-        millis: u64,
+        millis: i64,
         text: &'static str,
     }
 
@@ -1367,13 +1405,22 @@ mod tests {
             );
             assert_eq!(value.to_string(), case.text, "Display is the profile text");
         }
-        for millis in [253_402_300_800_000, u64::MAX] {
+        for millis in [253_402_300_800_000, i64::MAX] {
             assert_eq!(
                 ReceivedAt::from_unix_millis(millis),
                 Err(ReceivedAtRangeError {
-                    unix_millis: millis
+                    reason: RangeReason::AfterLast(millis)
                 }),
                 "{millis} ms is after year 9999"
+            );
+        }
+        for millis in [-1, i64::MIN] {
+            assert_eq!(
+                ReceivedAt::from_unix_millis(millis),
+                Err(ReceivedAtRangeError {
+                    reason: RangeReason::BeforeEpoch(millis)
+                }),
+                "{millis} ms is before 1970"
             );
         }
     }
@@ -1415,7 +1462,7 @@ mod tests {
                 expected: "INVALID_RECEIPT",
             },
             CodeCase {
-                actual: ReceivedAt::from_unix_millis(u64::MAX)
+                actual: ReceivedAt::from_unix_millis(i64::MAX)
                     .expect_err("range")
                     .code(),
                 expected: "INVALID_RECEIPT",

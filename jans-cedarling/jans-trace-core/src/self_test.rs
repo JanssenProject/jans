@@ -115,7 +115,9 @@ fn check_sha256() -> bool {
 }
 
 fn check_ed25519() -> bool {
-    let signer = Ed25519Signer::from_secret_bytes("self-test", &RFC8032_SECRET);
+    let Ok(signer) = Ed25519Signer::from_secret_bytes("self-test", &RFC8032_SECRET) else {
+        return false;
+    };
     let Ok(signature) = signer.sign(b"") else {
         return false;
     };

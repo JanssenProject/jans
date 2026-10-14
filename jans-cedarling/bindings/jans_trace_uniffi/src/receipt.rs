@@ -24,11 +24,6 @@ pub fn receipt_profile() -> String {
     core::RECEIPT_PROFILE.to_owned()
 }
 
-/// Sequences crossing back to Java are at most 2^53-1, so they always fit `i64`.
-fn to_i64(value: u64) -> i64 {
-    i64::try_from(value).unwrap_or(i64::MAX)
-}
-
 /// Lock's receipt time, always `YYYY-MM-DDTHH:MM:SS.sssZ` for a real UTC instant.
 #[derive(Debug, PartialEq, Eq, Hash, uniffi::Object)]
 #[uniffi::export(Display, Eq, Hash)]
@@ -39,12 +34,9 @@ impl ReceivedAt {
     /// Formats Lock's clock reading.
     #[uniffi::constructor]
     pub fn from_unix_millis(unix_millis: i64) -> Result<Arc<Self>, ReceivedAtRangeError> {
-        let millis = u64::try_from(unix_millis).map_err(|_| {
-            ReceivedAtRangeError::InvalidReceipt(ReceivedAtRangeCause::BeforeEpoch(unix_millis))
-        })?;
-        core::ReceivedAt::from_unix_millis(millis)
+        core::ReceivedAt::from_unix_millis(unix_millis)
             .map(|received_at| Arc::new(Self(received_at)))
-            .map_err(|e| ReceivedAtRangeError::InvalidReceipt(ReceivedAtRangeCause::Core(e)))
+            .map_err(ReceivedAtRangeError::InvalidReceipt)
     }
 
     /// Only text that formats back unchanged, so dates like February 30 are rejected.
@@ -83,16 +75,13 @@ impl ReceiptPosition {
         sequence: i64,
         prev_receipt_hash: &Digest,
     ) -> Result<Arc<Self>, ReceiptPositionError> {
-        let sequence = u64::try_from(sequence).map_err(|_| {
-            ReceiptPositionError::InvalidReceipt(ReceiptPositionCause::Negative(sequence))
-        })?;
         core::ReceiptPosition::new(sequence, prev_receipt_hash.0)
             .map(|position| Arc::new(Self(position)))
-            .map_err(|e| ReceiptPositionError::InvalidReceipt(ReceiptPositionCause::Core(e)))
+            .map_err(ReceiptPositionError::InvalidReceipt)
     }
 
     pub fn sequence(&self) -> i64 {
-        to_i64(self.0.sequence())
+        self.0.sequence()
     }
 
     pub fn prev_receipt_hash(&self) -> Arc<Digest> {
@@ -212,11 +201,9 @@ impl ChainHead {
         sequence: i64,
         hash: &Digest,
     ) -> Result<Arc<Self>, ChainHeadError> {
-        let sequence = u64::try_from(sequence)
-            .map_err(|_| ChainHeadError::InvalidReceipt(ChainHeadCause::Negative(sequence)))?;
         core::ChainHead::resume(evidence_domain_id, sequence, hash.0)
             .map(|head| Arc::new(Self(head)))
-            .map_err(|e| ChainHeadError::InvalidReceipt(ChainHeadCause::Core(e)))
+            .map_err(ChainHeadError::InvalidReceipt)
     }
 
     /// Checks that `receipt` continues this chain and returns the head after it.
@@ -233,7 +220,7 @@ impl ChainHead {
 
     /// 0 while the chain is empty.
     pub fn sequence(&self) -> i64 {
-        to_i64(self.0.sequence())
+        self.0.sequence()
     }
 
     /// The genesis sentinel while the chain is empty.
@@ -247,16 +234,7 @@ impl ChainHead {
 #[uniffi(flat_error)]
 pub enum ReceivedAtRangeError {
     #[error(transparent)]
-    InvalidReceipt(ReceivedAtRangeCause),
-}
-
-/// The core reason, or a clock reading the core never sees because it is negative.
-#[derive(Debug, Error)]
-pub enum ReceivedAtRangeCause {
-    #[error(transparent)]
-    Core(core::ReceivedAtRangeError),
-    #[error("{0} ms is before 1970-01-01T00:00:00.000Z, the first receipt timestamp")]
-    BeforeEpoch(i64),
+    InvalidReceipt(core::ReceivedAtRangeError),
 }
 
 /// Variants are named after the core error codes.
@@ -272,16 +250,7 @@ pub enum ParseReceivedAtError {
 #[uniffi(flat_error)]
 pub enum ReceiptPositionError {
     #[error(transparent)]
-    InvalidReceipt(ReceiptPositionCause),
-}
-
-/// The core reason, or a sequence the core never sees because it is negative.
-#[derive(Debug, Error)]
-pub enum ReceiptPositionCause {
-    #[error(transparent)]
-    Core(core::ReceiptPositionError),
-    #[error("receipt position is not valid in a v1 chain: sequence {0} is outside 1..=2^53-1")]
-    Negative(i64),
+    InvalidReceipt(core::ReceiptPositionError),
 }
 
 /// Variants are named after the core error codes.
@@ -297,16 +266,7 @@ pub enum StoredReceiptError {
 #[uniffi(flat_error)]
 pub enum ChainHeadError {
     #[error(transparent)]
-    InvalidReceipt(ChainHeadCause),
-}
-
-/// The core reason, or a sequence the core never sees because it is negative.
-#[derive(Debug, Error)]
-pub enum ChainHeadCause {
-    #[error(transparent)]
-    Core(core::ChainHeadError),
-    #[error("saved chain head is not valid: sequence {0} is outside 0..=2^53-1")]
-    Negative(i64),
+    InvalidReceipt(core::ChainHeadError),
 }
 
 /// Variants are named after the core error codes.

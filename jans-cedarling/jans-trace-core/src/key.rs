@@ -40,7 +40,7 @@ enum PublicKeyReason {
     MissingX,
     #[error("{0}")]
     Base64(base64::DecodeError),
-    #[error("decoded `x` is {0} bytes, expected 32")]
+    #[error("key is {0} bytes, expected 32")]
     WrongLength(usize),
     #[error("bytes are not a compressed Edwards25519 point")]
     NotOnCurve,
@@ -93,7 +93,12 @@ pub struct PublicKey(VerifyingKey);
 impl PublicKey {
     /// Refuses small-order keys: `verify_strict` would reject every signature under them, so
     /// a registration error is better than silent verification failures later.
-    pub fn from_bytes(bytes: &[u8; 32]) -> Result<Self, PublicKeyError> {
+    /// Takes a slice and checks its length here, so every caller (bindings included) gets the
+    /// same rule and message.
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, PublicKeyError> {
+        let bytes: &[u8; 32] = bytes
+            .try_into()
+            .map_err(|_| PublicKeyReason::WrongLength(bytes.len()))?;
         // `SignatureError` is opaque by design (its `Display` is "signature error"), and point
         // decompression is the only way `from_bytes` fails, so naming that cause loses nothing.
         let key = VerifyingKey::from_bytes(bytes)
@@ -125,11 +130,7 @@ impl PublicKey {
             return Err(PublicKeyReason::PrivateMember.into());
         }
         let x = text("x").ok_or(PublicKeyReason::MissingX)?;
-        let bytes: [u8; 32] = URL_SAFE_NO_PAD
-            .decode(x)
-            .map_err(PublicKeyReason::Base64)?
-            .try_into()
-            .map_err(|bytes: Vec<u8>| PublicKeyReason::WrongLength(bytes.len()))?;
+        let bytes = URL_SAFE_NO_PAD.decode(x).map_err(PublicKeyReason::Base64)?;
         Ok(Self::from_bytes(&bytes)?)
     }
 
@@ -207,7 +208,8 @@ mod tests {
 
     #[test]
     fn jwk_and_raw_bytes_give_the_same_key() {
-        let signer = Ed25519Signer::from_secret_bytes("k", &[7; 32]);
+        let signer =
+            Ed25519Signer::from_secret_bytes("k", &[7; 32]).expect("test secret is 32 bytes");
         let raw = PublicKey::from_bytes(&signer.public_key_bytes()).expect("signer key is valid");
         let x = URL_SAFE_NO_PAD.encode(signer.public_key_bytes());
         let from_jwk =
@@ -223,7 +225,8 @@ mod tests {
 
     #[test]
     fn verifies_only_matching_signatures() {
-        let signer = Ed25519Signer::from_secret_bytes("k", &[7; 32]);
+        let signer =
+            Ed25519Signer::from_secret_bytes("k", &[7; 32]).expect("test secret is 32 bytes");
         let key = PublicKey::from_bytes(&signer.public_key_bytes()).expect("signer key is valid");
         let signature =
             SignatureValue::from_bytes(signer.sign(b"message").expect("in-memory signer"));
@@ -366,7 +369,7 @@ mod tests {
             .expect_err("3 bytes are not an Ed25519 key");
         assert_eq!(
             err.to_string(),
-            "public key is not a valid Ed25519 key: decoded `x` is 3 bytes, expected 32",
+            "public key is not a valid Ed25519 key: key is 3 bytes, expected 32",
             "`{{err}}` alone tells the operator what is wrong"
         );
         assert!(
@@ -393,5 +396,18 @@ mod tests {
             "DUPLICATE_MEMBER",
             "JSON failures keep their own code"
         );
+    }
+
+    #[test]
+    fn from_bytes_refuses_a_wrong_length() {
+        for length in [0, 31, 33] {
+            assert_eq!(
+                PublicKey::from_bytes(&vec![9; length]),
+                Err(PublicKeyError {
+                    reason: PublicKeyReason::WrongLength(length)
+                }),
+                "{length} bytes are not an Ed25519 public key"
+            );
+        }
     }
 }

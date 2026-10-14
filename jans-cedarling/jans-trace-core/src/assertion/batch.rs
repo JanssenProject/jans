@@ -171,7 +171,10 @@ mod tests {
         );
         UnsignedAssertion::parse(&unsigned, &Limits::default())
             .expect("test record is well formed")
-            .sign(&Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32]))
+            .sign(
+                &Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32])
+                    .expect("test secret is 32 bytes"),
+            )
             .expect("in-memory signer signs")
     }
 

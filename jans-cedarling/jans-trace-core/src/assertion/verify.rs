@@ -120,7 +120,7 @@ mod tests {
     }"#;
 
     fn signer() -> Ed25519Signer {
-        Ed25519Signer::from_secret_bytes(KID, &[7; 32])
+        Ed25519Signer::from_secret_bytes(KID, &[7; 32]).expect("test secret is 32 bytes")
     }
 
     fn public_key() -> PublicKey {
@@ -208,7 +208,9 @@ mod tests {
         let signature = produced.signature().to_string();
         let pretty = with_signature(UNSIGNED, &signature);
         let other_key = PublicKey::from_bytes(
-            &Ed25519Signer::from_secret_bytes(KID, &[8; 32]).public_key_bytes(),
+            &Ed25519Signer::from_secret_bytes(KID, &[8; 32])
+                .expect("test secret is 32 bytes")
+                .public_key_bytes(),
         )
         .expect("other key is valid");
         let foreign = sign(&UNSIGNED.replace("AUTHORIZATION_DECISION", "CAPABILITY_INVOKED"))

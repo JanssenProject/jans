@@ -33,12 +33,9 @@ impl PublicKey {
         reason = "UniFFI maps `Vec<u8>` to `byte[]`; `&[u8]` would become a `java.nio.ByteBuffer`"
     )]
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Arc<Self>, PublicKeyError> {
-        let bytes: &[u8; 32] = bytes.as_slice().try_into().map_err(|_| {
-            PublicKeyError::InvalidPublicKey(PublicKeyCause::WrongLength(bytes.len()))
-        })?;
-        jans_trace_core::key::PublicKey::from_bytes(bytes)
+        jans_trace_core::key::PublicKey::from_bytes(&bytes)
             .map(|key| Arc::new(Self(key)))
-            .map_err(|e| PublicKeyError::InvalidPublicKey(PublicKeyCause::Core(e)))
+            .map_err(PublicKeyError::InvalidPublicKey)
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -56,16 +53,7 @@ impl PublicKey {
 #[uniffi(flat_error)]
 pub enum PublicKeyError {
     #[error(transparent)]
-    InvalidPublicKey(PublicKeyCause),
-}
-
-/// The core reason, or a byte slice the core never sees because it has the wrong length.
-#[derive(Debug, Error)]
-pub enum PublicKeyCause {
-    #[error(transparent)]
-    Core(jans_trace_core::key::PublicKeyError),
-    #[error("public key is not a valid Ed25519 key: {0} bytes, expected 32")]
-    WrongLength(usize),
+    InvalidPublicKey(jans_trace_core::key::PublicKeyError),
 }
 
 /// Variants are named after the core error codes.
