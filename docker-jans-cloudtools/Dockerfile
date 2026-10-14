@@ -6,7 +6,7 @@ FROM bellsoft/liberica-openjre-alpine:17.0.20@sha256:b052d402e9146bca23524922cdb
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache openssl python3 curl tini py3-cryptography py3-psycopg2 \
+    && apk add --no-cache openssl python3 curl tini py3-psycopg2 \
     && apk add --no-cache --virtual .build-deps wget git
 
 # ===========
@@ -26,7 +26,7 @@ RUN wget -nv ${CN_SOURCE_URL} -P /app/javalibs/
 # Assets sync
 # ===========
 
-ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
+ARG JANS_SOURCE_VERSION=c4b4b52d4c3753d76f16d55df544a433f7c8732c
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 
 # note that as we're pulling from a monorepo (with multiple project in it)
