@@ -16,14 +16,15 @@ import io.jans.lock.service.trace.TraceTime;
 import io.jans.lock.service.trace.canon.CanonicalHashes;
 
 /**
- * The receipt-hash function of the receipt chain (design §9):
+ * The receipt-hash function of the receipt chain (design §9, TRACE MVP design decision D-8 step 3,
+ * D-13, D-24):
  *
  * <pre>
  * receiptHash = "sha256:" + hex(SHA-256(JCS({
  *     "receipt_profile":    "tag:jans.io,2026:lock-trace-receipt-v1",
  *     "evidence_domain_id": domainId,
  *     "receipt_sequence":   receiptSequence,   // JSON integer
- *     "received_at":        receivedAt,        // JSON string, RFC 3339 UTC, 3 fraction digits
+ *     "received_at":        receivedAt,        // JSON string, RFC 3339 UTC, 3 fraction digits (D-24)
  *     "producer_id":        producerId,
  *     "record_id":          recordId,
  *     "content_digest":     contentDigest,

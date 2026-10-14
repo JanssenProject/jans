@@ -40,7 +40,7 @@ import jakarta.inject.Inject;
 
 /**
  * Turns an incoming TRACE request body into a {@link ParsedAssertion}: bounded reading, strict
- * UTF-8 decoding, and JSON parsing under the request limits (design §14), all
+ * UTF-8 decoding, and JSON parsing under the request limits (design §14, decision D-12), all
  * before any cryptographic work is done. Common-field validation (design §7.1) is
  * {@link CommonAssertionValidator}'s job, not this class's.
  *

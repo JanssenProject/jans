@@ -8,8 +8,8 @@ package io.jans.lock.service.trace.error;
 
 /**
  * Thrown by the TRACE store/ingestion layer when a persistence operation fails or a
- * multi-node allocation protocol gives up after its retry limit. Always maps
- * to {@code storage_failure} / HTTP 500; see
+ * multi-node allocation protocol (design decision D-8) gives up after its retry limit. Always maps
+ * to {@code storage_failure} / HTTP 500 (design decision D-10); see
  * {@link TraceErrors#toWebApplicationException}.
  *
  * <p>{@link #getReason()} is a short stable token for the structured error body's {@code reason}

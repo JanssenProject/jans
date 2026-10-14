@@ -15,8 +15,8 @@ import jakarta.ws.rs.core.Response;
 
 /**
  * Translates the TRACE-pipeline runtime exceptions into the structured JSON error body produced by
- * {@link ErrorResponseFactory}. This is a plain helper called by the TRACE
- * REST implementations — it is <strong>not</strong> a JAX-RS
+ * {@link ErrorResponseFactory} (design decision D-10). This is a plain helper called by the TRACE
+ * REST implementations (tasks 15, 20, 21) — it is <strong>not</strong> a JAX-RS
  * {@code ExceptionMapper}; Lock has none, and adding one would change the error behavior of
  * unrelated endpoints.
  *
@@ -68,7 +68,8 @@ public final class TraceErrors {
 	/**
 	 * Classifies a TRACE-pipeline runtime exception into {@code (type, reason)} without building a
 	 * {@link WebApplicationException} or logging, for callers that embed the structured error body
-	 * inside a larger response rather than throwing it (bulk ingestion per-item results). Uses the same mapping {@link #toWebApplicationException} applies.
+	 * inside a larger response rather than throwing it (TRACE MVP D-16, bulk ingestion per-item
+	 * results). Uses the same mapping {@link #toWebApplicationException} applies.
 	 *
 	 * @param ex any runtime exception; one not raised by the TRACE packages classifies as
 	 *           {@link CommonErrorResponseType#UNKNOWN_ERROR}

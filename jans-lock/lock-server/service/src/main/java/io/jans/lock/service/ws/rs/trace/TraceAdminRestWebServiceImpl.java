@@ -55,7 +55,7 @@ import jakarta.ws.rs.core.Response;
 
 /**
  * Admin REST implementation for TRACE producer-key and producer-chain registration, listing and
- * revocation (design §6, §8). Every method follows the same shape: check
+ * revocation (design §6, §8, TRACE MVP task 15). Every method follows the same shape: check
  * {@code traceConfiguration.enabled} &rarr; resolve the submitting client's identity and evidence
  * domain &rarr; delegate to the relevant registry &rarr; map the result to a wire DTO. Every
  * {@link RuntimeException} raised by the TRACE packages is translated to the structured error

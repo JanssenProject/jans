@@ -18,10 +18,10 @@ import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 
 /**
- * The output of {@link TraceCorrelationService#plan}: everything the ingestion pipeline
+ * The output of {@link TraceCorrelationService#plan}: everything the ingestion pipeline (task 19)
  * needs to build the {@code StoredTraceRecord} it is about to insert, plus the neighbor rows
  * {@link TraceCorrelationService#afterInsert} must update once the insert succeeds (design §8,
- * §9).
+ * §9, design decisions D-5, D-6, D-9, D-11).
  *
  * @author Yuriy Movchan
  */

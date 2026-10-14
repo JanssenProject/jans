@@ -31,21 +31,23 @@ import io.jans.lock.service.trace.model.VerificationResult;
 import io.jans.lock.service.trace.store.TraceKeys;
 
 /**
- * Pure mapping between the {@link StoredTraceRecord} value type and the {@link TraceRecordEntry} ORM entity, in both directions.
+ * Pure mapping between the task 12 {@link StoredTraceRecord} value type and the task 03
+ * {@link TraceRecordEntry} ORM entity, in both directions (design decisions D-6, D-7).
  *
  * <p>Receipts, chain registrations and producer keys need no such mapping: {@code TraceStore}
  * exposes their jans-orm entities ({@code TraceReceiptEntry}, {@code TraceChainEntry},
  * {@code TraceProducerKeyEntry}) directly, unlike {@code StoredTraceRecord} — the two shapes
  * differ enough (structured identities vs. flat hashed keys, defensive copies on read) that a
- * dedicated value type still earns its keep for records.
+ * dedicated value type still earns its keep for records (deviation from task 12's original
+ * value-type-for-every-row design, approved 2026; see the TRACE MVP task notes).
  *
- * <p>{@code TraceRecordEntry} only carries <em>hashed</em> keys for the producer chain
+ * <p>{@code TraceRecordEntry} (T-1) only carries <em>hashed</em> keys for the producer chain
  * identity and token references ({@code jansTraceChainKey}, {@code jansTraceTokenKeys}) — it
  * never stores {@code producer_instance_id}, {@code producer_chain_id} or the raw token references
  * as separate attributes.
  * On the read path ({@link #toStoredTraceRecord(TraceRecordEntry)}) those raw values are recovered
  * by re-parsing the verbatim {@code jansTraceAssertion} text, consistent with the design's
- * "assertion is the source of truth, retrieval re-parses it" principle. This is a
+ * "assertion is the source of truth, retrieval re-parses it" principle (design D-13). This is a
  * deliberate re-derivation, not a schema round trip: the stored hashes remain the only thing that
  * is ever compared for equality/lookup.
  *

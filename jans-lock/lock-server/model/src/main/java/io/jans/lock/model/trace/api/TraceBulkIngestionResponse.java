@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * The {@code POST /audit/trace/bulk} response body (design §11.2): one
+ * The {@code POST /audit/trace/bulk} response body (design §11.2, decisions D-16 and D-22): one
  * {@link TraceBulkResultEntry} per submitted array element, in request order. The HTTP status is
  * always {@code 207} (Multi-Status) once the whole-request checks pass; per-item outcomes live in
  * {@link #getResults()}.

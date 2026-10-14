@@ -10,7 +10,7 @@ import io.jans.lock.service.trace.parse.ParsedAssertion;
 
 /**
  * Enforces the design §7.2 schema for one {@code trace.event_kind} and extracts the values the
- * correlation service indexes into the shared {@link CorrelationInputs.Builder}.
+ * correlation service (task 17) indexes into the shared {@link CorrelationInputs.Builder}.
  * Common-field validation (design §7.1) has already run by the time {@link #validate} is called;
  * this is only the per-kind {@code trace.event} shape and the kind-contradicting members listed
  * in design §7.2.

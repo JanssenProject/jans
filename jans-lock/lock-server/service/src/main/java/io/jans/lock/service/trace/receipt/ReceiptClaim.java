@@ -12,8 +12,8 @@ import java.util.Objects;
  * The outcome of a successful {@link TraceReceiptChain#claim} call: the allocated
  * {@code receipt_sequence}, the {@code prev_receipt_hash} it was computed against, the resulting
  * {@code receipt_hash}, and the {@code received_at} (epoch milliseconds) the caller supplied —
- * everything {@code TraceIngestionService} needs to build the receipt row it then
- * carries on the record itself.
+ * everything {@code TraceIngestionService} (task 19) needs to build the receipt row it then
+ * carries on the record itself (design decision D-8 steps 2-5).
  *
  * @author Yuriy Movchan
  */

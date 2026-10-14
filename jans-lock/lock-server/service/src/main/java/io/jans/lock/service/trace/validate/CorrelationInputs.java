@@ -14,7 +14,7 @@ import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 
 /**
- * The values the correlation service indexes for one accepted record: execution
+ * The values the correlation service (task 17) indexes for one accepted record: execution
  * identity, token references, chain position and parents. Built by
  * {@link EventKindValidatorRegistry#validate(ParsedAssertion)}: the common fields (design §7.1)
  * are filled in by the registry, the event-kind-specific ones ({@link #getTokenRefs()},

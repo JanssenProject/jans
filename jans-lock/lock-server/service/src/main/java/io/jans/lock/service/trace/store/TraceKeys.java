@@ -20,7 +20,7 @@ import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.TokenRef;
 
 /**
- * The composite-key function and the four DN builders:
+ * The D-6 composite-key function and the four DN builders (design decision D-6, D-7):
  *
  * <pre>
  * key(type, c1, ..., cn) = lowercaseHex( SHA-256( UTF-8( JCS( [type, c1, ..., cn] ) ) ) )

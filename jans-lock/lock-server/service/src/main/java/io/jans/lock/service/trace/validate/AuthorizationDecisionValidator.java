@@ -21,7 +21,7 @@ import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 
 /**
- * Validates {@code AUTHORIZATION_DECISION} records (design §7.1, §7.2): a PDP
+ * Validates {@code AUTHORIZATION_DECISION} records (design §7.1, §7.2, decision D-20): a PDP
  * decision signing exactly one of a singular {@code decision} or a batch {@code decisions[]} of
  * capability facts ({@code action}, {@code resource_type}, {@code outcome}; no resource id and no
  * record-level outcome), a {@code trace.subject.workload_id}, a complete {@code trace.policy}
@@ -36,7 +36,7 @@ public final class AuthorizationDecisionValidator implements EventKindValidator 
 
 	/**
 	 * A generic {@code algorithm:digest} form, accepted alongside {@link TraceConstants#HASH_PATTERN}
-	 * for {@code bundle_hash} (the design leaves the exact
+	 * for {@code bundle_hash} (design decision recorded in task 09: the design leaves the exact
 	 * digest algorithm for a policy bundle open, so any prefixed digest is accepted, not only
 	 * {@code sha256:<64 hex>}).
 	 */

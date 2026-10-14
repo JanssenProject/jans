@@ -42,7 +42,7 @@ public final class TraceConstants {
 	public static final Pattern HASH_PATTERN = Pattern.compile("^" + Pattern.quote(HASH_PREFIX) + "[0-9a-f]{64}$");
 
 	/**
-	 * Opaque stable producer id: 1 to 255 ASCII characters, starting with a letter or
+	 * Opaque stable producer id (design D-17): 1 to 255 ASCII characters, starting with a letter or
 	 * digit, then letters, digits and {@code . _ : / -}. Lock does not interpret the value, never
 	 * normalizes it and compares it byte-for-byte; software version travels separately in the
 	 * signed {@code producer_version} member. Shared by assertion validation and by producer-key and
@@ -73,7 +73,7 @@ public final class TraceConstants {
 	/** Name of the top-level signature field, excluded from the JCS signature input. */
 	public static final String SIGNATURE_FIELD = "signature";
 
-	/** Name of the field that is forbidden anywhere in an incoming assertion. */
+	/** Name of the field that is forbidden anywhere in an incoming assertion (design D-1). */
 	public static final String DOMAIN_FIELD = "evidence_domain_id";
 
 	/**

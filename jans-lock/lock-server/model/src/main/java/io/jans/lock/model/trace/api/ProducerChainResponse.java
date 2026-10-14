@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * A registered producer chain as returned by the admin API (design §8).
+ * A registered producer chain as returned by the admin API (design §8, T-3, task 15).
  *
  * @author Yuriy Movchan
  */

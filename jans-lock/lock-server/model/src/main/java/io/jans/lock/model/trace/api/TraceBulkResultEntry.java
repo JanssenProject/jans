@@ -14,7 +14,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * One element of {@code POST /audit/trace/bulk}'s {@code results} array (design §11.2): the submitted array's position and whether that item was accepted. An accepted entry
+ * One element of {@code POST /audit/trace/bulk}'s {@code results} array (design §11.2, decision
+ * D-22): the submitted array's position and whether that item was accepted. An accepted entry
  * carries the single-record acceptance members inline ({@code producer_id} ... {@code late_flag});
  * a rejected entry carries {@link #getError()} plus {@code producer_id}/{@code record_id} when they
  * were readable from the element. Members that do not apply to the entry's outcome are omitted.

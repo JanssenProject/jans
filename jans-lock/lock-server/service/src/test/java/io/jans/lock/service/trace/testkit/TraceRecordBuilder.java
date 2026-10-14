@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Task 22 consolidated test kit entry point for building signed TRACE assertions: a thin fluent
- * wrapper over {@link SignedAssertionFactory} that additionally assigns a fresh
+ * wrapper over {@link SignedAssertionFactory} (tasks 16/19) that additionally assigns a fresh
  * {@code record_id} (UUID v4) by default, so a test only calls {@link #recordId(String)} when the
  * identifier itself matters. Delegates every other operation to {@link SignedAssertionFactory}
  * rather than duplicating it.

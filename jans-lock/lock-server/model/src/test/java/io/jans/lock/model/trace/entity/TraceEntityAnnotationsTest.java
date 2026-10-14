@@ -23,12 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Reflective checks that TRACE entities expose exactly the mutable attributes the TRACE MVP
- * design allows and are tagged with the design's object class names.
+ * design allows (design decision D-7) and are tagged with the design's object class names.
  *
  * <p>Written against JUnit 5 rather than the repo's TestNG convention: this module's Surefire
  * setup (see {@code lock-server/pom.xml} surefire pluginManagement) pins the JUnit-Platform
  * provider and does not execute TestNG classes, so a TestNG version of this test would never run
- * (same precedent as {@code TraceConfigurationTest}).
+ * (same precedent as {@code TraceConfigurationTest}, task 02).
  *
  * @author Janssen Project
  */

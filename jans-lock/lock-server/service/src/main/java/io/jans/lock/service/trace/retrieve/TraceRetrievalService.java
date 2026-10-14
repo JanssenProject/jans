@@ -22,8 +22,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
- * Domain-scoped TRACE record/execution retrieval (design §11.2, §11.3), extracted out of
- * {@code TraceRestWebServiceImpl} so the acceptance suite's {@code TraceTestHarness} can
+ * Domain-scoped TRACE record/execution retrieval (design §11.2, §11.3, task 21), extracted out of
+ * {@code TraceRestWebServiceImpl} (task 22) so the acceptance suite's {@code TraceTestHarness} can
  * call the exact same logic the REST layer uses instead of re-implementing bare-id ambiguity and
  * domain scoping.
  *

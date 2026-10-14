@@ -15,7 +15,7 @@ import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 
 /**
- * Validates {@code CAPABILITY_INVOKED} records (design §7.1, §7.2): a PEP/gateway
+ * Validates {@code CAPABILITY_INVOKED} records (design §7.1, §7.2, decision D-20): a PEP/gateway
  * invocation signing exactly one of a singular {@code invocation} or a batch {@code invocations[]}
  * of capability facts ({@code action}, {@code resource_type}, an {@code outcome} of {@code SUCCESS}
  * or {@code FAILURE} (GovOps profile §8); no resource id and no record-level outcome), a

@@ -292,7 +292,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 		assertEquals(ProducerKeyRegistry.REASON_STORED_KEY_UNUSABLE, ex.getReason());
 	}
 
-	// -- authorized event kinds -----------------------------------------------------------
+	// -- authorized event kinds (D-18) -----------------------------------------------------------
 
 	@Test
 	void testRegister_AuthorizedEventKinds_StoredAndResolved() {

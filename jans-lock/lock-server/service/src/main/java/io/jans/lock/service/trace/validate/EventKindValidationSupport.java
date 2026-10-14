@@ -155,7 +155,8 @@ final class EventKindValidationSupport {
 	}
 
 	/**
-	 * Validates the signed capability <em>facts</em> of a decision or invocation event (design §7.2): exactly one of a singular object {@code singular} or a non-empty array
+	 * Validates the signed capability <em>facts</em> of a decision or invocation event (design §7.2,
+	 * decision D-20): exactly one of a singular object {@code singular} or a non-empty array
 	 * {@code plural} of entries. Every fact carries {@code action} and {@code resource_type}
 	 * (non-empty, at most {@value #MAX_FACT_TEXT_LENGTH} characters) and an {@code outcome}; plural
 	 * entries also carry a unique {@code idField}. A {@code resource_id} member is forbidden (the
@@ -163,7 +164,7 @@ final class EventKindValidationSupport {
 	 * {@code trace.event.outcome} and the removed {@code capability_ids} are forbidden, because the
 	 * outcome lives in the facts and Lock does not resolve capability ids.
 	 *
-	 * <p>Nothing is returned or stored: the facts remain in the signed assertion only.
+	 * <p>Nothing is returned or stored: the facts remain in the signed assertion only (D-21).
 	 *
 	 * @param outcomes the closed outcome vocabulary of the kind ({@link #DECISION_OUTCOMES} or
 	 *        {@link #INVOCATION_OUTCOMES})

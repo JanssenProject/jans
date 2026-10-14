@@ -13,9 +13,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * A single TRACE record envelope (design §10, §11.2): the stored assertion plus
+ * A single TRACE record envelope (design §10, §11.2, TRACE MVP task 21): the stored assertion plus
  * the verification outcome and the Lock-derived ingestion metadata. {@code assertion} is the
- * request body text re-parsed as a JSON value, never re-serialized by hand:
+ * request body text re-parsed as a JSON value, never re-serialized by hand (design decision D-13):
  * Jackson re-emits it, so semantic identity with the originally signed bytes is preserved, not
  * byte-for-byte identity. {@code assertionRaw} carries the exact accepted text (design §10, §14).
  *

@@ -191,7 +191,7 @@ public final class ParsedAssertion {
 
 	/**
 	 * @return {@code JCS(assertion without the top-level "signature" field)}, UTF-8 encoded
-	 *; computed on first use and cached
+	 *         (design D-13); computed on first use and cached
 	 */
 	public byte[] signatureInput() {
 		if (signatureInput == null) {
@@ -202,7 +202,7 @@ public final class ParsedAssertion {
 	}
 
 	/**
-	 * @return {@code "sha256:" + lowercaseHex(SHA-256(UTF-8(JCS(full assertion))))};
+	 * @return {@code "sha256:" + lowercaseHex(SHA-256(UTF-8(JCS(full assertion))))} (design D-13);
 	 *         computed on first use and cached
 	 */
 	public String contentDigest() {

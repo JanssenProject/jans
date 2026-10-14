@@ -30,7 +30,7 @@ import io.jans.lock.service.trace.store.TraceStoreContractTest;
  * {@code trace.event} block, but {@code OrmTraceStore}'s read path recovers a record's
  * {@code producer_instance_id}/{@code producer_chain_id} and token references by
  * re-parsing the stored assertion (see {@link TraceEntityMapper}), because {@code TraceRecordEntry}
- * only ever stores their hashed keys.
+ * (T-1) only ever stores their hashed keys.
  *
  * @author Yuriy Movchan
  */

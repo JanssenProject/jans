@@ -8,7 +8,7 @@ package io.jans.lock.service.trace.identity;
 
 /**
  * The submitting OAuth client identity resolved by {@link SubmitterIdentityService} from the
- * request's bearer token. This is a plain value object: it never carries
+ * request's bearer token (design decision D-2). This is a plain value object: it never carries
  * the token itself.
  *
  * @author Yuriy Movchan

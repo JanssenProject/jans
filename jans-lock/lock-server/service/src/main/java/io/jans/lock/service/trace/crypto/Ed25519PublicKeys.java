@@ -68,7 +68,7 @@ public final class Ed25519PublicKeys {
 
 	/**
 	 * RFC 7638 / RFC 8037 §A.3 JWK thumbprint of an Ed25519 key in the TRACE hash format
-	 *: {@code "sha256:" + lowercaseHex(SHA-256(UTF-8(
+	 * (design decision D-19): {@code "sha256:" + lowercaseHex(SHA-256(UTF-8(
 	 * '{"crv":"Ed25519","kty":"OKP","x":"<x>"}')))}. The required members are written in
 	 * lexicographic order with no whitespace; the JWK's {@code x} is used exactly as stored, and no
 	 * other member can influence the result (the input is not built from the map).

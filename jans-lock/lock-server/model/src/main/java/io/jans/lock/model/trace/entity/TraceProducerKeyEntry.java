@@ -20,7 +20,7 @@ import io.jans.orm.annotation.Version;
 import io.jans.orm.model.base.BaseEntry;
 
 /**
- * A registered producer Ed25519 key (design §6). Keys are
+ * A registered producer Ed25519 key (design §6, TRACE MVP design decisions T-4, D-4). Keys are
  * create-only; only {@link #getRevokedAt()} may change after creation, via {@code merge}.
  *
  * @author Yuriy Movchan
@@ -169,7 +169,8 @@ public class TraceProducerKeyEntry extends BaseEntry implements Serializable {
     //
     // Not persisted (no @AttributeName; jans-orm's BasicPropertyAnnotationResolver scans
     // declared *fields*, never getters, so these are invisible to persistence). They exist so
-    // callers that reason about validity windows in epoch milliseconds (see ProducerKeyRegistry.resolveForVerification) don't have to convert java.util.Date at every
+    // callers that reason about validity windows in epoch milliseconds (design decision D-4:
+    // ProducerKeyRegistry.resolveForVerification) don't have to convert java.util.Date at every
     // call site.
 
     /**

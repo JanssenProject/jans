@@ -14,7 +14,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Signature verification outcome stored alongside a TRACE record (design §10). {@code verifiedAtMs} is stored as epoch milliseconds; conversion to an RFC 3339
+ * Signature verification outcome stored alongside a TRACE record (design §10, TRACE MVP design
+ * decisions T-1). {@code verifiedAtMs} is stored as epoch milliseconds; conversion to an RFC 3339
  * string happens in the REST layer.
  *
  * @author Yuriy Movchan

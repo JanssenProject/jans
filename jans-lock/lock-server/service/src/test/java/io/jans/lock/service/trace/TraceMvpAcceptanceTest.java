@@ -64,7 +64,7 @@ import jakarta.ws.rs.core.Response;
  * MVP acceptance suite (design §15): one test method per numbered criterion, each quoting the §15
  * sentence it proves, run against the real service stack (parser, validators, canonicalizer,
  * crypto, registries, correlation, receipt chain, ingestion, retrieval) wired by
- * {@link TraceTestHarness} over {@code InMemoryTraceStore}.
+ * {@link TraceTestHarness} over {@code InMemoryTraceStore} (task 22).
  *
  * <p>Deterministic: every ingest uses {@link TraceTestHarness#ctx}, whose {@code received_at_ms}
  * and {@link io.jans.lock.service.trace.parse.CommonAssertionValidator} clock both come from

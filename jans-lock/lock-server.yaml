@@ -787,7 +787,8 @@ paths:
       tags:
       - Lock - Audit Trace
       summary: Retrieve one TRACE execution
-      description: All direct records of an execution, ordered by receipt sequence
+      description: "All direct records of an execution, ordered by receipt sequence\
+        \ (design §11.3)"
       operationId: getExecution
       parameters:
       - name: trace_execution_id
@@ -863,6 +864,7 @@ paths:
       - Lock - Audit Trace
       summary: Retrieve one TRACE record
       description: Domain-scoped retrieval of a stored envelope by record identity
+        (design §11.2)
       operationId: getRecord
       parameters:
       - name: record_id
@@ -923,10 +925,11 @@ paths:
       - Lock - Audit Trace
       summary: Submit a batch of TRACE evidence records
       description: "Verify and ingest a JSON array of signed TRACE assertions, continuing\
-        \ past per-item failures. One producer per batch"
+        \ past per-item failures. One producer per batch (design §11.2, decisions\
+        \ D-16 and D-22)"
       operationId: submitBulkRecords
       requestBody:
-        description: JSON array of TRACE assertions
+        description: "JSON array of TRACE assertions (design §7 shape, each)"
         content:
           application/json:
             schema:
@@ -968,10 +971,10 @@ paths:
       tags:
       - Lock - Audit Trace
       summary: Submit a TRACE evidence record
-      description: Verify and ingest a single signed TRACE assertion
+      description: Verify and ingest a single signed TRACE assertion (design §7)
       operationId: submitRecord
       requestBody:
-        description: TRACE assertion
+        description: TRACE assertion (design §7)
         content:
           application/json:
             schema:
@@ -1530,7 +1533,7 @@ components:
       properties:
         error:
           type: string
-          description: TRACE error id
+          description: TRACE error id (design decision D-10)
           example: invalid_assertion
         error_description:
           type: string

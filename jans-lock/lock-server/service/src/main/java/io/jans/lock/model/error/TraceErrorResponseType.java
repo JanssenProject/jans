@@ -16,8 +16,8 @@ import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 
 /**
- * TRACE error family. Every id and HTTP status here is normative;
- * do not add, remove or renumber an id without updating the error catalog in the TRACE documentation first.
+ * TRACE error family (TRACE MVP design decision D-10). Every id and HTTP status here is normative;
+ * do not add, remove or renumber an id without updating design decision D-10 first.
  *
  * @author Yuriy Movchan
  */
@@ -47,16 +47,16 @@ public enum TraceErrorResponseType implements IErrorType {
 	/** Ed25519 verification failed, or the signature is not well-formed base64url. */
 	INVALID_SIGNATURE("invalid_signature", BAD_REQUEST),
 
-	/** The producer's chain is not pre-registered. */
+	/** The producer's chain is not pre-registered (design decision D-5). */
 	CHAIN_NOT_REGISTERED("chain_not_registered", BAD_REQUEST),
 
-	/** The record's genesis position or previous-record hash is inconsistent. */
+	/** The record's genesis position or previous-record hash is inconsistent (design decision D-5). */
 	INVALID_GENESIS("invalid_genesis", BAD_REQUEST),
 
-	/** The authenticated client resolves to no evidence domain. */
+	/** The authenticated client resolves to no evidence domain (design decisions D-1/D-2). */
 	CLIENT_NOT_BOUND("client_not_bound", FORBIDDEN),
 
-	/** The authenticated client's binding does not allow the signed producer. */
+	/** The authenticated client's binding does not allow the signed producer (design decision D-3). */
 	PRODUCER_NOT_ALLOWED("producer_not_allowed", FORBIDDEN),
 
 	/** GET record: no match in the domain. */
@@ -102,7 +102,7 @@ public enum TraceErrorResponseType implements IErrorType {
 	}
 
 	/**
-	 * @return the HTTP status fixed for this id
+	 * @return the HTTP status fixed for this id by design decision D-10
 	 */
 	public Response.Status httpStatus() {
 		return httpStatus;

@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Swagger schema for the structured TRACE error body. The actual body is
+ * Swagger schema for the structured TRACE error body (design decision D-10). The actual body is
  * produced by {@code ErrorResponseFactory}/{@code DefaultErrorResponse}; this type exists only so
  * the TRACE OpenAPI responses document the {@code error}/{@code error_description}/{@code reason}
  * shape instead of the generic {@code LockApiError} schema.
@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class TraceErrorResponse {
 
 	@JsonProperty("error")
-	@Schema(description = "TRACE error id", example = "invalid_assertion")
+	@Schema(description = "TRACE error id (design decision D-10)", example = "invalid_assertion")
 	private String error;
 
 	@JsonProperty("error_description")

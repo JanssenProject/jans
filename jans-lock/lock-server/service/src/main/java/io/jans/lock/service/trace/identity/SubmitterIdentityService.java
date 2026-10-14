@@ -18,7 +18,7 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Resolves the submitting OAuth client behind a TRACE request by reading
+ * Resolves the submitting OAuth client behind a TRACE request (design decision D-2) by reading
  * the {@link AuthenticatedClient} the protection layer recorded when it authorized the call
  * (see {@link AuthenticatedClientContext}). The token is never parsed or introspected here: that
  * happened exactly once, in the filter, whose signature/expiry/scope verification this service

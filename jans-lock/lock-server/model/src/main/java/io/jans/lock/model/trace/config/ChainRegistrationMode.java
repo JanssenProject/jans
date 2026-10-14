@@ -7,13 +7,13 @@
 package io.jans.lock.model.trace.config;
 
 /**
- * How a producer chain comes to exist (design §8).
+ * How a producer chain comes to exist (design §8, TRACE MVP design decision D-23).
  *
  * @author Yuriy Movchan
  */
 public enum ChainRegistrationMode {
 
-    /** A chain must be registered through the admin API before its records are accepted. */
+    /** A chain must be registered through the admin API before its records are accepted (D-5). */
     PRE_REGISTERED,
 
     /**
