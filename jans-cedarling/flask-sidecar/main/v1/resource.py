@@ -42,13 +42,20 @@ class Evaluation(MethodView):
         """
         Evaluates whether a subject is authorized to perform a specific action on a resource.
         """
+        trace_header_count = 0
+        trace_headers = {}
+        for name in TRACE_HEADERS:
+            header = request.headers.get(name, None)
+            if header is not None:
+                trace_header_count += 1
+                trace_headers[name] = header
         return usecase.execute(
             CedarlingAuthorizeInputPort(
                 payload["subject"],
                 payload["action"],
                 payload["resource"],
                 payload["context"],
-                {name: request.headers.get(name) for name in TRACE_HEADERS},
+                trace_headers if trace_header_count > 0 else None,
             )
         )
 
