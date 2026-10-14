@@ -13,6 +13,10 @@ categories = ["cryptography", "wasm"]
 # parsers, so the out-of-tree `fuzz/` crate (a separate cargo-fuzz project)
 # can reach them. Not for normal use — see fuzz/README.md.
 fuzzing = []
+# Exposes `testing`, a signer that produces valid bundles under a synthetic
+# trust root, so downstream crates can test verification offline. Enable it
+# only from `[dev-dependencies]`; `rcgen` (with `ring`) does not build for wasm.
+test-support = ["dep:rcgen", "p256/pkcs8", "p384/pkcs8"]
 
 [dependencies]
 sha2 = { workspace = true }
@@ -35,6 +39,7 @@ x509-parser = { version = "0.18", default-features = false }
 serde_json_canonicalizer = "0.3"
 regex-lite = { version = "0.1" }
 base64 = { version = "0.22", default-features = false, features = ["alloc"] }
+rcgen = { version = "0.14", default-features = false, features = ["pem", "ring", "x509-parser"], optional = true }
 
 [dev-dependencies]
 rcgen = { version = "0.14", default-features = false, features = ["pem", "ring", "x509-parser"] }
@@ -49,6 +54,10 @@ p384 = { version = "0.13", default-features = false, features = ["ecdsa", "pkcs8
 x509-parser = { version = "0.18", default-features = false }
 base64 = { version = "0.22", default-features = false, features = ["alloc"] }
 chrono = { workspace = true }
+
+[[test]]
+name = "testing_signer"
+required-features = ["test-support"]
 
 [lints]
 workspace = true
