@@ -12,6 +12,8 @@ use ed25519_dalek::{Signature, SignatureError, VerifyingKey};
 use serde_json::Value;
 use thiserror::Error;
 
+use crate::ErrorCode;
+use crate::error_code::HasErrorCode;
 use crate::json::{JsonError, parse_strict};
 use crate::signature::SignatureValue;
 use crate::{Digest, Limits};
@@ -56,8 +58,8 @@ impl From<PublicKeyReason> for PublicKeyError {
 
 impl PublicKeyError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "INVALID_PUBLIC_KEY"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -78,11 +80,8 @@ impl From<PublicKeyReason> for JwkError {
 
 impl JwkError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        match self {
-            Self::Json(e) => e.code(),
-            Self::InvalidPublicKey(e) => e.code(),
-        }
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -163,6 +162,7 @@ mod tests {
     use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 
     use super::{JwkError, PublicKey, PublicKeyError, PublicKeyReason};
+    use crate::ErrorCode;
     use crate::json::JsonError;
     use crate::signature::{Ed25519Signer, SignatureValue, TraceSigner};
 
@@ -383,17 +383,17 @@ mod tests {
         let key_err = PublicKey::from_bytes(&point_with_y(1)).expect_err("weak key");
         assert_eq!(
             key_err.code(),
-            "INVALID_PUBLIC_KEY",
+            ErrorCode::InvalidPublicKey,
             "stable code from core design §10"
         );
         assert_eq!(
             JwkError::InvalidPublicKey(key_err).code(),
-            "INVALID_PUBLIC_KEY",
+            ErrorCode::InvalidPublicKey,
             "wrapping keeps the code"
         );
         assert_eq!(
             JwkError::Json(JsonError::DuplicateMember).code(),
-            "DUPLICATE_MEMBER",
+            ErrorCode::DuplicateMember,
             "JSON failures keep their own code"
         );
     }

@@ -10,6 +10,8 @@ use std::fmt;
 
 use thiserror::Error;
 
+use crate::ErrorCode;
+use crate::error_code::HasErrorCode;
 use crate::json::canonicalize_json;
 use crate::key::PublicKey;
 use crate::receipt::{ReceiptCommitment, ReceiptPosition, StoredReceipt};
@@ -26,8 +28,8 @@ pub struct SelfTestError {
 
 impl SelfTestError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "SELF_TEST_FAILED"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -148,6 +150,7 @@ fn check_receipt_hash() -> bool {
 #[cfg(test)]
 mod tests {
     use super::{Check, FailedChecks, SelfTestError, evaluate, self_test};
+    use crate::ErrorCode;
 
     #[test]
     fn passes_on_a_correct_build() {
@@ -185,7 +188,7 @@ mod tests {
         let err = evaluate(&[Check::Sha256]).expect_err("one known answer differs");
         assert_eq!(
             err.code(),
-            "SELF_TEST_FAILED",
+            ErrorCode::SelfTestFailed,
             "our code, not in core design §10"
         );
     }

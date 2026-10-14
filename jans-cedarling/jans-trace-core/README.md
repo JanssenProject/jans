@@ -229,7 +229,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ## API by module
 
 Shared types live at the crate root: `Digest` (`sha256:<hex>`, strict `FromStr`,
-`Digest::GENESIS`), `ParseDigestError`, `Limits`, `SizeLimitError`.
+`Digest::GENESIS`), `ParseDigestError`, `Limits`, `SizeLimitError`, `ErrorCode`.
 
 | Module | Items | Who calls it |
 |---|---|---|
@@ -277,8 +277,9 @@ range a fraction is written as its nearest double, as every JSON reader reads it
 
 ## Error codes
 
-Every error has `code()`, a stable string that bindings map to exceptions. A release
-never renames or reuses a code. `Display` explains the cause and never contains keys,
+Every error has `code()`, which returns an `ErrorCode`; `as_str()` (and `Display`) give the
+stable string below, which bindings carry to their exceptions. A release never renames or
+reuses a code. `Display` explains the cause and never contains keys,
 signatures or record content.
 
 | Code | Meaning |

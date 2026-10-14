@@ -17,7 +17,9 @@ use std::str::FromStr;
 use thiserror::Error;
 
 use crate::Digest;
+use crate::ErrorCode;
 use crate::assertion::VerifiedAssertion;
+use crate::error_code::HasErrorCode;
 use crate::json::write_jcs_string;
 
 pub const RECEIPT_PROFILE: &str = "tag:jans.io,2026:lock-trace-receipt-v1";
@@ -113,8 +115,8 @@ impl From<ReceivedAtReason> for ParseReceivedAtError {
 
 impl ParseReceivedAtError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "INVALID_RECEIPT"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -142,8 +144,8 @@ impl From<RangeReason> for ReceivedAtRangeError {
 
 impl ReceivedAtRangeError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "INVALID_RECEIPT"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -216,8 +218,8 @@ impl From<PositionReason> for ReceiptPositionError {
 
 impl ReceiptPositionError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "INVALID_RECEIPT"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -491,8 +493,8 @@ impl From<HeadReason> for ChainHeadError {
 
 impl ChainHeadError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "INVALID_RECEIPT"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -519,8 +521,8 @@ impl From<StoredReceiptReason> for StoredReceiptError {
 
 impl StoredReceiptError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "INVALID_RECEIPT"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -550,8 +552,8 @@ impl From<LinkReason> for ReceiptLinkError {
 
 impl ReceiptLinkError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "RECEIPT_LINK_MISMATCH"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -639,7 +641,7 @@ mod tests {
         ReceiptCommitment, ReceiptLinkError, ReceiptPosition, ReceiptPositionError, ReceivedAt,
         ReceivedAtRangeError, StoredReceipt, StoredReceiptError, StoredReceiptReason,
     };
-    use crate::Digest;
+    use crate::{Digest, ErrorCode};
 
     const MAX_SAFE_INTEGER: i64 = (1 << 53) - 1;
 
@@ -1035,7 +1037,7 @@ mod tests {
             (err.to_string().as_str(), err.code()),
             (
                 "saved chain head is not valid: sequence 0 must carry the genesis sentinel",
-                "INVALID_RECEIPT"
+                ErrorCode::InvalidReceipt
             ),
             "`{err}` explains the reason under the receipt code"
         );
@@ -1450,8 +1452,8 @@ mod tests {
     }
 
     struct CodeCase {
-        actual: &'static str,
-        expected: &'static str,
+        actual: ErrorCode,
+        expected: ErrorCode,
     }
 
     #[test]
@@ -1459,19 +1461,19 @@ mod tests {
         let cases = [
             CodeCase {
                 actual: "x".parse::<ReceivedAt>().expect_err("layout").code(),
-                expected: "INVALID_RECEIPT",
+                expected: ErrorCode::InvalidReceipt,
             },
             CodeCase {
                 actual: ReceivedAt::from_unix_millis(i64::MAX)
                     .expect_err("range")
                     .code(),
-                expected: "INVALID_RECEIPT",
+                expected: ErrorCode::InvalidReceipt,
             },
             CodeCase {
                 actual: ReceiptPosition::new(0, Digest::GENESIS)
                     .expect_err("zero")
                     .code(),
-                expected: "INVALID_RECEIPT",
+                expected: ErrorCode::InvalidReceipt,
             },
             CodeCase {
                 actual: ReceiptCommitment::from_stored(StoredReceipt {
@@ -1480,14 +1482,14 @@ mod tests {
                 })
                 .expect_err("empty producer")
                 .code(),
-                expected: "INVALID_RECEIPT",
+                expected: ErrorCode::InvalidReceipt,
             },
             CodeCase {
                 actual: genesis_receipt()
                     .verify_link(&Digest::sha256(b"head"))
                     .expect_err("mismatch")
                     .code(),
-                expected: "RECEIPT_LINK_MISMATCH",
+                expected: ErrorCode::ReceiptLinkMismatch,
             },
         ];
         for case in cases {

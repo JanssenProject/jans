@@ -19,6 +19,8 @@ use serde_json::value::RawValue;
 use thiserror::Error;
 
 use super::{ParseSignedAssertionError, SignedAssertion};
+use crate::ErrorCode;
+use crate::error_code::HasErrorCode;
 use crate::json::JsonError;
 use crate::limits::LimitKind;
 use crate::{Limits, SizeLimitError};
@@ -84,12 +86,8 @@ pub enum ParseBatchError {
 
 impl ParseBatchError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        match self {
-            Self::SizeLimitExceeded(e) => e.code(),
-            Self::Json(e) => e.code(),
-            Self::NotAnArray => "INVALID_BATCH",
-        }
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -159,6 +157,7 @@ mod tests {
     use std::sync::Arc;
 
     use super::{ParseBatchError, batch_body, parse_batch};
+    use crate::ErrorCode;
     use crate::assertion::{ParseSignedAssertionError, SignedAssertion, UnsignedAssertion};
     use crate::json::JsonError;
     use crate::limits::LimitKind;
@@ -387,12 +386,12 @@ mod tests {
     fn not_an_array_has_its_own_code() {
         assert_eq!(
             ParseBatchError::NotAnArray.code(),
-            "INVALID_BATCH",
+            ErrorCode::InvalidBatch,
             "our code, not in §10"
         );
         assert_eq!(
             ParseBatchError::Json(JsonError::DuplicateMember).code(),
-            "DUPLICATE_MEMBER",
+            ErrorCode::DuplicateMember,
             "JSON failures keep their code"
         );
     }
