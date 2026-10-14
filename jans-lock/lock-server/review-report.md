@@ -47,7 +47,7 @@ Status vocabulary:
 | 12 | Idempotency and errors | Conforms (documented deviation) | Every row implemented. Deviations: replay returns the record's current flags, not the first acceptance result verbatim; a failed insert leaves a `VOID` receipt row and, after a crash, a `PENDING` row for up to `pendingReceiptTimeoutSeconds + receiptRepairIntervalSeconds`. Record and indexes are never visible. |
 | 13 | Minimum storage keys and indexes | Conforms | All five keys present. Capability index deferred by the chapter. |
 | 14 | Security requirements | Conforms | Limits before crypto; batch limits; no token or body logging; original assertion and `kid` preserved; domain-scoped reads; Lock-derived members rejected from the signed body. TLS is deployment. |
-| 15 | Acceptance criteria | Conforms | Tests out of scope. Criterion 12 should be read as "no record, no index entry, no `COMMITTED` receipt". |
+| 15 | Acceptance criteria | Conforms (verified by test run) | `TraceMvpAcceptanceTest` has one or more tests for each of criteria 1–17; all pass. Run 2026-10-14 on the working branch: `mvn -o -pl model,service -am test` gave model 11/11 and service 864/864, 0 failures, 0 skipped (read from the surefire XML). Criterion 12 is asserted as "no record, no `COMMITTED` receipt, no index hit" with `verifyDomain` ok, so it matches the reworded reading in Task 01 item 3, not the literal "no receipt entry" text. Test depth was checked by reading criterion 12 only; other criteria were checked by name and result, not line by line. |
 | 16 | Later phases | Deferred | Nothing from later phases present. |
 
 ## 2. GovOps profile (secondary source), summary
