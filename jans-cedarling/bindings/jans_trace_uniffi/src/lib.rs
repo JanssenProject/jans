@@ -15,5 +15,6 @@ mod inputs;
 mod json;
 mod key;
 mod limits;
+mod receipt;
 mod self_test;
 mod signature;
