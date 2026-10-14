@@ -20,8 +20,9 @@ from marshmallow import validate
 
 
 class BaseSchema(ma.Schema):
-    class Meta:
+    class Meta(ma.Schema.Meta):
         unknown = EXCLUDE
+        ordered = False
 
 
 class SmartNested(ma.fields.Nested):
