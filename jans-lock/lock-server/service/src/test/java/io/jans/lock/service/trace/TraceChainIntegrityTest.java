@@ -6,12 +6,15 @@
 
 package io.jans.lock.service.trace;
 
+import io.jans.lock.service.trace.TraceTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.KeyPair;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -27,6 +30,7 @@ import io.jans.lock.service.trace.canon.CanonicalHashes;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.ingest.AcceptanceResult;
+import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.receipt.ChainVerificationReport;
 import io.jans.lock.service.trace.testkit.TraceRecordBuilder;
 import io.jans.lock.service.trace.testkit.TraceTestHarness;
@@ -60,7 +64,7 @@ class TraceChainIntegrityTest {
 
 	private static final String DOMAIN_B = "domain-b";
 
-	private static final String PRODUCER = "cedarling-fleet-1/1.0.0";
+	private static final String PRODUCER = "cedarling-fleet-1";
 
 	private static final String KID = "cedarling-fleet-1-2026-01";
 
@@ -68,7 +72,7 @@ class TraceChainIntegrityTest {
 
 	private static final String CHAIN = "chain-01JABC9Z0K";
 
-	private static final String GW_PRODUCER = "gateway-fleet-1/2.0.0";
+	private static final String GW_PRODUCER = "gateway-fleet-1";
 
 	private static final String GW_KID = "gateway-fleet-1-2026-01";
 
@@ -198,10 +202,139 @@ class TraceChainIntegrityTest {
 		assertEquals(24, reportB.getHeadSequence());
 	}
 
+	// -- task 30: several chains of one producer instance ---------------------------------------
+
+	private static final String SECOND_CHAIN = "chain-03JABC9Z0K";
+
+	private String signedAt(KeyPair keyPair, String chainId, long seq, String prevHash, String recordId) {
+		return TraceRecordBuilder.authorizationDecision().recordId(recordId).producerChainId(chainId)
+				.sequenceNumber(seq).prevRecordHash(prevHash).sign(keyPair.getPrivate());
+	}
+
+	@Test
+	void multiChain_oneInstanceTwoChains_independentSequencingFlagsAndDenseReceipts() {
+		KeyPair keyPair = harness.registerKey(DOMAIN_A, PRODUCER, KID);
+		harness.registerChain(DOMAIN_A, PRODUCER, INSTANCE, CHAIN);
+		harness.registerChain(DOMAIN_A, PRODUCER, INSTANCE, SECOND_CHAIN);
+
+		String a1 = signedAt(keyPair, CHAIN, 1, TraceConstants.ZERO_HASH, TraceRecordBuilder.freshRecordId());
+		String b1 = signedAt(keyPair, SECOND_CHAIN, 1, TraceConstants.ZERO_HASH, TraceRecordBuilder.freshRecordId());
+		String a2 = signedAt(keyPair, CHAIN, 2, contentDigestOf(a1), TraceRecordBuilder.freshRecordId());
+		// chain B skips position 2: position 3 must flag a gap on chain B only
+		String b2 = signedAt(keyPair, SECOND_CHAIN, 2, contentDigestOf(b1), TraceRecordBuilder.freshRecordId());
+		String b3 = signedAt(keyPair, SECOND_CHAIN, 3, contentDigestOf(b2), TraceRecordBuilder.freshRecordId());
+		String a3 = signedAt(keyPair, CHAIN, 3, contentDigestOf(a2), TraceRecordBuilder.freshRecordId());
+
+		AcceptanceResult ra1 = harness.ingest(a1, harness.ctx(DOMAIN_A));
+		AcceptanceResult rb1 = harness.ingest(b1, harness.ctx(DOMAIN_A));
+		AcceptanceResult ra2 = harness.ingest(a2, harness.ctx(DOMAIN_A));
+		AcceptanceResult rb3 = harness.ingest(b3, harness.ctx(DOMAIN_A));
+		AcceptanceResult ra3 = harness.ingest(a3, harness.ctx(DOMAIN_A));
+
+		assertFalse(ra1.isCoverageGapFlag());
+		assertFalse(rb1.isCoverageGapFlag());
+		assertFalse(ra2.isCoverageGapFlag());
+		assertTrue(rb3.isCoverageGapFlag(), "chain B position 3 arrived without position 2");
+		assertFalse(ra3.isCoverageGapFlag(), "chain A is unaffected by the gap on chain B");
+		assertFalse(ra3.isChainLinkFailureFlag());
+
+		// receipt sequences increase per domain across both chains, in arrival order
+		assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), Arrays.asList(ra1.getReceiptSequence(),
+				rb1.getReceiptSequence(), ra2.getReceiptSequence(), rb3.getReceiptSequence(),
+				ra3.getReceiptSequence()));
+
+		// late arrival of chain B position 2 closes the gap on position 3 without touching chain A
+		AcceptanceResult rb2 = harness.ingest(b2, harness.ctx(DOMAIN_A));
+		assertFalse(rb2.isCoverageGapFlag());
+		assertEquals(6L, rb2.getReceiptSequence());
+		StoredTraceRecord storedB3 = harness.getRecord(DOMAIN_A, rb3.getRecordId(), PRODUCER);
+		assertFalse(storedB3.getFlags().isCoverageGap());
+		assertFalse(storedB3.getFlags().isChainLinkFailure());
+
+		ChainVerificationReport report = harness.verifyDomain(DOMAIN_A);
+		assertTrue(report.isOk(), () -> "report: " + report);
+		assertEquals(6, report.getHeadSequence());
+	}
+
+	@Test
+	void multiChain_equivocationAndLinkFailureStayOnTheirOwnChain() {
+		KeyPair keyPair = harness.registerKey(DOMAIN_A, PRODUCER, KID);
+		harness.registerChain(DOMAIN_A, PRODUCER, INSTANCE, CHAIN);
+		harness.registerChain(DOMAIN_A, PRODUCER, INSTANCE, SECOND_CHAIN);
+
+		String a1 = signedAt(keyPair, CHAIN, 1, TraceConstants.ZERO_HASH, TraceRecordBuilder.freshRecordId());
+		String a2 = signedAt(keyPair, CHAIN, 2, contentDigestOf(a1), TraceRecordBuilder.freshRecordId());
+		String b1 = signedAt(keyPair, SECOND_CHAIN, 1, TraceConstants.ZERO_HASH, TraceRecordBuilder.freshRecordId());
+		// two different records claim chain B position 2: equivocation on chain B
+		String b2 = signedAt(keyPair, SECOND_CHAIN, 2, contentDigestOf(b1), TraceRecordBuilder.freshRecordId());
+		String b2Fork = signedAt(keyPair, SECOND_CHAIN, 2, contentDigestOf(b1), TraceRecordBuilder.freshRecordId());
+		// chain B position 3 links to a hash that is not b2's digest: link failure on chain B
+		String b3 = signedAt(keyPair, SECOND_CHAIN, 3, TraceConstants.HASH_PREFIX + "1".repeat(64),
+				TraceRecordBuilder.freshRecordId());
+
+		AcceptanceResult ra1 = harness.ingest(a1, harness.ctx(DOMAIN_A));
+		AcceptanceResult ra2 = harness.ingest(a2, harness.ctx(DOMAIN_A));
+		harness.ingest(b1, harness.ctx(DOMAIN_A));
+		AcceptanceResult rb2 = harness.ingest(b2, harness.ctx(DOMAIN_A));
+		AcceptanceResult rb2Fork = harness.ingest(b2Fork, harness.ctx(DOMAIN_A));
+		AcceptanceResult rb3 = harness.ingest(b3, harness.ctx(DOMAIN_A));
+
+		assertFalse(rb2.isEquivocationFlag());
+		assertTrue(rb2Fork.isEquivocationFlag());
+		assertTrue(harness.getRecord(DOMAIN_A, rb2.getRecordId(), PRODUCER).getFlags().isEquivocation(),
+				"the peer at the forked position is flagged too");
+		assertTrue(rb3.isChainLinkFailureFlag());
+
+		for (AcceptanceResult chainAResult : Arrays.asList(ra1, ra2)) {
+			StoredTraceRecord stored = harness.getRecord(DOMAIN_A, chainAResult.getRecordId(), PRODUCER);
+			assertFalse(stored.getFlags().isEquivocation());
+			assertFalse(stored.getFlags().isChainLinkFailure());
+			assertFalse(stored.getFlags().isCoverageGap());
+		}
+	}
+
 	private static void addAll(List<Op> ops, String domainId, List<String> jsons) {
 		for (String json : jsons) {
 			ops.add(new Op(domainId, json));
 		}
 	}
 
+	@Test
+	void receivedAt_millisecondBoundaries_hashReproducedFromRfc3339StringAlone() throws Exception {
+		KeyPair keyPair = harness.registerKey(DOMAIN_A, PRODUCER, KID);
+		harness.registerChain(DOMAIN_A, PRODUCER, INSTANCE, CHAIN);
+
+		long[] receivedAtMs = { TraceTestHarness.DEFAULT_NOW_MS, TraceTestHarness.DEFAULT_NOW_MS + 1,
+				TraceTestHarness.DEFAULT_NOW_MS + 999 };
+		String prevRecordHash = TraceConstants.ZERO_HASH;
+		String prevReceiptHash = TraceConstants.ZERO_HASH;
+		for (int i = 0; i < receivedAtMs.length; i++) {
+			String json = signedAt(keyPair, CHAIN, i + 1, prevRecordHash, TraceRecordBuilder.freshRecordId());
+			prevRecordHash = contentDigestOf(json);
+			AcceptanceResult result = harness.ingest(json, harness.ctx(DOMAIN_A, "client-1", receivedAtMs[i]));
+
+			StoredTraceRecord stored = harness.getRecord(DOMAIN_A, result.getRecordId(), PRODUCER);
+			String receivedAt = TraceTime.formatMillis(stored.getReceipt().getReceivedAtMs());
+			assertEquals(receivedAtMs[i], stored.getReceipt().getReceivedAtMs());
+			assertTrue(receivedAt.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"), receivedAt);
+
+			String canonical = "{\"content_digest\":\"" + stored.getContentDigest() + "\",\"evidence_domain_id\":\""
+					+ DOMAIN_A + "\",\"prev_receipt_hash\":\"" + prevReceiptHash + "\",\"producer_id\":\"" + PRODUCER
+					+ "\",\"receipt_sequence\":" + stored.getReceipt().getReceiptSequence() + ",\"received_at\":\""
+					+ receivedAt + "\",\"record_id\":\"" + result.getRecordId() + "\"}";
+			String expected = "sha256:" + sha256Hex(canonical);
+			assertEquals(expected, stored.getReceipt().getReceiptHash());
+			prevReceiptHash = expected;
+		}
+		assertTrue(TraceTime.formatMillis(receivedAtMs[0]).endsWith(".000Z"));
+
+		ChainVerificationReport report = harness.verifyDomain(DOMAIN_A);
+		assertTrue(report.isOk(), () -> "report: " + report);
+	}
+
+	private static String sha256Hex(String text) throws Exception {
+		byte[] hash = java.security.MessageDigest.getInstance("SHA-256")
+				.digest(text.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+		return String.format("%064x", new java.math.BigInteger(1, hash));
+	}
 }

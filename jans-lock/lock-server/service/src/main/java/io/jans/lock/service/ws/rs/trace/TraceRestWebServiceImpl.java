@@ -15,7 +15,6 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +27,7 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -47,6 +47,7 @@ import io.jans.lock.model.trace.api.TraceRecordResponse;
 import io.jans.lock.model.trace.api.TraceVerificationResponse;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
+import io.jans.lock.service.trace.TraceTime;
 import io.jans.lock.service.trace.error.TraceErrors;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.error.TraceValidationException;
@@ -94,6 +95,14 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 	private static final String REASON_MAX_BULK_RECORDS_EXCEEDED = "max_bulk_records_exceeded";
 
 	private static final String REASON_BULK_BODY_TOO_LARGE = "bulk_body_too_large";
+
+	private static final String REASON_BULK_MIXED_PRODUCERS = "bulk_mixed_producers";
+
+	private static final String FIELD_PRODUCER = "producer";
+
+	private static final String FIELD_RECORD_ID = "record_id";
+
+	private static final int STATUS_MULTI_STATUS = 207;
 
 	private static final String REASON_UNREADABLE_BODY = "unreadable_body";
 
@@ -176,16 +185,18 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 			TraceRequestContext context = evidenceDomainResolver.resolve(identity);
 
 			List<String> elements = splitBulkElements(body, config);
+			List<ElementIdentifiers> identifiers = scanElementIdentifiers(elements, config);
+			requireSingleProducer(identifiers);
 
 			List<TraceBulkResultEntry> results = new ArrayList<>(elements.size());
 			for (int index = 0; index < elements.size(); index++) {
-				results.add(ingestOne(index, elements.get(index), context));
+				results.add(ingestOne(index, elements.get(index), identifiers.get(index), context));
 			}
 
 			TraceBulkIngestionResponse dto = new TraceBulkIngestionResponse();
 			dto.setResults(results);
 
-			response = Response.status(Response.Status.ACCEPTED)
+			response = Response.status(STATUS_MULTI_STATUS)
 					.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate())
 					.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE).entity(dto).build();
 			return response;
@@ -289,7 +300,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		return request == null ? null : InetAddressUtility.getIpAddress(request);
 	}
 
-	// -- bulk ingestion (design decision D-16) -----------------------------------------------------
+	// -- bulk ingestion (design decisions D-16, D-22) -----------------------------------------------------
 
 	/**
 	 * Verifies and ingests one array element, never throwing: a failure of {@code ingestionService}
@@ -298,20 +309,118 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 	 * @param elementRaw the element's exact source text, sliced by {@link #splitBulkElements}; fed
 	 *                   to the same ingestion pipeline a standalone submission would use, so
 	 *                   raw-evidence immutability and the D-13 digest/signature hold per item
+	 * @param identifiers the identifiers pre-scanned from the element, echoed on a rejected entry
 	 */
-	private TraceBulkResultEntry ingestOne(int index, String elementRaw, TraceRequestContext context) {
+	private TraceBulkResultEntry ingestOne(int index, String elementRaw, ElementIdentifiers identifiers,
+			TraceRequestContext context) {
 		TraceBulkResultEntry entry = new TraceBulkResultEntry();
 		entry.setIndex(index);
 		try {
 			InputStream slice = new ByteArrayInputStream(elementRaw.getBytes(StandardCharsets.UTF_8));
 			AcceptanceResult result = ingestionService.ingest(slice, context);
 			entry.setAccepted(true);
-			entry.setRecord(toResponse(result));
+			applyAcceptance(entry, toResponse(result));
 		} catch (RuntimeException ex) {
 			entry.setAccepted(false);
+			entry.setProducerId(identifiers.producer);
+			entry.setRecordId(identifiers.recordId);
 			entry.setError(toErrorDto(ex));
 		}
 		return entry;
+	}
+
+	private void applyAcceptance(TraceBulkResultEntry entry, TraceAcceptanceResponse acceptance) {
+		entry.setProducerId(acceptance.getProducerId());
+		entry.setRecordId(acceptance.getRecordId());
+		entry.setContentDigest(acceptance.getContentDigest());
+		entry.setReceiptSequence(acceptance.getReceiptSequence());
+		entry.setReceivedAt(acceptance.getReceivedAt());
+		entry.setIdempotentReplay(acceptance.isIdempotentReplay());
+		entry.setCoverageGapFlag(acceptance.isCoverageGapFlag());
+		entry.setChainLinkFailureFlag(acceptance.isChainLinkFailureFlag());
+		entry.setEquivocationFlag(acceptance.isEquivocationFlag());
+		entry.setLateFlag(acceptance.isLateFlag());
+	}
+
+	/**
+	 * Reads the top-level string {@code producer} and {@code record_id} of each element without
+	 * building a tree or re-serializing it (the element text itself is never altered, D-13). The
+	 * scan streams the element with the same nesting-depth, string-length and duplicate-key limits
+	 * the single-record parser applies, and skips elements longer than {@code maxRequestBytes}
+	 * characters (they fail on their own in the ingestion pipeline). An element that is not a JSON object, or
+	 * that does not scan cleanly under those limits, yields no identifiers and fails individually.
+	 */
+	private List<ElementIdentifiers> scanElementIdentifiers(List<String> elements, TraceConfiguration config) {
+		StreamReadConstraints constraints = StreamReadConstraints.builder().maxNestingDepth(config.getMaxJsonDepth())
+				.maxStringLength(config.getMaxStringLength()).build();
+		JsonFactory factory = JsonFactory.builder().streamReadConstraints(constraints).build();
+		factory.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+
+		List<ElementIdentifiers> identifiers = new ArrayList<>(elements.size());
+		for (String element : elements) {
+			identifiers.add(element.length() > config.getMaxRequestBytes() ? ElementIdentifiers.NONE
+					: scanElementIdentifiers(factory, element));
+		}
+		return identifiers;
+	}
+
+	private ElementIdentifiers scanElementIdentifiers(JsonFactory factory, String element) {
+		String producer = null;
+		String recordId = null;
+		try (JsonParser parser = factory.createParser(element)) {
+			if (parser.nextToken() != JsonToken.START_OBJECT) {
+				return ElementIdentifiers.NONE;
+			}
+			while (parser.nextToken() == JsonToken.FIELD_NAME) {
+				String name = parser.currentName();
+				JsonToken value = parser.nextToken();
+				if (value == JsonToken.VALUE_STRING && FIELD_PRODUCER.equals(name)) {
+					producer = parser.getText();
+				} else if (value == JsonToken.VALUE_STRING && FIELD_RECORD_ID.equals(name)) {
+					recordId = parser.getText();
+				} else {
+					parser.skipChildren();
+				}
+			}
+		} catch (IOException ex) {
+			return ElementIdentifiers.NONE;
+		}
+		return new ElementIdentifiers(producer, recordId);
+	}
+
+	/**
+	 * Rejects the whole request when the batch names more than one distinct top-level
+	 * {@code producer} (design §11.2, D-22), before any element is ingested. Elements without a
+	 * readable producer are not counted.
+	 */
+	private void requireSingleProducer(List<ElementIdentifiers> identifiers) {
+		String first = null;
+		for (ElementIdentifiers element : identifiers) {
+			if (element.producer == null) {
+				continue;
+			}
+			if (first == null) {
+				first = element.producer;
+			} else if (!first.equals(element.producer)) {
+				throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST,
+						REASON_BULK_MIXED_PRODUCERS);
+			}
+		}
+	}
+
+	private static final class ElementIdentifiers {
+
+		private static final ElementIdentifiers NONE = new ElementIdentifiers(null, null);
+
+		private final String producer;
+
+		private final String recordId;
+
+		private ElementIdentifiers(String producer, String recordId) {
+			this.producer = producer;
+			this.recordId = recordId;
+		}
+
 	}
 
 	private TraceErrorResponse toErrorDto(RuntimeException ex) {
@@ -403,7 +512,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		dto.setRecordId(result.getRecordId());
 		dto.setContentDigest(result.getContentDigest());
 		dto.setReceiptSequence(result.getReceiptSequence());
-		dto.setReceivedAt(Instant.ofEpochMilli(result.getReceivedAtMs()).toString());
+		dto.setReceivedAt(TraceTime.formatMillis(result.getReceivedAtMs()));
 		dto.setIdempotentReplay(result.isIdempotentReplay());
 		dto.setCoverageGapFlag(result.isCoverageGapFlag());
 		dto.setChainLinkFailureFlag(result.isChainLinkFailureFlag());
@@ -436,15 +545,17 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		TraceVerificationResponse dto = new TraceVerificationResponse();
 		dto.setSignatureValid(verification.isSignatureValid());
 		dto.setKeyId(verification.getKeyId());
-		dto.setVerifiedAt(Instant.ofEpochMilli(verification.getVerifiedAtMs()).toString());
+		dto.setVerifiedAt(TraceTime.formatMillis(verification.getVerifiedAtMs()));
 		dto.setAlgorithm(verification.getAlgorithm());
+		dto.setKeyThumbprint(verification.getKeyThumbprint());
+		dto.setKeyAuthorized(verification.getKeyAuthorized());
 		return dto;
 	}
 
 	private TraceIngestionResponse toIngestionResponse(ReceiptEntry receipt, IngestionFlags flags) {
 		TraceIngestionResponse dto = new TraceIngestionResponse();
 		dto.setReceiptSequence(receipt.getReceiptSequence());
-		dto.setReceivedAt(Instant.ofEpochMilli(receipt.getReceivedAtMs()).toString());
+		dto.setReceivedAt(TraceTime.formatMillis(receipt.getReceivedAtMs()));
 		dto.setPrevReceiptHash(receipt.getPrevReceiptHash());
 		dto.setReceiptHash(receipt.getReceiptHash());
 		dto.setCoverageGapFlag(flags.isCoverageGap());

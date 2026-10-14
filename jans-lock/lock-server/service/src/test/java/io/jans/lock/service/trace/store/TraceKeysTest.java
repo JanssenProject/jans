@@ -56,16 +56,6 @@ class TraceKeysTest {
 	}
 
 	@Test
-	void testCapabilityKey_vs_tokenKey_typeConfusion_noCollision() {
-		// Same domain and same literal component value, but different key "type" tag ("cap" vs
-		// "tok") and different token-ref shape must never collide.
-		String capKey = TraceKeys.capabilityKey(DOMAIN, "shared-value");
-		String tokKey = TraceKeys.tokenKey(DOMAIN, new TokenRef("shared-value", "access_token", "jti", null));
-
-		assertNotEquals(capKey, tokKey);
-	}
-
-	@Test
 	void testTokenKey_jtiBranch_vs_fingerprintBranch_noCollision() {
 		String jtiKey = TraceKeys.tokenKey(DOMAIN, new TokenRef("issuer-1", "access_token", "x", null));
 		String fpKey = TraceKeys.tokenKey(DOMAIN, new TokenRef("issuer-1", "access_token", null, "x"));
@@ -107,13 +97,6 @@ class TraceKeysTest {
 		String recKey = TraceKeys.recordKey(new RecordIdentity(DOMAIN, "a", "b"));
 
 		assertNotEquals(execKey, recKey);
-	}
-
-	@Test
-	void testCapabilityKey_nullComponent_throws() {
-		// Reaches TraceKeys.key(...)'s own Objects.requireNonNull directly, unlike constructing an
-		// identity value type with a null field (which is rejected one layer earlier).
-		assertThrows(NullPointerException.class, () -> TraceKeys.capabilityKey(DOMAIN, null));
 	}
 
 	@Test

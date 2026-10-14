@@ -187,19 +187,29 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
-	public boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags) throws TraceStorageException {
+	public boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags, long expectedVersion)
+			throws TraceStorageException {
 		String key = TraceKeys.recordKey(id);
 		StoredTraceRecord[] holder = new StoredTraceRecord[1];
+		boolean[] versionConflict = new boolean[1];
 		recordsByKey.computeIfPresent(key, (k, existing) -> {
+			if (existing.getVersion() != expectedVersion) {
+				versionConflict[0] = true;
+				return existing;
+			}
 			IngestionFlags updated = existing.getFlags();
 			updated.setCoverageGap(flags.isCoverageGap());
 			updated.setChainLinkFailure(flags.isChainLinkFailure());
 			updated.setEquivocation(flags.isEquivocation());
 			// jansTraceLate is fixed at ingestion (design §10, T-1); never overwritten here.
-			StoredTraceRecord replacement = existing.withFlags(updated);
+			StoredTraceRecord replacement = existing.withFlags(updated, existing.getVersion() + 1);
 			holder[0] = replacement;
 			return replacement;
 		});
+		if (versionConflict[0]) {
+			throw new TraceStorageException(VERSION_CONFLICT_REASON,
+					"Version mismatch updating record flags for " + key);
+		}
 		return holder[0] != null;
 	}
 
@@ -238,16 +248,6 @@ public class InMemoryTraceStore implements TraceStore {
 	@Override
 	public List<StoredTraceRecord> findRecordsByChainPosition(ChainPosition position) {
 		return recordsByKey.values().stream().filter(r -> r.getChainPosition().equals(position))
-				.sorted(Comparator.comparingLong(r -> r.getReceipt().getReceiptSequence())).map(StoredTraceRecord::copy)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public List<StoredTraceRecord> findRecordsByCapability(String domainId, String capabilityId) {
-		String targetKey = TraceKeys.capabilityKey(domainId, capabilityId);
-		return recordsByKey.values().stream()
-				.filter(r -> r.getIdentity().getDomainId().equals(domainId) && r.getCapabilityIds().stream()
-						.anyMatch(cap -> TraceKeys.capabilityKey(domainId, cap).equals(targetKey)))
 				.sorted(Comparator.comparingLong(r -> r.getReceipt().getReceiptSequence())).map(StoredTraceRecord::copy)
 				.collect(Collectors.toList());
 	}
@@ -421,6 +421,7 @@ public class InMemoryTraceStore implements TraceStore {
 		copy.setProducerInstanceId(source.getProducerInstanceId());
 		copy.setProducerChainId(source.getProducerChainId());
 		copy.setRegisteredBy(source.getRegisteredBy());
+		copy.setGenesisKind(source.getGenesisKind());
 		copy.setCreationDate(source.getCreationDate());
 		return copy;
 	}
@@ -434,6 +435,8 @@ public class InMemoryTraceStore implements TraceStore {
 		copy.setKid(source.getKid());
 		Map<String, String> jwk = source.getPublicKeyJwk();
 		copy.setPublicKeyJwk(jwk == null ? null : new LinkedHashMap<>(jwk));
+		List<String> kinds = source.getAuthorizedEventKinds();
+		copy.setAuthorizedEventKinds(kinds == null ? null : new ArrayList<>(kinds));
 		copy.setValidFrom(source.getValidFrom());
 		copy.setValidUntil(source.getValidUntil());
 		copy.setRevokedAt(source.getRevokedAt());

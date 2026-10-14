@@ -52,7 +52,7 @@ tests:
     result:
       decision: Allow
         "#;
-        let parsed: Result<TestFile, _> = serde_yaml_ng::from_str(yaml);
+        let parsed: Result<TestFile, _> = serde_saphyr::from_str(yaml);
         parsed.expect("Valid YAML specification should parse successfully");
     }
 
@@ -69,7 +69,7 @@ tests:
     result:
       decision: Maybe
         "#;
-        let parsed: Result<TestFile, _> = serde_yaml_ng::from_str(yaml);
+        let parsed: Result<TestFile, _> = serde_saphyr::from_str(yaml);
         parsed.expect_err("Invalid decision 'Maybe' should fail to parse");
     }
 }

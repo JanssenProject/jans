@@ -30,10 +30,12 @@ public class TraceConfiguration {
     public static final int DEFAULT_MAX_ARRAY_LENGTH = 256;
     public static final int DEFAULT_MAX_OBJECT_MEMBERS = 256;
     public static final int DEFAULT_RECEIPT_ALLOCATION_RETRY_LIMIT = 8;
+    public static final int DEFAULT_CORRELATION_RETRY_LIMIT = 3;
     public static final int DEFAULT_RECEIPT_REPAIR_INTERVAL_SECONDS = 300;
     public static final int DEFAULT_PENDING_RECEIPT_TIMEOUT_SECONDS = 120;
     public static final int DEFAULT_MAX_BULK_RECORDS = 100;
     public static final int DEFAULT_MAX_BULK_REQUEST_BYTES = 4_194_304;
+    public static final String DEFAULT_CHAIN_REGISTRATION_MODE = "PRE_REGISTERED";
     /** Ceiling {@link #getMaxBulkRequestBytes()} clamps to regardless of configuration, so a
      *  careless value can never make the bulk endpoint buffer an unbounded amount of memory per
      *  request (CWE-770). Not itself configurable. */
@@ -79,6 +81,10 @@ public class TraceConfiguration {
     @Schema(description = "Maximum retries when allocating a receipt-chain sequence number")
     private int receiptAllocationRetryLimit = DEFAULT_RECEIPT_ALLOCATION_RETRY_LIMIT;
 
+    @DocProperty(description = "Maximum retries when a correlation neighbor update hits a version conflict", defaultValue = "3")
+    @Schema(description = "Maximum retries when a correlation neighbor update hits a version conflict")
+    private int correlationRetryLimit = DEFAULT_CORRELATION_RETRY_LIMIT;
+
     @DocProperty(description = "Interval in seconds between receipt repair timer runs", defaultValue = "300")
     @Schema(description = "Interval in seconds between receipt repair timer runs")
     private int receiptRepairIntervalSeconds = DEFAULT_RECEIPT_REPAIR_INTERVAL_SECONDS;
@@ -94,6 +100,10 @@ public class TraceConfiguration {
     @DocProperty(description = "Maximum total body size, in bytes, buffered for one POST /audit/trace/bulk request; clamped to 16777216 regardless of this value", defaultValue = "4194304")
     @Schema(description = "Maximum total body size, in bytes, buffered for one POST /audit/trace/bulk request; clamped to 16777216 regardless of this value")
     private int maxBulkRequestBytes = DEFAULT_MAX_BULK_REQUEST_BYTES;
+
+    @DocProperty(description = "How producer chains come to exist: PRE_REGISTERED (admin API only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers it); an unknown value is treated as PRE_REGISTERED", defaultValue = "PRE_REGISTERED")
+    @Schema(description = "How producer chains come to exist: PRE_REGISTERED (admin API only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers it); an unknown value is treated as PRE_REGISTERED")
+    private String chainRegistrationMode = DEFAULT_CHAIN_REGISTRATION_MODE;
 
     public boolean isEnabled() {
         return enabled;
@@ -175,6 +185,14 @@ public class TraceConfiguration {
         this.receiptAllocationRetryLimit = receiptAllocationRetryLimit;
     }
 
+    public int getCorrelationRetryLimit() {
+        return correlationRetryLimit > 0 ? correlationRetryLimit : DEFAULT_CORRELATION_RETRY_LIMIT;
+    }
+
+    public void setCorrelationRetryLimit(int correlationRetryLimit) {
+        this.correlationRetryLimit = correlationRetryLimit;
+    }
+
     public int getReceiptRepairIntervalSeconds() {
         return receiptRepairIntervalSeconds > 0 ? receiptRepairIntervalSeconds
                 : DEFAULT_RECEIPT_REPAIR_INTERVAL_SECONDS;
@@ -215,6 +233,16 @@ public class TraceConfiguration {
         this.maxBulkRequestBytes = maxBulkRequestBytes;
     }
 
+    public String getChainRegistrationMode() {
+        return chainRegistrationMode == null || chainRegistrationMode.trim().isEmpty()
+                ? DEFAULT_CHAIN_REGISTRATION_MODE
+                : chainRegistrationMode;
+    }
+
+    public void setChainRegistrationMode(String chainRegistrationMode) {
+        this.chainRegistrationMode = chainRegistrationMode;
+    }
+
     @Override
     public String toString() {
         return "TraceConfiguration [enabled=" + enabled + ", defaultEvidenceDomainId=" + defaultEvidenceDomainId
@@ -223,9 +251,11 @@ public class TraceConfiguration {
                 + getMaxJsonDepth() + ", maxStringLength=" + getMaxStringLength() + ", maxArrayLength="
                 + getMaxArrayLength() + ", maxObjectMembers=" + getMaxObjectMembers()
                 + ", receiptAllocationRetryLimit=" + getReceiptAllocationRetryLimit()
+                + ", correlationRetryLimit=" + getCorrelationRetryLimit()
                 + ", receiptRepairIntervalSeconds=" + getReceiptRepairIntervalSeconds()
                 + ", pendingReceiptTimeoutSeconds=" + getPendingReceiptTimeoutSeconds() + ", maxBulkRecords="
-                + getMaxBulkRecords() + ", maxBulkRequestBytes=" + getMaxBulkRequestBytes() + "]";
+                + getMaxBulkRecords() + ", maxBulkRequestBytes=" + getMaxBulkRequestBytes()
+                + ", chainRegistrationMode=" + getChainRegistrationMode() + "]";
     }
 
 }

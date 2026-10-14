@@ -15,6 +15,7 @@ import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.Version;
 import io.jans.orm.model.base.BaseEntry;
 
 /**
@@ -70,9 +71,6 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
     @AttributeName(name = "jansTracePrevRecordHash", ignoreDuringUpdate = true)
     private String prevRecordHash;
 
-    @AttributeName(name = "jansTraceCapKeys", ignoreDuringUpdate = true)
-    private List<String> capKeys;
-
     @AttributeName(name = "jansTraceTokenKeys", ignoreDuringUpdate = true)
     private List<String> tokenKeys;
 
@@ -115,6 +113,10 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
 
     @AttributeName(name = "jansTraceNodeId", ignoreDuringUpdate = true)
     private String nodeId;
+
+    @Version
+    @AttributeName(name = "jansVersion", ignoreDuringUpdate = true)
+    private Long version;
 
     @AttributeName(name = "creationDate", ignoreDuringUpdate = true)
     private Date creationDate;
@@ -221,14 +223,6 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
 
     public void setPrevRecordHash(String prevRecordHash) {
         this.prevRecordHash = prevRecordHash;
-    }
-
-    public List<String> getCapKeys() {
-        return capKeys;
-    }
-
-    public void setCapKeys(List<String> capKeys) {
-        this.capKeys = capKeys;
     }
 
     public List<String> getTokenKeys() {
@@ -343,6 +337,14 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
         this.nodeId = nodeId;
     }
 
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public Date getCreationDate() {
         return creationDate;
     }
@@ -366,7 +368,7 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 && Objects.equals(execKey, that.execKey) && Objects.equals(execId, that.execId)
                 && Objects.equals(execAuthority, that.execAuthority) && Objects.equals(chainKey, that.chainKey)
                 && Objects.equals(chainPosKey, that.chainPosKey) && Objects.equals(seqNum, that.seqNum)
-                && Objects.equals(prevRecordHash, that.prevRecordHash) && Objects.equals(capKeys, that.capKeys)
+                && Objects.equals(prevRecordHash, that.prevRecordHash)
                 && Objects.equals(tokenKeys, that.tokenKeys) && Objects.equals(assertion, that.assertion)
                 && Objects.equals(contentDigest, that.contentDigest)
                 && Objects.equals(verification, that.verification) && Objects.equals(receiptSeq, that.receiptSeq)
@@ -375,15 +377,16 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 && Objects.equals(receiptHash, that.receiptHash) && Objects.equals(coverageGap, that.coverageGap)
                 && Objects.equals(chainLinkFailure, that.chainLinkFailure)
                 && Objects.equals(equivocation, that.equivocation) && Objects.equals(late, that.late)
-                && Objects.equals(nodeId, that.nodeId) && Objects.equals(creationDate, that.creationDate);
+                && Objects.equals(nodeId, that.nodeId) && Objects.equals(version, that.version)
+                && Objects.equals(creationDate, that.creationDate);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, domainId, producerId, recordId, eventKind, signedAt, execKey, execId, execAuthority,
-                chainKey, chainPosKey, seqNum, prevRecordHash, capKeys, tokenKeys, assertion, contentDigest,
+                chainKey, chainPosKey, seqNum, prevRecordHash, tokenKeys, assertion, contentDigest,
                 verification, receiptSeq, receivedAt, receivedAtMs, prevReceiptHash, receiptHash, coverageGap,
-                chainLinkFailure, equivocation, late, nodeId, creationDate);
+                chainLinkFailure, equivocation, late, nodeId, version, creationDate);
     }
 
     @Override
@@ -392,12 +395,12 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 + recordId + ", eventKind=" + eventKind + ", signedAt=" + signedAt + ", execKey=" + execKey
                 + ", execId=" + execId + ", execAuthority=" + execAuthority + ", chainKey=" + chainKey
                 + ", chainPosKey=" + chainPosKey + ", seqNum=" + seqNum + ", prevRecordHash=" + prevRecordHash
-                + ", capKeys=" + capKeys + ", tokenKeys=" + tokenKeys + ", contentDigest=" + contentDigest
+                 + ", tokenKeys=" + tokenKeys + ", contentDigest=" + contentDigest
                 + ", verification=" + verification + ", receiptSeq=" + receiptSeq + ", receivedAt=" + receivedAt
                 + ", receivedAtMs=" + receivedAtMs + ", prevReceiptHash=" + prevReceiptHash + ", receiptHash="
                 + receiptHash + ", coverageGap=" + coverageGap + ", chainLinkFailure=" + chainLinkFailure
-                + ", equivocation=" + equivocation + ", late=" + late + ", nodeId=" + nodeId + ", creationDate="
-                + creationDate + "]";
+                + ", equivocation=" + equivocation + ", late=" + late + ", nodeId=" + nodeId + ", version=" + version
+                + ", creationDate=" + creationDate + "]";
     }
 
 }

@@ -11,17 +11,18 @@ import java.util.Objects;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.lock.service.trace.TraceTime;
 import io.jans.lock.service.trace.canon.CanonicalHashes;
 
 /**
  * The receipt-hash function of the receipt chain (design §9, TRACE MVP design decision D-8 step 3,
- * D-13):
+ * D-13, D-24):
  *
  * <pre>
  * receiptHash = "sha256:" + hex(SHA-256(JCS({
  *     "evidence_domain_id": domainId,
  *     "receipt_sequence":   receiptSequence,   // JSON integer
- *     "received_at":        receivedAtMs,      // JSON integer, epoch milliseconds
+ *     "received_at":        receivedAt,        // JSON string, RFC 3339 UTC, 3 fraction digits (D-24)
  *     "producer_id":        producerId,
  *     "record_id":          recordId,
  *     "content_digest":     contentDigest,
@@ -54,7 +55,7 @@ public final class ReceiptHashes {
 		ObjectNode node = JsonNodeFactory.instance.objectNode();
 		node.put("evidence_domain_id", domainId);
 		node.put("receipt_sequence", receiptSequence);
-		node.put("received_at", receivedAtMs);
+		node.put("received_at", TraceTime.formatMillis(receivedAtMs));
 		node.put("producer_id", producerId);
 		node.put("record_id", recordId);
 		node.put("content_digest", contentDigest);

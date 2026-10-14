@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.canon.JcsCanonicalizer;
 import io.jans.lock.service.trace.crypto.Ed25519Capability;
@@ -69,7 +71,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	private static final String NODE_ID = "node-1";
 
 	/** The fixture's signed {@code producer}. */
-	private static final String PRODUCER = "cedarling-fleet-1/1.0.0";
+	private static final String PRODUCER = "cedarling-fleet-1";
 
 	/** The fixture's {@code kid}. */
 	private static final String KID = "cedarling-fleet-1-2026-01";
@@ -122,8 +124,8 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 		service = newService(capability, keyRegistry, new Ed25519Verifier(), parser);
 
 		keyPair = Ed25519TestKeys.generateKeyPair();
-		keyRegistry.register(DOMAIN, PRODUCER, KID, Ed25519TestKeys.toJwk(keyPair.getPublic()), KEY_VALID_FROM_MS,
-				null, CLIENT_ID, KEY_VALID_FROM_MS);
+		keyRegistry.register(DOMAIN, PRODUCER, KID, Ed25519TestKeys.toJwk(keyPair.getPublic()),
+				new ArrayList<>(TraceConstants.EVENT_KINDS), KEY_VALID_FROM_MS, null, CLIENT_ID, KEY_VALID_FROM_MS);
 	}
 
 	/**
@@ -157,13 +159,15 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 		assertEquals(PRODUCER, verified.getIdentity().getProducerId());
 		assertEquals(RECORD_ID, verified.getIdentity().getRecordId());
 		assertEquals("AUTHORIZATION_DECISION", verified.getInputs().getEventKind());
-		assertEquals(Arrays.asList("invoke:payment-authorization"), verified.getInputs().getCapabilityIds());
 		assertEquals(json, verified.getParsed().getRawText());
 
 		assertTrue(verified.getVerification().isSignatureValid());
 		assertEquals(KID, verified.getVerification().getKeyId());
 		assertEquals(RECEIVED_AT_MS, verified.getVerification().getVerifiedAtMs());
 		assertEquals(Ed25519PublicKeys.ALGORITHM, verified.getVerification().getAlgorithm());
+		assertEquals(Ed25519PublicKeys.thumbprint(Ed25519TestKeys.toJwk(keyPair.getPublic())),
+				verified.getVerification().getKeyThumbprint());
+		assertEquals(Boolean.TRUE, verified.getVerification().getKeyAuthorized());
 
 		assertEquals(independentContentDigest(json), verified.getContentDigest());
 	}
@@ -186,10 +190,34 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	}
 
 	@Test
+	void testVerify_EventKindOutsideKeyScope_UnknownProducerKeyBeforeSignature() {
+		String adOnlyKid = "ad-only-kid";
+		KeyPair adOnlyKey = Ed25519TestKeys.generateKeyPair();
+		keyRegistry.register(DOMAIN, PRODUCER, adOnlyKid, Ed25519TestKeys.toJwk(adOnlyKey.getPublic()),
+				List.of(TraceConstants.EVENT_KIND_AUTHORIZATION_DECISION), KEY_VALID_FROM_MS, null, CLIENT_ID,
+				KEY_VALID_FROM_MS);
+
+		String inScope = SignedAssertionFactory.authorizationDecision().kid(adOnlyKid).sign(adOnlyKey.getPrivate());
+		assertEquals("AUTHORIZATION_DECISION",
+				service.verify(body(inScope), ctx("*")).getInputs().getEventKind());
+
+		// Signed by the wrong private key: if the scope check ran after the signature check this
+		// would be invalid_signature, not unknown_producer_key.
+		String outOfScope = SignedAssertionFactory.capabilityInvoked().producer(PRODUCER).kid(adOnlyKid)
+				.sign(keyPair.getPrivate());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.verify(body(outOfScope), ctx("*")));
+
+		assertEquals(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY, ex.getErrorId());
+		assertEquals("event_kind_not_authorized", ex.getReason());
+	}
+
+	@Test
 	void testVerify_ExplicitProducerAllowlist_Verifies() {
 		String json = SignedAssertionFactory.authorizationDecision().sign(keyPair.getPrivate());
 
-		VerifiedAssertion verified = service.verify(body(json), ctx("other/2.0.0", PRODUCER));
+		VerifiedAssertion verified = service.verify(body(json), ctx("other-producer", PRODUCER));
 
 		assertEquals(PRODUCER, verified.getProducer());
 	}
@@ -229,7 +257,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	@Test
 	void testVerify_TamperedFieldAfterSigning_InvalidSignature() {
 		String json = SignedAssertionFactory.authorizationDecision().sign(keyPair.getPrivate());
-		String tampered = SignedAssertionFactory.tamperAfterSigning(json, "DENY", "trace", "event", "outcome");
+		String tampered = SignedAssertionFactory.tamperAfterSigning(json, "DENY", "trace", "event", "decision", "outcome");
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
 				() -> service.verify(body(tampered), ctx("*")));
@@ -303,7 +331,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 		String json = SignedAssertionFactory.authorizationDecision().sign(keyPair.getPrivate());
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> guarded.verify(body(json), ctx("other-producer/2.0.0")));
+				() -> guarded.verify(body(json), ctx("other-producer")));
 
 		assertEquals(TraceErrorResponseType.PRODUCER_NOT_ALLOWED, ex.getErrorId());
 		verifyNoInteractions(mockRegistry, mockVerifier);
@@ -317,7 +345,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 				.sign(keyPair.getPrivate());
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.verify(body(json), ctx("other-producer/2.0.0")));
+				() -> service.verify(body(json), ctx("other-producer")));
 
 		assertEquals(TraceErrorResponseType.PRODUCER_NOT_ALLOWED, ex.getErrorId());
 	}

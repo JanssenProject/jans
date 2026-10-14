@@ -102,13 +102,13 @@ public final class TraceAssertions {
 			trace.put("signed_at", signedAt);
 			trace.put("trace_execution_id", traceExecutionId);
 			trace.put("execution_authority", executionAuthority);
+			trace.putObject("subject").put("workload_id", "spiffe://example.org/agent/trace-end-to-end-test");
 
 			ObjectNode event = trace.putObject("event");
-			event.put("outcome", "ALLOW");
-			ArrayNode capabilityIds = event.putArray("capability_ids");
-			ObjectNode capability = capabilityIds.addObject();
-			capability.put("capability_id", "invoke:payment-authorization");
-			capability.put("outcome", "ALLOW");
+			ObjectNode decision = event.putObject("decision");
+			decision.put("action", "Acme::Action::\"Pay\"");
+			decision.put("resource_type", "Acme::Payment");
+			decision.put("outcome", "ALLOW");
 
 			ObjectNode policy = trace.putObject("policy");
 			policy.put("policy_store_id", "https://example.org/policy-stores/payments");
@@ -220,14 +220,14 @@ public final class TraceAssertions {
 			trace.put("signed_at", signedAt);
 			trace.put("trace_execution_id", traceExecutionId);
 			trace.put("execution_authority", executionAuthority);
+			trace.putObject("subject").put("workload_id", "spiffe://example.org/agent/trace-end-to-end-test");
 
 			ObjectNode event = trace.putObject("event");
-			event.put("outcome", "INVOKED");
+			ObjectNode invocation = event.putObject("invocation");
+			invocation.put("action", "Acme::Action::\"Pay\"");
+			invocation.put("resource_type", "Acme::Payment");
+			invocation.put("outcome", "INVOKED");
 			event.put("enforcement_point_id", "trace-end-to-end-test-gateway");
-			ArrayNode capabilityIds = event.putArray("capability_ids");
-			ObjectNode capability = capabilityIds.addObject();
-			capability.put("capability_id", "invoke:payment-authorization");
-			capability.put("outcome", "ALLOW");
 
 			ObjectNode chain = root.putObject("producer_chain");
 			chain.put("producer_id", producer);

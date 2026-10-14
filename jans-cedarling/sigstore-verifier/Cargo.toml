@@ -32,9 +32,9 @@ p256 = { version = "0.13", default-features = false, features = ["ecdsa"] }
 p384 = { version = "0.13", default-features = false, features = ["ecdsa"] }
 ecdsa = { version = "0.16", default-features = false, features = ["der", "verifying"] }
 x509-parser = { version = "0.18", default-features = false }
-serde_json_canonicalizer = "0.3"
+serde_json_canonicalizer = { workspace = true }
 regex-lite = { version = "0.1" }
-base64 = { version = "0.22", default-features = false, features = ["alloc"] }
+base64 = { workspace = true }
 
 [dev-dependencies]
 rcgen = { version = "0.14", default-features = false, features = ["pem", "ring", "x509-parser"] }
@@ -47,7 +47,7 @@ p384 = { version = "0.13", default-features = false, features = ["ecdsa", "pkcs8
 
 [build-dependencies]
 x509-parser = { version = "0.18", default-features = false }
-base64 = { version = "0.22", default-features = false, features = ["alloc"] }
+base64 = { workspace = true }
 chrono = { workspace = true }
 
 [lints]

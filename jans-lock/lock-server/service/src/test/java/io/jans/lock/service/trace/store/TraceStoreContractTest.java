@@ -28,6 +28,7 @@ import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
+import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
@@ -66,7 +67,7 @@ public abstract class TraceStoreContractTest {
 
 	protected StoredTraceRecord newRecord(String producerId, String recordId, String execAuthority, String execId,
 			String chainProducerId, String chainInstanceId, String chainId, long seq, long receiptSeq,
-			List<String> capabilityIds, List<TokenRef> tokenRefs) {
+			List<TokenRef> tokenRefs) {
 		RecordIdentity identity = new RecordIdentity(DOMAIN, producerId, recordId);
 		ExecutionIdentity execution = new ExecutionIdentity(DOMAIN, execAuthority, execId);
 		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, chainProducerId, chainInstanceId, chainId);
@@ -76,14 +77,14 @@ public abstract class TraceStoreContractTest {
 				receiptSeq, 2000L + receiptSeq, TraceConstants.ZERO_HASH, "sha256:" + String.format("%064d", receiptSeq));
 		IngestionFlags flags = new IngestionFlags(false, false, false, false);
 		return new StoredTraceRecord(identity, "{\"trace\":{}}", "sha256:" + String.format("%064d", receiptSeq),
-				verification, receipt, flags, execution, chainPosition, TraceConstants.ZERO_HASH, capabilityIds,
-				tokenRefs, TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 3000L + receiptSeq);
+				verification, receipt, flags, execution, chainPosition, TraceConstants.ZERO_HASH,
+				tokenRefs, TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 3000L + receiptSeq, 0L);
 	}
 
 	protected StoredTraceRecord newRecord(String producerId, String recordId, String execAuthority, String execId,
 			long seq, long receiptSeq) {
 		return newRecord(producerId, recordId, execAuthority, execId, producerId, "instance-1", "chain-1", seq,
-				receiptSeq, Collections.emptyList(), Collections.emptyList());
+				receiptSeq, Collections.emptyList());
 	}
 
 	protected TraceReceiptEntry newReceiptRow(long seq, long receivedAtMs, String producerId, String recordId,
@@ -115,6 +116,7 @@ public abstract class TraceStoreContractTest {
 		entity.setProducerId(producerId);
 		entity.setKid(kid);
 		entity.setPublicKeyJwk(jwk);
+		entity.setAuthorizedEventKinds(Arrays.asList("AUTHORIZATION_DECISION", "RUNTIME_EFFECT"));
 		entity.setValidFrom(new Date(100L));
 		entity.setRegisteredBy("client-1");
 		entity.setCreationDate(new Date(100L));
@@ -185,7 +187,7 @@ public abstract class TraceStoreContractTest {
 		store.insertRecord(record);
 
 		IngestionFlags newFlags = new IngestionFlags(true, true, true, true);
-		boolean updated = store.updateRecordFlags(record.getIdentity(), newFlags);
+		boolean updated = store.updateRecordFlags(record.getIdentity(), newFlags, record.getVersion());
 
 		assertTrue(updated);
 		StoredTraceRecord found = store.findRecord(record.getIdentity()).get();
@@ -202,9 +204,42 @@ public abstract class TraceStoreContractTest {
 	@Test
 	void testUpdateRecordFlags_unknownIdentity_returnsFalse() throws Exception {
 		boolean updated = store.updateRecordFlags(new RecordIdentity(DOMAIN, "nope", "nope"),
-				new IngestionFlags(true, true, true, true));
+				new IngestionFlags(true, true, true, true), 0L);
 
 		assertFalse(updated);
+	}
+
+	// -- records: optimistic-concurrency version (design decision D-9, TRACE CAS MVP task 11) ----
+
+	@Test
+	void testUpdateRecordFlags_matchingVersion_succeedsAndIncrementsVersion() throws Exception {
+		StoredTraceRecord record = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
+		store.insertRecord(record);
+		long initialVersion = store.findRecord(record.getIdentity()).get().getVersion();
+
+		boolean updated = store.updateRecordFlags(record.getIdentity(), new IngestionFlags(true, false, false, false),
+				initialVersion);
+
+		assertTrue(updated);
+		assertEquals(initialVersion + 1, store.findRecord(record.getIdentity()).get().getVersion());
+	}
+
+	@Test
+	void testUpdateRecordFlags_staleVersion_throwsVersionConflictReason() throws Exception {
+		StoredTraceRecord record = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
+		store.insertRecord(record);
+		long initialVersion = store.findRecord(record.getIdentity()).get().getVersion();
+		// Advance the stored version once so the caller's expectation below is stale.
+		store.updateRecordFlags(record.getIdentity(), new IngestionFlags(true, false, false, false), initialVersion);
+
+		TraceStorageException ex = assertThrows(TraceStorageException.class,
+				() -> store.updateRecordFlags(record.getIdentity(), new IngestionFlags(false, true, false, false),
+						initialVersion));
+
+		assertEquals(TraceStore.VERSION_CONFLICT_REASON, ex.getReason());
+		// The losing writer's flags must never have been applied.
+		assertTrue(store.findRecord(record.getIdentity()).get().getFlags().isCoverageGap());
+		assertFalse(store.findRecord(record.getIdentity()).get().getFlags().isChainLinkFailure());
 	}
 
 	// -- records: execution ordering -----------------------------------------------------------
@@ -273,34 +308,22 @@ public abstract class TraceStoreContractTest {
 		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "producer-1", "instance-1", "chain-1");
 		ChainPosition position = new ChainPosition(chainIdentity, 1L);
 		store.insertRecord(newRecord("producer-1", "record-a", "authority-1", "exec-a", "producer-1", "instance-1",
-				"chain-1", 1L, 1L, Collections.emptyList(), Collections.emptyList()));
+				"chain-1", 1L, 1L, Collections.emptyList()));
 		store.insertRecord(newRecord("producer-1", "record-b", "authority-1", "exec-b", "producer-1", "instance-1",
-				"chain-1", 1L, 2L, Collections.emptyList(), Collections.emptyList()));
+				"chain-1", 1L, 2L, Collections.emptyList()));
 
 		List<StoredTraceRecord> found = store.findRecordsByChainPosition(position);
 
 		assertEquals(2, found.size());
 	}
 
-	// -- records: capability / token lookups ------------------------------------------------------
-
-	@Test
-	void testFindRecordsByCapability_matchesByDerivedKeyNotRawEquality() throws Exception {
-		store.insertRecord(newRecord("producer-1", "record-1", "authority-1", "exec-1", "producer-1", "instance-1",
-				"chain-1", 1L, 1L, Arrays.asList("cap-1", "cap-2"), Collections.emptyList()));
-		store.insertRecord(newRecord("producer-1", "record-2", "authority-1", "exec-2", "producer-1", "instance-1",
-				"chain-1", 2L, 2L, Arrays.asList("cap-2"), Collections.emptyList()));
-
-		List<StoredTraceRecord> found = store.findRecordsByCapability(DOMAIN, "cap-2");
-
-		assertEquals(2, found.size());
-	}
+	// -- records: token lookups ------------------------------------------------------
 
 	@Test
 	void testFindRecordsByToken_jtiReference_matchesRegardlessOfTokenType() throws Exception {
 		TokenRef stored = new TokenRef("issuer-1", "access_token", "jti-1", null);
 		store.insertRecord(newRecord("producer-1", "record-1", "authority-1", "exec-1", "producer-1", "instance-1",
-				"chain-1", 1L, 1L, Collections.emptyList(), Arrays.asList(stored)));
+				"chain-1", 1L, 1L, Arrays.asList(stored)));
 
 		TokenRef search = new TokenRef("issuer-1", "refresh_token", "jti-1", null);
 		List<StoredTraceRecord> found = store.findRecordsByToken(DOMAIN, search);
@@ -458,6 +481,7 @@ public abstract class TraceStoreContractTest {
 
 		assertTrue(found.isPresent());
 		assertEquals("kid-1", found.get().getKid());
+		assertEquals(Arrays.asList("AUTHORIZATION_DECISION", "RUNTIME_EFFECT"), found.get().getAuthorizedEventKinds());
 		assertFalse(found.get().getRevokedAtMs() != null);
 	}
 

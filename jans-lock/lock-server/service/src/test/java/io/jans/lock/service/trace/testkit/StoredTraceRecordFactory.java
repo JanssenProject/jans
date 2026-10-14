@@ -34,7 +34,7 @@ public final class StoredTraceRecordFactory {
 
 	private String domainId = "domain-1";
 
-	private String producerId = "producer-1/1.0.0";
+	private String producerId = "producer-1";
 
 	private String recordId;
 
@@ -60,7 +60,7 @@ public final class StoredTraceRecordFactory {
 
 	private String receiptHash = TraceConstants.ZERO_HASH;
 
-	private List<String> capabilityIds = Collections.emptyList();
+	private VerificationResult verification;
 
 	private List<TokenRef> tokenRefs = Collections.emptyList();
 
@@ -79,6 +79,8 @@ public final class StoredTraceRecordFactory {
 	private boolean equivocation;
 
 	private boolean late;
+
+	private long version;
 
 	private StoredTraceRecordFactory() {
 	}
@@ -166,11 +168,6 @@ public final class StoredTraceRecordFactory {
 		return this;
 	}
 
-	public StoredTraceRecordFactory capabilityIds(List<String> capabilityIds) {
-		this.capabilityIds = capabilityIds;
-		return this;
-	}
-
 	public StoredTraceRecordFactory tokenRefs(List<TokenRef> tokenRefs) {
 		this.tokenRefs = tokenRefs;
 		return this;
@@ -211,8 +208,19 @@ public final class StoredTraceRecordFactory {
 		return this;
 	}
 
+	/** Overrides the default (legacy-shaped: no thumbprint, no key_authorized) verification block. */
+	public StoredTraceRecordFactory verification(VerificationResult verification) {
+		this.verification = verification;
+		return this;
+	}
+
 	public StoredTraceRecordFactory late(boolean late) {
 		this.late = late;
+		return this;
+	}
+
+	public StoredTraceRecordFactory version(long version) {
+		this.version = version;
 		return this;
 	}
 
@@ -228,13 +236,13 @@ public final class StoredTraceRecordFactory {
 		ExecutionIdentity execution = new ExecutionIdentity(domainId, executionAuthority, traceExecutionId);
 		ChainIdentity chainIdentity = new ChainIdentity(domainId, producerId, producerInstanceId, producerChainId);
 		ChainPosition chainPosition = new ChainPosition(chainIdentity, sequenceNumber);
-		VerificationResult verification = new VerificationResult(true, "kid-1", receivedAtMs, "Ed25519");
+		VerificationResult verification = this.verification != null ? this.verification
+				: new VerificationResult(true, "kid-1", receivedAtMs, "Ed25519");
 		ReceiptEntry receipt = new ReceiptEntry(receiptSequence, receivedAtMs, prevReceiptHash, receiptHash);
 		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late);
 
 		return new StoredTraceRecord(identity, "{\"trace\":{}}", contentDigest, verification, receipt, flags,
-				execution, chainPosition, prevRecordHash, capabilityIds, tokenRefs, eventKind, signedAt, nodeId,
-				createdAtMs);
+				execution, chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs, version);
 	}
 
 }

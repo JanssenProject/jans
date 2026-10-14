@@ -135,7 +135,6 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		assertEquals("AUTHORIZATION_DECISION", result.getEventKind());
 		assertEquals("spiffe://example.org/agent/planner", result.getExecutionAuthority());
 		assertEquals("exec-01JABCXYZQK8P5N9F2C7R3T4V6", result.getTraceExecutionId());
-		assertEquals(Arrays.asList("invoke:payment-authorization"), result.getCapabilityIds());
 		assertEquals(1, result.getTokenRefs().size());
 		TokenRef tokenRef = result.getTokenRefs().get(0);
 		assertEquals("https://accounts.example.org", tokenRef.getIssuer());
@@ -149,7 +148,7 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	/**
 	 * Acceptance criterion 1, literally: task 08's own design §7 example fixture (not this task's
 	 * near-copy) validates as {@code AUTHORIZATION_DECISION} and yields the specified
-	 * {@code capabilityIds} and {@code TokenRef}.
+	 * {@code TokenRef}.
 	 */
 	@Test
 	void testAuthorizationDecision_task08DesignExampleFixture_validatesAsSpecified() throws IOException {
@@ -157,7 +156,6 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 
 		CorrelationInputs result = registry.validate(assertion);
 
-		assertEquals(Arrays.asList("invoke:payment-authorization"), result.getCapabilityIds());
 		assertEquals(1, result.getTokenRefs().size());
 		assertEquals("https://accounts.example.org", result.getTokenRefs().get(0).getIssuer());
 		assertEquals("9c9f2e77-9a3e-4b62-9a2a-2f6e6e2a9f3e", result.getTokenRefs().get(0).getJti());
@@ -198,12 +196,12 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	@Test
 	void testAuthorizationDecision_outcomeNotAllowOrDeny_throwsInvalidOutcome() throws IOException {
 		ObjectNode root = loadFixture("authorization_decision_valid.json");
-		set(root, TextNode.valueOf("MAYBE"), "trace", "event", "outcome");
+		set(root, TextNode.valueOf("MAYBE"), "trace", "event", "decision", "outcome");
 
 		TraceValidationException ex = validateAndCapture(root);
 
 		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("invalid:trace.event.outcome", ex.getReason());
+		assertEquals("invalid:trace.event.decision.outcome", ex.getReason());
 	}
 
 	@Test
@@ -217,58 +215,202 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		assertEquals("missing:trace.runtime.pdp_id", ex.getReason());
 	}
 
-	// -- capability_ids[] (shared by AUTHORIZATION_DECISION / CAPABILITY_INVOKED) --------------
+	// -- decision facts (AUTHORIZATION_DECISION) ----------------------------------------------
 
-	@Test
-	void testCapabilityIds_empty_throwsEmpty() throws IOException {
-		ObjectNode root = loadFixture("authorization_decision_valid.json");
-		set(root, MAPPER.createArrayNode(), "trace", "event", "capability_ids");
-
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("empty:trace.event.capability_ids", ex.getReason());
-	}
-
-	@Test
-	void testCapabilityIds_entryInvalidOutcome_throwsInvalid() throws IOException {
-		ObjectNode root = loadFixture("authorization_decision_valid.json");
-		set(root, TextNode.valueOf("MAYBE"), "trace", "event", "capability_ids", "0", "outcome");
-
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("invalid:trace.event.capability_ids[0].outcome", ex.getReason());
-	}
-
-	@Test
-	void testCapabilityIds_capabilityIdTooLong_throwsLength() throws IOException {
-		ObjectNode root = loadFixture("authorization_decision_valid.json");
-		StringBuilder tooLong = new StringBuilder();
-		for (int i = 0; i < 513; i++) {
-			tooLong.append('a');
+	private static ObjectNode fact(String idField, String idValue, String outcome) {
+		ObjectNode fact = MAPPER.createObjectNode();
+		if (idField != null) {
+			fact.put(idField, idValue);
 		}
-		set(root, TextNode.valueOf(tooLong.toString()), "trace", "event", "capability_ids", "0", "capability_id");
+		fact.put("action", "Acme::Action::\"Pay\"");
+		fact.put("resource_type", "Acme::Payment");
+		fact.put("outcome", outcome);
+		return fact;
+	}
 
+	private static void replaceFacts(ObjectNode root, String singular, String plural, ArrayNode entries) {
+		ObjectNode event = (ObjectNode) at(root, "trace", "event");
+		event.remove(singular);
+		event.set(plural, entries);
+	}
+
+	private void assertRejected(ObjectNode root, String expectedReason) {
 		TraceValidationException ex = validateAndCapture(root);
 
 		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("length:trace.event.capability_ids[0].capability_id", ex.getReason());
+		assertEquals(expectedReason, ex.getReason());
 	}
 
 	@Test
-	void testCapabilityIds_duplicateCapabilityId_deduplicated() throws IOException {
-		ObjectNode root = loadFixture("authorization_decision_valid.json");
-		ArrayNode capabilityIds = (ArrayNode) at(root, "trace", "event", "capability_ids");
-		ObjectNode duplicate = MAPPER.createObjectNode();
-		duplicate.put("capability_id", "invoke:payment-authorization");
-		duplicate.put("outcome", "ALLOW");
-		capabilityIds.add(duplicate);
+	void testAuthorizationDecision_batchDecisions_accepted() throws IOException {
+		ParsedAssertion assertion = parseAndCommonValidate(loadFixture("authorization_decision_batch_valid.json"));
 
-		ParsedAssertion assertion = parseAndCommonValidate(root);
 		CorrelationInputs result = registry.validate(assertion);
 
-		assertEquals(Arrays.asList("invoke:payment-authorization"), result.getCapabilityIds());
+		assertEquals("AUTHORIZATION_DECISION", result.getEventKind());
+		assertEquals(1, result.getTokenRefs().size());
+	}
+
+	@Test
+	void testAuthorizationDecision_decisionsEmpty_throwsEmpty() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		replaceFacts(root, "decision", "decisions", MAPPER.createArrayNode());
+
+		assertRejected(root, "empty:trace.event.decisions");
+	}
+
+	@Test
+	void testAuthorizationDecision_decisionsDuplicateId_throwsDuplicate() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		ArrayNode entries = MAPPER.createArrayNode().add(fact("decision_id", "d-1", "ALLOW"))
+				.add(fact("decision_id", "d-1", "DENY"));
+		replaceFacts(root, "decision", "decisions", entries);
+
+		assertRejected(root, "duplicate:trace.event.decisions[1].decision_id");
+	}
+
+	@Test
+	void testAuthorizationDecision_decisionsEntryInvalidOutcome_throwsInvalid() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		replaceFacts(root, "decision", "decisions",
+				MAPPER.createArrayNode().add(fact("decision_id", "d-1", "MAYBE")));
+
+		assertRejected(root, "invalid:trace.event.decisions[0].outcome");
+	}
+
+	@Test
+	void testAuthorizationDecision_decisionsEntryWithoutId_throwsMissing() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		replaceFacts(root, "decision", "decisions", MAPPER.createArrayNode().add(fact(null, null, "ALLOW")));
+
+		assertRejected(root, "missing:trace.event.decisions[0].decision_id");
+	}
+
+	@Test
+	void testAuthorizationDecision_recordLevelOutcome_forbiddenInBothForms() throws IOException {
+		ObjectNode singular = loadFixture("authorization_decision_valid.json");
+		((ObjectNode) at(singular, "trace", "event")).put("outcome", "ALLOW");
+		assertRejected(singular, "forbidden:trace.event.outcome");
+
+		ObjectNode batch = loadFixture("authorization_decision_batch_valid.json");
+		((ObjectNode) at(batch, "trace", "event")).put("outcome", "ALLOW");
+		assertRejected(batch, "forbidden:trace.event.outcome");
+	}
+
+	@Test
+	void testAuthorizationDecision_decisionAndDecisions_throwsForbidden() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		((ObjectNode) at(root, "trace", "event")).set("decisions",
+				MAPPER.createArrayNode().add(fact("decision_id", "d-1", "ALLOW")));
+
+		assertRejected(root, "forbidden:trace.event.decisions");
+	}
+
+	@Test
+	void testAuthorizationDecision_neitherDecisionNorDecisions_throwsMissing() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		remove(root, "trace", "event", "decision");
+
+		assertRejected(root, "missing:trace.event.decision");
+	}
+
+	@Test
+	void testAuthorizationDecision_factFieldProblems_rejected() throws IOException {
+		ObjectNode noAction = loadFixture("authorization_decision_valid.json");
+		remove(noAction, "trace", "event", "decision", "action");
+		assertRejected(noAction, "missing:trace.event.decision.action");
+
+		ObjectNode longAction = loadFixture("authorization_decision_valid.json");
+		set(longAction, TextNode.valueOf("a".repeat(513)), "trace", "event", "decision", "action");
+		assertRejected(longAction, "length:trace.event.decision.action");
+
+		ObjectNode emptyType = loadFixture("authorization_decision_valid.json");
+		set(emptyType, TextNode.valueOf(""), "trace", "event", "decision", "resource_type");
+		assertRejected(emptyType, "empty:trace.event.decision.resource_type");
+
+		ObjectNode resourceId = loadFixture("authorization_decision_valid.json");
+		set(resourceId, TextNode.valueOf("Acme::Payment::\"p-1\""), "trace", "event", "decision", "resource_id");
+		assertRejected(resourceId, "forbidden:trace.event.decision.resource_id");
+
+		ObjectNode batchResourceId = loadFixture("authorization_decision_batch_valid.json");
+		set(batchResourceId, TextNode.valueOf("x"), "trace", "event", "decisions", "0", "resource_id");
+		assertRejected(batchResourceId, "forbidden:trace.event.decisions[0].resource_id");
+
+		ObjectNode notObject = loadFixture("authorization_decision_valid.json");
+		set(notObject, TextNode.valueOf("ALLOW"), "trace", "event", "decision");
+		assertRejected(notObject, "type:trace.event.decision");
+	}
+
+	@Test
+	void testAuthorizationDecision_capabilityIds_forbidden() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		((ObjectNode) at(root, "trace", "event")).set("capability_ids", MAPPER.createArrayNode()
+				.add(MAPPER.createObjectNode().put("capability_id", "invoke:payment-authorization")
+						.put("outcome", "ALLOW")));
+
+		assertRejected(root, "forbidden:trace.event.capability_ids");
+	}
+
+	@Test
+	void testEvent_unknownMembersInTraceEvent_stillAllowed() throws IOException {
+		for (String fixture : new String[] { "authorization_decision_valid.json", "capability_invoked_valid.json",
+				"runtime_effect_valid.json" }) {
+			ObjectNode root = loadFixture(fixture);
+			((ObjectNode) at(root, "trace", "event")).put("x_future_member", "kept");
+
+			registry.validate(parseAndCommonValidate(root));
+		}
+	}
+
+	// -- trace.subject (AUTHORIZATION_DECISION / CAPABILITY_INVOKED / RUNTIME_EFFECT) ------------
+
+	@Test
+	void testSubject_workloadIdRequiredForDecisionAndInvocation() throws IOException {
+		for (String fixture : new String[] { "authorization_decision_valid.json", "capability_invoked_valid.json" }) {
+			ObjectNode noWorkloadId = loadFixture(fixture);
+			remove(noWorkloadId, "trace", "subject", "workload_id");
+			assertRejected(noWorkloadId, "missing:trace.subject.workload_id");
+
+			ObjectNode noSubject = loadFixture(fixture);
+			remove(noSubject, "trace", "subject");
+			assertRejected(noSubject, "missing:trace.subject.workload_id");
+
+			ObjectNode emptyId = loadFixture(fixture);
+			set(emptyId, TextNode.valueOf(""), "trace", "subject", "workload_id");
+			assertRejected(emptyId, "empty:trace.subject.workload_id");
+
+			ObjectNode longId = loadFixture(fixture);
+			set(longId, TextNode.valueOf("w".repeat(256)), "trace", "subject", "workload_id");
+			assertRejected(longId, "length:trace.subject.workload_id");
+
+			ObjectNode longInstance = loadFixture(fixture);
+			set(longInstance, TextNode.valueOf("w".repeat(256)), "trace", "subject", "workload_instance_id");
+			assertRejected(longInstance, "length:trace.subject.workload_instance_id");
+
+			ObjectNode notObject = loadFixture(fixture);
+			set(notObject, TextNode.valueOf("spiffe://example.org/agent/planner"), "trace", "subject");
+			assertRejected(notObject, "type:trace.subject");
+		}
+	}
+
+	@Test
+	void testSubject_workloadInstanceIdOptional_andMaxLengthAccepted() throws IOException {
+		ObjectNode noInstance = loadFixture("authorization_decision_valid.json");
+		remove(noInstance, "trace", "subject", "workload_instance_id");
+		registry.validate(parseAndCommonValidate(noInstance));
+
+		ObjectNode maxLength = loadFixture("capability_invoked_valid.json");
+		set(maxLength, TextNode.valueOf("w".repeat(255)), "trace", "subject", "workload_id");
+		set(maxLength, TextNode.valueOf("w".repeat(255)), "trace", "subject", "workload_instance_id");
+		registry.validate(parseAndCommonValidate(maxLength));
+	}
+
+	@Test
+	void testSubject_workloadIdNotEqualToExecutionAuthority_accepted() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		set(root, TextNode.valueOf("spiffe://example.org/agent/other"), "trace", "subject", "workload_id");
+
+		registry.validate(parseAndCommonValidate(root));
 	}
 
 	// -- CAPABILITY_INVOKED ---------------------------------------------------------------------
@@ -280,7 +422,6 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		CorrelationInputs result = registry.validate(assertion);
 
 		assertEquals("CAPABILITY_INVOKED", result.getEventKind());
-		assertEquals(Arrays.asList("invoke:payment-authorization"), result.getCapabilityIds());
 		assertEquals(1, result.getTokenRefs().size());
 	}
 
@@ -309,28 +450,81 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testCapabilityInvoked_outcomeTooLong_throwsLength() throws IOException {
+	void testCapabilityInvoked_invocationOutcomeTooLong_throwsLength() throws IOException {
 		ObjectNode root = loadFixture("capability_invoked_valid.json");
-		StringBuilder tooLong = new StringBuilder();
-		for (int i = 0; i < 65; i++) {
-			tooLong.append('a');
-		}
-		set(root, TextNode.valueOf(tooLong.toString()), "trace", "event", "outcome");
+		set(root, TextNode.valueOf("a".repeat(65)), "trace", "event", "invocation", "outcome");
 
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("length:trace.event.outcome", ex.getReason());
+		assertRejected(root, "length:trace.event.invocation.outcome");
 	}
 
 	@Test
-	void testCapabilityInvoked_anyNonEmptyOutcome_accepted() throws IOException {
+	void testCapabilityInvoked_anyNonEmptyInvocationOutcome_accepted() throws IOException {
 		ObjectNode root = loadFixture("capability_invoked_valid.json");
-		set(root, TextNode.valueOf("some-custom-outcome"), "trace", "event", "outcome");
+		set(root, TextNode.valueOf("some-custom-outcome"), "trace", "event", "invocation", "outcome");
 
-		ParsedAssertion assertion = parseAndCommonValidate(root);
+		registry.validate(parseAndCommonValidate(root));
+	}
 
-		registry.validate(assertion);
+	@Test
+	void testCapabilityInvoked_batchInvocations_accepted() throws IOException {
+		CorrelationInputs result = registry
+				.validate(parseAndCommonValidate(loadFixture("capability_invoked_batch_valid.json")));
+
+		assertEquals("CAPABILITY_INVOKED", result.getEventKind());
+	}
+
+	@Test
+	void testCapabilityInvoked_invocationsEmptyOrDuplicateOrMalformed_rejected() throws IOException {
+		ObjectNode empty = loadFixture("capability_invoked_valid.json");
+		replaceFacts(empty, "invocation", "invocations", MAPPER.createArrayNode());
+		assertRejected(empty, "empty:trace.event.invocations");
+
+		ObjectNode duplicate = loadFixture("capability_invoked_valid.json");
+		replaceFacts(duplicate, "invocation", "invocations", MAPPER.createArrayNode()
+				.add(fact("invocation_id", "i-1", "INVOKED")).add(fact("invocation_id", "i-1", "FAILED")));
+		assertRejected(duplicate, "duplicate:trace.event.invocations[1].invocation_id");
+
+		ObjectNode noId = loadFixture("capability_invoked_valid.json");
+		replaceFacts(noId, "invocation", "invocations", MAPPER.createArrayNode().add(fact(null, null, "INVOKED")));
+		assertRejected(noId, "missing:trace.event.invocations[0].invocation_id");
+
+		ObjectNode notArray = loadFixture("capability_invoked_valid.json");
+		remove(notArray, "trace", "event", "invocation");
+		((ObjectNode) at(notArray, "trace", "event")).set("invocations", MAPPER.createObjectNode());
+		assertRejected(notArray, "type:trace.event.invocations");
+	}
+
+	@Test
+	void testCapabilityInvoked_recordLevelOutcomeAndBothForms_rejected() throws IOException {
+		ObjectNode singular = loadFixture("capability_invoked_valid.json");
+		((ObjectNode) at(singular, "trace", "event")).put("outcome", "INVOKED");
+		assertRejected(singular, "forbidden:trace.event.outcome");
+
+		ObjectNode batch = loadFixture("capability_invoked_batch_valid.json");
+		((ObjectNode) at(batch, "trace", "event")).put("outcome", "INVOKED");
+		assertRejected(batch, "forbidden:trace.event.outcome");
+
+		ObjectNode both = loadFixture("capability_invoked_valid.json");
+		((ObjectNode) at(both, "trace", "event")).set("invocations",
+				MAPPER.createArrayNode().add(fact("invocation_id", "i-1", "INVOKED")));
+		assertRejected(both, "forbidden:trace.event.invocations");
+
+		ObjectNode neither = loadFixture("capability_invoked_valid.json");
+		remove(neither, "trace", "event", "invocation");
+		assertRejected(neither, "missing:trace.event.invocation");
+	}
+
+	@Test
+	void testCapabilityInvoked_capabilityIdsAndResourceId_forbidden() throws IOException {
+		ObjectNode legacy = loadFixture("capability_invoked_valid.json");
+		((ObjectNode) at(legacy, "trace", "event")).set("capability_ids", MAPPER.createArrayNode()
+				.add(MAPPER.createObjectNode().put("capability_id", "invoke:payment-authorization")
+						.put("outcome", "ALLOW")));
+		assertRejected(legacy, "forbidden:trace.event.capability_ids");
+
+		ObjectNode resourceId = loadFixture("capability_invoked_valid.json");
+		set(resourceId, TextNode.valueOf("x"), "trace", "event", "invocation", "resource_id");
+		assertRejected(resourceId, "forbidden:trace.event.invocation.resource_id");
 	}
 
 	// -- RUNTIME_EFFECT -------------------------------------------------------------------------
@@ -342,7 +536,6 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		CorrelationInputs result = registry.validate(assertion);
 
 		assertEquals("RUNTIME_EFFECT", result.getEventKind());
-		assertTrue(result.getCapabilityIds().isEmpty());
 		assertTrue(result.getWarnings().isEmpty());
 	}
 
@@ -360,6 +553,41 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 
 		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
 		assertEquals("forbidden:trace.event.capability_ids", ex.getReason());
+	}
+
+	@Test
+	void testRuntimeEffect_withDecisionOrInvocationFacts_throwsForbidden() throws IOException {
+		String[] singular = { "decision", "invocation" };
+		for (String field : singular) {
+			ObjectNode root = loadFixture("runtime_effect_valid.json");
+			((ObjectNode) at(root, "trace", "event")).set(field, fact(null, null, "ALLOW"));
+			assertRejected(root, "forbidden:trace.event." + field);
+		}
+		String[][] plural = { { "decisions", "decision_id" }, { "invocations", "invocation_id" } };
+		for (String[] field : plural) {
+			ObjectNode root = loadFixture("runtime_effect_valid.json");
+			((ObjectNode) at(root, "trace", "event")).set(field[0],
+					MAPPER.createArrayNode().add(fact(field[1], "x-1", "ALLOW")));
+			assertRejected(root, "forbidden:trace.event." + field[0]);
+		}
+	}
+
+	@Test
+	void testRuntimeEffect_subjectOptional_validatedWhenPresent() throws IOException {
+		registry.validate(parseAndCommonValidate(loadFixture("runtime_effect_valid.json")));
+		registry.validate(parseAndCommonValidate(loadFixture("runtime_effect_with_subject_valid.json")));
+
+		ObjectNode longId = loadFixture("runtime_effect_with_subject_valid.json");
+		set(longId, TextNode.valueOf("w".repeat(256)), "trace", "subject", "workload_id");
+		assertRejected(longId, "length:trace.subject.workload_id");
+
+		ObjectNode notObject = loadFixture("runtime_effect_valid.json");
+		((ObjectNode) at(notObject, "trace")).put("subject", "x");
+		assertRejected(notObject, "type:trace.subject");
+
+		ObjectNode noWorkloadIdIsFine = loadFixture("runtime_effect_with_subject_valid.json");
+		remove(noWorkloadIdIsFine, "trace", "subject", "workload_id");
+		registry.validate(parseAndCommonValidate(noWorkloadIdIsFine));
 	}
 
 	@Test

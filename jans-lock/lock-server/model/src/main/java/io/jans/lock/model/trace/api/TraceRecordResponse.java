@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class TraceRecordResponse {
 
 	@JsonProperty("producer_id")
-	@Schema(description = "Producer id, name/semver", example = "cedarling-fleet-1/1.0.0")
+	@Schema(description = "Opaque stable producer id", example = "cedarling-fleet-1")
 	private String producerId;
 
 	@JsonProperty("record_id")

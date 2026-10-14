@@ -10,19 +10,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,6 +43,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.model.trace.entity.TraceChainEntry;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
@@ -39,6 +51,8 @@ import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.model.ChainIdentity;
+import io.jans.lock.service.trace.model.ChainPosition;
+import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -79,7 +93,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 	private static final String REGISTERED_BY = "2200.admin";
 
 	/** The {@code capabilityInvoked} fixture's producer-chain identity. */
-	private static final String PRODUCER = "gateway-fleet-1/2.0.0";
+	private static final String PRODUCER = "gateway-fleet-1";
 
 	private static final String INSTANCE = "gateway-001";
 
@@ -213,6 +227,106 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
 	}
 
+	// -- plan: chain registration mode (task 30, design D-23) -------------------------------------
+
+	@Test
+	void testPlan_FirstObservedGenesisOnUnregisteredChain_RegistersChainAndPlans() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
+
+		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
+
+		assertFalse(plan.getFlags().isCoverageGap());
+		TraceChainEntry chain = store.findChain(chainIdentity()).orElseThrow();
+		assertEquals(TraceChainEntry.GENESIS_KIND_FIRST_OBSERVED, chain.getGenesisKind());
+		assertEquals(CLIENT_ID, chain.getRegisteredBy());
+		assertEquals(RECEIVED_AT_MS, chain.getRegisteredAtMs());
+	}
+
+	@Test
+	void testPlan_FirstObservedModeIsCaseInsensitive() {
+		traceConfiguration.setChainRegistrationMode(" first_observed ");
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
+
+		service.plan(buildVerified(json, context()), context());
+
+		assertTrue(store.findChain(chainIdentity()).isPresent());
+	}
+
+	@Test
+	void testPlan_FirstObservedNonGenesisOnUnregisteredChain_ChainNotRegistered() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).sequenceNumber(2)
+				.prevRecordHash(digest("1")).unsignedJson();
+		VerifiedAssertion verified = buildVerified(json, context());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.plan(verified, context()));
+
+		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
+		assertFalse(store.findChain(chainIdentity()).isPresent());
+	}
+
+	@Test
+	void testPlan_FirstObservedGenesisWithoutSentinel_InvalidGenesisNothingRegistered() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).sequenceNumber(1)
+				.prevRecordHash(digest("1")).unsignedJson();
+		VerifiedAssertion verified = buildVerified(json, context());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.plan(verified, context()));
+
+		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
+		assertFalse(store.findChain(chainIdentity()).isPresent());
+	}
+
+	@Test
+	void testPlan_UnknownModeValue_TreatedAsPreRegisteredAndWarnedOnce() {
+		Logger log = mock(Logger.class);
+		setField(service, "log", log);
+		traceConfiguration.setChainRegistrationMode("SOMETHING_ELSE");
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
+		VerifiedAssertion verified = buildVerified(json, context());
+
+		for (int i = 0; i < 2; i++) {
+			TraceValidationException ex = assertThrows(TraceValidationException.class,
+					() -> service.plan(verified, context()));
+			assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
+		}
+
+		assertFalse(store.findChain(chainIdentity()).isPresent());
+		verify(log, times(1)).warn(anyString(), eq("SOMETHING_ELSE"), any());
+	}
+
+	@Test
+	void testPlan_DefaultModeUnregisteredGenesis_ChainNotRegisteredNothingRegistered() {
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
+		VerifiedAssertion verified = buildVerified(json, context());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.plan(verified, context()));
+
+		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
+		assertFalse(store.findChain(chainIdentity()).isPresent());
+	}
+
+	@Test
+	void testPlan_ChainLinkMember_PassesValidationUnchanged() throws IOException {
+		registerChain();
+		ObjectNode root = (ObjectNode) MAPPER.readTree(
+				SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson());
+		ObjectNode chainLink = ((ObjectNode) root.get("producer_chain")).putObject("chain_link");
+		chainLink.put("opaque", "anything");
+		chainLink.putArray("list").add(1).add("two");
+		String json = MAPPER.writeValueAsString(root);
+
+		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
+
+		assertFalse(plan.getFlags().isCoverageGap());
+		assertFalse(plan.getFlags().isChainLinkFailure());
+	}
+
 	// -- plan: predecessor / coverage gap / chain-link failure -------------------------------------
 
 	@Test
@@ -306,17 +420,6 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 	}
 
 	// -- plan: index projection ---------------------------------------------------------------------
-
-	@Test
-	void testPlan_CapabilityKeys_ComputedViaTraceKeys() {
-		registerChain();
-		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
-
-		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
-
-		assertEquals(Collections.singletonList(TraceKeys.capabilityKey(DOMAIN, "invoke:payment-authorization")),
-				plan.getCapabilityKeys());
-	}
 
 	@Test
 	void testPlan_TwoTokenRefsSameJtiDifferentIssuer_TwoDistinctTokenKeys() throws IOException {
@@ -437,6 +540,78 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertTrue(store.findRecord(new RecordIdentity(DOMAIN, PRODUCER, recordId2)).get().getFlags().isEquivocation());
 	}
 
+	// -- afterInsert: peer landing between plan() and insert (acceptance criterion 2, D-9 re-query) --
+
+	@Test
+	void testAfterInsert_PeerInsertedBetweenPlanAndInsert_BothRowsFlaggedViaReQuery() throws DuplicateEntryException {
+		registerChain();
+
+		String recordId1 = recordId();
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId1).genesis().unsignedJson();
+		VerifiedAssertion verified1 = buildVerified(json, context());
+		CorrelationPlan plan1 = service.plan(verified1, context());
+		assertFalse(plan1.getFlags().isEquivocation(), "store is empty when record1 is planned");
+
+		// A peer lands at the same chain position after plan() but before this node's own
+		// insertRecord() -- plan1's pre-insert snapshot never saw it (acceptance criterion 2).
+		String peerRecordId = recordId();
+		StoredTraceRecord peer = insertRecord(peerRecordId, digest("1"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+
+		StoredTraceRecord stored1 = insertRecord(recordId1, verified1.getContentDigest(), 1L,
+				TraceConstants.ZERO_HASH, plan1.getFlags());
+
+		service.afterInsert(stored1, plan1);
+
+		assertTrue(store.findRecord(stored1.getIdentity()).get().getFlags().isEquivocation(),
+				"the just-inserted row's own equivocation flag must also be corrected");
+		assertTrue(store.findRecord(peer.getIdentity()).get().getFlags().isEquivocation());
+	}
+
+	// -- afterInsert: concurrent updates to the same peer, no lost update (acceptance criterion 1) ---
+
+	@Test
+	void testAfterInsert_ConcurrentUpdatesToSamePeer_BothSucceedViaRetry_NoLostUpdate() throws Exception {
+		registerChain();
+		String peerRecordId = recordId();
+		StoredTraceRecord peer = insertRecord(peerRecordId, digest("1"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+		RecordIdentity peerIdentity = peer.getIdentity();
+
+		String insertedId1 = recordId();
+		String insertedId2 = recordId();
+		StoredTraceRecord inserted1 = insertRecord(insertedId1, digest("2"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+		StoredTraceRecord inserted2 = insertRecord(insertedId2, digest("3"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+
+		ChainPosition position = new ChainPosition(chainIdentity(), 1L);
+		ExecutionIdentity execution = new ExecutionIdentity(DOMAIN, "authority-1", "exec-1");
+		CorrelationPlan plan1 = new CorrelationPlan(new IngestionFlags(false, false, false, false), position,
+				execution, Collections.emptyList(), Collections.singletonList(peerIdentity), Collections.emptyList(),
+				Collections.emptyList());
+		CorrelationPlan plan2 = new CorrelationPlan(new IngestionFlags(false, false, false, false), position,
+				execution, Collections.emptyList(), Collections.singletonList(peerIdentity), Collections.emptyList(),
+				Collections.emptyList());
+
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		try {
+			List<Future<?>> futures = new ArrayList<>();
+			futures.add(executor.submit(() -> service.afterInsert(inserted1, plan1)));
+			futures.add(executor.submit(() -> service.afterInsert(inserted2, plan2)));
+			executor.shutdown();
+			assertTrue(executor.awaitTermination(10, TimeUnit.SECONDS));
+			for (Future<?> future : futures) {
+				future.get();
+			}
+		} finally {
+			executor.shutdownNow();
+		}
+
+		assertTrue(store.findRecord(peerIdentity).get().getFlags().isEquivocation(),
+				"neither concurrent writer's correction may be lost to the other");
+	}
+
 	// -- afterInsert: best-effort, never propagates a neighbor-update failure (gotcha) ----------------
 
 	@Test
@@ -484,12 +659,12 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		}
 
 		@Override
-		public boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags) {
+		public boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags, long expectedVersion) {
 			if (!thrown && failingIdentity.equals(id)) {
 				thrown = true;
 				throw new TraceStorageException("test_forced_failure", "forced for test");
 			}
-			return delegate.updateRecordFlags(id, flags);
+			return delegate.updateRecordFlags(id, flags, expectedVersion);
 		}
 
 		@Override

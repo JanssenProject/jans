@@ -199,3 +199,130 @@ policy_stores:
         "Expected metadata level to pass or skip: {report:?}"
     );
 }
+
+fn archive_source(spec_version: Option<u32>) -> crate::PolicyStoreConfig {
+    let mut builder = crate::common::policy_store::test_utils::fixtures::minimal_valid();
+    if let Some(version) = spec_version {
+        builder = builder.with_spec_version(version);
+    }
+    crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::ArchiveBytes(
+            builder.build_archive().expect("should build archive"),
+        ),
+        ..Default::default()
+    }
+}
+
+#[tokio::test]
+async fn test_validate_reports_outdated_spec_version_as_warning() {
+    let http_client_config = crate::http::HttpClientConfig::default();
+
+    let report = Cedarling::validate_policy_store(&archive_source(Some(0)), &http_client_config)
+        .await
+        .expect("infra layer ok");
+
+    assert!(
+        report.is_ok(),
+        "an outdated but supported version should not fail validation: {report:?}"
+    );
+    assert_eq!(
+        report.warnings.len(),
+        1,
+        "an outdated version should produce one warning: {report:?}"
+    );
+    assert!(
+        report.warnings[0]
+            .message
+            .contains("policy_store_spec_version is 0"),
+        "the warning should name the declared version, got: {}",
+        report.warnings[0].message
+    );
+}
+
+#[tokio::test]
+async fn test_validate_current_spec_version_has_no_warnings() {
+    let http_client_config = crate::http::HttpClientConfig::default();
+
+    let report = Cedarling::validate_policy_store(&archive_source(Some(1)), &http_client_config)
+        .await
+        .expect("infra layer ok");
+
+    assert!(
+        report.is_ok(),
+        "a current store should validate: {report:?}"
+    );
+    assert!(
+        report.warnings.is_empty(),
+        "a current store should have no warnings: {report:?}"
+    );
+}
+
+#[tokio::test]
+async fn test_validate_unsupported_spec_version_fails_metadata() {
+    let http_client_config = crate::http::HttpClientConfig::default();
+
+    let report = Cedarling::validate_policy_store(&archive_source(Some(99)), &http_client_config)
+        .await
+        .expect("infra layer ok");
+
+    assert!(
+        !report.is_ok(),
+        "an unsupported version must fail validation: {report:?}"
+    );
+    assert!(
+        matches!(
+            &report.metadata,
+            LevelResult::Failed { errors }
+                if errors.iter().any(|e| e.message.contains("policy_store_spec_version 99"))
+        ),
+        "the metadata level should fail naming the unsupported version: {report:?}"
+    );
+}
+
+/// Minimal Agama YAML store whose `policy_stores` key is `key`.
+fn yaml_store_with_key(key: &str) -> crate::PolicyStoreConfig {
+    let store = format!(
+        r#"
+cedar_version: v4.0.0
+policy_stores:
+  "{key}":
+    name: Test Store
+    schema:
+      encoding: none
+      content_type: cedar-json
+      body: '{{"Jans": {{"entityTypes": {{}}, "actions": {{}}}}}}'
+    policies: {{}}
+"#
+    );
+    crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::Yaml(store),
+        ..Default::default()
+    }
+}
+
+async fn validate_metadata(config: &crate::PolicyStoreConfig) -> LevelResult {
+    Cedarling::validate_policy_store(config, &crate::http::HttpClientConfig::default())
+        .await
+        .expect("infra layer ok")
+        .metadata
+}
+
+#[tokio::test]
+async fn test_validate_yaml_non_hex_key_passes_metadata() {
+    // The `policy_stores` key becomes the store ID and need not be hex.
+    let metadata = validate_metadata(&yaml_store_with_key("test_store")).await;
+    assert!(
+        matches!(metadata, LevelResult::Ok),
+        "a non-hex YAML key should pass metadata: {metadata:?}"
+    );
+}
+
+#[tokio::test]
+async fn test_validate_yaml_key_rules_other_than_id_still_apply() {
+    let metadata = validate_metadata(&yaml_store_with_key(&"a".repeat(256))).await;
+    assert!(
+        matches!(&metadata, LevelResult::Failed { errors }
+            if errors.iter().any(|e| e.message.contains("name too long"))),
+        "a YAML key over 255 bytes should fail the name check: {metadata:?}"
+    );
+}

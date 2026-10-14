@@ -15,6 +15,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.correlation.TraceCorrelationService;
 import io.jans.lock.service.trace.crypto.Ed25519Capability;
 import io.jans.lock.service.trace.crypto.Ed25519Verifier;
@@ -136,6 +138,10 @@ public final class TraceTestHarness {
 		return store;
 	}
 
+	public TraceIngestionService ingestionService() {
+		return ingestionService;
+	}
+
 	public TraceConfiguration traceConfiguration() {
 		return traceConfiguration;
 	}
@@ -155,22 +161,40 @@ public final class TraceTestHarness {
 
 	// -- registries ---------------------------------------------------------------------------------
 
+	/** Registers a key authorized for every event kind. */
 	public KeyPair registerKey(String domainId, String producerId, String kid) {
 		return registerKey(domainId, producerId, kid, 0L, null);
 	}
 
+	/** Registers a key authorized only for {@code authorizedEventKinds}. */
+	public KeyPair registerKey(String domainId, String producerId, String kid, List<String> authorizedEventKinds) {
+		KeyPair keyPair = TraceTestKeys.generateKeyPair();
+		keyRegistry.register(domainId, producerId, kid, TraceTestKeys.toJwk(keyPair.getPublic()),
+				authorizedEventKinds, 0L, null, DEFAULT_REGISTERED_BY, 0L);
+		return keyPair;
+	}
+
 	/** Registers a caller-supplied key pair instead of generating one (e.g. to reuse it across domains). */
 	public KeyPair registerKey(String domainId, String producerId, String kid, KeyPair keyPair) {
-		keyRegistry.register(domainId, producerId, kid, TraceTestKeys.toJwk(keyPair.getPublic()), 0L, null,
-				DEFAULT_REGISTERED_BY, 0L);
+		keyRegistry.register(domainId, producerId, kid, TraceTestKeys.toJwk(keyPair.getPublic()),
+				allEventKinds(), 0L, null, DEFAULT_REGISTERED_BY, 0L);
 		return keyPair;
 	}
 
 	public KeyPair registerKey(String domainId, String producerId, String kid, long validFromMs, Long validUntilMs) {
 		KeyPair keyPair = TraceTestKeys.generateKeyPair();
-		keyRegistry.register(domainId, producerId, kid, TraceTestKeys.toJwk(keyPair.getPublic()), validFromMs,
-				validUntilMs, DEFAULT_REGISTERED_BY, Math.max(validFromMs, 0L));
+		keyRegistry.register(domainId, producerId, kid, TraceTestKeys.toJwk(keyPair.getPublic()),
+				allEventKinds(), validFromMs, validUntilMs, DEFAULT_REGISTERED_BY, Math.max(validFromMs, 0L));
 		return keyPair;
+	}
+
+	/** Revokes a registered key as of {@code revokedAtMs}. */
+	public void revokeKey(String domainId, String producerId, String kid, long revokedAtMs) {
+		keyRegistry.revoke(domainId, producerId, kid, revokedAtMs);
+	}
+
+	private static List<String> allEventKinds() {
+		return new ArrayList<>(TraceConstants.EVENT_KINDS);
 	}
 
 	public void registerChain(String domainId, String producerId, String instanceId, String chainId) {

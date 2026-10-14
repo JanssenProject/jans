@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -35,6 +36,14 @@ public class TraceVerification implements Serializable {
 
     @JsonProperty("algorithm")
     private String algorithm;
+
+    @JsonProperty("key_thumbprint")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String keyThumbprint;
+
+    @JsonProperty("key_authorized")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean keyAuthorized;
 
     public boolean isSignatureValid() {
         return signatureValid;
@@ -68,6 +77,22 @@ public class TraceVerification implements Serializable {
         this.algorithm = algorithm;
     }
 
+    public String getKeyThumbprint() {
+        return keyThumbprint;
+    }
+
+    public void setKeyThumbprint(String keyThumbprint) {
+        this.keyThumbprint = keyThumbprint;
+    }
+
+    public Boolean getKeyAuthorized() {
+        return keyAuthorized;
+    }
+
+    public void setKeyAuthorized(Boolean keyAuthorized) {
+        this.keyAuthorized = keyAuthorized;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -78,18 +103,20 @@ public class TraceVerification implements Serializable {
         }
         TraceVerification that = (TraceVerification) o;
         return signatureValid == that.signatureValid && verifiedAtMs == that.verifiedAtMs
-                && Objects.equals(keyId, that.keyId) && Objects.equals(algorithm, that.algorithm);
+                && Objects.equals(keyId, that.keyId) && Objects.equals(algorithm, that.algorithm)
+                && Objects.equals(keyThumbprint, that.keyThumbprint) && Objects.equals(keyAuthorized, that.keyAuthorized);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(signatureValid, keyId, verifiedAtMs, algorithm);
+        return Objects.hash(signatureValid, keyId, verifiedAtMs, algorithm, keyThumbprint, keyAuthorized);
     }
 
     @Override
     public String toString() {
         return "TraceVerification [signatureValid=" + signatureValid + ", keyId=" + keyId + ", verifiedAtMs="
-                + verifiedAtMs + ", algorithm=" + algorithm + "]";
+                + verifiedAtMs + ", algorithm=" + algorithm + ", keyThumbprint=" + keyThumbprint + ", keyAuthorized="
+                + keyAuthorized + "]";
     }
 
 }

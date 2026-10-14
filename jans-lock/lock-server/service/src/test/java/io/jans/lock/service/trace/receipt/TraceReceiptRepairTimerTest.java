@@ -34,7 +34,7 @@ class TraceReceiptRepairTimerTest extends BaseLockServiceTest {
 
 	private static final String DOMAIN = "domain-1";
 
-	private static final String PRODUCER = "producer-1/1.0.0";
+	private static final String PRODUCER = "producer-1";
 
 	private static final String NODE_ID = "node-1";
 

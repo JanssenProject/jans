@@ -167,16 +167,16 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	}
 
 	private static StoredTraceRecord storedRecord(boolean late) {
-		RecordIdentity identity = new RecordIdentity(DOMAIN, "cedarling-fleet-1/1.0.0", "record-1");
+		RecordIdentity identity = new RecordIdentity(DOMAIN, "cedarling-fleet-1", "record-1");
 		VerificationResult verification = new VerificationResult(true, "kid-1", 5000L, "Ed25519");
 		ReceiptEntry receipt = new ReceiptEntry(108422L, 5000L, "sha256:" + "0".repeat(64), "sha256:" + "1".repeat(64));
 		IngestionFlags flags = new IngestionFlags(false, false, false, late);
 		ExecutionIdentity execution = new ExecutionIdentity(DOMAIN, "spiffe://example.org/agent/planner", "exec-1");
-		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "cedarling-fleet-1/1.0.0", "instance-1", "chain-1");
+		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "cedarling-fleet-1", "instance-1", "chain-1");
 		ChainPosition chainPosition = new ChainPosition(chainIdentity, 1L);
 		return new StoredTraceRecord(identity, "{}", "sha256:" + "2".repeat(64), verification, receipt, flags,
-				execution, chainPosition, "sha256:" + "0".repeat(64), List.of(), List.of(), "AUTHORIZATION_DECISION",
-				4000L, "node-1", 5000L);
+				execution, chainPosition, "sha256:" + "0".repeat(64), List.of(), "AUTHORIZATION_DECISION",
+				4000L, "node-1", 5000L, 0L);
 	}
 
 	// -- happy path -------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		TraceAcceptanceResponse dto = (TraceAcceptanceResponse) response.getEntity();
 		assertTrue(dto.isAccepted());
-		assertEquals("cedarling-fleet-1/1.0.0", dto.getProducerId());
+		assertEquals("cedarling-fleet-1", dto.getProducerId());
 		assertEquals("record-1", dto.getRecordId());
 		assertEquals(108422L, dto.getReceiptSequence());
 		assertFalse(dto.isIdempotentReplay());
@@ -290,20 +290,21 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	// -- submitBulkRecords (design decision D-16) -----------------------------------------------------
 
 	@Test
-	void testSubmitBulkRecords_AllAccepted_Returns202() {
+	void testSubmitBulkRecords_AllAccepted_Returns207() {
 		when(ingestionService.ingest(any(), eq(context)))
 				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
 
 		Response response = impl.submitBulkRecords(body("[{\"a\":1},{\"b\":2}]"), httpServletRequest, null);
 
-		assertEquals(202, response.getStatus());
+		assertEquals(207, response.getStatus());
 		TraceBulkIngestionResponse dto = (TraceBulkIngestionResponse) response.getEntity();
 		assertEquals(2, dto.getResults().size());
 		for (int i = 0; i < 2; i++) {
 			TraceBulkResultEntry entry = dto.getResults().get(i);
 			assertEquals(i, entry.getIndex());
 			assertTrue(entry.isAccepted());
-			assertNotNull(entry.getRecord());
+			assertEquals("record-1", entry.getRecordId());
+			assertEquals(108422L, entry.getReceiptSequence());
 		}
 		verify(ingestionService, times(2)).ingest(any(), eq(context));
 		verify(applicationAuditLogger).log(any(), eq(true));
@@ -323,13 +324,13 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		Response response = impl
 				.submitBulkRecords(body("[{\"marker\":\"good\"},{\"marker\":\"bad\"}]"), httpServletRequest, null);
 
-		assertEquals(202, response.getStatus());
+		assertEquals(207, response.getStatus());
 		TraceBulkIngestionResponse dto = (TraceBulkIngestionResponse) response.getEntity();
 		assertEquals(2, dto.getResults().size());
 
 		TraceBulkResultEntry first = dto.getResults().get(0);
 		assertTrue(first.isAccepted());
-		assertNotNull(first.getRecord());
+		assertEquals("record-1", first.getRecordId());
 
 		TraceBulkResultEntry second = dto.getResults().get(1);
 		assertFalse(second.isAccepted());
@@ -337,6 +338,107 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		assertEquals("invalid_assertion", second.getError().getError());
 
 		verify(applicationAuditLogger).log(any(), eq(true));
+	}
+
+	@Test
+	void testSubmitBulkRecords_MixedProducers_Returns400BeforeAnyIngest() {
+		WebApplicationException ex = assertThrows(WebApplicationException.class,
+				() -> impl.submitBulkRecords(body("[{\"producer\":\"p-1\"},{\"producer\":\"p-2\"}]"),
+						httpServletRequest, null));
+
+		assertEquals(400, ex.getResponse().getStatus());
+		@SuppressWarnings("unchecked")
+		Map<String, String> entity = (Map<String, String>) ex.getResponse().getEntity();
+		assertEquals("invalid_request", entity.get("error"));
+		assertEquals("bulk_mixed_producers", entity.get("reason"));
+		verify(ingestionService, never()).ingest(any(), any());
+		verify(applicationAuditLogger).log(any(), eq(false));
+	}
+
+	@Test
+	void testSubmitBulkRecords_MixedProducersLateInBatch_NothingIngested() {
+		WebApplicationException ex = assertThrows(WebApplicationException.class,
+				() -> impl.submitBulkRecords(body("[{\"producer\":\"p-1\"},{\"producer\":\"p-1\"},"
+						+ "{\"x\":{\"producer\":\"ignored\"},\"producer\":\"p-2\"}]"), httpServletRequest, null));
+
+		assertEquals(400, ex.getResponse().getStatus());
+		verify(ingestionService, never()).ingest(any(), any());
+	}
+
+	@Test
+	void testSubmitBulkRecords_SingleProducerPlusUnreadableElements_StillProcessed() {
+		when(ingestionService.ingest(any(), eq(context))).thenThrow(
+				new TraceValidationException(TraceErrorResponseType.INVALID_ASSERTION, "missing:trace.signed_at"));
+
+		Response response = impl.submitBulkRecords(body("[{\"producer\":\"p-1\"},5,[1],{\"a\":1},"
+				+ "{\"producer\":7},{\"producer\":\"p-1\"}]"), httpServletRequest, null);
+
+		assertEquals(207, response.getStatus());
+		TraceBulkIngestionResponse dto = (TraceBulkIngestionResponse) response.getEntity();
+		assertEquals(6, dto.getResults().size());
+		verify(ingestionService, times(6)).ingest(any(), eq(context));
+	}
+
+	@Test
+	void testSubmitBulkRecords_NestedOrNonStringProducer_NotCounted() {
+		when(ingestionService.ingest(any(), eq(context)))
+				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
+
+		Response response = impl.submitBulkRecords(body("[{\"producer\":\"p-1\"},{\"producer\":{\"producer\":\"p-2\"}},"
+				+ "{\"producer\":null},{\"trace\":{\"producer\":\"p-3\"}}]"), httpServletRequest, null);
+
+		assertEquals(207, response.getStatus());
+		verify(ingestionService, times(4)).ingest(any(), eq(context));
+	}
+
+	@Test
+	void testSubmitBulkRecords_ExactJsonMembers_AcceptedAndRejectedEntries() throws Exception {
+		when(ingestionService.ingest(any(), eq(context))).thenAnswer(inv -> {
+			String text = readAll(inv.getArgument(0));
+			if (text.contains("good")) {
+				return AcceptanceResult.fromStored(storedRecord(false), false);
+			}
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_ASSERTION, "missing:trace.signed_at");
+		});
+
+		Response response = impl.submitBulkRecords(
+				body("[{\"producer\":\"cedarling-fleet-1\",\"record_id\":\"r-good\",\"m\":\"good\"},"
+						+ "{\"producer\":\"cedarling-fleet-1\",\"record_id\":\"r-bad\",\"m\":\"bad\"},"
+						+ "{\"m\":\"bad\"},7]"),
+				httpServletRequest, null);
+
+		com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+		com.fasterxml.jackson.databind.JsonNode tree = mapper.readTree(mapper.writeValueAsString(response.getEntity()));
+		com.fasterxml.jackson.databind.JsonNode results = tree.get("results");
+		assertEquals(4, results.size());
+
+		List<String> acceptedMembers = List.of("index", "accepted", "producer_id", "record_id", "content_digest",
+				"receipt_sequence", "received_at", "idempotent_replay", "coverage_gap_flag",
+				"chain_link_failure_flag", "equivocation_flag", "late_flag");
+		assertEquals(acceptedMembers, fieldNames(results.get(0)));
+		assertEquals(0, results.get(0).get("index").intValue());
+		assertTrue(results.get(0).get("accepted").booleanValue());
+		assertEquals("cedarling-fleet-1", results.get(0).get("producer_id").textValue());
+		assertEquals("record-1", results.get(0).get("record_id").textValue());
+		assertEquals(108422L, results.get(0).get("receipt_sequence").longValue());
+		assertFalse(results.get(0).get("idempotent_replay").booleanValue());
+
+		assertEquals(List.of("index", "accepted", "producer_id", "record_id", "error"), fieldNames(results.get(1)));
+		assertFalse(results.get(1).get("accepted").booleanValue());
+		assertEquals("cedarling-fleet-1", results.get(1).get("producer_id").textValue());
+		assertEquals("r-bad", results.get(1).get("record_id").textValue());
+		assertEquals(List.of("error", "error_description", "reason"), fieldNames(results.get(1).get("error")));
+		assertEquals("invalid_assertion", results.get(1).get("error").get("error").textValue());
+		assertEquals("missing:trace.signed_at", results.get(1).get("error").get("reason").textValue());
+
+		assertEquals(List.of("index", "accepted", "error"), fieldNames(results.get(2)));
+		assertEquals(List.of("index", "accepted", "error"), fieldNames(results.get(3)));
+	}
+
+	private static List<String> fieldNames(com.fasterxml.jackson.databind.JsonNode node) {
+		List<String> names = new java.util.ArrayList<>();
+		node.fieldNames().forEachRemaining(names::add);
+		return names;
 	}
 
 	@Test
