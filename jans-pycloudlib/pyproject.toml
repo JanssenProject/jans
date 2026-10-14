@@ -39,8 +39,8 @@ dependencies = [
     "requests>=2.22.0",
     "python-consul>=1.0.1",
     "hvac>=0.7.0",
-    # don't use v36 until patches available
-    "kubernetes>=11.0,<36.0",
+    # don't use broken v36, see https://github.com/JanssenProject/jans/issues/14156
+    "kubernetes>=11.0,!=36.*",
 
     # the ldap3 library is not removed for the following reasons:
     #
@@ -83,7 +83,7 @@ dependencies = [
     "cloud-sql-python-connector[pg8000]>=1.0.0",
     "pg8000>=1.30.0",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.scripts]
 jans-pycloudlib = "jans.pycloudlib.cli:cli"
