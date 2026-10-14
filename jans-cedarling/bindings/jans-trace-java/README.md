@@ -31,6 +31,24 @@ mvn clean install  # compiles and tests the Java API, installs the jar
 `src/main/resources/<platform>`; both are generated, so git ignores them. Run `make` again
 after any change on the Rust side. Without it, `mvn` stops with a message that says so.
 
+### Use the local build
+
+`mvn install` produces `target/jans-trace-java-<version>.jar` and installs it into the local
+Maven repository (`~/.m2`). `mvn clean package` builds and tests the same jar but leaves it
+in `target/` only. The jar holds the Java API, the generated Kotlin and the native library,
+built only for the platform of the build machine. It does not hold `kotlin-stdlib` and `jna`:
+a project that uses the jar file directly puts those two on its class path itself.
+
+Add the installed jar to a Maven project with:
+
+```xml
+<dependency>
+    <groupId>io.jans</groupId>
+    <artifactId>jans-trace-java</artifactId>
+    <version>0.0.0-nightly</version>
+</dependency>
+```
+
 ## Example
 
 A producer signs a record and Lock ingests it, end to end. A test compiles and runs this
