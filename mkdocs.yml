@@ -644,8 +644,8 @@ nav:
       - Unsigned Flow: cedarling/integrations/terraform-authz.md
       - JWT Flow: cedarling/integrations/terraform-authz-jwt.md
   - Sidecar:
-      - Overview: cedarling/developer/sidecar/cedarling-sidecar-overview.md
-      - Tutorial: cedarling/developer/sidecar/cedarling-sidecar-tutorial.md
+      - Overview: cedarling/sidecar/cedarling-sidecar-overview.md
+      - Tutorial: cedarling/sidecar/cedarling-sidecar-tutorial.md
 
 
 plugins:

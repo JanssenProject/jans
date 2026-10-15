@@ -105,7 +105,7 @@ Example request to the evaluation endpoint:
 }
 ```
 
-Cedarling requires OpenID tokens from one or more trusted issuers to perform authorization, as described [here](../../reference/cedarling-authz.md). These values are sent in the subject field's properties. A more detailed example of creating an AuthZen request can be seen in the [gateway example](./cedarling-sidecar-tutorial.md#setup-test-gateway).
+Cedarling requires OpenID tokens from one or more trusted issuers to perform authorization, as described [here](../reference/cedarling-authz.md). These values are sent in the subject field's properties. A more detailed example of creating an AuthZen request can be seen in the [gateway example](./cedarling-sidecar-tutorial.md#setup-test-gateway).
 
 Upon creating the principal, action, resource, and context entities, cedarling will evaluate these entities against the policies defined in the policy store. Then it will return a true/false decision. If the decision is false, the sidecar will analyze cedarling diagnostics and provide additional information for the admin.
 
