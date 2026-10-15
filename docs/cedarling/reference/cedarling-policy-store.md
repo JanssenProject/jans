@@ -480,7 +480,7 @@ A `Cache-Control: max-age` / `Expires` hint in any successful response may **sho
 
 ### Failure handling
 
-Failures (network, HTTP, parse, rebuild) leave the previously loaded `Authz` in place and exponentially back off the next attempt — `interval × 2^failures`, capped at 600 seconds, with ±10% jitter. The worker recovers automatically on the next success.
+Failures (network, HTTP, parse, rebuild, and, with `CEDARLING_POLICY_STORE_SIGSTORE_MODE=enforce`, a missing or invalid signature bundle) leave the previously loaded `Authz` in place and exponentially back off the next attempt — `interval × 2^failures`, capped at 600 seconds, with ±10% jitter. The worker recovers automatically on the next success.
 
 ### Metrics
 
@@ -491,7 +491,7 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.last_attempt_secs` | Unix timestamp of the most recent tick attempt |
 | `policy_store_refresh.last_success_secs` | Unix timestamp of the most recent `Success` or `NotModified` outcome |
 | `policy_store_refresh.consecutive_failures` | Current failure streak (resets to zero on success) |
-| `policy_store_refresh.last_outcome` | Integer enum: `1`=Success, `2`=NotModified, `3`=HttpError, `4`=NetworkError, `5`=ParseError, `6`=RebuildError, `7`=DecodeError |
+| `policy_store_refresh.last_outcome` | Integer enum: `1`=Success, `2`=NotModified, `3`=HttpError, `4`=NetworkError, `5`=ParseError, `6`=RebuildError, `7`=DecodeError, `8`=VerificationError |
 | `policy_store_refresh.strategy_current` | Integer enum: `1`=Conditional, `2`=HeadThenGet, `3`=PlainGet |
 | `policy_store_refresh.conditional_to_head_transitions` | Cumulative count of `Conditional → HeadThenGet` degrades |
 | `policy_store_refresh.head_to_plain_transitions` | Cumulative count of `HeadThenGet → PlainGet` degrades |
@@ -504,6 +504,7 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.outcome_parse_error` | Cumulative count of `ParseError` outcomes (body couldn't be parsed) |
 | `policy_store_refresh.outcome_rebuild_error` | Cumulative count of `RebuildError` outcomes (body parsed, but `JwtService` / `EntityBuilder` / trusted-issuer rebuild failed) |
 | `policy_store_refresh.outcome_decode_error` | Cumulative count of `DecodeError` outcomes (HTTP transaction succeeded but reading the response body failed — e.g. TCP drop mid-stream, transfer-encoding issue) |
+| `policy_store_refresh.outcome_verification_error` | Cumulative count of `VerificationError` outcomes (the refreshed `.cjar` failed its Sigstore signature check) |
 
 ## Legacy Single-File Format (YAML Test Suites)
 
