@@ -1025,7 +1025,7 @@ class JCA_CLI:
                 if isinstance(data, (str, bytes)):
                     try:
                         data_ = json.loads(data_)
-                    except:
+                    except (json.JSONDecodeError, TypeError, ValueError):
                         data_ = None
                 if data_ is not None:
                     if requirename not in data_:
