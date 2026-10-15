@@ -65,16 +65,22 @@ impl From<&cedarling::DropReason> for DropReason {
 impl DropReason {
     /// Stable snake-case slug for this reason (e.g. ``"jwt_validation_failed"``).
     fn slug(&self) -> &'static str {
-        match self {
-            DropReason::InvalidInput => "invalid_input",
-            DropReason::JwtValidationFailed => "jwt_validation_failed",
-            DropReason::DuplicateToken => "duplicate_token",
-            DropReason::DuplicateMapping => "duplicate_mapping",
-            DropReason::NoProcessorRegistered => "no_processor_registered",
-            DropReason::CustomProcessingFailed => "custom_processing_failed",
-            DropReason::CustomProcessingTimedOut => "custom_processing_timed_out",
-            DropReason::EntityBuildFailed => "entity_build_failed",
-        }
+        // Delegate to core so slugs have a single source of truth. The core
+        // slug ignores the `InvalidInput` payload, so any `TokenInputError`
+        // yields the same value.
+        let core = match self {
+            DropReason::InvalidInput => {
+                cedarling::DropReason::InvalidInput(cedarling::TokenInputError::EmptyMapping)
+            },
+            DropReason::JwtValidationFailed => cedarling::DropReason::JwtValidationFailed,
+            DropReason::DuplicateToken => cedarling::DropReason::DuplicateToken,
+            DropReason::DuplicateMapping => cedarling::DropReason::DuplicateMapping,
+            DropReason::NoProcessorRegistered => cedarling::DropReason::NoProcessorRegistered,
+            DropReason::CustomProcessingFailed => cedarling::DropReason::CustomProcessingFailed,
+            DropReason::CustomProcessingTimedOut => cedarling::DropReason::CustomProcessingTimedOut,
+            DropReason::EntityBuildFailed => cedarling::DropReason::EntityBuildFailed,
+        };
+        core.slug()
     }
 }
 

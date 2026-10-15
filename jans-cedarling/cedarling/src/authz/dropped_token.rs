@@ -15,12 +15,12 @@
 //! input `mapping` and zero-based `index`, and carries a claim-free
 //! [`DropReason`].
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::errors::TokenInputError;
 
 /// A token the caller supplied that multi-issuer authorization did not use.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct DroppedToken {
     /// Cedar entity-type mapping of the dropped input, e.g.
     /// `Jans::Access_Token`. This is the caller-supplied label, never a token
@@ -51,14 +51,12 @@ impl DroppedToken {
 /// `Display` and the serialized form are deliberately claim-free: they never
 /// embed token payloads, claim values, or processor-supplied error text. Only
 /// the drop category (and, for [`DropReason::InvalidInput`], which input field
-/// was malformed) is exposed. The serde representation is adjacently tagged
-/// `{"kind": "...", "detail": ..., "message": "..."}`: `detail` only appears
-/// for [`DropReason::InvalidInput`], while `message` is the [`DropReason`]
-/// `Display` text and is therefore present and non-empty for every variant,
-/// including unit ones. The `kind` slugs are a stable API consumed by
-/// language bindings; see [`DropReason::slug`].
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize, thiserror::Error)]
-#[serde(tag = "kind", content = "detail", rename_all = "snake_case")]
+/// was malformed) is exposed. The serialized form is
+/// `{"kind": "...", "detail": ..., "message": "..."}`, built from
+/// [`DropReason::slug`], [`DropReason::detail`] and [`DropReason::message`].
+/// `detail` only appears for [`DropReason::InvalidInput`]; `message` is
+/// non-empty for every variant.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum DropReason {
     /// The token input itself was malformed (empty mapping or payload) before
     /// any validation was attempted.
@@ -164,29 +162,30 @@ mod tests {
     use super::*;
     use serde_json::json;
 
+    /// Slugs are a stable wire contract; renaming one is a breaking change.
     #[test]
-    fn slug_matches_serde_kind_tag() {
+    fn slugs_are_stable() {
         let cases = [
-            DropReason::InvalidInput(TokenInputError::EmptyMapping),
-            DropReason::JwtValidationFailed,
-            DropReason::DuplicateToken,
-            DropReason::DuplicateMapping,
-            DropReason::NoProcessorRegistered,
-            DropReason::CustomProcessingFailed,
-            DropReason::CustomProcessingTimedOut,
-            DropReason::EntityBuildFailed,
+            (
+                DropReason::InvalidInput(TokenInputError::EmptyMapping),
+                "invalid_input",
+            ),
+            (DropReason::JwtValidationFailed, "jwt_validation_failed"),
+            (DropReason::DuplicateToken, "duplicate_token"),
+            (DropReason::DuplicateMapping, "duplicate_mapping"),
+            (DropReason::NoProcessorRegistered, "no_processor_registered"),
+            (
+                DropReason::CustomProcessingFailed,
+                "custom_processing_failed",
+            ),
+            (
+                DropReason::CustomProcessingTimedOut,
+                "custom_processing_timed_out",
+            ),
+            (DropReason::EntityBuildFailed, "entity_build_failed"),
         ];
-        for reason in cases {
-            let value = serde_json::to_value(&reason).expect("serialize reason");
-            let kind = value
-                .get("kind")
-                .and_then(|k| k.as_str())
-                .expect("reason must serialize a `kind` tag");
-            assert_eq!(
-                kind,
-                reason.slug(),
-                "slug() must match serde kind for {reason:?}"
-            );
+        for (reason, slug) in cases {
+            assert_eq!(reason.slug(), slug, "slug changed for {reason:?}");
         }
     }
 
@@ -249,27 +248,24 @@ mod tests {
     }
 
     #[test]
-    fn dropped_token_round_trips_json() {
-        let dropped = DroppedToken::new("Jans::Access_Token", 2, DropReason::JwtValidationFailed);
-        let s = serde_json::to_string(&dropped).expect("serialize");
-        let round: DroppedToken = serde_json::from_str(&s).expect("deserialize");
-        assert_eq!(
-            dropped, round,
-            "DroppedToken should round-trip through JSON"
-        );
-
-        // The hand-written `message` entry must not disturb the derived
-        // `Deserialize`, which only reads `kind` and `detail`.
+    fn dropped_token_serializes_flat_shape() {
         let dropped = DroppedToken::new(
             "Jans::Access_Token",
             0,
             DropReason::InvalidInput(TokenInputError::EmptyPayload),
         );
-        let s = serde_json::to_string(&dropped).expect("serialize");
-        let round: DroppedToken = serde_json::from_str(&s).expect("deserialize");
         assert_eq!(
-            dropped, round,
-            "an InvalidInput DroppedToken should round-trip through JSON"
+            serde_json::to_value(&dropped).expect("serialize"),
+            json!({
+                "mapping": "Jans::Access_Token",
+                "index": 0,
+                "reason": {
+                    "kind": "invalid_input",
+                    "detail": "empty_payload",
+                    "message": "token input was invalid: Empty payload"
+                }
+            }),
+            "DroppedToken must serialize mapping, index and the reason object"
         );
     }
 
