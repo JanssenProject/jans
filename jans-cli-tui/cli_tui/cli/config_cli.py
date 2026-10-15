@@ -265,8 +265,6 @@ if not(host and (client_id and client_secret or access_token)):
 
 
 def ssl_verify_setting():
-    if os.environ.get('VERIFY_SSL'):
-        return get_bool(os.environ['VERIFY_SSL'])
     verify = not args.noverify
     for ca_cert in (config['DEFAULT'].get('ca_cert'), DEFAULT_CA_CERT):
         if verify and ca_cert and os.path.isfile(ca_cert):
