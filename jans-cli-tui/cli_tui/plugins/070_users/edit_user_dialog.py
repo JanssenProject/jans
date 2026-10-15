@@ -129,7 +129,9 @@ class EditUserDialog(JansGDialog, DialogUtils):
             active_checked = True
 
         def get_input_help(fieldname):
-            help_txt = common_data.app.get_help_from_schema(self.schema, fieldname) or _(f"Value for field {fieldname}")
+            help_txt = common_data.app.get_help_from_schema(self.schema, fieldname)
+            if not help_txt:
+                help_txt = _(f"Value for field {fieldname}")
             return help_txt
 
         self.edit_user_content = [

@@ -1009,32 +1009,38 @@ class JCA_CLI:
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
 
+        scheme = {}
         mime_type = self.get_mime_for_endpoint(endpoint)
-        schema_ref = endpoint.info['requestBody']['content'][mime_type]['schema']['$ref']
-        schema = self.get_schema_from_reference(endpoint.info['__plugin__'], schema_ref)
+        if 'schema' in endpoint.info['requestBody']['content'][mime_type]:
+            if '$ref' in endpoint.info['requestBody']['content'][mime_type]['schema']:
+                schema_ref = endpoint.info['requestBody']['content'][mime_type]['schema']['$ref']
+                schema = self.get_schema_from_reference(endpoint.info['__plugin__'], schema_ref)
+            else:
+                schema = endpoint.info['requestBody']['content'][mime_type]['schema']
 
         if 'required' in schema:
             required = schema['required']
             for requirename in required:
-                if requirename not in data:
-                    err = f"{requirename} is required, but not exists in data"
+                data_ = copy.deepcopy(data)
+                if isinstance(data, (str, bytes)):
+                    try:
+                        data_ = json.loads(data_)
+                    except:
+                        data_ = None
+                if data_ is not None:
+                    if requirename not in data_:
+                        err = f"{requirename} is required, but not exists in data"
 
-                    if self.wrapped:
-                        class FakeResponse:
-                            status_code = 800
-                            text = err
-                            reason = "Invalid data"
+                        if self.wrapped:
+                            class FakeResponse:
+                                status_code = 800
+                                text = err
+                                reason = "Invalid data"
 
-                        return FakeResponse()
+                            return FakeResponse()
 
-                    else:
-                        self.print_exception(err)
-                        sys.exit(61)
-
-
-
-                    raise ValueError(f"{requirename} is required, but not exists in data")
-
+                        else:
+                            self.print_exception(err)
 
         if mime_type == 'multipart/form-data':
             data_js = json.loads(data) if (isinstance(data, str) or isinstance(data, bytes)) else copy.deepcopy(data)
