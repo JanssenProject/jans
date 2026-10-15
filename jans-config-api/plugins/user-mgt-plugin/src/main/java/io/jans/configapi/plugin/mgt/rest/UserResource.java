@@ -247,16 +247,7 @@ public class UserResource extends BaseResource {
             // get User object
             User user = setUserAttributes(customUser);
 
-            // parse birthdate if present
-            userMgmtSrv.parseBirthDateAttribute(user);
-            logger.debug("Create  user:{}", user);
-
-            // checking mandatory attributes
-            checkMissingAttributes(user, null);
-            ignoreCustomAttributes(user, removeNonLDAPAttributes);
-            validateUser(user, false);
-            validateAttributes(user);
-
+            validateUserData(user, false, removeNonLDAPAttributes, null);
             logger.info("Service call to create user:{}", user);
 
             user = userMgmtSrv.addUser(user, true);
@@ -335,16 +326,9 @@ public class UserResource extends BaseResource {
             String candidateUserInum = user.getAttribute("inum");
             validateUserPermission(candidateUserInum, ApiConstants.WRITE_REQUEST, servletRequest);
 
-            // parse birthdate if present
-            userMgmtSrv.parseBirthDateAttribute(user);
-            logger.debug("Create  user:{}", user);
-
             // checking mandatory attributes
             List<String> excludeAttributes = List.of(USER_PWD);
-            checkMissingAttributes(user, excludeAttributes);
-            ignoreCustomAttributes(user, removeNonLDAPAttributes);
-            validateUser(user, true);
-            validateAttributes(user);
+            validateUserData(user, true, removeNonLDAPAttributes, excludeAttributes);
 
             logger.info("Call update user:{}", user);
 
@@ -527,6 +511,23 @@ public class UserResource extends BaseResource {
 
     private User excludeUserAttributes(User user) throws IllegalAccessException, InvocationTargetException {
         return userMgmtSrv.excludeAttributes(user, userMgmtSrv.getUserExclusionAttributesAsString());
+    }
+
+    private User validateUserData(User user, boolean isUpdate, boolean removeNonLDAPAttributes,
+            List<String> excludeAttributes)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, ApiApplicationException {
+
+        // parse birthdate if present
+        userMgmtSrv.parseBirthDateAttribute(user);
+        logger.debug("Post parseBirthDateAttribute  user:{}", user);
+
+        // checking mandatory attributes
+        checkMissingAttributes(user, excludeAttributes);
+        ignoreCustomAttributes(user, removeNonLDAPAttributes);
+        validateUser(user, isUpdate);
+        validateAttributes(user);
+        logger.debug("Post validateUser  user:{}", user);
+        return user;
     }
 
     private void checkMissingAttributes(User user, List<String> excludeAttributes)
@@ -767,8 +768,9 @@ public class UserResource extends BaseResource {
         }
 
         // Return if user is updating own profile
-        logger.info("UserResource::validateUserPermission() userInum :{}, this.getContextUserId(servletRequest):{}", userInum, this.getContextUserId(servletRequest));
-        if (StringUtils.isNotBlank(userInum) && userInum.equals(this.getContextUserId(servletRequest)) ) {
+        logger.info("UserResource::validateUserPermission() userInum :{}, this.getContextUserId(servletRequest):{}",
+                userInum, this.getContextUserId(servletRequest));
+        if (StringUtils.isNotBlank(userInum) && userInum.equals(this.getContextUserId(servletRequest))) {
             logger.info("UserResource::validateUserPermission() user is updating own profile :{}", userInum);
             return;
         }
@@ -829,11 +831,11 @@ public class UserResource extends BaseResource {
         }
 
         logger.info("headerUserInum:{}, isAdmin:{}", headerUserInum, isAdmin);
-        
+
         // check permission if loggedInUser is null or does not have `admin` role
-       if(!isAdmin) {
-           isAdmin = userHasAdminScope(httpRequestMethod, servletRequest);
-       }
+        if (!isAdmin) {
+            isAdmin = userHasAdminScope(httpRequestMethod, servletRequest);
+        }
         logger.info(" Final isAdmin - headerUserInum:{}, isAdmin:{}", headerUserInum, isAdmin);
 
         return isAdmin;
@@ -849,7 +851,8 @@ public class UserResource extends BaseResource {
         logger.info(
                 "userHasAdminScope - hasAdminScope:{}, getContextClientId(servletRequest):{}, getContextSubject(servletRequest):{}, getContextScope(servletRequest):{}, getResourceScope(servletRequest):{}, getContextUserId(servletRequest):{}, getContextUserDn(servletRequest):{}",
                 hasAdminScope, getContextClientId(servletRequest), getContextSubject(servletRequest),
-                getContextScope(servletRequest), getResourceScope(servletRequest), getContextUserId(servletRequest), getContextUserDn(servletRequest));
+                getContextScope(servletRequest), getResourceScope(servletRequest), getContextUserId(servletRequest),
+                getContextUserDn(servletRequest));
 
         return hasAdminScope;
     }
@@ -887,14 +890,13 @@ public class UserResource extends BaseResource {
         return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_CLIENTID))
                 .orElse(null);
     }
-    
+
     private String getContextInum(HttpServletRequest servletRequest) {
         String subject = null;
         if (servletRequest == null) {
             return subject;
         }
-        return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_INUM))
-                .orElse(null);
+        return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_INUM)).orElse(null);
     }
 
     private String getContextUserId(HttpServletRequest servletRequest) {
@@ -905,7 +907,7 @@ public class UserResource extends BaseResource {
         return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_USER_ID))
                 .orElse(null);
     }
-    
+
     private String getContextUserDn(HttpServletRequest servletRequest) {
         String subject = null;
         if (servletRequest == null) {
@@ -914,7 +916,7 @@ public class UserResource extends BaseResource {
         return AuthUtil.getStringFromObject(servletRequest.getAttribute(ApiConstants.INTROSPECTION_USER_DN))
                 .orElse(null);
     }
-    
+
     private boolean isRolePermissionExemptClient(String inum) {
         logger.debug(
                 " UserResource::isRolePermissionExemptClient() - inum:{}, StringUtils.isBlank(inum):{}, authUtil.isUserRolePermissionExcluded(inum):{}",
