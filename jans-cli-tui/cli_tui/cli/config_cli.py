@@ -984,10 +984,9 @@ class JCA_CLI:
         return None
 
     def get_mime_for_endpoint(self, endpoint, req='requestBody'):
-        if req in endpoint.info:
-            for key in endpoint.info[req]['content']:
-                return key
-        return None
+        request_info = endpoint.info.get(req) or {}
+        content = request_info.get('content') or {}
+        return next(iter(content), None)
 
 
     def resolve_user_file(self, path):
