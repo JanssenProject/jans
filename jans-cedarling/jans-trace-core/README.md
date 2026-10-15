@@ -76,7 +76,7 @@ For every record:
 1. Build the record's JSON. Producer chain: `sequence_number` is the previous one plus 1,
    `prev_record_hash` is the previous record's `content_digest`, or `Digest::GENESIS` for
    the first record of a chain. For a token without `jti`, put
-   `inputs::token_fingerprint(token_bytes)` in the record.
+   `inputs::token_fingerprint(token_text)` in the record.
 2. `assertion::UnsignedAssertion::parse(json_text, &limits)`. Use the limits Lock enforces: a
    record Lock would refuse for its size fails here, before it is signed.
 3. `unsigned.sign(&signer)` returns a `SignedAssertion`. Its `as_str()` is the JCS form
@@ -142,6 +142,8 @@ hash on the machine and binary that actually run. If it fails, disable TRACE ing
 
 ### Calling from other languages
 
+Java: [`jans-trace-java`](../bindings/jans-trace-java/README.md).
+
 Every JSON input is text (`&str`), so invalid UTF-8 cannot reach the core; bindings take a
 string, and their toolkit does the UTF-8 conversion. Read an HTTP body as UTF-8 and pass
 the text unchanged: do not parse it and serialize it again, and do not normalize Unicode.
@@ -169,7 +171,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ---- Producer (Cedarling) ----
 
     // A fixed secret is for examples only; load real keys with `from_pkcs8_pem`.
-    let signer: Ed25519Signer = Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32]);
+    let signer: Ed25519Signer = Ed25519Signer::from_secret_bytes("key-2026-01", &[7; 32])?;
 
     // The core takes the record as JSON text, never as a parsed tree. How the producer
     // builds it does not matter, nor does formatting: the core canonicalizes before signing.
@@ -229,7 +231,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ## API by module
 
 Shared types live at the crate root: `Digest` (`sha256:<hex>`, strict `FromStr`,
-`Digest::GENESIS`), `ParseDigestError`, `Limits`, `SizeLimitError`.
+`Digest::GENESIS`), `ParseDigestError`, `Limits`, `SizeLimitError`, `ErrorCode`.
 
 | Module | Items | Who calls it |
 |---|---|---|
@@ -277,8 +279,9 @@ range a fraction is written as its nearest double, as every JSON reader reads it
 
 ## Error codes
 
-Every error has `code()`, a stable string that bindings map to exceptions. A release
-never renames or reuses a code. `Display` explains the cause and never contains keys,
+Every error has `code()`, which returns an `ErrorCode`; `as_str()` (and `Display`) give the
+stable string below, which bindings carry to their exceptions. A release never renames or
+reuses a code. `Display` explains the cause and never contains keys,
 signatures or record content.
 
 | Code | Meaning |
@@ -295,7 +298,7 @@ signatures or record content.
 | `PRODUCER_MISMATCH` | Signed `producer` differs from the expected one. |
 | `KID_MISMATCH` | Signed `kid` differs from the selected key, or the record's `kid` from the signer's. |
 | `INVALID_PUBLIC_KEY` | JWK or key bytes do not describe a usable Ed25519 public key. |
-| `INVALID_PRIVATE_KEY` | Not an unencrypted PKCS#8 PEM Ed25519 key. Not in the core design. |
+| `INVALID_PRIVATE_KEY` | Not an unencrypted PKCS#8 PEM Ed25519 key, or a raw secret that is not 32 bytes. Not in the core design. |
 | `INVALID_DIGEST` | Text is not `sha256:` plus 64 lowercase hex digits. |
 | `INVALID_RECEIPT` | `received_at` text or sequence and predecessor break the v1 profile, a clock reading is after year 9999, a stored receipt has an empty `producer_id` / `record_id`, or a saved chain head pairs sequence 0 and the sentinel wrongly. |
 | `RECEIPT_LINK_MISMATCH` | Receipt does not name the expected predecessor; with `ChainHead::append`, also another evidence domain or a sequence that is not the next one. |

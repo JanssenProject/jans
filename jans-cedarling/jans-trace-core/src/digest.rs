@@ -8,6 +8,8 @@
 use std::fmt;
 use std::str::FromStr;
 
+use crate::ErrorCode;
+use crate::error_code::HasErrorCode;
 use sha2::{Digest as _, Sha256};
 use thiserror::Error;
 
@@ -43,8 +45,8 @@ impl From<DigestReason> for ParseDigestError {
 
 impl ParseDigestError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "INVALID_DIGEST"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -106,6 +108,7 @@ fn lower_hex_value(c: u8, offset: usize) -> Result<u8, DigestReason> {
 #[cfg(test)]
 mod tests {
     use super::{Digest, DigestReason, ParseDigestError};
+    use crate::ErrorCode;
 
     const EMPTY_SHA256: &str =
         "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
@@ -193,7 +196,7 @@ mod tests {
     fn code_is_stable() {
         assert_eq!(
             "x".parse::<Digest>().expect_err("not a digest").code(),
-            "INVALID_DIGEST",
+            ErrorCode::InvalidDigest,
             "stable code from core design §10"
         );
     }

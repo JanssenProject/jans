@@ -10,6 +10,8 @@ use std::fmt::Write as _;
 use serde_json::Value;
 use thiserror::Error;
 
+use crate::ErrorCode;
+use crate::error_code::HasErrorCode;
 use crate::json::{JsonError, NonCanonicalCause, NonCanonicalReason, parse_strict};
 use crate::limits::LimitKind;
 use crate::{Limits, SizeLimitError};
@@ -25,11 +27,8 @@ pub enum CanonicalizeError {
 
 impl CanonicalizeError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        match self {
-            Self::SizeLimitExceeded(e) => e.code(),
-            Self::Json(e) => e.code(),
-        }
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -88,6 +87,7 @@ pub(crate) fn write_jcs_string(out: &mut String, text: &str) {
 #[cfg(test)]
 mod tests {
     use super::{CanonicalizeError, canonicalize_json, canonicalizer_refused, write_jcs_string};
+    use crate::ErrorCode;
     use crate::json::{JsonError, NonCanonicalCause, NonCanonicalReason};
     use crate::limits::LimitKind;
     use crate::{Limits, SizeLimitError};
@@ -286,13 +286,16 @@ mod tests {
     #[test]
     fn codes_are_stable() {
         let cases = [
-            (JsonError::Invalid { line: 1, column: 1 }, "INVALID_JSON"),
-            (JsonError::DuplicateMember, "DUPLICATE_MEMBER"),
+            (
+                JsonError::Invalid { line: 1, column: 1 },
+                ErrorCode::InvalidJson,
+            ),
+            (JsonError::DuplicateMember, ErrorCode::DuplicateMember),
             (
                 JsonError::NonCanonicalizable(NonCanonicalReason(
                     NonCanonicalCause::OutOfSafeRange,
                 )),
-                "NON_CANONICALIZABLE_JSON",
+                ErrorCode::NonCanonicalizableJson,
             ),
         ];
         for (error, code) in cases {
@@ -401,7 +404,7 @@ mod tests {
     fn limit_code_is_size_limit_exceeded() {
         assert_eq!(
             JsonError::LimitExceeded(SizeLimitError::new(LimitKind::Depth, 1)).code(),
-            "SIZE_LIMIT_EXCEEDED",
+            ErrorCode::SizeLimitExceeded,
             "structural limits share the size-limit code from core design §10"
         );
     }
