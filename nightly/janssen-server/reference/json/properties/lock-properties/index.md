@@ -15,6 +15,7 @@
 | clientId | OAuth client id bound to the evidence domain | [Details](#clientid) |
 | clientPassword | Lock client password | [Details](#clientpassword) |
 | correlationRetryLimit | Maximum retries when a correlation neighbor update hits a version conflict | [Details](#correlationretrylimit) |
+| defaultAllowedProducerIds | Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none | [Details](#defaultallowedproducerids) |
 | defaultEvidenceDomainId | Evidence domain id used when a submitting client has no explicit binding | [Details](#defaultevidencedomainid) |
 | disableExternalLoggerConfiguration | Choose whether to disable external log4j configuration override | [Details](#disableexternalloggerconfiguration) |
 | disableJdkLogger | Choose whether to disable JDK loggers | [Details](#disablejdklogger) |
@@ -30,6 +31,7 @@
 | maxArrayLength | Maximum accepted JSON array length in a TRACE assertion | [Details](#maxarraylength) |
 | maxBulkRecords | Maximum number of assertions accepted in one POST /audit/trace/bulk request | [Details](#maxbulkrecords) |
 | maxBulkRequestBytes | Maximum total body size, in bytes, buffered for one POST /audit/trace/bulk request; clamped to 16777216 regardless of this value | [Details](#maxbulkrequestbytes) |
+| maxFutureSkewSeconds | Seconds a signed_at may be ahead of Lock's clock before the record is rejected | [Details](#maxfutureskewseconds) |
 | maxJsonDepth | Maximum accepted JSON nesting depth of a TRACE assertion | [Details](#maxjsondepth) |
 | maxObjectMembers | Maximum accepted JSON object member count in a TRACE assertion | [Details](#maxobjectmembers) |
 | maxRequestBytes | Maximum accepted TRACE request body size in bytes | [Details](#maxrequestbytes) |
@@ -170,6 +172,15 @@
 - Default value: 3
 
 
+## defaultAllowedProducerIds
+
+- Description: Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none
+
+- Required: No
+
+- Default value: None
+
+
 ## defaultEvidenceDomainId
 
 - Description: Evidence domain id used when a submitting client has no explicit binding
@@ -303,6 +314,15 @@
 - Required: No
 
 - Default value: 4194304
+
+
+## maxFutureSkewSeconds
+
+- Description: Seconds a signed_at may be ahead of Lock's clock before the record is rejected
+
+- Required: No
+
+- Default value: 300
 
 
 ## maxJsonDepth

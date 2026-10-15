@@ -1718,6 +1718,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#optional-profile-members" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Optional profile members
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#event-kinds" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2290,6 +2301,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#optional-profile-members" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Optional profile members
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#event-kinds" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2726,6 +2748,7 @@
 <li>Producer keys, record identity, execution correlation, indexes, and retrieval are all scoped to the domain.</li>
 <li>A key registered in one domain gives no authority in another. A producer that serves several domains needs an explicit registration in each.</li>
 <li>Readers and administrators see only the domain their client is bound to. Lock never searches other domains.</li>
+<li>A client with no <code>clientDomainBindings</code> entry falls back to <code>defaultEvidenceDomainId</code> only for its domain. It gets no forwarding permission: see "Default-domain fallback" under <a href="#configuration">Configuration</a>.</li>
 <li>A request body that contains <code>evidence_domain_id</code> (top level or inside <code>trace</code>) is rejected with <code>domain_field_forbidden</code>.</li>
 </ul>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
@@ -2733,6 +2756,7 @@
 <div class="highlight"><pre><span></span><code><span class="nt">&quot;traceConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;defaultEvidenceDomainId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;defaultAllowedProducerIds&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
 <span class="w">  </span><span class="nt">&quot;clientDomainBindings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;clientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2200.00000000-0000-0000-0000-000000000000&quot;</span><span class="p">,</span>
@@ -2741,6 +2765,7 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;latenessThresholdSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;maxFutureSkewSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;maxRequestBytes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">262144</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;maxBulkRecords&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;maxBulkRequestBytes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4194304</span><span class="p">,</span>
@@ -2752,9 +2777,10 @@
 <span class="p">}</span>
 </code></pre></div>
 <p><strong>Client-to-domain bindings.</strong> Lock resolves the domain for an authenticated <code>client_id</code> in this order: an explicit entry in <code>clientDomainBindings</code>, then <code>defaultEvidenceDomainId</code> if set, otherwise the request fails with <code>403 client_not_bound</code>. The same rule applies to submitters, readers, and administrators.</p>
+<p><strong>Default-domain fallback.</strong> A client that falls back to <code>defaultEvidenceDomainId</code> has no forwarding permission of its own. Its allowlist is <code>defaultAllowedProducerIds</code> (default: empty), never <code>"*"</code>. With the default empty list, an unbound client can read and administer the default domain but cannot submit any record: every submission fails with <code>403 producer_not_allowed</code>. To let unbound clients submit for specific producers, list those producers in <code>defaultAllowedProducerIds</code>. To let a client forward for a producer other than itself, give the client an explicit <code>clientDomainBindings</code> entry.</p>
 <p><strong>Forwarding.</strong> A client may submit a record only if the binding's <code>allowedProducerIds</code> contains the signed <code>producer</code> string exactly, or contains <code>"*"</code>. Otherwise the request fails with <code>403 producer_not_allowed</code>.</p>
 <p><strong>Limits.</strong> Lock applies the request limits (<code>maxRequestBytes</code>, <code>maxJsonDepth</code>, <code>maxStringLength</code>, <code>maxArrayLength</code>, <code>maxObjectMembers</code>) before any cryptographic work. A request over a limit fails with <code>400 invalid_request</code>. For bulk requests, <code>maxBulkRecords</code> bounds the array length and <code>maxBulkRequestBytes</code> bounds the whole body (always clamped to 16 MiB). <code>maxRequestBytes</code> still bounds each record in the batch.</p>
-<p><strong>Lateness.</strong> A record is flagged <code>late_flag: true</code> when Lock receives it more than <code>latenessThresholdSeconds</code> after its <code>signed_at</code>. Lateness alone never rejects a record. A <code>signed_at</code> that is more than <code>latenessThresholdSeconds</code> in the future is rejected with <code>invalid_assertion</code> (<code>signed_at_in_future</code>).</p>
+<p><strong>Lateness.</strong> A record is flagged <code>late_flag: true</code> when Lock receives it more than <code>latenessThresholdSeconds</code> after its <code>signed_at</code>. Lateness alone never rejects a record. A <code>signed_at</code> that is more than <code>maxFutureSkewSeconds</code> ahead of Lock's clock is rejected with <code>invalid_assertion</code> (<code>signed_at_in_future</code>). The two properties are independent.</p>
 <p><strong>Neighbor-update retries.</strong> After a record is stored, Lock updates derived flags on neighboring records. Each update is a compare-and-swap write against the neighbor's version. On a version conflict, Lock re-reads the neighbor, recomputes the flag from its current state and retries, up to <code>correlationRetryLimit</code> times. When the budget is exhausted Lock logs a warning and gives up on that update. It never fails the request.</p>
 <p><strong>Chain registration mode.</strong> <code>chainRegistrationMode</code> is <code>PRE_REGISTERED</code> (default) or <code>FIRST_OBSERVED</code>. See <a href="#chain-registration-modes">Chain registration modes</a>. A value that is not one of the two names is treated as <code>PRE_REGISTERED</code> and logged once at <code>WARN</code>.</p>
 <p><strong>Timers.</strong> The receipt repair timer runs every <code>receiptRepairIntervalSeconds</code>. It settles receipt claims that stayed <code>PENDING</code> longer than <code>pendingReceiptTimeoutSeconds</code> (see <a href="#deployment-constraints">Deployment constraints</a>). Setting <code>enabled</code> to <code>false</code> makes every TRACE endpoint return a structured <code>invalid_request</code> error with reason <code>trace_disabled</code> and stops the timer.</p>
@@ -2863,7 +2889,7 @@
 </tr>
 </tbody>
 </table>
-<p>Restarting a producer does not by itself mean a new chain. A producer that durably retained its <code>producer_chain_id</code>, last <code>sequence_number</code> and previous record hash should continue its existing chain. A new chain is needed when that state is unavailable, when a new independently sequenced writer is created, or when the producer rotates deliberately. Lock only checks the records it receives. The signed <code>chain_link</code> member can reference the previous chain head, and Lock records it without validating it.</p>
+<p>Restarting a producer does not by itself mean a new chain. A producer that durably retained its <code>producer_chain_id</code>, last <code>sequence_number</code> and previous record hash should continue its existing chain. A new chain is needed when that state is unavailable, when a new independently sequenced writer is created, or when the producer rotates deliberately. Lock only checks the records it receives. The signed <code>chain_link</code> member can reference the previous chain head. Lock checks its shape and that only a genesis record carries it. Lock does not validate the link against the prior chain.</p>
 <h3 id="list-keys-and-chains">List keys and chains<a class="headerlink" href="#list-keys-and-chains" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/admin/producer-keys?producer_id=cedarling-fleet-1&quot;</span><span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span>
 curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/admin/producer-chains&quot;</span><span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span>
@@ -2929,9 +2955,73 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <li><code>trace.subject.workload_id</code> is required (non-empty string, at most 255 characters) for <code>AUTHORIZATION_DECISION</code> and <code>CAPABILITY_INVOKED</code>. <code>workload_instance_id</code> is optional. For <code>RUNTIME_EFFECT</code> the subject is optional and is validated when present.</li>
 <li>Producers sign capability <em>facts</em>, not a governance label. An <code>AUTHORIZATION_DECISION</code> carries a singular <code>decision</code> and a <code>CAPABILITY_INVOKED</code> carries a singular <code>invocation</code>. Each has <code>action</code> and <code>resource_type</code> (the Cedar action and resource type, never a resource id) and an <code>outcome</code>. See <a href="#event-kinds">Event kinds</a>. Lock does not resolve capability ids.</li>
 <li><code>tokens[]</code> holds references only: <code>issuer</code>, <code>token_type</code>, and either <code>jti</code> or <code>fingerprint</code>. Never send a raw bearer token. Lock rejects material that looks like a JWT. Token identity is <code>(domain, issuer, jti)</code>, never a bare <code>jti</code>.</li>
-<li><code>producer_chain</code> can carry an optional <code>chain_link</code> member. Lock keeps it unchanged inside the signed assertion, returns it unchanged on retrieval, and does not validate or interpret it.</li>
+<li>A signed body must not carry a member that Lock derives or assigns itself. The reserved members are <code>cnf</code>, <code>content_digest</code>, <code>receipt_sequence</code>, <code>received_at</code>, <code>prev_receipt_hash</code>, <code>coverage_gap_flag</code>, <code>chain_link_failure_flag</code>, <code>equivocation_flag</code>, <code>late_flag</code>, <code>unattributed_flag</code>, <code>candidate_flag</code>, <code>key_resolved</code>, <code>key_temporally_valid</code>, <code>key_not_revoked</code>, <code>key_authorized_for_producer</code>, <code>producer_authorized_for_claim</code>, <code>key_thumbprint</code>, <code>key_authorization_ref</code>, <code>verified_at</code>, <code>trust_tier</code>, <code>capability_resolution</code>, <code>capability_id</code> and <code>capability_ids</code>. Lock checks the top level, <code>trace</code>, <code>trace.event</code> and each <code>decision</code> or <code>invocation</code> fact. A body that carries one is rejected with <code>400 invalid_assertion</code> and reason <code>forbidden:&lt;path&gt;</code> (for example <code>forbidden:cnf</code> or <code>forbidden:trace.trust_tier</code>). Lock never stores it. Lock resolves the verification key only from the producer key registry, never from a key in the body.</li>
+<li><code>producer_chain</code> can carry an optional <code>chain_link</code> member that references the previous chain head. It must be a JSON object, and only a genesis record (<code>sequence_number</code> 1) can carry it. On any other record Lock returns <code>400 invalid_genesis</code> with reason <code>chain_link_on_non_genesis</code>. Lock checks that <code>prev_producer_chain_id</code>, when present, is a non-empty string. It keeps the member unchanged inside the signed assertion, returns it unchanged on retrieval, and does not validate the link against the prior chain.</li>
 <li>The first record of a chain has <code>sequence_number</code> 1 and <code>prev_record_hash</code> set to <code>sha256:</code> followed by 64 zeros. Any other record needs the previous record's <code>content_digest</code> in <code>prev_record_hash</code>.</li>
 </ul>
+<h3 id="optional-profile-members">Optional profile members<a class="headerlink" href="#optional-profile-members" title="Permanent link">#</a></h3>
+<p>Lock checks the JSON type of each optional member below when the producer signs it. A member of the wrong type returns <code>400 invalid_assertion</code> with reason <code>type:&lt;path&gt;</code>, <code>empty:&lt;path&gt;</code>, <code>length:&lt;path&gt;</code> or <code>invalid:&lt;path&gt;</code>, in the same way as the required members. A <code>null</code> value counts as absent. Lock does not interpret the values and stores them only inside the signed assertion.</p>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Member</th>
+<th>Accepted shape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>trace</code></td>
+<td><code>execution_epoch_id</code>, <code>previous_epoch_id</code>, <code>parent_execution_id</code></td>
+<td>Non-empty string of at most 255 characters.</td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td><code>operation_ids</code></td>
+<td>Array of non-empty strings.</td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td><code>session_id</code>, <code>session_issuer</code></td>
+<td>Non-empty strings. <code>session_issuer</code> is required when <code>session_id</code> is present (<code>missing:trace.session_issuer</code>) and follows the token issuer rule (<code>https</code>, or <code>http</code> for <code>localhost</code>).</td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td><code>evidence_origin</code>, <code>measurement_point</code></td>
+<td>Non-empty strings. Lock does not restrict the values.</td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td><code>recorder</code></td>
+<td>Object or string.</td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td><code>attestation_ref</code></td>
+<td>Object.</td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td><code>workload_authentication</code></td>
+<td>Object. The members <code>authentication_layer</code>, <code>method</code>, <code>authenticated_workload_id</code> and <code>proof_ref</code> are strings when present.</td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td><code>model</code></td>
+<td>Object. The members <code>provider</code>, <code>model_id</code> and <code>version</code> are strings when present.</td>
+</tr>
+<tr>
+<td><code>trace.subject</code></td>
+<td><code>human_sponsor</code>, <code>delegating_org</code></td>
+<td>String or object.</td>
+</tr>
+<tr>
+<td><code>trace.policy</code></td>
+<td><code>enforcement_mode</code></td>
+<td><code>enforce</code>, <code>advisory</code>, <code>silent</code> or <code>declared</code>. Checked wherever Lock validates <code>trace.policy</code>: always for <code>AUTHORIZATION_DECISION</code>, and when present for <code>CAPABILITY_INVOKED</code>.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="event-kinds">Event kinds<a class="headerlink" href="#event-kinds" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -2950,7 +3040,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <tr>
 <td><code>CAPABILITY_INVOKED</code></td>
 <td>PEP, agent gateway or tool gateway</td>
-<td>Exactly one of a singular <code>trace.event.invocation</code> <code>{action, resource_type, outcome}</code> or <code>trace.event.invocations[]</code>. <code>trace.event.enforcement_point_id</code>. <code>trace.subject.workload_id</code>. <code>trace.policy</code> is not allowed.</td>
+<td>Exactly one of a singular <code>trace.event.invocation</code> <code>{action, resource_type, outcome}</code> or <code>trace.event.invocations[]</code>. <code>trace.event.enforcement_point_id</code>. <code>trace.subject.workload_id</code>. <code>trace.policy</code> is optional. When present, it must be complete, like a decision's.</td>
 </tr>
 <tr>
 <td><code>RUNTIME_EFFECT</code></td>
@@ -2962,8 +3052,9 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <p>Rules for the capability facts:</p>
 <ul>
 <li><code>action</code> and <code>resource_type</code> are non-empty strings of at most 512 characters.</li>
-<li>For <code>AUTHORIZATION_DECISION</code>, <code>outcome</code> is <code>ALLOW</code> or <code>DENY</code>. For <code>CAPABILITY_INVOKED</code>, <code>outcome</code> is a non-empty string of at most 64 characters.</li>
+<li>For <code>AUTHORIZATION_DECISION</code>, <code>outcome</code> is <code>ALLOW</code> or <code>DENY</code>. For <code>CAPABILITY_INVOKED</code>, <code>outcome</code> is <code>SUCCESS</code> or <code>FAILURE</code>. The vocabularies are distinct, so an invocation with <code>ALLOW</code> or a decision with <code>SUCCESS</code> returns <code>400 invalid_assertion</code> with reason <code>invalid:trace.event.invocation.outcome</code> (or <code>invalid:trace.event.decision.outcome</code>, or the indexed plural path such as <code>invalid:trace.event.invocations[0].outcome</code>).</li>
 <li>An atomic batch evaluation can use the plural form instead. Each entry carries a <code>decision_id</code> or <code>invocation_id</code> (non-empty, at most 256 characters, unique within the array) and repeats <code>action</code>, <code>resource_type</code> and <code>outcome</code>. The record-level <code>trace.event.outcome</code> is not allowed in either form.</li>
+<li>Operation-binding digests are optional members of <code>trace.event</code>: <code>request_digest</code>, <code>input_digest</code> and <code>tool_call_digest</code> on <code>AUTHORIZATION_DECISION</code>, and <code>request_digest</code>, <code>tool_call_digest</code> and <code>result_digest</code> on <code>CAPABILITY_INVOKED</code> (and <code>result_digest</code> on <code>RUNTIME_EFFECT</code>). A present digest is <code>sha256:</code> followed by 64 lowercase hex characters. Any other string returns <code>400 invalid_assertion</code> with reason <code>invalid:trace.event.&lt;member&gt;</code>, and a non-string value returns <code>type:trace.event.&lt;member&gt;</code>. Lock stores them in the signed assertion and does not interpret them. <code>trace.policy.bundle_hash</code> keeps its own rule, which also accepts other <code>algorithm:digest</code> forms.</li>
 <li>Both the singular and the plural member in one record, <code>capability_ids</code> anywhere, and a <code>resource_id</code> inside a fact are rejected with <code>400 invalid_assertion</code> (reason such as <code>forbidden:trace.event.capability_ids</code>).</li>
 </ul>
 <p>Lock validates the schema for the declared kind and rejects fields that contradict it. Lock does not infer that an authorization caused an invocation because their timestamps are close. Producers state causal relationships in <code>parent_record_ids</code>.</p>
@@ -3082,7 +3173,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <tr>
 <td><code>invalid_assertion</code></td>
 <td>400</td>
-<td>A schema violation in the assertion. <code>reason</code> names the field.</td>
+<td>A schema violation in the assertion, or a member reserved for Lock such as <code>cnf</code> or <code>trust_tier</code> (reason <code>forbidden:&lt;path&gt;</code>). <code>reason</code> names the field.</td>
 </tr>
 <tr>
 <td><code>unsupported_profile</code></td>
@@ -3237,11 +3328,12 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/executions/exec-01JABCXYZQK8P5N9F2C7R3T4V6?execution_authority=spiffe%3A%2F%2Fexample.org%2Fagent%2Fplanner&amp;start=0&amp;count=100&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$READ_TOKEN</span><span class="s2">&quot;</span>
 </code></pre></div>
-<p>A record response has three separate parts:</p>
+<p>A record response has three separate parts: the assertion (in a parsed form and as exact text), the verification result and the ingestion metadata.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;producer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;assertion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;...&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;the producer-signed record&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;assertion_raw&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{\&quot;...\&quot;: \&quot;the producer-signed record, exact text\&quot;}&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;content_digest&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;verification&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;signature_valid&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
@@ -3256,6 +3348,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <span class="w">    </span><span class="nt">&quot;received_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-11T00:41:02.123Z&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;prev_receipt_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;receipt_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;receipt_state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;COMMITTED&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;coverage_gap_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;chain_link_failure_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;equivocation_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
@@ -3264,7 +3357,9 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <span class="p">}</span>
 </code></pre></div>
 <ul>
-<li><code>assertion</code> is stored as the text received and never modified. The API returns it as a JSON value that is semantically identical to what the producer sent. Lock never adds resolved claims, status, or receipt data to it.</li>
+<li><code>assertion_raw</code> is the exact accepted text: Lock stores the request body as received and returns it unchanged, byte for byte. Lock never adds resolved claims, status, or receipt data to it.</li>
+<li><code>assertion</code> is the same text parsed as a JSON value. It is a re-emission, so member order, whitespace and number formatting can differ from the signed bytes. Use it when you want structure and <code>assertion_raw</code> when you need the original text.</li>
+<li>Both forms verify. The signature and <code>content_digest</code> are defined over the JCS (RFC 8785) form, and the JCS form of <code>assertion</code> and of <code>assertion_raw</code> is identical.</li>
 <li><code>verification</code> records the admission decision Lock made at <code>verified_at</code>. It is written once at ingestion and never recomputed from the current key registry. <code>key_thumbprint</code> pins the exact key, independently of the non-unique <code>kid</code> selector: it is <code>sha256:</code> plus the lowercase hex SHA-256 of the RFC 7638 required-members JSON of the key (<code>{"crv":"Ed25519","kty":"OKP","x":"&lt;x&gt;"}</code>). <code>key_authorized</code> is a single boolean. It states that the key existed, was inside its validity window, was not revoked, was registered for the <code>producer_id</code> and was authorized for the record's <code>event_kind</code>. Every stored record has <code>key_authorized: true</code>, because a record that fails any admission check is rejected and never stored. Later revocation, expiry or re-scoping of the key never rewrites these values. Records stored before these two members existed omit them.</li>
 <li><code>ingestion</code> is Lock-derived metadata.</li>
 </ul>
@@ -3313,8 +3408,10 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <li><code>prev_receipt_hash</code>: the hash of the preceding receipt entry.</li>
 <li><code>receipt_hash</code>: the hash of this entry.</li>
 </ul>
-<p>The receipt hash binds <code>evidence_domain_id</code>, <code>receipt_sequence</code>, <code>received_at</code>, <code>producer_id</code>, <code>record_id</code>, <code>content_digest</code>, and <code>prev_receipt_hash</code>. The hash input is the JCS canonical form of those seven members. <code>received_at</code> enters the hash as a JSON string in the RFC 3339 form with three fractional digits and <code>Z</code> (<code>2026-06-11T00:41:02.123Z</code>), and <code>receipt_sequence</code> as a JSON integer. A value shown without milliseconds would not reproduce the receipt hash. The first entry in a domain uses the all-zero sentinel as its <code>prev_receipt_hash</code>.</p>
+<p>Every receipt entry has a state: <code>PENDING</code> while Lock stores the record, <code>COMMITTED</code> once the record is stored, and <code>VOID</code> if the record was never stored. The retrieval response carries the state of a record's receipt entry as <code>ingestion.receipt_state</code>. A stored record shows <code>COMMITTED</code>, or <code>PENDING</code> during the short window between storing the record and settling its claim. It never shows <code>VOID</code>.</p>
+<p>The receipt hash binds the receipt profile tag <code>receipt_profile</code> (<code>tag:jans.io,2026:lock-trace-receipt-v1</code>), <code>evidence_domain_id</code>, <code>receipt_sequence</code>, <code>received_at</code>, <code>producer_id</code>, <code>record_id</code>, <code>content_digest</code>, and <code>prev_receipt_hash</code>. The hash input is the JCS canonical form of those eight members. <code>receipt_profile</code> is a string constant in every hash input. A change to this member set needs a new profile tag. <code>received_at</code> enters the hash as a JSON string in the RFC 3339 form with three fractional digits and <code>Z</code> (<code>2026-06-11T00:41:02.123Z</code>), and <code>receipt_sequence</code> as a JSON integer. A value shown without milliseconds would not reproduce the receipt hash. The first entry in a domain uses the all-zero sentinel as its <code>prev_receipt_hash</code>.</p>
 <p>A verifier can walk the receipts by sequence, recompute each hash, and check each committed entry against the stored record. This makes local insertion, deletion, and rewriting detectable.</p>
+<p>A verifier must accept a <code>VOID</code> entry whose hash and <code>prev_receipt_hash</code> linkage verify and which has no stored record. A <code>VOID</code> entry is a chain position that Lock allocated and then abandoned. It is not a missing entry, and a verifier must not report it as a gap. A <code>VOID</code> entry that has a stored record is an inconsistency. The receipt state is not part of the receipt hash, so settling an entry never changes the hashes of the chain.</p>
 <div class="admonition warning">
 <p class="admonition-title">What the receipt chain does not protect against</p>
 <p>The receipt chain is local tamper evidence only. It has no signed checkpoints and no independent external anchor. It does not protect against an operator who can rewrite the whole chain, including every hash. Do not describe the receipt chain as proof of integrity against such an operator, and do not describe TRACE evidence as settled, complete, or externally anchored.</p>
@@ -3328,6 +3425,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <li>It stores the record, then marks the claim <code>COMMITTED</code>. If storing fails, it marks the claim <code>VOID</code>.</li>
 </ol>
 <p>A node that stops between steps leaves a <code>PENDING</code> claim. The repair timer settles claims older than <code>pendingReceiptTimeoutSeconds</code>: <code>COMMITTED</code> if the record exists, otherwise <code>VOID</code>. <code>VOID</code> entries keep the chain dense and verifiable, because the receipt state is not part of the receipt hash. A claim without a record is never returned by any API.</p>
+<p>The database ORM has no transactions, so storing the record and appending its receipt entry is not a single atomic write. A failed request leaves no stored record, no index entry, and no <code>COMMITTED</code> receipt entry. It can leave a <code>VOID</code> receipt entry at the allocated position, and a <code>PENDING</code> entry is visible between the claim and its settlement. After a node stops, a <code>PENDING</code> entry stays until the repair timer settles it. That takes up to <code>pendingReceiptTimeoutSeconds</code> plus <code>receiptRepairIntervalSeconds</code>. A <code>VOID</code> entry stays in the chain permanently, because the <code>prev_receipt_hash</code> of the next entry binds its hash.</p>
 <p><strong>Request size and column size.</strong> <code>maxRequestBytes</code> limits the size of one request body. The stored assertion is kept as text in a <code>MEDIUMTEXT</code> column on MySQL and a <code>TEXT</code> column on PostgreSQL. Keep <code>maxRequestBytes</code> and the per-record limit inside the bulk path well below the size of that column type for your database, and raise the limits only after checking it. Many TRACE identifiers are stored in <code>VARCHAR</code> columns of fixed width, which Lock's validation keeps the values within.</p>
 <p><strong>Time.</strong> Lock uses <code>received_at</code> for receipt order and treats <code>signed_at</code> as a producer claim. Keep node clocks synchronized.</p>
 <h2 id="deferred-features">Deferred features<a class="headerlink" href="#deferred-features" title="Permanent link">#</a></h2>
@@ -3417,7 +3515,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 13, 2026
+    October 14, 2026
   </span>
 
     
