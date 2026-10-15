@@ -12,8 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Admin request body to revoke a producer's Ed25519 verification key (design decision D-4, task
- * 15).
+ * Admin request body to revoke a producer's Ed25519 verification key.
  *
  * @author Yuriy Movchan
  */

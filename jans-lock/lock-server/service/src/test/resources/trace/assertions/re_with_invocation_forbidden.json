@@ -15,7 +15,7 @@
       "invocation": {
         "action": "Acme::Action::\"Pay\"",
         "resource_type": "Acme::Payment",
-        "outcome": "INVOKED"
+        "outcome": "SUCCESS"
       }
     }
   },

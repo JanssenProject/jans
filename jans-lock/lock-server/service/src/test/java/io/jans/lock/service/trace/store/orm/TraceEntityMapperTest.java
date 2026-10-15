@@ -34,7 +34,7 @@ import io.jans.lock.service.trace.store.TraceKeys;
 /**
  * Tests for {@link TraceEntityMapper}: the record round trip (including the assertion re-parse that
  * recovers {@code producer_instance_id}/{@code producer_chain_id} and token
- * references — see task 13's design decision on entity-to-record mapping) and the
+ * references) and the
  * null-Boolean-flag convention. Receipts, chains and producer keys need no mapper test: since the
  * collapse of their store value types onto the jans-orm entities, {@code TraceStore} exposes those
  * entities directly and there is no conversion left to test here.

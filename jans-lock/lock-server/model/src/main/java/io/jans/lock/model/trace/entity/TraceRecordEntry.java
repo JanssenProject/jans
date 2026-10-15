@@ -19,10 +19,10 @@ import io.jans.orm.annotation.Version;
 import io.jans.orm.model.base.BaseEntry;
 
 /**
- * One accepted TRACE record (design §10, TRACE MVP design decision T-1). Every attribute is
+ * One accepted TRACE record (design §10). Every attribute is
  * immutable once persisted, except the three Lock-derived correlation flags
  * ({@link #getCoverageGap()}, {@link #getChainLinkFailure()}, {@link #getEquivocation()}), which
- * neighbor updates may set later (design decision D-9).
+ * neighbor updates may set later.
  *
  * @author Yuriy Movchan
  */

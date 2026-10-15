@@ -15,7 +15,7 @@
       "invocation": {
         "action": "Acme::Action::\"Pay\"",
         "resource_type": "Acme::Payment",
-        "outcome": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "outcome": "SUCCESS"
       },
       "enforcement_point_id": "gateway-001",
       "tokens": [
@@ -25,6 +25,14 @@
           "jti": "9c9f2e77-9a3e-4b62-9a2a-2f6e6e2a9f3e"
         }
       ]
+    },
+    "policy": {
+      "policy_store_id": "https://example.org/policy-stores/payments",
+      "policy_store_version": "1.2.3",
+      "policy_language": "cedar",
+      "policy_language_version": "4.4.0",
+      "bundle_hash": "sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf7",
+      "enforcement_mode": "Enforce"
     }
   },
   "producer_chain": {

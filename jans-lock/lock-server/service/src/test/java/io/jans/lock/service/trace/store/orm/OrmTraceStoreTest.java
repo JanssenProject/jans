@@ -23,14 +23,14 @@ import io.jans.lock.service.trace.store.TraceStoreContractTest;
 
 /**
  * Runs the shared {@link TraceStoreContractTest} suite against {@link OrmTraceStore}, backed by
- * {@link FakeEntryManagerBehavior} instead of a live database (task 13 acceptance criteria).
+ * {@link FakeEntryManagerBehavior} instead of a live database.
  *
  * <p>Overrides the record fixture only to give each record a realistic {@code assertion} body: the
  * base fixture's {@code {"trace":{}}} placeholder has no {@code producer_chain} or
  * {@code trace.event} block, but {@code OrmTraceStore}'s read path recovers a record's
  * {@code producer_instance_id}/{@code producer_chain_id} and token references by
  * re-parsing the stored assertion (see {@link TraceEntityMapper}), because {@code TraceRecordEntry}
- * (T-1) only ever stores their hashed keys.
+ * only ever stores their hashed keys.
  *
  * @author Yuriy Movchan
  */

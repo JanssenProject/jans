@@ -70,7 +70,7 @@ import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Response;
 
 /**
- * Tests for {@link TraceRestWebServiceImpl} (TRACE MVP task 20 acceptance criteria): the 202 happy
+ * Tests for {@link TraceRestWebServiceImpl} the 202 happy
  * path and idempotent-replay path, the {@code record_conflict}/{@code client_not_bound}/validation/
  * {@code storage_failure}/disabled-feature error paths, the audit-logger call on every outcome, and
  * a fixture check of the interface's protection annotations.
@@ -287,7 +287,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		verify(submitterIdentityService, never()).resolve(any());
 	}
 
-	// -- submitBulkRecords (design decision D-16) -----------------------------------------------------
+	// -- submitBulkRecords -----------------------------------------------------
 
 	@Test
 	void testSubmitBulkRecords_AllAccepted_Returns207() {
@@ -526,7 +526,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		verify(applicationAuditLogger).log(any(), eq(false));
 	}
 
-	// -- annotation fixture check (task 20 "Tests" section, extended for D-16) ------------------------
+	// -- annotation fixture check ------------------------
 
 	@Test
 	void testInterfaceMethod_CarriesBothProtectionAnnotationsWithMatchingIdAndPath() throws Exception {
@@ -541,7 +541,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		assertEquals(1, protectedApi.scopes().length);
 		assertEquals(ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS, protectedApi.scopes()[0]);
-		assertEquals("", protectedApi.grpcMethodName(), "TRACE write has no gRPC transport (D-15)");
+		assertEquals("", protectedApi.grpcMethodName(), "TRACE write has no gRPC transport");
 
 		assertEquals("Jans::Action::\"POST\"", cedarlingApi.action());
 		assertEquals("Jans::HTTP_Request", cedarlingApi.resource());
@@ -563,7 +563,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		assertEquals(1, protectedApi.scopes().length);
 		assertEquals(ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS, protectedApi.scopes()[0]);
-		assertEquals("", protectedApi.grpcMethodName(), "TRACE bulk write has no gRPC transport (D-15)");
+		assertEquals("", protectedApi.grpcMethodName(), "TRACE bulk write has no gRPC transport");
 
 		assertEquals("Jans::Action::\"POST\"", cedarlingApi.action());
 		assertEquals("Jans::HTTP_Request", cedarlingApi.resource());

@@ -9,8 +9,8 @@ package io.jans.lock.service.trace.model;
 import java.util.Objects;
 
 /**
- * Signature verification outcome carried by the store layer (design §10, T-1). This is a plain
- * value copy independent of the {@code TraceVerification} ORM POJO (task 03) — the store
+ * Signature verification outcome carried by the store layer (design §10). This is a plain
+ * value copy independent of the {@code TraceVerification} ORM POJO — the store
  * abstraction never depends on ORM/JSON-column types.
  *
  * @author Yuriy Movchan

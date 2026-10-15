@@ -12,9 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * The {@code ingestion} member of a TRACE record envelope (design §10, TRACE MVP task 21): the
- * receipt-chain position and the four Lock-derived flags (design decision D-9, eventually
- * consistent).
+ * The {@code ingestion} member of a TRACE record envelope (design §10): the
+ * receipt-chain position and the four Lock-derived flags (eventually consistent).
  *
  * @author Yuriy Movchan
  */
@@ -37,6 +36,10 @@ public class TraceIngestionResponse {
 	@JsonProperty("receipt_hash")
 	@Schema(description = "sha256:<hex> hash of this receipt")
 	private String receiptHash;
+
+	@JsonProperty("receipt_state")
+	@Schema(description = "State of this record's receipt entry: COMMITTED, or PENDING while the claim is not yet settled", example = "COMMITTED")
+	private String receiptState;
 
 	@JsonProperty("coverage_gap_flag")
 	@Schema(description = "True when this record's predecessor in its producer chain is missing")
@@ -84,6 +87,14 @@ public class TraceIngestionResponse {
 
 	public void setReceiptHash(String receiptHash) {
 		this.receiptHash = receiptHash;
+	}
+
+	public String getReceiptState() {
+		return receiptState;
+	}
+
+	public void setReceiptState(String receiptState) {
+		this.receiptState = receiptState;
 	}
 
 	public boolean isCoverageGapFlag() {

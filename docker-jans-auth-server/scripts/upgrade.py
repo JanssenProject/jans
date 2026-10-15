@@ -62,6 +62,7 @@ def _transform_lock_dynamic_config(conf, manager):
         ("traceConfiguration", {
             "enabled": True,
             "defaultEvidenceDomainId": "",
+            "defaultAllowedProducerIds": [],
             "clientDomainBindings": [
                 {
                     "clientId": client_id,
@@ -70,6 +71,7 @@ def _transform_lock_dynamic_config(conf, manager):
                 },
             ],
             "latenessThresholdSeconds": 300,
+            "maxFutureSkewSeconds": 300,
             "maxRequestBytes": 262144,
             "maxJsonDepth": 32,
             "maxStringLength": 8192,

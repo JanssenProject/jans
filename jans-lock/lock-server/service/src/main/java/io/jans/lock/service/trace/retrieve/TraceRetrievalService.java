@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
+import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
@@ -21,8 +22,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
- * Domain-scoped TRACE record/execution retrieval (design §11.2, §11.3, task 21), extracted out of
- * {@code TraceRestWebServiceImpl} (task 22) so the acceptance suite's {@code TraceTestHarness} can
+ * Domain-scoped TRACE record/execution retrieval (design §11.2, §11.3), extracted out of
+ * {@code TraceRestWebServiceImpl} so the acceptance suite's {@code TraceTestHarness} can
  * call the exact same logic the REST layer uses instead of re-implementing bare-id ambiguity and
  * domain scoping.
  *
@@ -64,6 +65,17 @@ public class TraceRetrievalService {
 			throw new TraceConflictException(TraceErrorResponseType.AMBIGUOUS_IDENTIFIER, REASON_MULTIPLE_PRODUCERS);
 		}
 		return candidates.get(0);
+	}
+
+	/**
+	 * The state name of the receipt entry at {@code record}'s chain position, or {@code null} when
+	 * no receipt row exists there. A visible record carries a {@code COMMITTED} receipt, or a
+	 * {@code PENDING} one during the short window before the claim is settled; a {@code VOID}
+	 * entry never belongs to a stored record (design §9).
+	 */
+	public String findReceiptState(StoredTraceRecord record) {
+		return traceStore.findReceipt(record.getIdentity().getDomainId(), record.getReceipt().getReceiptSequence())
+				.map(TraceReceiptEntry::getReceiptState).orElse(null);
 	}
 
 	/**

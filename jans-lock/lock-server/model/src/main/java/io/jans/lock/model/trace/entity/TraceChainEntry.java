@@ -16,7 +16,7 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 
 /**
- * A registered producer chain (design §8, TRACE MVP design decision T-3). Immutable once
+ * A registered producer chain (design §8). Immutable once
  * persisted.
  *
  * @author Yuriy Movchan

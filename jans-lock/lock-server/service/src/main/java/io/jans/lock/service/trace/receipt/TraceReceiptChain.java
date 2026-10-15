@@ -32,16 +32,15 @@ import jakarta.inject.Inject;
 
 /**
  * Allocates per-domain receipt-chain positions and hash-chains them safely across several Lock
- * nodes, using only primary-key uniqueness (design §9, TRACE MVP design decision D-8). jans-orm
+ * nodes, using only primary-key uniqueness (design §9). jans-orm
  * offers no transactions, sequences or CAS, so correctness comes entirely from
  * {@link TraceStore#insertReceipt} rejecting a second claim at the same {@code (domainId, seq)};
  * the per-domain {@link ReentrantLock} below only reduces same-node contention and is never load
- * bearing (design decision D-8 step 1).
+ * bearing.
  *
  * <p>{@link #claim} is the only method that allocates a new sequence; {@link #commit} and
  * {@link #voidClaim} settle an already-allocated one and never throw — a failure is logged at
- * WARN and left for {@code TraceReceiptRepairTimer} to resolve later (design decision D-8 steps
- * 6-7).
+ * WARN and left for {@code TraceReceiptRepairTimer} to resolve later.
  *
  * @author Yuriy Movchan
  */
@@ -61,7 +60,7 @@ public class TraceReceiptChain {
 
 	/**
 	 * Allocates the next receipt-chain position for {@code domainId} and inserts it as a
-	 * {@code PENDING} claim (design decision D-8 steps 2-4). Retries on contention with another
+	 * {@code PENDING} claim. Retries on contention with another
 	 * claim (same node or another) up to {@code receiptAllocationRetryLimit} times.
 	 *
 	 * @throws TraceStorageException {@code receipt_allocation_exhausted} once every retry is spent,
@@ -111,8 +110,7 @@ public class TraceReceiptChain {
 	}
 
 	/**
-	 * Settles a claim as {@code COMMITTED} once the record row carrying it is visible (design
-	 * decision D-8 step 6). Best-effort: a failure is logged at WARN, not thrown — the repair timer
+	 * Settles a claim as {@code COMMITTED} once the record row carrying it is visible. Best-effort: a failure is logged at WARN, not thrown — the repair timer
 	 * resolves a stuck {@code PENDING} row later.
 	 */
 	public void commit(String domainId, long seq) {
@@ -128,7 +126,7 @@ public class TraceReceiptChain {
 
 	/**
 	 * Settles a claim as {@code VOID} after the matching record insert lost a cross-node identity
-	 * race or otherwise failed (design decision D-8 step 5). Best-effort, like {@link #commit}.
+	 * race or otherwise failed. Best-effort, like {@link #commit}.
 	 */
 	public void voidClaim(String domainId, long seq) {
 		try {
