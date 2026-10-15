@@ -128,16 +128,20 @@ class EditUserDialog(JansGDialog, DialogUtils):
         else:
             active_checked = True
 
+        def get_input_help(fieldname):
+            help_txt = common_data.app.get_help_from_schema(self.schema, fieldname) or _(f"Value for field {fieldname}")
+            return help_txt
+
         self.edit_user_content = [
-                    common_data.app.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'inum'), read_only=True),
-                    common_data.app.getTitledText(_("Username *"), name='userId', value=self.data.get('userId',''), style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'userId')),
-                    common_data.app.getTitledText(_("First Name"), name='givenName', value=self.data.get('givenName',''), style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'givenName')),
-                    common_data.app.getTitledText(_("Middle Name"), name='middleName', value=get_custom_attribute('middleName'), style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'middleName')),
-                    common_data.app.getTitledText(_("Last Name"), name='sn', value=get_custom_attribute('sn'), style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'sn')),
-                    common_data.app.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'displayName')),
-                    common_data.app.getTitledText(_("Email *"), name='mail', value=self.data.get('mail',''), style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'mail')),
-                    common_data.app.getTitledCheckBox(_("Active"), name='active', checked=active_checked, style='class:script-checkbox', jans_help=common_data.app.get_help_from_schema(self.schema, 'enabled')),
-                    common_data.app.getTitledText(_("Nickname"), name='nickname', value=get_custom_attribute('nickname', multi=False), style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'nickname')),
+                    common_data.app.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style='class:script-titledtext', jans_help=get_input_help('inum'), read_only=True),
+                    common_data.app.getTitledText(_("Username *"), name='userId', value=self.data.get('userId',''), style='class:script-titledtext', jans_help=get_input_help('userId')),
+                    common_data.app.getTitledText(_("First Name"), name='givenName', value=self.data.get('givenName',''), style='class:script-titledtext', jans_help=get_input_help('givenName')),
+                    common_data.app.getTitledText(_("Middle Name"), name='middleName', value=get_custom_attribute('middleName'), style='class:script-titledtext', jans_help=get_input_help('middleName')),
+                    common_data.app.getTitledText(_("Last Name"), name='sn', value=get_custom_attribute('sn'), style='class:script-titledtext', jans_help=get_input_help('sn')),
+                    common_data.app.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:script-titledtext', jans_help=get_input_help('displayName')),
+                    common_data.app.getTitledText(_("Email *"), name='mail', value=self.data.get('mail',''), style='class:script-titledtext', jans_help=get_input_help('mail')),
+                    common_data.app.getTitledCheckBox(_("Active"), name='active', checked=active_checked, style='class:script-checkbox', jans_help=get_input_help('enabled')),
+                    common_data.app.getTitledText(_("Nickname"), name='nickname', value=get_custom_attribute('nickname', multi=False), style='class:script-titledtext', jans_help=get_input_help('nickname')),
                     Button(_("Add Claim"), handler=self.add_claim),
                 ]
 
@@ -153,7 +157,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         if not self.data:
             self.edit_user_content.insert(2,
-                    common_data.app.getTitledText(_("Password *"), name='userPassword', value='', style='class:script-titledtext', jans_help=common_data.app.get_help_from_schema(self.schema, 'userPassword'))
+                    common_data.app.getTitledText(_("Password *"), name='userPassword', value='', style='class:script-titledtext', jans_help=get_input_help('userPassword'))
                 )
 
 
@@ -179,7 +183,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
                     name=ca['name'],
                     value=value,
                     style='class:script-titledtext',
-                    jans_help=common_data.app.get_help_from_schema(self.schema, ca['name']),
+                    jans_help=get_input_help(ca['name']),
                     jans_list_type = claim_prop.get('oxMultiValuedAttribute'),
                     height = 2 if claim_prop.get('oxMultiValuedAttribute') else 1
                     )
@@ -188,7 +192,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
             elif claim_prop.get('dataType') == 'boolean':
                 self.edit_user_content.insert(-1, 
-                    common_data.app.getTitledCheckBox(_(claim_prop['displayName']), name=ca['name'], checked=ca['value'], style='class:script-checkbox', jans_help=common_data.app.get_help_from_schema(self.schema, ca['name']))
+                    common_data.app.getTitledCheckBox(_(claim_prop['displayName']), name=ca['name'], checked=ca['value'], style='class:script-checkbox', jans_help=get_input_help(ca['name']))
                 )
 
         self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),show_scrollbar=False)

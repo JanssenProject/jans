@@ -106,6 +106,19 @@ def unobscure(s=''):
     decrypted = cipher.decrypt(base64.b64decode(s), padmode=pyDes.PAD_PKCS5)
     return decrypted.decode('utf-8')
 
+def deep_merge(base, head):
+  """Recursively merges head dictionary into base dictionary."""
+  merged = base.copy()
+  for key, value in head.items():
+    if (
+        key in merged
+        and isinstance(merged[key], dict)
+        and isinstance(value, dict)
+    ):
+      merged[key] = deep_merge(merged[key], value)
+    else:
+      merged[key] = value
+  return merged
 
 name_regex = re.compile('[^a-zA-Z0-9]')
 
@@ -119,7 +132,12 @@ def get_plugin_name_from_title(title):
     return ''
 
 cfg_yaml = {}
+yaml_updates = {}
 
+yaml_updates_fn = os.path.join(cur_dir, 'ops/updates.json')
+if os.path.exists(yaml_updates_fn):
+    with open(yaml_updates_fn) as f:
+        yaml_updates = json.load(f)
 
 # load yaml files
 def read_swagger(op_mode):
@@ -130,6 +148,8 @@ def read_swagger(op_mode):
         with open(yaml_fn) as f:
             config_ = yaml_obj.load(f.read().replace('\t', ''))
             plugin_name = get_plugin_name_from_title(config_['info']['title'])
+            if op_mode in yaml_updates and plugin_name in yaml_updates[op_mode]:
+                config_ = deep_merge(config_, yaml_updates[op_mode][plugin_name])
             cfg_yaml[op_mode][plugin_name] = config_
 
             for path in config_['paths']:
@@ -245,6 +265,8 @@ if not(host and (client_id and client_secret or access_token)):
 
 
 def ssl_verify_setting():
+    if os.environ.get('VERIFY_SSL'):
+        return get_bool(os.environ['VERIFY_SSL'])
     verify = not args.noverify
     for ca_cert in (config['DEFAULT'].get('ca_cert'), DEFAULT_CA_CERT):
         if verify and ca_cert and os.path.isfile(ca_cert):
@@ -988,11 +1010,34 @@ class JCA_CLI:
         self.get_access_token(security)
 
         mime_type = self.get_mime_for_endpoint(endpoint)
+        schema_ref = endpoint.info['requestBody']['content'][mime_type]['schema']['$ref']
+        schema = self.get_schema_from_reference(endpoint.info['__plugin__'], schema_ref)
+
+        if 'required' in schema:
+            required = schema['required']
+            for requirename in required:
+                if requirename not in data:
+                    err = f"{requirename} is required, but not exists in data"
+
+                    if self.wrapped:
+                        class FakeResponse:
+                            status_code = 800
+                            text = err
+                            reason = "Invalid data"
+
+                        return FakeResponse()
+
+                    else:
+                        self.print_exception(err)
+                        sys.exit(61)
+
+
+
+                    raise ValueError(f"{requirename} is required, but not exists in data")
+
 
         if mime_type == 'multipart/form-data':
             data_js = json.loads(data) if (isinstance(data, str) or isinstance(data, bytes)) else copy.deepcopy(data)
-            schema_ref = endpoint.info['requestBody']['content'][mime_type]['schema']['$ref']
-            schema = self.get_schema_from_reference(endpoint.info['__plugin__'], schema_ref)
             multi_part_fields = {}
             for prop in schema['properties']:
                 if schema['properties'][prop].get('type') == 'string' and schema['properties'][prop].get('format') == 'binary':
