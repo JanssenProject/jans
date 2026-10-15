@@ -1009,7 +1009,7 @@ class JCA_CLI:
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
 
-        scheme = {}
+        schema = {}
         mime_type = self.get_mime_for_endpoint(endpoint)
         if 'schema' in endpoint.info['requestBody']['content'][mime_type]:
             if '$ref' in endpoint.info['requestBody']['content'][mime_type]['schema']:
