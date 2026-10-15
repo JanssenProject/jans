@@ -1019,7 +1019,7 @@ impl Authz {
                 self.config.metrics.record_authz_error();
             })?;
 
-        let setup_entities = self
+        let mut setup_entities = self
             .config
             .entity_builder
             .build_multi_issuer_setup_entities(&validated.tokens, self.config.log_service.as_ref())
@@ -1034,27 +1034,16 @@ impl Authz {
             dropped: mut dropped_tokens,
         } = validated;
 
-        // Merge entity-build drops, recovering each token's original request
-        // index from the same validated entry. A duplicate-mapping drop carries the
-        // prior index but is pushed while processing the later input, so
-        // validation drops alone are already unordered by index; entity-build
-        // drops append after.
-        for name in &setup_entities.dropped_names {
-            let Some(entry) = validated_tokens.get(name) else {
-                continue;
-            };
-            dropped_tokens.push(DroppedToken::new(
-                name.clone(),
-                entry.index,
-                DropReason::EntityBuildFailed,
-            ));
-        }
-
         // A token that failed entity building must not also be reported as
         // used: drop it from the validated map so `LogTokensInfo` (built from
         // this map for both single and batch paths) never logs the same
         // mapping under both `tokens` and `dropped_tokens`.
-        validated_tokens.retain(|name, _| !setup_entities.dropped_names.contains(name));
+        let entity_build_drops = std::mem::take(&mut setup_entities.dropped);
+        validated_tokens.retain(|name, _| !entity_build_drops.iter().any(|d| d.mapping == *name));
+
+        // Order is not guaranteed: entity-build drops append after validation
+        // drops; callers correlate entries by `index`.
+        dropped_tokens.extend(entity_build_drops);
 
         Ok(MultiIssuerSetup {
             validated_tokens,

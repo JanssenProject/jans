@@ -8,6 +8,7 @@ use super::{
     BuildEntityError, BuiltEntities, DEFAULT_ENTITY_TYPE_NAME, EntityBuilder,
     default_tkn_entity_name,
 };
+use crate::authz::{DropReason, DroppedToken};
 use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::token_entity_metadata::DEFAULT_TKN_ID;
@@ -285,11 +286,16 @@ pub(crate) struct MultiIssuerSetupEntities {
     pub tokens: HashMap<String, Entity>,
     pub issuers: HashSet<Entity>,
     pub default_entities: DefaultEntities,
-    /// Names (mappings) of validated tokens that could not be turned into a
-    /// Cedar entity. The caller pairs each with its original request index to
-    /// produce a [`DroppedToken`](crate::DroppedToken) with
+    /// Validated tokens that could not be turned into a Cedar entity, each
+    /// with its original request index and
     /// [`DropReason::EntityBuildFailed`](crate::DropReason::EntityBuildFailed).
-    pub dropped_names: Vec<String>,
+    pub dropped: Vec<DroppedToken>,
+}
+
+/// Token that owns a `context.tokens` entity key within one request.
+struct EntityKeyOwner<'a> {
+    mapping: &'a str,
+    index: usize,
 }
 
 impl EntityBuilder {
@@ -305,16 +311,19 @@ impl EntityBuilder {
         let mut built_entities = BuiltEntities::from(&self.iss_entities);
 
         let mut token_entities = HashMap::new();
-        let mut dropped_names = Vec::new();
-        let mut entity_key_to_token_name: HashMap<String, String> = HashMap::new();
+        let mut dropped = Vec::new();
+        let mut entity_key_owners: HashMap<String, EntityKeyOwner<'_>> = HashMap::new();
         for (token_name, entry) in tokens {
             let token = &entry.token;
             match self.build_single_token_entity(token, &built_entities) {
                 Ok(entity) => match self.generate_entity_key(token_name, token) {
                     Ok(entity_key) => {
                         built_entities.insert(&entity.uid());
-                        if let Some(displaced) =
-                            entity_key_to_token_name.insert(entity_key.clone(), token_name.clone())
+                        let owner = EntityKeyOwner {
+                            mapping: token_name,
+                            index: entry.index,
+                        };
+                        if let Some(displaced) = entity_key_owners.insert(entity_key.clone(), owner)
                         {
                             log_service.log_any(
                                 LogEntry::new(BaseLogEntry::new_system_opt_request_id(
@@ -323,11 +332,16 @@ impl EntityBuilder {
                                 ))
                                 .set_message(format!(
                                     "Entity key collision for token '{token_name}': \
-                                    replaces '{displaced}'"
+                                    replaces '{}'",
+                                    displaced.mapping
                                 ))
                                 .set_error(format!("duplicate entity key '{entity_key}'")),
                             );
-                            dropped_names.push(displaced);
+                            dropped.push(DroppedToken::new(
+                                displaced.mapping,
+                                displaced.index,
+                                DropReason::EntityBuildFailed,
+                            ));
                         }
                         token_entities.insert(entity_key, entity);
                     },
@@ -342,7 +356,11 @@ impl EntityBuilder {
                             ))
                             .set_error(e.to_string()),
                         );
-                        dropped_names.push(token_name.clone());
+                        dropped.push(DroppedToken::new(
+                            token_name.as_str(),
+                            entry.index,
+                            DropReason::EntityBuildFailed,
+                        ));
                     },
                 },
                 Err(e) => {
@@ -356,7 +374,11 @@ impl EntityBuilder {
                         ))
                         .set_error(e.to_string()),
                     );
-                    dropped_names.push(token_name.clone());
+                    dropped.push(DroppedToken::new(
+                        token_name.as_str(),
+                        entry.index,
+                        DropReason::EntityBuildFailed,
+                    ));
                 },
             }
         }
@@ -379,7 +401,7 @@ impl EntityBuilder {
             tokens: token_entities,
             issuers,
             default_entities: self.default_entities.clone(),
-            dropped_names,
+            dropped,
         })
     }
 
@@ -1092,11 +1114,15 @@ mod tests {
         assert!(entities_data.tokens.contains_key("dolphin_dolphintoken"));
 
         // The token that validated but failed entity building (missing issuer)
-        // is reported by name so the caller can mark it EntityBuildFailed.
+        // is reported with its own request index.
         assert_eq!(
-            entities_data.dropped_names,
-            vec!["Jans::Id_Token".to_string()],
-            "the token that failed entity building must be reported in dropped_names"
+            entities_data.dropped,
+            vec![DroppedToken::new(
+                "Jans::Id_Token",
+                tokens["Jans::Id_Token"].index,
+                DropReason::EntityBuildFailed,
+            )],
+            "the token that failed entity building must be reported as EntityBuildFailed"
         );
     }
 
