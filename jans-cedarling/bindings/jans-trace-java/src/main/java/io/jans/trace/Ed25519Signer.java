@@ -6,6 +6,7 @@
 package io.jans.trace;
 
 import java.util.Objects;
+import io.jans.trace.TraceException.PrivateKeyException;
 
 /**
  * In-memory Ed25519 signer for a producer key from a mounted secret. The native copy of the

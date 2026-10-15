@@ -6,6 +6,7 @@
 package io.jans.trace;
 
 import java.util.Objects;
+import io.jans.trace.TraceException.ParseDigestException;
 
 /** SHA-256 digest in the TRACE text form {@code sha256:<64 lowercase hex>}. Immutable. */
 public final class Digest {

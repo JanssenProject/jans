@@ -12,6 +12,9 @@ import static org.testng.Assert.expectThrows;
 
 import org.testng.annotations.Test;
 import io.jans.trace.uniffi.ErrorCode;
+import io.jans.trace.TraceException.JwkException;
+import io.jans.trace.TraceException.PrivateKeyException;
+import io.jans.trace.TraceException.PublicKeyException;
 
 public class PublicKeyTest {
 

@@ -6,6 +6,7 @@
 package io.jans.trace;
 
 import io.jans.trace.uniffi.Jans_trace_uniffiKt;
+import io.jans.trace.TraceException.SelfTestException;
 
 /** Known-answer checks a host runs at startup. */
 public final class SelfTest {

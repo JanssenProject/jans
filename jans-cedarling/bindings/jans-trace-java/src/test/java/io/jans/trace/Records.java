@@ -5,6 +5,9 @@
 
 package io.jans.trace;
 
+import io.jans.trace.TraceException.PrivateKeyException;
+import io.jans.trace.TraceException.PublicKeyException;
+
 /**
  * A decision record signed with the RFC 8032 TEST 1 key. Expected values were computed
  * independently with Python {@code json.dumps(sort_keys=True)} (JCS for strings and small

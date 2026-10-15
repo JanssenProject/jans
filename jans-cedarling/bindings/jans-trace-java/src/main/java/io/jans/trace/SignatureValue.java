@@ -7,6 +7,7 @@ package io.jans.trace;
 
 import java.util.Arrays;
 import java.util.Objects;
+import io.jans.trace.TraceException.ParseSignatureException;
 
 /** A 64-byte Ed25519 signature as carried in the top-level {@code signature} member. Immutable. */
 public final class SignatureValue {

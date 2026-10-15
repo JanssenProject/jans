@@ -6,6 +6,8 @@
 package io.jans.trace;
 
 import java.util.Objects;
+import io.jans.trace.TraceException.ParseReceivedAtException;
+import io.jans.trace.TraceException.ReceivedAtRangeException;
 
 /**
  * Lock's receipt time, always {@code YYYY-MM-DDTHH:MM:SS.sssZ} for a real UTC instant, so the

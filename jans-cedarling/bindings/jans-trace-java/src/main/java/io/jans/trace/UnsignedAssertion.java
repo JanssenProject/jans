@@ -6,6 +6,8 @@
 package io.jans.trace;
 
 import java.util.Objects;
+import io.jans.trace.TraceException.ParseUnsignedAssertionException;
+import io.jans.trace.TraceException.SignException;
 
 /**
  * A producer's record before signing: strict JSON, an object with non-empty {@code producer},

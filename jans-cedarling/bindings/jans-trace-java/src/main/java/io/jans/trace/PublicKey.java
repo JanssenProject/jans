@@ -7,6 +7,8 @@ package io.jans.trace;
 
 import java.util.Arrays;
 import java.util.Objects;
+import io.jans.trace.TraceException.JwkException;
+import io.jans.trace.TraceException.PublicKeyException;
 
 /** An Ed25519 key that verifies producer signatures. Immutable; parse once at registration. */
 public final class PublicKey {

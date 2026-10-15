@@ -6,6 +6,7 @@
 package io.jans.trace;
 
 import io.jans.trace.uniffi.ErrorCode;
+import io.jans.trace.TraceException.ParseSignedAssertionException;
 
 /**
  * One element of a bulk body: the parsed record, or why it was rejected. Lock answers every

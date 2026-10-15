@@ -6,6 +6,8 @@
 package io.jans.trace;
 
 import java.util.Objects;
+import io.jans.trace.TraceException.ParseSignedAssertionException;
+import io.jans.trace.TraceException.VerifyException;
 
 /**
  * A record with a well-formed top-level {@code signature}, not yet verified. Parsed once:

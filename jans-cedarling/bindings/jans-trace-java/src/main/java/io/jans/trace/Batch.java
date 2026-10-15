@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Objects;
 
 import io.jans.trace.uniffi.Jans_trace_uniffiKt;
+import io.jans.trace.TraceException.ParseBatchException;
+import io.jans.trace.TraceException.SizeLimitException;
 
 /** Bulk request bodies: a JSON array of signed records (Lock MVP section 11.2). */
 public final class Batch {

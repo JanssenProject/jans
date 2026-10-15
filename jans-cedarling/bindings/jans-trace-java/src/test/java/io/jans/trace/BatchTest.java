@@ -14,6 +14,9 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 import io.jans.trace.uniffi.ErrorCode;
+import io.jans.trace.TraceException.ParseBatchException;
+import io.jans.trace.TraceException.ParseSignedAssertionException;
+import io.jans.trace.TraceException.SizeLimitException;
 
 public class BatchTest {
 

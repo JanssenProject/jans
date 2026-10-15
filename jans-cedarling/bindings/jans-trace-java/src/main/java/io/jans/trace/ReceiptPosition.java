@@ -6,6 +6,7 @@
 package io.jans.trace;
 
 import java.util.Objects;
+import io.jans.trace.TraceException.ReceiptPositionException;
 
 /**
  * Where a receipt sits in its evidence-domain chain. Sequence 1 names the genesis sentinel and

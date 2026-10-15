@@ -160,7 +160,8 @@ these are the Java calls.
 
 Every operation declares its own checked exception: `SignedAssertion.parse` throws
 `ParseSignedAssertionException`, `verify` throws `VerifyException`, and so on. All of them
-extend `TraceException`; catch it to handle every failure in one place.
+are nested in and extend `TraceException` (`import io.jans.trace.TraceException.VerifyException;`);
+catch `TraceException` to handle every failure in one place.
 
 - Decide by exception type: it tells which operation failed and limits the possible codes.
 - `code()` returns the stable code, for the wire and for logs. Lock returns `code().name()`

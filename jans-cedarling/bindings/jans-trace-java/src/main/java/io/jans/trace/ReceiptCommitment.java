@@ -6,6 +6,8 @@
 package io.jans.trace;
 
 import java.util.Objects;
+import io.jans.trace.TraceException.ReceiptLinkException;
+import io.jans.trace.TraceException.StoredReceiptException;
 
 /**
  * The v1 field set hashed into a receipt. Every field is valid by its type, so any commitment

@@ -6,6 +6,8 @@
 package io.jans.trace;
 
 import java.util.Objects;
+import io.jans.trace.TraceException.ChainHeadException;
+import io.jans.trace.TraceException.ReceiptLinkException;
 
 /**
  * The end of an evidence-domain chain verified so far: only the last sequence and hash, because

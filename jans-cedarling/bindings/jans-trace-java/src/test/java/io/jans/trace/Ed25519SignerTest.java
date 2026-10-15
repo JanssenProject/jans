@@ -12,6 +12,7 @@ import static org.testng.Assert.expectThrows;
 
 import org.testng.annotations.Test;
 import io.jans.trace.uniffi.ErrorCode;
+import io.jans.trace.TraceException.PrivateKeyException;
 
 public class Ed25519SignerTest {
 

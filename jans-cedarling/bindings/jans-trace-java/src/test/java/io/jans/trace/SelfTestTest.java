@@ -6,6 +6,7 @@
 package io.jans.trace;
 
 import org.testng.annotations.Test;
+import io.jans.trace.TraceException.SelfTestException;
 
 public class SelfTestTest {
 

@@ -8,6 +8,7 @@ package io.jans.trace;
 import java.util.Objects;
 
 import io.jans.trace.uniffi.Jans_trace_uniffiKt;
+import io.jans.trace.TraceException.CanonicalizeException;
 
 /** RFC 8785 canonicalization under the strict JSON rules every operation of this library applies. */
 public final class Json {
