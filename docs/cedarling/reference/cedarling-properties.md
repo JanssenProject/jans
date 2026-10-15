@@ -52,6 +52,21 @@ To load the policy store, one of the following properties must be set:
 
     This limit is independent of `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`, which bounds the compressed archive while it is downloaded. Serving a `.cjar` over HTTP whose compressed size exceeds `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES` (10 MB by default) requires raising that property as well.
 
+### Verifying policy store signatures
+
+- **`CEDARLING_POLICY_STORE_SIGSTORE_MODE`** : `disabled` (default) or `enforce`. With `enforce`, Cedarling loads a `.cjar` policy store only if its Sigstore (cosign keyless) bundle verifies against the signer below; otherwise loading fails and, on refresh, the current store is kept. Only `.cjar` sources can be signed, so `enforce` with a directory or YAML policy store is a configuration error.
+- **`CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY`** : Expected signer identity (the certificate SAN), matched exactly. Required with `enforce`.
+- **`CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER`** : Expected OIDC issuer of the signing certificate, matched exactly. Required with `enforce`.
+- **`CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI`** : Location of the bundle, as a URL for remote stores or a path for a local `.cjar`. Defaults to the policy store location with `.sigstore.json` appended.
+
+These match the `cosign verify-blob` flags. For a policy store published by Agama Lab:
+
+```json
+"CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+"CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+"CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com"
+```
+
 ### Optional properties
 
 Properties listed here are optional. If a property value is not set, 
