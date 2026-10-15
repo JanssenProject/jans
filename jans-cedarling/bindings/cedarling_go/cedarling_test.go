@@ -3,6 +3,9 @@ package cedarling_go
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -851,5 +854,32 @@ func TestPolicyStoreID(t *testing.T) {
 	}
 	if id != "a1bf93115de86de760ee0bea1d529b521489e5a11747" {
 		t.Errorf("unexpected policy store ID %q", id)
+	}
+}
+
+// TestSigstoreEnforceRejectsCjarWithoutBundle checks that the signature
+// properties pass through the Go config: the bundle is checked before the
+// archive is parsed, so any bytes will do.
+func TestSigstoreEnforceRejectsCjarWithoutBundle(t *testing.T) {
+	archive := filepath.Join(t.TempDir(), "store.cjar")
+	if err := os.WriteFile(archive, []byte("archive"), 0o600); err != nil {
+		t.Fatalf("Failed to write archive: %v", err)
+	}
+	config, err := loadTestConfig(func(conf map[string]any) {
+		conf["CEDARLING_POLICY_STORE_LOCAL_FN"] = archive
+		conf["CEDARLING_POLICY_STORE_SIGSTORE_MODE"] = "enforce"
+		conf["CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY"] = "signer@example.com"
+		conf["CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER"] = "https://accounts.google.com"
+	})
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+
+	_, err = NewCedarling(config)
+	if err == nil {
+		t.Fatal("A .cjar without its bundle must not load when the signature check is enforced")
+	}
+	if !strings.Contains(err.Error(), "store.cjar.sigstore.json") {
+		t.Errorf("error should name the missing bundle, got: %v", err)
 	}
 }
