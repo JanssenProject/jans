@@ -62,7 +62,6 @@ def _transform_lock_dynamic_config(conf, manager):
         ("traceConfiguration", {
             "enabled": True,
             "defaultEvidenceDomainId": "",
-            "defaultAllowedProducerIds": [],
             "clientDomainBindings": [
                 {
                     "clientId": client_id,
@@ -71,7 +70,6 @@ def _transform_lock_dynamic_config(conf, manager):
                 },
             ],
             "latenessThresholdSeconds": 300,
-            "maxFutureSkewSeconds": 300,
             "maxRequestBytes": 262144,
             "maxJsonDepth": 32,
             "maxStringLength": 8192,
@@ -119,6 +117,14 @@ def _transform_lock_dynamic_config(conf, manager):
                 "evidenceDomainId": "default",
                 "allowedProducerIds": ["*"],
             })
+            should_update = True
+
+    for tconf_k, tconf_v in [
+        ("defaultAllowedProducerIds", []),
+        ("maxFutureSkewSeconds", 300),
+    ]:
+        if tconf_k not in conf["traceConfiguration"]:
+            conf["traceConfiguration"][tconf_k] = tconf_v
             should_update = True
 
     # return modified config (if any) and update flag
