@@ -6,8 +6,7 @@
           "CustomUser": {
             "required": [
               "userId",
-              "mail",
-              "displayName"
+              "mail"
             ]
           }
         }
