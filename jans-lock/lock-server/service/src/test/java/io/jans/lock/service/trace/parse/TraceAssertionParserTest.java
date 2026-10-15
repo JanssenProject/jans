@@ -30,7 +30,7 @@ import io.jans.lock.service.trace.error.TraceValidationException;
 
 /**
  * Tests for {@link TraceAssertionParser}: bounded reading, strict UTF-8 decoding, and the JSON
- * limits from design decision D-12.
+ * limits from design §14.
  */
 class TraceAssertionParserTest {
 
@@ -100,7 +100,7 @@ class TraceAssertionParserTest {
 
 		assertEquals(fixture, result.getRawText());
 		ObjectNode root = result.getRoot();
-		assertEquals("cedarling-fleet-1/1.0.0", root.get("producer").textValue());
+		assertEquals("cedarling-fleet-1", root.get("producer").textValue());
 		assertTrue(root.get("trace").isObject());
 		assertTrue(root.get("parent_record_ids").isArray());
 	}

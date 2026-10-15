@@ -23,8 +23,7 @@ import io.jans.lock.service.trace.model.VerificationResult;
 /**
  * Test-only fluent builder of {@link StoredTraceRecord}s, so a test can seed a
  * {@code TraceStore} with predecessor/peer/successor rows directly, without going through
- * parsing, verification or ingestion. Shared by the correlation (task 17), receipt-chain (task
- * 18) and ingestion (task 19) tests.
+ * parsing, verification or ingestion. Shared by the correlation, receipt-chain and ingestion tests.
  *
  * <p>Every field has a usable default except {@link #recordId(String)} and
  * {@link #contentDigest(String)}, which a test must always set explicitly since they are exactly
@@ -34,7 +33,7 @@ public final class StoredTraceRecordFactory {
 
 	private String domainId = "domain-1";
 
-	private String producerId = "producer-1/1.0.0";
+	private String producerId = "producer-1";
 
 	private String recordId;
 
@@ -50,6 +49,8 @@ public final class StoredTraceRecordFactory {
 
 	private String prevRecordHash = TraceConstants.ZERO_HASH;
 
+	private String assertionRaw = "{\"trace\":{}}";
+
 	private String contentDigest;
 
 	private long receiptSequence = 1L;
@@ -60,7 +61,7 @@ public final class StoredTraceRecordFactory {
 
 	private String receiptHash = TraceConstants.ZERO_HASH;
 
-	private List<String> capabilityIds = Collections.emptyList();
+	private VerificationResult verification;
 
 	private List<TokenRef> tokenRefs = Collections.emptyList();
 
@@ -135,12 +136,16 @@ public final class StoredTraceRecordFactory {
 	}
 
 	/**
-	 * Convenience for a genesis row: {@code sequence_number = 1} and the zero-hash sentinel
-	 * (design decision D-5).
+	 * Convenience for a genesis row: {@code sequence_number = 1} and the zero-hash sentinel.
 	 */
 	public StoredTraceRecordFactory genesis() {
 		sequenceNumber(1L);
 		return prevRecordHash(TraceConstants.ZERO_HASH);
+	}
+
+	public StoredTraceRecordFactory assertionRaw(String assertionRaw) {
+		this.assertionRaw = assertionRaw;
+		return this;
 	}
 
 	public StoredTraceRecordFactory contentDigest(String contentDigest) {
@@ -165,11 +170,6 @@ public final class StoredTraceRecordFactory {
 
 	public StoredTraceRecordFactory receiptHash(String receiptHash) {
 		this.receiptHash = receiptHash;
-		return this;
-	}
-
-	public StoredTraceRecordFactory capabilityIds(List<String> capabilityIds) {
-		this.capabilityIds = capabilityIds;
 		return this;
 	}
 
@@ -213,6 +213,12 @@ public final class StoredTraceRecordFactory {
 		return this;
 	}
 
+	/** Overrides the default (legacy-shaped: no thumbprint, no key_authorized) verification block. */
+	public StoredTraceRecordFactory verification(VerificationResult verification) {
+		this.verification = verification;
+		return this;
+	}
+
 	public StoredTraceRecordFactory late(boolean late) {
 		this.late = late;
 		return this;
@@ -235,13 +241,13 @@ public final class StoredTraceRecordFactory {
 		ExecutionIdentity execution = new ExecutionIdentity(domainId, executionAuthority, traceExecutionId);
 		ChainIdentity chainIdentity = new ChainIdentity(domainId, producerId, producerInstanceId, producerChainId);
 		ChainPosition chainPosition = new ChainPosition(chainIdentity, sequenceNumber);
-		VerificationResult verification = new VerificationResult(true, "kid-1", receivedAtMs, "Ed25519");
+		VerificationResult verification = this.verification != null ? this.verification
+				: new VerificationResult(true, "kid-1", receivedAtMs, "Ed25519");
 		ReceiptEntry receipt = new ReceiptEntry(receiptSequence, receivedAtMs, prevReceiptHash, receiptHash);
 		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late);
 
-		return new StoredTraceRecord(identity, "{\"trace\":{}}", contentDigest, verification, receipt, flags,
-				execution, chainPosition, prevRecordHash, capabilityIds, tokenRefs, eventKind, signedAt, nodeId,
-				createdAtMs, version);
+		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verification, receipt, flags,
+				execution, chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs, version);
 	}
 
 }

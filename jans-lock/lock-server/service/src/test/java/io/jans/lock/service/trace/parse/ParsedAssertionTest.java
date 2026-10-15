@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 /**
  * Tests for {@link ParsedAssertion#signatureInput()} and {@link ParsedAssertion#contentDigest()}
- * (design D-13): the signature input must exclude {@code signature} while the content digest must
+ *: the signature input must exclude {@code signature} while the content digest must
  * include it, and both must be computed once and cached.
  */
 class ParsedAssertionTest {

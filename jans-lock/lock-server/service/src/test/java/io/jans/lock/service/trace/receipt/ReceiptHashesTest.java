@@ -23,8 +23,7 @@ import io.jans.lock.service.trace.TraceConstants;
  * Known-vector test for {@link ReceiptHashes#receiptHash}: the expected hash below is computed
  * independently here, by hand-building the canonical JSON string (object members in ASCII key
  * order, exactly as RFC 8785/JCS would sort them) and hashing it with a raw {@link MessageDigest},
- * never through {@code JcsCanonicalizer}/{@code CanonicalHashes} (design §9, TRACE MVP design
- * decisions D-8, D-13).
+ * never through {@code JcsCanonicalizer}/{@code CanonicalHashes} (design §9).
  */
 class ReceiptHashesTest {
 
@@ -33,14 +32,14 @@ class ReceiptHashesTest {
 		String domainId = "domain-1";
 		long receiptSequence = 1L;
 		long receivedAtMs = 1_800_000_000_000L;
-		String producerId = "producer-1/1.0.0";
+		String producerId = "producer-1";
 		String recordId = "record-1";
 		String contentDigest = "sha256:" + repeat('a', 64);
 		String prevReceiptHash = TraceConstants.ZERO_HASH;
 
 		String canonical = "{\"content_digest\":\"" + contentDigest + "\",\"evidence_domain_id\":\"" + domainId
 				+ "\",\"prev_receipt_hash\":\"" + prevReceiptHash + "\",\"producer_id\":\"" + producerId
-				+ "\",\"receipt_sequence\":" + receiptSequence + ",\"received_at\":" + receivedAtMs
+				+ "\",\"receipt_profile\":\"tag:jans.io,2026:lock-trace-receipt-v1\",\"receipt_sequence\":" + receiptSequence + ",\"received_at\":\"2027-01-15T08:00:00.000Z\""
 				+ ",\"record_id\":\"" + recordId + "\"}";
 		String expected = "sha256:" + sha256Hex(canonical);
 
@@ -51,12 +50,31 @@ class ReceiptHashesTest {
 		assertTrue(actual.matches("^sha256:[0-9a-f]{64}$"));
 	}
 
+	/**
+	 * Fixed vectors computed with {@code hashlib} and {@code json.dumps(sort_keys=True,
+	 * separators=(",", ":"))}, independent of the production code path. The first has a zero
+	 * millisecond part and must carry {@code .000Z}.
+	 */
+	@Test
+	void testReceiptHash_pythonKnownAnswer_zeroMillis() {
+		assertEquals("sha256:cd66cd1b3c53dbdbdebc76e313a3ba72cbf3460d9c05cddf8e09216eb03e95b0",
+				ReceiptHashes.receiptHash("domain-1", 1L, 1_800_000_000_000L, "producer-1", "record-1",
+						"sha256:" + repeat('a', 64), TraceConstants.ZERO_HASH));
+	}
+
+	@Test
+	void testReceiptHash_pythonKnownAnswer_nonZeroMillis() {
+		assertEquals("sha256:ef30fe233db4f3adf4b5df5f0755faf44b8b3fbf3e15b2ea4bd7be94cc6b8fff",
+				ReceiptHashes.receiptHash("domain-1", 1L, 1_800_000_000_123L, "producer-1", "record-1",
+						"sha256:" + repeat('a', 64), TraceConstants.ZERO_HASH));
+	}
+
 	@Test
 	void testReceiptHash_differentPrevReceiptHash_differentResult() {
 		String domainId = "domain-1";
 		long receiptSequence = 2L;
 		long receivedAtMs = 1_800_000_000_000L;
-		String producerId = "producer-1/1.0.0";
+		String producerId = "producer-1";
 		String recordId = "record-2";
 		String contentDigest = "sha256:" + repeat('b', 64);
 
@@ -71,7 +89,7 @@ class ReceiptHashesTest {
 	@Test
 	void testReceiptHash_nullDomainId_throwsNullPointerException() {
 		assertThrows(NullPointerException.class,
-				() -> ReceiptHashes.receiptHash(null, 1L, 1_000L, "p/1.0.0", "r", "sha256:" + repeat('0', 64),
+				() -> ReceiptHashes.receiptHash(null, 1L, 1_000L, "p", "r", "sha256:" + repeat('0', 64),
 						TraceConstants.ZERO_HASH));
 	}
 

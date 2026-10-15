@@ -17,7 +17,7 @@ import io.jans.orm.annotation.Version;
 import io.jans.orm.model.base.BaseEntry;
 
 /**
- * A receipt-chain position allocation claim (design §9, TRACE MVP design decisions T-2, D-8).
+ * A receipt-chain position allocation claim (design §9).
  * Only {@link #getReceiptState()} may change after creation, via {@code merge}.
  *
  * <p>{@code sortByName} (not {@code sortBy}) so that SQL/Couchbase/Spanner order by

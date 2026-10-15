@@ -20,9 +20,7 @@ import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.TokenRef;
 
 /**
- * Tests for {@link TraceKeys}: design decision D-6. Not run under TestNG — see the project note
- * that Surefire in {@code lock-server} silently skips TestNG classes; JUnit 5 is used for every
- * TRACE test in this series (established in task 02).
+ * Tests for {@link TraceKeys}: the composite-key function. Not run under TestNG: Surefire in {@code lock-server} silently skips TestNG classes, so JUnit 5 is used.
  */
 class TraceKeysTest {
 
@@ -53,16 +51,6 @@ class TraceKeysTest {
 		String withPipeInSecond = TraceKeys.recordKey(new RecordIdentity(DOMAIN, "a", "b|c"));
 
 		assertNotEquals(withPipeInFirst, withPipeInSecond);
-	}
-
-	@Test
-	void testCapabilityKey_vs_tokenKey_typeConfusion_noCollision() {
-		// Same domain and same literal component value, but different key "type" tag ("cap" vs
-		// "tok") and different token-ref shape must never collide.
-		String capKey = TraceKeys.capabilityKey(DOMAIN, "shared-value");
-		String tokKey = TraceKeys.tokenKey(DOMAIN, new TokenRef("shared-value", "access_token", "jti", null));
-
-		assertNotEquals(capKey, tokKey);
 	}
 
 	@Test
@@ -107,13 +95,6 @@ class TraceKeysTest {
 		String recKey = TraceKeys.recordKey(new RecordIdentity(DOMAIN, "a", "b"));
 
 		assertNotEquals(execKey, recKey);
-	}
-
-	@Test
-	void testCapabilityKey_nullComponent_throws() {
-		// Reaches TraceKeys.key(...)'s own Objects.requireNonNull directly, unlike constructing an
-		// identity value type with a null field (which is rejected one layer earlier).
-		assertThrows(NullPointerException.class, () -> TraceKeys.capabilityKey(DOMAIN, null));
 	}
 
 	@Test

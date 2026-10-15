@@ -12,8 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Admin request body to revoke a producer's Ed25519 verification key (design decision D-4, task
- * 15).
+ * Admin request body to revoke a producer's Ed25519 verification key.
  *
  * @author Yuriy Movchan
  */
@@ -22,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class ProducerKeyRevokeRequest {
 
 	@JsonProperty("producer_id")
-	@Schema(description = "Producer id, name/semver", example = "cedarling-fleet-1/1.0.0")
+	@Schema(description = "Opaque stable producer id", example = "cedarling-fleet-1")
 	private String producerId;
 
 	@JsonProperty("kid")

@@ -16,7 +16,7 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 
 /**
- * A registered producer chain (design §8, TRACE MVP design decision T-3). Immutable once
+ * A registered producer chain (design §8). Immutable once
  * persisted.
  *
  * @author Yuriy Movchan
@@ -26,6 +26,12 @@ import io.jans.orm.model.base.BaseEntry;
 public class TraceChainEntry extends BaseEntry implements Serializable {
 
     private static final long serialVersionUID = -1748469212323484330L;
+
+    /** Created through the admin API; also what a row without {@code jansTraceGenesisKind} reads as. */
+    public static final String GENESIS_KIND_PRE_REGISTERED = "pre_registered_genesis";
+
+    /** Created by the first genesis record Lock observed for the chain. */
+    public static final String GENESIS_KIND_FIRST_OBSERVED = "first_observed_genesis";
 
     @AttributeName(name = "jansId", ignoreDuringUpdate = true)
     private String id;
@@ -44,6 +50,9 @@ public class TraceChainEntry extends BaseEntry implements Serializable {
 
     @AttributeName(name = "jansTraceRegisteredBy", ignoreDuringUpdate = true)
     private String registeredBy;
+
+    @AttributeName(name = "jansTraceGenesisKind", ignoreDuringUpdate = true)
+    private String genesisKind;
 
     @AttributeName(name = "creationDate", ignoreDuringUpdate = true)
     private Date creationDate;
@@ -96,6 +105,18 @@ public class TraceChainEntry extends BaseEntry implements Serializable {
         this.registeredBy = registeredBy;
     }
 
+    /**
+     * @return how the chain came to exist; {@link #GENESIS_KIND_PRE_REGISTERED} when the row was
+     *         stored without the attribute
+     */
+    public String getGenesisKind() {
+        return genesisKind == null ? GENESIS_KIND_PRE_REGISTERED : genesisKind;
+    }
+
+    public void setGenesisKind(String genesisKind) {
+        this.genesisKind = genesisKind;
+    }
+
     public Date getCreationDate() {
         return creationDate;
     }
@@ -127,20 +148,21 @@ public class TraceChainEntry extends BaseEntry implements Serializable {
                 && Objects.equals(producerInstanceId, that.producerInstanceId)
                 && Objects.equals(producerChainId, that.producerChainId)
                 && Objects.equals(registeredBy, that.registeredBy)
+                && Objects.equals(getGenesisKind(), that.getGenesisKind())
                 && Objects.equals(creationDate, that.creationDate);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, domainId, producerId, producerInstanceId, producerChainId, registeredBy,
-                creationDate);
+                getGenesisKind(), creationDate);
     }
 
     @Override
     public String toString() {
         return "TraceChainEntry [id=" + id + ", domainId=" + domainId + ", producerId=" + producerId
                 + ", producerInstanceId=" + producerInstanceId + ", producerChainId=" + producerChainId
-                + ", registeredBy=" + registeredBy + ", creationDate=" + creationDate + "]";
+                + ", registeredBy=" + registeredBy + ", genesisKind=" + getGenesisKind() + ", creationDate=" + creationDate + "]";
     }
 
 }

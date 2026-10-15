@@ -7,8 +7,7 @@
 package io.jans.lock.model.trace.entity;
 
 /**
- * State of a TRACE receipt-chain position allocation claim (design §9, TRACE MVP design decision
- * D-8). Stored on {@link TraceReceiptEntry#getReceiptState()} as its {@code String} name.
+ * State of a TRACE receipt-chain position allocation claim (design §9). Stored on {@link TraceReceiptEntry#getReceiptState()} as its {@code String} name.
  *
  * @author Yuriy Movchan
  */

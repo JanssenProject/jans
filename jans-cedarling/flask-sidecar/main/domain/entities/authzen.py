@@ -30,11 +30,20 @@ def resource_from_data(data: _t.Dict[str, _t.Any]) -> Resource:
 
 
 @dataclass
+class TraceCorrelation:
+    trace_execution_id: str
+    execution_authority: str
+    workload_id: str | None = None
+    workload_instance_id: str | None = None
+
+
+@dataclass
 class CedarlingRequest:
     tokens: _t.List[Token]
     action: str
     resource: Resource
     context: Context
+    trace: TraceCorrelation | None = None
 
 
 @dataclass

@@ -11,11 +11,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.nio.charset.StandardCharsets;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.jans.lock.service.trace.canon.CanonicalHashes;
 import io.jans.lock.service.trace.error.TraceCryptoException;
 import io.jans.util.security.SecurityProviderUtility;
 
@@ -57,7 +60,34 @@ public final class Ed25519PublicKeys {
 	private static final String MEMBER_X = "x";
 	private static final String MEMBER_D = "d";
 
+	/** An unpadded base64url encoding of exactly {@value #RAW_KEY_LENGTH} bytes (43 characters). */
+	private static final Pattern X_PATTERN = Pattern.compile("^[A-Za-z0-9_-]{43}$");
+
 	private Ed25519PublicKeys() {
+	}
+
+	/**
+	 * RFC 7638 / RFC 8037 §A.3 JWK thumbprint of an Ed25519 key in the TRACE hash format
+	 *: {@code "sha256:" + lowercaseHex(SHA-256(UTF-8(
+	 * '{"crv":"Ed25519","kty":"OKP","x":"<x>"}')))}. The required members are written in
+	 * lexicographic order with no whitespace; the JWK's {@code x} is used exactly as stored, and no
+	 * other member can influence the result (the input is not built from the map).
+	 *
+	 * @throws TraceCryptoException with reason {@code jwk_format} when the JWK is {@code null} or
+	 *         has no {@code x}, or {@code jwk_x_encoding} when {@code x} is not an unpadded base64url
+	 *         encoding of 32 bytes
+	 */
+	public static String thumbprint(Map<String, String> jwk) {
+		String x = jwk == null ? null : jwk.get(MEMBER_X);
+		if (x == null) {
+			throw new TraceCryptoException(TraceCryptoException.REASON_JWK_FORMAT, "JWK has no x member");
+		}
+		if (!X_PATTERN.matcher(x).matches()) {
+			throw new TraceCryptoException(TraceCryptoException.REASON_JWK_X_ENCODING,
+					"JWK x is not an unpadded base64url encoding of " + RAW_KEY_LENGTH + " bytes");
+		}
+		String input = "{\"crv\":\"" + JWK_CRV_ED25519 + "\",\"kty\":\"" + JWK_KTY_OKP + "\",\"x\":\"" + x + "\"}";
+		return CanonicalHashes.sha256Prefixed(input.getBytes(StandardCharsets.UTF_8));
 	}
 
 	/**

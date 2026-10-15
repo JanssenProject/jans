@@ -20,7 +20,7 @@ import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.TokenRef;
 
 /**
- * The D-6 composite-key function and the four DN builders (design decision D-6, D-7):
+ * The composite-key function and the four DN builders:
  *
  * <pre>
  * key(type, c1, ..., cn) = lowercaseHex( SHA-256( UTF-8( JCS( [type, c1, ..., cn] ) ) ) )
@@ -67,11 +67,6 @@ public final class TraceKeys {
 		ChainIdentity chain = position.getChainIdentity();
 		return key("pos", chain.getDomainId(), chain.getProducerId(), chain.getProducerInstanceId(),
 				chain.getProducerChainId(), Long.toString(position.getSequenceNumber()));
-	}
-
-	/** Key type {@code cap}: {@code (domain, capability_id)}. */
-	public static String capabilityKey(String domainId, String capabilityId) {
-		return key("cap", domainId, capabilityId);
 	}
 
 	/**

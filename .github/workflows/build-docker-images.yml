@@ -16,6 +16,8 @@ on:
       - main
     paths:
       - "docker-jans-**/**"
+      - "jans-cedarling/flask-sidecar/**"
+      - "jans-cedarling/cedarling_opa/**"
       - "!docker-jans-**/CHANGELOG.md"
       - "!docker-jans-**/version.txt"
       - "!**.md"
@@ -183,10 +185,17 @@ jobs:
               echo "build=${BUILD}" >> $GITHUB_OUTPUT
             fi
           else
+            # Map changed paths to image names; sidecar/OPA live under jans-cedarling/.
+            changed_images() {
+              sed -nE \
+                -e 's#^(docker-jans-[^/]+)/.*#\1#p' \
+                -e 's#^jans-cedarling/flask-sidecar/.*#cedarling-flask-sidecar#p' \
+                -e 's#^jans-cedarling/cedarling_opa/.*#cedarling-opa#p' | sort -u | grep .
+            }
             pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
             if [[ -n "$pull_number" && "$pull_number" != "null" ]]; then
               # PR: get changed files via GitHub API
-              DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^flask-sidecar|^cedarling_opa' || echo "$ALL_SERVICES")
+              DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | changed_images || echo "$ALL_SERVICES")
             elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
               # Chained nightly/release publish -> build all images. all-in-one is matrix-
               # only (absent from ALL_SERVICES), so add it or the chain silently skips it.
@@ -198,7 +207,7 @@ jobs:
               if [[ -z "$BEFORE" || "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
                 DIRECTORIES_CHANGED="$ALL_SERVICES"
               else
-                DIRECTORIES_CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^flask-sidecar|^cedarling_opa' || true)
+                DIRECTORIES_CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" | changed_images || true)
               fi
             fi
             MATCH=false

@@ -9,7 +9,7 @@ FROM bellsoft/liberica-openjdk-alpine:17.0.20@sha256:1aa69057bcd3eafa77738ec58ba
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache openssl python3 tini curl bash py3-cryptography py3-psycopg2 \
+    && apk add --no-cache openssl python3 tini curl bash py3-psycopg2 \
     && apk add --no-cache --virtual .build-deps wget git zip
 
 # =====
@@ -91,7 +91,7 @@ RUN set -e \
     done
 
 # Download jans-lock JARs to _lock_libs (conditionally copied via Python script when lock is enabled)
-RUN wget -nv https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
+RUN wget -nv ${CN_RELEASE_DOWNLOAD_URL}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
     && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/_lock_libs \
     && rm -f /tmp/lock-svc-deps.zip
 
@@ -106,7 +106,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
+ARG JANS_SOURCE_VERSION=c4b4b52d4c3753d76f16d55df544a433f7c8732c
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
