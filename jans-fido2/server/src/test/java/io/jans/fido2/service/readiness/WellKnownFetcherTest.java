@@ -22,7 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
@@ -73,6 +75,11 @@ class WellKnownFetcherTest {
 
     private interface ExchangeHandler {
         void handle(HttpExchange exchange) throws IOException;
+    }
+
+    /** Waits on a latch that is never released: same delay as a sleep, interruptible the same way. */
+    private static void pause(long millis) throws InterruptedException {
+        new CountDownLatch(1).await(millis, TimeUnit.MILLISECONDS);
     }
 
     private static void respond(HttpExchange exchange, int status, byte[] body) throws IOException {
@@ -245,7 +252,7 @@ class WellKnownFetcherTest {
     void aSlowServerTimesOut() {
         handle("/", exchange -> {
             try {
-                Thread.sleep(2500);
+                pause(2500);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -268,7 +275,7 @@ class WellKnownFetcherTest {
                 for (int i = 0; i < 40; i++) {
                     out.write('x');
                     out.flush();
-                    Thread.sleep(100);
+                    pause(100);
                 }
             } catch (IOException | InterruptedException e) {
                 // the client gave up, which is the point

@@ -66,67 +66,92 @@ public final class RpIdValidator {
     }
 
     public static Result validate(String value) {
-        if (value == null || value.isEmpty()) {
-            return reject(Rejection.EMPTY);
+        Rejection rejection = checkRaw(value);
+        if (rejection != null) {
+            return reject(rejection);
         }
-        for (int i = 0; i < value.length(); i++) {
-            char c = value.charAt(i);
-            if (c <= ' ' || c == 0x7f || Character.isWhitespace(c) || Character.isISOControl(c)) {
-                return reject(Rejection.CONTROL_OR_WHITESPACE);
-            }
+        String ascii = toAscii(value);
+        if (ascii == null) {
+            return reject(Rejection.MALFORMED);
+        }
+        rejection = checkName(ascii);
+        return rejection != null ? reject(rejection) : new Result(new ValidatedRpId(ascii), null);
+    }
+
+    /** Checks on the text as given, before any normalization: control characters, credentials, IP, port, path. */
+    private static Rejection checkRaw(String value) {
+        if (value == null || value.isEmpty()) {
+            return Rejection.EMPTY;
+        }
+        if (hasControlOrWhitespace(value)) {
+            return Rejection.CONTROL_OR_WHITESPACE;
         }
         if (value.indexOf('@') >= 0) {
-            return reject(Rejection.CREDENTIALS);
+            return Rejection.CREDENTIALS;
         }
         if (value.indexOf('[') >= 0 || value.indexOf(']') >= 0 || isIpv6Shaped(value)) {
-            return reject(Rejection.IP_LITERAL);
+            return Rejection.IP_LITERAL;
         }
         if (value.indexOf(':') >= 0) {
-            return reject(Rejection.PORT);
+            return Rejection.PORT;
         }
         if (value.indexOf('/') >= 0 || value.indexOf('\\') >= 0 || value.indexOf('?') >= 0
                 || value.indexOf('#') >= 0) {
-            return reject(Rejection.PATH_QUERY_OR_FRAGMENT);
+            return Rejection.PATH_QUERY_OR_FRAGMENT;
         }
+        return null;
+    }
 
+    private static boolean hasControlOrWhitespace(String value) {
+        return value.chars().anyMatch(c -> c <= ' ' || c == 0x7f || Character.isWhitespace(c) || Character.isISOControl(c));
+    }
+
+    /** Lower-case ASCII (punycode) form without a trailing dot, or null when the name cannot be converted. */
+    private static String toAscii(String value) {
         String ascii;
         try {
             ascii = IDN.toASCII(value).toLowerCase(Locale.ROOT);
         } catch (IllegalArgumentException e) {
-            return reject(Rejection.MALFORMED);
+            return null;
         }
-        if (ascii.endsWith(".")) {
-            ascii = ascii.substring(0, ascii.length() - 1);
-        }
+        return ascii.endsWith(".") ? ascii.substring(0, ascii.length() - 1) : ascii;
+    }
+
+    /** Checks on the normalized name: length, numeric TLD, reserved names, label shape and script mixing. */
+    private static Rejection checkName(String ascii) {
         if (ascii.isEmpty()) {
-            return reject(Rejection.EMPTY);
+            return Rejection.EMPTY;
         }
         if (ascii.length() > MAX_HOSTNAME_LENGTH) {
-            return reject(Rejection.TOO_LONG);
+            return Rejection.TOO_LONG;
         }
-
         String[] labels = ascii.split("\\.", -1);
         if (isIpv4Shaped(labels)) {
-            return reject(Rejection.IP_LITERAL);
+            return Rejection.IP_LITERAL;
         }
         if (isReserved(ascii)) {
-            return reject(Rejection.RESERVED_NAME);
+            return Rejection.RESERVED_NAME;
         }
         if (labels.length < 2) {
-            return reject(Rejection.MALFORMED);
+            return Rejection.MALFORMED;
         }
         for (String label : labels) {
-            if (label.length() > MAX_LABEL_LENGTH) {
-                return reject(Rejection.TOO_LONG);
-            }
-            if (!label.matches("[a-z0-9]([a-z0-9-]*[a-z0-9])?")) {
-                return reject(Rejection.MALFORMED);
-            }
-            if (mixesScripts(label)) {
-                return reject(Rejection.MIXED_SCRIPT);
+            Rejection rejection = checkLabel(label);
+            if (rejection != null) {
+                return rejection;
             }
         }
-        return new Result(new ValidatedRpId(ascii), null);
+        return null;
+    }
+
+    private static Rejection checkLabel(String label) {
+        if (label.length() > MAX_LABEL_LENGTH) {
+            return Rejection.TOO_LONG;
+        }
+        if (!label.matches("[a-z0-9]([a-z0-9-]*[a-z0-9])?")) {
+            return Rejection.MALFORMED;
+        }
+        return mixesScripts(label) ? Rejection.MIXED_SCRIPT : null;
     }
 
     private static Result reject(Rejection rejection) {

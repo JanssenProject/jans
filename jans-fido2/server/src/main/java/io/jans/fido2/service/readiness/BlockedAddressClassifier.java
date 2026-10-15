@@ -22,6 +22,7 @@ import java.util.List;
  * An IPv4-mapped IPv6 address ({@code ::ffff:10.0.0.1}) needs no handling here: {@link InetAddress} already
  * hands it back as an IPv4 address. Pure byte comparison; nothing is resolved.
  */
+@SuppressWarnings("java:S1313") // the hard-coded addresses are the block list itself
 public final class BlockedAddressClassifier {
 
     private static final List<Range> BLOCKED_V4 = Arrays.asList(

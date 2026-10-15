@@ -102,6 +102,7 @@ public class WellKnownFetcher {
      * Test seam, visible to the package only: lets a test point the fetcher at a local server with a
      * scripted resolver. Production code cannot reach it, so there is no way to switch the guard off.
      */
+    @SuppressWarnings("java:S107") // test seam; a parameter object would only add a class for one test constructor
     WellKnownFetcher(String scheme, int port, Resolver resolver, Predicate<InetAddress> blocked,
             int maxResponseBytes, int connectTimeoutMs, int readTimeoutMs, int totalTimeoutMs) {
         this.scheme = scheme;
