@@ -44,8 +44,6 @@ pub enum SignatureError {
 
 /// Who signed a verified archive, and its digest.
 #[derive(Debug)]
-// Logged once the policy store is loaded, in a later change.
-#[allow(dead_code)]
 pub(crate) struct VerifiedArchive {
     pub identity: String,
     pub issuer: String,
@@ -53,6 +51,32 @@ pub(crate) struct VerifiedArchive {
     pub integrated_time: i64,
     /// Lowercase hex SHA-256 of the archive bytes.
     pub sha256: String,
+}
+
+impl std::fmt::Display for VerifiedArchive {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "identity={} issuer={} archive_sha256={} rekor_integrated_time={}",
+            self.identity, self.issuer, self.sha256, self.integrated_time
+        )
+    }
+}
+
+/// Runs [`ArchiveVerifier::check`] when signature checking is enabled.
+pub(crate) async fn check_if_enabled(
+    verifier: Option<&ArchiveVerifier>,
+    http: &HttpClient,
+    store_location: Option<&str>,
+    archive: &[u8],
+) -> Result<Option<VerifiedArchive>, SignatureError> {
+    match verifier {
+        Some(verifier) => verifier
+            .check(http, store_location, archive)
+            .await
+            .map(Some),
+        None => Ok(None),
+    }
 }
 
 /// Verifies `.cjar` archives against the configured signer.
@@ -295,6 +319,24 @@ mod tests {
             .expect("enforce builds")
             .verify(ARCHIVE, &signer.sign(ARCHIVE))
             .expect_err("production trust root must not trust the test signer");
+    }
+
+    #[test]
+    fn verified_archive_displays_signer_and_digest() {
+        let verified = VerifiedArchive {
+            identity: "signer@example.com".to_string(),
+            issuer: "https://accounts.google.com".to_string(),
+            integrated_time: 1_792_033_521,
+            sha256: ARCHIVE_SHA256.to_string(),
+        };
+        assert_eq!(
+            verified.to_string(),
+            format!(
+                "identity=signer@example.com issuer=https://accounts.google.com \
+                 archive_sha256={ARCHIVE_SHA256} rekor_integrated_time=1792033521"
+            ),
+            "log text names the signer, issuer, digest and Rekor time"
+        );
     }
 
     #[test]

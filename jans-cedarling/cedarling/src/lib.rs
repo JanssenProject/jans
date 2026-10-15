@@ -571,7 +571,18 @@ async fn perform_bootstrap_load(
         format,
         body_hash,
         validators,
+        signed_by,
     } = loaded;
+
+    if let Some(signed_by) = signed_by {
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::INFO,
+                None,
+            ))
+            .set_message(format!("policy store signature verified: {signed_by}")),
+        );
+    }
 
     for warning in &format.warnings {
         log.log_any(

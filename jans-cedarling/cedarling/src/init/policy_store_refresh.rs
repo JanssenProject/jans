@@ -46,7 +46,7 @@ use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
 use super::authz_builder::{BuildAuthzError, build_authz};
 
 use super::policy_store::{PolicyStoreLoadError, ZIP_MAGIC, parse_cjar_bytes};
-use super::policy_store_signature::ArchiveVerifier;
+use super::policy_store_signature::{ArchiveVerifier, VerifiedArchive, check_if_enabled};
 
 /// Upper bound on exponential backoff between failed refresh attempts.
 const REFRESH_FAILURE_BACKOFF_MAX_SECS: u64 = 600;
@@ -420,14 +420,12 @@ impl RefreshSource {
         verifier: Option<&ArchiveVerifier>,
         strict_schema_validation: bool,
         limits: ArchiveLimits,
-    ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
+    ) -> Result<(ParsedPolicyStore, Option<VerifiedArchive>), PolicyStoreLoadError> {
         if bytes.starts_with(&ZIP_MAGIC) {
-            if let Some(verifier) = verifier {
-                verifier
-                    .check(http_client, Some(self.url()), &bytes)
-                    .await?;
-            }
-            return parse_cjar_bytes(bytes, strict_schema_validation, limits).await;
+            let signed_by =
+                check_if_enabled(verifier, http_client, Some(self.url()), &bytes).await?;
+            let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
+            return Ok((parsed, signed_by));
         }
         if crate::common::policy_store::is_json_bytes(&bytes) {
             return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
@@ -722,7 +720,7 @@ async fn parse_swap_and_record(
 ) -> RefreshOutcome {
     let url = ctx.source.url();
     let start = Utc::now();
-    let parsed = match ctx
+    let (parsed, signed_by) = match ctx
         .source
         .parse(
             bytes,
@@ -801,9 +799,12 @@ async fn parse_swap_and_record(
             LogLevel::INFO,
             None,
         ))
-        .set_message(format!(
-            "policy store refresh: swapped new store from {url} in {elapsed} ms"
-        )),
+        .set_message(match signed_by {
+            Some(signed_by) => format!(
+                "policy store refresh: swapped new store from {url} in {elapsed} ms, signature verified: {signed_by}"
+            ),
+            None => format!("policy store refresh: swapped new store from {url} in {elapsed} ms"),
+        }),
     );
 
     RefreshOutcome::Success
@@ -1950,7 +1951,7 @@ mod signature_tests {
         archive: Vec<u8>,
         bundle: Option<Vec<u8>>,
         verifier: Option<&ArchiveVerifier>,
-    ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
+    ) -> Result<(ParsedPolicyStore, Option<VerifiedArchive>), PolicyStoreLoadError> {
         let mut server = Server::new_async().await;
         let bundle_mock = server.mock("GET", "/store.cjar.sigstore.json");
         match bundle {
@@ -1984,9 +1985,14 @@ mod signature_tests {
         let signer = TestSigner::new();
         let archive = archive();
         let bundle = signer.sign(&archive);
-        refresh(archive, Some(bundle), Some(&verifier(&signer)))
+        let (_, signed_by) = refresh(archive, Some(bundle), Some(&verifier(&signer)))
             .await
             .expect("a correctly signed refresh must parse");
+        assert_eq!(
+            signed_by.map(|v| v.identity).as_deref(),
+            Some(TestSigner::IDENTITY),
+            "a verified refresh reports its signer for logging"
+        );
     }
 
     #[tokio::test]

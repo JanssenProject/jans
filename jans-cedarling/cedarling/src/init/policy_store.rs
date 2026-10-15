@@ -19,7 +19,9 @@ use crate::common::policy_store::{ConversionError, PolicyStore, PolicyStoreWithI
 use crate::http::cache_headers::CacheHeadersState;
 use crate::http::{HttpClient, HttpClientError};
 
-use super::policy_store_signature::{ArchiveVerifier, SignatureError};
+use super::policy_store_signature::{
+    ArchiveVerifier, SignatureError, VerifiedArchive, check_if_enabled,
+};
 
 // ZIP local-file-header magic bytes.
 pub(super) const ZIP_MAGIC: [u8; 4] = [0x50, 0x4B, 0x03, 0x04];
@@ -143,6 +145,8 @@ pub(crate) struct LoadedPolicyStore {
     pub format: FormatReport,
     pub body_hash: Option<u64>,
     pub validators: CacheHeadersState,
+    /// Signer of the archive, when its signature was checked.
+    pub signed_by: Option<VerifiedArchive>,
 }
 
 /// Loads the policy store based on the provided configuration.
@@ -201,20 +205,14 @@ async fn load_verified_policy_store(
         },
         #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::CjarFile(path) => {
-            let parsed = load_policy_store_from_cjar_file(
+            load_policy_store_from_cjar_file(
                 path,
                 http_client,
                 strict_schema_validation,
                 limits,
                 verifier,
             )
-            .await?;
-            LoadedPolicyStore {
-                store: parsed.store,
-                format: parsed.format,
-                body_hash: None,
-                validators: CacheHeadersState::default(),
-            }
+            .await?
         },
         #[cfg(target_arch = "wasm32")]
         PolicyStoreSource::CjarFile(path) => {
@@ -224,6 +222,7 @@ async fn load_verified_policy_store(
                 format: parsed.format,
                 body_hash: None,
                 validators: CacheHeadersState::default(),
+                signed_by: None,
             }
         },
         PolicyStoreSource::CjarUrl(url) => {
@@ -244,6 +243,7 @@ async fn load_verified_policy_store(
                 format: parsed.format,
                 body_hash: None,
                 validators: CacheHeadersState::default(),
+                signed_by: None,
             }
         },
         #[cfg(target_arch = "wasm32")]
@@ -254,12 +254,11 @@ async fn load_verified_policy_store(
                 format: parsed.format,
                 body_hash: None,
                 validators: CacheHeadersState::default(),
+                signed_by: None,
             }
         },
         PolicyStoreSource::ArchiveBytes(bytes) => {
-            if let Some(verifier) = verifier {
-                verifier.check(http_client, None, bytes).await?;
-            }
+            let signed_by = check_if_enabled(verifier, http_client, None, bytes).await?;
             // The config keeps its bytes, so the read takes a copy it can own.
             let parsed = parse_cjar_bytes(bytes.clone(), strict_schema_validation, limits).await?;
             LoadedPolicyStore {
@@ -267,6 +266,7 @@ async fn load_verified_policy_store(
                 format: parsed.format,
                 body_hash: None,
                 validators: CacheHeadersState::default(),
+                signed_by,
             }
         },
     };
@@ -285,6 +285,7 @@ fn process_legacy_agama_store(
         format: FormatReport::default(),
         body_hash: None,
         validators: CacheHeadersState::default(),
+        signed_by: None,
     })
 }
 
@@ -304,15 +305,14 @@ async fn load_policy_store_from_uri(
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
     if bytes.starts_with(&ZIP_MAGIC) {
-        if let Some(verifier) = verifier {
-            verifier.check(http_client, Some(uri), &bytes).await?;
-        }
+        let signed_by = check_if_enabled(verifier, http_client, Some(uri), &bytes).await?;
         let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
         return Ok(LoadedPolicyStore {
             store: parsed.store,
             format: parsed.format,
             body_hash: Some(body_hash),
             validators,
+            signed_by,
         });
     }
 
@@ -379,23 +379,33 @@ async fn load_policy_store_from_cjar_file(
     strict_schema_validation: bool,
     limits: ArchiveLimits,
     verifier: Option<&ArchiveVerifier>,
-) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
-    if let Some(verifier) = verifier {
+) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
+    let (parsed, signed_by) = if let Some(verifier) = verifier {
         let bytes = read_cjar_file(path, limits)?;
-        verifier
+        let signed_by = verifier
             .check(http_client, Some(&path.to_string_lossy()), &bytes)
             .await?;
-        return parse_cjar_bytes(bytes, strict_schema_validation, limits).await;
-    }
-    let path = path.to_path_buf();
-    read_store_offloaded(
-        move || {
-            loader::read_policy_store_archive(&path, strict_schema_validation, limits)
-                .map_err(|e| map_read_err(e, true))
-        },
-        PolicyStoreLoadError::Archive,
-    )
-    .await
+        let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
+        (parsed, Some(signed_by))
+    } else {
+        let path = path.to_path_buf();
+        let parsed = read_store_offloaded(
+            move || {
+                loader::read_policy_store_archive(&path, strict_schema_validation, limits)
+                    .map_err(|e| map_read_err(e, true))
+            },
+            PolicyStoreLoadError::Archive,
+        )
+        .await?;
+        (parsed, None)
+    };
+    Ok(LoadedPolicyStore {
+        store: parsed.store,
+        format: parsed.format,
+        body_hash: None,
+        validators: CacheHeadersState::default(),
+        signed_by,
+    })
 }
 
 /// Reads a `.cjar` into memory, so the verified bytes are the parsed bytes.
@@ -459,9 +469,7 @@ async fn load_policy_store_from_cjar_url(
 
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
-    if let Some(verifier) = verifier {
-        verifier.check(http_client, Some(url), &bytes).await?;
-    }
+    let signed_by = check_if_enabled(verifier, http_client, Some(url), &bytes).await?;
     let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
 
     Ok(LoadedPolicyStore {
@@ -469,6 +477,7 @@ async fn load_policy_store_from_cjar_url(
         format: parsed.format,
         body_hash: Some(body_hash),
         validators,
+        signed_by,
     })
 }
 
@@ -1124,12 +1133,19 @@ mod signature_tests {
         let verifier = verifier(&signer, &signature(TestSigner::IDENTITY, None));
         let url = format!("{}/store.cjar", server.url());
 
-        load_from_url(PolicyStoreSource::CjarUrl(url.clone()), Some(&verifier))
-            .await
-            .expect("a correctly signed store must load from a CJAR URL");
-        load_from_url(PolicyStoreSource::Uri(url), Some(&verifier))
-            .await
-            .expect("a correctly signed store must load from a URI");
+        for source in [
+            PolicyStoreSource::CjarUrl(url.clone()),
+            PolicyStoreSource::Uri(url.clone()),
+        ] {
+            let loaded = load_from_url(source, Some(&verifier))
+                .await
+                .expect("a correctly signed store must load");
+            let signed_by = loaded
+                .signed_by
+                .expect("an enforced load reports its signer");
+            assert_eq!(signed_by.identity, TestSigner::IDENTITY, "verified signer");
+            assert_eq!(signed_by.sha256.len(), 64, "archive sha256 is hex encoded");
+        }
     }
 
     #[tokio::test]
