@@ -718,23 +718,10 @@ impl JwtService {
                 .get_claim_val("iss")
                 .and_then(|iss| iss.as_str())
                 .ok_or(MultiIssuerValidationError::MissingIssuer)?;
-            let combination = SeenToken {
-                issuer: SmolStr::from(issuer),
-                mapping: SmolStr::from(ctx.token.mapping.as_str()),
-            };
-            if ctx.seen_combinations.insert(combination) {
-                return Ok(TokenOutcome::Validated(cedar_token));
+            if !self.mark_jwt_seen(ctx, issuer) {
+                return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
             }
-            if let Some(logger) = &self.logger {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
-                        ctx.token.mapping, issuer
-                    ),
-                    Some(LogLevel::WARN),
-                ));
-            }
-            return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
+            return Ok(TokenOutcome::Validated(cedar_token));
         }
 
         // Validate JWT using existing single token validation
@@ -749,42 +736,28 @@ impl JwtService {
                     .ok_or(MultiIssuerValidationError::MissingIssuer)?;
 
                 // Check for non-deterministic tokens (graceful validation)
-                let combination = SeenToken {
-                    issuer: SmolStr::from(issuer),
-                    mapping: SmolStr::from(ctx.token.mapping.as_str()),
-                };
-                if ctx.seen_combinations.insert(combination) {
-                    // Convert ValidatedJwt to Token
-                    let claims = TokenClaims::try_from(validated_jwt.claims)
-                        .map_err(MultiIssuerValidationError::InvalidClaims)?;
-
-                    let cedar_token = Arc::new(Token::new(
-                        &ctx.token.mapping,
-                        claims,
-                        validated_jwt.trusted_iss.map(TokenIssuer::Jwt),
-                    ));
-
-                    self.token_cache.save(
-                        &token_kind,
-                        &ctx.token.payload,
-                        cedar_token.clone(),
-                        ctx.now,
-                    );
-
-                    Ok(TokenOutcome::Validated(cedar_token))
-                } else {
-                    // Log warning but continue processing
-                    if let Some(logger) = &self.logger {
-                        logger.log_any(JwtLogEntry::new(
-                            format!(
-                                "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
-                                ctx.token.mapping, issuer
-                            ),
-                            Some(LogLevel::WARN),
-                        ));
-                    }
-                    Ok(TokenOutcome::Dropped(DropReason::DuplicateToken))
+                if !self.mark_jwt_seen(ctx, issuer) {
+                    return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
                 }
+
+                // Convert ValidatedJwt to Token
+                let claims = TokenClaims::try_from(validated_jwt.claims)
+                    .map_err(MultiIssuerValidationError::InvalidClaims)?;
+
+                let cedar_token = Arc::new(Token::new(
+                    &ctx.token.mapping,
+                    claims,
+                    validated_jwt.trusted_iss.map(TokenIssuer::Jwt),
+                ));
+
+                self.token_cache.save(
+                    &token_kind,
+                    &ctx.token.payload,
+                    cedar_token.clone(),
+                    ctx.now,
+                );
+
+                Ok(TokenOutcome::Validated(cedar_token))
             },
             Err(err) => {
                 self.metrics.record_jwt_validation(false);
@@ -798,6 +771,26 @@ impl JwtService {
                 Ok(TokenOutcome::Dropped(DropReason::JwtValidationFailed))
             },
         }
+    }
+
+    /// Record the JWT's `(issuer, mapping)` pair as seen in this request.
+    /// Returns `false` and logs a warning when the pair was already accepted,
+    /// so the caller drops the token as [`DropReason::DuplicateToken`].
+    fn mark_jwt_seen(&self, ctx: &mut TokenCallCtx<'_>, issuer: &str) -> bool {
+        let inserted = ctx.seen_combinations.insert(SeenToken {
+            issuer: SmolStr::from(issuer),
+            mapping: SmolStr::from(ctx.token.mapping.as_str()),
+        });
+        if !inserted && let Some(logger) = &self.logger {
+            logger.log_any(JwtLogEntry::new(
+                format!(
+                    "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
+                    ctx.token.mapping, issuer
+                ),
+                Some(LogLevel::WARN),
+            ));
+        }
+        inserted
     }
 
     /// Process a single custom (non-JWT) token via the registered processor.
