@@ -877,12 +877,10 @@ async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_tok
     );
 }
 
-/// `droppedTokens()` must return plain objects: `reason` is `{kind, detail?,
-/// message}`, not an ES `Map`, so `reason.kind` reads directly and
-/// `JSON.stringify(reason)` is not `{}`.
+/// `droppedTokens()` exposes typed getters backed by the core values, and
+/// `JSON.stringify` yields the same object as the core JSON form.
 #[wasm_bindgen_test]
-async fn test_multi_issuer_dropped_tokens_are_plain_objects() {
-    use wasm_bindgen::JsCast;
+async fn test_multi_issuer_dropped_tokens_expose_core_values() {
     let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
@@ -940,32 +938,51 @@ async fn test_multi_issuer_dropped_tokens_are_plain_objects() {
         .await
         .expect("Should succeed gracefully when some tokens are invalid");
 
-    let js_dropped = result
-        .dropped_tokens()
-        .expect("droppedTokens should serialize to JS");
-    let arr = wasm_bindgen_futures::js_sys::Array::from(&js_dropped);
-    assert_eq!(arr.length(), 1, "one invalid token should be dropped");
-    let first = arr.get(0);
-    let reason =
-        Reflect::get(&first, &"reason".into()).expect("dropped entry should have a reason object");
-    assert!(
-        !reason.is_instance_of::<Map>(),
-        "reason must be a plain object, not a Map"
-    );
-    let kind = Reflect::get(&reason, &"kind".into())
-        .expect("reason should have kind")
-        .as_string()
-        .expect("reason.kind should be a string");
+    let dropped = result.dropped_tokens();
+    assert_eq!(dropped.len(), 1, "one invalid token should be dropped");
+    let first = &dropped[0];
     assert_eq!(
-        kind, "jwt_validation_failed",
+        first.mapping(),
+        "Invalid::Token",
+        "mapping of the dropped input"
+    );
+    assert_eq!(first.index(), 1, "index of the dropped input");
+
+    let reason = first.reason();
+    assert_eq!(
+        reason.kind(),
+        "jwt_validation_failed",
         "dropped invalid mapping should report jwt_validation_failed"
     );
-    let json_str: String = wasm_bindgen_futures::js_sys::JSON::stringify(&reason)
-        .expect("JSON.stringify(reason) should succeed")
-        .into();
-    assert_ne!(
-        json_str, "{}",
-        "JSON.stringify(reason) must not be empty, got: {json_str}"
+    assert_eq!(
+        reason.detail(),
+        None,
+        "detail is undefined for unit reasons"
+    );
+    assert_eq!(
+        reason.message(),
+        "JWT validation failed",
+        "message is the claim-free Display text"
+    );
+
+    // `toJSON` makes `JSON.stringify` produce the core JSON form instead of `{}`.
+    let json_str: String =
+        wasm_bindgen_futures::js_sys::JSON::stringify(&JsValue::from(first.clone()))
+            .expect("JSON.stringify(droppedToken) should succeed")
+            .into();
+    let json: serde_json::Value =
+        serde_json::from_str(&json_str).expect("stringified dropped token is valid JSON");
+    assert_eq!(
+        json,
+        json!({
+            "mapping": "Invalid::Token",
+            "index": 1,
+            "reason": {
+                "kind": "jwt_validation_failed",
+                "message": "JWT validation failed"
+            }
+        }),
+        "JSON.stringify(droppedToken) must match the core JSON form"
     );
 }
 
