@@ -133,10 +133,8 @@ dmypy.json
 .idea/
 .idea
 
+# do not upload local yaml files
+cli_tui/cli/ops/*
+
 # but inculde updates.json
 !cli_tui/cli/ops/updates.json
-
-# do not upload local yaml files
-cli_tui/cli/ops/
-
-
