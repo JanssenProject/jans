@@ -5,9 +5,6 @@
 
 //! Sigstore check of a `.cjar` policy store, run on the archive bytes before they are parsed.
 
-// Wired into the policy store loader in the next change.
-#![allow(dead_code)]
-
 use std::fmt::Write as _;
 use std::io::Read as _;
 
@@ -24,10 +21,15 @@ const MAX_BUNDLE_BYTES: u64 = 1024 * 1024;
 
 /// Why a policy store failed its signature check.
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum SignatureError {
+pub enum SignatureError {
     /// The bundle could not be fetched or read.
     #[error("failed to load the policy store signature bundle from {location}: {reason}")]
     Bundle { location: String, reason: String },
+    /// An in-memory archive has no location to derive its bundle location from.
+    #[error(
+        "no signature bundle location for an in-memory policy store; set CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI"
+    )]
+    NoBundleLocation,
     /// The bundle does not verify the archive for the configured signer.
     #[error(
         "policy store signature does not verify for identity '{identity}' and issuer '{issuer}': {source}"
@@ -42,6 +44,8 @@ pub(crate) enum SignatureError {
 
 /// Who signed a verified archive, and its digest.
 #[derive(Debug)]
+// Logged once the policy store is loaded, in a later change.
+#[allow(dead_code)]
 pub(crate) struct VerifiedArchive {
     pub identity: String,
     pub issuer: String,
@@ -68,7 +72,7 @@ impl ArchiveVerifier {
         Self::with_verifier(signature, SigstoreBlobVerifier::with_static_trust_root())
     }
 
-    fn with_verifier(
+    pub(crate) fn with_verifier(
         signature: &PolicyStoreSignature,
         verifier: SigstoreBlobVerifier,
     ) -> Option<Self> {
@@ -88,16 +92,30 @@ impl ArchiveVerifier {
         })
     }
 
-    /// Bundle location for a store at `store_location`: the configured
-    /// override, else the store location plus `.sigstore.json`.
-    pub(crate) fn bundle_location(&self, store_location: &str) -> String {
+    /// Loads the bundle for a store at `store_location` and verifies `archive` with it.
+    /// `store_location` is `None` for in-memory archives.
+    pub(crate) async fn check(
+        &self,
+        http: &HttpClient,
+        store_location: Option<&str>,
+        archive: &[u8],
+    ) -> Result<VerifiedArchive, SignatureError> {
+        let location = self
+            .bundle_location(store_location)
+            .ok_or(SignatureError::NoBundleLocation)?;
+        let bundle = self.load_bundle(http, &location).await?;
+        self.verify(archive, &bundle)
+    }
+
+    /// The configured override, else the store location plus `.sigstore.json`.
+    fn bundle_location(&self, store_location: Option<&str>) -> Option<String> {
         self.bundle_uri
             .clone()
-            .unwrap_or_else(|| default_bundle_location(store_location))
+            .or_else(|| store_location.map(default_bundle_location))
     }
 
     /// Reads the bundle at `location`, over HTTP for `http(s)` URLs, else from disk.
-    pub(crate) async fn load_bundle(
+    async fn load_bundle(
         &self,
         http: &HttpClient,
         location: &str,
@@ -113,12 +131,8 @@ impl ArchiveVerifier {
         })
     }
 
-    /// Verifies `bundle` over `archive`; CPU-only, so callers run it off the async executor.
-    pub(crate) fn verify(
-        &self,
-        archive: &[u8],
-        bundle: &[u8],
-    ) -> Result<VerifiedArchive, SignatureError> {
+    /// Verifies `bundle` over `archive`.
+    fn verify(&self, archive: &[u8], bundle: &[u8]) -> Result<VerifiedArchive, SignatureError> {
         let policy = VerificationPolicy {
             cert_identity: IdentityMatch::Exact(self.identity.clone()),
             cert_issuer: self.issuer.clone(),
@@ -314,9 +328,29 @@ mod tests {
         };
         let verifier = ArchiveVerifier::new(&signature).expect("enforce builds");
         assert_eq!(
-            verifier.bundle_location("https://lock.example.com/policy/x"),
-            "https://lock.example.com/policy/x/sigstore",
+            verifier
+                .bundle_location(Some("https://lock.example.com/policy/x"))
+                .as_deref(),
+            Some("https://lock.example.com/policy/x/sigstore"),
             "configured bundle URI must be used as is"
+        );
+        assert_eq!(
+            verifier.bundle_location(None).as_deref(),
+            Some("https://lock.example.com/policy/x/sigstore"),
+            "in-memory archives use the configured bundle URI"
+        );
+    }
+
+    #[tokio::test]
+    async fn in_memory_archive_without_bundle_uri_is_rejected() {
+        let verifier = ArchiveVerifier::new(&enforce(TestSigner::IDENTITY)).expect("enforce");
+        let err = verifier
+            .check(&http_client(), None, ARCHIVE)
+            .await
+            .expect_err("no store location and no override leaves no bundle to check");
+        assert!(
+            matches!(err, SignatureError::NoBundleLocation),
+            "expected NoBundleLocation, got {err:?}"
         );
     }
 

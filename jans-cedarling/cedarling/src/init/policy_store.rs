@@ -19,6 +19,8 @@ use crate::common::policy_store::{ConversionError, PolicyStore, PolicyStoreWithI
 use crate::http::cache_headers::CacheHeadersState;
 use crate::http::{HttpClient, HttpClientError};
 
+use super::policy_store_signature::{ArchiveVerifier, SignatureError};
+
 // ZIP local-file-header magic bytes.
 pub(super) const ZIP_MAGIC: [u8; 4] = [0x50, 0x4B, 0x03, 0x04];
 
@@ -54,6 +56,9 @@ pub enum PolicyStoreLoadError {
     /// Policy store validation error.
     #[error("Policy store validation error: {0}")]
     Validation(#[from] ValidationError),
+    /// The `.cjar` failed its Sigstore signature check.
+    #[error(transparent)]
+    Signature(#[from] SignatureError),
 }
 
 // LegacyAgamaPolicyStore contains the structure to accommodate several policies,
@@ -152,6 +157,23 @@ pub(crate) async fn load_policy_store(
     http_client: &HttpClient,
     strict_schema_validation: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
+    let verifier = ArchiveVerifier::new(&config.signature);
+    load_verified_policy_store(
+        config,
+        http_client,
+        strict_schema_validation,
+        verifier.as_ref(),
+    )
+    .await
+}
+
+/// [`load_policy_store`] with the signature verifier supplied, so tests can use their own trust root.
+async fn load_verified_policy_store(
+    config: &PolicyStoreConfig,
+    http_client: &HttpClient,
+    strict_schema_validation: bool,
+    verifier: Option<&ArchiveVerifier>,
+) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
     let limits = config.archive_limits();
 
     let loaded = match &config.source {
@@ -163,14 +185,9 @@ pub(crate) async fn load_policy_store(
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
             process_legacy_agama_store(&agama_policy_store, strict_schema_validation)?
         },
-        PolicyStoreSource::LockServer(policy_store_uri) => {
-            load_policy_store_from_uri(
-                policy_store_uri,
-                http_client,
-                strict_schema_validation,
-                limits,
-            )
-            .await?
+        PolicyStoreSource::LockServer(uri) | PolicyStoreSource::Uri(uri) => {
+            load_policy_store_from_uri(uri, http_client, strict_schema_validation, limits, verifier)
+                .await?
         },
         PolicyStoreSource::FileYaml(path) => {
             let policy_yaml = fs::read_to_string(path)
@@ -184,8 +201,14 @@ pub(crate) async fn load_policy_store(
         },
         #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::CjarFile(path) => {
-            let parsed =
-                load_policy_store_from_cjar_file(path, strict_schema_validation, limits).await?;
+            let parsed = load_policy_store_from_cjar_file(
+                path,
+                http_client,
+                strict_schema_validation,
+                limits,
+                verifier,
+            )
+            .await?;
             LoadedPolicyStore {
                 store: parsed.store,
                 format: parsed.format,
@@ -204,8 +227,14 @@ pub(crate) async fn load_policy_store(
             }
         },
         PolicyStoreSource::CjarUrl(url) => {
-            load_policy_store_from_cjar_url(url, http_client, strict_schema_validation, limits)
-                .await?
+            load_policy_store_from_cjar_url(
+                url,
+                http_client,
+                strict_schema_validation,
+                limits,
+                verifier,
+            )
+            .await?
         },
         #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::Directory(path) => {
@@ -228,6 +257,9 @@ pub(crate) async fn load_policy_store(
             }
         },
         PolicyStoreSource::ArchiveBytes(bytes) => {
+            if let Some(verifier) = verifier {
+                verifier.check(http_client, None, bytes).await?;
+            }
             // The config keeps its bytes, so the read takes a copy it can own.
             let parsed = parse_cjar_bytes(bytes.clone(), strict_schema_validation, limits).await?;
             LoadedPolicyStore {
@@ -236,9 +268,6 @@ pub(crate) async fn load_policy_store(
                 body_hash: None,
                 validators: CacheHeadersState::default(),
             }
-        },
-        PolicyStoreSource::Uri(uri) => {
-            load_policy_store_from_uri(uri, http_client, strict_schema_validation, limits).await?
         },
     };
 
@@ -265,6 +294,7 @@ async fn load_policy_store_from_uri(
     http_client: &HttpClient,
     strict_schema_validation: bool,
     limits: ArchiveLimits,
+    verifier: Option<&ArchiveVerifier>,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
     let response = http_client.get_with_retry(uri).await?;
 
@@ -274,6 +304,9 @@ async fn load_policy_store_from_uri(
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
     if bytes.starts_with(&ZIP_MAGIC) {
+        if let Some(verifier) = verifier {
+            verifier.check(http_client, Some(uri), &bytes).await?;
+        }
         let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
         return Ok(LoadedPolicyStore {
             store: parsed.store,
@@ -342,9 +375,18 @@ async fn read_store_offloaded(
 #[cfg(not(target_arch = "wasm32"))]
 async fn load_policy_store_from_cjar_file(
     path: &Path,
+    http_client: &HttpClient,
     strict_schema_validation: bool,
     limits: ArchiveLimits,
+    verifier: Option<&ArchiveVerifier>,
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
+    if let Some(verifier) = verifier {
+        let bytes = read_cjar_file(path, limits)?;
+        verifier
+            .check(http_client, Some(&path.to_string_lossy()), &bytes)
+            .await?;
+        return parse_cjar_bytes(bytes, strict_schema_validation, limits).await;
+    }
     let path = path.to_path_buf();
     read_store_offloaded(
         move || {
@@ -354,6 +396,21 @@ async fn load_policy_store_from_cjar_file(
         PolicyStoreLoadError::Archive,
     )
     .await
+}
+
+/// Reads a `.cjar` into memory, so the verified bytes are the parsed bytes.
+#[cfg(not(target_arch = "wasm32"))]
+fn read_cjar_file(path: &Path, limits: ArchiveLimits) -> Result<Vec<u8>, PolicyStoreLoadError> {
+    let to_err = |e| PolicyStoreLoadError::ParseFile(path.into(), e);
+    let len = fs::metadata(path).map_err(to_err)?.len();
+    if limits.max_total_size != 0 && len > limits.max_total_size {
+        return Err(PolicyStoreLoadError::Archive(format!(
+            "{} is {len} bytes, over the {} byte limit",
+            path.display(),
+            limits.max_total_size
+        )));
+    }
+    fs::read(path).map_err(to_err)
 }
 
 /// Loads the policy store from a Cedar Archive (.cjar) file.
@@ -383,6 +440,7 @@ async fn load_policy_store_from_cjar_url(
     http_client: &HttpClient,
     strict_schema_validation: bool,
     limits: ArchiveLimits,
+    verifier: Option<&ArchiveVerifier>,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
     // Fetch via `get_with_retry` to capture response headers (for the refresh
     // worker's initial `validators` seed) alongside the body bytes (for the
@@ -401,6 +459,9 @@ async fn load_policy_store_from_cjar_url(
 
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
+    if let Some(verifier) = verifier {
+        verifier.check(http_client, Some(url), &bytes).await?;
+    }
     let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
 
     Ok(LoadedPolicyStore {
@@ -980,5 +1041,247 @@ mod test {
             matches!(&err, PolicyStoreLoadError::Directory(msg) if msg.contains("panicked")),
             "expected the panic as a Directory error, got: {err:?}"
         );
+    }
+}
+
+#[cfg(test)]
+mod signature_tests {
+    use std::sync::LazyLock;
+    use std::time::Duration;
+
+    use mockito::{Server, ServerGuard};
+    use sigstore_verifier::SigstoreBlobVerifier;
+    use sigstore_verifier::testing::TestSigner;
+
+    use super::*;
+    use crate::bootstrap_config::PolicyStoreSignature;
+    use crate::common::policy_store::test_utils::fixtures;
+    use crate::http::HttpClientConfig;
+
+    static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(1),
+            request_timeout: Duration::from_secs(2),
+            max_response_size_bytes: None,
+        })
+        .expect("http client should be constructed")
+    });
+
+    fn archive() -> Vec<u8> {
+        fixtures::minimal_valid()
+            .build_archive()
+            .expect("test archive builds")
+    }
+
+    fn signature(identity: &str, bundle_uri: Option<String>) -> PolicyStoreSignature {
+        PolicyStoreSignature::Enforce {
+            cert_identity: identity.to_string(),
+            cert_oidc_issuer: TestSigner::ISSUER.to_string(),
+            bundle_uri,
+        }
+    }
+
+    fn verifier(signer: &TestSigner, signature: &PolicyStoreSignature) -> ArchiveVerifier {
+        let trust = SigstoreBlobVerifier::new(&signer.trust_root()).expect("test trust root");
+        ArchiveVerifier::with_verifier(signature, trust).expect("enforce builds a verifier")
+    }
+
+    /// Serves `archive` at `/store.cjar` and, when given, `bundle` next to it.
+    async fn serve(archive: Vec<u8>, bundle: Option<Vec<u8>>) -> ServerGuard {
+        let mut server = Server::new_async().await;
+        server
+            .mock("GET", "/store.cjar")
+            .with_body(archive)
+            .create_async()
+            .await;
+        let bundle_mock = server.mock("GET", "/store.cjar.sigstore.json");
+        match bundle {
+            Some(bundle) => bundle_mock.with_body(bundle),
+            None => bundle_mock.with_status(404),
+        }
+        .create_async()
+        .await;
+        server
+    }
+
+    async fn load_from_url(
+        source: PolicyStoreSource,
+        verifier: Option<&ArchiveVerifier>,
+    ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
+        let config = PolicyStoreConfig {
+            source,
+            ..Default::default()
+        };
+        load_verified_policy_store(&config, &HTTP_CLIENT, false, verifier).await
+    }
+
+    #[tokio::test]
+    async fn signed_store_loads_from_cjar_url_and_uri() {
+        let signer = TestSigner::new();
+        let archive = archive();
+        let server = serve(archive.clone(), Some(signer.sign(&archive))).await;
+        let verifier = verifier(&signer, &signature(TestSigner::IDENTITY, None));
+        let url = format!("{}/store.cjar", server.url());
+
+        load_from_url(PolicyStoreSource::CjarUrl(url.clone()), Some(&verifier))
+            .await
+            .expect("a correctly signed store must load from a CJAR URL");
+        load_from_url(PolicyStoreSource::Uri(url), Some(&verifier))
+            .await
+            .expect("a correctly signed store must load from a URI");
+    }
+
+    #[tokio::test]
+    async fn modified_store_is_rejected() {
+        let signer = TestSigner::new();
+        let archive = archive();
+        let mut tampered = archive.clone();
+        let last = tampered.len() - 1;
+        tampered[last] ^= 1;
+        let server = serve(tampered, Some(signer.sign(&archive))).await;
+        let verifier = verifier(&signer, &signature(TestSigner::IDENTITY, None));
+
+        let err = load_from_url(
+            PolicyStoreSource::CjarUrl(format!("{}/store.cjar", server.url())),
+            Some(&verifier),
+        )
+        .await
+        .expect_err("a store changed after signing must not load");
+        assert!(
+            matches!(
+                err,
+                PolicyStoreLoadError::Signature(SignatureError::Verification { .. })
+            ),
+            "expected a verification error, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn wrong_signer_is_rejected() {
+        let signer = TestSigner::new();
+        let archive = archive();
+        let server = serve(archive.clone(), Some(signer.sign(&archive))).await;
+        let verifier = verifier(&signer, &signature("someone-else@example.com", None));
+
+        let err = load_from_url(
+            PolicyStoreSource::Uri(format!("{}/store.cjar", server.url())),
+            Some(&verifier),
+        )
+        .await
+        .expect_err("a store signed by someone else must not load");
+        assert!(
+            err.to_string().contains("someone-else@example.com"),
+            "error must name the expected signer, got: {err}"
+        );
+    }
+
+    #[tokio::test]
+    async fn missing_bundle_is_rejected_only_when_enforced() {
+        let signer = TestSigner::new();
+        let server = serve(archive(), None).await;
+        let url = format!("{}/store.cjar", server.url());
+        let verifier = verifier(&signer, &signature(TestSigner::IDENTITY, None));
+
+        let err = load_from_url(PolicyStoreSource::CjarUrl(url.clone()), Some(&verifier))
+            .await
+            .expect_err("a store without a bundle must not load when enforced");
+        assert!(
+            matches!(
+                err,
+                PolicyStoreLoadError::Signature(SignatureError::Bundle { .. })
+            ),
+            "expected a bundle error, got {err:?}"
+        );
+
+        load_from_url(PolicyStoreSource::CjarUrl(url), None)
+            .await
+            .expect("without enforcement a store loads with no bundle");
+    }
+
+    #[tokio::test]
+    async fn load_policy_store_enforces_configured_signature() {
+        let signer = TestSigner::new();
+        let archive = archive();
+        let server = serve(archive.clone(), Some(signer.sign(&archive))).await;
+        let config = PolicyStoreConfig {
+            source: PolicyStoreSource::CjarUrl(format!("{}/store.cjar", server.url())),
+            signature: signature(TestSigner::IDENTITY, None),
+            ..Default::default()
+        };
+
+        let err = load_policy_store(&config, &HTTP_CLIENT, false)
+            .await
+            .expect_err("the production trust root must reject a test-signed store");
+        assert!(
+            matches!(
+                err,
+                PolicyStoreLoadError::Signature(SignatureError::Verification { .. })
+            ),
+            "expected a verification error, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn signed_store_loads_from_cjar_file() {
+        let signer = TestSigner::new();
+        let archive = archive();
+        let dir = tempfile::tempdir().expect("temp dir");
+        let path = dir.path().join("store.cjar");
+        std::fs::write(&path, &archive).expect("write archive");
+        let verifier = verifier(&signer, &signature(TestSigner::IDENTITY, None));
+        let source = || PolicyStoreSource::CjarFile(path.clone());
+
+        let err = load_from_url(source(), Some(&verifier))
+            .await
+            .expect_err("a local store without its bundle file must not load");
+        assert!(
+            matches!(
+                err,
+                PolicyStoreLoadError::Signature(SignatureError::Bundle { .. })
+            ),
+            "expected a bundle error, got {err:?}"
+        );
+
+        std::fs::write(
+            dir.path().join("store.cjar.sigstore.json"),
+            signer.sign(&archive),
+        )
+        .expect("write bundle");
+        load_from_url(source(), Some(&verifier))
+            .await
+            .expect("a local store with a valid sibling bundle must load");
+    }
+
+    #[tokio::test]
+    async fn archive_bytes_need_a_bundle_uri() {
+        let signer = TestSigner::new();
+        let archive = archive();
+        let source = || PolicyStoreSource::ArchiveBytes(archive.clone());
+
+        let err = load_from_url(
+            source(),
+            Some(&verifier(&signer, &signature(TestSigner::IDENTITY, None))),
+        )
+        .await
+        .expect_err("in-memory bytes have no default bundle location");
+        assert!(
+            matches!(
+                err,
+                PolicyStoreLoadError::Signature(SignatureError::NoBundleLocation)
+            ),
+            "expected NoBundleLocation, got {err:?}"
+        );
+
+        let dir = tempfile::tempdir().expect("temp dir");
+        let bundle = dir.path().join("bundle.json");
+        std::fs::write(&bundle, signer.sign(&archive)).expect("write bundle");
+        let with_uri = signature(
+            TestSigner::IDENTITY,
+            Some(bundle.to_string_lossy().into_owned()),
+        );
+        load_from_url(source(), Some(&verifier(&signer, &with_uri)))
+            .await
+            .expect("in-memory bytes load with a configured bundle");
     }
 }
