@@ -123,6 +123,29 @@ properties. The package still loads and initializes its own WASM binary. In
 Node.js, use an absolute download URL. Keep upstream policy-store credentials on
 a trusted server; browser configuration is visible to its users.
 
+#### Verify the Archive Signature
+
+Set `CEDARLING_POLICY_STORE_SIGSTORE_MODE` to `enforce` to load an archive only
+if its Sigstore bundle verifies for the expected signer. For an archive
+published by Agama Lab:
+
+```ts
+const config = {
+  // ...other bootstrap properties
+  CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+  CEDARLING_POLICY_STORE_SIGSTORE_MODE: "enforce",
+  CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY:
+    "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+  CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER: "https://accounts.google.com",
+};
+```
+
+Cedarling fetches the bundle from the archive URL with `.sigstore.json`
+appended. With `initFromArchiveBytes()`, also set
+`CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` to the bundle's HTTP(S) URL. In a
+browser, the bundle server needs the same CORS headers as the archive server.
+See [bootstrap properties](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/#verifying-policy-store-signatures).
+
 ### Authorization
 
 Choose token-based authorization when identity comes from JWTs, or unsigned
