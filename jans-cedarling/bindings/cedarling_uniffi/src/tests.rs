@@ -889,44 +889,39 @@ fn test_drain_metrics_local_mode_snapshot_and_reset() {
     );
 }
 
+/// The uniffi `DropReason` must carry exactly the fields of the core JSON
+/// `reason` object, so every binding exposes the same shape.
 #[test]
-fn test_dropped_token_carries_claim_free_message() {
-    let dropped = crate::result::DroppedToken::from(cedarling::DroppedToken::new(
-        "Jans::Access_Token",
-        1,
+fn test_dropped_token_reason_matches_core_json() {
+    let cases = [
         cedarling::DropReason::DuplicateToken,
-    ));
-    assert_eq!(
-        dropped.reason,
-        crate::result::DropReason::DuplicateToken,
-        "reason must be the enum variant"
-    );
-    assert_eq!(
-        dropped.message, "duplicate issuer and token-type combination",
-        "a unit reason must expose a non-empty claim-free message"
-    );
-    assert_eq!(dropped.detail, "", "detail stays empty for unit reasons");
-}
-
-#[test]
-fn test_dropped_token_detail_is_stable_slug() {
-    let reason = cedarling::DropReason::InvalidInput(cedarling::TokenInputError::EmptyPayload);
-    let dropped = crate::result::DroppedToken::from(cedarling::DroppedToken::new(
-        "Jans::Access_Token",
-        0,
-        reason,
-    ));
-    assert_eq!(
-        dropped.reason,
-        crate::result::DropReason::InvalidInput,
-        "reason must be the enum variant"
-    );
-    assert_eq!(
-        dropped.detail, "empty_payload",
-        "detail must be the stable slug, same value as the core JSON"
-    );
-    assert_eq!(
-        dropped.message, "token input was invalid: Empty payload",
-        "message carries the human-readable Display text"
-    );
+        cedarling::DropReason::InvalidInput(cedarling::TokenInputError::EmptyPayload),
+    ];
+    for reason in cases {
+        // Core omits `detail` for unit reasons; uniffi exposes it as `None`.
+        let mut expected = serde_json::to_value(&reason).expect("core reason serializes");
+        expected["detail"] = expected
+            .get("detail")
+            .cloned()
+            .unwrap_or(serde_json::Value::Null);
+        let dropped = crate::result::DroppedToken::from(cedarling::DroppedToken::new(
+            "Jans::Access_Token",
+            3,
+            reason,
+        ));
+        assert_eq!(
+            dropped.mapping, "Jans::Access_Token",
+            "mapping is passed through"
+        );
+        assert_eq!(dropped.index, 3, "index is passed through");
+        assert_eq!(
+            serde_json::json!({
+                "kind": dropped.reason.kind(),
+                "detail": dropped.reason.detail(),
+                "message": dropped.reason.message(),
+            }),
+            expected,
+            "uniffi reason must match the core JSON reason"
+        );
+    }
 }

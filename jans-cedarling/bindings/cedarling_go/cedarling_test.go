@@ -492,6 +492,23 @@ func TestValidationGracefulDegradationInvalidToken(t *testing.T) {
 	if result.RequestID == "" {
 		t.Error("request_id should be present")
 	}
+
+	if len(result.DroppedTokens) != 1 {
+		t.Fatalf("the invalid token must be reported as dropped, got %+v", result.DroppedTokens)
+	}
+	dropped := result.DroppedTokens[0]
+	if dropped.Mapping != "Invalid::Token" || dropped.Index != 1 {
+		t.Errorf("unexpected dropped entry: %+v", dropped)
+	}
+	if dropped.Reason.Kind != "jwt_validation_failed" {
+		t.Errorf("reason kind must be the stable slug, got %q", dropped.Reason.Kind)
+	}
+	if dropped.Reason.Detail != nil {
+		t.Errorf("detail must be nil for unit reasons, got %q", *dropped.Reason.Detail)
+	}
+	if dropped.Reason.Message != "JWT validation failed" {
+		t.Errorf("unexpected reason message %q", dropped.Reason.Message)
+	}
 }
 
 // TestDataAPIPushAndGetCtx tests basic push and get operations

@@ -675,23 +675,18 @@ class AuthorizeMultiIssuerRequest:
 
 @final
 class DropReason:
-    InvalidInput: DropReason
-    JwtValidationFailed: DropReason
-    DuplicateToken: DropReason
-    DuplicateMapping: DropReason
-    NoProcessorRegistered: DropReason
-    CustomProcessingFailed: DropReason
-    CustomProcessingTimedOut: DropReason
-    EntityBuildFailed: DropReason
-    def slug(self) -> str: ...
+    """Why a token was dropped; same shape as the core JSON `reason` object."""
+
+    kind: str
+    detail: Optional[str]
+    message: str
+    def __repr__(self) -> str: ...
 
 @final
 class DroppedToken:
     mapping: str
     index: int
     reason: DropReason
-    detail: str
-    message: str
     def __repr__(self) -> str: ...
 
 @final

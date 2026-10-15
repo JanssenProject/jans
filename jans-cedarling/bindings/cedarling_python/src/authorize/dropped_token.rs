@@ -10,77 +10,48 @@ use pyo3::prelude::*;
 /// DropReason
 /// ==========
 ///
-/// Why a token was dropped from a multi-issuer authorization.
-/// Mirrors ``cedarling::DropReason``; exhaustive so a new core variant
-/// becomes a compile error here instead of a silent gap.
+/// Why a token was dropped from a multi-issuer authorization. Same shape as
+/// the ``reason`` object in the core JSON.
 ///
-/// Values
-/// ------
-///
-/// - InvalidInput
-/// - JwtValidationFailed
-/// - DuplicateToken
-/// - DuplicateMapping
-/// - NoProcessorRegistered
-/// - CustomProcessingFailed
-/// - CustomProcessingTimedOut
-/// - EntityBuildFailed
-///
-/// Methods
-/// -------
-///
-/// .. method:: slug(self) -> str
-///     Stable snake-case slug (e.g. ``"jwt_validation_failed"``); same
-///     values as the core JSON ``kind``.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[pyclass(eq, eq_int, frozen, skip_from_py_object)]
-#[pyo3(name = "DropReason")]
-pub enum DropReason {
-    InvalidInput,
-    JwtValidationFailed,
-    DuplicateToken,
-    DuplicateMapping,
-    NoProcessorRegistered,
-    CustomProcessingFailed,
-    CustomProcessingTimedOut,
-    EntityBuildFailed,
-}
-
-impl From<&cedarling::DropReason> for DropReason {
-    fn from(value: &cedarling::DropReason) -> Self {
-        match value {
-            cedarling::DropReason::InvalidInput(_) => DropReason::InvalidInput,
-            cedarling::DropReason::JwtValidationFailed => DropReason::JwtValidationFailed,
-            cedarling::DropReason::DuplicateToken => DropReason::DuplicateToken,
-            cedarling::DropReason::DuplicateMapping => DropReason::DuplicateMapping,
-            cedarling::DropReason::NoProcessorRegistered => DropReason::NoProcessorRegistered,
-            cedarling::DropReason::CustomProcessingFailed => DropReason::CustomProcessingFailed,
-            cedarling::DropReason::CustomProcessingTimedOut => DropReason::CustomProcessingTimedOut,
-            cedarling::DropReason::EntityBuildFailed => DropReason::EntityBuildFailed,
-        }
-    }
+/// Attributes
+/// ----------
+/// .. attribute:: kind
+///     str: stable snake-case slug (e.g. ``"jwt_validation_failed"``).
+/// .. attribute:: detail
+///     str | None: stable detail slug for ``invalid_input``
+///     (``"empty_mapping"`` / ``"empty_payload"``); ``None`` otherwise.
+/// .. attribute:: message
+///     str: claim-free human-readable message; non-empty for every reason.
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[pyclass(eq, frozen, skip_from_py_object)]
+pub struct DropReason {
+    inner: cedarling::DropReason,
 }
 
 #[pymethods]
 impl DropReason {
-    /// Stable snake-case slug for this reason (e.g. ``"jwt_validation_failed"``).
-    fn slug(&self) -> &'static str {
-        // Delegate to core so slugs have a single source of truth. The core
-        // slug ignores the `InvalidInput` payload, so any `TokenInputError`
-        // yields the same value.
-        let core = match self {
-            DropReason::InvalidInput => {
-                cedarling::DropReason::InvalidInput(cedarling::TokenInputError::EmptyMapping)
-            },
-            DropReason::JwtValidationFailed => cedarling::DropReason::JwtValidationFailed,
-            DropReason::DuplicateToken => cedarling::DropReason::DuplicateToken,
-            DropReason::DuplicateMapping => cedarling::DropReason::DuplicateMapping,
-            DropReason::NoProcessorRegistered => cedarling::DropReason::NoProcessorRegistered,
-            DropReason::CustomProcessingFailed => cedarling::DropReason::CustomProcessingFailed,
-            DropReason::CustomProcessingTimedOut => cedarling::DropReason::CustomProcessingTimedOut,
-            DropReason::EntityBuildFailed => cedarling::DropReason::EntityBuildFailed,
-        };
-        core.slug()
+    #[getter]
+    fn kind(&self) -> &'static str {
+        self.inner.slug()
+    }
+
+    #[getter]
+    fn detail(&self) -> Option<&'static str> {
+        self.inner.detail()
+    }
+
+    #[getter]
+    fn message(&self) -> String {
+        self.inner.message()
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "DropReason(kind='{}', detail={:?}, message='{}')",
+            self.inner.slug(),
+            self.inner.detail(),
+            self.inner.message()
+        )
     }
 }
 
@@ -99,47 +70,42 @@ impl DropReason {
 ///     int: zero-based position in the request's ``tokens`` list.
 /// .. attribute:: reason
 ///     DropReason: why the token was dropped.
-/// .. attribute:: detail
-///     str: stable detail slug for ``InvalidInput`` (``"empty_mapping"`` /
-///     ``"empty_payload"``); empty otherwise. Same value as the core JSON.
-/// .. attribute:: message
-///     str: claim-free reason message from ``DropReason``'s display text;
-///     non-empty for every reason.
-#[pyclass]
+#[pyclass(frozen)]
 pub struct DroppedToken {
-    #[pyo3(get)]
-    mapping: String,
-    #[pyo3(get)]
-    index: usize,
-    #[pyo3(get)]
-    reason: DropReason,
-    #[pyo3(get)]
-    detail: String,
-    #[pyo3(get)]
-    message: String,
+    inner: cedarling::DroppedToken,
 }
 
 #[pymethods]
 impl DroppedToken {
+    #[getter]
+    fn mapping(&self) -> &str {
+        &self.inner.mapping
+    }
+
+    #[getter]
+    fn index(&self) -> usize {
+        self.inner.index
+    }
+
+    #[getter]
+    fn reason(&self) -> DropReason {
+        DropReason {
+            inner: self.inner.reason.clone(),
+        }
+    }
+
     fn __repr__(&self) -> String {
         format!(
-            "DroppedToken(mapping='{}', index={}, reason={:?})",
-            self.mapping, self.index, self.reason
+            "DroppedToken(mapping='{}', index={}, reason='{}')",
+            self.inner.mapping,
+            self.inner.index,
+            self.inner.reason.slug()
         )
     }
 }
 
 impl From<cedarling::DroppedToken> for DroppedToken {
-    fn from(d: cedarling::DroppedToken) -> Self {
-        let detail = d.reason.detail().unwrap_or_default().to_string();
-        let message = d.reason.message();
-        let reason = DropReason::from(&d.reason);
-        Self {
-            mapping: d.mapping,
-            index: d.index,
-            reason,
-            detail,
-            message,
-        }
+    fn from(inner: cedarling::DroppedToken) -> Self {
+        Self { inner }
     }
 }

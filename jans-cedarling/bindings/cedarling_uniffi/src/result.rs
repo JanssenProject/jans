@@ -77,12 +77,19 @@ pub struct MultiIssuerAuthorizeResult {
     pub dropped_tokens: Vec<DroppedToken>,
 }
 
-/// Why a token was dropped. Mirrors [`core::DropReason`]; the conversion is
-/// exhaustive so a new core variant becomes a compile error here instead of
-/// a silent gap.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+use cedarling::{DropReason, TokenInputError};
+
+// UniFFI exports the core enums directly; a mismatch with the core definition
+// fails to compile, so there is no hand-written mapping to drift.
+#[uniffi::remote(Enum)]
+pub enum TokenInputError {
+    EmptyMapping,
+    EmptyPayload,
+}
+
+#[uniffi::remote(Enum)]
 pub enum DropReason {
-    InvalidInput,
+    InvalidInput(TokenInputError),
     JwtValidationFailed,
     DuplicateToken,
     DuplicateMapping,
@@ -92,49 +99,49 @@ pub enum DropReason {
     EntityBuildFailed,
 }
 
-impl From<&core::DropReason> for DropReason {
-    fn from(value: &core::DropReason) -> Self {
-        match value {
-            core::DropReason::InvalidInput(_) => DropReason::InvalidInput,
-            core::DropReason::JwtValidationFailed => DropReason::JwtValidationFailed,
-            core::DropReason::DuplicateToken => DropReason::DuplicateToken,
-            core::DropReason::DuplicateMapping => DropReason::DuplicateMapping,
-            core::DropReason::NoProcessorRegistered => DropReason::NoProcessorRegistered,
-            core::DropReason::CustomProcessingFailed => DropReason::CustomProcessingFailed,
-            core::DropReason::CustomProcessingTimedOut => DropReason::CustomProcessingTimedOut,
-            core::DropReason::EntityBuildFailed => DropReason::EntityBuildFailed,
-        }
+/// Why a token was dropped. `kind()`, `detail()` and `message()` return the
+/// same values as the core JSON `reason` object; `variant` is the typed reason.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct DropReasonInfo {
+    pub variant: DropReason,
+}
+
+#[uniffi::export]
+impl DropReasonInfo {
+    /// Stable snake-case slug, e.g. `"jwt_validation_failed"`.
+    pub fn kind(&self) -> String {
+        self.variant.slug().to_string()
+    }
+
+    /// Stable detail slug for `invalid_input` (`"empty_mapping"` /
+    /// `"empty_payload"`); `None` otherwise.
+    pub fn detail(&self) -> Option<String> {
+        self.variant.detail().map(str::to_string)
+    }
+
+    /// Claim-free human-readable message; non-empty for every reason.
+    pub fn message(&self) -> String {
+        self.variant.message()
     }
 }
 
 /// A token dropped during multi-issuer authorization, identified by its input
-/// `mapping` and zero-based `index`. `reason` is the drop reason enum;
-/// `detail` is the stable detail slug for `InvalidInput`
-/// (`"empty_mapping"` / `"empty_payload"`), empty otherwise.
-/// `message` carries the claim-free reason message and is
-/// non-empty for every reason.
+/// `mapping` and zero-based `index`, with the claim-free `reason`.
 #[derive(Debug, uniffi::Record)]
 pub struct DroppedToken {
     pub mapping: String,
     // i64 (not u64) so the Kotlin/Java binding exposes a signed Long rather
     // than a JVM-hostile ULong; usize casts fit trivially.
     pub index: i64,
-    pub reason: DropReason,
-    pub detail: String,
-    pub message: String,
+    pub reason: DropReasonInfo,
 }
 
 impl From<core::DroppedToken> for DroppedToken {
     fn from(d: core::DroppedToken) -> Self {
-        let detail = d.reason.detail().unwrap_or_default().to_string();
-        let message = d.reason.message();
-        let reason = DropReason::from(&d.reason);
         Self {
+            reason: DropReasonInfo { variant: d.reason },
             mapping: d.mapping,
             index: d.index as i64,
-            reason,
-            detail,
-            message,
         }
     }
 }

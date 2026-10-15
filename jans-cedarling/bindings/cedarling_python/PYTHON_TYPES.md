@@ -486,28 +486,18 @@ errors : list of PolicyEvaluationError
 DropReason
 ==========
 
-Why a token was dropped from a multi-issuer authorization.
-Mirrors ``cedarling::DropReason``; exhaustive so a new core variant
-becomes a compile error here instead of a silent gap.
+Why a token was dropped from a multi-issuer authorization. Same shape as
+the ``reason`` object in the core JSON.
 
-Values
-------
-
-- InvalidInput
-- JwtValidationFailed
-- DuplicateToken
-- DuplicateMapping
-- NoProcessorRegistered
-- CustomProcessingFailed
-- CustomProcessingTimedOut
-- EntityBuildFailed
-
-Methods
--------
-
-.. method:: slug(self) -> str
-    Stable snake-case slug (e.g. ``"jwt_validation_failed"``); same
-    values as the core JSON ``kind``.
+Attributes
+----------
+.. attribute:: kind
+    str: stable snake-case slug (e.g. ``"jwt_validation_failed"``).
+.. attribute:: detail
+    str | None: stable detail slug for ``invalid_input``
+    (``"empty_mapping"`` / ``"empty_payload"``); ``None`` otherwise.
+.. attribute:: message
+    str: claim-free human-readable message; non-empty for every reason.
 ---
 
 DroppedToken
@@ -525,12 +515,6 @@ Attributes
     int: zero-based position in the request's ``tokens`` list.
 .. attribute:: reason
     DropReason: why the token was dropped.
-.. attribute:: detail
-    str: stable detail slug for ``InvalidInput`` (``"empty_mapping"`` /
-    ``"empty_payload"``); empty otherwise. Same value as the core JSON.
-.. attribute:: message
-    str: claim-free reason message from ``DropReason``'s display text;
-    non-empty for every reason.
 ---
 
 EntityData

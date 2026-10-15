@@ -983,23 +983,40 @@ A dropped token no longer has to be recovered from the logs. Every
 `MultiIssuerAuthorizeResult` carries a `dropped_tokens` list, and the same list
 is written to the decision-log entry for the request. Each entry identifies the
 caller's token by its input `mapping` and its zero-based `index` in the request
-`tokens` array, plus a claim-free `reason` and a non-empty `message` (the
-reason's human-readable text). In Python, `reason` is a `DropReason` enum.
-Call `.slug()` for the documented snake-case slug:
+`tokens` array, plus a claim-free `reason`. Every binding exposes the same
+shape as the JSON form:
+
+```json
+{
+  "mapping": "Invalid::Token",
+  "index": 1,
+  "reason": {
+    "kind": "jwt_validation_failed",
+    "message": "JWT validation failed"
+  }
+}
+```
+
+| Binding | Access |
+|---------|--------|
+| Python | `result.dropped_tokens()[i].reason.kind` |
+| JavaScript (WASM) | `result.droppedTokens()[i].reason.kind` |
+| Kotlin / Java / Swift | `result.droppedTokens[i].reason.kind()` (typed enum: `reason.variant`) |
+| Go | `result.DroppedTokens[i].Reason.Kind` |
 
 ```python
 result = cedarling.authorize_multi_issuer(request)
 
 for dropped in result.dropped_tokens():
     print(f"token #{dropped.index} ({dropped.mapping}) dropped: "
-          f"{dropped.reason.slug()} - {dropped.message}")
+          f"{dropped.reason.kind} - {dropped.reason.message}")
 ```
 
-`dropped.reason.slug()` is one of the following stable slugs:
+`reason.kind` is one of the following stable slugs:
 
 | Reason slug | Meaning |
 |-------------|---------|
-| `invalid_input` | The token input was malformed (empty mapping or payload). `detail` is the stable slug (`"empty_mapping"` / `"empty_payload"`). |
+| `invalid_input` | The token input was malformed (empty mapping or payload). `reason.detail` is the stable slug (`"empty_mapping"` / `"empty_payload"`). |
 | `jwt_validation_failed` | Signature/claims validation failed, or no trusted issuer declares the token's mapping. |
 | `duplicate_token` | A token with the same issuer and token type was already accepted (see [Non-Deterministic Tokens](#non-deterministic-tokens)). |
 | `duplicate_mapping` | Two trusted issuers map to the same entity type; the later input replaced the earlier one (last wins). |
@@ -1009,10 +1026,10 @@ for dropped in result.dropped_tokens():
 | `entity_build_failed` | The token validated but a Cedar entity could not be built from it. |
 
 The reason is deliberately claim-free: it never contains token payloads or claim
-values, so it is safe to log and surface to callers. `message` is always the
-reason's `Display` text (e.g. `duplicate issuer and token-type combination`) and
-is non-empty for every slug, while `detail` is the stable slug for
-`invalid_input` (same value as the core JSON) and empty otherwise. Order is not
+values, so it is safe to log and surface to callers. `reason.message` is
+non-empty for every slug (e.g. `duplicate issuer and token-type combination`),
+while `reason.detail` is set only for `invalid_input` and is absent (`None` /
+`null` / `nil`) otherwise. Order is not
 guaranteed; use each entry's `index` to correlate with the request `tokens`
 array. When no token is dropped
 the list is empty and the field is omitted from the serialized result. For a
