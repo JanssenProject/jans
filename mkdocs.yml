@@ -631,9 +631,6 @@ nav:
       - UniFFI Interface: cedarling/developer/mobile-apps/cedarling-uniffi.md
       - Android: cedarling/developer/mobile-apps/cedarling-android.md
       - iOS: cedarling/developer/mobile-apps/cedarling-ios.md
-    - Sidecar:
-      - Overview: cedarling/developer/sidecar/cedarling-sidecar-overview.md
-      - Tutorial: cedarling/developer/sidecar/cedarling-sidecar-tutorial.md
     - Interface Reference:
       - Rust: https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
       - JavaScript/WASM: https://janssenproject.github.io/developer-docs/cedarling/cedarling_wasm/index.html
@@ -646,6 +643,9 @@ nav:
       - Overview: cedarling/integrations/terraform-authz-overview.md
       - Unsigned Flow: cedarling/integrations/terraform-authz.md
       - JWT Flow: cedarling/integrations/terraform-authz-jwt.md
+  - Sidecar:
+      - Overview: cedarling/developer/sidecar/cedarling-sidecar-overview.md
+      - Tutorial: cedarling/developer/sidecar/cedarling-sidecar-tutorial.md
 
 
 plugins:
