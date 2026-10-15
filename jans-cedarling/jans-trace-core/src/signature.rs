@@ -8,6 +8,8 @@
 use std::fmt;
 use std::str::FromStr;
 
+use crate::ErrorCode;
+use crate::error_code::HasErrorCode;
 use base64::Engine as _;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use ed25519_dalek::pkcs8::DecodePrivateKey as _;
@@ -44,8 +46,8 @@ impl ParseSignatureError {
     }
 
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "INVALID_SIGNATURE_ENCODING"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -57,15 +59,16 @@ pub struct SignerError;
 
 impl SignerError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "SIGNER_FAILURE"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
-/// Bytes are not an unencrypted PKCS#8 PEM Ed25519 private key (RFC 8410). The reason in
-/// `Display` names PEM labels, OIDs and positions, never key bytes.
+/// Input is not a usable Ed25519 private key: expected an unencrypted PKCS#8 PEM key (RFC 8410)
+/// or a raw 32-byte secret. The reason in `Display` names PEM labels, OIDs, positions
+/// and lengths, never key bytes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
-#[error("private key is not an unencrypted PKCS#8 PEM Ed25519 key: {reason}")]
+#[error("private key is not a usable Ed25519 key: {reason}")]
 pub struct PrivateKeyError {
     reason: PrivateKeyReason,
 }
@@ -74,14 +77,16 @@ pub struct PrivateKeyError {
 /// `Display` only, as for `SignatureEncodingReason`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
 enum PrivateKeyReason {
-    #[error("{0}")]
+    #[error("expected an unencrypted PKCS#8 PEM key: {0}")]
     Pkcs8(ed25519_dalek::pkcs8::Error),
+    #[error("raw secret is {0} bytes, expected 32")]
+    WrongLength(usize),
 }
 
 impl PrivateKeyError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "INVALID_PRIVATE_KEY"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -142,12 +147,19 @@ pub struct Ed25519Signer {
 }
 
 impl Ed25519Signer {
-    #[must_use]
-    pub fn from_secret_bytes(kid: impl Into<String>, secret: &[u8; 32]) -> Self {
-        Self {
+    /// Takes a slice and checks its length here, so every caller (bindings included) gets the
+    /// same rule and message.
+    pub fn from_secret_bytes(
+        kid: impl Into<String>,
+        secret: &[u8],
+    ) -> Result<Self, PrivateKeyError> {
+        let secret: &[u8; 32] = secret.try_into().map_err(|_| PrivateKeyError {
+            reason: PrivateKeyReason::WrongLength(secret.len()),
+        })?;
+        Ok(Self {
             kid: kid.into(),
             key: SigningKey::from_bytes(secret),
-        }
+        })
     }
 
     /// Loads the key format `openssl genpkey -algorithm ed25519` writes (decision R20).
@@ -189,13 +201,14 @@ impl TraceSigner for Ed25519Signer {
 
 #[cfg(test)]
 mod tests {
+    use crate::ErrorCode;
     use base64::DecodeError;
     use ed25519_dalek::pkcs8::spki::der::{self, pem};
     use ed25519_dalek::pkcs8::{self, DecodePrivateKey as _, spki};
 
     use super::{
-        Ed25519Signer, ParseSignatureError, PrivateKeyReason, SignatureEncodingReason,
-        SignatureValue, SignerError, TraceSigner,
+        Ed25519Signer, ParseSignatureError, PrivateKeyError, PrivateKeyReason,
+        SignatureEncodingReason, SignatureValue, SignerError, TraceSigner,
     };
 
     struct Rfc8032Case {
@@ -224,7 +237,27 @@ mod tests {
             .expect("test secret is hex")
             .try_into()
             .expect("test secret is 32 bytes");
-        Ed25519Signer::from_secret_bytes("key-test", &secret)
+        Ed25519Signer::from_secret_bytes("key-test", &secret).expect("test secret is valid")
+    }
+
+    #[test]
+    fn from_secret_bytes_refuses_a_wrong_length() {
+        for length in [0, 31, 33] {
+            let err = Ed25519Signer::from_secret_bytes("k", &vec![7; length])
+                .expect_err("only 32 bytes are an Ed25519 secret");
+            assert_eq!(
+                err,
+                PrivateKeyError {
+                    reason: PrivateKeyReason::WrongLength(length)
+                },
+                "{length} bytes are refused with their length"
+            );
+            assert_eq!(
+                err.code(),
+                ErrorCode::InvalidPrivateKey,
+                "same code as a bad PEM"
+            );
+        }
     }
 
     #[test]
@@ -336,7 +369,9 @@ mod tests {
         let key_err = Ed25519Signer::from_pkcs8_pem("k", "not a key").expect_err("not PEM");
         assert_eq!(
             key_err.to_string(),
-            format!("private key is not an unencrypted PKCS#8 PEM Ed25519 key: {pem_err}"),
+            format!(
+                "private key is not a usable Ed25519 key: expected an unencrypted PKCS#8 PEM key: {pem_err}"
+            ),
             "`{{err}}` alone tells the operator what is wrong"
         );
 
@@ -353,12 +388,12 @@ mod tests {
             "!".parse::<SignatureValue>()
                 .expect_err("not base64url")
                 .code(),
-            "INVALID_SIGNATURE_ENCODING",
+            ErrorCode::InvalidSignatureEncoding,
             "stable code from core design §10"
         );
         assert_eq!(
             SignerError.code(),
-            "SIGNER_FAILURE",
+            ErrorCode::SignerFailure,
             "stable code from core design §10"
         );
     }
@@ -465,7 +500,7 @@ mod tests {
             Ed25519Signer::from_pkcs8_pem("k", "")
                 .expect_err("empty input is not a key")
                 .code(),
-            "INVALID_PRIVATE_KEY",
+            ErrorCode::InvalidPrivateKey,
             "our code, not in §10"
         );
     }

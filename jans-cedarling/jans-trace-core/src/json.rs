@@ -18,6 +18,8 @@ use serde::de::{self, DeserializeSeed, Deserializer, MapAccess, SeqAccess, Visit
 use serde_json::{Map, Number, Value};
 use thiserror::Error;
 
+use crate::ErrorCode;
+use crate::error_code::HasErrorCode;
 use crate::limits::LimitKind;
 use crate::{Limits, SizeLimitError};
 
@@ -45,13 +47,8 @@ pub enum JsonError {
 
 impl JsonError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        match self {
-            Self::Invalid { .. } => "INVALID_JSON",
-            Self::DuplicateMember => "DUPLICATE_MEMBER",
-            Self::NonCanonicalizable(_) => "NON_CANONICALIZABLE_JSON",
-            Self::LimitExceeded(e) => e.code(),
-        }
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 

@@ -11,6 +11,7 @@
 
 pub mod assertion;
 mod digest;
+mod error_code;
 pub mod inputs;
 pub mod json;
 pub mod key;
@@ -21,4 +22,5 @@ pub mod signature;
 
 // Shared by every module, so they live at the root instead of `digest::Digest`.
 pub use digest::{Digest, ParseDigestError};
+pub use error_code::ErrorCode;
 pub use limits::{Limits, SizeLimitError};
