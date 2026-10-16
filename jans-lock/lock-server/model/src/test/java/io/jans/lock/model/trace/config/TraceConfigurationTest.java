@@ -51,7 +51,8 @@ public class TraceConfigurationTest {
                 + "  \"receiptRepairIntervalSeconds\": 60,"
                 + "  \"pendingReceiptTimeoutSeconds\": 30,"
                 + "  \"maxBulkRecords\": 10,"
-                + "  \"maxBulkRequestBytes\": 2048"
+                + "  \"maxBulkRequestBytes\": 2048,"
+                + "  \"cryptoProvider\": \"NATIVE\""
                 + "}"
                 + "}";
 
@@ -81,6 +82,7 @@ public class TraceConfigurationTest {
         assertEquals(30, traceConfiguration.getPendingReceiptTimeoutSeconds());
         assertEquals(10, traceConfiguration.getMaxBulkRecords());
         assertEquals(2048, traceConfiguration.getMaxBulkRequestBytes());
+        assertEquals("NATIVE", traceConfiguration.getCryptoProvider());
     }
 
     @Test
@@ -106,6 +108,7 @@ public class TraceConfigurationTest {
         assertEquals(TraceConfiguration.DEFAULT_PENDING_RECEIPT_TIMEOUT_SECONDS, traceConfiguration.getPendingReceiptTimeoutSeconds());
         assertEquals(TraceConfiguration.DEFAULT_MAX_BULK_RECORDS, traceConfiguration.getMaxBulkRecords());
         assertEquals(TraceConfiguration.DEFAULT_MAX_BULK_REQUEST_BYTES, traceConfiguration.getMaxBulkRequestBytes());
+        assertEquals("JAVA", traceConfiguration.getCryptoProvider());
     }
 
     @Test
@@ -145,6 +148,35 @@ public class TraceConfigurationTest {
         traceConfiguration.setMaxBulkRequestBytes(TraceConfiguration.HARD_MAX_BULK_REQUEST_BYTES + 1_000_000);
 
         assertEquals(TraceConfiguration.HARD_MAX_BULK_REQUEST_BYTES, traceConfiguration.getMaxBulkRequestBytes());
+    }
+
+    @Test
+    public void testCryptoProvider_defaultIsJava() {
+        assertEquals("JAVA", TraceConfiguration.DEFAULT_CRYPTO_PROVIDER);
+        assertEquals("JAVA", new TraceConfiguration().getCryptoProvider());
+    }
+
+    @Test
+    public void testCryptoProvider_jacksonRoundTrip() throws Exception {
+        TraceConfiguration traceConfiguration = new TraceConfiguration();
+        traceConfiguration.setCryptoProvider("NATIVE");
+
+        String json = mapper.writeValueAsString(traceConfiguration);
+        TraceConfiguration restored = mapper.readValue(json, TraceConfiguration.class);
+
+        assertTrue(json.contains("\"cryptoProvider\":\"NATIVE\""));
+        assertEquals("NATIVE", restored.getCryptoProvider());
+    }
+
+    @Test
+    public void testCryptoProvider_nullOrBlank_fallsBackToDefault() {
+        TraceConfiguration traceConfiguration = new TraceConfiguration();
+
+        traceConfiguration.setCryptoProvider(null);
+        assertEquals("JAVA", traceConfiguration.getCryptoProvider());
+
+        traceConfiguration.setCryptoProvider("   ");
+        assertEquals("JAVA", traceConfiguration.getCryptoProvider());
     }
 
 }

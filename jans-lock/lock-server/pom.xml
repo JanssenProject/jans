@@ -16,8 +16,11 @@
 
 	<modules>
 		<module>model</module>
+		<module>trace-crypto-api</module>
+		<module>trace-crypto-java</module>
 		<module>client</module>
 		<module>service</module>
+		<module>trace-crypto-native</module>
 		<module>server</module>
 		<module>server-fips</module>
 	</modules>
@@ -94,7 +97,41 @@
 
 			<dependency>
 				<groupId>io.jans</groupId>
+				<artifactId>jans-lock-trace-crypto-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-lock-trace-crypto-java</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-lock-trace-crypto-java</artifactId>
+				<version>${project.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>io.jans</groupId>
 				<artifactId>jans-lock-service</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-lock-service</artifactId>
+				<version>${project.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-lock-trace-crypto-native</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

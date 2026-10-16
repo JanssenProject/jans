@@ -29,6 +29,7 @@ import io.jans.lock.service.trace.store.TraceKeys;
 import io.jans.lock.service.trace.store.TraceStore;
 import io.jans.lock.service.trace.verify.TraceVerificationService;
 import io.jans.lock.service.trace.verify.VerifiedAssertion;
+import io.jans.lock.trace.crypto.TraceCryptoException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -67,6 +68,9 @@ public class TraceIngestionService {
 	@Inject
 	private TraceStore store;
 
+	@Inject
+	private TraceKeys traceKeys;
+
 	/**
 	 * @throws io.jans.lock.service.trace.error.TraceCryptoException     {@code crypto_unavailable}
 	 * @throws io.jans.lock.service.trace.error.TraceValidationException every verification,
@@ -89,7 +93,7 @@ public class TraceIngestionService {
 		CorrelationPlan plan = correlation.plan(verified, ctx);
 
 		String domainId = ctx.getEvidenceDomainId();
-		String recordKey = TraceKeys.recordKey(identity);
+		String recordKey = traceKeys.recordKey(identity);
 		ReceiptClaim claim = receiptChain.claim(domainId, verified.getProducer(), verified.getRecordId(), recordKey,
 				verified.getContentDigest(), ctx.getReceivedAtMs(), ctx.getNodeId());
 
