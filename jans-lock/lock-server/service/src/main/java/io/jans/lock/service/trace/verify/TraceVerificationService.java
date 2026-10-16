@@ -11,10 +11,10 @@ import java.io.InputStream;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
-import io.jans.lock.service.trace.canon.JcsException;
-import io.jans.lock.service.trace.crypto.Ed25519Capability;
-import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
-import io.jans.lock.service.trace.crypto.Ed25519Verifier;
+import io.jans.lock.trace.crypto.bc.JcsException;
+import io.jans.lock.trace.crypto.bc.Ed25519Capability;
+import io.jans.lock.trace.crypto.bc.Ed25519PublicKeys;
+import io.jans.lock.trace.crypto.bc.Ed25519Verifier;
 import io.jans.lock.trace.crypto.StrictBase64Url;
 import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;

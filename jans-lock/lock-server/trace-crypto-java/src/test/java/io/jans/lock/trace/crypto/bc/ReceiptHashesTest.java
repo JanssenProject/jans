@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.receipt;
+package io.jans.lock.trace.crypto.bc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -17,7 +17,7 @@ import java.security.NoSuchAlgorithmException;
 
 import org.junit.jupiter.api.Test;
 
-import io.jans.lock.service.trace.TraceConstants;
+import io.jans.lock.trace.crypto.TraceHashes;
 
 /**
  * Known-vector test for {@link ReceiptHashes#receiptHash}: the expected hash below is computed
@@ -35,7 +35,7 @@ class ReceiptHashesTest {
 		String producerId = "producer-1";
 		String recordId = "record-1";
 		String contentDigest = "sha256:" + repeat('a', 64);
-		String prevReceiptHash = TraceConstants.ZERO_HASH;
+		String prevReceiptHash = TraceHashes.ZERO_HASH;
 
 		String canonical = "{\"content_digest\":\"" + contentDigest + "\",\"evidence_domain_id\":\"" + domainId
 				+ "\",\"prev_receipt_hash\":\"" + prevReceiptHash + "\",\"producer_id\":\"" + producerId
@@ -59,14 +59,14 @@ class ReceiptHashesTest {
 	void testReceiptHash_pythonKnownAnswer_zeroMillis() {
 		assertEquals("sha256:cd66cd1b3c53dbdbdebc76e313a3ba72cbf3460d9c05cddf8e09216eb03e95b0",
 				ReceiptHashes.receiptHash("domain-1", 1L, 1_800_000_000_000L, "producer-1", "record-1",
-						"sha256:" + repeat('a', 64), TraceConstants.ZERO_HASH));
+						"sha256:" + repeat('a', 64), TraceHashes.ZERO_HASH));
 	}
 
 	@Test
 	void testReceiptHash_pythonKnownAnswer_nonZeroMillis() {
 		assertEquals("sha256:ef30fe233db4f3adf4b5df5f0755faf44b8b3fbf3e15b2ea4bd7be94cc6b8fff",
 				ReceiptHashes.receiptHash("domain-1", 1L, 1_800_000_000_123L, "producer-1", "record-1",
-						"sha256:" + repeat('a', 64), TraceConstants.ZERO_HASH));
+						"sha256:" + repeat('a', 64), TraceHashes.ZERO_HASH));
 	}
 
 	@Test
@@ -90,7 +90,7 @@ class ReceiptHashesTest {
 	void testReceiptHash_nullDomainId_throwsNullPointerException() {
 		assertThrows(NullPointerException.class,
 				() -> ReceiptHashes.receiptHash(null, 1L, 1_000L, "p", "r", "sha256:" + repeat('0', 64),
-						TraceConstants.ZERO_HASH));
+						TraceHashes.ZERO_HASH));
 	}
 
 	private static String sha256Hex(String s) {

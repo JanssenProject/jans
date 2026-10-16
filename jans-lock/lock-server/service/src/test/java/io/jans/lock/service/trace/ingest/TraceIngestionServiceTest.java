@@ -45,9 +45,9 @@ import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.correlation.TraceCorrelationService;
-import io.jans.lock.service.trace.crypto.Ed25519Capability;
-import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
-import io.jans.lock.service.trace.crypto.Ed25519Verifier;
+import io.jans.lock.trace.crypto.bc.Ed25519Capability;
+import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
+import io.jans.lock.trace.crypto.bc.Ed25519Verifier;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.error.TraceValidationException;
@@ -112,7 +112,7 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 
 	@BeforeAll
 	static void installProvider() {
-		Ed25519TestKeys.installProvider();
+		TraceTestKeys.installProvider();
 	}
 
 	@BeforeEach
@@ -178,8 +178,8 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 	// -- fixtures -----------------------------------------------------------------------------
 
 	private KeyPair registerKey(String producerId, String kid) {
-		KeyPair keyPair = Ed25519TestKeys.generateKeyPair();
-		keyRegistry.register(DOMAIN, producerId, kid, Ed25519TestKeys.toJwk(keyPair.getPublic()),
+		KeyPair keyPair = TraceTestKeys.generateKeyPair();
+		keyRegistry.register(DOMAIN, producerId, kid, TraceTestKeys.toJwk(keyPair.getPublic()),
 				new ArrayList<>(TraceConstants.EVENT_KINDS), KEY_VALID_FROM_MS, null, REGISTERED_BY, KEY_VALID_FROM_MS);
 		return keyPair;
 	}
@@ -245,7 +245,7 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 	void testIngest_InvalidSignature_NoRecordNoReceiptRows() {
 		registerKey(PRODUCER, KID);
 		registerChain(PRODUCER, INSTANCE, CHAIN);
-		KeyPair otherKeyPair = Ed25519TestKeys.generateKeyPair();
+		KeyPair otherKeyPair = TraceTestKeys.generateKeyPair();
 		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
 				.sign(otherKeyPair.getPrivate());
 
@@ -474,7 +474,7 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 	void testIngest_FirstObservedRejectedBeforeCorrelation_NoChainRegistered() {
 		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
 		KeyPair keyPair = registerKey(PRODUCER, KID);
-		KeyPair otherKeyPair = Ed25519TestKeys.generateKeyPair();
+		KeyPair otherKeyPair = TraceTestKeys.generateKeyPair();
 
 		String badSignature = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
 				.sign(otherKeyPair.getPrivate());
@@ -499,8 +499,8 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 	@Test
 	void testIngest_FirstObservedEventKindNotAuthorized_NoChainRegistered() {
 		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
-		KeyPair keyPair = Ed25519TestKeys.generateKeyPair();
-		keyRegistry.register(DOMAIN, PRODUCER, KID, Ed25519TestKeys.toJwk(keyPair.getPublic()),
+		KeyPair keyPair = TraceTestKeys.generateKeyPair();
+		keyRegistry.register(DOMAIN, PRODUCER, KID, TraceTestKeys.toJwk(keyPair.getPublic()),
 				Collections.singletonList(TraceConstants.EVENT_KIND_RUNTIME_EFFECT), KEY_VALID_FROM_MS, null,
 				REGISTERED_BY, KEY_VALID_FROM_MS);
 		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()

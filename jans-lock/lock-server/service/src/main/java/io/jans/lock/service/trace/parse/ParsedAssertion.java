@@ -13,8 +13,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.service.trace.TraceConstants;
-import io.jans.lock.service.trace.canon.CanonicalHashes;
-import io.jans.lock.service.trace.canon.JcsCanonicalizer;
+import io.jans.lock.trace.crypto.bc.CanonicalHashes;
+import io.jans.lock.trace.crypto.bc.JcsCanonicalizer;
 
 /**
  * The bounded-parsed form of an incoming TRACE assertion: the exact received bytes decoded as

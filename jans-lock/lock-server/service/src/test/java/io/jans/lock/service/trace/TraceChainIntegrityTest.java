@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.lock.service.trace.canon.CanonicalHashes;
+import io.jans.lock.trace.crypto.bc.CanonicalHashes;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.ingest.AcceptanceResult;

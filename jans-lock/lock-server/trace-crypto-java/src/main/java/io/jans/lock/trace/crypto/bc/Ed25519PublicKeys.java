@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.crypto;
+package io.jans.lock.trace.crypto.bc;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.jans.lock.service.trace.canon.CanonicalHashes;
 import io.jans.lock.trace.crypto.StrictBase64Url;
 import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.util.security.SecurityProviderUtility;

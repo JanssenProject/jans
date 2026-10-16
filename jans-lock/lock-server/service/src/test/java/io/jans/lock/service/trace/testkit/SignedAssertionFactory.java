@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import io.jans.lock.service.trace.TraceConstants;
-import io.jans.lock.service.trace.canon.JcsCanonicalizer;
-import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
+import io.jans.lock.trace.crypto.bc.JcsCanonicalizer;
+import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
 import io.jans.lock.trace.crypto.StrictBase64Url;
 
 /**
@@ -192,7 +192,7 @@ public final class SignedAssertionFactory {
 	public String sign(PrivateKey privateKey) {
 		byte[] input = JcsCanonicalizer
 				.canonicalizeToUtf8(JcsCanonicalizer.withoutField(root, TraceConstants.SIGNATURE_FIELD));
-		return putSignature(Ed25519TestKeys.sign(privateKey, input));
+		return putSignature(TraceTestKeys.sign(privateKey, input));
 	}
 
 	/**
@@ -205,7 +205,7 @@ public final class SignedAssertionFactory {
 			root.put(TraceConstants.SIGNATURE_FIELD, StrictBase64Url.encode(new byte[64]));
 		}
 		byte[] input = JcsCanonicalizer.canonicalizeToUtf8(root);
-		return putSignature(Ed25519TestKeys.sign(privateKey, input));
+		return putSignature(TraceTestKeys.sign(privateKey, input));
 	}
 
 	/**

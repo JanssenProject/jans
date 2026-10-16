@@ -39,11 +39,11 @@ import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.BaseLockServiceTest;
-import io.jans.lock.service.trace.canon.JcsCanonicalizer;
-import io.jans.lock.service.trace.crypto.Ed25519Capability;
-import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
-import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
-import io.jans.lock.service.trace.crypto.Ed25519Verifier;
+import io.jans.lock.trace.crypto.bc.JcsCanonicalizer;
+import io.jans.lock.trace.crypto.bc.Ed25519Capability;
+import io.jans.lock.trace.crypto.bc.Ed25519PublicKeys;
+import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
+import io.jans.lock.trace.crypto.bc.Ed25519Verifier;
 import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
@@ -98,7 +98,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 
 	@BeforeAll
 	static void installProvider() {
-		Ed25519TestKeys.installProvider();
+		TraceTestKeys.installProvider();
 	}
 
 	@BeforeEach
@@ -123,8 +123,8 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 
 		service = newService(capability, keyRegistry, new Ed25519Verifier(), parser);
 
-		keyPair = Ed25519TestKeys.generateKeyPair();
-		keyRegistry.register(DOMAIN, PRODUCER, KID, Ed25519TestKeys.toJwk(keyPair.getPublic()),
+		keyPair = TraceTestKeys.generateKeyPair();
+		keyRegistry.register(DOMAIN, PRODUCER, KID, TraceTestKeys.toJwk(keyPair.getPublic()),
 				new ArrayList<>(TraceConstants.EVENT_KINDS), KEY_VALID_FROM_MS, null, CLIENT_ID, KEY_VALID_FROM_MS);
 	}
 
@@ -165,7 +165,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 		assertEquals(KID, verified.getVerification().getKeyId());
 		assertEquals(RECEIVED_AT_MS, verified.getVerification().getVerifiedAtMs());
 		assertEquals(Ed25519PublicKeys.ALGORITHM, verified.getVerification().getAlgorithm());
-		assertEquals(Ed25519PublicKeys.thumbprint(Ed25519TestKeys.toJwk(keyPair.getPublic())),
+		assertEquals(Ed25519PublicKeys.thumbprint(TraceTestKeys.toJwk(keyPair.getPublic())),
 				verified.getVerification().getKeyThumbprint());
 		assertEquals(Boolean.TRUE, verified.getVerification().getKeyAuthorized());
 
@@ -192,8 +192,8 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	@Test
 	void testVerify_EventKindOutsideKeyScope_UnknownProducerKeyBeforeSignature() {
 		String adOnlyKid = "ad-only-kid";
-		KeyPair adOnlyKey = Ed25519TestKeys.generateKeyPair();
-		keyRegistry.register(DOMAIN, PRODUCER, adOnlyKid, Ed25519TestKeys.toJwk(adOnlyKey.getPublic()),
+		KeyPair adOnlyKey = TraceTestKeys.generateKeyPair();
+		keyRegistry.register(DOMAIN, PRODUCER, adOnlyKid, TraceTestKeys.toJwk(adOnlyKey.getPublic()),
 				List.of(TraceConstants.EVENT_KIND_AUTHORIZATION_DECISION), KEY_VALID_FROM_MS, null, CLIENT_ID,
 				KEY_VALID_FROM_MS);
 
@@ -279,7 +279,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 
 	@Test
 	void testVerify_SignedWithDifferentKey_InvalidSignature() {
-		KeyPair otherKeyPair = Ed25519TestKeys.generateKeyPair();
+		KeyPair otherKeyPair = TraceTestKeys.generateKeyPair();
 		String json = SignedAssertionFactory.authorizationDecision().sign(otherKeyPair.getPrivate());
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,

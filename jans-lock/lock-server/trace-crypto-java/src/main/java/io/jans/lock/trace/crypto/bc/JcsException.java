@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.canon;
+package io.jans.lock.trace.crypto.bc;
 
 /**
  * Thrown when a JSON value cannot be canonicalized according to RFC 8785 (JSON Canonicalization

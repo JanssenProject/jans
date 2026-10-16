@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.service.trace.TraceConstants;
-import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
+import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
@@ -59,7 +59,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@BeforeAll
 	static void installProvider() {
-		Ed25519TestKeys.installProvider();
+		TraceTestKeys.installProvider();
 	}
 
 	@BeforeEach
@@ -69,8 +69,8 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 		setField(registry, "traceStore", store);
 		setField(registry, "log", LoggerFactory.getLogger(ProducerKeyRegistry.class));
 
-		KeyPair keyPair = Ed25519TestKeys.generateKeyPair();
-		jwk = Ed25519TestKeys.toJwk(keyPair.getPublic());
+		KeyPair keyPair = TraceTestKeys.generateKeyPair();
+		jwk = TraceTestKeys.toJwk(keyPair.getPublic());
 	}
 
 	// -- registration ---------------------------------------------------------------------------

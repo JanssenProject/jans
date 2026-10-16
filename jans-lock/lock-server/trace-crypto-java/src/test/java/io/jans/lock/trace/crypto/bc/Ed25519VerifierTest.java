@@ -4,9 +4,10 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.crypto;
+package io.jans.lock.trace.crypto.bc;
 
 import io.jans.lock.trace.crypto.StrictBase64Url;
+import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -45,7 +46,7 @@ class Ed25519VerifierTest {
 
 	@BeforeAll
 	static void installProvider() {
-		Ed25519TestKeys.installProvider();
+		TraceTestKeys.installProvider();
 	}
 
 	/**
@@ -74,9 +75,9 @@ class Ed25519VerifierTest {
 	@MethodSource("rfc8032Vectors")
 	void testVerify_rfc8032Vector_true(String name, String seedHex, String publicHex, String messageHex,
 			String signatureHex) {
-		PublicKey key = Ed25519TestKeys.publicKeyFromRaw(Ed25519TestKeys.hex(publicHex));
-		byte[] message = Ed25519TestKeys.hex(messageHex);
-		byte[] signature = Ed25519TestKeys.hex(signatureHex);
+		PublicKey key = TraceTestKeys.publicKeyFromRaw(TraceTestKeys.hex(publicHex));
+		byte[] message = TraceTestKeys.hex(messageHex);
+		byte[] signature = TraceTestKeys.hex(signatureHex);
 
 		assertTrue(VERIFIER.verify(key, message, signature));
 	}
@@ -85,20 +86,20 @@ class Ed25519VerifierTest {
 	@MethodSource("rfc8032Vectors")
 	void testVerify_rfc8032Vector_seedDerivesPublicKeyAndSignature(String name, String seedHex, String publicHex,
 			String messageHex, String signatureHex) {
-		PrivateKey privateKey = Ed25519TestKeys.privateKeyFromSeed(Ed25519TestKeys.hex(seedHex));
-		byte[] message = Ed25519TestKeys.hex(messageHex);
+		PrivateKey privateKey = TraceTestKeys.privateKeyFromSeed(TraceTestKeys.hex(seedHex));
+		byte[] message = TraceTestKeys.hex(messageHex);
 
 		// Ed25519 signing is deterministic, so the provider must reproduce the RFC signature exactly.
-		assertArrayEquals(Ed25519TestKeys.hex(signatureHex), Ed25519TestKeys.sign(privateKey, message));
+		assertArrayEquals(TraceTestKeys.hex(signatureHex), TraceTestKeys.sign(privateKey, message));
 	}
 
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("rfc8032Vectors")
 	void testVerify_rfc8032VectorFlippedBit_false(String name, String seedHex, String publicHex, String messageHex,
 			String signatureHex) {
-		PublicKey key = Ed25519TestKeys.publicKeyFromRaw(Ed25519TestKeys.hex(publicHex));
-		byte[] message = Ed25519TestKeys.hex(messageHex);
-		byte[] signature = Ed25519TestKeys.hex(signatureHex);
+		PublicKey key = TraceTestKeys.publicKeyFromRaw(TraceTestKeys.hex(publicHex));
+		byte[] message = TraceTestKeys.hex(messageHex);
+		byte[] signature = TraceTestKeys.hex(signatureHex);
 
 		for (int index : new int[] { 0, 31, 32, 63 }) {
 			byte[] flipped = signature.clone();
@@ -111,9 +112,9 @@ class Ed25519VerifierTest {
 	@MethodSource("rfc8032Vectors")
 	void testVerify_rfc8032VectorDifferentMessage_false(String name, String seedHex, String publicHex,
 			String messageHex, String signatureHex) {
-		PublicKey key = Ed25519TestKeys.publicKeyFromRaw(Ed25519TestKeys.hex(publicHex));
-		byte[] message = Ed25519TestKeys.hex(messageHex);
-		byte[] signature = Ed25519TestKeys.hex(signatureHex);
+		PublicKey key = TraceTestKeys.publicKeyFromRaw(TraceTestKeys.hex(publicHex));
+		byte[] message = TraceTestKeys.hex(messageHex);
+		byte[] signature = TraceTestKeys.hex(signatureHex);
 
 		byte[] appended = Arrays.copyOf(message, message.length + 1);
 		assertFalse(VERIFIER.verify(key, appended, signature));
@@ -135,7 +136,7 @@ class Ed25519VerifierTest {
 
 	@Test
 	void testVerify_rfc8037AppendixA4WrongKey_false() {
-		PublicKey otherKey = Ed25519TestKeys.generateKeyPair().getPublic();
+		PublicKey otherKey = TraceTestKeys.generateKeyPair().getPublic();
 		byte[] signingInput = RFC8037_SIGNING_INPUT.getBytes(StandardCharsets.US_ASCII);
 		byte[] signature = StrictBase64Url.decode(RFC8037_SIGNATURE);
 
@@ -144,12 +145,12 @@ class Ed25519VerifierTest {
 
 	@Test
 	void testVerify_generatedKeyPair_signThenVerify() {
-		KeyPair pair = Ed25519TestKeys.generateKeyPair();
+		KeyPair pair = TraceTestKeys.generateKeyPair();
 		byte[] message = "{\"a\":1}".getBytes(StandardCharsets.UTF_8);
-		byte[] signature = Ed25519TestKeys.sign(pair.getPrivate(), message);
+		byte[] signature = TraceTestKeys.sign(pair.getPrivate(), message);
 
 		assertTrue(VERIFIER.verify(pair.getPublic(), message, signature));
-		assertTrue(VERIFIER.verify(Ed25519PublicKeys.fromJwk(Ed25519TestKeys.toJwk(pair.getPublic())), message,
+		assertTrue(VERIFIER.verify(Ed25519PublicKeys.fromJwk(TraceTestKeys.toJwk(pair.getPublic())), message,
 				signature));
 	}
 

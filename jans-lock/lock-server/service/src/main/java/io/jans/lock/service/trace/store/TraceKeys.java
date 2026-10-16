@@ -11,8 +11,8 @@ import java.util.Objects;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-import io.jans.lock.service.trace.canon.CanonicalHashes;
-import io.jans.lock.service.trace.canon.JcsCanonicalizer;
+import io.jans.lock.trace.crypto.bc.CanonicalHashes;
+import io.jans.lock.trace.crypto.bc.JcsCanonicalizer;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;

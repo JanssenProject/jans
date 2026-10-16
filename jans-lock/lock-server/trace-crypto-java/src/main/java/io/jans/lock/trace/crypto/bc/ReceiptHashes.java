@@ -4,16 +4,15 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.receipt;
+package io.jans.lock.trace.crypto.bc;
 
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.jans.lock.service.trace.TraceConstants;
+import io.jans.lock.trace.crypto.TraceHashes;
 import io.jans.lock.trace.crypto.TraceTime;
-import io.jans.lock.service.trace.canon.CanonicalHashes;
 
 /**
  * The receipt-hash function of the receipt chain (design §9):
@@ -54,7 +53,7 @@ public final class ReceiptHashes {
 		Objects.requireNonNull(prevReceiptHash, "prevReceiptHash");
 
 		ObjectNode node = JsonNodeFactory.instance.objectNode();
-		node.put("receipt_profile", TraceConstants.RECEIPT_PROFILE);
+		node.put("receipt_profile", TraceHashes.RECEIPT_PROFILE);
 		node.put("evidence_domain_id", domainId);
 		node.put("receipt_sequence", receiptSequence);
 		node.put("received_at", TraceTime.formatMillis(receivedAtMs));

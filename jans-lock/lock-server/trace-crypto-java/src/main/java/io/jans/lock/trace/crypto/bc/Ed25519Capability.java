@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.crypto;
+package io.jans.lock.trace.crypto.bc;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;

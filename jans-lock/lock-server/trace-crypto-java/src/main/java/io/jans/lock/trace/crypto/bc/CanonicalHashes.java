@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.canon;
+package io.jans.lock.trace.crypto.bc;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

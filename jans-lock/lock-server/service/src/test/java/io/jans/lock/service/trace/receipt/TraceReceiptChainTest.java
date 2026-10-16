@@ -42,6 +42,7 @@ import io.jans.lock.service.trace.receipt.ChainVerificationReport.Entry;
 import io.jans.lock.service.trace.receipt.ChainVerificationReport.EntryStatus;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
+import io.jans.lock.trace.crypto.bc.ReceiptHashes;
 
 /**
  * Tests for {@link TraceReceiptChain}: sequential allocation and linkage, cross-node contention on

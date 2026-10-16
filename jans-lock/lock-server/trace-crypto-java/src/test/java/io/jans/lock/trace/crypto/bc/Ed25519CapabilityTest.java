@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.crypto;
+package io.jans.lock.trace.crypto.bc;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,13 +19,14 @@ import org.junit.jupiter.api.Test;
 
 import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.util.security.SecurityProviderUtility;
+import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
 
 class Ed25519CapabilityTest {
 
 	@BeforeAll
 	static void installProvider() {
 		// Guarded: a previous test class in the same JVM may already have installed the provider.
-		Ed25519TestKeys.installProvider();
+		TraceTestKeys.installProvider();
 	}
 
 	@Test

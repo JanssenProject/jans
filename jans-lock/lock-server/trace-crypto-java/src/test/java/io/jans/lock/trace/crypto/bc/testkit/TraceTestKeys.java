@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.testkit;
+package io.jans.lock.trace.crypto.bc.testkit;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -21,16 +21,14 @@ import java.util.Map;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
-import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
+import io.jans.lock.trace.crypto.bc.Ed25519PublicKeys;
 import io.jans.lock.trace.crypto.StrictBase64Url;
 import io.jans.util.security.SecurityProviderUtility;
 
 /**
  * Test-only Ed25519 helpers shared by the whole TRACE test suite: provider installation, key
  * generation, deterministic keys from RFC 8032 seeds, signing, and RFC 8037 JWK export of public
- * keys (consolidated test kit). Moved here from
- * {@code io.jans.lock.service.trace.crypto.Ed25519TestKeys}, which now delegates
- * to this class so earlier call sites keep compiling.
+ * keys (consolidated test kit).
  */
 public final class TraceTestKeys {
 

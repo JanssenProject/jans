@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.crypto;
+package io.jans.lock.trace.crypto.bc;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.trace.crypto.StrictBase64Url;
 import io.jans.lock.trace.crypto.TraceCryptoException;
+import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
 
 class Ed25519PublicKeysTest {
 
@@ -38,7 +39,7 @@ class Ed25519PublicKeysTest {
 
 	@BeforeAll
 	static void installProvider() {
-		Ed25519TestKeys.installProvider();
+		TraceTestKeys.installProvider();
 	}
 
 	@Test
@@ -46,8 +47,8 @@ class Ed25519PublicKeysTest {
 		PublicKey key = Ed25519PublicKeys.fromJwk(validJwk());
 
 		assertNotNull(key);
-		assertArrayEquals(Ed25519TestKeys.hex("302a300506032b6570032100" + RFC8037_X_HEX), key.getEncoded());
-		assertArrayEquals(Ed25519TestKeys.hex(RFC8037_X_HEX), Ed25519TestKeys.rawPublicKey(key));
+		assertArrayEquals(TraceTestKeys.hex("302a300506032b6570032100" + RFC8037_X_HEX), key.getEncoded());
+		assertArrayEquals(TraceTestKeys.hex(RFC8037_X_HEX), TraceTestKeys.rawPublicKey(key));
 	}
 
 	@Test
@@ -161,7 +162,7 @@ class Ed25519PublicKeysTest {
 	void testFromJwk_x44ByteSpkiBlob_rejected() {
 		// The jans-auth crypto provider convention (full SPKI in x) is not RFC 8037 and must fail.
 		Map<String, String> jwk = validJwk();
-		jwk.put("x", StrictBase64Url.encode(Ed25519TestKeys.hex("302a300506032b6570032100" + RFC8037_X_HEX)));
+		jwk.put("x", StrictBase64Url.encode(TraceTestKeys.hex("302a300506032b6570032100" + RFC8037_X_HEX)));
 
 		assertReason(TraceCryptoException.REASON_JWK_X_LENGTH, jwk);
 	}
@@ -224,9 +225,9 @@ class Ed25519PublicKeysTest {
 
 	@Test
 	void testFromJwk_generatedKeyRoundTrip_matchesOriginalEncoding() {
-		PublicKey original = Ed25519TestKeys.generateKeyPair().getPublic();
+		PublicKey original = TraceTestKeys.generateKeyPair().getPublic();
 
-		PublicKey rebuilt = Ed25519PublicKeys.fromJwk(Ed25519TestKeys.toJwk(original));
+		PublicKey rebuilt = Ed25519PublicKeys.fromJwk(TraceTestKeys.toJwk(original));
 
 		assertArrayEquals(original.getEncoded(), rebuilt.getEncoded());
 	}
@@ -253,7 +254,7 @@ class Ed25519PublicKeysTest {
 
 	@Test
 	void testThumbprint_differentKeys_differ() {
-		Map<String, String> other = Ed25519TestKeys.toJwk(Ed25519TestKeys.generateKeyPair().getPublic());
+		Map<String, String> other = TraceTestKeys.toJwk(TraceTestKeys.generateKeyPair().getPublic());
 
 		assertNotEquals(Ed25519PublicKeys.thumbprint(validJwk()), Ed25519PublicKeys.thumbprint(other));
 		assertEquals(Ed25519PublicKeys.thumbprint(other), Ed25519PublicKeys.thumbprint(other));

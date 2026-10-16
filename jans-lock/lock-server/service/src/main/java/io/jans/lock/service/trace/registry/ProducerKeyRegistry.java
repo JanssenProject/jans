@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.service.trace.TraceConstants;
-import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
+import io.jans.lock.trace.crypto.bc.Ed25519PublicKeys;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.trace.crypto.TraceCryptoException;
