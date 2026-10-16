@@ -147,7 +147,11 @@ where
                     details: e.to_string(),
                 })?;
 
-            let file_name = file.name();
+            let file_name = file.name().map_err(|e| ArchiveError::CorruptedEntry {
+                index: i,
+                details: e.to_string(),
+            })?;
+            let file_name = file_name.as_ref();
 
             // Explicitly reject absolute paths (Unix-style or Windows-style)
             // Note: enclosed_name() behavior is inconsistent across environments -
@@ -351,7 +355,10 @@ where
 
         for i in 0..archive.len() {
             if let Ok(file) = archive.by_index(i) {
-                let file_name = file.name();
+                let Ok(file_name) = file.name() else {
+                    continue;
+                };
+                let file_name = file_name.as_ref();
                 if file_name == normalized || file_name.starts_with(&dir_prefix) {
                     return Ok(true);
                 }
@@ -403,7 +410,10 @@ where
         // Check if any files have this as a prefix (implicit directory)
         for i in 0..archive.len() {
             if let Ok(file) = archive.by_index(i) {
-                let file_name = file.name();
+                let Ok(file_name) = file.name() else {
+                    continue;
+                };
+                let file_name = file_name.as_ref();
                 if file_name.starts_with(&format!("{normalized}/")) {
                     return true;
                 }
@@ -486,7 +496,10 @@ where
                 std::io::Error::other(format!("Failed to read archive entry {i}: {e}"))
             })?;
 
-            let file_name = file.name();
+            let file_name = file.name().map_err(|e| {
+                std::io::Error::other(format!("Failed to decode archive entry {i} name: {e}"))
+            })?;
+            let file_name = file_name.as_ref();
 
             // Check if this file is in the requested directory
             if file_name.starts_with(&prefix) || (prefix.is_empty() && !file_name.contains('/')) {
@@ -953,22 +966,13 @@ mod limit_tests {
     }
 
     #[test]
-    fn test_total_size_is_enforced_against_bytes_actually_read() {
-        // Understating every entry lets the archive past the construction-time
-        // total, which can only see declared sizes. Each entry still fits under
-        // the per-entry cap, so only the running total of real decompressed
-        // bytes catches it.
+    fn test_running_total_limits_repeated_decompression() {
+        // Since zip 9.0.1 the reader refuses to emit more than an entry
+        // declared, so a single pass over the archive is already bounded by the
+        // construction-time total. The running total now backstops repeated
+        // reads, each of which decompresses the entry into memory again.
         let entry = small_limit_bytes();
-        let mut bytes = create_archive_with_sizes(vec![("a.json", entry), ("b.json", entry)]);
-        let patched = patch_declared_size(
-            &mut bytes,
-            u32::try_from(entry).expect("entry size fits in u32"),
-            1,
-        );
-        assert!(
-            patched >= 4,
-            "expected to patch 4 size fields, patched {patched}"
-        );
+        let bytes = create_archive_with_sizes(vec![("a.json", entry)]);
 
         let limits = ArchiveLimits {
             max_entry_size: SMALL_LIMIT,
@@ -976,16 +980,16 @@ mod limit_tests {
             max_entries: 100,
         };
         let vfs = ArchiveVfs::from_buffer(bytes, limits)
-            .expect("understated sizes must pass the construction-time total");
+            .expect("the declared entry size fits the construction-time total");
 
         assert_eq!(
-            vfs.read_file("a.json").expect("first entry fits").len(),
+            vfs.read_file("a.json").expect("first read fits").len(),
             entry
         );
 
         let err = vfs
-            .read_file("b.json")
-            .expect_err("the second entry must push the running total past the cap");
+            .read_file("a.json")
+            .expect_err("a repeated read must push the running total past the cap");
         let source = err
             .get_ref()
             .and_then(|e| e.downcast_ref::<ArchiveError>())
@@ -998,23 +1002,14 @@ mod limit_tests {
 
     #[test]
     fn test_read_file_rejects_entry_whose_declared_size_lies() {
-        // Rewrite the central directory's recorded size to 1 byte so the
-        // construction-time check passes, then confirm `read_file` still
-        // refuses to buffer the real payload.
+        // Rewrite the recorded size to 1 byte so the construction-time check
+        // passes, then confirm `read_file` still refuses to hand out the real
+        // payload.
         let real_size = small_limit_bytes() + 1;
         let mut bytes = create_archive_with_sizes(vec![("metadata.json", real_size)]);
-        let truthful = u32::try_from(real_size)
-            .expect("test entry size fits in u32")
-            .to_le_bytes();
-        let lie = 1u32.to_le_bytes();
+        let truthful = u32::try_from(real_size).expect("test entry size fits in u32");
 
-        let mut patched = 0;
-        for i in 0..bytes.len().saturating_sub(4) {
-            if bytes[i..i + 4] == truthful {
-                bytes[i..i + 4].copy_from_slice(&lie);
-                patched += 1;
-            }
-        }
+        let patched = patch_declared_size(&mut bytes, truthful, 1);
         assert!(
             patched >= 2,
             "expected to patch the local header and central directory size fields, patched {patched}"
@@ -1026,13 +1021,14 @@ mod limit_tests {
         let err = vfs
             .read_file("metadata.json")
             .expect_err("read_file must reject an entry that decompresses past the cap");
-        let source = err
-            .get_ref()
-            .and_then(|e| e.downcast_ref::<ArchiveError>())
-            .expect("io::Error must carry the typed ArchiveError");
-        assert!(
-            matches!(source, ArchiveError::EntrySizeExceeded { .. }),
-            "Expected EntrySizeExceeded, got: {source:?}"
+        // The rejection comes from the zip reader itself: it stops once more
+        // bytes than declared are produced, before our own cap check can count
+        // them. If that guard ever disappears, this assertion fails and the
+        // `EntrySizeExceeded` backstop in `read_file` must take over.
+        assert_eq!(
+            err.kind(),
+            std::io::ErrorKind::InvalidData,
+            "Expected an InvalidData io error, got: {err}"
         );
     }
 }
