@@ -39,8 +39,8 @@ dependencies = [
     "requests>=2.22.0",
     "python-consul>=1.0.1",
     "hvac>=0.7.0",
-    # don't use broken v36, see https://github.com/JanssenProject/jans/issues/14156
-    "kubernetes>=11.0,!=36.*",
+    # v36 is broken, hence start from v37 instead; see https://github.com/JanssenProject/jans/issues/14156
+    "kubernetes>=37.0",
 
     # the ldap3 library is not removed for the following reasons:
     #
