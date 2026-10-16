@@ -452,6 +452,50 @@ const bytes = new Uint8Array(await response.arrayBuffer());
 const cedarling = await initFromArchiveBytes(config, bytes);
 ```
 
+## Verifying policy store signatures
+
+Agama Lab publishes each `.cjar` with a Sigstore (cosign keyless) bundle, `<store>.cjar.sigstore.json`, that signs the whole archive. With [`CEDARLING_POLICY_STORE_SIGSTORE_MODE`](./cedarling-properties.md#verifying-policy-store-signatures) set to `enforce`, Cedarling loads a `.cjar` only if that bundle verifies for the configured signer:
+
+```json
+"CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+"CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+"CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com"
+```
+
+The bundle is verified offline against the public Sigstore trust root (Fulcio, Rekor and CT log keys) built into Cedarling. The check runs on the downloaded or read archive bytes before they are parsed, and the same bytes are then loaded. It is equivalent to:
+
+```bash
+cosign verify-blob store.cjar \
+  --bundle store.cjar.sigstore.json \
+  --certificate-identity "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com" \
+  --certificate-oidc-issuer https://accounts.google.com
+```
+
+If the bundle is missing, does not verify, or was signed by someone else, Cedarling fails to start. During [background refresh](#background-refresh) the current store is kept and the attempt is recorded as `VerificationError`. Each verified load is logged at `INFO`:
+
+```text
+policy store signature verified: identity=asset-signer@... issuer=https://accounts.google.com archive_sha256=<hex> rekor_integrated_time=<unix seconds>
+```
+
+### Where the bundle comes from
+
+| Policy store source | Bundle location |
+|---|---|
+| `CEDARLING_POLICY_STORE_URI` or `CEDARLING_POLICY_STORE_CJAR_URL` | The archive URL with `.sigstore.json` appended to its path |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` with a `.cjar` file | The archive path with `.sigstore.json` appended |
+| [Lock Server](./cedarling-lock-server.md#loading-policy-stores-from-lock-server) | Set `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` to the full URL `https://<lock-host>/jans-lock/api/v1/policy/{policy_store_id}/sigstore`. It is fetched with the same client as the store, so the Lock access token is sent |
+| Archive bytes (`initFromArchiveBytes`, `load_from_json_with_archive_bytes`) | `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` is required |
+
+`CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` overrides the location for any source. Directory and YAML policy stores cannot be signed, so `enforce` with them is a configuration error.
+
+### Limitations
+
+- A signature proves who published an archive, not that it is the latest one. Someone who controls the policy store URL can serve an older, validly signed archive.
+- Refresh re-checks the signature only when the archive changes. A new bundle for the same archive is not fetched.
+- If a new archive is published before its bundle, the next refresh fails and is retried with backoff.
+- Bundles must carry a Rekor v1 transparency log entry with an inclusion proof, as `cosign sign-blob --bundle` writes them today.
+- The trust root is built into each Cedarling release. A build older than a Sigstore root rotation stops verifying new signatures until it is upgraded.
+
 ## Background refresh
 
 For URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Lock Server endpoint or a `.cjar`), Cedarling can periodically re-fetch the policy store and atomically swap the in-memory `Authz` instance so long-running processes see policy updates without restart. Refresh is **opt-in** via [`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`](./cedarling-properties.md#refreshing-the-policy-store) and is silently ignored for local sources.
