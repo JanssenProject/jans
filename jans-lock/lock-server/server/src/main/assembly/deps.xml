@@ -30,6 +30,8 @@
                 <include>io.jans:jans-lock-service</include>
                 <include>io.jans:jans-lock-trace-crypto-api</include>
                 <include>io.jans:jans-lock-trace-crypto-java</include>
+                <include>io.jans:jans-lock-trace-crypto-native</include>
+                <include>io.jans:jans-trace-java</include>
                 <include>io.jans:jans-lock-cedarling</include>
                 <include>io.jans:cedarling-java</include>
                 <include>com.github.javaparser:javaparser-core</include>
