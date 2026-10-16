@@ -204,15 +204,19 @@ fn build_policy_store_signature(
     ) {
         return Err(BootstrapConfigLoadingError::SigstoreUnsupportedSource);
     }
-    let cert_identity = raw.policy_store_sigstore_cert_identity.clone().ok_or(
-        BootstrapConfigLoadingError::MissingSigstoreProperty(
-            "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY",
-        ),
+    // A blank value would never match a certificate, so treat it as unset.
+    let required = |value: &Option<String>, property| {
+        value.clone().filter(|v| !v.trim().is_empty()).ok_or(
+            BootstrapConfigLoadingError::MissingSigstoreProperty(property),
+        )
+    };
+    let cert_identity = required(
+        &raw.policy_store_sigstore_cert_identity,
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY",
     )?;
-    let cert_oidc_issuer = raw.policy_store_sigstore_cert_oidc_issuer.clone().ok_or(
-        BootstrapConfigLoadingError::MissingSigstoreProperty(
-            "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER",
-        ),
+    let cert_oidc_issuer = required(
+        &raw.policy_store_sigstore_cert_oidc_issuer,
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER",
     )?;
     Ok(PolicyStoreSignature::Enforce {
         cert_identity,
@@ -479,6 +483,41 @@ mod tests {
                 "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com""#,
         )
         .expect_err("enforce without issuer must fail");
+        assert!(
+            matches!(
+                err,
+                BootstrapConfigLoadingError::MissingSigstoreProperty(
+                    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER"
+                )
+            ),
+            "expected missing issuer, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn sigstore_enforce_rejects_blank_signer() {
+        let err = decode_cjar_url(
+            r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "   ",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com""#,
+        )
+        .expect_err("a blank identity must fail");
+        assert!(
+            matches!(
+                err,
+                BootstrapConfigLoadingError::MissingSigstoreProperty(
+                    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY"
+                )
+            ),
+            "expected missing identity, got {err:?}"
+        );
+
+        let err = decode_cjar_url(
+            r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "\t""#,
+        )
+        .expect_err("a blank issuer must fail");
         assert!(
             matches!(
                 err,
