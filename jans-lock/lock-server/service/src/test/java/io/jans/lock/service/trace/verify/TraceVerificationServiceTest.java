@@ -44,7 +44,7 @@ import io.jans.lock.service.trace.crypto.Ed25519Capability;
 import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
 import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
 import io.jans.lock.service.trace.crypto.Ed25519Verifier;
-import io.jans.lock.service.trace.error.TraceCryptoException;
+import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.parse.CommonAssertionValidator;

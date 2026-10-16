@@ -29,6 +29,7 @@ import io.jans.lock.service.trace.store.TraceKeys;
 import io.jans.lock.service.trace.store.TraceStore;
 import io.jans.lock.service.trace.verify.TraceVerificationService;
 import io.jans.lock.service.trace.verify.VerifiedAssertion;
+import io.jans.lock.trace.crypto.TraceCryptoException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 

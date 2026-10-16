@@ -6,6 +6,8 @@
 
 package io.jans.lock.service.trace.crypto;
 
+import io.jans.lock.trace.crypto.StrictBase64Url;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;

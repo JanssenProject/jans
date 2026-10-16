@@ -22,7 +22,7 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
 import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
-import io.jans.lock.service.trace.crypto.StrictBase64Url;
+import io.jans.lock.trace.crypto.StrictBase64Url;
 import io.jans.util.security.SecurityProviderUtility;
 
 /**

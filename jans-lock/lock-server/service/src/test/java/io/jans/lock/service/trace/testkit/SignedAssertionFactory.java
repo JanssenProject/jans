@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.canon.JcsCanonicalizer;
 import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
-import io.jans.lock.service.trace.crypto.StrictBase64Url;
+import io.jans.lock.trace.crypto.StrictBase64Url;
 
 /**
  * Test-only builder of signed TRACE assertions. Starts from one of the fixture templates under

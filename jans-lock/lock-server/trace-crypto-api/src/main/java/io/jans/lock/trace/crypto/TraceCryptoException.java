@@ -4,14 +4,13 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace.error;
-
-import io.jans.lock.service.trace.crypto.Ed25519Verifier;
+package io.jans.lock.trace.crypto;
 
 /**
  * Thrown by the TRACE crypto layer when a key cannot be built from a JWK or when the security
- * provider cannot perform Ed25519 operations. Never thrown for a signature that merely fails to
- * verify (that is a {@code false} from {@link Ed25519Verifier#verify}).
+ * provider cannot perform Ed25519 operations. Also thrown by {@link TraceCryptoProvider} for a
+ * signature that does not verify, for input that cannot be canonicalized and for input that cannot
+ * be a receipt position. Messages never carry key material, signature bytes or record content.
  *
  * <p>The {@link #getReason() reason} is a short stable token intended for the structured error
  * body ({@code reason} member); the message is for logs.
@@ -45,6 +44,15 @@ public class TraceCryptoException extends RuntimeException {
 
 	/** The provider rejected the key (not an Ed25519 key usable for verification). */
 	public static final String REASON_INVALID_KEY = "invalid_key";
+
+	/** The Ed25519 signature does not verify over the signature scope of the record. */
+	public static final String REASON_SIGNATURE_MISMATCH = "signature_mismatch";
+
+	/** The JSON value cannot be reduced to RFC 8785 canonical form. */
+	public static final String REASON_CANONICALIZATION_FAILED = "canonicalization_failed";
+
+	/** An input cannot be a receipt position (receipt-hash input is malformed). */
+	public static final String REASON_INVALID_RECEIPT_INPUT = "invalid_receipt_input";
 
 	private final String reason;
 

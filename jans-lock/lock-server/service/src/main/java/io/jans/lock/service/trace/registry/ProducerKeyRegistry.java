@@ -26,7 +26,7 @@ import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceConflictException;
-import io.jans.lock.service.trace.error.TraceCryptoException;
+import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.store.TraceStore;
 import jakarta.enterprise.context.ApplicationScoped;

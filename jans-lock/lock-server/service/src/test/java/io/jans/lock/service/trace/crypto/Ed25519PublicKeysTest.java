@@ -23,7 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.jans.lock.service.trace.error.TraceCryptoException;
+import io.jans.lock.trace.crypto.StrictBase64Url;
+import io.jans.lock.trace.crypto.TraceCryptoException;
 
 class Ed25519PublicKeysTest {
 

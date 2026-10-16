@@ -16,6 +16,7 @@
 
 	<modules>
 		<module>model</module>
+		<module>trace-crypto-api</module>
 		<module>client</module>
 		<module>service</module>
 		<module>server</module>
@@ -89,6 +90,12 @@
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-lock-model</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-lock-trace-crypto-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

@@ -34,7 +34,7 @@ import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.TraceConstants;
-import io.jans.lock.service.trace.TraceTime;
+import io.jans.lock.trace.crypto.TraceTime;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.StoredTraceRecord;

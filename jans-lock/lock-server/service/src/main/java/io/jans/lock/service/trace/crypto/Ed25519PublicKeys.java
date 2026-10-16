@@ -19,7 +19,8 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.lock.service.trace.canon.CanonicalHashes;
-import io.jans.lock.service.trace.error.TraceCryptoException;
+import io.jans.lock.trace.crypto.StrictBase64Url;
+import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.util.security.SecurityProviderUtility;
 
 /**

@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.service.trace.TraceConstants;
-import io.jans.lock.service.trace.TraceTime;
+import io.jans.lock.trace.crypto.TraceTime;
 import io.jans.lock.service.trace.canon.CanonicalHashes;
 
 /**

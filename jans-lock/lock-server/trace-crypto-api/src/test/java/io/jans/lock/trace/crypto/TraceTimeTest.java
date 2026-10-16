@@ -4,7 +4,7 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.service.trace;
+package io.jans.lock.trace.crypto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

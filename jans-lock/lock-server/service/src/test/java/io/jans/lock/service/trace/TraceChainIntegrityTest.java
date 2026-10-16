@@ -6,7 +6,7 @@
 
 package io.jans.lock.service.trace;
 
-import io.jans.lock.service.trace.TraceTime;
+import io.jans.lock.trace.crypto.TraceTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
