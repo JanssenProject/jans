@@ -25,7 +25,7 @@ import jakarta.inject.Inject;
 
 /**
  * Business-level service over {@link TraceStore} for producer-chain pre-registration and the
- * genesis rule (design §8, T-3, design decisions D-5).
+ * genesis rule (design §8).
  *
  * @author Yuriy Movchan
  */
@@ -54,7 +54,7 @@ public class ProducerChainRegistry {
 
 	static final String REASON_DUPLICATE_CHAIN = "duplicate_chain";
 
-	/** T-3: {@code jansTraceProducerInstanceId}/{@code jansTraceProducerChainId} are VARCHAR(255). */
+	/** {@code jansTraceProducerInstanceId} and {@code jansTraceProducerChainId} are VARCHAR(255). */
 	private static final int MAX_IDENTIFIER_LENGTH = 255;
 
 	@Inject
@@ -62,7 +62,7 @@ public class ProducerChainRegistry {
 
 	/**
 	 * @throws TraceValidationException {@code chain_not_registered} when {@code id} has not been
-	 *                                  pre-registered (design decision D-5)
+	 *                                  pre-registered
 	 */
 	public TraceChainEntry requireRegistered(ChainIdentity id) {
 		return traceStore.findChain(id)
@@ -71,7 +71,7 @@ public class ProducerChainRegistry {
 	}
 
 	/**
-	 * Enforces design decision D-5: {@code sequenceNumber == 1} if and only if
+	 * Enforces that {@code sequenceNumber == 1} if and only if
 	 * {@code prevRecordHash} is the zero-hash sentinel.
 	 *
 	 * @throws TraceValidationException {@code invalid_genesis} with reason {@code genesis_hash}
@@ -92,7 +92,7 @@ public class ProducerChainRegistry {
 	}
 
 	/**
-	 * Registers a producer chain. Chains are create-only (T-3): there is no update.
+	 * Registers a producer chain. Chains are create-only: there is no update.
 	 *
 	 * @throws TraceValidationException {@code invalid_request} when {@code producerId},
 	 *                                  {@code producerInstanceId} or {@code producerChainId} is
@@ -112,7 +112,7 @@ public class ProducerChainRegistry {
 	}
 
 	/**
-	 * {@code FIRST_OBSERVED} lookup (design §8, D-23): returns the registered chain; when {@code id}
+	 * {@code FIRST_OBSERVED} lookup (design §8): returns the registered chain; when {@code id}
 	 * is unregistered and the record is a genesis ({@code sequenceNumber == 1} with the zero-hash
 	 * sentinel), registers the chain with genesis kind {@code first_observed_genesis} and
 	 * {@code registeredBy} the submitting client. The caller must call this only after key

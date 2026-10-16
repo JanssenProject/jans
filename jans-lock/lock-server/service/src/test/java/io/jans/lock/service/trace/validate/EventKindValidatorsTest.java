@@ -20,14 +20,18 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.LongNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -120,8 +124,50 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	private TraceValidationException validateAndCapture(ObjectNode root) {
-		ParsedAssertion assertion = parseAndCommonValidate(root);
-		return assertThrows(TraceValidationException.class, () -> registry.validate(assertion));
+		return assertThrows(TraceValidationException.class, () -> registry.validate(parseAndCommonValidate(root)));
+	}
+
+	// -- Optional GovOps profile members ------------------------------------------------------
+
+	@ParameterizedTest
+	@ValueSource(strings = { "govops_example_b.json", "govops_example_d.json",
+			"authorization_decision_optional_members_valid.json" })
+	void testOptionalGovopsMembers_profileFixtures_accepted(String fixture) throws IOException {
+		registry.validate(parseAndCommonValidate(loadFixture(fixture)));
+	}
+
+	@Test
+	void testOptionalGovopsMembers_absent_accepted() throws IOException {
+		registry.validate(parseAndCommonValidate(loadFixture("authorization_decision_valid.json")));
+	}
+
+	@Test
+	void testEnforcementMode_everyAllowedValue_accepted() throws IOException {
+		for (String mode : new String[] { "enforce", "advisory", "silent", "declared" }) {
+			ObjectNode root = loadFixture("authorization_decision_valid.json");
+			set(root, new TextNode(mode), "trace", "policy", "enforcement_mode");
+			registry.validate(parseAndCommonValidate(root));
+		}
+	}
+
+	@Test
+	void testChainLink_onGenesis_accepted() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_optional_members_valid.json");
+		assertEquals(1, at(root, "producer_chain", "sequence_number").asInt());
+		assertEquals("chain-01JABC8Y0J",
+				at(root, "producer_chain", "chain_link", "prev_producer_chain_id").asText());
+		registry.validate(parseAndCommonValidate(root));
+	}
+
+	@Test
+	void testChainLink_atSequence7_throwsInvalidGenesis() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_optional_members_valid.json");
+		set(root, new LongNode(7), "producer_chain", "sequence_number");
+
+		TraceValidationException ex = validateAndCapture(root);
+
+		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
+		assertEquals("chain_link_on_non_genesis", ex.getReason());
 	}
 
 	// -- AUTHORIZATION_DECISION --------------------------------------------------------------
@@ -146,8 +192,7 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	/**
-	 * Acceptance criterion 1, literally: task 08's own design §7 example fixture (not this task's
-	 * near-copy) validates as {@code AUTHORIZATION_DECISION} and yields the specified
+	 * The design §7 example fixture validates as {@code AUTHORIZATION_DECISION} and yields the specified
 	 * {@code TokenRef}.
 	 */
 	@Test
@@ -426,16 +471,22 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testCapabilityInvoked_withPolicy_throwsForbiddenPolicy() throws IOException {
+	void testCapabilityInvoked_withCompletePolicy_accepted() throws IOException {
+		ObjectNode root = loadFixture("capability_invoked_valid.json");
+		set(root, at(loadFixture("authorization_decision_valid.json"), "trace", "policy").deepCopy(), "trace",
+				"policy");
+
+		registry.validate(parseAndCommonValidate(root));
+	}
+
+	@Test
+	void testCapabilityInvoked_withIncompletePolicy_throwsMissing() throws IOException {
 		ObjectNode root = loadFixture("capability_invoked_valid.json");
 		ObjectNode policy = MAPPER.createObjectNode();
 		policy.put("policy_store_id", "x");
 		set(root, policy, "trace", "policy");
 
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("forbidden:trace.policy", ex.getReason());
+		assertRejected(root, "missing:trace.policy.policy_store_version");
 	}
 
 	@Test
@@ -450,19 +501,83 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testCapabilityInvoked_invocationOutcomeTooLong_throwsLength() throws IOException {
-		ObjectNode root = loadFixture("capability_invoked_valid.json");
-		set(root, TextNode.valueOf("a".repeat(65)), "trace", "event", "invocation", "outcome");
+	void testCapabilityInvoked_outcomeOutsideVocabulary_throwsInvalid() throws IOException {
+		for (String outcome : new String[] { "ok", "INVOKED", "ALLOW", "success" }) {
+			ObjectNode root = loadFixture("capability_invoked_valid.json");
+			set(root, TextNode.valueOf(outcome), "trace", "event", "invocation", "outcome");
 
-		assertRejected(root, "length:trace.event.invocation.outcome");
+			assertRejected(root, "invalid:trace.event.invocation.outcome");
+		}
 	}
 
 	@Test
-	void testCapabilityInvoked_anyNonEmptyInvocationOutcome_accepted() throws IOException {
+	void testCapabilityInvoked_batchEntryOutcomeOutsideVocabulary_throwsInvalid() throws IOException {
 		ObjectNode root = loadFixture("capability_invoked_valid.json");
-		set(root, TextNode.valueOf("some-custom-outcome"), "trace", "event", "invocation", "outcome");
+		replaceFacts(root, "invocation", "invocations",
+				MAPPER.createArrayNode().add(fact("invocation_id", "i-1", "ALLOW")));
 
-		registry.validate(parseAndCommonValidate(root));
+		assertRejected(root, "invalid:trace.event.invocations[0].outcome");
+	}
+
+	@Test
+	void testCapabilityInvoked_successAndFailureOutcomes_accepted() throws IOException {
+		for (String outcome : new String[] { "SUCCESS", "FAILURE" }) {
+			ObjectNode root = loadFixture("capability_invoked_valid.json");
+			set(root, TextNode.valueOf(outcome), "trace", "event", "invocation", "outcome");
+
+			registry.validate(parseAndCommonValidate(root));
+		}
+	}
+
+	@Test
+	void testDecision_denyAndAllowOnly_invocationOutcomeRejected() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		set(root, TextNode.valueOf("SUCCESS"), "trace", "event", "decision", "outcome");
+
+		assertRejected(root, "invalid:trace.event.decision.outcome");
+	}
+
+	@Test
+	void testOperationBindingDigests_wellFormed_accepted() throws IOException {
+		String digest = "sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf7";
+		ObjectNode decision = loadFixture("authorization_decision_valid.json");
+		for (String field : new String[] { "request_digest", "input_digest", "tool_call_digest" }) {
+			set(decision, TextNode.valueOf(digest), "trace", "event", field);
+		}
+		registry.validate(parseAndCommonValidate(decision));
+
+		ObjectNode invocation = loadFixture("capability_invoked_valid.json");
+		for (String field : new String[] { "request_digest", "tool_call_digest", "result_digest" }) {
+			set(invocation, TextNode.valueOf(digest), "trace", "event", field);
+		}
+		registry.validate(parseAndCommonValidate(invocation));
+	}
+
+	@Test
+	void testOperationBindingDigests_malformed_throwsInvalid() throws IOException {
+		for (String field : new String[] { "request_digest", "input_digest", "tool_call_digest" }) {
+			for (String bad : new String[] { "not-a-hash", "sha256:ABC", "md5:84fd9bac333ad79154348296204fa7f8" }) {
+				ObjectNode root = loadFixture("authorization_decision_valid.json");
+				set(root, TextNode.valueOf(bad), "trace", "event", field);
+				assertRejected(root, "invalid:trace.event." + field);
+			}
+		}
+		for (String field : new String[] { "request_digest", "tool_call_digest", "result_digest" }) {
+			ObjectNode root = loadFixture("capability_invoked_valid.json");
+			set(root, TextNode.valueOf("not-a-hash"), "trace", "event", field);
+			assertRejected(root, "invalid:trace.event." + field);
+		}
+	}
+
+	@Test
+	void testOperationBindingDigests_nonString_throwsType() throws IOException {
+		ObjectNode decision = loadFixture("authorization_decision_valid.json");
+		((ObjectNode) at(decision, "trace", "event")).put("request_digest", 42);
+		assertRejected(decision, "type:trace.event.request_digest");
+
+		ObjectNode invocation = loadFixture("capability_invoked_valid.json");
+		((ObjectNode) at(invocation, "trace", "event")).put("result_digest", 42);
+		assertRejected(invocation, "type:trace.event.result_digest");
 	}
 
 	@Test
@@ -481,11 +596,11 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 
 		ObjectNode duplicate = loadFixture("capability_invoked_valid.json");
 		replaceFacts(duplicate, "invocation", "invocations", MAPPER.createArrayNode()
-				.add(fact("invocation_id", "i-1", "INVOKED")).add(fact("invocation_id", "i-1", "FAILED")));
+				.add(fact("invocation_id", "i-1", "SUCCESS")).add(fact("invocation_id", "i-1", "FAILURE")));
 		assertRejected(duplicate, "duplicate:trace.event.invocations[1].invocation_id");
 
 		ObjectNode noId = loadFixture("capability_invoked_valid.json");
-		replaceFacts(noId, "invocation", "invocations", MAPPER.createArrayNode().add(fact(null, null, "INVOKED")));
+		replaceFacts(noId, "invocation", "invocations", MAPPER.createArrayNode().add(fact(null, null, "SUCCESS")));
 		assertRejected(noId, "missing:trace.event.invocations[0].invocation_id");
 
 		ObjectNode notArray = loadFixture("capability_invoked_valid.json");
@@ -497,16 +612,16 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	@Test
 	void testCapabilityInvoked_recordLevelOutcomeAndBothForms_rejected() throws IOException {
 		ObjectNode singular = loadFixture("capability_invoked_valid.json");
-		((ObjectNode) at(singular, "trace", "event")).put("outcome", "INVOKED");
+		((ObjectNode) at(singular, "trace", "event")).put("outcome", "SUCCESS");
 		assertRejected(singular, "forbidden:trace.event.outcome");
 
 		ObjectNode batch = loadFixture("capability_invoked_batch_valid.json");
-		((ObjectNode) at(batch, "trace", "event")).put("outcome", "INVOKED");
+		((ObjectNode) at(batch, "trace", "event")).put("outcome", "SUCCESS");
 		assertRejected(batch, "forbidden:trace.event.outcome");
 
 		ObjectNode both = loadFixture("capability_invoked_valid.json");
 		((ObjectNode) at(both, "trace", "event")).set("invocations",
-				MAPPER.createArrayNode().add(fact("invocation_id", "i-1", "INVOKED")));
+				MAPPER.createArrayNode().add(fact("invocation_id", "i-1", "SUCCESS")));
 		assertRejected(both, "forbidden:trace.event.invocations");
 
 		ObjectNode neither = loadFixture("capability_invoked_valid.json");

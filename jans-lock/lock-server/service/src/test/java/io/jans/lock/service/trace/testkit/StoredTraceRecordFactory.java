@@ -23,8 +23,7 @@ import io.jans.lock.service.trace.model.VerificationResult;
 /**
  * Test-only fluent builder of {@link StoredTraceRecord}s, so a test can seed a
  * {@code TraceStore} with predecessor/peer/successor rows directly, without going through
- * parsing, verification or ingestion. Shared by the correlation (task 17), receipt-chain (task
- * 18) and ingestion (task 19) tests.
+ * parsing, verification or ingestion. Shared by the correlation, receipt-chain and ingestion tests.
  *
  * <p>Every field has a usable default except {@link #recordId(String)} and
  * {@link #contentDigest(String)}, which a test must always set explicitly since they are exactly
@@ -49,6 +48,8 @@ public final class StoredTraceRecordFactory {
 	private long sequenceNumber = 1L;
 
 	private String prevRecordHash = TraceConstants.ZERO_HASH;
+
+	private String assertionRaw = "{\"trace\":{}}";
 
 	private String contentDigest;
 
@@ -135,12 +136,16 @@ public final class StoredTraceRecordFactory {
 	}
 
 	/**
-	 * Convenience for a genesis row: {@code sequence_number = 1} and the zero-hash sentinel
-	 * (design decision D-5).
+	 * Convenience for a genesis row: {@code sequence_number = 1} and the zero-hash sentinel.
 	 */
 	public StoredTraceRecordFactory genesis() {
 		sequenceNumber(1L);
 		return prevRecordHash(TraceConstants.ZERO_HASH);
+	}
+
+	public StoredTraceRecordFactory assertionRaw(String assertionRaw) {
+		this.assertionRaw = assertionRaw;
+		return this;
 	}
 
 	public StoredTraceRecordFactory contentDigest(String contentDigest) {
@@ -241,7 +246,7 @@ public final class StoredTraceRecordFactory {
 		ReceiptEntry receipt = new ReceiptEntry(receiptSequence, receivedAtMs, prevReceiptHash, receiptHash);
 		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late);
 
-		return new StoredTraceRecord(identity, "{\"trace\":{}}", contentDigest, verification, receipt, flags,
+		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verification, receipt, flags,
 				execution, chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs, version);
 	}
 

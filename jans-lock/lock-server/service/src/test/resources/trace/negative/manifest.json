@@ -190,9 +190,9 @@
     "reason": "missing:trace.runtime.pdp_id"
   },
   {
-    "file": "ci_with_policy_forbidden.json",
+    "file": "ci_policy_incomplete.json",
     "errorId": "invalid_assertion",
-    "reason": "forbidden:trace.policy"
+    "reason": "missing:trace.policy.policy_store_version"
   },
   {
     "file": "ci_missing_enforcement_point_id.json",
@@ -200,9 +200,9 @@
     "reason": "missing:trace.event.enforcement_point_id"
   },
   {
-    "file": "ci_invocation_outcome_too_long.json",
+    "file": "ci_invocation_outcome_invalid.json",
     "errorId": "invalid_assertion",
-    "reason": "length:trace.event.invocation.outcome"
+    "reason": "invalid:trace.event.invocation.outcome"
   },
   {
     "file": "re_with_capability_ids_forbidden.json",
@@ -458,5 +458,190 @@
     "file": "re_subject_not_object.json",
     "errorId": "invalid_assertion",
     "reason": "type:trace.subject"
+  },
+  {
+    "file": "ci_request_digest_invalid.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.event.request_digest"
+  },
+  {
+    "file": "ci_result_digest_invalid.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.event.result_digest"
+  },
+  {
+    "file": "ad_request_digest_invalid.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.event.request_digest"
+  },
+  {
+    "file": "ad_input_digest_invalid.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.event.input_digest"
+  },
+  {
+    "file": "ad_tool_call_digest_invalid.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.event.tool_call_digest"
+  },
+  {
+    "file": "cnf_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:cnf"
+  },
+  {
+    "file": "content_digest_forbidden.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:content_digest"
+  },
+  {
+    "file": "trust_tier_forbidden_trace.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.trust_tier"
+  },
+  {
+    "file": "capability_resolution_forbidden_event.json",
+    "errorId": "invalid_assertion",
+    "reason": "forbidden:trace.event.capability_resolution"
+  },
+  {
+    "file": "ad_execution_epoch_id_not_string.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.execution_epoch_id"
+  },
+  {
+    "file": "ad_execution_epoch_id_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.execution_epoch_id"
+  },
+  {
+    "file": "ad_previous_epoch_id_empty.json",
+    "errorId": "invalid_assertion",
+    "reason": "empty:trace.previous_epoch_id"
+  },
+  {
+    "file": "ad_parent_execution_id_too_long.json",
+    "errorId": "invalid_assertion",
+    "reason": "length:trace.parent_execution_id"
+  },
+  {
+    "file": "ad_operation_ids_not_array.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.operation_ids"
+  },
+  {
+    "file": "ad_operation_ids_entry_not_string.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.operation_ids[1]"
+  },
+  {
+    "file": "ad_operation_ids_entry_empty.json",
+    "errorId": "invalid_assertion",
+    "reason": "empty:trace.operation_ids[0]"
+  },
+  {
+    "file": "ad_session_id_without_issuer.json",
+    "errorId": "invalid_assertion",
+    "reason": "missing:trace.session_issuer"
+  },
+  {
+    "file": "ad_session_id_not_string.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.session_id"
+  },
+  {
+    "file": "ad_session_issuer_invalid.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.session_issuer"
+  },
+  {
+    "file": "ad_session_issuer_http_non_local.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.session_issuer"
+  },
+  {
+    "file": "ad_evidence_origin_empty.json",
+    "errorId": "invalid_assertion",
+    "reason": "empty:trace.evidence_origin"
+  },
+  {
+    "file": "ad_measurement_point_not_string.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.measurement_point"
+  },
+  {
+    "file": "ad_recorder_array.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.recorder"
+  },
+  {
+    "file": "ad_attestation_ref_string.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.attestation_ref"
+  },
+  {
+    "file": "ad_workload_authentication_not_object.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.workload_authentication"
+  },
+  {
+    "file": "ad_workload_authentication_method_not_string.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.workload_authentication.method"
+  },
+  {
+    "file": "ad_model_not_object.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.model"
+  },
+  {
+    "file": "ad_model_provider_not_string.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.model.provider"
+  },
+  {
+    "file": "ad_human_sponsor_array.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.subject.human_sponsor"
+  },
+  {
+    "file": "ad_delegating_org_number.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.subject.delegating_org"
+  },
+  {
+    "file": "ad_enforcement_mode_invalid.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.policy.enforcement_mode"
+  },
+  {
+    "file": "ad_enforcement_mode_not_string.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:trace.policy.enforcement_mode"
+  },
+  {
+    "file": "ci_enforcement_mode_invalid.json",
+    "errorId": "invalid_assertion",
+    "reason": "invalid:trace.policy.enforcement_mode"
+  },
+  {
+    "file": "ad_chain_link_not_object.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:producer_chain.chain_link"
+  },
+  {
+    "file": "ad_chain_link_on_non_genesis.json",
+    "errorId": "invalid_genesis",
+    "reason": "chain_link_on_non_genesis"
+  },
+  {
+    "file": "ad_chain_link_at_sequence_7.json",
+    "errorId": "invalid_genesis",
+    "reason": "chain_link_on_non_genesis"
+  },
+  {
+    "file": "ad_chain_link_prev_chain_id_not_string.json",
+    "errorId": "invalid_assertion",
+    "reason": "type:producer_chain.chain_link.prev_producer_chain_id"
   }
 ]

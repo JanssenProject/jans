@@ -12,8 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Admin request body to pre-register a producer chain (design §8, TRACE MVP design decision D-5,
- * task 15).
+ * Admin request body to pre-register a producer chain (design §8).
  *
  * @author Yuriy Movchan
  */

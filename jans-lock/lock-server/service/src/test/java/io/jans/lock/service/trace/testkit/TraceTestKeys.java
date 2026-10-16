@@ -28,8 +28,8 @@ import io.jans.util.security.SecurityProviderUtility;
 /**
  * Test-only Ed25519 helpers shared by the whole TRACE test suite: provider installation, key
  * generation, deterministic keys from RFC 8032 seeds, signing, and RFC 8037 JWK export of public
- * keys (task 22 consolidated test kit). Moved here from
- * {@code io.jans.lock.service.trace.crypto.Ed25519TestKeys} (tasks 07/16/19), which now delegates
+ * keys (consolidated test kit). Moved here from
+ * {@code io.jans.lock.service.trace.crypto.Ed25519TestKeys}, which now delegates
  * to this class so earlier call sites keep compiling.
  */
 public final class TraceTestKeys {

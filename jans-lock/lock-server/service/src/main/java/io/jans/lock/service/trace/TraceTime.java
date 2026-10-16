@@ -13,7 +13,7 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 
 /**
- * Renders and parses the TRACE receipt timestamp (design §9, decision D-24): an RFC 3339 UTC string
+ * Renders and parses the TRACE receipt timestamp (design §9): an RFC 3339 UTC string
  * with exactly three fractional digits and a {@code Z} suffix, for example
  * {@code 2026-06-11T00:41:02.123Z}.
  *

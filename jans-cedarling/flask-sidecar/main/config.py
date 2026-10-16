@@ -32,7 +32,6 @@ def parse_bool_env(var_name: str, default: str = "False") -> bool:
     return value.lower() in ("true", "1", "yes")
 
 
-
 class BaseConfig:
     API_TITLE = "Cedarling Sidecar"
     API_VERSION = "v1"

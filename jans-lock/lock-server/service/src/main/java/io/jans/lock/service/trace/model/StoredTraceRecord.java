@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A fully-assembled TRACE record as the store layer sees it (design §10, T-1). This is
- * <strong>not</strong> the {@code TraceRecordEntry} ORM entity (task 03) — it carries the same
- * information in domain terms so both {@code InMemoryTraceStore} (this task) and the ORM store
- * (task 13) share one contract.
+ * A fully-assembled TRACE record as the store layer sees it (design §10). This is
+ * <strong>not</strong> the {@code TraceRecordEntry} ORM entity — it carries the same
+ * information in domain terms so both {@code InMemoryTraceStore} and the ORM store
+ * share one contract.
  *
  * <p>{@link #equals(Object)}/{@link #hashCode()} are defined on {@link #getIdentity()} only, the
  * record's unique identity; use field-by-field comparison in tests that need to assert on the
@@ -141,8 +141,7 @@ public final class StoredTraceRecord {
 	}
 
 	/**
-	 * @return the record's optimistic-concurrency version, as last observed by the store (design
-	 *         decision D-9); used by {@link io.jans.lock.service.trace.store.TraceStore#updateRecordFlags}
+	 * @return the record's optimistic-concurrency version, as last observed by the store; used by {@link io.jans.lock.service.trace.store.TraceStore#updateRecordFlags}
 	 *         callers to assert the expected value for a compare-and-swap write
 	 */
 	public long getVersion() {

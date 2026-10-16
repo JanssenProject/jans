@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * TRACE evidence-ingestion configuration: evidence-domain bindings, lateness policy and request
- * limits (design references TRACE MVP design decisions D-1, D-3, D-11, D-12).
+ * limits .
  *
  * @author Yuriy Movchan
  */
@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class TraceConfiguration {
 
     public static final int DEFAULT_LATENESS_THRESHOLD_SECONDS = 300;
+    public static final int DEFAULT_MAX_FUTURE_SKEW_SECONDS = 300;
     public static final int DEFAULT_MAX_REQUEST_BYTES = 262144;
     public static final int DEFAULT_MAX_JSON_DEPTH = 32;
     public static final int DEFAULT_MAX_STRING_LENGTH = 8192;
@@ -49,6 +50,10 @@ public class TraceConfiguration {
     @Schema(description = "Evidence domain id used when a submitting client has no explicit binding")
     private String defaultEvidenceDomainId;
 
+    @DocProperty(description = "Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none")
+    @Schema(description = "Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none")
+    private List<String> defaultAllowedProducerIds = new ArrayList<>();
+
     @DocProperty(description = "OAuth client to evidence-domain bindings")
     @Schema(description = "OAuth client to evidence-domain bindings")
     private List<TraceClientDomainBinding> clientDomainBindings = new ArrayList<>();
@@ -56,6 +61,10 @@ public class TraceConfiguration {
     @DocProperty(description = "Seconds after signed_at a record is accepted before being flagged late", defaultValue = "300")
     @Schema(description = "Seconds after signed_at a record is accepted before being flagged late")
     private int latenessThresholdSeconds = DEFAULT_LATENESS_THRESHOLD_SECONDS;
+
+    @DocProperty(description = "Seconds a signed_at may be ahead of Lock's clock before the record is rejected", defaultValue = "300")
+    @Schema(description = "Seconds a signed_at may be ahead of Lock's clock before the record is rejected")
+    private int maxFutureSkewSeconds = DEFAULT_MAX_FUTURE_SKEW_SECONDS;
 
     @DocProperty(description = "Maximum accepted TRACE request body size in bytes", defaultValue = "262144")
     @Schema(description = "Maximum accepted TRACE request body size in bytes")
@@ -121,6 +130,14 @@ public class TraceConfiguration {
         this.defaultEvidenceDomainId = defaultEvidenceDomainId;
     }
 
+    public List<String> getDefaultAllowedProducerIds() {
+        return defaultAllowedProducerIds;
+    }
+
+    public void setDefaultAllowedProducerIds(List<String> defaultAllowedProducerIds) {
+        this.defaultAllowedProducerIds = defaultAllowedProducerIds;
+    }
+
     public List<TraceClientDomainBinding> getClientDomainBindings() {
         return clientDomainBindings;
     }
@@ -135,6 +152,14 @@ public class TraceConfiguration {
 
     public void setLatenessThresholdSeconds(int latenessThresholdSeconds) {
         this.latenessThresholdSeconds = latenessThresholdSeconds;
+    }
+
+    public int getMaxFutureSkewSeconds() {
+        return maxFutureSkewSeconds > 0 ? maxFutureSkewSeconds : DEFAULT_MAX_FUTURE_SKEW_SECONDS;
+    }
+
+    public void setMaxFutureSkewSeconds(int maxFutureSkewSeconds) {
+        this.maxFutureSkewSeconds = maxFutureSkewSeconds;
     }
 
     public int getMaxRequestBytes() {
@@ -246,8 +271,9 @@ public class TraceConfiguration {
     @Override
     public String toString() {
         return "TraceConfiguration [enabled=" + enabled + ", defaultEvidenceDomainId=" + defaultEvidenceDomainId
-                + ", clientDomainBindings=" + clientDomainBindings + ", latenessThresholdSeconds="
-                + getLatenessThresholdSeconds() + ", maxRequestBytes=" + getMaxRequestBytes() + ", maxJsonDepth="
+                + ", defaultAllowedProducerIds=" + defaultAllowedProducerIds + ", clientDomainBindings=" + clientDomainBindings + ", latenessThresholdSeconds="
+                + getLatenessThresholdSeconds() + ", maxFutureSkewSeconds=" + getMaxFutureSkewSeconds()
+                + ", maxRequestBytes=" + getMaxRequestBytes() + ", maxJsonDepth="
                 + getMaxJsonDepth() + ", maxStringLength=" + getMaxStringLength() + ", maxArrayLength="
                 + getMaxArrayLength() + ", maxObjectMembers=" + getMaxObjectMembers()
                 + ", receiptAllocationRetryLimit=" + getReceiptAllocationRetryLimit()

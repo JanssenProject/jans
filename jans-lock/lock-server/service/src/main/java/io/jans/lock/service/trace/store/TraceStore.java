@@ -27,14 +27,14 @@ import io.jans.lock.service.trace.model.TokenRef;
 /**
  * The persistence contract shared by the ingestion, correlation and receipt-chain services
  * (design §5, §8, §9, §10, §13). {@link io.jans.lock.service.trace.store.TraceKeys} is the single
- * key function every implementation must use; {@code InMemoryTraceStore} (test sources, this
- * task) and the ORM-backed store (task 13) are both required to pass the same
+ * key function every implementation must use; {@code InMemoryTraceStore} (test sources)
+ * and the ORM-backed store are both required to pass the same
  * {@code TraceStoreContractTest} suite.
  *
  * <p>Every {@code find*} method is domain-scoped both because the composite key already embeds the
- * domain (design decision D-6) and, for the "bare identifier" lookups that intentionally omit part
+ * domain and, for the "bare identifier" lookups that intentionally omit part
  * of the identity (producer, execution authority), by an explicit {@code domainId} filter — a
- * client of one evidence domain must never see another domain's rows (design decision D-1).
+ * client of one evidence domain must never see another domain's rows.
  *
  * @author Yuriy Movchan
  */
@@ -42,8 +42,7 @@ public interface TraceStore {
 
 	/**
 	 * {@link TraceStorageException#getReason()} value used when {@link #updateRecordFlags} loses a
-	 * compare-and-swap race against the expected version (design decision D-9, TRACE CAS MVP task
-	 * 11). {@link io.jans.lock.service.trace.correlation.TraceCorrelationService} is the only
+	 * compare-and-swap race against the expected version. {@link io.jans.lock.service.trace.correlation.TraceCorrelationService} is the only
 	 * caller that special-cases this reason for retry; any other reason keeps the pre-existing
 	 * log-and-swallow behavior.
 	 */
@@ -53,7 +52,7 @@ public interface TraceStore {
 
 	/**
 	 * @throws DuplicateEntryException if a record with the same {@link RecordIdentity} already
-	 *                                  exists (design decision D-8 step 5)
+	 *                                  exists
 	 * @throws TraceStorageException   on any other persistence failure
 	 */
 	void insertRecord(StoredTraceRecord record) throws DuplicateEntryException, TraceStorageException;
@@ -61,8 +60,7 @@ public interface TraceStore {
 	/**
 	 * Replaces the three mutable correlation flags ({@code coverageGap}, {@code chainLinkFailure},
 	 * {@code equivocation}) on the record identified by {@code id}, succeeding only if the record's
-	 * currently stored version still equals {@code expectedVersion} (design §10, T-1, design
-	 * decisions D-9, CAS MVP D-3); {@code late} is fixed at ingestion and is never changed here.
+	 * currently stored version still equals {@code expectedVersion} (design §10); {@code late} is fixed at ingestion and is never changed here.
 	 *
 	 * @return {@code true} if a matching record was found and updated, {@code false} if no record
 	 *         with this identity exists
@@ -94,7 +92,7 @@ public interface TraceStore {
 
 	/**
 	 * @return every record at this chain position; more than one row is an equivocation, not an
-	 *         error (design decision D-9)
+	 *         error
 	 */
 	List<StoredTraceRecord> findRecordsByChainPosition(ChainPosition position);
 
@@ -109,11 +107,10 @@ public interface TraceStore {
 	 * ({@code domainId}, {@code receiptSeq}, {@code receivedAt(Ms)}, {@code producerId},
 	 * {@code recordId}, {@code recordKey}, {@code contentDigest}, {@code prevReceiptHash},
 	 * {@code receiptHash}, {@code receiptState}, {@code nodeId}); the store computes and sets
-	 * {@code id}/{@code dn} from the D-6 key function.
+	 * {@code id}/{@code dn} from {@link TraceKeys}.
 	 *
 	 * @throws DuplicateEntryException if a receipt already exists at this
-	 *                                  {@code (domainId, receiptSequence)} (design decision D-8
-	 *                                  step 4 — another node claimed the sequence)
+	 *                                  {@code (domainId, receiptSequence)} (another node claimed the sequence)
 	 * @throws TraceStorageException   on any other persistence failure
 	 */
 	void insertReceipt(TraceReceiptEntry row) throws DuplicateEntryException, TraceStorageException;
@@ -127,7 +124,7 @@ public interface TraceStore {
 
 	/**
 	 * @return the receipt with the highest {@code receiptSequence} in the domain, in any state
-	 *         (design decision D-8 step 2)
+	 *
 	 */
 	Optional<ReceiptHead> findReceiptHead(String domainId);
 
@@ -137,7 +134,7 @@ public interface TraceStore {
 	 * @return {@code PENDING} receipts received strictly before {@code cutoffMs} (a receipt
 	 *         received exactly at {@code cutoffMs} is excluded), across every domain, oldest
 	 *         first by {@code receivedAtMs}, limited to {@code limit} rows — feeds
-	 *         {@code TraceReceiptRepairTimer} (task 18)
+	 *         {@code TraceReceiptRepairTimer}
 	 */
 	List<TraceReceiptEntry> findPendingReceiptsOlderThan(long cutoffMs, int limit);
 
@@ -149,7 +146,7 @@ public interface TraceStore {
 	 * Registers a producer chain. The caller sets only the business fields ({@code domainId},
 	 * {@code producerId}, {@code producerInstanceId}, {@code producerChainId},
 	 * {@code registeredBy}, {@code creationDate}); the store computes and sets {@code id}/
-	 * {@code dn} from the D-6 key function.
+	 * {@code dn} from {@link TraceKeys}.
 	 *
 	 * @throws DuplicateEntryException if this chain is already registered (admin:
 	 *                                  {@code chain_already_exists})
@@ -169,7 +166,7 @@ public interface TraceStore {
 	 * Registers a producer key. The caller sets only the business fields ({@code domainId},
 	 * {@code producerId}, {@code kid}, {@code publicKeyJwk}, {@code validFrom}, {@code validUntil},
 	 * {@code registeredBy}, {@code creationDate}); the store computes and sets {@code id}/
-	 * {@code dn} from the D-6 key function.
+	 * {@code dn} from {@link TraceKeys}.
 	 *
 	 * @throws DuplicateEntryException if this {@code (domainId, producerId, kid)} is already
 	 *                                  registered (admin: {@code key_already_exists})

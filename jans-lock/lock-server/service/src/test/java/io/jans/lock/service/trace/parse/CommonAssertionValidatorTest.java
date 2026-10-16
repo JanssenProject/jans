@@ -361,22 +361,22 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testValidate_signedAtAtLatenessBoundary_accepted() throws IOException {
+	void testValidate_signedAtAtFutureSkewBoundary_accepted() throws IOException {
 		Instant now = Instant.parse("2026-06-11T00:00:00Z");
 		setField(validator, "clock", Clock.fixed(now, ZoneOffset.UTC));
 		ObjectNode root = loadFixture();
-		long boundary = now.getEpochSecond() + traceConfiguration.getLatenessThresholdSeconds();
+		long boundary = now.getEpochSecond() + traceConfiguration.getMaxFutureSkewSeconds();
 		set(root, MAPPER.getNodeFactory().numberNode(boundary), "trace", "signed_at");
 
 		validator.validate(assertionOf(root));
 	}
 
 	@Test
-	void testValidate_signedAtPastLatenessBoundary_throwsSignedAtInFuture() throws IOException {
+	void testValidate_signedAtPastFutureSkewBoundary_throwsSignedAtInFuture() throws IOException {
 		Instant now = Instant.parse("2026-06-11T00:00:00Z");
 		setField(validator, "clock", Clock.fixed(now, ZoneOffset.UTC));
 		ObjectNode root = loadFixture();
-		long pastBoundary = now.getEpochSecond() + traceConfiguration.getLatenessThresholdSeconds() + 1;
+		long pastBoundary = now.getEpochSecond() + traceConfiguration.getMaxFutureSkewSeconds() + 1;
 		set(root, MAPPER.getNodeFactory().numberNode(pastBoundary), "trace", "signed_at");
 
 		TraceValidationException ex = validateAndCapture(root);
@@ -492,6 +492,56 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 		TraceValidationException ex = validateAndCapture(root);
 
 		assertEquals(TraceValidationException.ERROR_DOMAIN_FIELD_FORBIDDEN, ex.getErrorId());
+	}
+
+	@Test
+	void testValidate_lockDerivedMemberAtTopLevel_throwsForbidden() throws IOException {
+		for (String member : new String[] { "cnf", "content_digest", "receipt_sequence", "key_thumbprint" }) {
+			ObjectNode root = loadFixture();
+			root.set(member, TextNode.valueOf("x"));
+
+			TraceValidationException ex = validateAndCapture(root);
+
+			assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
+			assertEquals("forbidden:" + member, ex.getReason());
+		}
+	}
+
+	@Test
+	void testValidate_lockDerivedMemberInTraceAndEvent_throwsForbidden() throws IOException {
+		ObjectNode inTrace = loadFixture();
+		((ObjectNode) inTrace.get("trace")).set("trust_tier", TextNode.valueOf("attested"));
+		assertEquals("forbidden:trace.trust_tier", validateAndCapture(inTrace).getReason());
+
+		ObjectNode inEvent = loadFixture();
+		((ObjectNode) inEvent.get("trace").get("event")).set("capability_resolution", TextNode.valueOf("x"));
+		assertEquals("forbidden:trace.event.capability_resolution", validateAndCapture(inEvent).getReason());
+	}
+
+	@Test
+	void testValidate_lockDerivedMemberInFact_throwsForbidden() throws IOException {
+		ObjectNode root = loadFixture();
+		ObjectNode event = (ObjectNode) root.get("trace").get("event");
+		ObjectNode fact = event.putObject("decision");
+		fact.set("capability_id", TextNode.valueOf("x"));
+
+		assertEquals("forbidden:trace.event.decision.capability_id", validateAndCapture(root).getReason());
+
+		root = loadFixture();
+		event = (ObjectNode) root.get("trace").get("event");
+		event.remove("decision");
+		event.putArray("decisions").addObject().set("late_flag", TextNode.valueOf("x"));
+
+		assertEquals("forbidden:trace.event.decisions[0].late_flag", validateAndCapture(root).getReason());
+	}
+
+	@Test
+	void testValidate_lockDerivedNameInsideTokenEntry_notReserved() throws IOException {
+		ObjectNode root = loadFixture();
+		ObjectNode event = (ObjectNode) root.get("trace").get("event");
+		((ObjectNode) event.get("tokens").get(0)).set("cnf", TextNode.valueOf("x"));
+
+		validator.validate(assertionOf(root));
 	}
 
 }

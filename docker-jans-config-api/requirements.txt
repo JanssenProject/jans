@@ -1,2 +1,4 @@
-grpcio==1.83.0
+# force using wheel only, image build fails fast if wheel package isn't available
+--only-binary=grpcio
+--only-binary=cryptography
 /tmp/jans/jans-pycloudlib

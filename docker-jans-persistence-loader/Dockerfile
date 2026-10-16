@@ -6,7 +6,7 @@ FROM bellsoft/liberica-openjre-alpine:17.0.20@sha256:b052d402e9146bca23524922cdb
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 \
+    && apk add --no-cache python3 curl tini py3-psycopg2 \
     && apk add --no-cache --virtual .build-deps git wget \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
@@ -18,7 +18,7 @@ RUN apk update \
 RUN mkdir -p /app/static /app/schema /app/static/opendj /app/templates
 
 # janssenproject/jans SHA commit
-ARG JANS_SOURCE_VERSION=21ec4fdd7d826d2e60e9acf6bd069ed5093eda28
+ARG JANS_SOURCE_VERSION=c4b4b52d4c3753d76f16d55df544a433f7c8732c
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog

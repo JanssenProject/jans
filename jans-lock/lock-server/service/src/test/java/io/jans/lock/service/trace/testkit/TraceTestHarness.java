@@ -44,14 +44,14 @@ import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
 import io.jans.lock.service.trace.verify.TraceVerificationService;
 
 /**
- * Task 22 consolidated test harness: wires the real TRACE collaborators (parser, common/event-kind
+ * Test harness: wires the real TRACE collaborators (parser, common/event-kind
  * validation, verification, correlation, receipt-chain allocation, ingestion, retrieval) around one
  * shared {@link InMemoryTraceStore} and a mutable {@link TraceConfiguration}, exactly the way
- * {@code TraceIngestionServiceTest} (task 19) wires them inline. Nothing here is mocked: every
+ * {@code TraceIngestionServiceTest} wires them inline. Nothing here is mocked: every
  * collaborator, including {@link AppConfiguration}, is a real instance.
  *
  * <p>Every "now" in the suite flows through {@link #setNow(long)}: it fixes
- * {@link CommonAssertionValidator}'s clock (design D-11's {@code signed_at_in_future} check) and
+ * {@link CommonAssertionValidator}'s clock (the {@code signed_at_in_future} check) and
  * becomes the default {@code received_at_ms} for {@link #ctx(String, String, String...)}, so a test
  * is fully deterministic without touching the system clock.
  */

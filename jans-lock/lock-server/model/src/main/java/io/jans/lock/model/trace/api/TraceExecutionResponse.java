@@ -15,8 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * The direct TRACE records of one execution, ordered by receipt sequence (design §10, §11.3,
- * TRACE MVP task 21). Carries no completeness claim beyond the fixed {@code "not_assessed"}
+ * The direct TRACE records of one execution, ordered by receipt sequence (design §10, §11.3). Carries no completeness claim beyond the fixed {@code "not_assessed"}
  * value and never includes child executions (design §14).
  *
  * @author Yuriy Movchan

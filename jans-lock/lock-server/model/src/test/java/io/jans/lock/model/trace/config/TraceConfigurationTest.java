@@ -38,8 +38,10 @@ public class TraceConfigurationTest {
                 + "\"traceConfiguration\": {"
                 + "  \"enabled\": false,"
                 + "  \"defaultEvidenceDomainId\": \"default\","
+                + "  \"defaultAllowedProducerIds\": [\"prod-a\", \"prod-b\"],"
                 + "  \"clientDomainBindings\": [ { \"clientId\": \"2200.abc\", \"evidenceDomainId\": \"default\", \"allowedProducerIds\": [\"*\"] } ],"
                 + "  \"latenessThresholdSeconds\": 120,"
+                + "  \"maxFutureSkewSeconds\": 45,"
                 + "  \"maxRequestBytes\": 1024,"
                 + "  \"maxJsonDepth\": 4,"
                 + "  \"maxStringLength\": 16,"
@@ -59,6 +61,7 @@ public class TraceConfigurationTest {
         assertNotNull(traceConfiguration);
         assertFalse(traceConfiguration.isEnabled());
         assertEquals("default", traceConfiguration.getDefaultEvidenceDomainId());
+        assertEquals(java.util.Arrays.asList("prod-a", "prod-b"), traceConfiguration.getDefaultAllowedProducerIds());
         assertEquals(1, traceConfiguration.getClientDomainBindings().size());
 
         TraceClientDomainBinding binding = traceConfiguration.getClientDomainBindings().get(0);
@@ -67,6 +70,7 @@ public class TraceConfigurationTest {
         assertEquals(Collections.singletonList("*"), binding.getAllowedProducerIds());
 
         assertEquals(120, traceConfiguration.getLatenessThresholdSeconds());
+        assertEquals(45, traceConfiguration.getMaxFutureSkewSeconds());
         assertEquals(1024, traceConfiguration.getMaxRequestBytes());
         assertEquals(4, traceConfiguration.getMaxJsonDepth());
         assertEquals(16, traceConfiguration.getMaxStringLength());
@@ -88,8 +92,10 @@ public class TraceConfigurationTest {
         assertNotNull(traceConfiguration);
         assertTrue(traceConfiguration.isEnabled());
         assertNull(traceConfiguration.getDefaultEvidenceDomainId());
+        assertTrue(traceConfiguration.getDefaultAllowedProducerIds().isEmpty());
         assertTrue(traceConfiguration.getClientDomainBindings().isEmpty());
         assertEquals(TraceConfiguration.DEFAULT_LATENESS_THRESHOLD_SECONDS, traceConfiguration.getLatenessThresholdSeconds());
+        assertEquals(TraceConfiguration.DEFAULT_MAX_FUTURE_SKEW_SECONDS, traceConfiguration.getMaxFutureSkewSeconds());
         assertEquals(TraceConfiguration.DEFAULT_MAX_REQUEST_BYTES, traceConfiguration.getMaxRequestBytes());
         assertEquals(TraceConfiguration.DEFAULT_MAX_JSON_DEPTH, traceConfiguration.getMaxJsonDepth());
         assertEquals(TraceConfiguration.DEFAULT_MAX_STRING_LENGTH, traceConfiguration.getMaxStringLength());
@@ -107,6 +113,7 @@ public class TraceConfigurationTest {
         TraceConfiguration traceConfiguration = new TraceConfiguration();
 
         traceConfiguration.setLatenessThresholdSeconds(0);
+        traceConfiguration.setMaxFutureSkewSeconds(0);
         traceConfiguration.setMaxRequestBytes(-1);
         traceConfiguration.setMaxJsonDepth(0);
         traceConfiguration.setMaxStringLength(-100);
@@ -119,6 +126,7 @@ public class TraceConfigurationTest {
         traceConfiguration.setMaxBulkRequestBytes(0);
 
         assertEquals(TraceConfiguration.DEFAULT_LATENESS_THRESHOLD_SECONDS, traceConfiguration.getLatenessThresholdSeconds());
+        assertEquals(TraceConfiguration.DEFAULT_MAX_FUTURE_SKEW_SECONDS, traceConfiguration.getMaxFutureSkewSeconds());
         assertEquals(TraceConfiguration.DEFAULT_MAX_REQUEST_BYTES, traceConfiguration.getMaxRequestBytes());
         assertEquals(TraceConfiguration.DEFAULT_MAX_JSON_DEPTH, traceConfiguration.getMaxJsonDepth());
         assertEquals(TraceConfiguration.DEFAULT_MAX_STRING_LENGTH, traceConfiguration.getMaxStringLength());

@@ -26,6 +26,12 @@ public final class TraceConstants {
 	/** {@code trace.eat_profile} value the MVP accepts (design §7.1). */
 	public static final String EAT_PROFILE = "tag:jans.io,2026:trace-v1";
 
+	/**
+	 * Receipt-commitment profile tag (GovOps profile §11). It is the {@code receipt_profile} member
+	 * of every receipt-hash input; a different receipt-hash layout needs a new tag.
+	 */
+	public static final String RECEIPT_PROFILE = "tag:jans.io,2026:lock-trace-receipt-v1";
+
 	/** Prefix of every TRACE hash string; kept in sync with {@link CanonicalHashes#SHA256_PREFIX}. */
 	public static final String HASH_PREFIX = CanonicalHashes.SHA256_PREFIX;
 
@@ -36,7 +42,7 @@ public final class TraceConstants {
 	public static final Pattern HASH_PATTERN = Pattern.compile("^" + Pattern.quote(HASH_PREFIX) + "[0-9a-f]{64}$");
 
 	/**
-	 * Opaque stable producer id (design D-17): 1 to 255 ASCII characters, starting with a letter or
+	 * Opaque stable producer id: 1 to 255 ASCII characters, starting with a letter or
 	 * digit, then letters, digits and {@code . _ : / -}. Lock does not interpret the value, never
 	 * normalizes it and compares it byte-for-byte; software version travels separately in the
 	 * signed {@code producer_version} member. Shared by assertion validation and by producer-key and
@@ -67,8 +73,25 @@ public final class TraceConstants {
 	/** Name of the top-level signature field, excluded from the JCS signature input. */
 	public static final String SIGNATURE_FIELD = "signature";
 
-	/** Name of the field that is forbidden anywhere in an incoming assertion (design D-1). */
+	/** Name of the field that is forbidden anywhere in an incoming assertion. */
 	public static final String DOMAIN_FIELD = "evidence_domain_id";
+
+	/**
+	 * Members Lock derives, assigns or resolves itself (design §4.1, §10; GovOps profile §1, §12).
+	 * A producer must never sign any of them, so an assertion carrying one at the top level, in
+	 * {@code trace}, in {@code trace.event} or in a {@code decision}/{@code invocation} fact is
+	 * rejected as {@code invalid_assertion} with reason {@code forbidden:<path>}.
+	 * {@link #DOMAIN_FIELD} has its own error and is not listed here. The profile names no
+	 * members for the verification vector or the settlement, completeness, assurance, lineage,
+	 * delegation, instance-binding and external-anchor assessments, so none is listed for them.
+	 */
+	public static final Set<String> LOCK_DERIVED_MEMBERS = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
+			"content_digest", "receipt_sequence", "received_at", "prev_receipt_hash",
+			"coverage_gap_flag", "chain_link_failure_flag", "equivocation_flag", "late_flag",
+			"unattributed_flag", "candidate_flag",
+			"key_resolved", "key_temporally_valid", "key_not_revoked", "key_authorized_for_producer",
+			"producer_authorized_for_claim", "key_thumbprint", "key_authorization_ref", "verified_at",
+			"trust_tier", "capability_resolution", "capability_id", "capability_ids", "cnf")));
 
 	private static String repeat(char c, int count) {
 		char[] chars = new char[count];

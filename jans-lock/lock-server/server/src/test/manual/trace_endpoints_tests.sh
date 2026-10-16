@@ -20,8 +20,9 @@
 # Prerequisites on the Lock Server under test
 #   * traceConfiguration.enabled = true
 #   * CLIENT_ID is bound to an evidence domain (clientDomainBindings, or
-#     defaultEvidenceDomainId) and its allowedProducerIds covers the producers
-#     used here (e2e-pdp-<run>, e2e-pep-<run>) or contains "*".
+#     defaultEvidenceDomainId) and its allowedProducerIds (or, for the default
+#     domain, defaultAllowedProducerIds) covers the producers used here
+#     (e2e-pdp-<run>, e2e-pep-<run>) or contains "*".
 #   * CLIENT_ID has been granted the three TRACE scopes manually. The client
 #     created by jans_lock.py gets its scopes from lock-plugin-swagger.yaml
 #     (config-api plugin), not from Lock's own OpenAPI file, so it does NOT have
@@ -299,7 +300,7 @@ build_capability_invoked() { # RECORD_ID SEQ PREV_HASH SIGNED_AT PARENT_RECORD_I
       execution_authority: $auth,
       subject: { workload_id: $auth },
       event: {
-        invocation: { action: "Acme::Action::\"Pay\"", resource_type: "Acme::Payment", outcome: "INVOKED" },
+        invocation: { action: "Acme::Action::\"Pay\"", resource_type: "Acme::Payment", outcome: "SUCCESS" },
         enforcement_point_id: "e2e-gateway-001",
         tokens: [ { issuer: "https://accounts.example.org", token_type: "access_token", jti: ("e2e-jti-" + $parent) } ]
       }
@@ -442,6 +443,14 @@ expect_status "write → AUTHORIZATION_DECISION signed by a key scoped to CAPABI
 DOMAIN_JSON="$(build_authorization_decision "$(py uuid)" 2 "$DIGEST_AUTH" "$NOW" | jq -c '. + {evidence_domain_id: "other-domain"}')"
 post_json "$API" "$WRITE_TOKEN" "$DOMAIN_JSON"
 expect_status "write → body carrying evidence_domain_id" 400 "domain_field_forbidden"
+
+CNF_JSON="$(build_authorization_decision "$(py uuid)" 2 "$DIGEST_AUTH" "$NOW" | jq -c '. + {cnf: {jwk: {kty: "OKP"}}}')"
+post_json "$API" "$WRITE_TOKEN" "$CNF_JSON"
+expect_status "write → body carrying cnf" 400 "invalid_assertion"
+
+TIER_JSON="$(build_authorization_decision "$(py uuid)" 2 "$DIGEST_AUTH" "$NOW" | jq -c '.trace.trust_tier = "attested"')"
+post_json "$API" "$WRITE_TOKEN" "$TIER_JSON"
+expect_status "write → body carrying trace.trust_tier" 400 "invalid_assertion"
 
 if [[ -n "$WRONG_TOKEN" ]]; then
   post_json "$API" "$WRONG_TOKEN" "$AUTH_JSON"

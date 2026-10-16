@@ -41,12 +41,12 @@ import io.jans.lock.service.trace.model.VerificationResult;
 
 /**
  * Contract that every {@link TraceStore} implementation must satisfy (design §5, §8, §9, §10,
- * §13). {@code InMemoryTraceStore} (this task) and the ORM-backed store (task 13) both run this
+ * §13). {@code InMemoryTraceStore} and the ORM-backed store both run this
  * suite via {@link #createStore()}.
  *
  * <p>JUnit 5, not TestNG: Surefire in {@code lock-server} is pinned to the JUnit-Platform provider
  * and silently skips TestNG classes (confirmed against the pre-existing {@code AuditServiceTest}),
- * so every TRACE test in this series (tasks 02 onward) is written in JUnit 5 instead.
+ * so every TRACE test is written in JUnit 5 instead.
  *
  * @author Yuriy Movchan
  */
@@ -194,7 +194,7 @@ public abstract class TraceStoreContractTest {
 		assertTrue(found.getFlags().isCoverageGap());
 		assertTrue(found.getFlags().isChainLinkFailure());
 		assertTrue(found.getFlags().isEquivocation());
-		// jansTraceLate is immutable after ingestion (design §10, T-1): the store must not adopt
+		// jansTraceLate is immutable after ingestion (design §10): the store must not adopt
 		// the incoming value even though IngestionFlags carries one.
 		assertFalse(found.getFlags().isLate());
 		assertEquals(record.getContentDigest(), found.getContentDigest());
@@ -209,7 +209,7 @@ public abstract class TraceStoreContractTest {
 		assertFalse(updated);
 	}
 
-	// -- records: optimistic-concurrency version (design decision D-9, TRACE CAS MVP task 11) ----
+	// -- records: optimistic-concurrency version ----
 
 	@Test
 	void testUpdateRecordFlags_matchingVersion_succeedsAndIncrementsVersion() throws Exception {

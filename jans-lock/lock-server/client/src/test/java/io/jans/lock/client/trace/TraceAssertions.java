@@ -226,7 +226,7 @@ public final class TraceAssertions {
 			ObjectNode invocation = event.putObject("invocation");
 			invocation.put("action", "Acme::Action::\"Pay\"");
 			invocation.put("resource_type", "Acme::Payment");
-			invocation.put("outcome", "INVOKED");
+			invocation.put("outcome", "SUCCESS");
 			event.put("enforcement_point_id", "trace-end-to-end-test-gateway");
 
 			ObjectNode chain = root.putObject("producer_chain");
@@ -264,7 +264,7 @@ public final class TraceAssertions {
 		}
 	}
 
-	/** @return {@code content_digest} (design §10/D-13): sha256 of the JCS form including {@code signature} */
+	/** @return {@code content_digest} (design §10): sha256 of the JCS form including {@code signature} */
 	public static String contentDigest(String signedJson) {
 		try {
 			JsonNode node = MAPPER.readTree(signedJson);

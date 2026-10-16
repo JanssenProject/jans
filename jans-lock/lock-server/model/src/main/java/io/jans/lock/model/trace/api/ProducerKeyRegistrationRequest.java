@@ -15,8 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Admin request body to register a producer's Ed25519 verification key (design §6, TRACE MVP
- * task 15).
+ * Admin request body to register a producer's Ed25519 verification key (design §6).
  *
  * @author Yuriy Movchan
  */

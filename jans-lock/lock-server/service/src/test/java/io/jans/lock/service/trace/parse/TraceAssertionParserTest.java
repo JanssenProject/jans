@@ -30,7 +30,7 @@ import io.jans.lock.service.trace.error.TraceValidationException;
 
 /**
  * Tests for {@link TraceAssertionParser}: bounded reading, strict UTF-8 decoding, and the JSON
- * limits from design decision D-12.
+ * limits from design §14.
  */
 class TraceAssertionParserTest {
 
