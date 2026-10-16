@@ -8,10 +8,9 @@
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import UserService
-from io.jans.util import StringHelper
 from io.jans.service.cdi.util import CdiUtil
+from java.lang import Throwable
 
-import java
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -50,16 +49,16 @@ class PersonAuthentication(PersonAuthenticationType):
             userService = CdiUtil.bean(UserService)
             foundUser = userService.getUserByAttribute("uid", user_name)
 
-            if foundUser == None:
+            if foundUser is None:
                 print "Identifier First. User does not exist"
                 return ""
 
             attr = configurationAttributes.get("acr_attribute").getValue2()
             acr=foundUser.getAttribute(attr)     
             #acr="u2f" or "otp" or "twilio_sms", etc...
-            if acr == None:
+            if acr is None:
                 acr = "basic"
-        except:
+        except (Exception, Throwable):
             print "Identifier First. Error looking up user or his preferred method"         
 
         print "Identifier First. new acr value %s" % acr

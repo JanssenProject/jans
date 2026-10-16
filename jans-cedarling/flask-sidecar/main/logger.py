@@ -1,5 +1,5 @@
 """
-Copyright (c) 2025, Gluu, Inc. 
+Copyright (c) 2025, Gluu, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,8 +18,15 @@ from datetime import datetime
 import logging
 import orjson
 
-from structlog import configure, get_logger, stdlib, processors, BytesLoggerFactory, make_filtering_bound_logger, \
-    contextvars
+from structlog import (
+    configure,
+    get_logger,
+    stdlib,
+    processors,
+    BytesLoggerFactory,
+    make_filtering_bound_logger,
+    contextvars,
+)
 from pythonjsonlogger import jsonlogger
 
 configure(
@@ -35,7 +42,7 @@ configure(
     logger_factory=BytesLoggerFactory(),
 )
 
-logger:stdlib.BoundLogger = get_logger()
+logger: stdlib.BoundLogger = get_logger()
 
 
 class JsonLogFormatter(jsonlogger.JsonFormatter):  # pragma: no cover

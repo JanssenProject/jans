@@ -60,6 +60,109 @@ paths:
                     type: string
                   details:
                     type: string
+  /.well-known/oauth-authorization-server:
+    get:
+      tags:
+        - OAuth Authorization Server Metadata
+      summary: Gets OAuth 2.0 Authorization Server Metadata.
+      description: Gets OAuth 2.0 Authorization Server Metadata as defined by RFC 8414. Response content is the same document served at /.well-known/openid-configuration (OpenID Connect Discovery is a superset of RFC 8414 metadata), including additional non-standard members.
+      operationId: oauth-authorization-server
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: OAuth 2.0 Authorization Server Metadata
+                required:
+                  - issuer
+                  - response_types_supported
+                properties:
+                  issuer:
+                    type: string
+                    description: "URL using the https scheme that uniquely identifies the authorization server."
+                  authorization_endpoint:
+                    type: string
+                    description: "URL of the authorization server's authorization endpoint."
+                  token_endpoint:
+                    type: string
+                    description: "URL of the authorization server's token endpoint."
+                  jwks_uri:
+                    type: string
+                    description: "URL of the authorization server's JWK Set document."
+                  registration_endpoint:
+                    type: string
+                    description: "URL of the authorization server's dynamic client registration endpoint."
+                  scopes_supported:
+                    type: array
+                    description: Array of scope values supported by this authorization server.
+                    items:
+                      type: string
+                  response_types_supported:
+                    type: array
+                    description: Array of response_type values supported by this authorization server.
+                    items:
+                      type: string
+                  response_modes_supported:
+                    type: array
+                    description: Array of response_mode values supported by this authorization server.
+                    items:
+                      type: string
+                  grant_types_supported:
+                    type: array
+                    description: Array of grant_type values supported by this authorization server.
+                    items:
+                      type: string
+                  token_endpoint_auth_methods_supported:
+                    type: array
+                    description: Array of client authentication methods supported by the token endpoint.
+                    items:
+                      type: string
+                  service_documentation:
+                    type: string
+                    description: "URL of a page containing human-readable information for developers."
+                  ui_locales_supported:
+                    type: array
+                    description: Array of languages and scripts supported for the user interface.
+                    items:
+                      type: string
+                  op_policy_uri:
+                    type: string
+                    description: "URL of a page with policy information about data usage."
+                  op_tos_uri:
+                    type: string
+                    description: "URL of a page with terms of service."
+                  revocation_endpoint:
+                    type: string
+                    description: "URL of the authorization server's token revocation endpoint."
+                  introspection_endpoint:
+                    type: string
+                    description: "URL of the authorization server's token introspection endpoint."
+                  code_challenge_methods_supported:
+                    type: array
+                    description: Array of PKCE code_challenge_method values supported by this authorization server.
+                    items:
+                      type: string
+        500:
+          description: Error during request processing endpoint.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string
   /restv1/evaluation:
     post:
       tags:
@@ -877,13 +980,11 @@ paths:
       description: The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.
       operationId: get_clientinfo
       parameters:
-        - name: access_token
-          in: query
-          schema:
-            type: string
-            description: Client-specific access token.
         - name: Authorization
           in: header
+          required: true
+          description: 'Bearer access token, e.g. "Authorization: Bearer <access_token>". Sending the access token as a
+            query parameter is not supported.'
           schema:
             type: string
       responses:
@@ -4348,14 +4449,11 @@ paths:
       description: Returns Claims about the authenticated End-User.
       operationId: get-userinfo
       parameters:
-        - name: access_token
-          in: query
-          required: true
-          description: OAuth 2.0 Access Token.
-          schema:
-            type: string
         - name: Authorization
           in: header
+          required: true
+          description: 'Bearer access token, e.g. "Authorization: Bearer <access_token>". Sending the access token as a
+            query parameter is not supported.'
           schema:
             type: string
       responses:

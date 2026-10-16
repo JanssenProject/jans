@@ -6,14 +6,18 @@ import com.fasterxml.jackson.databind.node.*;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
+import io.jans.fido2.exception.Fido2NativeFailureException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.exception.Fido2TrustException;
 import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.auth.AuthData;
+import io.jans.fido2.model.conf.AndroidApp;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.IosApp;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.CommonErrorResponseType;
@@ -106,6 +110,23 @@ class CommonVerifiersTest {
         verify(log).warn("hash from domain doesn't match hash from assertion HEX");
     }
 
+    /**
+     * A mismatch is tagged with a diagnostic code (#14608) so metrics can count it by cause instead
+     * of the free-text message — a common symptom of a misconfigured native asset-link/AASA
+     * association presenting the wrong RP ID.
+     */
+    @Test
+    void verifyRpIdHash_retrieveRpIdHashAndCalculatedRpIdHashNotEqual_carriesNativeFailureDiagnostic() {
+        AuthData authData = new AuthData();
+        authData.setRpIdHash("TEST-rpIdHash".getBytes());
+        String domain = "https://test.domain";
+
+        Fido2NativeFailureException ex = assertThrows(Fido2NativeFailureException.class,
+                () -> commonVerifiers.verifyRpIdHash(authData, domain));
+
+        assertEquals(NativeFailureDiagnostic.JFS_RPID_HASH_MISMATCH, ex.getDiagnostic());
+    }
+
     @Test
     void verifyRpIdHash_retrieveRpIdHashAndCalculatedRpIdHashAreEqual_valid() {
         AuthData authData = new AuthData();
@@ -155,6 +176,64 @@ class CommonVerifiersTest {
 
         assertNotNull(response);
         assertEquals("test.bank.com", response);
+    }
+
+    /**
+     * Native apps are recorded for asset-file generation only; they must neither widen nor narrow what the
+     * origin check accepts, so an RP carrying them behaves exactly like one without.
+     */
+    @Test
+    void verifyRpDomain_nativeAppsAreNotConsultedWhenOriginIsListed_valid() {
+        RequestedParty rp = rpWithNativeApp();
+        rp.setOrigins(Arrays.asList("test.bank.com"));
+        when(networkService.getHost("https://test.bank.com")).thenReturn("test.bank.com");
+
+        assertEquals("test.bank.com",
+                commonVerifiers.verifyRpDomain("https://test.bank.com", "bank.com", Arrays.asList(rp)));
+    }
+
+    @Test
+    void verifyRpDomain_nativeAppsDoNotMakeAnUnlistedOriginAcceptable_invalid() {
+        RequestedParty rp = rpWithNativeApp();
+        rp.setOrigins(Arrays.asList("test.bank.com"));
+        when(networkService.getHost("https://com.example.app")).thenReturn("com.example.app");
+        when(log.isWarnEnabled()).thenReturn(true);
+        when(errorResponseFactory.badRequestException(any(), anyString()))
+                .thenThrow(new BadRequestException("rejected"));
+
+        assertThrows(BadRequestException.class,
+                () -> commonVerifiers.verifyRpDomain("https://com.example.app", "bank.com", Arrays.asList(rp)));
+
+        // The server log, and only it, says why: one RP, two configured native apps, neither matched.
+        verify(log).warn(anyString(), eq("com.example.app"), eq(1), eq(2L));
+    }
+
+    /** A stored config with explicit nulls must still be rejected cleanly, not fail while logging why. */
+    @Test
+    void verifyRpDomain_nullNativeAppListsStillRejectCleanly_invalid() {
+        RequestedParty rp = new RequestedParty();
+        rp.setOrigins(Arrays.asList("test.bank.com"));
+        rp.setAndroidApps(null);
+        rp.setIosApps(null);
+        when(networkService.getHost("https://other.com")).thenReturn("other.com");
+        when(log.isWarnEnabled()).thenReturn(true);
+        when(errorResponseFactory.badRequestException(any(), anyString()))
+                .thenThrow(new BadRequestException("rejected"));
+
+        assertThrows(BadRequestException.class,
+                () -> commonVerifiers.verifyRpDomain("https://other.com", "bank.com", Arrays.asList(rp)));
+    }
+
+    private RequestedParty rpWithNativeApp() {
+        RequestedParty rp = new RequestedParty();
+        rp.setId("bank.com");
+        AndroidApp android = new AndroidApp();
+        android.setPackageName("com.example.app");
+        rp.setAndroidApps(Arrays.asList(android));
+        IosApp ios = new IosApp();
+        ios.setBundleId("com.example.app");
+        rp.setIosApps(Arrays.asList(ios));
+        return rp;
     }
 
     @Test

@@ -138,7 +138,7 @@ def test_drop_down():
 #---------------------------------------------------------------------------#
 def test_date_picker():
     value, parent = prompt('input')
-    wid = DateSelectWidget(value=value,parent=parent)
+    wid = DateSelectWidget(value=value,app=parent)
     print(_wid_to_text_wid(wid))
     return _wid_to_text_wid(wid) == value
 

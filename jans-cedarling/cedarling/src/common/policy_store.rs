@@ -14,14 +14,14 @@ pub(crate) mod token_entity_metadata;
 use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
 
 pub(crate) mod archive_handler;
-pub(crate) mod custom_issuer_parser;
 pub(crate) mod entity_parser;
 pub(crate) mod errors;
-pub(crate) mod issuer_parser;
+pub(crate) mod formats;
 pub(crate) mod legacy_store;
 pub(crate) mod loader;
 pub(crate) mod manager;
 pub(crate) mod metadata;
+pub(crate) mod migration;
 pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;
 #[cfg(feature = "tools")]
@@ -883,7 +883,10 @@ mod policy_metadata_tests {
         assert_eq!(result, ["/trial", "/upgrade"]);
 
         assert_eq!(container.annotation_values(ids.iter(), "audit"), ["true"]);
-        assert!(container.annotation_values(ids.iter(), "absent").is_empty());
+        assert_eq!(
+            container.annotation_values(ids.iter(), "absent"),
+            [] as [std::string::String; 0]
+        );
     }
 
     #[test]
@@ -910,7 +913,10 @@ mod policy_metadata_tests {
         let ids = [PolicyId::new("plain")];
 
         assert!(container.annotations_map(ids.iter()).is_empty());
-        assert!(container.annotation_values(ids.iter(), "any").is_empty());
+        assert_eq!(
+            container.annotation_values(ids.iter(), "any"),
+            [] as [std::string::String; 0]
+        );
 
         let by_policy = container.annotations_by_policy(ids.iter());
         assert_eq!(by_policy.len(), 1);

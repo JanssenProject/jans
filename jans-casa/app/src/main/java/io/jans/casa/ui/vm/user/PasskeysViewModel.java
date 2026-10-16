@@ -103,7 +103,9 @@ public class PasskeysViewModel extends UserViewModel {
 			uiAwaiting = true;
 			BindUtils.postNotifyChange(this, "uiAwaiting");
 			String uid = user.getUserName();
-			String jsonRequest = fido2Service.doRegister(uid, Optional.ofNullable(user.getGivenName()).orElse(uid));
+			HttpServletRequest httpRequest = io.jans.casa.misc.WebUtils.getServletRequest();
+			String jsonRequest = fido2Service.doRegister(uid, Optional.ofNullable(user.getGivenName()).orElse(uid),
+					httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"));
 			logger.debug("JSONrequest - " + jsonRequest);
 			// Notify browser to exec proper function
 			UIUtils.showMessageUI(Clients.NOTIFICATION_TYPE_INFO, Labels.getLabel("usr.fido2_touch"));
@@ -124,7 +126,9 @@ public class PasskeysViewModel extends UserViewModel {
 		String errMessage = null;
 		try {
 
-			if (fido2Service.verifyRegistration(mapper.writeValueAsString(event.getData()))) {
+			HttpServletRequest httpRequest = io.jans.casa.misc.WebUtils.getServletRequest();
+			if (fido2Service.verifyRegistration(mapper.writeValueAsString(event.getData()),
+					httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"))) {
 
 				// pick the most suitable recent entry
 				newDevice = fido2Service.getLatestPasskey(user.getId(), System.currentTimeMillis());

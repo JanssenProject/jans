@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -27,7 +28,9 @@ import org.mockito.invocation.InvocationOnMock;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Version;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.exception.VersionMismatchException;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.BaseEntry;
@@ -36,11 +39,15 @@ import io.jans.orm.search.filter.Filter;
 /**
  * A map-backed stand-in for {@link PersistenceEntryManager} that emulates enough of a SQL backend's
  * behavior for {@code OrmTraceStore} to be exercised by the shared {@code TraceStoreContractTest}
- * suite (task 13 acceptance criteria): {@code contains}, {@code persist} (throwing
+ * suite: {@code contains}, {@code persist} (throwing
  * {@link EntryPersistenceException} with <strong>no</strong> {@code DuplicateEntryException} cause
- * on a duplicate DN, exactly like SQL), {@code find} (throwing when the DN is absent), {@code merge},
- * {@code findEntries}, {@code findPagedEntries} and {@code countEntries} — evaluating
- * {@code AND}/{@code OR}/{@code EQUALITY} (including the {@code multiValued()} marker used for
+ * on a duplicate DN, exactly like SQL), {@code find} (throwing when the DN is absent; returns a
+ * defensive copy, like a real backend deserializing a fresh row, so a caller mutating the found
+ * entity never aliases the stored state before a subsequent CAS check), {@code merge},
+ * {@code updateWithVersion} (compare-and-swaps the entity's {@code @Version} field against
+ * the stored value, throwing {@link VersionMismatchException} on a mismatch), {@code findEntries},
+ * {@code findPagedEntries} and {@code countEntries} — evaluating {@code AND}/{@code OR}/
+ * {@code EQUALITY} (including the {@code multiValued()} marker used for
  * {@code jansTraceCapKeys}/{@code jansTraceTokenKeys}) and {@code LESS_OR_EQUAL} filters by
  * reflecting on each entity's {@code @AttributeName} fields, and applying the entity's
  * {@code @DataEntry} default sort before any {@code limit}, as the SQL backend does.
@@ -81,9 +88,10 @@ final class FakeEntryManagerBehavior {
 			Map<String, Object> store = storeFor(entity.getClass());
 			if (store.containsKey(dn)) {
 				// SQL does not throw io.jans.orm.exception.operation.DuplicateEntryException; it
-				// wraps every persist failure in a plain EntryPersistenceException (design D-8).
+				// wraps every persist failure in a plain EntryPersistenceException.
 				throw new EntryPersistenceException("Duplicate entry: " + dn);
 			}
+			initVersionIfNeeded(entity);
 			store.put(dn, entity);
 			return null;
 		}).when(mock).persist(any());
@@ -99,6 +107,32 @@ final class FakeEntryManagerBehavior {
 			return null;
 		}).when(mock).merge(any());
 
+		doAnswer(inv -> {
+			Object entity = inv.getArgument(0);
+			String dn = dnOf(entity);
+			Class<?> entryClass = entity.getClass();
+			Map<String, Object> store = storeFor(entryClass);
+			Object current = store.get(dn);
+			if (current == null) {
+				throw new EntryPersistenceException("No such entry: " + dn);
+			}
+			Field versionField = versionFieldOrNull(entryClass);
+			if (versionField == null) {
+				throw new UnsupportedOperationException(
+						"FakeEntryManagerBehavior: no @Version field on " + entryClass);
+			}
+			Long expected = (Long) versionField.get(entity);
+			Long storedVersion = (Long) versionField.get(current);
+			long storedValue = storedVersion == null ? 0L : storedVersion;
+			if (expected == null || expected.longValue() != storedValue) {
+				throw new VersionMismatchException(dn, expected);
+			}
+			long newVersion = storedValue + 1;
+			versionField.set(entity, newVersion);
+			store.put(dn, entity);
+			return null;
+		}).when(mock).updateWithVersion(any());
+
 		when(mock.find(anyString(), any(Class.class), any())).thenAnswer(inv -> {
 			String dn = inv.getArgument(0);
 			Class<?> entryClass = inv.getArgument(1);
@@ -106,7 +140,10 @@ final class FakeEntryManagerBehavior {
 			if (entity == null) {
 				throw new EntryPersistenceException("No such entry: " + dn);
 			}
-			return entity;
+			// A defensive copy, like a real backend deserializing a fresh row: without it, a caller
+			// mutating the found entity before updateWithVersion would alias the very state the CAS
+			// check above is supposed to compare against.
+			return shallowCopy(entity);
 		});
 
 		when(mock.findEntries(anyString(), any(Class.class), any(Filter.class)))
@@ -300,6 +337,57 @@ final class FakeEntryManagerBehavior {
 			}
 			return map;
 		});
+	}
+
+	// -- @Version support (compare-and-swap) -------------------------------------------
+
+	private static Field versionFieldOrNull(Class<?> entryClass) {
+		for (Field field : entryClass.getDeclaredFields()) {
+			if (field.isAnnotationPresent(Version.class)) {
+				field.setAccessible(true);
+				return field;
+			}
+		}
+		return null;
+	}
+
+	private static void initVersionIfNeeded(Object entity) {
+		Field versionField = versionFieldOrNull(entity.getClass());
+		if (versionField == null) {
+			return;
+		}
+		try {
+			if (versionField.get(entity) == null) {
+				versionField.set(entity, 0L);
+			}
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	/**
+	 * A shallow field-for-field copy of a jans-orm entity (walking every declared field, including
+	 * inherited ones such as {@code BaseEntry.dn}), so {@code find()} can hand back a fresh object
+	 * per call instead of the live reference held in {@link #storesByClass} -- the same separation
+	 * a real backend gets for free by deserializing each row anew.
+	 */
+	@SuppressWarnings("unchecked")
+	private static <T> T shallowCopy(T source) {
+		try {
+			T copy = (T) source.getClass().getDeclaredConstructor().newInstance();
+			for (Class<?> c = source.getClass(); c != null; c = c.getSuperclass()) {
+				for (Field field : c.getDeclaredFields()) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						continue;
+					}
+					field.setAccessible(true);
+					field.set(copy, field.get(source));
+				}
+			}
+			return copy;
+		} catch (ReflectiveOperationException e) {
+			throw new IllegalStateException("Failed to copy " + source.getClass(), e);
+		}
 	}
 
 }

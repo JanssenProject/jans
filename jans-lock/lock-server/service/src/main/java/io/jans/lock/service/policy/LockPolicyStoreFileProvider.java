@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -57,13 +58,13 @@ public class LockPolicyStoreFileProvider implements PolicyStoreFileProvider {
         }
 
         try {
-            tempZipFile = Files.createTempFile("lock-policy-store-", ".cjar");
+            tempZipFile = createPrivateTempFile();
             log.info("Preparing policy store from classpath resource '{}' (issuer: {})", POLICY_STORE_RESOURCE, openIdIssuer);
 
             copyAndPatchZip(openIdIssuer);
 
             log.info("Policy store prepared at: {}", tempZipFile);
-        } catch (IOException ex) {
+        } catch (IOException | UnsupportedOperationException ex) {
             cleanup();
             throw new RuntimeException("Failed to prepare policy store from classpath resource: " + POLICY_STORE_RESOURCE, ex);
         }
@@ -87,6 +88,11 @@ public class LockPolicyStoreFileProvider implements PolicyStoreFileProvider {
         }
     }
 
+    private static Path createPrivateTempFile() throws IOException {
+        return Files.createTempFile("lock-policy-store-", ".cjar",
+                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
+    }
+
     private void copyAndPatchZip(String openIdIssuer) throws IOException {
         try (InputStream resource = getClass().getClassLoader().getResourceAsStream(POLICY_STORE_RESOURCE)) {
             if (resource == null) {
@@ -104,7 +110,7 @@ public class LockPolicyStoreFileProvider implements PolicyStoreFileProvider {
                     if (JANS_ISSUER_ENTRY.equals(entry.getName())) {
                         byte[] patched = patchIssuerJson(IOUtils.toByteArray(zis), openIdIssuer);
                         zos.write(patched);
-                        log.debug("Patched {} with issuer URL: {}", JANS_ISSUER_ENTRY, openIdIssuer + WELL_KNOWN_PATH);
+                        log.debug("Patched {} with issuer URL: {}{}", JANS_ISSUER_ENTRY, openIdIssuer, WELL_KNOWN_PATH);
                     } else {
                         IOUtils.copy(zis, zos);
                     }

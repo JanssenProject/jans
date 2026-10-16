@@ -109,7 +109,7 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
-        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec();
+        AuthorizationResponse authorizationResponse2 = execAuthorize(authorizeClient2);
 
         assertNotNull(authorizationResponse2.getLocation(), "The location is null");
         assertNotNull(authorizationResponse2.getAccessToken(), "The accessToken is null");

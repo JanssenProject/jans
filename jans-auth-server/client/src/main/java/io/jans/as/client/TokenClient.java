@@ -78,8 +78,17 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
      */
     public TokenResponse execAuthorizationCode(String code, String redirectUri,
                                                String clientId, String clientSecret) {
+        return execAuthorizationCode(code, redirectUri, clientId, clientSecret, null);
+    }
+
+    /**
+     * Same as {@link #execAuthorizationCode(String, String, String, String)} with PKCE code_verifier.
+     */
+    public TokenResponse execAuthorizationCode(String code, String redirectUri,
+                                               String clientId, String clientSecret, String codeVerifier) {
         setRequest(new TokenRequest(GrantType.AUTHORIZATION_CODE));
         getRequest().setCode(code);
+        getRequest().setCodeVerifier(codeVerifier);
         getRequest().setRedirectUri(redirectUri);
         getRequest().setAuthUsername(clientId);
         getRequest().setAuthPassword(clientSecret);

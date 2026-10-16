@@ -274,7 +274,6 @@
       "jansTraceExecId",
       "jansTraceChainPosKey",
       "jansTraceReceiptSeq",
-      "jansTraceCapKeys",
       "jansTraceTokenKeys"
     ]
   },

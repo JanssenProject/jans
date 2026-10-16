@@ -208,3 +208,72 @@ func TestClient_RevokeUserSessions(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_SearchSessions(t *testing.T) {
+	responseBody := SessionPagedResult{
+		Start:             0,
+		TotalEntriesCount: 1,
+		EntriesCount:      1,
+		Entries: []SessionId{
+			{
+				Sid:    "search-sid-1",
+				UserDn: "uid=user1,ou=people,o=jans",
+				State:  "authenticated",
+			},
+		},
+	}
+
+	server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/jans-config-api/api/v1/jans-auth-server/session/search" {
+			t.Errorf("Expected path '/jans-config-api/api/v1/jans-auth-server/session/search', got %s", r.URL.Path)
+		}
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected GET method, got %s", r.Method)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseBody)
+	}))
+	defer server.Close()
+
+	client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	result, err := client.SearchSessions(context.Background())
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if len(result) != len(responseBody.Entries) {
+		t.Fatalf("Expected %d sessions, got %d", len(responseBody.Entries), len(result))
+	}
+	if result[0].Sid != responseBody.Entries[0].Sid {
+		t.Errorf("Expected SID %s, got %s", responseBody.Entries[0].Sid, result[0].Sid)
+	}
+}
+
+func TestClient_DeleteSessionBySid(t *testing.T) {
+	sid := "test-sid-123"
+
+	server := httptest.NewServer(createMockOAuthHandler(func(w http.ResponseWriter, r *http.Request) {
+		expectedPath := "/jans-config-api/api/v1/jans-auth-server/session/sid/" + sid
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path '%s', got %s", expectedPath, r.URL.Path)
+		}
+		if r.Method != http.MethodDelete {
+			t.Errorf("Expected DELETE method, got %s", r.Method)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, err := NewInsecureClient(server.URL, "test-client-id", "test-client-secret")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	if err := client.DeleteSessionBySid(context.Background(), sid); err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+}

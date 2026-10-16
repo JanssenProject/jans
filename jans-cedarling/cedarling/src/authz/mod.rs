@@ -167,6 +167,16 @@ impl Authz {
         self.config.policy_store.trusted_issuers.as_ref()
     }
 
+    /// Returns the ID of the currently loaded policy store, if it carries one.
+    pub(crate) fn policy_store_id(&self) -> Option<String> {
+        let id = &self.config.policy_store.id;
+        if id.is_empty() {
+            None
+        } else {
+            Some(id.clone())
+        }
+    }
+
     /// Clone the [`Arc`] wrapping the current [`jwt::JwtService`] for reuse across a refresh.
     pub(crate) fn clone_jwt_service(&self) -> Arc<jwt::JwtService> {
         Arc::clone(&self.config.jwt_service)

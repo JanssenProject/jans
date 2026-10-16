@@ -9,9 +9,8 @@ package io.jans.lock.service.trace.model;
 import java.util.Objects;
 
 /**
- * A position within a producer chain: {@link ChainIdentity} plus {@code sequence_number} (design
- * decision D-6, key type {@code pos}; design §8). More than one record may share a
- * {@code ChainPosition} — that is an equivocation, not a duplicate (design decision D-9).
+ * A position within a producer chain: {@link ChainIdentity} plus {@code sequence_number} (key type {@code pos} in {@code TraceKeys}; design §8). More than one record may share a
+ * {@code ChainPosition} — that is an equivocation, not a duplicate.
  *
  * @author Yuriy Movchan
  */

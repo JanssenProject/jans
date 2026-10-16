@@ -493,6 +493,16 @@ fn test_trusted_issuer_loading_info_defaults() {
     }
 }
 
+#[test]
+fn test_policy_store_id_legacy() {
+    let cedarling = create_test_cedarling();
+    assert_eq!(
+        cedarling.policy_store_id(),
+        Some("a1bf93115de86de760ee0bea1d529b521489e5a11747".to_string()),
+        "legacy store should report policy_stores map key"
+    );
+}
+
 fn batch_resource(id: &str) -> Arc<EntityData> {
     Arc::new(
         EntityData::from_json(

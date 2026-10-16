@@ -743,6 +743,24 @@ pub fn total_issuers(instance_id: u64) -> Result<usize, CedarlingErrorCode> {
     Ok(instance.total_issuers())
 }
 
+/// Get the ID of the currently published policy store, if it carries one
+pub fn policy_store_id(instance_id: u64) -> Result<Option<String>, CedarlingErrorCode> {
+    clear_last_error();
+    let runtime = runtime_ref();
+    let instance = match runtime.get_instance(instance_id) {
+        Ok(Some(instance)) => instance,
+        Ok(None) => {
+            set_last_error("Instance not found");
+            return Err(CedarlingErrorCode::InstanceNotFound);
+        },
+        Err((code, ref msg)) => {
+            set_last_error(msg);
+            return Err(code);
+        },
+    };
+    Ok(instance.policy_store_id())
+}
+
 /// Get number of trusted issuers loaded successfully
 pub fn loaded_trusted_issuers_count(instance_id: u64) -> Result<usize, CedarlingErrorCode> {
     clear_last_error();

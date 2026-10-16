@@ -26,7 +26,7 @@ type Fido2Configuration struct {
         MdsCertsFolder                  string             `schema:"mds_certs_folder" json:"mdsCertsFolder"`
         MdsTocsFolder                   string             `schema:"mds_tocs_folder" json:"mdsTocsFolder"`
         ServerMetadataFolder            string             `schema:"server_metadata_folder" json:"serverMetadataFolder"`
-        RequestedParties                []RequestedParties `schema:"requested_parties" json:"requestedParties"`
+        RequestedParties                []RequestedParties `schema:"requested_parties" json:"rp"`
         UnfinishedRequestExpiration     int                `schema:"unfinished_request_expiration" json:"unfinishedRequestExpiration"`
         AuthenticationHistoryExpiration int                `schema:"authentication_history_expiration" json:"authenticationHistoryExpiration"`
         DebugUserAutoEnrollment         bool               `schema:"user_auto_enrollment" json:"userAutoEnrollment"`
@@ -42,6 +42,11 @@ type Fido2Configuration struct {
         EnterpriseAttestation           bool               `schema:"enterprise_attestation" json:"enterpriseAttestation"`
         AttestationMode                 string             `schema:"attestation_mode" json:"attestationMode"`
         AllowedTopOrigins               []string           `schema:"allowed_top_origins" json:"allowedTopOrigins"`
+        LockAuditEnabled                bool               `schema:"lock_audit_enabled" json:"lockAuditEnabled"`
+        LockAuditEndpoint               string             `schema:"lock_audit_endpoint" json:"lockAuditEndpoint"`
+        LockAuditClientId               string             `schema:"lock_audit_client_id" json:"lockAuditClientId"`
+        LockAuditClientPassword         string             `schema:"lock_audit_client_password" json:"lockAuditClientPassword"`
+        LockAuditFlushInterval          int                `schema:"lock_audit_flush_interval" json:"lockAuditFlushInterval"`
 }
 
 // JansFido2DynConfiguration defines the Fido2 dynamic configuration

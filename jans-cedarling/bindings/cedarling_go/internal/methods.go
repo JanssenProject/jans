@@ -143,6 +143,8 @@ func CallDrainMetrics(instance_id uint) Result {
 	return result
 }
 
+func CallPolicyStoreId(instance_id uint) string { return G2R.policy_store_id(&instance_id) }
+
 func CallIsTrustedIssuerLoadedByName(instance_id uint, issuerID string) bool {
 	return G2R.is_trusted_issuer_loaded_by_name(&instance_id, &issuerID)
 }

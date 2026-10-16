@@ -97,7 +97,7 @@ async fn batch_multi_issuer_single_item_allow() {
         expect_ok(&response.results[0], 0).decision,
         "single item should allow via role mapping"
     );
-    assert!(!response.batch_id.to_string().is_empty());
+    assert_ne!(response.batch_id.to_string(), "");
 }
 
 /// Ordering: alternating allow/deny items must map back to input positions.

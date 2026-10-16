@@ -43,6 +43,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -785,6 +787,13 @@ public class AuthUtil {
             return keyValue;
         }
         return keyNode.asText();
+    }
+    
+    public static String getStackTraceAsString(Throwable throwable) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        throwable.printStackTrace(pw); // Redirects the trace output into the StringWriter
+        return sw.toString();
     }
 
 }

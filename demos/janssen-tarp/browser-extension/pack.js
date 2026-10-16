@@ -1,5 +1,5 @@
 const { readFileSync, existsSync, mkdirSync } = require('fs');
-const { parse, resolve } = require('path');
+const { resolve } = require('path');
 const AdmZip = require('adm-zip');
 
 try {

@@ -764,6 +764,25 @@ impl Cedarling {
             .map_err(Error::new)
     }
 
+    /// Get the ID of the currently published policy store, if it carries one.
+    ///
+    /// `undefined` means the store carries no ID. The value is an opaque,
+    /// source-dependent string; it may change after a background refresh.
+    ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const id = cedarling.policyStoreId();
+    /// ```
+    #[wasm_bindgen(js_name = policyStoreId)]
+    pub fn policy_store_id(&self) -> Option<String> {
+        self.instance.policy_store_id()
+    }
+
     /// Check whether a trusted issuer was loaded by issuer identifier.
     ///
     /// # Arguments

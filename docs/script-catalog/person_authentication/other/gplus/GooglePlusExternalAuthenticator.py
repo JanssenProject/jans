@@ -16,6 +16,7 @@ from io.jans.as.server.security import Identity
 from io.jans.as.server.service import UserService, ClientService, AuthenticationService
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper
+from java.lang import Throwable
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -30,7 +31,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
         clientSecretsFile = configurationAttributes.get("gplus_client_secrets_file").getValue2()
         self.clientSecrets = self.loadClientSecrets(clientSecretsFile)
-        if (self.clientSecrets == None):
+        if (self.clientSecrets is None):
             print "Google+ Initialization. File with Google+ client secrets should be not empty"
             return False
 
@@ -49,7 +50,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             self.attributesMapping = self.prepareAttributesMapping(remoteAttributesList, localAttributesList)
-            if (self.attributesMapping == None):
+            if (self.attributesMapping is None):
                 print "Google+ Initialization. The attributes mapping isn't valid"
                 return False
 
@@ -124,7 +125,6 @@ class PersonAuthentication(PersonAuthenticationType):
         
                 loggedIn = False
                 if (StringHelper.isNotEmptyString(userName) and StringHelper.isNotEmptyString(userPassword)):
-                    userService = CdiUtil.bean(UserService)
                     loggedIn = authenticationService.authenticate(userName, userPassword)
         
                 if (not loggedIn):
@@ -136,13 +136,13 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Google+ Authenticate for step 1. gplusAuthCode:", gplusAuthCode
 
             currentClientSecrets = self.getCurrentClientSecrets(self.clientSecrets, configurationAttributes, requestParameters)
-            if (currentClientSecrets == None):
+            if (currentClientSecrets is None):
                 print "Google+ Authenticate for step 1. Client secrets configuration is invalid"
                 return False
             
             print "Google+ Authenticate for step 1. Attempting to gets tokens"
             tokenResponse = self.getTokensByCode(self.clientSecrets, configurationAttributes, gplusAuthCode)
-            if ((tokenResponse == None) or (tokenResponse.getIdToken() == None) or (tokenResponse.getAccessToken() == None)):
+            if ((tokenResponse is None) or (tokenResponse.getIdToken() is None) or (tokenResponse.getAccessToken() is None)):
                 print "Google+ Authenticate for step 1. Failed to get tokens"
                 return False
             else:
@@ -161,7 +161,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Check if there is user with specified gplusUserUid
                 foundUser = userService.getUserByAttribute("oxExternalUid", "gplus:" + gplusUserUid)
 
-                if (foundUser == None):
+                if (foundUser is None):
                     print "Google+ Authenticate for step 1. Failed to find user"
                     print "Google+ Authenticate for step 1. Setting count steps to 2"
                     identity.setWorkingParameter("gplus_count_login_steps", 2)
@@ -190,13 +190,13 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Check if there is user with specified gplusUserUid
                 foundUser = userService.getUserByAttribute("oxExternalUid", "gplus:" + gplusUserUid)
  
-                if (foundUser == None):
+                if (foundUser is None):
                     # Auto user enrollemnt
                     print "Google+ Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
 
                     print "Google+ Authenticate for step 1. Attempting to gets user info"
                     userInfoResponse = self.getUserInfo(currentClientSecrets, configurationAttributes, tokenResponse.getAccessToken())
-                    if ((userInfoResponse == None) or (userInfoResponse.getClaims().size() == 0)):
+                    if ((userInfoResponse is None) or (userInfoResponse.getClaims().size() == 0)):
                         print "Google+ Authenticate for step 1. Failed to get user info"
                         return False
                     else:
@@ -222,10 +222,10 @@ class PersonAuthentication(PersonAuthenticationType):
                         if (localAttribute != None):
                             newUser.setAttribute(localAttribute, localAttributeValue)
  
-                    if (newUser.getAttribute("sn") == None):
+                    if (newUser.getAttribute("sn") is None):
                         newUser.setAttribute("sn", gplusUserUid)
  
-                    if (newUser.getAttribute("cn") == None):
+                    if (newUser.getAttribute("cn") is None):
                         newUser.setAttribute("cn", gplusUserUid)
 
                     # Add mail to oxTrustEmail so that the user's
@@ -270,7 +270,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Google+ Authenticate for step 1. Attempting to find user by uid: '%s'" % gplusUserUid
 
                 foundUser = userService.getUser(gplusUserUid)
-                if (foundUser == None):
+                if (foundUser is None):
                     print "Google+ Authenticate for step 1. Failed to find user"
                     return False
 
@@ -293,7 +293,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Google+ Authenticate for step 2"
             
             sessionAttributes = identity.getSessionId().getSessionAttributes()
-            if (sessionAttributes == None) or not sessionAttributes.containsKey("gplus_user_uid"):
+            if (sessionAttributes is None) or not sessionAttributes.containsKey("gplus_user_uid"):
                 print "Google+ Authenticate for step 2. gplus_user_uid is empty"
                 return False
 
@@ -319,10 +319,10 @@ class PersonAuthentication(PersonAuthenticationType):
             # Avoid mapping Google account to more than one IDP account
             foundUser = userService.getUserByAttribute("oxExternalUid", "gplus:" + gplusUserUid)
 
-            if (foundUser == None):
+            if (foundUser is None):
                 # Add gplusUserUid to user one id UIDs
                 foundUser = userService.addUserAttribute(userName, "oxExternalUid", "gplus:" + gplusUserUid)
-                if (foundUser == None):
+                if (foundUser is None):
                     print "Google+ Authenticate for step 2. Failed to update current user"
                     return False
 
@@ -346,13 +346,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-        authenticationService = CdiUtil.bean(AuthenticationService)
 
         if (step == 1):
             print "Google+ Prepare for step 1"
             
             currentClientSecrets = self.getCurrentClientSecrets(self.clientSecrets, configurationAttributes, requestParameters)
-            if (currentClientSecrets == None):
+            if (currentClientSecrets is None):
                 print "Google+ Prepare for step 1. Google+ client configuration is invalid"
                 return False
             
@@ -404,7 +403,7 @@ class PersonAuthentication(PersonAuthenticationType):
         f = open(clientSecretsFile, 'r')
         try:
             clientSecrets = json.loads(f.read())
-        except:
+        except (Exception, Throwable):
             print "Failed to load Google+ client secrets from file: '%s'" % clientSecrets
             return None
         finally:
@@ -418,7 +417,7 @@ class PersonAuthentication(PersonAuthenticationType):
             clientConfigurationAttribute = configurationAttributes.get("gplus_client_configuration_attribute").getValue2()
             print "Google+ GetClientConfiguration. Using client attribute: '%s'" % clientConfigurationAttribute
 
-            if (requestParameters == None):
+            if (requestParameters is None):
                 return None
 
             clientId = None
@@ -429,23 +428,23 @@ class PersonAuthentication(PersonAuthenticationType):
                 clientId = clientIdArray[0]
 
             # Attempt to determine client_id from event context
-            if (clientId == None):
+            if (clientId is None):
                 identity = CdiUtil.bean(Identity)
                 if (identity.isSetWorkingParameter("sessionAttributes")):
                     clientId = identity.getSessionId().getSessionAttributes().get("client_id")
 
-            if (clientId == None):
+            if (clientId is None):
                 print "Google+ GetClientConfiguration. client_id is empty"
                 return None
 
             clientService = CdiUtil.bean(ClientService)
             client = clientService.getClient(clientId)
-            if (client == None):
+            if (client is None):
                 print "Google+ GetClientConfiguration. Failed to find client '%s' in local LDAP" % clientId
                 return None
 
             clientConfiguration = clientService.getCustomAttribute(client, clientConfigurationAttribute)
-            if ((clientConfiguration == None) or StringHelper.isEmpty(clientConfiguration.getValue())):
+            if ((clientConfiguration is None) or StringHelper.isEmpty(clientConfiguration.getValue())):
                 print "Google+ GetClientConfiguration. Client '%s' attribute '%s' is empty" % (clientId, clientConfigurationAttribute)
             else:
                 print "Google+ GetClientConfiguration. Client '%s' attribute '%s' is '%s'" % (clientId, clientConfigurationAttribute, clientConfiguration)
@@ -455,7 +454,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getCurrentClientSecrets(self, currentClientSecrets, configurationAttributes, requestParameters):
         clientConfiguration = self.getClientConfiguration(configurationAttributes, requestParameters)
-        if (clientConfiguration == None):
+        if (clientConfiguration is None):
             return currentClientSecrets
         
         clientConfigurationValue = json.loads(clientConfiguration.getValue())
@@ -464,13 +463,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getCurrentAttributesMapping(self, currentAttributesMapping, configurationAttributes, requestParameters):
         clientConfiguration = self.getClientConfiguration(configurationAttributes, requestParameters)
-        if (clientConfiguration == None):
+        if (clientConfiguration is None):
             return currentAttributesMapping
 
         clientConfigurationValue = json.loads(clientConfiguration.getValue())
 
         clientAttributesMapping = self.prepareAttributesMapping(clientConfigurationValue["gplus_remote_attributes_list"], clientConfigurationValue["gplus_local_attributes_list"])
-        if (clientAttributesMapping == None):
+        if (clientAttributesMapping is None):
             print "Google+ GetCurrentAttributesMapping. Client attributes mapping is invalid. Using default one"
             return currentAttributesMapping
 
@@ -524,7 +523,7 @@ class PersonAuthentication(PersonAuthenticationType):
         tokenClient.setRequest(tokenRequest)
         
         tokenResponse = tokenClient.exec()
-        if ((tokenResponse == None) or (tokenResponse.getStatus() != 200)):
+        if ((tokenResponse is None) or (tokenResponse.getStatus() != 200)):
             return None
 
         return tokenResponse
@@ -533,7 +532,7 @@ class PersonAuthentication(PersonAuthenticationType):
         userInfoClient = UserInfoClient("https://www.googleapis.com/plus/v1/people/me/openIdConnect")
 
         userInfoResponse = userInfoClient.execUserInfo(accessToken)
-        if ((userInfoResponse == None) or (userInfoResponse.getStatus() != 200)):
+        if ((userInfoResponse is None) or (userInfoResponse.getStatus() != 200)):
             return None
 
         return userInfoResponse

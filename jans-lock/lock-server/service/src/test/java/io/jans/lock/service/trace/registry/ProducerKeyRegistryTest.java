@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
+import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceCryptoException;
@@ -34,18 +35,21 @@ import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 
 /**
- * Tests for {@link ProducerKeyRegistry}: the design decision D-4 validity matrix, create-only
+ * Tests for {@link ProducerKeyRegistry}: the key validity matrix, create-only
  * registration, idempotent revocation and the "stored key unusable" data-error path.
  */
 class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	private static final String DOMAIN = "domain-1";
 
-	private static final String PRODUCER = "cedarling-fleet-1/1.0.0";
+	private static final String PRODUCER = "cedarling-fleet-1";
 
 	private static final String KID = "kid-1";
 
 	private static final String REGISTERED_BY = "2200.abcd";
+
+	private static final List<String> ALL_KINDS = List.of(TraceConstants.EVENT_KIND_AUTHORIZATION_DECISION,
+			TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, TraceConstants.EVENT_KIND_RUNTIME_EFFECT);
 
 	private InMemoryTraceStore store;
 
@@ -73,7 +77,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@Test
 	void testRegister_NewKey_Succeeds() {
-		TraceProducerKeyEntry key = registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L);
+		TraceProducerKeyEntry key = registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
 
 		assertEquals(DOMAIN, key.getDomainId());
 		assertEquals(PRODUCER, key.getProducerId());
@@ -87,10 +91,10 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@Test
 	void testRegister_SameKeyTwice_KeyAlreadyExists() {
-		registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
 
 		TraceConflictException ex = assertThrows(TraceConflictException.class,
-				() -> registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L));
+				() -> registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L));
 
 		assertEquals(TraceErrorResponseType.KEY_ALREADY_EXISTS, ex.getErrorId());
 	}
@@ -98,7 +102,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 	@Test
 	void testRegister_ValidUntilBeforeValidFrom_InvalidKey() {
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> registry.register(DOMAIN, PRODUCER, KID, jwk, 2000L, 1000L, REGISTERED_BY, 1000L));
+				() -> registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 2000L, 1000L, REGISTERED_BY, 1000L));
 
 		assertEquals(TraceErrorResponseType.INVALID_KEY, ex.getErrorId());
 		assertEquals(ProducerKeyRegistry.REASON_VALIDITY_WINDOW, ex.getReason());
@@ -107,7 +111,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 	@Test
 	void testRegister_ValidUntilEqualsValidFrom_InvalidKey() {
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, 1000L, REGISTERED_BY, 1000L));
+				() -> registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, 1000L, REGISTERED_BY, 1000L));
 
 		assertEquals(TraceErrorResponseType.INVALID_KEY, ex.getErrorId());
 		assertEquals(ProducerKeyRegistry.REASON_VALIDITY_WINDOW, ex.getReason());
@@ -116,7 +120,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 	@Test
 	void testRegister_ProducerIdBadFormat_InvalidKey() {
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> registry.register(DOMAIN, "not-a-valid-producer-id", KID, jwk, 1000L, null, REGISTERED_BY, 1000L));
+				() -> registry.register(DOMAIN, "-bad producer", KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L));
 
 		assertEquals(TraceErrorResponseType.INVALID_KEY, ex.getErrorId());
 		assertEquals(ProducerKeyRegistry.REASON_PRODUCER_ID_FORMAT, ex.getReason());
@@ -125,7 +129,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 	@Test
 	void testRegister_EmptyKid_InvalidKey() {
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> registry.register(DOMAIN, PRODUCER, "", jwk, 1000L, null, REGISTERED_BY, 1000L));
+				() -> registry.register(DOMAIN, PRODUCER, "", jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L));
 
 		assertEquals(TraceErrorResponseType.INVALID_KEY, ex.getErrorId());
 		assertEquals(ProducerKeyRegistry.REASON_KID_EMPTY, ex.getReason());
@@ -136,7 +140,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 		String longKid = repeat('k', 256);
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> registry.register(DOMAIN, PRODUCER, longKid, jwk, 1000L, null, REGISTERED_BY, 1000L));
+				() -> registry.register(DOMAIN, PRODUCER, longKid, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L));
 
 		assertEquals(TraceErrorResponseType.INVALID_KEY, ex.getErrorId());
 		assertEquals(ProducerKeyRegistry.REASON_KID_LENGTH, ex.getReason());
@@ -148,7 +152,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 		badJwk.put("kty", "RSA");
 
 		assertThrows(TraceCryptoException.class,
-				() -> registry.register(DOMAIN, PRODUCER, KID, badJwk, 1000L, null, REGISTERED_BY, 1000L));
+				() -> registry.register(DOMAIN, PRODUCER, KID, badJwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L));
 	}
 
 	// -- revocation -------------------------------------------------------------------------------
@@ -162,7 +166,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@Test
 	void testRevoke_KnownKey_SetsRevokedAt() {
-		registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
 
 		Optional<TraceProducerKeyEntry> result = registry.revoke(DOMAIN, PRODUCER, KID, 5000L);
 
@@ -172,7 +176,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@Test
 	void testRevoke_Twice_IdempotentSameRevokedAt() {
-		registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
 		registry.revoke(DOMAIN, PRODUCER, KID, 5000L);
 
 		Optional<TraceProducerKeyEntry> result = registry.revoke(DOMAIN, PRODUCER, KID, 9000L);
@@ -181,7 +185,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 		assertEquals(Long.valueOf(5000L), result.get().getRevokedAtMs());
 	}
 
-	// -- resolveForVerification: design decision D-4 validity matrix ----------------------------
+	// -- resolveForVerification: key validity matrix ----------------------------
 
 	@Test
 	void testResolveForVerification_UnknownKey_UnknownProducerKey() {
@@ -194,7 +198,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@Test
 	void testResolveForVerification_BeforeValidFrom_NotYetValid() {
-		registry.register(DOMAIN, PRODUCER, KID, jwk, 5000L, null, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 5000L, null, REGISTERED_BY, 1000L);
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
 				() -> registry.resolveForVerification(DOMAIN, PRODUCER, KID, 4999L));
@@ -205,7 +209,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@Test
 	void testResolveForVerification_InsideWindow_Resolves() {
-		registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, 9000L, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, 9000L, REGISTERED_BY, 1000L);
 
 		ProducerKeyRegistry.ResolvedKey resolved = registry.resolveForVerification(DOMAIN, PRODUCER, KID, 5000L);
 
@@ -215,7 +219,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@Test
 	void testResolveForVerification_NoValidUntil_ResolvesFarInTheFuture() {
-		registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
 
 		ProducerKeyRegistry.ResolvedKey resolved = registry.resolveForVerification(DOMAIN, PRODUCER, KID,
 				Long.MAX_VALUE / 2);
@@ -225,7 +229,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@Test
 	void testResolveForVerification_AtValidFrom_Resolves() {
-		registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, 9000L, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, 9000L, REGISTERED_BY, 1000L);
 
 		ProducerKeyRegistry.ResolvedKey resolved = registry.resolveForVerification(DOMAIN, PRODUCER, KID, 1000L);
 
@@ -234,7 +238,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@Test
 	void testResolveForVerification_AfterValidUntil_Expired() {
-		registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, 9000L, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, 9000L, REGISTERED_BY, 1000L);
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
 				() -> registry.resolveForVerification(DOMAIN, PRODUCER, KID, 9000L));
@@ -245,7 +249,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@Test
 	void testResolveForVerification_RevokedInThePast_Revoked() {
-		registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
 		registry.revoke(DOMAIN, PRODUCER, KID, 5000L);
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
@@ -257,7 +261,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 
 	@Test
 	void testResolveForVerification_RevokedInTheFuture_StillValidNow() {
-		registry.register(DOMAIN, PRODUCER, KID, jwk, 1000L, null, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
 		registry.revoke(DOMAIN, PRODUCER, KID, 9000L);
 
 		ProducerKeyRegistry.ResolvedKey resolved = registry.resolveForVerification(DOMAIN, PRODUCER, KID, 5000L);
@@ -288,12 +292,103 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 		assertEquals(ProducerKeyRegistry.REASON_STORED_KEY_UNUSABLE, ex.getReason());
 	}
 
+	// -- authorized event kinds -----------------------------------------------------------
+
+	@Test
+	void testRegister_AuthorizedEventKinds_StoredAndResolved() {
+		List<String> kinds = List.of(TraceConstants.EVENT_KIND_AUTHORIZATION_DECISION,
+				TraceConstants.EVENT_KIND_RUNTIME_EFFECT);
+
+		TraceProducerKeyEntry key = registry.register(DOMAIN, PRODUCER, KID, jwk, kinds, 1000L, null, REGISTERED_BY,
+				1000L);
+
+		assertEquals(kinds, key.getAuthorizedEventKinds());
+		ProducerKeyRegistry.ResolvedKey resolved = registry.resolveForVerification(DOMAIN, PRODUCER, KID, 5000L);
+		assertEquals(kinds, resolved.getAuthorizedEventKinds());
+		assertEquals(kinds, store.findProducerKey(DOMAIN, PRODUCER, KID).get().getAuthorizedEventKinds());
+	}
+
+	@Test
+	void testRegister_AuthorizedEventKindsInvalid_InvalidKeyAndNothingStored() {
+		List<List<String>> invalid = new java.util.ArrayList<>();
+		invalid.add(null);
+		invalid.add(Collections.emptyList());
+		invalid.add(List.of("NOPE"));
+		invalid.add(List.of("authorization_decision"));
+		invalid.add(List.of(TraceConstants.EVENT_KIND_RUNTIME_EFFECT, TraceConstants.EVENT_KIND_RUNTIME_EFFECT));
+		invalid.add(java.util.Arrays.asList(TraceConstants.EVENT_KIND_RUNTIME_EFFECT, null));
+
+		for (List<String> kinds : invalid) {
+			TraceValidationException ex = assertThrows(TraceValidationException.class,
+					() -> registry.register(DOMAIN, PRODUCER, KID, jwk, kinds, 1000L, null, REGISTERED_BY, 1000L),
+					String.valueOf(kinds));
+
+			assertEquals(TraceErrorResponseType.INVALID_KEY, ex.getErrorId());
+			assertEquals(ProducerKeyRegistry.REASON_AUTHORIZED_EVENT_KINDS, ex.getReason());
+		}
+		assertTrue(registry.list(DOMAIN, null).isEmpty());
+	}
+
+	@Test
+	void testRequireEventKindAuthorized_KindInScope_Passes() {
+		registry.register(DOMAIN, PRODUCER, KID, jwk, List.of(TraceConstants.EVENT_KIND_AUTHORIZATION_DECISION),
+				1000L, null, REGISTERED_BY, 1000L);
+		ProducerKeyRegistry.ResolvedKey resolved = registry.resolveForVerification(DOMAIN, PRODUCER, KID, 5000L);
+
+		registry.requireEventKindAuthorized(resolved, TraceConstants.EVENT_KIND_AUTHORIZATION_DECISION);
+	}
+
+	@Test
+	void testRequireEventKindAuthorized_KindOutOfScope_UnknownProducerKey() {
+		registry.register(DOMAIN, PRODUCER, KID, jwk, List.of(TraceConstants.EVENT_KIND_AUTHORIZATION_DECISION),
+				1000L, null, REGISTERED_BY, 1000L);
+		ProducerKeyRegistry.ResolvedKey resolved = registry.resolveForVerification(DOMAIN, PRODUCER, KID, 5000L);
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> registry.requireEventKindAuthorized(resolved, TraceConstants.EVENT_KIND_CAPABILITY_INVOKED));
+
+		assertEquals(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY, ex.getErrorId());
+		assertEquals(ProducerKeyRegistry.REASON_EVENT_KIND_NOT_AUTHORIZED, ex.getReason());
+	}
+
+	@Test
+	void testRequireEventKindAuthorized_LegacyRowWithoutAttribute_RejectsEveryKind() throws Exception {
+		TraceProducerKeyEntry legacy = new TraceProducerKeyEntry();
+		legacy.setDomainId(DOMAIN);
+		legacy.setProducerId(PRODUCER);
+		legacy.setKid(KID);
+		legacy.setPublicKeyJwk(jwk);
+		legacy.setValidFrom(new Date(1000L));
+		legacy.setRegisteredBy(REGISTERED_BY);
+		legacy.setCreationDate(new Date(1000L));
+		store.insertProducerKey(legacy);
+		ProducerKeyRegistry.ResolvedKey resolved = registry.resolveForVerification(DOMAIN, PRODUCER, KID, 5000L);
+
+		assertTrue(resolved.getAuthorizedEventKinds().isEmpty());
+		for (String kind : TraceConstants.EVENT_KINDS) {
+			TraceValidationException ex = assertThrows(TraceValidationException.class,
+					() -> registry.requireEventKindAuthorized(resolved, kind), kind);
+			assertEquals(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY, ex.getErrorId());
+			assertEquals(ProducerKeyRegistry.REASON_EVENT_KIND_NOT_AUTHORIZED, ex.getReason());
+		}
+	}
+
+	@Test
+	void testRevoke_KeepsAuthorizedEventKinds() {
+		registry.register(DOMAIN, PRODUCER, KID, jwk, List.of(TraceConstants.EVENT_KIND_RUNTIME_EFFECT), 1000L, null,
+				REGISTERED_BY, 1000L);
+
+		TraceProducerKeyEntry revoked = registry.revoke(DOMAIN, PRODUCER, KID, 5000L).get();
+
+		assertEquals(List.of(TraceConstants.EVENT_KIND_RUNTIME_EFFECT), revoked.getAuthorizedEventKinds());
+	}
+
 	// -- list -----------------------------------------------------------------------------------
 
 	@Test
 	void testList_FiltersByProducerId() {
-		registry.register(DOMAIN, PRODUCER, "kid-a", jwk, 1000L, null, REGISTERED_BY, 1000L);
-		registry.register(DOMAIN, "other-producer/2.0.0", "kid-b", jwk, 1000L, null, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, PRODUCER, "kid-a", jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
+		registry.register(DOMAIN, "other-producer", "kid-b", jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
 
 		List<TraceProducerKeyEntry> filtered = registry.list(DOMAIN, PRODUCER);
 

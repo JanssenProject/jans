@@ -17,7 +17,7 @@
 //! ## Platform Support
 //!
 //! - **Native platforms**: All tests run, including directory/file-based loading
-//! - **WASM**: Tests using `CjarUrl` and `load_policy_store_archive_bytes` work,
+//! - **WASM**: Tests using `CjarUrl` and `read_policy_store_archive_bytes` work,
 //!   as they don't require filesystem access. Directory and file-based tests are
 //!   skipped with `#[cfg(not(target_arch = "wasm32"))]`.
 
@@ -36,6 +36,7 @@ use zip::read::ZipArchive;
 
 use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
 
+use crate::log::interface::LogStorage;
 use crate::tests::utils::cedarling_util::{get_cedarling_with_callback, get_config};
 use crate::tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request};
 use crate::{
@@ -471,6 +472,144 @@ permit(
 
     let failed_ids = cedarling.failed_trusted_issuer_ids();
     assert!(failed_ids.is_empty());
+}
+
+/// Test that `Cedarling::policy_store_id()` returns the store ID for
+/// directory and `.cjar` sources.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_directory_and_cjar() {
+    let builder = create_authz_policy_store_builder();
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+    let from_dir = get_cedarling_from_directory(temp_dir.path().to_path_buf()).await;
+    assert_eq!(
+        from_dir.policy_store_id(),
+        Some("a1b2c3d4e5f6a7b8".to_string()),
+        "directory store should report builder ID"
+    );
+
+    let cjar_dir = TempDir::new().expect("Failed to create temp directory");
+    let cjar_path = cjar_dir.path().join("test_policy_store.cjar");
+    fs::write(&cjar_path, &archive).expect("Failed to write archive file");
+    let from_cjar = get_cedarling_from_cjar_file(cjar_path).await;
+    assert_eq!(
+        from_cjar.policy_store_id(),
+        Some("a1b2c3d4e5f6a7b8".to_string()),
+        ".cjar store should report builder ID"
+    );
+}
+
+/// Test that a legacy YAML store reports the `policy_stores` map key.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_legacy_yaml() {
+    use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
+    let yaml = r#"
+cedar_version: "4.0.0"
+policy_stores:
+  legacy-test-key:
+    name: Test Store
+    policies: {}
+"#;
+    let cedarling = get_cedarling_with_callback(PolicyStoreSource::Yaml(yaml.to_string()), |cfg| {
+        cfg.authorization_config.strict_schema_validation = false;
+    })
+    .await;
+    assert_eq!(
+        cedarling.policy_store_id(),
+        Some("legacy-test-key".to_string()),
+        "legacy store should report map key"
+    );
+}
+
+/// Test that a new-format store without an ID reports `None`.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_missing_returns_none() {
+    let mut builder = create_authz_policy_store_builder();
+    builder.extra_files.insert(
+        "metadata.json".to_string(),
+        r#"{"cedar_version":"4.4.0","policy_store":{"name":"Integration Test Policy Store","version":"1.0.0"}}"#.to_string(),
+    );
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+    let cedarling = get_cedarling_from_directory(temp_dir.path().to_path_buf()).await;
+    assert_eq!(
+        cedarling.policy_store_id(),
+        None,
+        "store without metadata id should report None"
+    );
+}
+
+/// Test that hot-swapping `Authz` updates the reported ID.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_hot_reload_updates() {
+    let builder_a = create_authz_policy_store_builder();
+    let archive_a = builder_a
+        .build_archive()
+        .expect("Failed to build test archive");
+    let dir_a = extract_archive_to_temp_dir(&archive_a);
+    let a = get_cedarling_from_directory(dir_a.path().to_path_buf()).await;
+
+    let mut builder_b = create_authz_policy_store_builder();
+    builder_b.id = "b1b2c3d4e5f6a7b8".to_string();
+    let archive_b = builder_b
+        .build_archive()
+        .expect("Failed to build test archive");
+    let dir_b = extract_archive_to_temp_dir(&archive_b);
+    let b = get_cedarling_from_directory(dir_b.path().to_path_buf()).await;
+
+    assert_eq!(
+        a.policy_store_id(),
+        Some("a1b2c3d4e5f6a7b8".to_string()),
+        "first store should report its own ID"
+    );
+    a.authz.store(b.authz.load_full());
+    assert_eq!(
+        a.policy_store_id(),
+        Some("b1b2c3d4e5f6a7b8".to_string()),
+        "after swap first should report second ID"
+    );
+}
+
+/// Test that a malformed new-format ID fails to load.
+/// Validator unit tests already cover `InvalidPolicyStoreId` at the
+/// `MetadataValidator` level; this covers the `Cedarling::new` surface.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_policy_store_id_malformed_fails_to_load() {
+    use crate::InitCedarlingError;
+    use crate::common::policy_store::errors::ValidationError;
+    use crate::init::policy_store::PolicyStoreLoadError;
+    use crate::init::service_config::ServiceConfigError;
+    use crate::tests::utils::cedarling_util::get_config;
+
+    let mut builder = create_authz_policy_store_builder();
+    builder.id = "not-hex!".to_string();
+    let archive = builder
+        .build_archive()
+        .expect("Failed to build test archive");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+    let config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
+    let Err(err) = Cedarling::new(&config).await else {
+        panic!("malformed ID should fail to load")
+    };
+    assert!(
+        matches!(
+            err,
+            InitCedarlingError::ServiceConfig(ServiceConfigError::PolicyStore(
+                PolicyStoreLoadError::Validation(ValidationError::InvalidPolicyStoreId { .. })
+            ))
+        ),
+        "expected InvalidPolicyStoreId, got: {err:?}"
+    );
 }
 
 /// Test that the `TrustedIssuerLoadingInfo` trait correctly tracks failed issuers on `Cedarling`.
@@ -1220,7 +1359,7 @@ async fn test_cjar_url_handles_http_error() {
 
 /// Test loading archive from bytes directly using the loader function.
 ///
-/// This tests the `load_policy_store_archive_bytes` function which is the
+/// This tests the `read_policy_store_archive_bytes` function which is the
 /// underlying mechanism used by `CjarUrl` and is WASM-compatible.
 /// `CEDARLING_POLICY_STORE_MAX_FILE_SIZE` must reach the archive loader, not
 /// just the `ArchiveVfs::from_buffer` call site. A store that loads fine at the
@@ -1267,9 +1406,9 @@ async fn test_configured_max_file_size_reaches_archive_loader() {
 }
 
 #[test]
-async fn test_load_policy_store_archive_bytes_directly() {
+async fn test_read_policy_store_archive_bytes_directly() {
     use crate::common::policy_store::archive_handler::ArchiveLimits;
-    use crate::common::policy_store::loader::load_policy_store_archive_bytes;
+    use crate::common::policy_store::loader::read_policy_store_archive_bytes;
 
     // Build archive bytes
     let builder = create_authz_policy_store_builder();
@@ -1277,54 +1416,58 @@ async fn test_load_policy_store_archive_bytes_directly() {
         .build_archive()
         .expect("Failed to build test archive");
 
-    // Load directly using the bytes loader
-    let loaded = load_policy_store_archive_bytes(&archive_bytes, true, ArchiveLimits::default())
-        .expect("Should load policy store from bytes");
+    // Read directly using the bytes reader
+    let parsed = read_policy_store_archive_bytes(archive_bytes, true, ArchiveLimits::default())
+        .expect("Should read policy store from bytes");
 
-    // Verify the loaded policy store
+    // Verify the parsed policy store
     assert_eq!(
-        loaded.metadata.policy_store.id, "a1b2c3d4e5f6a7b8",
+        parsed.store.id, "a1b2c3d4e5f6a7b8",
         "Policy store ID should match"
     );
+    let metadata = parsed
+        .store
+        .metadata
+        .as_ref()
+        .expect("a directory-format store should carry metadata");
     assert_eq!(
-        loaded.metadata.policy_store.name, "Integration Test Policy Store",
+        metadata.policy_store.name, "Integration Test Policy Store",
         "Policy store name should match"
     );
-    assert!(
-        !loaded.policies.is_empty(),
-        "Should have loaded at least one policy"
-    );
-    assert_eq!(loaded.policies.len(), 2, "Should have loaded 2 policies");
 
     // Verify policy content
-    let policy_names: Vec<&str> = loaded.policies.iter().map(|p| p.name.as_str()).collect();
-    assert!(
-        policy_names.contains(&"allow-read.cedar"),
-        "Should have allow-read policy"
+    let policy_set = parsed.store.policies.get_set();
+    assert_eq!(
+        policy_set.num_of_policies(),
+        2,
+        "Should have read 2 policies"
     );
-    assert!(
-        policy_names.contains(&"deny-write-guest.cedar"),
-        "Should have deny-write-guest policy"
-    );
+    for id in ["allow-read", "deny-write-guest"] {
+        assert!(
+            policy_set
+                .policy(&cedar_policy::PolicyId::new(id))
+                .is_some(),
+            "Should have the {id} policy"
+        );
+    }
 }
 
 /// Test that invalid archive bytes are rejected.
 #[test]
-async fn test_load_policy_store_archive_bytes_invalid() {
+async fn test_read_policy_store_archive_bytes_invalid() {
     use crate::common::policy_store::archive_handler::ArchiveLimits;
-    use crate::common::policy_store::loader::load_policy_store_archive_bytes;
+    use crate::common::policy_store::errors::PolicyStoreError;
+    use crate::common::policy_store::formats::ReadStoreError;
+    use crate::common::policy_store::loader::read_policy_store_archive_bytes;
 
-    // Try to load invalid bytes
+    // Try to read invalid bytes
     let invalid_bytes = vec![0x00, 0x01, 0x02, 0x03];
-    let err = load_policy_store_archive_bytes(&invalid_bytes, true, ArchiveLimits::default())
-        .expect_err("Should fail to load invalid archive bytes");
+    let err = read_policy_store_archive_bytes(invalid_bytes, true, ArchiveLimits::default())
+        .expect_err("Should fail to read invalid archive bytes");
 
     // Verify the error is an Archive error (invalid zip format)
     assert!(
-        matches!(
-            err,
-            crate::common::policy_store::errors::PolicyStoreError::Archive(_)
-        ),
+        matches!(err, ReadStoreError::Read(PolicyStoreError::Archive(_))),
         "Expected Archive error for invalid bytes, got: {err:?}"
     );
 }
@@ -1451,16 +1594,28 @@ async fn test_load_directory_without_schema_strict_false_succeeds() {
 #[test]
 #[cfg(not(target_arch = "wasm32"))]
 async fn test_load_directory_without_schema_strict_true_fails() {
+    use crate::InitCedarlingError;
+    use crate::common::policy_store::errors::ValidationError;
+    use crate::init::policy_store::PolicyStoreLoadError;
+    use crate::init::service_config::ServiceConfigError;
+
     let archive = build_archive_without_schema("deadbeef87654321", "No Schema Dir Strict");
     let temp_dir = extract_archive_to_temp_dir(&archive);
 
     let mut config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
     config.authorization_config.strict_schema_validation = true;
 
-    let result = Cedarling::new(&config).await;
+    let Err(err) = Cedarling::new(&config).await else {
+        panic!("strict_schema_validation=true with no schema should fail to load")
+    };
     assert!(
-        result.is_err(),
-        "Expected init to fail: strict_schema_validation=true but policy store has no schema (directory)"
+        matches!(
+            err,
+            InitCedarlingError::ServiceConfig(ServiceConfigError::PolicyStore(
+                PolicyStoreLoadError::Validation(ValidationError::MissingSchemaSource { .. })
+            ))
+        ),
+        "expected MissingSchemaSource, got: {err:?}"
     );
 }
 
@@ -1490,4 +1645,57 @@ async fn test_archive_without_schema_strict_false_succeeds() {
         .await
         .expect("authorization should succeed without schema");
     assert!(result.decision, "allow-all should permit");
+}
+
+// ============================================================================
+// Policy Store Spec Version Warnings
+// ============================================================================
+
+/// Messages of WARN logs about an outdated policy store format.
+fn spec_version_warnings(logs: &[serde_json::Value]) -> Vec<String> {
+    logs.iter()
+        .filter(|log| log["level"] == "WARN")
+        .filter_map(|log| log["msg"].as_str())
+        .filter(|msg| msg.contains("policy store format is outdated"))
+        .map(str::to_string)
+        .collect()
+}
+
+#[test]
+async fn test_missing_spec_version_is_logged_once_at_startup() {
+    let archive_bytes = create_authz_policy_store_builder()
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let cedarling =
+        get_cedarling_with_callback(PolicyStoreSource::ArchiveBytes(archive_bytes), |_| {}).await;
+
+    let warnings = spec_version_warnings(&cedarling.pop_logs());
+    assert_eq!(
+        warnings.len(),
+        1,
+        "a store without policy_store_spec_version should log exactly one WARN, got: {warnings:?}"
+    );
+    assert!(
+        warnings[0].contains("no policy_store_spec_version"),
+        "the warning should say the field is missing, got: {}",
+        warnings[0]
+    );
+}
+
+#[test]
+async fn test_current_spec_version_logs_no_warning() {
+    let archive_bytes = create_authz_policy_store_builder()
+        .with_spec_version(1)
+        .build_archive()
+        .expect("Failed to build test archive");
+
+    let cedarling =
+        get_cedarling_with_callback(PolicyStoreSource::ArchiveBytes(archive_bytes), |_| {}).await;
+
+    let warnings = spec_version_warnings(&cedarling.pop_logs());
+    assert!(
+        warnings.is_empty(),
+        "a current-version store should not log a format warning, got: {warnings:?}"
+    );
 }

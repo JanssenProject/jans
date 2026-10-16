@@ -1,7 +1,7 @@
 
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.layout.containers import Float, HSplit, Window, ScrollOffsets, AnyContainer
+from prompt_toolkit.layout.containers import Float, HSplit, Window, ScrollOffsets
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.layout.margins import ScrollbarMargin
@@ -11,8 +11,8 @@ from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 
 from prompt_toolkit.layout.dimension import AnyDimension
-from typing import Optional, Sequence, Union
-from typing import TypeVar, Callable
+from typing import Optional
+from typing import Callable
 
 import cli_style
 from utils.multi_lang import _

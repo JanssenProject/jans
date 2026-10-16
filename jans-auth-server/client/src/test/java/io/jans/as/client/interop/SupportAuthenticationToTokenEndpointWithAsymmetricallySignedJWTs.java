@@ -148,6 +148,7 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 

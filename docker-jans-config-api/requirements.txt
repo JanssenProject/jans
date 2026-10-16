@@ -1,3 +1,4 @@
-# pinned to py3-grpcio version to avoid failure on native extension build
-grpcio==1.76.0
+# force using wheel only, image build fails fast if wheel package isn't available
+--only-binary=grpcio
+--only-binary=cryptography
 /tmp/jans/jans-pycloudlib

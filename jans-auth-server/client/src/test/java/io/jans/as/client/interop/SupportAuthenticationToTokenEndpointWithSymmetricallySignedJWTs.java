@@ -78,6 +78,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -141,6 +142,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         tokenRequest.setAlgorithm(SignatureAlgorithm.HS384);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -204,6 +206,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         tokenRequest.setAlgorithm(SignatureAlgorithm.HS512);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);

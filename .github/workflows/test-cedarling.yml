@@ -26,6 +26,8 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
@@ -42,6 +44,8 @@ jobs:
       run: cargo test --locked --no-default-features
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Run Tests
       working-directory: jans-cedarling
       run: cargo test --locked --workspace
@@ -93,10 +97,19 @@ jobs:
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Run cargo-deny
-      uses: EmbarkStudios/cargo-deny-action@91bf2b620e09e18d6eb78b92e7861937469acedb # v2.0.17
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
-        manifest-path: jans-cedarling/Cargo.toml
+        toolchain: stable
+    - name: Install cargo-deny
+      uses: taiki-e/install-action@9bcaee1dcae34154180f412e2fa69355a7cda9f6 # v2.82.6
+      with:
+        tool: cargo-deny@0.19.2
+    - name: Run cargo-deny
+      working-directory: jans-cedarling
+      # deny.toml also sets graph.all-features; the flag is kept to match the
+      # previous cargo-deny-action invocation.
+      run: cargo deny --all-features check
 
   custom_lints:
     runs-on: ubuntu-latest
@@ -108,6 +121,8 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Rust Stable
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
@@ -157,6 +172,8 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
@@ -205,6 +222,8 @@ jobs:
 
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Rust Stable
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
@@ -280,6 +299,8 @@ jobs:
         persist-credentials: false
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
@@ -347,6 +368,8 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
@@ -358,10 +381,19 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
-        toolchain: "1.95.0"
+        toolchain: stable
     - name: Test with pytest
       working-directory: jans-cedarling/bindings/cedarling_python
       run: tox
+    - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+      name: Install uv
+      with:
+        version: "0.11.3"
+    - name: Test sidecar
+      working-directory: jans-cedarling/flask-sidecar
+      run: |
+        uv tool install tox --with tox-uv-bare
+        tox
     - name: Run Python binding benchmarks
       if: matrix.python-version == '3.11'
       working-directory: jans-cedarling/bindings/cedarling_python
@@ -386,6 +418,8 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
@@ -437,6 +471,8 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
@@ -471,6 +507,37 @@ jobs:
         path: jans-cedarling/bindings/cedarling_c/benchmarks/bench_output.jsonl
         retention-days: 7
 
+  jans_trace_java_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      with:
+        workspaces: jans-cedarling
+    # The lowest Java version the binding supports, so the tests run where Lock runs.
+    - name: Set up JDK 11
+      uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+      with:
+        distribution: temurin
+        java-version: "11"
+        cache: maven
+        cache-dependency-path: jans-cedarling/bindings/jans-trace-java/pom.xml
+    - name: Build native library and Kotlin bindings
+      working-directory: jans-cedarling/bindings/jans-trace-java
+      run: make
+    - name: Build jar and run Java tests
+      working-directory: jans-cedarling/bindings/jans-trace-java
+      run: mvn -B -ntp clean verify
+
   uniffi_benchmarks:
     runs-on: ubuntu-latest
     steps:
@@ -481,6 +548,8 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:

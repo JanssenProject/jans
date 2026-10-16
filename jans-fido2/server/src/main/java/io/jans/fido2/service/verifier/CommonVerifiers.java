@@ -23,9 +23,11 @@ import com.google.common.base.Strings;
 
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
+import io.jans.fido2.exception.Fido2NativeFailureException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.exception.Fido2TrustException;
 import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
+import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
@@ -91,7 +93,10 @@ public class CommonVerifiers {
         }
         if (!Arrays.equals(retrievedRpIdHash, calculatedRpIdHash)) {
             log.warn("hash from domain doesn't match hash from assertion HEX");
-            throw new Fido2RuntimeException("Hashes don't match");
+            // Often a native-app misconfiguration (wrong Android asset-link / iOS AASA association
+            // presenting the wrong RP ID to the authenticator) — see issue #14608. Tagged so metrics
+            // can count it by cause instead of a free-text message.
+            throw new Fido2NativeFailureException(NativeFailureDiagnostic.JFS_RPID_HASH_MISMATCH, "Hashes don't match");
         }
     }
 
@@ -106,18 +111,29 @@ public class CommonVerifiers {
 
         // Check if requestedParties is null or empty
         if (requestedParties == null || requestedParties.isEmpty()) {
+            log.debug("Origin '{}' accepted: no requestedParties are configured", origin);
             return origin;
         }
         // Check if the origin exists in any of the RequestedParties origins
-        String finalOrigin = origin;
-        boolean originExists = requestedParties.stream()
-                .flatMap(requestedParty -> requestedParty.getOrigins().stream())
-                .anyMatch(allowedOrigin -> allowedOrigin.equals(finalOrigin));
-
-        if (!originExists) {
-            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_ORIGIN, "The origin '" + origin + "' is not listed in the allowed origins.");
+        for (RequestedParty requestedParty : requestedParties) {
+            if (requestedParty.getOrigins().contains(origin)) {
+                log.debug("Origin '{}' accepted: listed in the web origins of RP '{}'", origin, requestedParty.getId());
+                return origin;
+            }
         }
-        return origin;
+
+        // Why, for the server log only: the response body stays the generic message below. androidApps and
+        // iosApps are not consulted by this check, so say so rather than let their presence suggest a match.
+        if (log.isWarnEnabled()) {
+            long nativeApps = requestedParties.stream()
+                    .mapToLong(rp -> (rp.getAndroidApps() == null ? 0 : rp.getAndroidApps().size())
+                            + (rp.getIosApps() == null ? 0 : rp.getIosApps().size()))
+                    .sum();
+            log.warn("Origin '{}' rejected: not among the web origins of any of the {} configured RP(s); "
+                    + "{} configured native app(s) are not matched against the origin", origin,
+                    requestedParties.size(), nativeApps);
+        }
+        throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_ORIGIN, "The origin '" + origin + "' is not listed in the allowed origins.");
     }
 
     public void verifyCounter(int oldCounter, int newCounter) {

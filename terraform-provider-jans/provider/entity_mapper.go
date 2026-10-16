@@ -1,14 +1,14 @@
 package provider
 
 import (
-        "fmt"
-        "reflect"
-        "strings"
-        "time"
+	"fmt"
+	"reflect"
+	"strings"
+	"time"
 
-        "github.com/hashicorp/go-cty/cty"
-        "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-        "github.com/jans/terraform-provider-jans/jans"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/jans/terraform-provider-jans/jans"
 )
 
 // setter is a function that is passed to the encoder function. It
@@ -27,19 +27,19 @@ type getter func(key string) (val any, ok bool)
 // entity must be a pointer to a struct.
 func toSchemaResource(d *schema.ResourceData, entity any) error {
 
-        setter := func(key string, val any) error {
-                // Check if the key exists in the resource schema
-                rawState := d.GetRawState()
-                if !rawState.IsNull() {
-                        if attrVal := rawState.GetAttr(key); !attrVal.IsNull() && !attrVal.IsKnown() {
-                                // Skip fields that don't exist in the schema to prevent panics
-                                return nil
-                        }
-                }
-                return d.Set(key, val)
-        }
+	setter := func(key string, val any) error {
+		// Check if the key exists in the resource schema
+		rawState := d.GetRawState()
+		if !rawState.IsNull() {
+			if attrVal := rawState.GetAttr(key); !attrVal.IsNull() && !attrVal.IsKnown() {
+				// Skip fields that don't exist in the schema to prevent panics
+				return nil
+			}
+		}
+		return d.Set(key, val)
+	}
 
-        return encoder(setter, entity)
+	return encoder(setter, entity)
 }
 
 // fromSchemaResource retrieves the values from a schema.ResourceData and
@@ -47,11 +47,11 @@ func toSchemaResource(d *schema.ResourceData, entity any) error {
 // must be a pointer to a struct.
 func fromSchemaResource(d *schema.ResourceData, entity any) error {
 
-        getter := func(key string) (any, bool) {
-                return d.GetOk(key)
-        }
+	getter := func(key string) (any, bool) {
+		return d.GetOk(key)
+	}
 
-        return decoder(getter, entity)
+	return decoder(getter, entity)
 }
 
 // configState describes whether an attribute is present in the practitioner's
@@ -59,9 +59,9 @@ func fromSchemaResource(d *schema.ResourceData, entity any) error {
 type configState int
 
 const (
-        configUnavailable configState = iota
-        configNull
-        configSet
+	configUnavailable configState = iota
+	configNull
+	configSet
 )
 
 // attrConfigState reports whether key is declared in rawConfig. It returns
@@ -69,24 +69,24 @@ const (
 // case the caller has to fall back to the merged state.
 func attrConfigState(rawConfig cty.Value, key string) configState {
 
-        if rawConfig.IsNull() || !rawConfig.IsKnown() {
-                return configUnavailable
-        }
+	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+		return configUnavailable
+	}
 
-        if !rawConfig.Type().IsObjectType() || !rawConfig.Type().HasAttribute(key) {
-                return configUnavailable
-        }
+	if !rawConfig.Type().IsObjectType() || !rawConfig.Type().HasAttribute(key) {
+		return configUnavailable
+	}
 
-        attr := rawConfig.GetAttr(key)
-        if !attr.IsKnown() {
-                return configUnavailable
-        }
+	attr := rawConfig.GetAttr(key)
+	if !attr.IsKnown() {
+		return configUnavailable
+	}
 
-        if attr.IsNull() {
-                return configNull
-        }
+	if attr.IsNull() {
+		return configNull
+	}
 
-        return configSet
+	return configSet
 }
 
 // mergeFromSchemaResource maps only the attributes that are declared in the
@@ -95,21 +95,21 @@ func attrConfigState(rawConfig cty.Value, key string) configState {
 // are not declared survive an update that replaces the whole configuration.
 func mergeFromSchemaResource(d *schema.ResourceData, entity any) error {
 
-        rawConfig := d.GetRawConfig()
+	rawConfig := d.GetRawConfig()
 
-        getter := func(key string) (any, bool) {
+	getter := func(key string) (any, bool) {
 
-                switch attrConfigState(rawConfig, key) {
-                case configNull:
-                        return nil, false
-                case configSet:
-                        return pruneUndeclared(rawConfig.GetAttr(key), d.Get(key)), true
-                default:
-                        return d.GetOk(key)
-                }
-        }
+		switch attrConfigState(rawConfig, key) {
+		case configNull:
+			return nil, false
+		case configSet:
+			return pruneUndeclared(rawConfig.GetAttr(key), d.Get(key)), true
+		default:
+			return d.GetOk(key)
+		}
+	}
 
-        return decoder(getter, entity)
+	return decoder(getter, entity)
 }
 
 // pruneUndeclared drops the attributes of a nested block that the practitioner
@@ -117,54 +117,54 @@ func mergeFromSchemaResource(d *schema.ResourceData, entity any) error {
 // at their current value instead of overwriting them with a zero value.
 func pruneUndeclared(cfg cty.Value, val any) any {
 
-        if cfg.IsNull() || !cfg.IsKnown() {
-                return val
-        }
+	if cfg.IsNull() || !cfg.IsKnown() {
+		return val
+	}
 
-        switch typed := val.(type) {
+	switch typed := val.(type) {
 
-        case []any:
-                if !cfg.Type().IsListType() && !cfg.Type().IsTupleType() {
-                        return val
-                }
+	case []any:
+		if !cfg.Type().IsListType() && !cfg.Type().IsTupleType() {
+			return val
+		}
 
-                elements := cfg.AsValueSlice()
-                pruned := make([]any, len(typed))
-                for i, element := range typed {
-                        if i >= len(elements) {
-                                pruned[i] = element
-                                continue
-                        }
-                        pruned[i] = pruneUndeclared(elements[i], element)
-                }
+		elements := cfg.AsValueSlice()
+		pruned := make([]any, len(typed))
+		for i, element := range typed {
+			if i >= len(elements) {
+				pruned[i] = element
+				continue
+			}
+			pruned[i] = pruneUndeclared(elements[i], element)
+		}
 
-                return pruned
+		return pruned
 
-        case map[string]any:
-                if !cfg.Type().IsObjectType() {
-                        return val
-                }
+	case map[string]any:
+		if !cfg.Type().IsObjectType() {
+			return val
+		}
 
-                pruned := make(map[string]any, len(typed))
-                for key, value := range typed {
-                        if !cfg.Type().HasAttribute(key) {
-                                pruned[key] = value
-                                continue
-                        }
+		pruned := make(map[string]any, len(typed))
+		for key, value := range typed {
+			if !cfg.Type().HasAttribute(key) {
+				pruned[key] = value
+				continue
+			}
 
-                        attr := cfg.GetAttr(key)
-                        if attr.IsNull() {
-                                continue
-                        }
+			attr := cfg.GetAttr(key)
+			if attr.IsNull() {
+				continue
+			}
 
-                        pruned[key] = pruneUndeclared(attr, value)
-                }
+			pruned[key] = pruneUndeclared(attr, value)
+		}
 
-                return pruned
+		return pruned
 
-        default:
-                return val
-        }
+	default:
+		return val
+	}
 }
 
 // patchFromResourceData creates a list of patch requests from the
@@ -173,81 +173,120 @@ func pruneUndeclared(cfg cty.Value, val any) any {
 // request will be created with the correct path set.
 func patchFromResourceData(d *schema.ResourceData, entity any) ([]jans.PatchRequest, error) {
 
-        ret, err := recursivePatchFromResourceData(d, entity, "/", "", []jans.PatchRequest{})
+	ret, err := recursivePatchFromResourceData(d, entity, "/", "", []jans.PatchRequest{})
 
-        return ret, err
+	return ret, err
 }
 
 // recursivePatchFromResourceData is the recursive part of the functionality
 // of patchFromResourceData, used for nested structs. It should never be
 // called on its own, only via patchFromResourceData.
+func remapSliceElemKeys(val interface{}, elemType reflect.Type) interface{} {
+	list, ok := val.([]interface{})
+	if !ok {
+		return val
+	}
+	mapping := map[string]string{}
+	for i := 0; i < elemType.NumField(); i++ {
+		st, ok1 := elemType.Field(i).Tag.Lookup("schema")
+		jt, ok2 := elemType.Field(i).Tag.Lookup("json")
+		if ok1 && ok2 {
+			mapping[st] = strings.TrimSuffix(jt, ",omitempty")
+		}
+	}
+	out := make([]interface{}, 0, len(list))
+	for _, el := range list {
+		em, ok := el.(map[string]interface{})
+		if !ok {
+			out = append(out, el)
+			continue
+		}
+		nm := map[string]interface{}{}
+		for k, v := range em {
+			if j, ok := mapping[k]; ok {
+				nm[j] = v
+			} else {
+				nm[k] = v
+			}
+		}
+		out = append(out, nm)
+	}
+	return out
+}
+
 func recursivePatchFromResourceData(d *schema.ResourceData, entity any, jsonPath, schemaPath string, data []jans.PatchRequest) ([]jans.PatchRequest, error) {
 
-        var e reflect.Value
+	var e reflect.Value
 
-        if reflect.TypeOf(entity).Kind() == reflect.Ptr {
-                e = reflect.ValueOf(entity).Elem()
-        } else {
-                e = reflect.ValueOf(entity)
-        }
+	if reflect.TypeOf(entity).Kind() == reflect.Ptr {
+		e = reflect.ValueOf(entity).Elem()
+	} else {
+		e = reflect.ValueOf(entity)
+	}
 
-        for i := 0; i < e.NumField(); i++ {
+	for i := 0; i < e.NumField(); i++ {
 
-                schemaTag, ok := e.Type().Field(i).Tag.Lookup("schema")
-                if !ok {
-                        // skip fields that don't have a schema mapping name
-                        continue
-                }
+		schemaTag, ok := e.Type().Field(i).Tag.Lookup("schema")
+		if !ok {
+			// skip fields that don't have a schema mapping name
+			continue
+		}
 
-                jsonTag, ok := e.Type().Field(i).Tag.Lookup("json")
-                if !ok {
-                        // skip fields that don't have a json mapping name
-                        continue
-                }
+		jsonTag, ok := e.Type().Field(i).Tag.Lookup("json")
+		if !ok {
+			// skip fields that don't have a json mapping name
+			continue
+		}
 
-                jsonTag = strings.TrimSuffix(jsonTag, ",omitempty")
+		jsonTag = strings.TrimSuffix(jsonTag, ",omitempty")
 
-                val, ok := d.GetOk(schemaPath + schemaTag)
-                if !ok {
-                        // value was not set
-                        continue
-                }
+		val, ok := d.GetOk(schemaPath + schemaTag)
+		if !ok {
+			// value was not set
+			continue
+		}
 
-                // get the value of the entity field
-                v := e.Field(i).Interface()
+		// get the value of the entity field
+		v := e.Field(i).Interface()
 
-                // create an instance of the field type, if it's a pointer
-                t := reflect.TypeOf(v)
-                if t.Kind() == reflect.Ptr {
-                        t = t.Elem()
-                        v = reflect.New(t).Interface()
-                }
+		// create an instance of the field type, if it's a pointer
+		t := reflect.TypeOf(v)
+		if t.Kind() == reflect.Ptr {
+			t = t.Elem()
+			v = reflect.New(t).Interface()
+		}
 
-                // for structs, recurse into the field
-                if t.Kind() == reflect.Struct {
+		// for structs, recurse into the field
+		if t.Kind() == reflect.Struct {
 
-                        subPath := jsonPath + jsonTag + "/"
-                        schemaPath := schemaTag + ".0."
-                        newPatches, err := recursivePatchFromResourceData(d, v, subPath, schemaPath, data)
-                        if err != nil {
-                                return nil, err
-                        }
+			subPath := jsonPath + jsonTag + "/"
+			schemaPath := schemaTag + ".0."
+			newPatches, err := recursivePatchFromResourceData(d, v, subPath, schemaPath, data)
+			if err != nil {
+				return nil, err
+			}
 
-                        data = newPatches
+			data = newPatches
 
-                        continue
-                }
+			continue
+		}
 
-                // create new patch request for the field
-                data = append(data, jans.PatchRequest{
-                        Op:    "replace",
-                        Path:  jsonPath + jsonTag,
-                        Value: val,
-                })
+		// Slice-of-struct values arrive keyed by schema (snake) names; remap to the
+		// element struct's JSON names so PATCH carries API keys (trust_domain -> trustDomain).
+		if t.Kind() == reflect.Slice && t.Elem().Kind() == reflect.Struct {
+			val = remapSliceElemKeys(val, t.Elem())
+		}
 
-        }
+		// create new patch request for the field
+		data = append(data, jans.PatchRequest{
+			Op:    "replace",
+			Path:  jsonPath + jsonTag,
+			Value: val,
+		})
 
-        return data, nil
+	}
+
+	return data, nil
 }
 
 // encoder recursively transforms the passed structure into the correct
@@ -255,284 +294,284 @@ func recursivePatchFromResourceData(d *schema.ResourceData, entity any, jsonPath
 // the provided setter function to correctly transform them.
 func encoder(s setter, entity any) error {
 
-        var e reflect.Value
+	var e reflect.Value
 
-        if reflect.TypeOf(entity).Kind() == reflect.Ptr {
-                e = reflect.ValueOf(entity).Elem()
-        } else {
-                e = reflect.ValueOf(entity)
-        }
+	if reflect.TypeOf(entity).Kind() == reflect.Ptr {
+		e = reflect.ValueOf(entity).Elem()
+	} else {
+		e = reflect.ValueOf(entity)
+	}
 
-        for i := 0; i < e.NumField(); i++ {
+	for i := 0; i < e.NumField(); i++ {
 
-                // first get the name of the schema field, skipping fields
-                // that don't have a schema mapping name
-                n, ok := e.Type().Field(i).Tag.Lookup("schema")
-                if !ok {
-                        continue
-                }
+		// first get the name of the schema field, skipping fields
+		// that don't have a schema mapping name
+		n, ok := e.Type().Field(i).Tag.Lookup("schema")
+		if !ok {
+			continue
+		}
 
-                // get the value of the entity field
-                v := e.Field(i).Interface()
+		// get the value of the entity field
+		v := e.Field(i).Interface()
 
-                // dereference the value if it's a pointer
-                t := reflect.TypeOf(v)
-                if t.Kind() == reflect.Ptr {
+		// dereference the value if it's a pointer
+		t := reflect.TypeOf(v)
+		if t.Kind() == reflect.Ptr {
 
-                        if !reflect.ValueOf(v).IsNil() {
-                                t = reflect.Indirect(reflect.ValueOf(v)).Type()
-                                v = reflect.ValueOf(v).Elem().Interface()
-                        } else {
-                                v = nil
-                        }
-                }
+			if !reflect.ValueOf(v).IsNil() {
+				t = reflect.Indirect(reflect.ValueOf(v)).Type()
+				v = reflect.ValueOf(v).Elem().Interface()
+			} else {
+				v = nil
+			}
+		}
 
-                // Special handling for time.Time - convert to RFC3339 string
-                if t == reflect.TypeOf(time.Time{}) {
-                        timeVal := v.(time.Time)
-                        if !timeVal.IsZero() {
-                                if err := s(n, timeVal.Format(time.RFC3339)); err != nil {
-                                        return fmt.Errorf("failed to set %s: %w", n, err)
-                                }
-                        }
-                        continue
-                }
+		// Special handling for time.Time - convert to RFC3339 string
+		if t == reflect.TypeOf(time.Time{}) {
+			timeVal := v.(time.Time)
+			if !timeVal.IsZero() {
+				if err := s(n, timeVal.Format(time.RFC3339)); err != nil {
+					return fmt.Errorf("failed to set %s: %w", n, err)
+				}
+			}
+			continue
+		}
 
-                // Since structs cannot directly be represented in the schema.ResourceData,
-                // the common workaround is to convert the struct to a map and then set the
-                // map as the value, wrapping it inside an interface slice ¯\_(ツ)_/¯
-                if t.Kind() == reflect.Struct {
+		// Since structs cannot directly be represented in the schema.ResourceData,
+		// the common workaround is to convert the struct to a map and then set the
+		// map as the value, wrapping it inside an interface slice ¯\_(ツ)_/¯
+		if t.Kind() == reflect.Struct {
 
-                        m := make(map[string]interface{})
-                        mapSetter := func(key string, val any) error {
-                                m[key] = val
-                                return nil
-                        }
+			m := make(map[string]interface{})
+			mapSetter := func(key string, val any) error {
+				m[key] = val
+				return nil
+			}
 
-                        if err := encoder(mapSetter, v); err != nil {
-                                return fmt.Errorf("failed to convert struct to map: %w", err)
-                        }
+			if err := encoder(mapSetter, v); err != nil {
+				return fmt.Errorf("failed to convert struct to map: %w", err)
+			}
 
-                        if err := s(n, []interface{}{m}); err != nil {
-                                return fmt.Errorf("failed to set %s: %w", n, err)
-                        }
+			if err := s(n, []interface{}{m}); err != nil {
+				return fmt.Errorf("failed to set %s: %w", n, err)
+			}
 
-                        continue
-                }
+			continue
+		}
 
-                // check if slice is a slice of structs. If so, iterate over the entries and
-                // convert each struct to a map and add it to a slice of maps.
-                if t.Kind() == reflect.Slice && t.Elem().Kind() == reflect.Struct {
+		// check if slice is a slice of structs. If so, iterate over the entries and
+		// convert each struct to a map and add it to a slice of maps.
+		if t.Kind() == reflect.Slice && t.Elem().Kind() == reflect.Struct {
 
-                        sl := reflect.ValueOf(v)
+			sl := reflect.ValueOf(v)
 
-                        nestedMaps := make([]map[string]interface{}, sl.Len())
+			nestedMaps := make([]map[string]interface{}, sl.Len())
 
-                        for i := 0; i < sl.Len(); i++ {
+			for i := 0; i < sl.Len(); i++ {
 
-                                nestedMap := make(map[string]interface{})
-                                mapSetter := func(key string, val any) error {
-                                        nestedMap[key] = val
-                                        return nil
-                                }
+				nestedMap := make(map[string]interface{})
+				mapSetter := func(key string, val any) error {
+					nestedMap[key] = val
+					return nil
+				}
 
-                                val := sl.Index(i).Interface()
-                                if err := encoder(mapSetter, val); err != nil {
-                                        return fmt.Errorf("failed to convert struct to map: %w", err)
-                                }
+				val := sl.Index(i).Interface()
+				if err := encoder(mapSetter, val); err != nil {
+					return fmt.Errorf("failed to convert struct to map: %w", err)
+				}
 
-                                nestedMaps[i] = nestedMap
-                        }
+				nestedMaps[i] = nestedMap
+			}
 
-                        if err := s(n, nestedMaps); err != nil {
-                                return fmt.Errorf("failed to set %s: %w", n, err)
-                        }
+			if err := s(n, nestedMaps); err != nil {
+				return fmt.Errorf("failed to set %s: %w", n, err)
+			}
 
-                        continue
-                }
+			continue
+		}
 
-                // primitive types and slices are set directly
-                if err := s(n, v); err != nil {
-                        return fmt.Errorf("failed to set %s: %w", n, err)
-                }
+		// primitive types and slices are set directly
+		if err := s(n, v); err != nil {
+			return fmt.Errorf("failed to set %s: %w", n, err)
+		}
 
-        }
+	}
 
-        return nil
+	return nil
 }
 
 // decorder recursively sets the attributes of the passed structure
 // with the values returned by the getter func for the respective key.
 func decoder(g getter, entity any) error {
 
-        var e reflect.Value
+	var e reflect.Value
 
-        if reflect.TypeOf(entity).Kind() == reflect.Ptr {
-                e = reflect.ValueOf(entity).Elem()
-        } else {
-                e = reflect.ValueOf(entity)
-        }
+	if reflect.TypeOf(entity).Kind() == reflect.Ptr {
+		e = reflect.ValueOf(entity).Elem()
+	} else {
+		e = reflect.ValueOf(entity)
+	}
 
-        for i := 0; i < e.NumField(); i++ {
+	for i := 0; i < e.NumField(); i++ {
 
-                t, ok := e.Type().Field(i).Tag.Lookup("schema")
-                if !ok {
-                        // skip fields that don't have a schema mapping name
-                        continue
-                }
+		t, ok := e.Type().Field(i).Tag.Lookup("schema")
+		if !ok {
+			// skip fields that don't have a schema mapping name
+			continue
+		}
 
-                v, ok := g(t)
-                if !ok {
-                        // value was not set
+		v, ok := g(t)
+		if !ok {
+			// value was not set
 
-                        // we're entering this branch for empty slices, so we need to
-                        // set the value to an empty slice if we want to fully restore
-                        // the original state of the entity
+			// we're entering this branch for empty slices, so we need to
+			// set the value to an empty slice if we want to fully restore
+			// the original state of the entity
 
-                        continue
-                }
+			continue
+		}
 
-                f := e.Field(i)
+		f := e.Field(i)
 
-                if err := setFieldValue(f, v); err != nil {
-                        return fmt.Errorf("failed to set field %s: %w", t, err)
-                }
-        }
+		if err := setFieldValue(f, v); err != nil {
+			return fmt.Errorf("failed to set field %s: %w", t, err)
+		}
+	}
 
-        return nil
+	return nil
 }
 
 // setFieldValue sets the value of a reflection field, handling all different
 // types of values and considering terraform schema limitations.
 func setFieldValue(f reflect.Value, v interface{}) error {
 
-        vType := reflect.TypeOf(f.Interface())
-        isPointer := false
+	vType := reflect.TypeOf(f.Interface())
+	isPointer := false
 
-        // target field is of type `any`
-        if vType == nil {
-                f.Set(reflect.ValueOf(v))
-                return nil
-        }
+	// target field is of type `any`
+	if vType == nil {
+		f.Set(reflect.ValueOf(v))
+		return nil
+	}
 
-        // if the field is a pointer, use the underlying type
-        // for the below switch statement
-        if vType.Kind() == reflect.Ptr {
-                vType = vType.Elem()
-                isPointer = true
-        }
+	// if the field is a pointer, use the underlying type
+	// for the below switch statement
+	if vType.Kind() == reflect.Ptr {
+		vType = vType.Elem()
+		isPointer = true
+	}
 
-        // Special handling for time.Time - parse from RFC3339 string
-        if vType == reflect.TypeOf(time.Time{}) {
-                if strVal, ok := v.(string); ok && strVal != "" {
-                        parsedTime, err := time.Parse(time.RFC3339, strVal)
-                        if err != nil {
-                                return fmt.Errorf("failed to parse time from RFC3339: %w", err)
-                        }
-                        f.Set(reflect.ValueOf(parsedTime))
-                }
-                return nil
-        }
+	// Special handling for time.Time - parse from RFC3339 string
+	if vType == reflect.TypeOf(time.Time{}) {
+		if strVal, ok := v.(string); ok && strVal != "" {
+			parsedTime, err := time.Parse(time.RFC3339, strVal)
+			if err != nil {
+				return fmt.Errorf("failed to parse time from RFC3339: %w", err)
+			}
+			f.Set(reflect.ValueOf(parsedTime))
+		}
+		return nil
+	}
 
-        switch vType.Kind() {
+	switch vType.Kind() {
 
-        case reflect.Struct:
-                // if the field is a struct, we need to convert the single item slice
-                // with a map to a struct first, before we can set the value.
+	case reflect.Struct:
+		// if the field is a struct, we need to convert the single item slice
+		// with a map to a struct first, before we can set the value.
 
-                s, ok := v.([]interface{})
-                if !ok {
-                        return fmt.Errorf("failed to convert value to slice")
-                }
+		s, ok := v.([]interface{})
+		if !ok {
+			return fmt.Errorf("failed to convert value to slice")
+		}
 
-                if len(s) == 0 || s[0] == nil {
-                        return nil
-                }
+		if len(s) == 0 || s[0] == nil {
+			return nil
+		}
 
-                m, ok := s[0].(map[string]interface{})
-                if !ok {
-                        return fmt.Errorf("failed to convert value to map")
-                }
+		m, ok := s[0].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("failed to convert value to map")
+		}
 
-                v := f.Addr().Interface()
-                if isPointer {
-                        // if the field is a pointer, we need to create a new
-                        // instance of the struct, since it is nil at this point
-                        v = reflect.New(vType).Interface()
-                }
+		v := f.Addr().Interface()
+		if isPointer {
+			// if the field is a pointer, we need to create a new
+			// instance of the struct, since it is nil at this point
+			v = reflect.New(vType).Interface()
+		}
 
-                getter := func(key string) (any, bool) {
-                        val, ok := m[key]
-                        return val, ok
-                }
+		getter := func(key string) (any, bool) {
+			val, ok := m[key]
+			return val, ok
+		}
 
-                if err := decoder(getter, v); err != nil {
-                        return fmt.Errorf("failed to convert map to struct: %w", err)
-                }
+		if err := decoder(getter, v); err != nil {
+			return fmt.Errorf("failed to convert map to struct: %w", err)
+		}
 
-                // set the field value using the pointer to the struct.
-                valueToSet := reflect.ValueOf(v)
-                if !isPointer {
-                        // If it's already a pointer, we have to dereference it first.
-                        valueToSet = reflect.Indirect(valueToSet)
-                }
-                f.Set(valueToSet)
+		// set the field value using the pointer to the struct.
+		valueToSet := reflect.ValueOf(v)
+		if !isPointer {
+			// If it's already a pointer, we have to dereference it first.
+			valueToSet = reflect.Indirect(valueToSet)
+		}
+		f.Set(valueToSet)
 
-        case reflect.Slice:
-                elemSlice, err := convertSlice(vType, v)
-                if err != nil {
-                        return fmt.Errorf("failed to convert slice: %w", err)
-                }
+	case reflect.Slice:
+		elemSlice, err := convertSlice(vType, v)
+		if err != nil {
+			return fmt.Errorf("failed to convert slice: %w", err)
+		}
 
-                f.Set(elemSlice)
+		f.Set(elemSlice)
 
-        case reflect.Map:
-                // if the field is a map, we need to initialize a new map of
-                // the correct type and add all items to it
+	case reflect.Map:
+		// if the field is a map, we need to initialize a new map of
+		// the correct type and add all items to it
 
-                // check the size of the map, if it is 0, we can skip setting the value
-                // to avoid some inconsistency, which result from terraform's schema
-                // not passing nil values for maps correctly.
-                // https://github.com/hashicorp/terraform/issues/29921
-                length := len(v.(map[string]any))
-                if length == 0 {
-                        break
-                }
+		// check the size of the map, if it is 0, we can skip setting the value
+		// to avoid some inconsistency, which result from terraform's schema
+		// not passing nil values for maps correctly.
+		// https://github.com/hashicorp/terraform/issues/29921
+		length := len(v.(map[string]any))
+		if length == 0 {
+			break
+		}
 
-                // only string keys are supported for maps, so we can just
-                // use the map[string]interface{} type for iterating, but
-                // need to create a new map of the correct type
-                newMap := reflect.MakeMap(reflect.MapOf(reflect.TypeOf(""), vType.Elem()))
+		// only string keys are supported for maps, so we can just
+		// use the map[string]interface{} type for iterating, but
+		// need to create a new map of the correct type
+		newMap := reflect.MakeMap(reflect.MapOf(reflect.TypeOf(""), vType.Elem()))
 
-                for key, elem := range v.(map[string]any) {
-                        newMap.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf(elem))
-                }
+		for key, elem := range v.(map[string]any) {
+			newMap.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf(elem))
+		}
 
-                f.Set(newMap)
+		f.Set(newMap)
 
-        default:
+	default:
 
-                // All other types are set directly. We just need to make sure
-                // pointers are handled correctly via a temporary variable.
-                var valueToSet reflect.Value
-                if isPointer {
-                        interim := reflect.New(vType).Elem()
-                        interim.Set(reflect.ValueOf(v))
-                        valueToSet = interim.Addr()
-                } else {
-                        valueToSet = reflect.Indirect(reflect.ValueOf(v))
-                }
+		// All other types are set directly. We just need to make sure
+		// pointers are handled correctly via a temporary variable.
+		var valueToSet reflect.Value
+		if isPointer {
+			interim := reflect.New(vType).Elem()
+			interim.Set(reflect.ValueOf(v))
+			valueToSet = interim.Addr()
+		} else {
+			valueToSet = reflect.Indirect(reflect.ValueOf(v))
+		}
 
-                // special treatment for OptionalString
-                if f.Type().AssignableTo(valueToSet.Type()) {
-                        f.Set(valueToSet)
-                } else {
-                        f.Set(valueToSet.Convert(f.Type()))
-                }
+		// special treatment for OptionalString
+		if f.Type().AssignableTo(valueToSet.Type()) {
+			f.Set(valueToSet)
+		} else {
+			f.Set(valueToSet.Convert(f.Type()))
+		}
 
-        }
+	}
 
-        return nil
+	return nil
 }
 
 // convertSlice will take the provided value and convert it to a slice of the
@@ -541,63 +580,63 @@ func setFieldValue(f reflect.Value, v interface{}) error {
 // will be returned. For slices, this will run recursively.
 func convertSlice(targetType reflect.Type, value interface{}) (reflect.Value, error) {
 
-        // if the field is a slice, we need to initialize a new slice of
-        // the correct type and add all items to it
+	// if the field is a slice, we need to initialize a new slice of
+	// the correct type and add all items to it
 
-        elemType := targetType.Elem()
+	elemType := targetType.Elem()
 
-        // create a new slice of the correct type
-        elemSlice := reflect.New(reflect.SliceOf(elemType)).Elem()
+	// create a new slice of the correct type
+	elemSlice := reflect.New(reflect.SliceOf(elemType)).Elem()
 
-        // if the elements in the slice are structs, we need to map them back
-        // from the map to the struct first, before we can add them to the slice
-        if targetType.Elem().Kind() == reflect.Struct {
+	// if the elements in the slice are structs, we need to map them back
+	// from the map to the struct first, before we can add them to the slice
+	if targetType.Elem().Kind() == reflect.Struct {
 
-                for _, elem := range value.([]interface{}) {
+		for _, elem := range value.([]interface{}) {
 
-                        m, ok := elem.(map[string]interface{})
-                        if !ok {
-                                return reflect.ValueOf(nil), fmt.Errorf("failed to convert value to map")
-                        }
+			m, ok := elem.(map[string]interface{})
+			if !ok {
+				return reflect.ValueOf(nil), fmt.Errorf("failed to convert value to map")
+			}
 
-                        // create a new struct of the correct type
-                        newElem := reflect.New(elemType)
+			// create a new struct of the correct type
+			newElem := reflect.New(elemType)
 
-                        getter := func(key string) (any, bool) {
-                                val, ok := m[key]
-                                return val, ok
-                        }
+			getter := func(key string) (any, bool) {
+				val, ok := m[key]
+				return val, ok
+			}
 
-                        if err := decoder(getter, newElem.Interface()); err != nil {
-                                return reflect.ValueOf(nil), fmt.Errorf("failed to convert map to struct: %w", err)
-                        }
+			if err := decoder(getter, newElem.Interface()); err != nil {
+				return reflect.ValueOf(nil), fmt.Errorf("failed to convert map to struct: %w", err)
+			}
 
-                        elemSlice = reflect.Append(elemSlice, reflect.Indirect(newElem))
-                }
+			elemSlice = reflect.Append(elemSlice, reflect.Indirect(newElem))
+		}
 
-        } else if targetType.Elem().Kind() == reflect.Slice {
+	} else if targetType.Elem().Kind() == reflect.Slice {
 
-                // nested slices have to be handled separately from primitive types
+		// nested slices have to be handled separately from primitive types
 
-                subType := reflect.SliceOf(elemType.Elem())
-                for _, elem := range value.([]interface{}) {
-                        val, err := convertSlice(subType, elem)
-                        if err != nil {
-                                return reflect.ValueOf(nil), fmt.Errorf("failed to convert slice: %w", err)
-                        }
+		subType := reflect.SliceOf(elemType.Elem())
+		for _, elem := range value.([]interface{}) {
+			val, err := convertSlice(subType, elem)
+			if err != nil {
+				return reflect.ValueOf(nil), fmt.Errorf("failed to convert slice: %w", err)
+			}
 
-                        elemSlice = reflect.Append(elemSlice, val)
-                }
+			elemSlice = reflect.Append(elemSlice, val)
+		}
 
-        } else {
+	} else {
 
-                // otherwise we can just fill the slice, assuming it's
-                // a slice of primitive types
-                for _, elem := range value.([]interface{}) {
-                        elemSlice = reflect.Append(elemSlice, reflect.ValueOf(elem))
-                }
+		// otherwise we can just fill the slice, assuming it's
+		// a slice of primitive types
+		for _, elem := range value.([]interface{}) {
+			elemSlice = reflect.Append(elemSlice, reflect.ValueOf(elem))
+		}
 
-        }
+	}
 
-        return elemSlice, nil
+	return elemSlice, nil
 }

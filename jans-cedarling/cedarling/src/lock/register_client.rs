@@ -14,7 +14,7 @@ use serde_json::json;
 use thiserror::Error;
 
 pub(super) const DCR_SCOPE: &str = "cedarling";
-pub(super) const ACCESS_TKN_SCOPE: &str = "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write";
+pub(super) const ACCESS_TKN_SCOPE: &str = "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write https://jans.io/oauth/lock/policy.readonly";
 
 pub(super) async fn register_client(
     pdp_id: PdpID,

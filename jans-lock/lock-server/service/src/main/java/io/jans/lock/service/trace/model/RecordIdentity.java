@@ -10,8 +10,8 @@ import java.util.Objects;
 
 /**
  * A TRACE record's external identity: {@code (evidence_domain_id, producer_id, record_id)}
- * (design decision D-6, key type {@code rec}). Two records with the same identity but a different
- * {@code content_digest} are a conflict (design decision D-8 step 5).
+ * (key type {@code rec} in {@code TraceKeys}). Two records with the same identity but a different
+ * {@code content_digest} are a conflict.
  *
  * @author Yuriy Movchan
  */

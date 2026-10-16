@@ -19,6 +19,7 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.json.JSONObject;
@@ -514,10 +515,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response4 = userInfoClient3.exec();
 
         showClient(userInfoClient3);
-        AssertBuilder.userInfoResponse(response4)
-                .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.EMAIL)
-                .check();
+        assertEquals(response4.getStatus(), 400, "Unexpected response code: " + response4.getEntity());
+        assertEquals(response4.getErrorType(), UserInfoErrorResponseType.INVALID_REQUEST);
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
@@ -581,6 +580,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);

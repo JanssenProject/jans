@@ -101,6 +101,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -189,7 +190,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertTrue(authorizationResponse.getStatus() == 302
@@ -275,6 +276,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         // 5. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -364,7 +366,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertTrue(authorizationResponse.getStatus() == 302
@@ -518,7 +520,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertTrue(authorizationResponse.getStatus() == 302

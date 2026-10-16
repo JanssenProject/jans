@@ -1,6 +1,5 @@
 import os
 import sys
-import argparse
 
 from setup_app.static import InstallTypes, SetupProfiles
 from setup_app.utils import base
@@ -9,8 +8,8 @@ def get_setup_options():
 
     setupOptions = {
         'setup_properties': None,
-        'noPrompt': False,
-        'downloadWars': False,
+        'no_prompt': False,
+        'download_wars': False,
         'install_jans_auth': True,
         'install_config_api': True,
         'install_httpd': True,
@@ -20,11 +19,11 @@ def get_setup_options():
         'install_casa': False,
         'install_jans_shib': False,
         'install_jans_lock': False,
-        'loadTestData': False,
-        'allowPreReleasedFeatures': False,
+        'load_test_data': False,
+        'allow_pre_released_features': False,
         'listenAllInterfaces': False,
         'loadTestDataExit': False,
-        'loadData': True,
+        'load_data': True,
         'properties_password': None,
     }
 
@@ -96,15 +95,15 @@ def get_setup_options():
             else:
                 print("\nOoops... %s file not found for setup properties.\n" %base.argsp.f)
 
-        setupOptions['downloadWars'] = base.argsp.w
-        setupOptions['loadTestData']  = base.argsp.t
+        setupOptions['download_wars'] = base.argsp.w
+        setupOptions['load_test_data']  = base.argsp.t
         setupOptions['loadTestDataExit'] = base.argsp.x
-        setupOptions['allowPreReleasedFeatures'] = base.argsp.allow_pre_released_features
+        setupOptions['allow_pre_released_features'] = base.argsp.allow_pre_released_features
         setupOptions['config_patch_creds'] = base.argsp.config_patch_creds
         setupOptions['dump_config_on_error'] = base.argsp.dump_config_on_error
 
         if base.argsp.no_data:
-            setupOptions['loadData'] = False
+            setupOptions['load_data'] = False
 
         if base.argsp.import_ldif:
             if os.path.isdir(base.argsp.import_ldif):
@@ -135,7 +134,7 @@ def get_setup_options():
         setupOptions['hostname'] = base.argsp.host_name
         
     if base.argsp.org_name:
-        setupOptions['orgName'] = base.argsp.org_name
+        setupOptions['org_name'] = base.argsp.org_name
 
     if base.argsp.email:
         setupOptions['admin_email'] = base.argsp.email
@@ -147,9 +146,9 @@ def get_setup_options():
         setupOptions['state'] = base.argsp.state
 
     if base.argsp.country:
-        setupOptions['countryCode'] = base.argsp.country
+        setupOptions['country_code'] = base.argsp.country
 
-    setupOptions['noPrompt'] = base.argsp.n
+    setupOptions['no_prompt'] = base.argsp.n
 
     if base.argsp.no_httpd:
         setupOptions['install_httpd'] = False

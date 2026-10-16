@@ -68,6 +68,7 @@ public final class ConfigurationResponseClaim {
     public static final String TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED = "token_endpoint_auth_methods_supported";
     public static final String TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED = "token_endpoint_auth_signing_alg_values_supported";
     public static final String DPOP_SIGNING_ALG_VALUES_SUPPORTED = "dpop_signing_alg_values_supported";
+    public static final String CODE_CHALLENGE_METHODS_SUPPORTED = "code_challenge_methods_supported";
     public static final String DISPLAY_VALUES_SUPPORTED = "display_values_supported";
     public static final String CLAIM_TYPES_SUPPORTED = "claim_types_supported";
     public static final String CLAIMS_SUPPORTED = "claims_supported";

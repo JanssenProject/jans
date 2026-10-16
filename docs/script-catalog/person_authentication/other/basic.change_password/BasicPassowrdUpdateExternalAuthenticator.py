@@ -9,9 +9,7 @@ from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import UserService, AuthenticationService
 from io.jans.util import StringHelper, ArrayHelper
-from io.jans.as.server.util import ServerUtil
 
-import java
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -63,7 +61,7 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Basic (with password update). Authenticate for step 2"
             user = authenticationService.getAuthenticatedUser()
-            if user == None:
+            if user is None:
                 print "Basic (with password update). Authenticate for step 2. Failed to determine user name"
                 return False
 

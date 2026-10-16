@@ -2048,7 +2048,7 @@
     }
 
     if (typeof value === 'string') {
-      return fromString(value, offset)
+      return fromString(value)
     }
 
     return fromObject(value)
@@ -2107,7 +2107,7 @@
     var newBuf = this.subarray(start, end);
     // Return an augmented `Uint8Array` instance
     newBuf.__proto__ = Buffer.prototype;
-    return newBuf
+    return newBuf;
   };
 
   Buffer.prototype.copy = function copy (target, targetStart, start, end) {
@@ -2215,7 +2215,7 @@
     }
 
     if (list.length === 0) {
-      return createBuffer(null, 0)
+      return createBuffer(null)
     }
 
     var i;
@@ -2373,11 +2373,6 @@
     }
   };
   });
-  var errorCorrectionLevel_1 = errorCorrectionLevel.L;
-  var errorCorrectionLevel_2 = errorCorrectionLevel.M;
-  var errorCorrectionLevel_3 = errorCorrectionLevel.Q;
-  var errorCorrectionLevel_4 = errorCorrectionLevel.H;
-  var errorCorrectionLevel_5 = errorCorrectionLevel.isValid;
 
   function BitBuffer () {
     this.buffer = [];
@@ -2570,8 +2565,6 @@
     return coords
   };
   });
-  var alignmentPattern_1 = alignmentPattern.getRowColCoords;
-  var alignmentPattern_2 = alignmentPattern.getPositions;
 
   var getSymbolSize$1 = utils.getSymbolSize;
   var FINDER_PATTERN_SIZE = 7;
@@ -2670,7 +2663,7 @@
       if (sameCountRow >= 5) points += PenaltyScores.N1 + (sameCountRow - 5);
     }
 
-    return points
+    return points;
   };
 
   /**
@@ -2719,7 +2712,7 @@
       }
     }
 
-    return points * PenaltyScores.N3
+    return points * PenaltyScores.N3;
   };
 
   /**
@@ -2812,16 +2805,9 @@
       }
     }
 
-    return bestPattern
+    return bestPattern;
   };
   });
-  var maskPattern_1 = maskPattern.Patterns;
-  var maskPattern_2 = maskPattern.getPenaltyN1;
-  var maskPattern_3 = maskPattern.getPenaltyN2;
-  var maskPattern_4 = maskPattern.getPenaltyN3;
-  var maskPattern_5 = maskPattern.getPenaltyN4;
-  var maskPattern_6 = maskPattern.applyMask;
-  var maskPattern_7 = maskPattern.getBestMask;
 
   var EC_BLOCKS_TABLE = [
   // L  M  Q  H
@@ -3102,9 +3088,6 @@
     return poly
   };
   });
-  var polynomial_1 = polynomial.mul;
-  var polynomial_2 = polynomial.mod;
-  var polynomial_3 = polynomial.generateECPolynomial;
 
   function ReedSolomonEncoder (degree) {
     this.genPoly = undefined;
@@ -3370,14 +3353,6 @@
     }
   };
   });
-  var mode_1 = mode.NUMERIC;
-  var mode_2 = mode.ALPHANUMERIC;
-  var mode_3 = mode.BYTE;
-  var mode_4 = mode.KANJI;
-  var mode_5 = mode.MIXED;
-  var mode_6 = mode.getCharCountIndicator;
-  var mode_7 = mode.getBestModeForData;
-  var mode_8 = mode.isValid;
 
   var version = createCommonjsModule(function (module, exports) {
   // Generator polynomial used to encode version information
@@ -3548,10 +3523,6 @@
     return (version << 12) | d
   };
   });
-  var version_1 = version.isValid;
-  var version_2 = version.getCapacity;
-  var version_3 = version.getBestVersionForData;
-  var version_4 = version.getEncodedBits;
 
   var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
   var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
@@ -3860,10 +3831,8 @@
     extract_shortest_path_from_predecessor_list: function(predecessors, d) {
       var nodes = [];
       var u = d;
-      var predecessor;
       while (u) {
         nodes.push(u);
-        predecessor = predecessors[u];
         u = predecessors[u];
       }
       nodes.reverse();
@@ -3997,7 +3966,7 @@
           mode: obj.mode,
           length: obj.length
         }
-      })
+      });
   }
 
   /**
@@ -4142,7 +4111,7 @@
       graph[prevNodeIds[n]]['end'] = 0;
     }
 
-    return { map: graph, table: table }
+    return { map: graph, table: table };
   }
 
   /**
@@ -4222,7 +4191,7 @@
    * @return {Array}          Array of segments
    */
   exports.fromString = function fromString (data, version) {
-    var segs = getSegmentsFromString(data, utils.isKanjiModeEnabled());
+    var segs = getSegmentsFromString(data);
 
     var nodes = buildNodes(segs);
     var graph = buildGraph(nodes, version);
@@ -4248,13 +4217,10 @@
    */
   exports.rawSplit = function rawSplit (data) {
     return exports.fromArray(
-      getSegmentsFromString(data, utils.isKanjiModeEnabled())
+      getSegmentsFromString(data)
     )
   };
   });
-  var segments_1 = segments.fromArray;
-  var segments_2 = segments.fromString;
-  var segments_3 = segments.rawSplit;
 
   /**
    * QRCode for JavaScript
@@ -4458,7 +4424,7 @@
         if (row < 0 || size <= row) {
           row -= inc;
           inc = -inc;
-          break
+          break;
         }
       }
     }
@@ -4525,7 +4491,7 @@
       buffer.put(i % 2 ? 0x11 : 0xEC, 8);
     }
 
-    return createCodewords(buffer, version, errorCorrectionLevel)
+    return createCodewords(buffer, version, errorCorrectionLevel);
   }
 
   /**
@@ -4607,7 +4573,7 @@
       }
     }
 
-    return data
+    return data;
   }
 
   /**
@@ -4863,7 +4829,7 @@
     clearCanvas(ctx, canvasEl, size);
     ctx.putImageData(image, 0, 0);
 
-    return canvasEl
+    return canvasEl;
   };
 
   exports.renderToDataURL = function renderToDataURL (qrData, canvas, options) {
@@ -4884,8 +4850,6 @@
     return canvasEl.toDataURL(type, rendererOpts.quality)
   };
   });
-  var canvas_1 = canvas.render;
-  var canvas_2 = canvas.renderToDataURL;
 
   function getColorAttrib (color) {
     return 'fill="rgb(' + [color.r, color.g, color.b].join(',') + ')" ' +
@@ -4914,7 +4878,7 @@
 
     for (var i = 0; i < size; i++) {
       for (var j = 0; j < size; j++) {
-        if (!data[i * size + j]) continue
+        if (!data[i * size + j]) continue;
 
         var x = (opts.margin + j) * opts.scale;
         var y = (opts.margin + i) * opts.scale;
@@ -4925,7 +4889,7 @@
     xmlStr += '</g>\n';
     xmlStr += '</svg>';
 
-    return xmlStr
+    return xmlStr;
   };
 
   var svgRender = {
@@ -4985,10 +4949,6 @@
     }
   };
   });
-  var browser_1 = browser.create;
-  var browser_2 = browser.toCanvas;
-  var browser_3 = browser.toDataURL;
-  var browser_4 = browser.qrcodedraw;
 
   var isMobile = function isMobile() {
     return navigator && ('userAgent' in navigator && navigator.userAgent.match(/iPhone|iPod|iPad|Android/i) || navigator.maxTouchPoints > 1 && navigator.platform === 'MacIntel');
@@ -5507,6 +5467,10 @@
     return "".concat(WWPASS_UNSUPPORTED_PLATFORM_MSG_TMPL, " ").concat(platformName);
   };
 
+  var escapeHtml = function escapeHtml(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  };
+
   var wwpassShowError = function wwpassShowError(message, title, onCloseCallback) {
     if (!document.getElementById('_wwpass_css')) {
       var l = document.createElement('link');
@@ -5684,7 +5648,7 @@
     if (!PluginInfo.showsErrors) {
       return function (code, ticketOrMessage) {
         if (code !== WWPASS_STATUS.OK && code !== WWPASS_STATUS.USER_REJECT) {
-          var message = "<p><b>A error has occured:</b> ".concat(ticketOrMessage, "</p>") + "<p><a href=\"https://support.wwpass.com/?topic=".concat(code, "\">Learn more</a></p>");
+          var message = "<p><b>A error has occured:</b> ".concat(escapeHtml(ticketOrMessage), "</p>") + "<p><a href=\"https://support.wwpass.com/?topic=".concat(encodeURIComponent(code), "\">Learn more</a></p>");
           wwpassShowError(message, 'WWPass Error', function () {
             callback(code, ticketOrMessage);
           });
@@ -5814,7 +5778,7 @@
             args: args ? JSON.parse(JSON.stringify(args)) : args
           }, '*');
           window.addEventListener('message', function onMessageCallee(event) {
-            if (event.data.type === '_WWAuth_Message' && event.data.src === 'plugin' && event.data.id === id) {
+            if (event.source === window && event.origin === window.location.origin && event.data && event.data.type === '_WWAuth_Message' && event.data.src === 'plugin' && event.data.id === id) {
               window.removeEventListener('message', onMessageCallee, false);
 
               if (event.data.code === WWPASS_STATUS.NO_AUTH_INTERFACES_FOUND) {

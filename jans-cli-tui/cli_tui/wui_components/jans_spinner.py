@@ -1,7 +1,7 @@
 from prompt_toolkit.formatted_text import merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import FormattedTextControl, Window
-from typing import Optional, Sequence, Union
+from typing import Optional
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 

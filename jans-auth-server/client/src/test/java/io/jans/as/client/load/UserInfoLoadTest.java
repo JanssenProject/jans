@@ -56,7 +56,7 @@ public class UserInfoLoadTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        AuthorizationResponse response1 = authorizeClient.exec();
+        AuthorizationResponse response1 = execAuthorize(authorizeClient);
 
         showClient(authorizeClient);
         assertEquals(response1.getStatus(), 302, "Unexpected response code: " + response1.getStatus());

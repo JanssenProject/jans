@@ -26,7 +26,6 @@ const jwt = require('jsonwebtoken')
 const fs = require('fs')
 const crypto = require('crypto')
 
-const port = process.env.PORT
 const jansPostUrl = process.env.JANS_POST_URL
 
 passport.serializeUser((user, done) => done(null, user))
@@ -104,8 +103,6 @@ app.get('/passport/token',
     res.status(200).send({ token_: t })
   }
 )
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 app.listen(8090, () => {
   console.log('-----------------------\nServer started successfully!, Open this URL http://localhost:8090\n-----------------------')

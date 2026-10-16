@@ -44,6 +44,7 @@ resource "jans_scim_app_configuration" "global" {
 - `bulk_max_operations` (Number) Specifies maximum bulk operations.
 - `bulk_max_payload_size` (Number) Specifies maximum payload size of bulk operations.
 - `disable_audit_logger` (Boolean)
+- `disable_external_logger_configuration` (Boolean) Boolean value specifying whether to ignore the external log4j2 logging configuration.
 - `disable_jdk_logger` (Boolean) Boolean value specifying whether to enable JDK Loggers.
 - `disable_logger_timer` (Boolean)
 - `external_logger_configuration` (String) Path to external log4j2 logging configuration.
@@ -56,6 +57,7 @@ resource "jans_scim_app_configuration" "global" {
 - `ox_auth_issuer` (String) Jans Auth - Issuer identifier.
 - `person_custom_object_class` (String) Person Object Class
 - `protection_mode` (String) SCIM Protection Mode
+- `skip_defined_password_validation` (Boolean) Boolean value specifying whether to skip the defined password validation.
 - `use_local_cache` (Boolean) Boolean value specifying whether to enable local in-memory cache.
 - `user_extension_schema_uri` (String) User Extension Schema URI
 

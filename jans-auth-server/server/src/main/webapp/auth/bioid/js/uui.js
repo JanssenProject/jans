@@ -191,15 +191,15 @@
             initialize();
 
             // set navigation for the buttons
-            $('#uuicancel').attr('href', returnURL + '?error=user_abort&access_token=' + token + '&state=' + state);
-            $('#uuiskip').attr('href', returnURL + '?error=user_skip&access_token=' + token + '&state=' + state);
+            $('#uuicancel').attr('href', returnURL + '?error=user_abort&access_token=' + token + '&state=' + state); // # gitleaks:allow
+            $('#uuiskip').attr('href', returnURL + '?error=user_skip&access_token=' + token + '&state=' + state); // # gitleaks:allow
 
             // set url for the BioID mobile app
             if (task === 'verification') {
-                $('#uuimobileapp').attr('href', 'bioid-verify://?access_token=' + token + '&return_url=' + returnURL + '&state=' + state);
+                $('#uuimobileapp').attr('href', 'bioid-verify://?access_token=' + token + '&return_url=' + returnURL + '&state=' + state); // # gitleaks:allow
             }
             else if (task === 'enrollment') {
-                $('#uuimobileapp').attr('href', 'bioid-enroll://?access_token=' + token + '&return_url=' + returnURL + '&state=' + state);
+                $('#uuimobileapp').attr('href', 'bioid-enroll://?access_token=' + token + '&return_url=' + returnURL + '&state=' + state); // # gitleaks:allow
             }
 
             $('#uuiinstruction').attr('data-res', 'UserInstruction-CloseUp');
@@ -310,7 +310,7 @@
                     console.log('Current Execution: ' + currentExecution);
                 } else {
                     // done: redirect to caller ...
-                    let url = returnURL + '?access_token=' + token;
+                    let url = returnURL + '?access_token=' + token; // # gitleaks:allow
                     if (error !== undefined) {
                         url = url + '&error=' + error;
                     }
@@ -469,7 +469,7 @@
             // Currently not neccessary - therefore the button is not shown!
             // $('#uuimirror').show().click(mirror);
 
-            $('#uuistart').show().click(function () { startRecording(task === 'enrollment'); });
+            $('#uuistart').show().click(function () { startRecording(); });
 
 
             $('#uuiok').show().click(function () {
@@ -549,14 +549,8 @@
             };
             let onError = function (xhr) {};
             let loader = new THREE.OBJLoader(manager);
-            let material = new THREE.MeshLambertMaterial({ transparent: false, opacity: 0.8 });
 
             loader.load('./model/head.obj', function (head) {
-                head.traverse(function (child) {
-                    if (child instanceof THREE.Mesh) {
-                     // child.material = material;
-                    }
-                });
                 head.name = 'BioIDHead';
                 head.position.y = 0;
                 scene.add(head);

@@ -1,3 +1,4 @@
+import contextlib
 import os
 import json
 import asyncio
@@ -9,7 +10,6 @@ import time
 
 from urllib import request
 from functools import partial
-from datetime import datetime
 from typing import Any
 from types import SimpleNamespace
 
@@ -22,7 +22,7 @@ from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, Window, HorizontalAlign
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.widgets import Button, Label, TextArea, Box, Frame, RadioList
+from prompt_toolkit.widgets import Button, Label, TextArea, Box, RadioList
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, fromisoformat, get_help_with, common_data
@@ -152,7 +152,6 @@ class Agama(DialogUtils):
         project_name = project_data['details']['projectMetadata']['projectName']
         fdata = SimpleNamespace()
 
-        export_current_config_button_title = _("Export Current Config")
         export_sample_config_button_title = _("Export Sample Config")
         import_configuration_button_title = _("Import Configuration")
 
@@ -219,32 +218,6 @@ class Agama(DialogUtils):
                     self.app.show_message(_(common_strings.info), _("File {} was successfully saved").format(path), tobefocused=fdata.main_dialog)
                 except Exception as e:
                     self.app.show_message(_(common_strings.error), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=fdata.main_dialog)
-
-
-            async def get_current_config_coroutine():
-
-                cli_args = {'operation_id': 'get-agama-prj-configs', 'url_suffix':'name:{}'.format(project_name)}
-                self.app.start_progressing(_("Retrieving project configuration..."))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
-
-                result = None
-                try:
-                    result = response.json()
-                    fdata.save_status = export_current_config_button_title
-                except Exception:
-                    result = response.text
-
-                if not result:
-                    self.app.show_message(_(common_strings.info), _("No configurations defined for {}").format(project_name), tobefocused=fdata.main_dialog)
-                    return
-
-                fdata.save_data = json.dumps(result, indent=2)
-                file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.save_as, ok_handler=save_data)
-                self.app.show_jans_dialog(file_browser_dialog)
-
-            def export_current_config():
-                asyncio.ensure_future(get_current_config_coroutine())
 
 
             def export_sample_config():
@@ -491,7 +464,7 @@ class Agama(DialogUtils):
 
             try:
                 result_config = response_config.json()
-            except Exception as e:
+            except Exception:
                 result_config = None
 
             if response.status_code == 200:
@@ -599,10 +572,8 @@ class Agama(DialogUtils):
 
             await asyncio.sleep(1)
 
-            try:
+            with contextlib.suppress(Exception):
                 download_project_dialog.future.set_result(True)
-            except Exception:
-                pass
 
             self.upload_project(file_path=download_path, community_project_name=project_name)
 

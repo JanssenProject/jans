@@ -15,6 +15,7 @@ import io.jans.as.server.authzen.ws.rs.AccessEvaluationSearchWS;
 import io.jans.as.server.bcauthorize.ws.rs.BackchannelAuthorizeRestWebServiceImpl;
 import io.jans.as.server.bcauthorize.ws.rs.BackchannelDeviceRegistrationRestWebServiceImpl;
 import io.jans.as.server.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
+import io.jans.as.server.discovery.ws.rs.OAuthAuthorizationServerMetadataWS;
 import io.jans.as.server.introspection.ws.rs.IntrospectionWebService;
 import io.jans.as.server.jans.ws.rs.JansConfigurationWS;
 import io.jans.as.server.jwk.ws.rs.ArchivedJwksWebServiceImpl;
@@ -58,6 +59,7 @@ public class ResteasyInitializer extends Application {
         classes.add(AccessEvaluationRestWebServiceImplV1.class);
         classes.add(AccessEvaluationDiscoveryWS.class);
         classes.add(AccessEvaluationSearchWS.class);
+        classes.add(OAuthAuthorizationServerMetadataWS.class);
         classes.add(RegisterRestWebServiceImpl.class);
         classes.add(ClientInfoRestWebServiceImpl.class);
         classes.add(RevokeRestWebServiceImpl.class);

@@ -111,7 +111,7 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 
 		validator.validate(assertion);
 
-		assertEquals("cedarling-fleet-1/1.0.0", assertion.getProducer());
+		assertEquals("cedarling-fleet-1", assertion.getProducer());
 		assertEquals("cedarling-fleet-1-2026-01", assertion.getKid());
 		assertEquals("9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41", assertion.getRecordId());
 		assertEquals("tag:jans.io,2026:trace-v1", assertion.getEatProfile());
@@ -120,7 +120,7 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 		assertEquals("exec-01JABCXYZQK8P5N9F2C7R3T4V6", assertion.getTraceExecutionId());
 		assertEquals("spiffe://example.org/agent/planner", assertion.getExecutionAuthority());
 		assertNotNull(assertion.getSubject());
-		assertEquals("cedarling-fleet-1/1.0.0", assertion.getProducerChain().getProducerId());
+		assertEquals("cedarling-fleet-1", assertion.getProducerChain().getProducerId());
 		assertEquals("cedarling-001", assertion.getProducerChain().getProducerInstanceId());
 		assertEquals("chain-01JABC9Z0K", assertion.getProducerChain().getProducerChainId());
 		assertEquals(4821L, assertion.getProducerChain().getSequenceNumber());
@@ -128,6 +128,93 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 		assertEquals(1, assertion.getParentRecordIds().size());
 		assertEquals("issued_token", assertion.getParentRecordIds().get(0).getRelationshipType());
 		assertNotNull(assertion.getSignature());
+	}
+
+	@Test
+	void testValidate_legacyNameSemverProducer_accepted() throws IOException {
+		ObjectNode root = loadFixture();
+		set(root, TextNode.valueOf("cedarling-fleet-1/1.0.0"), "producer");
+		set(root, TextNode.valueOf("cedarling-fleet-1/1.0.0"), "producer_chain", "producer_id");
+		ParsedAssertion assertion = assertionOf(root);
+
+		validator.validate(assertion);
+
+		assertEquals("cedarling-fleet-1/1.0.0", assertion.getProducer());
+		assertEquals("cedarling-fleet-1/1.0.0", assertion.getProducerChain().getProducerId());
+	}
+
+	@Test
+	void testValidate_producerVersionAbsent_accepted() throws IOException {
+		ObjectNode root = loadFixture();
+		root.remove("producer_version");
+
+		validator.validate(assertionOf(root));
+	}
+
+	@Test
+	void testValidate_producerVersionValid_acceptedAndLeftInAssertion() throws IOException {
+		ObjectNode root = loadFixture();
+		root.set("producer_version", TextNode.valueOf("1.4.2+build.7"));
+		ParsedAssertion assertion = assertionOf(root);
+
+		validator.validate(assertion);
+
+		assertEquals("1.4.2+build.7", assertion.getRoot().get("producer_version").textValue());
+	}
+
+	@Test
+	void testValidate_producerVersionMaxLength_accepted() throws IOException {
+		ObjectNode root = loadFixture();
+		root.set("producer_version", TextNode.valueOf(repeat('v', 255)));
+
+		validator.validate(assertionOf(root));
+	}
+
+	@Test
+	void testValidate_producerVersionTooLong_throwsInvalidAssertionLength() throws IOException {
+		ObjectNode root = loadFixture();
+		root.set("producer_version", TextNode.valueOf(repeat('v', 256)));
+
+		TraceValidationException ex = validateAndCapture(root);
+
+		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
+		assertEquals("length:producer_version", ex.getReason());
+	}
+
+	@Test
+	void testValidate_producerVersionEmpty_throwsInvalidAssertionLength() throws IOException {
+		ObjectNode root = loadFixture();
+		root.set("producer_version", TextNode.valueOf(""));
+
+		TraceValidationException ex = validateAndCapture(root);
+
+		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
+		assertEquals("length:producer_version", ex.getReason());
+	}
+
+	@ParameterizedTest
+	@MethodSource("nonStringProducerVersions")
+	void testValidate_producerVersionNotString_throwsInvalidAssertionType(JsonNode value) throws IOException {
+		ObjectNode root = loadFixture();
+		root.set("producer_version", value);
+
+		TraceValidationException ex = validateAndCapture(root);
+
+		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
+		assertEquals("type:producer_version", ex.getReason());
+	}
+
+	static Stream<Arguments> nonStringProducerVersions() {
+		return Stream.of(Arguments.of(MAPPER.getNodeFactory().numberNode(1)),
+				Arguments.of(MAPPER.getNodeFactory().booleanNode(true)),
+				Arguments.of(MAPPER.getNodeFactory().nullNode()), Arguments.of(MAPPER.createObjectNode()),
+				Arguments.of(MAPPER.createArrayNode()));
+	}
+
+	private static String repeat(char c, int count) {
+		char[] chars = new char[count];
+		java.util.Arrays.fill(chars, c);
+		return new String(chars);
 	}
 
 	@Test
@@ -209,7 +296,7 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 	// -- Specific-reason rules ------------------------------------------------------------------
 
 	@Test
-	void testValidate_producerNotSemver_throwsProducerMismatchFormat() throws IOException {
+	void testValidate_producerBadFormat_throwsProducerMismatchFormat() throws IOException {
 		ObjectNode root = loadFixture();
 		set(root, TextNode.valueOf("not a valid producer"), "producer");
 
@@ -222,7 +309,7 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 	@Test
 	void testValidate_producerDoesNotMatchChainProducerId_throwsProducerMismatch() throws IOException {
 		ObjectNode root = loadFixture();
-		set(root, TextNode.valueOf("other-producer/2.0.0"), "producer");
+		set(root, TextNode.valueOf("other-producer"), "producer");
 
 		TraceValidationException ex = validateAndCapture(root);
 
@@ -274,22 +361,22 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testValidate_signedAtAtLatenessBoundary_accepted() throws IOException {
+	void testValidate_signedAtAtFutureSkewBoundary_accepted() throws IOException {
 		Instant now = Instant.parse("2026-06-11T00:00:00Z");
 		setField(validator, "clock", Clock.fixed(now, ZoneOffset.UTC));
 		ObjectNode root = loadFixture();
-		long boundary = now.getEpochSecond() + traceConfiguration.getLatenessThresholdSeconds();
+		long boundary = now.getEpochSecond() + traceConfiguration.getMaxFutureSkewSeconds();
 		set(root, MAPPER.getNodeFactory().numberNode(boundary), "trace", "signed_at");
 
 		validator.validate(assertionOf(root));
 	}
 
 	@Test
-	void testValidate_signedAtPastLatenessBoundary_throwsSignedAtInFuture() throws IOException {
+	void testValidate_signedAtPastFutureSkewBoundary_throwsSignedAtInFuture() throws IOException {
 		Instant now = Instant.parse("2026-06-11T00:00:00Z");
 		setField(validator, "clock", Clock.fixed(now, ZoneOffset.UTC));
 		ObjectNode root = loadFixture();
-		long pastBoundary = now.getEpochSecond() + traceConfiguration.getLatenessThresholdSeconds() + 1;
+		long pastBoundary = now.getEpochSecond() + traceConfiguration.getMaxFutureSkewSeconds() + 1;
 		set(root, MAPPER.getNodeFactory().numberNode(pastBoundary), "trace", "signed_at");
 
 		TraceValidationException ex = validateAndCapture(root);
@@ -405,6 +492,56 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 		TraceValidationException ex = validateAndCapture(root);
 
 		assertEquals(TraceValidationException.ERROR_DOMAIN_FIELD_FORBIDDEN, ex.getErrorId());
+	}
+
+	@Test
+	void testValidate_lockDerivedMemberAtTopLevel_throwsForbidden() throws IOException {
+		for (String member : new String[] { "cnf", "content_digest", "receipt_sequence", "key_thumbprint" }) {
+			ObjectNode root = loadFixture();
+			root.set(member, TextNode.valueOf("x"));
+
+			TraceValidationException ex = validateAndCapture(root);
+
+			assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
+			assertEquals("forbidden:" + member, ex.getReason());
+		}
+	}
+
+	@Test
+	void testValidate_lockDerivedMemberInTraceAndEvent_throwsForbidden() throws IOException {
+		ObjectNode inTrace = loadFixture();
+		((ObjectNode) inTrace.get("trace")).set("trust_tier", TextNode.valueOf("attested"));
+		assertEquals("forbidden:trace.trust_tier", validateAndCapture(inTrace).getReason());
+
+		ObjectNode inEvent = loadFixture();
+		((ObjectNode) inEvent.get("trace").get("event")).set("capability_resolution", TextNode.valueOf("x"));
+		assertEquals("forbidden:trace.event.capability_resolution", validateAndCapture(inEvent).getReason());
+	}
+
+	@Test
+	void testValidate_lockDerivedMemberInFact_throwsForbidden() throws IOException {
+		ObjectNode root = loadFixture();
+		ObjectNode event = (ObjectNode) root.get("trace").get("event");
+		ObjectNode fact = event.putObject("decision");
+		fact.set("capability_id", TextNode.valueOf("x"));
+
+		assertEquals("forbidden:trace.event.decision.capability_id", validateAndCapture(root).getReason());
+
+		root = loadFixture();
+		event = (ObjectNode) root.get("trace").get("event");
+		event.remove("decision");
+		event.putArray("decisions").addObject().set("late_flag", TextNode.valueOf("x"));
+
+		assertEquals("forbidden:trace.event.decisions[0].late_flag", validateAndCapture(root).getReason());
+	}
+
+	@Test
+	void testValidate_lockDerivedNameInsideTokenEntry_notReserved() throws IOException {
+		ObjectNode root = loadFixture();
+		ObjectNode event = (ObjectNode) root.get("trace").get("event");
+		((ObjectNode) event.get("tokens").get(0)).set("cnf", TextNode.valueOf("x"));
+
+		validator.validate(assertionOf(root));
 	}
 
 }

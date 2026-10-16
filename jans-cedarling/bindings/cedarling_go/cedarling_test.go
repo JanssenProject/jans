@@ -833,3 +833,23 @@ func TestTrustedIssuerLoadingInfoDefaults(t *testing.T) {
 		}
 	}
 }
+
+func TestPolicyStoreID(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	id, ok := instance.PolicyStoreID()
+	if !ok {
+		t.Fatal("expected policy store ID to be set")
+	}
+	if id != "a1bf93115de86de760ee0bea1d529b521489e5a11747" {
+		t.Errorf("unexpected policy store ID %q", id)
+	}
+}

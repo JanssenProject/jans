@@ -15,7 +15,6 @@ from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from org.gluu.oxauth.model.config import StaticConfiguration
 
-import java
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):

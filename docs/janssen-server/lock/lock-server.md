@@ -258,22 +258,28 @@ lock.server.log.jwt.status.file=/opt/jans/lock-server/logs/lock_server_jwt_statu
 The `traceConfiguration` block of the Lock Server dynamic configuration (`jansConfDyn`) controls
 the TRACE evidence-ingestion feature: which OAuth clients may submit or read evidence for which
 evidence domain, lateness policy, and request limits enforced before any cryptographic
-verification.
+verification. See [TRACE Evidence](./trace.md) for the feature description and API.
 
 | Property | Type | Default | Meaning |
 |---|---|---|---|
 | `enabled` | boolean | `true` | When `false`, every TRACE endpoint returns a structured `invalid_request` error and the receipt repair timer does not run. |
 | `defaultEvidenceDomainId` | string | `null` | Evidence domain used for a submitting/reading client that has no explicit entry in `clientDomainBindings`. |
+| `defaultAllowedProducerIds` | array | `[]` | Producer ids a client without a binding may submit records for in the default evidence domain. Empty means such a client can submit nothing (`producer_not_allowed`). Read and admin paths are unaffected. |
 | `clientDomainBindings` | array | `[]` | List of `{ clientId, evidenceDomainId, allowedProducerIds[] }` bindings. A client without a binding and without `defaultEvidenceDomainId` set is rejected with `client_not_bound`. `allowedProducerIds` may contain `"*"` to allow any producer. |
 | `latenessThresholdSeconds` | integer | `300` | Seconds after `signed_at` a record may still be accepted before it is flagged `late_flag: true`. |
+| `maxFutureSkewSeconds` | integer | `300` | Seconds `signed_at` may be ahead of Lock's clock. A later `signed_at` is rejected with `invalid_assertion` (`signed_at_in_future`). |
 | `maxRequestBytes` | integer | `262144` | Maximum accepted TRACE request body size, in bytes. |
 | `maxJsonDepth` | integer | `32` | Maximum accepted JSON nesting depth of a TRACE assertion. |
 | `maxStringLength` | integer | `8192` | Maximum accepted JSON string length (UTF-16 units) in a TRACE assertion. |
 | `maxArrayLength` | integer | `256` | Maximum accepted JSON array length in a TRACE assertion. |
 | `maxObjectMembers` | integer | `256` | Maximum accepted JSON object member count in a TRACE assertion. |
 | `receiptAllocationRetryLimit` | integer | `8` | Maximum retries when allocating the next receipt-chain sequence number under multi-node contention. |
+| `correlationRetryLimit` | integer | `3` | Maximum retries when a neighbor-flag update after a record insert hits a version conflict. After the limit Lock logs a warning and gives up on that update; the request still succeeds. |
 | `receiptRepairIntervalSeconds` | integer | `300` | Interval between runs of the receipt repair timer, which settles stale `PENDING` receipts. |
 | `pendingReceiptTimeoutSeconds` | integer | `120` | Seconds a `PENDING` receipt may remain unresolved before the repair timer marks it `COMMITTED` or `VOID`. |
+| `maxBulkRecords` | integer | `100` | Maximum number of assertions accepted in one `POST /audit/trace/bulk` request. |
+| `maxBulkRequestBytes` | integer | `4194304` | Maximum total body size, in bytes, buffered for one `POST /audit/trace/bulk` request. Independent of `maxRequestBytes`/`maxBulkRecords`, and always clamped to 16777216 regardless of configuration. |
+| `chainRegistrationMode` | string | `PRE_REGISTERED` | How producer chains come to exist. `PRE_REGISTERED`: a chain must be registered through the admin API before its records are accepted. `FIRST_OBSERVED`: a record with `sequence_number` 1 and the all-zero `prev_record_hash` on an unregistered chain registers the chain, after the key, event-kind and signature checks pass. Any other record on an unregistered chain is still rejected with `chain_not_registered`. A value that is not a mode name is treated as `PRE_REGISTERED` and logged once at `WARN`. Changing the mode affects only later submissions; existing chains are not rewritten. |
 
 Every numeric limit above falls back to its default when configured with a value `<= 0`.
 

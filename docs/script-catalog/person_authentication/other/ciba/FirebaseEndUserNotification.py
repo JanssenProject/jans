@@ -5,12 +5,10 @@
 #
 #
 
-from org.gluu.oxauth.client.fcm import FirebaseCloudMessagingResponse
 from org.gluu.oxauth.client.fcm import FirebaseCloudMessagingClient
 from org.gluu.oxauth.client.fcm import FirebaseCloudMessagingRequest
 from io.jans.as.server.util import RedirectUri
 from io.jans.model.custom.script.type.ciba import EndUserNotificationType
-from java.lang import String
 from java.util import UUID
 
 class EndUserNotification(EndUserNotificationType):

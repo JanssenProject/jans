@@ -512,6 +512,17 @@ class Cedarling:
         """
         ...
 
+    def policy_store_id(self) -> Optional[str]:
+        """
+        Get the ID of the currently published policy store.
+
+        Returns:
+            The store ID, or None when the store carries no ID.
+            The value is opaque and source-dependent; it may change
+            after a background refresh.
+        """
+        ...
+
     def is_trusted_issuer_loaded_by_name(self, issuer_id: str) -> bool:
         """
         Check whether a trusted issuer was loaded by issuer identifier.

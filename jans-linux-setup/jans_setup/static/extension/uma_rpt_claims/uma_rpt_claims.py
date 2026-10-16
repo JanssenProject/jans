@@ -6,7 +6,6 @@
 #
 
 from io.jans.model.custom.script.type.uma import UmaRptClaimsType
-from java.lang import String
 
 class UmaRptClaims(UmaRptClaimsType):
     def __init__(self, currentTimeMillis):

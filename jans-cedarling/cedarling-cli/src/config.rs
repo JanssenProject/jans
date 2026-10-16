@@ -27,7 +27,7 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
             .unwrap_or("")
             .to_lowercase();
         let parsed: BootstrapConfigRaw = if ext == "yaml" || ext == "yml" {
-            serde_yaml_ng::from_str(&content).context("failed to parse config as YAML")?
+            serde_saphyr::from_str(&content).context("failed to parse config as YAML")?
         } else {
             serde_json::from_str(&content).context("failed to parse config as JSON")?
         };

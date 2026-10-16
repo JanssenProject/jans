@@ -1,19 +1,11 @@
 import os
-import re
-import glob
-import ssl
-import time
-import json
-import uuid
 
 from xml.etree import ElementTree
 
-from setup_app import paths
 from setup_app.config import Config
 from setup_app.pylib.ldif4.ldif import LDIFWriter
-from setup_app.static import AppType, InstallOption, SetupProfiles
+from setup_app.static import AppType, InstallOption
 from setup_app.utils import base
-from setup_app.utils.properties_utils import propertiesUtils
 from setup_app.utils.ldif_utils import myLdifParser
 from setup_app.installers.jetty import JettyInstaller
 
@@ -41,11 +33,10 @@ class CasaInstaller(JettyInstaller):
         self.register_progess()
 
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
-        self.templates_dir = os.path.join(Config.templateFolder, self.service_name)
+        self.templates_dir = os.path.join(Config.template_folder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
         self.ldif_client_fn = os.path.join(self.output_folder, 'client.ldif')
         self.config_json_fn = os.path.join(self.output_folder, 'casa-config.json')
-        self.scopes_fn = os.path.join(self.templates_dir, 'scopes.json')
         self.casa_agama_deployment_id = '202447d5-d44c-3125-b1f7-207cb33b6bf7'
         self.jans_start_date = self.get_ldap_time()
 
@@ -53,7 +44,6 @@ class CasaInstaller(JettyInstaller):
 
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
 
-        self.casa_scopes = self.create_scopes()
         self.add_plugins()
 
         # enable agama custom script
@@ -77,8 +67,8 @@ class CasaInstaller(JettyInstaller):
 
 
     def generate_configuration(self):
-        if not hasattr(self, 'casa_scopes'):
-            self.casa_scopes = self.create_scopes()
+        if not hasattr(self, 'scopes'):
+            self.create_scopes()
 
         self.check_clients([('casa_client_id', self.client_id_prefix)])
 
@@ -89,14 +79,14 @@ class CasaInstaller(JettyInstaller):
 
     def render_import_templates(self):
 
-        Config.templateRenderingDict['casa_redirect_uri'] = f'https://{Config.hostname}/{self.service_name}'
-        Config.templateRenderingDict['casa_redirect_logout_uri'] = f'https://{Config.hostname}/{self.service_name}/bye.zul'
-        Config.templateRenderingDict['casa_frontchannel_logout_uri'] = f'https://{Config.hostname}/{self.service_name}/autologout'
+        Config.template_rendering_dict['casa_redirect_uri'] = f'https://{Config.hostname}/{self.service_name}'
+        Config.template_rendering_dict['casa_redirect_logout_uri'] = f'https://{Config.hostname}/{self.service_name}/bye.zul'
+        Config.template_rendering_dict['casa_frontchannel_logout_uri'] = f'https://{Config.hostname}/{self.service_name}/autologout'
 
-        Config.templateRenderingDict['ads_prj_assets_base64'] = self.generate_base64_file(self.source_files[4][0], 1)
+        Config.template_rendering_dict['ads_prj_assets_base64'] = self.generate_base64_file(self.source_files[4][0], 1)
 
         self.renderTemplateInOut(self.config_json_fn, self.templates_dir, self.output_folder)
-        Config.templateRenderingDict['casa_config_base64'] = self.generate_base64_file(self.config_json_fn, 1)
+        Config.template_rendering_dict['casa_config_base64'] = self.generate_base64_file(self.config_json_fn, 1)
 
         self.renderTemplateInOut(self.ldif_client_fn, self.templates_dir, self.output_folder)
         self.renderTemplateInOut(self.ldif_config_fn, self.templates_dir, self.output_folder)
@@ -104,7 +94,7 @@ class CasaInstaller(JettyInstaller):
         casa_client_ldif_parser = myLdifParser(self.ldif_client_fn)
         casa_client_ldif_parser.parse()
 
-        casa_client_ldif_parser.entries[0][1]['jansScope'] += self.casa_scopes
+        casa_client_ldif_parser.entries[0][1]['jansScope'] += self.scopes
         with open(self.ldif_client_fn, 'wb') as w:
             casa_client_ldif_writer = LDIFWriter(w)
             casa_client_ldif_writer.unparse(casa_client_ldif_parser.entries[0][0], casa_client_ldif_parser.entries[0][1])

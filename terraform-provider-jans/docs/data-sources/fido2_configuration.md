@@ -17,8 +17,27 @@ Data source for retrieving the Fido2 configuration of the Janssen server
 
 ### Read-Only
 
-- `assertion` (String) list of fido2 assertion endpoints.
-- `attestation` (String) list of fido2 attestation endpoints.
+- `assertion` (List of Object) fido2 assertion endpoints. (see [below for nested schema](#nestedatt--assertion))
+- `attestation` (List of Object) fido2 attestation endpoints. (see [below for nested schema](#nestedatt--attestation))
 - `id` (String) The ID of this resource.
 - `issuer` (String) A URI indicating the party operating the FIDO U2F server.
 - `version` (String) The version of the FIDO2 U2F core protocol to which this server conforms. The value MUST be the string 1.0.
+
+<a id="nestedatt--assertion"></a>
+### Nested Schema for `assertion`
+
+Read-Only:
+
+- `base_path` (String)
+- `options_endpoint` (String)
+- `result_endpoint` (String)
+
+
+<a id="nestedatt--attestation"></a>
+### Nested Schema for `attestation`
+
+Read-Only:
+
+- `base_path` (String)
+- `options_endpoint` (String)
+- `result_endpoint` (String)

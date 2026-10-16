@@ -455,13 +455,14 @@ To modify any user properties, find the user from search box and hit `Enter` to 
 ![update-user](../../../assets/jans-tui-update-user.png)
 
 ### Change User Password
-No chance to recover user password, but you can change.
-To change password of a user navigate/or search user and press key `p` when the target user is higlighted.
-In the figure below, passowrd of user **sakamura** is being changed.
+You can change a user's password from the Jans TUI, but the current password cannot be retrieved.
+To change the password of a user, navigate to or search for the user and press `p` when the target user is highlighted.
+
+In the figure below, the password of user **sakamura** is being changed.
 
 ![Change User Password](../../../assets/tui-user-change-password.png)
 
-Once you write new password (it will be displayed while you type), go to button `< Save >` and press Enter.
+Once you enter the new password, go to the `< Save >` button and press Enter.
 
 ### Manage User FIDO Devices
 To view and manage users registered FIDO devices, first navigate/or search user and press key  `f` on the keyboard.

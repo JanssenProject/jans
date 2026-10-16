@@ -6,7 +6,6 @@ from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService
 from io.jans.util import StringHelper
 
-import java
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -77,7 +76,7 @@ class PersonAuthentication(PersonAuthenticationType):
         else:
             return False
 
-	def getNextStep(self, step, context):
+    def getNextStep(self, configurationAttributes, requestParameters, step):
         return -1
 
     def getExtraParametersForStep(self, configurationAttributes, step):

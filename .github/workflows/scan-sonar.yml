@@ -181,7 +181,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           MODULE: ${{ matrix.module }}
+          CHANGED_MODULES: ${{ join(fromJSON(needs.detect-changes.outputs.matrix).module, ' ') }}
         run: |
+          for dep in jans-orm jans-core; do
+            [ "$dep" = "$MODULE" ] && break
+            if echo "$CHANGED_MODULES" | tr ' ' '\n' | grep -qx "$dep"; then
+              echo "Installing changed upstream module $dep"
+              mvn -B -q -DskipTests=true -f "$dep/pom.xml" install
+            fi
+          done
           cd "$MODULE"
           case "$MODULE" in
             "jans-auth-server"|"jans-lock"|"jans-scim"|"jans-config-api")

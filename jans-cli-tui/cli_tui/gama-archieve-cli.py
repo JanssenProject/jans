@@ -105,6 +105,7 @@ def get_path(path_s, l):
         ns = l.find(path_s)
         rpath = strip_quotation(l[ns+len(path_s):].strip().split()[0])
         return rpath
+    return None
 
 for fpath, rpath in flow_files:
     #print("Examining", rpath)

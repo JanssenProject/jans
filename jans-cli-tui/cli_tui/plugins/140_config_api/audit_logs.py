@@ -1,22 +1,17 @@
 import asyncio
 from functools import partial
-from typing import Optional, Any
+from typing import Optional
 
-from prompt_toolkit.application import Application
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign, Window
+from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign
 from prompt_toolkit.widgets import TextArea, Button, Label
-from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.formatted_text import HTML
 
 from utils.multi_lang import _
 from utils.utils import common_data
 from utils.utils import DialogUtils
 from utils.static import cli_style, common_strings
-from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_vetrical_nav import JansVerticalNav
-from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_date_picker import DateSelectWidget
 
 

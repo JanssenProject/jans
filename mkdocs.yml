@@ -522,6 +522,7 @@ nav:
       - TUI for K8s: janssen-server/kubernetes-ops/tui-k8s.md
       - Custom Attributes: janssen-server/kubernetes-ops/custom-attributes.md
       - Memory Dump: janssen-server/kubernetes-ops/memory-dump.md
+      - Change FQDN: janssen-server/kubernetes-ops/change-fqdn.md
     - VM Operations:
       - VM Operations: janssen-server/vm-ops/README.md
       - Upgrade: janssen-server/vm-ops/upgrade.md
@@ -548,6 +549,7 @@ nav:
     - Lock:
       - Lock: janssen-server/lock/README.md
       - Lock Server: janssen-server/lock/lock-server.md
+      - TRACE Evidence: janssen-server/lock/trace.md
 
   # ====================
   # 9. PRODUCT, RELEASES & SUPPORT

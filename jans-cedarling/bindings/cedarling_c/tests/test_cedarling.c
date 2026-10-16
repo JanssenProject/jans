@@ -588,6 +588,40 @@ void test_trusted_issuer_loading_info() {
     cedarling_drop(instance_id);
 }
 
+void test_policy_store_id(void) {
+    printf("\nTest: Policy Store ID\n");
+    printf("=======================\n");
+
+    CedarlingInstanceResult instance_result;
+    int ret = cedarling_new(TEST_CONFIG, &instance_result);
+    if (ret != 0) {
+        printf("[FAIL] Failed to create instance for policy store ID tests\n");
+        cedarling_free_instance_result(&instance_result);
+        return;
+    }
+
+    uint64_t instance_id = instance_result.instance_id;
+    cedarling_free_instance_result(&instance_result);
+
+    // Legacy YAML store reports the policy_stores map key
+    char* id = NULL;
+    ret = cedarling_get_policy_store_id(instance_id, &id);
+    TEST_ASSERT(ret == 0, "Get policy store ID succeeds");
+    TEST_ASSERT(id != NULL && strcmp(id, "a1bf93115de86de760ee0bea1d529b521489e5a11747") == 0,
+        "Policy store ID equals policy_stores map key");
+    cedarling_free_string(id);
+
+    id = (char*)"sentinel";
+    ret = cedarling_get_policy_store_id(99999, &id);
+    TEST_ASSERT(ret != 0, "Invalid instance rejects policy store ID");
+    TEST_ASSERT(id == NULL, "Invalid instance resets policy store ID output to NULL");
+
+    ret = cedarling_get_policy_store_id(instance_id, NULL);
+    TEST_ASSERT(ret != 0, "Reject NULL out_id for policy store ID");
+
+    cedarling_drop(instance_id);
+}
+
  void test_memory_management(){
      printf("\nTest: Memory Management\n");
      printf("=========================\n");
@@ -906,6 +940,8 @@ void test_authorize_multi_issuer_batch(void) {
     test_logging_functions();
 
     test_trusted_issuer_loading_info();
+
+    test_policy_store_id();
 
      test_memory_management();
 

@@ -79,6 +79,7 @@ public class AuthorizationDetailsHttpTest extends BaseTest {
         // 4. Request access token using the authorization code and check response has authorization_details
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);

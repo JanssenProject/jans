@@ -56,6 +56,8 @@ routes:
   webfingerEnabled: true
   # -- Enable endpoint /.well-known/authzen-configuration
   authzenConfigEnabled: true
+  # -- Enable endpoint /.well-known/oauth-authorization-server
+  oauthServerConfigEnabled: true
   # -- Enable endpoint /.well-known/lock-server-configuration (if enabled, global.auth-server.lockEnabled must be enabled)
   lockConfigEnabled: false
   # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService (if enabled, global.auth-server.lockEnabled must be enabled)

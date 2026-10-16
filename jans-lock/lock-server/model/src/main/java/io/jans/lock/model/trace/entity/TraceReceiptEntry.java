@@ -13,10 +13,11 @@ import java.util.Objects;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.Version;
 import io.jans.orm.model.base.BaseEntry;
 
 /**
- * A receipt-chain position allocation claim (design §9, TRACE MVP design decisions T-2, D-8).
+ * A receipt-chain position allocation claim (design §9).
  * Only {@link #getReceiptState()} may change after creation, via {@code merge}.
  *
  * <p>{@code sortByName} (not {@code sortBy}) so that SQL/Couchbase/Spanner order by
@@ -69,6 +70,10 @@ public class TraceReceiptEntry extends BaseEntry implements Serializable {
 
     @AttributeName(name = "jansTraceNodeId", ignoreDuringUpdate = true)
     private String nodeId;
+
+    @Version
+    @AttributeName(name = "jansVersion", ignoreDuringUpdate = true)
+    private Long version;
 
     @AttributeName(name = "creationDate", ignoreDuringUpdate = true)
     private Date creationDate;
@@ -192,6 +197,14 @@ public class TraceReceiptEntry extends BaseEntry implements Serializable {
         this.nodeId = nodeId;
     }
 
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public Date getCreationDate() {
         return creationDate;
     }
@@ -216,13 +229,14 @@ public class TraceReceiptEntry extends BaseEntry implements Serializable {
                 && Objects.equals(contentDigest, that.contentDigest)
                 && Objects.equals(prevReceiptHash, that.prevReceiptHash)
                 && Objects.equals(receiptHash, that.receiptHash) && Objects.equals(receiptState, that.receiptState)
-                && Objects.equals(nodeId, that.nodeId) && Objects.equals(creationDate, that.creationDate);
+                && Objects.equals(nodeId, that.nodeId) && Objects.equals(version, that.version)
+                && Objects.equals(creationDate, that.creationDate);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, domainId, receiptSeq, receivedAt, receivedAtMs, producerId, recordId, recordKey,
-                contentDigest, prevReceiptHash, receiptHash, receiptState, nodeId, creationDate);
+                contentDigest, prevReceiptHash, receiptHash, receiptState, nodeId, version, creationDate);
     }
 
     @Override
@@ -231,7 +245,8 @@ public class TraceReceiptEntry extends BaseEntry implements Serializable {
                 + ", receivedAt=" + receivedAt + ", receivedAtMs=" + receivedAtMs + ", producerId=" + producerId
                 + ", recordId=" + recordId + ", recordKey=" + recordKey + ", contentDigest=" + contentDigest
                 + ", prevReceiptHash=" + prevReceiptHash + ", receiptHash=" + receiptHash + ", receiptState="
-                + receiptState + ", nodeId=" + nodeId + ", creationDate=" + creationDate + "]";
+                + receiptState + ", nodeId=" + nodeId + ", version=" + version + ", creationDate=" + creationDate
+                + "]";
     }
 
 }

@@ -38,7 +38,7 @@ import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
 
 /**
- * An in-memory {@link TraceStore} used by every higher-level TRACE test (tasks 13, 17, 18, 19),
+ * An in-memory {@link TraceStore} used by every higher-level TRACE test,
  * and exercised directly by {@code TraceStoreContractTest}. Backed by {@link ConcurrentHashMap}s
  * keyed by the {@link TraceKeys} outputs, so the same collision-freedom guarantees apply as to a
  * real backend.
@@ -78,6 +78,10 @@ public class InMemoryTraceStore implements TraceStore {
 
 	private volatile long insertRecordBarrierTimeoutMs;
 
+	private volatile CountDownLatch insertReceiptBarrier;
+
+	private volatile long insertReceiptBarrierTimeoutMs;
+
 	// -- test hooks ---------------------------------------------------------------------------
 
 	/** The next {@link #insertRecord(StoredTraceRecord)} call throws {@link TraceStorageException}. */
@@ -106,6 +110,17 @@ public class InMemoryTraceStore implements TraceStore {
 	public void setInsertRecordBarrier(CountDownLatch latch, long timeout, TimeUnit unit) {
 		this.insertRecordBarrier = latch;
 		this.insertRecordBarrierTimeoutMs = latch == null ? 0 : unit.toMillis(timeout);
+	}
+
+	/**
+	 * Installs a barrier that {@link #insertReceipt(TraceReceiptEntry)} counts down and then waits
+	 * on (bounded by {@code timeout}) immediately before it becomes visible in the store, so a test
+	 * can line up two concurrent receipt-sequence claims. Pass
+	 * {@code null} to remove the barrier.
+	 */
+	public void setInsertReceiptBarrier(CountDownLatch latch, long timeout, TimeUnit unit) {
+		this.insertReceiptBarrier = latch;
+		this.insertReceiptBarrierTimeoutMs = latch == null ? 0 : unit.toMillis(timeout);
 	}
 
 	/**
@@ -152,20 +167,49 @@ public class InMemoryTraceStore implements TraceStore {
 		}
 	}
 
+	private void awaitInsertReceiptBarrier() {
+		CountDownLatch latch = this.insertReceiptBarrier;
+		if (latch == null) {
+			return;
+		}
+		latch.countDown();
+		boolean reachedZero;
+		try {
+			reachedZero = latch.await(insertReceiptBarrierTimeoutMs, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new TraceStorageException("insert_receipt_barrier_interrupted", "Interrupted awaiting barrier", e);
+		}
+		if (!reachedZero) {
+			throw new TraceStorageException("insert_receipt_barrier_timeout",
+					"Timed out waiting for the insertReceipt barrier latch to reach zero");
+		}
+	}
+
 	@Override
-	public boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags) throws TraceStorageException {
+	public boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags, long expectedVersion)
+			throws TraceStorageException {
 		String key = TraceKeys.recordKey(id);
 		StoredTraceRecord[] holder = new StoredTraceRecord[1];
+		boolean[] versionConflict = new boolean[1];
 		recordsByKey.computeIfPresent(key, (k, existing) -> {
+			if (existing.getVersion() != expectedVersion) {
+				versionConflict[0] = true;
+				return existing;
+			}
 			IngestionFlags updated = existing.getFlags();
 			updated.setCoverageGap(flags.isCoverageGap());
 			updated.setChainLinkFailure(flags.isChainLinkFailure());
 			updated.setEquivocation(flags.isEquivocation());
-			// jansTraceLate is fixed at ingestion (design §10, T-1); never overwritten here.
-			StoredTraceRecord replacement = existing.withFlags(updated);
+			// jansTraceLate is fixed at ingestion (design §10); never overwritten here.
+			StoredTraceRecord replacement = existing.withFlags(updated, existing.getVersion() + 1);
 			holder[0] = replacement;
 			return replacement;
 		});
+		if (versionConflict[0]) {
+			throw new TraceStorageException(VERSION_CONFLICT_REASON,
+					"Version mismatch updating record flags for " + key);
+		}
 		return holder[0] != null;
 	}
 
@@ -209,16 +253,6 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
-	public List<StoredTraceRecord> findRecordsByCapability(String domainId, String capabilityId) {
-		String targetKey = TraceKeys.capabilityKey(domainId, capabilityId);
-		return recordsByKey.values().stream()
-				.filter(r -> r.getIdentity().getDomainId().equals(domainId) && r.getCapabilityIds().stream()
-						.anyMatch(cap -> TraceKeys.capabilityKey(domainId, cap).equals(targetKey)))
-				.sorted(Comparator.comparingLong(r -> r.getReceipt().getReceiptSequence())).map(StoredTraceRecord::copy)
-				.collect(Collectors.toList());
-	}
-
-	@Override
 	public List<StoredTraceRecord> findRecordsByToken(String domainId, TokenRef token) {
 		String targetKey = TraceKeys.tokenKey(domainId, token);
 		return recordsByKey.values().stream()
@@ -240,6 +274,8 @@ public class InMemoryTraceStore implements TraceStore {
 		if (failNextInsertReceipt.getAndSet(false)) {
 			throw new TraceStorageException("test_fail_next_insert_receipt", "Forced test failure");
 		}
+		awaitInsertReceiptBarrier();
+
 		String key = TraceKeys.receiptKey(row.getDomainId(), row.getReceiptSeq());
 		row.setId(key);
 		TraceReceiptEntry existing = receiptsByKey.putIfAbsent(key, copyOf(row));
@@ -385,6 +421,7 @@ public class InMemoryTraceStore implements TraceStore {
 		copy.setProducerInstanceId(source.getProducerInstanceId());
 		copy.setProducerChainId(source.getProducerChainId());
 		copy.setRegisteredBy(source.getRegisteredBy());
+		copy.setGenesisKind(source.getGenesisKind());
 		copy.setCreationDate(source.getCreationDate());
 		return copy;
 	}
@@ -398,6 +435,8 @@ public class InMemoryTraceStore implements TraceStore {
 		copy.setKid(source.getKid());
 		Map<String, String> jwk = source.getPublicKeyJwk();
 		copy.setPublicKeyJwk(jwk == null ? null : new LinkedHashMap<>(jwk));
+		List<String> kinds = source.getAuthorizedEventKinds();
+		copy.setAuthorizedEventKinds(kinds == null ? null : new ArrayList<>(kinds));
 		copy.setValidFrom(source.getValidFrom());
 		copy.setValidUntil(source.getValidUntil());
 		copy.setRevokedAt(source.getRevokedAt());

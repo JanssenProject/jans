@@ -77,8 +77,6 @@
     ],
     "grantTypesSupported":[
         "authorization_code",
-        "implicit",
-        "password",
         "client_credentials",
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
@@ -443,6 +441,7 @@
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
     "legacyIdTokenClaims": false,
+    "strictTokenRedirectUriValidation": true,
     "customHeadersWithAuthorizationResponse": true,
     "updateUserLastLogonTime": true,
     "updateClientAccessTime":true,

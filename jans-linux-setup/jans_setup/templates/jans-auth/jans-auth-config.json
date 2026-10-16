@@ -82,8 +82,6 @@
     ],
     "grantTypesSupported":[
         "authorization_code",
-        "implicit",
-        "password",
         "client_credentials",
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",

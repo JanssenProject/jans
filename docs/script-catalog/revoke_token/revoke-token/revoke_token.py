@@ -6,7 +6,6 @@
 #
 
 from org.gluu.model.custom.script.type.revoke import RevokeTokenType
-from java.lang import String
 
 class RevokeToken(RevokeTokenType):
     def __init__(self, currentTimeMillis):

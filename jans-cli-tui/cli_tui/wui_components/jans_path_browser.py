@@ -221,6 +221,7 @@ def jans_file_browser_dialog(
         elif BrowseType.directory:
             call_ok_handler(dialog)
 
+    title = ''
     if browse_type == BrowseType.directory:
         title = _("Select Directory")
     elif browse_type == BrowseType.file:

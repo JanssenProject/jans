@@ -1,5 +1,5 @@
 """
-Copyright (c) 2025, Gluu, Inc. 
+Copyright (c) 2025, Gluu, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@ limitations under the License.
 """
 
 from flask_smorest import Api, Blueprint
-from flask_cors import CORS 
+from flask_cors import CORS
 from main.base.cedarling.cedarling import CedarlingInstance
+
 
 class BlueprintApi(Blueprint):
     def __init__(self, *args, **kwargs):
@@ -27,6 +28,7 @@ class BlueprintApi(Blueprint):
         if data is not None:
             return data
         return None
+
 
 api = Api()
 cors = CORS(expose_headers="X-Pagination")

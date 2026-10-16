@@ -9,6 +9,7 @@ package io.jans.as.server.authorize.ws.rs;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
@@ -268,6 +269,10 @@ public class DeviceAuthorizationAction implements Serializable {
             if (StringUtils.isNotBlank(acr)) {
                 authRequest.addResponseParameter(ACR_VALUES, acr);
             }
+
+            CodeVerifier codeVerifier = new CodeVerifier(CodeVerifier.CodeChallengeMethod.S256);
+            authRequest.addResponseParameter(CODE_CHALLENGE, codeVerifier.getCodeChallenge());
+            authRequest.addResponseParameter(CODE_CHALLENGE_METHOD, codeVerifier.getTransformationType().getPkceString());
 
             final String redirectTo = authRequest.toString();
             log.debug("Redirecting to: {}", redirectTo);

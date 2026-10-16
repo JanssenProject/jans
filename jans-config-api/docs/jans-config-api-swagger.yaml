@@ -15694,6 +15694,12 @@ components:
           type: string
         selected:
           type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
@@ -15701,12 +15707,6 @@ components:
         userCanView:
           type: boolean
         userCanEdit:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -16364,6 +16364,8 @@ components:
           type: array
           items:
             type: string
+        strictTokenRedirectUriValidation:
+          type: boolean
         legacyIdTokenClaims:
           type: boolean
         customHeadersWithAuthorizationResponse:
@@ -16973,6 +16975,10 @@ components:
           type: array
           items:
             type: string
+        jwks:
+          type: string
+        jwksUri:
+          type: string
     PersistenceConfiguration:
       type: object
       properties:
@@ -17935,7 +17941,8 @@ components:
           description: Authorization token to access URI
         policyStoreUri:
           type: string
-          description: URI to policy store. Policy store can be either json/zip
+          description: "URI to policy store. Policy store can be json, zip or a .cjar\
+            \ archive (served by Lock under its policy_store.id)"
       description: List of Policy Sources
     SmtpConfiguration:
       type: object
@@ -18637,6 +18644,8 @@ components:
         statusListIndex:
           type: integer
           format: int32
+        redirectUri:
+          type: string
     TokenEntity:
       type: object
       properties:

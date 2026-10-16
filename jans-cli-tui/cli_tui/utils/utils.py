@@ -1,5 +1,4 @@
 import re
-import sys
 import datetime
 
 from types import SimpleNamespace
@@ -7,7 +6,6 @@ from typing import Optional, List
 
 import prompt_toolkit
 
-from cli_style import style
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_spinner import Spinner
 from wui_components.jans_vetrical_nav import JansVerticalNav
@@ -26,7 +24,7 @@ class DialogUtils:
             me = item.me
             key_ = me.window.jans_name
             if key_.startswith('__') and key_.endswith('__'):
-                return
+                return None
             if isinstance(me, prompt_toolkit.widgets.base.TextArea):
                 value_ = me.text
             elif isinstance(me, prompt_toolkit.widgets.base.Checkbox):
@@ -47,8 +45,9 @@ class DialogUtils:
             elif isinstance(me, prompt_toolkit.layout.containers.VSplit):
                 for wid in item.children:
                     self.get_item_data(wid)
+                return None
             else:
-                return
+                return None
 
             if getattr(me.window, 'text_type', None) == 'integer':
                 if value_:
@@ -61,6 +60,7 @@ class DialogUtils:
                     value_ = value_.split('\n')
 
             return {'key':key_, 'value':value_}
+        return None
 
 
     def make_data_from_dialog(
@@ -195,7 +195,7 @@ class DialogUtils:
 
 def fromisoformat(dt_str=None):
     if not dt_str:
-        return
+        return None
     dt, _, us = dt_str.partition(".")
     dt = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S")
     if us:

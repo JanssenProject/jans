@@ -73,12 +73,8 @@ def test_load_policy_store_ok():
 def test_policy_store_source_wrong_type():
     # map fixture to variable with shorter name for readability
 
-    try:
+    with pytest.raises(ValueError):
         load_bootstrap_config("invalid_config.abc")
-    except ValueError:
-        pass
-    else:
-        assert False, "ValueError was not raised when a policy store has an unsupported file type"
 
 
 def test_trusted_issuer_loading_info_defaults():
@@ -97,6 +93,13 @@ def test_trusted_issuer_loading_info_defaults():
     assert len(loaded_ids) == loaded
     for issuer_id in loaded_ids:
         assert instance.is_trusted_issuer_loaded_by_name(issuer_id) is True
+
+
+def test_policy_store_id_legacy():
+    policy_store_location = join(TEST_FILES_PATH, "policy-store_ok.yaml")
+    config = load_bootstrap_config(policy_store_location)
+    instance = Cedarling(config)
+    assert instance.policy_store_id() == "a1bf93115de86de760ee0bea1d529b521489e5a11747"
 
 
 def test_legacy_json_policy_store_rejected():

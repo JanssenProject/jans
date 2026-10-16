@@ -4,11 +4,9 @@
 # Author: Yuriy Movchan
 #
 
-from io.jans.service.cdi.util import CdiUtil
 from io.jans.model.custom.script.type.persistence import PersistenceType
 from io.jans.orm.util import StringHelper
 from io.jans.orm.operation.auth import PasswordEncryptionHelper
-from io.jans.orm.operation.auth import PasswordEncryptionMethod
 from org.bouncycastle.crypto.generators import Argon2BytesGenerator
 from org.bouncycastle.crypto.params import Argon2Parameters
 
@@ -16,8 +14,6 @@ from java.util import Base64
 from java.security import SecureRandom
 
 import jarray
-import base64
-import java
 
 class PersistenceExtension(PersistenceType):
 

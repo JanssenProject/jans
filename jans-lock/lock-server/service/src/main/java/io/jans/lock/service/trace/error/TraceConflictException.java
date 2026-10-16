@@ -10,7 +10,7 @@ import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.entity.TraceRecordEntry;
 
 /**
- * Thrown when an identity that must be unique already exists (design decision D-8 step 5) or a
+ * Thrown when an identity that must be unique already exists or a
  * bare identifier resolves to more than one candidate in a domain (design §14). Maps to one of two
  * {@link TraceErrorResponseType}s:
  * <ul>
