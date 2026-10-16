@@ -13,13 +13,18 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.jans.lock.model.config.AppConfiguration;
 
 import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.lock.trace.crypto.TraceCryptoException;
@@ -37,6 +42,7 @@ import jakarta.enterprise.inject.Instance;
 class TraceCryptoProviderFactoryTest {
 
 	private static final TraceCryptoImpl.Literal JAVA = new TraceCryptoImpl.Literal(TraceCryptoProviderType.JAVA);
+	private static final TraceCryptoImpl.Literal NATIVE = new TraceCryptoImpl.Literal(TraceCryptoProviderType.NATIVE);
 
 	@Test
 	void testSelect_javaImplementationPresent_returnsIt() {
@@ -84,10 +90,52 @@ class TraceCryptoProviderFactoryTest {
 	}
 
 	@Test
-	void testProducer_selectsJava() {
+	void testProducer_defaultConfiguration_selectsJava() {
 		TraceCryptoProvider java = TraceTestCrypto.javaProvider();
 
 		assertSame(java, factory(instance(false, false, java)).traceCryptoProvider());
+	}
+
+	@Test
+	void testConfiguredType_unknownValue_javaAndWarn() {
+		Logger log = mock(Logger.class);
+		TraceCryptoProviderFactory factory = factory(instance(false, false, null), "bogus", log);
+
+		assertEquals(TraceCryptoProviderType.JAVA, factory.configuredType());
+
+		verify(log).warn("Unknown traceConfiguration.cryptoProvider '{}', using JAVA", "bogus");
+	}
+
+	@Test
+	void testConfiguredType_lowerCasePadded_native() {
+		Logger log = mock(Logger.class);
+		TraceCryptoProviderFactory factory = factory(instance(false, false, null), "  native ", log);
+
+		assertEquals(TraceCryptoProviderType.NATIVE, factory.configuredType());
+
+		verify(log, never()).warn(any(String.class), any(Object.class));
+	}
+
+	@Test
+	void testConfiguredType_blank_javaWithoutWarn() {
+		Logger log = mock(Logger.class);
+		TraceCryptoProviderFactory factory = factory(instance(false, false, null), " ", log);
+
+		assertEquals(TraceCryptoProviderType.JAVA, factory.configuredType());
+
+		verify(log, never()).warn(any(String.class), any(Object.class));
+	}
+
+	@Test
+	void testProducer_nativeConfiguredButMissing_failsClosedWithoutFallback() {
+		Logger log = mock(Logger.class);
+		TraceCryptoProviderFactory factory = factory(instance(true, false, null), "NATIVE", log);
+
+		TraceCryptoProvider result = factory.traceCryptoProvider();
+
+		assertInstanceOf(UnavailableTraceCryptoProvider.class, result);
+		assertEquals(TraceCryptoProviderType.NATIVE, result.type());
+		assertFalse(result.isAvailable());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -97,6 +145,7 @@ class TraceCryptoProviderFactoryTest {
 		Instance<TraceCryptoProvider> selected = mock(Instance.class);
 		when(all.select(any(Annotation[].class))).thenReturn(selected);
 		when(all.select(JAVA)).thenReturn(selected);
+		when(all.select(NATIVE)).thenReturn(selected);
 		when(selected.isUnsatisfied()).thenReturn(unsatisfied);
 		when(selected.isAmbiguous()).thenReturn(ambiguous);
 		when(selected.get()).thenReturn(provider);
@@ -104,9 +153,19 @@ class TraceCryptoProviderFactoryTest {
 	}
 
 	private static TraceCryptoProviderFactory factory(Instance<TraceCryptoProvider> providers) {
+		return factory(providers, null, LoggerFactory.getLogger(TraceCryptoProviderFactory.class));
+	}
+
+	private static TraceCryptoProviderFactory factory(Instance<TraceCryptoProvider> providers, String cryptoProvider,
+			Logger log) {
+		AppConfiguration appConfiguration = new AppConfiguration();
+		if (cryptoProvider != null) {
+			appConfiguration.getTraceConfiguration().setCryptoProvider(cryptoProvider);
+		}
 		TraceCryptoProviderFactory factory = new TraceCryptoProviderFactory();
 		setField(factory, "providers", providers);
-		setField(factory, "log", LoggerFactory.getLogger(TraceCryptoProviderFactory.class));
+		setField(factory, "log", log);
+		setField(factory, "appConfiguration", appConfiguration);
 		return factory;
 	}
 

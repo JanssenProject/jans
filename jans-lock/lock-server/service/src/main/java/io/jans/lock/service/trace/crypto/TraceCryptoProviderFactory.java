@@ -41,10 +41,20 @@ public class TraceCryptoProviderFactory {
 	@Produces
 	@ApplicationScoped
 	public TraceCryptoProvider traceCryptoProvider() {
-		TraceCryptoProvider provider = select(TraceCryptoProviderType.JAVA);
+		TraceCryptoProvider provider = select(configuredType());
 		log.info("TRACE crypto provider: type={} available={} detail={}", provider.type(), provider.isAvailable(),
 				provider.describe());
 		return provider;
+	}
+
+	TraceCryptoProviderType configuredType() {
+		String raw = appConfiguration.getTraceConfiguration().getCryptoProvider();
+		TraceCryptoProviderType type = TraceCryptoProviderType.fromString(raw);
+		if (type == null) {
+			log.warn("Unknown traceConfiguration.cryptoProvider '{}', using JAVA", raw);
+			return TraceCryptoProviderType.JAVA;
+		}
+		return type;
 	}
 
 	TraceCryptoProvider select(TraceCryptoProviderType type) {
