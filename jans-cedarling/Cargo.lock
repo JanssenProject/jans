@@ -763,6 +763,8 @@ dependencies = [
  "serde",
  "serde-saphyr",
  "serde_json",
+ "sha2 0.11.0",
+ "sigstore-verifier",
  "smol_str",
  "stats_alloc",
  "strum",

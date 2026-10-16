@@ -46,6 +46,7 @@ use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
 use super::authz_builder::{BuildAuthzError, build_authz};
 
 use super::policy_store::{PolicyStoreLoadError, ZIP_MAGIC, parse_cjar_bytes};
+use super::policy_store_signature::{ArchiveVerifier, VerifiedArchive, check_if_enabled};
 
 /// Upper bound on exponential backoff between failed refresh attempts.
 const REFRESH_FAILURE_BACKOFF_MAX_SECS: u64 = 600;
@@ -71,6 +72,8 @@ pub(crate) enum RefreshOutcome {
     RebuildError = 6,
     /// Response received but body read failed (TCP drop, decode error, etc.).
     DecodeError = 7,
+    /// Body fetched but its Sigstore signature check failed.
+    VerificationError = 8,
 }
 
 impl RefreshOutcome {
@@ -409,14 +412,20 @@ impl RefreshSource {
         }
     }
 
+    /// Parses fetched bytes, checking the archive signature first when `verifier` is set.
     async fn parse(
         &self,
         bytes: Vec<u8>,
+        http_client: &HttpClient,
+        verifier: Option<&ArchiveVerifier>,
         strict_schema_validation: bool,
         limits: ArchiveLimits,
-    ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
+    ) -> Result<(ParsedPolicyStore, Option<VerifiedArchive>), PolicyStoreLoadError> {
         if bytes.starts_with(&ZIP_MAGIC) {
-            return parse_cjar_bytes(bytes, strict_schema_validation, limits).await;
+            let signed_by =
+                check_if_enabled(verifier, http_client, Some(self.url()), &bytes).await?;
+            let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
+            return Ok((parsed, signed_by));
         }
         if crate::common::policy_store::is_json_bytes(&bytes) {
             return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
@@ -491,6 +500,8 @@ pub(crate) struct WorkerContext {
     /// Forwarded from `BootstrapConfig.policy_store_config` so a refreshed
     /// `.cjar` is held to the same size limits as the bootstrap load.
     pub(crate) archive_limits: ArchiveLimits,
+    /// Checks each refreshed archive's signature before it is parsed; `None` when disabled.
+    pub(crate) verifier: Option<ArchiveVerifier>,
 }
 
 /// Spawn the background refresh worker. Returns a [`PolicyStoreRefreshHandle`]
@@ -709,24 +720,29 @@ async fn parse_swap_and_record(
 ) -> RefreshOutcome {
     let url = ctx.source.url();
     let start = Utc::now();
-    let parsed = match ctx
+    let (parsed, signed_by) = match ctx
         .source
-        .parse(bytes, ctx.strict_schema_validation, ctx.archive_limits)
+        .parse(
+            bytes,
+            &ctx.http_client,
+            ctx.verifier.as_ref(),
+            ctx.strict_schema_validation,
+            ctx.archive_limits,
+        )
         .await
     {
         Ok(p) => p,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
+            let (outcome, kind) = classify_parse_error(&e);
             ctx.log.log_any(
                 LogEntry::new(BaseLogEntry::new_system_opt_request_id(
                     LogLevel::ERROR,
                     None,
                 ))
-                .set_message(format!(
-                    "policy store refresh: parse failure for {url}: {e}"
-                )),
+                .set_message(format!("policy store refresh: {kind} for {url}: {e}")),
             );
-            return RefreshOutcome::ParseError;
+            return outcome;
         },
     };
 
@@ -783,12 +799,25 @@ async fn parse_swap_and_record(
             LogLevel::INFO,
             None,
         ))
-        .set_message(format!(
-            "policy store refresh: swapped new store from {url} in {elapsed} ms"
-        )),
+        .set_message(match signed_by {
+            Some(signed_by) => format!(
+                "policy store refresh: swapped new store from {url} in {elapsed} ms, signature verified: {signed_by}"
+            ),
+            None => format!("policy store refresh: swapped new store from {url} in {elapsed} ms"),
+        }),
     );
 
     RefreshOutcome::Success
+}
+
+/// A failed signature check keeps its own outcome so it is not mistaken for a broken store.
+fn classify_parse_error(e: &PolicyStoreLoadError) -> (RefreshOutcome, &'static str) {
+    match e {
+        PolicyStoreLoadError::Signature(_) => {
+            (RefreshOutcome::VerificationError, "signature check failure")
+        },
+        _ => (RefreshOutcome::ParseError, "parse failure"),
+    }
 }
 
 fn fetch_error(
@@ -1879,6 +1908,145 @@ mod tests {
             outcome,
             RefreshOutcome::HttpError,
             "HttpStatusError variant must surface as HttpError, got {outcome:?}",
+        );
+    }
+}
+
+#[cfg(test)]
+mod signature_tests {
+    use std::time::Duration;
+
+    use mockito::Server;
+    use sigstore_verifier::SigstoreBlobVerifier;
+    use sigstore_verifier::testing::TestSigner;
+
+    use super::*;
+    use crate::bootstrap_config::PolicyStoreSignature;
+    use crate::common::policy_store::test_utils::fixtures;
+    use crate::http::HttpClientConfig;
+    use crate::init::policy_store_signature::SignatureError;
+
+    fn http_client() -> HttpClient {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(1),
+            request_timeout: Duration::from_secs(2),
+            max_response_size_bytes: None,
+        })
+        .expect("http client")
+    }
+
+    fn verifier(signer: &TestSigner) -> ArchiveVerifier {
+        let signature = PolicyStoreSignature::Enforce {
+            cert_identity: TestSigner::IDENTITY.to_string(),
+            cert_oidc_issuer: TestSigner::ISSUER.to_string(),
+            bundle_uri: None,
+        };
+        let trust = SigstoreBlobVerifier::new(&signer.trust_root()).expect("test trust root");
+        ArchiveVerifier::with_verifier(&signature, trust).expect("enforce builds a verifier")
+    }
+
+    /// Parses `archive` as a refresh of `/store.cjar`, with `bundle` served next to it.
+    async fn refresh(
+        archive: Vec<u8>,
+        bundle: Option<Vec<u8>>,
+        verifier: Option<&ArchiveVerifier>,
+    ) -> Result<(ParsedPolicyStore, Option<VerifiedArchive>), PolicyStoreLoadError> {
+        let mut server = Server::new_async().await;
+        let bundle_mock = server.mock("GET", "/store.cjar.sigstore.json");
+        match bundle {
+            Some(bundle) => bundle_mock.with_body(bundle),
+            None => bundle_mock.with_status(404),
+        }
+        .create_async()
+        .await;
+        let source = RefreshSource::CjarUrl {
+            url: format!("{}/store.cjar", server.url()),
+        };
+        source
+            .parse(
+                archive,
+                &http_client(),
+                verifier,
+                false,
+                ArchiveLimits::default(),
+            )
+            .await
+    }
+
+    fn archive() -> Vec<u8> {
+        fixtures::minimal_valid()
+            .build_archive()
+            .expect("test archive builds")
+    }
+
+    #[tokio::test]
+    async fn signed_refresh_parses() {
+        let signer = TestSigner::new();
+        let archive = archive();
+        let bundle = signer.sign(&archive);
+        let (_, signed_by) = refresh(archive, Some(bundle), Some(&verifier(&signer)))
+            .await
+            .expect("a correctly signed refresh must parse");
+        assert_eq!(
+            signed_by.map(|v| v.identity).as_deref(),
+            Some(TestSigner::IDENTITY),
+            "a verified refresh reports its signer for logging"
+        );
+    }
+
+    #[tokio::test]
+    async fn modified_or_unsigned_refresh_is_rejected_as_verification_error() {
+        let signer = TestSigner::new();
+        let archive = archive();
+        let mut tampered = archive.clone();
+        let last = tampered.len() - 1;
+        tampered[last] ^= 1;
+
+        let modified = refresh(
+            tampered,
+            Some(signer.sign(&archive)),
+            Some(&verifier(&signer)),
+        )
+        .await
+        .expect_err("a refresh changed after signing must not parse");
+        let unsigned = refresh(archive, None, Some(&verifier(&signer)))
+            .await
+            .expect_err("a refresh without a bundle must not parse");
+
+        for err in [modified, unsigned] {
+            assert!(
+                matches!(err, PolicyStoreLoadError::Signature(_)),
+                "expected a signature error, got {err:?}"
+            );
+            assert_eq!(
+                classify_parse_error(&err).0,
+                RefreshOutcome::VerificationError,
+                "signature failures get their own refresh outcome"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn refresh_without_verifier_ignores_bundle() {
+        refresh(archive(), None, None)
+            .await
+            .expect("with signature checks off a refresh parses without a bundle");
+    }
+
+    #[test]
+    fn other_parse_failures_stay_parse_errors() {
+        let err = PolicyStoreLoadError::Archive("broken".to_string());
+        assert_eq!(
+            classify_parse_error(&err).0,
+            RefreshOutcome::ParseError,
+            "a broken archive is a parse error"
+        );
+        let err = PolicyStoreLoadError::Signature(SignatureError::NoBundleLocation);
+        assert_eq!(
+            classify_parse_error(&err).0,
+            RefreshOutcome::VerificationError,
+            "any signature error is a verification error"
         );
     }
 }

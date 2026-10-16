@@ -171,6 +171,15 @@ instance = Cedarling(bootstrap_config)
 bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
 instance = Cedarling(bootstrap_config)
 
+# Verify the .cjar Sigstore bundle before loading it (any .cjar source).
+# The bundle defaults to the archive location plus ".sigstore.json".
+# In your bootstrap-config.yaml:
+# CEDARLING_POLICY_STORE_SIGSTORE_MODE: "enforce"
+# CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY: "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com"
+# CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER: "https://accounts.google.com"
+bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
+instance = Cedarling(bootstrap_config)
+
 # Using environment variables instead of a file
 import os
 os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.cjar"
