@@ -8,7 +8,8 @@ use cedarling::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest,
     BatchAuthorizeResponse as CedarBatchAuthorizeResponse, BatchAuthorizeUnsignedRequest,
     BatchItemError as CedarBatchItemError, BootstrapConfig, BootstrapConfigRaw, DataApi,
-    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage,
+    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats,
+    DropReason as CedarDropReason, DroppedToken as CedarDroppedToken, LogStorage,
     MetricsSnapshot as CedarMetricsSnapshot, PolicyId, RequestUnsigned, TrustedIssuerLoadingInfo,
 };
 use serde::ser::{Serialize, SerializeStruct, Serializer};
@@ -47,6 +48,13 @@ pub struct MultiIssuerAuthorizeResult {
     /// Request ID of the authorization request
     #[wasm_bindgen(getter_with_clone)]
     pub request_id: String,
+
+    /// Tokens the caller supplied that were not used in this decision.
+    ///
+    /// Read it from JS via [`Self::dropped_tokens`] or `jsonString`. Omitted
+    /// from the JSON form when empty.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    dropped_tokens: Vec<CedarDroppedToken>,
 }
 
 #[wasm_bindgen]
@@ -55,6 +63,94 @@ impl MultiIssuerAuthorizeResult {
     #[wasm_bindgen(js_name = jsonString)]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
+    }
+
+    /// Tokens dropped from this decision (empty when every token was used).
+    #[wasm_bindgen(js_name = droppedTokens)]
+    pub fn dropped_tokens(&self) -> Vec<DroppedToken> {
+        self.dropped_tokens
+            .iter()
+            .cloned()
+            .map(DroppedToken::from)
+            .collect()
+    }
+}
+
+/// A token the caller supplied that multi-issuer authorization did not use,
+/// identified by its input `mapping` and zero-based `index`.
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct DroppedToken {
+    inner: CedarDroppedToken,
+}
+
+#[wasm_bindgen]
+impl DroppedToken {
+    /// Cedar entity-type mapping of the dropped input.
+    #[wasm_bindgen(getter)]
+    pub fn mapping(&self) -> String {
+        self.inner.mapping.clone()
+    }
+
+    /// Zero-based position of the token in the request's `tokens` array.
+    #[wasm_bindgen(getter)]
+    pub fn index(&self) -> usize {
+        self.inner.index
+    }
+
+    /// Why the token was dropped.
+    #[wasm_bindgen(getter)]
+    pub fn reason(&self) -> DropReason {
+        DropReason {
+            inner: self.inner.reason.clone(),
+        }
+    }
+
+    /// Same object as the core JSON form, so `JSON.stringify` works.
+    #[wasm_bindgen(js_name = toJSON)]
+    pub fn to_json(&self) -> Result<JsValue, Error> {
+        to_object_recursive(serde_wasm_bindgen::to_value(&self.inner)?)
+    }
+}
+
+impl From<CedarDroppedToken> for DroppedToken {
+    fn from(inner: CedarDroppedToken) -> Self {
+        Self { inner }
+    }
+}
+
+/// Why a token was dropped; same shape as the core JSON `reason` object.
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct DropReason {
+    inner: CedarDropReason,
+}
+
+#[wasm_bindgen]
+impl DropReason {
+    /// Stable snake-case slug, e.g. `jwt_validation_failed`.
+    #[wasm_bindgen(getter)]
+    pub fn kind(&self) -> String {
+        self.inner.slug().to_string()
+    }
+
+    /// Stable detail slug for `invalid_input` (`empty_mapping` /
+    /// `empty_payload`); `undefined` otherwise.
+    #[wasm_bindgen(getter)]
+    pub fn detail(&self) -> Option<String> {
+        self.inner.detail().map(str::to_string)
+    }
+
+    /// Claim-free human-readable message; non-empty for every reason.
+    #[wasm_bindgen(getter)]
+    pub fn message(&self) -> String {
+        self.inner.message()
+    }
+
+    /// Same object as the core JSON form, so `JSON.stringify` works.
+    #[wasm_bindgen(js_name = toJSON)]
+    pub fn to_json(&self) -> Result<JsValue, Error> {
+        to_object_recursive(serde_wasm_bindgen::to_value(&self.inner)?)
     }
 }
 
@@ -66,6 +162,7 @@ impl From<cedarling::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult 
             },
             decision: value.decision,
             request_id: value.request_id,
+            dropped_tokens: value.dropped_tokens,
         }
     }
 }

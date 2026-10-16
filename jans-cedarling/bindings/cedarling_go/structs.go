@@ -221,6 +221,26 @@ type MultiIssuerAuthorizeResult struct {
 	Response  CedarResponse `json:"response"`
 	Decision  bool          `json:"decision"`
 	RequestID string        `json:"request_id"`
+	// DroppedTokens lists the supplied tokens that were not used in this
+	// decision; empty when every token contributed.
+	DroppedTokens []DroppedToken `json:"dropped_tokens"`
+}
+
+// DroppedToken is a token the caller supplied that multi-issuer authorization
+// did not use, identified by its input Mapping and zero-based Index.
+type DroppedToken struct {
+	Mapping string     `json:"mapping"`
+	Index   uint64     `json:"index"`
+	Reason  DropReason `json:"reason"`
+}
+
+// DropReason explains why a token was dropped. Kind is the stable slug
+// ("jwt_validation_failed", ...); Detail is set only for "invalid_input"
+// ("empty_mapping" / "empty_payload"); Message is the non-empty claim-free text.
+type DropReason struct {
+	Kind    string  `json:"kind"`
+	Detail  *string `json:"detail,omitempty"`
+	Message string  `json:"message"`
 }
 
 // BatchItem is one {resource, action, context} triple in a batch
