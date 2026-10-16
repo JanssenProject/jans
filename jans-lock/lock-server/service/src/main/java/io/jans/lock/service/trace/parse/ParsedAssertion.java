@@ -12,9 +12,6 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.jans.lock.service.trace.TraceConstants;
-import io.jans.lock.trace.crypto.bc.CanonicalHashes;
-import io.jans.lock.trace.crypto.bc.JcsCanonicalizer;
 
 /**
  * The bounded-parsed form of an incoming TRACE assertion: the exact received bytes decoded as
@@ -58,10 +55,6 @@ public final class ParsedAssertion {
 	private String signature;
 
 	private JsonNode subject;
-
-	private byte[] signatureInput;
-
-	private String contentDigest;
 
 	ParsedAssertion(String rawText, ObjectNode root) {
 		this.rawText = rawText;
@@ -187,29 +180,6 @@ public final class ParsedAssertion {
 
 	void setSubject(JsonNode subject) {
 		this.subject = subject;
-	}
-
-	/**
-	 * @return {@code JCS(assertion without the top-level "signature" field)}, UTF-8 encoded;
-	 *         computed on first use and cached
-	 */
-	public byte[] signatureInput() {
-		if (signatureInput == null) {
-			signatureInput = JcsCanonicalizer
-					.canonicalizeToUtf8(JcsCanonicalizer.withoutField(root, TraceConstants.SIGNATURE_FIELD));
-		}
-		return signatureInput;
-	}
-
-	/**
-	 * @return {@code "sha256:" + lowercaseHex(SHA-256(UTF-8(JCS(full assertion))))};
-	 *         computed on first use and cached
-	 */
-	public String contentDigest() {
-		if (contentDigest == null) {
-			contentDigest = CanonicalHashes.sha256PrefixedOfJcs(root);
-		}
-		return contentDigest;
 	}
 
 	/**

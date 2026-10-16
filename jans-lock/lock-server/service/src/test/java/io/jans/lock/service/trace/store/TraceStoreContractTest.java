@@ -37,6 +37,7 @@ import io.jans.lock.service.trace.model.ReceiptHead;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.lock.service.trace.model.VerificationResult;
 
 /**
@@ -53,6 +54,8 @@ import io.jans.lock.service.trace.model.VerificationResult;
 public abstract class TraceStoreContractTest {
 
 	protected static final String DOMAIN = "default";
+
+	protected static final TraceKeys TRACE_KEYS = TraceTestCrypto.traceKeys();
 
 	protected TraceStore store;
 
@@ -96,7 +99,7 @@ public abstract class TraceStoreContractTest {
 		entity.setReceivedAtMs(receivedAtMs);
 		entity.setProducerId(producerId);
 		entity.setRecordId(recordId);
-		entity.setRecordKey(TraceKeys.recordKey(new RecordIdentity(DOMAIN, producerId, recordId)));
+		entity.setRecordKey(TRACE_KEYS.recordKey(new RecordIdentity(DOMAIN, producerId, recordId)));
 		entity.setContentDigest("sha256:" + String.format("%064d", seq));
 		entity.setPrevReceiptHash(TraceConstants.ZERO_HASH);
 		entity.setReceiptHash("sha256:" + String.format("%064d", seq));

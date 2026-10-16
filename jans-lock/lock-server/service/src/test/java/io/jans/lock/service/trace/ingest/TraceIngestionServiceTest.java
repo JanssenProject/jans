@@ -45,9 +45,9 @@ import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.correlation.TraceCorrelationService;
-import io.jans.lock.trace.crypto.bc.Ed25519Capability;
+import io.jans.lock.service.trace.store.TraceKeys;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
 import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
-import io.jans.lock.trace.crypto.bc.Ed25519Verifier;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.error.TraceValidationException;
@@ -62,6 +62,7 @@ import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.registry.ProducerKeyRegistry;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.testkit.SignedAssertionFactory;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
 import io.jans.lock.service.trace.verify.TraceVerificationService;
 
@@ -121,10 +122,14 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		traceConfiguration = new TraceConfiguration();
 		when(appConfiguration.getTraceConfiguration()).thenReturn(traceConfiguration);
 
-		store = new InMemoryTraceStore();
+		TraceCryptoProvider cryptoProvider = TraceTestCrypto.javaProvider();
+		assertTrue(cryptoProvider.isAvailable(), "Ed25519 must be available for these tests");
+		TraceKeys traceKeys = TraceTestCrypto.traceKeys(cryptoProvider);
+		store = new InMemoryTraceStore(traceKeys);
 
 		TraceAssertionParser parser = new TraceAssertionParser();
 		setField(parser, "appConfiguration", appConfiguration);
+		setField(parser, "cryptoProvider", cryptoProvider);
 
 		CommonAssertionValidator commonValidator = new CommonAssertionValidator();
 		setField(commonValidator, "appConfiguration", appConfiguration);
@@ -132,33 +137,31 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		keyRegistry = new ProducerKeyRegistry();
 		setField(keyRegistry, "traceStore", store);
 		setField(keyRegistry, "log", LoggerFactory.getLogger(ProducerKeyRegistry.class));
+		setField(keyRegistry, "cryptoProvider", cryptoProvider);
 
 		chainRegistry = new ProducerChainRegistry();
 		setField(chainRegistry, "traceStore", store);
 
-		Ed25519Capability capability = new Ed25519Capability();
-		capability.probe();
-		assertTrue(capability.isAvailable(), "Ed25519 must be available for these tests");
-
 		TraceVerificationService verification = new TraceVerificationService();
 		setField(verification, "log", LoggerFactory.getLogger(TraceVerificationService.class));
-		setField(verification, "capability", capability);
+		setField(verification, "cryptoProvider", cryptoProvider);
 		setField(verification, "parser", parser);
 		setField(verification, "commonValidator", commonValidator);
 		setField(verification, "eventKindRegistry", new EventKindValidatorRegistry());
 		setField(verification, "keyRegistry", keyRegistry);
-		setField(verification, "verifier", new Ed25519Verifier());
 
 		TraceCorrelationService correlation = new TraceCorrelationService();
 		setField(correlation, "log", LoggerFactory.getLogger(TraceCorrelationService.class));
 		setField(correlation, "store", store);
 		setField(correlation, "chainRegistry", chainRegistry);
 		setField(correlation, "appConfiguration", appConfiguration);
+		setField(correlation, "traceKeys", traceKeys);
 
 		TraceReceiptChain receiptChain = new TraceReceiptChain();
 		setField(receiptChain, "log", LoggerFactory.getLogger(TraceReceiptChain.class));
 		setField(receiptChain, "store", store);
 		setField(receiptChain, "appConfiguration", appConfiguration);
+		setField(receiptChain, "cryptoProvider", cryptoProvider);
 
 		service = new TraceIngestionService();
 		setField(service, "log", LoggerFactory.getLogger(TraceIngestionService.class));
@@ -166,6 +169,7 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		setField(service, "correlation", correlation);
 		setField(service, "receiptChain", receiptChain);
 		setField(service, "store", store);
+		setField(service, "traceKeys", traceKeys);
 	}
 
 	@AfterEach
@@ -405,6 +409,7 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		setField(chain, "log", LoggerFactory.getLogger(TraceReceiptChain.class));
 		setField(chain, "store", store);
 		setField(chain, "appConfiguration", appConfiguration);
+		setField(chain, "cryptoProvider", TraceTestCrypto.javaProvider());
 		return chain;
 	}
 

@@ -137,10 +137,10 @@
 			<artifactId>jans-lock-trace-crypto-api</artifactId>
 		</dependency>
 
-		<!-- narrowed to test scope in task 03 -->
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-lock-trace-crypto-java</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>

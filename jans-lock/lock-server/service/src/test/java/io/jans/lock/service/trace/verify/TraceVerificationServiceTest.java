@@ -13,6 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +47,9 @@ import io.jans.lock.trace.crypto.bc.Ed25519Capability;
 import io.jans.lock.trace.crypto.bc.Ed25519PublicKeys;
 import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
 import io.jans.lock.trace.crypto.bc.Ed25519Verifier;
+import io.jans.lock.trace.crypto.bc.JavaTraceCryptoProvider;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
@@ -90,7 +96,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 
 	private CommonAssertionValidator commonValidator;
 
-	private Ed25519Capability capability;
+	private TraceCryptoProvider cryptoProvider;
 
 	private TraceVerificationService service;
 
@@ -109,6 +115,10 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 		parser = new TraceAssertionParser();
 		setField(parser, "appConfiguration", appConfiguration);
 
+		cryptoProvider = TraceTestCrypto.javaProvider();
+		assertTrue(cryptoProvider.isAvailable(), "Ed25519 must be available for these tests");
+		setField(parser, "cryptoProvider", cryptoProvider);
+
 		commonValidator = new CommonAssertionValidator();
 		setField(commonValidator, "appConfiguration", appConfiguration);
 
@@ -116,12 +126,9 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 		keyRegistry = new ProducerKeyRegistry();
 		setField(keyRegistry, "traceStore", store);
 		setField(keyRegistry, "log", LoggerFactory.getLogger(ProducerKeyRegistry.class));
+		setField(keyRegistry, "cryptoProvider", cryptoProvider);
 
-		capability = new Ed25519Capability();
-		capability.probe();
-		assertTrue(capability.isAvailable(), "Ed25519 must be available for these tests");
-
-		service = newService(capability, keyRegistry, new Ed25519Verifier(), parser);
+		service = newService(cryptoProvider, keyRegistry, parser);
 
 		keyPair = TraceTestKeys.generateKeyPair();
 		keyRegistry.register(DOMAIN, PRODUCER, KID, TraceTestKeys.toJwk(keyPair.getPublic()),
@@ -132,16 +139,15 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	 * Wires the private {@code @Inject} fields by reflection (the service carries no test-seam
 	 * setters), the same way {@code OrmTraceStores} and {@code EventKindValidatorsTest} do.
 	 */
-	private TraceVerificationService newService(Ed25519Capability ed25519Capability, ProducerKeyRegistry registry,
-			Ed25519Verifier verifier, TraceAssertionParser assertionParser) {
+	private TraceVerificationService newService(TraceCryptoProvider provider, ProducerKeyRegistry registry,
+			TraceAssertionParser assertionParser) {
 		TraceVerificationService result = new TraceVerificationService();
 		setField(result, "log", LoggerFactory.getLogger(TraceVerificationService.class));
-		setField(result, "capability", ed25519Capability);
+		setField(result, "cryptoProvider", provider);
 		setField(result, "parser", assertionParser);
 		setField(result, "commonValidator", commonValidator);
 		setField(result, "eventKindRegistry", new EventKindValidatorRegistry());
 		setField(result, "keyRegistry", registry);
-		setField(result, "verifier", verifier);
 		return result;
 	}
 
@@ -326,15 +332,16 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	@Test
 	void testVerify_ProducerNotAllowed_NoKeyLookupAndNoCrypto() {
 		ProducerKeyRegistry mockRegistry = mock(ProducerKeyRegistry.class);
-		Ed25519Verifier mockVerifier = mock(Ed25519Verifier.class);
-		TraceVerificationService guarded = newService(capability, mockRegistry, mockVerifier, parser);
+		TraceCryptoProvider spyProvider = spy(cryptoProvider);
+		TraceVerificationService guarded = newService(spyProvider, mockRegistry, parser);
 		String json = SignedAssertionFactory.authorizationDecision().sign(keyPair.getPrivate());
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
 				() -> guarded.verify(body(json), ctx("other-producer")));
 
 		assertEquals(TraceErrorResponseType.PRODUCER_NOT_ALLOWED, ex.getErrorId());
-		verifyNoInteractions(mockRegistry, mockVerifier);
+		verifyNoInteractions(mockRegistry);
+		verify(spyProvider, never()).verifyAndDigest(any(), any(), any());
 	}
 
 	@Test
@@ -353,7 +360,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	@Test
 	void testVerify_EventKindViolation_InvalidAssertionBeforeKeyLookup() {
 		ProducerKeyRegistry mockRegistry = mock(ProducerKeyRegistry.class);
-		TraceVerificationService guarded = newService(capability, mockRegistry, new Ed25519Verifier(), parser);
+		TraceVerificationService guarded = newService(cryptoProvider, mockRegistry, parser);
 		String json = SignedAssertionFactory.authorizationDecision().withoutField("trace", "policy", "bundle_hash")
 				.sign(keyPair.getPrivate());
 
@@ -377,8 +384,8 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	void testVerify_CapabilityUnavailable_CryptoUnavailableBeforeParsing() {
 		TraceAssertionParser mockParser = mock(TraceAssertionParser.class);
 		// A never-probed capability reports Ed25519 as unavailable.
-		TraceVerificationService guarded = newService(new Ed25519Capability(), keyRegistry, new Ed25519Verifier(),
-				mockParser);
+		TraceVerificationService guarded = newService(
+				new JavaTraceCryptoProvider(new Ed25519Capability(), new Ed25519Verifier()), keyRegistry, mockParser);
 		String json = SignedAssertionFactory.authorizationDecision().sign(keyPair.getPrivate());
 
 		TraceCryptoException ex = assertThrows(TraceCryptoException.class,
@@ -394,7 +401,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 		TraceValidationException original = new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST,
 				"body_too_large");
 		when(mockParser.parse(any(InputStream.class))).thenThrow(original);
-		TraceVerificationService guarded = newService(capability, keyRegistry, new Ed25519Verifier(), mockParser);
+		TraceVerificationService guarded = newService(cryptoProvider, keyRegistry, mockParser);
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
 				() -> guarded.verify(body("{}"), ctx("*")));

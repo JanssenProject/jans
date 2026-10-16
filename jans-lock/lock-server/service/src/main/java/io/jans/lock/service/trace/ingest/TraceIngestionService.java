@@ -68,6 +68,9 @@ public class TraceIngestionService {
 	@Inject
 	private TraceStore store;
 
+	@Inject
+	private TraceKeys traceKeys;
+
 	/**
 	 * @throws io.jans.lock.service.trace.error.TraceCryptoException     {@code crypto_unavailable}
 	 * @throws io.jans.lock.service.trace.error.TraceValidationException every verification,
@@ -90,7 +93,7 @@ public class TraceIngestionService {
 		CorrelationPlan plan = correlation.plan(verified, ctx);
 
 		String domainId = ctx.getEvidenceDomainId();
-		String recordKey = TraceKeys.recordKey(identity);
+		String recordKey = traceKeys.recordKey(identity);
 		ReceiptClaim claim = receiptChain.claim(domainId, verified.getProducer(), verified.getRecordId(), recordKey,
 				verified.getContentDigest(), ctx.getReceivedAtMs(), ctx.getNodeId());
 

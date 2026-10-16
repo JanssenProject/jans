@@ -67,6 +67,9 @@ public final class TraceConstants {
 	public static final Set<String> EVENT_KINDS = Collections.unmodifiableSet(new LinkedHashSet<>(
 			Arrays.asList(EVENT_KIND_AUTHORIZATION_DECISION, EVENT_KIND_CAPABILITY_INVOKED, EVENT_KIND_RUNTIME_EFFECT)));
 
+	/** Signature algorithm recorded in {@code verification.algorithm}. */
+	public static final String SIGNATURE_ALGORITHM = "Ed25519";
+
 	/** Name of the top-level signature field, excluded from the JCS signature input. */
 	public static final String SIGNATURE_FIELD = "signature";
 

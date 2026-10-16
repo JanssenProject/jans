@@ -35,6 +35,7 @@ import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.parse.CommonAssertionValidator;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 import io.jans.lock.service.trace.parse.TraceAssertionParser;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
 
 /**
@@ -64,6 +65,7 @@ class TraceNegativeSchemaTest extends BaseLockServiceTest {
 
 		parser = new TraceAssertionParser();
 		setField(parser, "appConfiguration", appConfiguration);
+		setField(parser, "cryptoProvider", TraceTestCrypto.javaProvider());
 
 		commonValidator = new CommonAssertionValidator();
 		setField(commonValidator, "appConfiguration", appConfiguration);

@@ -42,6 +42,7 @@ import io.jans.lock.service.trace.receipt.ChainVerificationReport.Entry;
 import io.jans.lock.service.trace.receipt.ChainVerificationReport.EntryStatus;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.lock.trace.crypto.bc.ReceiptHashes;
 
 /**
@@ -84,6 +85,7 @@ class TraceReceiptChainTest extends BaseLockServiceTest {
 		setField(chain, "log", LoggerFactory.getLogger(TraceReceiptChain.class));
 		setField(chain, "store", backingStore);
 		setField(chain, "appConfiguration", appConfiguration);
+		setField(chain, "cryptoProvider", TraceTestCrypto.javaProvider());
 		return chain;
 	}
 

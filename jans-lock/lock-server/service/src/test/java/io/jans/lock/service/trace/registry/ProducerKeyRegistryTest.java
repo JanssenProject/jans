@@ -28,6 +28,7 @@ import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
@@ -68,6 +69,7 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 		registry = new ProducerKeyRegistry();
 		setField(registry, "traceStore", store);
 		setField(registry, "log", LoggerFactory.getLogger(ProducerKeyRegistry.class));
+		setField(registry, "cryptoProvider", TraceTestCrypto.javaProvider());
 
 		KeyPair keyPair = TraceTestKeys.generateKeyPair();
 		jwk = TraceTestKeys.toJwk(keyPair.getPublic());
@@ -214,7 +216,8 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 		ProducerKeyRegistry.ResolvedKey resolved = registry.resolveForVerification(DOMAIN, PRODUCER, KID, 5000L);
 
 		assertEquals(KID, resolved.getKey().getKid());
-		assertTrue(resolved.getPublicKey() != null);
+		assertTrue(resolved.getVerificationKey() != null);
+		assertFalse(resolved.getVerificationKey().thumbprint().isEmpty());
 	}
 
 	@Test

@@ -71,7 +71,7 @@ import jakarta.ws.rs.core.Response;
  * {@link TraceTestHarness#setNow(long)} (default {@link TraceTestHarness#DEFAULT_NOW_MS}); no test
  * reads the system clock.
  */
-class TraceMvpAcceptanceTest {
+public class TraceMvpAcceptanceTest {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -105,9 +105,14 @@ class TraceMvpAcceptanceTest {
 
 	private TraceTestHarness harness;
 
+	/** Override to run the same suite against another {@code TraceCryptoProvider}. */
+	protected TraceTestHarness newHarness() {
+		return new TraceTestHarness();
+	}
+
 	@BeforeEach
 	void setUp() {
-		harness = new TraceTestHarness();
+		harness = newHarness();
 	}
 
 	// -- fixtures -----------------------------------------------------------------------------------

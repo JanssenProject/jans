@@ -54,7 +54,7 @@ import io.jans.lock.service.trace.testkit.TraceTestHarness;
  * shuffle the 48 forward positions across 4 independent producer chains and still assert an exact
  * head sequence.
  */
-class TraceChainIntegrityTest {
+public class TraceChainIntegrityTest {
 
 	private static final long SEED = 42L;
 
@@ -84,9 +84,14 @@ class TraceChainIntegrityTest {
 
 	private TraceTestHarness harness;
 
+	/** Override to run the same suite against another {@code TraceCryptoProvider}. */
+	protected TraceTestHarness newHarness() {
+		return new TraceTestHarness();
+	}
+
 	@BeforeEach
 	void setUp() {
-		harness = new TraceTestHarness();
+		harness = newHarness();
 	}
 
 	private static String contentDigestOf(String json) {
