@@ -220,4 +220,31 @@ public class Jackson {
         return JacksonUtils.newMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
+    public static Map<String, String> collectJsonNodeData(JsonNode root) {
+        LOG.error("Inside Jackson:collectJsonNodeData() = root:{}", root);
+        Map<String, String> result = new LinkedHashMap<>();
+        collectJsonNodeData("", root, result);
+        result.forEach((key, value) -> LOG.error("JsonNode key:{},  value:{}",key, value));
+        return result;
+    }
+
+    private static void collectJsonNodeData(String path, JsonNode node, Map<String, String> out) {
+        LOG.error("Inside Jackson:collectJsonNodeData() = path:{}, node:{}, out:{}", path, node, out);
+        if (node == null || node.isMissingNode()) {
+            return;
+        }
+        if (node.isObject()) {
+            for (Map.Entry<String, JsonNode> e : node.properties()) {
+                String child = path.isEmpty() ? e.getKey() : path + "." + e.getKey();
+                collectJsonNodeData(child, e.getValue(), out);
+            }
+        } else if (node.isArray()) {
+            for (int i = 0; i < node.size(); i++) {
+                collectJsonNodeData(path + "[" + i + "]", node.get(i), out);
+            }
+        } else {
+            out.put(path, node.asText());
+        }
+    }
+
 }

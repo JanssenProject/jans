@@ -47,7 +47,6 @@ class Introspection(IntrospectionType):
 
         # Put user_id into response
         responseAsJsonObject.accumulate("user_id", authorizationGrant.getUser().getUserId())
-		responseAsJsonObject.accumulate("user_id", authorizationGrant.getUser().getDn())
 
         # Put custom parameters into response
         sessionDn = authorizationGrant.getSessionDn();

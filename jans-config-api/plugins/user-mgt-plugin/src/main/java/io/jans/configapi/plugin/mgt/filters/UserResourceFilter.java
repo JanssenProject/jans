@@ -1,7 +1,11 @@
 package io.jans.configapi.plugin.mgt.filters;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.filter.BaseFilter;
 import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.util.*;
@@ -21,6 +25,7 @@ import jakarta.ws.rs.ext.Provider;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
@@ -68,11 +73,16 @@ public class UserResourceFilter extends BaseFilter {
                         escapeLog(info.getPath()), PATH, escapeLog(requestContext.getMethod()));
             }
 
+            log.error(" UserResource Filter ");
             if (info.getPath() == null || !info.getPath().contains(PATH)) {
                 log.info(" Exiting as not User Management Endpoint!");
                 return;
             }
 
+            String authorizationHeader = getAuthorizationHeader(requestContext);
+            String issuer = requestContext.getHeaderString(ApiConstants.ISSUER);
+            log.error("\n\n\n\n ********* token:{}, issuer:{} {}", authorizationHeader, issuer, "***********\n\n\n\n");
+            
             // Verify current UserRolePermission
             validateUserRolePermission(requestContext, resourceInfo, httpHeaders);
 
@@ -114,11 +124,13 @@ public class UserResourceFilter extends BaseFilter {
         log.info(
                 " UserResourceFilter - authUtil.isValidateUserInumInIntrospectionFlag():{}, !getExcludedClients().isEmpty():{}",
                 authUtil.isValidateUserInumInIntrospectionFlag(), !getExcludedClients().isEmpty());
+        
         // Fetch token introspectionResponse
         IntrospectionResponse introspectionResponse = getIntrospectionResponse(requestContext);
-        log.info(" UserResourceFilter - Setting data in requestContext ");
+        log.info(" UserResourceFilter - token introspection done- introspectionResponse:{} ", introspectionResponse);
 
         // Set Data in request context
+        log.info(" UserResourceFilter - Setting data in requestContext ");
         setDataInRequest(introspectionResponse, resourceScopesByType);
 
         log.info(" UserResourceFilter - isRolePermissionExemptClient(introspectionResponse):{}",
@@ -231,6 +243,8 @@ public class UserResourceFilter extends BaseFilter {
         if (servletRequest == null || introspectionResponse == null) {
             return;
         }
+        
+        printJsonNode(introspectionResponse.getAuthorizationDetails());
 
         String inum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
         String clientId = introspectionResponse.getClientId();
@@ -283,4 +297,10 @@ public class UserResourceFilter extends BaseFilter {
         return scopes;
 
     }
+    
+    private static void printJsonNode(JsonNode jsonNode)  {
+       Jackson.collectJsonNodeData(jsonNode);
+    }
+    
 }
+

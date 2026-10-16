@@ -29,21 +29,40 @@ class Introspection(IntrospectionType):
         return 11
 
     def modifyResponse(self, responseAsJsonObject, context):
+        print "inside config_api_introspection.py modifyResponse"
         token = context.getHttpRequest().getParameter("token")
+        print token
+
         if token is None:
             print "Introspection. There is no token in request"
             return False
 
-        authorizationGrant = context.getTokenGrant()
-        if authorizationGrant is None:
-            print "Introspection. Failed to load authorization grant by context"
-            return False
-
+        print "Get authorizationGrant"
+        authorizationGrant = context.getGrantOfIntrospectionToken()
+        print authorizationGrant
+        print authorizationGrant.getClass().getName()
         user = authorizationGrant.getUser()
-        if user is None:
+        if user is not None:
             print "Introspection. No user on grant (client credentials token?)"
-            return True
+            print user2.getClass().getDeclaredMethods()
+            print user.getUserId()
+            print user.getDn()
+           
+        authorizationGrant2 = context.getTokenGrant()
+        print authorizationGrant2
 
-        responseAsJsonObject.accumulate("user_id", user.getUserId())
-        responseAsJsonObject.accumulate("user_dn", user.getDn())
+        if authorizationGrant2 is not None:
+            print "Introspection. Failed to load authorization grant by context"
+
+        user2 = authorizationGrant.getUser()
+        print user2
+        print user2.getClass().getDeclaredMethods()
+        if user2 is not None:
+            print "Introspection. No user on grant (client credentials token?)"
+            print user2.getUserId()
+            print user2.getDn()
+
+
+        responseAsJsonObject.accumulate("user_id", user2.getUserId())
+        responseAsJsonObject.accumulate("user_dn", user2.getDn())
         return True
