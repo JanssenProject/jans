@@ -39,6 +39,7 @@ class Introspection(IntrospectionType):
             print "Introspection. There is no token in request"
             return False
 
+        print context.getGrantOfIntrospectionToken().getUserId()
         authorizationGrantList = CdiUtil.bean(AuthorizationGrantList)
         authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
         if authorizationGrant is None:
