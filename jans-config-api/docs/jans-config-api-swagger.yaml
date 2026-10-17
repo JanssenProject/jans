@@ -16453,6 +16453,8 @@ components:
           type: boolean
         removeRefreshTokensForClientOnLogout:
           type: boolean
+        allowStartupOnJwksUriFetchFailure:
+          type: boolean
         skipRefreshTokenDuringRefreshing:
           type: boolean
         refreshTokenExtendLifetimeOnRotation:
