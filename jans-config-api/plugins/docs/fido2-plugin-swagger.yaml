@@ -1812,19 +1812,6 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        period:
-          type: string
-        registrationAttempts:
-          type: integer
-          format: int64
         registrationSuccesses:
           type: integer
           format: int64
@@ -1865,6 +1852,19 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        period:
+          type: string
+        registrationAttempts:
+          type: integer
+          format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
