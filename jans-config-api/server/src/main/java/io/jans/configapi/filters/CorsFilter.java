@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-@WebFilter(filterName = "CorsFilter", asyncSupported = true, urlPatterns = { "*" })
+@WebFilter(filterName = "CorsFilter", asyncSupported = true, urlPatterns = { "/*" })
 public class CorsFilter implements Filter {
 
     @Inject
