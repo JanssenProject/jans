@@ -59,6 +59,10 @@ on:
         description: 'cedarling-java binding'
         type: boolean
         default: false
+      jans_trace_java:
+        description: 'jans-trace-java binding'
+        type: boolean
+        default: false
       lock_server:
         description: 'jans-lock/lock-server'
         type: boolean
@@ -95,7 +99,7 @@ env:
   # Authoritative build/deploy order, mirroring the Jenkins "Full rebuild" job.
   # NOTE: jans-shibboleth-idp is intentionally excluded until it is ready to publish.
   # NOTE: jans-keycloak / jans-keycloak-link were commented out in the jenkins job too.
-  DEFAULT_MODULES: 'jans-bom jans-orm jans-cedarling/bindings/cedarling-java jans-core agama jans-auth-server jans-lock/lock-server jans-fido2 jans-scim jans-link jans-config-api jans-casa'
+  DEFAULT_MODULES: 'jans-bom jans-orm jans-cedarling/bindings/cedarling-java jans-cedarling/bindings/jans-trace-java jans-core agama jans-auth-server jans-lock/lock-server jans-fido2 jans-scim jans-link jans-config-api jans-casa'
 
 jobs:
   # GitHub Packages Maven is immutable per-version: re-running a build whose
@@ -262,6 +266,7 @@ jobs:
           [[ "${{ inputs.jans_bom }}"       == "true" ]] && MODULES="$MODULES jans-bom"
           [[ "${{ inputs.jans_orm }}"       == "true" ]] && MODULES="$MODULES jans-orm"
           [[ "${{ inputs.jans_core }}"      == "true" || "${{ inputs.cedarling_java }}" == "true" || "${{ inputs.lock_server }}" == "true" ]] && MODULES="$MODULES jans-cedarling/bindings/cedarling-java"
+          [[ "${{ inputs.jans_trace_java }}" == "true" ]] && MODULES="$MODULES jans-cedarling/bindings/jans-trace-java"
           [[ "${{ inputs.jans_core }}"      == "true" ]] && MODULES="$MODULES jans-core"
           [[ "${{ inputs.agama }}"          == "true" ]] && MODULES="$MODULES agama"
           [[ "${{ inputs.auth_server }}"    == "true" ]] && MODULES="$MODULES jans-auth-server"
@@ -290,7 +295,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
 
     - name: Install Rust (for cedarling native)
-      if: contains(steps.mods.outputs.modules, 'cedarling-java')
+      if: contains(steps.mods.outputs.modules, 'cedarling-java') || contains(steps.mods.outputs.modules, 'jans-trace-java')
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
       with:
         toolchain: stable
@@ -313,6 +318,12 @@ jobs:
         gh release upload "${TAG}" \
           "libcedarling_uniffi-${NV}.so" "cedarling_uniffi-kotlin-${NV}.zip" \
           --repo "${{ github.repository }}" --clobber
+
+    # jans-trace-java compiles against the UniFFI Kotlin + native lib that `make` generates.
+    - name: Build jans-trace-java native lib + kotlin bindings
+      if: contains(steps.mods.outputs.modules, 'jans-trace-java')
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/jans-trace-java
+      run: make
 
     # For a versioned release the poms (fixed at 0.0.0-nightly) must be bumped
     # before deploy. Nightly publishes 0.0.0-nightly as-is.
@@ -371,6 +382,7 @@ jobs:
             -o -name "casa-config-${VERSION}.jar" \
             -o -name "agama-inbound-${VERSION}.jar" \
             -o -name "cedarling-java-${VERSION}.jar" \
+            -o -name "jans-trace-java-${VERSION}.jar" \
           \) -exec cp -v {} "$OUT/" \;
         echo "Collected:"; ls -la "$OUT"
         echo "dir=${OUT}" >> "$GITHUB_OUTPUT"

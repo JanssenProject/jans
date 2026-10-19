@@ -1087,6 +1087,8 @@ components:
             records for in the default evidence domain; empty means none
           items:
             type: string
+            description: Producer ids a client without an explicit binding may submit
+              records for in the default evidence domain; empty means none
         clientDomainBindings:
           type: array
           description: OAuth client to evidence-domain bindings
