@@ -19,10 +19,10 @@ import io.jans.orm.annotation.Version;
 import io.jans.orm.model.base.BaseEntry;
 
 /**
- * One accepted TRACE record (design §10, TRACE MVP design decision T-1). Every attribute is
+ * One accepted TRACE record (design §10). Every attribute is
  * immutable once persisted, except the three Lock-derived correlation flags
  * ({@link #getCoverageGap()}, {@link #getChainLinkFailure()}, {@link #getEquivocation()}), which
- * neighbor updates may set later (design decision D-9).
+ * neighbor updates may set later.
  *
  * @author Yuriy Movchan
  */
@@ -70,9 +70,6 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
 
     @AttributeName(name = "jansTracePrevRecordHash", ignoreDuringUpdate = true)
     private String prevRecordHash;
-
-    @AttributeName(name = "jansTraceCapKeys", ignoreDuringUpdate = true)
-    private List<String> capKeys;
 
     @AttributeName(name = "jansTraceTokenKeys", ignoreDuringUpdate = true)
     private List<String> tokenKeys;
@@ -228,14 +225,6 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
         this.prevRecordHash = prevRecordHash;
     }
 
-    public List<String> getCapKeys() {
-        return capKeys;
-    }
-
-    public void setCapKeys(List<String> capKeys) {
-        this.capKeys = capKeys;
-    }
-
     public List<String> getTokenKeys() {
         return tokenKeys;
     }
@@ -379,7 +368,7 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 && Objects.equals(execKey, that.execKey) && Objects.equals(execId, that.execId)
                 && Objects.equals(execAuthority, that.execAuthority) && Objects.equals(chainKey, that.chainKey)
                 && Objects.equals(chainPosKey, that.chainPosKey) && Objects.equals(seqNum, that.seqNum)
-                && Objects.equals(prevRecordHash, that.prevRecordHash) && Objects.equals(capKeys, that.capKeys)
+                && Objects.equals(prevRecordHash, that.prevRecordHash)
                 && Objects.equals(tokenKeys, that.tokenKeys) && Objects.equals(assertion, that.assertion)
                 && Objects.equals(contentDigest, that.contentDigest)
                 && Objects.equals(verification, that.verification) && Objects.equals(receiptSeq, that.receiptSeq)
@@ -395,7 +384,7 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id, domainId, producerId, recordId, eventKind, signedAt, execKey, execId, execAuthority,
-                chainKey, chainPosKey, seqNum, prevRecordHash, capKeys, tokenKeys, assertion, contentDigest,
+                chainKey, chainPosKey, seqNum, prevRecordHash, tokenKeys, assertion, contentDigest,
                 verification, receiptSeq, receivedAt, receivedAtMs, prevReceiptHash, receiptHash, coverageGap,
                 chainLinkFailure, equivocation, late, nodeId, version, creationDate);
     }
@@ -406,7 +395,7 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 + recordId + ", eventKind=" + eventKind + ", signedAt=" + signedAt + ", execKey=" + execKey
                 + ", execId=" + execId + ", execAuthority=" + execAuthority + ", chainKey=" + chainKey
                 + ", chainPosKey=" + chainPosKey + ", seqNum=" + seqNum + ", prevRecordHash=" + prevRecordHash
-                + ", capKeys=" + capKeys + ", tokenKeys=" + tokenKeys + ", contentDigest=" + contentDigest
+                 + ", tokenKeys=" + tokenKeys + ", contentDigest=" + contentDigest
                 + ", verification=" + verification + ", receiptSeq=" + receiptSeq + ", receivedAt=" + receivedAt
                 + ", receivedAtMs=" + receivedAtMs + ", prevReceiptHash=" + prevReceiptHash + ", receiptHash="
                 + receiptHash + ", coverageGap=" + coverageGap + ", chainLinkFailure=" + chainLinkFailure

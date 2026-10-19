@@ -18,7 +18,7 @@ import io.jans.lock.service.trace.model.StoredTraceRecord;
 
 /**
  * Pure predecessor/peer/successor/lateness logic for {@link TraceCorrelationService}, unit
- * testable without a {@code TraceStore} (design §8, §12, design decisions D-9, D-11). Every method
+ * testable without a {@code TraceStore} (design §8, §12). Every method
  * here takes already-fetched rows; none of them perform a lookup.
  *
  * @author Yuriy Movchan
@@ -55,7 +55,7 @@ public final class ProducerChainRules {
 	}
 
 	/**
-	 * Design decision D-9: every row already occupying this record's chain position, other than one
+	 * Every row already occupying this record's chain position, other than one
 	 * sharing this record's own identity, is an equivocation peer. (In practice no row here ever
 	 * shares the identity — idempotency is handled by the ingestion service before planning — but
 	 * the filter is kept so this method stays correct on its own.)
@@ -72,7 +72,7 @@ public final class ProducerChainRules {
 	}
 
 	/**
-	 * Design decision D-11: {@code signed_at} is producer time, used only for lateness, never for
+	 * {@code signed_at} is producer time, used only for lateness, never for
 	 * ordering. A {@code signed_at} in the future is never late (clock skew).
 	 */
 	public static boolean isLate(long receivedAtMs, long signedAtSeconds, int latenessThresholdSeconds) {

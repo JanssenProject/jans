@@ -119,6 +119,14 @@ def _transform_lock_dynamic_config(conf, manager):
             })
             should_update = True
 
+    for tconf_k, tconf_v in [
+        ("defaultAllowedProducerIds", []),
+        ("maxFutureSkewSeconds", 300),
+    ]:
+        if tconf_k not in conf["traceConfiguration"]:
+            conf["traceConfiguration"][tconf_k] = tconf_v
+            should_update = True
+
     # return modified config (if any) and update flag
     return conf, should_update
 

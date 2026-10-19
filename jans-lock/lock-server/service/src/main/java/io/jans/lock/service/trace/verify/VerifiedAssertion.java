@@ -53,14 +53,14 @@ public final class VerifiedAssertion {
 	}
 
 	/**
-	 * @return the correlation inputs extracted by the event-kind validator (task 09)
+	 * @return the correlation inputs extracted by the event-kind validator
 	 */
 	public CorrelationInputs getInputs() {
 		return inputs;
 	}
 
 	/**
-	 * @return {@code "sha256:" + hex(SHA-256(JCS(full assertion including signature)))} (design D-13)
+	 * @return {@code "sha256:" + hex(SHA-256(JCS(full assertion including signature)))}
 	 */
 	public String getContentDigest() {
 		return contentDigest;

@@ -362,13 +362,6 @@
     },
 
     {
-        "attribute": "jansTraceCapKeys",
-        "type": "string",
-        "index": ["equality"],
-        "backend": ["userRoot"]
-    },
-
-    {
         "attribute": "jansTraceTokenKeys",
         "type": "string",
         "index": ["equality"],

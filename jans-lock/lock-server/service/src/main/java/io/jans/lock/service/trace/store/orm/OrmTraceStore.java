@@ -47,11 +47,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
- * Production {@link TraceStore} over jans-orm's {@link PersistenceEntryManager} (design §5 step 8,
- * §12, §13; task 01 D-7, D-8, D-9). Duplicate detection is backend-agnostic: a {@code contains(dn)}
+ * Production {@link TraceStore} over jans-orm's {@link PersistenceEntryManager} (design §5 step 8, §12, §13). Duplicate detection is backend-agnostic: a {@code contains(dn)}
  * pre-check, then a re-probe of {@code contains(dn)} after any {@code EntryPersistenceException}
  * from {@code persist} — SQL backends never throw a {@code DuplicateEntryException} in the cause
- * chain, so that type is never inspected here (design decision D-8).
+ * chain, so that type is never inspected here.
  *
  * @author Yuriy Movchan
  */
@@ -64,7 +63,6 @@ public class OrmTraceStore implements TraceStore {
 	private static final String ATTR_EXEC_ID = "jansTraceExecId";
 	private static final String ATTR_EXEC_AUTHORITY = "jansTraceExecAuthority";
 	private static final String ATTR_CHAIN_POS_KEY = "jansTraceChainPosKey";
-	private static final String ATTR_CAP_KEYS = "jansTraceCapKeys";
 	private static final String ATTR_TOKEN_KEYS = "jansTraceTokenKeys";
 	private static final String ATTR_RECEIPT_SEQ = "jansTraceReceiptSeq";
 	private static final String ATTR_RECEIPT_HASH = "jansTraceReceiptHash";
@@ -74,7 +72,7 @@ public class OrmTraceStore implements TraceStore {
 
 	/**
 	 * Bound on {@code updateReceiptState}/{@code revokeProducerKey}'s internal, caller-invisible
-	 * compare-and-swap retry (design decision D-9): unlike {@code updateRecordFlags}, neither method
+	 * compare-and-swap retry: unlike {@code updateRecordFlags}, neither method
 	 * has a multi-step "plan then insert" gap a caller needs to recover from, so a losing CAS here is
 	 * always safe to retry with a fresh read and the same idempotent recomputation, fully inside this
 	 * class.
@@ -123,7 +121,7 @@ public class OrmTraceStore implements TraceStore {
 		return "ou=keys," + baseDn();
 	}
 
-	// -- duplicate-safe insert (design decision D-8) -------------------------------------------
+	// -- duplicate-safe insert -------------------------------------------
 
 	private <T> void duplicateSafeInsert(String dn, Class<T> entityClass, T entity, String key)
 			throws DuplicateEntryException, TraceStorageException {
@@ -169,7 +167,7 @@ public class OrmTraceStore implements TraceStore {
 		entity.setCoverageGap(flags.isCoverageGap());
 		entity.setChainLinkFailure(flags.isChainLinkFailure());
 		entity.setEquivocation(flags.isEquivocation());
-		// jansTraceLate is fixed at ingestion (design §10, T-1); never overwritten here.
+		// jansTraceLate is fixed at ingestion (design §10); never overwritten here.
 		entity.setVersion(expectedVersion);
 		try {
 			persistenceEntryManager.updateWithVersion(entity);
@@ -198,7 +196,7 @@ public class OrmTraceStore implements TraceStore {
 			return Optional.empty();
 		}
 		if (!id.getDomainId().equals(entity.getDomainId())) {
-			// Defense in depth (design decision D-9): the key already embeds the domain, so this
+			// Defense in depth: the key already embeds the domain, so this
 			// should never happen, but a client of one domain must never see another's row.
 			log.debug("TRACE record {} domain mismatch: expected {}", key, id.getDomainId());
 			return Optional.empty();
@@ -248,14 +246,6 @@ public class OrmTraceStore implements TraceStore {
 		Filter filter = Filter.createANDFilter(
 				Filter.createEqualityFilter(ATTR_DOMAIN_ID, position.getChainIdentity().getDomainId()),
 				Filter.createEqualityFilter(ATTR_CHAIN_POS_KEY, key));
-		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
-	}
-
-	@Override
-	public List<StoredTraceRecord> findRecordsByCapability(String domainId, String capabilityId) {
-		String key = TraceKeys.capabilityKey(domainId, capabilityId);
-		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
-				Filter.createEqualityFilter(ATTR_CAP_KEYS, key).multiValued());
 		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
 	}
 

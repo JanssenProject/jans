@@ -6,7 +6,7 @@ FROM bellsoft/liberica-openjre-alpine:17.0.20@sha256:b052d402e9146bca23524922cdb
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 \
+    && apk add --no-cache python3 curl tini py3-psycopg2 \
     && apk add --no-cache --virtual .build-deps git wget \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
@@ -18,7 +18,7 @@ RUN apk update \
 RUN mkdir -p /app/static /app/schema /app/static/opendj /app/templates
 
 # janssenproject/jans SHA commit
-ARG JANS_SOURCE_VERSION=21ec4fdd7d826d2e60e9acf6bd069ed5093eda28
+ARG JANS_SOURCE_VERSION=71405a5c47221b70a3f7b8034b8678bedabfa4cf
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
@@ -60,7 +60,8 @@ WORKDIR /
 # default pip timeout
 ARG PIP_TIMEOUT=15
 COPY requirements.txt /app/requirements.txt
-RUN mv /usr/lib/python3.14/EXTERNALLY-MANAGED /usr/lib/python3.14/EXTERNALLY-MANAGED.disabled \
+RUN EXT_MANAGED_FILE=$(python3 -c "import sysconfig; print(sysconfig.get_path('stdlib') + '/EXTERNALLY-MANAGED')") \
+    && mv "${EXT_MANAGED_FILE}" "${EXT_MANAGED_FILE}.disabled" \
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
     && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \

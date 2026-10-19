@@ -12,8 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Admin request body to pre-register a producer chain (design §8, TRACE MVP design decision D-5,
- * task 15).
+ * Admin request body to pre-register a producer chain (design §8).
  *
  * @author Yuriy Movchan
  */
@@ -22,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class ProducerChainRegistrationRequest {
 
 	@JsonProperty("producer_id")
-	@Schema(description = "Producer id, name/semver", example = "cedarling-fleet-1/1.0.0")
+	@Schema(description = "Opaque stable producer id", example = "cedarling-fleet-1")
 	private String producerId;
 
 	@JsonProperty("producer_instance_id")

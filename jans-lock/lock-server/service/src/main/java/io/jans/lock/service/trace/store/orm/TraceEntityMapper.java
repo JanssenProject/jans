@@ -31,23 +31,21 @@ import io.jans.lock.service.trace.model.VerificationResult;
 import io.jans.lock.service.trace.store.TraceKeys;
 
 /**
- * Pure mapping between the task 12 {@link StoredTraceRecord} value type and the task 03
- * {@link TraceRecordEntry} ORM entity, in both directions (design decisions D-6, D-7).
+ * Pure mapping between the {@link StoredTraceRecord} value type and the {@link TraceRecordEntry} ORM entity, in both directions.
  *
  * <p>Receipts, chain registrations and producer keys need no such mapping: {@code TraceStore}
  * exposes their jans-orm entities ({@code TraceReceiptEntry}, {@code TraceChainEntry},
  * {@code TraceProducerKeyEntry}) directly, unlike {@code StoredTraceRecord} — the two shapes
  * differ enough (structured identities vs. flat hashed keys, defensive copies on read) that a
- * dedicated value type still earns its keep for records (deviation from task 12's original
- * value-type-for-every-row design, approved 2026; see the TRACE MVP task notes).
+ * dedicated value type still earns its keep for records.
  *
- * <p>{@code TraceRecordEntry} (T-1) only carries <em>hashed</em> keys for the producer chain
- * identity, capability ids and token references ({@code jansTraceChainKey}, {@code jansTraceCapKeys},
- * {@code jansTraceTokenKeys}) — it never stores {@code producer_instance_id}, {@code
- * producer_chain_id}, the raw capability ids or the raw token references as separate attributes.
+ * <p>{@code TraceRecordEntry} only carries <em>hashed</em> keys for the producer chain
+ * identity and token references ({@code jansTraceChainKey}, {@code jansTraceTokenKeys}) — it
+ * never stores {@code producer_instance_id}, {@code producer_chain_id} or the raw token references
+ * as separate attributes.
  * On the read path ({@link #toStoredTraceRecord(TraceRecordEntry)}) those raw values are recovered
  * by re-parsing the verbatim {@code jansTraceAssertion} text, consistent with the design's
- * "assertion is the source of truth, retrieval re-parses it" principle (design D-13). This is a
+ * "assertion is the source of truth, retrieval re-parses it" principle. This is a
  * deliberate re-derivation, not a schema round trip: the stored hashes remain the only thing that
  * is ever compared for equality/lookup.
  *
@@ -83,9 +81,6 @@ final class TraceEntityMapper {
 		entity.setChainPosKey(TraceKeys.chainPositionKey(chainPosition));
 		entity.setSeqNum(chainPosition.getSequenceNumber());
 		entity.setPrevRecordHash(record.getPrevRecordHash());
-		entity.setCapKeys(record.getCapabilityIds().stream()
-				.map(capabilityId -> TraceKeys.capabilityKey(identity.getDomainId(), capabilityId))
-				.collect(Collectors.toList()));
 		entity.setTokenKeys(record.getTokenRefs().stream()
 				.map(tokenRef -> TraceKeys.tokenKey(identity.getDomainId(), tokenRef)).collect(Collectors.toList()));
 		entity.setAssertion(record.getAssertionRaw());
@@ -117,7 +112,6 @@ final class TraceEntityMapper {
 		ChainIdentity chainIdentity = extractChainIdentity(assertionRoot, entity.getDomainId(),
 				entity.getProducerId(), key);
 		ChainPosition chainPosition = new ChainPosition(chainIdentity, nvl(entity.getSeqNum()));
-		List<String> capabilityIds = extractCapabilityIds(assertionRoot);
 		List<TokenRef> tokenRefs = extractTokenRefs(assertionRoot);
 
 		VerificationResult verification = toVerificationResult(entity.getVerification());
@@ -129,9 +123,8 @@ final class TraceEntityMapper {
 		long createdAtMs = entity.getCreationDate() == null ? 0L : entity.getCreationDate().getTime();
 
 		return new StoredTraceRecord(identity, entity.getAssertion(), entity.getContentDigest(), verification,
-				receipt, flags, execution, chainPosition, entity.getPrevRecordHash(), capabilityIds, tokenRefs,
-				entity.getEventKind(), nvl(entity.getSignedAt()), entity.getNodeId(), createdAtMs,
-				nvl(entity.getVersion()));
+				receipt, flags, execution, chainPosition, entity.getPrevRecordHash(), tokenRefs, entity.getEventKind(),
+				nvl(entity.getSignedAt()), entity.getNodeId(), createdAtMs, nvl(entity.getVersion()));
 	}
 
 	private static TraceVerification toVerificationPojo(VerificationResult verification) {
@@ -140,12 +133,14 @@ final class TraceEntityMapper {
 		pojo.setKeyId(verification.getKeyId());
 		pojo.setVerifiedAtMs(verification.getVerifiedAtMs());
 		pojo.setAlgorithm(verification.getAlgorithm());
+		pojo.setKeyThumbprint(verification.getKeyThumbprint());
+		pojo.setKeyAuthorized(verification.getKeyAuthorized());
 		return pojo;
 	}
 
 	private static VerificationResult toVerificationResult(TraceVerification pojo) {
 		return new VerificationResult(pojo.isSignatureValid(), pojo.getKeyId(), pojo.getVerifiedAtMs(),
-				pojo.getAlgorithm());
+				pojo.getAlgorithm(), pojo.getKeyThumbprint(), pojo.getKeyAuthorized());
 	}
 
 	private static JsonNode parseAssertion(String assertionText, String key) {
@@ -172,21 +167,6 @@ final class TraceEntityMapper {
 					+ " is missing required field producer_chain." + field);
 		}
 		return node.textValue();
-	}
-
-	private static List<String> extractCapabilityIds(JsonNode assertionRoot) {
-		JsonNode capabilityIdsNode = assertionRoot.path("trace").path("event").path("capability_ids");
-		if (!capabilityIdsNode.isArray()) {
-			return Collections.emptyList();
-		}
-		List<String> result = new ArrayList<>(capabilityIdsNode.size());
-		for (JsonNode entry : capabilityIdsNode) {
-			JsonNode idNode = entry.path("capability_id");
-			if (idNode.isTextual()) {
-				result.add(idNode.textValue());
-			}
-		}
-		return Collections.unmodifiableList(result);
 	}
 
 	private static List<TokenRef> extractTokenRefs(JsonNode assertionRoot) {

@@ -23,12 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Reflective checks that TRACE entities expose exactly the mutable attributes the TRACE MVP
- * design allows (design decision D-7) and are tagged with the design's object class names.
+ * design allows and are tagged with the design's object class names.
  *
  * <p>Written against JUnit 5 rather than the repo's TestNG convention: this module's Surefire
  * setup (see {@code lock-server/pom.xml} surefire pluginManagement) pins the JUnit-Platform
  * provider and does not execute TestNG classes, so a TestNG version of this test would never run
- * (same precedent as {@code TraceConfigurationTest}, task 02).
+ * (same precedent as {@code TraceConfigurationTest}).
  *
  * @author Janssen Project
  */
@@ -97,6 +97,29 @@ public class TraceEntityAnnotationsTest {
 
         assertEquals(new HashSet<>(Arrays.asList("signature_valid", "key_id", "verified_at", "algorithm")),
                 fieldNames);
+    }
+
+    @Test
+    public void testVerification_newMembers_serializedWhenSetAndLegacyJsonDeserializesWithNulls() throws Exception {
+        TraceVerification verification = new TraceVerification();
+        verification.setSignatureValid(true);
+        verification.setKeyId("kid-1");
+        verification.setVerifiedAtMs(1_700_000_000_000L);
+        verification.setAlgorithm("Ed25519");
+        verification.setKeyThumbprint("sha256:" + "a".repeat(64));
+        verification.setKeyAuthorized(Boolean.TRUE);
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.valueToTree(verification);
+
+        assertEquals("sha256:" + "a".repeat(64), node.get("key_thumbprint").asText());
+        assertEquals(true, node.get("key_authorized").asBoolean());
+
+        TraceVerification legacy = mapper.readValue(
+                "{\"signature_valid\":true,\"key_id\":\"kid-1\",\"verified_at\":1,\"algorithm\":\"Ed25519\"}",
+                TraceVerification.class);
+        assertEquals(null, legacy.getKeyThumbprint());
+        assertEquals(null, legacy.getKeyAuthorized());
     }
 
 }

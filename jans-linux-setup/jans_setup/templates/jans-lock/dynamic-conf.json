@@ -36,10 +36,12 @@
 	"traceConfiguration": {
 		"enabled": true,
 		"defaultEvidenceDomainId": "",
+		"defaultAllowedProducerIds": [],
 		"clientDomainBindings": [
 			{"clientId": "%(lock_client_id)s", "evidenceDomainId": "default", "allowedProducerIds": ["*"]}
 		],
 		"latenessThresholdSeconds": 300,
+		"maxFutureSkewSeconds": 300,
 		"maxRequestBytes": 262144,
 		"maxJsonDepth": 32,
 		"maxStringLength": 8192,

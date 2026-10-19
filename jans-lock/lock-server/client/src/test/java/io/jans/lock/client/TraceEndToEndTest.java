@@ -38,14 +38,12 @@ import io.jans.lock.client.trace.TraceAssertions.CapabilityInvoked;
 import io.jans.lock.client.trace.TraceSigningKey;
 
 /**
- * Manual end-to-end exercise of the TRACE API (design §7, §11; TRACE MVP task 23) against a real
- * deployed Lock Server, replacing the originally planned curl/python shell script with a JUnit 5
- * test that reuses the {@code -Dcfg=<profile>} client-profile mechanism
+ * Manual end-to-end exercise of the TRACE API (design §7, §11) against a real deployed Lock Server. It is a JUnit 5 test that reuses the {@code -Dcfg=<profile>} client-profile mechanism
  * ({@link BaseLockClientTest}) already reserved for this purpose (see
  * {@code profiles/default/README.md}). Skips itself entirely unless both a real server and a
  * TRACE-scoped client id/secret are configured ({@link #hasTraceClient()}).
  *
- * <p><b>Required client setup</b> (not automated here — see task 23's gotcha): the configured
+ * <p><b>Required client setup</b> (not automated here): the configured
  * client must hold all three TRACE scopes simultaneously ({@code trace.write},
  * {@code trace.readonly}, {@code trace.admin}), granted manually. The setup-generated Lock client
  * only receives scopes from {@code lock-plugin-swagger.yaml} (config-api plugin), not from
@@ -55,8 +53,7 @@ import io.jans.lock.client.trace.TraceSigningKey;
  * instance fields ({@link TestInstance.Lifecycle#PER_CLASS}): later scenarios build on records
  * accepted by earlier ones, the same way the sections of a manual script would.
  *
- * <p>Not covered: the optional "readonly token, second client, wrong domain → 404" scenario from
- * the original task — it needs a second OAuth client bound to a different evidence domain, which
+ * <p>Not covered: the optional "readonly token, second client, wrong domain → 404" scenario — it needs a second OAuth client bound to a different evidence domain, which
  * the single reserved {@code traceClientId} profile key does not provide.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -65,7 +62,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
-	/** Distinguishes identifiers across repeated runs so admin registration never collides (D-4: keys are create-only). */
+	/** Distinguishes identifiers across repeated runs so admin registration never collides (keys are create-only). */
 	private static final String RUN_ID = UUID.randomUUID().toString().substring(0, 8);
 
 	private final String producerA = "trace-e2e-a-" + RUN_ID + "/1.0.0";
@@ -84,6 +81,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 
 	private HttpClient client;
 	private String apiBasePath;
+	private JsonNode wellKnownAudit = MAPPER.createObjectNode();
 	private String adminToken;
 	private String writeToken;
 	private String readToken;
@@ -107,6 +105,29 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		}
 	}
 
+	/** Well-known document advertises the health, log and telemetry bulk audit endpoints. */
+	@Test
+	@Order(0)
+	void wellKnownPublishesBulkAuditEndpoints() {
+		for (String type : new String[] { "health", "log", "telemetry" }) {
+			assertEquals(apiBasePath + "/audit/" + type + "/bulk",
+					pathOf(wellKnownAudit.path(type + "_bulk_endpoint").asText("")));
+		}
+	}
+
+	/** Well-known document advertises the TRACE submit, bulk, record and execution endpoints. */
+	@Test
+	@Order(0)
+	void wellKnownPublishesTraceEndpoints() {
+		assertEquals(apiBasePath + "/audit/trace", pathOf(wellKnownAudit.path("trace_endpoint").asText("")));
+		assertEquals(apiBasePath + "/audit/trace/bulk", pathOf(wellKnownAudit.path("trace_bulk_endpoint").asText("")));
+		assertEquals(apiBasePath + "/audit/trace/records",
+				pathOf(wellKnownAudit.path("trace_record_endpoint").asText("")));
+		assertEquals(apiBasePath + "/audit/trace/executions",
+				pathOf(wellKnownAudit.path("trace_execution_endpoint").asText("")));
+	}
+
+	/** Client obtains one token each for trace.admin, trace.write and trace.readonly; later steps reuse them. */
 	@Test
 	@Order(1)
 	void obtainTokensForAllThreeTraceScopes() throws Exception {
@@ -119,6 +140,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertTrue(isPresent(readToken), "Failed to obtain a trace.readonly token; is the client granted that scope?");
 	}
 
+	/** Admin registers a signing key and a chain for each of two producers; later steps sign records with these keys. */
 	@Test
 	@Order(2)
 	void adminRegistersProducerKeysAndChains() throws Exception {
@@ -138,6 +160,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertEquals(201, chainBResponse.statusCode(), chainBResponse.body());
 	}
 
+	/** Registering the same producer key again fails with 409, because keys are create-only. */
 	@Test
 	@Order(3)
 	void adminRejectsDuplicateKeyRegistration() throws Exception {
@@ -146,6 +169,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertEquals("key_already_exists", readTree(response).get("error").asText());
 	}
 
+	/** Admin lists keys and chains for producer A and sees the entries registered earlier. */
 	@Test
 	@Order(4)
 	void adminListsRegisteredKeysAndChains() throws Exception {
@@ -162,6 +186,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertTrue(chainList.isArray() && (chainList.size() >= 1), "Expected at least the just-registered chain: " + chains.body());
 	}
 
+	/** Producer A submits the first record of its chain; Lock accepts it and allocates a receipt sequence. */
 	@Test
 	@Order(5)
 	void writeAcceptsGenesisAuthorizationDecisionFromProducerA() throws Exception {
@@ -182,6 +207,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		receiptSequenceA = body.get("receipt_sequence").asLong();
 	}
 
+	/** Producer B submits its first record in the same execution, with producer A's record as parent. */
 	@Test
 	@Order(6)
 	void writeAcceptsGenesisCapabilityInvokedFromProducerB() throws Exception {
@@ -196,6 +222,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertTrue(readTree(response).get("accepted").asBoolean());
 	}
 
+	/** Resubmitting identical content returns the original receipt as an idempotent replay. */
 	@Test
 	@Order(7)
 	void writeReplayOfIdenticalContentIsIdempotent() throws Exception {
@@ -207,6 +234,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 				"Replay must return the original receipt, never allocate a new one");
 	}
 
+	/** Resubmitting the same record identity with different signed content fails with 409 record_conflict. */
 	@Test
 	@Order(8)
 	void writeSameIdentityWithDifferentContentConflicts() throws Exception {
@@ -222,6 +250,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertEquals("record_conflict", readTree(response).get("error").asText());
 	}
 
+	/** A record with a corrupted signature is rejected with 400 invalid_signature. */
 	@Test
 	@Order(9)
 	void writeTamperedSignatureIsRejected() throws Exception {
@@ -239,6 +268,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertEquals("invalid_signature", readTree(response).get("error").asText());
 	}
 
+	/** A record that sets evidence_domain_id is rejected, because Lock derives the domain from the client. */
 	@Test
 	@Order(10)
 	void writeBodyWithEvidenceDomainIdIsRejected() throws Exception {
@@ -256,11 +286,11 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertEquals("domain_field_forbidden", readTree(response).get("error").asText());
 	}
 
+	/** A trace.readonly token cannot submit records; Lock answers 401 or 403. */
 	@Test
 	@Order(11)
 	void writeWithReadonlyScopedTokenIsRejected() throws Exception {
-		// Exercises the same "TRACE API access control" check the task's wrong-scope (log.write)
-		// scenario targets, using the readonly token instead: the reserved TRACE client is granted
+		// Exercises the same "TRACE API access control" check a wrong-scope (log.write) request targets, using the readonly token instead: the reserved TRACE client is granted
 		// only the three trace.* scopes (see profiles/default/README.md), so trace.readonly used
 		// against the write endpoint is a scope the client genuinely holds, just not for this path.
 		HttpResponse<String> response = submitRecord(recordA_signedJson, readToken);
@@ -268,6 +298,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 				"Expected 401/403, got " + response.statusCode() + ": " + response.body());
 	}
 
+	/** A submission without an access token fails with 401. */
 	@Test
 	@Order(12)
 	void writeWithoutTokenIsRejected() throws Exception {
@@ -275,11 +306,13 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertEquals(401, response.statusCode(), response.body());
 	}
 
+	/** A read-scoped token retrieves record A with its verification result and original receipt sequence. */
 	@Test
 	@Order(13)
 	void readReturnsStoredRecordEnvelope() throws Exception {
-		HttpResponse<String> response = getJson(
-				"/audit/trace/records/" + URLEncoder.encode(recordIdA, StandardCharsets.UTF_8) + "?producer_id="
+		HttpResponse<String> response = getUrl(
+				advertisedEndpoint("trace_record_endpoint", "/audit/trace/records") + "/"
+						+ URLEncoder.encode(recordIdA, StandardCharsets.UTF_8) + "?producer_id="
 						+ URLEncoder.encode(producerA, StandardCharsets.UTF_8),
 				readToken);
 		assertEquals(200, response.statusCode(), response.body());
@@ -289,11 +322,12 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertEquals(receiptSequenceA, body.get("ingestion").get("receipt_sequence").asLong());
 	}
 
+	/** Execution read returns both accepted records ordered by receipt sequence. */
 	@Test
 	@Order(14)
 	void readExecutionReturnsBothRecordsOrderedByReceiptSequence() throws Exception {
-		HttpResponse<String> response = getJson("/audit/trace/executions/"
-				+ URLEncoder.encode(traceExecutionId, StandardCharsets.UTF_8) + "?execution_authority="
+		HttpResponse<String> response = getUrl(advertisedEndpoint("trace_execution_endpoint", "/audit/trace/executions")
+				+ "/" + URLEncoder.encode(traceExecutionId, StandardCharsets.UTF_8) + "?execution_authority="
 				+ URLEncoder.encode(executionAuthority, StandardCharsets.UTF_8), readToken);
 		assertEquals(200, response.statusCode(), response.body());
 		JsonNode body = readTree(response);
@@ -304,6 +338,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertEquals(recordIdB, records.get(1).get("record_id").asText(), "Producer B's record was accepted second");
 	}
 
+	/** Admin revokes producer A's key; a later submission signed with it fails with key_not_valid. */
 	@Test
 	@Order(15)
 	void adminRevokesKeyThenSubmissionIsRejected() throws Exception {
@@ -335,7 +370,8 @@ class TraceEndToEndTest extends BaseLockClientTest {
 					.GET().build();
 			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 			if (response.statusCode() == 200) {
-				String healthEndpoint = readTree(response).path("audit").path("health_endpoint").asText("");
+				wellKnownAudit = readTree(response).path("audit");
+				String healthEndpoint = wellKnownAudit.path("health_endpoint").asText("");
 				String path = healthEndpoint.isEmpty() ? "" : URI.create(healthEndpoint).getPath();
 				if (path != null && path.endsWith(HEALTH_ENDPOINT_SUFFIX)) {
 					return path.substring(0, path.length() - HEALTH_ENDPOINT_SUFFIX.length());
@@ -364,7 +400,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 	}
 
 	private HttpResponse<String> submitRecord(String signedAssertionJson, String token) throws Exception {
-		return postJson("/audit/trace", signedAssertionJson, token);
+		return postUrl(advertisedEndpoint("trace_endpoint", "/audit/trace"), signedAssertionJson, token);
 	}
 
 	private HttpResponse<String> registerProducerKey(String producerId, String kid, TraceSigningKey key)
@@ -374,6 +410,10 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		body.put("kid", kid);
 		var jwk = body.putObject("public_key_jwk");
 		key.publicJwk().forEach(jwk::put);
+		var kinds = body.putArray("authorized_event_kinds");
+		kinds.add("AUTHORIZATION_DECISION");
+		kinds.add("CAPABILITY_INVOKED");
+		kinds.add("RUNTIME_EFFECT");
 		body.put("valid_from", "2020-01-01T00:00:00Z");
 		body.putNull("valid_until");
 		return postJson("/audit/trace/admin/producer-keys", body.toString(), adminToken);
@@ -388,8 +428,22 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		return postJson("/audit/trace/admin/producer-chains", body.toString(), adminToken);
 	}
 
+	/** Absolute URL advertised in the well-known document, falling back to the base path when it is not published. */
+	private String advertisedEndpoint(String key, String fallbackPath) {
+		String advertised = wellKnownAudit.path(key).asText("");
+		return advertised.isEmpty() ? baseUrl() + apiBasePath + fallbackPath : advertised;
+	}
+
+	private static String pathOf(String url) {
+		return url.isEmpty() ? "" : URI.create(url).getPath();
+	}
+
 	private HttpResponse<String> postJson(String path, String jsonBody, String token) throws Exception {
-		HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(baseUrl() + apiBasePath + path))
+		return postUrl(baseUrl() + apiBasePath + path, jsonBody, token);
+	}
+
+	private HttpResponse<String> postUrl(String url, String jsonBody, String token) throws Exception {
+		HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url))
 				.header("Content-Type", "application/json")
 				.POST(HttpRequest.BodyPublishers.ofString(jsonBody, StandardCharsets.UTF_8));
 		if (isPresent(token)) {
@@ -399,8 +453,11 @@ class TraceEndToEndTest extends BaseLockClientTest {
 	}
 
 	private HttpResponse<String> getJson(String pathWithQuery, String token) throws Exception {
-		HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(baseUrl() + apiBasePath + pathWithQuery))
-				.GET();
+		return getUrl(baseUrl() + apiBasePath + pathWithQuery, token);
+	}
+
+	private HttpResponse<String> getUrl(String url, String token) throws Exception {
+		HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url)).GET();
 		if (isPresent(token)) {
 			builder.header("Authorization", "Bearer " + token);
 		}

@@ -17,7 +17,7 @@
           "invocation_id": "i-1",
           "action": "Acme::Action::\"Pay\"",
           "resource_type": "Acme::Payment",
-          "outcome": "INVOKED"
+          "outcome": "SUCCESS"
         }
       ]
     }

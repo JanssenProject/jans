@@ -9,7 +9,7 @@ FROM bellsoft/liberica-openjre-alpine:17.0.20@sha256:b052d402e9146bca23524922cdb
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache python3 openssl tini py3-cryptography py3-psycopg2 curl \
+    && apk add --no-cache python3 openssl tini py3-psycopg2 curl \
     && apk add --no-cache --virtual .build-deps git wget zip
 
 # =====
@@ -46,7 +46,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-casa/webapps \
 # casa plugins
 RUN set -e \
     && mkdir -p ${JETTY_BASE}/jans-casa/plugins \
-    && for casa_plugin in acct-linking authorized-clients bioid-plugin custom-branding strong-authn-settings; \
+    && for casa_plugin in acct-linking authorized-clients custom-branding strong-authn-settings; \
     do \
         wget -nv "https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/${casa_plugin}-${CN_VERSION}-jar-with-dependencies.jar" -O "${JETTY_BASE}/jans-casa/plugins/${casa_plugin}-${CN_VERSION}.jar" || exit 1; \
     done
@@ -63,7 +63,7 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-casa
 
-ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
+ARG JANS_SOURCE_VERSION=71405a5c47221b70a3f7b8034b8678bedabfa4cf
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
@@ -98,7 +98,8 @@ WORKDIR /
 # default pip timeout
 ARG PIP_TIMEOUT=15
 COPY requirements.txt /app/requirements.txt
-RUN mv /usr/lib/python3.14/EXTERNALLY-MANAGED /usr/lib/python3.14/EXTERNALLY-MANAGED.disabled \
+RUN EXT_MANAGED_FILE=$(python3 -c "import sysconfig; print(sysconfig.get_path('stdlib') + '/EXTERNALLY-MANAGED')") \
+    && mv "${EXT_MANAGED_FILE}" "${EXT_MANAGED_FILE}.disabled" \
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
     && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \

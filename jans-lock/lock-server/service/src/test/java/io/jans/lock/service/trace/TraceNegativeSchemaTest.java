@@ -38,8 +38,8 @@ import io.jans.lock.service.trace.parse.TraceAssertionParser;
 import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
 
 /**
- * Task 22 deliverable 3: data-provider test over the static negative fixtures in
- * {@code src/test/resources/trace/negative/} (one JSON file per rule from tasks 08/09), each
+ * Data-provider test over the static negative fixtures in
+ * {@code src/test/resources/trace/negative/} (one JSON file per validation rule), each
  * asserting the exact {@code error} id and, where the rule names one, the {@code reason}. The
  * fixture set and the expected outcomes are generated together in
  * {@code negative/manifest.json}, mirroring the rule list proven interactively by

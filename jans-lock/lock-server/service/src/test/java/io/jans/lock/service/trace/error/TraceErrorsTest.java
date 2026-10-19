@@ -21,7 +21,7 @@ import jakarta.ws.rs.core.Response;
 
 /**
  * Tests for {@link TraceErrors#toWebApplicationException} — the mapping from each TRACE runtime
- * exception to the {@link TraceErrorResponseType} it carries (design decision D-10).
+ * exception to the {@link TraceErrorResponseType} it carries.
  */
 class TraceErrorsTest {
 

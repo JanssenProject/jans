@@ -7,8 +7,11 @@
 package io.jans.lock.service.ws.rs.trace;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -33,6 +36,8 @@ import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.api.TraceExecutionResponse;
 import io.jans.lock.model.trace.api.TraceRecordResponse;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.model.trace.entity.TraceReceiptEntry;
+import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.trace.identity.EvidenceDomainResolver;
@@ -40,6 +45,7 @@ import io.jans.lock.service.trace.identity.SubmitterIdentity;
 import io.jans.lock.service.trace.identity.SubmitterIdentityService;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.retrieve.TraceRetrievalService;
+import io.jans.lock.service.trace.model.VerificationResult;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,8 +54,7 @@ import jakarta.ws.rs.core.Response;
 
 /**
  * Tests for {@link TraceRestWebServiceImpl#getRecord(String, String)} and
- * {@link TraceRestWebServiceImpl#getExecution(String, String, int, int)} (TRACE MVP task 21
- * acceptance criteria): domain-scoped retrieval, the bare-identifier ambiguity cases, paging
+ * {@link TraceRestWebServiceImpl#getExecution(String, String, int, int)} domain-scoped retrieval, the bare-identifier ambiguity cases, paging
  * validation, and the audit-logger call on every outcome. Backed by {@link InMemoryTraceStore}
  * pre-populated via {@link StoredTraceRecordFactory}; identity/domain services are mocked to
  * return fixed contexts.
@@ -185,6 +190,132 @@ class TraceRetrievalRestTest extends BaseLockServiceTest {
 		ArgumentCaptor<AuditLogEntry> captor = ArgumentCaptor.forClass(AuditLogEntry.class);
 		verify(applicationAuditLogger).log(captor.capture(), org.mockito.ArgumentMatchers.eq(true));
 		assertEquals(AuditActionType.TRACE_RECORD_READ, captor.getValue().getAction());
+	}
+
+	@Test
+	void testGetRecord_AssertionRaw_ReturnedByteForByte() throws Exception {
+		String raw = "{ \"z\" : 1.0,\n  \"a\":1e2, \"trace\" : {} }";
+		traceStore.insertRecord(StoredTraceRecordFactory.builder().domainId("domain-a").producerId("producer-1")
+				.recordId("record-1").contentDigest("sha256:" + "1".repeat(64)).assertionRaw(raw).build());
+		boundToDomain("domain-a");
+
+		TraceRecordResponse dto = (TraceRecordResponse) impl.getRecord("record-1", "producer-1").getEntity();
+
+		assertEquals(raw, dto.getAssertionRaw());
+		assertNotNull(dto.getAssertion());
+		assertEquals("z", dto.getAssertion().fieldNames().next());
+	}
+
+	@Test
+	void testGetRecord_ReceiptEntryCommitted_IngestionCarriesReceiptState() throws Exception {
+		traceStore.insertRecord(StoredTraceRecordFactory.builder().domainId("domain-a").producerId("producer-1")
+				.recordId("record-1").contentDigest("sha256:" + "1".repeat(64)).receiptSequence(7L).build());
+		traceStore.insertReceipt(receiptRow("domain-a", 7L, TraceReceiptState.COMMITTED));
+		boundToDomain("domain-a");
+
+		TraceRecordResponse dto = (TraceRecordResponse) impl.getRecord("record-1", "producer-1").getEntity();
+
+		assertEquals("COMMITTED", dto.getIngestion().getReceiptState());
+		assertEquals("COMMITTED",
+				new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(dto.getIngestion()).get("receipt_state").asText());
+	}
+
+	@Test
+	void testGetRecord_ReceiptEntryPending_IngestionCarriesPendingState() throws Exception {
+		traceStore.insertRecord(StoredTraceRecordFactory.builder().domainId("domain-a").producerId("producer-1")
+				.recordId("record-1").contentDigest("sha256:" + "1".repeat(64)).receiptSequence(7L).build());
+		traceStore.insertReceipt(receiptRow("domain-a", 7L, TraceReceiptState.PENDING));
+		boundToDomain("domain-a");
+
+		TraceRecordResponse dto = (TraceRecordResponse) impl.getRecord("record-1", "producer-1").getEntity();
+
+		assertEquals("PENDING", dto.getIngestion().getReceiptState());
+	}
+
+	@Test
+	void testGetRecord_NoReceiptRow_ReceiptStateAbsent() throws Exception {
+		traceStore.insertRecord(StoredTraceRecordFactory.builder().domainId("domain-a").producerId("producer-1")
+				.recordId("record-1").contentDigest("sha256:" + "1".repeat(64)).receiptSequence(7L).build());
+		boundToDomain("domain-a");
+
+		TraceRecordResponse dto = (TraceRecordResponse) impl.getRecord("record-1", "producer-1").getEntity();
+
+		assertNull(dto.getIngestion().getReceiptState());
+	}
+
+	private static TraceReceiptEntry receiptRow(String domainId, long seq, TraceReceiptState state) {
+		TraceReceiptEntry row = new TraceReceiptEntry();
+		row.setDomainId(domainId);
+		row.setReceiptSeq(seq);
+		row.setProducerId("producer-1");
+		row.setRecordId("record-1");
+		row.setReceiptStateEnum(state);
+		return row;
+	}
+
+	@Test
+	void testGetRecord_VerificationBlockWithNewMembers_returnedAndSerialized() throws Exception {
+		traceStore.insertRecord(StoredTraceRecordFactory.builder().domainId("domain-a").recordId("record-1")
+				.contentDigest("sha256:" + "1".repeat(64)).verification(new VerificationResult(true, "kid-1", 1000L, "Ed25519", "sha256:" + "a".repeat(64),
+						Boolean.TRUE))
+				.build());
+		boundToDomain("domain-a");
+
+		TraceRecordResponse dto = (TraceRecordResponse) impl.getRecord("record-1", null).getEntity();
+
+		assertEquals("sha256:" + "a".repeat(64), dto.getVerification().getKeyThumbprint());
+		assertEquals(Boolean.TRUE, dto.getVerification().getKeyAuthorized());
+		com.fasterxml.jackson.databind.JsonNode json = new com.fasterxml.jackson.databind.ObjectMapper()
+				.valueToTree(dto.getVerification());
+		assertEquals("sha256:" + "a".repeat(64), json.get("key_thumbprint").textValue());
+		assertTrue(json.get("key_authorized").booleanValue());
+		assertEquals("kid-1", json.get("key_id").textValue());
+	}
+
+	@Test
+	void testGetRecord_LegacyVerificationBlock_omitsNewMembers() throws Exception {
+		traceStore.insertRecord(StoredTraceRecordFactory.builder().domainId("domain-a").recordId("record-1")
+				.contentDigest("sha256:" + "1".repeat(64)).build());
+		boundToDomain("domain-a");
+
+		TraceRecordResponse dto = (TraceRecordResponse) impl.getRecord("record-1", null).getEntity();
+
+		com.fasterxml.jackson.databind.JsonNode json = new com.fasterxml.jackson.databind.ObjectMapper()
+				.valueToTree(dto.getVerification());
+		assertFalse(json.has("key_thumbprint"));
+		assertFalse(json.has("key_authorized"));
+		assertTrue(json.has("signature_valid"));
+	}
+
+	@Test
+	void testGetRecord_ReceivedAtAndVerifiedAtZeroMillis_ThreeFractionDigitsAndHashReproducible() throws Exception {
+		long receivedAtMs = 1_800_000_000_000L;
+		String contentDigest = "sha256:" + "a".repeat(64);
+		String zero = "sha256:" + "0".repeat(64);
+		String canonical = "{\"content_digest\":\"" + contentDigest + "\",\"evidence_domain_id\":\"domain-a\""
+				+ ",\"prev_receipt_hash\":\"" + zero + "\",\"producer_id\":\"producer-1\",\"receipt_profile\":\"tag:jans.io,2026:lock-trace-receipt-v1\",\"receipt_sequence\":1"
+				+ ",\"received_at\":\"2027-01-15T08:00:00.000Z\",\"record_id\":\"record-1\"}";
+		String receiptHash = "sha256:" + String.format("%064x", new java.math.BigInteger(1,
+				java.security.MessageDigest.getInstance("SHA-256").digest(canonical.getBytes(java.nio.charset.StandardCharsets.UTF_8))));
+		traceStore.insertRecord(StoredTraceRecordFactory.builder().domainId("domain-a").producerId("producer-1")
+				.recordId("record-1").contentDigest(contentDigest).receiptSequence(1L).receivedAtMs(receivedAtMs)
+				.prevReceiptHash(zero).receiptHash(receiptHash)
+				.verification(new VerificationResult(true, "kid-1", receivedAtMs, "Ed25519")).build());
+		boundToDomain("domain-a");
+
+		TraceRecordResponse dto = (TraceRecordResponse) impl.getRecord("record-1", "producer-1").getEntity();
+
+		assertEquals("2027-01-15T08:00:00.000Z", dto.getIngestion().getReceivedAt());
+		assertEquals("2027-01-15T08:00:00.000Z", dto.getVerification().getVerifiedAt());
+		// recompute from API output alone
+		String fromApi = "{\"content_digest\":\"" + dto.getContentDigest() + "\",\"evidence_domain_id\":\"domain-a\""
+				+ ",\"prev_receipt_hash\":\"" + dto.getIngestion().getPrevReceiptHash() + "\",\"producer_id\":\""
+				+ dto.getProducerId() + "\",\"receipt_profile\":\"tag:jans.io,2026:lock-trace-receipt-v1\",\"receipt_sequence\":" + dto.getIngestion().getReceiptSequence()
+				+ ",\"received_at\":\"" + dto.getIngestion().getReceivedAt() + "\",\"record_id\":\"" + dto.getRecordId()
+				+ "\"}";
+		String recomputed = "sha256:" + String.format("%064x", new java.math.BigInteger(1,
+				java.security.MessageDigest.getInstance("SHA-256").digest(fromApi.getBytes(java.nio.charset.StandardCharsets.UTF_8))));
+		assertEquals(dto.getIngestion().getReceiptHash(), recomputed);
 	}
 
 	@Test

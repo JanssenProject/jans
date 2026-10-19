@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * The {@code POST /audit/trace} success body (design §11.1, TRACE MVP task 20): the identity and
+ * The {@code POST /audit/trace} success body (design §11.1): the identity and
  * receipt position the record was accepted at, plus the four ingestion flags fixed at ingestion
  * time. {@code idempotent_replay=true} means these are the values of the row that already held the
  * identity, not a freshly inserted one.
@@ -28,7 +28,7 @@ public class TraceAcceptanceResponse {
 	private boolean accepted;
 
 	@JsonProperty("producer_id")
-	@Schema(description = "Producer id, name/semver", example = "cedarling-fleet-1/1.0.0")
+	@Schema(description = "Opaque stable producer id", example = "cedarling-fleet-1")
 	private String producerId;
 
 	@JsonProperty("record_id")

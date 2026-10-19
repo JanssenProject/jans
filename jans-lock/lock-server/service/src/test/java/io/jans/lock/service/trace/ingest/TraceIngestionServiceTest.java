@@ -18,8 +18,10 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -37,8 +39,10 @@ import org.slf4j.LoggerFactory;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.model.trace.entity.TraceChainEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
+import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.correlation.TraceCorrelationService;
 import io.jans.lock.service.trace.crypto.Ed25519Capability;
@@ -62,10 +66,8 @@ import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
 import io.jans.lock.service.trace.verify.TraceVerificationService;
 
 /**
- * Tests for {@link TraceIngestionService}: orchestration of verification (task 16), correlation
- * (task 17) and receipt-chain allocation (task 18) into one atomic write protocol (design §5, §9,
- * §12 behavior table; design decisions D-8, D-9; task 19 acceptance criteria 1, 3, 4, 5, 12 and the
- * cross-thread race).
+ * Tests for {@link TraceIngestionService}: orchestration of verification, correlation
+ * and receipt-chain allocation into one atomic write protocol (design §5, §9, §12 behavior table), including the cross-thread race.
  *
  * <p>Every collaborator is real and wired by reflection ({@link #setField}) over one shared
  * {@link InMemoryTraceStore}, the same approach {@code TraceVerificationServiceTest},
@@ -83,7 +85,7 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 	private static final String REGISTERED_BY = "2200.admin";
 
 	/** The {@code authorization_decision_valid} fixture's producer-chain identity. */
-	private static final String PRODUCER = "cedarling-fleet-1/1.0.0";
+	private static final String PRODUCER = "cedarling-fleet-1";
 
 	private static final String KID = "cedarling-fleet-1-2026-01";
 
@@ -97,6 +99,8 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 	private static final long RECEIVED_AT_MS = 1_700_000_001_000L;
 
 	private InMemoryTraceStore store;
+
+	private TraceConfiguration traceConfiguration;
 
 	private ProducerKeyRegistry keyRegistry;
 
@@ -114,7 +118,8 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 	@BeforeEach
 	void setUp() {
 		AppConfiguration appConfiguration = mock(AppConfiguration.class);
-		when(appConfiguration.getTraceConfiguration()).thenReturn(new TraceConfiguration());
+		traceConfiguration = new TraceConfiguration();
+		when(appConfiguration.getTraceConfiguration()).thenReturn(traceConfiguration);
 
 		store = new InMemoryTraceStore();
 
@@ -174,8 +179,8 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 
 	private KeyPair registerKey(String producerId, String kid) {
 		KeyPair keyPair = Ed25519TestKeys.generateKeyPair();
-		keyRegistry.register(DOMAIN, producerId, kid, Ed25519TestKeys.toJwk(keyPair.getPublic()), KEY_VALID_FROM_MS,
-				null, REGISTERED_BY, KEY_VALID_FROM_MS);
+		keyRegistry.register(DOMAIN, producerId, kid, Ed25519TestKeys.toJwk(keyPair.getPublic()),
+				new ArrayList<>(TraceConstants.EVENT_KINDS), KEY_VALID_FROM_MS, null, REGISTERED_BY, KEY_VALID_FROM_MS);
 		return keyPair;
 	}
 
@@ -228,7 +233,6 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 
 		assertEquals(1,
 				store.findRecordsByExecution(stored.getExecution(), 0, 100).size());
-		assertEquals(1, store.findRecordsByCapability(DOMAIN, "invoke:payment-authorization").size());
 
 		TraceReceiptEntry receipt = store.findReceipt(DOMAIN, 1L).orElseThrow();
 		assertEquals(TraceReceiptState.COMMITTED, receipt.getReceiptStateEnum());
@@ -306,7 +310,7 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		KeyPair keyPairA = registerKey(PRODUCER, KID);
 		registerChain(PRODUCER, INSTANCE, CHAIN);
 
-		String otherProducer = "other-fleet-1/2.0.0";
+		String otherProducer = "other-fleet-1";
 		String otherKid = "other-fleet-1-2026-01";
 		String otherInstance = "other-001";
 		String otherChain = "chain-02JABC9Z0K";
@@ -403,5 +407,168 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		setField(chain, "appConfiguration", appConfiguration);
 		return chain;
 	}
+
+	// -- FIRST_OBSERVED chain registration -----------------------------
+
+	@Test
+	void testIngest_FirstObservedGenesis_RegistersChainThenAccepts() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		KeyPair keyPair = registerKey(PRODUCER, KID);
+		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
+				.sign(keyPair.getPrivate());
+
+		AcceptanceResult result = service.ingest(body(json), ctx());
+
+		assertTrue(result.isAccepted());
+		assertEquals(1L, result.getReceiptSequence());
+		TraceChainEntry chain = store.findChain(new ChainIdentity(DOMAIN, PRODUCER, INSTANCE, CHAIN)).orElseThrow();
+		assertEquals(TraceChainEntry.GENESIS_KIND_FIRST_OBSERVED, chain.getGenesisKind());
+		assertEquals(CLIENT_ID, chain.getRegisteredBy());
+		assertEquals(RECEIVED_AT_MS, chain.getRegisteredAtMs());
+	}
+
+	@Test
+	void testIngest_FirstObservedNonGenesisOnUnregisteredChain_ChainNotRegisteredNothingStored() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		KeyPair keyPair = registerKey(PRODUCER, KID);
+		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).sequenceNumber(2)
+				.prevRecordHash(TraceConstants.HASH_PREFIX + "1".repeat(64)).sign(keyPair.getPrivate());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.ingest(body(json), ctx()));
+
+		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
+		assertTrue(store.findChains(DOMAIN, null).isEmpty());
+		assertTrue(store.snapshot().isEmpty());
+	}
+
+	@Test
+	void testIngest_FirstObservedGenesisWithoutSentinel_InvalidGenesisNothingRegistered() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		KeyPair keyPair = registerKey(PRODUCER, KID);
+		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).sequenceNumber(1)
+				.prevRecordHash(TraceConstants.HASH_PREFIX + "1".repeat(64)).sign(keyPair.getPrivate());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.ingest(body(json), ctx()));
+
+		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
+		assertTrue(store.findChains(DOMAIN, null).isEmpty());
+	}
+
+	@Test
+	void testIngest_FirstObservedNonGenesisWithSentinel_InvalidGenesisNothingRegistered() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		KeyPair keyPair = registerKey(PRODUCER, KID);
+		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).sequenceNumber(2)
+				.prevRecordHash(TraceConstants.ZERO_HASH).sign(keyPair.getPrivate());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.ingest(body(json), ctx()));
+
+		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
+		assertTrue(store.findChains(DOMAIN, null).isEmpty());
+	}
+
+	@Test
+	void testIngest_FirstObservedRejectedBeforeCorrelation_NoChainRegistered() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		KeyPair keyPair = registerKey(PRODUCER, KID);
+		KeyPair otherKeyPair = Ed25519TestKeys.generateKeyPair();
+
+		String badSignature = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
+				.sign(otherKeyPair.getPrivate());
+		assertThrows(TraceValidationException.class, () -> service.ingest(body(badSignature), ctx()));
+
+		String unknownKid = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
+				.kid("no-such-kid").sign(keyPair.getPrivate());
+		assertThrows(TraceValidationException.class, () -> service.ingest(body(unknownKid), ctx()));
+
+		String notAllowed = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
+				.sign(keyPair.getPrivate());
+		TraceRequestContext forbiddenForProducer = new TraceRequestContext(CLIENT_ID, DOMAIN,
+				Collections.singletonList("some-other-producer"), RECEIVED_AT_MS, NODE_ID);
+		TraceValidationException forbidden = assertThrows(TraceValidationException.class,
+				() -> service.ingest(body(notAllowed), forbiddenForProducer));
+		assertEquals(TraceErrorResponseType.PRODUCER_NOT_ALLOWED, forbidden.getErrorId());
+
+		assertTrue(store.findChains(DOMAIN, null).isEmpty());
+		assertTrue(store.snapshot().isEmpty());
+	}
+
+	@Test
+	void testIngest_FirstObservedEventKindNotAuthorized_NoChainRegistered() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		KeyPair keyPair = Ed25519TestKeys.generateKeyPair();
+		keyRegistry.register(DOMAIN, PRODUCER, KID, Ed25519TestKeys.toJwk(keyPair.getPublic()),
+				Collections.singletonList(TraceConstants.EVENT_KIND_RUNTIME_EFFECT), KEY_VALID_FROM_MS, null,
+				REGISTERED_BY, KEY_VALID_FROM_MS);
+		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
+				.sign(keyPair.getPrivate());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.ingest(body(json), ctx()));
+
+		assertEquals(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY, ex.getErrorId());
+		assertTrue(store.findChains(DOMAIN, null).isEmpty());
+	}
+
+	@Test
+	void testIngest_FirstObservedAdminRegisteredChain_StaysPreRegistered() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		KeyPair keyPair = registerKey(PRODUCER, KID);
+		registerChain(PRODUCER, INSTANCE, CHAIN);
+		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
+				.sign(keyPair.getPrivate());
+
+		service.ingest(body(json), ctx());
+
+		List<TraceChainEntry> chains = store.findChains(DOMAIN, null);
+		assertEquals(1, chains.size());
+		assertEquals(TraceChainEntry.GENESIS_KIND_PRE_REGISTERED, chains.get(0).getGenesisKind());
+		assertEquals(REGISTERED_BY, chains.get(0).getRegisteredBy());
+	}
+
+	@Test
+	void testIngest_DefaultModeUnregisteredGenesis_ChainNotRegistered() {
+		KeyPair keyPair = registerKey(PRODUCER, KID);
+		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
+				.sign(keyPair.getPrivate());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.ingest(body(json), ctx()));
+
+		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
+		assertTrue(store.findChains(DOMAIN, null).isEmpty());
+	}
+
+	@Test
+	void testIngest_FirstObservedConcurrentGenesisSubmissions_BothSucceedOneChainRow() throws Exception {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		KeyPair keyPair = registerKey(PRODUCER, KID);
+		String first = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
+				.sign(keyPair.getPrivate());
+		String second = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
+				.sign(keyPair.getPrivate());
+		executor = Executors.newFixedThreadPool(2);
+		CountDownLatch start = new CountDownLatch(1);
+
+		List<Future<AcceptanceResult>> futures = new ArrayList<>();
+		for (String json : new String[] { first, second }) {
+			futures.add(executor.submit(() -> {
+				start.await();
+				return service.ingest(body(json), ctx());
+			}));
+		}
+		start.countDown();
+
+		for (Future<AcceptanceResult> future : futures) {
+			assertTrue(future.get(10, TimeUnit.SECONDS).isAccepted());
+		}
+		assertEquals(1, store.findChains(DOMAIN, null).size());
+		assertEquals(TraceChainEntry.GENESIS_KIND_FIRST_OBSERVED,
+				store.findChains(DOMAIN, null).get(0).getGenesisKind());
+	}
+
 
 }
