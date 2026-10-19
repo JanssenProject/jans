@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.trace.crypto.TraceCryptoImpl;
@@ -121,6 +122,7 @@ class TraceCryptoProviderFactoryTest {
 		TraceCryptoProviderFactory factory = new TraceCryptoProviderFactory();
 		setField(factory, "providers", providers);
 		setField(factory, "log", LoggerFactory.getLogger(TraceCryptoProviderFactory.class));
+		setField(factory, "appConfiguration", new AppConfiguration());
 		return factory;
 	}
 

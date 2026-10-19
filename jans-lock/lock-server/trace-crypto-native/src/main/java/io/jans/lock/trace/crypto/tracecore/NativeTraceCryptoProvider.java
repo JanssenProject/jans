@@ -217,12 +217,13 @@ public class NativeTraceCryptoProvider implements TraceCryptoProvider {
 		if (!(key instanceof NativeVerificationKey)) {
 			throw new IllegalArgumentException("key was not created by " + NativeTraceCryptoProvider.class.getSimpleName());
 		}
-		if (signature == null || signature.length != 64) {
-			throw new IllegalArgumentException("Ed25519 signature must be 64 bytes");
-		}
 		NativeVerificationKey nativeKey = (NativeVerificationKey) key;
 
 		requireAvailable();
+		if (signature == null || signature.length != 64) {
+			throw new TraceCryptoException(TraceCryptoException.REASON_SIGNATURE_MISMATCH,
+					"Ed25519 signature must be 64 bytes");
+		}
 		try {
 			SignedAssertion signed = SignedAssertion.parse(new JsonBody(record.getRawText()), limits);
 			VerifiedAssertion verified = signed

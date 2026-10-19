@@ -108,18 +108,24 @@ run_mvn() {
 
 echo "Threads=${THREADS} warmup=${WARMUP_MS}ms duration=${DURATION_MS}ms per operation; log: ${LOG_FILE}"
 
-# The java module is installed because the native module reads its test-jar (base
-# benchmark class) from the local repository.
-if [[ "${PROVIDER}" != "native" ]]; then
+run_java() {
     echo "Running JAVA benchmark ..."
     run_mvn -pl trace-crypto-java -am install -Dtest=JavaTraceCryptoBenchmarkTest \
         -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -Dgpg.skip
-fi
-
-if [[ "${PROVIDER}" != "java" ]]; then
+}
+run_native() {
     echo "Running NATIVE benchmark ..."
-    run_mvn -pl trace-crypto-native -am install -Dtest=NativeTraceCryptoBenchmarkTest
-fi
+    run_mvn -pl trace-crypto-native -am install -Dtest=NativeTraceCryptoBenchmarkTest \
+        -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -Dgpg.skip
+}
+case "${PROVIDER}" in
+    java) run_java ;;
+    native) run_native ;;
+    both)
+        if [[ "${REVERSE:-0}" == "1" ]]; then ORDER=(run_native run_java); else ORDER=(run_java run_native); fi
+        echo "Execution order: ${ORDER[*]}"
+        for step in "${ORDER[@]}"; do "${step}"; done ;;
+esac
 
 if ! grep -q '^TRACE-BENCH ' "${LOG_FILE}"; then
     echo "No TRACE-BENCH lines found; the benchmarks may have been skipped. See ${LOG_FILE}" >&2
