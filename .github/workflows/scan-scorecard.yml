@@ -41,7 +41,7 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
-          # GITHUB_TOKEN cannot read classic branch protection, so Branch-Protection scores -1 without a PAT
+          # PAT needed to read classic branch protection
           repo_token: ${{ secrets.SCORECARD_TOKEN || github.token }}
           # Publishes the score to the public OpenSSF Scorecard API.
           publish_results: true

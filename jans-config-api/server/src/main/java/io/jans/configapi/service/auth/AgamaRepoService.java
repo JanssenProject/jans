@@ -84,7 +84,7 @@ public class AgamaRepoService {
                 && uri.getRawUserInfo() == null;
     }
 
-    // Redirects are followed by hand so a transferred repo cannot redirect outside the org
+    // Manual redirects: a transferred repo must not lead outside the org
     private byte[] download(URI uri) throws IOException {
         URI current = uri;
         for (int hop = 0; hop <= MAX_REDIRECTS; hop++) {

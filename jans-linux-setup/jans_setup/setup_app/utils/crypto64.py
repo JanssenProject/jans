@@ -375,7 +375,7 @@ class Crypto64:
     def get_server_certificate(self, host):
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         context.minimum_version = ssl.TLSVersion.TLSv1_2
-        # fetching the peer cert to trust it, so it cannot be verified yet
+        # cert is fetched to be trusted; nothing to verify against yet
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         with socket.create_connection((host, 443), timeout=30) as sock:

@@ -944,8 +944,7 @@ mod limit_tests {
 
     #[test]
     fn test_total_size_is_enforced_against_bytes_actually_read() {
-        // Lowering the cap after construction isolates the running total of
-        // decompressed bytes from the construction-time check on declared sizes.
+        // Lowered after construction so only the running total can trip
         let entry = small_limit_bytes();
         let bytes = create_archive_with_sizes(vec![("a.json", entry), ("b.json", entry)]);
 
