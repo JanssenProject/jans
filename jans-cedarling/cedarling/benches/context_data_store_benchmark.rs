@@ -103,6 +103,7 @@ static BSCONFIG: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
     max_default_entities: None,
     data_store_config: DataStoreConfig::default(),
     http_client_config: HttpClientConfig::default(),
+    trace_config: None,
 });
 
 static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
@@ -122,6 +123,7 @@ static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| B
     max_default_entities: None,
     data_store_config: DataStoreConfig::default(),
     http_client_config: HttpClientConfig::default(),
+    trace_config: None,
 });
 
 // =============================================================================

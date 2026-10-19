@@ -20,12 +20,14 @@ pub mod log_config;
 pub mod policy_store_config;
 /// Raw config module
 pub mod raw_config;
+mod trace_config;
 
 #[cfg(not(target_arch = "wasm32"))]
 use config::{Config, File};
 #[cfg(not(target_arch = "wasm32"))]
 use std::{io, path::Path};
 
+use crate::trace::ParseProducerIdError;
 use crate::{context_data_api::DataStoreConfig, http::HttpClientConfig};
 
 // Re-export types that need to be public
@@ -38,6 +40,7 @@ pub use policy_store_config::{
     SigstoreSigner,
 };
 pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType, SigstoreMode};
+pub use trace_config::{TraceConfig, TraceEndpoint, TraceSigningKey};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -67,6 +70,8 @@ pub struct BootstrapConfig {
     pub data_store_config: DataStoreConfig,
     /// HTTP client settings shared across all outbound requests (timeouts, retries).
     pub http_client_config: HttpClientConfig,
+    /// TRACE producer settings. If `None` then TRACE is disabled.
+    pub trace_config: Option<TraceConfig>,
 }
 
 impl Default for BootstrapConfig {
@@ -95,6 +100,7 @@ impl Default for BootstrapConfig {
             max_base64_size: None,
             data_store_config: DataStoreConfig::default(),
             http_client_config: HttpClientConfig::default(),
+            trace_config: None,
         }
     }
 }
@@ -275,6 +281,57 @@ pub enum BootstrapConfigLoadingError {
         "`CEDARLING_LOCK_TRANSPORT` is set to `grpc` but `CEDARLING_LOCK_GRPC_ENDPOINT` is not set."
     )]
     MissingGrpcEndpoint,
+
+    /// Error returned when TRACE is enabled without Lock Server integration.
+    #[error(
+        "`CEDARLING_TRACE` is `enabled` but `CEDARLING_LOCK` is not: TRACE records are sent to \
+         Lock Server"
+    )]
+    TraceRequiresLock,
+
+    /// Error returned when TRACE is enabled without a signing key.
+    #[error(
+        "`CEDARLING_TRACE` is `enabled` but neither `CEDARLING_TRACE_SIGNING_KEY` nor \
+         `CEDARLING_TRACE_SIGNING_KEY_PEM` is set"
+    )]
+    MissingTraceSigningKey,
+
+    /// Error returned when the TRACE producer id would be rejected by Lock.
+    #[error(
+        "invalid TRACE producer id taken from `{property}`: {source}. Set \
+         `CEDARLING_TRACE_PRODUCER_ID` to 1-255 ASCII characters: a letter or digit, then \
+         letters, digits or `._:/-`"
+    )]
+    InvalidTraceProducerId {
+        /// Property the invalid value came from.
+        property: &'static str,
+        /// Why the value is invalid.
+        source: ParseProducerIdError,
+    },
+
+    /// Error returned when TRACE is enabled with a policy store that is not a `.cjar` archive.
+    #[error(
+        "`CEDARLING_TRACE` requires a `.cjar` policy store (local file, URL or Lock Server): \
+         `bundle_hash` is computed from the archive bytes"
+    )]
+    TraceRequiresArchivePolicyStore,
+
+    /// Error returned when the TRACE `kid` is longer than Lock accepts.
+    #[error("`CEDARLING_TRACE_SIGNING_KID` is longer than 255 characters")]
+    InvalidTraceSigningKid,
+
+    /// Error returned when `CEDARLING_TRACE_ENDPOINT` is neither `discovered` nor a URL.
+    #[error("invalid `CEDARLING_TRACE_ENDPOINT`: {0}")]
+    InvalidTraceEndpoint(url::ParseError),
+
+    /// Error returned when a TRACE bulk limit is zero.
+    #[error("`{0}` must be greater than 0")]
+    ZeroTraceBulkLimit(&'static str),
+
+    /// Error returned when TRACE is enabled on WASM, where the MVP does not sign records.
+    #[cfg(target_arch = "wasm32")]
+    #[error("`CEDARLING_TRACE` is not supported on WASM")]
+    TraceNotSupportedOnWasm,
 }
 
 impl From<url::ParseError> for BootstrapConfigLoadingError {
@@ -363,5 +420,10 @@ mod tests {
         assert_eq!(config.data_store_config.max_entries, 10000);
         assert_eq!(config.data_store_config.default_ttl, None);
         assert!(config.data_store_config.enable_metrics);
+
+        assert!(
+            config.trace_config.is_none(),
+            "TRACE must be disabled in the default config"
+        );
     }
 }

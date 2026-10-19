@@ -131,6 +131,30 @@ The following bootstrap properties are only needed for the Lock Server Integrati
 - **`CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`** : Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. Default is `100`.
 - **`CEDARLING_LOCK_LOG_MAX_RETRIES`** : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff strategy. Default is `5`.
 
+### TRACE properties
+
+With TRACE enabled, Cedarling signs an `AUTHORIZATION_DECISION` TRACE record for each authorization decision that carries a TRACE context (see [Authorize options and TRACE context](./cedarling-authz.md#authorize-options-and-trace-context)) and sends it to Lock Server. TRACE never changes the decision. An invalid TRACE configuration stops Cedarling at startup.
+
+TRACE requires:
+
+- `CEDARLING_LOCK` set to `enabled`: records are sent to Lock Server.
+- A `.cjar` policy store (local `.cjar` file, `.cjar` URL, Lock Server or policy store URI). Each record carries `bundle_hash`, the SHA-256 of the `.cjar` bytes Cedarling loaded, so a directory or YAML policy store cannot be used.
+- A signing key (`CEDARLING_TRACE_SIGNING_KEY` or `CEDARLING_TRACE_SIGNING_KEY_PEM`).
+- A native build. TRACE is not supported on WASM.
+
+Properties:
+
+- **`CEDARLING_TRACE`** : `enabled` | `disabled`. Default is `disabled`.
+- **`CEDARLING_TRACE_PRODUCER_ID`** : Stable producer id signed into every record and registered in Lock. 1 to 255 ASCII characters: a letter or digit, then letters, digits or `._:/-`. Default is the value of `CEDARLING_APPLICATION_NAME`, which must then satisfy the same rule (the default `My App` does not, because of the space).
+- **`CEDARLING_TRACE_SIGNING_KEY`** : Path to the Ed25519 private key as an unencrypted PKCS#8 PEM file, for example created with `openssl genpkey -algorithm ed25519 -out trace-key.pem`. Prefer a file (for example a mounted Kubernetes or Docker secret with restricted permissions): it keeps the secret out of the bootstrap configuration. If `CEDARLING_TRACE` == `enabled`, this property or `CEDARLING_TRACE_SIGNING_KEY_PEM` is required; when both are set, this one is used.
+- **`CEDARLING_TRACE_SIGNING_KEY_PEM`** : The same key as PEM text in the property value, for hosts that inject secrets as values rather than files. Used only when `CEDARLING_TRACE_SIGNING_KEY` is not set. Treat a configuration that contains this property as a secret.
+- **`CEDARLING_TRACE_SIGNING_KID`** : `kid` the key is registered under in Lock, at most 255 characters. If unset or blank, the `kid` is the RFC 7638 thumbprint of the public key (`sha256:<hex>`). Cedarling logs the producer id, `kid` and thumbprint at startup, so the admin can register the key in Lock.
+- **`CEDARLING_TRACE_ENDPOINT`** : `discovered` or a URL of the TRACE bulk endpoint. `discovered` (the default) takes `trace_bulk_endpoint` from the Lock Server well-known configuration.
+- **`CEDARLING_TRACE_BULK_MAX_RECORDS`** : Maximum number of records in one bulk request. Must be greater than 0. Default is `100`, the Lock Server default.
+- **`CEDARLING_TRACE_BULK_MAX_BYTES`** : Maximum size in bytes of one bulk request. Must be greater than 0. Default is `4194304` (4 MiB), the Lock Server default.
+
+Two properties from the TRACE design are intentionally absent, because in this release each has a single possible value: `CEDARLING_TRACE_CHAIN_GENESIS` (a new producer chain always starts as `first_observed` at each start) and `CEDARLING_TRACE_EMISSION` (every decision with a TRACE context is emitted).
+
 
 ## authorize_multi_issuer method properties
 

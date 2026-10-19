@@ -11,7 +11,8 @@ use super::default_values::{
     default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
     default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
     default_policy_store_max_file_size, default_status_list_refresh_interval_max,
-    default_token_cache_capacity, default_token_cache_max_ttl, default_true,
+    default_token_cache_capacity, default_token_cache_max_ttl, default_trace_bulk_max_bytes,
+    default_trace_bulk_max_records, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
@@ -556,6 +557,77 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "parse_option_string"
     )]
     pub policy_store_sigstore_bundle_uri: Option<String>,
+
+    // =========================================================================
+    // TRACE Configuration
+    // =========================================================================
+    /// If enabled, Cedarling signs an `AUTHORIZATION_DECISION` TRACE record for
+    /// each decision and sends it to Lock Server. Requires `CEDARLING_LOCK` and
+    /// a `.cjar` policy store. Default: `disabled`.
+    #[serde(rename = "CEDARLING_TRACE", default)]
+    pub trace: FeatureToggle,
+
+    /// Stable producer id registered in Lock. Defaults to `CEDARLING_APPLICATION_NAME`.
+    #[serde(
+        rename = "CEDARLING_TRACE_PRODUCER_ID",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub trace_producer_id: Option<String>,
+
+    /// Path to the unencrypted PKCS#8 PEM Ed25519 private key that signs TRACE
+    /// records. A path keeps the secret out of the bootstrap config.
+    /// ***Required*** if `CEDARLING_TRACE == enabled` and
+    /// `CEDARLING_TRACE_SIGNING_KEY_PEM` is not set.
+    #[serde(
+        rename = "CEDARLING_TRACE_SIGNING_KEY",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub trace_signing_key: Option<String>,
+
+    /// The same key as unencrypted PKCS#8 PEM text, for hosts that inject secrets
+    /// as values. Used only when `CEDARLING_TRACE_SIGNING_KEY` is not set.
+    #[serde(
+        rename = "CEDARLING_TRACE_SIGNING_KEY_PEM",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub trace_signing_key_pem: Option<String>,
+
+    /// `kid` the signing key is registered under in Lock. When unset or blank,
+    /// the RFC 7638 thumbprint of the public key (`sha256:<hex>`) is used.
+    #[serde(
+        rename = "CEDARLING_TRACE_SIGNING_KID",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub trace_signing_kid: Option<String>,
+
+    /// TRACE bulk endpoint. `discovered` or unset takes `trace_bulk_endpoint`
+    /// from the Lock Server well-known configuration.
+    #[serde(
+        rename = "CEDARLING_TRACE_ENDPOINT",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub trace_endpoint: Option<String>,
+
+    /// Maximum number of records in one TRACE bulk request. Default: 100, as in Lock.
+    #[serde(
+        rename = "CEDARLING_TRACE_BULK_MAX_RECORDS",
+        default = "default_trace_bulk_max_records",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trace_bulk_max_records: usize,
+
+    /// Maximum size in bytes of one TRACE bulk request. Default: 4194304 (4 MiB), as in Lock.
+    #[serde(
+        rename = "CEDARLING_TRACE_BULK_MAX_BYTES",
+        default = "default_trace_bulk_max_bytes",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trace_bulk_max_bytes: usize,
 }
 
 impl Default for BootstrapConfigRaw {

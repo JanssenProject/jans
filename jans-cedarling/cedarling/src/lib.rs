@@ -27,6 +27,7 @@ mod init;
 mod jwt;
 mod lock;
 mod log;
+mod trace;
 // is reexported in hidden bindings module
 #[doc(hidden)]
 pub mod sparkv;
@@ -88,6 +89,7 @@ use lock::health_registry::HealthStatus;
 use log::interface::LogWriter;
 use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
+pub use trace::{ParseProducerIdError, ProducerId};
 
 use semver::Version;
 

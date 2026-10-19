@@ -114,6 +114,7 @@ async fn init_cedarling_multi_issuer(
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
+        trace_config: None,
     };
 
     Cedarling::new(&bootstrap_config).await

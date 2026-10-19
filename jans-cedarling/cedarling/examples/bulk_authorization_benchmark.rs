@@ -98,6 +98,7 @@ async fn initialize_cedarling() -> Result<Cedarling, Box<dyn std::error::Error>>
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
+        trace_config: None,
     })
     .await?;
 

@@ -283,6 +283,7 @@ async fn prepare_unsigned_cedarling() -> Result<Cedarling, InitCedarlingError> {
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
+        trace_config: None,
     };
     Cedarling::new(&bootstrap_config).await
 }
@@ -351,6 +352,7 @@ async fn prepare_multi_issuer_cedarling(
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
+        trace_config: None,
     };
     Cedarling::new(&bootstrap_config).await
 }

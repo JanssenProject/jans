@@ -17,6 +17,7 @@ use std::time::Duration;
 
 use super::authorization_config::AuthorizationConfig;
 use super::raw_config::LoggerType;
+use super::trace_config::build_trace_config;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSignature, PolicyStoreSource, SigstoreMode,
@@ -55,6 +56,7 @@ impl BootstrapConfig {
         };
 
         let policy_store_config = build_policy_store_config(raw)?;
+        let trace_config = build_trace_config(raw, &policy_store_config.source)?;
 
         // Load the jwks from a local file
         let jwks = raw
@@ -117,6 +119,7 @@ impl BootstrapConfig {
             max_base64_size: raw.max_base64_size,
             data_store_config,
             http_client_config,
+            trace_config,
         })
     }
 }
