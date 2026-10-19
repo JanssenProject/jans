@@ -89,6 +89,9 @@ class TraceCryptoProviderFactoryTest {
 		TraceCryptoProvider java = TraceTestCrypto.javaProvider();
 
 		assertSame(java, factory(instance(false, false, java)).traceCryptoProvider());
+		Instance<TraceCryptoProvider> all = instance(false, false, java);
+		assertSame(java, factory(all).traceCryptoProvider());
+		org.mockito.Mockito.verify(all).select(JAVA);
 	}
 
 	@Test
