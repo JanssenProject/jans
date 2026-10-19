@@ -100,7 +100,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             throw new WebApplicationException("InvalidJwtException - Jwt Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         } catch (JsonProcessingException ex) {
-            logger.error("Error while parsing Jwt token:{}, exception:{} ", token, ex);
+            logger.error("Error while parsing Jwt exception:{} ", ex);
             throw new WebApplicationException("Jwt Token is Invalid - JsonProcessingException.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
@@ -111,7 +111,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             introspectionResponse = openIdService.getIntrospectionResponse(token,
                     acccessToken, issuer);
         } catch (JsonProcessingException ex) {
-            logger.error("Error while token Introspection token:{}, exception:{} ", token, ex);
+            logger.error("Error while token Introspection exception - ", ex);
             throw new WebApplicationException("IntrospectionResponse - Jwt Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
@@ -235,13 +235,11 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
-    }
-    
+    }    
     
     private boolean externalAuthorization(String token, String issuer, String method, String path) {
         logger.debug(
-                "External Authorization script params -  request:{}, response:{}, token:{}, issuer:{}, method:{}, path:{} ",
-                request, response, token, issuer, method, path);
+                "External Authorization script params -  issuer:{}, method:{}, path:{} ", issuer, method, path);
         Map<String, Object> requestParameters = new HashMap<>();
         requestParameters.put("ISSUER", issuer);
         requestParameters.put("TOKEN", token);

@@ -1081,14 +1081,6 @@ components:
           type: string
           description: Evidence domain id used when a submitting client has no explicit
             binding
-        defaultAllowedProducerIds:
-          type: array
-          description: Producer ids a client without an explicit binding may submit
-            records for in the default evidence domain; empty means none
-          items:
-            type: string
-            description: Producer ids a client without an explicit binding may submit
-              records for in the default evidence domain; empty means none
         clientDomainBindings:
           type: array
           description: OAuth client to evidence-domain bindings
@@ -1098,11 +1090,6 @@ components:
           type: integer
           description: Seconds after signed_at a record is accepted before being flagged
             late
-          format: int32
-        maxFutureSkewSeconds:
-          type: integer
-          description: Seconds a signed_at may be ahead of Lock's clock before the
-            record is rejected
           format: int32
         maxRequestBytes:
           type: integer
@@ -1153,11 +1140,6 @@ components:
           description: "Maximum total body size, in bytes, buffered for one POST /audit/trace/bulk\
             \ request; clamped to 16777216 regardless of this value"
           format: int32
-        chainRegistrationMode:
-          type: string
-          description: "How producer chains come to exist: PRE_REGISTERED (admin API\
-            \ only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers\
-            \ it); an unknown value is treated as PRE_REGISTERED"
       description: TRACE evidence ingestion configuration
     JsonPatch:
       type: object
