@@ -378,7 +378,7 @@ class Crypto64:
         # fetching the peer cert to trust it, so it cannot be verified yet
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
-        with socket.create_connection((host, 443)) as sock:
+        with socket.create_connection((host, 443), timeout=30) as sock:
             with context.wrap_socket(sock, server_hostname=host) as ssl_sock:
                 cert_der = ssl_sock.getpeercert(True)
         return ssl.DER_cert_to_PEM_cert(cert_der)

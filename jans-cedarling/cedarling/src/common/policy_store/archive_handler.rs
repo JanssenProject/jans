@@ -1002,9 +1002,11 @@ mod limit_tests {
     ) {
         match err.get_ref().and_then(|e| e.downcast_ref::<ArchiveError>()) {
             Some(source) => assert!(expected(source), "unexpected ArchiveError: {source:?}"),
-            None => assert_eq!(
-                err.kind(),
-                std::io::ErrorKind::InvalidData,
+            None => assert!(
+                err.kind() == std::io::ErrorKind::InvalidData
+                    && err
+                        .to_string()
+                        .contains("larger than its declared uncompressed size"),
                 "unexpected error: {err:?}"
             ),
         }
