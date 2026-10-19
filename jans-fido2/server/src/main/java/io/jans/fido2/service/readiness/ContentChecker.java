@@ -55,6 +55,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class ContentChecker {
 
+    private static final String ID_PACKAGE = "content.android.package";
+    private static final String ID_FINGERPRINT = "content.android.fingerprint";
+    private static final String ID_RELATION = "content.android.relation";
+    private static final String ID_PARSE = "content.parse";
+    private static final String ID_IOS_APP = "content.ios.app";
+    private static final String ID_DRIFT = "content.drift";
+    private static final String PACKAGE = "package ";
+
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
@@ -65,18 +73,18 @@ public class ContentChecker {
             return checks;
         }
         if (party.getAndroidApps().isEmpty()) {
-            checks.add(pass("content.android.package", "no Android apps configured"));
+            checks.add(pass(ID_PACKAGE, "no Android apps configured"));
             return checks;
         }
         Set<String> found = androidFacts(deployed);
         for (AndroidApp app : party.getAndroidApps()) {
             String pkg = app.getPackageName();
-            checks.add(found.contains("P|" + pkg) ? pass("content.android.package", "package " + pkg + " listed")
-                    : fail("content.android.package", "package " + pkg + " not listed"));
+            checks.add(found.contains("P|" + pkg) ? pass(ID_PACKAGE, PACKAGE + pkg + " listed")
+                    : fail(ID_PACKAGE, PACKAGE + pkg + " not listed"));
             checks.addAll(fingerprintChecks(app, found));
             checks.add(relationBound(app, found)
-                    ? pass("content.android.relation", "package " + pkg + " has the login credentials relation")
-                    : fail("content.android.relation", "package " + pkg + " lacks " + LOGIN_CREDS_RELATION));
+                    ? pass(ID_RELATION, PACKAGE + pkg + " has the login credentials relation")
+                    : fail(ID_RELATION, PACKAGE + pkg + " lacks " + LOGIN_CREDS_RELATION));
         }
         checks.add(drift(androidFacts(ExpectedAssociationFileBuilder.assetLinks(party)), found));
         return checks;
@@ -87,14 +95,14 @@ public class ContentChecker {
         JsonNode deployed = parse(body, false, checks);
         if (deployed != null) {
             if (party.getIosApps().isEmpty()) {
-                checks.add(pass("content.ios.app", "no iOS apps configured"));
+                checks.add(pass(ID_IOS_APP, "no iOS apps configured"));
             } else {
                 Set<String> found = iosFacts(deployed);
                 for (IosApp app : party.getIosApps()) {
                     String id = ExpectedAssociationFileBuilder.iosAppId(app);
                     checks.add(found.contains(id.toUpperCase(Locale.ROOT))
-                            ? pass("content.ios.app", "app " + id + " listed in webcredentials.apps")
-                            : fail("content.ios.app", "app " + id + " not listed in webcredentials.apps"));
+                            ? pass(ID_IOS_APP, "app " + id + " listed in webcredentials.apps")
+                            : fail(ID_IOS_APP, "app " + id + " not listed in webcredentials.apps"));
                 }
                 checks.add(drift(iosFacts(ExpectedAssociationFileBuilder.appleAppSiteAssociation(party)), found));
             }
@@ -116,7 +124,7 @@ public class ContentChecker {
             }
             configured.add(normalized);
             if (!found.contains("F|" + pkg + "|" + normalized)) {
-                checks.add(fail("content.android.fingerprint",
+                checks.add(fail(ID_FINGERPRINT,
                         "fingerprint " + fingerprint + " for package " + pkg + " not listed"));
             }
         }
@@ -124,11 +132,11 @@ public class ContentChecker {
         long unconfigured = found.stream().filter(f -> f.startsWith(prefix))
                 .filter(f -> !configured.contains(f.substring(prefix.length()))).count();
         if (unconfigured > 0) {
-            checks.add(new CheckResult("content.android.fingerprint", CheckStatus.WARN,
+            checks.add(new CheckResult(ID_FINGERPRINT, CheckStatus.WARN,
                     "file lists " + unconfigured + " fingerprint(s) for package " + pkg + " not in configuration"));
         }
         if (checks.isEmpty()) {
-            checks.add(pass("content.android.fingerprint", "all configured fingerprints for package " + pkg + " listed"));
+            checks.add(pass(ID_FINGERPRINT, "all configured fingerprints for package " + pkg + " listed"));
         }
         return checks;
     }
@@ -161,9 +169,9 @@ public class ContentChecker {
         long missing = expected.stream().filter(f -> !deployed.contains(f)).count();
         long extra = deployed.stream().filter(f -> !expected.contains(f)).count();
         if (missing == 0 && extra == 0) {
-            return pass("content.drift", "deployed file matches what Jans would generate");
+            return pass(ID_DRIFT, "deployed file matches what Jans would generate");
         }
-        return new CheckResult("content.drift", CheckStatus.WARN, "deployed file differs from what Jans would "
+        return new CheckResult(ID_DRIFT, CheckStatus.WARN, "deployed file differs from what Jans would "
                 + "generate: " + missing + " expected entr" + (missing == 1 ? "y" : "ies") + " missing, " + extra
                 + " unexpected");
     }
@@ -181,10 +189,7 @@ public class ContentChecker {
                 continue;
             }
             String pkg = target.path("package_name").asText();
-            boolean hasRelation = false;
-            for (JsonNode relation : array(statement.path("relation"))) {
-                hasRelation |= LOGIN_CREDS_RELATION.equals(relation.asText());
-            }
+            boolean hasRelation = hasLoginCredsRelation(statement);
             facts.add("P|" + pkg);
             if (hasRelation) {
                 facts.add("R|" + pkg);
@@ -201,6 +206,15 @@ public class ContentChecker {
             }
         }
         return facts;
+    }
+
+    private static boolean hasLoginCredsRelation(JsonNode statement) {
+        for (JsonNode relation : array(statement.path("relation"))) {
+            if (LOGIN_CREDS_RELATION.equals(relation.asText())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** The node itself when it is a JSON array, else nothing to iterate (objects would iterate their values). */
@@ -226,15 +240,15 @@ public class ContentChecker {
         try {
             node = MAPPER.readTree(body);
         } catch (IOException | RuntimeException e) {
-            checks.add(fail("content.parse", "not valid JSON"));
+            checks.add(fail(ID_PARSE, "not valid JSON"));
             return null;
         }
         if (node == null || node.isMissingNode()) {
-            checks.add(fail("content.parse", "not valid JSON"));
+            checks.add(fail(ID_PARSE, "not valid JSON"));
             return null;
         }
         if (expectArray ? !node.isArray() : !node.isObject()) {
-            checks.add(fail("content.parse", expectArray ? "not a JSON array of statements" : "not a JSON object"));
+            checks.add(fail(ID_PARSE, expectArray ? "not a JSON array of statements" : "not a JSON object"));
             return null;
         }
         return node;
