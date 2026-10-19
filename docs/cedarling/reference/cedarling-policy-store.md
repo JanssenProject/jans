@@ -548,7 +548,7 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.outcome_parse_error` | Cumulative count of `ParseError` outcomes (body couldn't be parsed) |
 | `policy_store_refresh.outcome_rebuild_error` | Cumulative count of `RebuildError` outcomes (body parsed, but `JwtService` / `EntityBuilder` / trusted-issuer rebuild failed) |
 | `policy_store_refresh.outcome_decode_error` | Cumulative count of `DecodeError` outcomes (HTTP transaction succeeded but reading the response body failed — e.g. TCP drop mid-stream, transfer-encoding issue) |
-| `policy_store_refresh.outcome_verification_error` | Cumulative count of `VerificationError` outcomes (the refreshed `.cjar` failed its Sigstore signature check, including a missing bundle). A timeout or `5xx` while fetching the bundle counts as `NetworkError` or `HttpError` instead |
+| `policy_store_refresh.outcome_verification_error` | Cumulative count of `VerificationError` outcomes (the refreshed `.cjar` failed its Sigstore signature check, including a missing bundle). Failing to fetch the bundle counts like any other fetch failure instead: no response (timeout, connection refused) is `NetworkError`, a `5xx` is `HttpError`, and a failure while reading the bundle body is `DecodeError` |
 
 ## Legacy Single-File Format (YAML Test Suites)
 
