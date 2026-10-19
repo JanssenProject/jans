@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,7 +55,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class ContentChecker {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
     public List<CheckResult> checkAssetLinks(RequestedParty party, byte[] body) {
         List<CheckResult> checks = new ArrayList<>();
@@ -72,7 +74,7 @@ public class ContentChecker {
             checks.add(found.contains("P|" + pkg) ? pass("content.android.package", "package " + pkg + " listed")
                     : fail("content.android.package", "package " + pkg + " not listed"));
             checks.addAll(fingerprintChecks(app, found));
-            checks.add(found.contains("R|" + pkg)
+            checks.add(relationBound(app, found)
                     ? pass("content.android.relation", "package " + pkg + " has the login credentials relation")
                     : fail("content.android.relation", "package " + pkg + " lacks " + LOGIN_CREDS_RELATION));
         }
@@ -109,6 +111,9 @@ public class ContentChecker {
         Set<String> configured = new HashSet<>();
         for (String fingerprint : app.getSha256CertFingerprints()) {
             String normalized = ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint);
+            if (normalized == null) {
+                normalized = fingerprint;
+            }
             configured.add(normalized);
             if (!found.contains("F|" + pkg + "|" + normalized)) {
                 checks.add(fail("content.android.fingerprint",
@@ -128,7 +133,31 @@ public class ContentChecker {
         return checks;
     }
 
-    private static CheckResult drift(Set<String> expected, Set<String> deployed) {
+    /** The relation must sit on a statement that also carries each configured fingerprint of the app. */
+    private static boolean relationBound(AndroidApp app, Set<String> found) {
+        String pkg = app.getPackageName();
+        if (app.getSha256CertFingerprints().isEmpty()) {
+            return found.contains("R|" + pkg);
+        }
+        for (String fingerprint : app.getSha256CertFingerprints()) {
+            String normalized = ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint);
+            if (!found.contains("RF|" + pkg + "|" + (normalized != null ? normalized : fingerprint))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Drops each {@code F|} fact that has an {@code RF|} twin, so a fingerprint is counted once. */
+    private static Set<String> withoutShadowedFingerprints(Set<String> facts) {
+        Set<String> out = new HashSet<>(facts);
+        out.removeIf(f -> f.startsWith("F|") && facts.contains("R" + f));
+        return out;
+    }
+
+    private static CheckResult drift(Set<String> expectedFacts, Set<String> deployedFacts) {
+        Set<String> expected = withoutShadowedFingerprints(expectedFacts);
+        Set<String> deployed = withoutShadowedFingerprints(deployedFacts);
         long missing = expected.stream().filter(f -> !deployed.contains(f)).count();
         long extra = deployed.stream().filter(f -> !expected.contains(f)).count();
         if (missing == 0 && extra == 0) {
@@ -141,7 +170,8 @@ public class ContentChecker {
 
     /**
      * Flattens an assetlinks document into comparable facts: {@code P|pkg} (package listed), {@code F|pkg|FP}
-     * (normalized fingerprint) and {@code R|pkg} (login credentials relation present).
+     * (normalized fingerprint) and {@code R|pkg} (login credentials relation present) and {@code RF|pkg|FP} (fingerprint on a statement
+     * that carries the relation).
      */
     private static Set<String> androidFacts(JsonNode statements) {
         Set<String> facts = new HashSet<>();
@@ -151,15 +181,22 @@ public class ContentChecker {
                 continue;
             }
             String pkg = target.path("package_name").asText();
-            facts.add("P|" + pkg);
-            for (JsonNode fingerprint : target.path("sha256_cert_fingerprints")) {
-                if (fingerprint.isTextual()) {
-                    facts.add("F|" + pkg + "|" + ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint.asText()));
-                }
-            }
+            boolean hasRelation = false;
             for (JsonNode relation : statement.path("relation")) {
-                if (LOGIN_CREDS_RELATION.equals(relation.asText())) {
-                    facts.add("R|" + pkg);
+                hasRelation |= LOGIN_CREDS_RELATION.equals(relation.asText());
+            }
+            facts.add("P|" + pkg);
+            if (hasRelation) {
+                facts.add("R|" + pkg);
+            }
+            for (JsonNode fingerprint : target.path("sha256_cert_fingerprints")) {
+                String normalized = fingerprint.isTextual()
+                        ? ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint.asText()) : null;
+                if (normalized != null) {
+                    facts.add("F|" + pkg + "|" + normalized);
+                    if (hasRelation) {
+                        facts.add("RF|" + pkg + "|" + normalized);
+                    }
                 }
             }
         }
@@ -169,7 +206,8 @@ public class ContentChecker {
     /** The upper-cased {@code webcredentials.apps} entries. */
     private static Set<String> iosFacts(JsonNode association) {
         Set<String> facts = new HashSet<>();
-        for (JsonNode app : association.path("webcredentials").path("apps")) {
+        JsonNode apps = association.path("webcredentials").path("apps");
+        for (JsonNode app : apps.isArray() ? apps : MAPPER.createArrayNode()) {
             if (app.isTextual()) {
                 facts.add(app.asText().toUpperCase(Locale.ROOT));
             }

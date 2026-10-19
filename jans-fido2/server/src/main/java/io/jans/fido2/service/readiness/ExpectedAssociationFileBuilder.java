@@ -45,7 +45,8 @@ public final class ExpectedAssociationFileBuilder {
             target.put("package_name", app.getPackageName());
             ArrayNode fingerprints = target.putArray("sha256_cert_fingerprints");
             for (String fingerprint : app.getSha256CertFingerprints()) {
-                fingerprints.add(normalizeFingerprint(fingerprint));
+                String normalized = normalizeFingerprint(fingerprint);
+                fingerprints.add(normalized != null ? normalized : fingerprint);
             }
             ObjectNode statement = JSON.objectNode();
             statement.putArray("relation").add(LOGIN_CREDS_RELATION);
@@ -70,15 +71,24 @@ public final class ExpectedAssociationFileBuilder {
         return app.getTeamId() + "." + app.getBundleId();
     }
 
-    /** Upper-case colon-separated hex, whatever the input style (with or without colons, any case). */
+    /**
+     * Upper-case colon-separated hex, whatever the input style (with or without colons, any case), or
+     * {@code null} when the input is not hex (colons allowed) or has an odd number of digits.
+     */
     public static String normalizeFingerprint(String fingerprint) {
-        String hex = fingerprint.replaceAll("[^0-9A-Fa-f]", "").toUpperCase(Locale.ROOT);
+        if (fingerprint == null || !fingerprint.matches("[0-9A-Fa-f:]+")) {
+            return null;
+        }
+        String hex = fingerprint.replace(":", "").toUpperCase(Locale.ROOT);
+        if (hex.isEmpty() || hex.length() % 2 != 0) {
+            return null;
+        }
         StringBuilder out = new StringBuilder();
         for (int i = 0; i < hex.length(); i += 2) {
             if (i > 0) {
                 out.append(':');
             }
-            out.append(hex, i, Math.min(i + 2, hex.length()));
+            out.append(hex, i, i + 2);
         }
         return out.toString();
     }

@@ -9,6 +9,7 @@ package io.jans.fido2.service.readiness;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -284,5 +285,34 @@ class ContentCheckerTest {
         assertEquals("T1.b.one", ExpectedAssociationFileBuilder.appleAppSiteAssociation(party)
                 .path("webcredentials").path("apps").get(0).asText());
         assertNotEquals(assetLinks.get(0), assetLinks.get(1));
+    }
+
+    // ---- review hardening
+
+    @Test
+    void relationOnADifferentStatementThanTheFingerprint_doesNotPass() {
+        String split = "[" + statement("delegate_permission/common.handle_all_urls", "com.example.app", FP1) + ","
+                + statement(REL, "com.example.app", FP2) + "]";
+        assertTrue(any(android(ONE_APP, split), "content.android.relation", CheckStatus.FAIL, "com.example.app"));
+    }
+
+    @Test
+    void trailingJsonAfterTheDocument_failsParse() {
+        String body = "[" + statement(REL, "com.example.app", FP1) + "] []";
+        assertEquals(CheckStatus.FAIL, android(ONE_APP, body).get(0).status());
+        assertEquals("content.parse", android(ONE_APP, body).get(0).id());
+    }
+
+    @Test
+    void appsAsObject_isNotAcceptedAsAnArray() {
+        String body = "{\"webcredentials\":{\"apps\":{\"x\":\"ABCDE12345.com.example.app\"}}}";
+        assertTrue(any(aasa(ONE_IOS, body), "content.ios.app", CheckStatus.FAIL, "not listed"));
+    }
+
+    @Test
+    void fingerprintWithInvalidCharacters_isNotNormalizedToAMatch() {
+        assertNull(ExpectedAssociationFileBuilder.normalizeFingerprint(FP1 + "Z"));
+        String body = "[" + statement(REL, "com.example.app", FP1 + "Z") + "]";
+        assertTrue(any(android(ONE_APP, body), "content.android.fingerprint", CheckStatus.FAIL, "not listed"));
     }
 }
