@@ -33,8 +33,11 @@ pub use authorization_config::AuthorizationConfig;
 pub use jwt_config::JwtConfig;
 pub use lock_config::{LockServiceConfig, LockServiceConfigRaw, LockTransport};
 pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};
-pub use policy_store_config::{PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSource};
-pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType};
+pub use policy_store_config::{
+    PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSignature, PolicyStoreSource,
+    SigstoreSigner,
+};
+pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType, SigstoreMode};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -262,6 +265,10 @@ pub enum BootstrapConfigLoadingError {
         "cjar_url is missing or empty. A valid URL is required for CjarUrl policy store source."
     )]
     MissingCjarUrl,
+
+    /// Error returned when signature enforcement is on but a required property is unset.
+    #[error("`CEDARLING_POLICY_STORE_SIGSTORE_MODE` is `enforce` but `{0}` is not set")]
+    MissingSigstoreProperty(&'static str),
 
     /// Error returned when transport is set to gRPC but no gRPC endpoint is configured.
     #[error(
