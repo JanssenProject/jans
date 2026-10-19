@@ -315,4 +315,13 @@ class ContentCheckerTest {
         String body = "[" + statement(REL, "com.example.app", FP1 + "Z") + "]";
         assertTrue(any(android(ONE_APP, body), "content.android.fingerprint", CheckStatus.FAIL, "not listed"));
     }
+
+    @Test
+    void relationAndFingerprintsAsObjects_doNotEstablishAMatch() {
+        String body = "[{\"relation\":{\"r\":\"" + REL + "\"},\"target\":{\"namespace\":\"android_app\","
+                + "\"package_name\":\"com.example.app\",\"sha256_cert_fingerprints\":{\"f\":\"" + FP1 + "\"}}}]";
+        List<CheckResult> checks = android(ONE_APP, body);
+        assertTrue(any(checks, "content.android.relation", CheckStatus.FAIL, "com.example.app"));
+        assertTrue(any(checks, "content.android.fingerprint", CheckStatus.FAIL, "not listed"));
+    }
 }

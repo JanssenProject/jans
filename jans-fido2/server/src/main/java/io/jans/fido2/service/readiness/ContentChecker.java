@@ -182,14 +182,14 @@ public class ContentChecker {
             }
             String pkg = target.path("package_name").asText();
             boolean hasRelation = false;
-            for (JsonNode relation : statement.path("relation")) {
+            for (JsonNode relation : array(statement.path("relation"))) {
                 hasRelation |= LOGIN_CREDS_RELATION.equals(relation.asText());
             }
             facts.add("P|" + pkg);
             if (hasRelation) {
                 facts.add("R|" + pkg);
             }
-            for (JsonNode fingerprint : target.path("sha256_cert_fingerprints")) {
+            for (JsonNode fingerprint : array(target.path("sha256_cert_fingerprints"))) {
                 String normalized = fingerprint.isTextual()
                         ? ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint.asText()) : null;
                 if (normalized != null) {
@@ -203,11 +203,16 @@ public class ContentChecker {
         return facts;
     }
 
+    /** The node itself when it is a JSON array, else nothing to iterate (objects would iterate their values). */
+    private static Iterable<JsonNode> array(JsonNode node) {
+        return node.isArray() ? node : List.of();
+    }
+
     /** The upper-cased {@code webcredentials.apps} entries. */
     private static Set<String> iosFacts(JsonNode association) {
         Set<String> facts = new HashSet<>();
         JsonNode apps = association.path("webcredentials").path("apps");
-        for (JsonNode app : apps.isArray() ? apps : MAPPER.createArrayNode()) {
+        for (JsonNode app : array(apps)) {
             if (app.isTextual()) {
                 facts.add(app.asText().toUpperCase(Locale.ROOT));
             }
