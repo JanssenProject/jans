@@ -81,7 +81,7 @@ public class ContentChecker {
             String pkg = app.getPackageName();
             checks.add(found.contains("P|" + pkg) ? pass(ID_PACKAGE, PACKAGE + pkg + " listed")
                     : fail(ID_PACKAGE, PACKAGE + pkg + " not listed"));
-            checks.addAll(fingerprintChecks(app, found));
+            checks.addAll(fingerprintChecks(app, party.getAndroidApps(), found));
             checks.add(relationBound(app, found)
                     ? pass(ID_RELATION, PACKAGE + pkg + " has the login credentials relation")
                     : fail(ID_RELATION, PACKAGE + pkg + " lacks " + LOGIN_CREDS_RELATION));
@@ -113,7 +113,7 @@ public class ContentChecker {
         return checks;
     }
 
-    private static List<CheckResult> fingerprintChecks(AndroidApp app, Set<String> found) {
+    private static List<CheckResult> fingerprintChecks(AndroidApp app, List<AndroidApp> allApps, Set<String> found) {
         String pkg = app.getPackageName();
         List<CheckResult> checks = new ArrayList<>();
         Set<String> configured = new HashSet<>();
@@ -126,6 +126,15 @@ public class ContentChecker {
             if (!found.contains("F|" + pkg + "|" + normalized)) {
                 checks.add(fail(ID_FINGERPRINT,
                         "fingerprint " + fingerprint + " for package " + pkg + " not listed"));
+            }
+        }
+        // fingerprints configured on any entry for the same package are expected, not "unconfigured"
+        for (AndroidApp other : allApps) {
+            if (pkg.equals(other.getPackageName())) {
+                for (String fingerprint : other.getSha256CertFingerprints()) {
+                    String normalized = ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint);
+                    configured.add(normalized != null ? normalized : fingerprint);
+                }
             }
         }
         String prefix = "F|" + pkg + "|";

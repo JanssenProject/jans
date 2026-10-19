@@ -324,4 +324,12 @@ class ContentCheckerTest {
         assertTrue(any(checks, "content.android.relation", CheckStatus.FAIL, "com.example.app"));
         assertTrue(any(checks, "content.android.fingerprint", CheckStatus.FAIL, "not listed"));
     }
+
+    @Test
+    void twoEntriesForOnePackage_doNotWarnAboutEachOthersFingerprints() {
+        RequestedParty party = party(List.of(android("com.example.app", FP1), android("com.example.app", FP2)), List.of());
+        String generated = ExpectedAssociationFileBuilder.assetLinks(party).toString();
+        assertTrue(byId(android(party, generated), "content.android.fingerprint").stream()
+                .allMatch(c -> c.status() == CheckStatus.PASS));
+    }
 }
