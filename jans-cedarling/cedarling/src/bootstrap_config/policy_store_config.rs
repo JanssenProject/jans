@@ -117,6 +117,14 @@ impl Default for PolicyStoreConfig {
     }
 }
 
+impl PolicyStoreSource {
+    /// `true` for `.cjar` sources, the only ones that can carry a Sigstore signature.
+    /// URL sources count, since what they serve is only known once fetched.
+    pub(crate) fn is_archive(&self) -> bool {
+        !matches!(self, Self::Yaml(_) | Self::FileYaml(_) | Self::Directory(_))
+    }
+}
+
 /// Raw policy store config
 pub struct PolicyStoreConfigRaw {
     /// Source

@@ -486,7 +486,7 @@ policy store signature verified: identity=asset-signer@... issuer=https://accoun
 | [Lock Server](./cedarling-lock-server.md#loading-policy-stores-from-lock-server) | Set `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` to the full URL `https://<lock-host>/jans-lock/api/v1/policy/{policy_store_id}/sigstore`. It is fetched with the same client as the store, so the Lock access token is sent |
 | Archive bytes (`initFromArchiveBytes`, `load_from_json_with_archive_bytes`) | `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` is required |
 
-`CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` overrides the location for any source. Directory and YAML policy stores cannot be signed, so `enforce` with them is a configuration error.
+`CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` overrides the location for any source. Directory and YAML policy stores cannot be signed, so `enforce` with them fails at startup.
 
 ### Limitations
 

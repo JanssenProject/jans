@@ -270,12 +270,6 @@ pub enum BootstrapConfigLoadingError {
     #[error("`CEDARLING_POLICY_STORE_SIGSTORE_MODE` is `enforce` but `{0}` is not set")]
     MissingSigstoreProperty(&'static str),
 
-    /// Error returned when signature enforcement is on for a source that cannot be signed.
-    #[error(
-        "`CEDARLING_POLICY_STORE_SIGSTORE_MODE` is `enforce` but the policy store is not a `.cjar` archive"
-    )]
-    SigstoreUnsupportedSource,
-
     /// Error returned when transport is set to gRPC but no gRPC endpoint is configured.
     #[error(
         "`CEDARLING_LOCK_TRANSPORT` is set to `grpc` but `CEDARLING_LOCK_GRPC_ENDPOINT` is not set."

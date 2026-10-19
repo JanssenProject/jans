@@ -124,9 +124,10 @@ SIGSTORE_ENFORCE = {
 
 
 def test_sigstore_enforce_requires_cjar_source():
-    # policy-store_ok.yaml can't be signed, so enforcing must fail at config time
+    # policy-store_ok.yaml can't be signed, so enforcing must fail at startup
+    config = load_bootstrap_config(config_cb=lambda c: c.update(SIGSTORE_ENFORCE))
     with pytest.raises(ValueError, match="is not a `.cjar` archive"):
-        load_bootstrap_config(config_cb=lambda c: c.update(SIGSTORE_ENFORCE))
+        Cedarling(config)
 
 
 def test_sigstore_enforce_requires_signer():

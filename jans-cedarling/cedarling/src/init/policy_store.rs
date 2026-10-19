@@ -180,6 +180,11 @@ async fn load_verified_policy_store(
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
     let limits = config.archive_limits();
 
+    // Checked here rather than when decoding, so a `BootstrapConfig` built directly can't skip it.
+    if verifier.is_some() && !config.source.is_archive() {
+        return Err(SignatureError::UnsupportedSource.into());
+    }
+
     let loaded = match &config.source {
         PolicyStoreSource::Yaml(policy_yaml) => {
             if crate::common::policy_store::is_json_content(policy_yaml) {
@@ -1214,6 +1219,35 @@ mod signature_tests {
         load_from_url(PolicyStoreSource::CjarUrl(url), None)
             .await
             .expect("without enforcement a store loads with no bundle");
+    }
+
+    /// A config built directly, not decoded from raw properties, must not be able
+    /// to enforce signatures on a store that can't be signed.
+    #[tokio::test]
+    async fn enforce_rejects_unsigned_sources_however_configured() {
+        let dir = tempfile::tempdir().expect("temp dir");
+        let sources = [
+            PolicyStoreSource::Yaml("cedar_version: v4.0.0\npolicy_stores: {}".to_string()),
+            PolicyStoreSource::FileYaml(dir.path().join("store.yaml")),
+            PolicyStoreSource::Directory(dir.path().to_path_buf()),
+        ];
+        for source in sources {
+            let config = PolicyStoreConfig {
+                source: source.clone(),
+                signature: PolicyStoreSignature::Enforce(signature(TestSigner::IDENTITY, None)),
+                ..Default::default()
+            };
+            let err = load_policy_store(&config, &HTTP_CLIENT, false)
+                .await
+                .expect_err("enforce must reject a source that can't be signed");
+            assert!(
+                matches!(
+                    err,
+                    PolicyStoreLoadError::Signature(SignatureError::UnsupportedSource)
+                ),
+                "expected UnsupportedSource for {source:?}, got {err:?}"
+            );
+        }
     }
 
     #[tokio::test]

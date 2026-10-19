@@ -33,6 +33,11 @@ pub enum SignatureError {
         #[source]
         source: HttpClientError,
     },
+    /// The policy store is not a `.cjar` archive, so it cannot carry a signature.
+    #[error(
+        "`CEDARLING_POLICY_STORE_SIGSTORE_MODE` is `enforce` but the policy store is not a `.cjar` archive"
+    )]
+    UnsupportedSource,
     /// An in-memory archive has no location to derive its bundle location from.
     #[error(
         "no signature bundle location for an in-memory policy store; set CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI"

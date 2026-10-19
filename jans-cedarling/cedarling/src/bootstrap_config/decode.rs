@@ -180,7 +180,7 @@ fn build_policy_store_config(
         _ => return Err(BootstrapConfigLoadingError::ConflictingPolicyStores),
     };
 
-    let signature = build_policy_store_signature(raw, &source)?;
+    let signature = build_policy_store_signature(raw)?;
     Ok(PolicyStoreConfig {
         source,
         refresh_interval_secs: raw.policy_store_refresh_interval_secs,
@@ -189,21 +189,12 @@ fn build_policy_store_config(
     })
 }
 
-/// Build the Sigstore check; `enforce` needs a signer and a `.cjar` source.
+/// Build the Sigstore check; `enforce` needs a signer. The loader checks the source.
 fn build_policy_store_signature(
     raw: &BootstrapConfigRaw,
-    source: &PolicyStoreSource,
 ) -> Result<PolicyStoreSignature, BootstrapConfigLoadingError> {
     if raw.policy_store_sigstore_mode == SigstoreMode::Disabled {
         return Ok(PolicyStoreSignature::Disabled);
-    }
-    if matches!(
-        source,
-        PolicyStoreSource::Yaml(_)
-            | PolicyStoreSource::FileYaml(_)
-            | PolicyStoreSource::Directory(_)
-    ) {
-        return Err(BootstrapConfigLoadingError::SigstoreUnsupportedSource);
     }
     // A blank value would never match a certificate, so treat it as unset.
     let required = |value: &Option<String>, property| {
@@ -527,17 +518,6 @@ mod tests {
                 )
             ),
             "expected missing issuer, got {err:?}"
-        );
-    }
-
-    #[test]
-    fn sigstore_enforce_rejects_unsigned_sources() {
-        let raw: BootstrapConfigRaw = serde_json::from_str(&raw_config_json(SIGNER))
-            .expect("raw bootstrap config should deserialize");
-        let err = BootstrapConfig::try_from(raw).expect_err("enforce on inline YAML must fail");
-        assert!(
-            matches!(err, BootstrapConfigLoadingError::SigstoreUnsupportedSource),
-            "expected SigstoreUnsupportedSource, got {err:?}"
         );
     }
 
