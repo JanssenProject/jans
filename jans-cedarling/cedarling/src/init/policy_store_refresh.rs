@@ -46,7 +46,9 @@ use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
 use super::authz_builder::{BuildAuthzError, build_authz};
 
 use super::policy_store::{PolicyStoreLoadError, ZIP_MAGIC, parse_cjar_bytes};
-use super::policy_store_signature::{ArchiveVerifier, VerifiedArchive, check_if_enabled};
+use super::policy_store_signature::{
+    ArchiveVerifier, SignatureError, VerifiedArchive, check_if_enabled,
+};
 
 /// Upper bound on exponential backoff between failed refresh attempts.
 const REFRESH_FAILURE_BACKOFF_MAX_SECS: u64 = 600;
@@ -811,8 +813,15 @@ async fn parse_swap_and_record(
 }
 
 /// A failed signature check keeps its own outcome so it is not mistaken for a broken store.
+/// A bundle that could not be fetched counts like any fetch failure; a missing one (404) does not.
 fn classify_parse_error(e: &PolicyStoreLoadError) -> (RefreshOutcome, &'static str) {
     match e {
+        PolicyStoreLoadError::Signature(SignatureError::BundleFetch { source, .. })
+            if source.status_code() != Some(reqwest::StatusCode::NOT_FOUND) =>
+        {
+            let (kind, outcome) = classify_fetch_error(source);
+            (outcome, kind)
+        },
         PolicyStoreLoadError::Signature(_) => {
             (RefreshOutcome::VerificationError, "signature check failure")
         },
@@ -2032,6 +2041,45 @@ mod signature_tests {
         refresh(archive(), None, None)
             .await
             .expect("with signature checks off a refresh parses without a bundle");
+    }
+
+    #[tokio::test]
+    async fn bundle_transport_failures_are_fetch_outcomes() {
+        let mut server = Server::new_async().await;
+        server
+            .mock("GET", "/store.cjar.sigstore.json")
+            .with_status(500)
+            .create_async()
+            .await;
+        let signer = TestSigner::new();
+        let verifier = verifier(&signer);
+        let http = http_client();
+        let archive = archive();
+
+        let server_error = verifier
+            .check(
+                &http,
+                Some(&format!("{}/store.cjar", server.url())),
+                &archive,
+            )
+            .await
+            .expect_err("a 500 bundle response must fail");
+        // Port 1 is never listening, so the request fails before any response.
+        let unreachable = verifier
+            .check(&http, Some("http://127.0.0.1:1/store.cjar"), &archive)
+            .await
+            .expect_err("an unreachable bundle host must fail");
+
+        assert_eq!(
+            classify_parse_error(&PolicyStoreLoadError::Signature(server_error)).0,
+            RefreshOutcome::HttpError,
+            "a 5xx while fetching the bundle is an HTTP error, not a signature failure"
+        );
+        assert_eq!(
+            classify_parse_error(&PolicyStoreLoadError::Signature(unreachable)).0,
+            RefreshOutcome::NetworkError,
+            "a connection failure while fetching the bundle is a network error"
+        );
     }
 
     #[test]

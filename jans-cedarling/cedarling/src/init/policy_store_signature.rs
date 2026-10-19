@@ -14,7 +14,8 @@ use sigstore_verifier::{
 };
 
 use crate::bootstrap_config::{PolicyStoreSignature, SigstoreSigner};
-use crate::http::HttpClient;
+use crate::http::{HttpClient, HttpClientError};
+use crate::http_utils::{HttpRequestError, HttpRequestReasonError};
 
 /// Bundles are a few KB; anything near this is not a bundle.
 const MAX_BUNDLE_BYTES: u64 = 1024 * 1024;
@@ -22,9 +23,16 @@ const MAX_BUNDLE_BYTES: u64 = 1024 * 1024;
 /// Why a policy store failed its signature check.
 #[derive(Debug, thiserror::Error)]
 pub enum SignatureError {
-    /// The bundle could not be fetched or read.
+    /// The bundle could not be read from disk, or is too large to be a bundle.
     #[error("failed to load the policy store signature bundle from {location}: {reason}")]
     Bundle { location: String, reason: String },
+    /// The bundle could not be fetched over HTTP.
+    #[error("failed to fetch the policy store signature bundle from {location}: {source}")]
+    BundleFetch {
+        location: String,
+        #[source]
+        source: HttpClientError,
+    },
     /// An in-memory archive has no location to derive its bundle location from.
     #[error(
         "no signature bundle location for an in-memory policy store; set CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI"
@@ -133,12 +141,10 @@ impl ArchiveVerifier {
         http: &HttpClient,
         location: &str,
     ) -> Result<Vec<u8>, SignatureError> {
-        let bundle = if is_http_url(location) {
-            fetch_bundle(http, location).await
-        } else {
-            read_bundle_file(location)
-        };
-        bundle.map_err(|reason| SignatureError::Bundle {
+        if is_http_url(location) {
+            return fetch_bundle(http, location).await;
+        }
+        read_bundle_file(location).map_err(|reason| SignatureError::Bundle {
             location: location.to_string(),
             reason,
         })
@@ -183,11 +189,23 @@ fn default_bundle_location(store_location: &str) -> String {
     }
 }
 
-async fn fetch_bundle(http: &HttpClient, url: &str) -> Result<Vec<u8>, String> {
-    let response = http.get_with_retry(url).await.map_err(|e| e.to_string())?;
+/// Transport and HTTP failures stay typed so refresh can count them as network errors.
+async fn fetch_bundle(http: &HttpClient, url: &str) -> Result<Vec<u8>, SignatureError> {
+    let fetch_err = |source| SignatureError::BundleFetch {
+        location: url.to_string(),
+        source,
+    };
+    let response = http.get_with_retry(url).await.map_err(fetch_err)?;
+    let status = response.status();
     crate::http_utils::read_response_capped(response, Some(MAX_BUNDLE_BYTES))
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|reason| match reason {
+            HttpRequestReasonError::ResponseTooLarge { .. } => SignatureError::Bundle {
+                location: url.to_string(),
+                reason: format!("bundle exceeds {MAX_BUNDLE_BYTES} bytes"),
+            },
+            reason => fetch_err(HttpRequestError::new(reason, Some(status))),
+        })
 }
 
 fn read_bundle_file(path: &str) -> Result<Vec<u8>, String> {
@@ -414,11 +432,37 @@ mod tests {
             .await
             .expect_err("a 404 bundle must fail");
         assert!(
-            matches!(err, SignatureError::Bundle { .. }),
-            "expected a bundle error, got {err:?}"
+            matches!(
+                err,
+                SignatureError::BundleFetch { ref source, .. }
+                    if source.status_code() == Some(reqwest::StatusCode::NOT_FOUND)
+            ),
+            "expected a 404 bundle fetch error, got {err:?}"
         );
         ok.assert_async().await;
         missing.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn oversized_http_bundle_is_a_bundle_error() {
+        let mut server = Server::new_async().await;
+        let size = usize::try_from(MAX_BUNDLE_BYTES).expect("fits usize") + 1;
+        server
+            .mock("GET", "/big.sigstore.json")
+            .with_body(vec![b' '; size])
+            .create_async()
+            .await;
+        let err = static_verifier(&enforce(TestSigner::IDENTITY))
+            .load_bundle(
+                &http_client(),
+                &format!("{}/big.sigstore.json", server.url()),
+            )
+            .await
+            .expect_err("an oversized bundle must fail");
+        assert!(
+            matches!(err, SignatureError::Bundle { ref reason, .. } if reason.contains("exceeds")),
+            "an oversized bundle is a bad bundle, not a network error, got {err:?}"
+        );
     }
 
     #[tokio::test]

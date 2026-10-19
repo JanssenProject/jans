@@ -1205,9 +1205,10 @@ mod signature_tests {
         assert!(
             matches!(
                 err,
-                PolicyStoreLoadError::Signature(SignatureError::Bundle { .. })
+                PolicyStoreLoadError::Signature(SignatureError::BundleFetch { ref source, .. })
+                    if source.status_code() == Some(reqwest::StatusCode::NOT_FOUND)
             ),
-            "expected a bundle error, got {err:?}"
+            "expected a 404 bundle fetch error, got {err:?}"
         );
 
         load_from_url(PolicyStoreSource::CjarUrl(url), None)
