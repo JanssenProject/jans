@@ -116,30 +116,16 @@ public class ContentChecker {
     private static List<CheckResult> fingerprintChecks(AndroidApp app, List<AndroidApp> allApps, Set<String> found) {
         String pkg = app.getPackageName();
         List<CheckResult> checks = new ArrayList<>();
-        Set<String> configured = new HashSet<>();
         if (ExpectedAssociationFileBuilder.fingerprints(app).isEmpty()) {
             checks.add(fail(ID_FINGERPRINT, "no fingerprint configured for " + PACKAGE + pkg));
         }
         for (String fingerprint : ExpectedAssociationFileBuilder.fingerprints(app)) {
-            String normalized = ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint);
-            if (normalized == null) {
-                normalized = fingerprint;
-            }
-            configured.add(normalized);
-            if (!found.contains("F|" + pkg + "|" + normalized)) {
+            if (!found.contains("F|" + pkg + "|" + ExpectedAssociationFileBuilder.normalizeOrRaw(fingerprint))) {
                 checks.add(fail(ID_FINGERPRINT,
                         "fingerprint " + fingerprint + " for package " + pkg + " not listed"));
             }
         }
-        // fingerprints configured on any entry for the same package are expected, not "unconfigured"
-        for (AndroidApp other : allApps) {
-            if (pkg.equals(other.getPackageName())) {
-                for (String fingerprint : ExpectedAssociationFileBuilder.fingerprints(other)) {
-                    String normalized = ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint);
-                    configured.add(normalized != null ? normalized : fingerprint);
-                }
-            }
-        }
+        Set<String> configured = configuredFingerprints(pkg, allApps);
         String prefix = "F|" + pkg + "|";
         long unconfigured = found.stream().filter(f -> f.startsWith(prefix))
                 .filter(f -> !configured.contains(f.substring(prefix.length()))).count();
@@ -153,6 +139,19 @@ public class ContentChecker {
         return checks;
     }
 
+    /** Fingerprints configured on any entry for the same package are expected, not "unconfigured". */
+    private static Set<String> configuredFingerprints(String pkg, List<AndroidApp> allApps) {
+        Set<String> configured = new HashSet<>();
+        for (AndroidApp other : allApps) {
+            if (pkg.equals(other.getPackageName())) {
+                for (String fingerprint : ExpectedAssociationFileBuilder.fingerprints(other)) {
+                    configured.add(ExpectedAssociationFileBuilder.normalizeOrRaw(fingerprint));
+                }
+            }
+        }
+        return configured;
+    }
+
     /** The relation must sit on a statement that also carries each configured fingerprint; an app with none cannot pass. */
     private static boolean relationBound(AndroidApp app, Set<String> found) {
         String pkg = app.getPackageName();
@@ -160,8 +159,7 @@ public class ContentChecker {
             return false;
         }
         for (String fingerprint : ExpectedAssociationFileBuilder.fingerprints(app)) {
-            String normalized = ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint);
-            if (!found.contains("RF|" + pkg + "|" + (normalized != null ? normalized : fingerprint))) {
+            if (!found.contains("RF|" + pkg + "|" + ExpectedAssociationFileBuilder.normalizeOrRaw(fingerprint))) {
                 return false;
             }
         }
@@ -206,18 +204,22 @@ public class ContentChecker {
             if (hasRelation) {
                 facts.add("R|" + pkg);
             }
-            for (JsonNode fingerprint : array(target.path("sha256_cert_fingerprints"))) {
-                String normalized = fingerprint.isTextual()
-                        ? ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint.asText()) : null;
-                if (normalized != null) {
-                    facts.add("F|" + pkg + "|" + normalized);
-                    if (hasRelation) {
-                        facts.add("RF|" + pkg + "|" + normalized);
-                    }
+            addFingerprintFacts(facts, pkg, target, hasRelation);
+        }
+        return facts;
+    }
+
+    private static void addFingerprintFacts(Set<String> facts, String pkg, JsonNode target, boolean hasRelation) {
+        for (JsonNode fingerprint : array(target.path("sha256_cert_fingerprints"))) {
+            String normalized = fingerprint.isTextual()
+                    ? ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint.asText()) : null;
+            if (normalized != null) {
+                facts.add("F|" + pkg + "|" + normalized);
+                if (hasRelation) {
+                    facts.add("RF|" + pkg + "|" + normalized);
                 }
             }
         }
-        return facts;
     }
 
     private static boolean hasLoginCredsRelation(JsonNode statement) {

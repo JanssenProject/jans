@@ -92,17 +92,36 @@ public final class ExpectedAssociationFileBuilder {
      * {@code null} unless the input is whole hex bytes, optionally colon-separated between bytes.
      */
     public static String normalizeFingerprint(String fingerprint) {
-        if (fingerprint == null || !fingerprint.matches("[0-9A-Fa-f]{2}(:?[0-9A-Fa-f]{2})*")) {
+        if (fingerprint == null) {
             return null;
         }
-        String hex = fingerprint.replace(":", "").toUpperCase(Locale.ROOT);
         StringBuilder out = new StringBuilder();
-        for (int i = 0; i < hex.length(); i += 2) {
-            if (i > 0) {
+        int i = 0;
+        int n = fingerprint.length();
+        while (i < n) {
+            if (i + 2 > n || Character.digit(fingerprint.charAt(i), 16) < 0
+                    || Character.digit(fingerprint.charAt(i + 1), 16) < 0) {
+                return null;
+            }
+            if (out.length() > 0) {
                 out.append(':');
             }
-            out.append(hex, i, i + 2);
+            out.append(fingerprint, i, i + 2);
+            i += 2;
+            // one optional colon between bytes, never trailing
+            if (i < n && fingerprint.charAt(i) == ':') {
+                i++;
+                if (i == n) {
+                    return null;
+                }
+            }
         }
-        return out.toString();
+        return out.length() == 0 ? null : out.toString().toUpperCase(Locale.ROOT);
+    }
+
+    /** The normalized fingerprint, or the raw text when it is not valid hex (so it can never match). */
+    static String normalizeOrRaw(String fingerprint) {
+        String normalized = normalizeFingerprint(fingerprint);
+        return normalized != null ? normalized : fingerprint;
     }
 }
