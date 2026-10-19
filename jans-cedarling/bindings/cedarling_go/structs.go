@@ -221,9 +221,8 @@ type MultiIssuerAuthorizeResult struct {
 	Response  CedarResponse `json:"response"`
 	Decision  bool          `json:"decision"`
 	RequestID string        `json:"request_id"`
-	// DroppedTokens lists the supplied tokens that were not used in this
-	// decision; empty when every token contributed.
-	DroppedTokens []DroppedToken `json:"dropped_tokens"`
+	// DroppedTokens lists the supplied tokens that were not used in this decision.
+	DroppedTokens []DroppedToken `json:"dropped_tokens,omitempty"`
 }
 
 // DroppedToken is a token the caller supplied that multi-issuer authorization
