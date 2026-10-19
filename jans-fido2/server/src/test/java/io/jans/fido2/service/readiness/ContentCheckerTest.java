@@ -329,7 +329,8 @@ class ContentCheckerTest {
     void twoEntriesForOnePackage_doNotWarnAboutEachOthersFingerprints() {
         RequestedParty party = party(List.of(android("com.example.app", FP1), android("com.example.app", FP2)), List.of());
         String generated = ExpectedAssociationFileBuilder.assetLinks(party).toString();
-        assertTrue(byId(android(party, generated), "content.android.fingerprint").stream()
-                .allMatch(c -> c.status() == CheckStatus.PASS));
+        List<CheckResult> fingerprintChecks = byId(android(party, generated), "content.android.fingerprint");
+        assertEquals(2, fingerprintChecks.size());
+        assertTrue(fingerprintChecks.stream().allMatch(c -> c.status() == CheckStatus.PASS));
     }
 }
