@@ -42,14 +42,18 @@ pub enum PolicyStoreSignature {
     #[default]
     Disabled,
     /// The archive loads only if its bundle verifies for this signer.
-    Enforce {
-        /// Expected certificate SAN, matched exactly.
-        cert_identity: String,
-        /// Expected OIDC issuer, matched exactly.
-        cert_oidc_issuer: String,
-        /// Bundle location; `None` means the store location plus `.sigstore.json`.
-        bundle_uri: Option<String>,
-    },
+    Enforce(SigstoreSigner),
+}
+
+/// Expected signer of a `.cjar` policy store, and where its bundle lives.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SigstoreSigner {
+    /// Expected certificate SAN, matched exactly.
+    pub cert_identity: String,
+    /// Expected OIDC issuer, matched exactly.
+    pub cert_oidc_issuer: String,
+    /// Bundle location; `None` means the store location plus `.sigstore.json`.
+    pub bundle_uri: Option<String>,
 }
 
 /// Serde default for [`PolicyStoreConfig::max_file_size`], so a config

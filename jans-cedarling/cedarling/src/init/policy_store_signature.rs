@@ -13,7 +13,7 @@ use sigstore_verifier::{
     IdentityMatch, SigstoreBlobVerifier, SigstoreVerificationError, VerificationPolicy,
 };
 
-use crate::bootstrap_config::PolicyStoreSignature;
+use crate::bootstrap_config::{PolicyStoreSignature, SigstoreSigner};
 use crate::http::HttpClient;
 
 /// Bundles are a few KB; anything near this is not a bundle.
@@ -82,38 +82,26 @@ pub(crate) async fn check_if_enabled(
 /// Verifies `.cjar` archives against the configured signer.
 pub(crate) struct ArchiveVerifier {
     verifier: SigstoreBlobVerifier,
-    identity: String,
-    issuer: String,
-    bundle_uri: Option<String>,
+    signer: SigstoreSigner,
 }
 
 impl ArchiveVerifier {
     /// Returns `None` when signature checking is disabled.
-    pub(crate) fn new(signature: &PolicyStoreSignature) -> Option<Self> {
-        if *signature == PolicyStoreSignature::Disabled {
-            return None;
+    pub(crate) fn from_config(signature: &PolicyStoreSignature) -> Option<Self> {
+        match signature {
+            PolicyStoreSignature::Disabled => None,
+            PolicyStoreSignature::Enforce(signer) => Some(Self::new(
+                signer,
+                SigstoreBlobVerifier::with_static_trust_root(),
+            )),
         }
-        Self::with_verifier(signature, SigstoreBlobVerifier::with_static_trust_root())
     }
 
-    pub(crate) fn with_verifier(
-        signature: &PolicyStoreSignature,
-        verifier: SigstoreBlobVerifier,
-    ) -> Option<Self> {
-        let PolicyStoreSignature::Enforce {
-            cert_identity,
-            cert_oidc_issuer,
-            bundle_uri,
-        } = signature
-        else {
-            return None;
-        };
-        Some(Self {
+    pub(crate) fn new(signer: &SigstoreSigner, verifier: SigstoreBlobVerifier) -> Self {
+        Self {
             verifier,
-            identity: cert_identity.clone(),
-            issuer: cert_oidc_issuer.clone(),
-            bundle_uri: bundle_uri.clone(),
-        })
+            signer: signer.clone(),
+        }
     }
 
     /// Loads the bundle for a store at `store_location` and verifies `archive` with it.
@@ -133,7 +121,8 @@ impl ArchiveVerifier {
 
     /// The configured override, else the store location plus `.sigstore.json`.
     fn bundle_location(&self, store_location: Option<&str>) -> Option<String> {
-        self.bundle_uri
+        self.signer
+            .bundle_uri
             .clone()
             .or_else(|| store_location.map(default_bundle_location))
     }
@@ -158,15 +147,15 @@ impl ArchiveVerifier {
     /// Verifies `bundle` over `archive`.
     fn verify(&self, archive: &[u8], bundle: &[u8]) -> Result<VerifiedArchive, SignatureError> {
         let policy = VerificationPolicy {
-            cert_identity: IdentityMatch::Exact(self.identity.clone()),
-            cert_issuer: self.issuer.clone(),
+            cert_identity: IdentityMatch::Exact(self.signer.cert_identity.clone()),
+            cert_issuer: self.signer.cert_oidc_issuer.clone(),
         };
         let verified = self
             .verifier
             .verify(archive, bundle, &policy)
             .map_err(|source| SignatureError::Verification {
-                identity: self.identity.clone(),
-                issuer: self.issuer.clone(),
+                identity: self.signer.cert_identity.clone(),
+                issuer: self.signer.cert_oidc_issuer.clone(),
                 source,
             })?;
         Ok(VerifiedArchive {
@@ -234,17 +223,21 @@ mod tests {
     const ARCHIVE: &[u8] = b"abc";
     const ARCHIVE_SHA256: &str = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
 
-    fn enforce(identity: &str) -> PolicyStoreSignature {
-        PolicyStoreSignature::Enforce {
+    fn enforce(identity: &str) -> SigstoreSigner {
+        SigstoreSigner {
             cert_identity: identity.to_string(),
             cert_oidc_issuer: TestSigner::ISSUER.to_string(),
             bundle_uri: None,
         }
     }
 
+    fn static_verifier(signer: &SigstoreSigner) -> ArchiveVerifier {
+        ArchiveVerifier::new(signer, SigstoreBlobVerifier::with_static_trust_root())
+    }
+
     fn verifier_for(signer: &TestSigner, identity: &str) -> ArchiveVerifier {
         let verifier = SigstoreBlobVerifier::new(&signer.trust_root()).expect("test trust root");
-        ArchiveVerifier::with_verifier(&enforce(identity), verifier).expect("enforce builds")
+        ArchiveVerifier::new(&enforce(identity), verifier)
     }
 
     fn http_client() -> HttpClient {
@@ -260,7 +253,7 @@ mod tests {
     #[test]
     fn disabled_builds_no_verifier() {
         assert!(
-            ArchiveVerifier::new(&PolicyStoreSignature::Disabled).is_none(),
+            ArchiveVerifier::from_config(&PolicyStoreSignature::Disabled).is_none(),
             "disabled mode must not verify"
         );
     }
@@ -315,8 +308,7 @@ mod tests {
     #[test]
     fn static_trust_root_rejects_test_bundles() {
         let signer = TestSigner::new();
-        ArchiveVerifier::new(&enforce(TestSigner::IDENTITY))
-            .expect("enforce builds")
+        static_verifier(&enforce(TestSigner::IDENTITY))
             .verify(ARCHIVE, &signer.sign(ARCHIVE))
             .expect_err("production trust root must not trust the test signer");
     }
@@ -363,12 +355,10 @@ mod tests {
 
     #[test]
     fn bundle_uri_override_wins() {
-        let signature = PolicyStoreSignature::Enforce {
-            cert_identity: TestSigner::IDENTITY.to_string(),
-            cert_oidc_issuer: TestSigner::ISSUER.to_string(),
+        let verifier = static_verifier(&SigstoreSigner {
             bundle_uri: Some("https://lock.example.com/policy/x/sigstore".to_string()),
-        };
-        let verifier = ArchiveVerifier::new(&signature).expect("enforce builds");
+            ..enforce(TestSigner::IDENTITY)
+        });
         assert_eq!(
             verifier
                 .bundle_location(Some("https://lock.example.com/policy/x"))
@@ -385,7 +375,7 @@ mod tests {
 
     #[tokio::test]
     async fn in_memory_archive_without_bundle_uri_is_rejected() {
-        let verifier = ArchiveVerifier::new(&enforce(TestSigner::IDENTITY)).expect("enforce");
+        let verifier = static_verifier(&enforce(TestSigner::IDENTITY));
         let err = verifier
             .check(&http_client(), None, ARCHIVE)
             .await
@@ -410,7 +400,7 @@ mod tests {
             .with_status(404)
             .create_async()
             .await;
-        let verifier = ArchiveVerifier::new(&enforce(TestSigner::IDENTITY)).expect("enforce");
+        let verifier = static_verifier(&enforce(TestSigner::IDENTITY));
         let http = http_client();
 
         let bundle = verifier
@@ -434,7 +424,7 @@ mod tests {
     #[tokio::test]
     async fn bundle_loads_from_file_and_rejects_missing_or_oversized() {
         let dir = tempfile::tempdir().expect("temp dir");
-        let verifier = ArchiveVerifier::new(&enforce(TestSigner::IDENTITY)).expect("enforce");
+        let verifier = static_verifier(&enforce(TestSigner::IDENTITY));
         let http = http_client();
 
         let path = dir.path().join("store.cjar.sigstore.json");

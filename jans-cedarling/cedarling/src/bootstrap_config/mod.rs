@@ -35,6 +35,7 @@ pub use lock_config::{LockServiceConfig, LockServiceConfigRaw, LockTransport};
 pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};
 pub use policy_store_config::{
     PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSignature, PolicyStoreSource,
+    SigstoreSigner,
 };
 pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType, SigstoreMode};
 

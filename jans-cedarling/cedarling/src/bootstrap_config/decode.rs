@@ -20,6 +20,7 @@ use super::raw_config::LoggerType;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSignature, PolicyStoreSource, SigstoreMode,
+    SigstoreSigner,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
 use crate::HttpClientConfig;
@@ -218,11 +219,11 @@ fn build_policy_store_signature(
         &raw.policy_store_sigstore_cert_oidc_issuer,
         "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER",
     )?;
-    Ok(PolicyStoreSignature::Enforce {
+    Ok(PolicyStoreSignature::Enforce(SigstoreSigner {
         cert_identity,
         cert_oidc_issuer,
         bundle_uri: raw.policy_store_sigstore_bundle_uri.clone(),
-    })
+    }))
 }
 
 /// Build `DataStoreConfig` from raw config fields.
@@ -442,11 +443,11 @@ mod tests {
         let config = decode_cjar_url(SIGNER).expect("enforce with signer decodes");
         assert_eq!(
             config.policy_store_config.signature,
-            PolicyStoreSignature::Enforce {
+            PolicyStoreSignature::Enforce(SigstoreSigner {
                 cert_identity: "signer@example.com".to_string(),
                 cert_oidc_issuer: "https://accounts.google.com".to_string(),
                 bundle_uri: None,
-            },
+            }),
             "enforce must carry the configured signer"
         );
 
@@ -457,7 +458,7 @@ mod tests {
         assert!(
             matches!(
                 config.policy_store_config.signature,
-                PolicyStoreSignature::Enforce { bundle_uri: Some(ref uri), .. }
+                PolicyStoreSignature::Enforce(SigstoreSigner { bundle_uri: Some(ref uri), .. })
                     if uri == "https://example.com/b.json"
             ),
             "bundle URI override must be kept"

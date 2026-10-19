@@ -1921,7 +1921,7 @@ mod signature_tests {
     use sigstore_verifier::testing::TestSigner;
 
     use super::*;
-    use crate::bootstrap_config::PolicyStoreSignature;
+    use crate::bootstrap_config::SigstoreSigner;
     use crate::common::policy_store::test_utils::fixtures;
     use crate::http::HttpClientConfig;
     use crate::init::policy_store_signature::SignatureError;
@@ -1937,13 +1937,13 @@ mod signature_tests {
     }
 
     fn verifier(signer: &TestSigner) -> ArchiveVerifier {
-        let signature = PolicyStoreSignature::Enforce {
+        let expected = SigstoreSigner {
             cert_identity: TestSigner::IDENTITY.to_string(),
             cert_oidc_issuer: TestSigner::ISSUER.to_string(),
             bundle_uri: None,
         };
         let trust = SigstoreBlobVerifier::new(&signer.trust_root()).expect("test trust root");
-        ArchiveVerifier::with_verifier(&signature, trust).expect("enforce builds a verifier")
+        ArchiveVerifier::new(&expected, trust)
     }
 
     /// Parses `archive` as a refresh of `/store.cjar`, with `bundle` served next to it.

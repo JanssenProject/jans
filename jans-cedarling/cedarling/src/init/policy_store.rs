@@ -161,7 +161,7 @@ pub(crate) async fn load_policy_store(
     http_client: &HttpClient,
     strict_schema_validation: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
-    let verifier = ArchiveVerifier::new(&config.signature);
+    let verifier = ArchiveVerifier::from_config(&config.signature);
     load_verified_policy_store(
         config,
         http_client,
@@ -1063,7 +1063,7 @@ mod signature_tests {
     use sigstore_verifier::testing::TestSigner;
 
     use super::*;
-    use crate::bootstrap_config::PolicyStoreSignature;
+    use crate::bootstrap_config::{PolicyStoreSignature, SigstoreSigner};
     use crate::common::policy_store::test_utils::fixtures;
     use crate::http::HttpClientConfig;
 
@@ -1083,17 +1083,17 @@ mod signature_tests {
             .expect("test archive builds")
     }
 
-    fn signature(identity: &str, bundle_uri: Option<String>) -> PolicyStoreSignature {
-        PolicyStoreSignature::Enforce {
+    fn signature(identity: &str, bundle_uri: Option<String>) -> SigstoreSigner {
+        SigstoreSigner {
             cert_identity: identity.to_string(),
             cert_oidc_issuer: TestSigner::ISSUER.to_string(),
             bundle_uri,
         }
     }
 
-    fn verifier(signer: &TestSigner, signature: &PolicyStoreSignature) -> ArchiveVerifier {
+    fn verifier(signer: &TestSigner, signature: &SigstoreSigner) -> ArchiveVerifier {
         let trust = SigstoreBlobVerifier::new(&signer.trust_root()).expect("test trust root");
-        ArchiveVerifier::with_verifier(signature, trust).expect("enforce builds a verifier")
+        ArchiveVerifier::new(signature, trust)
     }
 
     /// Serves `archive` at `/store.cjar` and, when given, `bundle` next to it.
@@ -1222,7 +1222,7 @@ mod signature_tests {
         let server = serve(archive.clone(), Some(signer.sign(&archive))).await;
         let config = PolicyStoreConfig {
             source: PolicyStoreSource::CjarUrl(format!("{}/store.cjar", server.url())),
-            signature: signature(TestSigner::IDENTITY, None),
+            signature: PolicyStoreSignature::Enforce(signature(TestSigner::IDENTITY, None)),
             ..Default::default()
         };
 
