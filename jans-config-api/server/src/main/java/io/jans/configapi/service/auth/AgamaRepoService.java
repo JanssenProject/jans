@@ -44,7 +44,9 @@ public class AgamaRepoService {
             throw new InvalidAttributeException("Agama Project url is null!!!");
         }
         String url = URLDecoder.decode(downloadLink, Util.UTF8_STRING_ENCODING);
-        logger.info("Decoded Agama Project url :{}", escapeLog(url));
+        if (logger.isInfoEnabled()) {
+            logger.info("Decoded Agama Project url :{}", escapeLog(url));
+        }
         if (!url.startsWith(AGAMA_LAB_DOWNLOAD_PREFIX)) {
             throw new InvalidAttributeException("Agama Project url must start with " + AGAMA_LAB_DOWNLOAD_PREFIX);
         }
