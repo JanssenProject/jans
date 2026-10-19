@@ -333,4 +333,20 @@ class ContentCheckerTest {
         assertEquals(2, fingerprintChecks.size());
         assertTrue(fingerprintChecks.stream().allMatch(c -> c.status() == CheckStatus.PASS));
     }
+
+    @Test
+    void nullAppListsAndFingerprints_areTreatedAsNothingConfigured() {
+        RequestedParty party = party(null, null);
+        assertEquals(CheckStatus.PASS, byId(android(party, "[]"), "content.android.package").get(0).status());
+        assertEquals(CheckStatus.PASS, byId(aasa(party, "{}"), "content.ios.app").get(0).status());
+        assertEquals(0, ExpectedAssociationFileBuilder.assetLinks(party).size());
+
+        AndroidApp noFingerprints = new AndroidApp();
+        noFingerprints.setPackageName("com.example.app");
+        noFingerprints.setSha256CertFingerprints(null);
+        String body = "[{\"relation\":[\"" + REL + "\"],\"target\":{\"namespace\":\"android_app\","
+                + "\"package_name\":\"com.example.app\"}}]";
+        assertEquals(CheckStatus.PASS, byId(android(party(List.of(noFingerprints), null), body),
+                "content.android.relation").get(0).status());
+    }
 }

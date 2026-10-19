@@ -6,6 +6,7 @@
 
 package io.jans.fido2.service.readiness;
 
+import java.util.List;
 import java.util.Locale;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,12 +40,12 @@ public final class ExpectedAssociationFileBuilder {
     /** The expected {@code assetlinks.json}: a JSON array with one statement per configured Android app. */
     public static ArrayNode assetLinks(RequestedParty party) {
         ArrayNode statements = JSON.arrayNode();
-        for (AndroidApp app : party.getAndroidApps()) {
+        for (AndroidApp app : androidApps(party)) {
             ObjectNode target = JSON.objectNode();
             target.put("namespace", "android_app");
             target.put("package_name", app.getPackageName());
             ArrayNode fingerprints = target.putArray("sha256_cert_fingerprints");
-            for (String fingerprint : app.getSha256CertFingerprints()) {
+            for (String fingerprint : fingerprints(app)) {
                 String normalized = normalizeFingerprint(fingerprint);
                 fingerprints.add(normalized != null ? normalized : fingerprint);
             }
@@ -60,10 +61,25 @@ public final class ExpectedAssociationFileBuilder {
     public static JsonNode appleAppSiteAssociation(RequestedParty party) {
         ObjectNode root = JSON.objectNode();
         ArrayNode apps = root.putObject("webcredentials").putArray("apps");
-        for (IosApp app : party.getIosApps()) {
+        for (IosApp app : iosApps(party)) {
             apps.add(iosAppId(app));
         }
         return root;
+    }
+
+    /** The configured Android apps; the model setters accept null, which means none. */
+    static List<AndroidApp> androidApps(RequestedParty party) {
+        return party.getAndroidApps() == null ? List.of() : party.getAndroidApps();
+    }
+
+    /** The configured iOS apps; null means none. */
+    static List<IosApp> iosApps(RequestedParty party) {
+        return party.getIosApps() == null ? List.of() : party.getIosApps();
+    }
+
+    /** The configured fingerprints of an Android app; null means none. */
+    static List<String> fingerprints(AndroidApp app) {
+        return app.getSha256CertFingerprints() == null ? List.of() : app.getSha256CertFingerprints();
     }
 
     /** {@code TeamID.BundleID}. */

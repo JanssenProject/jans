@@ -72,16 +72,16 @@ public class ContentChecker {
         if (deployed == null) {
             return checks;
         }
-        if (party.getAndroidApps().isEmpty()) {
+        if (ExpectedAssociationFileBuilder.androidApps(party).isEmpty()) {
             checks.add(pass(ID_PACKAGE, "no Android apps configured"));
             return checks;
         }
         Set<String> found = androidFacts(deployed);
-        for (AndroidApp app : party.getAndroidApps()) {
+        for (AndroidApp app : ExpectedAssociationFileBuilder.androidApps(party)) {
             String pkg = app.getPackageName();
             checks.add(found.contains("P|" + pkg) ? pass(ID_PACKAGE, PACKAGE + pkg + " listed")
                     : fail(ID_PACKAGE, PACKAGE + pkg + " not listed"));
-            checks.addAll(fingerprintChecks(app, party.getAndroidApps(), found));
+            checks.addAll(fingerprintChecks(app, ExpectedAssociationFileBuilder.androidApps(party), found));
             checks.add(relationBound(app, found)
                     ? pass(ID_RELATION, PACKAGE + pkg + " has the login credentials relation")
                     : fail(ID_RELATION, PACKAGE + pkg + " lacks " + LOGIN_CREDS_RELATION));
@@ -94,11 +94,11 @@ public class ContentChecker {
         List<CheckResult> checks = new ArrayList<>();
         JsonNode deployed = parse(body, false, checks);
         if (deployed != null) {
-            if (party.getIosApps().isEmpty()) {
+            if (ExpectedAssociationFileBuilder.iosApps(party).isEmpty()) {
                 checks.add(pass(ID_IOS_APP, "no iOS apps configured"));
             } else {
                 Set<String> found = iosFacts(deployed);
-                for (IosApp app : party.getIosApps()) {
+                for (IosApp app : ExpectedAssociationFileBuilder.iosApps(party)) {
                     String id = ExpectedAssociationFileBuilder.iosAppId(app);
                     checks.add(found.contains(id.toUpperCase(Locale.ROOT))
                             ? pass(ID_IOS_APP, "app " + id + " listed in webcredentials.apps")
@@ -117,7 +117,7 @@ public class ContentChecker {
         String pkg = app.getPackageName();
         List<CheckResult> checks = new ArrayList<>();
         Set<String> configured = new HashSet<>();
-        for (String fingerprint : app.getSha256CertFingerprints()) {
+        for (String fingerprint : ExpectedAssociationFileBuilder.fingerprints(app)) {
             String normalized = ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint);
             if (normalized == null) {
                 normalized = fingerprint;
@@ -131,7 +131,7 @@ public class ContentChecker {
         // fingerprints configured on any entry for the same package are expected, not "unconfigured"
         for (AndroidApp other : allApps) {
             if (pkg.equals(other.getPackageName())) {
-                for (String fingerprint : other.getSha256CertFingerprints()) {
+                for (String fingerprint : ExpectedAssociationFileBuilder.fingerprints(other)) {
                     String normalized = ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint);
                     configured.add(normalized != null ? normalized : fingerprint);
                 }
@@ -153,10 +153,10 @@ public class ContentChecker {
     /** The relation must sit on a statement that also carries each configured fingerprint of the app. */
     private static boolean relationBound(AndroidApp app, Set<String> found) {
         String pkg = app.getPackageName();
-        if (app.getSha256CertFingerprints().isEmpty()) {
+        if (ExpectedAssociationFileBuilder.fingerprints(app).isEmpty()) {
             return found.contains("R|" + pkg);
         }
-        for (String fingerprint : app.getSha256CertFingerprints()) {
+        for (String fingerprint : ExpectedAssociationFileBuilder.fingerprints(app)) {
             String normalized = ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint);
             if (!found.contains("RF|" + pkg + "|" + (normalized != null ? normalized : fingerprint))) {
                 return false;
