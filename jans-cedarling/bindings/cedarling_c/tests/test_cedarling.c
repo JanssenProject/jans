@@ -622,6 +622,30 @@ void test_policy_store_id(void) {
     cedarling_drop(instance_id);
 }
 
+// The signature properties pass through the C JSON config: a YAML store
+// cannot be signed, so enforcing the check must fail at init.
+void test_sigstore_enforce_requires_cjar(void) {
+    printf("\nTest: Policy Store Signature Check\n");
+    printf("====================================\n");
+
+    const char* config = "{\n"
+        "    \"CEDARLING_APPLICATION_NAME\": \"TestApp\",\n"
+        "    \"CEDARLING_LOG_TYPE\": \"off\",\n"
+        "    \"CEDARLING_POLICY_STORE_LOCAL_FN\": \"../../../test_files/policy-store_ok_2.yaml\",\n"
+        "    \"CEDARLING_POLICY_STORE_SIGSTORE_MODE\": \"enforce\",\n"
+        "    \"CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY\": \"signer@example.com\",\n"
+        "    \"CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER\": \"https://accounts.google.com\"\n"
+        "}";
+
+    CedarlingInstanceResult result;
+    int ret = cedarling_new(config, &result);
+    TEST_ASSERT(ret != 0, "Reject signature enforcement for a YAML policy store");
+    TEST_ASSERT(result.error_message != NULL
+        && strstr(result.error_message, "is not a `.cjar` archive") != NULL,
+        "Error says the policy store is not a .cjar archive");
+    cedarling_free_instance_result(&result);
+}
+
  void test_memory_management(){
      printf("\nTest: Memory Management\n");
      printf("=========================\n");
@@ -942,6 +966,8 @@ void test_authorize_multi_issuer_batch(void) {
     test_trusted_issuer_loading_info();
 
     test_policy_store_id();
+
+    test_sigstore_enforce_requires_cjar();
 
      test_memory_management();
 

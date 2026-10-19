@@ -1854,3 +1854,31 @@ async fn test_metrics_snapshot_json_string() {
         "json must contain interval_secs, got: {json}"
     );
 }
+
+/// Archive bytes have no location to derive a bundle from, so enforcing the
+/// signature check without `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` must
+/// fail and say which property to set.
+#[wasm_bindgen_test]
+async fn test_init_from_archive_bytes_enforce_requires_bundle_uri() {
+    let config = json!({
+        "CEDARLING_APPLICATION_NAME": "My App",
+        "CEDARLING_LOG_TYPE": "off",
+        "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com",
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com",
+    });
+    let config = serde_wasm_bindgen::to_value(&config)
+        .expect("serde json value should be converted to JsValue");
+    let config = Object::from_entries(&config).expect("map value should be converted to object");
+    let archive = js_sys::Uint8Array::from(&b"archive bytes"[..]);
+
+    let err = init_from_archive_bytes(config.into(), archive)
+        .await
+        .err()
+        .expect("enforce without a bundle URI must fail");
+    assert!(
+        err.to_string()
+            .contains("CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI"),
+        "error must name the bundle URI property, got: {err}"
+    );
+}

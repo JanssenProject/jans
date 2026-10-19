@@ -80,6 +80,7 @@ use init::policy_store_refresh::{
     AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource, RefreshWorkerSeed, WorkerContext,
     spawn_refresh_worker,
 };
+use init::policy_store_signature::ArchiveVerifier;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
@@ -573,7 +574,18 @@ async fn perform_bootstrap_load(
         format,
         body_hash,
         validators,
+        signed_by,
     } = loaded;
+
+    if let Some(signed_by) = signed_by {
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::INFO,
+                None,
+            ))
+            .set_message(format!("policy store signature verified: {signed_by}")),
+        );
+    }
 
     for warning in &format.warnings {
         log.log_any(
@@ -677,6 +689,7 @@ fn maybe_spawn_refresh_worker(
         initial_format: seed.format,
         strict_schema_validation: config.authorization_config.strict_schema_validation,
         archive_limits: config.policy_store_config.archive_limits(),
+        verifier: ArchiveVerifier::from_config(&config.policy_store_config.signature),
     };
     Some(Arc::new(spawn_refresh_worker(ctx)))
 }

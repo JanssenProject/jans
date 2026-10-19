@@ -4,14 +4,18 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 //! Shared test helpers — synthetic certs/keys via `rcgen` (pure Rust, WASM-safe,
-//! no network). Compiled only under `cfg(test)`.
+//! no network). Compiled under `cfg(test)` or the `test-support` feature.
 //!
 //! These build Fulcio-like CA and leaf certificates with full control over
 //! SAN, OIDC-issuer extension, EKU, `BasicConstraints`, and validity window so
 //! each verification step can be exercised in isolation.
 
-#![cfg(test)]
+// `testing` uses only a few of these helpers; the rest serve the unit tests.
+#![cfg_attr(not(test), allow(dead_code))]
 
+use std::collections::BTreeMap;
+
+use p256::ecdsa::signature::hazmat::PrehashSigner;
 use p256::ecdsa::{Signature, SigningKey, VerifyingKey, signature::Signer};
 use p256::pkcs8::DecodePrivateKey;
 use p384::ecdsa::SigningKey as P384SigningKey;
@@ -502,4 +506,114 @@ pub fn der_to_pem(der: &[u8]) -> String {
     }
     out.push_str("-----END CERTIFICATE-----\n");
     out
+}
+
+/// Standard base64, as bundle JSON encodes bytes.
+pub fn b64(bytes: &[u8]) -> String {
+    base64::Engine::encode(&base64::engine::general_purpose::STANDARD, bytes)
+}
+
+/// SHA-256 key ID of a Rekor signing key's uncompressed SPKI point.
+pub fn rekor_key_id(rekor_sk: &SigningKey) -> [u8; 32] {
+    crate::crypto::p256_key_id(rekor_sk.verifying_key().to_encoded_point(false).as_bytes())
+        .expect("P-256 uncompressed point is 65 bytes")
+}
+
+/// Inclusion proof for a single-entry log containing `body_b64`'s bytes:
+/// root = RFC 6962 leaf hash, empty audit path, checkpoint signed by `rekor_sk`.
+pub fn inclusion_proof_value(rekor_sk: &SigningKey, body_b64: &str) -> serde_json::Value {
+    let body_bytes =
+        base64::Engine::decode(&base64::engine::general_purpose::STANDARD, body_b64).unwrap();
+    // RFC 6962 leaf hash: SHA-256(0x00 || entry).
+    let mut h = Sha256::new();
+    h.update([0x00]);
+    h.update(&body_bytes);
+    let root: [u8; 32] = h.finalize().into();
+
+    // Signed note: body lines (origin, size, root) then "— <name> <b64>".
+    let signed_text = format!("rekor.test \u{2014} log\n1\n{}\n", b64(&root));
+    let note_hash: [u8; 32] = Sha256::digest(signed_text.as_bytes()).into();
+    let note_sig: Signature = PrehashSigner::sign_prehash(rekor_sk, &note_hash).unwrap();
+    let mut sig_blob = rekor_key_id(rekor_sk)[..4].to_vec();
+    sig_blob.extend_from_slice(note_sig.to_der().as_bytes());
+    let envelope = format!("{signed_text}\n\u{2014} rekor.test {}\n", b64(&sig_blob));
+
+    serde_json::json!({
+        "logIndex": "0",
+        "rootHash": b64(&root),
+        "treeSize": "1",
+        "hashes": [],
+        "checkpoint": { "envelope": envelope }
+    })
+}
+
+/// Assemble a v0.3 `messageSignature` bundle over `artifact`, as cosign
+/// `sign-blob` emits. `set_sk` signs the SET (pass a foreign key to forge
+/// one); `checkpoint_sk` signs the inclusion-proof checkpoint.
+pub fn message_signature_bundle(
+    artifact: &[u8],
+    leaf_der: &[u8],
+    leaf_sk: &SigningKey,
+    set_sk: &SigningKey,
+    checkpoint_sk: &SigningKey,
+    rekor_log_id: &[u8; 32],
+    integrated_time: i64,
+) -> Vec<u8> {
+    let digest: [u8; 32] = Sha256::digest(artifact).into();
+    let digest_hex: String = crate::hex::encode(&digest);
+
+    let sig: Signature = leaf_sk.sign(artifact);
+    let sig_b64 = b64(sig.to_der().as_bytes());
+
+    // hashedrekord tlog body.
+    let body = serde_json::json!({
+        "apiVersion": "0.0.1",
+        "kind": "hashedrekord",
+        "spec": {
+            "data": { "hash": { "algorithm": "sha256", "value": digest_hex } },
+            "signature": {
+                "content": sig_b64,
+                "publicKey": { "content": b64(der_to_pem(leaf_der).as_bytes()) }
+            }
+        }
+    });
+    let body_b64 = b64(&serde_json::to_vec(&body).unwrap());
+
+    // Rekor SET over the canonical payload (body as base64 STRING).
+    let mut payload = BTreeMap::new();
+    payload.insert("body".to_string(), serde_json::json!(body_b64.clone()));
+    payload.insert(
+        "integratedTime".to_string(),
+        serde_json::json!(integrated_time),
+    );
+    payload.insert("logIndex".to_string(), serde_json::json!(42));
+    payload.insert(
+        "logID".to_string(),
+        serde_json::json!(crate::hex::encode(rekor_log_id)),
+    );
+    let canonical = serde_json_canonicalizer::to_vec(&payload).unwrap();
+    let set_sig: Signature = set_sk.sign(&canonical);
+
+    let bundle = serde_json::json!({
+        "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+        "verificationMaterial": {
+            "certificate": { "rawBytes": b64(leaf_der) },
+            "tlogEntries": [{
+                "logIndex": "42",
+                "logId": { "keyId": b64(rekor_log_id) },
+                "kindVersion": { "kind": "hashedrekord", "version": "0.0.1" },
+                "integratedTime": integrated_time.to_string(),
+                "inclusionPromise": {
+                    "signedEntryTimestamp": b64(set_sig.to_der().as_bytes())
+                },
+                "inclusionProof": inclusion_proof_value(checkpoint_sk, &body_b64),
+                "canonicalizedBody": body_b64
+            }]
+        },
+        "messageSignature": {
+            "messageDigest": { "algorithm": "SHA2_256", "digest": b64(&digest) },
+            "signature": sig_b64
+        }
+    });
+    serde_json::to_vec(&bundle).unwrap()
 }

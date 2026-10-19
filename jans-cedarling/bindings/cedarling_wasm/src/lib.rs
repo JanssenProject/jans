@@ -205,7 +205,9 @@ pub async fn init(config: JsValue) -> Result<Cedarling, Error> {
 ///
 /// # Arguments
 /// * `config` - Bootstrap configuration (Map or Object) without a policy-store
-///   source property. The archive bytes provide the policy store.
+///   source property. The archive bytes provide the policy store. With
+///   `CEDARLING_POLICY_STORE_SIGSTORE_MODE: "enforce"`, also set
+///   `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` to the bundle's URL.
 /// * `archive_bytes` - The .cjar archive bytes (Uint8Array)
 ///
 /// # Example
