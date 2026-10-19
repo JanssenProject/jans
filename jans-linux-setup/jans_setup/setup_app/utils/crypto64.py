@@ -378,9 +378,9 @@ class Crypto64:
         # cert is fetched to be trusted; nothing to verify against yet
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
-        with socket.create_connection((host, 443), timeout=30) as sock:
-            with context.wrap_socket(sock, server_hostname=host) as ssl_sock:
-                cert_der = ssl_sock.getpeercert(True)
+        with socket.create_connection((host, 443), timeout=30) as sock, \
+                context.wrap_socket(sock, server_hostname=host) as ssl_sock:
+            cert_der = ssl_sock.getpeercert(True)
         return ssl.DER_cert_to_PEM_cert(cert_der)
 
     def download_ob_cert(self, ob_cert_fn=None):
