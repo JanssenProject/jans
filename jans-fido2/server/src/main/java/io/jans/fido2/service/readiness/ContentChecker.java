@@ -68,12 +68,12 @@ public class ContentChecker {
 
     public List<CheckResult> checkAssetLinks(RequestedParty party, byte[] body) {
         List<CheckResult> checks = new ArrayList<>();
-        JsonNode deployed = parse(body, true, checks);
-        if (deployed == null) {
-            return checks;
-        }
         if (ExpectedAssociationFileBuilder.androidApps(party).isEmpty()) {
             checks.add(pass(ID_PACKAGE, "no Android apps configured"));
+            return checks;
+        }
+        JsonNode deployed = parse(body, true, checks);
+        if (deployed == null) {
             return checks;
         }
         Set<String> found = androidFacts(deployed);
@@ -92,11 +92,11 @@ public class ContentChecker {
 
     public List<CheckResult> checkAppleAppSiteAssociation(RequestedParty party, byte[] body) {
         List<CheckResult> checks = new ArrayList<>();
-        JsonNode deployed = parse(body, false, checks);
-        if (deployed != null) {
-            if (ExpectedAssociationFileBuilder.iosApps(party).isEmpty()) {
-                checks.add(pass(ID_IOS_APP, "no iOS apps configured"));
-            } else {
+        if (ExpectedAssociationFileBuilder.iosApps(party).isEmpty()) {
+            checks.add(pass(ID_IOS_APP, "no iOS apps configured"));
+        } else {
+            JsonNode deployed = parse(body, false, checks);
+            if (deployed != null) {
                 Set<String> found = iosFacts(deployed);
                 for (IosApp app : ExpectedAssociationFileBuilder.iosApps(party)) {
                     String id = ExpectedAssociationFileBuilder.iosAppId(app);
@@ -117,6 +117,9 @@ public class ContentChecker {
         String pkg = app.getPackageName();
         List<CheckResult> checks = new ArrayList<>();
         Set<String> configured = new HashSet<>();
+        if (ExpectedAssociationFileBuilder.fingerprints(app).isEmpty()) {
+            checks.add(fail(ID_FINGERPRINT, "no fingerprint configured for " + PACKAGE + pkg));
+        }
         for (String fingerprint : ExpectedAssociationFileBuilder.fingerprints(app)) {
             String normalized = ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint);
             if (normalized == null) {
@@ -150,11 +153,11 @@ public class ContentChecker {
         return checks;
     }
 
-    /** The relation must sit on a statement that also carries each configured fingerprint of the app. */
+    /** The relation must sit on a statement that also carries each configured fingerprint; an app with none cannot pass. */
     private static boolean relationBound(AndroidApp app, Set<String> found) {
         String pkg = app.getPackageName();
         if (ExpectedAssociationFileBuilder.fingerprints(app).isEmpty()) {
-            return found.contains("R|" + pkg);
+            return false;
         }
         for (String fingerprint : ExpectedAssociationFileBuilder.fingerprints(app)) {
             String normalized = ExpectedAssociationFileBuilder.normalizeFingerprint(fingerprint);

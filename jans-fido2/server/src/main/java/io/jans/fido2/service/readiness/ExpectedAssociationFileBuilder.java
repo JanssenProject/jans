@@ -89,16 +89,13 @@ public final class ExpectedAssociationFileBuilder {
 
     /**
      * Upper-case colon-separated hex, whatever the input style (with or without colons, any case), or
-     * {@code null} when the input is not hex (colons allowed) or has an odd number of digits.
+     * {@code null} unless the input is whole hex bytes, optionally colon-separated between bytes.
      */
     public static String normalizeFingerprint(String fingerprint) {
-        if (fingerprint == null || !fingerprint.matches("[0-9A-Fa-f:]+")) {
+        if (fingerprint == null || !fingerprint.matches("[0-9A-Fa-f]{2}(:?[0-9A-Fa-f]{2})*")) {
             return null;
         }
         String hex = fingerprint.replace(":", "").toUpperCase(Locale.ROOT);
-        if (hex.isEmpty() || hex.length() % 2 != 0) {
-            return null;
-        }
         StringBuilder out = new StringBuilder();
         for (int i = 0; i < hex.length(); i += 2) {
             if (i > 0) {

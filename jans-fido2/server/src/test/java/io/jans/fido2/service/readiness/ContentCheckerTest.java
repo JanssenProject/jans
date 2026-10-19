@@ -346,7 +346,25 @@ class ContentCheckerTest {
         noFingerprints.setSha256CertFingerprints(null);
         String body = "[{\"relation\":[\"" + REL + "\"],\"target\":{\"namespace\":\"android_app\","
                 + "\"package_name\":\"com.example.app\"}}]";
-        assertEquals(CheckStatus.PASS, byId(android(party(List.of(noFingerprints), null), body),
-                "content.android.relation").get(0).status());
+        List<CheckResult> noFp = android(party(List.of(noFingerprints), null), body);
+        assertEquals(CheckStatus.FAIL, byId(noFp, "content.android.fingerprint").get(0).status());
+        assertEquals(CheckStatus.FAIL, byId(noFp, "content.android.relation").get(0).status());
+    }
+
+    @Test
+    void unconfiguredPlatform_isSkippedEvenWhenItsBodyIsNotJson() {
+        RequestedParty none = party(List.of(), List.of());
+        assertEquals(CheckStatus.PASS, android(none, "not json").get(0).status());
+        assertTrue(byId(aasa(none, "not json"), "content.parse").isEmpty());
+        assertEquals(CheckStatus.PASS, byId(aasa(none, "not json"), "content.ios.app").get(0).status());
+    }
+
+    @Test
+    void malformedFingerprintSeparators_areRejected() {
+        for (String bad : List.of("AA::BB", ":AA:BB", "AA:BB:", "A:ABB", "AAB", "AA BB")) {
+            assertNull(ExpectedAssociationFileBuilder.normalizeFingerprint(bad), bad);
+        }
+        assertEquals("AA:BB", ExpectedAssociationFileBuilder.normalizeFingerprint("aabb"));
+        assertEquals("AA:BB", ExpectedAssociationFileBuilder.normalizeFingerprint("aa:bb"));
     }
 }
