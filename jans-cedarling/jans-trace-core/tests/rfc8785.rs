@@ -8,7 +8,7 @@
 use std::fs;
 use std::path::Path;
 
-use jans_trace_core::Limits;
+use jans_trace_core::{ErrorCode, Limits};
 
 const CASES: [&str; 6] = [
     "arrays",
@@ -53,7 +53,7 @@ fn strict_canonicalization_matches_the_reference_inside_the_profile() {
             assert_eq!(
                 (err.code(), err.to_string().as_str()),
                 (
-                    "NON_CANONICALIZABLE_JSON",
+                    ErrorCode::NonCanonicalizableJson,
                     "JSON value cannot be canonicalized without changing it: a number is \
                      outside +/-(2^53-1), the range every JSON reader keeps exact"
                 ),
