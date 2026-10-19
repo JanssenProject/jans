@@ -93,8 +93,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 jwtUtil.parse(acccessToken);
                 List<String> tokenScopes = jwtUtil.validateToken(acccessToken);
                 logger.debug(" tokenScopes:{} ", tokenScopes);
-                // Validate Scopes
-                return this.validateScope(acccessToken, tokenScopes, resourceInfo, issuer, httpHeaders);
+              
             }
         } catch (InvalidJwtException exp) {
             logger.error("oAuth Invalid Jwt token:{}, exception:{} ", token, exp);
@@ -106,11 +105,11 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
-        logger.info("Token is NOT JWT hence introspecting it as Reference token ");
+        logger.info("Introspecting Token ");
         IntrospectionResponse introspectionResponse = null;
         try {
             introspectionResponse = openIdService.getIntrospectionResponse(token,
-                    token.substring("Bearer".length()).trim(), issuer);
+                    acccessToken, issuer);
         } catch (JsonProcessingException ex) {
             logger.error("Error while token Introspection token:{}, exception:{} ", token, ex);
             throw new WebApplicationException("IntrospectionResponse - Jwt Token is Invalid.",
@@ -125,6 +124,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         List<String> tokenScopes = introspectionResponse.getScope();
+        
         // Validate Scopes
         acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer, httpHeaders);
 
