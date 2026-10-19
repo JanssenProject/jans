@@ -55360,7 +55360,6 @@ Casa is a plugin-oriented, Java web application. Existing functionality can be e
 - [Accounts linking](./plugins/accts-linking/account-linking-index.md)
 - [Consent management](./plugins/consent-management.md)
 - [Custom branding](./plugins/custom-branding.md)
-- [BioID](./plugins/bioid.md)
 - [Email OTP](./plugins/email-otp.md)
 - [Certificate authentication](./plugins/cert-authn.md)
 
@@ -55645,56 +55644,6 @@ After attribute mapping occurs, the local database is checked to determine if th
 - If `cumulativeUpdate` is set to `true`, the existing attribute values in the entry are preserved and new values are added if present in the mapping
 
 The updates just referenced apply to the matching entry based on mapping and provider ID, however, when `emailLinkingSafe` is set to `true` and the mapping comes with a `mail` value equal to an existing e-mail in the database, the update is carried over the e-mail matching entry.
-
-# BioID plugin
-
-
-This plugin allows users to enroll their BioID facial biometrics.
-
-## Requirements
-- A Janssen server installation with Casa installed
-- A BioID account. Register on the [BioID site](https://bwsportal.bioid.com/register) 
-- Application credentials from the BWS Portal. Please register an application against your account. You will need the app identifier, app secret, storage and partition. 
-
-## Installation
-
-1. [Download](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/bioid-plugin-replace-janssen-version-jar-with-dependencies.jar) the plugin jar.
-1. Log into Casa as an administrator, navigate to `Administration Console > Casa plugins` and add the plugin jar
-1. Restart the casa service: `sudo systemctl restart jans-casa`
-1. Using the TUI, navigate to `Auth Server` > `Clients`, open the details for `Client for Casa`, and add the following redirect URI: `https://<hostname>/jans-casa/pl/bioid-plugin/user/interlude.zul`. Replace `<hostname>` with the hostname of your server, and save the client.
-1. Run the following commands to generate the Agama flow file:
-
-```
-git clone --depth 1 --branch main --no-checkout https://github.com/JanssenProject/jans.git
-cd jans/jans-casa/plugins/bioid/extras/agama
-zip -r casa-bioid.gama ./*
-```
-1. Transfer the `casa-bioid.gama` file to the server, and deploy it using the TUI
-1. Using the TUI, export the sample configuration, edit it according to the specification below and import it back in
-
-## Agama Configuration
-```
-{
-  "io.jans.agama.bioid.enroll": {
-    "host": "https://<HOSTNAME>/jans-auth/fl/callback",
-    "endpoint": "https://bws.bioid.com/extension/",
-    "appIdentifier": "",
-    "appSecret": "",
-    "storage": "",
-    "partition": ""
-  }
-}
-```
-
-- `host`: Replace `<HOSTNAME>` with the hostname of your server
-- `endpoint`: BioID API endpoint. Leave as default
-- `appIdentifier`: The app identifier string from BWS Portal - Configuration
-- `appSecret`: The app secret from BWS Portal - Configuration
-- `storage`: Storage value from BWS Portal - Configuration
-- `partition`: Partition value from BWS Portal - Configuration
-
-## How to use
-The plugin provides a user menu. When clicking the `Click to Enroll` button, Casa launches the `io.jans.agama.bioid.enroll` flow on the authorization server. This flow queries the BioID database for existing enrollments for the user. If the user has not enrolled, the flow presents the BWS GUI for enrollment. Upon success, the flow redirects back to a Casa landing page. Deletion of credentials is not supported as of now because Casa is unaware of enrollment status of a user.
 
 # Tutorial: smart card authentication in Janssen
 
@@ -61439,6 +61388,10 @@ The following methods are called on the result obtained from the authorization c
 
     The request ID for this authorization call, used for log retrieval and auditing
 
+- `dropped_tokens`
+
+    The supplied tokens that were not used in this decision (empty when every token contributed). See [Inspecting dropped tokens](./cedarling-multi-issuer.md#inspecting-dropped-tokens) for the reason slugs.
+
 ## Logs
 
 These methods are called to retrieve logs from the memory of the Cedarling instance when it is running in `memory` mode.
@@ -62336,7 +62289,7 @@ In the unsigned flow, `principal` contains the Cedar entity type names of each p
 
 #### `authorize_multi_issuer` example
 
-In the multi-issuer flow, `principal` is empty (no principal entities are created). The `tokens` field contains JWT claim information for each validated token.
+In the multi-issuer flow, `principal` is empty (no principal entities are created). The `tokens` field contains JWT claim information for each validated token. When a supplied token is not used in the decision, it is reported in the `dropped_tokens` field (shown below; omitted when no token was dropped).
 
 ```json
 {
@@ -62365,6 +62318,13 @@ In the multi-issuer flow, `principal` is empty (no principal entities are create
             "jti": "token_abc"
         }
     },
+    "dropped_tokens": [
+        {
+            "mapping": "Acme::Id_Token",
+            "index": 1,
+            "reason": { "kind": "jwt_validation_failed", "message": "JWT validation failed" }
+        }
+    ],
     "decision_time_micro_sec": 3
 }
 ```
@@ -62385,6 +62345,7 @@ In the multi-issuer flow, `principal` is empty (no principal entities are create
 * `resource`: From the request
 * `decision`: `ALLOW` or `DENY`
 * `tokens`: Dictionary with the token type and claims which should be included in the log (omitted if empty)
+* `dropped_tokens`: Multi-issuer only. List of supplied tokens that were not used in the decision, each with the input `mapping`, zero-based `index`, and a claim-free `reason` (`{ "kind": "...", "detail": ..., "message": "..." }`, where `kind` is a stable slug and `detail` is optional — present for `invalid_input`, omitted for unit reasons — while `message` is always the non-empty Display text). Omitted when no token was dropped. See [Inspecting dropped tokens](./cedarling-multi-issuer.md#inspecting-dropped-tokens) for the reason slugs.
 * `decision_time_micro_sec`: how long the decision took
 * `pushed_data`: Information about pushed data injected into the authorization context (omitted if none)
 
@@ -63453,6 +63414,65 @@ result = cedarling.authorize_multi_issuer(request)
 ```
 
 However, if every token is invalid, Cedarling will raise an error. **It is important that users always handle errors gracefully.**
+
+#### Inspecting dropped tokens
+
+A dropped token no longer has to be recovered from the logs. Every
+`MultiIssuerAuthorizeResult` carries a `dropped_tokens` list, and the same list
+is written to the decision-log entry for the request. Each entry identifies the
+caller's token by its input `mapping` and its zero-based `index` in the request
+`tokens` array, plus a claim-free `reason`. Every binding exposes the same
+shape as the JSON form:
+
+```json
+{
+  "mapping": "Invalid::Token",
+  "index": 1,
+  "reason": {
+    "kind": "jwt_validation_failed",
+    "message": "JWT validation failed"
+  }
+}
+```
+
+| Binding | Access |
+|---------|--------|
+| Python | `result.dropped_tokens()[i].reason.kind` |
+| JavaScript (WASM) | `result.droppedTokens()[i].reason.kind` |
+| Kotlin / Java / Swift | `result.droppedTokens[i].reason.kind()` (typed enum: `reason.variant`) |
+| Go | `result.DroppedTokens[i].Reason.Kind` |
+
+```python
+result = cedarling.authorize_multi_issuer(request)
+
+for dropped in result.dropped_tokens():
+    print(f"token #{dropped.index} ({dropped.mapping}) dropped: "
+          f"{dropped.reason.kind} - {dropped.reason.message}")
+```
+
+`reason.kind` is one of the following stable slugs:
+
+| Reason slug | Meaning |
+|-------------|---------|
+| `invalid_input` | The token input was malformed (empty mapping or payload). `reason.detail` is the stable slug (`"empty_mapping"` / `"empty_payload"`). |
+| `jwt_validation_failed` | Signature/claims validation failed, or no trusted issuer declares the token's mapping. |
+| `duplicate_token` | A token with the same issuer and token type was already accepted (see [Non-Deterministic Tokens](#non-deterministic-tokens)). |
+| `duplicate_mapping` | Two trusted issuers map to the same entity type; the later input replaced the earlier one (last wins). |
+| `no_processor_registered` | The mapping routes to a custom issuer but no processor is registered, and the mapping is not `required`. |
+| `custom_processing_failed` | A registered custom processor rejected the token. |
+| `custom_processing_timed_out` | A registered custom processor exceeded `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS`. |
+| `entity_build_failed` | The token validated but a Cedar entity could not be built from it. |
+
+The reason is deliberately claim-free: it never contains token payloads or claim
+values, so it is safe to log and surface to callers. `reason.message` is
+non-empty for every slug (e.g. `duplicate issuer and token-type combination`),
+while `reason.detail` is set only for `invalid_input` and is absent (`None` /
+`null` / `nil`) otherwise. Order is not
+guaranteed; use each entry's `index` to correlate with the request `tokens`
+array. When no token is dropped
+the list is empty and the field is omitted from the serialized result. For a
+batch request the list is produced once (tokens are validated once for the whole
+batch) and repeats on every item's result.
 
 ### Non-Deterministic Tokens
 
@@ -76051,107 +76071,6 @@ This is 3 steps authentication which supports rediect to previous authentication
 For demo purposes it asks user to pass basic authentication 3 times. After unsuccessful login attempt it forward user to previous step.
 
 This module hasn't properties.
-
-# Integrating BioID's biometric authentication with Casa
-
-
-## BioID Web Service
-[BioID Web Service](https://www.bioid.com) is a "Biometrics as a service" provider. This document will explain how to use Janssen Server [BioID interception script](./BioIDExternalAuthenticator.py) along with a Plugin in Casa to enroll a user's biometric traits and use it is as a method for 2FA.
-
-In order to use this authentication mechanism your organization will need to register for a BioID account.
-
-## Prerequisites
-- A Janssen Server
-- [BioID interception script](./BioIDExternalAuthenticator.py).
-- An account with [BioID](https://bwsportal.bioid.com/register).
-
-## Configure BioID Account
-
-1. [Sign up](https://bwsportal.bioid.com/register) for a BioID account.
-
-2. Upon registration, you will recieve an email with the instance name (listed as STORAGE in Janssen Server's BioID authentication script), partition number(listed as PARTITION in Janssen Server's BioID authentication script).
-
-3. As the owner of this instance, you are entitled to access BWS Portal at https://bwsportal.bioid.com using the account associated with your email.
-   With the BWS Portal, you can do the following:  
-   a. View your trial information such as your credentials (e.g. your client certificate), enrolled classes, BWS logs and more.  
-   b. Create your App ID and App secret, under "Web API keys".
-
-## BioID Documentation
-
-1. You can find all API reference at https://developer.bioid.com/bwsreference.
-2. Lots of useful information about BWS is available at https://developer.bioid.com/blog.
-3. For liveness detection, you will find information about motion trigger helpful: https://developer.bioid.com/app-developer-guide/bioid-motion-detection
-
-## Script configurations
-
-Log into oxTrust, and go to `Configuration` > `Person Authentication scripts` > `Add custom script configuration`.
-### Script contents
-
-Download this [file](./BioIDExternalAuthenticator.py) and copy its contents in the `Script` form field.
-
-### Properties
-The mandatory properties in the BioID authentication script are as follows
-|	Property	|	Description	|	Example		|
-|---------------|---------------|---------------|
-|ENDPOINT 		|URL of the BioID Web Service|`https://bws.bioid.com/extension/`|
-|APP_IDENTIFIER 	|API key |`c20b04cc-776a-45ed-7a1f-06347f8edf6c`|
-|APP_SECRET 	|API secret |`sTGB4n4HAkvc2BnJp6KeNUTk`|
-|STORAGE 	|The storage name assigned by BioID depending on the type of contract you have. |`bws`|
-|PARTITION 	|A number assigned to your company by BioID. |`12345`|
-
-
-### Save changes
-
-Click on `Enable` under the script contents box, and press `Update` at the bottom of the page.
-
-
-## Plugin installation
-
-
-### Add the plugin to Casa
-
-1. [Download the plugin](https://maven.gluu.org/maven/org/gluu/casa/plugins/bioid-plugin/4.5.0.Final/bioid-plugin-4.5.0.Final-jar-with-dependencies.jar)
-
-1. Log in to Casa using an administrator account
-
-1. Visit `Administration console` > `Casa plugins`
-
-   ![plugins page](../../../../assets/casa/plugins/bioid-plugin.png)
-
-1. Click on `Add a plugin...` and select the plugin jar file
-
-1. Click on `Add`
-
-Alternatively you can log into Janssen Server and copy the jar file directly to `/opt/jans/jetty/jans-casa/plugins`.
-
-### Enable the authentication method
-
-Wait for one minute, then visit `Administration Console` > `Enabled methods` and tick `bioid`. On the right, the plugin will be selected by default. Finally save the changes.
-
-## Testing
-So far, users that log into Casa should be able to see a new entry "Biometric credentials" that will appear under "2FA credentials" .
-
-![plugins page](../../../../assets/casa/plugins/bioid-menu.png)
-
-From there they can enroll their biometric traits.
-The steps to enroll your facial and periocular traits are self explanatory. Follow the instructions on the web page.
-You can enroll again or delete your credentials by visiting your registered credential.
-
-![plugins page](../../../../assets/casa/plugins/enroll_bioid.png)
-
-
-
-Note - When you first use BioID you may wish to enroll a few times at different times of days or in different locations under a variety of environmental conditions. Once you can be reliably recognized, you only need to enroll again if something in your face changes significantly (such as after an accident or cosmetic surgery, or if you radically change eyeglasses, facial hair, facial jewelry, etc.) or if you often have to try more than once to be recognized. Once recognized, BioID typically adjusts itself to adapt to the changes right away.
-
-![plugins page](../../../../assets/casa/plugins/bioid_edit_delete.png)
-
-### Use the biometric credential as a second factor
-Ensure you have added another credential, hopefully of a different kind, for example a mobile phone number or an OTP token. Then visit the home page and click the toggle to turn 2FA on and logout.
-Try to access the application once more and supply the username and password for the account recently used to enroll the biometric credential. Depending on the numeric level assigned to the `bioid` script, you will be prompted for a different factor, for instance, to enter an OTP code. If so, click on `Try an alternative way to sign in` and click on `Biometric credential`.
-
-Follow the instructions on the screen for verification of facial and periocular traits.
-
-Finally, you will be redirected and get access to the application.
 
 # Description
 
