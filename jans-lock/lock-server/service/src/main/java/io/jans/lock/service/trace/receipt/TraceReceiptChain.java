@@ -179,10 +179,12 @@ public class TraceReceiptChain {
 						receipt.getProducerId(), receipt.getRecordId(), receipt.getContentDigest(),
 						receipt.getPrevReceiptHash());
 			} catch (TraceCryptoException ex) {
+				if (TraceCryptoException.REASON_CRYPTO_UNAVAILABLE.equals(ex.getReason())) {
+					throw ex;
+				}
 				log.debug("receipt hash not recomputable: domain={}, seq={}, reason={}", domainId, seq,
 						ex.getReason());
 			}
-
 			EntryStatus status;
 			if (recomputedHash == null || !recomputedHash.equals(receipt.getReceiptHash())) {
 				status = EntryStatus.HASH_MISMATCH;

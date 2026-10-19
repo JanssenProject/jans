@@ -113,12 +113,14 @@ public class ProducerKeyRegistry {
 		try {
 			verificationKey = cryptoProvider.parseKey(key.getPublicKeyJwk());
 		} catch (TraceCryptoException ex) {
+			if (TraceCryptoException.REASON_CRYPTO_UNAVAILABLE.equals(ex.getReason())) {
+				throw ex;
+			}
 			log.error("Stored producer key is unusable: domainId={}, producerId={}, kid={}, reason={}", domainId,
 					producerId, kid, ex.getReason());
 			throw new TraceValidationException(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY, REASON_STORED_KEY_UNUSABLE,
 					ex);
 		}
-
 		return new ResolvedKey(key, verificationKey);
 	}
 

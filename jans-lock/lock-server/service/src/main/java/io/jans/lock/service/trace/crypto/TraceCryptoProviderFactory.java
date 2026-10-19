@@ -8,7 +8,6 @@ package io.jans.lock.service.trace.crypto;
 
 import org.slf4j.Logger;
 
-import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.trace.crypto.TraceCryptoImpl;
 import io.jans.lock.trace.crypto.TraceCryptoProvider;
 import io.jans.lock.trace.crypto.TraceCryptoProviderType;
@@ -35,26 +34,13 @@ public class TraceCryptoProviderFactory {
 	@Inject
 	private Logger log;
 
-	@Inject
-	private AppConfiguration appConfiguration;
-
 	@Produces
 	@ApplicationScoped
 	public TraceCryptoProvider traceCryptoProvider() {
-		TraceCryptoProvider provider = select(configuredType());
+		TraceCryptoProvider provider = select(TraceCryptoProviderType.JAVA);
 		log.info("TRACE crypto provider: type={} available={} detail={}", provider.type(), provider.isAvailable(),
 				provider.describe());
 		return provider;
-	}
-
-	TraceCryptoProviderType configuredType() {
-		String raw = appConfiguration.getTraceConfiguration().getCryptoProvider();
-		TraceCryptoProviderType type = TraceCryptoProviderType.fromString(raw);
-		if (type == null) {
-			log.warn("Unknown traceConfiguration.cryptoProvider '{}', using JAVA", raw);
-			return TraceCryptoProviderType.JAVA;
-		}
-		return type;
 	}
 
 	TraceCryptoProvider select(TraceCryptoProviderType type) {
