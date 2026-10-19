@@ -133,6 +133,11 @@ impl PublicKey {
         Ok(Self::from_bytes(&bytes)?)
     }
 
+    /// For keys known to be valid, such as one derived from a private key.
+    pub(crate) fn from_verifying_key(key: VerifyingKey) -> Self {
+        Self(key)
+    }
+
     #[must_use]
     pub fn to_bytes(&self) -> [u8; 32] {
         self.0.to_bytes()
