@@ -112,17 +112,13 @@ echo "Threads=${THREADS} warmup=${WARMUP_MS}ms duration=${DURATION_MS}ms per ope
 # benchmark class) from the local repository.
 if [[ "${PROVIDER}" != "native" ]]; then
     echo "Running JAVA benchmark ..."
-    run_mvn -pl trace-crypto-java install -Dtest=JavaTraceCryptoBenchmarkTest \
-        -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -Dgpg.skip
-elif ! ls "${HOME}"/.m2/repository/io/jans/jans-lock-trace-crypto-java/*/*-tests.jar > /dev/null 2>&1; then
-    echo "Running JAVA module install (native benchmark needs its test-jar) ..."
-    run_mvn -pl trace-crypto-java install -DskipTests \
+    run_mvn -pl trace-crypto-java -am install -Dtest=JavaTraceCryptoBenchmarkTest \
         -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -Dgpg.skip
 fi
 
 if [[ "${PROVIDER}" != "java" ]]; then
     echo "Running NATIVE benchmark ..."
-    run_mvn -pl trace-crypto-native test -Dtest=NativeTraceCryptoBenchmarkTest
+    run_mvn -pl trace-crypto-native -am install -Dtest=NativeTraceCryptoBenchmarkTest
 fi
 
 if ! grep -q '^TRACE-BENCH ' "${LOG_FILE}"; then

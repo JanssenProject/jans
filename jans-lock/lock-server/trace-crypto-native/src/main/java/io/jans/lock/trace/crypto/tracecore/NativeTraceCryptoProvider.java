@@ -43,9 +43,12 @@ import io.jans.trace.TraceException.ParseSignedAssertionException;
 import io.jans.trace.TraceException.VerifyException;
 import io.jans.trace.VerificationContext;
 import io.jans.trace.VerifiedAssertion;
+import io.jans.service.cdi.event.ConfigurationUpdate;
 import io.jans.trace.uniffi.ErrorCode;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.event.Reception;
 import jakarta.inject.Inject;
 
 /**
@@ -110,6 +113,25 @@ public class NativeTraceCryptoProvider implements TraceCryptoProvider {
 			this.failure = t.getClass().getSimpleName() + ": " + t.getMessage();
 			LOG.error("Native TRACE crypto probe: available=false ({}); TRACE ingestion will fail closed", failure);
 			LOG.debug("Native TRACE crypto probe failure detail", t);
+		}
+	}
+
+	/**
+	 * Rebuilds the native limits after a configuration reload so they keep tracking the Lock
+	 * limits. Availability and profile are left as probed; a reload that cannot be applied keeps
+	 * the previous limits. {@code IF_EXISTS} avoids instantiating, and so probing, the provider
+	 * when NATIVE is not in use.
+	 */
+	void onConfigurationUpdate(
+			@Observes(notifyObserver = Reception.IF_EXISTS) @ConfigurationUpdate AppConfiguration updated) {
+		if (traceConfiguration != null || !available) {
+			return;
+		}
+		try {
+			this.limits = buildLimits(updated.getTraceConfiguration());
+			LOG.info("Native TRACE crypto limits refreshed after configuration reload");
+		} catch (RuntimeException ex) {
+			LOG.warn("Native TRACE crypto limits not refreshed, keeping previous limits: {}", ex.getMessage());
 		}
 	}
 

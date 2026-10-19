@@ -8,9 +8,11 @@ package io.jans.lock.trace.crypto.tracecore;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.trace.crypto.TraceCryptoProviderType;
@@ -110,6 +113,45 @@ class NativeTraceCryptoProviderTest {
 		assertEquals(10_000L, limits.maxArrayElements());
 		assertEquals(200_000L, limits.maxStringBytes());
 		assertEquals(2_000_000L, limits.maxCanonicalBytes());
+	}
+
+	@Test
+	void onConfigurationUpdate_raisedLimits_limitsRefreshed() throws ReflectiveOperationException {
+		NativeTraceCryptoProvider injected = new NativeTraceCryptoProvider();
+		setField(injected, "appConfiguration", new AppConfiguration());
+		injected.probe();
+		assertTrue(injected.isAvailable(), injected.describe());
+		assertEquals(524_288L, limitsOf(injected).maxInputBytes());
+
+		AppConfiguration updated = new AppConfiguration();
+		updated.getTraceConfiguration().setMaxRequestBytes(1_000_000);
+		injected.onConfigurationUpdate(updated);
+
+		assertEquals(2_000_000L, limitsOf(injected).maxInputBytes());
+		assertTrue(injected.isAvailable());
+		assertTrue(injected.describe().startsWith("native/jans-trace-core "), injected.describe());
+	}
+
+	@Test
+	void onConfigurationUpdate_unavailableProvider_ignored() throws ReflectiveOperationException {
+		NativeTraceCryptoProvider unprobed = new NativeTraceCryptoProvider();
+
+		unprobed.onConfigurationUpdate(new AppConfiguration());
+
+		assertFalse(unprobed.isAvailable());
+		assertNull(limitsOf(unprobed));
+	}
+
+	private static Limits limitsOf(NativeTraceCryptoProvider target) throws ReflectiveOperationException {
+		Field field = NativeTraceCryptoProvider.class.getDeclaredField("limits");
+		field.setAccessible(true);
+		return (Limits) field.get(target);
+	}
+
+	private static void setField(Object target, String name, Object value) throws ReflectiveOperationException {
+		Field field = target.getClass().getDeclaredField(name);
+		field.setAccessible(true);
+		field.set(target, value);
 	}
 
 	@Test
