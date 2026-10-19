@@ -83,12 +83,16 @@ use init::policy_store_refresh::{
 };
 use init::policy_store_signature::ArchiveVerifier;
 use init::service_config::{ServiceConfig, ServiceConfigError};
+#[cfg(not(target_arch = "wasm32"))]
+pub use init::service_factory::LoadProducerKeyError;
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
 use lock::health_registry::HealthStatus;
 use log::interface::LogWriter;
 use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
+#[cfg(not(target_arch = "wasm32"))]
+use trace::ProducerKey;
 pub use trace::{ParseProducerIdError, ProducerId};
 
 use semver::Version;
@@ -136,6 +140,10 @@ pub enum InitCedarlingError {
     /// logs to the Lock Server.
     #[error("failed to initialize the Lock Service: {0}")]
     InitLockService(#[from] InitLockServiceError),
+    /// Error returned when TRACE is enabled but its signing key cannot be loaded.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[error(transparent)]
+    TraceKey(#[from] LoadProducerKeyError),
 }
 
 /// Sized wrapper around the custom token processor trait object so it can be
@@ -167,6 +175,10 @@ pub struct Cedarling {
     /// exits when [`Cedarling`] goes away. The leading `_` tells the compiler
     /// the field is intentionally not read.
     _refresh_handle: Option<Arc<PolicyStoreRefreshHandle>>,
+    /// TRACE signing key, loaded at startup so a bad key stops `new` instead of
+    /// failing every record later. Read by the TRACE emitter.
+    #[cfg(not(target_arch = "wasm32"))]
+    _trace_key: Option<Arc<ProducerKey>>,
 }
 
 impl Cedarling {
@@ -243,6 +255,9 @@ impl Cedarling {
             metrics.clone(),
         );
 
+        #[cfg(not(target_arch = "wasm32"))]
+        let trace_key = service_factory.trace_key().await?;
+
         // Log policy store metadata if available (new format only)
         if let Some(metadata) = service_factory.policy_store_metadata() {
             log_policy_store_metadata(&log, metadata);
@@ -279,6 +294,8 @@ impl Cedarling {
             data,
             metrics,
             _refresh_handle: refresh_handle,
+            #[cfg(not(target_arch = "wasm32"))]
+            _trace_key: trace_key,
         })
     }
 

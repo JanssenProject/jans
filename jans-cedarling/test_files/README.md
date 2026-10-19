@@ -29,3 +29,8 @@ YAML remains supported for test suites. These fixtures are used across unit and 
 1. `policy-store_schema_err.yaml`: contains broken json cedar-policy schema (should be error on reading json value).
 1. `policy-store_with_trusted_issuers_ok.yaml`: list of trusted issuers for multi-issuer tests.
 
+
+## TRACE key fixtures
+
+- `trace/producer_ed25519.pem`: unencrypted PKCS#8 PEM Ed25519 key from RFC 8410 section 10.3 (a public test vector, not a secret). Used as the TRACE producer signing key in tests.
+- `trace/encrypted_ed25519.pem`: the same key encrypted with `openssl pkcs8 -topk8 -v2 aes-256-cbc` (passphrase `trace-test`), to check that encrypted keys are rejected.

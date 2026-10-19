@@ -20,4 +20,6 @@ mod metrics_snapshot;
 mod policy_store_loader;
 mod ssa_validation_integration;
 mod success_test_json;
+#[cfg(not(target_arch = "wasm32"))]
+mod trace_key;
 mod validate;
