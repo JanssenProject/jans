@@ -450,6 +450,7 @@ impl Cedarling {
             context: context
                 .try_into()
                 .map_err(|_| AuthorizeError::InvalidContext)?,
+            options: core::AuthorizeOptions::default(),
         };
 
         let result = self.inner.authorize_unsigned(core_request).map_err(|e| {
@@ -490,6 +491,7 @@ impl Cedarling {
             resource: core_resource,
             action,
             context: core_context,
+            options: core::AuthorizeOptions::default(),
         };
 
         let result = self
@@ -521,6 +523,7 @@ impl Cedarling {
         let core_request = core::BatchAuthorizeUnsignedRequest {
             principal: principal.map(|p| p.inner.clone()),
             items: core_items,
+            options: core::AuthorizeOptions::default(),
         };
         let response = self
             .inner
@@ -557,6 +560,7 @@ impl Cedarling {
         let core_request = core::BatchAuthorizeMultiIssuerRequest {
             tokens: core_tokens,
             items: core_items,
+            options: core::AuthorizeOptions::default(),
         };
         let response = self
             .inner

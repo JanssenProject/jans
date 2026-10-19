@@ -111,6 +111,7 @@ impl AuthorizeMultiIssuerRequest {
             resource: self.resource.clone().into(),
             action: self.action.clone(),
             context,
+            options: cedarling::AuthorizeOptions::default(),
         })
     }
 }

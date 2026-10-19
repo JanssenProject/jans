@@ -77,6 +77,10 @@ impl BatchAuthorizeMultiIssuerRequest {
             .iter()
             .map(BatchItem::to_cedarling)
             .collect::<Result<Vec<_>, _>>()?;
-        Ok(cedarling::BatchAuthorizeMultiIssuerRequest { tokens, items })
+        Ok(cedarling::BatchAuthorizeMultiIssuerRequest {
+            tokens,
+            items,
+            options: cedarling::AuthorizeOptions::default(),
+        })
     }
 }

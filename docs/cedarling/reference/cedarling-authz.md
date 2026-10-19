@@ -596,6 +596,48 @@ response.results.forEach((r, i) => {
 
 Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer Authorization](#multi-issuer-authorization-authorize_multi_issuer-recommended) for the token contract.
 
+## Authorize options and TRACE context
+
+Every request type (`RequestUnsigned`, `AuthorizeMultiIssuerRequest`, `BatchAuthorizeUnsignedRequest`, `BatchAuthorizeMultiIssuerRequest`) has an optional `options` field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. A request without `options` behaves exactly as before. In a batch request, `options` applies to the whole call, not to individual items.
+
+The only option today is `trace`, the TRACE execution context of the call:
+
+| Field | Required | Meaning |
+|---|---|---|
+| `execution_id` | yes | `trace_execution_id` issued by the execution initiator (gateway, PEP, host, agent runtime or scheduler) |
+| `execution_authority` | yes | Authority that issued `execution_id`; always passed together with it |
+| `workload_id` | yes | Stable id of the workload the decision is made for |
+| `workload_instance_id` | no | Instance of the workload, when the host distinguishes instances |
+
+The host passes already normalized values. Cedarling does not parse HTTP headers, tokens or baggage to find the context, and it never generates `execution_id` itself. A missing `trace`, or an empty required field, means the call has no execution context: no TRACE record is produced for that decision, and the decision is returned as usual. When TRACE is disabled, `options` has no effect at all.
+
+```json
+{
+  "principal": { "cedar_entity_mapping": { "entity_type": "Jans::User", "id": "1" } },
+  "action": "Jans::Action::\"Read\"",
+  "resource": { "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": "2" } },
+  "context": {},
+  "options": {
+    "trace": {
+      "execution_id": "01J9Z3K4N6Q8R0S2T4V6W8X0Y2",
+      "execution_authority": "https://gateway.example.com",
+      "workload_id": "billing-service",
+      "workload_instance_id": "billing-service-7f9c"
+    }
+  }
+}
+```
+
+In Rust, attach options with `with_options`:
+
+```rust
+let request = request.with_options(AuthorizeOptions::with_trace(TraceContext::new(
+    execution_id,
+    execution_authority,
+    workload_id,
+)));
+```
+
 ## Policy Introspection
 
 Cedarling also provides methods to discover which policies are potentially applicable to a given authorization request **without executing authorization**. This is useful for:

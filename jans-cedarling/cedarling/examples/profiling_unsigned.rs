@@ -7,9 +7,9 @@
 #![allow(dead_code)]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData, HttpClientConfig,
-    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
-    RequestUnsigned,
+    AuthorizationConfig, AuthorizeOptions, BootstrapConfig, Cedarling, DataStoreConfig, EntityData,
+    HttpClientConfig, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, RequestUnsigned,
 };
 use serde::Deserialize;
 use serde_json::json;
@@ -194,6 +194,7 @@ fn prepare_unsigned_request() -> RequestUnsigned {
         action: "Jans::Action::\"Update\"".to_string(),
         context: json!({}),
         resource,
+        options: AuthorizeOptions::default(),
     }
 }
 

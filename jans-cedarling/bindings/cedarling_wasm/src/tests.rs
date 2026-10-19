@@ -8,8 +8,8 @@
 
 use crate::*;
 use cedarling::{
-    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest,
-    BatchItem, EntityData, RequestUnsigned, TokenInput,
+    AuthorizeMultiIssuerRequest, AuthorizeOptions, BatchAuthorizeMultiIssuerRequest,
+    BatchAuthorizeUnsignedRequest, BatchItem, EntityData, RequestUnsigned, TokenInput,
 };
 use serde::Deserialize;
 use serde_json::json;
@@ -184,6 +184,7 @@ async fn test_run_cedarling() {
             }
         }))
         .expect("ResourceData should be deserialized correctly"),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str =
@@ -327,6 +328,7 @@ async fn test_memory_log_interface() {
             }
         }))
         .expect("ResourceData should be deserialized correctly"),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str =
@@ -414,6 +416,7 @@ async fn test_authorize_unsigned_single_principal_allow() {
         }))
         .expect("ResourceData should be deserialized correctly"),
         context: json!({}),
+        options: AuthorizeOptions::default(),
     };
 
     let result = instance
@@ -468,6 +471,7 @@ async fn test_annotations_of_determining_policies() {
         }))
         .expect("ResourceData should be deserialized correctly"),
         context: json!({}),
+        options: AuthorizeOptions::default(),
     };
 
     let result = instance
@@ -546,6 +550,7 @@ async fn test_authorize_unsigned_no_principal_public_action_allow() {
         }))
         .expect("ResourceData should be deserialized correctly"),
         context: json!({}),
+        options: AuthorizeOptions::default(),
     };
 
     let result = instance
@@ -588,6 +593,7 @@ async fn test_authorize_unsigned_no_principal_principal_dependent_deny() {
         }))
         .expect("ResourceData should be deserialized correctly"),
         context: json!({}),
+        options: AuthorizeOptions::default(),
     };
 
     let result = instance
@@ -662,6 +668,7 @@ async fn test_multi_issuer_authorize_single_token() {
         .expect("Resource should be deserialized correctly"),
         action: "Jans::Action::\"Update\"".to_string(),
         context: Some(json!({})),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str = serde_json::to_string(&multi_issuer_request)
@@ -780,6 +787,7 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         .expect("Resource should be deserialized correctly"),
         action: "Jans::Action::\"Update\"".to_string(),
         context: Some(json!({})),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str = serde_json::to_string(&multi_issuer_request)
@@ -856,6 +864,7 @@ async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_tok
         .expect("Resource should be deserialized correctly"),
         action: "Jans::Action::\"Update\"".to_string(),
         context: Some(json!({})),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str = serde_json::to_string(&multi_issuer_request)
@@ -930,6 +939,7 @@ async fn test_multi_issuer_dropped_tokens_expose_core_values() {
         .expect("Resource should be deserialized correctly"),
         action: "Jans::Action::\"Update\"".to_string(),
         context: Some(json!({})),
+        options: AuthorizeOptions::default(),
     };
     let request_str = serde_json::to_string(&multi_issuer_request)
         .expect("Multi-issuer request should serialize to JSON");
@@ -1014,6 +1024,7 @@ async fn test_multi_issuer_authorize_validation_empty_token_array() {
         .expect("Resource should be deserialized correctly"),
         action: "Jans::Action::\"Update\"".to_string(),
         context: Some(json!({})),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str = serde_json::to_string(&multi_issuer_request)
@@ -1776,6 +1787,7 @@ async fn test_drain_metrics_local_mode_snapshot_and_reset() {
             }
         }))
         .expect("resource EntityData should be deserialized correctly"),
+        options: AuthorizeOptions::default(),
     };
     let request_str =
         serde_json::to_string(&request).expect("RequestUnsigned should serialize to JSON");

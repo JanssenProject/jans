@@ -7,9 +7,9 @@
 
 use cedarling::log_config::StdOutLoggerMode;
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
-    EntityData, HttpClientConfig, JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel,
-    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    AuthorizationConfig, AuthorizeOptions, BootstrapConfig, CedarEntityMapping, Cedarling,
+    DataStoreConfig, EntityData, HttpClientConfig, JwtConfig, LockServiceConfig, LockTransport,
+    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
 };
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
@@ -106,6 +106,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     ),
                 ]),
             },
+            options: AuthorizeOptions::default(),
         })
         .await;
 

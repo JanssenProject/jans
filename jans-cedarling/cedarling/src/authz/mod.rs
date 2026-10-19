@@ -44,12 +44,14 @@ mod dropped_token;
 mod error_metrics;
 mod errors;
 pub(crate) mod metrics;
+mod options;
 
 pub(crate) mod request;
 
 pub use authorize_result::{AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use dropped_token::{DropReason, DroppedToken};
 pub use errors::*;
+pub use options::{AuthorizeOptions, TraceContext};
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {

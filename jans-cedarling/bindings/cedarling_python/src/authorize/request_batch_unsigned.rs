@@ -65,6 +65,7 @@ impl BatchAuthorizeUnsignedRequest {
         Ok(cedarling::BatchAuthorizeUnsignedRequest {
             principal: self.principal.clone().map(Into::into),
             items,
+            options: cedarling::AuthorizeOptions::default(),
         })
     }
 }

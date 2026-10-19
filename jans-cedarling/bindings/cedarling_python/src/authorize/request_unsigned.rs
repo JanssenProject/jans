@@ -83,6 +83,7 @@ impl RequestUnsigned {
             action: self.action.clone(),
             resource: self.resource.clone().into(),
             context,
+            options: cedarling::AuthorizeOptions::default(),
         })
     }
 }
