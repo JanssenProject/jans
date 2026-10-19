@@ -300,6 +300,23 @@ class CryptoProviderParityTest {
 	}
 
 	@Test
+	void verifyAndDigest_suppliedSignatureDiffersFromEmbedded_bothReportSignatureMismatch() throws Exception {
+		KeyPair keyPair = TraceTestKeys.generateKeyPair();
+		Map<String, String> jwk = TraceTestKeys.toJwk(keyPair.getPublic());
+		String signedText = SignedAssertionFactory.authorizationDecision().sign(keyPair.getPrivate());
+		ObjectNode root = (ObjectNode) MAPPER.readTree(signedText);
+		TraceSignedRecord record = new TraceSignedRecord(signedText, root, root.get("producer").asText(),
+				root.get("kid").asText());
+		byte[] other = new byte[64];
+
+		for (TraceCryptoProvider provider : Arrays.asList(javaCrypto, nativeProvider)) {
+			TraceCryptoException ex = assertThrows(TraceCryptoException.class,
+					() -> provider.verifyAndDigest(record, other, provider.parseKey(jwk)));
+			assertEquals(TraceCryptoException.REASON_SIGNATURE_MISMATCH, ex.getReason());
+		}
+	}
+
+	@Test
 	void verifyAndDigest_tamperedRecord_bothReportSignatureMismatch() throws Exception {
 		KeyPair keyPair = TraceTestKeys.generateKeyPair();
 		Map<String, String> jwk = TraceTestKeys.toJwk(keyPair.getPublic());

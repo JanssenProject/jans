@@ -11,11 +11,12 @@
 # with -Dtrace.bench=true, which this script sets.
 #
 # Usage: trace_crypto_bench.sh [-p java|native|both] [-t threads] [-w warmupMs]
-#                              [-d durationMs] [-o] [-l logfile]
+#                              [-d durationMs] [-r] [-o] [-l logfile]
 #   -p  provider to run (default: both)
 #   -t  worker threads (default: 4)
 #   -w  warm-up per operation in ms (default: 2000)
 #   -d  measured time per operation in ms (default: 5000)
+#   -r  with -p both, run NATIVE first instead of JAVA (also: REVERSE=1)
 #   -o  run Maven offline
 #   -l  keep the full Maven output in this file (default: temporary file)
 #
@@ -33,6 +34,7 @@ WARMUP_MS=2000
 DURATION_MS=5000
 OFFLINE=""
 LOG_FILE=""
+REVERSE="${REVERSE:-0}"
 
 usage() {
     local status="${1:-1}"
@@ -49,6 +51,9 @@ Options:
   -t <threads>   Worker threads (default: 4)
   -w <ms>        Warm-up time per operation in ms (default: 2000)
   -d <ms>        Measured time per operation in ms (default: 5000)
+  -r             With -p both, run NATIVE first instead of JAVA. The first run sees
+                 a colder cache and a different CPU frequency state, so repeat
+                 with and without -r and compare. REVERSE=1 does the same.
   -o             Run Maven offline
   -l <file>      Keep the full Maven output in <file> (default: temporary file)
   -h             Show this help and exit
@@ -57,18 +62,20 @@ Examples:
   ${name}                     # both providers, defaults
   ${name} -p native -t 8      # native only, 8 threads
   ${name} -o -w 500 -d 2000   # quick offline run
+  ${name} -r                  # both providers, NATIVE first
 
 Requirements: bash, mvn, awk
 EOF
     exit "${status}"
 }
 
-while getopts "p:t:w:d:ol:h" opt; do
+while getopts "p:t:w:d:rol:h" opt; do
     case "${opt}" in
         p) PROVIDER="${OPTARG}" ;;
         t) THREADS="${OPTARG}" ;;
         w) WARMUP_MS="${OPTARG}" ;;
         d) DURATION_MS="${OPTARG}" ;;
+        r) REVERSE=1 ;;
         o) OFFLINE="-o" ;;
         l) LOG_FILE="${OPTARG}" ;;
         h) usage 0 ;;
@@ -119,13 +126,15 @@ run_native() {
         -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -Dgpg.skip
 }
 case "${PROVIDER}" in
-    java) run_java ;;
-    native) run_native ;;
+    java) ORDER=(java) ;;
+    native) ORDER=(native) ;;
     both)
-        if [[ "${REVERSE:-0}" == "1" ]]; then ORDER=(run_native run_java); else ORDER=(run_java run_native); fi
-        echo "Execution order: ${ORDER[*]}"
-        for step in "${ORDER[@]}"; do "${step}"; done ;;
+        if [[ "${REVERSE}" == "1" ]]; then ORDER=(native java); else ORDER=(java native); fi ;;
 esac
+EXECUTION_ORDER="${ORDER[*]}"
+EXECUTION_ORDER="${EXECUTION_ORDER// / then }"
+echo "Execution order: ${EXECUTION_ORDER}"
+for step in "${ORDER[@]}"; do "run_${step}"; done
 
 if ! grep -q '^TRACE-BENCH ' "${LOG_FILE}"; then
     echo "No TRACE-BENCH lines found; the benchmarks may have been skipped. See ${LOG_FILE}" >&2
@@ -133,7 +142,7 @@ if ! grep -q '^TRACE-BENCH ' "${LOG_FILE}"; then
 fi
 
 echo
-grep '^TRACE-BENCH ' "${LOG_FILE}" | awk '
+grep '^TRACE-BENCH ' "${LOG_FILE}" | awk -v order="${EXECUTION_ORDER}" '
 function field(line, name,    pattern, rest) {
     pattern = " " name "=[^ ]+"
     if (match(line, pattern)) {
@@ -178,7 +187,8 @@ function metric(title, table, withRatio,    i, j, line, ratio) {
     printf "\n"
 }
 END {
-    printf "Threads: %s, measured: %s ms per operation\n\n", threads, duration
+    printf "Threads: %s, measured: %s ms per operation\n", threads, duration
+    printf "Execution order: %s (the first run has no preceding warm cache)\n\n", order
     metric("Throughput (ops/s, higher is better)", opsPerSecond, 1)
     metric("Mean latency (us, lower is better)", mean, 0)
     metric("p50 latency (us)", p50, 0)
