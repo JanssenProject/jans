@@ -1240,6 +1240,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#verifying-policy-store-signatures" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Verifying policy store signatures
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verifying policy store signatures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-the-bundle-comes-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Where the bundle comes from
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Limitations
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#background-refresh" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2202,6 +2241,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#verifying-policy-store-signatures" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Verifying policy store signatures
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verifying policy store signatures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-the-bundle-comes-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Where the bundle comes from
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Limitations
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#background-refresh" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -3104,6 +3182,57 @@ release drops support for the oldest version.</p>
 <span class="kd">const</span><span class="w"> </span><span class="nx">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Uint8Array</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">());</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">initFromArchiveBytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
 </code></pre></div>
+<h2 id="verifying-policy-store-signatures">Verifying policy store signatures<a class="headerlink" href="#verifying-policy-store-signatures" title="Permanent link">#</a></h2>
+<p>Agama Lab publishes each <code>.cjar</code> with a Sigstore (cosign keyless) bundle, <code>&lt;store&gt;.cjar.sigstore.json</code>, that signs the whole archive. With <a href=".././cedarling-properties/#verifying-policy-store-signatures"><code>CEDARLING_POLICY_STORE_SIGSTORE_MODE</code></a> set to <code>enforce</code>, Cedarling loads a <code>.cjar</code> only if that bundle verifies for the configured signer:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;CEDARLING_POLICY_STORE_SIGSTORE_MODE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enforce&quot;</span><span class="p">,</span>
+<span class="nt">&quot;CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com&quot;</span><span class="p">,</span>
+<span class="nt">&quot;CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com&quot;</span>
+</code></pre></div>
+<p>The bundle is verified offline against the public Sigstore trust root (Fulcio, Rekor and CT log keys) built into Cedarling. The check runs on the downloaded or read archive bytes before they are parsed, and the same bytes are then loaded. It is equivalent to:</p>
+<div class="highlight"><pre><span></span><code>cosign<span class="w"> </span>verify-blob<span class="w"> </span>store.cjar<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bundle<span class="w"> </span>store.cjar.sigstore.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-identity<span class="w"> </span><span class="s2">&quot;asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span>https://accounts.google.com
+</code></pre></div>
+<p>If the bundle is missing, does not verify, or was signed by someone else, Cedarling fails to start. During <a href="#background-refresh">background refresh</a> the current store is kept and the attempt is recorded as <code>VerificationError</code>. Each verified load is logged at <code>INFO</code>:</p>
+<div class="highlight"><pre><span></span><code>policy store signature verified: identity=asset-signer@... issuer=https://accounts.google.com archive_sha256=&lt;hex&gt; rekor_integrated_time=&lt;unix seconds&gt;
+</code></pre></div>
+<h3 id="where-the-bundle-comes-from">Where the bundle comes from<a class="headerlink" href="#where-the-bundle-comes-from" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Policy store source</th>
+<th>Bundle location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CEDARLING_POLICY_STORE_URI</code> or <code>CEDARLING_POLICY_STORE_CJAR_URL</code></td>
+<td>The archive URL with <code>.sigstore.json</code> appended to its path</td>
+</tr>
+<tr>
+<td><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> with a <code>.cjar</code> file</td>
+<td>The archive path with <code>.sigstore.json</code> appended</td>
+</tr>
+<tr>
+<td><a href=".././cedarling-lock-server/#loading-policy-stores-from-lock-server">Lock Server</a></td>
+<td>Set <code>CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI</code> to the full URL <code>https://&lt;lock-host&gt;/jans-lock/api/v1/policy/{policy_store_id}/sigstore</code>. It is fetched with the same client as the store, so the Lock access token is sent</td>
+</tr>
+<tr>
+<td>Archive bytes (<code>initFromArchiveBytes</code>, <code>load_from_json_with_archive_bytes</code>)</td>
+<td><code>CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI</code> is required</td>
+</tr>
+</tbody>
+</table>
+<p><code>CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI</code> overrides the location for any source. Directory and YAML policy stores cannot be signed, so <code>enforce</code> with them fails at startup.</p>
+<h3 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">#</a></h3>
+<ul>
+<li>A signature proves who published an archive, not that it is the latest one. Someone who controls the policy store URL can serve an older, validly signed archive.</li>
+<li>Refresh re-checks the signature only when the archive changes. A new bundle for the same archive is not fetched.</li>
+<li>If a new archive is published before its bundle, the next refresh fails and is retried with backoff.</li>
+<li>Bundles must carry a Rekor v1 transparency log entry with an inclusion proof, as <code>cosign sign-blob --bundle</code> writes them today.</li>
+<li>The trust root is built into each Cedarling release. A build older than a Sigstore root rotation stops verifying new signatures until it is upgraded.</li>
+</ul>
 <h2 id="background-refresh">Background refresh<a class="headerlink" href="#background-refresh" title="Permanent link">#</a></h2>
 <p>For URL-based policy store sources (<code>CEDARLING_POLICY_STORE_URI</code> pointing at a Lock Server endpoint or a <code>.cjar</code>), Cedarling can periodically re-fetch the policy store and atomically swap the in-memory <code>Authz</code> instance so long-running processes see policy updates without restart. Refresh is <strong>opt-in</strong> via <a href=".././cedarling-properties/#refreshing-the-policy-store"><code>CEDARLING_POLICY_STORE_REFRESH_INTERVAL</code></a> and is silently ignored for local sources.</p>
 <h3 id="per-request-consistency">Per-request consistency<a class="headerlink" href="#per-request-consistency" title="Permanent link">#</a></h3>
@@ -3142,7 +3271,7 @@ must not cache it.</p>
 <p>Across all three strategies the worker maintains a body-hash short-circuit: even when the server returns <code>200</code> with byte-identical bytes (some servers ignore conditional headers, some emit non-deterministic <code>ETag</code>s), Cedarling skips parse / rebuild / swap entirely.</p>
 <p>A <code>Cache-Control: max-age</code> / <code>Expires</code> hint in any successful response may <strong>shorten</strong> the next sleep but never lengthens it past the operator-configured interval.</p>
 <h3 id="failure-handling">Failure handling<a class="headerlink" href="#failure-handling" title="Permanent link">#</a></h3>
-<p>Failures (network, HTTP, parse, rebuild) leave the previously loaded <code>Authz</code> in place and exponentially back off the next attempt — <code>interval × 2^failures</code>, capped at 600 seconds, with ±10% jitter. The worker recovers automatically on the next success.</p>
+<p>Failures (network, HTTP, parse, rebuild, and, with <code>CEDARLING_POLICY_STORE_SIGSTORE_MODE=enforce</code>, a missing or invalid signature bundle) leave the previously loaded <code>Authz</code> in place and exponentially back off the next attempt — <code>interval × 2^failures</code>, capped at 600 seconds, with ±10% jitter. The worker recovers automatically on the next success.</p>
 <h3 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">#</a></h3>
 <p>The refresh worker emits the following keys into the <code>operational_stats</code> map of each metrics snapshot. Keys are emitted <strong>sparsely</strong> — only when the underlying value is non-zero — so dashboards can distinguish "no observation yet" from a genuine zero reading.</p>
 <table>
@@ -3167,7 +3296,7 @@ must not cache it.</p>
 </tr>
 <tr>
 <td><code>policy_store_refresh.last_outcome</code></td>
-<td>Integer enum: <code>1</code>=Success, <code>2</code>=NotModified, <code>3</code>=HttpError, <code>4</code>=NetworkError, <code>5</code>=ParseError, <code>6</code>=RebuildError, <code>7</code>=DecodeError</td>
+<td>Integer enum: <code>1</code>=Success, <code>2</code>=NotModified, <code>3</code>=HttpError, <code>4</code>=NetworkError, <code>5</code>=ParseError, <code>6</code>=RebuildError, <code>7</code>=DecodeError, <code>8</code>=VerificationError</td>
 </tr>
 <tr>
 <td><code>policy_store_refresh.strategy_current</code></td>
@@ -3216,6 +3345,10 @@ must not cache it.</p>
 <tr>
 <td><code>policy_store_refresh.outcome_decode_error</code></td>
 <td>Cumulative count of <code>DecodeError</code> outcomes (HTTP transaction succeeded but reading the response body failed — e.g. TCP drop mid-stream, transfer-encoding issue)</td>
+</tr>
+<tr>
+<td><code>policy_store_refresh.outcome_verification_error</code></td>
+<td>Cumulative count of <code>VerificationError</code> outcomes (the refreshed <code>.cjar</code> failed its Sigstore signature check, including a missing bundle). Failing to fetch the bundle counts like any other fetch failure instead: no response (timeout, connection refused) is <code>NetworkError</code>, a <code>5xx</code> is <code>HttpError</code>, and a failure while reading the bundle body is <code>DecodeError</code></td>
 </tr>
 </tbody>
 </table>
@@ -3921,7 +4054,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 13, 2026
+    October 19, 2026
   </span>
 
     
