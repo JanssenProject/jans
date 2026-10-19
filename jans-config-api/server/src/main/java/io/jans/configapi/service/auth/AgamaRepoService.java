@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class AgamaRepoService {
 
+    private static final String AGAMA_LAB_DOWNLOAD_PREFIX = "https://github.com/GluuFederation/";
+
     @Inject
     private Logger logger;
 
@@ -43,15 +45,14 @@ public class AgamaRepoService {
         }
         String url = URLDecoder.decode(downloadLink, Util.UTF8_STRING_ENCODING);
         logger.info("Decoded Agama Project url :{}", escapeLog(url));
+        if (!url.startsWith(AGAMA_LAB_DOWNLOAD_PREFIX)) {
+            throw new InvalidAttributeException("Agama Project url must start with " + AGAMA_LAB_DOWNLOAD_PREFIX);
+        }
         URI uri;
         try {
             uri = new URI(url);
         } catch (URISyntaxException ex) {
             throw new InvalidAttributeException("Invalid Agama Project url");
-        }
-        String scheme = uri.getScheme();
-        if (!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme)) {
-            throw new InvalidAttributeException("Agama Project url must use http or https");
         }
         try (InputStream in = uri.toURL().openStream()) {
             return Base64.encodeBase64(IOUtils.toByteArray(in), true);
