@@ -70,7 +70,7 @@ vfs = "0.13.0"
 # AES-encrypted zip support is not required.
 # If AES-encrypted zip support is ever needed, re-enable aes-crypto here AND
 # update custom-lints/rust-toolchain to a nightly >= rustc 1.95.0.
-zip = { version = "8.6.0", default-features = false, features = [
+zip = { version = "9.0.5", default-features = false, features = [
     "bzip2",
     "deflate64",
     "deflate",
@@ -85,6 +85,8 @@ prost-types = { version = "0.14.3", optional = true }
 tonic-prost = { version = "0.14.6", optional = true }
 hdrhistogram = "7.5.4"
 arc-swap = "1.9.2"
+sigstore-verifier = { workspace = true }
+sha2 = { workspace = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tonic = { version = "0.14.6", optional = true, features = ["tls-native-roots"] }
@@ -111,6 +113,7 @@ tonic-web-wasm-client = { version = "0.9.0", optional = true }
 [dev-dependencies]
 # is used in testing
 test_utils = { workspace = true }
+sigstore-verifier = { workspace = true, features = ["test-support"] }
 jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = { workspace = true }
 criterion = { version = "0.8.2", features = ["async_tokio"] }

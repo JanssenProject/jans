@@ -674,10 +674,27 @@ class AuthorizeMultiIssuerRequest:
     ) -> None: ...
 
 @final
+class DropReason:
+    """Why a token was dropped; same shape as the core JSON `reason` object."""
+
+    kind: str
+    detail: Optional[str]
+    message: str
+    def __repr__(self) -> str: ...
+
+@final
+class DroppedToken:
+    mapping: str
+    index: int
+    reason: DropReason
+    def __repr__(self) -> str: ...
+
+@final
 class MultiIssuerAuthorizeResult:
     def is_allowed(self) -> bool: ...
     def response(self) -> AuthorizeResultResponse: ...
     def request_id(self) -> str: ...
+    def dropped_tokens(self) -> List[DroppedToken]: ...
 
 @final
 class BatchItem:

@@ -2,7 +2,7 @@ module github.com/JanssenProject/jans/jans-cedarling/cedarling_opa
 
 go 1.26.0
 
-toolchain go1.26.8
+toolchain go1.26.9
 
 require (
 	github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260416194629-3a7db527e089
@@ -99,11 +99,11 @@ require (
 	// GO-2026-5932: golang.org/x/crypto/openpgp is unsafe/unmaintained; no fix exists.
 	// This repo does NOT import the openpgp sub-package anywhere — only safe sub-packages
 	// (e.g. x/crypto/sha3, x/crypto/chacha20poly1305) are used transitively.
-	golang.org/x/crypto v0.56.0 // indirect
-	golang.org/x/net v0.58.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260803160001-6ac0973c030d // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260803160001-6ac0973c030d // indirect

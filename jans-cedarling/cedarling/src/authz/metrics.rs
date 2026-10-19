@@ -465,6 +465,7 @@ struct PolicyStoreRefreshMetrics {
     outcome_parse_error: AtomicI64,
     outcome_rebuild_error: AtomicI64,
     outcome_decode_error: AtomicI64,
+    outcome_verification_error: AtomicI64,
 }
 
 impl PolicyStoreRefreshMetrics {
@@ -482,6 +483,7 @@ impl PolicyStoreRefreshMetrics {
             RefreshOutcome::ParseError => &self.outcome_parse_error,
             RefreshOutcome::RebuildError => &self.outcome_rebuild_error,
             RefreshOutcome::DecodeError => &self.outcome_decode_error,
+            RefreshOutcome::VerificationError => &self.outcome_verification_error,
         };
         per_outcome.fetch_add(1, Ordering::Relaxed);
 
@@ -494,7 +496,8 @@ impl PolicyStoreRefreshMetrics {
             | RefreshOutcome::NetworkError
             | RefreshOutcome::ParseError
             | RefreshOutcome::RebuildError
-            | RefreshOutcome::DecodeError => {
+            | RefreshOutcome::DecodeError
+            | RefreshOutcome::VerificationError => {
                 self.consecutive_failures.fetch_add(1, Ordering::Relaxed);
             },
         }
@@ -601,6 +604,11 @@ impl PolicyStoreRefreshMetrics {
             ops,
             "policy_store_refresh.outcome_decode_error",
             &self.outcome_decode_error,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_verification_error",
+            &self.outcome_verification_error,
         );
     }
 }
@@ -1570,6 +1578,25 @@ mod tests {
                 .get("policy_store_refresh.consecutive_failures"),
             Some(&2),
             "RebuildError counts as a failure for the streak"
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_verification_error_counts_as_failure() {
+        let collector = MetricsCollector::new(MetricsMode::Local);
+        collector.record_policy_store_refresh(RefreshOutcome::VerificationError);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_verification_error"),
+            Some(&1),
+            "VerificationError must increment its own per-outcome counter",
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.consecutive_failures"),
+            Some(&1),
+            "VerificationError counts as a failure for the streak",
         );
     }
 

@@ -114,3 +114,37 @@ def test_legacy_json_policy_store_local_rejected():
             "CEDARLING_POLICY_STORE_LOCAL": "{}",
         }))
 
+
+
+SIGSTORE_ENFORCE = {
+    "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com",
+}
+
+
+def test_sigstore_enforce_requires_cjar_source():
+    # policy-store_ok.yaml can't be signed, so enforcing must fail at startup
+    config = load_bootstrap_config(config_cb=lambda c: c.update(SIGSTORE_ENFORCE))
+    with pytest.raises(ValueError, match="is not a `.cjar` archive"):
+        Cedarling(config)
+
+
+def test_sigstore_enforce_requires_signer():
+    with pytest.raises(ValueError, match="CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY"):
+        load_bootstrap_config(
+            policy_store_location="store.cjar",
+            config_cb=lambda c: c.update({"CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce"}),
+        )
+
+
+def test_sigstore_enforce_rejects_cjar_without_bundle(tmp_path):
+    # the signature is checked before the archive is parsed, so any bytes will do
+    archive = tmp_path / "store.cjar"
+    archive.write_bytes(b"archive")
+    config = load_bootstrap_config(
+        policy_store_location=str(archive),
+        config_cb=lambda c: c.update(SIGSTORE_ENFORCE),
+    )
+    with pytest.raises(ValueError, match="store.cjar.sigstore.json"):
+        Cedarling(config)

@@ -104,6 +104,42 @@ public class MultiIssuerAuthzTest {
         assertTrue(result.getDecision(), "Authorization should ALLOW for valid tokens");
     }
 
+    @Test
+    public void testAuthorizeSuccessReportsNoDroppedTokens() throws Exception {
+        MultiIssuerAuthorizeResult result =
+                adapter.authorizeMultiIssuer(createValidTokens(), action, resource, emptyContext());
+
+        assertTrue(result.getDroppedTokens().isEmpty(),
+                "A decision that used every token must report no dropped tokens");
+    }
+
+    @Test
+    public void testAuthorizeReportsDroppedToken() throws Exception {
+        List<TokenInput> tokens = new ArrayList<>();
+        for (Map.Entry<String, String> entry : createValidTokens().entrySet()) {
+            tokens.add(new TokenInput(entry.getKey(), entry.getValue()));
+        }
+        int strayIndex = tokens.size();
+        tokens.add(new TokenInput("Nope::Token", "not-a-valid-jwt"));
+
+        MultiIssuerAuthorizeResult result =
+                adapter.authorizeMultiIssuer(tokens, action, resource, emptyContext());
+
+        assertTrue(result.getDecision(), "Valid tokens must still decide the request");
+        assertEquals(result.getDroppedTokens().size(), 1, "Exactly the stray token must be dropped");
+
+        DroppedToken dropped = result.getDroppedTokens().get(0);
+        assertEquals(dropped.getMapping(), "Nope::Token", "Mapping of the dropped input");
+        assertEquals(dropped.getIndex(), (long) strayIndex, "Index of the dropped input");
+
+        DropReasonInfo reason = dropped.getReason();
+        assertEquals(reason.kind(), "jwt_validation_failed", "kind must be the stable slug");
+        assertNull(reason.detail(), "detail must be null for unit reasons");
+        assertEquals(reason.message(), "JWT validation failed", "message must be the claim-free text");
+        assertTrue(reason.getVariant() instanceof DropReason.JwtValidationFailed,
+                "variant must be the typed core reason");
+    }
+
     @Test(expectedExceptions = uniffi.cedarling_uniffi.AuthorizeException.class)
     public void testAuthorizeDeniedInvalidToken() throws Exception {
         Map<String, String> tokens = createValidTokens();

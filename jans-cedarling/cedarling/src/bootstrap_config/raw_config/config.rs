@@ -17,7 +17,7 @@ use super::default_values::{
 use super::default_values::{
     default_http_client_request_timeout, default_stdout_buffer_limit, default_stdout_timeout_millis,
 };
-use super::feature_types::{FeatureToggle, LoggerType};
+use super::feature_types::{FeatureToggle, LoggerType, SigstoreMode};
 use super::json_util::{
     deserialize_jwks_refresh_interval, deserialize_jwks_refresh_min_interval,
     deserialize_or_parse_string_as_json, deserialize_status_list_refresh_interval_max,
@@ -527,6 +527,35 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub policy_store_max_file_size: u64,
+
+    /// `enforce` rejects a `.cjar` policy store unless its Sigstore bundle
+    /// verifies. Default: `disabled`.
+    #[serde(rename = "CEDARLING_POLICY_STORE_SIGSTORE_MODE", default)]
+    pub policy_store_sigstore_mode: SigstoreMode,
+
+    /// Expected signer identity (certificate SAN), matched exactly.
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub policy_store_sigstore_cert_identity: Option<String>,
+
+    /// Expected OIDC issuer of the signing certificate, matched exactly.
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub policy_store_sigstore_cert_oidc_issuer: Option<String>,
+
+    /// Bundle location; defaults to the policy store location plus `.sigstore.json`.
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub policy_store_sigstore_bundle_uri: Option<String>,
 }
 
 impl Default for BootstrapConfigRaw {

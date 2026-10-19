@@ -5,6 +5,8 @@
 
 //! Caller-chosen bounds for untrusted input (core design §11, decision R16).
 
+use crate::ErrorCode;
+use crate::error_code::HasErrorCode;
 use thiserror::Error;
 
 /// Bounds applied before and during parsing, so hostile input is rejected without unbounded
@@ -194,14 +196,15 @@ impl SizeLimitError {
     }
 
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "SIZE_LIMIT_EXCEEDED"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{LimitKind, Limits, SizeLimitError};
+    use crate::ErrorCode;
 
     #[test]
     fn display_names_the_limit() {
@@ -274,7 +277,7 @@ mod tests {
     fn code_is_stable() {
         assert_eq!(
             SizeLimitError::new(LimitKind::Depth, 1).code(),
-            "SIZE_LIMIT_EXCEEDED",
+            ErrorCode::SizeLimitExceeded,
             "stable code from core design §10"
         );
     }

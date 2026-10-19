@@ -8,18 +8,18 @@ use super::{
     BuildEntityError, BuiltEntities, DEFAULT_ENTITY_TYPE_NAME, EntityBuilder,
     default_tkn_entity_name,
 };
+use crate::authz::{DropReason, DroppedToken};
 use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::token_entity_metadata::DEFAULT_TKN_ID;
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
-use crate::jwt::{Token, TokenIssuer};
+use crate::jwt::{Token, TokenIssuer, ValidatedToken};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel};
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
-use std::sync::Arc;
 
 /// Errors that can occur during multi-issuer entity building
 #[derive(Debug, thiserror::Error)]
@@ -286,6 +286,16 @@ pub(crate) struct MultiIssuerSetupEntities {
     pub tokens: HashMap<String, Entity>,
     pub issuers: HashSet<Entity>,
     pub default_entities: DefaultEntities,
+    /// Validated tokens that could not be turned into a Cedar entity, each
+    /// with its original request index and
+    /// [`DropReason::EntityBuildFailed`](crate::DropReason::EntityBuildFailed).
+    pub dropped: Vec<DroppedToken>,
+}
+
+/// Token that owns a `context.tokens` entity key within one request.
+struct EntityKeyOwner<'a> {
+    mapping: &'a str,
+    index: usize,
 }
 
 impl EntityBuilder {
@@ -295,17 +305,44 @@ impl EntityBuilder {
     /// [`Self::build_resource_entity`] call to complete each decision.
     pub(crate) fn build_multi_issuer_setup_entities(
         &self,
-        tokens: &HashMap<String, Arc<Token>>,
+        tokens: &HashMap<String, ValidatedToken>,
         log_service: &impl LogWriter,
     ) -> Result<MultiIssuerSetupEntities, MultiIssuerEntityError> {
         let mut built_entities = BuiltEntities::from(&self.iss_entities);
 
         let mut token_entities = HashMap::new();
-        for (token_name, token) in tokens {
+        let mut dropped = Vec::new();
+        let mut entity_key_owners: HashMap<String, EntityKeyOwner<'_>> = HashMap::new();
+        for (token_name, entry) in tokens {
+            let token = &entry.token;
             match self.build_single_token_entity(token, &built_entities) {
                 Ok(entity) => match self.generate_entity_key(token_name, token) {
                     Ok(entity_key) => {
                         built_entities.insert(&entity.uid());
+                        let owner = EntityKeyOwner {
+                            mapping: token_name,
+                            index: entry.index,
+                        };
+                        if let Some(displaced) = entity_key_owners.insert(entity_key.clone(), owner)
+                        {
+                            log_service.log_any(
+                                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                                    LogLevel::WARN,
+                                    None,
+                                ))
+                                .set_message(format!(
+                                    "Entity key collision for token '{token_name}': \
+                                    replaces '{}'",
+                                    displaced.mapping
+                                ))
+                                .set_error(format!("duplicate entity key '{entity_key}'")),
+                            );
+                            dropped.push(DroppedToken::new(
+                                displaced.mapping,
+                                displaced.index,
+                                DropReason::EntityBuildFailed,
+                            ));
+                        }
                         token_entities.insert(entity_key, entity);
                     },
                     Err(e) => {
@@ -319,6 +356,11 @@ impl EntityBuilder {
                             ))
                             .set_error(e.to_string()),
                         );
+                        dropped.push(DroppedToken::new(
+                            token_name.as_str(),
+                            entry.index,
+                            DropReason::EntityBuildFailed,
+                        ));
                     },
                 },
                 Err(e) => {
@@ -332,6 +374,11 @@ impl EntityBuilder {
                         ))
                         .set_error(e.to_string()),
                     );
+                    dropped.push(DroppedToken::new(
+                        token_name.as_str(),
+                        entry.index,
+                        DropReason::EntityBuildFailed,
+                    ));
                 },
             }
         }
@@ -354,6 +401,7 @@ impl EntityBuilder {
             tokens: token_entities,
             issuers,
             default_entities: self.default_entities.clone(),
+            dropped,
         })
     }
 
@@ -554,7 +602,20 @@ mod tests {
     use cedar_policy_core::validator::ValidatorSchema;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
     use url::Url;
+
+    /// Wrap test tokens as validated entries with arbitrary distinct indexes.
+    fn into_validated(tokens: HashMap<String, Token>) -> HashMap<String, ValidatedToken> {
+        tokens
+            .into_iter()
+            .enumerate()
+            .map(|(index, (name, token))| {
+                let token = Arc::new(token);
+                (name, ValidatedToken { token, index })
+            })
+            .collect()
+    }
 
     fn create_test_entity_builder() -> EntityBuilder {
         let mut trusted_issuers = HashMap::new();
@@ -804,8 +865,7 @@ mod tests {
         let token_two = create_test_token("https://idp.acme.com/auth", "token2", claims2, &builder);
         tokens.insert("Jans::Access_Token2".to_string(), token_two);
 
-        let tokens: HashMap<String, Arc<Token>> =
-            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+        let tokens = into_validated(tokens);
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
@@ -848,8 +908,7 @@ mod tests {
         let token_three = Token::new("Jans::Id_Token", token_claims3, None);
         tokens.insert("Jans::Id_Token".to_string(), token_three);
 
-        let tokens: HashMap<String, Arc<Token>> =
-            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+        let tokens = into_validated(tokens);
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
@@ -1043,8 +1102,7 @@ mod tests {
             create_test_token("https://idp.dolphin.sea/auth", "token3", claims3, &builder);
         tokens.insert("Acme::DolphinToken".to_string(), token_three);
 
-        let tokens: HashMap<String, Arc<Token>> =
-            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+        let tokens = into_validated(tokens);
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
@@ -1054,6 +1112,18 @@ mod tests {
         assert_eq!(entities_data.tokens.len(), 2);
         assert!(entities_data.tokens.contains_key("acme_access_token"));
         assert!(entities_data.tokens.contains_key("dolphin_dolphintoken"));
+
+        // The token that validated but failed entity building (missing issuer)
+        // is reported with its own request index.
+        assert_eq!(
+            entities_data.dropped,
+            vec![DroppedToken::new(
+                "Jans::Id_Token",
+                tokens["Jans::Id_Token"].index,
+                DropReason::EntityBuildFailed,
+            )],
+            "the token that failed entity building must be reported as EntityBuildFailed"
+        );
     }
 
     #[test]
@@ -1076,8 +1146,7 @@ mod tests {
         let token_two = Token::new("Jans::Id_Token", token_claims2, None);
         tokens.insert("Jans::Id_Token".to_string(), token_two);
 
-        let tokens: HashMap<String, Arc<Token>> =
-            tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
+        let tokens = into_validated(tokens);
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
 
