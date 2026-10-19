@@ -293,6 +293,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
             token_endpoint_authmethods.append((method, method))
 
 
+        grant_types_supperted_checkbox_widget = self.myparent.getTitledCheckBoxList(
+                _("Grant"),
+                name='grantTypes',
+                values=[(grant_type, grant_type.split(':')[-1]) for grant_type in self.myparent.app_configuration.get('grantTypesSupported') or ()],
+                current_values=self.data.get('grantTypes', []),
+                jans_help=self.myparent.get_help_from_schema(
+                    schema, 'grantTypes'),
+                style='class:outh-client-checkboxlist')
+
         basic_tab_widgets = [
             self.myparent.getTitledText(
                 _("Client_ID"),
@@ -358,22 +367,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     schema, 'sectorIdentifierUri'),
                 style=cli_style.check_box),
 
-            self.myparent.getTitledCheckBoxList(
-                _("Grant"),
-                name='grantTypes',
-                values=[
-                    ('authorization_code', 'Authorization Code'),
-                    ('refresh_token', 'Refresh Token'),
-                    ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'),
-                    ('client_credentials', 'Client Credentials'),
-                    ('password', 'Password'),
-                    ('implicit', 'Implicit'),
-                    ('urn:ietf:params:oauth:grant-type:device_code', 'Device Code'),
-                    ],
-                current_values=self.data.get('grantTypes', []),
-                jans_help=self.myparent.get_help_from_schema(
-                    schema, 'grantTypes'),
-                style='class:outh-client-checkboxlist'),
+            grant_types_supperted_checkbox_widget,
 
             self.myparent.getTitledCheckBoxList(
                 _("Response Types"),
