@@ -9,8 +9,10 @@ import io.jans.util.exception.InvalidAttributeException;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.net.URL;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -40,8 +42,20 @@ public class AgamaRepoService {
             throw new InvalidAttributeException("Agama Project url is null!!!");
         }
         String url = URLDecoder.decode(downloadLink, Util.UTF8_STRING_ENCODING);
-        logger.info("Decoded Agama Project url :{}", url);
-        return Base64.encodeBase64(IOUtils.toByteArray((new URL(url)).openStream()), true);
+        logger.info("Decoded Agama Project url :{}", escapeLog(url));
+        URI uri;
+        try {
+            uri = new URI(url);
+        } catch (URISyntaxException ex) {
+            throw new InvalidAttributeException("Invalid Agama Project url");
+        }
+        String scheme = uri.getScheme();
+        if (!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme)) {
+            throw new InvalidAttributeException("Agama Project url must use http or https");
+        }
+        try (InputStream in = uri.toURL().openStream()) {
+            return Base64.encodeBase64(IOUtils.toByteArray(in), true);
+        }
     }
 
 }
