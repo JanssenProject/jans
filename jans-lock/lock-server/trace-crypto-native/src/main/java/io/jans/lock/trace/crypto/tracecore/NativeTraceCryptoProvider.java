@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
-import io.jans.lock.trace.crypto.StrictBase64Url;
 import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.trace.crypto.TraceCryptoImpl;
 import io.jans.lock.trace.crypto.TraceCryptoProvider;
@@ -226,9 +225,12 @@ public class NativeTraceCryptoProvider implements TraceCryptoProvider {
 			throw new TraceCryptoException(TraceCryptoException.REASON_SIGNATURE_MISMATCH,
 					"Ed25519 signature must be 64 bytes");
 		}
-		requireEmbeddedSignature(record, signature);
 		try {
 			SignedAssertion signed = SignedAssertion.parse(new JsonBody(record.getRawText()), limits);
+			if (!MessageDigest.isEqual(signed.signature().toBytes(), signature)) {
+				throw new TraceCryptoException(TraceCryptoException.REASON_SIGNATURE_MISMATCH,
+						"Supplied signature differs from the signature in the record text");
+			}
 			VerifiedAssertion verified = signed
 					.verify(new VerificationContext(record.getProducer(), record.getKid(), nativeKey.key));
 			return verified.contentDigest().toString();
@@ -259,29 +261,6 @@ public class NativeTraceCryptoProvider implements TraceCryptoProvider {
 			throw unavailable(err);
 		} catch (Exception ex) {
 			throw unencodable(ex, TraceCryptoException.REASON_INVALID_RECEIPT_INPUT);
-		}
-	}
-
-	/**
-	 * The native library verifies the signature embedded in the record text, so the supplied bytes
-	 * must be that same signature; otherwise this provider would accept what the Java provider
-	 * rejects.
-	 */
-	private static void requireEmbeddedSignature(TraceSignedRecord record, byte[] signature) {
-		JsonNode embedded = record.getRoot().get("signature");
-		if (embedded == null || !embedded.isTextual()) {
-			return;
-		}
-		byte[] decoded;
-		try {
-			decoded = StrictBase64Url.decode(embedded.asText());
-		} catch (IllegalArgumentException ex) {
-			throw new TraceCryptoException(TraceCryptoException.REASON_SIGNATURE_MISMATCH,
-					"Embedded signature is not base64url", ex);
-		}
-		if (!MessageDigest.isEqual(decoded, signature)) {
-			throw new TraceCryptoException(TraceCryptoException.REASON_SIGNATURE_MISMATCH,
-					"Supplied signature differs from the embedded signature");
 		}
 	}
 
