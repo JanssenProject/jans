@@ -36,13 +36,24 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: "Check Scorecard PAT"
+        id: pat
+        env:
+          SCORECARD_TOKEN: ${{ secrets.SCORECARD_TOKEN }}
+        run: |
+          if [ -n "$SCORECARD_TOKEN" ] && curl -sf -o /dev/null -H "Authorization: Bearer $SCORECARD_TOKEN" "https://api.github.com/repos/$GITHUB_REPOSITORY"; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::SCORECARD_TOKEN missing or invalid; falling back to GITHUB_TOKEN"
+          fi
+
       - name: "Run analysis"
         uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
         with:
           results_file: results.sarif
           results_format: sarif
           # PAT needed to read classic branch protection
-          repo_token: ${{ secrets.SCORECARD_TOKEN || github.token }}
+          repo_token: ${{ steps.pat.outputs.valid == 'true' && secrets.SCORECARD_TOKEN || github.token }}
           # Publishes the score to the public OpenSSF Scorecard API.
           publish_results: true
 
