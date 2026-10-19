@@ -147,7 +147,10 @@ where
                     details: e.to_string(),
                 })?;
 
-            let file_name = file.name();
+            let file_name = file.name().map_err(|e| ArchiveError::CorruptedEntry {
+                index: i,
+                details: e.to_string(),
+            })?;
 
             // Explicitly reject absolute paths (Unix-style or Windows-style)
             // Note: enclosed_name() behavior is inconsistent across environments -
@@ -350,11 +353,11 @@ where
         };
 
         for i in 0..archive.len() {
-            if let Ok(file) = archive.by_index(i) {
-                let file_name = file.name();
-                if file_name == normalized || file_name.starts_with(&dir_prefix) {
-                    return Ok(true);
-                }
+            if let Ok(file) = archive.by_index(i)
+                && let Ok(file_name) = file.name()
+                && (file_name == normalized || file_name.starts_with(&dir_prefix))
+            {
+                return Ok(true);
             }
         }
 
@@ -402,11 +405,11 @@ where
 
         // Check if any files have this as a prefix (implicit directory)
         for i in 0..archive.len() {
-            if let Ok(file) = archive.by_index(i) {
-                let file_name = file.name();
-                if file_name.starts_with(&format!("{normalized}/")) {
-                    return true;
-                }
+            if let Ok(file) = archive.by_index(i)
+                && let Ok(file_name) = file.name()
+                && file_name.starts_with(&format!("{normalized}/"))
+            {
+                return true;
             }
         }
 
@@ -486,12 +489,14 @@ where
                 std::io::Error::other(format!("Failed to read archive entry {i}: {e}"))
             })?;
 
-            let file_name = file.name();
+            let file_name = file.name().map_err(|e| {
+                std::io::Error::other(format!("Failed to read archive entry name {i}: {e}"))
+            })?;
 
             // Check if this file is in the requested directory
             if file_name.starts_with(&prefix) || (prefix.is_empty() && !file_name.contains('/')) {
                 let relative = if prefix.is_empty() {
-                    file_name
+                    file_name.as_ref()
                 } else {
                     &file_name[prefix.len()..]
                 };
@@ -937,52 +942,25 @@ mod limit_tests {
         assert_eq!(vfs.read_file("metadata.json").unwrap().len(), 64 * 1024);
     }
 
-    /// Overwrite every little-endian `u32` occurrence of `from` with `to`,
-    /// which rewrites an entry's size in both the local header and the central
-    /// directory. Returns how many fields were patched.
-    fn patch_declared_size(bytes: &mut [u8], from: u32, to: u32) -> usize {
-        let (from, to) = (from.to_le_bytes(), to.to_le_bytes());
-        let mut patched = 0;
-        for i in 0..bytes.len().saturating_sub(4) {
-            if bytes[i..i + 4] == from {
-                bytes[i..i + 4].copy_from_slice(&to);
-                patched += 1;
-            }
-        }
-        patched
-    }
-
     #[test]
     fn test_total_size_is_enforced_against_bytes_actually_read() {
-        // Understating every entry lets the archive past the construction-time
-        // total, which can only see declared sizes. Each entry still fits under
-        // the per-entry cap, so only the running total of real decompressed
-        // bytes catches it.
+        // Lowered after construction so only the running total can trip
         let entry = small_limit_bytes();
-        let mut bytes = create_archive_with_sizes(vec![("a.json", entry), ("b.json", entry)]);
-        let patched = patch_declared_size(
-            &mut bytes,
-            u32::try_from(entry).expect("entry size fits in u32"),
-            1,
-        );
-        assert!(
-            patched >= 4,
-            "expected to patch 4 size fields, patched {patched}"
-        );
+        let bytes = create_archive_with_sizes(vec![("a.json", entry), ("b.json", entry)]);
 
         let limits = ArchiveLimits {
             max_entry_size: SMALL_LIMIT,
-            max_total_size: SMALL_LIMIT + 1000,
+            max_total_size: SMALL_LIMIT * 2,
             max_entries: 100,
         };
-        let vfs = ArchiveVfs::from_buffer(bytes, limits)
-            .expect("understated sizes must pass the construction-time total");
+        let mut vfs = ArchiveVfs::from_buffer(bytes, limits)
+            .expect("both entries fit under the construction-time total");
+        vfs.limits.max_total_size = SMALL_LIMIT + 1000;
 
         assert_eq!(
             vfs.read_file("a.json").expect("first entry fits").len(),
             entry
         );
-
         let err = vfs
             .read_file("b.json")
             .expect_err("the second entry must push the running total past the cap");
@@ -994,6 +972,22 @@ mod limit_tests {
             matches!(source, ArchiveError::ArchiveSizeExceeded { .. }),
             "Expected ArchiveSizeExceeded, got: {source:?}"
         );
+    }
+
+    fn assert_understated_entry_rejected(
+        err: &std::io::Error,
+        expected: impl Fn(&ArchiveError) -> bool,
+    ) {
+        match err.get_ref().and_then(|e| e.downcast_ref::<ArchiveError>()) {
+            Some(source) => assert!(expected(source), "unexpected ArchiveError: {source:?}"),
+            None => assert!(
+                err.kind() == std::io::ErrorKind::InvalidData
+                    && err
+                        .to_string()
+                        .contains("larger than its declared uncompressed size"),
+                "unexpected error: {err:?}"
+            ),
+        }
     }
 
     #[test]
@@ -1026,13 +1020,8 @@ mod limit_tests {
         let err = vfs
             .read_file("metadata.json")
             .expect_err("read_file must reject an entry that decompresses past the cap");
-        let source = err
-            .get_ref()
-            .and_then(|e| e.downcast_ref::<ArchiveError>())
-            .expect("io::Error must carry the typed ArchiveError");
-        assert!(
-            matches!(source, ArchiveError::EntrySizeExceeded { .. }),
-            "Expected EntrySizeExceeded, got: {source:?}"
-        );
+        assert_understated_entry_rejected(&err, |e| {
+            matches!(e, ArchiveError::EntrySizeExceeded { .. })
+        });
     }
 }

@@ -947,3 +947,40 @@ fn test_load_from_json_with_archive_bytes_enforce_rejects_invalid_bundle_file() 
         "a bundle that does not verify must be rejected, got: {error_msg}"
     );
 }
+
+/// The uniffi `DropReason` must carry exactly the fields of the core JSON
+/// `reason` object, so every binding exposes the same shape.
+#[test]
+fn test_dropped_token_reason_matches_core_json() {
+    let cases = [
+        cedarling::DropReason::DuplicateToken,
+        cedarling::DropReason::InvalidInput(cedarling::TokenInputError::EmptyPayload),
+    ];
+    for reason in cases {
+        // Core omits `detail` for unit reasons; uniffi exposes it as `None`.
+        let mut expected = serde_json::to_value(&reason).expect("core reason serializes");
+        expected["detail"] = expected
+            .get("detail")
+            .cloned()
+            .unwrap_or(serde_json::Value::Null);
+        let dropped = crate::result::DroppedToken::from(cedarling::DroppedToken::new(
+            "Jans::Access_Token",
+            3,
+            reason,
+        ));
+        assert_eq!(
+            dropped.mapping, "Jans::Access_Token",
+            "mapping is passed through"
+        );
+        assert_eq!(dropped.index, 3, "index is passed through");
+        assert_eq!(
+            serde_json::json!({
+                "kind": dropped.reason.kind(),
+                "detail": dropped.reason.detail(),
+                "message": dropped.reason.message(),
+            }),
+            expected,
+            "uniffi reason must match the core JSON reason"
+        );
+    }
+}

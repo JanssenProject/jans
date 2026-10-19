@@ -40,7 +40,7 @@ setup(
         "sqlalchemy==2.0.49",
         "ldap3",
         "PyMySQL",
-        "PyJWT>=2.3.0",
+        "PyJWT>=2.15.1",
     ],
     classifiers=[
         "Intended Audience :: Developers",

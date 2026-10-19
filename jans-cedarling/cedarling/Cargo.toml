@@ -70,7 +70,7 @@ vfs = "0.13.0"
 # AES-encrypted zip support is not required.
 # If AES-encrypted zip support is ever needed, re-enable aes-crypto here AND
 # update custom-lints/rust-toolchain to a nightly >= rustc 1.95.0.
-zip = { version = "8.6.0", default-features = false, features = [
+zip = { version = "9.0.5", default-features = false, features = [
     "bzip2",
     "deflate64",
     "deflate",

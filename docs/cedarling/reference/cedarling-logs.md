@@ -152,7 +152,7 @@ In the unsigned flow, `principal` contains the Cedar entity type names of each p
 
 #### `authorize_multi_issuer` example
 
-In the multi-issuer flow, `principal` is empty (no principal entities are created). The `tokens` field contains JWT claim information for each validated token.
+In the multi-issuer flow, `principal` is empty (no principal entities are created). The `tokens` field contains JWT claim information for each validated token. When a supplied token is not used in the decision, it is reported in the `dropped_tokens` field (shown below; omitted when no token was dropped).
 
 ```json
 {
@@ -181,6 +181,13 @@ In the multi-issuer flow, `principal` is empty (no principal entities are create
             "jti": "token_abc"
         }
     },
+    "dropped_tokens": [
+        {
+            "mapping": "Acme::Id_Token",
+            "index": 1,
+            "reason": { "kind": "jwt_validation_failed", "message": "JWT validation failed" }
+        }
+    ],
     "decision_time_micro_sec": 3
 }
 ```
@@ -201,6 +208,7 @@ In the multi-issuer flow, `principal` is empty (no principal entities are create
 * `resource`: From the request
 * `decision`: `ALLOW` or `DENY`
 * `tokens`: Dictionary with the token type and claims which should be included in the log (omitted if empty)
+* `dropped_tokens`: Multi-issuer only. List of supplied tokens that were not used in the decision, each with the input `mapping`, zero-based `index`, and a claim-free `reason` (`{ "kind": "...", "detail": ..., "message": "..." }`, where `kind` is a stable slug and `detail` is optional — present for `invalid_input`, omitted for unit reasons — while `message` is always the non-empty Display text). Omitted when no token was dropped. See [Inspecting dropped tokens](./cedarling-multi-issuer.md#inspecting-dropped-tokens) for the reason slugs.
 * `decision_time_micro_sec`: how long the decision took
 * `pushed_data`: Information about pushed data injected into the authorization context (omitted if none)
 
