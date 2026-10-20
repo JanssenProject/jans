@@ -638,6 +638,15 @@ let request = request.with_options(AuthorizeOptions::with_trace(TraceContext::ne
 )));
 ```
 
+In Python, pass `options` to the request constructor:
+
+```python
+from cedarling_python import AuthorizeOptions, RequestUnsigned, TraceContext
+
+options = AuthorizeOptions(trace=TraceContext(execution_id, execution_authority, workload_id))
+request = RequestUnsigned(action=action, resource=resource, context={}, options=options)
+```
+
 ## Policy Introspection
 
 Cedarling also provides methods to discover which policies are potentially applicable to a given authorization request **without executing authorization**. This is useful for:

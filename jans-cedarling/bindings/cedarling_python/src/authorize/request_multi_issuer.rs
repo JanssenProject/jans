@@ -5,6 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use super::authorize_options::{self, AuthorizeOptions};
 use super::entity_data::EntityData;
 use super::token_input::TokenInput;
 use pyo3::exceptions::PyRuntimeError;
@@ -25,6 +26,7 @@ use std::sync::OnceLock;
 /// :param resource: Resource data (wrapped `EntityData` object)
 /// :param action: The action to be authorized
 /// :param context: Optional Python dictionary with additional context
+/// :param options: Optional `AuthorizeOptions`, e.g. a TRACE context.
 ///
 /// Example
 /// -------
@@ -57,6 +59,10 @@ pub struct AuthorizeMultiIssuerRequest {
     /// mutations to the source dict (or nested values) are always picked up.
     #[pyo3(get, set)]
     pub context: Option<Py<PyDict>>,
+    /// Per-call options; never change the decision. The getter returns a copy,
+    /// so mutating `req.options.trace` is discarded; assign new options instead.
+    #[pyo3(get, set)]
+    pub options: Option<AuthorizeOptions>,
     /// Sticky cache of `tokens` converted to `cedarling::TokenInput`.
     cached_tokens: OnceLock<Vec<cedarling::TokenInput>>,
 }
@@ -64,18 +70,20 @@ pub struct AuthorizeMultiIssuerRequest {
 #[pymethods]
 impl AuthorizeMultiIssuerRequest {
     #[new]
-    #[pyo3(signature = (tokens, resource, action, context=None))]
+    #[pyo3(signature = (tokens, resource, action, context=None, options=None))]
     fn new(
         tokens: Vec<TokenInput>,
         resource: EntityData,
         action: String,
         context: Option<Py<PyDict>>,
+        options: Option<AuthorizeOptions>,
     ) -> Self {
         Self {
             tokens,
             resource,
             action,
             context,
+            options,
             cached_tokens: OnceLock::new(),
         }
     }
@@ -111,7 +119,7 @@ impl AuthorizeMultiIssuerRequest {
             resource: self.resource.clone().into(),
             action: self.action.clone(),
             context,
-            options: cedarling::AuthorizeOptions::default(),
+            options: authorize_options::to_cedarling(self.options.as_ref()),
         })
     }
 }
