@@ -9,6 +9,7 @@
 #[cfg(not(target_arch = "wasm32"))]
 mod key;
 mod producer_id;
+mod record;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) use key::ProducerKey;
