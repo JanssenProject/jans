@@ -3808,6 +3808,12 @@ verification. See <a href=".././trace/">TRACE Evidence</a> for the feature descr
 <td><code>PRE_REGISTERED</code></td>
 <td>How producer chains come to exist. <code>PRE_REGISTERED</code>: a chain must be registered through the admin API before its records are accepted. <code>FIRST_OBSERVED</code>: a record with <code>sequence_number</code> 1 and the all-zero <code>prev_record_hash</code> on an unregistered chain registers the chain, after the key, event-kind and signature checks pass. Any other record on an unregistered chain is still rejected with <code>chain_not_registered</code>. A value that is not a mode name is treated as <code>PRE_REGISTERED</code> and logged once at <code>WARN</code>. Changing the mode affects only later submissions; existing chains are not rewritten.</td>
 </tr>
+<tr>
+<td><code>cryptoProvider</code></td>
+<td>string</td>
+<td><code>JAVA</code></td>
+<td>TRACE cryptography implementation. <code>JAVA</code>: BouncyCastle, in-process. <code>NATIVE</code>: <code>jans-trace-core</code> through the <code>jans-trace-java</code> binding. Both produce the same digests, thumbprints and receipt hashes, so switching does not invalidate the stored receipt chain. When the selected provider is not available, every TRACE submission fails with <code>crypto_unavailable</code>; Lock never falls back to the other provider. A value that is not a provider name is treated as <code>JAVA</code> and logged once at <code>WARN</code>. See <a href=".././trace/#configuration">TRACE</a>.</td>
+</tr>
 </tbody>
 </table>
 <p>Every numeric limit above falls back to its default when configured with a value <code>&lt;= 0</code>.</p>
@@ -4298,7 +4304,7 @@ tail<span class="w"> </span>-f<span class="w"> </span>/opt/jans/lock-server/logs
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 14, 2026
+    October 20, 2026
   </span>
 
     
