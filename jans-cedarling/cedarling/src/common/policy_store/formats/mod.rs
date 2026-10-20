@@ -344,6 +344,8 @@ pub(super) fn read_policy_store(
             id: metadata.policy_store.id.clone(),
             store,
             metadata: Some(metadata),
+            // Only the caller knows whether the files came from a `.cjar`.
+            bundle_hash: None,
         },
         format: FormatReport {
             spec_version: Some(selected.spec_version),

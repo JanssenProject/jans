@@ -1504,6 +1504,96 @@ impl AuthorizeEntitiesData {
 }
 
 #[cfg(test)]
+mod bundle_hash_tests {
+    use std::sync::Arc;
+    use std::time::Duration;
+
+    use super::*;
+    use crate::authz::metrics::{MetricsCollector, MetricsMode};
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
+    use crate::common::policy_store::test_utils::fixtures;
+    use crate::context_data_api::{DataStore, DataStoreConfig};
+    use crate::http::{HttpClient, HttpClientConfig};
+    use crate::init::authz_builder::build_authz;
+    use crate::init::policy_store::parse_cjar_bytes;
+    use crate::init::policy_store_refresh::AuthzRebuilder;
+    use crate::log::TEST_LOGGER;
+    use crate::{AuthorizationConfig, JwtConfig};
+
+    async fn parsed_store(version: &str) -> (PolicyStoreWithID, jans_trace_core::Digest) {
+        let bytes = fixtures::minimal_valid()
+            .with_version(version)
+            .build_archive()
+            .expect("test archive builds");
+        let hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
+        let store = parse_cjar_bytes(bytes, false, ArchiveLimits::default())
+            .await
+            .expect("test archive parses")
+            .store;
+        (store, hash)
+    }
+
+    /// A refreshed store carries its own `bundle_hash`, while an `Authz`
+    /// snapshot taken before the swap keeps the hash of the store it decided with.
+    #[tokio::test]
+    async fn refresh_with_new_archive_changes_bundle_hash() {
+        let (first, first_hash) = parsed_store("1.0.0").await;
+        let (second, second_hash) = parsed_store("2.0.0").await;
+        assert_ne!(first_hash, second_hash, "the two archives should differ");
+
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let rebuilder = AuthzRebuilder {
+            jwt_config: JwtConfig::new_without_validation(),
+            authorization_config: AuthorizationConfig::default(),
+            http_client: HttpClient::new(HttpClientConfig {
+                max_retries: 0,
+                retry_delay: Duration::from_millis(1),
+                request_timeout: Duration::from_secs(2),
+                max_response_size_bytes: None,
+            })
+            .expect("http client should be constructed"),
+            log: TEST_LOGGER.clone(),
+            data_store: Arc::new(
+                DataStore::new(DataStoreConfig::default(), metrics.clone())
+                    .expect("data store should be created"),
+            ),
+            metrics,
+        };
+        let bootstrap = build_authz(
+            first,
+            &rebuilder.jwt_config,
+            &rebuilder.authorization_config,
+            rebuilder.http_client.clone(),
+            &rebuilder.log,
+            rebuilder.data_store.clone(),
+            rebuilder.metrics.clone(),
+            None,
+        )
+        .await
+        .expect("bootstrap Authz should build");
+        let swap = arc_swap::ArcSwap::from_pointee(bootstrap);
+
+        let snapshot = swap.load_full();
+        let refreshed = rebuilder
+            .rebuild(second, &snapshot)
+            .await
+            .expect("refreshed Authz should build");
+        swap.store(Arc::new(refreshed));
+
+        assert_eq!(
+            swap.load().config.policy_store.bundle_hash,
+            Some(second_hash),
+            "the refreshed Authz should carry the new archive's bundle_hash"
+        );
+        assert_eq!(
+            snapshot.config.policy_store.bundle_hash,
+            Some(first_hash),
+            "a snapshot held across the refresh keeps the old bundle_hash"
+        );
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use serde_json::json;

@@ -74,6 +74,11 @@ impl<'a> ServiceFactory<'a> {
         self.service_config.policy_store.metadata.as_ref()
     }
 
+    /// `bundle_hash` of the loaded store, when it came from a `.cjar`.
+    pub(crate) fn policy_store_bundle_hash(&self) -> Option<jans_trace_core::Digest> {
+        self.service_config.policy_store.bundle_hash
+    }
+
     /// Returns a clone of the HTTP client used during service initialization.
     /// Exposed so the policy-store refresh worker can reuse the same client
     /// (and therefore the same timeout / retry configuration) for its periodic

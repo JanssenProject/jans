@@ -262,6 +262,16 @@ impl Cedarling {
         if let Some(metadata) = service_factory.policy_store_metadata() {
             log_policy_store_metadata(&log, metadata);
         }
+        // Compared with the `bundle_hash` Lock serves for the same `.cjar`.
+        if let Some(bundle_hash) = service_factory.policy_store_bundle_hash() {
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::INFO,
+                    None,
+                ))
+                .set_message(format!("Policy store bundle_hash: {bundle_hash}")),
+            );
+        }
 
         if let Some(registry) = log.health_registry() {
             registry.register("core", || HealthStatus::Success);

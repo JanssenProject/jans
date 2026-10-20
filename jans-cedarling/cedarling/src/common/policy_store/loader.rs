@@ -63,20 +63,6 @@ pub(crate) fn read_policy_store_directory(
     Err(PolicyStoreError::from(super::errors::ArchiveError::WasmUnsupported).into())
 }
 
-/// Read a policy store from a Cedar Archive (.cjar) file.
-///
-/// This function uses `ArchiveVfs` to read from a zip archive.
-/// It is only available on native platforms (not WASM).
-#[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn read_policy_store_archive(
-    path: &Path,
-    strict: bool,
-    limits: ArchiveLimits,
-) -> Result<ParsedPolicyStore, ReadStoreError> {
-    let archive_vfs = ArchiveVfs::from_file(path, limits).map_err(PolicyStoreError::from)?;
-    read_from_vfs(&archive_vfs, ".", strict)
-}
-
 /// Read a policy store from a Cedar Archive (.cjar) file (WASM stub).
 ///
 /// File-based archive loading is not supported in WASM environments.

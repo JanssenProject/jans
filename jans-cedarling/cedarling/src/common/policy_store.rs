@@ -171,6 +171,10 @@ pub(crate) struct PolicyStoreWithID {
     /// Optional metadata from new format policy stores.
     /// Contains `cedar_version`, `policy_store` info (name, version, description, etc.)
     pub(crate) metadata: Option<metadata::PolicyStoreMetadata>,
+    /// `sha256:<hex>` of the raw `.cjar` bytes this store was parsed from; `None`
+    /// for stores without an archive (YAML, directory). Lives with the store, so
+    /// a refresh swaps the hash together with the policies it identifies.
+    pub(crate) bundle_hash: Option<jans_trace_core::Digest>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
