@@ -12,7 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import io.jans.lock.service.trace.canon.CanonicalHashes;
+import io.jans.lock.trace.crypto.TraceHashes;
 
 /**
  * Shared TRACE wire-format constants: the EAT profile tag, the {@code sha256:<64 hex>} hash
@@ -26,17 +26,14 @@ public final class TraceConstants {
 	/** {@code trace.eat_profile} value the MVP accepts (design §7.1). */
 	public static final String EAT_PROFILE = "tag:jans.io,2026:trace-v1";
 
-	/**
-	 * Receipt-commitment profile tag (GovOps profile §11). It is the {@code receipt_profile} member
-	 * of every receipt-hash input; a different receipt-hash layout needs a new tag.
-	 */
-	public static final String RECEIPT_PROFILE = "tag:jans.io,2026:lock-trace-receipt-v1";
+	/** Alias of {@link TraceHashes#RECEIPT_PROFILE}. */
+	public static final String RECEIPT_PROFILE = TraceHashes.RECEIPT_PROFILE;
 
-	/** Prefix of every TRACE hash string; kept in sync with {@link CanonicalHashes#SHA256_PREFIX}. */
-	public static final String HASH_PREFIX = CanonicalHashes.SHA256_PREFIX;
+	/** Alias of {@link TraceHashes#SHA256_PREFIX}. */
+	public static final String HASH_PREFIX = TraceHashes.SHA256_PREFIX;
 
-	/** The genesis predecessor sentinel: {@code "sha256:"} followed by 64 zero digits. */
-	public static final String ZERO_HASH = HASH_PREFIX + repeat('0', 64);
+	/** Alias of {@link TraceHashes#ZERO_HASH}. */
+	public static final String ZERO_HASH = TraceHashes.ZERO_HASH;
 
 	/** Matches the full {@code sha256:<64 lowercase hex>} hash format used throughout TRACE. */
 	public static final Pattern HASH_PATTERN = Pattern.compile("^" + Pattern.quote(HASH_PREFIX) + "[0-9a-f]{64}$");
@@ -70,6 +67,9 @@ public final class TraceConstants {
 	public static final Set<String> EVENT_KINDS = Collections.unmodifiableSet(new LinkedHashSet<>(
 			Arrays.asList(EVENT_KIND_AUTHORIZATION_DECISION, EVENT_KIND_CAPABILITY_INVOKED, EVENT_KIND_RUNTIME_EFFECT)));
 
+	/** Signature algorithm recorded in {@code verification.algorithm}. */
+	public static final String SIGNATURE_ALGORITHM = "Ed25519";
+
 	/** Name of the top-level signature field, excluded from the JCS signature input. */
 	public static final String SIGNATURE_FIELD = "signature";
 
@@ -92,12 +92,6 @@ public final class TraceConstants {
 			"key_resolved", "key_temporally_valid", "key_not_revoked", "key_authorized_for_producer",
 			"producer_authorized_for_claim", "key_thumbprint", "key_authorization_ref", "verified_at",
 			"trust_tier", "capability_resolution", "capability_id", "capability_ids", "cnf")));
-
-	private static String repeat(char c, int count) {
-		char[] chars = new char[count];
-		Arrays.fill(chars, c);
-		return new String(chars);
-	}
 
 	private TraceConstants() {
 	}

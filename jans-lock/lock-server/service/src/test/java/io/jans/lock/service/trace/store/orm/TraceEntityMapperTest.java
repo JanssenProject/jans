@@ -30,6 +30,7 @@ import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.model.VerificationResult;
 import io.jans.lock.service.trace.store.TraceKeys;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 
 /**
  * Tests for {@link TraceEntityMapper}: the record round trip (including the assertion re-parse that
@@ -44,6 +45,8 @@ import io.jans.lock.service.trace.store.TraceKeys;
 class TraceEntityMapperTest {
 
 	private static final String DOMAIN = "default";
+
+	private static final TraceKeys TRACE_KEYS = TraceTestCrypto.traceKeys();
 
 	private static final String ASSERTION = "{\"trace\":{\"event\":{\"capability_ids\":"
 			+ "[{\"capability_id\":\"cap-1\"},{\"capability_id\":\"cap-2\"}],\"tokens\":"
@@ -72,7 +75,7 @@ class TraceEntityMapperTest {
 	void testToEntity_thenToStoredTraceRecord_roundTripsIdentityAndCoreFields() {
 		StoredTraceRecord record = newRecord(ASSERTION);
 
-		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans");
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
 		StoredTraceRecord roundTripped = TraceEntityMapper.toStoredTraceRecord(entity);
 
 		assertEquals(record.getIdentity(), roundTripped.getIdentity());
@@ -97,7 +100,7 @@ class TraceEntityMapperTest {
 				"sha256:" + "a".repeat(64), Boolean.TRUE);
 		StoredTraceRecord record = newRecord(ASSERTION, verification);
 
-		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans");
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
 		StoredTraceRecord roundTripped = TraceEntityMapper.toStoredTraceRecord(entity);
 
 		assertEquals("sha256:" + "a".repeat(64), entity.getVerification().getKeyThumbprint());
@@ -108,7 +111,7 @@ class TraceEntityMapperTest {
 	@Test
 	void testToStoredTraceRecord_legacyVerificationWithoutNewMembers_mapsWithNulls() {
 		StoredTraceRecord record = newRecord(ASSERTION);
-		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans");
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
 		TraceVerification legacy = new TraceVerification();
 		legacy.setSignatureValid(true);
 		legacy.setKeyId("kid-1");
@@ -127,18 +130,18 @@ class TraceEntityMapperTest {
 	void testToEntity_computesHashedKeysFromRawValues() {
 		StoredTraceRecord record = newRecord(ASSERTION);
 
-		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans");
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
 
-		assertEquals(TraceKeys.recordKey(record.getIdentity()), entity.getId());
-		assertEquals(TraceKeys.chainKey(record.getChainPosition().getChainIdentity()), entity.getChainKey());
-		assertEquals(TraceKeys.chainPositionKey(record.getChainPosition()), entity.getChainPosKey());
-		assertEquals(Arrays.asList(TraceKeys.tokenKey(DOMAIN, record.getTokenRefs().get(0))), entity.getTokenKeys());
+		assertEquals(TRACE_KEYS.recordKey(record.getIdentity()), entity.getId());
+		assertEquals(TRACE_KEYS.chainKey(record.getChainPosition().getChainIdentity()), entity.getChainKey());
+		assertEquals(TRACE_KEYS.chainPositionKey(record.getChainPosition()), entity.getChainPosKey());
+		assertEquals(Arrays.asList(TRACE_KEYS.tokenKey(DOMAIN, record.getTokenRefs().get(0))), entity.getTokenKeys());
 	}
 
 	@Test
 	void testToStoredTraceRecord_missingProducerChainField_throwsTraceStorageException() {
 		TraceRecordEntry entity = TraceEntityMapper.toEntity(newRecord(ASSERTION),
-				"jansId=x,ou=records,ou=trace,ou=lock,o=jans");
+				"jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
 		entity.setAssertion("{\"producer_chain\":{}}");
 
 		assertThrows(TraceStorageException.class, () -> TraceEntityMapper.toStoredTraceRecord(entity));
@@ -147,7 +150,7 @@ class TraceEntityMapperTest {
 	@Test
 	void testToStoredTraceRecord_nullBooleanFlags_treatedAsFalse() {
 		TraceRecordEntry entity = TraceEntityMapper.toEntity(newRecord(ASSERTION),
-				"jansId=x,ou=records,ou=trace,ou=lock,o=jans");
+				"jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
 		entity.setCoverageGap(null);
 		entity.setChainLinkFailure(null);
 		entity.setEquivocation(null);

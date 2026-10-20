@@ -60,7 +60,7 @@ final class TraceEntityMapper {
 
 	// -- records ------------------------------------------------------------------------------
 
-	static TraceRecordEntry toEntity(StoredTraceRecord record, String dn) {
+	static TraceRecordEntry toEntity(StoredTraceRecord record, String dn, TraceKeys traceKeys) {
 		RecordIdentity identity = record.getIdentity();
 		ChainPosition chainPosition = record.getChainPosition();
 		ReceiptEntry receipt = record.getReceipt();
@@ -68,21 +68,21 @@ final class TraceEntityMapper {
 
 		TraceRecordEntry entity = new TraceRecordEntry();
 		entity.setDn(dn);
-		entity.setId(TraceKeys.recordKey(identity));
+		entity.setId(traceKeys.recordKey(identity));
 		entity.setDomainId(identity.getDomainId());
 		entity.setProducerId(identity.getProducerId());
 		entity.setRecordId(identity.getRecordId());
 		entity.setEventKind(record.getEventKind());
 		entity.setSignedAt(record.getSignedAt());
-		entity.setExecKey(TraceKeys.executionKey(record.getExecution()));
+		entity.setExecKey(traceKeys.executionKey(record.getExecution()));
 		entity.setExecId(record.getExecution().getTraceExecutionId());
 		entity.setExecAuthority(record.getExecution().getExecutionAuthority());
-		entity.setChainKey(TraceKeys.chainKey(chainPosition.getChainIdentity()));
-		entity.setChainPosKey(TraceKeys.chainPositionKey(chainPosition));
+		entity.setChainKey(traceKeys.chainKey(chainPosition.getChainIdentity()));
+		entity.setChainPosKey(traceKeys.chainPositionKey(chainPosition));
 		entity.setSeqNum(chainPosition.getSequenceNumber());
 		entity.setPrevRecordHash(record.getPrevRecordHash());
 		entity.setTokenKeys(record.getTokenRefs().stream()
-				.map(tokenRef -> TraceKeys.tokenKey(identity.getDomainId(), tokenRef)).collect(Collectors.toList()));
+				.map(tokenRef -> traceKeys.tokenKey(identity.getDomainId(), tokenRef)).collect(Collectors.toList()));
 		entity.setAssertion(record.getAssertionRaw());
 		entity.setContentDigest(record.getContentDigest());
 		entity.setVerification(toVerificationPojo(record.getVerification()));

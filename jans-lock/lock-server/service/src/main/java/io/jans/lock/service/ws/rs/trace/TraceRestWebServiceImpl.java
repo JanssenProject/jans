@@ -47,7 +47,7 @@ import io.jans.lock.model.trace.api.TraceRecordResponse;
 import io.jans.lock.model.trace.api.TraceVerificationResponse;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
-import io.jans.lock.service.trace.TraceTime;
+import io.jans.lock.trace.crypto.TraceTime;
 import io.jans.lock.service.trace.error.TraceErrors;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.error.TraceValidationException;

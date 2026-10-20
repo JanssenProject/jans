@@ -65,6 +65,8 @@ import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.store.TraceKeys;
 import io.jans.lock.service.trace.testkit.SignedAssertionFactory;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
+import io.jans.lock.trace.crypto.bc.CanonicalHashes;
 import io.jans.lock.service.trace.validate.CorrelationInputs;
 import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
 import io.jans.lock.service.trace.verify.VerifiedAssertion;
@@ -122,6 +124,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 
 		parser = new TraceAssertionParser();
 		setField(parser, "appConfiguration", appConfiguration);
+		setField(parser, "cryptoProvider", TraceTestCrypto.javaProvider());
 
 		commonValidator = new CommonAssertionValidator();
 		setField(commonValidator, "appConfiguration", appConfiguration);
@@ -138,6 +141,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		setField(service, "store", store);
 		setField(service, "chainRegistry", chainRegistry);
 		setField(service, "appConfiguration", appConfiguration);
+		setField(service, "traceKeys", TraceTestCrypto.traceKeys());
 	}
 
 	// -- fixtures ---------------------------------------------------------------------------------
@@ -162,7 +166,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		ParsedAssertion parsed = parser.parse(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
 		commonValidator.validate(parsed);
 		CorrelationInputs inputs = eventKindRegistry.validate(parsed);
-		String contentDigest = parsed.contentDigest();
+		String contentDigest = CanonicalHashes.sha256PrefixedOfJcs(parsed.getRoot());
 		VerificationResult verification = new VerificationResult(true, parsed.getKid(), ctx.getReceivedAtMs(),
 				"Ed25519");
 		RecordIdentity identity = new RecordIdentity(ctx.getEvidenceDomainId(), parsed.getProducer(),

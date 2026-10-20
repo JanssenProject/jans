@@ -25,8 +25,7 @@ import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.correlation.TraceCorrelationService;
-import io.jans.lock.service.trace.crypto.Ed25519Capability;
-import io.jans.lock.service.trace.crypto.Ed25519Verifier;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.ingest.AcceptanceResult;
 import io.jans.lock.service.trace.ingest.TraceIngestionService;
@@ -40,8 +39,10 @@ import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.registry.ProducerKeyRegistry;
 import io.jans.lock.service.trace.retrieve.TraceRetrievalService;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
+import io.jans.lock.service.trace.store.TraceKeys;
 import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
 import io.jans.lock.service.trace.verify.TraceVerificationService;
+import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
 
 /**
  * Test harness: wires the real TRACE collaborators (parser, common/event-kind
@@ -66,7 +67,11 @@ public final class TraceTestHarness {
 	/** One second after the design-example fixtures' {@code trace.signed_at} (1700000000s). */
 	public static final long DEFAULT_NOW_MS = 1_700_000_001_000L;
 
-	private final InMemoryTraceStore store = new InMemoryTraceStore();
+	private final TraceCryptoProvider cryptoProvider;
+
+	private final TraceKeys traceKeys;
+
+	private final InMemoryTraceStore store;
 
 	private final AppConfiguration appConfiguration = new AppConfiguration();
 
@@ -88,51 +93,64 @@ public final class TraceTestHarness {
 
 	private volatile long nowMs = DEFAULT_NOW_MS;
 
+	/** Wires the harness over the {@code JAVA} provider. */
 	public TraceTestHarness() {
-		TraceTestKeys.installProvider();
+		this(TraceTestCrypto.javaProvider());
+	}
+
+	/** Wires the harness over {@code provider}, e.g. the {@code NATIVE} provider in a parity suite. */
+	public TraceTestHarness(TraceCryptoProvider provider) {
+		this.cryptoProvider = provider;
+		this.traceKeys = new TraceKeys(provider);
+		this.store = new InMemoryTraceStore(traceKeys);
 
 		TraceAssertionParser parser = new TraceAssertionParser();
 		setField(parser, "appConfiguration", appConfiguration);
+		setField(parser, "cryptoProvider", provider);
 
 		setField(commonValidator, "appConfiguration", appConfiguration);
 		setField(commonValidator, "clock", fixedClock(nowMs));
 
 		setField(keyRegistry, "traceStore", store);
 		setField(keyRegistry, "log", LoggerFactory.getLogger(ProducerKeyRegistry.class));
+		setField(keyRegistry, "cryptoProvider", provider);
 
 		setField(chainRegistry, "traceStore", store);
 
-		Ed25519Capability capability = new Ed25519Capability();
-		capability.probe();
-
 		TraceVerificationService verification = new TraceVerificationService();
 		setField(verification, "log", LoggerFactory.getLogger(TraceVerificationService.class));
-		setField(verification, "capability", capability);
+		setField(verification, "cryptoProvider", provider);
 		setField(verification, "parser", parser);
 		setField(verification, "commonValidator", commonValidator);
 		setField(verification, "eventKindRegistry", new EventKindValidatorRegistry());
 		setField(verification, "keyRegistry", keyRegistry);
-		setField(verification, "verifier", new Ed25519Verifier());
 
 		setField(correlation, "log", LoggerFactory.getLogger(TraceCorrelationService.class));
 		setField(correlation, "store", store);
 		setField(correlation, "chainRegistry", chainRegistry);
 		setField(correlation, "appConfiguration", appConfiguration);
+		setField(correlation, "traceKeys", traceKeys);
 
 		setField(receiptChain, "log", LoggerFactory.getLogger(TraceReceiptChain.class));
 		setField(receiptChain, "store", store);
 		setField(receiptChain, "appConfiguration", appConfiguration);
+		setField(receiptChain, "cryptoProvider", provider);
 
 		setField(ingestionService, "log", LoggerFactory.getLogger(TraceIngestionService.class));
 		setField(ingestionService, "verification", verification);
 		setField(ingestionService, "correlation", correlation);
 		setField(ingestionService, "receiptChain", receiptChain);
 		setField(ingestionService, "store", store);
+		setField(ingestionService, "traceKeys", traceKeys);
 
 		setField(retrievalService, "traceStore", store);
 	}
 
 	// -- shared state access -----------------------------------------------------------------------
+
+	public TraceCryptoProvider cryptoProvider() {
+		return cryptoProvider;
+	}
 
 	public InMemoryTraceStore store() {
 		return store;
