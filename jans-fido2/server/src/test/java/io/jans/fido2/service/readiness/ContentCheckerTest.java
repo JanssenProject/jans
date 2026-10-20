@@ -367,4 +367,21 @@ class ContentCheckerTest {
         assertEquals("AA:BB", ExpectedAssociationFileBuilder.normalizeFingerprint("aabb"));
         assertEquals("AA:BB", ExpectedAssociationFileBuilder.normalizeFingerprint("aa:bb"));
     }
+
+    @Test
+    void androidAppWithoutPackageName_failsInsteadOfThrowing() {
+        AndroidApp noPackage = new AndroidApp();
+        noPackage.setSha256CertFingerprints(List.of(FP1));
+        List<CheckResult> checks = android(party(List.of(noPackage, android("com.example.app", FP1)), List.of()),
+                "[" + statement(REL, "com.example.app", FP1) + "]");
+        assertTrue(any(checks, "content.android.package", CheckStatus.FAIL, "without a package name"));
+        assertTrue(any(checks, "content.android.package", CheckStatus.PASS, "com.example.app"));
+    }
+
+    @Test
+    void nonAsciiHexDigits_areRejected() {
+        // fullwidth "AA" and Arabic-Indic digits are digits to Character.digit but not to Digital Asset Links
+        assertNull(ExpectedAssociationFileBuilder.normalizeFingerprint("ＡＡ"));
+        assertNull(ExpectedAssociationFileBuilder.normalizeFingerprint("١٢"));
+    }
 }

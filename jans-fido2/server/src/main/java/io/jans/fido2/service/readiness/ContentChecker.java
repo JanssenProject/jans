@@ -79,6 +79,10 @@ public class ContentChecker {
         Set<String> found = androidFacts(deployed);
         for (AndroidApp app : ExpectedAssociationFileBuilder.androidApps(party)) {
             String pkg = app.getPackageName();
+            if (pkg == null || pkg.isBlank()) {
+                checks.add(fail(ID_PACKAGE, "an Android app is configured without a package name"));
+                continue;
+            }
             checks.add(found.contains("P|" + pkg) ? pass(ID_PACKAGE, PACKAGE + pkg + " listed")
                     : fail(ID_PACKAGE, PACKAGE + pkg + " not listed"));
             checks.addAll(fingerprintChecks(app, ExpectedAssociationFileBuilder.androidApps(party), found));

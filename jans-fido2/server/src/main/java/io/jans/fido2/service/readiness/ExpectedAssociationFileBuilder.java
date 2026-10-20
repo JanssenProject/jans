@@ -99,8 +99,7 @@ public final class ExpectedAssociationFileBuilder {
         int i = 0;
         int n = fingerprint.length();
         while (i < n) {
-            if (i + 2 > n || Character.digit(fingerprint.charAt(i), 16) < 0
-                    || Character.digit(fingerprint.charAt(i + 1), 16) < 0) {
+            if (i + 2 > n || !isAsciiHex(fingerprint.charAt(i)) || !isAsciiHex(fingerprint.charAt(i + 1))) {
                 return null;
             }
             if (out.length() > 0) {
@@ -117,6 +116,11 @@ public final class ExpectedAssociationFileBuilder {
             }
         }
         return out.length() == 0 ? null : out.toString().toUpperCase(Locale.ROOT);
+    }
+
+    /** ASCII 0-9, A-F, a-f only; {@code Character.digit} would also accept e.g. fullwidth digits. */
+    private static boolean isAsciiHex(char c) {
+        return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
     }
 
     /** The normalized fingerprint, or the raw text when it is not valid hex (so it can never match). */
