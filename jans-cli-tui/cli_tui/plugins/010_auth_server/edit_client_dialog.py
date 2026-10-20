@@ -293,13 +293,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
             token_endpoint_authmethods.append((method, method))
 
         current_grant_types = self.data.get('grantTypes') or []
-        grant_types_list = [(grant_type, grant_type.split(':')[-1]) for grant_type in self.myparent.app_configuration.get('grantTypesSupported') or ()]
+        grant_types_supported = self.myparent.app_configuration.get('grantTypesSupported') or []
+        grant_types_list = [(grant_type, grant_type.split(':')[-1]) for grant_type in grant_types_supported]
         # check if grant_types_list contains current_grant_types
         for current_grant_type in current_grant_types:
-            grant_type_tuple = (current_grant_type, current_grant_type)
-            if grant_type_tuple not in grant_types_list:
-                grant_types_list.append(grant_type_tuple)
-
+            if current_grant_type not in grant_types_supported:
+                grant_types_list.append((current_grant_type, current_grant_type))
 
         if grant_types_list:
             grant_types_supperted_checkbox_widget = self.myparent.getTitledCheckBoxList(
