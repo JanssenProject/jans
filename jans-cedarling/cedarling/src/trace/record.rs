@@ -22,7 +22,6 @@ use url::Url;
 use uuid7::Uuid;
 
 use crate::authz::TraceContext;
-use crate::common::app_types::PdpID;
 use crate::common::policy_store::PolicyStoreWithID;
 
 /// Lock `MAX_FACT_TEXT_LENGTH` for `action` and `resource_type`
@@ -125,7 +124,8 @@ impl PolicyFacts {
     }
 }
 
-/// Everything a record carries except its chain position and signature.
+/// Facts of one record. The producer, its instance (`pdp_id`), the chain
+/// position and the signature come from the producer chain.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct RecordDraft {
     pub(crate) record_id: Uuid,
@@ -133,7 +133,6 @@ pub(crate) struct RecordDraft {
     pub(crate) trace: TraceContext,
     pub(crate) decision: DecisionFacts,
     pub(crate) policy: PolicyFacts,
-    pub(crate) pdp_id: PdpID,
 }
 
 /// Why no record is built. Each maps to a `trace_record_status` (decision R53):
@@ -160,7 +159,6 @@ impl RecordDraft {
         trace: &TraceContext,
         decision: DecisionFacts,
         policy: PolicyFacts,
-        pdp_id: PdpID,
     ) -> Result<Self, DraftError> {
         require_context(&trace.execution_id, "execution_id")?;
         require_context(&trace.execution_authority, "execution_authority")?;
@@ -209,7 +207,6 @@ impl RecordDraft {
             trace: trace.clone(),
             decision,
             policy,
-            pdp_id,
         })
     }
 }
@@ -305,7 +302,6 @@ mod tests {
     use jans_trace_core::inputs::token_fingerprint;
 
     use super::*;
-    use crate::common::app_types::PdpID;
     use crate::log::gen_uuid7;
 
     const ISSUER: &str = "https://idp.example.com";
@@ -349,14 +345,7 @@ mod tests {
         trace: &TraceContext,
         decision: DecisionFacts,
     ) -> Result<RecordDraft, DraftError> {
-        RecordDraft::new(
-            gen_uuid7(),
-            1_700_000_000,
-            trace,
-            decision,
-            policy(),
-            PdpID::new(),
-        )
+        RecordDraft::new(gen_uuid7(), 1_700_000_000, trace, decision, policy())
     }
 
     fn draft(decision: DecisionFacts) -> Result<RecordDraft, DraftError> {
@@ -364,7 +353,11 @@ mod tests {
     }
 
     fn over_limit(err: &DraftError, expected_path: &str, expected_limit: usize) -> bool {
-        matches!(err, DraftError::OverLimit { path, limit } if path == expected_path && *limit == expected_limit)
+        matches!(
+            err,
+            DraftError::OverLimit { path, limit }
+                if path == expected_path && *limit == expected_limit
+        )
     }
 
     fn invalid_field(err: &DraftError, expected_path: &str) -> bool {

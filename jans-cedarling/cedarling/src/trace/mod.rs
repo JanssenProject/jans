@@ -6,6 +6,7 @@
 //! TRACE producer: everything Cedarling needs to sign `AUTHORIZATION_DECISION`
 //! records. Cryptography lives in `jans-trace-core`.
 
+mod chain;
 #[cfg(not(target_arch = "wasm32"))]
 mod key;
 mod producer_id;
