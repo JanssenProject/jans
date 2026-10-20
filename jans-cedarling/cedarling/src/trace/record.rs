@@ -38,8 +38,6 @@ const MAX_TOKEN_TYPE: usize = 64;
 const MAX_JTI: usize = 256;
 /// Operational limit from the design (decision R44); Lock itself caps arrays at 256.
 const MAX_TOKENS: usize = 32;
-/// Lock `MIN_RAW_TOKEN_MATERIAL_LENGTH`: shorter dotted text is not taken for a JWS.
-const MIN_RAW_TOKEN_LEN: usize = 20;
 
 /// Cedar decision as Lock names it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -84,19 +82,42 @@ pub(crate) enum TokenId {
 }
 
 impl TokenRef {
-    /// An empty `jti` counts as none: Lock rejects an empty one.
-    pub(crate) fn new(issuer: &str, mapping: &str, jti: Option<&str>, raw_token: &str) -> Self {
-        let id = match jti.filter(|jti| !jti.is_empty()) {
+    /// An empty `jti` counts as none: Lock rejects an empty one. Refuses a field
+    /// that holds `raw_token` itself, so a wiring mistake cannot sign the token
+    /// into the record (decision R22).
+    pub(crate) fn new(
+        issuer: &str,
+        mapping: &str,
+        jti: Option<&str>,
+        raw_token: &str,
+    ) -> Result<Self, RawTokenInField> {
+        let jti = jti.filter(|jti| !jti.is_empty());
+        let holds_token = |text: &str| !raw_token.is_empty() && text.contains(raw_token);
+        for (field, text) in [
+            ("issuer", Some(issuer)),
+            ("token_type", Some(mapping)),
+            ("jti", jti),
+        ] {
+            if text.is_some_and(holds_token) {
+                return Err(RawTokenInField(field));
+            }
+        }
+        let id = match jti {
             Some(jti) => TokenId::Jti(jti.to_string()),
             None => TokenId::Fingerprint(token_fingerprint(raw_token)),
         };
-        Self {
+        Ok(Self {
             issuer: issuer.to_string(),
             token_type: mapping.to_string(),
             id,
-        }
+        })
     }
 }
+
+/// A token reference field holds the token it describes.
+#[derive(Debug, Clone, PartialEq, thiserror::Error)]
+#[error("TRACE token field `{0}` holds the raw token")]
+pub(crate) struct RawTokenInField(pub(crate) &'static str);
 
 /// Which policy store decided.
 #[derive(Debug, Clone, PartialEq)]
@@ -147,7 +168,7 @@ pub(crate) enum DraftError {
     /// sign incomplete facts (decision R44).
     #[error("`{path}` is over the Lock limit of {limit}")]
     OverLimit { path: String, limit: usize },
-    /// A value Lock rejects for its form: empty, a non-`https` issuer, or token text.
+    /// A value Lock rejects for its form: empty, or a non-`https` issuer.
     #[error("`{path}` has a value Lock rejects")]
     InvalidField { path: String },
 }
@@ -247,22 +268,6 @@ fn check_token(token: &TokenRef, index: usize) -> Result<(), DraftError> {
     if let TokenId::Jti(jti) = &token.id {
         check_len(jti, &path("jti"), MAX_JTI)?;
     }
-    // Lock refuses any token-entry text that could be the token itself.
-    let texts = [
-        ("issuer", token.issuer.as_str()),
-        ("token_type", token.token_type.as_str()),
-    ];
-    let jti = match &token.id {
-        TokenId::Jti(jti) => Some(("jti", jti.as_str())),
-        TokenId::Fingerprint(_) => None,
-    };
-    if let Some((field, _)) = texts
-        .into_iter()
-        .chain(jti)
-        .find(|(_, text)| looks_like_compact_jws(text))
-    {
-        return Err(invalid(&path(field)));
-    }
     Ok(())
 }
 
@@ -282,19 +287,6 @@ fn is_lock_issuer(issuer: &str) -> bool {
         ("http", Some(host)) => host.eq_ignore_ascii_case("localhost"),
         _ => false,
     }
-}
-
-/// Lock `COMPACT_JWS_PATTERN` (`^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$`)
-/// from `MIN_RAW_TOKEN_LEN` characters on.
-fn looks_like_compact_jws(text: &str) -> bool {
-    let segment = |part: &str| {
-        !part.is_empty()
-            && part
-                .bytes()
-                .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
-    };
-    let parts: Vec<&str> = text.split('.').collect();
-    text.len() >= MIN_RAW_TOKEN_LEN && parts.len() == 3 && parts.into_iter().all(segment)
 }
 
 #[cfg(test)]
@@ -321,6 +313,7 @@ mod tests {
             Some("jti-1"),
             "header.payload.sig",
         )
+        .expect("test token ref should build")
     }
 
     fn decision(action: &str, tokens: Vec<TokenRef>) -> DecisionFacts {
@@ -451,7 +444,8 @@ mod tests {
 
     #[test]
     fn token_type_65_is_over_limit() {
-        let long = TokenRef::new(ISSUER, &"T".repeat(65), Some("jti-1"), "raw");
+        let long = TokenRef::new(ISSUER, &"T".repeat(65), Some("jti-1"), "raw")
+            .expect("test token ref should build");
         let err = draft(decision("a", vec![long]))
             .expect_err("a 65-character token_type should be over the limit");
         assert!(
@@ -462,7 +456,8 @@ mod tests {
 
     #[test]
     fn jti_257_is_over_limit() {
-        let long = TokenRef::new(ISSUER, "Jans::Access_Token", Some(&"j".repeat(257)), "raw");
+        let long = TokenRef::new(ISSUER, "Jans::Access_Token", Some(&"j".repeat(257)), "raw")
+            .expect("test token ref should build");
         let err = draft(decision("a", vec![long]))
             .expect_err("a 257-character jti should be over the limit");
         assert!(
@@ -512,33 +507,67 @@ mod tests {
     }
 
     #[test]
-    fn jws_like_token_field_is_invalid() {
-        // Lock rejects any token-entry text that looks like a compact JWS.
-        let jws = "eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiIxIn0.c2lnbmF0dXJl";
-        let leaking = TokenRef::new(ISSUER, "Jans::Access_Token", Some(jws), "raw");
-        let err = draft(decision("a", vec![leaking]))
-            .expect_err("a jti shaped like a JWS should be rejected");
-        assert!(
-            invalid_field(&err, "trace.event.tokens[0].jti"),
-            "expected InvalidField for jti, got {err:?}"
-        );
-        // Shorter than Lock's 20-character threshold: not treated as a token.
-        let short = TokenRef::new(ISSUER, "Jans::Access_Token", Some("a.b.c"), "raw");
-        draft(decision("a", vec![short])).expect("a short dotted jti is allowed");
+    fn token_field_holding_raw_token_is_error() {
+        let raw = "eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiIxIn0.c2lnbmF0dXJl";
+        for (issuer, mapping, jti, field) in [
+            (ISSUER, "Jans::Access_Token", Some(raw), "jti"),
+            (
+                ISSUER,
+                &*format!("Jans::{raw}"),
+                Some("jti-1"),
+                "token_type",
+            ),
+            (
+                &*format!("https://idp.example.com/{raw}"),
+                "Jans::Access_Token",
+                None,
+                "issuer",
+            ),
+        ] {
+            let err = TokenRef::new(issuer, mapping, jti, raw)
+                .expect_err("a field that holds the raw token should be rejected");
+            assert_eq!(
+                err,
+                RawTokenInField(field),
+                "the error should name `{field}`"
+            );
+        }
+    }
+
+    #[test]
+    fn jws_shaped_jti_is_allowed() {
+        // Only the token itself is refused, not values that merely look like one.
+        let jti = "aaaaaaaaaa.bbbbbbbbbb.cccccccccc";
+        let token = TokenRef::new(
+            ISSUER,
+            "Jans::Access_Token",
+            Some(jti),
+            "header.payload.sig",
+        )
+        .expect("a JWS-shaped jti that is not the token should be accepted");
+        draft(decision("a", vec![token])).expect("the record should build");
+    }
+
+    #[test]
+    fn empty_raw_token_is_never_found() {
+        TokenRef::new(ISSUER, "Jans::Access_Token", Some("jti-1"), "")
+            .expect("an empty raw token cannot leak into a field");
     }
 
     #[test]
     fn token_without_jti_uses_core_fingerprint() {
         let raw = "header.payload.signature";
         for jti in [None, Some("")] {
-            let token = TokenRef::new(ISSUER, "Jans::Access_Token", jti, raw);
+            let token = TokenRef::new(ISSUER, "Jans::Access_Token", jti, raw)
+                .expect("test token ref should build");
             assert_eq!(
                 token.id,
                 TokenId::Fingerprint(token_fingerprint(raw)),
                 "a token without jti ({jti:?}) should use the core fingerprint"
             );
         }
-        let token = TokenRef::new(ISSUER, "Jans::Access_Token", Some("jti-1"), raw);
+        let token = TokenRef::new(ISSUER, "Jans::Access_Token", Some("jti-1"), raw)
+            .expect("test token ref should build");
         assert_eq!(
             token.id,
             TokenId::Jti("jti-1".to_string()),

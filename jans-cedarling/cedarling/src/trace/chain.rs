@@ -231,8 +231,10 @@ mod tests {
                 "Jans::Access_Token",
                 Some("jti-1"),
                 "a.b.c",
-            ),
-            TokenRef::new("https://idp.example.com", "Jans::Id_Token", None, "d.e.f"),
+            )
+            .expect("test token ref should build"),
+            TokenRef::new("https://idp.example.com", "Jans::Id_Token", None, "d.e.f")
+                .expect("test token ref should build"),
         ]
     }
 
