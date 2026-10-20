@@ -44,7 +44,12 @@ use std::num::NonZeroUsize;
 /// This structure is used to deserialize values from ENV VARS so json keys is same as keys in environment variables
 //
 //  All fields should be available to parse from string, because env vars always string.
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
+//
+//  No `Debug` outside tests: the raw values include secrets (the inline TRACE key,
+//  the SSA JWT) that the decoded `BootstrapConfig` redacts, and a `{:?}` of this
+//  struct would print them.
+#[derive(Deserialize, Serialize, PartialEq)]
+#[cfg_attr(test, derive(Debug))]
 pub struct BootstrapConfigRaw {
     ///  Human friendly identifier for the application
     #[serde(rename = "CEDARLING_APPLICATION_NAME")]
@@ -588,6 +593,10 @@ pub struct BootstrapConfigRaw {
 
     /// The same key as unencrypted PKCS#8 PEM text, for hosts that inject secrets
     /// as values. Used only when `CEDARLING_TRACE_SIGNING_KEY` is not set.
+    ///
+    /// Prefer the key file where the host can provide one: a key inlined in the
+    /// configuration can leak through environment dumps, process listings or
+    /// configuration files kept under version control.
     #[serde(
         rename = "CEDARLING_TRACE_SIGNING_KEY_PEM",
         default,
