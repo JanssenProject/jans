@@ -600,7 +600,7 @@ Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer 
 
 Every request type (`RequestUnsigned`, `AuthorizeMultiIssuerRequest`, `BatchAuthorizeUnsignedRequest`, `BatchAuthorizeMultiIssuerRequest`) has an optional `options` field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. A request without `options` behaves exactly as before. In a batch request, `options` applies to the whole call, not to individual items.
 
-The only option today is `trace`, the TRACE execution context of the call:
+The only option today is `trace`, the TRACE execution context of the call. TRACE is still in development: Cedarling accepts the context but does not emit TRACE records yet (see [TRACE properties](./cedarling-properties.md#trace-properties)).
 
 | Field | Required | Meaning |
 |---|---|---|

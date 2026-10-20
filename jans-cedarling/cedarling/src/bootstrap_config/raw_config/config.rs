@@ -568,7 +568,8 @@ pub struct BootstrapConfigRaw {
     // =========================================================================
     /// If enabled, Cedarling signs an `AUTHORIZATION_DECISION` TRACE record for
     /// each decision and sends it to Lock Server. Requires `CEDARLING_LOCK` and
-    /// a `.cjar` policy store. Default: `disabled`.
+    /// a `.cjar` policy store. Default: `disabled`. Still in development: for now
+    /// only the configuration is validated and the key loaded; no record is sent.
     #[serde(rename = "CEDARLING_TRACE", default)]
     pub trace: FeatureToggle,
 
