@@ -3,15 +3,18 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! The producer chain: one per Cedarling start (decision R43). Each signed
+//! The producer chain: a new one on every Cedarling start. Each signed
 //! record takes the next position and carries the `content_digest` of the one
 //! before, so Lock sees a gap or a fork.
 
-// Driven by the TRACE emitter (C6). Remove this attribute there: `expect` turns
+// Driven by the TRACE emitter, not wired in yet. Remove this attribute with it: `expect` turns
 // into a warning as soon as the items are used.
 #![cfg_attr(
     not(test),
-    expect(dead_code, reason = "consumed by the TRACE emitter (C6); remove there")
+    expect(
+        dead_code,
+        reason = "consumed by the TRACE emitter; remove when it is wired in"
+    )
 )]
 
 use jans_trace_core::assertion::{
@@ -36,7 +39,7 @@ const POLICY_LANGUAGE: &str = "cedar";
 pub(crate) struct ProducerChain {
     producer_id: ProducerId,
     /// Both `producer_chain.producer_instance_id` and `trace.runtime.pdp_id`:
-    /// one value (D9), so it has one source.
+    /// one value, as the PDP is the producer instance, so it has one source.
     pdp_id: PdpID,
     chain_id: Uuid,
     next_sequence: u64,
@@ -54,7 +57,7 @@ pub(crate) enum AppendError {
 }
 
 impl ProducerChain {
-    /// A new chain on every start (decision R43); Lock registers it from its
+    /// A new chain on every start; Lock registers it from its
     /// genesis record (`first_observed`).
     pub(crate) fn open(producer_id: ProducerId, pdp_id: PdpID) -> Self {
         Self {
@@ -82,7 +85,7 @@ impl ProducerChain {
     }
 
     /// The Lock `AUTHORIZATION_DECISION` shape. `producer_version` is left out on
-    /// purpose (decision R40): it is only a build label, while `eat_profile`
+    /// purpose: it is only a build label, while `eat_profile`
     /// versions the format. The member is optional, so it can be added later
     /// without a new profile. `parent_record_ids` and `chain_link` are optional
     /// too and Cedarling has nothing to put there.

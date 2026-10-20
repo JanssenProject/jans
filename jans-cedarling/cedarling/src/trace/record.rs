@@ -6,14 +6,17 @@
 //! Facts of one authorization decision, checked against what Lock accepts.
 //!
 //! Everything here is checked before signing: a record Lock would reject is
-//! never signed, so the producer chain gets no gap (decision R44). Lengths are
+//! never signed, so the producer chain gets no gap. Lengths are
 //! counted in UTF-16 units, because Lock counts Java `String` length.
 
-// Read by the TRACE emitter (C6). Remove this attribute there: `expect` turns
+// Read by the TRACE emitter, not wired in yet. Remove this attribute with it: `expect` turns
 // into a warning as soon as the items are used.
 #![cfg_attr(
     not(test),
-    expect(dead_code, reason = "consumed by the TRACE emitter (C6); remove there")
+    expect(
+        dead_code,
+        reason = "consumed by the TRACE emitter; remove when it is wired in"
+    )
 )]
 
 use jans_trace_core::Digest;
@@ -36,7 +39,7 @@ const MAX_SUBJECT_ID: usize = 255;
 const MAX_TOKEN_TYPE: usize = 64;
 /// Lock `MAX_JTI_LENGTH`.
 const MAX_JTI: usize = 256;
-/// Operational limit from the design (decision R44); Lock itself caps arrays at 256.
+/// Operational limit from the TRACE design; Lock itself caps arrays at 256.
 const MAX_TOKENS: usize = 32;
 
 /// Cedar decision as Lock names it.
@@ -65,11 +68,11 @@ pub(crate) struct DecisionFacts {
     pub(crate) tokens: Vec<TokenRef>,
 }
 
-/// A token reference: never the token itself (decision R22).
+/// A token reference: never the token itself, which must not leave Cedarling.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct TokenRef {
     pub(crate) issuer: String,
-    /// The request `mapping` as is, e.g. `Jans::Access_Token` (decision R49).
+    /// The request `mapping` as is, e.g. `Jans::Access_Token`.
     pub(crate) token_type: String,
     pub(crate) id: TokenId,
 }
@@ -84,7 +87,7 @@ pub(crate) enum TokenId {
 impl TokenRef {
     /// An empty `jti` counts as none: Lock rejects an empty one. Refuses a field
     /// that holds `raw_token` itself, so a wiring mistake cannot sign the token
-    /// into the record (decision R22).
+    /// into the record.
     pub(crate) fn new(
         issuer: &str,
         mapping: &str,
@@ -156,16 +159,16 @@ pub(crate) struct RecordDraft {
     pub(crate) policy: PolicyFacts,
 }
 
-/// Why no record is built. Each maps to a `trace_record_status` (decision R53):
+/// Why no record is built. Each maps to a `trace_record_status`:
 /// `MissingContext` to `not_emitted_missing_context`, `OverLimit` to
 /// `not_emitted_over_limit`, `InvalidField` to `not_emitted_invalid_field`.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub(crate) enum DraftError {
-    /// A mandatory `TraceContext` field is empty, which means no context (decision R52).
+    /// A mandatory `TraceContext` field is empty, which means no context.
     #[error("TRACE context field `{0}` is empty")]
     MissingContext(&'static str),
     /// A value is longer, or a list larger, than Lock accepts; truncating would
-    /// sign incomplete facts (decision R44).
+    /// sign incomplete facts.
     #[error("`{path}` is over the Lock limit of {limit}")]
     OverLimit { path: String, limit: usize },
     /// A value Lock rejects for its form: empty, or a non-`https` issuer.
