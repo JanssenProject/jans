@@ -443,4 +443,14 @@ pub enum TrustedIssuerValidateError {
         first_file: String,
         second_file: String,
     },
+    #[error(
+        "Entity type '{entity_type_name}' declared by token_metadata keys '{key_a}' and \
+         '{key_b}' in file '{file}'"
+    )]
+    DuplicateEntityType {
+        entity_type_name: String,
+        key_a: String,
+        key_b: String,
+        file: String,
+    },
 }

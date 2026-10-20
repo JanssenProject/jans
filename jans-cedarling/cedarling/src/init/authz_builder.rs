@@ -80,8 +80,8 @@ pub(crate) async fn build_authz(
             .trusted_issuers
             .iter()
             .flatten()
-            .flat_map(|(_, ti)| ti.token_metadata.values())
-            .map(|meta| meta.entity_type_name.as_str())
+            .flat_map(|(_, ti)| ti.token_metadata.keys())
+            .map(String::as_str)
             .collect();
         for mapping in custom_issuer_index.mappings() {
             if jwt_token_types.contains(mapping) {

@@ -41,15 +41,6 @@ pub enum TrustedIssuerError {
         /// The type of token being validated
         token_type: String,
     },
-
-    /// Token metadata has empty `entity_type_name`
-    #[error(
-        "Invalid token metadata configuration: entity_type_name is empty for token type '{token_type}'"
-    )]
-    EmptyEntityTypeName {
-        /// The token type with empty `entity_type_name`
-        token_type: String,
-    },
 }
 
 /// Result type for trusted issuer validation operations.
@@ -102,7 +93,6 @@ impl TrustedIssuerValidator {
 ///
 /// This is a standalone function that can be used independently of `TrustedIssuerValidator`.
 /// It validates:
-/// - `entity_type_name` is not empty (configuration validation)
 /// - All claims in `required_claims` set exist
 ///
 /// Note: Mapping fields like `user_id`, `role_mapping`, and `token_id`
@@ -112,7 +102,7 @@ impl TrustedIssuerValidator {
 /// # Arguments
 ///
 /// * `claims` - The JWT claims as a JSON value
-/// * `token_type` - The type of token (e.g., "`access_token`", "`id_token`")
+/// * `token_type` - The token's Cedar entity type (e.g., "`Jans::Access_token`")
 /// * `token_metadata` - The token metadata configuration from the trusted issuer
 ///
 pub(crate) fn validate_required_claims(
@@ -120,13 +110,6 @@ pub(crate) fn validate_required_claims(
     token_type: &str,
     token_metadata: &TokenEntityMetadata,
 ) -> Result<()> {
-    // Check for entity_type_name (configuration validation, always required)
-    if token_metadata.entity_type_name.is_empty() {
-        return Err(TrustedIssuerError::EmptyEntityTypeName {
-            token_type: token_type.to_string(),
-        });
-    }
-
     // Validate all claims explicitly specified in required_claims set
     // This is the authoritative list of required claims from the issuer configuration
     for claim in &token_metadata.required_claims {
@@ -204,7 +187,6 @@ mod tests {
         });
 
         let metadata = TokenEntityMetadata::builder()
-            .entity_type_name("Jans::Access_token".to_string())
             .token_id("jti".to_string())
             .build();
 
@@ -221,7 +203,6 @@ mod tests {
 
         // Only claims in required_claims are validated
         let metadata = TokenEntityMetadata::builder()
-            .entity_type_name("Jans::Access_token".to_string())
             .token_id("jti".to_string())
             .required_claims(HashSet::from(["sub".to_string()])) // This IS validated
             .build();
@@ -245,7 +226,6 @@ mod tests {
 
         // Only claims in required_claims are validated
         let metadata = TokenEntityMetadata::builder()
-            .entity_type_name("Jans::Access_token".to_string())
             .token_id("jti".to_string())
             .required_claims(HashSet::from(["role".to_string()])) // This IS validated
             .build();
@@ -269,7 +249,6 @@ mod tests {
 
         // Only claims in required_claims are validated
         let metadata = TokenEntityMetadata::builder()
-            .entity_type_name("Jans::Access_token".to_string())
             .token_id("jti".to_string()) // This is just a mapping, not validated
             .required_claims(HashSet::from(["jti".to_string()])) // This IS validated
             .build();
@@ -294,7 +273,6 @@ mod tests {
         });
 
         let metadata = TokenEntityMetadata::builder()
-            .entity_type_name("Jans::Access_token".to_string())
             .token_id("jti".to_string())          // Mapping only
             .required_claims(HashSet::new())      // No required claims
             .build();

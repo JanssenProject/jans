@@ -226,9 +226,9 @@ mod tests {
             .as_ref()
             .expect("trusted issuers should be present")["Alpha"];
         assert_eq!(issuer.name, "Issuer Alpha", "issuer name mismatch");
-        assert_eq!(
-            issuer.token_metadata["access_token"].entity_type_name, "Alpha::Access_token",
-            "token metadata should be converted"
+        assert!(
+            issuer.token_metadata.contains_key("Alpha::Access_token"),
+            "token metadata should be converted and keyed by entity type"
         );
         assert!(
             store.custom_issuers["acme"].tokens_mappings["Acme::Custom"]

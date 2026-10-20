@@ -47,11 +47,6 @@ pub(crate) use built_entities::BuiltEntities;
 
 pub(crate) use error::*;
 
-pub(crate) const DEFAULT_ACCESS_TKN_ENTITY_NAME: &str = "Jans::Access_token";
-pub(crate) const DEFAULT_ID_TKN_ENTITY_NAME: &str = "Jans::Id_token";
-pub(crate) const DEFAULT_USERINFO_TKN_ENTITY_NAME: &str = "Jans::Userinfo_token";
-pub(crate) const DEFAULT_ENTITY_TYPE_NAME: &str = "Token";
-
 pub(crate) struct EntityBuilder {
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
@@ -134,8 +129,7 @@ impl EntityBuilder {
         for iss in issuers_index.values() {
             let expected_iss_type = Self::trusted_issuer_typename(&iss.name);
 
-            for token_metadata in iss.token_metadata.values() {
-                let entity_type_name = token_metadata.entity_type_name.as_str();
+            for entity_type_name in iss.token_metadata.keys() {
                 let Some(shape) = schema.get_entity_shape(entity_type_name) else {
                     continue;
                 };
@@ -209,15 +203,6 @@ pub(super) fn build_cedar_entity(
         .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
 
     Ok(entity)
-}
-
-fn default_tkn_entity_name(tkn_name: &str) -> Option<&'static str> {
-    match tkn_name {
-        "access_token" => Some(DEFAULT_ACCESS_TKN_ENTITY_NAME),
-        "id_token" => Some(DEFAULT_ID_TKN_ENTITY_NAME),
-        "userinfo_token" => Some(DEFAULT_USERINFO_TKN_ENTITY_NAME),
-        _ => None,
-    }
 }
 
 #[derive(Default)]
@@ -319,10 +304,8 @@ mod test {
 
         let iss_name: &str = "Alpha";
         let token_metadata = HashMap::from([(
-            "access_token".to_string(),
-            TokenEntityMetadata::builder()
-                .entity_type_name("Jans::Access_token".to_string())
-                .build(),
+            "Jans::Access_token".to_string(),
+            TokenEntityMetadata::builder().build(),
         )]);
         let issuers = HashMap::from([(
             iss_name.to_lowercase(),

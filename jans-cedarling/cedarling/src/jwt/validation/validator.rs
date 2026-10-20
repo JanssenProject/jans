@@ -82,48 +82,6 @@ pub(crate) struct JwtValidator {
 }
 
 impl JwtValidator {
-    /// Creates a new validator for the tokens passed through [`crate::Cedarling::authorize`]
-    pub(super) fn new_input_tkn_validator<'a>(
-        iss: Option<&'a IssClaim>,
-        tkn_name: &'a str,
-        token_metadata: &TokenEntityMetadata,
-        algorithm: Algorithm,
-        status_lists: StatusListCache,
-        validate_signature: bool,
-        validate_status_list: bool,
-    ) -> (Self, ValidatorInfo<'a>) {
-        let token_kind = TokenKind::AuthzRequestInput(tkn_name);
-
-        let mut validation = Validation::new(algorithm);
-        validation.validate_exp = true;
-        validation.validate_nbf = true;
-
-        // we will validate the missing claims in another function since the
-        // jsonwebtoken crate does not support required custom claims
-        // ... but this defaults to true so we need to set it to false.
-        validation.required_spec_claims.clear();
-        validation.validate_aud = false;
-
-        let required_claims = token_metadata.required_claims.iter().cloned().collect();
-
-        let key = ValidatorInfo {
-            iss,
-            token_kind,
-            algorithm,
-        };
-
-        let validator = JwtValidator {
-            validation,
-            expected_iss: iss.cloned(),
-            required_claims,
-            validate_signature,
-            validate_status_list,
-            status_list_cache: status_lists,
-        };
-
-        (validator, key)
-    }
-
     /// Creates a new validator for multi-issuer tokens passed through [`crate::Cedarling::authorize_multi_issuer`]
     pub(super) fn new_multi_issuer_tkn_validator<'a>(
         iss: Option<&'a IssClaim>,
@@ -434,8 +392,6 @@ mod test {
 
     static TEST_TKN_ENTITY_METADATA: LazyLock<TokenEntityMetadata> =
         LazyLock::new(|| TokenEntityMetadata {
-            trusted: true,
-            entity_type_name: "Jans::AccessToken".into(),
             token_id: "jti".into(),
             required_claims: HashSet::from(["exp".into(), "nbf".into()]),
         });
@@ -458,7 +414,7 @@ mod test {
             generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
         let decoding_key = keys.decoding_key().unwrap();
 
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
@@ -499,7 +455,7 @@ mod test {
 
         let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
         tkn_entity_metadata.required_claims = HashSet::from(["exp".into()]);
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
@@ -535,7 +491,7 @@ mod test {
             generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
         let decoding_key = keys.decoding_key().unwrap();
 
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
@@ -578,7 +534,7 @@ mod test {
             generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
         let decoding_key = keys.decoding_key().unwrap();
 
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(expected_iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
@@ -631,7 +587,7 @@ mod test {
             .expect("Should generate token using keys");
 
         let decoding_key = keys.decoding_key().unwrap();
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(expected_iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
@@ -675,7 +631,7 @@ mod test {
 
         let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
         tkn_entity_metadata.required_claims = HashSet::from(["exp".into(), "nbf".into()]);
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
@@ -716,7 +672,7 @@ mod test {
             generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
         let decoding_key = keys.decoding_key().unwrap();
 
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
@@ -760,7 +716,7 @@ mod test {
         let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
         tkn_entity_metadata.required_claims =
             HashSet::from(["sub", "name", "iat"].map(std::convert::Into::into));
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(iss)),
             "access_token",
             &tkn_entity_metadata,
@@ -785,7 +741,7 @@ mod test {
         let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
         tkn_entity_metadata.required_claims =
             HashSet::from(["sub", "name", "iat", "nbf"].map(std::convert::Into::into));
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(iss)),
             "access_token",
             &tkn_entity_metadata,
@@ -839,7 +795,7 @@ mod test {
         )])
         .into();
 
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&iss),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
@@ -867,8 +823,6 @@ mod test {
     /// Represents the default configuration most deployments use.
     fn tkn_meta_no_required_claims() -> TokenEntityMetadata {
         TokenEntityMetadata {
-            trusted: true,
-            entity_type_name: "Jans::AccessToken".into(),
             token_id: "jti".into(),
             required_claims: HashSet::new(),
         }
@@ -890,7 +844,7 @@ mod test {
             generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
         let decoding_key = keys.decoding_key().unwrap();
 
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(iss)),
             "access_token",
             &tkn_meta_no_required_claims(),
@@ -929,7 +883,7 @@ mod test {
             generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
         let decoding_key = keys.decoding_key().unwrap();
 
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(iss)),
             "access_token",
             &tkn_meta_no_required_claims(),
@@ -968,7 +922,7 @@ mod test {
             generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
         let decoding_key = keys.decoding_key().unwrap();
 
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(iss)),
             "access_token",
             &tkn_meta_no_required_claims(),
@@ -1007,7 +961,7 @@ mod test {
             generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
         let decoding_key = keys.decoding_key().unwrap();
 
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&IssClaim::new(iss)),
             "access_token",
             &tkn_meta_no_required_claims(),
@@ -1134,7 +1088,7 @@ mod test {
         )])
         .into();
 
-        let (validator, _) = JwtValidator::new_input_tkn_validator(
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&iss),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,

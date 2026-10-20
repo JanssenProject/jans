@@ -107,8 +107,6 @@ impl From<LegacyCustomIssuerMetadata> for super::CustomIssuerMetadata {
 impl From<LegacyTokenEntityMetadata> for super::TokenEntityMetadata {
     fn from(v: LegacyTokenEntityMetadata) -> Self {
         super::TokenEntityMetadata::builder()
-            .trusted(v.trusted)
-            .entity_type_name(v.entity_type_name)
             .token_id(v.token_id)
             .required_claims(v.required_claims)
             .build()
@@ -125,8 +123,32 @@ pub(crate) struct LegacyTrustedIssuer {
         deserialize_with = "de_oidc_endpoint_url"
     )]
     oidc_endpoint: Url,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "de_token_metadata")]
     pub(crate) token_metadata: HashMap<String, LegacyTokenEntityMetadata>,
+}
+
+/// Rejects two keys declaring one entity type, since the runtime keys tokens
+/// by entity type.
+fn de_token_metadata<'de, D>(
+    deserializer: D,
+) -> Result<HashMap<String, LegacyTokenEntityMetadata>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let tokens = HashMap::<String, LegacyTokenEntityMetadata>::deserialize(deserializer)?;
+
+    let mut keys: Vec<(&String, &LegacyTokenEntityMetadata)> = tokens.iter().collect();
+    keys.sort_by(|a, b| a.0.cmp(b.0));
+    let mut owners: HashMap<&str, &str> = HashMap::with_capacity(keys.len());
+    for (key, token) in keys {
+        if let Some(first) = owners.insert(&token.entity_type_name, key) {
+            return Err(de::Error::custom(format!(
+                "entity type '{}' is declared by token_metadata keys '{first}' and '{key}'",
+                token.entity_type_name
+            )));
+        }
+    }
+    Ok(tokens)
 }
 
 fn de_oidc_endpoint_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
@@ -146,8 +168,9 @@ impl From<LegacyTrustedIssuer> for super::TrustedIssuer {
             v.description,
             v.oidc_endpoint,
             v.token_metadata
-                .into_iter()
-                .map(|(k, v)| (k, v.into()))
+                .into_values()
+                .filter(|token| token.trusted)
+                .map(|token| (token.entity_type_name.clone(), token.into()))
                 .collect(),
         )
     }

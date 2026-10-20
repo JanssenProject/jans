@@ -42,8 +42,6 @@ fn default_token_id() -> String {
 impl From<TokenMetadataDoc> for TokenEntityMetadata {
     fn from(doc: TokenMetadataDoc) -> Self {
         TokenEntityMetadata::builder()
-            .trusted(doc.trusted)
-            .entity_type_name(doc.entity_type_name)
             .token_id(doc.token_id)
             .required_claims(doc.required_claims)
             .build()
@@ -59,6 +57,8 @@ pub(crate) struct TrustedIssuerDoc {
     pub(crate) token_metadata: HashMap<String, TokenMetadataDoc>,
 }
 
+/// Keys tokens by entity type and drops `trusted: false` ones, which were
+/// never validated. Assumes `validate_issuers` rejected duplicate entity types.
 impl From<TrustedIssuerDoc> for TrustedIssuer {
     fn from(doc: TrustedIssuerDoc) -> Self {
         TrustedIssuer::new(
@@ -66,8 +66,9 @@ impl From<TrustedIssuerDoc> for TrustedIssuer {
             doc.description,
             doc.oidc_endpoint,
             doc.token_metadata
-                .into_iter()
-                .map(|(key, token)| (key, token.into()))
+                .into_values()
+                .filter(|token| token.trusted)
+                .map(|token| (token.entity_type_name.clone(), token.into()))
                 .collect(),
         )
     }
@@ -82,6 +83,27 @@ pub(crate) struct ParsedIssuer {
     pub(crate) issuer: TrustedIssuerDoc,
     /// Source filename
     pub(crate) filename: String,
+}
+
+/// Entity types claimed by more than one `token_metadata` key of one issuer;
+/// the runtime keys tokens by entity type, so these cannot both be kept.
+fn duplicate_entity_types(parsed: &ParsedIssuer) -> Vec<TrustedIssuerValidateError> {
+    let mut keys: Vec<(&String, &TokenMetadataDoc)> = parsed.issuer.token_metadata.iter().collect();
+    keys.sort_by(|a, b| a.0.cmp(b.0));
+
+    let mut owners: HashMap<&str, &str> = HashMap::with_capacity(keys.len());
+    let mut errors = Vec::new();
+    for (key, token) in keys {
+        if let Some(first) = owners.insert(&token.entity_type_name, key) {
+            errors.push(TrustedIssuerValidateError::DuplicateEntityType {
+                entity_type_name: token.entity_type_name.clone(),
+                key_a: first.to_string(),
+                key_b: key.clone(),
+                file: parsed.filename.clone(),
+            });
+        }
+    }
+    errors
 }
 
 /// Issuer parser for loading and validating trusted issuer configurations.
@@ -262,11 +284,7 @@ impl IssuerParser {
                 seen_ids.insert(parsed.id.clone(), parsed.filename.clone());
             }
 
-            // Token metadata is optional for JWKS-only configurations
-            // It's only required when token_metadata entries specify entity_type_name or required_claims
-            // for signed-token/trusted-issuer validation. Since we can't determine this requirement
-            // when token_metadata is empty, we allow empty token_metadata to support JWKS-only use cases.
-            // Validation of required fields within token_metadata entries is handled in parse_token_metadata.
+            errors.extend(duplicate_entity_types(parsed));
         }
 
         if errors.is_empty() {
@@ -364,7 +382,7 @@ mod tests {
     #[test]
     fn token_metadata_doc_converts_to_runtime() {
         let doc = TokenMetadataDoc {
-            trusted: false,
+            trusted: true,
             entity_type_name: "Jans::Id_token".into(),
             token_id: "sid".into(),
             required_claims: HashSet::from(["iss".to_string()]),
@@ -373,12 +391,63 @@ mod tests {
         assert_eq!(
             TokenEntityMetadata::from(doc),
             TokenEntityMetadata::builder()
-                .trusted(false)
-                .entity_type_name("Jans::Id_token".into())
                 .token_id("sid".into())
                 .required_claims(HashSet::from(["iss".to_string()]))
                 .build(),
             "every TokenMetadataDoc field should map onto the runtime type"
+        );
+    }
+
+    fn issuer_doc(tokens: &[(&str, TokenMetadataDoc)]) -> TrustedIssuerDoc {
+        TrustedIssuerDoc {
+            name: "Jans".into(),
+            description: String::new(),
+            oidc_endpoint: Url::parse("https://jans.test/.well-known/openid-configuration")
+                .expect("valid url"),
+            token_metadata: tokens
+                .iter()
+                .map(|(key, token)| ((*key).to_string(), token.clone()))
+                .collect(),
+        }
+    }
+
+    #[test]
+    fn issuer_converts_keyed_by_entity_type_without_untrusted_tokens() {
+        let mut untrusted = token_doc("Jans::Id_token");
+        untrusted.trusted = false;
+        let issuer = TrustedIssuer::from(issuer_doc(&[
+            ("access_token", token_doc("Jans::Access_token")),
+            ("id_token", untrusted),
+        ]));
+
+        assert_eq!(
+            issuer.token_metadata.keys().collect::<Vec<_>>(),
+            vec!["Jans::Access_token"],
+            "tokens should be keyed by entity type and `trusted: false` ones dropped"
+        );
+    }
+
+    #[test]
+    fn validate_rejects_entity_type_declared_twice_in_one_issuer() {
+        let parsed = ParsedIssuer {
+            id: "jans".into(),
+            issuer: issuer_doc(&[
+                ("access_token", token_doc("Jans::Access_token")),
+                ("at", token_doc("Jans::Access_token")),
+            ]),
+            filename: "jans.json".into(),
+        };
+
+        let errors = IssuerParser::validate_issuers(&[parsed])
+            .expect_err("two keys for one entity type must be rejected");
+        assert!(
+            matches!(
+                &errors[..],
+                [TrustedIssuerValidateError::DuplicateEntityType { entity_type_name, key_a, key_b, file }]
+                    if entity_type_name == "Jans::Access_token"
+                        && key_a == "access_token" && key_b == "at" && file == "jans.json"
+            ),
+            "expected one DuplicateEntityType naming both keys and the file, got: {errors:?}"
         );
     }
 

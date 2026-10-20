@@ -317,6 +317,41 @@ fn test_legacy_policy_store_invalid_schema_format_with_non_null_still_errors() {
 }
 
 #[test]
+fn test_trusted_issuer_entity_type_declared_twice_is_rejected() {
+    let schema = base64::prelude::BASE64_STANDARD.encode("{}");
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": schema,
+                "policies": {},
+                "trusted_issuers": {
+                    "jans": {
+                        "name": "Jans",
+                        "description": "test",
+                        "openid_configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
+                        "token_metadata": {
+                            "access_token": { "entity_type_name": "Jans::Access_token" },
+                            "at": { "entity_type_name": "Jans::Access_token" }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    let err = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string())
+        .expect_err("two keys for one entity type must be rejected");
+    assert!(
+        err.to_string().contains(
+            "entity type 'Jans::Access_token' is declared by token_metadata keys 'access_token' and 'at'"
+        ),
+        "error should name the entity type and both keys, got: {err}"
+    );
+}
+
+#[test]
 fn test_invalid_trusted_issuers_format() {
     let schema = base64::prelude::BASE64_STANDARD.encode("{}");
     let json = json!({

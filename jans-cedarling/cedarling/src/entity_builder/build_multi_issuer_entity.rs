@@ -4,10 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
-use super::{
-    BuildEntityError, BuiltEntities, DEFAULT_ENTITY_TYPE_NAME, EntityBuilder,
-    default_tkn_entity_name,
-};
+use super::{BuildEntityError, BuiltEntities, EntityBuilder};
 use crate::authz::{DropReason, DroppedToken};
 use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
@@ -250,33 +247,6 @@ fn convert_claim_to_string_set(value: &Value) -> RestrictedExpression {
     }
 }
 
-/// Determine the entity type for a token dynamically
-fn determine_token_entity_type(token: &Token) -> String {
-    match &token.iss {
-        Some(TokenIssuer::Jwt(issuer)) => {
-            if let Some(metadata) = issuer.token_metadata.get(&token.name) {
-                return metadata.entity_type_name.clone();
-            }
-        },
-        Some(TokenIssuer::Custom(meta)) => {
-            if let Some(entity_type_name) = &meta.entity_type_name {
-                return entity_type_name.clone();
-            }
-        },
-        None => {},
-    }
-
-    if token.name.contains("::") {
-        return token.name.clone();
-    }
-
-    if let Some(default_type) = default_tkn_entity_name(&token.name) {
-        return default_type.to_string();
-    }
-
-    DEFAULT_ENTITY_TYPE_NAME.to_string()
-}
-
 /// Resource-independent multi-issuer entities produced by
 /// [`EntityBuilder::build_multi_issuer_setup_entities`]. Built once per
 /// authorization call (single-item or batch) and combined with a per-item
@@ -411,8 +381,8 @@ impl EntityBuilder {
         token: &Token,
         built_entities: &BuiltEntities,
     ) -> Result<Entity, MultiIssuerEntityError> {
-        // Determine entity type name using the same logic as regular entity builder
-        let entity_type = determine_token_entity_type(token);
+        // The mapping is the configured Cedar entity type, for JWT and custom alike.
+        let entity_type = token.name.as_str();
 
         // Resolve the entity id.
         //
@@ -443,7 +413,7 @@ impl EntityBuilder {
         let attrs_shape = self
             .schema
             .as_ref()
-            .and_then(|schema| schema.get_entity_shape(&entity_type));
+            .and_then(|schema| schema.get_entity_shape(entity_type));
 
         let claims = token.claims_value();
 
@@ -532,7 +502,7 @@ impl EntityBuilder {
         // Create the Cedar entity using the existing build_cedar_entity function
         // Note: build_cedar_entity doesn't support tags, so we need to use Entity::new_with_tags directly
         // but we can still reuse the UID creation logic
-        let entity_type_name = EntityTypeName::from_str(&entity_type)
+        let entity_type_name = EntityTypeName::from_str(entity_type)
             .map_err(|e| MultiIssuerEntityError::InvalidEntityUid(e.to_string()))?;
         // EntityId::from_str returns Result<_, Infallible>, so parsing never fails
         let entity_id = EntityId::from_str(&entity_id).unwrap_or_else(|e| match e {});
@@ -1250,7 +1220,6 @@ mod tests {
         // can prove that the final `jti` attribute comes from
         // `add_reserved_claims` (entity_id), not from the raw claim.
         let tkn_meta = TokenEntityMetadata::builder()
-            .entity_type_name("Jans::Access_Token".into())
             .token_id("sub".into())
             .build();
         let mut token_metadata = HashMap::new();
@@ -1354,7 +1323,6 @@ mod tests {
         // so that `determine_token_entity_type` resolves to something the
         // schema can look up.
         let tkn_meta = TokenEntityMetadata::builder()
-            .entity_type_name("Jans::Access_Token".into())
             .token_id("sub".into())
             .build();
         let mut token_metadata = HashMap::new();
@@ -1478,7 +1446,6 @@ mod tests {
             .expect("should parse schema");
 
         let tkn_meta = TokenEntityMetadata::builder()
-            .entity_type_name("Jans::Access_Token".into())
             .token_id("sub".into())
             .build();
         let mut token_metadata = HashMap::new();

@@ -131,9 +131,7 @@ impl ErrorMetricKey for TrustedIssuerError {
     fn metric_key(&self) -> &'static str {
         match self {
             Self::UntrustedIssuer(_) => "jwt.untrusted_issuer",
-            Self::MissingRequiredClaim { .. } | Self::EmptyEntityTypeName { .. } => {
-                "jwt.missing_required_claim"
-            },
+            Self::MissingRequiredClaim { .. } => "jwt.missing_required_claim",
         }
     }
 }

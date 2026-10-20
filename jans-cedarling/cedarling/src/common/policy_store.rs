@@ -90,22 +90,14 @@ impl PolicyStore {
     }
 }
 
-/// The token (`token_metadata` key + issuer id) that first claimed a given entity
-/// type, used to report a later duplicate.
-#[derive(Clone, Copy)]
-struct EntityTypeBinding<'a> {
-    token_key: &'a str,
-    issuer_id: &'a str,
-}
-
 /// Validates the trusted-issuer configuration before any service is built from it.
 ///
-/// Enforces that each Cedar entity type is owned by exactly one token.
+/// Enforces that each Cedar entity type is owned by exactly one issuer.
 fn validate_trusted_issuers_config(
     trusted_issuers: Option<&HashMap<String, TrustedIssuer>>,
 ) -> Result<(), TrustedIssuersValidationError> {
     let mut oidc_to_issuer: HashMap<String, &str> = HashMap::new();
-    let mut entity_type_owners: HashMap<&str, EntityTypeBinding> = HashMap::new();
+    let mut entity_type_owners: HashMap<&str, &str> = HashMap::new();
 
     for (issuer_id, trusted_issuer) in trusted_issuers.into_iter().flatten() {
         let oidc_url = trusted_issuer.oidc_endpoint.to_string();
@@ -113,22 +105,15 @@ fn validate_trusted_issuers_config(
             return Err(TrustedIssuersValidationError::DuplicateOidcEndpoint { oidc_url });
         }
 
-        for (token_key, token_metadata) in &trusted_issuer.token_metadata {
-            let entity_type_name = token_metadata.entity_type_name.as_str();
+        for entity_type_name in trusted_issuer.token_metadata.keys() {
             match entity_type_owners.entry(entity_type_name) {
                 Entry::Vacant(entry) => {
-                    entry.insert(EntityTypeBinding {
-                        token_key,
-                        issuer_id,
-                    });
+                    entry.insert(issuer_id);
                 },
                 Entry::Occupied(entry) => {
-                    let first = entry.get();
                     return Err(TrustedIssuersValidationError::DuplicateEntityType {
-                        entity_type_name: entity_type_name.to_string(),
-                        key_a: first.token_key.to_string(),
-                        issuer_a: first.issuer_id.to_string(),
-                        key_b: token_key.clone(),
+                        entity_type_name: entity_type_name.clone(),
+                        issuer_a: (*entry.get()).to_string(),
                         issuer_b: issuer_id.clone(),
                     });
                 },
@@ -144,14 +129,12 @@ pub(crate) enum TrustedIssuersValidationError {
     #[error("openid_configuration_endpoint '{oidc_url}' is used by more than one issuer")]
     DuplicateOidcEndpoint { oidc_url: String },
     #[error(
-        "Entity type '{entity_type_name}' declared by conflicting tokens: \
-         key '{key_a}' (issuer '{issuer_a}') and key '{key_b}' (issuer '{issuer_b}')"
+        "Entity type '{entity_type_name}' declared by more than one issuer: \
+         '{issuer_a}' and '{issuer_b}'"
     )]
     DuplicateEntityType {
         entity_type_name: String,
-        key_a: String,
         issuer_a: String,
-        key_b: String,
         issuer_b: String,
     },
 }
@@ -189,7 +172,8 @@ pub(crate) struct TrustedIssuer {
     /// This endpoint is used to obtain information about the issuer's capabilities.
     // Private to force usage of `iss_claim` method to get normalized iss claim
     oidc_endpoint: Url,
-    /// Metadata for tokens issued by the trusted issuer.
+    /// Metadata for tokens issued by the trusted issuer, keyed by Cedar entity
+    /// type (the request `TokenInput.mapping`).
     pub(crate) token_metadata: HashMap<String, TokenEntityMetadata>,
 }
 
@@ -203,10 +187,13 @@ impl Default for TrustedIssuer {
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .unwrap(),
             token_metadata: HashMap::from([
-                ("access_token".into(), TokenEntityMetadata::access_token()),
-                ("id_token".into(), TokenEntityMetadata::id_token()),
                 (
-                    "userinfo_token".into(),
+                    "Jans::Access_token".into(),
+                    TokenEntityMetadata::access_token(),
+                ),
+                ("Jans::Id_token".into(), TokenEntityMetadata::id_token()),
+                (
+                    "Jans::Userinfo_token".into(),
                     TokenEntityMetadata::userinfo_token(),
                 ),
             ]),
@@ -928,20 +915,18 @@ mod policy_metadata_tests {
 mod validate_trusted_issuers_tests {
     use super::*;
 
-    /// Builds a [`TrustedIssuer`] with `(token_metadata key, entity_type_name)` pairs.
-    fn issuer(oidc_endpoint: &str, token_metadata: &[(&str, &str)]) -> TrustedIssuer {
+    /// Builds a [`TrustedIssuer`] declaring the given entity types.
+    fn issuer(oidc_endpoint: &str, entity_types: &[&str]) -> TrustedIssuer {
         TrustedIssuer::new(
             "Test".to_string(),
             String::default(),
             Url::parse(oidc_endpoint).expect("test oidc endpoint should be a valid url"),
-            token_metadata
+            entity_types
                 .iter()
-                .map(|(key, entity_type_name)| {
+                .map(|entity_type_name| {
                     (
-                        (*key).to_string(),
-                        TokenEntityMetadata::builder()
-                            .entity_type_name((*entity_type_name).to_string())
-                            .build(),
+                        (*entity_type_name).to_string(),
+                        TokenEntityMetadata::builder().build(),
                     )
                 })
                 .collect(),
@@ -957,20 +942,14 @@ mod validate_trusted_issuers_tests {
                 "alpha".to_string(),
                 issuer(
                     "https://idp.alpha.example/.well-known/openid-configuration",
-                    &[
-                        ("access_token", "Alpha::Access_token"),
-                        ("id_token", "Alpha::Id_token"),
-                    ],
+                    &["Alpha::Access_token", "Alpha::Id_token"],
                 ),
             ),
             (
                 "beta".to_string(),
                 issuer(
                     "https://idp.beta.example/.well-known/openid-configuration",
-                    &[
-                        ("access_token", "Beta::Access_token"),
-                        ("id_token", "Beta::Id_token"),
-                    ],
+                    &["Beta::Access_token", "Beta::Id_token"],
                 ),
             ),
         ]);
@@ -983,21 +962,21 @@ mod validate_trusted_issuers_tests {
 
     #[test]
     fn rejects_entity_type_shared_across_issuers() {
-        // Same entity type under the same key: unbuildable once `iss` is declared,
-        // because the shared type can only name one issuer namespace.
+        // Unbuildable once `iss` is declared: the shared type can only name one
+        // issuer namespace.
         let issuers = HashMap::from([
             (
                 "alpha".to_string(),
                 issuer(
                     "https://idp.alpha.example/.well-known/openid-configuration",
-                    &[("access_token", "Jans::Access_token")],
+                    &["Jans::Access_token"],
                 ),
             ),
             (
                 "beta".to_string(),
                 issuer(
                     "https://idp.beta.example/.well-known/openid-configuration",
-                    &[("access_token", "Jans::Access_token")],
+                    &["Jans::Access_token"],
                 ),
             ),
         ]);
@@ -1015,71 +994,11 @@ mod validate_trusted_issuers_tests {
     }
 
     #[test]
-    fn rejects_entity_type_shared_across_issuers_with_different_keys() {
-        let issuers = HashMap::from([
-            (
-                "alpha".to_string(),
-                issuer(
-                    "https://idp.alpha.example/.well-known/openid-configuration",
-                    &[("access_token", "Jans::Access_token")],
-                ),
-            ),
-            (
-                "beta".to_string(),
-                issuer(
-                    "https://idp.beta.example/.well-known/openid-configuration",
-                    &[("at", "Jans::Access_token")],
-                ),
-            ),
-        ]);
-
-        let err = validate_trusted_issuers_config(Some(&issuers))
-            .expect_err("an entity type shared across issuers must be rejected");
-        assert!(
-            matches!(
-                &err,
-                TrustedIssuersValidationError::DuplicateEntityType { .. }
-            ),
-            "expected DuplicateEntityType, got: {err}"
-        );
-    }
-
-    #[test]
-    fn rejects_duplicate_entity_type_within_issuer() {
-        let issuers = HashMap::from([(
-            "alpha".to_string(),
-            issuer(
-                "https://idp.alpha.example/.well-known/openid-configuration",
-                &[
-                    ("access_token", "Jans::Access_token"),
-                    ("at", "Jans::Access_token"),
-                ],
-            ),
-        )]);
-
-        let err = validate_trusted_issuers_config(Some(&issuers))
-            .expect_err("two keys mapping to one entity type within an issuer must be rejected");
-        assert!(
-            matches!(
-                &err,
-                TrustedIssuersValidationError::DuplicateEntityType { .. }
-            ),
-            "expected DuplicateEntityType, got: {err}"
-        );
-    }
-
-    #[test]
     fn rejects_duplicate_oidc_endpoint() {
         let oidc = "https://idp.example/.well-known/openid-configuration";
         let issuers = HashMap::from([
-            (
-                "alpha".to_string(),
-                issuer(oidc, &[("access_token", "Jans::Access_token")]),
-            ),
-            (
-                "beta".to_string(),
-                issuer(oidc, &[("access_token", "Jans::Access_token")]),
-            ),
+            ("alpha".to_string(), issuer(oidc, &["Jans::Access_token"])),
+            ("beta".to_string(), issuer(oidc, &["Jans::Access_token"])),
         ]);
 
         let err = validate_trusted_issuers_config(Some(&issuers))

@@ -58,44 +58,19 @@ impl JwtValidatorCache {
             .as_ref()
             .map_or_else(|| iss_config.policy.iss_claim(), |oidc| oidc.issuer.clone());
 
-        for (token_name, tkn_metadata) in &iss_config.policy.token_metadata {
-            if !tkn_metadata.trusted {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "skipping metadata for '{}' from '{}' since `trusted == false`",
-                        token_name, iss_config.issuer_id,
-                    ),
-                    Some(LogLevel::INFO),
-                ));
-                continue;
-            }
-
+        for (entity_type, tkn_metadata) in &iss_config.policy.token_metadata {
             logger.log_any(JwtLogEntry::new(
                     format!(
-                        "creating validators for token: {token_name} under issuer: {iss} with algorithms: {:?}",
+                        "creating validators for token: {entity_type} under issuer: {iss} with algorithms: {:?}",
                         jwt_config.signature_algorithms_supported
                     ),
                     Some(LogLevel::DEBUG),
                 ));
 
             for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
-                let (validator, key) = JwtValidator::new_input_tkn_validator(
-                    Some(&iss),
-                    token_name,
-                    tkn_metadata,
-                    algorithm,
-                    status_lists.clone(),
-                    jwt_config.jwt_sig_validation,
-                    jwt_config.jwt_status_validation,
-                );
-
-                self.insert(&key, validator);
-            }
-
-            for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
                 let (validator, key) = JwtValidator::new_multi_issuer_tkn_validator(
                     Some(&iss),
-                    token_name,
+                    entity_type,
                     tkn_metadata,
                     algorithm,
                     status_lists.clone(),
@@ -183,10 +158,6 @@ pub(crate) struct ValidatorInfo<'a> {
 
 #[derive(Hash, Clone, PartialEq)]
 pub(crate) enum TokenKind<'a> {
-    /// A token that's provided by the user through the [`authorize`] function.
-    ///
-    /// [`authorize`]: crate::Cedarling::authorize
-    AuthzRequestInput(&'a str),
     /// A statuslist JWT.
     StatusList,
     /// A token that's provided by the user through the [`authorize_multi_issuer`] function.
@@ -204,9 +175,6 @@ impl Display for TokenKind<'_> {
             TokenKind::AuthorizeMultiIssuer(tkn_name) | TokenKind::AuthorizeCustom(tkn_name) => {
                 write!(f, "{tkn_name}")
             },
-            TokenKind::AuthzRequestInput(tkn_name) => {
-                write!(f, "{tkn_name}")
-            },
         }
     }
 }
@@ -221,10 +189,6 @@ pub struct OwnedValidatorInfo {
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum OwnedTokenKind {
-    /// A token that's provided by the user through the [`authorize`] function.
-    ///
-    /// [`authorize`]: crate::Cedarling::authorize
-    AuthzRequestInput(String),
     /// A statuslist JWT.
     StatusList,
     /// A token that's provided by the user through the [`authorize_multi_issuer`] function.
@@ -238,9 +202,6 @@ pub(crate) enum OwnedTokenKind {
 impl From<&TokenKind<'_>> for OwnedTokenKind {
     fn from(tkn_kind: &TokenKind<'_>) -> Self {
         match tkn_kind {
-            TokenKind::AuthzRequestInput(tkn_name) => {
-                Self::AuthzRequestInput((*tkn_name).to_string())
-            },
             TokenKind::StatusList => Self::StatusList,
             TokenKind::AuthorizeMultiIssuer(tkn_name) => {
                 Self::AuthorizeMultiIssuer(tkn_name.to_string())
@@ -257,10 +218,6 @@ impl OwnedTokenKind {
     fn is_equal_to(&self, other: &TokenKind<'_>) -> bool {
         match (self, other) {
             (OwnedTokenKind::StatusList, TokenKind::StatusList) => true,
-            (
-                OwnedTokenKind::AuthzRequestInput(tkn_name_string),
-                TokenKind::AuthzRequestInput(tkn_name_str),
-            ) => tkn_name_string.as_str() == *tkn_name_str,
             (
                 OwnedTokenKind::AuthorizeMultiIssuer(tkn_name_string),
                 TokenKind::AuthorizeMultiIssuer(tkn_name_str),
@@ -332,12 +289,10 @@ mod test {
     fn test_insert_and_retrieve() {
         let store = JwtValidatorCache::default();
         let test_iss = IssClaim::new("https://example.com/issuer");
-        let (validator, info) = JwtValidator::new_input_tkn_validator(
+        let (validator, info) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&test_iss),
-            "access_tkn",
+            "Jans::Access_token",
             &TokenEntityMetadata {
-                trusted: true,
-                entity_type_name: "AccessToken".into(),
                 token_id: "iss".into(),
                 required_claims: HashSet::new(),
             },
