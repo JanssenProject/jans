@@ -179,7 +179,7 @@ impl ServiceFactory<'_> {
             TraceSigningKey::File(path) => (read_key_file(path.clone()).await?, Some(path)),
             TraceSigningKey::Pem(pem) => (pem.clone(), None),
         };
-        let key = ProducerKey::from_pem(&pem, trace.signing_kid.as_deref()).map_err(|source| {
+        let key = ProducerKey::from_pem(&pem, trace.signing_kid.as_ref()).map_err(|source| {
             LoadProducerKeyError::InvalidKey {
                 property: trace.signing_key.property(),
                 path: path.cloned(),

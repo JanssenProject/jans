@@ -93,7 +93,7 @@ use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
 #[cfg(not(target_arch = "wasm32"))]
 use trace::ProducerKey;
-pub use trace::{ParseProducerIdError, ProducerId};
+pub use trace::{ParseProducerIdError, ParseTraceSigningKidError, ProducerId, TraceSigningKid};
 
 use semver::Version;
 
@@ -140,6 +140,10 @@ pub enum InitCedarlingError {
     /// logs to the Lock Server.
     #[error("failed to initialize the Lock Service: {0}")]
     InitLockService(#[from] InitLockServiceError),
+    /// Error returned when TRACE is enabled without what it needs from the rest of
+    /// the configuration.
+    #[error(transparent)]
+    TraceSetup(#[from] TraceSetupError),
     /// Error returned when TRACE is enabled but its signing key cannot be loaded.
     #[cfg(not(target_arch = "wasm32"))]
     #[error(transparent)]
@@ -195,6 +199,14 @@ impl Cedarling {
 
     /// Create a new instance of the Cedarling application.
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
+        // Checked here as well as when decoding, so a `BootstrapConfig` built
+        // directly cannot skip it; before any network work, as it needs none.
+        if config.trace_config.is_some() {
+            bootstrap_config::check_trace_setup(
+                config.lock_config.is_some(),
+                &config.policy_store_config.source,
+            )?;
+        }
         let pdp_id = app_types::PdpID::new();
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName::from(config.application_name.clone()));

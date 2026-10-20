@@ -10,11 +10,7 @@ use std::path::PathBuf;
 use url::Url;
 
 use super::{BootstrapConfigLoadingError, BootstrapConfigRaw, PolicyStoreSource};
-use crate::trace::ProducerId;
-
-/// Lock's `ProducerKeyRegistry.MAX_KID_LENGTH`. Lock counts Java `String` length,
-/// that is UTF-16 code units.
-const MAX_SIGNING_KID_LEN: usize = 255;
+use crate::trace::{ProducerId, TraceSigningKid};
 
 /// TRACE producer settings. Exists only when `CEDARLING_TRACE` is enabled, so a
 /// configuration with TRACE on but without a key cannot be represented.
@@ -27,7 +23,7 @@ pub struct TraceConfig {
     pub signing_key: TraceSigningKey,
     /// Explicit `kid` (`CEDARLING_TRACE_SIGNING_KID`). `None` means the key
     /// thumbprint, which is what an admin registers in Lock by default.
-    pub signing_kid: Option<String>,
+    pub signing_kid: Option<TraceSigningKid>,
     /// Where TRACE bulk requests go (`CEDARLING_TRACE_ENDPOINT`).
     pub endpoint: TraceEndpoint,
     /// Maximum records per bulk request (`CEDARLING_TRACE_BULK_MAX_RECORDS`).
@@ -87,6 +83,51 @@ pub enum TraceEndpoint {
     Url(Url),
 }
 
+/// What TRACE needs from the rest of the configuration is missing.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum TraceSetupError {
+    /// TRACE records are sent to Lock Server.
+    #[error(
+        "`CEDARLING_TRACE` is `enabled` but `CEDARLING_LOCK` is not: TRACE records are sent to \
+         Lock Server"
+    )]
+    RequiresLock,
+    /// `bundle_hash` is the hash of the `.cjar` bytes; other sources have no artifact.
+    #[error(
+        "`CEDARLING_TRACE` requires a `.cjar` policy store (local file, URL or Lock Server): \
+         `bundle_hash` is computed from the archive bytes"
+    )]
+    RequiresArchivePolicyStore,
+    /// The MVP signs on trusted hosts only, never in the browser.
+    #[cfg(target_arch = "wasm32")]
+    #[error("`CEDARLING_TRACE` is not supported on WASM")]
+    NotSupportedOnWasm,
+}
+
+/// Checks what TRACE needs besides its own properties. Runs when the bootstrap
+/// configuration is decoded and again when Cedarling starts, so a
+/// `BootstrapConfig` built directly cannot skip it.
+pub(crate) fn check_trace_setup(
+    lock_enabled: bool,
+    policy_store_source: &PolicyStoreSource,
+) -> Result<(), TraceSetupError> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        let _ = (lock_enabled, policy_store_source);
+        Err(TraceSetupError::NotSupportedOnWasm)
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        if !lock_enabled {
+            return Err(TraceSetupError::RequiresLock);
+        }
+        if !policy_store_source.is_archive() {
+            return Err(TraceSetupError::RequiresArchivePolicyStore);
+        }
+        Ok(())
+    }
+}
+
 /// Builds the TRACE settings; `None` when TRACE is disabled. Invalid combinations
 /// stop startup, because a producer that cannot emit valid records should not
 /// look healthy.
@@ -97,34 +138,13 @@ pub(super) fn build_trace_config(
     if !raw.trace.is_enabled() {
         return Ok(None);
     }
-    reject_on_wasm()?;
-    build_enabled_trace_config(raw, policy_store_source).map(Some)
-}
-
-/// The MVP signs on trusted hosts only, never in the browser.
-#[cfg(target_arch = "wasm32")]
-fn reject_on_wasm() -> Result<(), BootstrapConfigLoadingError> {
-    Err(BootstrapConfigLoadingError::TraceNotSupportedOnWasm)
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-#[allow(clippy::unnecessary_wraps)] // same signature as the WASM variant
-fn reject_on_wasm() -> Result<(), BootstrapConfigLoadingError> {
-    Ok(())
+    check_trace_setup(raw.lock.is_enabled(), policy_store_source)?;
+    build_enabled_trace_config(raw).map(Some)
 }
 
 fn build_enabled_trace_config(
     raw: &BootstrapConfigRaw,
-    policy_store_source: &PolicyStoreSource,
 ) -> Result<TraceConfig, BootstrapConfigLoadingError> {
-    if !raw.lock.is_enabled() {
-        return Err(BootstrapConfigLoadingError::TraceRequiresLock);
-    }
-    // `bundle_hash` is the hash of the `.cjar` bytes; other sources have no artifact.
-    if !policy_store_source.is_archive() {
-        return Err(BootstrapConfigLoadingError::TraceRequiresArchivePolicyStore);
-    }
-
     let (property, producer_id) = match &raw.trace_producer_id {
         Some(id) => ("CEDARLING_TRACE_PRODUCER_ID", id.as_str()),
         None => ("CEDARLING_APPLICATION_NAME", raw.application_name.as_str()),
@@ -143,16 +163,11 @@ fn build_enabled_trace_config(
         (None, None) => return Err(BootstrapConfigLoadingError::MissingTraceSigningKey),
     };
 
-    let signing_kid = raw
-        .trace_signing_kid
-        .clone()
-        .filter(|kid| !kid.trim().is_empty());
-    if signing_kid
-        .as_deref()
-        .is_some_and(|kid| kid.encode_utf16().count() > MAX_SIGNING_KID_LEN)
-    {
-        return Err(BootstrapConfigLoadingError::InvalidTraceSigningKid);
-    }
+    // A blank property means unset: the kid falls back to the key thumbprint.
+    let signing_kid = not_blank(&raw.trace_signing_kid)
+        .map(|kid| kid.parse())
+        .transpose()
+        .map_err(BootstrapConfigLoadingError::InvalidTraceSigningKid)?;
 
     let endpoint = match raw.trace_endpoint.as_deref() {
         None | Some("discovered") => TraceEndpoint::Discovered,
@@ -186,6 +201,7 @@ mod tests {
     use crate::bootstrap_config::{
         BootstrapConfig, BootstrapConfigLoadingError, BootstrapConfigRaw,
     };
+    use crate::trace::ParseTraceSigningKidError;
 
     const KEY_PATH: &str = "/etc/cedarling/trace-key.pem";
 
@@ -290,8 +306,11 @@ mod tests {
         let err = decode_with(&[("CEDARLING_LOCK", None)])
             .expect_err("TRACE without Lock should be rejected");
         assert!(
-            matches!(err, BootstrapConfigLoadingError::TraceRequiresLock),
-            "expected TraceRequiresLock, got {err:?}"
+            matches!(
+                err,
+                BootstrapConfigLoadingError::TraceSetup(TraceSetupError::RequiresLock)
+            ),
+            "expected TraceSetup(RequiresLock), got {err:?}"
         );
     }
 
@@ -418,9 +437,11 @@ mod tests {
         assert!(
             matches!(
                 err,
-                BootstrapConfigLoadingError::TraceRequiresArchivePolicyStore
+                BootstrapConfigLoadingError::TraceSetup(
+                    TraceSetupError::RequiresArchivePolicyStore
+                )
             ),
-            "expected TraceRequiresArchivePolicyStore for a directory, got {err:?}"
+            "expected TraceSetup(RequiresArchivePolicyStore) for a directory, got {err:?}"
         );
 
         let err = decode_with(&[
@@ -434,9 +455,11 @@ mod tests {
         assert!(
             matches!(
                 err,
-                BootstrapConfigLoadingError::TraceRequiresArchivePolicyStore
+                BootstrapConfigLoadingError::TraceSetup(
+                    TraceSetupError::RequiresArchivePolicyStore
+                )
             ),
-            "expected TraceRequiresArchivePolicyStore for YAML, got {err:?}"
+            "expected TraceSetup(RequiresArchivePolicyStore) for YAML, got {err:?}"
         );
     }
 
@@ -450,7 +473,7 @@ mod tests {
 
         let config = trace_config(&[("CEDARLING_TRACE_SIGNING_KID", Some(json!("fleet-key-1")))]);
         assert_eq!(
-            config.signing_kid.as_deref(),
+            config.signing_kid.as_ref().map(TraceSigningKid::as_str),
             Some("fleet-key-1"),
             "an explicit kid is kept as is"
         );
@@ -460,7 +483,7 @@ mod tests {
     fn kid_over_255_is_error() {
         let config = trace_config(&[("CEDARLING_TRACE_SIGNING_KID", Some(json!("k".repeat(255))))]);
         assert_eq!(
-            config.signing_kid.map(|kid| kid.len()),
+            config.signing_kid.map(|kid| kid.as_str().len()),
             Some(255),
             "a 255-character kid is accepted"
         );
@@ -468,8 +491,13 @@ mod tests {
         let err = decode_with(&[("CEDARLING_TRACE_SIGNING_KID", Some(json!("k".repeat(256))))])
             .expect_err("a 256-character kid should be rejected");
         assert!(
-            matches!(err, BootstrapConfigLoadingError::InvalidTraceSigningKid),
-            "expected InvalidTraceSigningKid, got {err:?}"
+            matches!(
+                err,
+                BootstrapConfigLoadingError::InvalidTraceSigningKid(
+                    ParseTraceSigningKidError::TooLong(256)
+                )
+            ),
+            "expected InvalidTraceSigningKid(TooLong(256)), got {err:?}"
         );
     }
 

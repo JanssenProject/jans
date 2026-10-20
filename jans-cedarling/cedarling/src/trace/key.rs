@@ -8,6 +8,8 @@
 use jans_trace_core::Digest;
 use jans_trace_core::signature::{Ed25519Signer, PrivateKeyError, SignerError, TraceSigner};
 
+use super::TraceSigningKid;
+
 /// Signing key of this Cedarling instance with its `kid`.
 ///
 /// Wraps [`Ed25519Signer`] because the default `kid` is the thumbprint of the
@@ -23,11 +25,14 @@ impl ProducerKey {
     /// Parses an unencrypted PKCS#8 PEM key; no I/O, the caller reads the file.
     /// `kid` falls back to the thumbprint, the value an admin registers in Lock
     /// by default.
-    pub(crate) fn from_pem(pem: &str, kid: Option<&str>) -> Result<Self, PrivateKeyError> {
+    pub(crate) fn from_pem(
+        pem: &str,
+        kid: Option<&TraceSigningKid>,
+    ) -> Result<Self, PrivateKeyError> {
         // `ProducerKey::kid` answers for the signer, so the inner `kid` is unused.
         let signer = Ed25519Signer::from_pkcs8_pem(String::new(), pem)?;
         let thumbprint = signer.public_key().thumbprint();
-        let kid = kid.map_or_else(|| thumbprint.to_string(), str::to_owned);
+        let kid = kid.map_or_else(|| thumbprint.to_string(), |kid| kid.as_str().to_owned());
         Ok(Self {
             kid,
             thumbprint,
@@ -56,6 +61,11 @@ mod tests {
     use jans_trace_core::key::PublicKey;
 
     use super::*;
+    use crate::trace::TraceSigningKid;
+
+    fn kid(text: &str) -> TraceSigningKid {
+        text.parse().expect("test kid should parse")
+    }
 
     /// RFC 8410 section 10.3 example key: public test vector, not a secret.
     const KEY_PEM: &str = include_str!("../../../test_files/trace/producer_ed25519.pem");
@@ -91,8 +101,8 @@ mod tests {
 
     #[test]
     fn explicit_kid_is_used() {
-        let key =
-            ProducerKey::from_pem(KEY_PEM, Some("fleet-key-1")).expect("test key should parse");
+        let key = ProducerKey::from_pem(KEY_PEM, Some(&kid("fleet-key-1")))
+            .expect("test key should parse");
         assert_eq!(key.kid(), "fleet-key-1", "explicit kid should be kept");
         assert_eq!(
             key.thumbprint(),
@@ -151,8 +161,8 @@ mod tests {
 
     #[test]
     fn signs_under_its_own_kid() {
-        let key =
-            ProducerKey::from_pem(KEY_PEM, Some("fleet-key-1")).expect("test key should parse");
+        let key = ProducerKey::from_pem(KEY_PEM, Some(&kid("fleet-key-1")))
+            .expect("test key should parse");
         let signer: &dyn TraceSigner = &key;
         assert_eq!(
             signer.kid(),

@@ -3,20 +3,23 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Startup with a TRACE producer key: a bad key stops `Cedarling::new`, a good
-//! one is logged so the admin can register it in Lock.
+//! Startup with TRACE: a configuration TRACE cannot work with or a bad key stops
+//! `Cedarling::new`, a good key is logged so the admin can register it in Lock.
 
 use std::num::NonZeroUsize;
 use std::path::{Path, PathBuf};
 
 use jans_trace_core::key::PublicKey;
-use serde_json::Value;
+use mockito::{Server, ServerGuard};
+use serde_json::{Value, json};
 
+use crate::bootstrap_config::{BootstrapConfig, LockServiceConfig};
+use crate::common::policy_store::test_utils::fixtures;
 use crate::log::interface::LogStorage;
 use crate::tests::utils::cedarling_util::get_config;
 use crate::{
     Cedarling, InitCedarlingError, LoadProducerKeyError, PolicyStoreSource, TraceConfig,
-    TraceEndpoint, TraceSigningKey,
+    TraceEndpoint, TraceSetupError, TraceSigningKey,
 };
 
 /// Public key of the RFC 8410 section 10.3 example key in `test_files/trace`.
@@ -42,19 +45,66 @@ fn rfc8410_thumbprint() -> String {
         .to_string()
 }
 
-async fn start_err(signing_key: TraceSigningKey) -> InitCedarlingError {
-    let mut config = get_config(yaml_store());
+/// Lock that serves only its well-known configuration; with a pre-issued access
+/// token and no intervals, Cedarling needs nothing else from it at startup.
+async fn lock_server() -> ServerGuard {
+    let mut server = Server::new_async().await;
+    let base = server.url();
+    server
+        .mock("GET", "/.well-known/lock-server-configuration")
+        .with_body(
+            json!({
+                "version": "1.0",
+                "issuer": base,
+                "audit": {
+                    "log_endpoint": format!("{base}/audit/log"),
+                    "health_endpoint": format!("{base}/audit/health"),
+                    "telemetry_endpoint": format!("{base}/audit/telemetry"),
+                },
+                "config": {
+                    "config_endpoint": format!("{base}/config"),
+                    "issuers_endpoint": format!("{base}/config/issuers"),
+                    "policy_endpoint": format!("{base}/config/policy"),
+                    "schema_endpoint": format!("{base}/config/schema"),
+                    "sse_endpoint": format!("{base}/sse"),
+                },
+            })
+            .to_string(),
+        )
+        .create_async()
+        .await;
+    server
+}
+
+fn lock_config(server: &ServerGuard) -> LockServiceConfig {
+    LockServiceConfig {
+        config_uri: format!("{}/.well-known/lock-server-configuration", server.url())
+            .parse()
+            .expect("mock Lock URL should parse"),
+        access_token_jwt: Some("pre.issued.token".to_string()), // # gitleaks:allow
+        ..Default::default()
+    }
+}
+
+/// Everything TRACE needs: Lock and a `.cjar` store.
+fn trace_ready_config(server: &ServerGuard, signing_key: TraceSigningKey) -> BootstrapConfig {
+    let mut config = get_config(cjar_store());
+    config.lock_config = Some(lock_config(server));
     config.trace_config = Some(trace_config(signing_key));
-    Cedarling::new(&config)
+    config
+}
+
+async fn start_err(signing_key: TraceSigningKey) -> InitCedarlingError {
+    let server = lock_server().await;
+    Cedarling::new(&trace_ready_config(&server, signing_key))
         .await
         .err()
         .expect("a bad TRACE key should stop startup")
 }
 
 async fn logged_key_message(signing_key: TraceSigningKey) -> Option<String> {
-    let mut config = get_config(yaml_store());
-    config.trace_config = Some(trace_config(signing_key));
-    let cedarling = Cedarling::new(&config)
+    let server = lock_server().await;
+    let cedarling = Cedarling::new(&trace_ready_config(&server, signing_key))
         .await
         .expect("Cedarling should start with a valid TRACE key");
     cedarling
@@ -76,10 +126,55 @@ fn trace_config(signing_key: TraceSigningKey) -> TraceConfig {
     }
 }
 
+fn cjar_store() -> PolicyStoreSource {
+    PolicyStoreSource::ArchiveBytes(
+        fixtures::minimal_valid()
+            .build_archive()
+            .expect("test archive should build"),
+    )
+}
+
 fn yaml_store() -> PolicyStoreSource {
     PolicyStoreSource::Yaml(
         include_str!("../../../test_files/policy-store_no_trusted_issuers.yaml").to_string(),
     )
+}
+
+/// A `BootstrapConfig` built directly skips bootstrap decoding, so startup checks
+/// what TRACE needs from the rest of the configuration again.
+#[tokio::test]
+async fn cedarling_new_rejects_trace_without_lock() {
+    let mut config = get_config(cjar_store());
+    config.trace_config = Some(trace_config(key_file()));
+    let err = Cedarling::new(&config)
+        .await
+        .err()
+        .expect("TRACE without Lock should stop startup");
+    assert!(
+        matches!(
+            err,
+            InitCedarlingError::TraceSetup(TraceSetupError::RequiresLock)
+        ),
+        "expected TraceSetup(RequiresLock), got {err:?}"
+    );
+}
+
+#[tokio::test]
+async fn cedarling_new_rejects_trace_with_yaml_store() {
+    let server = lock_server().await;
+    let mut config = trace_ready_config(&server, key_file());
+    config.policy_store_config.source = yaml_store();
+    let err = Cedarling::new(&config)
+        .await
+        .err()
+        .expect("TRACE with a YAML store should stop startup");
+    assert!(
+        matches!(
+            err,
+            InitCedarlingError::TraceSetup(TraceSetupError::RequiresArchivePolicyStore)
+        ),
+        "expected TraceSetup(RequiresArchivePolicyStore), got {err:?}"
+    );
 }
 
 #[tokio::test]

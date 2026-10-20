@@ -27,7 +27,7 @@ use config::{Config, File};
 #[cfg(not(target_arch = "wasm32"))]
 use std::{io, path::Path};
 
-use crate::trace::ParseProducerIdError;
+use crate::trace::{ParseProducerIdError, ParseTraceSigningKidError};
 use crate::{context_data_api::DataStoreConfig, http::HttpClientConfig};
 
 // Re-export types that need to be public
@@ -40,7 +40,8 @@ pub use policy_store_config::{
     SigstoreSigner,
 };
 pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType, SigstoreMode};
-pub use trace_config::{TraceConfig, TraceEndpoint, TraceSigningKey};
+pub(crate) use trace_config::check_trace_setup;
+pub use trace_config::{TraceConfig, TraceEndpoint, TraceSetupError, TraceSigningKey};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -282,12 +283,10 @@ pub enum BootstrapConfigLoadingError {
     )]
     MissingGrpcEndpoint,
 
-    /// Error returned when TRACE is enabled without Lock Server integration.
-    #[error(
-        "`CEDARLING_TRACE` is `enabled` but `CEDARLING_LOCK` is not: TRACE records are sent to \
-         Lock Server"
-    )]
-    TraceRequiresLock,
+    /// Error returned when TRACE is enabled without what it needs from the rest
+    /// of the configuration.
+    #[error(transparent)]
+    TraceSetup(#[from] TraceSetupError),
 
     /// Error returned when TRACE is enabled without a signing key.
     #[error(
@@ -309,16 +308,9 @@ pub enum BootstrapConfigLoadingError {
         source: ParseProducerIdError,
     },
 
-    /// Error returned when TRACE is enabled with a policy store that is not a `.cjar` archive.
-    #[error(
-        "`CEDARLING_TRACE` requires a `.cjar` policy store (local file, URL or Lock Server): \
-         `bundle_hash` is computed from the archive bytes"
-    )]
-    TraceRequiresArchivePolicyStore,
-
-    /// Error returned when the TRACE `kid` is longer than Lock accepts.
-    #[error("`CEDARLING_TRACE_SIGNING_KID` is longer than 255 characters")]
-    InvalidTraceSigningKid,
+    /// Error returned when the TRACE `kid` would be rejected by Lock.
+    #[error("invalid `CEDARLING_TRACE_SIGNING_KID`: {0}")]
+    InvalidTraceSigningKid(ParseTraceSigningKidError),
 
     /// Error returned when `CEDARLING_TRACE_ENDPOINT` is neither `discovered` nor a URL.
     #[error("invalid `CEDARLING_TRACE_ENDPOINT`: {0}")]
@@ -327,11 +319,6 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when a TRACE bulk limit is zero.
     #[error("`{0}` must be greater than 0")]
     ZeroTraceBulkLimit(&'static str),
-
-    /// Error returned when TRACE is enabled on WASM, where the MVP does not sign records.
-    #[cfg(target_arch = "wasm32")]
-    #[error("`CEDARLING_TRACE` is not supported on WASM")]
-    TraceNotSupportedOnWasm,
 }
 
 impl From<url::ParseError> for BootstrapConfigLoadingError {
