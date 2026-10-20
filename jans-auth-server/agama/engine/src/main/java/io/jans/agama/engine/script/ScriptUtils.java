@@ -4,8 +4,7 @@ import io.jans.agama.model.EngineConfig;
 import io.jans.agama.engine.continuation.PendingRedirectException;
 import io.jans.agama.engine.continuation.PendingRenderException;
 import io.jans.agama.engine.misc.PrimitiveUtils;
-import io.jans.agama.engine.service.ActionService;
-import io.jans.agama.engine.service.FlowService;
+import io.jans.agama.engine.service.*;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.Pair;
 
@@ -23,6 +22,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.NativeContinuation;
 import org.mozilla.javascript.NativeJavaObject;
+import org.mozilla.javascript.NativeObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +33,9 @@ public class ScriptUtils {
     // NOTE: do not alter this method's signature so that it returns void. The returned 
     // value is simulated when the continuation is resumed: see 3rd parameter in call
     // to resumeContinuation (FlowService)
-    public static Pair<String, String> pauseForRender(String page, boolean allowCallbackResume, Object data)
-            throws PendingRenderException, AccessDeniedException, URISyntaxException {
-        
-        page = normalize(page);
+    public static Pair<String, String> pauseForRender(String page, boolean allowCallbackResume, Object data,
+            String flowQname, int line) throws PendingRenderException {
+
         Context cx = Context.enter();
         try {
             PendingRenderException pending = new PendingRenderException(
@@ -44,6 +43,9 @@ public class ScriptUtils {
             pending.setTemplatePath(page);
             pending.setDataModel(data);
             pending.setAllowCallbackResume(allowCallbackResume);
+            pending.setCurrentQname(flowQname);
+            pending.setCurrentLine(line);
+            
             LOG.debug("Pausing flow");
             throw pending;
         } finally {
@@ -55,7 +57,8 @@ public class ScriptUtils {
     // NOTE: do not alter this method's signature so that it returns void. The returned 
     // value is simulated when the continuation is resumed: see 3rd parameter in call
     // to resumeContinuation (FlowService)    
-    public static Pair<Boolean, String> pauseForExternalRedirect(String url) throws PendingRedirectException {
+    public static Pair<Boolean, String> pauseForExternalRedirect(String url,
+            String flowQname, int line) throws PendingRedirectException {
         
         Context cx = Context.enter();
         try {            
@@ -63,11 +66,28 @@ public class ScriptUtils {
                     (NativeContinuation) cx.captureContinuation().getContinuation());
             pending.setLocation(url);
             pending.setAllowCallbackResume(true);
+            pending.setCurrentQname(flowQname);
+            pending.setCurrentLine(line);
+            
             LOG.debug("Pausing flow");
             throw pending;
         } finally {
             Context.exit();
         }
+    }
+    
+    public static boolean isValidDataModel(Object val) {
+
+        //See utils.js#_isObject
+        if (val == null) return false;
+        
+        Class<?> cls = val.getClass();
+        
+        if (NativeObject.class == cls) return true;
+        
+        return !(String.class.isInstance(val) || PrimitiveUtils.isPrimitive(cls, true)
+            || cls.isArray() || Collection.class.isInstance(val));
+
     }
     
     public static boolean testEquality(Object a, Object b) {
@@ -105,6 +125,10 @@ public class ScriptUtils {
         }
         return false;
         
+    }
+
+    public static void track(String qname, int[] lines, Exception exception) {
+        CdiUtil.bean(TrackingService.class).track(qname, lines, exception);
     }
     
     //Issue a call to this method only if the request scope is active
@@ -173,7 +197,7 @@ public class ScriptUtils {
         
     }
     
-    private static String normalize(String sUri) throws AccessDeniedException, URISyntaxException {
+    public static String normalize(String sUri) throws AccessDeniedException, URISyntaxException {
 
         EngineConfig engineConf = CdiUtil.bean(EngineConfig.class);
         String templatesFolder = engineConf.getRootDir() + engineConf.getTemplatesPath() + "/";
