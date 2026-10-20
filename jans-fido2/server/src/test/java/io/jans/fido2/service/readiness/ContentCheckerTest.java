@@ -395,4 +395,17 @@ class ContentCheckerTest {
         assertEquals(CheckStatus.WARN, drift.status());
         assertFalse(drift.reason().contains("not-a-fingerprint"), drift.reason());
     }
+
+    @Test
+    void iosAppWithoutTeamOrBundleId_failsAndIsNotGenerated() {
+        IosApp noTeam = ios(null, "com.example.app");
+        IosApp noBundle = ios("ABCDE12345", " ");
+        RequestedParty party = party(List.of(), List.of(noTeam, noBundle, ios("ABCDE12345", "com.example.app")));
+        List<CheckResult> checks = aasa(party, "{\"webcredentials\":{\"apps\":[\"ABCDE12345.com.example.app\"]}}");
+        assertEquals(2, byId(checks, "content.ios.app").stream().filter(c -> c.status() == CheckStatus.FAIL).count());
+        assertTrue(any(checks, "content.ios.app", CheckStatus.FAIL, "without a teamId or bundleId"));
+        assertEquals(1, ExpectedAssociationFileBuilder.appleAppSiteAssociation(party)
+                .path("webcredentials").path("apps").size());
+        assertEquals(CheckStatus.PASS, byId(checks, "content.drift").get(0).status());
+    }
 }

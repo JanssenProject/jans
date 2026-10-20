@@ -62,7 +62,9 @@ public final class ExpectedAssociationFileBuilder {
         ObjectNode root = JSON.objectNode();
         ArrayNode apps = root.putObject("webcredentials").putArray("apps");
         for (IosApp app : iosApps(party)) {
-            apps.add(iosAppId(app));
+            if (isComplete(app)) {
+                apps.add(iosAppId(app));
+            }
         }
         return root;
     }
@@ -80,6 +82,12 @@ public final class ExpectedAssociationFileBuilder {
     /** The configured fingerprints of an Android app; null means none. */
     static List<String> fingerprints(AndroidApp app) {
         return app.getSha256CertFingerprints() == null ? List.of() : app.getSha256CertFingerprints();
+    }
+
+    /** True when both the team id and the bundle id are set; an incomplete app is never written to the file. */
+    static boolean isComplete(IosApp app) {
+        return app.getTeamId() != null && !app.getTeamId().isBlank()
+                && app.getBundleId() != null && !app.getBundleId().isBlank();
     }
 
     /** {@code TeamID.BundleID}. */

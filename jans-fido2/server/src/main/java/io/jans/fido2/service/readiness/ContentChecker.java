@@ -103,10 +103,7 @@ public class ContentChecker {
             if (deployed != null) {
                 Set<String> found = iosFacts(deployed);
                 for (IosApp app : ExpectedAssociationFileBuilder.iosApps(party)) {
-                    String id = ExpectedAssociationFileBuilder.iosAppId(app);
-                    checks.add(found.contains(id.toUpperCase(Locale.ROOT))
-                            ? pass(ID_IOS_APP, "app " + id + " listed in webcredentials.apps")
-                            : fail(ID_IOS_APP, "app " + id + " not listed in webcredentials.apps"));
+                    checks.add(iosAppCheck(app, found));
                 }
                 checks.add(drift(iosFacts(ExpectedAssociationFileBuilder.appleAppSiteAssociation(party)), found));
             }
@@ -115,6 +112,16 @@ public class ContentChecker {
                 "iOS reads this file through app-site-association.cdn-apple.com, which caches aggressively; "
                         + "a correct file may not take effect immediately"));
         return checks;
+    }
+
+    private static CheckResult iosAppCheck(IosApp app, Set<String> found) {
+        if (!ExpectedAssociationFileBuilder.isComplete(app)) {
+            return fail(ID_IOS_APP, "an iOS app is configured without a teamId or bundleId");
+        }
+        String id = ExpectedAssociationFileBuilder.iosAppId(app);
+        return found.contains(id.toUpperCase(Locale.ROOT))
+                ? pass(ID_IOS_APP, "app " + id + " listed in webcredentials.apps")
+                : fail(ID_IOS_APP, "app " + id + " not listed in webcredentials.apps");
     }
 
     private static List<CheckResult> fingerprintChecks(AndroidApp app, List<AndroidApp> allApps, Set<String> found) {
