@@ -26,13 +26,6 @@
 		</testResources>
 
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>false</skipTests>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -80,24 +73,12 @@
 		<!-- Test -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-lock-service</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-lock-service</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
 			<artifactId>jans-lock-trace-crypto-java</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-lock-trace-crypto-java</artifactId>
-			<type>test-jar</type>
+			<artifactId>jans-lock-trace-crypto-testkit</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -113,17 +94,6 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<!-- TraceMvpAcceptanceTest (service test-jar) uses Mockito -->
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

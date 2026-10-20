@@ -32,13 +32,6 @@
 		</testResources>
 
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>false</skipTests>
-				</configuration>
-			</plugin>
 
 			<!-- Swagger -->
 			<plugin>
@@ -145,8 +138,14 @@
 
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-lock-trace-crypto-java</artifactId>
-			<type>test-jar</type>
+			<artifactId>jans-lock-trace-crypto-testkit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Runs the shared TRACE suites against the NATIVE provider as well -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-lock-trace-crypto-native</artifactId>
 			<scope>test</scope>
 		</dependency>
 

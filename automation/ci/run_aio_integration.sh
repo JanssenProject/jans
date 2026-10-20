@@ -150,10 +150,9 @@ for mod in agama jans-cedarling/bindings/cedarling-java jans-lock/lock-server; d
     *cedarling*|*lock*) [ "$CED_READY" = 1 ] || { echo "[info] skip build $mod (cedarling native lib not ready)"; continue; } ;;
   esac
   pl=""
-  skip_tests="-Dmaven.test.skip=true"
-  case "$mod" in *lock-server) pl="$NO_FIPS"; skip_tests="-DskipTests" ;; esac
+  case "$mod" in *lock-server) pl="$NO_FIPS" ;; esac
   echo "::group::build $mod"
-  mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default $skip_tests $MVN_SKIPS -fae $CED_OPTS \
+  mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae $CED_OPTS \
     $pl -f "$mod/pom.xml" clean install || echo "[warn] build $mod failed; its tests will be skipped"
   echo "::endgroup::"
 done

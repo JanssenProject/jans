@@ -6,7 +6,7 @@
 #   JAVA   : trace-crypto-java    JavaTraceCryptoBenchmarkTest
 #   NATIVE : trace-crypto-native  NativeTraceCryptoBenchmarkTest
 #
-# Both tests extend AbstractTraceCryptoBenchmarkTest (java test-jar), so the
+# Both tests extend AbstractTraceCryptoBenchmarkTest (trace-crypto-testkit), so the
 # workload and the measurement are identical. The tests are opt-in and run only
 # with -Dtrace.bench=true, which this script sets.
 #
