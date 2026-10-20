@@ -655,6 +655,20 @@ AuthorizeOptions options = new AuthorizeOptions(
 AuthorizeResult result = adapter.authorizeUnsigned(principalJson, action, resource, context, options);
 ```
 
+The WASM and C bindings take the request as JSON, so `options` is the member shown above. In Go, set the `Options` field of the request struct:
+
+```go
+request := cedarling_go.RequestUnsigned{
+    Action:   action,
+    Resource: resource,
+    Options: &cedarling_go.AuthorizeOptions{Trace: &cedarling_go.TraceContext{
+        ExecutionID:        executionID,
+        ExecutionAuthority: executionAuthority,
+        WorkloadID:         workloadID,
+    }},
+}
+```
+
 ## Policy Introspection
 
 Cedarling also provides methods to discover which policies are potentially applicable to a given authorization request **without executing authorization**. This is useful for:
