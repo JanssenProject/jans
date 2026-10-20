@@ -85,8 +85,8 @@ public class ScriptUtils {
         
         if (NativeObject.class == cls) return true;
         
-        return !(String.class.isInstance(val) || PrimitiveUtils.isPrimitive(cls, true)
-            || cls.isArray() || Collection.class.isInstance(val));
+        return !(val instanceof String || PrimitiveUtils.isPrimitive(cls, true)
+            || cls.isArray() || val instanceof Collection);
 
     }
     

@@ -17,9 +17,6 @@ import io.jans.agama.engine.service.FlowService;
 public class RestartServlet extends BaseServlet {
 
     public static final String PATH = "/fl/restart";
-    
-    @Inject
-    private FlowService flowService;
 
     @Inject
     private NativeJansFlowBridge bridge;

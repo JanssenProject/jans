@@ -5,24 +5,11 @@ import io.jans.agama.model.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import org.slf4j.Logger;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 @ApplicationScoped
 public class TrackingService {
     
-    @Inject
-    private Logger logger;
-
-    @Inject
-    private EngineConfig engineConfig;
-    
     public void track(String flowQname, int[] lines, Exception exception) {
-        //TODO
-        //if (!engineConfig.getTrackingSettings().isEnabled())
-        //logger.debug("============== {}: {}, {}", flowQname, lines, exception== null? null : exception.getMessage());        
-        //if (flowQname == null) return;
+        //See https://github.com/JanssenProject/jans/issues/15436 and https://github.com/JanssenProject/jans/issues/15437
     }
     
     public void track(String flowQname, int line, Exception exception) {

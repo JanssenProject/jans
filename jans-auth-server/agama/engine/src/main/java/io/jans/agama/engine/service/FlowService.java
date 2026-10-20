@@ -14,7 +14,6 @@ import io.jans.agama.engine.misc.FlowUtils;
 import io.jans.agama.engine.model.FlowResult;
 import io.jans.agama.engine.model.FlowStatus;
 import io.jans.agama.engine.script.ScriptUtils;
-import io.jans.agama.engine.service.TrackingService;
 import io.jans.agama.model.FlowMetadata;
 import io.jans.agama.model.EngineConfig;
 import io.jans.agama.model.Flow;
@@ -27,7 +26,6 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -350,7 +348,7 @@ public class FlowService {
                 if (!templPath.contains("."))
                     throw new IOException(
                             "Expecting file extension for the template to render: " + templPath);
-//TODO: track qname + templPath count
+//TODO: track qname + templPath count, see https://github.com/JanssenProject/jans/issues/15437
                 status.setTemplatePath(templPath);
                 status.setTemplateDataModel(pre.getDataModel());
                 status.setExternalRedirectUrl(null);

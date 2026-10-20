@@ -116,10 +116,14 @@ public abstract class BaseServlet extends HttpServlet {
             }
         } catch (TemplateProcessingException | JsonProcessingException e) {
 
-            tracker.track(flowQname, lineOfCode, e);
-            try {
-                flowService.terminateFlow();
-            } catch (IOException ie) { }
+            if (flowQname != null) {
+                try {
+                    tracker.track(flowQname, lineOfCode, e);
+                    flowService.terminateFlow();
+                } catch (IOException ie) {
+                    // No need to do any processing here. 
+                }
+            }
             
             try {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

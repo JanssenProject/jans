@@ -213,7 +213,7 @@ public class AgamaPersistenceService {
             //update that follows below
 
             FlowStatus status = run.getStatus();
-//TODO: track run time and count of finished (true/false) flows here            
+//TODO: track run time and count of finished (true/false) flows here, see https://github.com/JanssenProject/jans/issues/15437          
             status.setStartedAt(FlowStatus.FINISHED);
             status.setResult(result);
 
@@ -240,7 +240,7 @@ public class AgamaPersistenceService {
     public void terminateFlow(String sessionId) throws IOException {
     
         try {
-//TODO: track count of crashed/timed out flows here            
+//TODO: track count of crashed/timed out flows here, see , see https://github.com/JanssenProject/jans/issues/15437
             logger.info("Removing flow run...");
             entryManager.remove(AGAMA_FLOWRUNS_BASE, FlowRun.class, frEqFilter(sessionId), 1);
         } catch (Exception e) {

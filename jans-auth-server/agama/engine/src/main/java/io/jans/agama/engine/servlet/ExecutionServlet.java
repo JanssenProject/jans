@@ -14,7 +14,6 @@ import io.jans.agama.engine.exception.FlowCrashException;
 import io.jans.agama.engine.exception.FlowTimeoutException;
 import io.jans.agama.engine.model.FlowResult;
 import io.jans.agama.engine.model.FlowStatus;
-import io.jans.agama.engine.service.FlowService;
 
 @WebServlet(urlPatterns = {
     "*" + ExecutionServlet.URL_SUFFIX,
