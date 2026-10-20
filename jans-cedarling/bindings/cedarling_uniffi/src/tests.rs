@@ -888,3 +888,99 @@ fn test_drain_metrics_local_mode_snapshot_and_reset() {
         snapshot_reset.operational_stats
     );
 }
+
+/// Bootstrap JSON for archive bytes with the signature check enforced.
+fn enforce_signature_config(bundle_uri: Option<&str>) -> String {
+    let mut config: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
+            .expect("bootstrap.json should be readable"),
+    )
+    .expect("bootstrap.json should be valid JSON");
+    config["CEDARLING_POLICY_STORE_SIGSTORE_MODE"] = json!("enforce");
+    config["CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY"] = json!("signer@example.com");
+    config["CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER"] =
+        json!("https://accounts.google.com");
+    if let Some(uri) = bundle_uri {
+        config["CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI"] = json!(uri);
+    }
+    config.to_string()
+}
+
+fn my_store_cjar() -> Vec<u8> {
+    std::fs::read("../../bindings/cedarling_uniffi/androidApp/app/src/main/assets/MyStore.cjar")
+        .expect("MyStore.cjar should be readable")
+}
+
+#[test]
+fn test_load_from_json_with_archive_bytes_enforce_requires_bundle_uri() {
+    let result = Cedarling::load_from_json_with_archive_bytes(
+        enforce_signature_config(None),
+        &my_store_cjar(),
+    );
+    let Err(CedarlingError::InitializationFailed { error_msg }) = result else {
+        panic!("enforce without a bundle URI must fail");
+    };
+    assert!(
+        error_msg.contains("CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI"),
+        "error must name the bundle URI property, got: {error_msg}"
+    );
+}
+
+#[test]
+fn test_load_from_json_with_archive_bytes_enforce_rejects_invalid_bundle_file() {
+    let bundle = std::env::temp_dir().join(format!(
+        "cedarling-uniffi-{}-bundle.sigstore.json",
+        std::process::id()
+    ));
+    std::fs::write(&bundle, b"{}").expect("bundle file should be written");
+
+    let result = Cedarling::load_from_json_with_archive_bytes(
+        enforce_signature_config(Some(&bundle.to_string_lossy())),
+        &my_store_cjar(),
+    );
+    let _ = std::fs::remove_file(&bundle);
+    let Err(CedarlingError::InitializationFailed { error_msg }) = result else {
+        panic!("an invalid bundle must not load");
+    };
+    assert!(
+        error_msg.contains("policy store signature does not verify"),
+        "a bundle that does not verify must be rejected, got: {error_msg}"
+    );
+}
+
+/// The uniffi `DropReason` must carry exactly the fields of the core JSON
+/// `reason` object, so every binding exposes the same shape.
+#[test]
+fn test_dropped_token_reason_matches_core_json() {
+    let cases = [
+        cedarling::DropReason::DuplicateToken,
+        cedarling::DropReason::InvalidInput(cedarling::TokenInputError::EmptyPayload),
+    ];
+    for reason in cases {
+        // Core omits `detail` for unit reasons; uniffi exposes it as `None`.
+        let mut expected = serde_json::to_value(&reason).expect("core reason serializes");
+        expected["detail"] = expected
+            .get("detail")
+            .cloned()
+            .unwrap_or(serde_json::Value::Null);
+        let dropped = crate::result::DroppedToken::from(cedarling::DroppedToken::new(
+            "Jans::Access_Token",
+            3,
+            reason,
+        ));
+        assert_eq!(
+            dropped.mapping, "Jans::Access_Token",
+            "mapping is passed through"
+        );
+        assert_eq!(dropped.index, 3, "index is passed through");
+        assert_eq!(
+            serde_json::json!({
+                "kind": dropped.reason.kind(),
+                "detail": dropped.reason.detail(),
+                "message": dropped.reason.message(),
+            }),
+            expected,
+            "uniffi reason must match the core JSON reason"
+        );
+    }
+}

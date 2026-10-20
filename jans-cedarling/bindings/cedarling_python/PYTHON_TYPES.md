@@ -483,6 +483,40 @@ errors : list of PolicyEvaluationError
     A list of errors that occurred during the authorization process. These are unordered as policies may be evaluated in any order.
 ---
 
+DropReason
+==========
+
+Why a token was dropped from a multi-issuer authorization. Same shape as
+the ``reason`` object in the core JSON.
+
+Attributes
+----------
+.. attribute:: kind
+    str: stable snake-case slug (e.g. ``"jwt_validation_failed"``).
+.. attribute:: detail
+    str | None: stable detail slug for ``invalid_input``
+    (``"empty_mapping"`` / ``"empty_payload"``); ``None`` otherwise.
+.. attribute:: message
+    str: claim-free human-readable message; non-empty for every reason.
+---
+
+DroppedToken
+============
+
+A token the caller supplied that multi-issuer authorization did not use.
+Identifies the entry by its input `mapping` and zero-based `index`, with a
+claim-free `reason`.
+
+Attributes
+----------
+.. attribute:: mapping
+    str: the Cedar entity-type mapping of the dropped input.
+.. attribute:: index
+    int: zero-based position in the request's ``tokens`` list.
+.. attribute:: reason
+    DropReason: why the token was dropped.
+---
+
 EntityData
 ============
 
@@ -541,6 +575,10 @@ Methods
 
 .. method:: request_id(self) -> str
     Returns the unique request ID for this authorization.
+
+.. method:: dropped_tokens(self) -> list[DroppedToken]
+    Returns the tokens the caller supplied that were not used in this
+    decision (empty when every token contributed).
 
 ---
 

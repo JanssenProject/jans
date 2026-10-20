@@ -108,7 +108,9 @@ fn extract_archive_to_temp_dir(archive_bytes: &[u8]) -> TempDir {
 
     for i in 0..zip_archive.len() {
         let mut file = zip_archive.by_index(i).expect("Failed to get zip entry");
-        let file_path = temp_dir.path().join(file.name());
+        let file_path = temp_dir
+            .path()
+            .join(file.name().expect("Failed to read zip entry name").as_ref());
 
         if file.is_dir() {
             fs::create_dir_all(&file_path).expect("Failed to create directory");
