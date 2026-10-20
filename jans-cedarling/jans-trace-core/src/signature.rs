@@ -163,7 +163,7 @@ impl Ed25519Signer {
         })
     }
 
-    /// Loads the key format `openssl genpkey -algorithm ed25519` writes (decision R20).
+    /// Loads the key format `openssl genpkey -algorithm ed25519` writes.
     /// Takes the PEM text, not a path: reading the file is the host's job.
     pub fn from_pkcs8_pem(kid: impl Into<String>, pem: &str) -> Result<Self, PrivateKeyError> {
         let key = SigningKey::from_pkcs8_pem(pem).map_err(|e| PrivateKeyError {
