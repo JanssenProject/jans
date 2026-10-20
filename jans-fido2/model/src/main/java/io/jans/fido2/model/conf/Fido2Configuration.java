@@ -78,6 +78,17 @@ public class Fido2Configuration {
 	@DocProperty(description = "Interval in seconds between batched deliveries of buffered Lock Server audit events. Read once at server startup; changing it requires a restart to take effect", defaultValue = "20")
 	private int lockAuditFlushInterval = 20;
 
+	@DocProperty(description = "Boolean value indicating whether the native app readiness endpoint is available. When false the endpoint does no work", defaultValue = "false")
+	private boolean nativeReadinessEnabled = false;
+	@DocProperty(description = "Boolean value indicating whether the native app readiness checks may make outbound requests to a relying party's /.well-known files. Outbound requests need both nativeReadinessEnabled and this property", defaultValue = "false")
+	private boolean nativeReadinessAllowExternalFetch = false;
+	@DocProperty(description = "Maximum number of bytes read from one association file by the native app readiness checks. The server also enforces a fixed upper bound", defaultValue = "131072")
+	private int nativeReadinessMaxResponseBytes = 131072;
+	@DocProperty(description = "Overall deadline in milliseconds for fetching one association file in the native app readiness checks. The server also enforces a fixed upper bound", defaultValue = "3000")
+	private int nativeReadinessTimeoutMs = 3000;
+	@DocProperty(description = "Time in seconds a native app readiness result is served from cache before the association files are fetched again", defaultValue = "3600")
+	private int nativeReadinessCacheTtlSeconds = 3600;
+
 	public boolean isRecordAbandonedAssertions() {
 		return recordAbandonedAssertions;
 	}
@@ -280,6 +291,46 @@ public class Fido2Configuration {
 
 	public void setLockAuditFlushInterval(int lockAuditFlushInterval) {
 		this.lockAuditFlushInterval = lockAuditFlushInterval;
+	}
+
+	public boolean isNativeReadinessEnabled() {
+		return nativeReadinessEnabled;
+	}
+
+	public void setNativeReadinessEnabled(boolean nativeReadinessEnabled) {
+		this.nativeReadinessEnabled = nativeReadinessEnabled;
+	}
+
+	public boolean isNativeReadinessAllowExternalFetch() {
+		return nativeReadinessAllowExternalFetch;
+	}
+
+	public void setNativeReadinessAllowExternalFetch(boolean nativeReadinessAllowExternalFetch) {
+		this.nativeReadinessAllowExternalFetch = nativeReadinessAllowExternalFetch;
+	}
+
+	public int getNativeReadinessMaxResponseBytes() {
+		return nativeReadinessMaxResponseBytes;
+	}
+
+	public void setNativeReadinessMaxResponseBytes(int nativeReadinessMaxResponseBytes) {
+		this.nativeReadinessMaxResponseBytes = nativeReadinessMaxResponseBytes;
+	}
+
+	public int getNativeReadinessTimeoutMs() {
+		return nativeReadinessTimeoutMs;
+	}
+
+	public void setNativeReadinessTimeoutMs(int nativeReadinessTimeoutMs) {
+		this.nativeReadinessTimeoutMs = nativeReadinessTimeoutMs;
+	}
+
+	public int getNativeReadinessCacheTtlSeconds() {
+		return nativeReadinessCacheTtlSeconds;
+	}
+
+	public void setNativeReadinessCacheTtlSeconds(int nativeReadinessCacheTtlSeconds) {
+		this.nativeReadinessCacheTtlSeconds = nativeReadinessCacheTtlSeconds;
 	}
 
 	public Fido2Configuration() {
