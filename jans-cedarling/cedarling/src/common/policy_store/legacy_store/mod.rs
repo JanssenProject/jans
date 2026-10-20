@@ -80,6 +80,7 @@ pub(crate) struct LegacyCustomIssuerMetadata {
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct LegacyCustomTokenMetadata {
+    /// Still accepted, but ignored: every custom token is optional.
     #[serde(default)]
     pub(crate) required: bool,
     #[serde(default)]
@@ -94,7 +95,6 @@ impl From<LegacyCustomIssuerMetadata> for super::CustomIssuerMetadata {
                 .into_iter()
                 .map(|(mapping, token)| {
                     let token = super::CustomTokenMetadata {
-                        required: token.required,
                         required_claims: token.required_claims,
                     };
                     (mapping, token)

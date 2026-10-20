@@ -27,7 +27,7 @@ use async_trait::async_trait;
 use serde_json::json;
 
 /// Policy store with a single custom issuer `CustomKeys` (mapping `Custom::ApiKey`,
-/// `required: true`, `required_claims: [sub]`) and a policy that allows reads when
+/// `required_claims: [sub]`) and a policy that allows reads when
 /// the API key carries the `admin` scope. The schema types
 /// `context.tokens.customkeys_apikey` as a `Custom::ApiKey` entity so its claim
 /// tags are readable.
@@ -43,7 +43,6 @@ policy_stores:
       CustomKeys:
         tokens_mappings:
           "Custom::ApiKey":
-            required: true
             required_claims:
               - sub
     policies:
@@ -156,10 +155,10 @@ async fn custom_token_happy_path_allows() {
     );
 }
 
-/// A registered processor that rejects the payload + a `required` issuer → the
-/// whole request fails (not a silent DENY).
+/// A registered processor that rejects the payload drops the token; as the only
+/// token, the request has no valid tokens left.
 #[tokio::test]
-async fn custom_token_required_rejection_fails_request() {
+async fn custom_token_rejection_drops_token() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         |_| {},
@@ -170,21 +169,20 @@ async fn custom_token_required_rejection_fails_request() {
     let err = cedarling
         .authorize_multi_issuer(read_doc_request("not-a-real-key"))
         .await
-        .expect_err("required issuer + processor rejection should fail the request");
+        .expect_err("the only token was rejected by the processor");
     assert!(
         matches!(
             err,
-            AuthorizeError::MultiIssuerValidation(MultiIssuerValidationError::CustomToken(
-                CustomTokenError::Processing(_)
-            ))
+            AuthorizeError::MultiIssuerValidation(
+                MultiIssuerValidationError::TokenValidationFailed
+            )
         ),
-        "expected a processing failure, got: {err:?}"
+        "the custom token should be dropped, leaving no valid tokens, got: {err:?}"
     );
 }
 
 /// `set_custom_token_processor(None)` clears a previously registered processor;
-/// a subsequent token for a `required` custom mapping falls back to
-/// `NoProcessorRegistered` (fail-closed).
+/// a subsequent custom token is dropped as `NoProcessorRegistered`.
 #[tokio::test]
 async fn set_custom_token_processor_none_clears() {
     let cedarling = get_cedarling_with_callback(
@@ -206,15 +204,15 @@ async fn set_custom_token_processor_none_clears() {
     let err = cedarling
         .authorize_multi_issuer(read_doc_request("secret-admin-key"))
         .await
-        .expect_err("after clearing, a required custom mapping should fail closed");
+        .expect_err("after clearing, the only custom token should be dropped");
     assert!(
         matches!(
             err,
-            AuthorizeError::MultiIssuerValidation(MultiIssuerValidationError::CustomToken(
-                CustomTokenError::NoProcessorRegistered(_)
-            ))
+            AuthorizeError::MultiIssuerValidation(
+                MultiIssuerValidationError::TokenValidationFailed
+            )
         ),
-        "expected NoProcessorRegistered, got: {err:?}"
+        "the custom token should be dropped, leaving no valid tokens, got: {err:?}"
     );
 }
 
@@ -317,9 +315,9 @@ fn read_item(resource_id: &str) -> BatchItem {
 }
 
 /// `required_claims: [sub]` configured on the issuer but the processor omits `sub`
-/// → `MissingRequiredClaim` (fail-closed, issuer is `required`).
+/// → the token is dropped.
 #[tokio::test]
-async fn custom_token_missing_required_claim_fails() {
+async fn custom_token_missing_required_claim_drops_token() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         |_| {},
@@ -330,22 +328,22 @@ async fn custom_token_missing_required_claim_fails() {
     let err = cedarling
         .authorize_multi_issuer(read_doc_request("secret-admin-key"))
         .await
-        .expect_err("missing required claim should fail the request");
+        .expect_err("the only token lacks a required claim");
     assert!(
         matches!(
             err,
-            AuthorizeError::MultiIssuerValidation(MultiIssuerValidationError::CustomToken(
-                CustomTokenError::MissingRequiredClaim(ref c)
-            )) if c == "sub"
+            AuthorizeError::MultiIssuerValidation(
+                MultiIssuerValidationError::TokenValidationFailed
+            )
         ),
-        "expected MissingRequiredClaim(sub), got: {err:?}"
+        "the custom token should be dropped, leaving no valid tokens, got: {err:?}"
     );
 }
 
 /// A positive `custom_token_processor_timeout_millis` races `process` against the
-/// deadline; a slow processor on a `required` issuer surfaces `Timeout`.
+/// deadline; a slow processor's token is dropped.
 #[tokio::test]
-async fn custom_token_native_timeout_fails() {
+async fn custom_token_native_timeout_drops_token() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         |config| {
@@ -360,15 +358,15 @@ async fn custom_token_native_timeout_fails() {
     let err = cedarling
         .authorize_multi_issuer(read_doc_request("secret-admin-key"))
         .await
-        .expect_err("slow processor past the deadline should fail");
+        .expect_err("the only token timed out");
     assert!(
         matches!(
             err,
-            AuthorizeError::MultiIssuerValidation(MultiIssuerValidationError::CustomToken(
-                CustomTokenError::Timeout(_)
-            ))
+            AuthorizeError::MultiIssuerValidation(
+                MultiIssuerValidationError::TokenValidationFailed
+            )
         ),
-        "expected Timeout, got: {err:?}"
+        "the custom token should be dropped, leaving no valid tokens, got: {err:?}"
     );
 }
 

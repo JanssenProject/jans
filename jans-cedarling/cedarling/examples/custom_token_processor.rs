@@ -40,7 +40,6 @@ policy_stores:
       CustomKeys:
         tokens_mappings:
           "Custom::ApiKey":
-            required: true
             required_claims:
               - sub
     policies:
@@ -184,8 +183,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     println!("valid admin key   -> decision: {}", allow.decision);
 
-    // An unknown key: the issuer is `required`, so processing failure fails the
-    // whole request rather than silently dropping the token.
+    // An unknown key: the processor rejects it, so the token is dropped. It is the
+    // only token, so the request fails with no valid tokens left.
     let rejected = cedarling
         .authorize_multi_issuer(AuthorizeMultiIssuerRequest::new_with_fields(
             vec![TokenInput::new(
@@ -199,7 +198,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await;
     match rejected {
         Ok(res) => println!("unknown key       -> decision: {}", res.decision),
-        Err(e) => println!("unknown key       -> rejected (required issuer): {e}"),
+        Err(e) => println!("unknown key       -> rejected (token dropped): {e}"),
     }
 
     Ok(())

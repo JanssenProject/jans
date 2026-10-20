@@ -40,9 +40,8 @@ pub trait CustomTokenProcessor: Send + Sync {
     ///   (e.g. `"Acme::CustomToken"`); use it to dispatch between token formats.
     /// - `payload`: the raw token string, opaque to Cedarling.
     ///
-    /// Returns [`ProcessedTokenClaims`] on success. On error the token is dropped
-    /// (skip-and-continue) unless its custom issuer is marked `required`, in which
-    /// case the whole authorization request fails.
+    /// Returns [`ProcessedTokenClaims`] on success. On error only this token is
+    /// dropped and the request continues with the others.
     ///
     /// The framework may race this future against a configured timeout deadline.
     /// Cancellation still requires the future to yield, so a `process` that blocks
@@ -283,20 +282,6 @@ impl CustomIssuerIndex {
         self.by_mapping.contains_key(mapping)
     }
 
-    /// Whether any custom issuer declaring this `mapping` is `required`. Used to
-    /// decide fail-closed vs skip-and-continue on a processing error.
-    ///
-    /// The issuer is not yet known at call time (processing has not run, or has just
-    /// failed), so this resolves whatever sole issuer declares the mapping:
-    /// `build`'s `DuplicateMapping` check guarantees there is at most one.
-    pub(crate) fn mapping_required(&self, mapping: &str) -> bool {
-        self.by_mapping
-            .get(mapping)
-            .and_then(|id| self.by_id.get(id))
-            .and_then(|issuer| issuer.tokens_mappings.get(mapping))
-            .is_some_and(|token| token.required)
-    }
-
     /// Resolve the custom issuer and its token metadata for a processed token.
     /// `mapping` identifies the sole issuer declaring it: `build` rejects a
     /// duplicate declarer via `DuplicateMapping`, so the by-mapping index maps a
@@ -330,27 +315,18 @@ impl CustomIssuerIndex {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::HashSet;
 
     /// An issuer declaring a single token type.
-    fn meta(entity_type_name: &str, required: bool) -> CustomIssuerMetadata {
-        multi_meta(&[(entity_type_name, required)])
+    fn meta(entity_type_name: &str) -> CustomIssuerMetadata {
+        multi_meta(&[entity_type_name])
     }
 
     /// An issuer declaring several token types.
-    fn multi_meta(tokens: &[(&str, bool)]) -> CustomIssuerMetadata {
+    fn multi_meta(tokens: &[&str]) -> CustomIssuerMetadata {
         CustomIssuerMetadata {
             tokens_mappings: tokens
                 .iter()
-                .map(|(name, required)| {
-                    (
-                        (*name).to_string(),
-                        CustomTokenMetadata {
-                            required: *required,
-                            required_claims: HashSet::new(),
-                        },
-                    )
-                })
+                .map(|name| ((*name).to_string(), CustomTokenMetadata::default()))
                 .collect(),
         }
     }
@@ -358,7 +334,7 @@ mod tests {
     #[test]
     fn build_sanitizes_issuer_ids_and_routes_by_mapping() {
         let mut issuers = HashMap::new();
-        issuers.insert("Ac-me Corp".to_string(), meta("Acme::CustomToken", false));
+        issuers.insert("Ac-me Corp".to_string(), meta("Acme::CustomToken"));
         let index = CustomIssuerIndex::build(&issuers).expect("index should build");
 
         assert!(
@@ -386,7 +362,7 @@ mod tests {
         let mut issuers = HashMap::new();
         issuers.insert(
             "Acme".to_string(),
-            multi_meta(&[("Acme::DolphinToken", true), ("Acme::WhaleToken", false)]),
+            multi_meta(&["Acme::DolphinToken", "Acme::WhaleToken"]),
         );
         let index = CustomIssuerIndex::build(&issuers).expect("index should build");
 
@@ -406,8 +382,8 @@ mod tests {
     #[test]
     fn build_rejects_sanitized_duplicate_ids() {
         let mut issuers = HashMap::new();
-        issuers.insert("Ac-Me".to_string(), meta("First::T", false));
-        issuers.insert("ac me".to_string(), meta("Second::T", true));
+        issuers.insert("Ac-Me".to_string(), meta("First::T"));
+        issuers.insert("ac me".to_string(), meta("Second::T"));
 
         let err = CustomIssuerIndex::build(&issuers)
             .expect_err("names colliding after sanitization should be rejected at build time");
@@ -419,33 +395,10 @@ mod tests {
     }
 
     #[test]
-    fn mapping_required_is_per_token_not_per_issuer() {
-        let mut issuers = HashMap::new();
-        issuers.insert(
-            "acme".to_string(),
-            multi_meta(&[("Acme::DolphinToken", true), ("Acme::WhaleToken", false)]),
-        );
-        let index = CustomIssuerIndex::build(&issuers).expect("index should build");
-
-        assert!(
-            index.mapping_required("Acme::DolphinToken"),
-            "a token declared required should be fail-closed"
-        );
-        assert!(
-            !index.mapping_required("Acme::WhaleToken"),
-            "a sibling token of the same issuer should keep its own required=false"
-        );
-        assert!(
-            !index.mapping_required("other"),
-            "an unknown mapping should not be fail-closed"
-        );
-    }
-
-    #[test]
     fn build_rejects_duplicate_mapping() {
         let mut issuers = HashMap::new();
-        issuers.insert("a".to_string(), meta("M::T", false));
-        issuers.insert("b".to_string(), meta("M::T", true));
+        issuers.insert("a".to_string(), meta("M::T"));
+        issuers.insert("b".to_string(), meta("M::T"));
         let err = CustomIssuerIndex::build(&issuers)
             .expect_err("two issuers declaring the same Cedar type must be rejected");
         assert!(
@@ -457,10 +410,7 @@ mod tests {
     #[test]
     fn build_rejects_same_issuer_entity_key_collision() {
         let mut issuers = HashMap::new();
-        issuers.insert(
-            "acme".to_string(),
-            multi_meta(&[("X::Foo", false), ("X::foo", true)]),
-        );
+        issuers.insert("acme".to_string(), multi_meta(&["X::Foo", "X::foo"]));
         let err = CustomIssuerIndex::build(&issuers)
             .expect_err("two token types that simplify to the same entity key must be rejected");
         assert!(
@@ -472,8 +422,8 @@ mod tests {
     #[test]
     fn build_rejects_cross_issuer_entity_key_collision() {
         let mut issuers = HashMap::new();
-        issuers.insert("Acme-B".to_string(), meta("Y::c", false));
-        issuers.insert("Acme".to_string(), meta("X::B_c", false));
+        issuers.insert("Acme-B".to_string(), meta("Y::c"));
+        issuers.insert("Acme".to_string(), meta("X::B_c"));
         let err = CustomIssuerIndex::build(&issuers).expect_err(
             "composite keys colliding across issuers via the '_' join must be rejected",
         );
@@ -486,7 +436,7 @@ mod tests {
     #[test]
     fn build_rejects_invalid_issuer_id() {
         let mut issuers = HashMap::new();
-        issuers.insert("acme+corp".to_string(), meta("M::T", false));
+        issuers.insert("acme+corp".to_string(), meta("M::T"));
         let err = CustomIssuerIndex::build(&issuers)
             .expect_err("a non-`[a-z_][a-z0-9_]*` issuer id must be rejected");
         assert!(
@@ -498,7 +448,7 @@ mod tests {
     #[test]
     fn build_rejects_empty_issuer_id() {
         let mut issuers = HashMap::new();
-        issuers.insert(String::new(), meta("M::T", false));
+        issuers.insert(String::new(), meta("M::T"));
         let err = CustomIssuerIndex::build(&issuers)
             .expect_err("an issuer name that sanitizes to empty must be rejected");
         assert!(
@@ -546,10 +496,13 @@ mod tests {
     #[test]
     fn resolve_uses_sole_declarer_when_unambiguous() {
         let mut issuers = HashMap::new();
-        issuers.insert(
-            "Acme".to_string(),
-            multi_meta(&[("Acme::DolphinToken", false), ("Acme::WhaleToken", true)]),
-        );
+        let mut acme = multi_meta(&["Acme::DolphinToken", "Acme::WhaleToken"]);
+        acme.tokens_mappings
+            .get_mut("Acme::WhaleToken")
+            .expect("declared above")
+            .required_claims
+            .insert("sub".to_string());
+        issuers.insert("Acme".to_string(), acme);
         let index = CustomIssuerIndex::build(&issuers).expect("index should build");
 
         let (issuer, token) = index
@@ -560,7 +513,7 @@ mod tests {
             "the sole declaring issuer should be resolved with its id sanitized"
         );
         assert!(
-            token.required,
+            token.required_claims.contains("sub"),
             "resolve should return the metadata of the requested token, not of a sibling"
         );
 

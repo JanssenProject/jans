@@ -78,8 +78,7 @@ pub enum DropReason {
     DuplicateMapping,
 
     /// The mapping routes to a custom issuer but no
-    /// [`CustomTokenProcessor`](crate::CustomTokenProcessor) is registered, and
-    /// the mapping is not marked required.
+    /// [`CustomTokenProcessor`](crate::CustomTokenProcessor) is registered.
     #[error("no custom token processor registered for this mapping")]
     NoProcessorRegistered,
 

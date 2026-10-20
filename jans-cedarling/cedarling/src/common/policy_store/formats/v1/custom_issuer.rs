@@ -29,6 +29,7 @@ pub(crate) struct CustomIssuerDoc {
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct CustomTokenDoc {
+    /// Still accepted, but ignored: every custom token is optional.
     #[serde(default)]
     pub(crate) required: bool,
     #[serde(default)]
@@ -43,7 +44,6 @@ impl From<CustomIssuerDoc> for CustomIssuerMetadata {
                 .into_iter()
                 .map(|(mapping, token)| {
                     let token = CustomTokenMetadata {
-                        required: token.required,
                         required_claims: token.required_claims,
                     };
                     (mapping, token)

@@ -29,9 +29,6 @@ pub(crate) struct CustomIssuerMetadata {
 /// Per-token configuration for a custom issuer.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub(crate) struct CustomTokenMetadata {
-    /// When true, a processing failure (or timeout) for this token fails the whole
-    /// authorization request instead of being skipped.
-    pub(crate) required: bool,
     /// Claims required to be present in the processed output.
     pub(crate) required_claims: HashSet<String>,
 }

@@ -918,7 +918,6 @@ fn test_load_custom_issuers_end_to_end() {
         .tokens_mappings
         .get("Acme::CustomToken")
         .expect("acme should declare the Acme::CustomToken type");
-    assert!(token.required);
     assert!(token.required_claims.contains("sub"));
 }
 
@@ -993,7 +992,6 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
         .tokens_mappings
         .get("Acme::CustomToken")
         .expect("acme should declare the Acme::CustomToken type");
-    assert!(token.required);
     assert!(token.required_claims.contains("sub"));
 
     let store2 = read_policy_store_archive_bytes(archive_bytes, false, ArchiveLimits::default())

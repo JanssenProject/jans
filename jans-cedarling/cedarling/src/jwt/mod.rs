@@ -510,7 +510,7 @@ impl JwtService {
             };
             let result = if custom_issuers.mapping_is_custom(&token.mapping) {
                 self.handle_custom_token(custom_processor, custom_issuers, custom_timeout, &mut ctx)
-                    .await?
+                    .await
             } else {
                 self.validate_jwt_token(&mut ctx)?
             };
@@ -568,24 +568,19 @@ impl JwtService {
 
     /// Dispatch a single token input whose mapping routes to a custom issuer.
     ///
-    /// Returns `TokenOutcome::Dropped` when the token is dropped (no processor,
-    /// duplicate, or non-required failure) and `Err` only when the failure is
-    /// fail-closed.
+    /// Every failure (no processor, duplicate, processing error or timeout) drops
+    /// only this token; a policy that needs it must check for it.
     async fn handle_custom_token(
         &self,
         custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
         custom_issuers: &CustomIssuerIndex,
         custom_timeout: Option<Duration>,
         ctx: &mut TokenCallCtx<'_>,
-    ) -> Result<TokenOutcome, MultiIssuerValidationError> {
+    ) -> TokenOutcome {
         let Some(processor) = custom_processor else {
             let err = MultiIssuerValidationError::CustomToken(
                 CustomTokenError::NoProcessorRegistered(ctx.token.mapping.clone()),
             );
-            // Record only on the skip-and-continue path
-            if custom_issuers.mapping_required(&ctx.token.mapping) {
-                return Err(err);
-            }
             self.metrics.record_error(&err);
             if let Some(logger) = &self.logger {
                 logger.log_any(JwtLogEntry::new(
@@ -593,7 +588,7 @@ impl JwtService {
                     Some(LogLevel::WARN),
                 ));
             }
-            return Ok(TokenOutcome::Dropped(DropReason::NoProcessorRegistered));
+            return TokenOutcome::Dropped(DropReason::NoProcessorRegistered);
         };
 
         if let Ok((issuer, _)) = custom_issuers.resolve(&ctx.token.mapping) {
@@ -611,7 +606,7 @@ impl JwtService {
                         Some(LogLevel::WARN),
                     ));
                 }
-                return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
+                return TokenOutcome::Dropped(DropReason::DuplicateToken);
             }
         }
 
@@ -634,7 +629,7 @@ impl JwtService {
                     issuer,
                     mapping: SmolStr::from(ctx.token.mapping.as_str()),
                 }) {
-                    Ok(TokenOutcome::Validated(cedar_token))
+                    TokenOutcome::Validated(cedar_token)
                 } else {
                     if let Some(logger) = &self.logger {
                         logger.log_any(JwtLogEntry::new(
@@ -645,17 +640,11 @@ impl JwtService {
                             Some(LogLevel::WARN),
                         ));
                     }
-                    Ok(TokenOutcome::Dropped(DropReason::DuplicateToken))
+                    TokenOutcome::Dropped(DropReason::DuplicateToken)
                 }
             },
             Err(err) => {
-                // Fail-closed for a `required` custom issuer; otherwise skip
-                // and continue, logging timeout vs. processor error distinctly.
-                // Record only on the skip path the fail-closed `return Err` is
-                // recorded once by `multi_issuer_setup`'s `inspect_err`.
-                if custom_issuers.mapping_required(&ctx.token.mapping) {
-                    return Err(err);
-                }
+                // Skip and continue, logging timeout vs. processor error distinctly.
                 self.metrics.record_error(&err);
                 let timed_out = matches!(
                     err,
@@ -680,7 +669,7 @@ impl JwtService {
                 } else {
                     DropReason::CustomProcessingFailed
                 };
-                Ok(TokenOutcome::Dropped(reason))
+                TokenOutcome::Dropped(reason)
             },
         }
     }
@@ -981,7 +970,9 @@ mod test {
     use super::JwtService;
     use super::TrustedIssuerLoadingInfo;
     use super::test_utils::*;
-    use super::{CustomIssuerIndex, CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
+    use super::{
+        CustomIssuerIndex, CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims, Token,
+    };
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
@@ -990,6 +981,7 @@ mod test {
     use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata};
     use crate::http::HttpClient;
     use crate::http::HttpClientConfig;
+    use crate::{DropReason, DroppedToken};
     use async_trait::async_trait;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
@@ -1084,7 +1076,8 @@ mod test {
         }
     }
 
-    /// Processor that fails for any mapping containing "Fail", succeeds otherwise.
+    /// Processor that fails for any mapping containing "Fail", hangs for one
+    /// containing "Slow", and succeeds otherwise.
     struct DispatchProcessor;
 
     #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
@@ -1097,6 +1090,9 @@ mod test {
         ) -> Result<ProcessedTokenClaims, CustomTokenError> {
             if mapping.contains("Fail") {
                 Err(CustomTokenError::Processing("boom".to_string()))
+            } else if mapping.contains("Slow") {
+                tokio::time::sleep(Duration::from_secs(10)).await;
+                Ok(ProcessedTokenClaims::new(HashMap::new(), "slow"))
             } else {
                 let mut claims = HashMap::new();
                 claims.insert("sub".to_string(), json!("ok"));
@@ -1139,23 +1135,31 @@ mod test {
         assert_eq!(super::parse_numeric_date(&json!(null)), None);
     }
 
-    fn custom_index(entries: &[(&str, &str, bool)]) -> CustomIssuerIndex {
+    /// Builds an index from `(issuer name, mapping)` pairs.
+    fn custom_index(entries: &[(&str, &str)]) -> CustomIssuerIndex {
         let mut m: HashMap<String, CustomIssuerMetadata> = HashMap::new();
-        for (name, mapping, required) in entries {
+        for (name, mapping) in entries {
             m.entry((*name).to_string())
                 .or_insert_with(|| CustomIssuerMetadata {
                     tokens_mappings: HashMap::new(),
                 })
                 .tokens_mappings
-                .insert(
-                    (*mapping).to_string(),
-                    CustomTokenMetadata {
-                        required: *required,
-                        required_claims: HashSet::new(),
-                    },
-                );
+                .insert((*mapping).to_string(), CustomTokenMetadata::default());
         }
         CustomIssuerIndex::build(&m).expect("test custom issuer index should build")
+    }
+
+    /// Processes one `Acme::CustomToken` directly, to see the error a dropped
+    /// token was dropped for.
+    async fn process_one(
+        processor: Arc<dyn CustomTokenProcessor>,
+        index: &CustomIssuerIndex,
+        timeout: Option<Duration>,
+    ) -> Result<Arc<Token>, MultiIssuerValidationError> {
+        let svc = custom_only_service().await;
+        let input = TokenInput::new("Acme::CustomToken".to_string(), "payload-1".to_string());
+        svc.process_custom_token(&processor, index, &input, timeout, chrono::Utc::now())
+            .await
     }
 
     async fn custom_only_service() -> JwtService {
@@ -1178,7 +1182,7 @@ mod test {
             calls: calls.clone(),
             behavior: StubBehavior::Ok { cacheable: true },
         });
-        let index = custom_index(&[("Acme", "Acme::CustomToken", false)]);
+        let index = custom_index(&[("Acme", "Acme::CustomToken")]);
         let tokens = vec![TokenInput::new(
             "Acme::CustomToken".to_string(),
             "payload-1".to_string(),
@@ -1212,7 +1216,7 @@ mod test {
             calls: calls.clone(),
             behavior: StubBehavior::Ok { cacheable: false },
         });
-        let index = custom_index(&[("Acme", "Acme::CustomToken", false)]);
+        let index = custom_index(&[("Acme", "Acme::CustomToken")]);
         let tokens = vec![TokenInput::new(
             "Acme::CustomToken".to_string(),
             "payload-1".to_string(),
@@ -1232,13 +1236,13 @@ mod test {
     }
 
     #[test]
-    async fn custom_token_required_failure_hard_errors() {
+    async fn custom_token_failure_drops_the_only_token() {
         let svc = custom_only_service().await;
         let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
             calls: Arc::new(AtomicUsize::new(0)),
             behavior: StubBehavior::Fail,
         });
-        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let index = custom_index(&[("Acme", "Acme::CustomToken")]);
         let tokens = vec![TokenInput::new(
             "Acme::CustomToken".to_string(),
             "payload-1".to_string(),
@@ -1247,21 +1251,18 @@ mod test {
         let err = svc
             .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
             .await
-            .expect_err("required custom token failure should hard-error");
+            .expect_err("no token survives, so the request has no valid tokens");
         assert!(
-            matches!(
-                err,
-                MultiIssuerValidationError::CustomToken(CustomTokenError::Processing(_))
-            ),
-            "a failing required custom token should hard-error with the processor's error"
+            matches!(err, MultiIssuerValidationError::TokenValidationFailed),
+            "a failing custom token should be dropped, not fail the request itself, got {err:?}"
         );
     }
 
     #[test]
-    async fn custom_token_non_required_failure_skips_and_keeps_others() {
+    async fn custom_token_failure_skips_and_keeps_others() {
         let svc = custom_only_service().await;
         let processor: Arc<dyn CustomTokenProcessor> = Arc::new(DispatchProcessor);
-        let index = custom_index(&[("FailIss", "Fail::T", false), ("OkIss", "Ok::T", false)]);
+        let index = custom_index(&[("FailIss", "Fail::T"), ("OkIss", "Ok::T")]);
         let tokens = vec![
             TokenInput::new("Fail::T".to_string(), "p1".to_string()),
             TokenInput::new("Ok::T".to_string(), "p2".to_string()),
@@ -1270,38 +1271,32 @@ mod test {
         let out = svc
             .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
             .await
-            .expect("a non-required custom failure must not fail the whole request");
+            .expect("a custom failure must not fail the whole request");
         assert_eq!(
-            out.tokens.len(),
-            1,
-            "only the succeeding custom token should be kept; the failing one must be skipped"
+            out.tokens.keys().collect::<Vec<_>>(),
+            vec!["Ok::T"],
+            "only the succeeding custom token should be kept"
         );
         assert!(
-            out.tokens.contains_key("Ok::T"),
-            "the output should contain the token from the succeeding custom issuer"
+            matches!(
+                &out.dropped[..],
+                [DroppedToken { mapping, index: 0, reason: DropReason::CustomProcessingFailed }]
+                    if mapping == "Fail::T"
+            ),
+            "the failing token should be reported as dropped, got {:?}",
+            out.dropped
         );
     }
 
     #[test]
     async fn custom_token_timeout_produces_timeout_error() {
-        let svc = custom_only_service().await;
         let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
             calls: Arc::new(AtomicUsize::new(0)),
             behavior: StubBehavior::Slow,
         });
-        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
-        let tokens = vec![TokenInput::new(
-            "Acme::CustomToken".to_string(),
-            "payload-1".to_string(),
-        )];
+        let index = custom_index(&[("Acme", "Acme::CustomToken")]);
 
-        let err = svc
-            .validate_multi_issuer_tokens(
-                &tokens,
-                Some(&processor),
-                &index,
-                Some(Duration::from_millis(50)),
-            )
+        let err = process_one(processor, &index, Some(Duration::from_millis(50)))
             .await
             .expect_err("slow processor should time out");
         assert!(
@@ -1314,8 +1309,44 @@ mod test {
     }
 
     #[test]
-    async fn custom_token_missing_required_claim_errors() {
+    async fn custom_token_timeout_drops_the_token() {
         let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(DispatchProcessor);
+        let index = custom_index(&[("SlowIss", "Slow::T"), ("OkIss", "Ok::T")]);
+        let tokens = vec![
+            TokenInput::new("Slow::T".to_string(), "p1".to_string()),
+            TokenInput::new("Ok::T".to_string(), "p2".to_string()),
+        ];
+
+        let out = svc
+            .validate_multi_issuer_tokens(
+                &tokens,
+                Some(&processor),
+                &index,
+                Some(Duration::from_millis(50)),
+            )
+            .await
+            .expect("a timed-out custom token must not fail the whole request");
+        assert!(
+            out.tokens.contains_key("Ok::T"),
+            "the token that finished in time should be kept"
+        );
+        assert!(
+            matches!(
+                &out.dropped[..],
+                [DroppedToken {
+                    index: 0,
+                    reason: DropReason::CustomProcessingTimedOut,
+                    ..
+                }]
+            ),
+            "the slow token should be dropped as timed out, got {:?}",
+            out.dropped
+        );
+    }
+
+    #[test]
+    async fn custom_token_missing_required_claim_errors() {
         let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
             calls: Arc::new(AtomicUsize::new(0)),
             // StubBehavior::Ok emits only `sub`, never `scope`.
@@ -1328,20 +1359,14 @@ mod test {
                 tokens_mappings: HashMap::from([(
                     "Acme::CustomToken".to_string(),
                     CustomTokenMetadata {
-                        required: true,
                         required_claims: HashSet::from(["scope".to_string()]),
                     },
                 )]),
             },
         );
         let index = CustomIssuerIndex::build(&m).expect("test custom issuer index should build");
-        let tokens = vec![TokenInput::new(
-            "Acme::CustomToken".to_string(),
-            "payload-1".to_string(),
-        )];
 
-        let err = svc
-            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+        let err = process_one(processor, &index, None)
             .await
             .expect_err("missing required claim should fail");
         assert!(
@@ -1356,21 +1381,15 @@ mod test {
 
     #[test]
     async fn custom_token_past_exp_errors() {
-        let svc = custom_only_service().await;
         let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
             calls: Arc::new(AtomicUsize::new(0)),
             behavior: StubBehavior::OkWithExp {
                 exp_offset_secs: -60,
             },
         });
-        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
-        let tokens = vec![TokenInput::new(
-            "Acme::CustomToken".to_string(),
-            "payload-1".to_string(),
-        )];
+        let index = custom_index(&[("Acme", "Acme::CustomToken")]);
 
-        let err = svc
-            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+        let err = process_one(processor, &index, None)
             .await
             .expect_err("an already-expired custom token should be rejected");
         assert!(
@@ -1387,21 +1406,15 @@ mod test {
 
     #[test]
     async fn custom_token_past_expiration_field_errors() {
-        let svc = custom_only_service().await;
         let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
             calls: Arc::new(AtomicUsize::new(0)),
             behavior: StubBehavior::OkWithExpirationField {
                 exp_offset_secs: -60,
             },
         });
-        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
-        let tokens = vec![TokenInput::new(
-            "Acme::CustomToken".to_string(),
-            "payload-1".to_string(),
-        )];
+        let index = custom_index(&[("Acme", "Acme::CustomToken")]);
 
-        let err = svc
-            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+        let err = process_one(processor, &index, None)
             .await
             .expect_err("a past `expiration` should be rejected even without an exp claim");
         assert!(
@@ -1425,7 +1438,7 @@ mod test {
                 exp_offset_secs: 3600,
             },
         });
-        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let index = custom_index(&[("Acme", "Acme::CustomToken")]);
         let tokens = vec![TokenInput::new(
             "Acme::CustomToken".to_string(),
             "payload-1".to_string(),
@@ -1442,31 +1455,9 @@ mod test {
     }
 
     #[test]
-    async fn custom_token_no_processor_required_hard_errors() {
+    async fn custom_token_no_processor_skips() {
         let svc = custom_only_service().await;
-        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
-        let tokens = vec![TokenInput::new(
-            "Acme::CustomToken".to_string(),
-            "payload-1".to_string(),
-        )];
-
-        let err = svc
-            .validate_multi_issuer_tokens(&tokens, None, &index, None)
-            .await
-            .expect_err("required custom mapping without a processor should hard-error");
-        assert!(
-            matches!(
-                err,
-                MultiIssuerValidationError::CustomToken(CustomTokenError::NoProcessorRegistered(_))
-            ),
-            "expected NoProcessorRegistered, got {err:?}"
-        );
-    }
-
-    #[test]
-    async fn custom_token_no_processor_optional_skips() {
-        let svc = custom_only_service().await;
-        let index = custom_index(&[("Acme", "Acme::CustomToken", false)]);
+        let index = custom_index(&[("Acme", "Acme::CustomToken")]);
         let tokens = vec![TokenInput::new(
             "Acme::CustomToken".to_string(),
             "payload-1".to_string(),
@@ -1478,7 +1469,7 @@ mod test {
             .expect_err("only token skipped -> no validated tokens");
         assert!(
             matches!(err, MultiIssuerValidationError::TokenValidationFailed),
-            "optional custom mapping without a processor should skip, got {err:?}"
+            "a custom mapping without a processor should skip, got {err:?}"
         );
     }
 
@@ -1490,7 +1481,7 @@ mod test {
             calls: calls.clone(),
             behavior: StubBehavior::SlowOk,
         });
-        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let index = custom_index(&[("Acme", "Acme::CustomToken")]);
         let tokens = vec![TokenInput::new(
             "Acme::CustomToken".to_string(),
             "payload-1".to_string(),

@@ -597,7 +597,9 @@ mod tests {
             "issuer id should be derived from the file name"
         );
         assert!(
-            from_v1.store.custom_issuers["acme"].tokens_mappings["Acme::Custom"].required,
+            from_v1.store.custom_issuers["acme"]
+                .tokens_mappings
+                .contains_key("Acme::Custom"),
             "custom issuer settings should reach the runtime store"
         );
     }
