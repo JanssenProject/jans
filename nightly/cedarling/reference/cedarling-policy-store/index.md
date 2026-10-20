@@ -442,6 +442,50 @@ const bytes = new Uint8Array(await response.arrayBuffer());
 const cedarling = await initFromArchiveBytes(config, bytes);
 ```
 
+## Verifying policy store signatures
+
+Agama Lab publishes each `.cjar` with a Sigstore (cosign keyless) bundle, `<store>.cjar.sigstore.json`, that signs the whole archive. With [`CEDARLING_POLICY_STORE_SIGSTORE_MODE`](./cedarling-properties.md#verifying-policy-store-signatures) set to `enforce`, Cedarling loads a `.cjar` only if that bundle verifies for the configured signer:
+
+```json
+"CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+"CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+"CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com"
+```
+
+The bundle is verified offline against the public Sigstore trust root (Fulcio, Rekor and CT log keys) built into Cedarling. The check runs on the downloaded or read archive bytes before they are parsed, and the same bytes are then loaded. It is equivalent to:
+
+```bash
+cosign verify-blob store.cjar \
+  --bundle store.cjar.sigstore.json \
+  --certificate-identity "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com" \
+  --certificate-oidc-issuer https://accounts.google.com
+```
+
+If the bundle is missing, does not verify, or was signed by someone else, Cedarling fails to start. During [background refresh](#background-refresh) the current store is kept and the attempt is recorded as `VerificationError`. Each verified load is logged at `INFO`:
+
+```text
+policy store signature verified: identity=asset-signer@... issuer=https://accounts.google.com archive_sha256=<hex> rekor_integrated_time=<unix seconds>
+```
+
+### Where the bundle comes from
+
+| Policy store source | Bundle location |
+|---|---|
+| `CEDARLING_POLICY_STORE_URI` or `CEDARLING_POLICY_STORE_CJAR_URL` | The archive URL with `.sigstore.json` appended to its path |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` with a `.cjar` file | The archive path with `.sigstore.json` appended |
+| [Lock Server](./cedarling-lock-server.md#loading-policy-stores-from-lock-server) | Set `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` to the full URL `https://<lock-host>/jans-lock/api/v1/policy/{policy_store_id}/sigstore`. It is fetched with the same client as the store, so the Lock access token is sent |
+| Archive bytes (`initFromArchiveBytes`, `load_from_json_with_archive_bytes`) | `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` is required |
+
+`CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` overrides the location for any source. Directory and YAML policy stores cannot be signed, so `enforce` with them fails at startup.
+
+### Limitations
+
+- A signature proves who published an archive, not that it is the latest one. Someone who controls the policy store URL can serve an older, validly signed archive.
+- Refresh re-checks the signature only when the archive changes. A new bundle for the same archive is not fetched.
+- If a new archive is published before its bundle, the next refresh fails and is retried with backoff.
+- Bundles must carry a Rekor v1 transparency log entry with an inclusion proof, as `cosign sign-blob --bundle` writes them today.
+- The trust root is built into each Cedarling release. A build older than a Sigstore root rotation stops verifying new signatures until it is upgraded.
+
 ## Background refresh
 
 For URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Lock Server endpoint or a `.cjar`), Cedarling can periodically re-fetch the policy store and atomically swap the in-memory `Authz` instance so long-running processes see policy updates without restart. Refresh is **opt-in** via [`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`](./cedarling-properties.md#refreshing-the-policy-store) and is silently ignored for local sources.
@@ -470,7 +514,7 @@ A `Cache-Control: max-age` / `Expires` hint in any successful response may **sho
 
 ### Failure handling
 
-Failures (network, HTTP, parse, rebuild) leave the previously loaded `Authz` in place and exponentially back off the next attempt — `interval × 2^failures`, capped at 600 seconds, with ±10% jitter. The worker recovers automatically on the next success.
+Failures (network, HTTP, parse, rebuild, and, with `CEDARLING_POLICY_STORE_SIGSTORE_MODE=enforce`, a missing or invalid signature bundle) leave the previously loaded `Authz` in place and exponentially back off the next attempt — `interval × 2^failures`, capped at 600 seconds, with ±10% jitter. The worker recovers automatically on the next success.
 
 ### Metrics
 
@@ -481,7 +525,7 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.last_attempt_secs` | Unix timestamp of the most recent tick attempt |
 | `policy_store_refresh.last_success_secs` | Unix timestamp of the most recent `Success` or `NotModified` outcome |
 | `policy_store_refresh.consecutive_failures` | Current failure streak (resets to zero on success) |
-| `policy_store_refresh.last_outcome` | Integer enum: `1`=Success, `2`=NotModified, `3`=HttpError, `4`=NetworkError, `5`=ParseError, `6`=RebuildError, `7`=DecodeError |
+| `policy_store_refresh.last_outcome` | Integer enum: `1`=Success, `2`=NotModified, `3`=HttpError, `4`=NetworkError, `5`=ParseError, `6`=RebuildError, `7`=DecodeError, `8`=VerificationError |
 | `policy_store_refresh.strategy_current` | Integer enum: `1`=Conditional, `2`=HeadThenGet, `3`=PlainGet |
 | `policy_store_refresh.conditional_to_head_transitions` | Cumulative count of `Conditional → HeadThenGet` degrades |
 | `policy_store_refresh.head_to_plain_transitions` | Cumulative count of `HeadThenGet → PlainGet` degrades |
@@ -494,6 +538,7 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.outcome_parse_error` | Cumulative count of `ParseError` outcomes (body couldn't be parsed) |
 | `policy_store_refresh.outcome_rebuild_error` | Cumulative count of `RebuildError` outcomes (body parsed, but `JwtService` / `EntityBuilder` / trusted-issuer rebuild failed) |
 | `policy_store_refresh.outcome_decode_error` | Cumulative count of `DecodeError` outcomes (HTTP transaction succeeded but reading the response body failed — e.g. TCP drop mid-stream, transfer-encoding issue) |
+| `policy_store_refresh.outcome_verification_error` | Cumulative count of `VerificationError` outcomes (the refreshed `.cjar` failed its Sigstore signature check, including a missing bundle). Failing to fetch the bundle counts like any other fetch failure instead: no response (timeout, connection refused) is `NetworkError`, a `5xx` is `HttpError`, and a failure while reading the bundle body is `DecodeError` |
 
 ## Legacy Single-File Format (YAML Test Suites)
 
