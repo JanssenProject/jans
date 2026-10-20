@@ -804,10 +804,10 @@ async fn parse_swap_and_record(
         ))
         .set_message(match signed_by {
             Some(signed_by) => format!(
-                "policy store refresh: swapped new store from {url} in {elapsed} ms, {bundle_hash_note_val}, signature verified: {signed_by}"
+                "policy store refresh: swapped new store from {url} in {elapsed} ms{bundle_hash_note_val}, signature verified: {signed_by}"
             ),
             None => format!(
-                "policy store refresh: swapped new store from {url} in {elapsed} ms, {bundle_hash_note_val}"
+                "policy store refresh: swapped new store from {url} in {elapsed} ms{bundle_hash_note_val}"
             ),
         }),
     );
@@ -818,7 +818,7 @@ async fn parse_swap_and_record(
 /// Logged with every swap, as at startup, so operators can compare the new store
 /// with the `bundle_hash` Lock serves for it.
 fn bundle_hash_note(bundle_hash: Option<jans_trace_core::Digest>) -> String {
-    bundle_hash.map_or_else(String::new, |hash| format!("bundle_hash: {hash}"))
+    bundle_hash.map_or_else(String::new, |hash| format!(", bundle_hash: {hash}"))
 }
 
 /// A failed signature check keeps its own outcome so it is not mistaken for a broken store.
