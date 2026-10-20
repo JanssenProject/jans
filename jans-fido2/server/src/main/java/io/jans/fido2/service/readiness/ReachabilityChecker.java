@@ -47,11 +47,21 @@ public class ReachabilityChecker {
     private WellKnownFetcher fetcher;
 
     public ReachabilityReport checkAssetLinks(ValidatedRpId rpId) {
-        return report(rpId, fetcher.fetchAssetLinks(rpId), CheckStatus.FAIL);
+        return checkAssetLinks(rpId, fetcher);
     }
 
     public ReachabilityReport checkAppleAppSiteAssociation(ValidatedRpId rpId) {
-        return report(rpId, fetcher.fetchAppleAppSiteAssociation(rpId), CheckStatus.WARN);
+        return checkAppleAppSiteAssociation(rpId, fetcher);
+    }
+
+    /** As {@link #checkAssetLinks(ValidatedRpId)}, using a fetcher that carries the caller's size and time limits. */
+    public ReachabilityReport checkAssetLinks(ValidatedRpId rpId, WellKnownFetcher withLimits) {
+        return report(rpId, withLimits.fetchAssetLinks(rpId), CheckStatus.FAIL);
+    }
+
+    /** As {@link #checkAppleAppSiteAssociation(ValidatedRpId)}, using a fetcher that carries the caller's limits. */
+    public ReachabilityReport checkAppleAppSiteAssociation(ValidatedRpId rpId, WellKnownFetcher withLimits) {
+        return report(rpId, withLimits.fetchAppleAppSiteAssociation(rpId), CheckStatus.WARN);
     }
 
     private static ReachabilityReport report(ValidatedRpId rpId, WellKnownFetchResult fetch,
