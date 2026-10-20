@@ -6,8 +6,6 @@
 use std::path::Path;
 use std::{fs, io};
 
-use jans_trace_core::inputs::compute_bundle_hash;
-
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::archive_handler::ArchiveLimits;
 use crate::common::policy_store::errors::{PolicyStoreError, ValidationError};
@@ -103,12 +101,7 @@ fn extract_first_policy_store(
                 },
             };
 
-            PolicyStoreWithID {
-                id: k.to_owned(),
-                store,
-                metadata: Some(metadata),
-                bundle_hash: None,
-            }
+            PolicyStoreWithID::without_archive(k.to_owned(), store, Some(metadata))
         })
         .next();
 
@@ -336,8 +329,8 @@ async fn load_policy_store_from_uri(
 /// Parses `.cjar` archive bytes, fetched or supplied, into a [`PolicyStoreWithID`].
 ///
 /// Takes the bytes by value so the archive is read in place rather than copied.
-/// Every `.cjar` source, refresh included, passes through here, so this is where
-/// `bundle_hash` is taken: from exactly the bytes that are parsed.
+/// Every `.cjar` source, refresh included, passes through here, so every one gets
+/// a `bundle_hash` of exactly the bytes that are parsed.
 pub(crate) async fn parse_cjar_bytes(
     bytes: Vec<u8>,
     strict_schema_validation: bool,
@@ -345,12 +338,8 @@ pub(crate) async fn parse_cjar_bytes(
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     read_store_offloaded(
         move || {
-            let bundle_hash = compute_bundle_hash(&bytes);
-            let mut parsed =
-                loader::read_policy_store_archive_bytes(bytes, strict_schema_validation, limits)
-                    .map_err(|e| map_read_err(e, true))?;
-            parsed.store.bundle_hash = Some(bundle_hash);
-            Ok(parsed)
+            loader::read_policy_store_archive_bytes(bytes, strict_schema_validation, limits)
+                .map_err(|e| map_read_err(e, true))
         },
         PolicyStoreLoadError::Archive,
     )
@@ -1395,7 +1384,7 @@ mod bundle_hash_tests {
         let bytes = archive();
         let store = load(PolicyStoreSource::ArchiveBytes(bytes.clone())).await;
         let hash = store
-            .bundle_hash
+            .bundle_hash()
             .expect("a store loaded from .cjar bytes should carry bundle_hash");
         assert_eq!(
             hash,
@@ -1439,15 +1428,18 @@ mod bundle_hash_tests {
 
         let expected = Some(compute_bundle_hash(&bytes));
         assert_eq!(
-            file_store.bundle_hash, expected,
+            file_store.bundle_hash(),
+            expected,
             "CjarFile should hash the file bytes"
         );
         assert_eq!(
-            url_store.bundle_hash, expected,
+            url_store.bundle_hash(),
+            expected,
             "CjarUrl should hash the fetched bytes"
         );
         assert_eq!(
-            generic_uri_store.bundle_hash, expected,
+            generic_uri_store.bundle_hash(),
+            expected,
             "Uri should hash the fetched bytes"
         );
     }
@@ -1459,7 +1451,8 @@ mod bundle_hash_tests {
         ))
         .await;
         assert_eq!(
-            store.bundle_hash, None,
+            store.bundle_hash(),
+            None,
             "a YAML store has no archive, so no bundle_hash"
         );
     }

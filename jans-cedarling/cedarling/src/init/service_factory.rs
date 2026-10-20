@@ -76,7 +76,7 @@ impl<'a> ServiceFactory<'a> {
 
     /// `bundle_hash` of the loaded store, when it came from a `.cjar`.
     pub(crate) fn policy_store_bundle_hash(&self) -> Option<jans_trace_core::Digest> {
-        self.service_config.policy_store.bundle_hash
+        self.service_config.policy_store.bundle_hash()
     }
 
     /// Returns a clone of the HTTP client used during service initialization.

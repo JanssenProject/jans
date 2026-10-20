@@ -1581,12 +1581,12 @@ mod bundle_hash_tests {
         swap.store(Arc::new(refreshed));
 
         assert_eq!(
-            swap.load().config.policy_store.bundle_hash,
+            swap.load().config.policy_store.bundle_hash(),
             Some(second_hash),
             "the refreshed Authz should carry the new archive's bundle_hash"
         );
         assert_eq!(
-            snapshot.config.policy_store.bundle_hash,
+            snapshot.config.policy_store.bundle_hash(),
             Some(first_hash),
             "a snapshot held across the refresh keeps the old bundle_hash"
         );

@@ -174,7 +174,30 @@ pub(crate) struct PolicyStoreWithID {
     /// `sha256:<hex>` of the raw `.cjar` bytes this store was parsed from; `None`
     /// for stores without an archive (YAML, directory). Lives with the store, so
     /// a refresh swaps the hash together with the policies it identifies.
-    pub(crate) bundle_hash: Option<jans_trace_core::Digest>,
+    /// Private and set only where the archive bytes are read, so a `.cjar` store
+    /// cannot exist without its hash.
+    bundle_hash: Option<jans_trace_core::Digest>,
+}
+
+impl PolicyStoreWithID {
+    /// A store that was not read from a `.cjar` (legacy YAML), so it has no `bundle_hash`.
+    pub(crate) fn without_archive(
+        id: String,
+        store: PolicyStore,
+        metadata: Option<metadata::PolicyStoreMetadata>,
+    ) -> Self {
+        Self {
+            id,
+            store,
+            metadata,
+            bundle_hash: None,
+        }
+    }
+
+    /// Hash of the `.cjar` this store came from; `None` without an archive.
+    pub(crate) fn bundle_hash(&self) -> Option<jans_trace_core::Digest> {
+        self.bundle_hash
+    }
 }
 
 /// Represents a trusted issuer that can provide JWTs.

@@ -30,6 +30,7 @@ pub(super) use v1 as current;
 use std::borrow::Cow;
 use std::fmt;
 
+use jans_trace_core::Digest;
 use serde::de::{IgnoredAny, MapAccess, Visitor};
 use serde::{Deserialize, Deserializer};
 
@@ -326,9 +327,11 @@ pub(crate) struct ParsedPolicyStore {
 /// or policy error. That version then reads the rest of the store from its own
 /// layout and parses it. Older versions are migrated step by step; only the
 /// current version converts into runtime types.
+/// `bundle_hash` is `Some` exactly when `fs` is a `.cjar`, and comes from its bytes.
 pub(super) fn read_policy_store(
     fs: &StoreFs<'_>,
     strict_schema_validation: bool,
+    bundle_hash: Option<Digest>,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     let (metadata_json, selected) = read_metadata(fs)?;
 
@@ -344,8 +347,7 @@ pub(super) fn read_policy_store(
             id: metadata.policy_store.id.clone(),
             store,
             metadata: Some(metadata),
-            // Only the caller knows whether the files came from a `.cjar`.
-            bundle_hash: None,
+            bundle_hash,
         },
         format: FormatReport {
             spec_version: Some(selected.spec_version),
@@ -416,7 +418,7 @@ mod tests {
                 .expect("in-memory test file should be created");
         }
         let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
-        read_policy_store(&fs, false)
+        read_policy_store(&fs, false, None)
     }
 
     #[test]
@@ -490,8 +492,8 @@ mod tests {
             .expect("in-memory metadata should be created");
         let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
 
-        let err =
-            read_policy_store(&fs, true).expect_err("an unsupported version must be rejected");
+        let err = read_policy_store(&fs, true, None)
+            .expect_err("an unsupported version must be rejected");
         assert!(
             matches!(
                 err,

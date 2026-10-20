@@ -861,7 +861,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     assert!(ids.contains(&"google_oauth".to_string()));
 
     // Build the runtime store and check the issuer map
-    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false)
+    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
         .expect("store with two issuers should parse")
         .store;
     let issuer_map = store
@@ -907,7 +907,7 @@ fn test_load_custom_issuers_end_to_end() {
 
     // Manager half: convert wires it into PolicyStore.custom_issuers.
     // strict=false so the assertion does not depend on a schema being present.
-    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false)
+    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
         .expect("conversion should succeed")
         .store;
     let acme = store
@@ -982,7 +982,7 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
         "ArchiveVfs: should discover 1 custom issuer file"
     );
 
-    let store = read_from_vfs(&archive_vfs, ".", false)
+    let store = read_from_vfs(&archive_vfs, ".", false, None)
         .expect("reading the archive should succeed")
         .store;
     let acme = store
@@ -1063,7 +1063,7 @@ fn test_load_custom_issuers_duplicate_id_errors() {
     .unwrap();
 
     let store_vfs = PhysicalVfs::new();
-    let err = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false)
+    let err = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
         .expect_err("duplicate custom issuer id should fail conversion");
     assert!(
         matches!(&err, ReadStoreError::Parse(ParseStoreError::Conversion(ConversionError::CustomIssuerValidation(errors)))
@@ -1221,7 +1221,8 @@ action "read" appliesTo {
     .unwrap();
 
     // Duplicates are rejected when the store is converted
-    let err = read_from_vfs(&vfs, "/", false).expect_err("Should detect duplicate issuer IDs");
+    let err =
+        read_from_vfs(&vfs, "/", false, None).expect_err("Should detect duplicate issuer IDs");
     assert!(
         matches!(
             &err,
@@ -1397,7 +1398,7 @@ fn test_complete_policy_store_with_issuers() {
     assert_eq!(entity_store.iter().count(), 1);
     assert_ne!(format!("{:?}", parsed_schema.get_schema()), "");
 
-    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false)
+    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
         .expect("complete store should parse")
         .store;
     let issuer_map = store
@@ -2290,7 +2291,7 @@ fn test_load_schema_from_schemas_dir_shared_namespace_full_pipeline() {
     )
     .expect("Should create test.cedar");
 
-    let policy_store = read_from_vfs(&vfs, ".", false)
+    let policy_store = read_from_vfs(&vfs, ".", false, None)
         .expect("the store should read with shared namespaces across files")
         .store;
 
@@ -2361,7 +2362,7 @@ fn test_archive_shared_namespace_full_pipeline() {
     let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
         .expect("Should create ArchiveVfs from bytes");
 
-    let policy_store = read_from_vfs(&archive_vfs, ".", false)
+    let policy_store = read_from_vfs(&archive_vfs, ".", false, None)
         .expect("the archive should read with shared namespaces")
         .store;
 
