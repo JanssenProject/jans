@@ -7,7 +7,7 @@ import io.jans.agama.engine.exception.TemplateProcessingException;
 import io.jans.agama.engine.misc.FlowUtils;
 import io.jans.agama.engine.page.BasicTemplateModel;
 import io.jans.agama.engine.page.Page;
-import io.jans.agama.engine.service.TemplatingService;
+import io.jans.agama.engine.service.*;
 import io.jans.agama.model.EngineConfig;
 import io.jans.util.Pair;
 
@@ -35,7 +35,13 @@ public abstract class BaseServlet extends HttpServlet {
     protected FlowUtils flowUtils;
     
     @Inject
+    protected FlowService flowService;
+    
+    @Inject
     private TemplatingService templatingService;
+
+    @Inject
+    private TrackingService tracker;
     
     @Inject
     private ObjectMapper mapper;
@@ -93,10 +99,11 @@ public abstract class BaseServlet extends HttpServlet {
     }
 
     protected void sendPageContents(HttpServletResponse response) throws IOException {        
-        sendPageContents(response, false);
+        sendPageContents(response, false, null, 0);
     }
 
-    protected void sendPageContents(HttpServletResponse response, boolean nativeClient) throws IOException {
+    protected void sendPageContents(HttpServletResponse response, boolean nativeClient, 
+            String flowQname, int lineOfCode) throws IOException {
         
         try {
             if (nativeClient) {
@@ -109,13 +116,18 @@ public abstract class BaseServlet extends HttpServlet {
             }
         } catch (TemplateProcessingException | JsonProcessingException e) {
 
+            tracker.track(flowQname, lineOfCode, e);
+            try {
+                flowService.terminateFlow();
+            } catch (IOException ie) { }
+            
             try {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 String templatePath = errorPath(engineConf.getCrashErrorPage());
                 processTemplate(response, templatePath, new BasicTemplateModel(e.getMessage()));
 
-            } catch (TemplateProcessingException e2) {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e2.getMessage());
+            } catch (TemplateProcessingException te) {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, te.getMessage());
             }
         }
 

@@ -13,6 +13,8 @@ import io.jans.agama.engine.exception.FlowTimeoutException;
 import io.jans.agama.engine.misc.FlowUtils;
 import io.jans.agama.engine.model.FlowResult;
 import io.jans.agama.engine.model.FlowStatus;
+import io.jans.agama.engine.script.ScriptUtils;
+import io.jans.agama.engine.service.TrackingService;
 import io.jans.agama.model.FlowMetadata;
 import io.jans.agama.model.EngineConfig;
 import io.jans.agama.model.Flow;
@@ -25,6 +27,7 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -32,17 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.ContinuationPending;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.NativeContinuation;
-import org.mozilla.javascript.NativeJavaList;
-import org.mozilla.javascript.NativeJavaMap;
-import org.mozilla.javascript.NativeJavaObject;
-import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.*;
 import org.slf4j.Logger;
 
 @RequestScoped
@@ -61,10 +54,13 @@ public class FlowService {
     
     @Inject
     private AgamaPersistenceService aps;
-    
+
+    @Inject
+    private TrackingService tracker;
+
     @Inject
     private FlowUtils flowUtils;
-    
+
     @Inject
     private EngineConfig engineConfig;
     
@@ -76,6 +72,42 @@ public class FlowService {
     private Scriptable globalScope;
     private Deque<Map<String, String>> parentsMappings;
 
+    private class JSValueInspector {       
+        
+        private boolean undefined;
+        private NativeObject nobj;
+        private Exception ex;
+        
+        JSValueInspector(Object obj) {
+            
+            undefined = obj != null && Undefined.isUndefined(obj);            
+            if (!undefined) {
+                
+                try {
+                    nobj = NativeObject.class.cast(obj);
+                } catch (ClassCastException e) {
+                    try {
+                        ex = Exception.class.cast(NativeJavaObject.class.cast(obj).unwrap());
+                    } catch (ClassCastException e2) { }
+                }
+            }           
+            
+        }
+        
+        boolean isUndefined() {
+            return undefined;
+        }
+        
+        NativeObject asNativeObject() {
+            return nobj;            
+        }
+        
+        Exception asException() {
+            return ex;
+        }
+        
+    }
+    
     /**
      * Obtains the status of the current flow (if any) for the current user
      * @return
@@ -87,11 +119,12 @@ public class FlowService {
 
     public FlowStatus startFlow(FlowStatus status) throws FlowCrashException {
         
+        status.setStartedAt(System.currentTimeMillis());
+        String flowName = status.getQname();
+        Object val = null;
+        
         try {
-            status.setStartedAt(System.currentTimeMillis());
-            String flowName = status.getQname();
-            
-            //retrieve the flow, execute until render/redirect is reached
+            //retrieve the flow, execute until render or redirect is reached
             Flow flow = aps.getFlow(flowName, true);
             FlowMetadata fl = flow.getMetadata();
             String funcName = fl.getFuncName();
@@ -99,35 +132,29 @@ public class FlowService {
             verifyCode(flow);
             logger.info("Evaluating flow code");
             
-            try {
-                globalScope = initContext(scriptCtx);
-                scriptCtx.evaluateString(globalScope, Transpiler.UTIL_SCRIPT_CONTENTS,
-                        Transpiler.UTIL_SCRIPT_NAME, 1, null);
-                flowUtils.printScopeIds(globalScope);
-                
-                scriptCtx.evaluateString(globalScope, flow.getTranspiled(), flowName + SCRIPT_SUFFIX, 1, null);
-                flowUtils.printScopeIds(globalScope);
+            globalScope = initContext(scriptCtx);
+            scriptCtx.evaluateString(globalScope, Transpiler.UTIL_SCRIPT_CONTENTS,
+                    Transpiler.UTIL_SCRIPT_NAME, 1, null);
+            flowUtils.printScopeIds(globalScope);
+            
+            scriptCtx.evaluateString(globalScope, flow.getTranspiled(), flowName + SCRIPT_SUFFIX, 1, null);
+            flowUtils.printScopeIds(globalScope);
 
-                logger.info("Executing function {}", funcName);
-                Function f = (Function) globalScope.get(funcName, globalScope);
-                parentsMappings = status.getParentsMappings();
+            logger.info("Executing function {}", funcName);
+            Function f = (Function) globalScope.get(funcName, globalScope);
+            parentsMappings = status.getParentsMappings();
 
-                Object[] params = getFuncParams(fl, status.getJsonInput());
-                Object val = scriptCtx.callFunctionWithContinuations(f, globalScope, params);
-                NativeObject result = checkJSReturnedValue(val);                
-                finishFlow(result, status);
-                
-            } catch (ContinuationPending pe) {
-                status = processPause(pe, status);
-
-            } catch (Exception e){
-                terminateFlow();
-                makeCrashException(e);
-            }
+            Object[] params = getFuncParams(fl, status.getJsonInput());
+            val = scriptCtx.callFunctionWithContinuations(f, globalScope, params);
+            
+        } catch (ContinuationPending pe) {
+            return processPause(pe, status);
 
         } catch (IOException ie) {
-            makeCrashException(ie);
+            reportAndThrow(ie, flowName, 0);
         }
+
+        wrapUpExecution(flowName, status, val);
         return status;
         
     }
@@ -135,44 +162,36 @@ public class FlowService {
     public FlowStatus continueFlow(FlowStatus status, String jsonParameters, boolean callbackResume,
             String cancelUrl) throws FlowCrashException, FlowTimeoutException {
 
+        String flowName = status.getQname();
+        Object val = null;    
         try {            
             if (callbackResume) {
                 //disable usage of callback endpoint
                 status.setAllowCallbackResume(false);
                 aps.persistFlowStatus(sessionId, status);
             }
-            
-            try {
-                ensureTimeNotExceeded(status);
+            ensureTimeNotExceeded(status);
 
-                Pair<Scriptable, NativeContinuation> pcont = aps.getContinuation(sessionId);
-                globalScope = pcont.getFirst();
-                flowUtils.printScopeIds(globalScope);
+            Pair<Scriptable, NativeContinuation> pcont = aps.getContinuation(sessionId);
+            globalScope = pcont.getFirst();
+            flowUtils.printScopeIds(globalScope);
 
-                logger.debug("Resuming flow");
-                parentsMappings = status.getParentsMappings();
+            logger.debug("Resuming flow");
+            parentsMappings = status.getParentsMappings();
 
-                Object val = scriptCtx.resumeContinuation(pcont.getSecond(), 
-                        globalScope, new Pair<>(cancelUrl, jsonParameters));
-                NativeObject result = checkJSReturnedValue(val);
-                finishFlow(result, status);
+            val = scriptCtx.resumeContinuation(pcont.getSecond(), globalScope,
+                    new Pair<>(cancelUrl, jsonParameters));
 
-            } catch (ContinuationPending pe) {
-                status = processPause(pe, status);
+        } catch (ContinuationPending pe) {
+            return processPause(pe, status);
 
-            } catch (FlowTimeoutException te) {
-                terminateFlow();
-                throw te;
-
-            } catch (Exception e) {
-                terminateFlow();
-                makeCrashException(e);
-            }
         } catch (IOException ie) {
-            makeCrashException(ie);
+            reportAndThrow(ie, flowName, 0);
         }
-        return status;
         
+        wrapUpExecution(flowName, status, val);
+        return status;
+
     }
     
     // This is called in the middle of a cx.resumeContinuation invocation (see util.js#_flowCall)
@@ -209,9 +228,14 @@ public class FlowService {
         //jython script -> agama, agama -> jython script. This helps agama flows to timeout
         //before the unauthenticated unused time
         if (System.currentTimeMillis() + TIMEOUT_SKEW > flstatus.getFinishBefore()) {
-            throw new FlowTimeoutException("You have exceeded the amount of time required " + 
-                    "to complete your authentication", flstatus.getQname());
+
+            String flowName = flstatus.getQname();
+            FlowTimeoutException te = new FlowTimeoutException("You have exceeded the amount of " + 
+                    "time required to complete your authentication", flowName);
             //"Your authentication attempt has run for more than " + time + " seconds"
+            terminateFlowWithReport(flowName);
+            reportEx(te, flowName, 0);
+            throw te;
         }
 
     }
@@ -224,6 +248,59 @@ public class FlowService {
         aps.terminateFlow(sessionId);
     }
     
+    public void terminateFlowWithReport(String flowQname) {
+        
+        try {
+            terminateFlow();
+        } catch (IOException ie) {
+            reportEx(ie, flowQname, 0);
+        }
+
+    }
+
+    private void reportEx(Exception e, String flowQname, int line) {
+        tracker.track(flowQname, line, e);
+    }
+
+    private void reportAndThrow(Exception e, String flowQname, int line) throws FlowCrashException {
+        reportEx(e, flowQname, line);
+        throwFlowCrashEx(e);
+    }
+
+    private void wrapUpExecution(String flowQname, FlowStatus status, Object val)
+            throws FlowCrashException {
+
+        Exception ex = null;
+        JSValueInspector insp = new JSValueInspector(val);
+        NativeObject result = insp.asNativeObject();
+       
+        if (result == null) {
+            ex = insp.asException(); //When non-null, the exception was already reported from JS code
+
+            if (ex == null) {
+                ex = new Exception(insp.isUndefined() ?
+                        //Truthy value may only arise for top-level flows. For subflows see util.js#_flowCall
+                        "No Finish instruction was reached during execution of flow" :
+                        "Unexpected value received upon flow termination");
+                reportEx(ex, flowQname, 0);
+            }
+        }
+
+        if (ex != null) {
+            terminateFlowWithReport(flowQname);
+        } else {
+            try {
+                finishFlow(result, status);
+            } catch (IOException e) {
+                reportEx(e, flowQname, 0);
+                ex = e;
+            }
+        }
+
+        if (ex != null) throwFlowCrashEx(ex);
+
+    }
+
     private void finishFlow(NativeObject result, FlowStatus status) throws IOException {
 
         FlowResult res = flowResultFrom(result);
@@ -253,44 +330,54 @@ public class FlowService {
     }
 
     private FlowStatus processPause(ContinuationPending pending, FlowStatus status)
-            throws IOException {
+            throws FlowCrashException {
 
-        PendingException pe = null;
-        if (pending instanceof PendingRenderException) {
+        PendingException pe = (PendingException) pending;
+        String currQname = pe.getCurrentQname();
+        int currLine = pe.getCurrentLine();
 
-            PendingRenderException pre = (PendingRenderException) pending;
-            String templPath = computeTemplatePath(pre.getTemplatePath(), parentsMappings);
-            
-            if (!templPath.contains("."))
-                throw new IOException(
-                        "Expecting file extension for the template to render: " + templPath);
+        try {
+            if (pending instanceof PendingRenderException) {
+    
+                PendingRenderException pre = (PendingRenderException) pending;
+                
+                if (!ScriptUtils.isValidDataModel(pre.getDataModel()))
+                    throw new IllegalArgumentException("Data passed to RRF was not a map or Java equivalent");
+                
+                String templPath = computeTemplatePath(ScriptUtils.normalize(pre.getTemplatePath()),
+                        parentsMappings);
+                
+                if (!templPath.contains("."))
+                    throw new IOException(
+                            "Expecting file extension for the template to render: " + templPath);
+//TODO: track qname + templPath count
+                status.setTemplatePath(templPath);
+                status.setTemplateDataModel(pre.getDataModel());
+                status.setExternalRedirectUrl(null);
+    
+            } else if (pending instanceof PendingRedirectException) {
+                
+                if (status.isNativeClient())
+                    throw new IOException("RFAC for native clients is not available");
 
-            status.setTemplatePath(templPath);
-            status.setTemplateDataModel(pre.getDataModel());
-            status.setExternalRedirectUrl(null);
-            pe = pre;
-
-        } else if (pending instanceof PendingRedirectException) {
+                PendingRedirectException pre = (PendingRedirectException) pending;
+                
+                status.setTemplatePath(null);
+                status.setTemplateDataModel(null);
+                status.setExternalRedirectUrl(pre.getLocation());
+                
+            }
+            logger.debug("Parents mappings: {}", status.getParentsMappings());
+            status.setAllowCallbackResume(pe.isAllowCallbackResume());
+            status.setCurrentQname(currQname);
+            status.setCurrentLine(currLine);
             
-            if (status.isNativeClient())
-                throw new IOException("RFAC for native clients is not available");
-            
-            PendingRedirectException pre = (PendingRedirectException) pending;
-            
-            status.setTemplatePath(null);
-            status.setTemplateDataModel(null);
-            status.setExternalRedirectUrl(pre.getLocation());
-            pe = pre;
-            
-        } else {
-            throw new IllegalArgumentException("Unexpected instance of ContinuationPending");
+            //Save the state
+            aps.saveState(sessionId, status, pe.getContinuation(), globalScope);
+        } catch (Exception e) {
+            terminateFlowWithReport(status.getQname());
+            reportAndThrow(e, currQname, currLine);
         }
-
-        logger.debug("Parents mappings: {}", status.getParentsMappings());
-        status.setAllowCallbackResume(pe.isAllowCallbackResume());
-        //Save the state
-        aps.saveState(sessionId, status, pe.getContinuation(), globalScope);
-
         return status;
         
     }
@@ -350,36 +437,9 @@ public class FlowService {
         return null;
         
     }
-    
-    private NativeObject checkJSReturnedValue(Object obj) throws Exception {
 
-        try {      
-            //obj is not null
-            if (Undefined.isUndefined(obj)) {
-                //This may only happen at a top-level flow. For subflows see util.js#_flowCall
-                throw new FlowCrashException("No Finish instruction was reached during execution of flow");
-                
-            } else return NativeObject.class.cast(obj);
-
-        } catch (ClassCastException e) {
-
-            Object ex = NativeJavaObject.class.cast(obj).unwrap();
-            
-            if (Exception.class.isInstance(ex))
-                throw (Exception) ex;
-            
-            throw new RuntimeException("Unexpected Java value received upon flow termination");
-        }
-
-    }
-
-    private void makeCrashException(Exception e) throws FlowCrashException {
-        
-        if (FlowCrashException.class.isInstance(e))
-            throw (FlowCrashException) e;
-
-        throw new FlowCrashException(e.getMessage(), e);
-        
+    private void throwFlowCrashEx(Exception e) throws FlowCrashException {
+        throw new FlowCrashException(e.getMessage(), e);        
     }
 
     /**

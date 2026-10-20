@@ -194,7 +194,11 @@ public class AgamaPersistenceService {
         run.setStatus(fst);
         
         logger.debug("Saving state of current flow run");
-        entryManager.merge(run);
+        try {
+            entryManager.merge(run);
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
 
     }
     
@@ -209,6 +213,7 @@ public class AgamaPersistenceService {
             //update that follows below
 
             FlowStatus status = run.getStatus();
+//TODO: track run time and count of finished (true/false) flows here            
             status.setStartedAt(FlowStatus.FINISHED);
             status.setResult(result);
 
@@ -229,11 +234,13 @@ public class AgamaPersistenceService {
         } catch (Exception e) {
             throw new IOException(e);
         }
+
     }
 
     public void terminateFlow(String sessionId) throws IOException {
     
         try {
+//TODO: track count of crashed/timed out flows here            
             logger.info("Removing flow run...");
             entryManager.remove(AGAMA_FLOWRUNS_BASE, FlowRun.class, frEqFilter(sessionId), 1);
         } catch (Exception e) {
