@@ -8,6 +8,7 @@ package io.jans.fido2.model.conf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,8 @@ class NativeReadinessConfigurationTest {
         Fido2Configuration conf = new ObjectMapper().readValue("{\"lockAuditEnabled\":true}", Fido2Configuration.class);
         assertFalse(conf.isNativeReadinessEnabled());
         assertFalse(conf.isNativeReadinessAllowExternalFetch());
+        assertEquals(131072, conf.getNativeReadinessMaxResponseBytes());
+        assertEquals(3000, conf.getNativeReadinessTimeoutMs());
         assertEquals(3600, conf.getNativeReadinessCacheTtlSeconds());
     }
 
@@ -39,6 +42,8 @@ class NativeReadinessConfigurationTest {
                 "{\"nativeReadinessEnabled\":true,\"nativeReadinessAllowExternalFetch\":true,"
                         + "\"nativeReadinessMaxResponseBytes\":1024,\"nativeReadinessTimeoutMs\":500,"
                         + "\"nativeReadinessCacheTtlSeconds\":60}", Fido2Configuration.class);
+        assertTrue(conf.isNativeReadinessEnabled());
+        assertTrue(conf.isNativeReadinessAllowExternalFetch());
         assertEquals(1024, conf.getNativeReadinessMaxResponseBytes());
         assertEquals(500, conf.getNativeReadinessTimeoutMs());
         assertEquals(60, conf.getNativeReadinessCacheTtlSeconds());
