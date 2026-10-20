@@ -183,7 +183,7 @@ impl ServiceFactory<'_> {
             LoadProducerKeyError::InvalidKey {
                 property: trace.signing_key.property(),
                 path: path.cloned(),
-                source,
+                source: InvalidTraceKeyError(source),
             }
         })?;
 
@@ -244,9 +244,16 @@ pub enum LoadProducerKeyError {
         path: Option<PathBuf>,
         /// Why the key was rejected.
         #[source]
-        source: PrivateKeyError,
+        source: InvalidTraceKeyError,
     },
 }
+
+/// Why a TRACE signing key is not a usable Ed25519 key. Wraps the core library
+/// error so callers need no dependency on it; the text never carries key material.
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Debug, thiserror::Error)]
+#[error(transparent)]
+pub struct InvalidTraceKeyError(PrivateKeyError);
 
 /// Error type for failing to initialize a service
 #[derive(Debug, thiserror::Error)]

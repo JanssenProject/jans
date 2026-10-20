@@ -18,8 +18,8 @@ use crate::common::policy_store::test_utils::fixtures;
 use crate::log::interface::LogStorage;
 use crate::tests::utils::cedarling_util::get_config;
 use crate::{
-    Cedarling, InitCedarlingError, LoadProducerKeyError, PolicyStoreSource, TraceConfig,
-    TraceEndpoint, TraceSetupError, TraceSigningKey,
+    Cedarling, InitCedarlingError, InvalidTraceKeyError, LoadProducerKeyError, PolicyStoreSource,
+    TraceConfig, TraceEndpoint, TraceSetupError, TraceSigningKey,
 };
 
 /// Public key of the RFC 8410 section 10.3 example key, extracted with `openssl` so the
@@ -189,6 +189,23 @@ async fn cedarling_new_fails_on_bad_trace_key() {
             })
         ),
         "expected TraceKey(InvalidKey) from the inline property, got {err:?}"
+    );
+}
+
+/// Callers can name the key error without depending on `jans-trace-core`.
+#[tokio::test]
+async fn invalid_key_error_is_a_cedarling_type() {
+    let err = start_err(TraceSigningKey::Pem("not a key".to_string())).await;
+    let source: Option<&InvalidTraceKeyError> = match &err {
+        InitCedarlingError::TraceKey(LoadProducerKeyError::InvalidKey { source, .. }) => {
+            Some(source)
+        },
+        _ => None,
+    };
+    let source = source.expect("an inline garbage key should give TraceKey(InvalidKey)");
+    assert!(
+        !source.to_string().is_empty(),
+        "the wrapped error should say why the key is invalid"
     );
 }
 

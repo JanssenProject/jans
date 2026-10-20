@@ -83,9 +83,9 @@ use init::policy_store_refresh::{
 };
 use init::policy_store_signature::ArchiveVerifier;
 use init::service_config::{ServiceConfig, ServiceConfigError};
-#[cfg(not(target_arch = "wasm32"))]
-pub use init::service_factory::LoadProducerKeyError;
 use init::service_factory::ServiceInitError;
+#[cfg(not(target_arch = "wasm32"))]
+pub use init::service_factory::{InvalidTraceKeyError, LoadProducerKeyError};
 use lock::InitLockServiceError;
 use lock::health_registry::HealthStatus;
 use log::interface::LogWriter;
