@@ -115,6 +115,11 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `lockAuditClientId` | String | — | OAuth2 client ID used to obtain a token, via the client credentials grant, for the `https://jans.io/oauth/lock/log.write` scope. |
 | `lockAuditClientPassword` | String | — | OAuth2 client secret paired with `lockAuditClientId`. Encrypted at rest, same as other client secrets, and deliberately excluded from configuration logging. |
 | `lockAuditFlushInterval` | Integer | `20` | Interval in seconds between batched deliveries of buffered Lock Server audit events. Delivery is asynchronous and batched, never one HTTP call per ceremony. Read once at server startup — unlike `lockAuditEnabled`, `lockAuditEndpoint` and the credential properties, which are re-read on every flush, changing this value requires a server restart to take effect. |
+| `nativeReadinessEnabled` | Boolean | `false` | Makes the native app readiness endpoint available. When `false` the endpoint does no work. |
+| `nativeReadinessAllowExternalFetch` | Boolean | `false` | Allows the readiness checks to make outbound requests to a relying party's `/.well-known` association files. Outbound requests need both this and `nativeReadinessEnabled`. |
+| `nativeReadinessMaxResponseBytes` | Integer | `131072` | Maximum number of bytes read from one association file. The server also enforces a fixed upper bound, so a mis-set value cannot remove the limit. |
+| `nativeReadinessTimeoutMs` | Integer | `3000` | Overall deadline in milliseconds for fetching one association file. The server also enforces a fixed upper bound. |
+| `nativeReadinessCacheTtlSeconds` | Integer | `3600` | Time in seconds a readiness result is served from cache before the files are fetched again. |
 
 ### Lock Server audit delivery
 
