@@ -94,13 +94,11 @@ mod tests {
             "urn:jans/pdp.v1_x",
             &"x".repeat(255),
         ] {
-            let id: ProducerId = valid
-                .parse()
-                .unwrap_or_else(|err| panic!("`{valid}` should be accepted: {err}"));
+            let id = valid.parse::<ProducerId>();
             assert_eq!(
-                id.as_str(),
-                valid,
-                "producer id keeps its value byte-for-byte"
+                id.as_ref().map(ProducerId::as_str),
+                Ok(valid),
+                "`{valid}` should be accepted and kept byte-for-byte"
             );
         }
 

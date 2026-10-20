@@ -504,8 +504,11 @@ mod tests {
             "http://LOCALHOST",
             "https://idp.example.com",
         ] {
-            draft(decision("a", vec![token(issuer)]))
-                .unwrap_or_else(|err| panic!("issuer `{issuer}` should be accepted: {err}"));
+            assert_eq!(
+                draft(decision("a", vec![token(issuer)])).err(),
+                None,
+                "issuer `{issuer}` should be accepted"
+            );
         }
     }
 
