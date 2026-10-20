@@ -647,6 +647,14 @@ options = AuthorizeOptions(trace=TraceContext(execution_id, execution_authority,
 request = RequestUnsigned(action=action, resource=resource, context={}, options=options)
 ```
 
+In Java, every `CedarlingAdapter.authorize*` method has an overload with a trailing `AuthorizeOptions` argument; the overloads without it pass `null`. The UniFFI methods (Kotlin, Swift) take `options` as an optional last parameter that defaults to none:
+
+```java
+AuthorizeOptions options = new AuthorizeOptions(
+        new TraceContext(executionId, executionAuthority, workloadId, null));
+AuthorizeResult result = adapter.authorizeUnsigned(principalJson, action, resource, context, options);
+```
+
 ## Policy Introspection
 
 Cedarling also provides methods to discover which policies are potentially applicable to a given authorization request **without executing authorization**. This is useful for:
