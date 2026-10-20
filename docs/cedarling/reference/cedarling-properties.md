@@ -155,6 +155,8 @@ Properties:
 
 Two properties from the TRACE design are intentionally absent, because in this release each has a single possible value: `CEDARLING_TRACE_CHAIN_GENESIS` (a new producer chain always starts as `first_observed` at each start) and `CEDARLING_TRACE_EMISSION` (every decision with a TRACE context is emitted).
 
+**Limitation: TRACE fully describes JWT tokens only.** A record lists the tokens of an `authorize_multi_issuer` call by issuer, token type and `jti` (or a fingerprint when there is no `jti`). Lock accepts only an `https` issuer, or `http` with host `localhost`. A custom (non-JWT) token handled by a [custom token processor](./cedarling-multi-issuer.md#custom-non-jwt-token-processing) is listed only when the processor returns such an issuer as the `iss` claim. Otherwise the token is left out of the record and Cedarling logs a warning; the record is still sent. A JWT whose `iss` Lock would reject means no record for that decision.
+
 
 ## authorize_multi_issuer method properties
 
