@@ -11,7 +11,6 @@ import java.io.IOException;
 import io.jans.agama.NativeJansFlowBridge;
 import io.jans.agama.engine.exception.*;
 import io.jans.agama.engine.model.FlowStatus;
-import io.jans.agama.engine.service.FlowService;
 
 @WebServlet(urlPatterns = RestartServlet.PATH)
 public class RestartServlet extends BaseServlet {

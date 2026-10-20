@@ -1,9 +1,6 @@
 package io.jans.agama.engine.service;
 
-import io.jans.agama.model.*;
-
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class TrackingService {

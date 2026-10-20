@@ -18,11 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.NativeContinuation;
-import org.mozilla.javascript.NativeJavaObject;
-import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +75,7 @@ public class ScriptUtils {
     public static boolean isValidDataModel(Object val) {
 
         //See utils.js#_isObject
-        if (val == null) return false;
+        if (val == null || Undefined.isUndefined(val)) return false;
         
         Class<?> cls = val.getClass();
         
