@@ -33,4 +33,5 @@ YAML remains supported for test suites. These fixtures are used across unit and 
 ## TRACE key fixtures
 
 - `trace/producer_ed25519.pem`: unencrypted PKCS#8 PEM Ed25519 key from RFC 8410 section 10.3 (a public test vector, not a secret). Used as the TRACE producer signing key in tests.
+- `trace/producer_ed25519.pub`: the raw 32-byte public key of `producer_ed25519.pem`, written by `openssl pkey -in producer_ed25519.pem -pubout -outform DER | tail -c 32`. Tests compare the key thumbprint against it.
 - `trace/encrypted_ed25519.pem`: the same key encrypted with `openssl pkcs8 -topk8 -v2 aes-256-cbc` (passphrase `trace-test`), to check that encrypted keys are rejected.

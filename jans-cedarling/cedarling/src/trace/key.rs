@@ -70,16 +70,15 @@ mod tests {
     /// RFC 8410 section 10.3 example key: public test vector, not a secret.
     const KEY_PEM: &str = include_str!("../../../test_files/trace/producer_ed25519.pem");
     const ENCRYPTED_PEM: &str = include_str!("../../../test_files/trace/encrypted_ed25519.pem");
-    const RFC8410_PUBLIC_KEY: [u8; 32] = [
-        0x19, 0xbf, 0x44, 0x09, 0x69, 0x84, 0xcd, 0xfe, 0x85, 0x41, 0xba, 0xc1, 0x67, 0xdc, 0x3b,
-        0x96, 0xc8, 0x50, 0x86, 0xaa, 0x30, 0xb6, 0xb6, 0xcb, 0x0c, 0x5c, 0x38, 0xad, 0x70, 0x31,
-        0x66, 0xe1,
-    ];
+    /// Public key of `KEY_PEM`, extracted with `openssl` so the thumbprint is checked
+    /// against bytes this crate did not derive.
+    const RFC8410_PUBLIC_KEY: &[u8; 32] =
+        include_bytes!("../../../test_files/trace/producer_ed25519.pub");
     /// Body line of `KEY_PEM`; must never appear in an error.
     const KEY_BODY: &str = "MC4CAQAwBQYDK2VwBCIEINTuctv5E1hK1bbY8fdp";
 
     fn rfc8410_thumbprint() -> Digest {
-        PublicKey::from_bytes(&RFC8410_PUBLIC_KEY)
+        PublicKey::from_bytes(RFC8410_PUBLIC_KEY)
             .expect("RFC 8410 public key is valid")
             .thumbprint()
     }

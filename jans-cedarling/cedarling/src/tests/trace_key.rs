@@ -22,11 +22,10 @@ use crate::{
     TraceEndpoint, TraceSetupError, TraceSigningKey,
 };
 
-/// Public key of the RFC 8410 section 10.3 example key in `test_files/trace`.
-const RFC8410_PUBLIC_KEY: [u8; 32] = [
-    0x19, 0xbf, 0x44, 0x09, 0x69, 0x84, 0xcd, 0xfe, 0x85, 0x41, 0xba, 0xc1, 0x67, 0xdc, 0x3b, 0x96,
-    0xc8, 0x50, 0x86, 0xaa, 0x30, 0xb6, 0xb6, 0xcb, 0x0c, 0x5c, 0x38, 0xad, 0x70, 0x31, 0x66, 0xe1,
-];
+/// Public key of the RFC 8410 section 10.3 example key, extracted with `openssl` so the
+/// thumbprint is checked against bytes this crate did not derive.
+const RFC8410_PUBLIC_KEY: &[u8; 32] =
+    include_bytes!("../../../test_files/trace/producer_ed25519.pub");
 
 fn fixture(name: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -39,7 +38,7 @@ fn key_file() -> TraceSigningKey {
 }
 
 fn rfc8410_thumbprint() -> String {
-    PublicKey::from_bytes(&RFC8410_PUBLIC_KEY)
+    PublicKey::from_bytes(RFC8410_PUBLIC_KEY)
         .expect("RFC 8410 public key is valid")
         .thumbprint()
         .to_string()
