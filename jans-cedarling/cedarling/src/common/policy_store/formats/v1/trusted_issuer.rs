@@ -12,7 +12,9 @@ use crate::common::policy_store::errors::{
     PolicyStoreError, TrustedIssuerErrorType, TrustedIssuerValidateError,
 };
 use crate::common::policy_store::formats::file_id::id_from_filename;
-use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
+use crate::common::policy_store::{
+    InvalidConfigurationEndpoint, TokenEntityMetadata, TrustedIssuer,
+};
 use serde::Deserialize;
 use serde_json::Value as JsonValue;
 use std::collections::{HashMap, HashSet};
@@ -59,9 +61,11 @@ pub(crate) struct TrustedIssuerDoc {
 
 /// Keys tokens by entity type and drops `trusted: false` ones, which were
 /// never validated. Assumes `validate_issuers` rejected duplicate entity types.
-impl From<TrustedIssuerDoc> for TrustedIssuer {
-    fn from(doc: TrustedIssuerDoc) -> Self {
-        TrustedIssuer::new(
+impl TryFrom<TrustedIssuerDoc> for TrustedIssuer {
+    type Error = InvalidConfigurationEndpoint;
+
+    fn try_from(doc: TrustedIssuerDoc) -> Result<Self, Self::Error> {
+        TrustedIssuer::from_configuration(
             doc.name,
             doc.description,
             doc.oidc_endpoint,
@@ -295,7 +299,9 @@ impl IssuerParser {
     }
 
     /// Create a consolidated map of all issuers.
-    pub(crate) fn create_issuer_map(issuers: Vec<ParsedIssuer>) -> HashMap<String, TrustedIssuer> {
+    pub(crate) fn create_issuer_map(
+        issuers: Vec<ParsedIssuer>,
+    ) -> Result<HashMap<String, TrustedIssuer>, TrustedIssuerValidateError> {
         let mut issuer_map = HashMap::with_capacity(issuers.len());
 
         for parsed in issuers {
@@ -304,11 +310,17 @@ impl IssuerParser {
             if let std::collections::hash_map::Entry::Vacant(e) =
                 issuer_map.entry(parsed.id.clone())
             {
-                e.insert(parsed.issuer.into());
+                let issuer = TrustedIssuer::try_from(parsed.issuer).map_err(|source| {
+                    TrustedIssuerValidateError::InvalidConfigurationEndpoint {
+                        file: parsed.filename,
+                        source,
+                    }
+                })?;
+                e.insert(issuer);
             }
         }
 
-        issuer_map
+        Ok(issuer_map)
     }
 }
 
@@ -415,15 +427,51 @@ mod tests {
     fn issuer_converts_keyed_by_entity_type_without_untrusted_tokens() {
         let mut untrusted = token_doc("Jans::Id_token");
         untrusted.trusted = false;
-        let issuer = TrustedIssuer::from(issuer_doc(&[
+        let issuer = TrustedIssuer::try_from(issuer_doc(&[
             ("access_token", token_doc("Jans::Access_token")),
             ("id_token", untrusted),
-        ]));
+        ]))
+        .expect("a discovery endpoint should convert");
 
         assert_eq!(
             issuer.token_metadata.keys().collect::<Vec<_>>(),
             vec!["Jans::Access_token"],
             "tokens should be keyed by entity type and `trusted: false` ones dropped"
+        );
+    }
+
+    #[test]
+    fn issuer_converts_with_iss_derived_from_endpoint() {
+        let mut doc = issuer_doc(&[]);
+        doc.oidc_endpoint = Url::parse("https://kc.test/realms/a/.well-known/openid-configuration")
+            .expect("valid url");
+        let issuer = TrustedIssuer::try_from(doc).expect("a discovery endpoint should convert");
+        assert_eq!(
+            issuer.iss().as_str(),
+            "https://kc.test/realms/a",
+            "iss should keep the path before the well-known suffix"
+        );
+    }
+
+    #[test]
+    fn create_issuer_map_rejects_endpoint_not_of_discovery_shape() {
+        let mut doc = issuer_doc(&[]);
+        doc.oidc_endpoint = Url::parse("https://jans.test/auth").expect("valid url");
+        let parsed = ParsedIssuer {
+            id: "jans".into(),
+            issuer: doc,
+            filename: "jans.json".into(),
+        };
+
+        let err = IssuerParser::create_issuer_map(vec![parsed])
+            .expect_err("an endpoint without the well-known suffix must be rejected");
+        assert!(
+            matches!(
+                &err,
+                TrustedIssuerValidateError::InvalidConfigurationEndpoint { file, .. }
+                    if file == "jans.json"
+            ),
+            "expected InvalidConfigurationEndpoint naming the file, got: {err:?}"
         );
     }
 
@@ -804,7 +852,7 @@ mod tests {
             },
         ];
 
-        let map = IssuerParser::create_issuer_map(issuers);
+        let map = IssuerParser::create_issuer_map(issuers).expect("both issuers should convert");
 
         assert_eq!(map.len(), 2, "both issuers should reach the map");
         assert!(

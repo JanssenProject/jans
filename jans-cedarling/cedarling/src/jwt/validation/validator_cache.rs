@@ -53,10 +53,8 @@ impl JwtValidatorCache {
         status_lists: &StatusListCache,
         logger: Option<&Logger>,
     ) {
-        let iss = iss_config
-            .openid_config
-            .as_ref()
-            .map_or_else(|| iss_config.policy.iss_claim(), |oidc| oidc.issuer.clone());
+        // The loader rejects a discovery document whose `issuer` differs from this.
+        let iss = iss_config.policy.iss_claim();
 
         for (entity_type, tkn_metadata) in &iss_config.policy.token_metadata {
             logger.log_any(JwtLogEntry::new(

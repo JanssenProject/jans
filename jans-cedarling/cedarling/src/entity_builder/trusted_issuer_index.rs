@@ -44,8 +44,8 @@ impl TrustedIssuerIndex {
         sorted.sort_by(|a, b| a.0.cmp(b.0));
 
         for (_, iss) in sorted {
-            let origin = iss.iss_claim();
-            let full_url = IssClaim::new(iss.get_oidc_endpoint().as_str());
+            let origin = IssClaim::new(&iss.iss().origin().ascii_serialization());
+            let full_url = iss.iss_claim();
             let issuer = Arc::new(iss.clone());
 
             if let Some(existing) = origin_index.get(&origin) {
@@ -90,7 +90,7 @@ mod tests {
     fn create_issuer_index() -> TrustedIssuerIndex {
         let mut trusted_issuers = HashMap::new();
 
-        let issuer_one = TrustedIssuer::new(
+        let issuer_one = TrustedIssuer::discovery_at(
             "Issuer One".to_string(),
             "Issuer One".to_string(),
             Url::parse("https://issuer1.example.com/auth").unwrap(),
@@ -98,15 +98,16 @@ mod tests {
         );
         trusted_issuers.insert("issuer_one".to_string(), issuer_one);
 
-        let jans = TrustedIssuer::new(
+        let jans = TrustedIssuer::from_configuration(
             "Jans".to_string(),
             "Janssen".to_string(),
             Url::parse("https://account.gluu.org/.well-known/openid-configuration").unwrap(),
             HashMap::new(),
-        );
+        )
+        .expect("test configuration endpoint should derive an iss");
         trusted_issuers.insert("jans".to_string(), jans);
 
-        let microsoft_issuer = TrustedIssuer::new(
+        let microsoft_issuer = TrustedIssuer::discovery_at(
             "Microsoft".to_string(),
             "Microsoft Azure AD".to_string(),
             Url::parse("https://login.microsoftonline.com/tenant").unwrap(),
@@ -114,7 +115,7 @@ mod tests {
         );
         trusted_issuers.insert("microsoft".to_string(), microsoft_issuer);
 
-        let company_issuer = TrustedIssuer::new(
+        let company_issuer = TrustedIssuer::discovery_at(
             "Company".to_string(),
             "Company Internal Auth".to_string(),
             Url::parse("https://auth.company.internal:8443/oauth").unwrap(),
@@ -156,7 +157,7 @@ mod tests {
 
         assert_eq!(issuer.name, "Microsoft");
         assert_eq!(
-            issuer.get_oidc_endpoint().as_str(),
+            issuer.iss().as_str(),
             "https://login.microsoftonline.com/tenant"
         );
     }
@@ -169,10 +170,7 @@ mod tests {
             .expect("Should find issuer by origin");
 
         assert_eq!(issuer.name, "Jans");
-        assert_eq!(
-            issuer.get_oidc_endpoint().as_str(),
-            "https://account.gluu.org/.well-known/openid-configuration"
-        );
+        assert_eq!(issuer.iss().as_str(), "https://account.gluu.org/");
     }
 
     #[test]
@@ -200,7 +198,7 @@ mod tests {
 
         assert_eq!(issuer.name, "Company");
         assert_eq!(
-            issuer.get_oidc_endpoint().as_str(),
+            issuer.iss().as_str(),
             "https://auth.company.internal:8443/oauth"
         );
     }

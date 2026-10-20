@@ -120,9 +120,9 @@ pub(crate) struct LegacyTrustedIssuer {
     #[serde(
         rename = "openid_configuration_endpoint",
         alias = "configuration_endpoint",
-        deserialize_with = "de_oidc_endpoint_url"
+        deserialize_with = "de_discovery_endpoint"
     )]
-    oidc_endpoint: Url,
+    discovery: DiscoveryEndpoint,
     #[serde(default, deserialize_with = "de_token_metadata")]
     pub(crate) token_metadata: HashMap<String, LegacyTokenEntityMetadata>,
 }
@@ -151,14 +151,23 @@ where
     Ok(tokens)
 }
 
-fn de_oidc_endpoint_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
+/// A discovery URL and the `iss` derived from it at parse time.
+#[derive(Debug, Clone, PartialEq)]
+struct DiscoveryEndpoint {
+    configuration: Url,
+    iss: Url,
+}
+
+fn de_discovery_endpoint<'de, D>(deserializer: D) -> Result<DiscoveryEndpoint, D::Error>
 where
     D: Deserializer<'de>,
 {
     let url_str = String::deserialize(deserializer)?;
-    Url::parse(&url_str).map_err(|_| {
+    let configuration = Url::parse(&url_str).map_err(|_| {
         de::Error::custom("the `\"openid_configuration_endpoint\"` or `\"configuration_endpoint\"` is not a valid url")
-    })
+    })?;
+    let iss = super::iss_from_configuration(&configuration).map_err(de::Error::custom)?;
+    Ok(DiscoveryEndpoint { configuration, iss })
 }
 
 impl From<LegacyTrustedIssuer> for super::TrustedIssuer {
@@ -166,7 +175,10 @@ impl From<LegacyTrustedIssuer> for super::TrustedIssuer {
         super::TrustedIssuer::new(
             v.name,
             v.description,
-            v.oidc_endpoint,
+            v.discovery.iss,
+            super::KeySource::Discovery {
+                configuration: v.discovery.configuration,
+            },
             v.token_metadata
                 .into_values()
                 .filter(|token| token.trusted)

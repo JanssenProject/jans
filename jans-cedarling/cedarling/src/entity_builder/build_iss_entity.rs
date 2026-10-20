@@ -20,7 +20,7 @@ pub(super) fn build_iss_entity(
     iss: &TrustedIssuer,
     schema: Option<&MappingSchema>,
 ) -> Result<(Origin, Entity), BuildEntityError> {
-    let origin = iss.get_oidc_endpoint().origin();
+    let origin = iss.iss().origin();
 
     let attrs_shape = schema
         .as_ref()
@@ -48,13 +48,13 @@ impl TrustedIssuer {
     /// This currently hard-coded since we don't have specifications yet on
     /// how to configure this using the policy store.
     fn entity_attr_srcs(&self) -> HashMap<String, Value> {
-        let oidc_endpoint = &self.get_oidc_endpoint();
+        let iss = self.iss();
         HashMap::from([(
             "issuer_entity_id".into(),
             json!({
-                "host": oidc_endpoint.host().map(|h| h.to_smolstr()),
+                "host": iss.host().map(|h| h.to_smolstr()),
                 "path": "/",
-                "protocol": oidc_endpoint.scheme(),
+                "protocol": iss.scheme(),
             }),
         )])
     }
@@ -73,7 +73,7 @@ mod test {
     use crate::entity_builder::schema::MappingSchema;
 
     fn test_trusted_issuer() -> TrustedIssuer {
-        TrustedIssuer::new(
+        TrustedIssuer::discovery_at(
             "some_iss".to_string(),
             "some_desc".to_string(),
             Url::parse("https://test.jans.org").unwrap(),

@@ -978,7 +978,9 @@ mod test {
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
     use crate::authz::request::TokenInput;
     use crate::common::policy_store::TokenEntityMetadata;
-    use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata};
+    use crate::common::policy_store::{
+        CustomIssuerMetadata, CustomTokenMetadata, KeySource, TrustedIssuer,
+    };
     use crate::http::HttpClient;
     use crate::http::HttpClientConfig;
     use crate::{DropReason, DroppedToken};
@@ -991,6 +993,7 @@ mod test {
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::time::Duration;
     use tokio::test;
+    use url::Url;
 
     static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
         HttpClient::new(HttpClientConfig {
@@ -1571,6 +1574,94 @@ mod test {
         // Verify the tokens have the correct mapping
         assert!(validated_tokens.contains_key("Jans::Access_Token"));
         assert!(validated_tokens.contains_key("Jans::Id_Token"));
+    }
+
+    /// A static issuer validates tokens carrying its configured `iss`, without a
+    /// discovery request, and drops one signed by its keys under another `iss`.
+    #[test]
+    async fn static_issuer_validates_only_its_configured_iss() {
+        let mut server = mockito::Server::new_async().await;
+        let keys = generate_keypair_hs256(Some("static_key")).expect("should generate keys");
+        let jwks = server
+            .mock("GET", "/keys")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                json!({ "keys": generate_jwks(std::slice::from_ref(&keys)).keys }).to_string(),
+            )
+            .expect(1)
+            .create();
+        let discovery = server
+            .mock("GET", "/.well-known/openid-configuration")
+            .expect(0)
+            .create();
+        let iss = server.url();
+        let issuer = TrustedIssuer::new(
+            "Partner".into(),
+            String::new(),
+            Url::parse(&iss).expect("valid url"),
+            KeySource::Static {
+                jwks: Url::parse(&format!("{iss}/keys")).expect("valid url"),
+            },
+            HashMap::from([(
+                "Partner::Access_token".to_string(),
+                TokenEntityMetadata::builder().build(),
+            )]),
+        );
+        let svc = JwtService::new(
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
+            },
+            Some(HashMap::from([("partner".to_string(), issuer)])),
+            None,
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
+        )
+        .await
+        .expect("a static issuer should load");
+
+        let token = |iss: &str| {
+            generate_token_using_claims(
+                &json!({ "iss": iss, "sub": "user", "jti": "1", "exp": u64::MAX }),
+                &keys,
+            )
+            .expect("should sign token")
+        };
+        let tokens = vec![
+            TokenInput::new("Partner::Access_token".to_string(), token(&iss)),
+            TokenInput::new(
+                "Partner::Access_token".to_string(),
+                token("https://other.example"),
+            ),
+        ];
+
+        let out = svc
+            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .await
+            .expect("the token with the configured iss should validate");
+        assert_eq!(
+            out.tokens.get("Partner::Access_token").map(|t| t.index),
+            Some(0),
+            "the token carrying the configured iss should be kept"
+        );
+        assert!(
+            matches!(
+                &out.dropped[..],
+                [DroppedToken {
+                    index: 1,
+                    reason: DropReason::JwtValidationFailed,
+                    ..
+                }]
+            ),
+            "the token with another iss should be dropped, got {:?}",
+            out.dropped
+        );
+        jwks.assert();
+        discovery.assert();
     }
 
     #[test]

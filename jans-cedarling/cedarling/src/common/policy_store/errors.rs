@@ -453,4 +453,9 @@ pub enum TrustedIssuerValidateError {
         key_b: String,
         file: String,
     },
+    #[error("Invalid issuer in file '{file}': {source}")]
+    InvalidConfigurationEndpoint {
+        file: String,
+        source: super::InvalidConfigurationEndpoint,
+    },
 }

@@ -96,13 +96,15 @@ impl PolicyStore {
 fn validate_trusted_issuers_config(
     trusted_issuers: Option<&HashMap<String, TrustedIssuer>>,
 ) -> Result<(), TrustedIssuersValidationError> {
-    let mut oidc_to_issuer: HashMap<String, &str> = HashMap::new();
+    let mut key_source_owners: HashMap<&Url, &str> = HashMap::new();
     let mut entity_type_owners: HashMap<&str, &str> = HashMap::new();
 
     for (issuer_id, trusted_issuer) in trusted_issuers.into_iter().flatten() {
-        let oidc_url = trusted_issuer.oidc_endpoint.to_string();
-        if oidc_to_issuer.insert(oidc_url.clone(), issuer_id).is_some() {
-            return Err(TrustedIssuersValidationError::DuplicateOidcEndpoint { oidc_url });
+        let url = trusted_issuer.key_source.url();
+        if key_source_owners.insert(url, issuer_id).is_some() {
+            return Err(TrustedIssuersValidationError::DuplicateKeySource {
+                url: url.to_string(),
+            });
         }
 
         for entity_type_name in trusted_issuer.token_metadata.keys() {
@@ -126,8 +128,8 @@ fn validate_trusted_issuers_config(
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum TrustedIssuersValidationError {
-    #[error("openid_configuration_endpoint '{oidc_url}' is used by more than one issuer")]
-    DuplicateOidcEndpoint { oidc_url: String },
+    #[error("key source '{url}' is used by more than one issuer")]
+    DuplicateKeySource { url: String },
     #[error(
         "Entity type '{entity_type_name}' declared by more than one issuer: \
          '{issuer_a}' and '{issuer_b}'"
@@ -156,10 +158,61 @@ pub(crate) struct PolicyStoreWithID {
     pub(crate) metadata: Option<metadata::PolicyStoreMetadata>,
 }
 
+/// Path suffix that turns an issuer URL into its discovery URL (OIDC Discovery §4).
+const DISCOVERY_SUFFIX: &str = "/.well-known/openid-configuration";
+
+/// A configuration endpoint the expected `iss` cannot be derived from.
+#[derive(Debug, Clone, PartialEq, thiserror::Error)]
+#[error(
+    "configuration endpoint '{0}' must be the issuer URL followed by \
+     `/.well-known/openid-configuration`, without query or fragment"
+)]
+pub struct InvalidConfigurationEndpoint(String);
+
+/// Derives the expected `iss` from an OIDC discovery URL, keeping any path
+/// before the well-known suffix (OIDC Discovery §4).
+pub(crate) fn iss_from_configuration(
+    configuration: &Url,
+) -> Result<Url, InvalidConfigurationEndpoint> {
+    let invalid = || InvalidConfigurationEndpoint(configuration.to_string());
+    if configuration.query().is_some() || configuration.fragment().is_some() {
+        return Err(invalid());
+    }
+    let issuer_path = configuration
+        .path()
+        .strip_suffix(DISCOVERY_SUFFIX)
+        .ok_or_else(invalid)?;
+    let mut iss = configuration.clone();
+    iss.set_path(issuer_path);
+    Ok(iss)
+}
+
+/// Where an issuer's signing keys come from.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) enum KeySource {
+    /// OIDC discovery; keys come from the discovered `jwks_uri`.
+    Discovery { configuration: Url },
+    /// Keys fetched straight from a JWKS URL, with no discovery request.
+    #[cfg_attr(
+        not(test),
+        expect(dead_code, reason = "only the v2 format builds static issuers")
+    )]
+    Static { jwks: Url },
+}
+
+impl KeySource {
+    /// The URL the issuer is loaded from.
+    pub(crate) fn url(&self) -> &Url {
+        match self {
+            Self::Discovery { configuration } => configuration,
+            Self::Static { jwks } => jwks,
+        }
+    }
+}
+
 /// Represents a trusted issuer that can provide JWTs.
 ///
-/// This struct includes the issuer's name, description, and the `OpenID` configuration endpoint
-/// for discovering issuer-related information.
+/// Holds the `iss` its tokens must carry and where its signing keys come from.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct TrustedIssuer {
     /// The name of the trusted issuer.
@@ -167,11 +220,11 @@ pub(crate) struct TrustedIssuer {
     pub(crate) name: String,
     /// A brief description of the trusted issuer.
     pub(crate) description: String,
-    /// The `OpenID` configuration endpoint for the issuer.
-    ///
-    /// This endpoint is used to obtain information about the issuer's capabilities.
+    /// The `iss` its tokens must carry.
     // Private to force usage of `iss_claim` method to get normalized iss claim
-    oidc_endpoint: Url,
+    iss: Url,
+    /// Where the issuer's signing keys come from.
+    pub(crate) key_source: KeySource,
     /// Metadata for tokens issued by the trusted issuer, keyed by Cedar entity
     /// type (the request `TokenInput.mapping`).
     pub(crate) token_metadata: HashMap<String, TokenEntityMetadata>,
@@ -184,8 +237,11 @@ impl Default for TrustedIssuer {
             name: "Jans".to_string(),
             description: String::default(),
             // This will only really be called during testing so we just put this test value
-            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
-                .unwrap(),
+            iss: Url::parse("https://test.jans.org").unwrap(),
+            key_source: KeySource::Discovery {
+                configuration: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+                    .unwrap(),
+            },
             token_metadata: HashMap::from([
                 (
                     "Jans::Access_token".into(),
@@ -214,32 +270,75 @@ impl TrustedIssuer {
     pub(crate) fn new(
         name: String,
         description: String,
-        oidc_endpoint: Url,
+        iss: Url,
+        key_source: KeySource,
         metadata: HashMap<String, TokenEntityMetadata>,
     ) -> Self {
         Self {
             name,
             description,
-            oidc_endpoint,
+            iss,
+            key_source,
             token_metadata: metadata,
         }
     }
 
-    #[cfg(test)]
-    pub(crate) fn set_oidc_endpoint(&mut self, url: Url) {
-        self.oidc_endpoint = url;
+    /// An issuer loaded through OIDC discovery, with `iss` derived offline
+    /// from `configuration`.
+    pub(crate) fn from_configuration(
+        name: String,
+        description: String,
+        configuration: Url,
+        metadata: HashMap<String, TokenEntityMetadata>,
+    ) -> Result<Self, InvalidConfigurationEndpoint> {
+        let iss = iss_from_configuration(&configuration)?;
+        Ok(Self::new(
+            name,
+            description,
+            iss,
+            KeySource::Discovery { configuration },
+            metadata,
+        ))
     }
 
-    /// Get the OIDC endpoint URL.
-    /// Should be used when we need to make requests to the OIDC endpoint.
-    ///
-    /// If you need comparison with `iss` claim, use `iss_claim` method instead.
-    pub(crate) fn get_oidc_endpoint(&self) -> &Url {
-        &self.oidc_endpoint
+    /// A discovery issuer whose configuration endpoint is `iss` plus the
+    /// well-known suffix.
+    #[cfg(test)]
+    pub(crate) fn discovery_at(
+        name: String,
+        description: String,
+        iss: Url,
+        metadata: HashMap<String, TokenEntityMetadata>,
+    ) -> Self {
+        let configuration = Url::parse(&format!(
+            "{}{DISCOVERY_SUFFIX}",
+            iss.as_str().trim_end_matches('/')
+        ))
+        .expect("test configuration endpoint should be a valid url");
+        Self::new(
+            name,
+            description,
+            iss,
+            KeySource::Discovery { configuration },
+            metadata,
+        )
+    }
+
+    /// Points the issuer at another discovery endpoint, re-deriving `iss`.
+    #[cfg(test)]
+    pub(crate) fn set_configuration_endpoint(&mut self, configuration: Url) {
+        self.iss = iss_from_configuration(&configuration)
+            .expect("test configuration endpoint should derive an iss");
+        self.key_source = KeySource::Discovery { configuration };
+    }
+
+    /// The `iss` its tokens must carry.
+    pub(crate) fn iss(&self) -> &Url {
+        &self.iss
     }
 
     pub(crate) fn iss_claim(&self) -> IssClaim {
-        IssClaim::new(&self.oidc_endpoint.origin().ascii_serialization())
+        IssClaim::new(self.iss.as_str())
     }
 }
 
@@ -917,7 +1016,7 @@ mod validate_trusted_issuers_tests {
 
     /// Builds a [`TrustedIssuer`] declaring the given entity types.
     fn issuer(oidc_endpoint: &str, entity_types: &[&str]) -> TrustedIssuer {
-        TrustedIssuer::new(
+        TrustedIssuer::from_configuration(
             "Test".to_string(),
             String::default(),
             Url::parse(oidc_endpoint).expect("test oidc endpoint should be a valid url"),
@@ -931,6 +1030,7 @@ mod validate_trusted_issuers_tests {
                 })
                 .collect(),
         )
+        .expect("test oidc endpoint should derive an iss")
     }
 
     #[test]
@@ -994,7 +1094,7 @@ mod validate_trusted_issuers_tests {
     }
 
     #[test]
-    fn rejects_duplicate_oidc_endpoint() {
+    fn rejects_duplicate_key_source() {
         let oidc = "https://idp.example/.well-known/openid-configuration";
         let issuers = HashMap::from([
             ("alpha".to_string(), issuer(oidc, &["Jans::Access_token"])),
@@ -1002,13 +1102,75 @@ mod validate_trusted_issuers_tests {
         ]);
 
         let err = validate_trusted_issuers_config(Some(&issuers))
-            .expect_err("duplicate oidc endpoint must be rejected");
+            .expect_err("duplicate key source must be rejected");
         assert!(
             matches!(
                 &err,
-                TrustedIssuersValidationError::DuplicateOidcEndpoint { .. }
+                TrustedIssuersValidationError::DuplicateKeySource { url } if url == oidc
             ),
-            "expected TrustedIssuersValidationError::DuplicateOidcEndpoint, got: {err}"
+            "expected DuplicateKeySource naming the endpoint, got: {err}"
         );
+    }
+}
+
+#[cfg(test)]
+mod iss_from_configuration_tests {
+    use super::*;
+
+    fn derive(configuration: &str) -> Result<Url, InvalidConfigurationEndpoint> {
+        iss_from_configuration(&Url::parse(configuration).expect("test url should parse"))
+    }
+
+    #[test]
+    fn root_issuer_keeps_origin() {
+        let iss = derive("https://idp.example/.well-known/openid-configuration")
+            .expect("a root discovery URL should derive an iss");
+        assert_eq!(
+            IssClaim::new(iss.as_str()),
+            IssClaim::new("https://idp.example"),
+            "a root issuer should derive its origin"
+        );
+    }
+
+    #[test]
+    fn path_before_suffix_is_kept() {
+        for (configuration, expected) in [
+            (
+                "https://kc.example/realms/a/.well-known/openid-configuration",
+                "https://kc.example/realms/a",
+            ),
+            (
+                "https://login.microsoftonline.com/tenant-1/v2.0/.well-known/openid-configuration",
+                "https://login.microsoftonline.com/tenant-1/v2.0",
+            ),
+        ] {
+            let iss = derive(configuration).expect("a path-based discovery URL should derive");
+            assert_eq!(
+                iss.as_str(),
+                expected,
+                "{configuration} should keep the issuer path"
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_url_not_of_discovery_shape() {
+        for configuration in [
+            "https://idp.example",
+            "https://idp.example/auth",
+            "https://idp.example/.well-known/openid-configuration/extra",
+            "https://idp.example/.well-known/openid-configuration?tenant=a",
+            "https://idp.example/.well-known/openid-configuration#frag",
+        ] {
+            let err = derive(configuration)
+                .expect_err("a URL not of the discovery shape must be rejected");
+            assert_eq!(
+                err,
+                InvalidConfigurationEndpoint(
+                    Url::parse(configuration).expect("valid url").to_string()
+                ),
+                "the error should name {configuration}"
+            );
+        }
     }
 }

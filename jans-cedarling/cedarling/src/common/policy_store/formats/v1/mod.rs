@@ -134,7 +134,9 @@ fn trusted_issuers_into_runtime(
         return Ok(None);
     }
     IssuerParser::validate_issuers(&issuers).map_err(ConversionError::TrustedIssuerValidation)?;
-    Ok(Some(IssuerParser::create_issuer_map(issuers)))
+    let issuers = IssuerParser::create_issuer_map(issuers)
+        .map_err(|e| ConversionError::TrustedIssuerValidation(vec![e]))?;
+    Ok(Some(issuers))
 }
 
 /// Rejects duplicate custom issuer ids across files.

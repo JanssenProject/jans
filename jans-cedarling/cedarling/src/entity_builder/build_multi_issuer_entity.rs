@@ -591,7 +591,7 @@ mod tests {
         let mut trusted_issuers = HashMap::new();
 
         // Add Acme issuer
-        let acme_issuer = TrustedIssuer::new(
+        let acme_issuer = TrustedIssuer::discovery_at(
             "Acme".to_string(),
             "Acme Corporation".to_string(),
             Url::parse("https://idp.acme.com/auth").unwrap(),
@@ -600,7 +600,7 @@ mod tests {
         trusted_issuers.insert("acme".to_string(), acme_issuer);
 
         // Add Dolphin issuer
-        let dolphin_issuer = TrustedIssuer::new(
+        let dolphin_issuer = TrustedIssuer::discovery_at(
             "Dolphin".to_string(),
             "Dolphin Sea Services".to_string(),
             Url::parse("https://idp.dolphin.sea/auth").unwrap(),
@@ -609,7 +609,7 @@ mod tests {
         trusted_issuers.insert("dolphin".to_string(), dolphin_issuer);
 
         // Add Microsoft issuer
-        let microsoft_issuer = TrustedIssuer::new(
+        let microsoft_issuer = TrustedIssuer::discovery_at(
             "Microsoft".to_string(),
             "Microsoft Azure AD".to_string(),
             Url::parse("https://login.microsoftonline.com/tenant").unwrap(),
@@ -618,7 +618,7 @@ mod tests {
         trusted_issuers.insert("microsoft".to_string(), microsoft_issuer);
 
         // Add Company issuer
-        let company_issuer = TrustedIssuer::new(
+        let company_issuer = TrustedIssuer::discovery_at(
             "Company".to_string(),
             "Company Internal Auth".to_string(),
             Url::parse("https://auth.company.internal:8443/oauth").unwrap(),
@@ -963,7 +963,7 @@ mod tests {
         let validator_schema = cedar_policy_core::validator::ValidatorSchema::from_str(schema_src)
             .expect("should parse schema");
 
-        let ti = TrustedIssuer::new(
+        let ti = TrustedIssuer::discovery_at(
             "Jans".to_string(),
             String::new(),
             Url::parse("https://test.issuer.com").unwrap(),
@@ -1143,13 +1143,14 @@ mod tests {
         let validator_schema = cedar_policy_core::validator::ValidatorSchema::from_str(schema_src)
             .expect("should parse schema");
 
-        let ti = TrustedIssuer::new(
+        let ti = TrustedIssuer::from_configuration(
             "Jans".to_string(),
             String::new(),
             Url::parse("https://test.issuer.com/.well-known/openid-configuration")
                 .expect("url should be parsed"),
             HashMap::new(),
-        );
+        )
+        .expect("test configuration endpoint should derive an iss");
 
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
@@ -1224,7 +1225,7 @@ mod tests {
             .build();
         let mut token_metadata = HashMap::new();
         token_metadata.insert("Jans::Access_Token".into(), tkn_meta);
-        let ti = TrustedIssuer::new(
+        let ti = TrustedIssuer::discovery_at(
             "TestIssuer".to_string(),
             String::new(),
             Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
@@ -1327,7 +1328,7 @@ mod tests {
             .build();
         let mut token_metadata = HashMap::new();
         token_metadata.insert("Jans::Access_Token".into(), tkn_meta);
-        let ti = TrustedIssuer::new(
+        let ti = TrustedIssuer::discovery_at(
             "Jans".to_string(),
             String::new(),
             Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
@@ -1450,7 +1451,7 @@ mod tests {
             .build();
         let mut token_metadata = HashMap::new();
         token_metadata.insert("Jans::Access_Token".into(), tkn_meta);
-        let ti = TrustedIssuer::new(
+        let ti = TrustedIssuer::discovery_at(
             "Jans".to_string(),
             String::new(),
             Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),

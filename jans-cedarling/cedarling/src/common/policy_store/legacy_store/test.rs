@@ -352,6 +352,36 @@ fn test_trusted_issuer_entity_type_declared_twice_is_rejected() {
 }
 
 #[test]
+fn test_trusted_issuer_endpoint_without_discovery_suffix_is_rejected() {
+    let schema = base64::prelude::BASE64_STANDARD.encode("{}");
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": schema,
+                "policies": {},
+                "trusted_issuers": {
+                    "jans": {
+                        "name": "Jans",
+                        "description": "test",
+                        "openid_configuration_endpoint": "https://jans.test/auth"
+                    }
+                }
+            }
+        }
+    });
+
+    let err = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string())
+        .expect_err("an endpoint the iss cannot be derived from must be rejected");
+    assert!(
+        err.to_string()
+            .contains("configuration endpoint 'https://jans.test/auth' must be the issuer URL"),
+        "error should name the endpoint, got: {err}"
+    );
+}
+
+#[test]
 fn test_invalid_trusted_issuers_format() {
     let schema = base64::prelude::BASE64_STANDARD.encode("{}");
     let json = json!({

@@ -140,12 +140,13 @@ mod tests {
         );
         token_metadata.insert("id_token".to_string(), TokenEntityMetadata::id_token());
 
-        TrustedIssuer::new(
+        TrustedIssuer::from_configuration(
             format!("Test Issuer {id}"),
             "Test issuer for validation".to_string(),
             Url::parse(endpoint).unwrap(),
             token_metadata,
         )
+        .expect("test configuration endpoint should derive an iss")
     }
 
     #[test]
