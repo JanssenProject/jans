@@ -250,9 +250,9 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 			checkEnabled();
 			checlStart(start);
 			requireCountInRange(count);
-			String storeId = StringUtils.trimToNull(policyStoreId);
-			String version = StringUtils.trimToNull(policyStoreVersion);
-			String hash = StringUtils.trimToNull(bundleHash);
+			String storeId = blankToNull(policyStoreId);
+			String version = blankToNull(policyStoreVersion);
+			String hash = blankToNull(bundleHash);
 			if (storeId == null && hash == null) {
 				throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_MISSING_POLICY_FILTER);
 			}
@@ -279,6 +279,10 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		} finally {
 			applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
 		}
+	}
+
+	private static String blankToNull(String value) {
+		return StringUtils.isBlank(value) ? null : value;
 	}
 
 	private static Long parseTimestamp(String value, String fieldName) {

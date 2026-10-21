@@ -70,6 +70,30 @@ class LogEntryTest {
 	}
 
 	@Test
+	void indexContextInformation_oversizedExplicitValues_replacedFromContextOrDropped() {
+		Map<String, String> context = new HashMap<>();
+		context.put("request_id", "from-context");
+		LogEntry entry = withContext(context);
+		entry.setRequestId("r".repeat(LogEntry.MAX_REQUEST_ID_LENGTH + 1));
+		entry.setPolicyStoreId("s".repeat(LogEntry.MAX_POLICY_STORE_FIELD_LENGTH + 1));
+
+		entry.indexContextInformation();
+
+		assertEquals("from-context", entry.getRequestId());
+		assertNull(entry.getPolicyStoreId());
+	}
+
+	@Test
+	void indexContextInformation_noContext_keepsFittingExplicitValue() {
+		LogEntry entry = new LogEntry();
+		entry.setPolicyStoreVersion("1.0.0");
+
+		entry.indexContextInformation();
+
+		assertEquals("1.0.0", entry.getPolicyStoreVersion());
+	}
+
+	@Test
 	void indexContextInformation_noContext_noChange() {
 		LogEntry entry = new LogEntry();
 

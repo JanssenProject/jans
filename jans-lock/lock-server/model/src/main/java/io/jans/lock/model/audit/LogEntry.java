@@ -261,24 +261,23 @@ public class LogEntry extends BaseEntry implements Serializable {
 	}
 
 	/**
-	 * Copies {@code request_id}, {@code policystore_id} and {@code policystore_version} from
-	 * {@code contextInformation} into the indexed members that are still empty. A value longer
-	 * than its column is not indexed.
+	 * Settles the indexed members before persistence. An explicit value is kept when it fits its
+	 * column; otherwise {@code request_id}, {@code policystore_id} or {@code policystore_version}
+	 * from {@code contextInformation} is used when it fits. A value that is empty or longer than
+	 * its column is never indexed.
 	 */
 	public void indexContextInformation() {
-		if (contextInformation == null) {
-			return;
+		requestId = indexed(requestId, CONTEXT_REQUEST_ID, MAX_REQUEST_ID_LENGTH);
+		policyStoreId = indexed(policyStoreId, CONTEXT_POLICY_STORE_ID, MAX_POLICY_STORE_FIELD_LENGTH);
+		policyStoreVersion = indexed(policyStoreVersion, CONTEXT_POLICY_STORE_VERSION, MAX_POLICY_STORE_FIELD_LENGTH);
+	}
+
+	private String indexed(String explicit, String contextKey, int maxLength) {
+		String value = indexable(explicit, maxLength);
+		if (value == null && contextInformation != null) {
+			value = indexable(contextInformation.get(contextKey), maxLength);
 		}
-		if (requestId == null) {
-			requestId = indexable(contextInformation.get(CONTEXT_REQUEST_ID), MAX_REQUEST_ID_LENGTH);
-		}
-		if (policyStoreId == null) {
-			policyStoreId = indexable(contextInformation.get(CONTEXT_POLICY_STORE_ID), MAX_POLICY_STORE_FIELD_LENGTH);
-		}
-		if (policyStoreVersion == null) {
-			policyStoreVersion = indexable(contextInformation.get(CONTEXT_POLICY_STORE_VERSION),
-					MAX_POLICY_STORE_FIELD_LENGTH);
-		}
+		return value;
 	}
 
 	private static String indexable(String value, int maxLength) {

@@ -236,7 +236,6 @@ public class AuditService {
         if (logEntry == null) {
             return logEntry;
         }
-        logEntry.indexContextInformation();
         String inum = logEntry.getInum();
         if (StringUtils.isBlank(inum)) {
             inum = this.generateInumForEntry("log", LogEntry.class);
@@ -273,7 +272,7 @@ public class AuditService {
    
     private static void addEqualityFilter(List<Filter> filters, String attribute, String value) {
         if (StringUtils.isNotBlank(value)) {
-            filters.add(Filter.createEqualityFilter(attribute, value.trim()));
+            filters.add(Filter.createEqualityFilter(attribute, value));
         }
     }
 

@@ -42,8 +42,6 @@ public class AuditService {
 			return;
 		}
 
-		logEntry.indexContextInformation();
-
 		String inum = this.generateInumForEntry(DN_LOG_FORMAT, LogEntry.class);
 		logEntry.setInum(inum);
 		logEntry.setDn(this.getDnForLogEntry(inum));

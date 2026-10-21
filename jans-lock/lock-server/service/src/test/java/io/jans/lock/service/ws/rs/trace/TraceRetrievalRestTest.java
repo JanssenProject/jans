@@ -484,6 +484,19 @@ class TraceRetrievalRestTest extends BaseLockServiceTest {
 	}
 
 	@Test
+	void testSearchRecords_PaddedValue_MatchedExactly() throws Exception {
+		insertPolicyRecord("domain-a", "record-1", 1, 1000L, " store-1 ", "1.0.0", HASH_A);
+		insertPolicyRecord("domain-a", "record-2", 2, 2000L, "store-1", "1.0.0", HASH_A);
+		boundToDomain("domain-a");
+
+		TraceRecordSearchResponse dto = (TraceRecordSearchResponse) impl
+				.searchRecords(" store-1 ", null, null, null, null, 0, 100).getEntity();
+
+		assertEquals(List.of("record-1"),
+				dto.getRecords().stream().map(TraceRecordResponse::getRecordId).collect(java.util.stream.Collectors.toList()));
+	}
+
+	@Test
 	void testSearchRecords_ReceivedRange_IsInclusive() throws Exception {
 		insertPolicyRecord("domain-a", "record-1", 1, 1000L, "store-1", "1.0.0", HASH_A);
 		insertPolicyRecord("domain-a", "record-2", 2, 2000L, "store-1", "1.0.0", HASH_A);
