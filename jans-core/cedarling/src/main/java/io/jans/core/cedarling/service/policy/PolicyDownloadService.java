@@ -24,10 +24,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -95,7 +94,7 @@ public class PolicyDownloadService {
 
 	private ObjectMapper objectMapper;
 
-	private Map<String, LoadedPolicySource> loadedPolicySourcesUris;
+	private volatile Map<String, LoadedPolicySource> loadedPolicySourcesUris = Collections.emptyMap();
 
 	private AtomicBoolean isActive;
 
@@ -105,7 +104,7 @@ public class PolicyDownloadService {
 		this.isActive = new AtomicBoolean(false);
 
 		this.objectMapper = new ObjectMapper();	
-		this.loadedPolicySourcesUris = new HashMap<>();
+		this.loadedPolicySourcesUris = Collections.emptyMap();
 	}
 
 	public void initTimer() {
@@ -152,7 +151,7 @@ public class PolicyDownloadService {
 			return;
 		}
 
-		List<String> downloadedPolicies = new ArrayList<>();
+		Map<String, LoadedPolicySource> reloaded = new LinkedHashMap<>();
 		for(PolicySource policySource : cedarlingConfiguration.getPolicySources()) {
 			// Load policy source from specified source
 			List<LoadedPolicySource> loadedPolicySources = loadPolicy(policySource);
@@ -162,27 +161,16 @@ public class PolicyDownloadService {
 
 			for(LoadedPolicySource loadedPolicySource : loadedPolicySources) {
 				String policyStoreUri = loadedPolicySource.getPolicyStoreUri();
-				if (downloadedPolicies.contains(policyStoreUri)) {
+				if (reloaded.put(policyStoreUri, loadedPolicySource) != null) {
 					log.warn("Policy '{}' from '{}' replaces a policy loaded from another source", policyStoreUri, loadedPolicySource.getSourceUri());
 				}
-
-				// Collect list of policyStoreUris
-				downloadedPolicies.add(policyStoreUri);
-
-				// Update loadedPolicySourcesUris
-				loadedPolicySourcesUris.put(policyStoreUri, loadedPolicySource);
 			}
 		}
 
-		// Remove unloaded policy Uris 
-		for (Iterator<Entry<String, LoadedPolicySource>> it = loadedPolicySourcesUris.entrySet().iterator(); it.hasNext();) {
-			Entry<String, LoadedPolicySource> item = it.next();
-			if (!downloadedPolicies.contains(item.getKey())) {
-				it.remove();
-			}
-		}
+		// Readers see either the previous or the new set, never a partial reload
+		loadedPolicySourcesUris = Collections.unmodifiableMap(reloaded);
 
-		log.debug("End URIs policies reload. Count policies: {}", loadedPolicySourcesUris.size());
+		log.debug("End URIs policies reload. Count policies: {}", reloaded.size());
 	}
 
 	private List<LoadedPolicySource> loadPolicy(PolicySource policySource) {
@@ -434,14 +422,10 @@ public class PolicyDownloadService {
 	}
 
 	private void cleanAllPolicies() {
-		loadedPolicySourcesUris.clear();
+		loadedPolicySourcesUris = Collections.emptyMap();
 	}
 
 	public Map<String, LoadedPolicySource> getLoadedPolicies() {
-		if (loadedPolicySourcesUris == null) {
-			return new HashMap<>();
-		}
-
 		return new HashMap<>(loadedPolicySourcesUris);
 	}
 
