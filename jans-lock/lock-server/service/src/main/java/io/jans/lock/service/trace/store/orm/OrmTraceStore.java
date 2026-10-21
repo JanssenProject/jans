@@ -30,6 +30,7 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.ReceiptHead;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -69,6 +70,9 @@ public class OrmTraceStore implements TraceStore {
 	private static final String ATTR_RECEIPT_STATE = "jansTraceReceiptState";
 	private static final String ATTR_RECEIVED_AT_MS = "jansTraceReceivedAtMs";
 	private static final String ATTR_PRODUCER_ID = "jansTraceProducerId";
+	private static final String ATTR_POLICY_STORE_ID = "jansTracePolicyStoreId";
+	private static final String ATTR_POLICY_STORE_VERSION = "jansTracePolicyStoreVersion";
+	private static final String ATTR_BUNDLE_HASH = "jansTraceBundleHash";
 
 	/**
 	 * Bound on {@code updateReceiptState}/{@code revokeProducerKey}'s internal, caller-invisible
@@ -258,6 +262,34 @@ public class OrmTraceStore implements TraceStore {
 		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
 				Filter.createEqualityFilter(ATTR_TOKEN_KEYS, key).multiValued());
 		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
+	}
+
+	@Override
+	public List<StoredTraceRecord> findRecordsByPolicy(String domainId, PolicyRecordQuery query, int start, int count) {
+		if (count <= 0) {
+			return Collections.emptyList();
+		}
+		List<Filter> filters = new ArrayList<>();
+		filters.add(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId));
+		if (query.getPolicyStoreId() != null) {
+			filters.add(Filter.createEqualityFilter(ATTR_POLICY_STORE_ID, query.getPolicyStoreId()));
+		}
+		if (query.getPolicyStoreVersion() != null) {
+			filters.add(Filter.createEqualityFilter(ATTR_POLICY_STORE_VERSION, query.getPolicyStoreVersion()));
+		}
+		if (query.getBundleHash() != null) {
+			filters.add(Filter.createEqualityFilter(ATTR_BUNDLE_HASH, query.getBundleHash()));
+		}
+		if (query.getReceivedFromMs() != null) {
+			filters.add(Filter.createGreaterOrEqualFilter(ATTR_RECEIVED_AT_MS, query.getReceivedFromMs()));
+		}
+		if (query.getReceivedToMs() != null) {
+			filters.add(Filter.createLessOrEqualFilter(ATTR_RECEIVED_AT_MS, query.getReceivedToMs()));
+		}
+		PagedResult<TraceRecordEntry> paged = persistenceEntryManager.findPagedEntries(recordsBase(),
+				TraceRecordEntry.class, Filter.createANDFilter(filters), null, ATTR_RECEIPT_SEQ, SortOrder.ASCENDING,
+				Math.max(0, start), count, count);
+		return toStoredList(paged.getEntries());
 	}
 
 	@Override

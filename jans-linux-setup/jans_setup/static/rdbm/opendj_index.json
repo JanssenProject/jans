@@ -369,6 +369,27 @@
     },
 
     {
+        "attribute": "jansTracePolicyStoreId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTracePolicyStoreVersion",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceBundleHash",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
         "attribute": "jansTraceReceiptSeq",
         "type": "integer",
         "index": ["ordering"],

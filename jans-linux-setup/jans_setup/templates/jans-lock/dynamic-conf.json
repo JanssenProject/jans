@@ -54,6 +54,7 @@
 		"maxBulkRequestBytes": 4194304,
 		"correlationRetryLimit": 3,
 		"chainRegistrationMode": "PRE_REGISTERED",
-		"cryptoProvider": "JAVA"
+		"cryptoProvider": "JAVA",
+		"rejectPolicyMismatch": false
 	}
 }

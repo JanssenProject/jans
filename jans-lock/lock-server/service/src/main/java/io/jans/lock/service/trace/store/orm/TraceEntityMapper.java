@@ -23,6 +23,7 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.ReceiptEntry;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -95,7 +96,14 @@ final class TraceEntityMapper {
 		entity.setChainLinkFailure(flags.isChainLinkFailure());
 		entity.setEquivocation(flags.isEquivocation());
 		entity.setLate(flags.isLate());
+		entity.setPolicyMismatch(flags.isPolicyMismatch());
 		entity.setNodeId(record.getNodeId());
+		PolicyRef policy = record.getPolicy();
+		if (policy != null) {
+			entity.setPolicyStoreId(policy.getPolicyStoreId());
+			entity.setPolicyStoreVersion(policy.getPolicyStoreVersion());
+			entity.setBundleHash(policy.getBundleHash());
+		}
 		entity.setVersion(record.getVersion());
 		entity.setCreationDate(new Date(record.getCreatedAtMs()));
 		return entity;
@@ -118,13 +126,22 @@ final class TraceEntityMapper {
 		ReceiptEntry receipt = new ReceiptEntry(nvl(entity.getReceiptSeq()), nvl(entity.getReceivedAtMs()),
 				entity.getPrevReceiptHash(), entity.getReceiptHash());
 		IngestionFlags flags = new IngestionFlags(nvl(entity.getCoverageGap()), nvl(entity.getChainLinkFailure()),
-				nvl(entity.getEquivocation()), nvl(entity.getLate()));
+				nvl(entity.getEquivocation()), nvl(entity.getLate()), nvl(entity.getPolicyMismatch()));
 
 		long createdAtMs = entity.getCreationDate() == null ? 0L : entity.getCreationDate().getTime();
 
 		return new StoredTraceRecord(identity, entity.getAssertion(), entity.getContentDigest(), verification,
 				receipt, flags, execution, chainPosition, entity.getPrevRecordHash(), tokenRefs, entity.getEventKind(),
-				nvl(entity.getSignedAt()), entity.getNodeId(), createdAtMs, nvl(entity.getVersion()));
+				nvl(entity.getSignedAt()), entity.getNodeId(), createdAtMs, nvl(entity.getVersion()),
+				toPolicyRef(entity));
+	}
+
+	private static PolicyRef toPolicyRef(TraceRecordEntry entity) {
+		if (entity.getPolicyStoreId() == null || entity.getPolicyStoreVersion() == null
+				|| entity.getBundleHash() == null) {
+			return null;
+		}
+		return new PolicyRef(entity.getPolicyStoreId(), entity.getPolicyStoreVersion(), entity.getBundleHash());
 	}
 
 	private static TraceVerification toVerificationPojo(VerificationResult verification) {

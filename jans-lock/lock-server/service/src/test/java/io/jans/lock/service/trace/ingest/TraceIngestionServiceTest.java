@@ -61,6 +61,7 @@ import io.jans.lock.service.trace.receipt.TraceReceiptChain;
 import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.registry.ProducerKeyRegistry;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
+import io.jans.lock.service.trace.testkit.PolicyMismatchChecks;
 import io.jans.lock.service.trace.testkit.SignedAssertionFactory;
 import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
@@ -156,6 +157,7 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		setField(correlation, "chainRegistry", chainRegistry);
 		setField(correlation, "appConfiguration", appConfiguration);
 		setField(correlation, "traceKeys", traceKeys);
+		setField(correlation, "policyMismatchCheck", PolicyMismatchChecks.none(appConfiguration));
 
 		TraceReceiptChain receiptChain = new TraceReceiptChain();
 		setField(receiptChain, "log", LoggerFactory.getLogger(TraceReceiptChain.class));

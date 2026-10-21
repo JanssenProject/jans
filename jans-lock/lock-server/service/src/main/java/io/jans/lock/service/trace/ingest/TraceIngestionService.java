@@ -140,17 +140,17 @@ public class TraceIngestionService {
 				plan.getExecution(), plan.getPosition(), verified.getInputs().getChainPosition().getPrevRecordHash(),
 				verified.getInputs().getTokenRefs(),
 				verified.getInputs().getEventKind(), verified.getInputs().getSignedAt(), ctx.getNodeId(),
-				ctx.getReceivedAtMs(), 0L);
+				ctx.getReceivedAtMs(), 0L, verified.getInputs().getPolicy());
 	}
 
 	private void logAcceptance(StoredTraceRecord record, boolean replay) {
 		log.info(
 				"TRACE record accepted: producer={}, record_id={}, receipt_sequence={}, coverage_gap={}, "
-						+ "chain_link_failure={}, equivocation={}, late={}, replay={}",
+						+ "chain_link_failure={}, equivocation={}, late={}, policy_mismatch={}, replay={}",
 				record.getIdentity().getProducerId(), record.getIdentity().getRecordId(),
 				record.getReceipt().getReceiptSequence(), record.getFlags().isCoverageGap(),
 				record.getFlags().isChainLinkFailure(), record.getFlags().isEquivocation(),
-				record.getFlags().isLate(), replay);
+				record.getFlags().isLate(), record.getFlags().isPolicyMismatch(), replay);
 	}
 
 	private static boolean digestsEqual(String a, String b) {

@@ -15,6 +15,7 @@ import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
+import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.store.TraceStore;
@@ -97,6 +98,15 @@ public class TraceRetrievalService {
 			throw new TraceValidationException(TraceErrorResponseType.EXECUTION_NOT_FOUND, REASON_EXECUTION_NOT_FOUND);
 		}
 		return new ExecutionResult(authority, records);
+	}
+
+	/**
+	 * @return the domain's records naming the queried policy store release, in receipt order; an
+	 *         empty list when nothing matches
+	 */
+	public List<StoredTraceRecord> findRecordsByPolicy(String domainId, PolicyRecordQuery query, int start,
+			int count) {
+		return traceStore.findRecordsByPolicy(domainId, query, start, count);
 	}
 
 	private String resolveSoleAuthority(String domainId, String traceExecutionId) {

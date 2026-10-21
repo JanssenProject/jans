@@ -77,6 +77,10 @@ public class TraceBulkResultEntry {
 	@Schema(description = "Present when accepted: true when the record arrived after the configured lateness threshold")
 	private Boolean lateFlag;
 
+	@JsonProperty("policy_mismatch_flag")
+	@Schema(description = "Present when accepted: true when trace.policy names a policy store Lock serves but its bundle_hash or policy_store_version differs from the served release")
+	private Boolean policyMismatchFlag;
+
 	@JsonProperty("error")
 	@Schema(description = "Present when accepted=false: the structured error for this item only")
 	private TraceErrorResponse error;
@@ -175,6 +179,14 @@ public class TraceBulkResultEntry {
 
 	public void setLateFlag(Boolean lateFlag) {
 		this.lateFlag = lateFlag;
+	}
+
+	public Boolean getPolicyMismatchFlag() {
+		return policyMismatchFlag;
+	}
+
+	public void setPolicyMismatchFlag(Boolean policyMismatchFlag) {
+		this.policyMismatchFlag = policyMismatchFlag;
 	}
 
 	public TraceErrorResponse getError() {

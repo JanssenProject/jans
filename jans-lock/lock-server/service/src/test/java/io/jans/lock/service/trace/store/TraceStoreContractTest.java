@@ -33,6 +33,8 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRecordQuery;
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.ReceiptHead;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -277,6 +279,47 @@ public abstract class TraceStoreContractTest {
 		assertEquals(2, page.size());
 		assertEquals("record-3", page.get(0).getIdentity().getRecordId());
 		assertEquals("record-4", page.get(1).getIdentity().getRecordId());
+	}
+
+	// -- records: policy store release search ----------------------------------------------------
+
+	private static StoredTraceRecord withPolicy(StoredTraceRecord r, PolicyRef policy) {
+		return new StoredTraceRecord(r.getIdentity(), r.getAssertionRaw(), r.getContentDigest(), r.getVerification(),
+				r.getReceipt(), r.getFlags(), r.getExecution(), r.getChainPosition(), r.getPrevRecordHash(),
+				r.getTokenRefs(), r.getEventKind(), r.getSignedAt(), r.getNodeId(), r.getCreatedAtMs(), r.getVersion(),
+				policy);
+	}
+
+	private static List<String> recordIds(List<StoredTraceRecord> records) {
+		return records.stream().map(r -> r.getIdentity().getRecordId()).collect(java.util.stream.Collectors.toList());
+	}
+
+	@Test
+	void testFindRecordsByPolicy_filtersByReleaseAndReceivedRange() throws Exception {
+		String hash1 = "sha256:" + "1".repeat(64);
+		String hash2 = "sha256:" + "2".repeat(64);
+		PolicyRef v1 = new PolicyRef("store-1", "1.0.0", hash1);
+		store.insertRecord(withPolicy(newRecord("producer-1", "record-2", "authority-1", "exec-1", 1L, 20L), v1));
+		store.insertRecord(withPolicy(newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 10L), v1));
+		store.insertRecord(withPolicy(newRecord("producer-1", "record-3", "authority-1", "exec-1", 1L, 30L),
+				new PolicyRef("store-1", "2.0.0", hash2)));
+		store.insertRecord(withPolicy(newRecord("producer-1", "record-4", "authority-1", "exec-1", 1L, 40L),
+				new PolicyRef("store-2", "1.0.0", hash1)));
+		store.insertRecord(newRecord("producer-1", "record-5", "authority-1", "exec-1", 1L, 50L));
+
+		List<StoredTraceRecord> byRelease = store.findRecordsByPolicy(DOMAIN,
+				new PolicyRecordQuery("store-1", "1.0.0", null, null, null), 0, 100);
+		assertEquals(Arrays.asList("record-1", "record-2"), recordIds(byRelease));
+		assertEquals(v1, byRelease.get(0).getPolicy());
+
+		assertEquals(Arrays.asList("record-1", "record-2", "record-4"), recordIds(
+				store.findRecordsByPolicy(DOMAIN, new PolicyRecordQuery(null, null, hash1, null, null), 0, 100)));
+		assertEquals(Arrays.asList("record-2", "record-3"), recordIds(store.findRecordsByPolicy(DOMAIN,
+				new PolicyRecordQuery("store-1", null, null, 2020L, 2030L), 0, 100)));
+		assertEquals(Arrays.asList("record-2"), recordIds(
+				store.findRecordsByPolicy(DOMAIN, new PolicyRecordQuery("store-1", null, null, null, null), 1, 1)));
+		assertTrue(store.findRecordsByPolicy("other-domain", new PolicyRecordQuery("store-1", null, null, null, null),
+				0, 100).isEmpty());
 	}
 
 	// -- records: bare-id ambiguity data --------------------------------------------------------

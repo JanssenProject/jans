@@ -9,11 +9,11 @@ package io.jans.lock.service.trace.model;
 import java.util.Objects;
 
 /**
- * The four Lock-derived ingestion flags on a TRACE record (design §10). Unlike the other
+ * The Lock-derived ingestion flags on a TRACE record (design §10). Unlike the other
  * store value types this class is a mutable, copy-able bag: {@code coverageGap},
  * {@code chainLinkFailure} and {@code equivocation} may be updated after ingestion by the
- * correlation service; {@code late} is fixed at ingestion and the store
- * layer never changes it via {@code updateRecordFlags}.
+ * correlation service; {@code late} and {@code policyMismatch} are fixed at ingestion and the
+ * store layer never changes them via {@code updateRecordFlags}.
  *
  * @author Yuriy Movchan
  */
@@ -27,11 +27,19 @@ public final class IngestionFlags {
 
 	private boolean late;
 
+	private boolean policyMismatch;
+
 	public IngestionFlags(boolean coverageGap, boolean chainLinkFailure, boolean equivocation, boolean late) {
+		this(coverageGap, chainLinkFailure, equivocation, late, false);
+	}
+
+	public IngestionFlags(boolean coverageGap, boolean chainLinkFailure, boolean equivocation, boolean late,
+			boolean policyMismatch) {
 		this.coverageGap = coverageGap;
 		this.chainLinkFailure = chainLinkFailure;
 		this.equivocation = equivocation;
 		this.late = late;
+		this.policyMismatch = policyMismatch;
 	}
 
 	/**
@@ -39,7 +47,7 @@ public final class IngestionFlags {
 	 * mutable reference.
 	 */
 	public IngestionFlags(IngestionFlags other) {
-		this(other.coverageGap, other.chainLinkFailure, other.equivocation, other.late);
+		this(other.coverageGap, other.chainLinkFailure, other.equivocation, other.late, other.policyMismatch);
 	}
 
 	/**
@@ -81,6 +89,14 @@ public final class IngestionFlags {
 		this.late = late;
 	}
 
+	public boolean isPolicyMismatch() {
+		return policyMismatch;
+	}
+
+	public void setPolicyMismatch(boolean policyMismatch) {
+		this.policyMismatch = policyMismatch;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -91,18 +107,18 @@ public final class IngestionFlags {
 		}
 		IngestionFlags other = (IngestionFlags) o;
 		return coverageGap == other.coverageGap && chainLinkFailure == other.chainLinkFailure
-				&& equivocation == other.equivocation && late == other.late;
+				&& equivocation == other.equivocation && late == other.late && policyMismatch == other.policyMismatch;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(coverageGap, chainLinkFailure, equivocation, late);
+		return Objects.hash(coverageGap, chainLinkFailure, equivocation, late, policyMismatch);
 	}
 
 	@Override
 	public String toString() {
 		return "IngestionFlags [coverageGap=" + coverageGap + ", chainLinkFailure=" + chainLinkFailure
-				+ ", equivocation=" + equivocation + ", late=" + late + "]";
+				+ ", equivocation=" + equivocation + ", late=" + late + ", policyMismatch=" + policyMismatch + "]";
 	}
 
 }

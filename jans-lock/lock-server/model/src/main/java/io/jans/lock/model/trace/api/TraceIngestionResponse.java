@@ -57,6 +57,10 @@ public class TraceIngestionResponse {
 	@Schema(description = "True when the record arrived after the configured lateness threshold")
 	private boolean lateFlag;
 
+	@JsonProperty("policy_mismatch_flag")
+	@Schema(description = "True when trace.policy names a policy store Lock serves but its bundle_hash or policy_store_version differs from the served release")
+	private boolean policyMismatchFlag;
+
 	public long getReceiptSequence() {
 		return receiptSequence;
 	}
@@ -127,6 +131,14 @@ public class TraceIngestionResponse {
 
 	public void setLateFlag(boolean lateFlag) {
 		this.lateFlag = lateFlag;
+	}
+
+	public boolean isPolicyMismatchFlag() {
+		return policyMismatchFlag;
+	}
+
+	public void setPolicyMismatchFlag(boolean policyMismatchFlag) {
+		this.policyMismatchFlag = policyMismatchFlag;
 	}
 
 }

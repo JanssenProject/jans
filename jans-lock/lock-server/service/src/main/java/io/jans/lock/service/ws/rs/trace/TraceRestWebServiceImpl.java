@@ -15,6 +15,8 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,6 +46,7 @@ import io.jans.lock.model.trace.api.TraceErrorResponse;
 import io.jans.lock.model.trace.api.TraceExecutionResponse;
 import io.jans.lock.model.trace.api.TraceIngestionResponse;
 import io.jans.lock.model.trace.api.TraceRecordResponse;
+import io.jans.lock.model.trace.api.TraceRecordSearchResponse;
 import io.jans.lock.model.trace.api.TraceVerificationResponse;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
@@ -58,6 +61,7 @@ import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.ingest.AcceptanceResult;
 import io.jans.lock.service.trace.ingest.TraceIngestionService;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.ReceiptEntry;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.VerificationResult;
@@ -74,7 +78,7 @@ import jakarta.ws.rs.core.SecurityContext;
 /**
  * REST implementation for {@code POST /audit/trace} (design §11.1) and for
  * {@code GET /audit/trace/records/{record_id}} / {@code GET /audit/trace/executions/{trace_execution_id}}
- * (design §11.2, §11.3): resolve the submitting client and its evidence domain,
+ * (design §11.2, §11.3) and the policy store release search {@code GET /audit/trace/records}: resolve the submitting client and its evidence domain,
  * hand the raw body to {@link TraceIngestionService} for
  * verification/correlation/receipt-allocation/storage or read via {@link TraceRetrievalService},
  * and map the outcome to the §11.1/§11.2/§11.3 response shapes. Every
@@ -115,6 +119,10 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 	private static final int MAX_RECORD_ID_LENGTH = 128;
 
 	private static final int MAX_EXECUTION_ID_LENGTH = 255;
+
+	private static final int MAX_POLICY_FIELD_LENGTH = 255;
+
+	private static final String REASON_MISSING_POLICY_FILTER = "missing:policy_store_id";
 
 	private static final int MIN_COUNT = 1;
 
@@ -231,6 +239,60 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 	}
 
 	@Override
+	public Response searchRecords(String policyStoreId, String policyStoreVersion, String bundleHash,
+			String receivedFrom, String receivedTo, int start, int count) {
+		AuditLogEntry auditLogEntry = newAuditLogEntry(AuditActionType.TRACE_RECORD_READ);
+
+		Response response = null;
+		try {
+			log.debug("Searching TRACE records, policyStoreId: {}, policyStoreVersion: {}, bundleHash: {}",
+					policyStoreId, policyStoreVersion, bundleHash);
+			checkEnabled();
+			checlStart(start);
+			requireCountInRange(count);
+			String storeId = StringUtils.trimToNull(policyStoreId);
+			String version = StringUtils.trimToNull(policyStoreVersion);
+			String hash = StringUtils.trimToNull(bundleHash);
+			if (storeId == null && hash == null) {
+				throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_MISSING_POLICY_FILTER);
+			}
+			requireMaxLength(storeId, MAX_POLICY_FIELD_LENGTH, "policy_store_id");
+			requireMaxLength(version, MAX_POLICY_FIELD_LENGTH, "policy_store_version");
+			requireMaxLength(hash, MAX_POLICY_FIELD_LENGTH, "bundle_hash");
+			Long fromMs = parseTimestamp(receivedFrom, "received_from");
+			Long toMs = parseTimestamp(receivedTo, "received_to");
+			if (fromMs != null && toMs != null && fromMs > toMs) {
+				throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, "invalid:received_to");
+			}
+
+			TraceRequestContext context = resolveContext();
+			List<StoredTraceRecord> records = retrievalService.findRecordsByPolicy(context.getEvidenceDomainId(),
+					new PolicyRecordQuery(storeId, version, hash, fromMs, toMs), start, count);
+
+			TraceRecordSearchResponse dto = new TraceRecordSearchResponse();
+			dto.setRecords(records.stream().map(this::toRecordResponse).collect(Collectors.toList()));
+			response = Response.ok(dto).cacheControl(ServerUtil.cacheControl(true))
+					.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE).build();
+			return response;
+		} catch (RuntimeException ex) {
+			throw TraceErrors.toWebApplicationException(ex, errorResponseFactory);
+		} finally {
+			applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
+		}
+	}
+
+	private static Long parseTimestamp(String value, String fieldName) {
+		if (StringUtils.isBlank(value)) {
+			return null;
+		}
+		try {
+			return OffsetDateTime.parse(value.trim()).toInstant().toEpochMilli();
+		} catch (DateTimeParseException ex) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, "invalid:" + fieldName, ex);
+		}
+	}
+
+	@Override
 	public Response getExecution(String traceExecutionId, String executionAuthority, int start, int count) {
 		AuditLogEntry auditLogEntry = newAuditLogEntry(AuditActionType.TRACE_EXECUTION_READ);
 
@@ -340,6 +402,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		entry.setChainLinkFailureFlag(acceptance.isChainLinkFailureFlag());
 		entry.setEquivocationFlag(acceptance.isEquivocationFlag());
 		entry.setLateFlag(acceptance.isLateFlag());
+		entry.setPolicyMismatchFlag(acceptance.isPolicyMismatchFlag());
 	}
 
 	/**
@@ -518,6 +581,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		dto.setChainLinkFailureFlag(result.isChainLinkFailureFlag());
 		dto.setEquivocationFlag(result.isEquivocationFlag());
 		dto.setLateFlag(result.isLateFlag());
+		dto.setPolicyMismatchFlag(result.isPolicyMismatchFlag());
 		return dto;
 	}
 
@@ -566,6 +630,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		dto.setChainLinkFailureFlag(flags.isChainLinkFailure());
 		dto.setEquivocationFlag(flags.isEquivocation());
 		dto.setLateFlag(flags.isLate());
+		dto.setPolicyMismatchFlag(flags.isPolicyMismatch());
 		return dto;
 	}
 

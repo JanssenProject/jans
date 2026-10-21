@@ -72,17 +72,22 @@ public class TraceCorrelationService {
 	@Inject
 	private TraceKeys traceKeys;
 
+	@Inject
+	private PolicyMismatchCheck policyMismatchCheck;
+
 	/** Last unknown {@code chainRegistrationMode} value already reported, so it is logged once. */
 	private volatile String warnedChainRegistrationMode;
 
 	/**
-	 * @throws io.jans.lock.service.trace.error.TraceValidationException {@code chain_not_registered}
-	 * or {@code invalid_genesis}
+	 * @throws io.jans.lock.service.trace.error.TraceValidationException {@code chain_not_registered},
+	 * {@code invalid_genesis}, or {@code invalid_assertion} for a rejected policy mismatch
 	 */
 	public CorrelationPlan plan(VerifiedAssertion verified, TraceRequestContext ctx) {
 		CorrelationInputs inputs = verified.getInputs();
 		ParsedAssertion.ProducerChain producerChain = inputs.getChainPosition();
 		String domainId = ctx.getEvidenceDomainId();
+
+		boolean policyMismatch = policyMismatchCheck.check(inputs.getPolicy());
 
 		ChainIdentity chainIdentity = new ChainIdentity(domainId, producerChain.getProducerId(),
 				producerChain.getProducerInstanceId(), producerChain.getProducerChainId());
@@ -115,7 +120,7 @@ public class TraceCorrelationService {
 		boolean late = ProducerChainRules.isLate(ctx.getReceivedAtMs(), inputs.getSignedAt(),
 				appConfiguration.getTraceConfiguration().getLatenessThresholdSeconds());
 
-		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late);
+		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late, policyMismatch);
 
 		ExecutionIdentity execution = new ExecutionIdentity(domainId, inputs.getExecutionAuthority(),
 				inputs.getTraceExecutionId());

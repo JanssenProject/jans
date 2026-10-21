@@ -119,6 +119,10 @@ public class TraceConfiguration {
     @Schema(description = "TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA")
     private String cryptoProvider = DEFAULT_CRYPTO_PROVIDER;
 
+    @DocProperty(description = "Reject an AUTHORIZATION_DECISION or CAPABILITY_INVOKED record whose trace.policy names a policy store Lock serves but whose bundle_hash or policy_store_version differs from the served release; when false such records are accepted with policy_mismatch_flag", defaultValue = "false")
+    @Schema(description = "Reject an AUTHORIZATION_DECISION or CAPABILITY_INVOKED record whose trace.policy names a policy store Lock serves but whose bundle_hash or policy_store_version differs from the served release; when false such records are accepted with policy_mismatch_flag")
+    private boolean rejectPolicyMismatch;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -283,6 +287,14 @@ public class TraceConfiguration {
         this.cryptoProvider = cryptoProvider;
     }
 
+    public boolean isRejectPolicyMismatch() {
+        return rejectPolicyMismatch;
+    }
+
+    public void setRejectPolicyMismatch(boolean rejectPolicyMismatch) {
+        this.rejectPolicyMismatch = rejectPolicyMismatch;
+    }
+
     @Override
     public String toString() {
         return "TraceConfiguration [enabled=" + enabled + ", defaultEvidenceDomainId=" + defaultEvidenceDomainId
@@ -297,7 +309,7 @@ public class TraceConfiguration {
                 + ", pendingReceiptTimeoutSeconds=" + getPendingReceiptTimeoutSeconds() + ", maxBulkRecords="
                 + getMaxBulkRecords() + ", maxBulkRequestBytes=" + getMaxBulkRequestBytes()
                 + ", chainRegistrationMode=" + getChainRegistrationMode()
-                + ", cryptoProvider=" + getCryptoProvider() + "]";
+                + ", cryptoProvider=" + getCryptoProvider() + ", rejectPolicyMismatch=" + rejectPolicyMismatch + "]";
     }
 
 }

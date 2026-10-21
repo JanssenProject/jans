@@ -52,7 +52,8 @@ public class TraceConfigurationTest {
                 + "  \"pendingReceiptTimeoutSeconds\": 30,"
                 + "  \"maxBulkRecords\": 10,"
                 + "  \"maxBulkRequestBytes\": 2048,"
-                + "  \"cryptoProvider\": \"NATIVE\""
+                + "  \"cryptoProvider\": \"NATIVE\","
+                + "  \"rejectPolicyMismatch\": true"
                 + "}"
                 + "}";
 
@@ -83,6 +84,7 @@ public class TraceConfigurationTest {
         assertEquals(10, traceConfiguration.getMaxBulkRecords());
         assertEquals(2048, traceConfiguration.getMaxBulkRequestBytes());
         assertEquals("NATIVE", traceConfiguration.getCryptoProvider());
+        assertTrue(traceConfiguration.isRejectPolicyMismatch());
     }
 
     @Test
@@ -109,6 +111,7 @@ public class TraceConfigurationTest {
         assertEquals(TraceConfiguration.DEFAULT_MAX_BULK_RECORDS, traceConfiguration.getMaxBulkRecords());
         assertEquals(TraceConfiguration.DEFAULT_MAX_BULK_REQUEST_BYTES, traceConfiguration.getMaxBulkRequestBytes());
         assertEquals("JAVA", traceConfiguration.getCryptoProvider());
+        assertFalse(traceConfiguration.isRejectPolicyMismatch());
     }
 
     @Test

@@ -43,9 +43,11 @@ public final class AcceptanceResult {
 
 	private final boolean lateFlag;
 
+	private final boolean policyMismatchFlag;
+
 	private AcceptanceResult(String producerId, String recordId, String contentDigest, long receiptSequence,
 			long receivedAtMs, boolean idempotentReplay, boolean coverageGapFlag, boolean chainLinkFailureFlag,
-			boolean equivocationFlag, boolean lateFlag) {
+			boolean equivocationFlag, boolean lateFlag, boolean policyMismatchFlag) {
 		this.producerId = producerId;
 		this.recordId = recordId;
 		this.contentDigest = contentDigest;
@@ -56,6 +58,7 @@ public final class AcceptanceResult {
 		this.chainLinkFailureFlag = chainLinkFailureFlag;
 		this.equivocationFlag = equivocationFlag;
 		this.lateFlag = lateFlag;
+		this.policyMismatchFlag = policyMismatchFlag;
 	}
 
 	/**
@@ -68,7 +71,7 @@ public final class AcceptanceResult {
 		return new AcceptanceResult(stored.getIdentity().getProducerId(), stored.getIdentity().getRecordId(),
 				stored.getContentDigest(), stored.getReceipt().getReceiptSequence(),
 				stored.getReceipt().getReceivedAtMs(), replay, flags.isCoverageGap(), flags.isChainLinkFailure(),
-				flags.isEquivocation(), flags.isLate());
+				flags.isEquivocation(), flags.isLate(), flags.isPolicyMismatch());
 	}
 
 	/**
@@ -118,13 +121,17 @@ public final class AcceptanceResult {
 		return lateFlag;
 	}
 
+	public boolean isPolicyMismatchFlag() {
+		return policyMismatchFlag;
+	}
+
 	@Override
 	public String toString() {
 		return "AcceptanceResult [producerId=" + producerId + ", recordId=" + recordId + ", contentDigest="
 				+ contentDigest + ", receiptSequence=" + receiptSequence + ", receivedAtMs=" + receivedAtMs
 				+ ", idempotentReplay=" + idempotentReplay + ", coverageGapFlag=" + coverageGapFlag
 				+ ", chainLinkFailureFlag=" + chainLinkFailureFlag + ", equivocationFlag=" + equivocationFlag
-				+ ", lateFlag=" + lateFlag + "]";
+				+ ", lateFlag=" + lateFlag + ", policyMismatchFlag=" + policyMismatchFlag + "]";
 	}
 
 }

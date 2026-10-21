@@ -63,6 +63,7 @@ import io.jans.lock.service.trace.parse.TraceAssertionParser;
 import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.store.TraceKeys;
+import io.jans.lock.service.trace.testkit.PolicyMismatchChecks;
 import io.jans.lock.service.trace.testkit.SignedAssertionFactory;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
 import io.jans.lock.service.trace.testkit.TraceTestCrypto;
@@ -142,6 +143,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		setField(service, "chainRegistry", chainRegistry);
 		setField(service, "appConfiguration", appConfiguration);
 		setField(service, "traceKeys", TraceTestCrypto.traceKeys());
+		setField(service, "policyMismatchCheck", PolicyMismatchChecks.none(appConfiguration));
 	}
 
 	// -- fixtures ---------------------------------------------------------------------------------
@@ -228,6 +230,58 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 				() -> service.plan(verified, context()));
 
 		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
+	}
+
+	// -- plan: policy store release check ------------------------------------
+
+	private static final String SERVED_STORE = "https://example.org/policy-stores/payments";
+
+	private void servePolicyStore(String version, String bundleHash) {
+		AppConfiguration checkConfiguration = mock(AppConfiguration.class);
+		when(checkConfiguration.getTraceConfiguration()).thenReturn(traceConfiguration);
+		setField(service, "policyMismatchCheck", PolicyMismatchChecks.serving(checkConfiguration,
+				new PolicyMismatchChecks.StaticPolicyDownloadService().archive(SERVED_STORE, version, bundleHash)));
+	}
+
+	@Test
+	void testPlan_DecisionNamesServedStoreWithOtherBundleHash_FlagsPolicyMismatch() {
+		registerChain();
+		servePolicyStore("1.2.3", "sha256:" + "f".repeat(64));
+		String json = SignedAssertionFactory.authorizationDecision().producer(PRODUCER).producerInstanceId(INSTANCE)
+				.producerChainId(CHAIN).recordId(recordId()).genesis().unsignedJson();
+
+		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
+
+		assertTrue(plan.getFlags().isPolicyMismatch());
+	}
+
+	@Test
+	void testPlan_DecisionNamesServedStoreWithSameRelease_NoPolicyMismatch() {
+		registerChain();
+		servePolicyStore("1.2.3", "sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf7");
+		String json = SignedAssertionFactory.authorizationDecision().producer(PRODUCER).producerInstanceId(INSTANCE)
+				.producerChainId(CHAIN).recordId(recordId()).genesis().unsignedJson();
+
+		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
+
+		assertFalse(plan.getFlags().isPolicyMismatch());
+	}
+
+	@Test
+	void testPlan_RejectPolicyMismatch_RejectsBeforeFirstObservedRegistration() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		traceConfiguration.setRejectPolicyMismatch(true);
+		servePolicyStore("1.2.3", "sha256:" + "f".repeat(64));
+		String json = SignedAssertionFactory.authorizationDecision().producer(PRODUCER).producerInstanceId(INSTANCE)
+				.producerChainId(CHAIN).recordId(recordId()).genesis().unsignedJson();
+		VerifiedAssertion verified = buildVerified(json, context());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> service.plan(verified, context()));
+
+		assertEquals(TraceErrorResponseType.INVALID_ASSERTION, ex.getErrorId());
+		assertEquals(PolicyMismatchCheck.REASON_POLICY_MISMATCH, ex.getReason());
+		assertFalse(store.findChain(chainIdentity()).isPresent());
 	}
 
 	// -- plan: chain registration mode -------------------------------------

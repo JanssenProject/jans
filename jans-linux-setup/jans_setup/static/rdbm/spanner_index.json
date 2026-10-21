@@ -265,7 +265,10 @@
       "jansTraceExecId",
       "jansTraceChainPosKey",
       "jansTraceReceiptSeq",
-      "jansTraceTokenKeys"
+      "jansTraceTokenKeys",
+      "jansTracePolicyStoreId",
+      "jansTracePolicyStoreVersion",
+      "jansTraceBundleHash"
     ]
   },
   "jansTraceReceipt": {

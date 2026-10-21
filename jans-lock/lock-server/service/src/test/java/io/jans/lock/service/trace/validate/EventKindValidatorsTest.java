@@ -34,6 +34,7 @@ import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.trace.error.TraceValidationException;
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.parse.CommonAssertionValidator;
@@ -206,6 +207,31 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		assertEquals(1, result.getTokenRefs().size());
 		assertEquals("https://accounts.example.org", result.getTokenRefs().get(0).getIssuer());
 		assertEquals("9c9f2e77-9a3e-4b62-9a2a-2f6e6e2a9f3e", result.getTokenRefs().get(0).getJti());
+	}
+
+	@Test
+	void testAuthorizationDecision_policyRelease_populatesCorrelationInputs() throws IOException {
+		CorrelationInputs result = registry.validate(parseAndCommonValidate(loadFixture("authorization_decision_valid.json")));
+
+		assertEquals(new PolicyRef("https://example.org/policy-stores/payments", "1.2.3",
+				"sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf7"), result.getPolicy());
+	}
+
+	@Test
+	void testRuntimeEffect_noPolicy_policyAbsent() throws IOException {
+		CorrelationInputs result = registry.validate(parseAndCommonValidate(loadFixture("runtime_effect_valid.json")));
+
+		assertNull(result.getPolicy());
+	}
+
+	@Test
+	void testAuthorizationDecision_policyStoreIdTooLong_throwsLength() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		set(root, TextNode.valueOf("s".repeat(256)), "trace", "policy", "policy_store_id");
+
+		TraceValidationException ex = validateAndCapture(root);
+
+		assertEquals("length:trace.policy.policy_store_id", ex.getReason());
 	}
 
 	@Test

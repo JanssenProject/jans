@@ -857,6 +857,85 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/trace.readonly
+  /api/v1/audit/trace/records:
+    get:
+      tags:
+      - Lock - Audit Trace
+      summary: Search TRACE records by policy store release
+      description: "Records whose trace.policy names the given policy store id, version\
+        \ or bundle hash, optionally within a receipt time range, ordered by receipt\
+        \ sequence"
+      operationId: searchRecords
+      parameters:
+      - name: policy_store_id
+        in: query
+        description: trace.policy.policy_store_id to match
+        schema:
+          type: string
+      - name: policy_store_version
+        in: query
+        description: trace.policy.policy_store_version to match
+        schema:
+          type: string
+      - name: bundle_hash
+        in: query
+        description: trace.policy.bundle_hash to match
+        schema:
+          type: string
+      - name: received_from
+        in: query
+        description: "Earliest received_at, RFC 3339, inclusive"
+        schema:
+          type: string
+      - name: received_to
+        in: query
+        description: "Latest received_at, RFC 3339, inclusive"
+        schema:
+          type: string
+      - name: start
+        in: query
+        description: Paging offset
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: count
+        in: query
+        description: "Paging size, 1-1000"
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceRecordSearchResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.readonly
   /api/v1/audit/trace/records/{record_id}:
     get:
       tags:
@@ -1429,6 +1508,20 @@ components:
           items:
             $ref: "#/components/schemas/TraceRecordResponse"
       description: "Direct TRACE records of one execution, ordered by receipt sequence"
+    TraceRecordSearchResponse:
+      type: object
+      properties:
+        ordering:
+          type: string
+          description: "Fixed: records are ordered by receipt_sequence"
+          example: receipt_sequence
+        records:
+          type: array
+          description: "Matching records, ordered by receipt_sequence"
+          items:
+            $ref: "#/components/schemas/TraceRecordResponse"
+      description: "TRACE records matching a policy store release search, ordered\
+        \ by receipt sequence"
     TraceIngestionResponse:
       type: object
       properties:
@@ -1468,6 +1561,10 @@ components:
           type: boolean
           description: True when the record arrived after the configured lateness
             threshold
+        policy_mismatch_flag:
+          type: boolean
+          description: True when trace.policy names a policy store Lock serves but
+            its bundle_hash or policy_store_version differs from the served release
       description: Receipt-chain position and ingestion flags for a TRACE record
     TraceRecordResponse:
       type: object
@@ -1607,6 +1704,11 @@ components:
           type: boolean
           description: "Present when accepted: true when the record arrived after\
             \ the configured lateness threshold"
+        policy_mismatch_flag:
+          type: boolean
+          description: "Present when accepted: true when trace.policy names a policy\
+            \ store Lock serves but its bundle_hash or policy_store_version differs\
+            \ from the served release"
         error:
           $ref: "#/components/schemas/TraceErrorResponse"
       description: One item's outcome within a TRACE bulk ingestion response
@@ -1658,6 +1760,10 @@ components:
           type: boolean
           description: True when the record arrived after the configured lateness
             threshold
+        policy_mismatch_flag:
+          type: boolean
+          description: True when trace.policy names a policy store Lock serves but
+            its bundle_hash or policy_store_version differs from the served release
       description: TRACE record acceptance response
   securitySchemes:
     oauth2:

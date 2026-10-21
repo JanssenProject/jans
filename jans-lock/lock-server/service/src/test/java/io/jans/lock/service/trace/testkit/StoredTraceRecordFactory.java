@@ -14,6 +14,7 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.ReceiptEntry;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -82,6 +83,10 @@ public final class StoredTraceRecordFactory {
 	private boolean late;
 
 	private long version;
+
+	private boolean policyMismatch;
+
+	private PolicyRef policy;
 
 	private StoredTraceRecordFactory() {
 	}
@@ -229,6 +234,16 @@ public final class StoredTraceRecordFactory {
 		return this;
 	}
 
+	public StoredTraceRecordFactory policy(String policyStoreId, String policyStoreVersion, String bundleHash) {
+		this.policy = new PolicyRef(policyStoreId, policyStoreVersion, bundleHash);
+		return this;
+	}
+
+	public StoredTraceRecordFactory policyMismatch(boolean policyMismatch) {
+		this.policyMismatch = policyMismatch;
+		return this;
+	}
+
 	public StoredTraceRecord build() {
 		if (recordId == null) {
 			throw new IllegalStateException("recordId must be set");
@@ -244,10 +259,11 @@ public final class StoredTraceRecordFactory {
 		VerificationResult verification = this.verification != null ? this.verification
 				: new VerificationResult(true, "kid-1", receivedAtMs, "Ed25519");
 		ReceiptEntry receipt = new ReceiptEntry(receiptSequence, receivedAtMs, prevReceiptHash, receiptHash);
-		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late);
+		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late, policyMismatch);
 
 		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verification, receipt, flags,
-				execution, chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs, version);
+				execution, chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs, version,
+				policy);
 	}
 
 }

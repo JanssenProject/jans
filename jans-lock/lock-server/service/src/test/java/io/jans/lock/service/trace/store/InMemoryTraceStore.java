@@ -32,6 +32,7 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.ReceiptHead;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -241,6 +242,14 @@ public class InMemoryTraceStore implements TraceStore {
 	@Override
 	public List<StoredTraceRecord> findRecordsByExecution(ExecutionIdentity exec, int start, int count) {
 		return recordsByKey.values().stream().filter(r -> r.getExecution().equals(exec))
+				.sorted(Comparator.comparingLong(r -> r.getReceipt().getReceiptSequence())).skip(Math.max(0, start))
+				.limit(Math.max(0, count)).map(StoredTraceRecord::copy).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<StoredTraceRecord> findRecordsByPolicy(String domainId, PolicyRecordQuery query, int start, int count) {
+		return recordsByKey.values().stream()
+				.filter(r -> r.getIdentity().getDomainId().equals(domainId) && query.matches(r))
 				.sorted(Comparator.comparingLong(r -> r.getReceipt().getReceiptSequence())).skip(Math.max(0, start))
 				.limit(Math.max(0, count)).map(StoredTraceRecord::copy).collect(Collectors.toList());
 	}

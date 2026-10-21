@@ -19,6 +19,7 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.ReceiptHead;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -97,6 +98,13 @@ public interface TraceStore {
 	List<StoredTraceRecord> findRecordsByChainPosition(ChainPosition position);
 
 	List<StoredTraceRecord> findRecordsByToken(String domainId, TokenRef token);
+
+	/**
+	 * @return records in the domain whose indexed {@code trace.policy} release matches
+	 *         {@code query}, ordered by {@code receiptSequence} ascending, paged by
+	 *         {@code start}/{@code count}
+	 */
+	List<StoredTraceRecord> findRecordsByPolicy(String domainId, PolicyRecordQuery query, int start, int count);
 
 	long countRecords(String domainId);
 

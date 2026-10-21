@@ -262,6 +262,8 @@ final class FakeEntryManagerBehavior {
 			return matchesEquality(filter, entity);
 		case LESS_OR_EQUAL:
 			return matchesLessOrEqual(filter, entity);
+		case GREATER_OR_EQUAL:
+			return matchesGreaterOrEqual(filter, entity);
 		default:
 			throw new UnsupportedOperationException("FakeEntryManagerBehavior does not support: " + filter.getType());
 		}
@@ -292,6 +294,14 @@ final class FakeEntryManagerBehavior {
 		long actual = ((Number) attrValue).longValue();
 		long expected = ((Number) filter.getAssertionValue()).longValue();
 		return actual <= expected;
+	}
+
+	private static boolean matchesGreaterOrEqual(Filter filter, Object entity) {
+		Object attrValue = attrValue(entity, filter.getAttributeName());
+		if (!(attrValue instanceof Number)) {
+			return false;
+		}
+		return ((Number) attrValue).longValue() >= ((Number) filter.getAssertionValue()).longValue();
 	}
 
 	@SuppressWarnings("unchecked")

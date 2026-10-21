@@ -114,6 +114,18 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
     @AttributeName(name = "jansTraceNodeId", ignoreDuringUpdate = true)
     private String nodeId;
 
+    @AttributeName(name = "jansTracePolicyStoreId", ignoreDuringUpdate = true)
+    private String policyStoreId;
+
+    @AttributeName(name = "jansTracePolicyStoreVersion", ignoreDuringUpdate = true)
+    private String policyStoreVersion;
+
+    @AttributeName(name = "jansTraceBundleHash", ignoreDuringUpdate = true)
+    private String bundleHash;
+
+    @AttributeName(name = "jansTracePolicyMismatch", ignoreDuringUpdate = true)
+    private Boolean policyMismatch;
+
     @Version
     @AttributeName(name = "jansVersion", ignoreDuringUpdate = true)
     private Long version;
@@ -337,6 +349,38 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
         this.nodeId = nodeId;
     }
 
+    public String getPolicyStoreId() {
+        return policyStoreId;
+    }
+
+    public void setPolicyStoreId(String policyStoreId) {
+        this.policyStoreId = policyStoreId;
+    }
+
+    public String getPolicyStoreVersion() {
+        return policyStoreVersion;
+    }
+
+    public void setPolicyStoreVersion(String policyStoreVersion) {
+        this.policyStoreVersion = policyStoreVersion;
+    }
+
+    public String getBundleHash() {
+        return bundleHash;
+    }
+
+    public void setBundleHash(String bundleHash) {
+        this.bundleHash = bundleHash;
+    }
+
+    public Boolean getPolicyMismatch() {
+        return policyMismatch;
+    }
+
+    public void setPolicyMismatch(Boolean policyMismatch) {
+        this.policyMismatch = policyMismatch;
+    }
+
     public Long getVersion() {
         return version;
     }
@@ -377,7 +421,10 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 && Objects.equals(receiptHash, that.receiptHash) && Objects.equals(coverageGap, that.coverageGap)
                 && Objects.equals(chainLinkFailure, that.chainLinkFailure)
                 && Objects.equals(equivocation, that.equivocation) && Objects.equals(late, that.late)
-                && Objects.equals(nodeId, that.nodeId) && Objects.equals(version, that.version)
+                && Objects.equals(nodeId, that.nodeId) && Objects.equals(policyStoreId, that.policyStoreId)
+                && Objects.equals(policyStoreVersion, that.policyStoreVersion)
+                && Objects.equals(bundleHash, that.bundleHash) && Objects.equals(policyMismatch, that.policyMismatch)
+                && Objects.equals(version, that.version)
                 && Objects.equals(creationDate, that.creationDate);
     }
 
@@ -386,7 +433,8 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
         return Objects.hash(id, domainId, producerId, recordId, eventKind, signedAt, execKey, execId, execAuthority,
                 chainKey, chainPosKey, seqNum, prevRecordHash, tokenKeys, assertion, contentDigest,
                 verification, receiptSeq, receivedAt, receivedAtMs, prevReceiptHash, receiptHash, coverageGap,
-                chainLinkFailure, equivocation, late, nodeId, version, creationDate);
+                chainLinkFailure, equivocation, late, nodeId, policyStoreId, policyStoreVersion, bundleHash,
+                policyMismatch, version, creationDate);
     }
 
     @Override
@@ -399,7 +447,9 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 + ", verification=" + verification + ", receiptSeq=" + receiptSeq + ", receivedAt=" + receivedAt
                 + ", receivedAtMs=" + receivedAtMs + ", prevReceiptHash=" + prevReceiptHash + ", receiptHash="
                 + receiptHash + ", coverageGap=" + coverageGap + ", chainLinkFailure=" + chainLinkFailure
-                + ", equivocation=" + equivocation + ", late=" + late + ", nodeId=" + nodeId + ", version=" + version
+                + ", equivocation=" + equivocation + ", late=" + late + ", nodeId=" + nodeId + ", policyStoreId="
+                + policyStoreId + ", policyStoreVersion=" + policyStoreVersion + ", bundleHash=" + bundleHash
+                + ", policyMismatch=" + policyMismatch + ", version=" + version
                 + ", creationDate=" + creationDate + "]";
     }
 

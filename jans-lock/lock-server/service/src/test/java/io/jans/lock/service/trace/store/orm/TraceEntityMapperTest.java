@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,6 +25,7 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.ReceiptEntry;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -92,6 +94,38 @@ class TraceEntityMapperTest {
 		assertEquals(record.getVerification(), roundTripped.getVerification());
 		assertEquals(record.getFlags(), roundTripped.getFlags());
 		assertEquals(record.getVersion(), roundTripped.getVersion());
+	}
+
+	@Test
+	void testToEntity_policyReleaseAndMismatchFlag_roundTrip() {
+		StoredTraceRecord base = newRecord(ASSERTION);
+		PolicyRef policy = new PolicyRef("store-1", "1.2.3", "sha256:" + "c".repeat(64));
+		StoredTraceRecord record = new StoredTraceRecord(base.getIdentity(), base.getAssertionRaw(),
+				base.getContentDigest(), base.getVerification(), base.getReceipt(),
+				new IngestionFlags(false, false, false, false, true), base.getExecution(), base.getChainPosition(),
+				base.getPrevRecordHash(), base.getTokenRefs(), base.getEventKind(), base.getSignedAt(),
+				base.getNodeId(), base.getCreatedAtMs(), base.getVersion(), policy);
+
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
+		StoredTraceRecord roundTripped = TraceEntityMapper.toStoredTraceRecord(entity);
+
+		assertEquals("store-1", entity.getPolicyStoreId());
+		assertEquals("1.2.3", entity.getPolicyStoreVersion());
+		assertEquals("sha256:" + "c".repeat(64), entity.getBundleHash());
+		assertEquals(Boolean.TRUE, entity.getPolicyMismatch());
+		assertEquals(policy, roundTripped.getPolicy());
+		assertTrue(roundTripped.getFlags().isPolicyMismatch());
+	}
+
+	@Test
+	void testToEntity_noPolicy_leavesPolicyAttributesUnset() {
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(newRecord(ASSERTION), "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
+
+		assertNull(entity.getPolicyStoreId());
+		assertNull(entity.getBundleHash());
+		assertNull(TraceEntityMapper.toStoredTraceRecord(entity).getPolicy());
+		entity.setPolicyMismatch(null);
+		assertFalse(TraceEntityMapper.toStoredTraceRecord(entity).getFlags().isPolicyMismatch());
 	}
 
 	@Test

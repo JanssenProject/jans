@@ -5103,6 +5103,49 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "TRACE record trace.policy.policy_store_id",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTracePolicyStoreId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record trace.policy.policy_store_version",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTracePolicyStoreVersion"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record trace.policy.bundle_hash",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceBundleHash"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record policy-mismatch flag",
+      "equality": "booleanMatch",
+      "names": [
+        "jansTracePolicyMismatch"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "TRACE record key referenced by a receipt",
       "equality": "caseExactMatch",
       "names": [
@@ -6981,6 +7024,10 @@
         "jansTraceEquivocation",
         "jansTraceLate",
         "jansTraceNodeId",
+        "jansTracePolicyStoreId",
+        "jansTracePolicyStoreVersion",
+        "jansTraceBundleHash",
+        "jansTracePolicyMismatch",
         "jansVersion",
         "creationDate"
       ],
