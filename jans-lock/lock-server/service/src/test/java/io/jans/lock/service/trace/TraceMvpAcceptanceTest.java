@@ -249,11 +249,12 @@ public class TraceMvpAcceptanceTest {
 
 		assertTrue(result.isAccepted());
 		assertTrue(result.isReservedMemberFlag());
+		assertEquals(List.of("evidence_domain_id", "receipt_sequence", "trace.trust_tier"), result.getReservedMembers());
 		assertEquals(1L, result.getReceiptSequence());
 		StoredTraceRecord stored = harness.getRecord(DOMAIN, recordId, PRODUCER);
 		assertEquals(DOMAIN, stored.getIdentity().getDomainId());
 		assertEquals(json, stored.getAssertionRaw());
-		assertTrue(stored.getFlags().isReservedMember());
+		assertEquals(result.getReservedMembers(), stored.getFlags().getReservedMembers());
 	}
 
 	@Test

@@ -6,18 +6,23 @@
 
 package io.jans.lock.service.trace.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * The Lock-derived ingestion flags on a TRACE record (design §10). Unlike the other
  * store value types this class is a mutable, copy-able bag: {@code coverageGap},
  * {@code chainLinkFailure} and {@code equivocation} may be updated after ingestion by the
- * correlation service; {@code late}, {@code policyMismatch} and {@code reservedMember} are fixed at ingestion and the
+ * correlation service; {@code late}, {@code policyMismatch} and {@code reservedMembers} are fixed at ingestion and the
  * store layer never changes them via {@code updateRecordFlags}.
  *
  * @author Yuriy Movchan
  */
 public final class IngestionFlags {
+
+	public static final int MAX_RESERVED_MEMBERS = 32;
 
 	private boolean coverageGap;
 
@@ -29,7 +34,7 @@ public final class IngestionFlags {
 
 	private boolean policyMismatch;
 
-	private boolean reservedMember;
+	private List<String> reservedMembers = Collections.emptyList();
 
 	public IngestionFlags(boolean coverageGap, boolean chainLinkFailure, boolean equivocation, boolean late) {
 		this(coverageGap, chainLinkFailure, equivocation, late, false);
@@ -50,7 +55,7 @@ public final class IngestionFlags {
 	 */
 	public IngestionFlags(IngestionFlags other) {
 		this(other.coverageGap, other.chainLinkFailure, other.equivocation, other.late, other.policyMismatch);
-		this.reservedMember = other.reservedMember;
+		this.reservedMembers = other.reservedMembers;
 	}
 
 	/**
@@ -101,11 +106,26 @@ public final class IngestionFlags {
 	}
 
 	public boolean isReservedMember() {
-		return reservedMember;
+		return !reservedMembers.isEmpty();
 	}
 
-	public void setReservedMember(boolean reservedMember) {
-		this.reservedMember = reservedMember;
+	/**
+	 * @return paths of the Lock-derived members the producer signed and Lock ignored, at most
+	 *         {@value #MAX_RESERVED_MEMBERS}
+	 */
+	public List<String> getReservedMembers() {
+		return reservedMembers;
+	}
+
+	public void setReservedMembers(List<String> reservedMembers) {
+		if (reservedMembers == null || reservedMembers.isEmpty()) {
+			this.reservedMembers = Collections.emptyList();
+			return;
+		}
+		List<String> capped = reservedMembers.size() > MAX_RESERVED_MEMBERS
+				? reservedMembers.subList(0, MAX_RESERVED_MEMBERS)
+				: reservedMembers;
+		this.reservedMembers = Collections.unmodifiableList(new ArrayList<>(capped));
 	}
 
 	@Override
@@ -119,19 +139,19 @@ public final class IngestionFlags {
 		IngestionFlags other = (IngestionFlags) o;
 		return coverageGap == other.coverageGap && chainLinkFailure == other.chainLinkFailure
 				&& equivocation == other.equivocation && late == other.late && policyMismatch == other.policyMismatch
-				&& reservedMember == other.reservedMember;
+				&& reservedMembers.equals(other.reservedMembers);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(coverageGap, chainLinkFailure, equivocation, late, policyMismatch, reservedMember);
+		return Objects.hash(coverageGap, chainLinkFailure, equivocation, late, policyMismatch, reservedMembers);
 	}
 
 	@Override
 	public String toString() {
 		return "IngestionFlags [coverageGap=" + coverageGap + ", chainLinkFailure=" + chainLinkFailure
 				+ ", equivocation=" + equivocation + ", late=" + late + ", policyMismatch=" + policyMismatch
-				+ ", reservedMember=" + reservedMember + "]";
+				+ ", reservedMembers=" + reservedMembers + "]";
 	}
 
 }

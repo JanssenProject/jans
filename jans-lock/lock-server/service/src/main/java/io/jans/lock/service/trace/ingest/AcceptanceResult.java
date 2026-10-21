@@ -6,6 +6,8 @@
 
 package io.jans.lock.service.trace.ingest;
 
+import java.util.List;
+
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 
@@ -114,6 +116,10 @@ public final class AcceptanceResult {
 
 	public boolean isReservedMemberFlag() {
 		return flags.isReservedMember();
+	}
+
+	public List<String> getReservedMembers() {
+		return flags.getReservedMembers();
 	}
 
 	@Override

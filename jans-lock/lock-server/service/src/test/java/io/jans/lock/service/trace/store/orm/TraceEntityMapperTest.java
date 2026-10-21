@@ -15,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import io.jans.lock.model.trace.entity.TraceRecordEntry;
@@ -115,6 +117,24 @@ class TraceEntityMapperTest {
 		assertEquals(Boolean.TRUE, entity.getPolicyMismatch());
 		assertEquals(policy, roundTripped.getPolicy());
 		assertTrue(roundTripped.getFlags().isPolicyMismatch());
+	}
+
+	@Test
+	void testToEntity_reservedMembers_roundTrip() {
+		StoredTraceRecord base = newRecord(ASSERTION);
+		IngestionFlags flags = new IngestionFlags(false, false, false, false);
+		flags.setReservedMembers(List.of("evidence_domain_id", "trace.trust_tier"));
+		StoredTraceRecord stored = base.withFlags(flags, base.getVersion());
+
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(stored, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
+		StoredTraceRecord roundTripped = TraceEntityMapper.toStoredTraceRecord(entity);
+
+		assertEquals(List.of("evidence_domain_id", "trace.trust_tier"), entity.getReservedMembers());
+		assertEquals(flags.getReservedMembers(), roundTripped.getFlags().getReservedMembers());
+		assertTrue(roundTripped.getFlags().isReservedMember());
+
+		entity.setReservedMembers(null);
+		assertFalse(TraceEntityMapper.toStoredTraceRecord(entity).getFlags().isReservedMember());
 	}
 
 	@Test

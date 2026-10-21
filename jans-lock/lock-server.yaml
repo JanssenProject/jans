@@ -1584,6 +1584,12 @@ components:
           type: boolean
           description: True when Lock-derived members the producer placed in its signed
             body (for example evidence_domain_id or trust_tier) were ignored
+        reserved_members:
+          type: array
+          description: "Paths of the ignored Lock-derived members, for example trace.trust_tier;\
+            \ their values inside assertion are producer-supplied and unused"
+          items:
+            type: string
       description: Receipt-chain position and ingestion flags for a TRACE record
     TraceRecordResponse:
       type: object
@@ -1733,6 +1739,11 @@ components:
           description: "Present when accepted: true when Lock-derived members the producer\
             \ placed in its signed body (for example evidence_domain_id or trust_tier)\
             \ were ignored"
+        reserved_members:
+          type: array
+          description: "Present when accepted: paths of the ignored Lock-derived members"
+          items:
+            type: string
         error:
           $ref: "#/components/schemas/TraceErrorResponse"
       description: One item's outcome within a TRACE bulk ingestion response
@@ -1792,6 +1803,12 @@ components:
           type: boolean
           description: True when Lock-derived members the producer placed in its signed
             body (for example evidence_domain_id or trust_tier) were ignored
+        reserved_members:
+          type: array
+          description: "Paths of the ignored Lock-derived members, for example trace.trust_tier;\
+            \ their values inside assertion are producer-supplied and unused"
+          items:
+            type: string
       description: TRACE record acceptance response
   securitySchemes:
     oauth2:

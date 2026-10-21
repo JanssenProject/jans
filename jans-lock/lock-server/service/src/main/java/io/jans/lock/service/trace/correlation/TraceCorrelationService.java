@@ -124,7 +124,7 @@ public class TraceCorrelationService {
 		if (!reservedMembers.isEmpty()) {
 			log.warn("TRACE record carries Lock-derived members, ignored: producer={}, record_id={}, members={}",
 					verified.getProducer(), verified.getRecordId(), reservedMembers);
-			flags.setReservedMember(true);
+			flags.setReservedMembers(reservedMembers);
 		}
 
 		ExecutionIdentity execution = new ExecutionIdentity(domainId, inputs.getExecutionAuthority(),

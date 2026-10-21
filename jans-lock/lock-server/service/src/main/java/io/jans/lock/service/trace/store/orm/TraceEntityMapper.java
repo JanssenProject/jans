@@ -97,7 +97,7 @@ final class TraceEntityMapper {
 		entity.setEquivocation(flags.isEquivocation());
 		entity.setLate(flags.isLate());
 		entity.setPolicyMismatch(flags.isPolicyMismatch());
-		entity.setReservedMember(flags.isReservedMember());
+		entity.setReservedMembers(flags.isReservedMember() ? new ArrayList<>(flags.getReservedMembers()) : null);
 		entity.setNodeId(stored.getNodeId());
 		PolicyRef policy = stored.getPolicy();
 		if (policy != null) {
@@ -128,7 +128,7 @@ final class TraceEntityMapper {
 				entity.getPrevReceiptHash(), entity.getReceiptHash());
 		IngestionFlags flags = new IngestionFlags(nvl(entity.getCoverageGap()), nvl(entity.getChainLinkFailure()),
 				nvl(entity.getEquivocation()), nvl(entity.getLate()), nvl(entity.getPolicyMismatch()));
-		flags.setReservedMember(nvl(entity.getReservedMember()));
+		flags.setReservedMembers(entity.getReservedMembers());
 
 		long createdAtMs = entity.getCreationDate() == null ? 0L : entity.getCreationDate().getTime();
 

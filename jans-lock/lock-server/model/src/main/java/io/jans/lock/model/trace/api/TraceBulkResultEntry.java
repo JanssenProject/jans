@@ -6,6 +6,8 @@
 
 package io.jans.lock.model.trace.api;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,7 +28,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "index", "accepted", "producer_id", "record_id", "content_digest", "receipt_sequence",
 		"received_at", "idempotent_replay", "coverage_gap_flag", "chain_link_failure_flag", "equivocation_flag",
-		"late_flag", "error" })
+		"late_flag", "policy_mismatch_flag", "reserved_member_flag", "reserved_members", "error" })
 public class TraceBulkResultEntry {
 
 	@JsonProperty("index")
@@ -84,6 +86,10 @@ public class TraceBulkResultEntry {
 	@JsonProperty("reserved_member_flag")
 	@Schema(description = "Present when accepted: true when Lock-derived members the producer placed in its signed body (for example evidence_domain_id or trust_tier) were ignored")
 	private Boolean reservedMemberFlag;
+
+	@JsonProperty("reserved_members")
+	@Schema(description = "Present when accepted: paths of the ignored Lock-derived members")
+	private List<String> reservedMembers;
 
 	@JsonProperty("error")
 	@Schema(description = "Present when accepted=false: the structured error for this item only")
@@ -199,6 +205,14 @@ public class TraceBulkResultEntry {
 
 	public void setReservedMemberFlag(Boolean reservedMemberFlag) {
 		this.reservedMemberFlag = reservedMemberFlag;
+	}
+
+	public List<String> getReservedMembers() {
+		return reservedMembers;
+	}
+
+	public void setReservedMembers(List<String> reservedMembers) {
+		this.reservedMembers = reservedMembers;
 	}
 
 	public TraceErrorResponse getError() {

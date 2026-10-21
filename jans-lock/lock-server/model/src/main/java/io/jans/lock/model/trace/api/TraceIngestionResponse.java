@@ -8,6 +8,7 @@ package io.jans.lock.model.trace.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -19,7 +20,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(description = "Receipt-chain position and ingestion flags for a TRACE record")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TraceIngestionResponse {
+@JsonPropertyOrder({ "receipt_sequence", "received_at", "prev_receipt_hash", "receipt_hash", "receipt_state" })
+public class TraceIngestionResponse extends TraceFlagsResponse {
 
 	@JsonProperty("receipt_sequence")
 	@Schema(description = "Position in the domain's receipt chain", example = "108422")
@@ -40,30 +42,6 @@ public class TraceIngestionResponse {
 	@JsonProperty("receipt_state")
 	@Schema(description = "State of this record's receipt entry: COMMITTED, or PENDING while the claim is not yet settled", example = "COMMITTED")
 	private String receiptState;
-
-	@JsonProperty("coverage_gap_flag")
-	@Schema(description = "True when this record's predecessor in its producer chain is missing")
-	private boolean coverageGapFlag;
-
-	@JsonProperty("chain_link_failure_flag")
-	@Schema(description = "True when this record's prev_record_hash does not match its predecessor")
-	private boolean chainLinkFailureFlag;
-
-	@JsonProperty("equivocation_flag")
-	@Schema(description = "True when another record already occupies this producer-chain position")
-	private boolean equivocationFlag;
-
-	@JsonProperty("late_flag")
-	@Schema(description = "True when the record arrived after the configured lateness threshold")
-	private boolean lateFlag;
-
-	@JsonProperty("policy_mismatch_flag")
-	@Schema(description = "True when trace.policy names a policy store Lock serves but its bundle_hash or policy_store_version differs from the served release")
-	private boolean policyMismatchFlag;
-
-	@JsonProperty("reserved_member_flag")
-	@Schema(description = "True when Lock-derived members the producer placed in its signed body (for example evidence_domain_id or trust_tier) were ignored")
-	private boolean reservedMemberFlag;
 
 	public long getReceiptSequence() {
 		return receiptSequence;
@@ -103,54 +81,6 @@ public class TraceIngestionResponse {
 
 	public void setReceiptState(String receiptState) {
 		this.receiptState = receiptState;
-	}
-
-	public boolean isCoverageGapFlag() {
-		return coverageGapFlag;
-	}
-
-	public void setCoverageGapFlag(boolean coverageGapFlag) {
-		this.coverageGapFlag = coverageGapFlag;
-	}
-
-	public boolean isChainLinkFailureFlag() {
-		return chainLinkFailureFlag;
-	}
-
-	public void setChainLinkFailureFlag(boolean chainLinkFailureFlag) {
-		this.chainLinkFailureFlag = chainLinkFailureFlag;
-	}
-
-	public boolean isEquivocationFlag() {
-		return equivocationFlag;
-	}
-
-	public void setEquivocationFlag(boolean equivocationFlag) {
-		this.equivocationFlag = equivocationFlag;
-	}
-
-	public boolean isLateFlag() {
-		return lateFlag;
-	}
-
-	public void setLateFlag(boolean lateFlag) {
-		this.lateFlag = lateFlag;
-	}
-
-	public boolean isPolicyMismatchFlag() {
-		return policyMismatchFlag;
-	}
-
-	public void setPolicyMismatchFlag(boolean policyMismatchFlag) {
-		this.policyMismatchFlag = policyMismatchFlag;
-	}
-
-	public boolean isReservedMemberFlag() {
-		return reservedMemberFlag;
-	}
-
-	public void setReservedMemberFlag(boolean reservedMemberFlag) {
-		this.reservedMemberFlag = reservedMemberFlag;
 	}
 
 }
