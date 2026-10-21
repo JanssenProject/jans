@@ -78,6 +78,8 @@ public class InMemoryTraceStore implements TraceStore {
 
 	private final AtomicInteger policyReleaseWrites = new AtomicInteger();
 
+	private final AtomicInteger policyReleaseReads = new AtomicInteger();
+
 	private final ConcurrentHashMap<String, TraceChainEntry> chainsByKey = new ConcurrentHashMap<>();
 
 	private final ConcurrentHashMap<String, TraceProducerKeyEntry> producerKeysByKey = new ConcurrentHashMap<>();
@@ -358,6 +360,7 @@ public class InMemoryTraceStore implements TraceStore {
 
 	@Override
 	public Optional<TracePolicyReleaseEntry> findPolicyRelease(String policyStoreId, String bundleHash) {
+		policyReleaseReads.incrementAndGet();
 		return Optional.ofNullable(policyReleasesByKey.get(traceKeys.policyReleaseKey(policyStoreId, bundleHash)))
 				.map(InMemoryTraceStore::copyOf);
 	}
@@ -385,6 +388,11 @@ public class InMemoryTraceStore implements TraceStore {
 					return next;
 				});
 		return updated != null;
+	}
+
+	/** @return how many policy release reads were made */
+	public int getPolicyReleaseReads() {
+		return policyReleaseReads.get();
 	}
 
 	/** @return how many policy release inserts and updates were made */

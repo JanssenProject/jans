@@ -41,6 +41,8 @@ public class PolicyMismatchCheck {
 
 	static final long CACHE_TTL_MS = 10_000L;
 
+	static final long NEGATIVE_CACHE_TTL_MS = 1_000L;
+
 	static final int CACHE_MAX_ENTRIES = 1_000;
 
 	private static final long MAX_SERVED_UPDATE_INTERVAL_MS = 60_000L;
@@ -75,6 +77,9 @@ public class PolicyMismatchCheck {
 	 * known one has its last-served time moved forward at most once per update interval.
 	 */
 	public void onPolicySnapshot(@Observes PolicySnapshotEvent event) {
+		synchronized (cache) {
+			cache.values().removeIf(cached -> cached.release == null);
+		}
 		event.getCurrent().forEach((policyStoreId, source) -> {
 			if (isComparable(source)) {
 				try {
@@ -135,7 +140,7 @@ public class PolicyMismatchCheck {
 		String bundleHash = source.getBundleHash();
 		String version = source.getPolicyStoreVersion();
 		CachedRelease cached = cache.get(cacheKey(policyStoreId, bundleHash));
-		if (cached != null && !needsUpdate(cached.release, servedAtMs)) {
+		if (cached != null && cached.release != null && !needsUpdate(cached.release, servedAtMs)) {
 			return;
 		}
 		Optional<TracePolicyReleaseEntry> stored = store.findPolicyRelease(policyStoreId, bundleHash);
@@ -175,11 +180,12 @@ public class PolicyMismatchCheck {
 		String key = cacheKey(policyStoreId, bundleHash);
 		long now = clock.millis();
 		CachedRelease cached = cache.get(key);
-		if (cached != null && now - cached.fetchedAtMs < CACHE_TTL_MS) {
-			return Optional.of(cached.release);
+		if (cached != null
+				&& now - cached.fetchedAtMs < (cached.release == null ? NEGATIVE_CACHE_TTL_MS : CACHE_TTL_MS)) {
+			return Optional.ofNullable(cached.release);
 		}
 		Optional<TracePolicyReleaseEntry> release = store.findPolicyRelease(policyStoreId, bundleHash);
-		release.ifPresent(found -> remember(policyStoreId, bundleHash, found));
+		remember(policyStoreId, bundleHash, release.orElse(null));
 		return release;
 	}
 

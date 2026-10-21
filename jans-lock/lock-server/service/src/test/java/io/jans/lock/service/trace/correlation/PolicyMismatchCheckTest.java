@@ -144,14 +144,40 @@ class PolicyMismatchCheckTest {
 	}
 
 	@Test
-	void testCheck_UnknownReleaseNotCached_SeenOnceAnotherNodeRecordsIt() {
+	void testCheck_UnknownRelease_SeenAfterNegativeCacheExpires() {
 		PolicyRef second = new PolicyRef(STORE, "2.0.0", NEXT_HASH);
 		assertTrue(check.check(second, T0));
 
 		PolicyMismatchCheck nodeA = node(new StaticPolicyDownloadService().archive(STORE, "2.0.0", NEXT_HASH));
 		publish(nodeA, Map.of(), SECOND, T0);
+		PolicyMismatchChecks.setClock(check,
+				Clock.fixed(Instant.ofEpochMilli(T0 + PolicyMismatchCheck.NEGATIVE_CACHE_TTL_MS), ZoneOffset.UTC));
 
 		assertFalse(check.check(second, T0 + 1_000L));
+	}
+
+	@Test
+	void testCheck_UnknownReleaseSpam_OneStoreReadPerNegativeTtl() {
+		PolicyRef unknown = new PolicyRef(STORE, "9.9.9", NEXT_HASH);
+		int readsBefore = store.getPolicyReleaseReads();
+
+		for (int i = 0; i < 50; i++) {
+			assertTrue(check.check(unknown, T0));
+		}
+
+		assertEquals(readsBefore + 1, store.getPolicyReleaseReads());
+	}
+
+	@Test
+	void testCheck_OwnPublishClearsNegativeCache() {
+		PolicyRef second = new PolicyRef(STORE, "2.0.0", NEXT_HASH);
+		assertTrue(check.check(second, T0));
+		PolicyMismatchCheck nodeA = node(new StaticPolicyDownloadService().archive(STORE, "2.0.0", NEXT_HASH));
+		publish(nodeA, Map.of(), SECOND, T0);
+
+		publish(check, FIRST, FIRST, T0);
+
+		assertFalse(check.check(second, T0));
 	}
 
 	@Test
