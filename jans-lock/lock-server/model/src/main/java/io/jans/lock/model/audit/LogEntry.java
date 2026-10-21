@@ -137,6 +137,12 @@ public class LogEntry extends BaseEntry implements Serializable {
     @AttributeName(name = "jansPolicyStoreVersion")
     private String policyStoreVersion;
 
+    private transient String explicitRequestId;
+
+    private transient String explicitPolicyStoreId;
+
+    private transient String explicitPolicyStoreVersion;
+
 	public String getInum() {
 		return inum;
 	}
@@ -245,45 +251,63 @@ public class LogEntry extends BaseEntry implements Serializable {
 		return contextInformation;
 	}
 
+	/**
+	 * Also recomputes {@code requestId}, {@code policyStoreId} and {@code policyStoreVersion}: a
+	 * value under {@code request_id}, {@code policystore_id} or {@code policystore_version} here
+	 * takes precedence over the explicit one.
+	 */
 	public void setContextInformation(Map<String, String> contextInformation) {
 		this.contextInformation = contextInformation;
+		refreshIndexedMembers();
 	}
 
-	/**
-	 * @return {@code request_id} from {@code contextInformation} when present and at most
-	 *         {@value #MAX_REQUEST_ID_LENGTH} characters, else the explicit value under the same
-	 *         limit, else {@code null}. Persistence and JSON output read this getter.
-	 */
 	public String getRequestId() {
-		return indexed(CONTEXT_REQUEST_ID, requestId, MAX_REQUEST_ID_LENGTH);
+		return requestId;
 	}
 
+	/**
+	 * Sets the explicit value. The stored {@code requestId} is {@code request_id} from
+	 * {@code contextInformation} when present and at most {@value #MAX_REQUEST_ID_LENGTH}
+	 * characters, else this value under the same limit, else {@code null}.
+	 */
 	public void setRequestId(String requestId) {
-		this.requestId = requestId;
+		this.explicitRequestId = requestId;
+		refreshIndexedMembers();
 	}
 
-	/**
-	 * @return {@code policystore_id} from {@code contextInformation}, else the explicit value;
-	 *         each only when at most {@value #MAX_POLICY_STORE_FIELD_LENGTH} characters
-	 */
 	public String getPolicyStoreId() {
-		return indexed(CONTEXT_POLICY_STORE_ID, policyStoreId, MAX_POLICY_STORE_FIELD_LENGTH);
-	}
-
-	public void setPolicyStoreId(String policyStoreId) {
-		this.policyStoreId = policyStoreId;
+		return policyStoreId;
 	}
 
 	/**
-	 * @return {@code policystore_version} from {@code contextInformation}, else the explicit
-	 *         value; each only when at most {@value #MAX_POLICY_STORE_FIELD_LENGTH} characters
+	 * Sets the explicit value. The stored {@code policyStoreId} is {@code policystore_id} from
+	 * {@code contextInformation} when present, else this value; each only when at most
+	 * {@value #MAX_POLICY_STORE_FIELD_LENGTH} characters.
 	 */
-	public String getPolicyStoreVersion() {
-		return indexed(CONTEXT_POLICY_STORE_VERSION, policyStoreVersion, MAX_POLICY_STORE_FIELD_LENGTH);
+	public void setPolicyStoreId(String policyStoreId) {
+		this.explicitPolicyStoreId = policyStoreId;
+		refreshIndexedMembers();
 	}
 
+	public String getPolicyStoreVersion() {
+		return policyStoreVersion;
+	}
+
+	/**
+	 * Sets the explicit value. The stored {@code policyStoreVersion} is {@code policystore_version}
+	 * from {@code contextInformation} when present, else this value; each only when at most
+	 * {@value #MAX_POLICY_STORE_FIELD_LENGTH} characters.
+	 */
 	public void setPolicyStoreVersion(String policyStoreVersion) {
-		this.policyStoreVersion = policyStoreVersion;
+		this.explicitPolicyStoreVersion = policyStoreVersion;
+		refreshIndexedMembers();
+	}
+
+	private void refreshIndexedMembers() {
+		requestId = indexed(CONTEXT_REQUEST_ID, explicitRequestId, MAX_REQUEST_ID_LENGTH);
+		policyStoreId = indexed(CONTEXT_POLICY_STORE_ID, explicitPolicyStoreId, MAX_POLICY_STORE_FIELD_LENGTH);
+		policyStoreVersion = indexed(CONTEXT_POLICY_STORE_VERSION, explicitPolicyStoreVersion,
+				MAX_POLICY_STORE_FIELD_LENGTH);
 	}
 
 	private String indexed(String contextKey, String explicit, int maxLength) {
@@ -313,16 +337,16 @@ public class LogEntry extends BaseEntry implements Serializable {
                 Objects.equals(clientId, logEntry.clientId) &&
                 Objects.equals(jti, logEntry.jti) &&
                 Objects.equals(contextInformation, logEntry.contextInformation) &&
-                Objects.equals(getRequestId(), logEntry.getRequestId()) &&
-                Objects.equals(getPolicyStoreId(), logEntry.getPolicyStoreId()) &&
-                Objects.equals(getPolicyStoreVersion(), logEntry.getPolicyStoreVersion());
+                Objects.equals(requestId, logEntry.requestId) &&
+                Objects.equals(policyStoreId, logEntry.policyStoreId) &&
+                Objects.equals(policyStoreVersion, logEntry.policyStoreVersion);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(creationDate, eventTime, service, nodeName, eventType, 
                 severityLevel, action, decisionResult, requestedResource, 
-                principalId, clientId, jti, contextInformation, getRequestId(), getPolicyStoreId(), getPolicyStoreVersion());
+                principalId, clientId, jti, contextInformation, requestId, policyStoreId, policyStoreVersion);
     }
 
     @Override
@@ -341,9 +365,9 @@ public class LogEntry extends BaseEntry implements Serializable {
                 ", clientId='" + clientId + '\'' +
                 ", jti='" + jti + '\'' +
                 ", contextInformation=" + contextInformation +
-                ", requestId='" + getRequestId() + '\'' +
-                ", policyStoreId='" + getPolicyStoreId() + '\'' +
-                ", policyStoreVersion='" + getPolicyStoreVersion() + '\'' +
+                ", requestId='" + requestId + '\'' +
+                ", policyStoreId='" + policyStoreId + '\'' +
+                ", policyStoreVersion='" + policyStoreVersion + '\'' +
                 '}';
     }
 }

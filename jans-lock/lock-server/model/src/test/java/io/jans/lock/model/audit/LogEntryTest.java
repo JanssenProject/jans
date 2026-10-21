@@ -50,6 +50,42 @@ class LogEntryTest {
 	}
 
 	@Test
+	void indexedMembers_explicitSetAfterContext_contextStillWins() {
+		LogEntry entry = new LogEntry();
+		entry.setContextInformation(decisionContext());
+		entry.setRequestId("explicit");
+		entry.setPolicyStoreId("explicit-store");
+
+		assertEquals("from-context", entry.getRequestId());
+		assertEquals("context-store", entry.getPolicyStoreId());
+	}
+
+	@Test
+	void indexedMembers_contextSetAfterExplicitWithoutKey_explicitKept() {
+		LogEntry entry = new LogEntry();
+		entry.setRequestId("explicit");
+		entry.setContextInformation(new HashMap<>());
+
+		assertEquals("explicit", entry.getRequestId());
+	}
+
+	@Test
+	void json_bothMemberOrders_storeTheSameValues() throws Exception {
+		ObjectMapper mapper = new ObjectMapper();
+		LogEntry contextFirst = mapper.readValue(
+				"{\"contextInformation\":{\"request_id\":\"ctx\"},\"requestId\":\"explicit\",\"policyStoreId\":\"s1\"}",
+				LogEntry.class);
+		LogEntry explicitFirst = mapper.readValue(
+				"{\"requestId\":\"explicit\",\"policyStoreId\":\"s1\",\"contextInformation\":{\"request_id\":\"ctx\"}}",
+				LogEntry.class);
+
+		assertEquals("ctx", contextFirst.getRequestId());
+		assertEquals("ctx", explicitFirst.getRequestId());
+		assertEquals("s1", explicitFirst.getPolicyStoreId());
+		assertEquals(contextFirst, explicitFirst);
+	}
+
+	@Test
 	void indexedMembers_explicitUsedWhenContextLacksKey() {
 		LogEntry entry = withContext(new HashMap<>());
 		entry.setRequestId("explicit");
@@ -91,6 +127,16 @@ class LogEntryTest {
 		assertEquals("from-context", ReflectHelper.getGetter(LogEntry.class, "requestId").get(entry));
 		assertEquals("context-store", ReflectHelper.getGetter(LogEntry.class, "policyStoreId").get(entry));
 		assertEquals("1.2.3", ReflectHelper.getGetter(LogEntry.class, "policyStoreVersion").get(entry));
+	}
+
+	@Test
+	void orm_loadThroughSetters_keepsStoredValue() {
+		LogEntry entry = new LogEntry();
+		ReflectHelper.getSetter(LogEntry.class, "requestId").set(entry, "from-context");
+		ReflectHelper.getSetter(LogEntry.class, "contextInformation").set(entry, decisionContext());
+
+		assertEquals("from-context", entry.getRequestId());
+		assertEquals("context-store", entry.getPolicyStoreId());
 	}
 
 	@Test
