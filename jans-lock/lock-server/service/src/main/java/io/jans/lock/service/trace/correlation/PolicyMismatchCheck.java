@@ -7,9 +7,10 @@
 package io.jans.lock.service.trace.correlation;
 
 import java.time.Clock;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 
@@ -56,7 +57,16 @@ public class PolicyMismatchCheck {
 	@Inject
 	private TraceStore store;
 
-	private final Map<String, CachedRelease> cache = new ConcurrentHashMap<>();
+	private final Map<String, CachedRelease> cache = Collections.synchronizedMap(new LinkedHashMap<>(16, 0.75f, true) {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<String, CachedRelease> eldest) {
+			return size() > CACHE_MAX_ENTRIES;
+		}
+
+	});
 
 	private Clock clock = Clock.systemUTC();
 
@@ -174,10 +184,15 @@ public class PolicyMismatchCheck {
 	}
 
 	private void remember(String policyStoreId, String bundleHash, TracePolicyReleaseEntry release) {
-		if (cache.size() >= CACHE_MAX_ENTRIES) {
-			cache.clear();
-		}
 		cache.put(cacheKey(policyStoreId, bundleHash), new CachedRelease(release, clock.millis()));
+	}
+
+	boolean isCached(String policyStoreId, String bundleHash) {
+		return cache.containsKey(cacheKey(policyStoreId, bundleHash));
+	}
+
+	int cachedReleaseCount() {
+		return cache.size();
 	}
 
 	private static String cacheKey(String policyStoreId, String bundleHash) {

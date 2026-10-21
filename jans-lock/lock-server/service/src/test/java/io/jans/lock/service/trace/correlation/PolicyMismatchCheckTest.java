@@ -194,6 +194,27 @@ class PolicyMismatchCheckTest {
 	}
 
 	@Test
+	void testCache_EvictsLeastRecentlyUsed() {
+		Map<String, LoadedPolicySource> many = new java.util.LinkedHashMap<>();
+		for (int i = 0; i < PolicyMismatchCheck.CACHE_MAX_ENTRIES; i++) {
+			many.put("store-" + i, PolicyMismatchChecks.archiveSource("store-" + i, "1.0.0", hashOf(i)));
+		}
+		publish(check, Map.of(), many, T0);
+		served.archive("store-0", "2.0.0", NEXT_HASH);
+		check.check(new PolicyRef("store-0", "1.0.0", hashOf(0)), T0);
+		publish(check, many, Map.of("store-new", PolicyMismatchChecks.archiveSource("store-new", "1.0.0", HASH)), T0);
+
+		assertEquals(PolicyMismatchCheck.CACHE_MAX_ENTRIES, check.cachedReleaseCount());
+		assertTrue(check.isCached("store-0", hashOf(0)));
+		assertFalse(check.isCached("store-1", hashOf(1)));
+		assertTrue(check.isCached("store-new", HASH));
+	}
+
+	private static String hashOf(int i) {
+		return "sha256:" + String.format("%064x", i);
+	}
+
+	@Test
 	void testCheck_LoadedPoliciesFails_NoMismatch() {
 		PolicyDownloadService failing = new PolicyDownloadService() {
 			@Override
