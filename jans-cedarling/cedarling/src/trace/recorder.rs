@@ -204,6 +204,7 @@ mod tests {
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
     use crate::authz::{AuthorizeOptions, TraceContext};
     use crate::common::policy_store::TrustedIssuer;
+    use crate::common::policy_store::test_utils::fixtures;
     use crate::jwt::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer, ValidatedToken};
     use crate::log::{LogStrategy, Logger, TEST_LOGGER, gen_uuid7};
     use crate::trace::TraceRecordStatus;
@@ -304,7 +305,7 @@ mod tests {
         let status = recorder.record(
             gen_uuid7(),
             &AuthorizeOptions::default(),
-            &cjar_store("1.0.0").0,
+            &cjar_store(&fixtures::minimal_valid()).0,
             || {
                 built.set(true);
                 Ok(facts(Vec::new()))
@@ -336,7 +337,7 @@ mod tests {
         let (tx, _rx) = mpsc::channel(1);
         let log = memory_log();
         let recorder = TraceRecorder::new(Some(tx), log.clone(), metrics());
-        let (store, _) = cjar_store("1.0.0");
+        let (store, _) = cjar_store(&fixtures::minimal_valid());
         let first = recorder.record(gen_uuid7(), &options(), &store, || Ok(facts(Vec::new())));
         assert_eq!(
             first,
@@ -361,7 +362,7 @@ mod tests {
         let status = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics()).record(
             gen_uuid7(),
             &options(),
-            &cjar_store("1.0.0").0,
+            &cjar_store(&fixtures::minimal_valid()).0,
             || Ok(facts(Vec::new())),
         );
         assert_eq!(
@@ -377,7 +378,7 @@ mod tests {
         let status = TraceRecorder::new(None, TEST_LOGGER.clone(), metrics.clone()).record(
             gen_uuid7(),
             &options(),
-            &cjar_store("1.0.0").0,
+            &cjar_store(&fixtures::minimal_valid()).0,
             || Ok(facts(Vec::new())),
         );
         assert_eq!(
@@ -397,7 +398,7 @@ mod tests {
 
     #[test]
     fn store_without_bundle_hash_is_invalid_field() {
-        let (archived, _) = cjar_store("1.0.0");
+        let (archived, _) = cjar_store(&fixtures::minimal_valid());
         let store = PolicyStoreWithID::without_archive(
             archived.id.clone(),
             archived.store.clone(),
@@ -428,7 +429,7 @@ mod tests {
         let status = TraceRecorder::new(None, log.clone(), metrics()).record(
             request_id,
             &options(),
-            &cjar_store("1.0.0").0,
+            &cjar_store(&fixtures::minimal_valid()).0,
             || {
                 let mut facts = facts(Vec::new());
                 facts.action = "a".repeat(513);
@@ -455,7 +456,7 @@ mod tests {
 
     #[test]
     fn custom_token_without_lock_issuer_is_left_out() {
-        let (store, _) = cjar_store("1.0.0");
+        let (store, _) = cjar_store(&fixtures::minimal_valid());
         for claims in [json!({"sub": "d1"}), json!({"iss": "dolphin", "sub": "d1"})] {
             let log = memory_log();
             let inputs = [
@@ -539,7 +540,7 @@ mod tests {
         let status = TraceRecorder::new(None, log.clone(), metrics()).record(
             gen_uuid7(),
             &options(),
-            &cjar_store("1.0.0").0,
+            &cjar_store(&fixtures::minimal_valid()).0,
             || Ok(facts(refs)),
         );
         assert_eq!(

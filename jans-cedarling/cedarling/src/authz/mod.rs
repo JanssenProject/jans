@@ -1563,7 +1563,7 @@ mod bundle_hash_tests {
     use super::*;
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
     use crate::common::policy_store::archive_handler::ArchiveLimits;
-    use crate::common::policy_store::test_utils::fixtures;
+    use crate::common::policy_store::test_utils::{PolicyStoreTestBuilder, fixtures};
     use crate::context_data_api::{DataStore, DataStoreConfig};
     use crate::http::{HttpClient, HttpClientConfig};
     use crate::init::authz_builder::build_authz;
@@ -1573,13 +1573,11 @@ mod bundle_hash_tests {
     use crate::trace::TraceRecorder;
     use crate::{AuthorizationConfig, JwtConfig};
 
+    /// `builder`'s archive parsed the way bootstrap parses it, and its `bundle_hash`.
     pub(super) async fn parsed_store(
-        version: &str,
+        builder: &PolicyStoreTestBuilder,
     ) -> (PolicyStoreWithID, jans_trace_core::Digest) {
-        let bytes = fixtures::minimal_valid()
-            .with_version(version)
-            .build_archive()
-            .expect("test archive builds");
+        let bytes = builder.build_archive().expect("test archive builds");
         let hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
         let store = parse_cjar_bytes(bytes, false, ArchiveLimits::default())
             .await
@@ -1634,8 +1632,9 @@ mod bundle_hash_tests {
     /// snapshot taken before the swap keeps the hash of the store it decided with.
     #[tokio::test]
     async fn refresh_with_new_archive_changes_bundle_hash() {
-        let (first, first_hash) = parsed_store("1.0.0").await;
-        let (second, second_hash) = parsed_store("2.0.0").await;
+        let (first, first_hash) = parsed_store(&fixtures::minimal_valid()).await;
+        let (second, second_hash) =
+            parsed_store(&fixtures::minimal_valid().with_version("2.0.0")).await;
         assert_ne!(first_hash, second_hash, "the two archives should differ");
 
         let rebuilder = rebuilder(
@@ -1675,6 +1674,7 @@ mod trace_record_tests {
     use super::*;
     use crate::app_types::PdpID;
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
+    use crate::common::policy_store::test_utils::fixtures;
     use crate::log::{LogStrategy, TEST_LOGGER};
     use crate::trace::{Outcome, TraceRecorder};
     use crate::{LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig};
@@ -1724,7 +1724,12 @@ mod trace_record_tests {
         let (tx, mut rx) = mpsc::channel(1);
         let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
         let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics.clone());
-        let authz = bootstrap(&rebuilder, parsed_store("1.0.0").await.0, Some(recorder)).await;
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&fixtures::minimal_valid()).await.0,
+            Some(recorder),
+        )
+        .await;
 
         let result = authz
             .authorize_unsigned(&request(with_trace()))
@@ -1768,7 +1773,12 @@ mod trace_record_tests {
             let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
             let recorder = trace.then(|| TraceRecorder::new(None, log.clone(), metrics.clone()));
             let rebuilder = rebuilder(log.clone(), metrics);
-            let authz = bootstrap(&rebuilder, parsed_store("1.0.0").await.0, recorder).await;
+            let authz = bootstrap(
+                &rebuilder,
+                parsed_store(&fixtures::minimal_valid()).await.0,
+                recorder,
+            )
+            .await;
             log.pop_logs();
 
             authz
@@ -1794,7 +1804,12 @@ mod trace_record_tests {
     async fn trace_disabled_adds_no_metric_keys() {
         let metrics = Arc::new(MetricsCollector::new(MetricsMode::Local));
         let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics.clone());
-        let authz = bootstrap(&rebuilder, parsed_store("1.0.0").await.0, None).await;
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&fixtures::minimal_valid()).await.0,
+            None,
+        )
+        .await;
 
         authz
             .authorize_unsigned(&request(with_trace()))
@@ -1818,8 +1833,9 @@ mod trace_record_tests {
 
     #[tokio::test]
     async fn refreshed_authz_keeps_recorder() {
-        let (first, _) = parsed_store("1.0.0").await;
-        let (second, second_hash) = parsed_store("2.0.0").await;
+        let (first, _) = parsed_store(&fixtures::minimal_valid()).await;
+        let (second, second_hash) =
+            parsed_store(&fixtures::minimal_valid().with_version("2.0.0")).await;
         let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
         let (tx, mut rx) = mpsc::channel(1);
         let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());

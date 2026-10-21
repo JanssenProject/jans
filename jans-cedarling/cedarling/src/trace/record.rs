@@ -291,6 +291,7 @@ mod tests {
     use jans_trace_core::inputs::token_fingerprint;
 
     use super::*;
+    use crate::common::policy_store::test_utils::fixtures;
     use crate::log::gen_uuid7;
     use crate::trace::test_utils::cjar_store;
 
@@ -594,7 +595,7 @@ mod tests {
 
     #[test]
     fn policy_facts_from_cjar_store() {
-        let (store, hash) = cjar_store("2.1.0");
+        let (store, hash) = cjar_store(&fixtures::minimal_valid().with_version("2.1.0"));
         let facts = PolicyFacts::from_store(&store).expect("a .cjar store has policy facts");
         assert_eq!(facts.bundle_hash, hash, "bundle_hash comes from the store");
         assert_eq!(facts.store_version, "2.1.0", "store version from metadata");
@@ -612,7 +613,7 @@ mod tests {
 
     #[test]
     fn policy_facts_none_without_bundle_hash() {
-        let (archived, _) = cjar_store("2.1.0");
+        let (archived, _) = cjar_store(&fixtures::minimal_valid());
         let store = PolicyStoreWithID::without_archive(
             archived.id.clone(),
             archived.store.clone(),
