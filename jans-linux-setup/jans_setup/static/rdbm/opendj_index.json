@@ -369,6 +369,55 @@
     },
 
     {
+        "attribute": "jansRequestId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansPolicyStoreId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansPolicyStoreVersion",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceLastServedAtMs",
+        "type": "integer",
+        "index": ["equality", "ordering"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTracePolicyStoreId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTracePolicyStoreVersion",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceBundleHash",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
         "attribute": "jansTraceReceiptSeq",
         "type": "integer",
         "index": ["ordering"],

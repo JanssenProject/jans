@@ -23,6 +23,7 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.ReceiptEntry;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -60,11 +61,11 @@ final class TraceEntityMapper {
 
 	// -- records ------------------------------------------------------------------------------
 
-	static TraceRecordEntry toEntity(StoredTraceRecord record, String dn, TraceKeys traceKeys) {
-		RecordIdentity identity = record.getIdentity();
-		ChainPosition chainPosition = record.getChainPosition();
-		ReceiptEntry receipt = record.getReceipt();
-		IngestionFlags flags = record.getFlags();
+	static TraceRecordEntry toEntity(StoredTraceRecord stored, String dn, TraceKeys traceKeys) {
+		RecordIdentity identity = stored.getIdentity();
+		ChainPosition chainPosition = stored.getChainPosition();
+		ReceiptEntry receipt = stored.getReceipt();
+		IngestionFlags flags = stored.getFlags();
 
 		TraceRecordEntry entity = new TraceRecordEntry();
 		entity.setDn(dn);
@@ -72,20 +73,20 @@ final class TraceEntityMapper {
 		entity.setDomainId(identity.getDomainId());
 		entity.setProducerId(identity.getProducerId());
 		entity.setRecordId(identity.getRecordId());
-		entity.setEventKind(record.getEventKind());
-		entity.setSignedAt(record.getSignedAt());
-		entity.setExecKey(traceKeys.executionKey(record.getExecution()));
-		entity.setExecId(record.getExecution().getTraceExecutionId());
-		entity.setExecAuthority(record.getExecution().getExecutionAuthority());
+		entity.setEventKind(stored.getEventKind());
+		entity.setSignedAt(stored.getSignedAt());
+		entity.setExecKey(traceKeys.executionKey(stored.getExecution()));
+		entity.setExecId(stored.getExecution().getTraceExecutionId());
+		entity.setExecAuthority(stored.getExecution().getExecutionAuthority());
 		entity.setChainKey(traceKeys.chainKey(chainPosition.getChainIdentity()));
 		entity.setChainPosKey(traceKeys.chainPositionKey(chainPosition));
 		entity.setSeqNum(chainPosition.getSequenceNumber());
-		entity.setPrevRecordHash(record.getPrevRecordHash());
-		entity.setTokenKeys(record.getTokenRefs().stream()
+		entity.setPrevRecordHash(stored.getPrevRecordHash());
+		entity.setTokenKeys(stored.getTokenRefs().stream()
 				.map(tokenRef -> traceKeys.tokenKey(identity.getDomainId(), tokenRef)).collect(Collectors.toList()));
-		entity.setAssertion(record.getAssertionRaw());
-		entity.setContentDigest(record.getContentDigest());
-		entity.setVerification(toVerificationPojo(record.getVerification()));
+		entity.setAssertion(stored.getAssertionRaw());
+		entity.setContentDigest(stored.getContentDigest());
+		entity.setVerification(toVerificationPojo(stored.getVerification()));
 		entity.setReceiptSeq(receipt.getReceiptSequence());
 		entity.setReceivedAt(new Date(receipt.getReceivedAtMs()));
 		entity.setReceivedAtMs(receipt.getReceivedAtMs());
@@ -95,9 +96,17 @@ final class TraceEntityMapper {
 		entity.setChainLinkFailure(flags.isChainLinkFailure());
 		entity.setEquivocation(flags.isEquivocation());
 		entity.setLate(flags.isLate());
-		entity.setNodeId(record.getNodeId());
-		entity.setVersion(record.getVersion());
-		entity.setCreationDate(new Date(record.getCreatedAtMs()));
+		entity.setPolicyMismatch(flags.isPolicyMismatch());
+		entity.setReservedMembers(flags.isReservedMember() ? new ArrayList<>(flags.getReservedMembers()) : null);
+		entity.setNodeId(stored.getNodeId());
+		PolicyRef policy = stored.getPolicy();
+		if (policy != null) {
+			entity.setPolicyStoreId(policy.getPolicyStoreId());
+			entity.setPolicyStoreVersion(policy.getPolicyStoreVersion());
+			entity.setBundleHash(policy.getBundleHash());
+		}
+		entity.setVersion(stored.getVersion());
+		entity.setCreationDate(new Date(stored.getCreatedAtMs()));
 		return entity;
 	}
 
@@ -118,13 +127,23 @@ final class TraceEntityMapper {
 		ReceiptEntry receipt = new ReceiptEntry(nvl(entity.getReceiptSeq()), nvl(entity.getReceivedAtMs()),
 				entity.getPrevReceiptHash(), entity.getReceiptHash());
 		IngestionFlags flags = new IngestionFlags(nvl(entity.getCoverageGap()), nvl(entity.getChainLinkFailure()),
-				nvl(entity.getEquivocation()), nvl(entity.getLate()));
+				nvl(entity.getEquivocation()), nvl(entity.getLate()), nvl(entity.getPolicyMismatch()));
+		flags.setReservedMembers(entity.getReservedMembers());
 
 		long createdAtMs = entity.getCreationDate() == null ? 0L : entity.getCreationDate().getTime();
 
 		return new StoredTraceRecord(identity, entity.getAssertion(), entity.getContentDigest(), verification,
 				receipt, flags, execution, chainPosition, entity.getPrevRecordHash(), tokenRefs, entity.getEventKind(),
-				nvl(entity.getSignedAt()), entity.getNodeId(), createdAtMs, nvl(entity.getVersion()));
+				nvl(entity.getSignedAt()), entity.getNodeId(), createdAtMs, nvl(entity.getVersion()),
+				toPolicyRef(entity));
+	}
+
+	private static PolicyRef toPolicyRef(TraceRecordEntry entity) {
+		if (entity.getPolicyStoreId() == null || entity.getPolicyStoreVersion() == null
+				|| entity.getBundleHash() == null) {
+			return null;
+		}
+		return new PolicyRef(entity.getPolicyStoreId(), entity.getPolicyStoreVersion(), entity.getBundleHash());
 	}
 
 	private static TraceVerification toVerificationPojo(VerificationResult verification) {

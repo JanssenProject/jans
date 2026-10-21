@@ -7,6 +7,7 @@
 package io.jans.lock.service.trace.store;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -14,15 +15,18 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import io.jans.lock.model.trace.entity.TraceChainEntry;
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
@@ -32,6 +36,7 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.ReceiptHead;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -66,6 +71,14 @@ public class InMemoryTraceStore implements TraceStore {
 	private final ConcurrentHashMap<String, StoredTraceRecord> recordsByKey = new ConcurrentHashMap<>();
 
 	private final ConcurrentHashMap<String, TraceReceiptEntry> receiptsByKey = new ConcurrentHashMap<>();
+
+	private final AtomicInteger receiptLookups = new AtomicInteger();
+
+	private final ConcurrentHashMap<String, TracePolicyReleaseEntry> policyReleasesByKey = new ConcurrentHashMap<>();
+
+	private final AtomicInteger policyReleaseWrites = new AtomicInteger();
+
+	private final AtomicInteger policyReleaseReads = new AtomicInteger();
 
 	private final ConcurrentHashMap<String, TraceChainEntry> chainsByKey = new ConcurrentHashMap<>();
 
@@ -146,14 +159,14 @@ public class InMemoryTraceStore implements TraceStore {
 	// -- records --------------------------------------------------------------------------------
 
 	@Override
-	public void insertRecord(StoredTraceRecord record) throws DuplicateEntryException, TraceStorageException {
+	public void insertRecord(StoredTraceRecord stored) throws DuplicateEntryException, TraceStorageException {
 		if (failNextInsertRecord.getAndSet(false)) {
 			throw new TraceStorageException("test_fail_next_insert_record", "Forced test failure");
 		}
 		awaitInsertRecordBarrier();
 
-		String key = traceKeys.recordKey(record.getIdentity());
-		StoredTraceRecord existing = recordsByKey.putIfAbsent(key, record.copy());
+		String key = traceKeys.recordKey(stored.getIdentity());
+		StoredTraceRecord existing = recordsByKey.putIfAbsent(key, stored.copy());
 		if (existing != null) {
 			throw new DuplicateEntryException(key);
 		}
@@ -246,6 +259,14 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
+	public List<StoredTraceRecord> findRecordsByPolicy(String domainId, PolicyRecordQuery query, int start, int count) {
+		return recordsByKey.values().stream()
+				.filter(r -> r.getIdentity().getDomainId().equals(domainId) && query.matches(r))
+				.sorted(Comparator.comparingLong(r -> r.getReceipt().getReceiptSequence())).skip(Math.max(0, start))
+				.limit(Math.max(0, count)).map(StoredTraceRecord::copy).collect(Collectors.toList());
+	}
+
+	@Override
 	public List<String> findExecutionAuthorities(String domainId, String traceExecutionId) {
 		Set<String> authorities = new LinkedHashSet<>();
 		recordsByKey.values().stream()
@@ -323,6 +344,91 @@ public class InMemoryTraceStore implements TraceStore {
 	public Optional<TraceReceiptEntry> findReceipt(String domainId, long receiptSequence) {
 		return Optional.ofNullable(receiptsByKey.get(traceKeys.receiptKey(domainId, receiptSequence)))
 				.map(InMemoryTraceStore::copyOf);
+	}
+
+	@Override
+	public List<TraceReceiptEntry> findReceipts(String domainId, Collection<Long> receiptSequences) {
+		receiptLookups.incrementAndGet();
+		return receiptSequences.stream().distinct().map(seq -> receiptsByKey.get(traceKeys.receiptKey(domainId, seq)))
+				.filter(Objects::nonNull).map(InMemoryTraceStore::copyOf).collect(Collectors.toList());
+	}
+
+	/** @return how many batched receipt lookups were made */
+	public int getReceiptLookups() {
+		return receiptLookups.get();
+	}
+
+	@Override
+	public Optional<TracePolicyReleaseEntry> findPolicyRelease(String policyStoreId, String bundleHash) {
+		policyReleaseReads.incrementAndGet();
+		return Optional.ofNullable(policyReleasesByKey.get(traceKeys.policyReleaseKey(policyStoreId, bundleHash)))
+				.map(InMemoryTraceStore::copyOf);
+	}
+
+	@Override
+	public void insertPolicyRelease(TracePolicyReleaseEntry entry) throws DuplicateEntryException {
+		String key = traceKeys.policyReleaseKey(entry.getPolicyStoreId(), entry.getBundleHash());
+		entry.setId(key);
+		if (policyReleasesByKey.putIfAbsent(key, copyOf(entry)) != null) {
+			throw new DuplicateEntryException(key);
+		}
+		policyReleaseWrites.incrementAndGet();
+	}
+
+	@Override
+	public boolean recordPolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
+			long servedAtMs) {
+		TracePolicyReleaseEntry updated = policyReleasesByKey.computeIfPresent(
+				traceKeys.policyReleaseKey(policyStoreId, bundleHash), (key, current) -> {
+					TracePolicyReleaseEntry next = copyOf(current);
+					if (!PolicyReleaseServed.apply(next, policyStoreVersion, servedAtMs)) {
+						return current;
+					}
+					policyReleaseWrites.incrementAndGet();
+					return next;
+				});
+		return updated != null;
+	}
+
+	@Override
+	public List<TracePolicyReleaseEntry> findPolicyReleasesLastServedBefore(long cutoffMs, int limit) {
+		return policyReleasesByKey.values().stream()
+				.filter(r -> r.getLastServedAtMs() != null && r.getLastServedAtMs() < cutoffMs).limit(limit)
+				.map(InMemoryTraceStore::copyOf).collect(Collectors.toList());
+	}
+
+	@Override
+	public boolean removePolicyReleaseLastServedBefore(String policyStoreId, String bundleHash, long cutoffMs) {
+		AtomicBoolean removed = new AtomicBoolean();
+		policyReleasesByKey.computeIfPresent(traceKeys.policyReleaseKey(policyStoreId, bundleHash), (key, current) -> {
+			if (current.getLastServedAtMs() != null && current.getLastServedAtMs() < cutoffMs) {
+				removed.set(true);
+				return null;
+			}
+			return current;
+		});
+		return removed.get();
+	}
+
+	/** @return how many policy release reads were made */
+	public int getPolicyReleaseReads() {
+		return policyReleaseReads.get();
+	}
+
+	/** @return how many policy release inserts and updates were made */
+	public int getPolicyReleaseWrites() {
+		return policyReleaseWrites.get();
+	}
+
+	private static TracePolicyReleaseEntry copyOf(TracePolicyReleaseEntry source) {
+		TracePolicyReleaseEntry copy = new TracePolicyReleaseEntry();
+		copy.setId(source.getId());
+		copy.setPolicyStoreId(source.getPolicyStoreId());
+		copy.setBundleHash(source.getBundleHash());
+		copy.setPolicyStoreVersion(source.getPolicyStoreVersion());
+		copy.setFirstServedAtMs(source.getFirstServedAtMs());
+		copy.setLastServedAtMs(source.getLastServedAtMs());
+		return copy;
 	}
 
 	@Override

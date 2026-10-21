@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.TraceValidationException;
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 
@@ -42,6 +43,8 @@ public final class AuthorizationDecisionValidator implements EventKindValidator 
 	 */
 	private static final Pattern GENERIC_DIGEST_PATTERN = Pattern.compile("^[a-z0-9-]+:[A-Za-z0-9+/=_-]+$");
 
+	private static final int MAX_POLICY_FIELD_LENGTH = 255;
+
 	/** {@code trace.policy.enforcement_mode} vocabulary (GovOps profile §4, base TRACE v0.2). */
 	private static final Set<String> ENFORCEMENT_MODES = Collections
 			.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("enforce", "advisory", "silent", "declared")));
@@ -50,18 +53,18 @@ public final class AuthorizationDecisionValidator implements EventKindValidator 
 	 * Validates the complete {@code trace.policy} block (design §7.2): required for a decision,
 	 * optional but validated when present for an invocation.
 	 */
-	static void validatePolicy(JsonNode trace) {
+	static PolicyRef validatePolicy(JsonNode trace) {
 		JsonNode policy = EventKindValidationSupport.requireObject(trace, "policy", "trace.policy");
-		EventKindValidationSupport.requireNonEmptyString(policy, "policy_store_id", "trace.policy.policy_store_id",
-				null);
-		EventKindValidationSupport.requireNonEmptyString(policy, "policy_store_version",
-				"trace.policy.policy_store_version", null);
+		String policyStoreId = EventKindValidationSupport.requireNonEmptyString(policy, "policy_store_id",
+				"trace.policy.policy_store_id", MAX_POLICY_FIELD_LENGTH);
+		String policyStoreVersion = EventKindValidationSupport.requireNonEmptyString(policy, "policy_store_version",
+				"trace.policy.policy_store_version", MAX_POLICY_FIELD_LENGTH);
 		EventKindValidationSupport.requireNonEmptyString(policy, "policy_language", "trace.policy.policy_language",
 				null);
 		EventKindValidationSupport.requireNonEmptyString(policy, "policy_language_version",
 				"trace.policy.policy_language_version", null);
 		String bundleHash = EventKindValidationSupport.requireNonEmptyString(policy, "bundle_hash",
-				"trace.policy.bundle_hash", null);
+				"trace.policy.bundle_hash", MAX_POLICY_FIELD_LENGTH);
 		boolean valid = bundleHash.startsWith("sha256:") ? TraceConstants.HASH_PATTERN.matcher(bundleHash).matches()
 				: GENERIC_DIGEST_PATTERN.matcher(bundleHash).matches();
 		if (!valid) {
@@ -72,6 +75,7 @@ public final class AuthorizationDecisionValidator implements EventKindValidator 
 			EventKindValidationSupport.requireEnum(policy, "enforcement_mode", "trace.policy.enforcement_mode",
 					ENFORCEMENT_MODES);
 		}
+		return new PolicyRef(policyStoreId, policyStoreVersion, bundleHash);
 	}
 
 	@Override
@@ -89,7 +93,7 @@ public final class AuthorizationDecisionValidator implements EventKindValidator 
 				EventKindValidationSupport.DECISION_OUTCOMES);
 		EventKindValidationSupport.optionalDigests(event, "request_digest", "input_digest", "tool_call_digest");
 
-		validatePolicy(trace);
+		out.policy(validatePolicy(trace));
 
 		JsonNode runtime = EventKindValidationSupport.requireObject(trace, "runtime", "trace.runtime");
 		EventKindValidationSupport.requireNonEmptyString(runtime, "pdp_id", "trace.runtime.pdp_id", null);

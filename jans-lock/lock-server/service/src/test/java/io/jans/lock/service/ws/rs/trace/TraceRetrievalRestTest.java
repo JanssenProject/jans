@@ -35,6 +35,7 @@ import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.api.TraceExecutionResponse;
 import io.jans.lock.model.trace.api.TraceRecordResponse;
+import io.jans.lock.model.trace.api.TraceRecordSearchResponse;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
@@ -330,8 +331,9 @@ class TraceRetrievalRestTest extends BaseLockServiceTest {
 	void testGetRecord_RecordIdTooLong_Returns400() {
 		boundToDomain("domain-a");
 
+		String recordId = "x".repeat(129);
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.getRecord("x".repeat(129), null));
+				() -> impl.getRecord(recordId, null));
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(submitterIdentityService, org.mockito.Mockito.never()).resolve(any());
 	}
@@ -429,6 +431,146 @@ class TraceRetrievalRestTest extends BaseLockServiceTest {
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
 				() -> impl.getExecution("exec-1", "spiffe://example.org/agent/planner", 0, 100));
 		assertEquals(404, ex.getResponse().getStatus());
+	}
+
+	// -- searchRecords ------------------------------------------------------------------------------
+
+	private static final String HASH_A = "sha256:" + "a".repeat(64);
+
+	private static final String HASH_B = "sha256:" + "b".repeat(64);
+
+	private void insertPolicyRecord(String domainId, String recordId, long receiptSequence, long receivedAtMs,
+			String storeId, String version, String bundleHash) throws Exception {
+		traceStore.insertRecord(StoredTraceRecordFactory.builder().domainId(domainId).recordId(recordId)
+				.receiptSequence(receiptSequence).receivedAtMs(receivedAtMs)
+				.contentDigest("sha256:" + String.format("%064d", receiptSequence))
+				.policy(storeId, version, bundleHash).policyMismatch(HASH_B.equals(bundleHash)).build());
+	}
+
+	@Test
+	void testSearchRecords_ByStoreAndVersion_ReturnsMatchesInReceiptOrder() throws Exception {
+		insertPolicyRecord("domain-a", "record-2", 2, 2000L, "store-1", "1.0.0", HASH_A);
+		insertPolicyRecord("domain-a", "record-1", 1, 1000L, "store-1", "1.0.0", HASH_A);
+		insertPolicyRecord("domain-a", "record-3", 3, 3000L, "store-1", "2.0.0", HASH_B);
+		insertPolicyRecord("domain-a", "record-4", 4, 4000L, "store-2", "1.0.0", HASH_A);
+		traceStore.insertRecord(StoredTraceRecordFactory.builder().domainId("domain-a").recordId("record-5")
+				.receiptSequence(5).contentDigest("sha256:" + "5".repeat(64)).build());
+		boundToDomain("domain-a");
+
+		Response response = impl.searchRecords("store-1", "1.0.0", null, null, null, 0, 100);
+
+		assertEquals(200, response.getStatus());
+		TraceRecordSearchResponse dto = (TraceRecordSearchResponse) response.getEntity();
+		assertEquals("receipt_sequence", dto.getOrdering());
+		assertEquals(List.of("record-1", "record-2"),
+				dto.getRecords().stream().map(TraceRecordResponse::getRecordId).collect(java.util.stream.Collectors.toList()));
+		ArgumentCaptor<AuditLogEntry> captor = ArgumentCaptor.forClass(AuditLogEntry.class);
+		verify(applicationAuditLogger).log(captor.capture(), org.mockito.ArgumentMatchers.eq(true));
+		assertEquals(AuditActionType.TRACE_RECORD_READ, captor.getValue().getAction());
+	}
+
+	@Test
+	void testSearchRecords_ByBundleHash_SurfacesPolicyMismatchFlag() throws Exception {
+		insertPolicyRecord("domain-a", "record-1", 1, 1000L, "store-1", "1.0.0", HASH_A);
+		insertPolicyRecord("domain-a", "record-3", 3, 3000L, "store-1", "2.0.0", HASH_B);
+		boundToDomain("domain-a");
+
+		TraceRecordSearchResponse dto = (TraceRecordSearchResponse) impl
+				.searchRecords(null, null, HASH_B, null, null, 0, 100).getEntity();
+
+		assertEquals(1, dto.getRecords().size());
+		assertEquals("record-3", dto.getRecords().get(0).getRecordId());
+		assertTrue(dto.getRecords().get(0).getIngestion().isPolicyMismatchFlag());
+	}
+
+	@Test
+	void testSearchRecords_PaddedValue_MatchedExactly() throws Exception {
+		insertPolicyRecord("domain-a", "record-1", 1, 1000L, " store-1 ", "1.0.0", HASH_A);
+		insertPolicyRecord("domain-a", "record-2", 2, 2000L, "store-1", "1.0.0", HASH_A);
+		boundToDomain("domain-a");
+
+		TraceRecordSearchResponse dto = (TraceRecordSearchResponse) impl
+				.searchRecords(" store-1 ", null, null, null, null, 0, 100).getEntity();
+
+		assertEquals(List.of("record-1"),
+				dto.getRecords().stream().map(TraceRecordResponse::getRecordId).collect(java.util.stream.Collectors.toList()));
+	}
+
+	@Test
+	void testSearchRecords_ReceiptStatesReadInOneLookup() throws Exception {
+		insertPolicyRecord("domain-a", "record-1", 1, 1000L, "store-1", "1.0.0", HASH_A);
+		insertPolicyRecord("domain-a", "record-2", 2, 2000L, "store-1", "1.0.0", HASH_A);
+		traceStore.insertReceipt(receiptRow("domain-a", 1L, TraceReceiptState.COMMITTED));
+		traceStore.insertReceipt(receiptRow("domain-a", 2L, TraceReceiptState.PENDING));
+		boundToDomain("domain-a");
+
+		TraceRecordSearchResponse dto = (TraceRecordSearchResponse) impl
+				.searchRecords("store-1", null, null, null, null, 0, 100).getEntity();
+
+		assertEquals(List.of("COMMITTED", "PENDING"), dto.getRecords().stream()
+				.map(r -> r.getIngestion().getReceiptState()).collect(java.util.stream.Collectors.toList()));
+		assertEquals(1, traceStore.getReceiptLookups());
+	}
+
+	@Test
+	void testSearchRecords_ReceivedRange_IsInclusive() throws Exception {
+		insertPolicyRecord("domain-a", "record-1", 1, 1000L, "store-1", "1.0.0", HASH_A);
+		insertPolicyRecord("domain-a", "record-2", 2, 2000L, "store-1", "1.0.0", HASH_A);
+		insertPolicyRecord("domain-a", "record-3", 3, 3000L, "store-1", "1.0.0", HASH_A);
+		boundToDomain("domain-a");
+
+		TraceRecordSearchResponse dto = (TraceRecordSearchResponse) impl.searchRecords("store-1", null, null,
+				"1970-01-01T00:00:02.000Z", "1970-01-01T00:00:03Z", 0, 100).getEntity();
+
+		assertEquals(List.of("record-2", "record-3"),
+				dto.getRecords().stream().map(TraceRecordResponse::getRecordId).collect(java.util.stream.Collectors.toList()));
+	}
+
+	@Test
+	void testSearchRecords_Paging_SkipsAndLimits() throws Exception {
+		insertPolicyRecord("domain-a", "record-1", 1, 1000L, "store-1", "1.0.0", HASH_A);
+		insertPolicyRecord("domain-a", "record-2", 2, 2000L, "store-1", "1.0.0", HASH_A);
+		insertPolicyRecord("domain-a", "record-3", 3, 3000L, "store-1", "1.0.0", HASH_A);
+		boundToDomain("domain-a");
+
+		TraceRecordSearchResponse dto = (TraceRecordSearchResponse) impl
+				.searchRecords("store-1", null, null, null, null, 1, 1).getEntity();
+
+		assertEquals(1, dto.getRecords().size());
+		assertEquals("record-2", dto.getRecords().get(0).getRecordId());
+	}
+
+	@Test
+	void testSearchRecords_ForeignDomain_ReturnsEmpty() throws Exception {
+		insertPolicyRecord("domain-a", "record-1", 1, 1000L, "store-1", "1.0.0", HASH_A);
+		boundToDomain("domain-b");
+
+		TraceRecordSearchResponse dto = (TraceRecordSearchResponse) impl
+				.searchRecords("store-1", null, null, null, null, 0, 100).getEntity();
+
+		assertTrue(dto.getRecords().isEmpty());
+	}
+
+	@Test
+	void testSearchRecords_NoStoreIdOrBundleHash_Returns400() {
+		boundToDomain("domain-a");
+
+		WebApplicationException ex = assertThrows(WebApplicationException.class,
+				() -> impl.searchRecords(null, "1.0.0", " ", null, null, 0, 100));
+		assertEquals(400, ex.getResponse().getStatus());
+	}
+
+	@Test
+	void testSearchRecords_InvalidTimestampOrRange_Returns400() {
+		boundToDomain("domain-a");
+
+		assertEquals(400, assertThrows(WebApplicationException.class,
+				() -> impl.searchRecords("store-1", null, null, "yesterday", null, 0, 100)).getResponse().getStatus());
+		assertEquals(400, assertThrows(WebApplicationException.class,
+				() -> impl.searchRecords("store-1", null, null, "2026-01-02T00:00:00Z", "2026-01-01T00:00:00Z", 0,
+						100)).getResponse().getStatus());
+		assertEquals(400, assertThrows(WebApplicationException.class,
+				() -> impl.searchRecords("store-1", null, null, null, null, 0, 1001)).getResponse().getStatus());
 	}
 
 }

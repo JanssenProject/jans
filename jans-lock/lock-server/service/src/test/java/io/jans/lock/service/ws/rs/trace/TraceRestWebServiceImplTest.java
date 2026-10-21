@@ -227,8 +227,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		when(ingestionService.ingest(any(), any()))
 				.thenThrow(new TraceConflictException(TraceErrorResponseType.RECORD_CONFLICT, "digest_mismatch"));
 
+		InputStream requestBody = body();
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitRecord(body(), httpServletRequest, null));
+				() -> impl.submitRecord(requestBody, httpServletRequest, null));
 
 		assertEquals(409, ex.getResponse().getStatus());
 		verify(applicationAuditLogger).log(any(), org.mockito.ArgumentMatchers.eq(false));
@@ -239,8 +240,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		when(evidenceDomainResolver.resolve(any()))
 				.thenThrow(new TraceValidationException(TraceErrorResponseType.CLIENT_NOT_BOUND, "no_domain_binding"));
 
+		InputStream requestBody = body();
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitRecord(body(), httpServletRequest, null));
+				() -> impl.submitRecord(requestBody, httpServletRequest, null));
 
 		assertEquals(403, ex.getResponse().getStatus());
 		verify(applicationAuditLogger).log(any(), org.mockito.ArgumentMatchers.eq(false));
@@ -252,8 +254,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		when(ingestionService.ingest(any(), any()))
 				.thenThrow(new TraceValidationException(TraceErrorResponseType.INVALID_ASSERTION, "missing:trace.signed_at"));
 
+		InputStream requestBody = body();
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitRecord(body(), httpServletRequest, null));
+				() -> impl.submitRecord(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(applicationAuditLogger).log(any(), org.mockito.ArgumentMatchers.eq(false));
@@ -264,8 +267,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		when(ingestionService.ingest(any(), any()))
 				.thenThrow(new TraceStorageException("receipt_allocation_retry_exhausted", "retries exhausted"));
 
+		InputStream requestBody = body();
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitRecord(body(), httpServletRequest, null));
+				() -> impl.submitRecord(requestBody, httpServletRequest, null));
 
 		assertEquals(500, ex.getResponse().getStatus());
 		verify(applicationAuditLogger).log(any(), org.mockito.ArgumentMatchers.eq(false));
@@ -275,8 +279,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	void testSubmitRecord_DisabledFeature_Returns400InvalidRequest() {
 		traceConfiguration.setEnabled(false);
 
+		InputStream requestBody = body();
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitRecord(body(), httpServletRequest, null));
+				() -> impl.submitRecord(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		@SuppressWarnings("unchecked")
@@ -311,7 +316,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testSubmitBulkRecords_Mixed_ReturnsPerItemOutcomes() throws Exception {
+	void testSubmitBulkRecords_Mixed_ReturnsPerItemOutcomes() {
 		when(ingestionService.ingest(any(), eq(context))).thenAnswer(inv -> {
 			InputStream slice = inv.getArgument(0);
 			String text = readAll(slice);
@@ -342,9 +347,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 	@Test
 	void testSubmitBulkRecords_MixedProducers_Returns400BeforeAnyIngest() {
+		InputStream requestBody = body("[{\"producer\":\"p-1\"},{\"producer\":\"p-2\"}]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[{\"producer\":\"p-1\"},{\"producer\":\"p-2\"}]"),
-						httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		@SuppressWarnings("unchecked")
@@ -357,9 +362,10 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 	@Test
 	void testSubmitBulkRecords_MixedProducersLateInBatch_NothingIngested() {
+		InputStream requestBody = body("[{\"producer\":\"p-1\"},{\"producer\":\"p-1\"},"
+						+ "{\"x\":{\"producer\":\"ignored\"},\"producer\":\"p-2\"}]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[{\"producer\":\"p-1\"},{\"producer\":\"p-1\"},"
-						+ "{\"x\":{\"producer\":\"ignored\"},\"producer\":\"p-2\"}]"), httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(ingestionService, never()).ingest(any(), any());
@@ -414,7 +420,8 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		List<String> acceptedMembers = List.of("index", "accepted", "producer_id", "record_id", "content_digest",
 				"receipt_sequence", "received_at", "idempotent_replay", "coverage_gap_flag",
-				"chain_link_failure_flag", "equivocation_flag", "late_flag");
+				"chain_link_failure_flag", "equivocation_flag", "late_flag", "policy_mismatch_flag",
+				"reserved_member_flag", "reserved_members");
 		assertEquals(acceptedMembers, fieldNames(results.get(0)));
 		assertEquals(0, results.get(0).get("index").intValue());
 		assertTrue(results.get(0).get("accepted").booleanValue());
@@ -459,9 +466,27 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	}
 
 	@Test
+	void testSubmitBulkRecords_ScalarAndMultibyteElements_ForwardedWithExactSourceText() throws Exception {
+		when(ingestionService.ingest(any(), eq(context)))
+				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
+
+		String scalar = "42";
+		String multibyte = "{ \"note\" : \"caf\u00e9 \u65e5\u672c \uD83D\uDE00\" }";
+		impl.submitBulkRecords(body("[" + scalar + ",  " + multibyte + "]"), httpServletRequest, null);
+
+		ArgumentCaptor<InputStream> captor = ArgumentCaptor.forClass(InputStream.class);
+		verify(ingestionService, times(2)).ingest(captor.capture(), eq(context));
+
+		List<InputStream> slices = captor.getAllValues();
+		assertEquals(scalar, readAll(slices.get(0)));
+		assertEquals(multibyte, readAll(slices.get(1)));
+	}
+
+	@Test
 	void testSubmitBulkRecords_EmptyArray_Returns400() {
+		InputStream requestBody = body("[]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[]"), httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(ingestionService, never()).ingest(any(), any());
@@ -470,8 +495,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 	@Test
 	void testSubmitBulkRecords_NotArray_Returns400() {
+		InputStream requestBody = body("{}");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("{}"), httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(ingestionService, never()).ingest(any(), any());
@@ -481,8 +507,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	void testSubmitBulkRecords_TooManyRecords_Returns400BeforeAnyIngest() {
 		traceConfiguration.setMaxBulkRecords(1);
 
+		InputStream requestBody = body("[{\"a\":1},{\"b\":2}]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[{\"a\":1},{\"b\":2}]"), httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(ingestionService, never()).ingest(any(), any());
@@ -492,9 +519,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	void testSubmitBulkRecords_BodyExceedsMaxBulkRequestBytes_Returns400BeforeAnyIngest() {
 		traceConfiguration.setMaxBulkRequestBytes(16);
 
+		InputStream requestBody = body("[{\"a\":\"this element alone is already longer than 16 bytes\"}]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[{\"a\":\"this element alone is already longer than 16 bytes\"}]"),
-						httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(ingestionService, never()).ingest(any(), any());
@@ -506,8 +533,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		when(evidenceDomainResolver.resolve(any()))
 				.thenThrow(new TraceValidationException(TraceErrorResponseType.CLIENT_NOT_BOUND, "no_domain_binding"));
 
+		InputStream requestBody = body("[{\"a\":1}]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[{\"a\":1}]"), httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(403, ex.getResponse().getStatus());
 		verify(ingestionService, never()).ingest(any(), any());
@@ -518,8 +546,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	void testSubmitBulkRecords_DisabledFeature_Returns400InvalidRequest() {
 		traceConfiguration.setEnabled(false);
 
+		InputStream requestBody = body("[{\"a\":1}]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[{\"a\":1}]"), httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(submitterIdentityService, never()).resolve(any());

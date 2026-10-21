@@ -45,12 +45,16 @@ import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
  * asserting the exact {@code error} id and, where the rule names one, the {@code reason}. The
  * fixture set and the expected outcomes are generated together in
  * {@code negative/manifest.json}, mirroring the rule list proven interactively by
- * {@code CommonAssertionValidatorTest} and {@code EventKindValidatorsTest}.
+ * {@code CommonAssertionValidatorTest} and {@code EventKindValidatorsTest}. Fixtures in
+ * {@code src/test/resources/trace/reserved/} carry a Lock-derived member and must pass the same
+ * pipeline with that member listed (GovOps profile §12).
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TraceNegativeSchemaTest extends BaseLockServiceTest {
 
 	private static final String NEGATIVE_ROOT = "/trace/negative/";
+
+	private static final String RESERVED_ROOT = "/trace/reserved/";
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -110,15 +114,39 @@ public class TraceNegativeSchemaTest extends BaseLockServiceTest {
 		}
 	}
 
-	private void runPipeline(String json) {
+	/** Reads {@code reserved/manifest.json}: one {@code (file, member)} row per Lock-derived member. */
+	static Stream<Arguments> reservedFixtures() throws IOException {
+		try (InputStream is = TraceNegativeSchemaTest.class.getResourceAsStream(RESERVED_ROOT + "manifest.json")) {
+			List<Arguments> args = new ArrayList<>();
+			for (JsonNode entry : MAPPER.readTree(is)) {
+				args.add(Arguments.of(entry.get("file").asText(), entry.get("member").asText()));
+			}
+			return args.stream();
+		}
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("reservedFixtures")
+	void reservedFixture_acceptedWithMemberListed(String file, String expectedMember) throws IOException {
+		ParsedAssertion assertion = runPipeline(loadFixture(RESERVED_ROOT, file));
+
+		assertEquals(List.of(expectedMember), assertion.getReservedMembers());
+	}
+
+	private ParsedAssertion runPipeline(String json) {
 		InputStream body = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
 		ParsedAssertion assertion = parser.parse(body);
 		commonValidator.validate(assertion);
 		registry.validate(assertion);
+		return assertion;
 	}
 
 	private static String loadFixture(String file) throws IOException {
-		try (InputStream is = TraceNegativeSchemaTest.class.getResourceAsStream(NEGATIVE_ROOT + file)) {
+		return loadFixture(NEGATIVE_ROOT, file);
+	}
+
+	private static String loadFixture(String root, String file) throws IOException {
+		try (InputStream is = TraceNegativeSchemaTest.class.getResourceAsStream(root + file)) {
 			byte[] bytes = is.readAllBytes();
 			return new String(bytes, StandardCharsets.UTF_8);
 		}

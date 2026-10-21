@@ -41,6 +41,8 @@
 			{"clientId": "%(lock_client_id)s", "evidenceDomainId": "default", "allowedProducerIds": ["*"]}
 		],
 		"latenessThresholdSeconds": 300,
+		"policyMismatchGraceSeconds": 300,
+		"policyReleaseRetentionDays": 30,
 		"maxFutureSkewSeconds": 300,
 		"maxRequestBytes": 262144,
 		"maxJsonDepth": 32,
