@@ -33,10 +33,13 @@ pub struct TraceConfig {
 }
 
 impl TraceConfig {
-    /// Lock's default `maxRecords` for the bulk endpoint.
+    /// Lock's default `maxBulkRecords` for the bulk endpoint.
     pub(super) const DEFAULT_BULK_MAX_RECORDS: NonZeroUsize = NonZeroUsize::new(100).unwrap();
-    /// Lock's default `maxRequestBytes` (4 MiB) for the bulk endpoint.
+    /// Lock's default `maxBulkRequestBytes` (4 MiB) for the bulk endpoint.
     pub(super) const DEFAULT_BULK_MAX_BYTES: NonZeroUsize = NonZeroUsize::new(4_194_304).unwrap();
+    /// Lock's default `maxRequestBytes` for one record, plus the `[` and `]` of a
+    /// bulk body: a smaller bulk limit could never send the largest record.
+    const MIN_BULK_MAX_BYTES: usize = 262_144 + 2;
 }
 
 /// Where the TRACE signing key comes from: an unencrypted PKCS#8 PEM Ed25519
@@ -169,7 +172,8 @@ fn build_enabled_trace_config(
         .transpose()
         .map_err(BootstrapConfigLoadingError::InvalidTraceSigningKid)?;
 
-    let endpoint = match raw.trace_endpoint.as_deref() {
+    // A blank property means unset, as for the kid: the endpoint is discovered.
+    let endpoint = match not_blank(&raw.trace_endpoint).as_deref() {
         None | Some("discovered") => TraceEndpoint::Discovered,
         Some(url) => TraceEndpoint::Url(
             Url::parse(url).map_err(BootstrapConfigLoadingError::InvalidTraceEndpoint)?,
@@ -189,8 +193,20 @@ fn build_enabled_trace_config(
             raw.trace_bulk_max_records,
             "CEDARLING_TRACE_BULK_MAX_RECORDS",
         )?,
-        bulk_max_bytes: non_zero(raw.trace_bulk_max_bytes, "CEDARLING_TRACE_BULK_MAX_BYTES")?,
+        bulk_max_bytes: bulk_max_bytes(non_zero(
+            raw.trace_bulk_max_bytes,
+            "CEDARLING_TRACE_BULK_MAX_BYTES",
+        )?)?,
     })
+}
+
+fn bulk_max_bytes(value: NonZeroUsize) -> Result<NonZeroUsize, BootstrapConfigLoadingError> {
+    if value.get() < TraceConfig::MIN_BULK_MAX_BYTES {
+        return Err(BootstrapConfigLoadingError::TraceBulkMaxBytesTooSmall {
+            min: TraceConfig::MIN_BULK_MAX_BYTES,
+        });
+    }
+    Ok(value)
 }
 
 #[cfg(test)]
@@ -542,5 +558,38 @@ mod tests {
                 "expected ZeroTraceBulkLimit({property}), got {err:?}"
             );
         }
+    }
+
+    #[test]
+    fn blank_endpoint_is_discovered() {
+        let config = trace_config(&[("CEDARLING_TRACE_ENDPOINT", Some(json!("   ")))]);
+        assert_eq!(
+            config.endpoint,
+            TraceEndpoint::Discovered,
+            "a blank endpoint means unset, like a blank signing kid"
+        );
+    }
+
+    #[test]
+    fn bulk_max_bytes_below_one_record_is_rejected() {
+        let err = decode_with(&[("CEDARLING_TRACE_BULK_MAX_BYTES", Some(json!(262_145)))])
+            .expect_err("a bulk limit that cannot hold one record should be rejected");
+        assert!(
+            matches!(
+                err,
+                BootstrapConfigLoadingError::TraceBulkMaxBytesTooSmall { min: 262_146 }
+            ),
+            "expected TraceBulkMaxBytesTooSmall {{ min: 262146 }}, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn bulk_max_bytes_one_record_is_ok() {
+        let config = trace_config(&[("CEDARLING_TRACE_BULK_MAX_BYTES", Some(json!(262_146)))]);
+        assert_eq!(
+            config.bulk_max_bytes.get(),
+            262_146,
+            "a bulk limit that holds exactly one record should be accepted"
+        );
     }
 }
