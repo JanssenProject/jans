@@ -2771,6 +2771,7 @@
 <span class="w">  </span><span class="nt">&quot;maxBulkRequestBytes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4194304</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;correlationRetryLimit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;chainRegistrationMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PRE_REGISTERED&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cryptoProvider&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;JAVA&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;receiptAllocationRetryLimit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;receiptRepairIntervalSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;pendingReceiptTimeoutSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span>
@@ -2783,6 +2784,15 @@
 <p><strong>Lateness.</strong> A record is flagged <code>late_flag: true</code> when Lock receives it more than <code>latenessThresholdSeconds</code> after its <code>signed_at</code>. Lateness alone never rejects a record. A <code>signed_at</code> that is more than <code>maxFutureSkewSeconds</code> ahead of Lock's clock is rejected with <code>invalid_assertion</code> (<code>signed_at_in_future</code>). The two properties are independent.</p>
 <p><strong>Neighbor-update retries.</strong> After a record is stored, Lock updates derived flags on neighboring records. Each update is a compare-and-swap write against the neighbor's version. On a version conflict, Lock re-reads the neighbor, recomputes the flag from its current state and retries, up to <code>correlationRetryLimit</code> times. When the budget is exhausted Lock logs a warning and gives up on that update. It never fails the request.</p>
 <p><strong>Chain registration mode.</strong> <code>chainRegistrationMode</code> is <code>PRE_REGISTERED</code> (default) or <code>FIRST_OBSERVED</code>. See <a href="#chain-registration-modes">Chain registration modes</a>. A value that is not one of the two names is treated as <code>PRE_REGISTERED</code> and logged once at <code>WARN</code>.</p>
+<p><strong>Crypto provider.</strong> <code>cryptoProvider</code> selects the implementation that parses producer keys, canonicalizes assertions, verifies signatures and computes receipt hashes. Values are matched case-insensitively:</p>
+<ul>
+<li><code>JAVA</code> (default): BouncyCastle, in the Lock process. This is the implementation Lock shipped with.</li>
+<li><code>NATIVE</code>: <code>jans-trace-core</code>, the Rust library that producers such as Cedarling sign with, reached through the <code>jans-trace-java</code> binding.</li>
+</ul>
+<p>Both providers produce the same <code>content_digest</code>, key thumbprint, receipt hash and storage keys. Switching the provider does not invalidate the stored receipt chain.</p>
+<p>Lock fails closed. When the selected provider is not available, because the native library is missing or its self-test fails, every TRACE submission returns <code>500 crypto_unavailable</code>. Lock never falls back to the other provider. Look for the startup log line <code>TRACE crypto provider: type=&lt;type&gt; available=&lt;true|false&gt; detail=&lt;detail&gt;</code>. The FIPS WAR ships without the native provider, so <code>NATIVE</code> fails closed there.</p>
+<p><code>NATIVE</code> rejects small-order Ed25519 public keys that BouncyCastle accepts. After you switch to <code>NATIVE</code>, a registered key of that kind fails with <code>unknown_producer_key</code> or <code>stored_key_unusable</code>. Check registered keys before you switch.</p>
+<p>A value that is not one of the two names is treated as <code>JAVA</code> and logged once at <code>WARN</code>: <code>Unknown traceConfiguration.cryptoProvider '&lt;value&gt;', using JAVA</code>.</p>
 <p><strong>Timers.</strong> The receipt repair timer runs every <code>receiptRepairIntervalSeconds</code>. It settles receipt claims that stayed <code>PENDING</code> longer than <code>pendingReceiptTimeoutSeconds</code> (see <a href="#deployment-constraints">Deployment constraints</a>). Setting <code>enabled</code> to <code>false</code> makes every TRACE endpoint return a structured <code>invalid_request</code> error with reason <code>trace_disabled</code> and stops the timer.</p>
 <h2 id="registering-producer-keys-and-chains">Registering producer keys and chains<a class="headerlink" href="#registering-producer-keys-and-chains" title="Permanent link">#</a></h2>
 <p>Lock accepts a producer key only through the admin API. It never accepts a public key because it accompanied a record. Possession of a signing key does not let the holder define its own producer identity. Registration, in the administrator's evidence domain, grants the authority.</p>
@@ -3268,7 +3278,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <tr>
 <td><code>crypto_unavailable</code></td>
 <td>500</td>
-<td>The security provider has no Ed25519 support. Lock fails closed.</td>
+<td>The selected crypto provider (<code>cryptoProvider</code>) is not available or has no Ed25519 support. Lock fails closed and does not fall back to the other provider.</td>
 </tr>
 </tbody>
 </table>
@@ -3515,7 +3525,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 14, 2026
+    October 20, 2026
   </span>
 
     
