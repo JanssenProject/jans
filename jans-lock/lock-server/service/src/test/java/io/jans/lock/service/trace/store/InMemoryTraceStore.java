@@ -398,8 +398,16 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
-	public void removePolicyRelease(String policyStoreId, String bundleHash) {
-		policyReleasesByKey.remove(traceKeys.policyReleaseKey(policyStoreId, bundleHash));
+	public boolean removePolicyReleaseLastServedBefore(String policyStoreId, String bundleHash, long cutoffMs) {
+		AtomicBoolean removed = new AtomicBoolean();
+		policyReleasesByKey.computeIfPresent(traceKeys.policyReleaseKey(policyStoreId, bundleHash), (key, current) -> {
+			if (current.getLastServedAtMs() != null && current.getLastServedAtMs() < cutoffMs) {
+				removed.set(true);
+				return null;
+			}
+			return current;
+		});
+		return removed.get();
 	}
 
 	/** @return how many policy release reads were made */

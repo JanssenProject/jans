@@ -127,10 +127,12 @@ final class FakeEntryManagerBehavior {
 			return null;
 		}).when(mock).merge(any());
 
-		doAnswer(inv -> {
-			storeFor(inv.getArgument(1)).remove((String) inv.getArgument(0));
-			return null;
-		}).when(mock).remove(anyString(), any(Class.class));
+		when(mock.remove(anyString(), any(Class.class), any(Filter.class), anyInt())).thenAnswer(inv -> {
+			List<Object> matched = matchAll(inv, (Integer) inv.getArgument(3));
+			Map<String, Object> store = storeFor(inv.getArgument(1));
+			store.values().removeAll(matched);
+			return matched.size();
+		});
 
 		doAnswer(inv -> {
 			Object entity = inv.getArgument(0);

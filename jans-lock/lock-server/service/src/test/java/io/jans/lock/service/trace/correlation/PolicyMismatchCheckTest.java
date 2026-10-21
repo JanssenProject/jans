@@ -25,6 +25,7 @@ import io.jans.core.cedarling.service.policy.PolicyDownloadService;
 import io.jans.core.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
 import io.jans.core.cedarling.service.policy.PolicySnapshotEvent;
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
@@ -274,6 +275,52 @@ class PolicyMismatchCheckTest {
 		assertFalse(store.findPolicyRelease("store-old", NEXT_HASH).isPresent());
 		assertTrue(store.findPolicyRelease(STORE, HASH).isPresent());
 		assertTrue(store.findPolicyRelease("store-recent", NEXT_HASH).isPresent());
+	}
+
+	private void publishExpired(PolicyMismatchCheck node, String storeId) {
+		long expired = T0 - (appConfiguration.getTraceConfiguration().getPolicyReleaseRetentionDays() + 1) * 86_400_000L;
+		publish(node, Map.of(), Map.of(storeId, PolicyMismatchChecks.archiveSource(storeId, "1.0.0", NEXT_HASH)), expired);
+	}
+
+	@Test
+	void testPruneExpiredReleases_RowRefreshedAfterListing_Kept() {
+		InMemoryTraceStore racing = new InMemoryTraceStore() {
+			@Override
+			public java.util.List<TracePolicyReleaseEntry> findPolicyReleasesLastServedBefore(long cutoffMs, int limit) {
+				java.util.List<TracePolicyReleaseEntry> listed = super.findPolicyReleasesLastServedBefore(cutoffMs, limit);
+				listed.forEach(r -> recordPolicyReleaseServed(r.getPolicyStoreId(), r.getBundleHash(), "1.0.0", T0));
+				return listed;
+			}
+		};
+		PolicyMismatchCheck node = PolicyMismatchChecks.serving(served, appConfiguration, racing);
+		PolicyMismatchChecks.setClock(node, Clock.fixed(Instant.ofEpochMilli(T0), ZoneOffset.UTC));
+		publishExpired(node, "store-old");
+
+		assertEquals(0, node.pruneExpiredReleases());
+
+		assertTrue(racing.findPolicyRelease("store-old", NEXT_HASH).isPresent());
+	}
+
+	@Test
+	void testPruneExpiredReleases_OneDeleteFails_RestOfBatchRuns() {
+		InMemoryTraceStore flaky = new InMemoryTraceStore() {
+			@Override
+			public boolean removePolicyReleaseLastServedBefore(String policyStoreId, String bundleHash, long cutoffMs) {
+				if ("store-a".equals(policyStoreId)) {
+					throw new TraceStorageException("delete_failed", "database down");
+				}
+				return super.removePolicyReleaseLastServedBefore(policyStoreId, bundleHash, cutoffMs);
+			}
+		};
+		PolicyMismatchCheck node = PolicyMismatchChecks.serving(served, appConfiguration, flaky);
+		PolicyMismatchChecks.setClock(node, Clock.fixed(Instant.ofEpochMilli(T0), ZoneOffset.UTC));
+		publishExpired(node, "store-a");
+		publishExpired(node, "store-b");
+
+		assertEquals(1, node.pruneExpiredReleases());
+
+		assertTrue(flaky.findPolicyRelease("store-a", NEXT_HASH).isPresent());
+		assertFalse(flaky.findPolicyRelease("store-b", NEXT_HASH).isPresent());
 	}
 
 	@Test

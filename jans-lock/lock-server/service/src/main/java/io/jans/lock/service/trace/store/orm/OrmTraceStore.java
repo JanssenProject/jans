@@ -466,12 +466,15 @@ public class OrmTraceStore implements TraceStore {
 	}
 
 	@Override
-	public void removePolicyRelease(String policyStoreId, String bundleHash) throws TraceStorageException {
-		String dn = policyReleaseDn(policyStoreId, bundleHash);
+	public boolean removePolicyReleaseLastServedBefore(String policyStoreId, String bundleHash, long cutoffMs)
+			throws TraceStorageException {
+		String key = traceKeys.policyReleaseKey(policyStoreId, bundleHash);
+		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_ID, key),
+				Filter.createLessOrEqualFilter(ATTR_LAST_SERVED_AT_MS, cutoffMs - 1));
 		try {
-			persistenceEntryManager.remove(dn, TracePolicyReleaseEntry.class);
+			return persistenceEntryManager.remove(policyReleasesBase(), TracePolicyReleaseEntry.class, filter, 1) > 0;
 		} catch (BasePersistenceException e) {
-			throw new TraceStorageException("delete_failed", "Failed to remove policy release " + dn, e);
+			throw new TraceStorageException("delete_failed", "Failed to remove policy release " + key, e);
 		}
 	}
 

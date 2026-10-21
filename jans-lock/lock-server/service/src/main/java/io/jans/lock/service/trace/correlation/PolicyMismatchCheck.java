@@ -180,25 +180,41 @@ public class PolicyMismatchCheck {
 	/**
 	 * Deletes up to {@value #PRUNE_BATCH_LIMIT} releases no node has served for
 	 * {@code policyReleaseRetentionDays} (never less than the acceptance window), skipping any
-	 * release this node serves now.
+	 * release this node serves now. Each delete is conditional on the release still being that
+	 * old, so one another node refreshed meanwhile is kept, and one another node already deleted
+	 * is not an error. A failed delete is skipped and the rest of the batch still runs.
 	 *
-	 * @return how many releases were deleted
+	 * @return how many releases this call deleted
 	 */
 	public int pruneExpiredReleases() {
 		long retentionMs = Math.max(
 				appConfiguration.getTraceConfiguration().getPolicyReleaseRetentionDays() * 86_400_000L,
 				acceptanceWindowMs());
+		long cutoffMs = clock.millis() - retentionMs;
 		Map<String, LoadedPolicySource> served = policyDownloadService.getLoadedPolicies();
 		int removed = 0;
-		for (TracePolicyReleaseEntry release : store
-				.findPolicyReleasesLastServedBefore(clock.millis() - retentionMs, PRUNE_BATCH_LIMIT)) {
+		int failed = 0;
+		RuntimeException firstFailure = null;
+		for (TracePolicyReleaseEntry release : store.findPolicyReleasesLastServedBefore(cutoffMs, PRUNE_BATCH_LIMIT)) {
 			LoadedPolicySource source = served.get(release.getPolicyStoreId());
 			if (isComparable(source) && source.getBundleHash().equals(release.getBundleHash())) {
 				continue;
 			}
-			store.removePolicyRelease(release.getPolicyStoreId(), release.getBundleHash());
-			cache.remove(cacheKey(release.getPolicyStoreId(), release.getBundleHash()));
-			removed++;
+			try {
+				if (store.removePolicyReleaseLastServedBefore(release.getPolicyStoreId(), release.getBundleHash(),
+						cutoffMs)) {
+					removed++;
+				}
+				cache.remove(cacheKey(release.getPolicyStoreId(), release.getBundleHash()));
+			} catch (RuntimeException ex) {
+				failed++;
+				if (firstFailure == null) {
+					firstFailure = ex;
+				}
+			}
+		}
+		if (failed > 0) {
+			log.warn("TRACE policy release retention: {} deletes failed", failed, firstFailure);
 		}
 		return removed;
 	}

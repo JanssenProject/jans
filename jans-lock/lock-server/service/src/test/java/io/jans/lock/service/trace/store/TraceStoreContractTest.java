@@ -474,8 +474,10 @@ public abstract class TraceStoreContractTest {
 		List<TracePolicyReleaseEntry> old = store.findPolicyReleasesLastServedBefore(5000L, 10);
 
 		assertEquals(List.of(oldHash), old.stream().map(TracePolicyReleaseEntry::getBundleHash).collect(Collectors.toList()));
-		store.removePolicyRelease("store-1", oldHash);
+		assertTrue(store.removePolicyReleaseLastServedBefore("store-1", oldHash, 5000L));
 		assertFalse(store.findPolicyRelease("store-1", oldHash).isPresent());
+		assertFalse(store.removePolicyReleaseLastServedBefore("store-1", oldHash, 5000L));
+		assertFalse(store.removePolicyReleaseLastServedBefore("store-1", recentHash, 5000L));
 		assertTrue(store.findPolicyRelease("store-1", recentHash).isPresent());
 		assertTrue(store.findPolicyReleasesLastServedBefore(5000L, 0).isEmpty());
 	}

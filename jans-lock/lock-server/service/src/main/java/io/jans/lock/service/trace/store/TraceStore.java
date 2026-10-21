@@ -170,7 +170,15 @@ public interface TraceStore {
 	/** @return up to {@code limit} releases whose last-served time is before {@code cutoffMs} */
 	List<TracePolicyReleaseEntry> findPolicyReleasesLastServedBefore(long cutoffMs, int limit);
 
-	void removePolicyRelease(String policyStoreId, String bundleHash) throws TraceStorageException;
+	/**
+	 * Deletes the release only if its last-served time is still before {@code cutoffMs}, in one
+	 * conditional delete, so a release another node refreshed meanwhile is kept.
+	 *
+	 * @return {@code true} when a row was deleted; {@code false} when it was refreshed or is
+	 *         already gone
+	 */
+	boolean removePolicyReleaseLastServedBefore(String policyStoreId, String bundleHash, long cutoffMs)
+			throws TraceStorageException;
 
 	/**
 	 * @return {@code PENDING} receipts received strictly before {@code cutoffMs} (a receipt
