@@ -267,6 +267,8 @@ verification. See [TRACE Evidence](./trace.md) for the feature description and A
 | `defaultAllowedProducerIds` | array | `[]` | Producer ids a client without a binding may submit records for in the default evidence domain. Empty means such a client can submit nothing (`producer_not_allowed`). Read and admin paths are unaffected. |
 | `clientDomainBindings` | array | `[]` | List of `{ clientId, evidenceDomainId, allowedProducerIds[] }` bindings. A client without a binding and without `defaultEvidenceDomainId` set is rejected with `client_not_bound`. `allowedProducerIds` may contain `"*"` to allow any producer. |
 | `latenessThresholdSeconds` | integer | `300` | Seconds after `signed_at` a record may still be accepted before it is flagged `late_flag: true`. |
+| `policyMismatchGraceSeconds` | integer | `300` | Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged `policy_mismatch_flag`. The check uses the larger of this and `latenessThresholdSeconds`, plus about 130 seconds for update and cache lag. See [TRACE](./trace.md#policy-store-release-check). |
+| `policyReleaseRetentionDays` | integer | `30` | Days a policy store release no node serves any more is kept before it is deleted; never less than the check's acceptance window. |
 | `maxFutureSkewSeconds` | integer | `300` | Seconds `signed_at` may be ahead of Lock's clock. A later `signed_at` is rejected with `invalid_assertion` (`signed_at_in_future`). |
 | `maxRequestBytes` | integer | `262144` | Maximum accepted TRACE request body size, in bytes. |
 | `maxJsonDepth` | integer | `32` | Maximum accepted JSON nesting depth of a TRACE assertion. |
@@ -364,32 +366,47 @@ Authorization: Bearer <access_token>
 ### Audit Endpoints
 
 #### Submit Audit Logs
+
 ```http
-POST /audit/logs
+POST /api/v1/audit/log
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 {
-  "logs": [
-    {
-      "request_id": "req-123456",
-      "timestamp": "2024-01-01T12:00:00Z",
-      "log_kind": "Decision",
-      "pdp_id": "cedarling-001",
-      "policy_store_id": "app-policies",
-      "decision": "ALLOW",
-      "principal": "Jans::User::\"user123\"",
-      "action": "Jans::Action::\"read\"",
-      "resource": "Jans::Application::\"app001\"",
-      "diagnostics": {
-        "reason": ["policy-001"],
-        "errors": []
-      },
-      "decision_time_ms": 15
-    }
-  ]
+  "creation_date": "2026-03-23T11:50:37.504Z",
+  "event_time": "2026-03-23T11:50:37.504Z",
+  "service": "my_app",
+  "node_name": "0195c6f2-8d1a-7c3e-9b4f-2a6d8e0f1b3c",
+  "event_type": "Decision",
+  "severity_level": "INFO",
+  "action": "Jans::Action::\"Update\"",
+  "decision_result": "ALLOW",
+  "requested_resource": "Jans::Issue::\"random_id\"",
+  "principal_id": "Jans::User, Jans::Workload",
+  "client_id": "lock-client-123",
+  "context_information": {
+    "request_id": "0195c6f2-8d1a-7c3e-9b4f-2a6d8e0f1b3e",
+    "policystore_id": "a1bf63d5a5e4a0b7d0d5c9e3",
+    "policystore_version": "1.0.0",
+    "diagnostics": { "reason": [], "errors": [] },
+    "decision_time_micro_sec": 42
+  }
 }
 ```
+
+This is the shape Cedarling sends. `POST /audit/log/bulk` takes an array of the same objects. Both need the `https://jans.io/oauth/lock/log.write` scope. Lock also accepts the camelCase member names it returns (`creationDate`, `eventTime`, `nodeName`, `contextInformation`, and so on). `contextInformation` is stored as a flat string map: a string value is kept as is, and an object, array, number or boolean value is stored as its JSON text, as on the gRPC path.
+
+#### Search Audit Logs
+
+Config API serves stored decision logs at `GET /jans-config-api/lock/audit/log/search`. `eventStartDate` and `eventEndDate` (ISO 8601) are required. Optional exact-match filters:
+
+| Parameter | Matches |
+|---|---|
+| `requestId` | Cedarling `request_id` of the decision |
+| `policyStoreId` | Policy store id used for the decision |
+| `policyStoreVersion` | Policy store version used for the decision |
+
+A stored entry takes these from the `request_id`, `policystore_id` and `policystore_version` keys of `contextInformation` when present, and otherwise from the entry's own `requestId`, `policyStoreId` and `policyStoreVersion`. A `request_id` longer than 64 characters or a policy store value longer than 255 characters is not indexed. Entries stored before this release are not indexed and match only the date range.
 
 #### Submit Health Status
 ```http
@@ -435,32 +452,33 @@ Content-Type: application/json
 
 #### Lock Server Configuration
 ```http
-GET /.well-known/lock-master-configuration
+GET /.well-known/lock-server-configuration
 ```
 
 **Response:**
 ```json
 {
-  "issuer": "https://lock-server.example.com",
-  "policy_store_endpoint": "https://lock-server.example.com/policy-store",
-  "policy_stores_endpoint": "https://lock-server.example.com/policy-stores",
-  "audit_endpoint": "https://lock-server.example.com/audit",
-
-  "jwks_uri": "https://auth.example.com/.well-known/jwks",
-  "scopes_supported": [
-    "https://jans.io/oauth/lock/policy-store.read",
-    "https://jans.io/oauth/lock/log.write",
-    "https://jans.io/oauth/lock/health.write",
-    "https://jans.io/oauth/lock/telemetry.write"
-  ],
-  "features_supported": [
-    "policy-store-retrieval",
-    "audit-collection",
-    "health-monitoring",
-    "telemetry-collection"
-  ]
+  "version": "1.0",
+  "issuer": "lock-server.example.com",
+  "audit": {
+    "health_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/health",
+    "health_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/health/bulk",
+    "log_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/log",
+    "log_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/log/bulk",
+    "telemetry_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/telemetry",
+    "telemetry_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/telemetry/bulk",
+    "trace_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace",
+    "trace_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace/bulk",
+    "trace_record_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace/records",
+    "trace_execution_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace/executions"
+  },
+  "config": {
+    "policy_endpoint": "https://lock-server.example.com/jans-lock/api/v1/policy"
+  }
 }
 ```
+
+The `trace_*` members appear only when TRACE is enabled.
 
 ## OAuth Security
 
@@ -475,7 +493,7 @@ The Lock Server uses OAuth 2.0 scopes to control access to different endpoints:
 | `https://jans.io/oauth/lock/health.write` | `/audit/health` | Submit health status information |
 | `https://jans.io/oauth/lock/telemetry.write` | `/audit/telemetry` | Submit telemetry and metrics data |
 | `https://jans.io/oauth/lock/trace.write` | `/audit/trace` | Submit TRACE evidence records |
-| `https://jans.io/oauth/lock/trace.readonly` | `/audit/trace/records/*`, `/audit/trace/executions/*` | Read TRACE records and executions |
+| `https://jans.io/oauth/lock/trace.readonly` | `/audit/trace/records`, `/audit/trace/records/*`, `/audit/trace/executions/*` | Read and search TRACE records and executions |
 | `https://jans.io/oauth/lock/trace.admin` | `/audit/trace/admin/*` | Manage TRACE producer keys and chains |
 
 ## Logging and Monitoring
@@ -520,28 +538,100 @@ Tracks JWT token validation and processing:
 
 ### RDBMS Audit Storage
 
-For enterprise deployments, audit logs can be stored in a relational database:
+With `auditPersistenceMode` set to `internal`, Lock stores decision logs in the `jansLogEntry` table of the Janssen database (entries under `ou=log` of the audit base DN). With `config-api`, Lock forwards them to Config API, which stores them in the same table.
 
-```sql
-CREATE TABLE audit_logs (
-    id VARCHAR(255) PRIMARY KEY,
-    client_id VARCHAR(255),
-    request_id VARCHAR(255),
-    timestamp TIMESTAMP,
-    log_kind VARCHAR(50),
-    pdp_id VARCHAR(255),
-    policy_store_id VARCHAR(255),
-    decision VARCHAR(10),
-    principal TEXT,
-    action TEXT,
-    resource TEXT,
-    diagnostics JSON,
-    decision_time_ms BIGINT,
-    INDEX idx_timestamp (timestamp),
-    INDEX idx_client_id (client_id),
-    INDEX idx_policy_store_id (policy_store_id)
-);
-```
+| Column | Source |
+|---|---|
+| `inum` | Generated by Lock |
+| `creationDate`, `eventTime` | `creation_date`, `event_time` |
+| `jansService`, `jansNodeName` | `service`, `node_name` |
+| `eventType`, `severityLevel` | `event_type`, `severity_level` |
+| `actionName`, `decisionResult`, `requestedResource` | `action`, `decision_result`, `requested_resource` |
+| `principalId`, `clientId`, `jti` | `principal_id`, `client_id`, `jti` |
+| `contextInformation` | `context_information`, as a JSON object of strings |
+| `jansRequestId`, `jansPolicyStoreId`, `jansPolicyStoreVersion` | Indexed copies of `request_id`, `policystore_id`, `policystore_version` (see [Search Audit Logs](#search-audit-logs)) |
+
+`eventTime`, `jansRequestId`, `jansPolicyStoreId` and `jansPolicyStoreVersion` are indexed.
+
+### Upgrading an Existing Deployment
+
+The audit log and TRACE search filters need new columns and indexes, and the policy release check needs the `jansTracePolicyRelease` table. Container and Kubernetes deployments get them automatically: the persistence loader adds missing columns and indexes on its next run. An existing VM install needs them added once, by hand. Back up the database first.
+
+=== "PostgreSQL"
+
+    ```sql
+    ALTER TABLE "jansLogEntry" ADD COLUMN "jansRequestId" VARCHAR(64);
+    ALTER TABLE "jansLogEntry" ADD COLUMN "jansPolicyStoreId" VARCHAR(255);
+    ALTER TABLE "jansLogEntry" ADD COLUMN "jansPolicyStoreVersion" VARCHAR(255);
+    CREATE INDEX "jansLogEntry_jansRequestId" ON "jansLogEntry" ("jansRequestId");
+    CREATE INDEX "jansLogEntry_jansPolicyStoreId" ON "jansLogEntry" ("jansPolicyStoreId");
+    CREATE INDEX "jansLogEntry_jansPolicyStoreVersion" ON "jansLogEntry" ("jansPolicyStoreVersion");
+
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyStoreId" VARCHAR(255);
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyStoreVersion" VARCHAR(255);
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTraceBundleHash" VARCHAR(255);
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyMismatch" BOOLEAN;
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTraceReservedMembers" JSONB;
+    CREATE INDEX "jansTraceRecord_jansTracePolicyStoreId" ON "jansTraceRecord" ("jansTracePolicyStoreId");
+    CREATE INDEX "jansTraceRecord_jansTracePolicyStoreVersion" ON "jansTraceRecord" ("jansTracePolicyStoreVersion");
+    CREATE INDEX "jansTraceRecord_jansTraceBundleHash" ON "jansTraceRecord" ("jansTraceBundleHash");
+
+    CREATE TABLE "jansTracePolicyRelease" (
+        doc_id VARCHAR(64) NOT NULL UNIQUE,
+        "objectClass" VARCHAR(48),
+        dn VARCHAR(128),
+        "jansId" VARCHAR(128),
+        "jansTracePolicyStoreId" VARCHAR(255),
+        "jansTraceBundleHash" VARCHAR(255),
+        "jansTracePolicyStoreVersion" VARCHAR(255),
+        "jansTraceFirstServedAtMs" BIGINT,
+        "jansTraceLastServedAtMs" BIGINT,
+        "jansVersion" BIGINT,
+        PRIMARY KEY (doc_id)
+    );
+    CREATE INDEX "jansTracePolicyRelease_jansId" ON "jansTracePolicyRelease" ("jansId");
+    CREATE INDEX "jansTracePolicyRelease_jansTracePolicyStoreId" ON "jansTracePolicyRelease" ("jansTracePolicyStoreId");
+    CREATE INDEX "jansTracePolicyRelease_jansTraceLastServedAtMs" ON "jansTracePolicyRelease" ("jansTraceLastServedAtMs");
+    ```
+
+=== "MySQL"
+
+    ```sql
+    ALTER TABLE jansLogEntry ADD COLUMN jansRequestId VARCHAR(64);
+    ALTER TABLE jansLogEntry ADD COLUMN jansPolicyStoreId VARCHAR(255);
+    ALTER TABLE jansLogEntry ADD COLUMN jansPolicyStoreVersion VARCHAR(255);
+    ALTER TABLE jansLogEntry ADD INDEX jansLogEntry_jansRequestId (jansRequestId);
+    ALTER TABLE jansLogEntry ADD INDEX jansLogEntry_jansPolicyStoreId (jansPolicyStoreId);
+    ALTER TABLE jansLogEntry ADD INDEX jansLogEntry_jansPolicyStoreVersion (jansPolicyStoreVersion);
+
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyStoreId VARCHAR(255);
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyStoreVersion VARCHAR(255);
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTraceBundleHash VARCHAR(255);
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyMismatch SMALLINT;
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTraceReservedMembers JSON;
+    ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreId (jansTracePolicyStoreId);
+    ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreVersion (jansTracePolicyStoreVersion);
+    ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTraceBundleHash (jansTraceBundleHash);
+
+    CREATE TABLE jansTracePolicyRelease (
+        doc_id VARCHAR(64) NOT NULL UNIQUE,
+        objectClass VARCHAR(48),
+        dn VARCHAR(128),
+        jansId VARCHAR(128),
+        jansTracePolicyStoreId VARCHAR(255),
+        jansTraceBundleHash VARCHAR(255),
+        jansTracePolicyStoreVersion VARCHAR(255),
+        jansTraceFirstServedAtMs BIGINT,
+        jansTraceLastServedAtMs BIGINT,
+        jansVersion BIGINT,
+        PRIMARY KEY (doc_id),
+        INDEX jansTracePolicyRelease_jansId (jansId),
+        INDEX jansTracePolicyRelease_jansTracePolicyStoreId (jansTracePolicyStoreId),
+        INDEX jansTracePolicyRelease_jansTraceLastServedAtMs (jansTraceLastServedAtMs)
+    );
+    ```
+
+Records and log entries stored before the upgrade have empty values in the new columns, so release search and log filters do not return them.
 
 ### Metrics and Monitoring
 

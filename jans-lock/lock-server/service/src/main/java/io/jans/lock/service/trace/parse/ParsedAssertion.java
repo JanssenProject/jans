@@ -56,6 +56,10 @@ public final class ParsedAssertion {
 
 	private JsonNode subject;
 
+	private List<String> reservedMembers = Collections.emptyList();
+
+	private int reservedMemberCount;
+
 	ParsedAssertion(String rawText, ObjectNode root) {
 		this.rawText = rawText;
 		this.root = root;
@@ -180,6 +184,28 @@ public final class ParsedAssertion {
 
 	void setSubject(JsonNode subject) {
 		this.subject = subject;
+	}
+
+	/**
+	 * @return paths of Lock-derived members the producer placed in its signed body; ignored by
+	 *         Lock and surfaced as {@code reserved_member_flag}
+	 */
+	public List<String> getReservedMembers() {
+		return reservedMembers;
+	}
+
+	/**
+	 * @return how many Lock-derived members the signed body carries; {@link #getReservedMembers()}
+	 *         keeps at most {@link io.jans.lock.service.trace.TraceConstants#MAX_RESERVED_MEMBERS}
+	 */
+	public int getReservedMemberCount() {
+		return reservedMemberCount;
+	}
+
+	void setReservedMembers(List<String> reservedMembers, int reservedMemberCount) {
+		this.reservedMembers = reservedMembers == null ? Collections.emptyList()
+				: Collections.unmodifiableList(reservedMembers);
+		this.reservedMemberCount = reservedMemberCount;
 	}
 
 	/**

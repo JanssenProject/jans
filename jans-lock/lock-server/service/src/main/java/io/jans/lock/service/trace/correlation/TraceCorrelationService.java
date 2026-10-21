@@ -26,7 +26,6 @@ import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
-import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.store.TraceKeys;
@@ -72,6 +71,9 @@ public class TraceCorrelationService {
 	@Inject
 	private TraceKeys traceKeys;
 
+	@Inject
+	private PolicyMismatchCheck policyMismatchCheck;
+
 	/** Last unknown {@code chainRegistrationMode} value already reported, so it is logged once. */
 	private volatile String warnedChainRegistrationMode;
 
@@ -83,6 +85,12 @@ public class TraceCorrelationService {
 		CorrelationInputs inputs = verified.getInputs();
 		ParsedAssertion.ProducerChain producerChain = inputs.getChainPosition();
 		String domainId = ctx.getEvidenceDomainId();
+
+		boolean late = ProducerChainRules.isLate(ctx.getReceivedAtMs(), inputs.getSignedAt(),
+				appConfiguration.getTraceConfiguration().getLatenessThresholdSeconds());
+		// signed_at is a producer claim: judge at receipt unless the record is already flagged late
+		long policyJudgedAtMs = late ? inputs.getSignedAt() * 1000L : ctx.getReceivedAtMs();
+		boolean policyMismatch = policyMismatchCheck.check(inputs.getPolicy(), policyJudgedAtMs);
 
 		ChainIdentity chainIdentity = new ChainIdentity(domainId, producerChain.getProducerId(),
 				producerChain.getProducerInstanceId(), producerChain.getProducerChainId());
@@ -112,10 +120,14 @@ public class TraceCorrelationService {
 		List<StoredTraceRecord> successors = store
 				.findRecordsByChainPosition(new ChainPosition(chainIdentity, sequenceNumber + 1));
 
-		boolean late = ProducerChainRules.isLate(ctx.getReceivedAtMs(), inputs.getSignedAt(),
-				appConfiguration.getTraceConfiguration().getLatenessThresholdSeconds());
-
-		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late);
+		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late, policyMismatch);
+		List<String> reservedMembers = verified.getParsed().getReservedMembers();
+		if (!reservedMembers.isEmpty()) {
+			log.warn("TRACE record carries {} Lock-derived members, ignored: producer={}, record_id={}, first={}",
+					verified.getParsed().getReservedMemberCount(), verified.getProducer(), verified.getRecordId(),
+					reservedMembers);
+			flags.setReservedMembers(reservedMembers);
+		}
 
 		ExecutionIdentity execution = new ExecutionIdentity(domainId, inputs.getExecutionAuthority(),
 				inputs.getTraceExecutionId());
@@ -176,8 +188,8 @@ public class TraceCorrelationService {
 	}
 
 	private void updatePeer(RecordIdentity insertedId, RecordIdentity peerId) {
-		updateFlags(peerId, record -> {
-			IngestionFlags flags = record.getFlags();
+		updateFlags(peerId, stored -> {
+			IngestionFlags flags = stored.getFlags();
 			if (flags.isEquivocation()) {
 				return null;
 			}
@@ -187,8 +199,8 @@ public class TraceCorrelationService {
 	}
 
 	private void updateSuccessor(StoredTraceRecord inserted, RecordIdentity successorId) {
-		updateFlags(successorId, record -> {
-			IngestionFlags flags = record.getFlags();
+		updateFlags(successorId, stored -> {
+			IngestionFlags flags = stored.getFlags();
 			boolean changed = false;
 			if (flags.isCoverageGap()) {
 				flags.setCoverageGap(false);
@@ -196,7 +208,7 @@ public class TraceCorrelationService {
 			}
 			// design §8: chainLinkFailure is never self-clearing, only ever set here.
 			if (!flags.isChainLinkFailure()
-					&& ProducerChainRules.successorLinkBroken(record.getPrevRecordHash(), inserted.getContentDigest())) {
+					&& ProducerChainRules.successorLinkBroken(stored.getPrevRecordHash(), inserted.getContentDigest())) {
 				flags.setChainLinkFailure(true);
 				changed = true;
 			}
@@ -217,39 +229,40 @@ public class TraceCorrelationService {
 			String action, RecordIdentity insertedId) {
 		try {
 			Optional<StoredTraceRecord> current = store.findRecord(targetId);
-			if (!current.isPresent()) {
-				return;
-			}
-			StoredTraceRecord record = current.get();
 			int retryLimit = appConfiguration.getTraceConfiguration().getCorrelationRetryLimit();
-			for (int attempt = 0; attempt <= retryLimit; attempt++) {
-				IngestionFlags newFlags = mutator.apply(record);
-				if (newFlags == null) {
+			for (int attempt = 0; current.isPresent() && attempt <= retryLimit; attempt++) {
+				StoredTraceRecord stored = current.get();
+				IngestionFlags newFlags = mutator.apply(stored);
+				if (newFlags == null || writeFlags(targetId, newFlags, stored.getVersion())) {
 					return;
 				}
-				try {
-					store.updateRecordFlags(targetId, newFlags, record.getVersion());
+				if (attempt == retryLimit) {
+					log.warn(
+							"TRACE correlation afterInsert exhausted {} retries to {} (version conflict): inserted={}, target={}",
+							retryLimit, action, insertedId, targetId);
 					return;
-				} catch (TraceStorageException ex) {
-					if (!TraceStore.VERSION_CONFLICT_REASON.equals(ex.getReason())) {
-						throw ex;
-					}
-					if (attempt == retryLimit) {
-						log.warn(
-								"TRACE correlation afterInsert exhausted {} retries to {} (version conflict): inserted={}, target={}",
-								retryLimit, action, insertedId, targetId);
-						return;
-					}
-					Optional<StoredTraceRecord> refreshed = store.findRecord(targetId);
-					if (!refreshed.isPresent()) {
-						return;
-					}
-					record = refreshed.get();
 				}
+				current = store.findRecord(targetId);
 			}
 		} catch (RuntimeException ex) {
 			log.error("TRACE correlation afterInsert failed to {}: inserted={}, target={}", action, insertedId,
 					targetId, ex);
+		}
+	}
+
+	/**
+	 * @return {@code true} when written, {@code false} on a version conflict
+	 * @throws TraceStorageException for any other storage failure
+	 */
+	private boolean writeFlags(RecordIdentity targetId, IngestionFlags flags, long version) {
+		try {
+			store.updateRecordFlags(targetId, flags, version);
+			return true;
+		} catch (TraceStorageException ex) {
+			if (!TraceStore.VERSION_CONFLICT_REASON.equals(ex.getReason())) {
+				throw ex;
+			}
+			return false;
 		}
 	}
 

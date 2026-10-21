@@ -228,11 +228,58 @@ public class TraceMvpAcceptanceTest {
 		String json = TraceRecordBuilder.authorizationDecision().recordId(TraceRecordBuilder.freshRecordId())
 				.genesis().withField(7L, "producer_version").sign(keyPair.getPrivate());
 
+		TraceRequestContext requestContext = ctx();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> harness.ingest(json, ctx()));
+				() -> harness.ingest(json, requestContext));
 
 		assertEquals(TraceErrorResponseType.INVALID_ASSERTION, ex.getErrorId());
 		assertEquals("type:producer_version", ex.getReason());
+	}
+
+	// -- Lock-derived members in the signed body (GovOps profile §12) -----------------------
+
+	@Test
+	void reservedMembers_signedByProducer_ignoredAndFlagged() {
+		KeyPair keyPair = registerPrimary();
+		String recordId = TraceRecordBuilder.freshRecordId();
+		String json = TraceRecordBuilder.authorizationDecision().recordId(recordId).genesis()
+				.withField("other-domain", "evidence_domain_id").withField("attested", "trace", "trust_tier")
+				.withField("x", "receipt_sequence").sign(keyPair.getPrivate());
+
+		AcceptanceResult result = harness.ingest(json, ctx());
+
+		assertTrue(result.isAccepted());
+		assertTrue(result.isReservedMemberFlag());
+		assertEquals(List.of("evidence_domain_id", "receipt_sequence", "trace.trust_tier"), result.getReservedMembers());
+		assertEquals(1L, result.getReceiptSequence());
+		StoredTraceRecord stored = harness.getRecord(DOMAIN, recordId, PRODUCER);
+		assertEquals(DOMAIN, stored.getIdentity().getDomainId());
+		assertEquals(json, stored.getAssertionRaw());
+		assertEquals(result.getReservedMembers(), stored.getFlags().getReservedMembers());
+	}
+
+	@Test
+	void reservedMembers_absent_notFlagged() {
+		KeyPair keyPair = registerPrimary();
+		String json = TraceRecordBuilder.authorizationDecision().recordId(TraceRecordBuilder.freshRecordId())
+				.genesis().sign(keyPair.getPrivate());
+
+		assertFalse(harness.ingest(json, ctx()).isReservedMemberFlag());
+	}
+
+	@Test
+	void reservedMembers_addedAfterSigning_rejectedInvalidSignature() {
+		KeyPair keyPair = registerPrimary();
+		String signed = TraceRecordBuilder.authorizationDecision().recordId(TraceRecordBuilder.freshRecordId())
+				.genesis().sign(keyPair.getPrivate());
+		String json = TraceRecordBuilder.tamperAfterSigning(signed, "attested", "trace", "trust_tier");
+		TraceRequestContext context = ctx();
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> harness.ingest(json, context));
+
+		assertEquals(TraceErrorResponseType.INVALID_SIGNATURE, ex.getErrorId());
+		assertEquals(0, harness.store().snapshot().size());
 	}
 
 	// -- criterion 15 --------------------------------------------------------------------------
@@ -256,15 +303,15 @@ public class TraceMvpAcceptanceTest {
 				.producerInstanceId(INSTANCE).producerChainId(CHAIN).recordId(deniedRecordId).sequenceNumber(2L)
 				.sign(keyPair.getPrivate());
 
+		TraceRequestContext requestContext = ctx();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> harness.ingest(deniedJson, ctx()));
+				() -> harness.ingest(deniedJson, requestContext));
 
 		assertEquals(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY, ex.getErrorId());
 		assertEquals("event_kind_not_authorized", ex.getReason());
 		assertThrows(TraceValidationException.class, () -> harness.getRecord(DOMAIN, deniedRecordId, PRODUCER));
 		assertEquals(1, harness.store().snapshot().size());
-		assertTrue(harness.getRecord(DOMAIN, allowedRecordId, PRODUCER).getIdentity().getRecordId()
-				.equals(allowedRecordId));
+		assertEquals(allowedRecordId, harness.getRecord(DOMAIN, allowedRecordId, PRODUCER).getIdentity().getRecordId());
 	}
 
 	// -- criterion 16 --------------------------------------------------------------------------
@@ -355,20 +402,23 @@ public class TraceMvpAcceptanceTest {
 		KeyPair wrongKeyPair = TraceTestKeys.generateKeyPair();
 		String invalidSignatureJson = TraceRecordBuilder.authorizationDecision().recordId(invalidSignatureRecordId)
 				.genesis().sign(wrongKeyPair.getPrivate());
-		assertThrows(TraceValidationException.class, () -> harness.ingest(invalidSignatureJson, ctx()));
+		TraceRequestContext requestContext1 = ctx();
+		assertThrows(TraceValidationException.class, () -> harness.ingest(invalidSignatureJson, requestContext1));
 		assertNeverRetrievable(invalidSignatureRecordId);
 
 		String unknownKeyRecordId = TraceRecordBuilder.freshRecordId();
 		String unknownKeyJson = TraceRecordBuilder.authorizationDecision().recordId(unknownKeyRecordId).genesis()
 				.kid("no-such-kid").sign(wrongKeyPair.getPrivate());
-		assertThrows(TraceValidationException.class, () -> harness.ingest(unknownKeyJson, ctx()));
+		TraceRequestContext requestContext2 = ctx();
+		assertThrows(TraceValidationException.class, () -> harness.ingest(unknownKeyJson, requestContext2));
 		assertNeverRetrievable(unknownKeyRecordId);
 
 		String mismatchRecordId = TraceRecordBuilder.freshRecordId();
 		String mismatchJson = TraceRecordBuilder.authorizationDecision().recordId(mismatchRecordId).genesis()
 				.withField("other-producer", "producer").sign(wrongKeyPair.getPrivate());
+		TraceRequestContext requestContext3 = ctx();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> harness.ingest(mismatchJson, ctx()));
+				() -> harness.ingest(mismatchJson, requestContext3));
 		assertEquals(TraceErrorResponseType.PRODUCER_MISMATCH, ex.getErrorId());
 		assertNeverRetrievable(mismatchRecordId);
 	}
@@ -418,7 +468,8 @@ public class TraceMvpAcceptanceTest {
 				.withField("1.2.4", "trace", "policy", "policy_store_version").sign(keyPair.getPrivate());
 
 		AcceptanceResult accepted = harness.ingest(first, ctx());
-		TraceConflictException ex = assertThrows(TraceConflictException.class, () -> harness.ingest(resigned, ctx()));
+		TraceRequestContext requestContext = ctx();
+		TraceConflictException ex = assertThrows(TraceConflictException.class, () -> harness.ingest(resigned, requestContext));
 		assertEquals(TraceErrorResponseType.RECORD_CONFLICT, ex.getErrorId());
 
 		StoredTraceRecord stored = harness.getRecord(DOMAIN, recordId, PRODUCER);
@@ -642,7 +693,8 @@ public class TraceMvpAcceptanceTest {
 		String json = TraceRecordBuilder.authorizationDecision().genesis().sign(keyPair.getPrivate());
 		harness.store().failNextInsertRecord();
 
-		assertThrows(TraceStorageException.class, () -> harness.ingest(json, ctx()));
+		TraceRequestContext requestContext = ctx();
+		assertThrows(TraceStorageException.class, () -> harness.ingest(json, requestContext));
 
 		assertTrue(harness.store().snapshot().isEmpty());
 		assertNotEquals(TraceReceiptState.COMMITTED,
@@ -793,6 +845,23 @@ public class TraceMvpAcceptanceTest {
 		TraceRestWebServiceImpl endpoint = bulkEndpoint();
 		JsonNode results = submitBulk(endpoint, batch, 207).get("results");
 
+		assertBulkResults(results, id1, badId, id3);
+
+		assertEquals(2, harness.store().snapshot().size());
+		assertThrows(TraceValidationException.class, () -> harness.getRecord(DOMAIN, badId, PRODUCER));
+		assertEquals(json1, harness.getRecord(DOMAIN, id1, PRODUCER).getAssertionRaw());
+		assertEquals(json3, harness.getRecord(DOMAIN, id3, PRODUCER).getAssertionRaw());
+
+		JsonNode replay = submitBulk(endpoint, batch, 207).get("results");
+		assertTrue(replay.get(0).get("idempotent_replay").booleanValue());
+		assertEquals(1L, replay.get(0).get("receipt_sequence").longValue());
+		assertFalse(replay.get(1).get("accepted").booleanValue());
+		assertTrue(replay.get(2).get("idempotent_replay").booleanValue());
+		assertEquals(2L, replay.get(2).get("receipt_sequence").longValue());
+		assertEquals(2, harness.store().snapshot().size());
+	}
+
+	private static void assertBulkResults(JsonNode results, String id1, String badId, String id3) {
 		assertEquals(3, results.size());
 		JsonNode first = results.get(0);
 		assertTrue(first.get("accepted").booleanValue());
@@ -816,19 +885,6 @@ public class TraceMvpAcceptanceTest {
 		assertTrue(third.get("accepted").booleanValue());
 		assertEquals(id3, third.get("record_id").textValue());
 		assertEquals(2L, third.get("receipt_sequence").longValue());
-
-		assertEquals(2, harness.store().snapshot().size());
-		assertThrows(TraceValidationException.class, () -> harness.getRecord(DOMAIN, badId, PRODUCER));
-		assertEquals(json1, harness.getRecord(DOMAIN, id1, PRODUCER).getAssertionRaw());
-		assertEquals(json3, harness.getRecord(DOMAIN, id3, PRODUCER).getAssertionRaw());
-
-		JsonNode replay = submitBulk(endpoint, batch, 207).get("results");
-		assertTrue(replay.get(0).get("idempotent_replay").booleanValue());
-		assertEquals(1L, replay.get(0).get("receipt_sequence").longValue());
-		assertFalse(replay.get(1).get("accepted").booleanValue());
-		assertTrue(replay.get(2).get("idempotent_replay").booleanValue());
-		assertEquals(2L, replay.get(2).get("receipt_sequence").longValue());
-		assertEquals(2, harness.store().snapshot().size());
 	}
 
 	/**
@@ -846,9 +902,10 @@ public class TraceMvpAcceptanceTest {
 				.sign(gatewayKey.getPrivate());
 
 		TraceRestWebServiceImpl endpoint = bulkEndpoint();
-		WebApplicationException ex = assertThrows(WebApplicationException.class, () -> endpoint
-				.submitBulkRecords(new ByteArrayInputStream(
-						("[" + primaryJson + "," + gatewayJson + "]").getBytes(StandardCharsets.UTF_8)), null, null));
+		ByteArrayInputStream mixedBatch = new ByteArrayInputStream(
+				("[" + primaryJson + "," + gatewayJson + "]").getBytes(StandardCharsets.UTF_8));
+		WebApplicationException ex = assertThrows(WebApplicationException.class,
+				() -> endpoint.submitBulkRecords(mixedBatch, null, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		JsonNode body = MAPPER.valueToTree(ex.getResponse().getEntity());
@@ -885,8 +942,9 @@ public class TraceMvpAcceptanceTest {
 
 		String otherChainSeq2 = TraceRecordBuilder.authorizationDecision().producerChainId(SECOND_CHAIN)
 				.sequenceNumber(2).prevRecordHash(contentDigestOf(genesisJson)).sign(keyPair.getPrivate());
+		TraceRequestContext requestContext = ctx();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> harness.ingest(otherChainSeq2, ctx()));
+				() -> harness.ingest(otherChainSeq2, requestContext));
 		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 		assertEquals(1, harness.store().findChains(DOMAIN, PRODUCER).size());
 	}
@@ -907,8 +965,9 @@ public class TraceMvpAcceptanceTest {
 		assertEquals("first_observed_genesis", harness.store().findChains(DOMAIN, PRODUCER).get(0).getGenesisKind());
 		String otherChainGenesis = TraceRecordBuilder.authorizationDecision().producerChainId(SECOND_CHAIN).genesis()
 				.sign(keyPair.getPrivate());
+		TraceRequestContext requestContext = ctx();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> harness.ingest(otherChainGenesis, ctx()));
+				() -> harness.ingest(otherChainGenesis, requestContext));
 		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 	}
 
