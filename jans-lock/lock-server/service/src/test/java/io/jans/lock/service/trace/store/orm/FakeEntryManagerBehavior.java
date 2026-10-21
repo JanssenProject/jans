@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import org.mockito.invocation.InvocationOnMock;
 
@@ -63,14 +64,33 @@ final class FakeEntryManagerBehavior {
 
 	private final Map<Class<?>, Map<String, Object>> storesByClass = new HashMap<>();
 
+	private static final Map<PersistenceEntryManager, FakeEntryManagerBehavior> BY_MOCK = new ConcurrentHashMap<>();
+
 	private final PersistenceEntryManager mock = mock(PersistenceEntryManager.class);
+
+	private int pendingVersionConflicts;
+
+	private Consumer<Object> concurrentWriter;
 
 	private FakeEntryManagerBehavior() {
 		wire();
 	}
 
 	static PersistenceEntryManager create() {
-		return new FakeEntryManagerBehavior().mock;
+		FakeEntryManagerBehavior behavior = new FakeEntryManagerBehavior();
+		BY_MOCK.put(behavior.mock, behavior);
+		return behavior.mock;
+	}
+
+	/**
+	 * Makes the next {@code count} {@code updateWithVersion} calls lose a race: each first lets
+	 * {@code writer} change the stored entry, bumps its version, then throws
+	 * {@link VersionMismatchException}.
+	 */
+	static void injectVersionConflicts(PersistenceEntryManager manager, int count, Consumer<Object> writer) {
+		FakeEntryManagerBehavior behavior = BY_MOCK.get(manager);
+		behavior.pendingVersionConflicts = count;
+		behavior.concurrentWriter = writer;
 	}
 
 	private Map<String, Object> storeFor(Class<?> entryClass) {
@@ -120,6 +140,13 @@ final class FakeEntryManagerBehavior {
 			if (versionField == null) {
 				throw new UnsupportedOperationException(
 						"FakeEntryManagerBehavior: no @Version field on " + entryClass);
+			}
+			if (pendingVersionConflicts > 0) {
+				pendingVersionConflicts--;
+				concurrentWriter.accept(current);
+				Long racedVersion = (Long) versionField.get(current);
+				versionField.set(current, (racedVersion == null ? 0L : racedVersion) + 1);
+				throw new VersionMismatchException(dn, (Long) versionField.get(entity));
 			}
 			Long expected = (Long) versionField.get(entity);
 			Long storedVersion = (Long) versionField.get(current);
