@@ -276,7 +276,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 				.recordId(UUID.randomUUID().toString()).signedAt(Instant.now().getEpochSecond())
 				.traceExecutionId(traceExecutionId + "-reserved").executionAuthority(executionAuthority)
 				.producerInstanceId(instanceIdA).producerChainId(chainIdA).sequenceNumber(99)
-				.prevRecordHash(TraceAssertions.ZERO_HASH);
+				.prevRecordHash(TraceAssertions.contentDigest(recordA_signedJson));
 		var tree = builder.unsignedTree();
 		tree.put("evidence_domain_id", "attempted-domain-override");
 		String signedJson = TraceAssertions.sign(tree, keyA);
