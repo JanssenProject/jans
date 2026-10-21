@@ -267,6 +267,7 @@ verification. See [TRACE Evidence](./trace.md) for the feature description and A
 | `defaultAllowedProducerIds` | array | `[]` | Producer ids a client without a binding may submit records for in the default evidence domain. Empty means such a client can submit nothing (`producer_not_allowed`). Read and admin paths are unaffected. |
 | `clientDomainBindings` | array | `[]` | List of `{ clientId, evidenceDomainId, allowedProducerIds[] }` bindings. A client without a binding and without `defaultEvidenceDomainId` set is rejected with `client_not_bound`. `allowedProducerIds` may contain `"*"` to allow any producer. |
 | `latenessThresholdSeconds` | integer | `300` | Seconds after `signed_at` a record may still be accepted before it is flagged `late_flag: true`. |
+| `policyMismatchGraceSeconds` | integer | `300` | Seconds after Lock stops serving a policy store release during which records signed under it are not flagged `policy_mismatch_flag`. See [TRACE](./trace.md#policy-store-release-check). |
 | `maxFutureSkewSeconds` | integer | `300` | Seconds `signed_at` may be ahead of Lock's clock. A later `signed_at` is rejected with `invalid_assertion` (`signed_at_in_future`). |
 | `maxRequestBytes` | integer | `262144` | Maximum accepted TRACE request body size, in bytes. |
 | `maxJsonDepth` | integer | `32` | Maximum accepted JSON nesting depth of a TRACE assertion. |
@@ -404,7 +405,7 @@ Config API serves stored decision logs at `GET /jans-config-api/lock/audit/log/s
 | `policyStoreId` | Policy store id used for the decision |
 | `policyStoreVersion` | Policy store version used for the decision |
 
-Lock sets these when it receives a log entry, before it stores or forwards it: from the entry's `requestId`, `policyStoreId` and `policyStoreVersion` when present, otherwise from the `request_id`, `policystore_id` and `policystore_version` keys of `contextInformation`. A `request_id` longer than 64 characters or a policy store value longer than 255 characters is not indexed. Entries stored before this release, and entries posted directly to Config API, are not indexed and match only the date range.
+A stored entry takes these from the `request_id`, `policystore_id` and `policystore_version` keys of `contextInformation` when present, and otherwise from the entry's own `requestId`, `policyStoreId` and `policyStoreVersion`. A `request_id` longer than 64 characters or a policy store value longer than 255 characters is not indexed. Entries stored before this release are not indexed and match only the date range.
 
 #### Submit Health Status
 ```http
@@ -569,7 +570,7 @@ The audit log and TRACE search filters need new columns and indexes. Container a
     ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyStoreVersion" VARCHAR(255);
     ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTraceBundleHash" VARCHAR(255);
     ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyMismatch" BOOLEAN;
-    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTraceReservedMember" BOOLEAN;
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTraceReservedMembers" JSONB;
     CREATE INDEX "jansTraceRecord_jansTracePolicyStoreId" ON "jansTraceRecord" ("jansTracePolicyStoreId");
     CREATE INDEX "jansTraceRecord_jansTracePolicyStoreVersion" ON "jansTraceRecord" ("jansTracePolicyStoreVersion");
     CREATE INDEX "jansTraceRecord_jansTraceBundleHash" ON "jansTraceRecord" ("jansTraceBundleHash");
@@ -589,7 +590,7 @@ The audit log and TRACE search filters need new columns and indexes. Container a
     ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyStoreVersion VARCHAR(255);
     ALTER TABLE jansTraceRecord ADD COLUMN jansTraceBundleHash VARCHAR(255);
     ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyMismatch SMALLINT;
-    ALTER TABLE jansTraceRecord ADD COLUMN jansTraceReservedMember SMALLINT;
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTraceReservedMembers JSON;
     ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreId (jansTracePolicyStoreId);
     ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreVersion (jansTracePolicyStoreVersion);
     ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTraceBundleHash (jansTraceBundleHash);
