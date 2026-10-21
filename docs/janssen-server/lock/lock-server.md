@@ -392,6 +392,18 @@ Content-Type: application/json
 }
 ```
 
+#### Search Audit Logs
+
+Config API serves stored decision logs at `GET /jans-config-api/lock/audit/log/search`. `eventStartDate` and `eventEndDate` (ISO 8601) are required. Optional exact-match filters:
+
+| Parameter | Matches |
+|---|---|
+| `requestId` | Cedarling `request_id` of the decision |
+| `policyStoreId` | Policy store id used for the decision |
+| `policyStoreVersion` | Policy store version used for the decision |
+
+Lock and Config API index these from the stored entry's `requestId`, `policyStoreId` and `policyStoreVersion`, or, when those are absent, from the `request_id`, `policystore_id` and `policystore_version` keys of `contextInformation`. A `request_id` longer than 64 characters or a policy store value longer than 255 characters is not indexed. Entries stored before this release are not indexed and match only the date range.
+
 #### Submit Health Status
 ```http
 POST /audit/health
@@ -544,6 +556,50 @@ CREATE TABLE audit_logs (
     INDEX idx_policy_store_id (policy_store_id)
 );
 ```
+
+### Upgrading an Existing Deployment
+
+The audit log and TRACE search filters need new columns and indexes. Container and Kubernetes deployments get them automatically: the persistence loader adds missing columns and indexes on its next run. An existing VM install needs them added once, by hand. Back up the database first.
+
+=== "PostgreSQL"
+
+    ```sql
+    ALTER TABLE "jansLogEntry" ADD COLUMN "jansRequestId" VARCHAR(64);
+    ALTER TABLE "jansLogEntry" ADD COLUMN "jansPolicyStoreId" VARCHAR(255);
+    ALTER TABLE "jansLogEntry" ADD COLUMN "jansPolicyStoreVersion" VARCHAR(255);
+    CREATE INDEX "jansLogEntry_jansRequestId" ON "jansLogEntry" ("jansRequestId");
+    CREATE INDEX "jansLogEntry_jansPolicyStoreId" ON "jansLogEntry" ("jansPolicyStoreId");
+    CREATE INDEX "jansLogEntry_jansPolicyStoreVersion" ON "jansLogEntry" ("jansPolicyStoreVersion");
+
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyStoreId" VARCHAR(255);
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyStoreVersion" VARCHAR(255);
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTraceBundleHash" VARCHAR(255);
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyMismatch" BOOLEAN;
+    CREATE INDEX "jansTraceRecord_jansTracePolicyStoreId" ON "jansTraceRecord" ("jansTracePolicyStoreId");
+    CREATE INDEX "jansTraceRecord_jansTracePolicyStoreVersion" ON "jansTraceRecord" ("jansTracePolicyStoreVersion");
+    CREATE INDEX "jansTraceRecord_jansTraceBundleHash" ON "jansTraceRecord" ("jansTraceBundleHash");
+    ```
+
+=== "MySQL"
+
+    ```sql
+    ALTER TABLE jansLogEntry ADD COLUMN jansRequestId VARCHAR(64);
+    ALTER TABLE jansLogEntry ADD COLUMN jansPolicyStoreId VARCHAR(255);
+    ALTER TABLE jansLogEntry ADD COLUMN jansPolicyStoreVersion VARCHAR(255);
+    ALTER TABLE jansLogEntry ADD INDEX jansLogEntry_jansRequestId (jansRequestId);
+    ALTER TABLE jansLogEntry ADD INDEX jansLogEntry_jansPolicyStoreId (jansPolicyStoreId);
+    ALTER TABLE jansLogEntry ADD INDEX jansLogEntry_jansPolicyStoreVersion (jansPolicyStoreVersion);
+
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyStoreId VARCHAR(255);
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyStoreVersion VARCHAR(255);
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTraceBundleHash VARCHAR(255);
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyMismatch SMALLINT;
+    ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreId (jansTracePolicyStoreId);
+    ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreVersion (jansTracePolicyStoreVersion);
+    ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTraceBundleHash (jansTraceBundleHash);
+    ```
+
+Records and log entries stored before the upgrade have empty values in the new columns, so release search and log filters do not return them.
 
 ### Metrics and Monitoring
 
