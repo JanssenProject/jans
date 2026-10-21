@@ -17,6 +17,7 @@ use crate::common::policy_store::PolicyStoreMetadata;
 use crate::context_data_api::DataStore;
 use crate::log::interface::LogWriter;
 use crate::log::{self, BaseLogEntry, LogEntry};
+use crate::trace::TraceRecorder;
 use std::collections::HashMap;
 use std::sync::Arc;
 #[cfg(not(target_arch = "wasm32"))]
@@ -37,6 +38,7 @@ pub(crate) struct ServiceFactory<'a> {
     log_service: log::Logger,
     data_store: Arc<DataStore>,
     metrics: Arc<MetricsCollector>,
+    trace: Option<TraceRecorder>,
     container: SingletonContainer,
 }
 
@@ -62,6 +64,7 @@ impl<'a> ServiceFactory<'a> {
             log_service,
             data_store,
             metrics,
+            trace: None,
             container: SingletonContainer::default(),
         }
     }
@@ -85,6 +88,13 @@ impl<'a> ServiceFactory<'a> {
     /// fetches.
     pub(crate) fn http_client_for_refresh(&self) -> crate::http::HttpClient {
         self.service_config.http_client.clone()
+    }
+
+    /// Sets the recorder the `Authz` built next records TRACE with; `None`
+    /// leaves TRACE disabled.
+    #[expect(dead_code, reason = "set at startup together with the TRACE emitter")]
+    pub(crate) fn set_trace_recorder(&mut self, trace: Option<TraceRecorder>) {
+        self.trace = trace;
     }
 
     // get log service
@@ -157,6 +167,7 @@ impl<'a> ServiceFactory<'a> {
             self.data_store.clone(),
             self.metrics.clone(),
             None,
+            self.trace.clone(),
         )
         .await?;
 

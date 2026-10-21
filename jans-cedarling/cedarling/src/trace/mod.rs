@@ -11,9 +11,16 @@ mod chain;
 mod key;
 mod producer_id;
 mod record;
+mod recorder;
 mod signing_kid;
+mod status;
+#[cfg(test)]
+mod test_utils;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) use key::ProducerKey;
 pub use producer_id::{ParseProducerIdError, ProducerId};
+pub(crate) use record::{DecisionFacts, Outcome};
+pub(crate) use recorder::{TraceRecorder, token_facts};
 pub use signing_kid::{ParseTraceSigningKidError, TraceSigningKid};
+pub(crate) use status::TraceRecordStatus;

@@ -9,16 +9,6 @@
 //! never signed, so the producer chain gets no gap. Lengths are
 //! counted in UTF-16 units, because Lock counts Java `String` length.
 
-// Read by the TRACE emitter, not wired in yet. Remove this attribute with it: `expect` turns
-// into a warning as soon as the items are used.
-#![cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "consumed by the TRACE emitter; remove when it is wired in"
-    )
-)]
-
 use jans_trace_core::Digest;
 use jans_trace_core::inputs::token_fingerprint;
 use url::Url;
@@ -50,6 +40,10 @@ pub(crate) enum Outcome {
 }
 
 impl Outcome {
+    pub(crate) fn from_allowed(allowed: bool) -> Self {
+        if allowed { Self::Allow } else { Self::Deny }
+    }
+
     pub(crate) fn as_str(self) -> &'static str {
         match self {
             Self::Allow => "ALLOW",
@@ -281,7 +275,7 @@ fn invalid(path: &str) -> DraftError {
 }
 
 /// Lock `TraceIssuers`: an absolute `https` URI, or `http` with host `localhost`.
-fn is_lock_issuer(issuer: &str) -> bool {
+pub(super) fn is_lock_issuer(issuer: &str) -> bool {
     let Ok(url) = Url::parse(issuer) else {
         return false;
     };
@@ -298,6 +292,7 @@ mod tests {
 
     use super::*;
     use crate::log::gen_uuid7;
+    use crate::trace::test_utils::cjar_store;
 
     const ISSUER: &str = "https://idp.example.com";
 
@@ -590,25 +585,16 @@ mod tests {
         assert_eq!(Outcome::Allow.as_str(), "ALLOW", "allow outcome");
         assert_eq!(Outcome::Deny.as_str(), "DENY", "deny outcome");
     }
-    fn cjar_store() -> (PolicyStoreWithID, jans_trace_core::Digest) {
-        let bytes = crate::common::policy_store::test_utils::fixtures::minimal_valid()
-            .with_version("2.1.0")
-            .build_archive()
-            .expect("test archive builds");
-        let hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
-        let store = crate::common::policy_store::loader::read_policy_store_archive_bytes(
-            bytes,
-            false,
-            crate::common::policy_store::archive_handler::ArchiveLimits::default(),
-        )
-        .expect("test archive parses")
-        .store;
-        (store, hash)
+
+    #[test]
+    fn outcome_from_allowed_decision() {
+        assert_eq!(Outcome::from_allowed(true), Outcome::Allow, "allowed");
+        assert_eq!(Outcome::from_allowed(false), Outcome::Deny, "denied");
     }
 
     #[test]
     fn policy_facts_from_cjar_store() {
-        let (store, hash) = cjar_store();
+        let (store, hash) = cjar_store("2.1.0");
         let facts = PolicyFacts::from_store(&store).expect("a .cjar store has policy facts");
         assert_eq!(facts.bundle_hash, hash, "bundle_hash comes from the store");
         assert_eq!(facts.store_version, "2.1.0", "store version from metadata");
@@ -626,7 +612,7 @@ mod tests {
 
     #[test]
     fn policy_facts_none_without_bundle_hash() {
-        let (archived, _) = cjar_store();
+        let (archived, _) = cjar_store("2.1.0");
         let store = PolicyStoreWithID::without_archive(
             archived.id.clone(),
             archived.store.clone(),
