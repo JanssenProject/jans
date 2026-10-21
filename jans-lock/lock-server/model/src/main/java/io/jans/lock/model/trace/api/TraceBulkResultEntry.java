@@ -81,6 +81,10 @@ public class TraceBulkResultEntry {
 	@Schema(description = "Present when accepted: true when trace.policy names a policy store Lock serves but its bundle_hash or policy_store_version differs from the served release")
 	private Boolean policyMismatchFlag;
 
+	@JsonProperty("reserved_member_flag")
+	@Schema(description = "Present when accepted: true when Lock-derived members the producer placed in its signed body (for example evidence_domain_id or trust_tier) were ignored")
+	private Boolean reservedMemberFlag;
+
 	@JsonProperty("error")
 	@Schema(description = "Present when accepted=false: the structured error for this item only")
 	private TraceErrorResponse error;
@@ -187,6 +191,14 @@ public class TraceBulkResultEntry {
 
 	public void setPolicyMismatchFlag(Boolean policyMismatchFlag) {
 		this.policyMismatchFlag = policyMismatchFlag;
+	}
+
+	public Boolean getReservedMemberFlag() {
+		return reservedMemberFlag;
+	}
+
+	public void setReservedMemberFlag(Boolean reservedMemberFlag) {
+		this.reservedMemberFlag = reservedMemberFlag;
 	}
 
 	public TraceErrorResponse getError() {

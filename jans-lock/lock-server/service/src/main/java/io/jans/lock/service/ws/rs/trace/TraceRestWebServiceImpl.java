@@ -403,6 +403,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		entry.setEquivocationFlag(acceptance.isEquivocationFlag());
 		entry.setLateFlag(acceptance.isLateFlag());
 		entry.setPolicyMismatchFlag(acceptance.isPolicyMismatchFlag());
+		entry.setReservedMemberFlag(acceptance.isReservedMemberFlag());
 	}
 
 	/**
@@ -582,6 +583,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		dto.setEquivocationFlag(result.isEquivocationFlag());
 		dto.setLateFlag(result.isLateFlag());
 		dto.setPolicyMismatchFlag(result.isPolicyMismatchFlag());
+		dto.setReservedMemberFlag(result.isReservedMemberFlag());
 		return dto;
 	}
 
@@ -631,6 +633,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		dto.setEquivocationFlag(flags.isEquivocation());
 		dto.setLateFlag(flags.isLate());
 		dto.setPolicyMismatchFlag(flags.isPolicyMismatch());
+		dto.setReservedMemberFlag(flags.isReservedMember());
 		return dto;
 	}
 

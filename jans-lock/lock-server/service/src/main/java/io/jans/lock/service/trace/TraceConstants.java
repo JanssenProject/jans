@@ -73,22 +73,21 @@ public final class TraceConstants {
 	/** Name of the top-level signature field, excluded from the JCS signature input. */
 	public static final String SIGNATURE_FIELD = "signature";
 
-	/** Name of the field that is forbidden anywhere in an incoming assertion. */
+	/** Name of the partition field Lock derives; a producer-supplied value is ignored and flagged. */
 	public static final String DOMAIN_FIELD = "evidence_domain_id";
 
 	/**
 	 * Members Lock derives, assigns or resolves itself (design §4.1, §10; GovOps profile §1, §12).
-	 * A producer must never sign any of them, so an assertion carrying one at the top level, in
-	 * {@code trace}, in {@code trace.event} or in a {@code decision}/{@code invocation} fact is
-	 * rejected as {@code invalid_assertion} with reason {@code forbidden:<path>}.
-	 * {@link #DOMAIN_FIELD} has its own error and is not listed here. The profile names no
-	 * members for the verification vector or the settlement, completeness, assurance, lineage,
-	 * delegation, instance-binding and external-anchor assessments, so none is listed for them.
+	 * A producer that signs any of them has the member ignored and the record flagged with
+	 * {@code reserved_member_flag}; see {@code CommonAssertionValidator}. {@link #DOMAIN_FIELD} is
+	 * handled the same way but listed separately. The profile names no members for the
+	 * verification vector or the settlement, completeness, assurance, lineage, delegation,
+	 * instance-binding and external-anchor assessments, so none is listed for them.
 	 */
 	public static final Set<String> LOCK_DERIVED_MEMBERS = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
 			"content_digest", "receipt_sequence", "received_at", "prev_receipt_hash",
 			"coverage_gap_flag", "chain_link_failure_flag", "equivocation_flag", "late_flag",
-			"policy_mismatch_flag", "unattributed_flag", "candidate_flag",
+			"policy_mismatch_flag", "reserved_member_flag", "unattributed_flag", "candidate_flag",
 			"key_resolved", "key_temporally_valid", "key_not_revoked", "key_authorized_for_producer",
 			"producer_authorized_for_claim", "key_thumbprint", "key_authorization_ref", "verified_at",
 			"trust_tier", "capability_resolution", "capability_id", "capability_ids", "cnf")));

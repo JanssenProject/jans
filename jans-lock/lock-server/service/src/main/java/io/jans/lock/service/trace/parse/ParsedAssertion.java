@@ -56,6 +56,8 @@ public final class ParsedAssertion {
 
 	private JsonNode subject;
 
+	private List<String> reservedMembers = Collections.emptyList();
+
 	ParsedAssertion(String rawText, ObjectNode root) {
 		this.rawText = rawText;
 		this.root = root;
@@ -180,6 +182,19 @@ public final class ParsedAssertion {
 
 	void setSubject(JsonNode subject) {
 		this.subject = subject;
+	}
+
+	/**
+	 * @return paths of Lock-derived members the producer placed in its signed body; ignored by
+	 *         Lock and surfaced as {@code reserved_member_flag}
+	 */
+	public List<String> getReservedMembers() {
+		return reservedMembers;
+	}
+
+	void setReservedMembers(List<String> reservedMembers) {
+		this.reservedMembers = reservedMembers == null ? Collections.emptyList()
+				: Collections.unmodifiableList(reservedMembers);
 	}
 
 	/**

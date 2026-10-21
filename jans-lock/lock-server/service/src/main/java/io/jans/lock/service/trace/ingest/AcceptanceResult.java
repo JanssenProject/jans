@@ -37,30 +37,17 @@ public final class AcceptanceResult {
 
 	private final boolean idempotentReplay;
 
-	private final boolean coverageGapFlag;
-
-	private final boolean chainLinkFailureFlag;
-
-	private final boolean equivocationFlag;
-
-	private final boolean lateFlag;
-
-	private final boolean policyMismatchFlag;
+	private final IngestionFlags flags;
 
 	private AcceptanceResult(String producerId, String recordId, String contentDigest, long receiptSequence,
-			long receivedAtMs, boolean idempotentReplay, boolean coverageGapFlag, boolean chainLinkFailureFlag,
-			boolean equivocationFlag, boolean lateFlag, boolean policyMismatchFlag) {
+			long receivedAtMs, boolean idempotentReplay, IngestionFlags flags) {
 		this.producerId = producerId;
 		this.recordId = recordId;
 		this.contentDigest = contentDigest;
 		this.receiptSequence = receiptSequence;
 		this.receivedAtMs = receivedAtMs;
 		this.idempotentReplay = idempotentReplay;
-		this.coverageGapFlag = coverageGapFlag;
-		this.chainLinkFailureFlag = chainLinkFailureFlag;
-		this.equivocationFlag = equivocationFlag;
-		this.lateFlag = lateFlag;
-		this.policyMismatchFlag = policyMismatchFlag;
+		this.flags = flags.copy();
 	}
 
 	/**
@@ -69,11 +56,9 @@ public final class AcceptanceResult {
 	 * @param replay whether this call is reporting an idempotent replay rather than a fresh insert
 	 */
 	public static AcceptanceResult fromStored(StoredTraceRecord stored, boolean replay) {
-		IngestionFlags flags = stored.getFlags();
 		return new AcceptanceResult(stored.getIdentity().getProducerId(), stored.getIdentity().getRecordId(),
 				stored.getContentDigest(), stored.getReceipt().getReceiptSequence(),
-				stored.getReceipt().getReceivedAtMs(), replay, flags.isCoverageGap(), flags.isChainLinkFailure(),
-				flags.isEquivocation(), flags.isLate(), flags.isPolicyMismatch());
+				stored.getReceipt().getReceivedAtMs(), replay, stored.getFlags());
 	}
 
 	/**
@@ -108,32 +93,34 @@ public final class AcceptanceResult {
 	}
 
 	public boolean isCoverageGapFlag() {
-		return coverageGapFlag;
+		return flags.isCoverageGap();
 	}
 
 	public boolean isChainLinkFailureFlag() {
-		return chainLinkFailureFlag;
+		return flags.isChainLinkFailure();
 	}
 
 	public boolean isEquivocationFlag() {
-		return equivocationFlag;
+		return flags.isEquivocation();
 	}
 
 	public boolean isLateFlag() {
-		return lateFlag;
+		return flags.isLate();
 	}
 
 	public boolean isPolicyMismatchFlag() {
-		return policyMismatchFlag;
+		return flags.isPolicyMismatch();
+	}
+
+	public boolean isReservedMemberFlag() {
+		return flags.isReservedMember();
 	}
 
 	@Override
 	public String toString() {
 		return "AcceptanceResult [producerId=" + producerId + ", recordId=" + recordId + ", contentDigest="
 				+ contentDigest + ", receiptSequence=" + receiptSequence + ", receivedAtMs=" + receivedAtMs
-				+ ", idempotentReplay=" + idempotentReplay + ", coverageGapFlag=" + coverageGapFlag
-				+ ", chainLinkFailureFlag=" + chainLinkFailureFlag + ", equivocationFlag=" + equivocationFlag
-				+ ", lateFlag=" + lateFlag + ", policyMismatchFlag=" + policyMismatchFlag + "]";
+				+ ", idempotentReplay=" + idempotentReplay + ", flags=" + flags + "]";
 	}
 
 }

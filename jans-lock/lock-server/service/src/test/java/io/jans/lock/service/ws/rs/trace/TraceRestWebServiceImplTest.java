@@ -420,7 +420,8 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		List<String> acceptedMembers = List.of("index", "accepted", "producer_id", "record_id", "content_digest",
 				"receipt_sequence", "received_at", "idempotent_replay", "coverage_gap_flag",
-				"chain_link_failure_flag", "equivocation_flag", "late_flag", "policy_mismatch_flag");
+				"chain_link_failure_flag", "equivocation_flag", "late_flag", "policy_mismatch_flag",
+				"reserved_member_flag");
 		assertEquals(acceptedMembers, fieldNames(results.get(0)));
 		assertEquals(0, results.get(0).get("index").intValue());
 		assertTrue(results.get(0).get("accepted").booleanValue());

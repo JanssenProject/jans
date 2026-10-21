@@ -61,6 +61,10 @@ public class TraceIngestionResponse {
 	@Schema(description = "True when trace.policy names a policy store Lock serves but its bundle_hash or policy_store_version differs from the served release")
 	private boolean policyMismatchFlag;
 
+	@JsonProperty("reserved_member_flag")
+	@Schema(description = "True when Lock-derived members the producer placed in its signed body (for example evidence_domain_id or trust_tier) were ignored")
+	private boolean reservedMemberFlag;
+
 	public long getReceiptSequence() {
 		return receiptSequence;
 	}
@@ -139,6 +143,14 @@ public class TraceIngestionResponse {
 
 	public void setPolicyMismatchFlag(boolean policyMismatchFlag) {
 		this.policyMismatchFlag = policyMismatchFlag;
+	}
+
+	public boolean isReservedMemberFlag() {
+		return reservedMemberFlag;
+	}
+
+	public void setReservedMemberFlag(boolean reservedMemberFlag) {
+		this.reservedMemberFlag = reservedMemberFlag;
 	}
 
 }

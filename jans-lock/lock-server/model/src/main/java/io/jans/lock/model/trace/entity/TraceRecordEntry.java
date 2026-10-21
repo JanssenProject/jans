@@ -126,6 +126,9 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
     @AttributeName(name = "jansTracePolicyMismatch", ignoreDuringUpdate = true)
     private Boolean policyMismatch;
 
+    @AttributeName(name = "jansTraceReservedMember", ignoreDuringUpdate = true)
+    private Boolean reservedMember;
+
     @Version
     @AttributeName(name = "jansVersion", ignoreDuringUpdate = true)
     private Long version;
@@ -381,6 +384,14 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
         this.policyMismatch = policyMismatch;
     }
 
+    public Boolean getReservedMember() {
+        return reservedMember;
+    }
+
+    public void setReservedMember(Boolean reservedMember) {
+        this.reservedMember = reservedMember;
+    }
+
     public Long getVersion() {
         return version;
     }
@@ -424,6 +435,7 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 && Objects.equals(nodeId, that.nodeId) && Objects.equals(policyStoreId, that.policyStoreId)
                 && Objects.equals(policyStoreVersion, that.policyStoreVersion)
                 && Objects.equals(bundleHash, that.bundleHash) && Objects.equals(policyMismatch, that.policyMismatch)
+                && Objects.equals(reservedMember, that.reservedMember)
                 && Objects.equals(version, that.version)
                 && Objects.equals(creationDate, that.creationDate);
     }
@@ -434,7 +446,7 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 chainKey, chainPosKey, seqNum, prevRecordHash, tokenKeys, assertion, contentDigest,
                 verification, receiptSeq, receivedAt, receivedAtMs, prevReceiptHash, receiptHash, coverageGap,
                 chainLinkFailure, equivocation, late, nodeId, policyStoreId, policyStoreVersion, bundleHash,
-                policyMismatch, version, creationDate);
+                policyMismatch, reservedMember, version, creationDate);
     }
 
     @Override
@@ -449,7 +461,7 @@ public class TraceRecordEntry extends BaseEntry implements Serializable {
                 + receiptHash + ", coverageGap=" + coverageGap + ", chainLinkFailure=" + chainLinkFailure
                 + ", equivocation=" + equivocation + ", late=" + late + ", nodeId=" + nodeId + ", policyStoreId="
                 + policyStoreId + ", policyStoreVersion=" + policyStoreVersion + ", bundleHash=" + bundleHash
-                + ", policyMismatch=" + policyMismatch + ", version=" + version
+                + ", policyMismatch=" + policyMismatch + ", reservedMember=" + reservedMember + ", version=" + version
                 + ", creationDate=" + creationDate + "]";
     }
 

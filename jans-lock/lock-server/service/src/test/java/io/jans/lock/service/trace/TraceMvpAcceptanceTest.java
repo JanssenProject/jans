@@ -235,6 +235,51 @@ public class TraceMvpAcceptanceTest {
 		assertEquals("type:producer_version", ex.getReason());
 	}
 
+	// -- Lock-derived members in the signed body (GovOps profile §12) -----------------------
+
+	@Test
+	void reservedMembers_signedByProducer_ignoredAndFlagged() {
+		KeyPair keyPair = registerPrimary();
+		String recordId = TraceRecordBuilder.freshRecordId();
+		String json = TraceRecordBuilder.authorizationDecision().recordId(recordId).genesis()
+				.withField("other-domain", "evidence_domain_id").withField("attested", "trace", "trust_tier")
+				.withField("x", "receipt_sequence").sign(keyPair.getPrivate());
+
+		AcceptanceResult result = harness.ingest(json, ctx());
+
+		assertTrue(result.isAccepted());
+		assertTrue(result.isReservedMemberFlag());
+		assertEquals(1L, result.getReceiptSequence());
+		StoredTraceRecord stored = harness.getRecord(DOMAIN, recordId, PRODUCER);
+		assertEquals(DOMAIN, stored.getIdentity().getDomainId());
+		assertEquals(json, stored.getAssertionRaw());
+		assertTrue(stored.getFlags().isReservedMember());
+	}
+
+	@Test
+	void reservedMembers_absent_notFlagged() {
+		KeyPair keyPair = registerPrimary();
+		String json = TraceRecordBuilder.authorizationDecision().recordId(TraceRecordBuilder.freshRecordId())
+				.genesis().sign(keyPair.getPrivate());
+
+		assertFalse(harness.ingest(json, ctx()).isReservedMemberFlag());
+	}
+
+	@Test
+	void reservedMembers_addedAfterSigning_rejectedInvalidSignature() {
+		KeyPair keyPair = registerPrimary();
+		String signed = TraceRecordBuilder.authorizationDecision().recordId(TraceRecordBuilder.freshRecordId())
+				.genesis().sign(keyPair.getPrivate());
+		String json = TraceRecordBuilder.tamperAfterSigning(signed, "attested", "trace", "trust_tier");
+		TraceRequestContext context = ctx();
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> harness.ingest(json, context));
+
+		assertEquals(TraceErrorResponseType.INVALID_SIGNATURE, ex.getErrorId());
+		assertEquals(0, harness.store().snapshot().size());
+	}
+
 	// -- criterion 15 --------------------------------------------------------------------------
 
 	/**

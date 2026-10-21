@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -474,66 +475,69 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 		assertEquals("signature_length", ex.getReason());
 	}
 
-	@Test
-	void testValidate_topLevelEvidenceDomainId_throwsDomainFieldForbidden() throws IOException {
-		ObjectNode root = loadFixture();
-		root.set("evidence_domain_id", TextNode.valueOf("default"));
-
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_DOMAIN_FIELD_FORBIDDEN, ex.getErrorId());
+	private List<String> reservedMembersOf(ObjectNode root) {
+		ParsedAssertion assertion = assertionOf(root);
+		validator.validate(assertion);
+		return assertion.getReservedMembers();
 	}
 
 	@Test
-	void testValidate_traceLevelEvidenceDomainId_throwsDomainFieldForbidden() throws IOException {
-		ObjectNode root = loadFixture();
-		((ObjectNode) root.get("trace")).set("evidence_domain_id", TextNode.valueOf("default"));
+	void testValidate_evidenceDomainId_ignoredAndListed() throws IOException {
+		ObjectNode topLevel = loadFixture();
+		topLevel.set("evidence_domain_id", TextNode.valueOf("default"));
+		assertEquals(List.of("evidence_domain_id"), reservedMembersOf(topLevel));
 
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_DOMAIN_FIELD_FORBIDDEN, ex.getErrorId());
+		ObjectNode inTrace = loadFixture();
+		((ObjectNode) inTrace.get("trace")).set("evidence_domain_id", TextNode.valueOf("default"));
+		assertEquals(List.of("trace.evidence_domain_id"), reservedMembersOf(inTrace));
 	}
 
 	@Test
-	void testValidate_lockDerivedMemberAtTopLevel_throwsForbidden() throws IOException {
+	void testValidate_lockDerivedMemberAtTopLevel_ignoredAndListed() throws IOException {
 		for (String member : new String[] { "cnf", "content_digest", "receipt_sequence", "key_thumbprint",
-				"policy_mismatch_flag" }) {
+				"policy_mismatch_flag", "reserved_member_flag" }) {
 			ObjectNode root = loadFixture();
 			root.set(member, TextNode.valueOf("x"));
 
-			TraceValidationException ex = validateAndCapture(root);
-
-			assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-			assertEquals("forbidden:" + member, ex.getReason());
+			assertEquals(List.of(member), reservedMembersOf(root));
 		}
 	}
 
 	@Test
-	void testValidate_lockDerivedMemberInTraceAndEvent_throwsForbidden() throws IOException {
+	void testValidate_lockDerivedMemberInTraceEventAndPolicy_ignoredAndListed() throws IOException {
 		ObjectNode inTrace = loadFixture();
 		((ObjectNode) inTrace.get("trace")).set("trust_tier", TextNode.valueOf("attested"));
-		assertEquals("forbidden:trace.trust_tier", validateAndCapture(inTrace).getReason());
+		assertEquals(List.of("trace.trust_tier"), reservedMembersOf(inTrace));
 
 		ObjectNode inEvent = loadFixture();
 		((ObjectNode) inEvent.get("trace").get("event")).set("capability_resolution", TextNode.valueOf("x"));
-		assertEquals("forbidden:trace.event.capability_resolution", validateAndCapture(inEvent).getReason());
+		assertEquals(List.of("trace.event.capability_resolution"), reservedMembersOf(inEvent));
+
+		ObjectNode inPolicy = loadFixture();
+		((ObjectNode) inPolicy.get("trace")).putObject("policy").set("policy_mismatch_flag", TextNode.valueOf("x"));
+		assertEquals(List.of("trace.policy.policy_mismatch_flag"), reservedMembersOf(inPolicy));
 	}
 
 	@Test
-	void testValidate_lockDerivedMemberInFact_throwsForbidden() throws IOException {
+	void testValidate_lockDerivedMemberInFact_ignoredAndListed() throws IOException {
 		ObjectNode root = loadFixture();
 		ObjectNode event = (ObjectNode) root.get("trace").get("event");
 		ObjectNode fact = event.putObject("decision");
 		fact.set("capability_id", TextNode.valueOf("x"));
 
-		assertEquals("forbidden:trace.event.decision.capability_id", validateAndCapture(root).getReason());
+		assertEquals(List.of("trace.event.decision.capability_id"), reservedMembersOf(root));
 
 		root = loadFixture();
 		event = (ObjectNode) root.get("trace").get("event");
 		event.remove("decision");
 		event.putArray("decisions").addObject().set("late_flag", TextNode.valueOf("x"));
 
-		assertEquals("forbidden:trace.event.decisions[0].late_flag", validateAndCapture(root).getReason());
+		assertEquals(List.of("trace.event.decisions[0].late_flag"), reservedMembersOf(root));
+	}
+
+	@Test
+	void testValidate_noLockDerivedMember_emptyList() throws IOException {
+		assertTrue(reservedMembersOf(loadFixture()).isEmpty());
 	}
 
 	@Test
@@ -542,7 +546,7 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 		ObjectNode event = (ObjectNode) root.get("trace").get("event");
 		((ObjectNode) event.get("tokens").get(0)).set("cnf", TextNode.valueOf("x"));
 
-		validator.validate(assertionOf(root));
+		assertTrue(reservedMembersOf(root).isEmpty());
 	}
 
 }

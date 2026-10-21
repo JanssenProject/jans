@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -419,13 +420,20 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testAuthorizationDecision_capabilityIds_forbidden() throws IOException {
+	void testAuthorizationDecision_capabilityIds_ignoredAndListed() throws IOException {
 		ObjectNode root = loadFixture("authorization_decision_valid.json");
 		((ObjectNode) at(root, "trace", "event")).set("capability_ids", MAPPER.createArrayNode()
 				.add(MAPPER.createObjectNode().put("capability_id", "invoke:payment-authorization")
 						.put("outcome", "ALLOW")));
 
-		assertRejected(root, "forbidden:trace.event.capability_ids");
+		assertCapabilityIdsIgnored(root);
+	}
+
+	private void assertCapabilityIdsIgnored(ObjectNode root) {
+		ParsedAssertion assertion = parseAndCommonValidate(root);
+		registry.validate(assertion);
+
+		assertEquals(List.of("trace.event.capability_ids"), assertion.getReservedMembers());
 	}
 
 	@Test
@@ -662,12 +670,12 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testCapabilityInvoked_capabilityIdsAndResourceId_forbidden() throws IOException {
+	void testCapabilityInvoked_capabilityIdsIgnoredAndResourceIdForbidden() throws IOException {
 		ObjectNode legacy = loadFixture("capability_invoked_valid.json");
 		((ObjectNode) at(legacy, "trace", "event")).set("capability_ids", MAPPER.createArrayNode()
 				.add(MAPPER.createObjectNode().put("capability_id", "invoke:payment-authorization")
 						.put("outcome", "ALLOW")));
-		assertRejected(legacy, "forbidden:trace.event.capability_ids");
+		assertCapabilityIdsIgnored(legacy);
 
 		ObjectNode resourceId = loadFixture("capability_invoked_valid.json");
 		set(resourceId, TextNode.valueOf("x"), "trace", "event", "invocation", "resource_id");
@@ -687,7 +695,7 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testRuntimeEffect_withCapabilityIds_throwsForbidden() throws IOException {
+	void testRuntimeEffect_withCapabilityIds_ignoredAndListed() throws IOException {
 		ObjectNode root = loadFixture("runtime_effect_valid.json");
 		ArrayNode capabilityIds = MAPPER.createArrayNode();
 		ObjectNode entry = MAPPER.createObjectNode();
@@ -696,10 +704,7 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		capabilityIds.add(entry);
 		set(root, capabilityIds, "trace", "event", "capability_ids");
 
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("forbidden:trace.event.capability_ids", ex.getReason());
+		assertCapabilityIdsIgnored(root);
 	}
 
 	@Test

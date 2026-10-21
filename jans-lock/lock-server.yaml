@@ -1580,6 +1580,10 @@ components:
           type: boolean
           description: True when trace.policy names a policy store Lock serves but
             its bundle_hash or policy_store_version differs from the served release
+        reserved_member_flag:
+          type: boolean
+          description: True when Lock-derived members the producer placed in its signed
+            body (for example evidence_domain_id or trust_tier) were ignored
       description: Receipt-chain position and ingestion flags for a TRACE record
     TraceRecordResponse:
       type: object
@@ -1724,6 +1728,11 @@ components:
           description: "Present when accepted: true when trace.policy names a policy\
             \ store Lock serves but its bundle_hash or policy_store_version differs\
             \ from the served release"
+        reserved_member_flag:
+          type: boolean
+          description: "Present when accepted: true when Lock-derived members the producer\
+            \ placed in its signed body (for example evidence_domain_id or trust_tier)\
+            \ were ignored"
         error:
           $ref: "#/components/schemas/TraceErrorResponse"
       description: One item's outcome within a TRACE bulk ingestion response
@@ -1779,6 +1788,10 @@ components:
           type: boolean
           description: True when trace.policy names a policy store Lock serves but
             its bundle_hash or policy_store_version differs from the served release
+        reserved_member_flag:
+          type: boolean
+          description: True when Lock-derived members the producer placed in its signed
+            body (for example evidence_domain_id or trust_tier) were ignored
       description: TRACE record acceptance response
   securitySchemes:
     oauth2:

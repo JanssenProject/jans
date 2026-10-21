@@ -1,0 +1,38 @@
+[
+  {
+    "file": "domain_field_forbidden_top.json",
+    "member": "evidence_domain_id"
+  },
+  {
+    "file": "domain_field_forbidden_trace.json",
+    "member": "trace.evidence_domain_id"
+  },
+  {
+    "file": "cnf_forbidden.json",
+    "member": "cnf"
+  },
+  {
+    "file": "content_digest_forbidden.json",
+    "member": "content_digest"
+  },
+  {
+    "file": "trust_tier_forbidden_trace.json",
+    "member": "trace.trust_tier"
+  },
+  {
+    "file": "capability_resolution_forbidden_event.json",
+    "member": "trace.event.capability_resolution"
+  },
+  {
+    "file": "re_with_capability_ids_forbidden.json",
+    "member": "trace.event.capability_ids"
+  },
+  {
+    "file": "ad_with_capability_ids_forbidden.json",
+    "member": "trace.event.capability_ids"
+  },
+  {
+    "file": "ci_with_capability_ids_forbidden.json",
+    "member": "trace.event.capability_ids"
+  }
+]

@@ -12,7 +12,7 @@ import java.util.Objects;
  * The Lock-derived ingestion flags on a TRACE record (design §10). Unlike the other
  * store value types this class is a mutable, copy-able bag: {@code coverageGap},
  * {@code chainLinkFailure} and {@code equivocation} may be updated after ingestion by the
- * correlation service; {@code late} and {@code policyMismatch} are fixed at ingestion and the
+ * correlation service; {@code late}, {@code policyMismatch} and {@code reservedMember} are fixed at ingestion and the
  * store layer never changes them via {@code updateRecordFlags}.
  *
  * @author Yuriy Movchan
@@ -28,6 +28,8 @@ public final class IngestionFlags {
 	private boolean late;
 
 	private boolean policyMismatch;
+
+	private boolean reservedMember;
 
 	public IngestionFlags(boolean coverageGap, boolean chainLinkFailure, boolean equivocation, boolean late) {
 		this(coverageGap, chainLinkFailure, equivocation, late, false);
@@ -48,6 +50,7 @@ public final class IngestionFlags {
 	 */
 	public IngestionFlags(IngestionFlags other) {
 		this(other.coverageGap, other.chainLinkFailure, other.equivocation, other.late, other.policyMismatch);
+		this.reservedMember = other.reservedMember;
 	}
 
 	/**
@@ -97,6 +100,14 @@ public final class IngestionFlags {
 		this.policyMismatch = policyMismatch;
 	}
 
+	public boolean isReservedMember() {
+		return reservedMember;
+	}
+
+	public void setReservedMember(boolean reservedMember) {
+		this.reservedMember = reservedMember;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -107,18 +118,20 @@ public final class IngestionFlags {
 		}
 		IngestionFlags other = (IngestionFlags) o;
 		return coverageGap == other.coverageGap && chainLinkFailure == other.chainLinkFailure
-				&& equivocation == other.equivocation && late == other.late && policyMismatch == other.policyMismatch;
+				&& equivocation == other.equivocation && late == other.late && policyMismatch == other.policyMismatch
+				&& reservedMember == other.reservedMember;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(coverageGap, chainLinkFailure, equivocation, late, policyMismatch);
+		return Objects.hash(coverageGap, chainLinkFailure, equivocation, late, policyMismatch, reservedMember);
 	}
 
 	@Override
 	public String toString() {
 		return "IngestionFlags [coverageGap=" + coverageGap + ", chainLinkFailure=" + chainLinkFailure
-				+ ", equivocation=" + equivocation + ", late=" + late + ", policyMismatch=" + policyMismatch + "]";
+				+ ", equivocation=" + equivocation + ", late=" + late + ", policyMismatch=" + policyMismatch
+				+ ", reservedMember=" + reservedMember + "]";
 	}
 
 }

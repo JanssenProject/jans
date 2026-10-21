@@ -160,8 +160,8 @@ final class EventKindValidationSupport {
 	 * (non-empty, at most {@value #MAX_FACT_TEXT_LENGTH} characters) and an {@code outcome}; plural
 	 * entries also carry a unique {@code idField}. A {@code resource_id} member is forbidden (the
 	 * facts name a resource <em>type</em>, never an instance). The record-level
-	 * {@code trace.event.outcome} and the removed {@code capability_ids} are forbidden, because the
-	 * outcome lives in the facts and Lock does not resolve capability ids.
+	 * {@code trace.event.outcome} is forbidden, because the outcome lives in the facts. A signed
+	 * {@code capability_ids} is a Lock-derived member: ignored and flagged, never rejected.
 	 *
 	 * <p>Nothing is returned or stored: the facts remain in the signed assertion only.
 	 *
@@ -170,7 +170,6 @@ final class EventKindValidationSupport {
 	 */
 	static void requireCapabilityFacts(JsonNode event, String singular, String plural, String idField,
 			Set<String> outcomes) {
-		forbidField(event, "capability_ids", "trace.event.capability_ids");
 		forbidField(event, "outcome", "trace.event.outcome");
 
 		boolean hasSingular = present(event, singular);

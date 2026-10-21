@@ -61,8 +61,7 @@ public class CommonAssertionValidator {
 	public void validate(ParsedAssertion assertion) {
 		ObjectNode root = assertion.getRoot();
 
-		rejectDomainField(root);
-		rejectLockDerivedMembers(root);
+		List<String> reservedMembers = findReservedMembers(root);
 
 		ObjectNode trace = requireObject(root, "trace", "trace");
 		ObjectNode producerChainNode = requireObject(root, "producer_chain", "producer_chain");
@@ -157,6 +156,7 @@ public class CommonAssertionValidator {
 				producerChainId, sequenceNumber, prevRecordHash));
 		assertion.setParentRecordIds(parentRecordIds);
 		assertion.setSignature(signature);
+		assertion.setReservedMembers(reservedMembers);
 	}
 
 	/**
@@ -313,55 +313,55 @@ public class CommonAssertionValidator {
 		}
 	}
 
-	private void rejectDomainField(ObjectNode root) {
-		if (root.has(TraceConstants.DOMAIN_FIELD) || root.path("trace").has(TraceConstants.DOMAIN_FIELD)) {
-			throw new TraceValidationException(TraceValidationException.ERROR_DOMAIN_FIELD_FORBIDDEN,
-					TraceConstants.DOMAIN_FIELD);
-		}
-	}
-
 	/**
-	 * Rejects any {@link TraceConstants#LOCK_DERIVED_MEMBERS} member at the top level, in
-	 * {@code trace}, in {@code trace.event} and in each {@code decision}/{@code invocation} fact.
-	 * Members of other objects (parent edges, {@code tokens[]}) are not reserved. Shape errors are
-	 * left to the later checks, so a non-object container is skipped here.
+	 * Lists the paths of members Lock derives itself ({@link TraceConstants#DOMAIN_FIELD} and
+	 * {@link TraceConstants#LOCK_DERIVED_MEMBERS}) found at the top level, in {@code trace},
+	 * {@code trace.policy}, {@code trace.event} and in each {@code decision}/{@code invocation}
+	 * fact (GovOps profile §12). Such members are ignored, never rejected: the record is flagged
+	 * and Lock's own values are used. Members of other objects (parent edges, {@code tokens[]})
+	 * are not reserved. A non-object container is skipped and left to the shape checks.
 	 */
-	private void rejectLockDerivedMembers(ObjectNode root) {
-		rejectLockDerivedMembers(root, "");
+	private List<String> findReservedMembers(ObjectNode root) {
+		List<String> found = new ArrayList<>();
+		collectReservedMembers(root, "", found);
 		JsonNode trace = root.get("trace");
 		if (trace == null || !trace.isObject()) {
-			return;
+			return found;
 		}
-		rejectLockDerivedMembers(trace, "trace.");
+		collectReservedMembers(trace, "trace.", found);
+		collectReservedMembersOfObject(trace.get("policy"), "trace.policy.", found);
 		JsonNode event = trace.get("event");
 		if (event == null || !event.isObject()) {
-			return;
+			return found;
 		}
-		rejectLockDerivedMembers(event, "trace.event.");
+		collectReservedMembers(event, "trace.event.", found);
 		for (String field : new String[] { "decision", "invocation" }) {
-			JsonNode fact = event.get(field);
-			if (fact != null && fact.isObject()) {
-				rejectLockDerivedMembers(fact, "trace.event." + field + ".");
-			}
+			collectReservedMembersOfObject(event.get(field), "trace.event." + field + ".", found);
 		}
 		for (String field : new String[] { "decisions", "invocations" }) {
 			JsonNode entries = event.get(field);
-			if (entries == null || !entries.isArray()) {
-				continue;
-			}
-			for (int i = 0; i < entries.size(); i++) {
-				if (entries.get(i).isObject()) {
-					rejectLockDerivedMembers(entries.get(i), "trace.event." + field + "[" + i + "].");
+			if (entries != null && entries.isArray()) {
+				for (int i = 0; i < entries.size(); i++) {
+					collectReservedMembersOfObject(entries.get(i), "trace.event." + field + "[" + i + "].", found);
 				}
 			}
 		}
+		return found;
 	}
 
-	private void rejectLockDerivedMembers(JsonNode node, String pathPrefix) {
+	private static void collectReservedMembersOfObject(JsonNode node, String pathPrefix, List<String> found) {
+		if (node != null && node.isObject()) {
+			collectReservedMembers(node, pathPrefix, found);
+		}
+	}
+
+	private static void collectReservedMembers(JsonNode node, String pathPrefix, List<String> found) {
+		if (node.has(TraceConstants.DOMAIN_FIELD)) {
+			found.add(pathPrefix + TraceConstants.DOMAIN_FIELD);
+		}
 		for (String member : TraceConstants.LOCK_DERIVED_MEMBERS) {
 			if (node.has(member)) {
-				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
-						"forbidden:" + pathPrefix + member);
+				found.add(pathPrefix + member);
 			}
 		}
 	}
