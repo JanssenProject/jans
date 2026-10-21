@@ -1578,8 +1578,9 @@ components:
             threshold
         policy_mismatch_flag:
           type: boolean
-          description: True when trace.policy names a policy store Lock serves but
-            its bundle_hash or policy_store_version differs from the served release
+          description: "True when trace.policy names a policy store Lock serves with a release\
+            \ this node did not serve at signed_at or within policyMismatchGraceSeconds before\
+            \ it"
         reserved_member_flag:
           type: boolean
           description: True when Lock-derived members the producer placed in its signed
@@ -1731,9 +1732,9 @@ components:
             \ the configured lateness threshold"
         policy_mismatch_flag:
           type: boolean
-          description: "Present when accepted: true when trace.policy names a policy\
-            \ store Lock serves but its bundle_hash or policy_store_version differs\
-            \ from the served release"
+          description: "Present when accepted: true when trace.policy names a policy store Lock\
+            \ serves with a release this node did not serve at signed_at or within policyMismatchGraceSeconds\
+            \ before it"
         reserved_member_flag:
           type: boolean
           description: "Present when accepted: true when Lock-derived members the producer\
@@ -1797,8 +1798,9 @@ components:
             threshold
         policy_mismatch_flag:
           type: boolean
-          description: True when trace.policy names a policy store Lock serves but
-            its bundle_hash or policy_store_version differs from the served release
+          description: "True when trace.policy names a policy store Lock serves with a release\
+            \ this node did not serve at signed_at or within policyMismatchGraceSeconds before\
+            \ it"
         reserved_member_flag:
           type: boolean
           description: True when Lock-derived members the producer placed in its signed

@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class TraceConfiguration {
 
     public static final int DEFAULT_LATENESS_THRESHOLD_SECONDS = 300;
+    public static final int DEFAULT_POLICY_MISMATCH_GRACE_SECONDS = 300;
     public static final int DEFAULT_MAX_FUTURE_SKEW_SECONDS = 300;
     public static final int DEFAULT_MAX_REQUEST_BYTES = 262144;
     public static final int DEFAULT_MAX_JSON_DEPTH = 32;
@@ -62,6 +63,10 @@ public class TraceConfiguration {
     @DocProperty(description = "Seconds after signed_at a record is accepted before being flagged late", defaultValue = "300")
     @Schema(description = "Seconds after signed_at a record is accepted before being flagged late")
     private int latenessThresholdSeconds = DEFAULT_LATENESS_THRESHOLD_SECONDS;
+
+    @DocProperty(description = "Seconds after Lock stops serving a policy store release during which records signed under it are not flagged policy_mismatch_flag", defaultValue = "300")
+    @Schema(description = "Seconds after Lock stops serving a policy store release during which records signed under it are not flagged policy_mismatch_flag")
+    private int policyMismatchGraceSeconds = DEFAULT_POLICY_MISMATCH_GRACE_SECONDS;
 
     @DocProperty(description = "Seconds a signed_at may be ahead of Lock's clock before the record is rejected", defaultValue = "300")
     @Schema(description = "Seconds a signed_at may be ahead of Lock's clock before the record is rejected")
@@ -157,6 +162,14 @@ public class TraceConfiguration {
 
     public void setLatenessThresholdSeconds(int latenessThresholdSeconds) {
         this.latenessThresholdSeconds = latenessThresholdSeconds;
+    }
+
+    public int getPolicyMismatchGraceSeconds() {
+        return policyMismatchGraceSeconds >= 0 ? policyMismatchGraceSeconds : DEFAULT_POLICY_MISMATCH_GRACE_SECONDS;
+    }
+
+    public void setPolicyMismatchGraceSeconds(int policyMismatchGraceSeconds) {
+        this.policyMismatchGraceSeconds = policyMismatchGraceSeconds;
     }
 
     public int getMaxFutureSkewSeconds() {
@@ -287,7 +300,8 @@ public class TraceConfiguration {
     public String toString() {
         return "TraceConfiguration [enabled=" + enabled + ", defaultEvidenceDomainId=" + defaultEvidenceDomainId
                 + ", defaultAllowedProducerIds=" + defaultAllowedProducerIds + ", clientDomainBindings=" + clientDomainBindings + ", latenessThresholdSeconds="
-                + getLatenessThresholdSeconds() + ", maxFutureSkewSeconds=" + getMaxFutureSkewSeconds()
+                + getLatenessThresholdSeconds() + ", policyMismatchGraceSeconds=" + getPolicyMismatchGraceSeconds()
+                + ", maxFutureSkewSeconds=" + getMaxFutureSkewSeconds()
                 + ", maxRequestBytes=" + getMaxRequestBytes() + ", maxJsonDepth="
                 + getMaxJsonDepth() + ", maxStringLength=" + getMaxStringLength() + ", maxArrayLength="
                 + getMaxArrayLength() + ", maxObjectMembers=" + getMaxObjectMembers()

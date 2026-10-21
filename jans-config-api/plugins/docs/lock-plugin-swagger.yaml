@@ -1129,6 +1129,11 @@ components:
           description: Seconds after signed_at a record is accepted before being flagged
             late
           format: int32
+        policyMismatchGraceSeconds:
+          type: integer
+          description: Seconds after Lock stops serving a policy store release during
+            which records signed under it are not flagged policy_mismatch_flag
+          format: int32
         maxFutureSkewSeconds:
           type: integer
           description: Seconds a signed_at may be ahead of Lock's clock before the

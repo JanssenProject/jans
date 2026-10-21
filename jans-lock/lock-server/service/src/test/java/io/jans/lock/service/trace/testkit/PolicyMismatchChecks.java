@@ -7,11 +7,15 @@
 package io.jans.lock.service.trace.testkit;
 
 import java.lang.reflect.Field;
+import java.time.Clock;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.LoggerFactory;
+
 import io.jans.core.cedarling.service.policy.PolicyDownloadService;
+import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.trace.correlation.PolicyMismatchCheck;
 
 /**
@@ -26,10 +30,20 @@ public final class PolicyMismatchChecks {
 		return serving(new StaticPolicyDownloadService());
 	}
 
-	public static PolicyMismatchCheck serving(StaticPolicyDownloadService served) {
+	public static PolicyMismatchCheck serving(PolicyDownloadService served) {
+		return serving(served, new AppConfiguration());
+	}
+
+	public static PolicyMismatchCheck serving(PolicyDownloadService served, AppConfiguration appConfiguration) {
 		PolicyMismatchCheck check = new PolicyMismatchCheck();
 		setField(check, "policyDownloadService", served);
+		setField(check, "appConfiguration", appConfiguration);
+		setField(check, "log", LoggerFactory.getLogger(PolicyMismatchCheck.class));
 		return check;
+	}
+
+	public static void setClock(PolicyMismatchCheck check, Clock clock) {
+		setField(check, "clock", clock);
 	}
 
 	public static final class StaticPolicyDownloadService extends PolicyDownloadService {
@@ -41,6 +55,11 @@ public final class PolicyMismatchChecks {
 					"https://policy.example.org/" + policyStoreId);
 			source.setPolicyStoreVersion(version);
 			policies.put(policyStoreId, source);
+			return this;
+		}
+
+		public StaticPolicyDownloadService remove(String policyStoreId) {
+			policies.remove(policyStoreId);
 			return this;
 		}
 

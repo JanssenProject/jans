@@ -36,7 +36,7 @@ public abstract class TraceFlagsResponse {
 	private boolean lateFlag;
 
 	@JsonProperty("policy_mismatch_flag")
-	@Schema(description = "True when trace.policy names a policy store Lock serves but its bundle_hash or policy_store_version differs from the served release")
+	@Schema(description = "True when trace.policy names a policy store Lock serves with a release this node did not serve at signed_at or within policyMismatchGraceSeconds before it")
 	private boolean policyMismatchFlag;
 
 	@JsonProperty("reserved_member_flag")

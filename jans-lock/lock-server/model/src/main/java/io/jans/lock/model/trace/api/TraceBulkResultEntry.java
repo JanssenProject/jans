@@ -80,7 +80,7 @@ public class TraceBulkResultEntry {
 	private Boolean lateFlag;
 
 	@JsonProperty("policy_mismatch_flag")
-	@Schema(description = "Present when accepted: true when trace.policy names a policy store Lock serves but its bundle_hash or policy_store_version differs from the served release")
+	@Schema(description = "Present when accepted: true when trace.policy names a policy store Lock serves with a release this node did not serve at signed_at or within policyMismatchGraceSeconds before it")
 	private Boolean policyMismatchFlag;
 
 	@JsonProperty("reserved_member_flag")
