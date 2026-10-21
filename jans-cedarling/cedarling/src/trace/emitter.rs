@@ -119,7 +119,8 @@ pub(crate) fn spawn_emitter(
         return Err(EmitterInitError::BulkMaxBytesTooSmall { min });
     }
     let cancel = CancellationToken::new();
-    let (emitter, chain) = Emitter::start(params);
+    let chain = ProducerChain::open(params.producer_id.clone(), params.pdp_id);
+    let emitter = Emitter::new(params, &chain);
     let join = spawn_task(emitter.run(chain, rx, cancel.clone()));
     Ok(EmitterHandle {
         cancel,
@@ -158,6 +159,12 @@ enum GenesisState {
     Lost,
 }
 
+/// The next bulk request: its body and the records joined into it, in order.
+struct BulkRequest {
+    body: String,
+    records: Vec<Pending>,
+}
+
 /// How a bulk request ended.
 enum Sent {
     /// Lock answered for each record.
@@ -189,12 +196,11 @@ struct Emitter {
 }
 
 impl Emitter {
-    /// The emitter and the chain it starts signing into.
-    fn start(params: EmitterParams) -> (Self, ProducerChain) {
+    /// An emitter that starts signing into `chain`.
+    fn new(params: EmitterParams, chain: &ProducerChain) -> Self {
         let limits = Limits::default()
             .with_max_batch_records(params.bulk_max_records.get())
             .with_max_batch_bytes(params.bulk_max_bytes.get());
-        let chain = ProducerChain::open(params.producer_id.clone(), params.pdp_id);
         let emitter = Self {
             producer_id: params.producer_id,
             pdp_id: params.pdp_id,
@@ -211,7 +217,7 @@ impl Emitter {
             pending: VecDeque::new(),
         };
         emitter.chain_opened();
-        (emitter, chain)
+        emitter
     }
 
     async fn run(
@@ -269,11 +275,14 @@ impl Emitter {
     ) -> ProducerChain {
         let mut chain = self.sign(chain, drafts).await;
         let mut resend = false;
-        if let Some((body, batch)) = self.next_request() {
-            match self.send(&body, batch.len(), cancel).await {
-                Sent::Results(results) => resend = self.settle(batch, results),
-                Sent::Lost => self.lose(&batch),
-                Sent::Interrupted => self.put_back(batch),
+        if let Some(request) = self.next_request() {
+            match self
+                .send(&request.body, request.records.len(), cancel)
+                .await
+            {
+                Sent::Results(results) => resend = self.settle(request.records, results),
+                Sent::Lost => self.lose(&request.records),
+                Sent::Interrupted => self.put_back(request.records),
             }
         }
         if self.genesis == GenesisState::Lost {
@@ -294,7 +303,7 @@ impl Emitter {
         let record_ids: Vec<Uuid> = drafts.iter().map(|draft| draft.record_id).collect();
         let signed =
             sign_batch_offloaded(chain, drafts, Arc::clone(&self.signer), self.limits).await;
-        let (chain, results) = match signed {
+        let SignedBatch { chain, results } = match signed {
             Ok(signed) => signed,
             Err(err) => {
                 self.log(
@@ -336,7 +345,7 @@ impl Emitter {
 
     /// Takes the records of the next request from the front of `pending`, as
     /// many as fit the bulk limits, and joins them into its body.
-    fn next_request(&mut self) -> Option<(String, Vec<Pending>)> {
+    fn next_request(&mut self) -> Option<BulkRequest> {
         let mut batch = Vec::new();
         // `[` and `]`, then each record and the comma before all but the first.
         let mut bytes = 2;
@@ -368,7 +377,10 @@ impl Emitter {
             return None;
         }
         match batch_body(&batch, &self.limits) {
-            Ok(body) => Some((body, batch)),
+            Ok(body) => Some(BulkRequest {
+                body,
+                records: batch,
+            }),
             Err(err) => {
                 self.log(
                     LogLevel::ERROR,
@@ -606,6 +618,13 @@ impl Emitter {
     }
 }
 
+/// What a signing task hands back: the chain, moved past every signed record,
+/// and one result per draft, in draft order.
+struct SignedBatch {
+    chain: ProducerChain,
+    results: Vec<Result<SignedAssertion, AppendError>>,
+}
+
 /// The signing task panicked, and the chain it held is gone with it.
 #[derive(Debug, thiserror::Error)]
 #[error("TRACE signing task failed: {0}")]
@@ -625,13 +644,13 @@ async fn sign_batch_offloaded(
     drafts: Vec<RecordDraft>,
     signer: Arc<dyn TraceSigner>,
     limits: Limits,
-) -> Result<(ProducerChain, Vec<Result<SignedAssertion, AppendError>>), SignTaskPanicked> {
+) -> Result<SignedBatch, SignTaskPanicked> {
     tokio::task::spawn_blocking(move || {
         let results = drafts
             .iter()
             .map(|draft| chain.append(draft, signer.as_ref(), &limits))
             .collect();
-        (chain, results)
+        SignedBatch { chain, results }
     })
     .await
     .map_err(SignTaskPanicked)
@@ -839,18 +858,25 @@ mod tests {
         draft_with(tokens)
     }
 
+    /// A running emitter and the sender that feeds it; holding the sender keeps
+    /// the emitter waiting for more drafts.
+    struct Running {
+        tx: mpsc::Sender<RecordDraft>,
+        handle: EmitterHandle,
+    }
+
     /// An emitter fed by a channel of `capacity` that already holds `drafts`.
     fn start(
         params: EmitterParams,
         capacity: usize,
         drafts: impl IntoIterator<Item = RecordDraft>,
-    ) -> (mpsc::Sender<RecordDraft>, EmitterHandle) {
+    ) -> Running {
         let (tx, rx) = mpsc::channel(capacity);
         for draft in drafts {
             tx.try_send(draft).expect("the channel has room");
         }
         let handle = spawn_emitter(params, rx).expect("the emitter should start");
-        (tx, handle)
+        Running { tx, handle }
     }
 
     fn records(body: &str) -> Vec<SignedAssertion> {
@@ -861,21 +887,27 @@ mod tests {
             .collect()
     }
 
-    /// `producer_chain_id`, `sequence_number` and `prev_record_hash` of a record.
-    fn position(record: &SignedAssertion) -> (String, u64, String) {
+    /// Where a record sits in its producer chain.
+    struct ChainPosition {
+        chain_id: String,
+        sequence: u64,
+        prev_record_hash: String,
+    }
+
+    fn position(record: &SignedAssertion) -> ChainPosition {
         let json: Value = serde_json::from_str(record.as_str()).expect("a record is JSON");
         let chain = &json["producer_chain"];
-        (
-            chain["producer_chain_id"]
+        ChainPosition {
+            chain_id: chain["producer_chain_id"]
                 .as_str()
                 .expect("chain id")
                 .to_string(),
-            chain["sequence_number"].as_u64().expect("sequence number"),
-            chain["prev_record_hash"]
+            sequence: chain["sequence_number"].as_u64().expect("sequence number"),
+            prev_record_hash: chain["prev_record_hash"]
                 .as_str()
                 .expect("prev hash")
                 .to_string(),
-        )
+        }
     }
 
     fn counter(metrics: &MetricsCollector, key: &str) -> Option<i64> {
@@ -889,7 +921,7 @@ mod tests {
     #[tokio::test]
     async fn drafts_form_one_chain() {
         let lock = FakeLock::new([]);
-        let (_tx, handle) = start(
+        let emitter = start(
             params(lock.clone(), metrics()),
             4,
             [draft(), draft(), draft()],
@@ -898,25 +930,25 @@ mod tests {
         let bodies = lock.bodies(1).await;
         let records = records(&bodies[0]);
         assert_eq!(records.len(), 3, "the three drafts go in one request");
-        let chain_id = position(&records[0]).0;
+        let chain_id = position(&records[0]).chain_id;
         let mut prev = Digest::GENESIS.to_string();
         for (expected, record) in (1..).zip(&records) {
             record
                 .verify(&verification())
                 .expect("each record verifies with the producer key");
-            let (chain, sequence, prev_record_hash) = position(record);
-            assert_eq!(chain, chain_id, "all records are in one chain");
+            let position = position(record);
+            assert_eq!(position.chain_id, chain_id, "all records are in one chain");
             assert_eq!(
-                sequence, expected,
+                position.sequence, expected,
                 "sequence numbers follow the draft order"
             );
             assert_eq!(
-                prev_record_hash, prev,
+                position.prev_record_hash, prev,
                 "each record links to the one before"
             );
             prev = record.content_digest().to_string();
         }
-        handle.shut_down().await;
+        emitter.handle.shut_down().await;
     }
 
     #[tokio::test]
@@ -924,7 +956,7 @@ mod tests {
         let lock = FakeLock::new([]);
         let mut params = params(lock.clone(), metrics());
         params.bulk_max_records = NonZeroUsize::new(2).expect("non-zero");
-        let (_tx, handle) = start(params, 5, std::iter::repeat_with(draft).take(5));
+        let emitter = start(params, 5, std::iter::repeat_with(draft).take(5));
 
         let sizes: Vec<usize> = lock
             .bodies(3)
@@ -933,7 +965,7 @@ mod tests {
             .map(|body| records(body).len())
             .collect();
         assert_eq!(sizes, [2, 2, 1], "no request carries more than two records");
-        handle.shut_down().await;
+        emitter.handle.shut_down().await;
     }
 
     #[tokio::test]
@@ -947,7 +979,7 @@ mod tests {
             .iter()
             .map(|draft| draft.record_id.to_string())
             .collect();
-        let (_tx, handle) = start(params, 30, drafts);
+        let emitter = start(params, 30, drafts);
 
         let bodies = lock
             .bodies_when(|bodies| {
@@ -968,23 +1000,23 @@ mod tests {
             .map(|record| record.identity().record_id().to_string())
             .collect();
         assert_eq!(sent, record_ids, "every record is sent once");
-        handle.shut_down().await;
+        emitter.handle.shut_down().await;
     }
 
     #[tokio::test(start_paused = true)]
     async fn retryable_request_resends_same_bytes() {
         let lock = FakeLock::new([Reply::Retryable]);
-        let (_tx, handle) = start(params(lock.clone(), metrics()), 4, [draft(), draft()]);
+        let emitter = start(params(lock.clone(), metrics()), 4, [draft(), draft()]);
 
         let bodies = lock.bodies(2).await;
         assert_eq!(bodies[1], bodies[0], "the retry sends the same bytes");
-        handle.shut_down().await;
+        emitter.handle.shut_down().await;
     }
 
     #[tokio::test(start_paused = true)]
     async fn record_storage_failure_resends_that_record_only() {
         let lock = FakeLock::new([Reply::PerRecord(vec![None, Some("storage_failure")])]);
-        let (_tx, handle) = start(params(lock.clone(), metrics()), 4, [draft(), draft()]);
+        let emitter = start(params(lock.clone(), metrics()), 4, [draft(), draft()]);
 
         let bodies = lock.bodies(2).await;
         let first = records(&bodies[0]);
@@ -995,17 +1027,21 @@ mod tests {
             first[1].as_str(),
             "the failed record goes again with the same bytes"
         );
-        handle.shut_down().await;
+        emitter.handle.shut_down().await;
     }
 
     #[tokio::test(start_paused = true)]
     async fn rejected_record_is_not_resent() {
         let lock = FakeLock::new([Reply::PerRecord(vec![None, Some("invalid_signature")])]);
         let metrics = metrics();
-        let (tx, handle) = start(params(lock.clone(), metrics.clone()), 4, [draft(), draft()]);
+        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft(), draft()]);
 
         let rejected = records(&lock.bodies(1).await[0])[1].as_str().to_string();
-        tx.send(draft()).await.expect("the emitter is running");
+        emitter
+            .tx
+            .send(draft())
+            .await
+            .expect("the emitter is running");
         let bodies = lock.bodies(2).await;
         let second = records(&bodies[1]);
         assert_eq!(second.len(), 1, "only the new record is sent");
@@ -1019,7 +1055,7 @@ mod tests {
             Some(1),
             "the rejected record is counted"
         );
-        handle.shut_down().await;
+        emitter.handle.shut_down().await;
     }
 
     #[tokio::test(start_paused = true)]
@@ -1029,7 +1065,7 @@ mod tests {
             Some("chain_not_registered"),
             Some("chain_not_registered"),
         ])]);
-        let (_tx, handle) = start(
+        let emitter = start(
             params(lock.clone(), metrics()),
             4,
             [draft(), draft(), draft()],
@@ -1040,7 +1076,7 @@ mod tests {
             bodies[1], bodies[0],
             "the genesis record and the tail go again in order, with the same bytes"
         );
-        handle.shut_down().await;
+        emitter.handle.shut_down().await;
     }
 
     #[tokio::test(start_paused = true)]
@@ -1051,14 +1087,18 @@ mod tests {
             Some("chain_not_registered"),
         ])]);
         let metrics = metrics();
-        let (tx, handle) = start(
+        let emitter = start(
             params(lock.clone(), metrics.clone()),
             4,
             [draft(), draft(), draft()],
         );
 
-        let old_chain = position(&records(&lock.bodies(1).await[0])[0]).0;
-        tx.send(draft()).await.expect("the emitter is running");
+        let old_chain = position(&records(&lock.bodies(1).await[0])[0]).chain_id;
+        emitter
+            .tx
+            .send(draft())
+            .await
+            .expect("the emitter is running");
         let bodies = lock.bodies(2).await;
         let second = records(&bodies[1]);
         assert_eq!(
@@ -1066,11 +1106,17 @@ mod tests {
             1,
             "the tail of the lost chain is not sent again"
         );
-        let (chain, sequence, prev_record_hash) = position(&second[0]);
-        assert_ne!(chain, old_chain, "the next record starts a new chain");
-        assert_eq!(sequence, 1, "the new chain starts at its genesis record");
+        let position = position(&second[0]);
+        assert_ne!(
+            position.chain_id, old_chain,
+            "the next record starts a new chain"
+        );
         assert_eq!(
-            prev_record_hash,
+            position.sequence, 1,
+            "the new chain starts at its genesis record"
+        );
+        assert_eq!(
+            position.prev_record_hash,
             Digest::GENESIS.to_string(),
             "a genesis record links to nothing"
         );
@@ -1086,7 +1132,7 @@ mod tests {
             Some(&2),
             "the tail of the lost chain"
         );
-        handle.shut_down().await;
+        emitter.handle.shut_down().await;
     }
 
     #[tokio::test(start_paused = true)]
@@ -1096,12 +1142,20 @@ mod tests {
             Reply::PerRecord(vec![Some("chain_not_registered")]),
         ]);
         let metrics = metrics();
-        let (tx, handle) = start(params(lock.clone(), metrics.clone()), 4, [draft()]);
+        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft()]);
 
         lock.bodies(1).await;
-        tx.send(draft()).await.expect("the emitter is running");
+        emitter
+            .tx
+            .send(draft())
+            .await
+            .expect("the emitter is running");
         let refused = records(&lock.bodies(2).await[1])[0].as_str().to_string();
-        tx.send(draft()).await.expect("the emitter is running");
+        emitter
+            .tx
+            .send(draft())
+            .await
+            .expect("the emitter is running");
         let bodies = lock.bodies(3).await;
         let third = records(&bodies[2]);
         assert_eq!(third.len(), 1, "only the new record is sent");
@@ -1115,7 +1169,7 @@ mod tests {
             Some(1),
             "the refused record is counted"
         );
-        handle.shut_down().await;
+        emitter.handle.shut_down().await;
     }
 
     #[tokio::test(start_paused = true)]
@@ -1162,7 +1216,7 @@ mod tests {
         let sequences = |body: &str| -> Vec<u64> {
             records(body)
                 .iter()
-                .map(|record| position(record).1)
+                .map(|record| position(record).sequence)
                 .collect()
         };
         assert_eq!(sequences(&bodies[0]), [1], "sent before the outage");
@@ -1179,9 +1233,9 @@ mod tests {
     #[tokio::test]
     async fn shutdown_flushes_queue() {
         let lock = FakeLock::new([]);
-        let (_tx, handle) = start(params(lock.clone(), metrics()), 4, [draft(), draft()]);
+        let emitter = start(params(lock.clone(), metrics()), 4, [draft(), draft()]);
 
-        handle.shut_down().await;
+        emitter.handle.shut_down().await;
 
         let sent: usize = lock
             .bodies(0)
@@ -1201,7 +1255,7 @@ mod tests {
         });
         let mut params = params(lock.clone(), metrics());
         params.signer = signer.clone();
-        let (_tx, handle) = start(params, 4, [draft()]);
+        let emitter = start(params, 4, [draft()]);
 
         lock.bodies(1).await;
         let threads = signer
@@ -1215,7 +1269,7 @@ mod tests {
             threads.iter().all(|thread| *thread != runtime_thread),
             "signing should not run on the runtime thread"
         );
-        handle.shut_down().await;
+        emitter.handle.shut_down().await;
     }
 
     #[tokio::test]
