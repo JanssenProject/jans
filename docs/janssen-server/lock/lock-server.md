@@ -281,7 +281,6 @@ verification. See [TRACE Evidence](./trace.md) for the feature description and A
 | `maxBulkRequestBytes` | integer | `4194304` | Maximum total body size, in bytes, buffered for one `POST /audit/trace/bulk` request. Independent of `maxRequestBytes`/`maxBulkRecords`, and always clamped to 16777216 regardless of configuration. |
 | `chainRegistrationMode` | string | `PRE_REGISTERED` | How producer chains come to exist. `PRE_REGISTERED`: a chain must be registered through the admin API before its records are accepted. `FIRST_OBSERVED`: a record with `sequence_number` 1 and the all-zero `prev_record_hash` on an unregistered chain registers the chain, after the key, event-kind and signature checks pass. Any other record on an unregistered chain is still rejected with `chain_not_registered`. A value that is not a mode name is treated as `PRE_REGISTERED` and logged once at `WARN`. Changing the mode affects only later submissions; existing chains are not rewritten. |
 | `cryptoProvider` | string | `JAVA` | TRACE cryptography implementation. `JAVA`: BouncyCastle, in-process. `NATIVE`: `jans-trace-core` through the `jans-trace-java` binding. Both produce the same digests, thumbprints and receipt hashes, so switching does not invalidate the stored receipt chain. When the selected provider is not available, every TRACE submission fails with `crypto_unavailable`; Lock never falls back to the other provider. A value that is not a provider name is treated as `JAVA` and logged once at `WARN`. See [TRACE](./trace.md#configuration). |
-| `rejectPolicyMismatch` | boolean | `false` | When `true`, a record whose `trace.policy` names a policy store Lock serves but with a different `bundle_hash` or `policy_store_version` is rejected with `invalid_assertion` (`policy_mismatch:trace.policy`). When `false`, it is accepted with `policy_mismatch_flag: true`. See [TRACE](./trace.md#policy-store-release-check). |
 
 Every numeric limit above falls back to its default when configured with a value `<= 0`.
 
@@ -365,32 +364,35 @@ Authorization: Bearer <access_token>
 ### Audit Endpoints
 
 #### Submit Audit Logs
+
 ```http
-POST /audit/logs
+POST /api/v1/audit/log
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 {
-  "logs": [
-    {
-      "request_id": "req-123456",
-      "timestamp": "2024-01-01T12:00:00Z",
-      "log_kind": "Decision",
-      "pdp_id": "cedarling-001",
-      "policy_store_id": "app-policies",
-      "decision": "ALLOW",
-      "principal": "Jans::User::\"user123\"",
-      "action": "Jans::Action::\"read\"",
-      "resource": "Jans::Application::\"app001\"",
-      "diagnostics": {
-        "reason": ["policy-001"],
-        "errors": []
-      },
-      "decision_time_ms": 15
-    }
-  ]
+  "creation_date": "2026-03-23T11:50:37.504Z",
+  "event_time": "2026-03-23T11:50:37.504Z",
+  "service": "my_app",
+  "node_name": "0195c6f2-8d1a-7c3e-9b4f-2a6d8e0f1b3c",
+  "event_type": "Decision",
+  "severity_level": "INFO",
+  "action": "Jans::Action::\"Update\"",
+  "decision_result": "ALLOW",
+  "requested_resource": "Jans::Issue::\"random_id\"",
+  "principal_id": "Jans::User, Jans::Workload",
+  "client_id": "lock-client-123",
+  "context_information": {
+    "request_id": "0195c6f2-8d1a-7c3e-9b4f-2a6d8e0f1b3e",
+    "policystore_id": "a1bf63d5a5e4a0b7d0d5c9e3",
+    "policystore_version": "1.0.0",
+    "diagnostics": { "reason": [], "errors": [] },
+    "decision_time_micro_sec": 42
+  }
 }
 ```
+
+This is the shape Cedarling sends. `POST /audit/log/bulk` takes an array of the same objects. Both need the `https://jans.io/oauth/lock/log.write` scope. Lock also accepts the camelCase member names it returns (`creationDate`, `eventTime`, `nodeName`, `contextInformation`, and so on). `contextInformation` is stored as a flat string map: a string value is kept as is, and an object, array, number or boolean value is stored as its JSON text, as on the gRPC path.
 
 #### Search Audit Logs
 
@@ -402,7 +404,7 @@ Config API serves stored decision logs at `GET /jans-config-api/lock/audit/log/s
 | `policyStoreId` | Policy store id used for the decision |
 | `policyStoreVersion` | Policy store version used for the decision |
 
-Lock and Config API index these from the stored entry's `requestId`, `policyStoreId` and `policyStoreVersion`, or, when those are absent, from the `request_id`, `policystore_id` and `policystore_version` keys of `contextInformation`. A `request_id` longer than 64 characters or a policy store value longer than 255 characters is not indexed. Entries stored before this release are not indexed and match only the date range.
+Lock sets these when it receives a log entry, before it stores or forwards it: from the entry's `requestId`, `policyStoreId` and `policyStoreVersion` when present, otherwise from the `request_id`, `policystore_id` and `policystore_version` keys of `contextInformation`. A `request_id` longer than 64 characters or a policy store value longer than 255 characters is not indexed. Entries stored before this release, and entries posted directly to Config API, are not indexed and match only the date range.
 
 #### Submit Health Status
 ```http
@@ -534,28 +536,20 @@ Tracks JWT token validation and processing:
 
 ### RDBMS Audit Storage
 
-For enterprise deployments, audit logs can be stored in a relational database:
+With `auditPersistenceMode` set to `internal`, Lock stores decision logs in the `jansLogEntry` table of the Janssen database (entries under `ou=log` of the audit base DN). With `config-api`, Lock forwards them to Config API, which stores them in the same table.
 
-```sql
-CREATE TABLE audit_logs (
-    id VARCHAR(255) PRIMARY KEY,
-    client_id VARCHAR(255),
-    request_id VARCHAR(255),
-    timestamp TIMESTAMP,
-    log_kind VARCHAR(50),
-    pdp_id VARCHAR(255),
-    policy_store_id VARCHAR(255),
-    decision VARCHAR(10),
-    principal TEXT,
-    action TEXT,
-    resource TEXT,
-    diagnostics JSON,
-    decision_time_ms BIGINT,
-    INDEX idx_timestamp (timestamp),
-    INDEX idx_client_id (client_id),
-    INDEX idx_policy_store_id (policy_store_id)
-);
-```
+| Column | Source |
+|---|---|
+| `inum` | Generated by Lock |
+| `creationDate`, `eventTime` | `creation_date`, `event_time` |
+| `jansService`, `jansNodeName` | `service`, `node_name` |
+| `eventType`, `severityLevel` | `event_type`, `severity_level` |
+| `actionName`, `decisionResult`, `requestedResource` | `action`, `decision_result`, `requested_resource` |
+| `principalId`, `clientId`, `jti` | `principal_id`, `client_id`, `jti` |
+| `contextInformation` | `context_information`, as a JSON object of strings |
+| `jansRequestId`, `jansPolicyStoreId`, `jansPolicyStoreVersion` | Indexed copies of `request_id`, `policystore_id`, `policystore_version` (see [Search Audit Logs](#search-audit-logs)) |
+
+`eventTime`, `jansRequestId`, `jansPolicyStoreId` and `jansPolicyStoreVersion` are indexed.
 
 ### Upgrading an Existing Deployment
 
@@ -575,6 +569,7 @@ The audit log and TRACE search filters need new columns and indexes. Container a
     ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyStoreVersion" VARCHAR(255);
     ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTraceBundleHash" VARCHAR(255);
     ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyMismatch" BOOLEAN;
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTraceReservedMember" BOOLEAN;
     CREATE INDEX "jansTraceRecord_jansTracePolicyStoreId" ON "jansTraceRecord" ("jansTracePolicyStoreId");
     CREATE INDEX "jansTraceRecord_jansTracePolicyStoreVersion" ON "jansTraceRecord" ("jansTracePolicyStoreVersion");
     CREATE INDEX "jansTraceRecord_jansTraceBundleHash" ON "jansTraceRecord" ("jansTraceBundleHash");
@@ -594,6 +589,7 @@ The audit log and TRACE search filters need new columns and indexes. Container a
     ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyStoreVersion VARCHAR(255);
     ALTER TABLE jansTraceRecord ADD COLUMN jansTraceBundleHash VARCHAR(255);
     ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyMismatch SMALLINT;
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTraceReservedMember SMALLINT;
     ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreId (jansTracePolicyStoreId);
     ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreVersion (jansTracePolicyStoreVersion);
     ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTraceBundleHash (jansTraceBundleHash);
