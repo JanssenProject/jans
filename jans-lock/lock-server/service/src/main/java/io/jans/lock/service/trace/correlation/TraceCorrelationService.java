@@ -86,7 +86,11 @@ public class TraceCorrelationService {
 		ParsedAssertion.ProducerChain producerChain = inputs.getChainPosition();
 		String domainId = ctx.getEvidenceDomainId();
 
-		boolean policyMismatch = policyMismatchCheck.check(inputs.getPolicy(), inputs.getSignedAt() * 1000L);
+		boolean late = ProducerChainRules.isLate(ctx.getReceivedAtMs(), inputs.getSignedAt(),
+				appConfiguration.getTraceConfiguration().getLatenessThresholdSeconds());
+		// signed_at is a producer claim: judge at receipt unless the record is already flagged late
+		long policyJudgedAtMs = late ? inputs.getSignedAt() * 1000L : ctx.getReceivedAtMs();
+		boolean policyMismatch = policyMismatchCheck.check(inputs.getPolicy(), policyJudgedAtMs);
 
 		ChainIdentity chainIdentity = new ChainIdentity(domainId, producerChain.getProducerId(),
 				producerChain.getProducerInstanceId(), producerChain.getProducerChainId());
@@ -115,9 +119,6 @@ public class TraceCorrelationService {
 
 		List<StoredTraceRecord> successors = store
 				.findRecordsByChainPosition(new ChainPosition(chainIdentity, sequenceNumber + 1));
-
-		boolean late = ProducerChainRules.isLate(ctx.getReceivedAtMs(), inputs.getSignedAt(),
-				appConfiguration.getTraceConfiguration().getLatenessThresholdSeconds());
 
 		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late, policyMismatch);
 		List<String> reservedMembers = verified.getParsed().getReservedMembers();
