@@ -1,3 +1,5 @@
+ignore-interior-mutability = ["cedar_policy::Entity"]
+
 [[disallowed-methods]]
 path = "std::time::SystemTime::now"
 reason = "may not work correctly in WASM, use chrono::Utc::now() instead"
