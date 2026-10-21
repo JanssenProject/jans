@@ -88,7 +88,7 @@ public final class TraceConstants {
 	public static final Set<String> LOCK_DERIVED_MEMBERS = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
 			"content_digest", "receipt_sequence", "received_at", "prev_receipt_hash",
 			"coverage_gap_flag", "chain_link_failure_flag", "equivocation_flag", "late_flag",
-			"unattributed_flag", "candidate_flag",
+			"policy_mismatch_flag", "unattributed_flag", "candidate_flag",
 			"key_resolved", "key_temporally_valid", "key_not_revoked", "key_authorized_for_producer",
 			"producer_authorized_for_claim", "key_thumbprint", "key_authorization_ref", "verified_at",
 			"trust_tier", "capability_resolution", "capability_id", "capability_ids", "cnf")));

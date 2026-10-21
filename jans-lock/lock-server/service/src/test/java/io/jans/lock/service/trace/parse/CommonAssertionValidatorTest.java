@@ -496,7 +496,8 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 
 	@Test
 	void testValidate_lockDerivedMemberAtTopLevel_throwsForbidden() throws IOException {
-		for (String member : new String[] { "cnf", "content_digest", "receipt_sequence", "key_thumbprint" }) {
+		for (String member : new String[] { "cnf", "content_digest", "receipt_sequence", "key_thumbprint",
+				"policy_mismatch_flag" }) {
 			ObjectNode root = loadFixture();
 			root.set(member, TextNode.valueOf("x"));
 
