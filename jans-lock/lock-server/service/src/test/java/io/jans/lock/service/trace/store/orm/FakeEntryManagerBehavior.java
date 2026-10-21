@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 
 import org.mockito.invocation.InvocationOnMock;
 
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -181,11 +182,11 @@ final class FakeEntryManagerBehavior {
 		});
 
 		when(mock.findEntries(anyString(), any(Class.class), any(Filter.class)))
-				.thenAnswer(inv -> matchAll(inv, -1));
+				.thenAnswer(inv -> readCopies(matchAll(inv, -1)));
 		when(mock.findEntries(anyString(), any(Class.class), any(Filter.class), anyInt()))
-				.thenAnswer(inv -> matchAll(inv, (Integer) inv.getArgument(3)));
+				.thenAnswer(inv -> readCopies(matchAll(inv, (Integer) inv.getArgument(3))));
 		when(mock.findEntries(anyString(), any(Class.class), any(Filter.class), any(String[].class)))
-				.thenAnswer(inv -> matchAll(inv, -1));
+				.thenAnswer(inv -> readCopies(matchAll(inv, -1)));
 
 		when(mock.findPagedEntries(anyString(), any(Class.class), any(Filter.class), any(), anyString(),
 				any(SortOrder.class), anyInt(), anyInt(), anyInt())).thenAnswer(this::pagedAnswer);
@@ -199,6 +200,19 @@ final class FakeEntryManagerBehavior {
 	 * ({@code sortByName}, falling back to {@code sortBy}) is applied inside the query, i.e.
 	 * before {@code limit} truncates the result.
 	 */
+	/**
+	 * Policy release reads return copies, like a real backend reading fresh rows, so a caller that
+	 * changes a found release cannot also change the stored one. Other entry types keep returning
+	 * the stored instances the existing tests rely on.
+	 */
+	private static List<Object> readCopies(List<Object> matched) {
+		List<Object> result = new ArrayList<>(matched.size());
+		for (Object entity : matched) {
+			result.add(entity instanceof TracePolicyReleaseEntry ? shallowCopy(entity) : entity);
+		}
+		return result;
+	}
+
 	private List<Object> matchAll(InvocationOnMock inv, int limit) {
 		String baseDn = inv.getArgument(0);
 		Class<?> entryClass = inv.getArgument(1);

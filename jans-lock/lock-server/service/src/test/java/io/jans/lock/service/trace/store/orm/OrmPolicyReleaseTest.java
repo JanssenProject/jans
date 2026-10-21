@@ -14,6 +14,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
@@ -95,16 +97,22 @@ class OrmPolicyReleaseTest {
 	}
 
 	@Test
-	void recordPolicyReleaseServed_concurrentHigherValue_notLowered() throws Exception {
+	void recordPolicyReleaseServed_concurrentHigherValue_rereadAndNotLowered() throws Exception {
 		PersistenceEntryManager manager = FakeEntryManagerBehavior.create();
 		TraceStore store = OrmTraceStores.create(manager);
 		store.insertPolicyRelease(release(1_000L));
-		FakeEntryManagerBehavior.injectVersionConflicts(manager, 1,
-				stored -> ((TracePolicyReleaseEntry) stored).setLastServedAtMs(9_000L));
+		FakeEntryManagerBehavior.injectVersionConflicts(manager, 1, stored -> {
+			TracePolicyReleaseEntry raced = (TracePolicyReleaseEntry) stored;
+			raced.setLastServedAtMs(9_000L);
+			raced.setPolicyStoreVersion("2.0.0");
+		});
 
 		assertTrue(store.recordPolicyReleaseServed("store-1", HASH, "1.0.1", 5_000L));
 
-		assertEquals(9_000L, store.findPolicyRelease("store-1", HASH).orElseThrow().getLastServedAtMs());
+		TracePolicyReleaseEntry found = store.findPolicyRelease("store-1", HASH).orElseThrow();
+		assertEquals(9_000L, found.getLastServedAtMs());
+		assertEquals("2.0.0", found.getPolicyStoreVersion());
+		verify(manager, times(3)).findEntries(anyString(), any(Class.class), any(Filter.class), anyInt());
 	}
 
 	@Test
