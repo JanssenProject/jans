@@ -101,7 +101,8 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 	}
 
 	private TraceValidationException validateAndCapture(ObjectNode root) {
-		return assertThrows(TraceValidationException.class, () -> validator.validate(assertionOf(root)));
+		ParsedAssertion assertion = assertionOf(root);
+		return assertThrows(TraceValidationException.class, () -> validator.validate(assertion));
 	}
 
 	// -- Positive path -----------------------------------------------------------------------

@@ -522,9 +522,9 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 			List<String> elements = new ArrayList<>();
 			JsonToken token;
 			while ((token = parser.nextToken()) != null && token != JsonToken.END_ARRAY) {
-				long startOffset = parser.getTokenLocation().getCharOffset();
+				long startOffset = parser.currentTokenLocation().getCharOffset();
 				parser.skipChildren();
-				long endOffset = parser.getCurrentLocation().getCharOffset();
+				long endOffset = parser.currentLocation().getCharOffset();
 				elements.add(rawText.substring((int) startOffset, (int) endOffset));
 
 				if (elements.size() > config.getMaxBulkRecords()) {

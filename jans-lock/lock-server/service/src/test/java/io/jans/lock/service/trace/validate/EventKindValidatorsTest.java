@@ -22,6 +22,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -802,15 +803,20 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 
 	// -- tokens[] (common to every kind) ---------------------------------------------------------
 
-	@Test
-	void testTokens_bothJtiAndFingerprintPresent_throwsTokenRefIdentity() throws IOException {
+	@ParameterizedTest(name = "{0}")
+	@CsvSource({
+			"fingerprint, abcdefghijklmnopqrst, token_ref_identity",
+			"issuer, http://accounts.example.org, invalid:trace.event.tokens[0].issuer",
+			"jti, eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dGhpc2lzYXNpZ25hdHVyZQ, raw_token_material" })
+	void testTokens_invalidTokenMember_throwsInvalidAssertion(String member, String value, String reason)
+			throws IOException {
 		ObjectNode root = loadFixture("authorization_decision_valid.json");
-		set(root, TextNode.valueOf("abcdefghijklmnopqrst"), "trace", "event", "tokens", "0", "fingerprint");
+		set(root, TextNode.valueOf(value), "trace", "event", "tokens", "0", member);
 
 		TraceValidationException ex = validateAndCapture(root);
 
 		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("token_ref_identity", ex.getReason());
+		assertEquals(reason, ex.getReason());
 	}
 
 	@Test
@@ -850,17 +856,6 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testTokens_issuerHttpNonLocalhost_throwsInvalid() throws IOException {
-		ObjectNode root = loadFixture("authorization_decision_valid.json");
-		set(root, TextNode.valueOf("http://accounts.example.org"), "trace", "event", "tokens", "0", "issuer");
-
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("invalid:trace.event.tokens[0].issuer", ex.getReason());
-	}
-
-	@Test
 	void testTokens_issuerHttpLocalhost_accepted() throws IOException {
 		ObjectNode root = loadFixture("authorization_decision_valid.json");
 		set(root, TextNode.valueOf("http://localhost:8080"), "trace", "event", "tokens", "0", "issuer");
@@ -868,18 +863,6 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		ParsedAssertion assertion = parseAndCommonValidate(root);
 
 		registry.validate(assertion);
-	}
-
-	@Test
-	void testTokens_rawJwtAsJti_throwsRawTokenMaterial() throws IOException {
-		ObjectNode root = loadFixture("authorization_decision_valid.json");
-		set(root, TextNode.valueOf("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dGhpc2lzYXNpZ25hdHVyZQ"), "trace",
-				"event", "tokens", "0", "jti");
-
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("raw_token_material", ex.getReason());
 	}
 
 	@Test

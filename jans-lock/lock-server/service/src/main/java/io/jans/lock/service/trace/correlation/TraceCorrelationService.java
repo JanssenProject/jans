@@ -227,39 +227,40 @@ public class TraceCorrelationService {
 			String action, RecordIdentity insertedId) {
 		try {
 			Optional<StoredTraceRecord> current = store.findRecord(targetId);
-			if (!current.isPresent()) {
-				return;
-			}
-			StoredTraceRecord stored = current.get();
 			int retryLimit = appConfiguration.getTraceConfiguration().getCorrelationRetryLimit();
-			for (int attempt = 0; attempt <= retryLimit; attempt++) {
+			for (int attempt = 0; current.isPresent() && attempt <= retryLimit; attempt++) {
+				StoredTraceRecord stored = current.get();
 				IngestionFlags newFlags = mutator.apply(stored);
-				if (newFlags == null) {
+				if (newFlags == null || writeFlags(targetId, newFlags, stored.getVersion())) {
 					return;
 				}
-				try {
-					store.updateRecordFlags(targetId, newFlags, stored.getVersion());
+				if (attempt == retryLimit) {
+					log.warn(
+							"TRACE correlation afterInsert exhausted {} retries to {} (version conflict): inserted={}, target={}",
+							retryLimit, action, insertedId, targetId);
 					return;
-				} catch (TraceStorageException ex) {
-					if (!TraceStore.VERSION_CONFLICT_REASON.equals(ex.getReason())) {
-						throw ex;
-					}
-					if (attempt == retryLimit) {
-						log.warn(
-								"TRACE correlation afterInsert exhausted {} retries to {} (version conflict): inserted={}, target={}",
-								retryLimit, action, insertedId, targetId);
-						return;
-					}
-					Optional<StoredTraceRecord> refreshed = store.findRecord(targetId);
-					if (!refreshed.isPresent()) {
-						return;
-					}
-					stored = refreshed.get();
 				}
+				current = store.findRecord(targetId);
 			}
 		} catch (RuntimeException ex) {
 			log.error("TRACE correlation afterInsert failed to {}: inserted={}, target={}", action, insertedId,
 					targetId, ex);
+		}
+	}
+
+	/**
+	 * @return {@code true} when written, {@code false} on a version conflict
+	 * @throws TraceStorageException for any other storage failure
+	 */
+	private boolean writeFlags(RecordIdentity targetId, IngestionFlags flags, long version) {
+		try {
+			store.updateRecordFlags(targetId, flags, version);
+			return true;
+		} catch (TraceStorageException ex) {
+			if (!TraceStore.VERSION_CONFLICT_REASON.equals(ex.getReason())) {
+				throw ex;
+			}
+			return false;
 		}
 	}
 
