@@ -80,6 +80,7 @@ def _transform_lock_dynamic_config(conf, manager):
             "pendingReceiptTimeoutSeconds": 120,
             "maxBulkRecords": 100,
             "maxBulkRequestBytes": 4194304,
+            "cryptoProvider": "JAVA",
         }),
     ]:
         if missing_key not in conf:
@@ -122,6 +123,7 @@ def _transform_lock_dynamic_config(conf, manager):
     for tconf_k, tconf_v in [
         ("defaultAllowedProducerIds", []),
         ("maxFutureSkewSeconds", 300),
+        ("cryptoProvider", "JAVA"),
     ]:
         if tconf_k not in conf["traceConfiguration"]:
             conf["traceConfiguration"][tconf_k] = tconf_v

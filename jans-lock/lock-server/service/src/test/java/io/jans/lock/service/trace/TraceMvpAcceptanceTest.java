@@ -38,7 +38,7 @@ import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
-import io.jans.lock.service.trace.canon.CanonicalHashes;
+import io.jans.lock.trace.crypto.bc.CanonicalHashes;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.error.TraceValidationException;
@@ -51,11 +51,11 @@ import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.model.VerificationResult;
-import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
+import io.jans.lock.trace.crypto.bc.Ed25519PublicKeys;
 import io.jans.lock.service.trace.retrieve.TraceRetrievalService;
 import io.jans.lock.service.trace.testkit.TraceRecordBuilder;
 import io.jans.lock.service.trace.testkit.TraceTestHarness;
-import io.jans.lock.service.trace.testkit.TraceTestKeys;
+import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
 import io.jans.lock.service.ws.rs.trace.TraceRestWebServiceImpl;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -71,7 +71,7 @@ import jakarta.ws.rs.core.Response;
  * {@link TraceTestHarness#setNow(long)} (default {@link TraceTestHarness#DEFAULT_NOW_MS}); no test
  * reads the system clock.
  */
-class TraceMvpAcceptanceTest {
+public class TraceMvpAcceptanceTest {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -105,9 +105,14 @@ class TraceMvpAcceptanceTest {
 
 	private TraceTestHarness harness;
 
+	/** Override to run the same suite against another {@code TraceCryptoProvider}. */
+	protected TraceTestHarness newHarness() {
+		return new TraceTestHarness();
+	}
+
 	@BeforeEach
 	void setUp() {
-		harness = new TraceTestHarness();
+		harness = newHarness();
 	}
 
 	// -- fixtures -----------------------------------------------------------------------------------

@@ -23,6 +23,7 @@ tags:
 | clientId | OAuth client id bound to the evidence domain | [Details](#clientid) |
 | clientPassword | Lock client password | [Details](#clientpassword) |
 | correlationRetryLimit | Maximum retries when a correlation neighbor update hits a version conflict | [Details](#correlationretrylimit) |
+| cryptoProvider | TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA | [Details](#cryptoprovider) |
 | defaultAllowedProducerIds | Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none | [Details](#defaultallowedproducerids) |
 | defaultEvidenceDomainId | Evidence domain id used when a submitting client has no explicit binding | [Details](#defaultevidencedomainid) |
 | disableExternalLoggerConfiguration | Choose whether to disable external log4j configuration override | [Details](#disableexternalloggerconfiguration) |
@@ -178,6 +179,15 @@ tags:
 - Required: No
 
 - Default value: 3
+
+
+## cryptoProvider
+
+- Description: TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA
+
+- Required: No
+
+- Default value: JAVA
 
 
 ## defaultAllowedProducerIds

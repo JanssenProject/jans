@@ -193,6 +193,19 @@ Choose either a local archive or a remote URI (they are mutually exclusive):
 
 > The optional `CEDARLING_POLICY_STORE_REFRESH_INTERVAL` (seconds) enables periodic re-fetch and atomic swap of the policy store for URL-based sources. Default `0` keeps the load-once-at-startup behavior. See [`cedarling-properties.md`](../../../docs/cedarling/reference/cedarling-properties.md#refreshing-the-policy-store) for full semantics.
 
+**Signature check (any `.cjar` source):**
+
+```json
+{
+  "CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.cjar",
+  "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+  "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+  "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com"
+}
+```
+
+> With `enforce`, the archive loads only if its Sigstore bundle verifies for this signer, and a refresh that fails the check keeps the current store. The bundle is read from the archive location plus `.sigstore.json` unless `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` is set. See [`cedarling-properties.md`](../../../docs/cedarling/reference/cedarling-properties.md#verifying-policy-store-signatures).
+
 #### New Directory-Based Format
 
 Policy stores can be structured as directories with human-readable Cedar files:

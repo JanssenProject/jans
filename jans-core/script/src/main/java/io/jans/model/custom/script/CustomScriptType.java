@@ -67,6 +67,8 @@ import io.jans.model.custom.script.type.selectaccount.DummySelectAccountType;
 import io.jans.model.custom.script.type.selectaccount.SelectAccountType;
 import io.jans.model.custom.script.type.session.ApplicationSessionType;
 import io.jans.model.custom.script.type.session.DummyApplicationSessionType;
+import io.jans.model.custom.script.type.shib.DummyShibPostAuthnApprovalType;
+import io.jans.model.custom.script.type.shib.ShibPostAuthnApprovalType;
 import io.jans.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
 import io.jans.model.custom.script.type.spontaneous.SpontaneousScopeType;
 import io.jans.model.custom.script.type.ssa.DummyModifySsaResponseType;
@@ -139,6 +141,7 @@ public enum CustomScriptType implements AttributeEnum {
     MODIFY_SSA_RESPONSE("modify_ssa_response", "Modify SSA Response", ModifySsaResponseType.class, CustomScript.class, "ModifySsaResponse", new DummyModifySsaResponseType()),
     FIDO2_EXTENSION("fido2_extension", "Fido2 Extension", Fido2ExtensionType.class, CustomScript.class, "Fido2Extension", new DummyFido2ExtensionType()),
     LOCK_EXTENSION("lock_extension", "Lock Extension", LockExtensionType.class, CustomScript.class, "LockExtension", new DummyLockExtensionType()),
+    SHIB_POST_AUTHN_APPROVAL("shib_post_authn_approval", "Shibboleth Post Authentication Approval", ShibPostAuthnApprovalType.class, CustomScript.class, "ShibPostAuthnApproval", new DummyShibPostAuthnApprovalType()),
     ;
 
     private String value;
