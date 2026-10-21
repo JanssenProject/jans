@@ -11,9 +11,11 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -42,12 +44,14 @@ public class LogEntry extends BaseEntry implements Serializable {
     private String inum;
 
     @JsonProperty("creationDate")
+    @JsonAlias("creation_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     @Schema(description = "Creation date of the entry", example = "2026-07-24T15:33:02.937Z")
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
     @JsonProperty("eventTime")
+    @JsonAlias("event_time")
     @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     @Schema(description = "Time when the event occurred", example = "2026-07-24T15:33:02.937Z")
     @AttributeName(name = "eventTime")
@@ -59,16 +63,19 @@ public class LogEntry extends BaseEntry implements Serializable {
     private String service;
 
     @JsonProperty("nodeName")
+    @JsonAlias("node_name")
     @Schema(description = "Node name or identifier", example = "04bbe9ef-a853-417c-a2b8-5328b62936e2")
     @AttributeName(name = "jansNodeName")
     private String nodeName;
 
     @JsonProperty("eventType")
+    @JsonAlias("event_type")
     @Schema(description = "Type of event", example = "Decision")
     @AttributeName(name = "eventType")
     private String eventType;
 
     @JsonProperty("severityLevel")
+    @JsonAlias("severity_level")
     @Schema(description = "Severity level", example = "warning", allowableValues = {"info", "warning", "error", "critical"})
     @AttributeName(name = "severityLevel")
     private String severityLevel;
@@ -79,21 +86,25 @@ public class LogEntry extends BaseEntry implements Serializable {
     private String action;
 
     @JsonProperty("decisionResult")
+    @JsonAlias("decision_result")
     @Schema(description = "Decision result", example = "ALLOW", allowableValues = {"ALLOW", "DENY"})
     @AttributeName(name = "decisionResult")
     private String decisionResult;
 
     @JsonProperty("requestedResource")
+    @JsonAlias("requested_resource")
     @Schema(description = "Requested resource identifier", example = "Jans::HTTP_Request::\"lock_audit_log_write\"")
     @AttributeName(name = "requestedResource")
     private String requestedResource;
 
     @JsonProperty("principalId")
+    @JsonAlias("principal_id")
     @Schema(description = "Principal (user) identifier", example = "ACC0001")
     @AttributeName(name = "principalId")
     private String principalId;
 
     @JsonProperty("clientId")
+    @JsonAlias("client_id")
     @Schema(description = "Client identifier", example = "CLI001")
     @AttributeName(name = "clientId")
     private String clientId;
@@ -104,6 +115,8 @@ public class LogEntry extends BaseEntry implements Serializable {
     private String jti;
 
     @JsonProperty("contextInformation")
+    @JsonAlias("context_information")
+    @JsonDeserialize(using = ContextInformationDeserializer.class)
     @Schema(description = "Additional context information as key-value pairs")
     @JsonObject
     @AttributeName(name = "contextInformation")
