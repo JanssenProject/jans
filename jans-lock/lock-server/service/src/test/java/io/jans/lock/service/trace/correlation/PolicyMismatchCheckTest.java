@@ -247,11 +247,16 @@ class PolicyMismatchCheckTest {
 		served.archive("store-0", "2.0.0", NEXT_HASH);
 		check.check(new PolicyRef("store-0", "1.0.0", hashOf(0)), T0);
 		publish(check, many, Map.of("store-new", PolicyMismatchChecks.archiveSource("store-new", "1.0.0", HASH)), T0);
+		served.archive("store-1", "2.0.0", NEXT_HASH);
+		served.archive("store-new", "2.0.0", NEXT_HASH);
+		int readsBefore = store.getPolicyReleaseReads();
 
-		assertEquals(PolicyMismatchCheck.CACHE_MAX_ENTRIES, check.cachedReleaseCount());
-		assertTrue(check.isCached("store-0", hashOf(0)));
-		assertFalse(check.isCached("store-1", hashOf(1)));
-		assertTrue(check.isCached("store-new", HASH));
+		check.check(new PolicyRef("store-0", "1.0.0", hashOf(0)), T0);
+		check.check(new PolicyRef("store-new", "1.0.0", HASH), T0);
+		assertEquals(readsBefore, store.getPolicyReleaseReads());
+
+		check.check(new PolicyRef("store-1", "1.0.0", hashOf(1)), T0);
+		assertEquals(readsBefore + 1, store.getPolicyReleaseReads());
 	}
 
 	private static String hashOf(int i) {

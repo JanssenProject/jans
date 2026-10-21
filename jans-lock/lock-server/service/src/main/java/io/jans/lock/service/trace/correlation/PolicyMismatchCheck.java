@@ -243,14 +243,6 @@ public class PolicyMismatchCheck {
 		cache.put(cacheKey(policyStoreId, bundleHash), new CachedRelease(release, clock.millis()));
 	}
 
-	boolean isCached(String policyStoreId, String bundleHash) {
-		return cache.containsKey(cacheKey(policyStoreId, bundleHash));
-	}
-
-	int cachedReleaseCount() {
-		return cache.size();
-	}
-
 	private static String cacheKey(String policyStoreId, String bundleHash) {
 		return policyStoreId + '\n' + bundleHash;
 	}
