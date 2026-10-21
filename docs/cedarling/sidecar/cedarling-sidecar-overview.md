@@ -12,7 +12,7 @@ The sidecar is a containerized Flask project that uses the `cedarling_python` bi
 
 - Ensure that you have installed [docker](https://docs.docker.com/engine/install/)
 - Create a file called `bootstrap.json`. You may use this [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/demo/bootstrap.json) file.
-- Modify the bootstrap file to your specifications. In particular you need to provide a link to your policy store in `CEDARLING_POLICY_STORE_URI`. The configuration keys are described [here](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi#L10).
+- Modify the bootstrap file to your specifications. In particular you need to provide a link to your policy store in `CEDARLING_POLICY_STORE_URI`. The configuration keys are described in the [Python binding configuration keys](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python/cedarling_python.pyi#L10).
 - Pull the docker image:
   ```
   docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
@@ -105,7 +105,7 @@ Example request to the evaluation endpoint:
 }
 ```
 
-Cedarling requires OpenID tokens from one or more trusted issuers to perform authorization, as described [here](../../reference/cedarling-authz.md). These values are sent in the subject field's properties. A more detailed example of creating an AuthZen request can be seen in the [gateway example](./cedarling-sidecar-tutorial.md#setup-test-gateway).
+Cedarling requires OpenID tokens from one or more trusted issuers to perform authorization, as described [Cedarling authorization reference](../reference/cedarling-authz.md). These values are sent in the subject field's properties. A more detailed example of creating an AuthZen request can be seen in the [gateway example](./cedarling-sidecar-tutorial.md#setup-test-gateway).
 
 Upon creating the principal, action, resource, and context entities, cedarling will evaluate these entities against the policies defined in the policy store. Then it will return a true/false decision. If the decision is false, the sidecar will analyze cedarling diagnostics and provide additional information for the admin.
 
