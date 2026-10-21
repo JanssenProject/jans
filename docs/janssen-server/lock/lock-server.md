@@ -589,7 +589,9 @@ The audit log and TRACE search filters need new columns and indexes, and the pol
         "jansVersion" BIGINT,
         PRIMARY KEY (doc_id)
     );
+    CREATE INDEX "jansTracePolicyRelease_jansId" ON "jansTracePolicyRelease" ("jansId");
     CREATE INDEX "jansTracePolicyRelease_jansTracePolicyStoreId" ON "jansTracePolicyRelease" ("jansTracePolicyStoreId");
+    CREATE INDEX "jansTracePolicyRelease_jansTraceLastServedAtMs" ON "jansTracePolicyRelease" ("jansTraceLastServedAtMs");
     ```
 
 === "MySQL"
@@ -623,7 +625,9 @@ The audit log and TRACE search filters need new columns and indexes, and the pol
         jansTraceLastServedAtMs BIGINT,
         jansVersion BIGINT,
         PRIMARY KEY (doc_id),
-        INDEX jansTracePolicyRelease_jansTracePolicyStoreId (jansTracePolicyStoreId)
+        INDEX jansTracePolicyRelease_jansId (jansId),
+        INDEX jansTracePolicyRelease_jansTracePolicyStoreId (jansTracePolicyStoreId),
+        INDEX jansTracePolicyRelease_jansTraceLastServedAtMs (jansTraceLastServedAtMs)
     );
     ```
 
