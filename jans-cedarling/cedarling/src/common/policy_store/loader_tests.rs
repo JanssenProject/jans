@@ -793,7 +793,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
         issuers_dir.join("jans.json"),
         r#"{
             "id": "jans_server",
-            "name": "Jans Authorization Server",
+            "name": "Jans",
             "description": "Primary Jans OpenID Connect Provider",
             "configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
             "token_metadata": {
@@ -814,7 +814,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
         issuers_dir.join("google.json"),
         r#"{
             "id": "google_oauth",
-            "name": "Google OAuth",
+            "name": "Google",
             "description": "Google OAuth 2.0 Provider",
             "configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
             "token_metadata": {
@@ -864,10 +864,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false)
         .expect("store with two issuers should parse")
         .store;
-    let issuer_map = store
-        .trusted_issuers
-        .as_ref()
-        .expect("trusted issuers should be present");
+    let issuer_map = store.token_types.jwt_issuers();
     assert_eq!(issuer_map.len(), 2, "Map should have 2 issuers");
 }
 
@@ -910,15 +907,24 @@ fn test_load_custom_issuers_end_to_end() {
     let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false)
         .expect("conversion should succeed")
         .store;
-    let acme = store
-        .custom_issuers
-        .get("acme")
-        .expect("acme custom issuer should be present");
-    let token = acme
-        .tokens_mappings
+    assert_acme_custom_token(&store);
+}
+
+/// The `acme` custom issuer's `Acme::CustomToken` reached the runtime store.
+fn assert_acme_custom_token(store: &crate::common::policy_store::PolicyStoreWithID) {
+    let token = store
+        .token_types
         .get("Acme::CustomToken")
         .expect("acme should declare the Acme::CustomToken type");
-    assert!(token.required_claims.contains("sub"));
+    assert_eq!(
+        token.issuer.as_str(),
+        "acme",
+        "issuer should be the file id"
+    );
+    assert!(
+        matches!(&token.kind, crate::common::policy_store::TokenTypeKind::Custom(token) if token.required_claims.contains("sub")),
+        "required_claims should be converted"
+    );
 }
 
 const ACME_JSON: &str = r#"{
@@ -984,21 +990,13 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
     let store = read_from_vfs(&archive_vfs, ".", false)
         .expect("reading the archive should succeed")
         .store;
-    let acme = store
-        .custom_issuers
-        .get("acme")
-        .expect("acme custom issuer should be present after convert");
-    let token = acme
-        .tokens_mappings
-        .get("Acme::CustomToken")
-        .expect("acme should declare the Acme::CustomToken type");
-    assert!(token.required_claims.contains("sub"));
+    assert_acme_custom_token(&store);
 
     let store2 = read_policy_store_archive_bytes(archive_bytes, false, ArchiveLimits::default())
         .expect("read_policy_store_archive_bytes should succeed")
         .store;
     assert!(
-        store2.custom_issuers.contains_key("acme"),
+        store2.token_types.get("Acme::CustomToken").is_some(),
         "acme issuer must survive round-trip through archive_bytes loader"
     );
 }
@@ -1324,7 +1322,7 @@ fn test_complete_policy_store_with_issuers() {
         issuers_dir.join("issuer.json"),
         r#"{
             "id": "main_issuer",
-            "name": "Main Issuer",
+            "name": "Main",
             "description": "Primary authentication provider",
             "configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
             "token_metadata": {
@@ -1398,12 +1396,9 @@ fn test_complete_policy_store_with_issuers() {
     let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false)
         .expect("complete store should parse")
         .store;
-    let issuer_map = store
-        .trusted_issuers
-        .as_ref()
-        .expect("trusted issuers should be present");
+    let issuer_map = store.token_types.jwt_issuers();
     assert_eq!(issuer_map.len(), 1);
-    assert!(issuer_map.contains_key("main_issuer"));
+    assert!(issuer_map.contains_key("Main"));
 }
 
 #[test]

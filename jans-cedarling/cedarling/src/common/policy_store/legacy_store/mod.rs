@@ -604,25 +604,35 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
     }
 }
 
-impl From<LegacyPolicyStore> for super::PolicyStore {
-    fn from(v: LegacyPolicyStore) -> Self {
+impl TryFrom<LegacyPolicyStore> for super::PolicyStore {
+    type Error = super::TokenTypesError;
+
+    fn try_from(v: LegacyPolicyStore) -> Result<Self, Self::Error> {
         let schema: Option<super::CedarSchema> = v.schema.map(std::convert::Into::into);
-        super::PolicyStore {
+        // A custom issuer is identified by its sanitized name, as in v1.
+        let token_types = super::TokenTypes::build(
+            v.trusted_issuers
+                .unwrap_or_default()
+                .into_values()
+                .map(super::TrustedIssuer::from),
+            v.custom_issuers
+                .unwrap_or_default()
+                .into_iter()
+                .map(|(name, issuer)| {
+                    (
+                        super::token_types::sanitize_issuer_name(&name),
+                        issuer.into(),
+                    )
+                }),
+        )?;
+        Ok(super::PolicyStore {
             version: v.version,
             schema_source_exists: schema.is_some(),
             schema,
             policies: v.policies.into(),
-            trusted_issuers: v
-                .trusted_issuers
-                .map(|issuers| issuers.into_iter().map(|(k, v)| (k, v.into())).collect()),
-            custom_issuers: v
-                .custom_issuers
-                .unwrap_or_default()
-                .into_iter()
-                .map(|(k, v)| (k, v.into()))
-                .collect(),
+            token_types,
             default_entities: v.default_entities.into(),
-        }
+        })
     }
 }
 

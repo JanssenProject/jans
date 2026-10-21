@@ -261,7 +261,8 @@ fn test_legacy_policy_store_with_null_schema_succeeds() {
     );
 
     // Verify conversion to PolicyStore also yields schema: None
-    let store: super::super::PolicyStore = legacy_store.clone().into();
+    let store = super::super::PolicyStore::try_from(legacy_store.clone())
+        .expect("a store without issuers should convert");
     assert!(
         store.schema.is_none(),
         "converted PolicyStore should have None schema"
@@ -288,7 +289,8 @@ fn test_legacy_policy_store_missing_schema_field_succeeds() {
         "schema should be None when field is absent"
     );
 
-    let store: super::super::PolicyStore = legacy_store.clone().into();
+    let store = super::super::PolicyStore::try_from(legacy_store.clone())
+        .expect("a store without issuers should convert");
     assert!(
         store.schema.is_none(),
         "converted PolicyStore should have None schema"

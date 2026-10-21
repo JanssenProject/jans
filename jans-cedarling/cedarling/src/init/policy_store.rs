@@ -82,32 +82,35 @@ fn extract_first_policy_store(
         .policy_stores
         .iter()
         .take(1)
-        .map(|(k, v)| {
-            let store: PolicyStore = v.to_owned().into();
+        .map(
+            |(k, v)| -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+                let store = PolicyStore::try_from(v.to_owned()).map_err(ConversionError::from)?;
 
-            let metadata = crate::common::policy_store::metadata::PolicyStoreMetadata {
-                cedar_version: agama_policy_store
-                    .cedar_version
-                    .strip_prefix('v')
-                    .unwrap_or(&agama_policy_store.cedar_version)
-                    .to_string(),
-                policy_store: crate::common::policy_store::metadata::PolicyStoreInfo {
-                    id: k.clone(),
-                    name: k.clone(),
-                    version: v.version.clone().unwrap_or_default(),
-                    description: None,
-                    created_date: None,
-                    updated_date: None,
-                },
-            };
+                let metadata = crate::common::policy_store::metadata::PolicyStoreMetadata {
+                    cedar_version: agama_policy_store
+                        .cedar_version
+                        .strip_prefix('v')
+                        .unwrap_or(&agama_policy_store.cedar_version)
+                        .to_string(),
+                    policy_store: crate::common::policy_store::metadata::PolicyStoreInfo {
+                        id: k.clone(),
+                        name: k.clone(),
+                        version: v.version.clone().unwrap_or_default(),
+                        description: None,
+                        created_date: None,
+                        updated_date: None,
+                    },
+                };
 
-            PolicyStoreWithID {
-                id: k.to_owned(),
-                store,
-                metadata: Some(metadata),
-            }
-        })
-        .next();
+                Ok(PolicyStoreWithID {
+                    id: k.to_owned(),
+                    store,
+                    metadata: Some(metadata),
+                })
+            },
+        )
+        .next()
+        .transpose()?;
 
     match policy_store_option {
         Some(policy_store) => {

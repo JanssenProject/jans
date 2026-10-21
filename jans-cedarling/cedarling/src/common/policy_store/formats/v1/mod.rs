@@ -23,7 +23,8 @@ use super::{Files, Layout, ParseStoreError, ReadStoreError, StoreContent};
 use crate::common::policy_store::loader::StoreFs;
 use crate::common::policy_store::manager::{ConversionError, PolicyStoreManager};
 use crate::common::policy_store::metadata::PolicyStoreMetadata;
-use crate::common::policy_store::{CustomIssuerMetadata, PolicyStore, TrustedIssuer};
+use crate::common::policy_store::token_types::sanitize_issuer_name;
+use crate::common::policy_store::{CustomIssuerMetadata, PolicyStore, TokenTypes, TrustedIssuer};
 
 pub(crate) const SPEC_VERSION: u32 = 1;
 
@@ -115,28 +116,31 @@ pub(crate) fn into_runtime(
     let metadata = metadata::into_runtime(doc.metadata)?;
     let trusted_issuers = trusted_issuers_into_runtime(doc.trusted_issuers)?;
     let custom_issuers = custom_issuers_into_runtime(doc.custom_issuers)?;
+    // A v1 custom issuer is identified by its sanitized id.
+    let token_types = TokenTypes::build(
+        trusted_issuers.into_values(),
+        custom_issuers
+            .into_iter()
+            .map(|(id, issuer)| (sanitize_issuer_name(&id), issuer)),
+    )
+    .map_err(ConversionError::from)?;
 
     let store = PolicyStoreManager::build(
         &doc.content,
         metadata.policy_store.version.clone(),
-        trusted_issuers,
-        custom_issuers,
+        token_types,
     )?;
 
     Ok((store, metadata))
 }
 
-/// Rejects duplicate issuer ids across files; `None` when there are no issuers.
+/// Rejects duplicate issuer ids across files.
 fn trusted_issuers_into_runtime(
     issuers: Vec<ParsedIssuer>,
-) -> Result<Option<HashMap<String, TrustedIssuer>>, ConversionError> {
-    if issuers.is_empty() {
-        return Ok(None);
-    }
+) -> Result<HashMap<String, TrustedIssuer>, ConversionError> {
     IssuerParser::validate_issuers(&issuers).map_err(ConversionError::TrustedIssuerValidation)?;
-    let issuers = IssuerParser::create_issuer_map(issuers)
-        .map_err(|e| ConversionError::TrustedIssuerValidation(vec![e]))?;
-    Ok(Some(issuers))
+    IssuerParser::create_issuer_map(issuers)
+        .map_err(|e| ConversionError::TrustedIssuerValidation(vec![e]))
 }
 
 /// Rejects duplicate custom issuer ids across files.
@@ -153,6 +157,7 @@ fn custom_issuers_into_runtime(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::common::policy_store::TokenTypeKind;
     use crate::common::policy_store::errors::{PolicyStoreError, TrustedIssuerValidateError};
     use crate::common::policy_store::loader::StoreFile;
 
@@ -168,7 +173,7 @@ mod tests {
             content: format!(
                 r#"{{
                     "id": "{id}",
-                    "name": "Issuer {id}",
+                    "name": "{id}",
                     "openid_configuration_endpoint": "https://{id}.test/.well-known/openid-configuration",
                     "token_metadata": {{
                         "access_token": {{ "entity_type_name": "{id}::Access_token" }}
@@ -223,19 +228,22 @@ mod tests {
             "content version should come from policy_store.version"
         );
 
-        let issuer = &store
-            .trusted_issuers
-            .as_ref()
-            .expect("trusted issuers should be present")["Alpha"];
-        assert_eq!(issuer.name, "Issuer Alpha", "issuer name mismatch");
+        let issuer = &store.token_types.jwt_issuers()["Alpha"];
         assert!(
             issuer.token_metadata.contains_key("Alpha::Access_token"),
             "token metadata should be converted and keyed by entity type"
         );
+        let custom = store
+            .token_types
+            .get("Acme::Custom")
+            .expect("the custom token type should be converted");
+        assert_eq!(
+            custom.issuer.as_str(),
+            "acme",
+            "a custom issuer should be named by its file id"
+        );
         assert!(
-            store.custom_issuers["acme"].tokens_mappings["Acme::Custom"]
-                .required_claims
-                .contains("sub"),
+            matches!(&custom.kind, TokenTypeKind::Custom(token) if token.required_claims.contains("sub")),
             "custom issuer required_claims should be converted"
         );
     }
@@ -244,13 +252,10 @@ mod tests {
     fn no_issuers_convert_to_empty_runtime_fields() {
         let doc = parse(loaded(vec![], vec![])).expect("store without issuers should parse");
         let (store, _) = into_runtime(doc).expect("store without issuers should convert");
-        assert!(
-            store.trusted_issuers.is_none(),
-            "no trusted issuer files should leave trusted_issuers unset"
-        );
-        assert!(
-            store.custom_issuers.is_empty(),
-            "no custom issuer files should leave custom_issuers empty"
+        assert_eq!(
+            store.token_types,
+            TokenTypes::default(),
+            "no issuer files should leave no token types"
         );
     }
 

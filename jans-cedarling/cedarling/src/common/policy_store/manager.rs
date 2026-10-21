@@ -21,7 +21,7 @@ use super::formats::StoreContent;
 use super::log_entry::PolicyStoreLogEntry;
 use super::policy_parser::PolicyParser;
 use super::schema_parser::ParsedSchema;
-use super::{CustomIssuerMetadata, PoliciesContainer, PolicyStore, TrustedIssuer};
+use super::{PoliciesContainer, PolicyStore, TokenTypes};
 use crate::common::cedar_schema::CedarSchema;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::parse_default_entities_with_warns;
@@ -63,6 +63,10 @@ pub enum ConversionError {
     #[error("Failed to convert custom issuers: {}", join_errors(.0))]
     CustomIssuerValidation(Vec<super::errors::CustomIssuerParseError>),
 
+    /// Token types conflict across issuers
+    #[error("Invalid token types: {0}")]
+    TokenTypes(#[from] super::TokenTypesError),
+
     /// Entity conversion failed
     #[error("Failed to convert entities: {0}")]
     EntityConversion(String),
@@ -93,8 +97,7 @@ impl PolicyStoreManager {
     pub(crate) fn build(
         content: &StoreContent,
         version: String,
-        trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
-        custom_issuers: HashMap<String, CustomIssuerMetadata>,
+        token_types: TokenTypes,
     ) -> Result<PolicyStore, ConversionError> {
         let cedar_schema = content
             .schema
@@ -119,8 +122,7 @@ impl PolicyStoreManager {
             schema: cedar_schema,
             schema_source_exists: content.schema_source_exists,
             policies: policies_container,
-            trusted_issuers,
-            custom_issuers,
+            token_types,
             default_entities,
         })
     }
@@ -511,7 +513,8 @@ mod tests {
             entities: vec![],
         };
 
-        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new());
+        let result =
+            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
         let store =
             result.expect("a schemaless store should build; strictness is checked when reading");
         assert!(
@@ -544,7 +547,8 @@ mod tests {
             entities: vec![],
         };
 
-        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new());
+        let result =
+            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
         let store = result.expect("a store with a schema should build");
         assert!(
             store.schema.is_some(),
@@ -576,13 +580,14 @@ mod tests {
             entities: vec![],
         };
 
-        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new());
+        let result =
+            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
         assert_eq!(store.version, Some("1.0.0".to_string()));
         assert!(!store.policies.get_set().is_empty());
-        assert!(store.trusted_issuers.is_none());
+        assert!(store.token_types.jwt_issuers().is_empty());
         assert_eq!(store.default_entities.entities().len(), 0);
     }
 
@@ -615,17 +620,15 @@ mod tests {
             }],
         };
 
-        let issuers = HashMap::from([("main".to_string(), TrustedIssuer::default())]);
-        let result =
-            PolicyStoreManager::build(&content, "1.0.0".to_string(), Some(issuers), HashMap::new());
+        let token_types =
+            TokenTypes::build([crate::common::policy_store::TrustedIssuer::default()], [])
+                .expect("the default issuer should be valid");
+        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), token_types);
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
-        assert!(store.trusted_issuers.is_some());
         assert!(store.default_entities.entities().len() > 0);
-
-        let issuers = store.trusted_issuers.unwrap();
-        assert!(issuers.contains_key("main"));
+        assert!(store.token_types.jwt_issuers().contains_key("Jans"));
 
         assert_eq!(store.default_entities.entities().len(), 1);
     }

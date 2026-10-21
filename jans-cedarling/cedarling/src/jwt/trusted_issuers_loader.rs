@@ -58,6 +58,14 @@ pub(crate) enum TrustedIssuerLoaderError {
         expected: IssClaim,
         found: IssClaim,
     },
+    #[error("iss '{iss}' already loads keys from '{existing}', so '{conflicting}' is rejected")]
+    ConflictingJwks {
+        iss: IssClaim,
+        existing: String,
+        conflicting: String,
+    },
+    #[error("failed to acquire the JWKS ownership lock - a thread panicked while holding it")]
+    JwksOwnershipLock,
 }
 
 /// Loads and initializes trusted issuers for JWT validation.
@@ -73,6 +81,9 @@ pub(super) struct TrustedIssuerLoader {
     pub(super) loading_state: Arc<TrustedIssuerLoadingState>,
     pub(super) http_client: HttpClient,
     pub(super) jwks_refresh_notifiers: Arc<Mutex<HashMap<IssClaim, Arc<Notify>>>>,
+    /// The JWKS each `iss` loaded its keys from; keys are stored per `iss`, so
+    /// a second key set for one `iss` could plant keys under another issuer.
+    pub(super) jwks_by_iss: Arc<Mutex<HashMap<IssClaim, url::Url>>>,
     pub(super) jwks_cancel_token: CancellationToken,
 }
 
@@ -239,6 +250,7 @@ pub(super) async fn load_trusted_issuer(
     if loader.jwt_config.jwt_sig_validation
         && let Some(jwks_uri) = &jwks_uri
     {
+        claim_jwks(loader, &iss_claim, jwks_uri)?;
         loader
             .key_service
             .fetch_keys(
@@ -288,6 +300,38 @@ pub(super) async fn load_trusted_issuer(
     loader.issuer_configs.insert(iss_claim, iss_config);
 
     Ok(())
+}
+
+/// Records `jwks_uri` as the key set of `iss`, rejecting a different one already
+/// recorded for it.
+fn claim_jwks(
+    loader: &TrustedIssuerLoader,
+    iss: &IssClaim,
+    jwks_uri: &url::Url,
+) -> Result<(), TrustedIssuerLoaderError> {
+    let mut owners = loader
+        .jwks_by_iss
+        .lock()
+        .map_err(|_| TrustedIssuerLoaderError::JwksOwnershipLock)?;
+    match owners.get(iss) {
+        Some(existing) if existing != jwks_uri => {
+            let err = TrustedIssuerLoaderError::ConflictingJwks {
+                iss: iss.clone(),
+                existing: existing.to_string(),
+                conflicting: jwks_uri.to_string(),
+            };
+            loader.logger.log_any(JwtLogEntry::new(
+                format!("trusted issuer not loaded: {err}"),
+                Some(LogLevel::ERROR),
+            ));
+            Err(err)
+        },
+        Some(_) => Ok(()),
+        None => {
+            owners.insert(iss.clone(), jwks_uri.clone());
+            Ok(())
+        },
+    }
 }
 
 /// Starts the background task that keeps the JWKS of `iss` fresh.
@@ -524,6 +568,7 @@ mod test {
             loading_state: Arc::new(TrustedIssuerLoadingState::new(issuer_count)),
             http_client: HTTP_CLIENT.clone(),
             jwks_refresh_notifiers: Arc::new(Mutex::new(HashMap::new())),
+            jwks_by_iss: Arc::new(Mutex::new(HashMap::new())),
             jwks_cancel_token: CancellationToken::new(),
         }
     }
@@ -739,6 +784,7 @@ mod test {
             loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
             http_client: HTTP_CLIENT.clone(),
             jwks_refresh_notifiers: Arc::new(Mutex::new(HashMap::new())),
+            jwks_by_iss: Arc::new(Mutex::new(HashMap::new())),
             jwks_cancel_token: CancellationToken::new(),
         };
 
@@ -1010,6 +1056,68 @@ mod test {
         );
         discovery.assert();
         jwks.assert();
+    }
+
+    /// Two key sources only found to share an `iss` after discovery: the second
+    /// issuer must not load keys under the first one's `iss`.
+    #[tokio::test]
+    async fn second_key_source_for_one_iss_fails_to_load() {
+        let mut server = Server::new_async().await;
+        let iss = server.url();
+        let discovery = mock_discovery(
+            &mut server,
+            "/.well-known/openid-configuration",
+            &iss,
+            "/discovered-keys",
+            1,
+        );
+        let static_jwks = mock_jwks(&mut server, "/static-keys", 1);
+        let discovered_jwks = mock_jwks(&mut server, "/discovered-keys", 0);
+        let static_issuer = TrustedIssuer::new(
+            "Partner".into(),
+            String::new(),
+            Url::parse(&iss).expect("valid url"),
+            KeySource::Static {
+                jwks: Url::parse(&(iss.clone() + "/static-keys")).expect("valid url"),
+            },
+            HashMap::new(),
+        );
+        let mut discovery_issuer = TrustedIssuer::default();
+        discovery_issuer.name = "Other".into();
+        discovery_issuer.set_configuration_endpoint(
+            Url::parse(&(iss.clone() + "/.well-known/openid-configuration")).expect("valid url"),
+        );
+        let loader = create_loader(sig_validation_config(), 2);
+
+        load_trusted_issuer(
+            &loader,
+            "Partner".into(),
+            static_issuer,
+            HTTP_CLIENT.clone(),
+        )
+        .await
+        .expect("the first key source for an iss should load");
+        let err = load_trusted_issuer(
+            &loader,
+            "Other".into(),
+            discovery_issuer,
+            HTTP_CLIENT.clone(),
+        )
+        .await
+        .expect_err("a second key set for the same iss must not load");
+        assert!(
+            matches!(
+                &err,
+                JwtServiceInitError::LoadTrustedIssuers(TrustedIssuerLoaderError::ConflictingJwks {
+                    iss: conflict_iss,
+                    ..
+                }) if *conflict_iss == IssClaim::new(&iss)
+            ),
+            "expected ConflictingJwks for the shared iss, got: {err:?}"
+        );
+        discovery.assert();
+        static_jwks.assert();
+        discovered_jwks.assert();
     }
 
     #[tokio::test]

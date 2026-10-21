@@ -587,19 +587,12 @@ mod tests {
             from_v1.store.id, "abc123def456",
             "id should come from policy_store.id"
         );
-        let issuers = from_v1
-            .store
-            .trusted_issuers
-            .as_ref()
-            .expect("trusted issuers should be present");
         assert!(
-            issuers.contains_key("jans"),
-            "issuer id should be derived from the file name"
+            from_v1.store.token_types.jwt_issuers().contains_key("Jans"),
+            "a JWT issuer should be keyed by its name"
         );
         assert!(
-            from_v1.store.custom_issuers["acme"]
-                .tokens_mappings
-                .contains_key("Acme::Custom"),
+            from_v1.store.token_types.get("Acme::Custom").is_some(),
             "custom issuer settings should reach the runtime store"
         );
     }

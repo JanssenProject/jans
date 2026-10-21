@@ -10,6 +10,7 @@ pub(crate) mod log_entry;
 #[cfg(test)]
 pub(crate) mod test_utils;
 pub(crate) mod token_entity_metadata;
+pub(crate) mod token_types;
 
 use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
 
@@ -32,11 +33,12 @@ pub(crate) mod vfs_adapter;
 use super::cedar_schema::CedarSchema;
 use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy, PolicyId};
 use serde::Serialize;
-use std::collections::{HashMap, HashSet, hash_map::Entry};
+use std::collections::{HashMap, HashSet};
 use url::Url;
 
 pub(crate) use custom_issuer_metadata::{CustomIssuerMetadata, CustomTokenMetadata};
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
+pub(crate) use token_types::{TokenTypeKind, TokenTypes, TokenTypesError};
 
 // Re-export types used by init/policy_store.rs and external consumers
 pub(crate) use manager::ConversionError;
@@ -64,17 +66,9 @@ pub(crate) struct PolicyStore {
     /// Cedar policy set
     pub(crate) policies: PoliciesContainer,
 
-    /// An optional `HashMap` of trusted issuers.
-    ///
-    /// This field may contain issuers that are trusted to provide tokens, allowing for additional
-    /// verification and security when handling JWTs.
-    pub(crate) trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
-
-    /// Custom (non-JWT) issuers, keyed by issuer name. Tokens whose request
-    /// `mapping` matches a custom issuer's `entity_type_name` are validated by a
-    /// registered [`CustomTokenProcessor`](crate::CustomTokenProcessor) rather
-    /// than the JWT pipeline. Empty when no custom issuers are configured.
-    pub(crate) custom_issuers: HashMap<String, CustomIssuerMetadata>,
+    /// Every accepted token type, JWT and custom, keyed by the entity type a
+    /// request `mapping` names.
+    pub(crate) token_types: TokenTypes,
 
     /// Default entities for the policy store.
     pub(crate) default_entities: DefaultEntitiesWithWarns,
@@ -84,51 +78,6 @@ impl PolicyStore {
     pub(crate) fn get_store_version(&self) -> &str {
         self.version.as_deref().unwrap_or("undefined")
     }
-
-    pub(crate) fn validate_trusted_issuers(&self) -> Result<(), TrustedIssuersValidationError> {
-        validate_trusted_issuers_config(self.trusted_issuers.as_ref())
-    }
-}
-
-/// Validates the trusted-issuer configuration before any service is built from it.
-///
-/// Enforces that each Cedar entity type is owned by exactly one issuer.
-fn validate_trusted_issuers_config(
-    trusted_issuers: Option<&HashMap<String, TrustedIssuer>>,
-) -> Result<(), TrustedIssuersValidationError> {
-    let mut entity_type_owners: HashMap<&str, &str> = HashMap::new();
-
-    for (issuer_id, trusted_issuer) in trusted_issuers.into_iter().flatten() {
-        for entity_type_name in trusted_issuer.token_metadata.keys() {
-            match entity_type_owners.entry(entity_type_name) {
-                Entry::Vacant(entry) => {
-                    entry.insert(issuer_id);
-                },
-                Entry::Occupied(entry) => {
-                    return Err(TrustedIssuersValidationError::DuplicateEntityType {
-                        entity_type_name: entity_type_name.clone(),
-                        issuer_a: (*entry.get()).to_string(),
-                        issuer_b: issuer_id.clone(),
-                    });
-                },
-            }
-        }
-    }
-
-    Ok(())
-}
-
-#[derive(Debug, thiserror::Error)]
-pub(crate) enum TrustedIssuersValidationError {
-    #[error(
-        "Entity type '{entity_type_name}' declared by more than one issuer: \
-         '{issuer_a}' and '{issuer_b}'"
-    )]
-    DuplicateEntityType {
-        entity_type_name: String,
-        issuer_a: String,
-        issuer_b: String,
-    },
 }
 
 /// Wrapper around [`PolicyStore`] to have access to it and ID of policy store.
@@ -987,103 +936,6 @@ mod policy_metadata_tests {
         let by_policy = container.annotations_by_policy(ids.iter());
         assert_eq!(by_policy.len(), 1);
         assert!(by_policy["plain"].is_empty());
-    }
-}
-
-#[cfg(test)]
-mod validate_trusted_issuers_tests {
-    use super::*;
-
-    /// Builds a [`TrustedIssuer`] declaring the given entity types.
-    fn issuer(oidc_endpoint: &str, entity_types: &[&str]) -> TrustedIssuer {
-        TrustedIssuer::from_configuration(
-            "Test".to_string(),
-            String::default(),
-            Url::parse(oidc_endpoint).expect("test oidc endpoint should be a valid url"),
-            entity_types
-                .iter()
-                .map(|entity_type_name| {
-                    (
-                        (*entity_type_name).to_string(),
-                        TokenEntityMetadata::builder().build(),
-                    )
-                })
-                .collect(),
-        )
-        .expect("test oidc endpoint should derive an iss")
-    }
-
-    #[test]
-    fn accepts_distinct_entity_types_per_issuer_namespace() {
-        // The supported multi-issuer setup: each issuer owns its own entity types
-        // in its own namespace.
-        let issuers = HashMap::from([
-            (
-                "alpha".to_string(),
-                issuer(
-                    "https://idp.alpha.example/.well-known/openid-configuration",
-                    &["Alpha::Access_token", "Alpha::Id_token"],
-                ),
-            ),
-            (
-                "beta".to_string(),
-                issuer(
-                    "https://idp.beta.example/.well-known/openid-configuration",
-                    &["Beta::Access_token", "Beta::Id_token"],
-                ),
-            ),
-        ]);
-
-        assert!(
-            validate_trusted_issuers_config(Some(&issuers)).is_ok(),
-            "a distinct-per-namespace multi-issuer mapping is expected to be valid"
-        );
-    }
-
-    /// One identity provider serving two apps with different schemas.
-    #[test]
-    fn accepts_issuers_sharing_one_discovery_endpoint() {
-        let oidc = "https://idp.example/.well-known/openid-configuration";
-        let issuers = HashMap::from([
-            ("alpha".to_string(), issuer(oidc, &["Alpha::Access_token"])),
-            ("beta".to_string(), issuer(oidc, &["Beta::Access_token"])),
-        ]);
-
-        validate_trusted_issuers_config(Some(&issuers))
-            .expect("issuers sharing an iss and its keys should be accepted");
-    }
-
-    #[test]
-    fn rejects_entity_type_shared_across_issuers() {
-        // Unbuildable once `iss` is declared: the shared type can only name one
-        // issuer namespace.
-        let issuers = HashMap::from([
-            (
-                "alpha".to_string(),
-                issuer(
-                    "https://idp.alpha.example/.well-known/openid-configuration",
-                    &["Jans::Access_token"],
-                ),
-            ),
-            (
-                "beta".to_string(),
-                issuer(
-                    "https://idp.beta.example/.well-known/openid-configuration",
-                    &["Jans::Access_token"],
-                ),
-            ),
-        ]);
-
-        let err = validate_trusted_issuers_config(Some(&issuers))
-            .expect_err("an entity type shared across issuers must be rejected");
-        assert!(
-            matches!(
-                &err,
-                TrustedIssuersValidationError::DuplicateEntityType { entity_type_name, .. }
-                    if entity_type_name == "Jans::Access_token"
-            ),
-            "expected DuplicateEntityType for Jans::Access_token, got: {err}"
-        );
     }
 }
 

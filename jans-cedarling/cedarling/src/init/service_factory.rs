@@ -17,7 +17,6 @@ use crate::common::policy_store::PolicyStoreMetadata;
 use crate::context_data_api::DataStore;
 use crate::log::interface::LogWriter;
 use crate::log::{self, BaseLogEntry, LogEntry};
-use std::collections::HashMap;
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -125,10 +124,7 @@ impl<'a> ServiceFactory<'a> {
             .set_message(format!(
                 "Policy store loaded: {} policies, {} issuers, {} entities",
                 policy_store.policies.get_set().policies().count(),
-                policy_store
-                    .trusted_issuers
-                    .as_ref()
-                    .map_or(0, HashMap::len),
+                policy_store.token_types.jwt_issuers().len(),
                 policy_store.default_entities.entities().len(),
             )),
         );

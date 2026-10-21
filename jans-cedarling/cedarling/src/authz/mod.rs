@@ -57,16 +57,6 @@ pub(crate) struct AuthzConfig {
     pub policy_store: PolicyStoreWithID,
     pub jwt_service: Arc<jwt::JwtService>,
     pub entity_builder: Arc<EntityBuilder>,
-    /// Index of configured custom (non-JWT) issuers. Rebuilt on every policy-store
-    /// swap so the *index* is never stale, and consulted to route tokens to a
-    /// registered [`CustomTokenProcessor`](crate::CustomTokenProcessor).
-    ///
-    /// Note this does not extend to already-cached processing *results*: the
-    /// `JwtService` (and its `TokenCache`) is reused across swaps when
-    /// `trusted_issuers` is unchanged, so cached custom tokens can outlive a
-    /// tightening `custom_issuers` change until `CEDARLING_TOKEN_CACHE_MAX_TTL`
-    /// lapses.
-    pub custom_issuer_index: Arc<jwt::CustomIssuerIndex>,
     pub authorization: AuthorizationConfig,
     /// Data store for pushed data that gets injected into context
     pub data_store: Arc<DataStore>,
@@ -165,8 +155,8 @@ impl Authz {
         }
     }
 
-    pub(crate) fn trusted_issuers(&self) -> Option<&HashMap<String, TrustedIssuer>> {
-        self.config.policy_store.trusted_issuers.as_ref()
+    pub(crate) fn trusted_issuers(&self) -> &HashMap<String, TrustedIssuer> {
+        self.config.policy_store.token_types.jwt_issuers()
     }
 
     /// Returns the ID of the currently loaded policy store, if it carries one.
@@ -1010,7 +1000,7 @@ impl Authz {
             .validate_multi_issuer_tokens(
                 tokens,
                 custom_processor,
-                &self.config.custom_issuer_index,
+                &self.config.policy_store.token_types,
                 custom_timeout,
             )
             .await
@@ -1261,7 +1251,7 @@ impl Authz {
             .validate_multi_issuer_tokens(
                 tokens,
                 custom_processor,
-                &self.config.custom_issuer_index,
+                &self.config.policy_store.token_types,
                 custom_timeout,
             )
             .await?;

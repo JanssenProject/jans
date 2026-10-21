@@ -77,7 +77,6 @@ mod validation;
 
 pub(crate) mod test_utils;
 
-pub(crate) use custom_token::{CustomIssuerIndex, CustomIssuerIndexError};
 pub use custom_token::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
 pub(crate) use decode::*;
 pub(crate) use error::*;
@@ -94,7 +93,8 @@ use crate::authz::metrics::MetricsCollector;
 use crate::authz::request::TokenInput;
 use crate::authz::{DropReason, DroppedToken};
 use crate::common::issuer_utils::IssClaim;
-use crate::common::policy_store::TrustedIssuer;
+use crate::common::policy_store::token_types::{IssuerName, TokenType};
+use crate::common::policy_store::{CustomTokenMetadata, TokenTypeKind, TokenTypes, TrustedIssuer};
 
 use self::http_utils::{GetFromUrl, OpenIdConfig};
 use crate::http::HttpClient;
@@ -182,6 +182,13 @@ struct IssuerConfig {
     policy: Arc<TrustedIssuer>,
     /// The [`OpenIdConfig`] loaded from the IDP's `/.well-known/openid-configuration` endpoint
     openid_config: Option<OpenIdConfig>,
+}
+
+/// The configured custom token type a token input routes to.
+#[derive(Clone, Copy)]
+struct CustomTarget<'a> {
+    issuer: &'a IssuerName,
+    token_meta: &'a CustomTokenMetadata,
 }
 
 struct TokenCallCtx<'a> {
@@ -296,6 +303,7 @@ impl JwtService {
             loading_state: loading_state.clone(),
             http_client,
             jwks_refresh_notifiers: jwks_refresh_notifiers.clone(),
+            jwks_by_iss: Arc::new(Mutex::new(HashMap::new())),
             jwks_cancel_token: jwks_cancel_token.clone(),
         };
 
@@ -405,7 +413,7 @@ impl JwtService {
         &self,
         tokens: &[TokenInput],
         custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
-        custom_issuers: &CustomIssuerIndex,
+        token_types: &TokenTypes,
         custom_timeout: Option<Duration>,
     ) -> Result<ValidatedMultiIssuerTokens, MultiIssuerValidationError> {
         if tokens.is_empty() {
@@ -457,11 +465,17 @@ impl JwtService {
                 now,
                 seen_combinations: &mut seen_combinations,
             };
-            let result = if custom_issuers.mapping_is_custom(&token.mapping) {
-                self.handle_custom_token(custom_processor, custom_issuers, custom_timeout, &mut ctx)
-                    .await
-            } else {
-                self.validate_jwt_token(&mut ctx)?
+            let result = match token_types.get(&token.mapping) {
+                Some(TokenType {
+                    issuer,
+                    kind: TokenTypeKind::Custom(token_meta),
+                    ..
+                }) => {
+                    let target = CustomTarget { issuer, token_meta };
+                    self.handle_custom_token(custom_processor, target, custom_timeout, &mut ctx)
+                        .await
+                },
+                _ => self.validate_jwt_token(&mut ctx)?,
             };
 
             match result {
@@ -522,7 +536,7 @@ impl JwtService {
     async fn handle_custom_token(
         &self,
         custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
-        custom_issuers: &CustomIssuerIndex,
+        target: CustomTarget<'_>,
         custom_timeout: Option<Duration>,
         ctx: &mut TokenCallCtx<'_>,
     ) -> TokenOutcome {
@@ -540,33 +554,25 @@ impl JwtService {
             return TokenOutcome::Dropped(DropReason::NoProcessorRegistered);
         };
 
-        if let Ok((issuer, _)) = custom_issuers.resolve(&ctx.token.mapping) {
-            let combination = SeenToken {
-                issuer: SmolStr::from(issuer.issuer_id.as_str()),
-                mapping: SmolStr::from(ctx.token.mapping.as_str()),
-            };
-            if ctx.seen_combinations.contains(&combination) {
-                if let Some(logger) = &self.logger {
-                    logger.log_any(JwtLogEntry::new(
-                        format!(
-                            "Non-deterministic custom token detected: type '{}' (duplicate found, skipping before processing)",
-                            ctx.token.mapping
-                        ),
-                        Some(LogLevel::WARN),
-                    ));
-                }
-                return TokenOutcome::Dropped(DropReason::DuplicateToken);
+        let combination = SeenToken {
+            issuer: SmolStr::from(target.issuer.key_prefix()),
+            mapping: SmolStr::from(ctx.token.mapping.as_str()),
+        };
+        if ctx.seen_combinations.contains(&combination) {
+            if let Some(logger) = &self.logger {
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "Non-deterministic custom token detected: type '{}' (duplicate found, skipping before processing)",
+                        ctx.token.mapping
+                    ),
+                    Some(LogLevel::WARN),
+                ));
             }
+            return TokenOutcome::Dropped(DropReason::DuplicateToken);
         }
 
         match self
-            .process_custom_token(
-                processor,
-                custom_issuers,
-                ctx.token,
-                custom_timeout,
-                ctx.now,
-            )
+            .process_custom_token(processor, target, ctx.token, custom_timeout, ctx.now)
             .await
         {
             Ok(cedar_token) => {
@@ -727,7 +733,7 @@ impl JwtService {
 
     /// Process a single custom (non-JWT) token via the registered processor.
     ///
-    /// Resolves the custom issuer, enforces required claims, and caches the result
+    /// Enforces required claims, and caches the result
     /// unless the processor opts out. Serves a still-valid cached result on hit.
     ///
     /// DEBT: lives in `JwtService` for a minimal v1 diff; see the note at the
@@ -736,7 +742,7 @@ impl JwtService {
     async fn process_custom_token(
         &self,
         processor: &Arc<dyn CustomTokenProcessor>,
-        custom_issuers: &CustomIssuerIndex,
+        target: CustomTarget<'_>,
         input: &TokenInput,
         timeout: Option<Duration>,
         now: chrono::DateTime<Utc>,
@@ -767,8 +773,7 @@ impl JwtService {
                 return Err(CustomTokenError::EmptyTokenId(input.mapping.clone()).into());
             }
 
-            let (issuer, token_meta) = custom_issuers.resolve(&input.mapping)?;
-            for required in &token_meta.required_claims {
+            for required in &target.token_meta.required_claims {
                 if !processed.claims.contains_key(required) {
                     return Err(CustomTokenError::MissingRequiredClaim(required.clone()).into());
                 }
@@ -792,7 +797,7 @@ impl JwtService {
             }
 
             let meta = CustomTokenIssuerMeta {
-                issuer_id: issuer.issuer_id.clone(),
+                issuer_id: target.issuer.key_prefix(),
                 entity_type_name: Some(input.mapping.clone()),
                 token_id: processed.token_id.clone(),
                 expiration,
@@ -913,17 +918,15 @@ mod test {
     use super::JwtService;
     use super::TrustedIssuerLoadingInfo;
     use super::test_utils::*;
-    use super::{
-        CustomIssuerIndex, CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims, Token,
-        TokenIssuer,
-    };
+    use super::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims, Token, TokenIssuer};
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
     use crate::authz::request::TokenInput;
     use crate::common::policy_store::TokenEntityMetadata;
     use crate::common::policy_store::{
-        CustomIssuerMetadata, CustomTokenMetadata, KeySource, TrustedIssuer,
+        CustomIssuerMetadata, CustomTokenMetadata, KeySource, TokenTypeKind, TokenTypes,
+        TrustedIssuer,
     };
     use crate::http::HttpClient;
     use crate::http::HttpClientConfig;
@@ -1082,8 +1085,8 @@ mod test {
         assert_eq!(super::parse_numeric_date(&json!(null)), None);
     }
 
-    /// Builds an index from `(issuer name, mapping)` pairs.
-    fn custom_index(entries: &[(&str, &str)]) -> CustomIssuerIndex {
+    /// Builds custom token types from `(issuer name, mapping)` pairs.
+    fn custom_index(entries: &[(&str, &str)]) -> TokenTypes {
         let mut m: HashMap<String, CustomIssuerMetadata> = HashMap::new();
         for (name, mapping) in entries {
             m.entry((*name).to_string())
@@ -1093,19 +1096,29 @@ mod test {
                 .tokens_mappings
                 .insert((*mapping).to_string(), CustomTokenMetadata::default());
         }
-        CustomIssuerIndex::build(&m).expect("test custom issuer index should build")
+        TokenTypes::build([], m).expect("test custom token types should build")
     }
 
     /// Processes one `Acme::CustomToken` directly, to see the error a dropped
     /// token was dropped for.
     async fn process_one(
         processor: Arc<dyn CustomTokenProcessor>,
-        index: &CustomIssuerIndex,
+        index: &TokenTypes,
         timeout: Option<Duration>,
     ) -> Result<Arc<Token>, MultiIssuerValidationError> {
         let svc = custom_only_service().await;
         let input = TokenInput::new("Acme::CustomToken".to_string(), "payload-1".to_string());
-        svc.process_custom_token(&processor, index, &input, timeout, chrono::Utc::now())
+        let token_type = index
+            .get(&input.mapping)
+            .expect("Acme::CustomToken should be configured");
+        let TokenTypeKind::Custom(token_meta) = &token_type.kind else {
+            unreachable!("Acme::CustomToken is configured as a custom token")
+        };
+        let target = super::CustomTarget {
+            issuer: &token_type.issuer,
+            token_meta,
+        };
+        svc.process_custom_token(&processor, target, &input, timeout, chrono::Utc::now())
             .await
     }
 
@@ -1311,7 +1324,7 @@ mod test {
                 )]),
             },
         );
-        let index = CustomIssuerIndex::build(&m).expect("test custom issuer index should build");
+        let index = TokenTypes::build([], m).expect("test custom token types should build");
 
         let err = process_one(processor, &index, None)
             .await
@@ -1508,7 +1521,7 @@ mod test {
         ];
 
         let result = jwt_service
-            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .validate_multi_issuer_tokens(&tokens, None, &TokenTypes::default(), None)
             .await;
         assert!(result.is_ok());
 
@@ -1568,7 +1581,7 @@ mod test {
         ];
 
         let out = svc
-            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .validate_multi_issuer_tokens(&tokens, None, &TokenTypes::default(), None)
             .await
             .expect("both tokens should validate");
         for (mapping, name) in [
@@ -1652,7 +1665,7 @@ mod test {
         ];
 
         let out = svc
-            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .validate_multi_issuer_tokens(&tokens, None, &TokenTypes::default(), None)
             .await
             .expect("the token with the configured iss should validate");
         assert_eq!(
@@ -1698,7 +1711,7 @@ mod test {
         .expect("Should create JwtService");
 
         let result = jwt_service
-            .validate_multi_issuer_tokens(&[], None, &CustomIssuerIndex::default(), None)
+            .validate_multi_issuer_tokens(&[], None, &TokenTypes::default(), None)
             .await;
         assert!(matches!(
             result,
@@ -1734,7 +1747,7 @@ mod test {
         ];
 
         let result = jwt_service
-            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .validate_multi_issuer_tokens(&tokens, None, &TokenTypes::default(), None)
             .await;
         assert!(matches!(
             result,
@@ -1799,7 +1812,7 @@ mod test {
         ];
 
         let result = jwt_service
-            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .validate_multi_issuer_tokens(&tokens, None, &TokenTypes::default(), None)
             .await;
         assert!(result.is_ok());
 
@@ -1866,7 +1879,7 @@ mod test {
         ];
 
         let result = jwt_service
-            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .validate_multi_issuer_tokens(&tokens, None, &TokenTypes::default(), None)
             .await;
         assert!(result.is_ok());
 
@@ -1908,7 +1921,7 @@ mod test {
         let tokens = vec![TokenInput::new("Jans::Access_Token".to_string(), token)];
 
         let result = jwt_service
-            .validate_multi_issuer_tokens(&tokens, None, &CustomIssuerIndex::default(), None)
+            .validate_multi_issuer_tokens(&tokens, None, &TokenTypes::default(), None)
             .await;
         assert!(matches!(
             result,
@@ -1963,7 +1976,7 @@ mod test {
             .validate_multi_issuer_tokens(
                 &[TokenInput::new(mapping.clone(), token_before_rotation)],
                 None,
-                &CustomIssuerIndex::default(),
+                &TokenTypes::default(),
                 None,
             )
             .await
@@ -1990,7 +2003,7 @@ mod test {
                     token_after_rotation.clone(),
                 )],
                 None,
-                &CustomIssuerIndex::default(),
+                &TokenTypes::default(),
                 None,
             )
             .await
@@ -2002,7 +2015,7 @@ mod test {
             .validate_multi_issuer_tokens(
                 &[TokenInput::new(mapping, token_after_rotation)],
                 None,
-                &CustomIssuerIndex::default(),
+                &TokenTypes::default(),
                 None,
             )
             .await
@@ -2063,7 +2076,7 @@ mod test {
                     token_after_rotation.clone(),
                 )],
                 None,
-                &CustomIssuerIndex::default(),
+                &TokenTypes::default(),
                 None,
             )
             .await
@@ -2075,7 +2088,7 @@ mod test {
             .validate_multi_issuer_tokens(
                 &[TokenInput::new(mapping, token_after_rotation)],
                 None,
-                &CustomIssuerIndex::default(),
+                &TokenTypes::default(),
                 None,
             )
             .await

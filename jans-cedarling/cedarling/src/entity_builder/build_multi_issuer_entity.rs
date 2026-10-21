@@ -43,29 +43,6 @@ pub enum MultiIssuerEntityError {
     BuildAttrs(#[from] BuildAttrsErrorVec),
 }
 
-/// Sanitize issuer name for Cedar compatibility
-pub(crate) fn sanitize_issuer_name(name: &str) -> String {
-    name.replace(['.', ' ', '-'], "_").to_lowercase()
-}
-
-/// Whether a sanitized issuer id is a valid Cedar `context.tokens` field-name
-/// component: `^[a-z_][a-z0-9_]*$`. `sanitize_issuer_name` only folds `.`/` `/`-`
-/// and lowercases, so anything else (`+`, unicode, digits-first) survives and would
-/// otherwise surface as a per-request schema mismatch.
-pub(crate) fn is_valid_issuer_id(id: &str) -> bool {
-    let mut chars = id.chars();
-    matches!(chars.next(), Some(c) if c.is_ascii_lowercase() || c == '_')
-        && chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
-}
-
-/// Simplify token type for Cedar compatibility
-pub(crate) fn simplify_token_type(mapping: &str) -> String {
-    // Split by namespace separator and use the last part
-    // Keep underscores in token type names as specified in design
-    mapping.split("::").last().unwrap_or(mapping).to_lowercase()
-}
-
-/// Create a Set of String from a single string value
 fn create_string_set(value: &str) -> RestrictedExpression {
     RestrictedExpression::new_set(vec![RestrictedExpression::new_string(value.to_string())])
 }
@@ -286,7 +263,7 @@ impl EntityBuilder {
         for (token_name, entry) in tokens {
             let token = &entry.token;
             match self.build_single_token_entity(token, &built_entities) {
-                Ok(entity) => match Self::generate_entity_key(token_name, token) {
+                Ok(entity) => match self.generate_entity_key(token_name) {
                     Ok(entity_key) => {
                         built_entities.insert(&entity.uid());
                         let owner = EntityKeyOwner {
@@ -515,21 +492,12 @@ impl EntityBuilder {
         Ok(entity)
     }
 
-    /// Generate a unique key for the token entity
-    fn generate_entity_key(
-        token_name: &str,
-        token: &Token,
-    ) -> Result<String, MultiIssuerEntityError> {
-        // The key prefix is the configured issuer the token's mapping resolved
-        // to; a custom issuer id is already sanitized.
-        let issuer_simplified = match &token.iss {
-            Some(TokenIssuer::Jwt(trusted_issuer)) => sanitize_issuer_name(&trusted_issuer.name),
-            Some(TokenIssuer::Custom(meta)) => meta.issuer_id.clone(),
-            None => return Err(MultiIssuerEntityError::MissingIssuer),
-        };
-        let token_type_simplified = simplify_token_type(token_name);
-
-        Ok(format!("{issuer_simplified}_{token_type_simplified}"))
+    /// The precomputed `context.tokens` key of a token type.
+    fn generate_entity_key(&self, token_name: &str) -> Result<String, MultiIssuerEntityError> {
+        self.context_keys
+            .get(token_name)
+            .map(ToString::to_string)
+            .ok_or(MultiIssuerEntityError::MissingIssuer)
     }
 }
 
@@ -539,7 +507,7 @@ mod tests {
     use crate::common::default_entities::DefaultEntities;
     use crate::common::policy_store::TrustedIssuer;
     use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
-    use crate::entity_builder::TrustedIssuerIndex;
+    use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata, TokenTypes};
     use crate::jwt::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer};
     use crate::log::NopLogger;
     use cedar_policy::EvalResult;
@@ -561,6 +529,19 @@ mod tests {
             .collect()
     }
 
+    /// Token metadata declaring each of `entity_types`.
+    fn tokens(entity_types: &[&str]) -> HashMap<String, TokenEntityMetadata> {
+        entity_types
+            .iter()
+            .map(|entity_type| {
+                (
+                    (*entity_type).to_string(),
+                    TokenEntityMetadata::builder().build(),
+                )
+            })
+            .collect()
+    }
+
     fn create_test_entity_builder() -> EntityBuilder {
         let mut trusted_issuers = HashMap::new();
 
@@ -569,7 +550,11 @@ mod tests {
             "Acme".to_string(),
             "Acme Corporation".to_string(),
             Url::parse("https://idp.acme.com/auth").unwrap(),
-            HashMap::new(),
+            tokens(&[
+                "Jans::Access_Token",
+                "Jans::Access_Token2",
+                "Jans::Id_Token",
+            ]),
         );
         trusted_issuers.insert("acme".to_string(), acme_issuer);
 
@@ -578,7 +563,7 @@ mod tests {
             "Dolphin".to_string(),
             "Dolphin Sea Services".to_string(),
             Url::parse("https://idp.dolphin.sea/auth").unwrap(),
-            HashMap::new(),
+            tokens(&["Acme::DolphinToken"]),
         );
         trusted_issuers.insert("dolphin".to_string(), dolphin_issuer);
 
@@ -600,8 +585,19 @@ mod tests {
         );
         trusted_issuers.insert("company".to_string(), company_issuer);
 
+        let custom_issuers = [(
+            "acmekeys".to_string(),
+            CustomIssuerMetadata {
+                tokens_mappings: HashMap::from([(
+                    "Acme::CustomToken".to_string(),
+                    CustomTokenMetadata::default(),
+                )]),
+            },
+        )];
+
         EntityBuilder::new(
-            &TrustedIssuerIndex::new(&trusted_issuers),
+            &TokenTypes::build(trusted_issuers.into_values(), custom_issuers)
+                .expect("test token types should build"),
             None,
             DefaultEntities::default(),
         )
@@ -632,22 +628,18 @@ mod tests {
         )
     }
 
-    /// Builds an entity builder from `(issuer id, name, iss)` triples.
+    /// Builds an entity builder from `(name, iss, entity type)` triples.
     fn builder_with_issuers(issuers: &[(&str, &str, &str)]) -> EntityBuilder {
-        let trusted_issuers = issuers
-            .iter()
-            .map(|(id, name, iss)| {
-                let issuer = TrustedIssuer::discovery_at(
-                    (*name).to_string(),
-                    String::new(),
-                    Url::parse(iss).expect("valid url"),
-                    HashMap::new(),
-                );
-                ((*id).to_string(), issuer)
-            })
-            .collect();
+        let trusted_issuers = issuers.iter().map(|(name, iss, entity_type)| {
+            TrustedIssuer::discovery_at(
+                (*name).to_string(),
+                String::new(),
+                Url::parse(iss).expect("valid url"),
+                tokens(&[entity_type]),
+            )
+        });
         EntityBuilder::new(
-            &TrustedIssuerIndex::new(&trusted_issuers),
+            &TokenTypes::build(trusted_issuers, []).expect("test token types should build"),
             None,
             DefaultEntities::default(),
         )
@@ -668,8 +660,16 @@ mod tests {
     #[test]
     fn path_based_issuers_on_one_origin_get_distinct_entities() {
         let builder = builder_with_issuers(&[
-            ("a", "RealmA", "https://kc.example/realms/a"),
-            ("b", "RealmB", "https://kc.example/realms/b"),
+            (
+                "RealmA",
+                "https://kc.example/realms/a",
+                "RealmA::Access_token",
+            ),
+            (
+                "RealmB",
+                "https://kc.example/realms/b",
+                "RealmB::Access_token",
+            ),
         ]);
 
         assert_eq!(
@@ -685,7 +685,10 @@ mod tests {
     #[test]
     fn issuers_sharing_one_iss_get_their_own_entity_and_key() {
         let iss = "https://idp.shared.example";
-        let builder = builder_with_issuers(&[("acme", "Acme", iss), ("beta", "Beta", iss)]);
+        let builder = builder_with_issuers(&[
+            ("Acme", iss, "Acme::Access_token"),
+            ("Beta", iss, "Beta::Access_token"),
+        ]);
 
         assert_eq!(
             issuer_uids(&builder),
@@ -696,27 +699,16 @@ mod tests {
             "each issuer sharing an iss should get its own TrustedIssuer entity"
         );
 
-        let token_of = |name: &str| {
-            let issuer = builder
-                .issuers_index
-                .values()
-                .find(|issuer| issuer.name == name)
-                .expect("issuer should be configured");
-            Token::new(
-                "Jans::Access_Token",
-                TokenClaims::from(HashMap::from([
-                    ("iss".to_string(), json!(iss)),
-                    ("jti".to_string(), json!(name)),
-                ])),
-                Some(TokenIssuer::Jwt(Arc::new(issuer.clone()))),
-            )
-        };
-        for (name, key) in [("Acme", "acme_access_token"), ("Beta", "beta_access_token")] {
+        for (mapping, key) in [
+            ("Acme::Access_token", "acme_access_token"),
+            ("Beta::Access_token", "beta_access_token"),
+        ] {
             assert_eq!(
-                EntityBuilder::generate_entity_key("Jans::Access_Token", &token_of(name))
-                    .expect("a configured issuer should give a key"),
+                builder
+                    .generate_entity_key(mapping)
+                    .expect("a configured token type should have a key"),
                 key,
-                "the key prefix should be the issuer the token resolved to, not its iss"
+                "the key prefix should be the issuer the mapping names, not the iss"
             );
         }
     }
@@ -775,7 +767,7 @@ mod tests {
         ";
         let validator = ValidatorSchema::from_str(schema_src).expect("valid schema");
         let builder = EntityBuilder::new(
-            &TrustedIssuerIndex::new(&HashMap::new()),
+            &TokenTypes::default(),
             Some(&validator),
             DefaultEntities::default(),
         )
@@ -812,47 +804,24 @@ mod tests {
     }
 
     #[test]
-    fn test_token_type_simplification() {
-        // Test various token type mappings
-        assert_eq!(simplify_token_type("Jans::Access_Token"), "access_token");
-        assert_eq!(simplify_token_type("Jans::Id_Token"), "id_token");
-        assert_eq!(simplify_token_type("Acme::DolphinToken"), "dolphintoken");
-        assert_eq!(
-            simplify_token_type("Custom::Employee_Token"),
-            "employee_token"
-        );
-        assert_eq!(simplify_token_type("SimpleToken"), "simpletoken");
-    }
-
-    #[test]
     fn test_entity_key_generation() {
         let builder = create_test_entity_builder();
 
-        let mut claims = HashMap::new();
-        claims.insert("sub".to_string(), json!("user123"));
-        let token = create_test_token("https://idp.acme.com/auth", "token123", claims, &builder);
-
-        let key = EntityBuilder::generate_entity_key("Jans::Access_Token", &token).unwrap();
+        let key = builder
+            .generate_entity_key("Jans::Access_Token")
+            .expect("a configured token type should have a key");
         assert_eq!(key, "acme_access_token");
     }
 
-    /// The key prefix only ever comes from config: a token without a configured
-    /// issuer has no `context.tokens` key, rather than one made up from its `iss`.
+    /// Keys only ever come from config: an unconfigured token type has no
+    /// `context.tokens` key, rather than one made up from its `iss`.
     #[test]
     fn test_entity_key_generation_with_unknown_issuer() {
         let builder = create_test_entity_builder();
 
-        let mut claims = HashMap::new();
-        claims.insert("sub".to_string(), json!("user123"));
-        let token = create_test_token(
-            "https://unknown.issuer.com/auth",
-            "token123",
-            claims,
-            &builder,
-        );
-
-        let err = EntityBuilder::generate_entity_key("Custom::Employee_Token", &token)
-            .expect_err("a token without a configured issuer must not get a key");
+        let err = builder
+            .generate_entity_key("Custom::Employee_Token")
+            .expect_err("an unconfigured token type must not get a key");
         assert!(
             matches!(err, MultiIssuerEntityError::MissingIssuer),
             "expected MissingIssuer, got {err:?}"
@@ -1003,9 +972,11 @@ mod tests {
             Url::parse("https://test.issuer.com").unwrap(),
             HashMap::default(),
         );
-        let trusted_issuers = HashMap::from_iter(vec![("Jans".to_string(), ti)]);
+        let trusted_issuers: HashMap<String, TrustedIssuer> =
+            HashMap::from_iter(vec![("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
-            &TrustedIssuerIndex::new(&trusted_issuers),
+            &TokenTypes::build(trusted_issuers.into_values(), [])
+                .expect("test token types should build"),
             Some(&validator_schema),
             DefaultEntities::default(),
         )
@@ -1188,7 +1159,8 @@ mod tests {
 
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
-            &TrustedIssuerIndex::new(&trusted_issuers),
+            &TokenTypes::build(trusted_issuers.into_values(), [])
+                .expect("test token types should build"),
             Some(&validator_schema),
             DefaultEntities::default(),
         )
@@ -1267,7 +1239,8 @@ mod tests {
         );
         let trusted_issuers = HashMap::from([("TestIssuer".to_string(), ti)]);
         let builder = EntityBuilder::new(
-            &TrustedIssuerIndex::new(&trusted_issuers),
+            &TokenTypes::build(trusted_issuers.into_values(), [])
+                .expect("test token types should build"),
             None, // no schema — exercises the no-schema path
             DefaultEntities::default(),
         )
@@ -1370,7 +1343,8 @@ mod tests {
         );
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
-            &TrustedIssuerIndex::new(&trusted_issuers),
+            &TokenTypes::build(trusted_issuers.into_values(), [])
+                .expect("test token types should build"),
             Some(&validator_schema),
             DefaultEntities::default(),
         )
@@ -1493,7 +1467,8 @@ mod tests {
         );
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
-            &TrustedIssuerIndex::new(&trusted_issuers),
+            &TokenTypes::build(trusted_issuers.into_values(), [])
+                .expect("test token types should build"),
             Some(&validator_schema),
             DefaultEntities::default(),
         )

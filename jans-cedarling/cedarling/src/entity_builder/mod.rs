@@ -17,31 +17,26 @@ mod built_entities;
 mod entity_id_getters;
 mod error;
 mod schema;
-mod trusted_issuer_index;
 pub(crate) mod value_to_expr;
 
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
-#[cfg(test)]
-use crate::common::policy_store::TrustedIssuer;
+use crate::common::policy_store::{TokenTypes, TrustedIssuer};
 use build_entity_attrs::build_entity_attrs;
 use build_iss_entity::build_iss_entity;
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 use cedar_policy_core::validator::ValidatorSchema;
 use schema::MappingSchema;
 use serde_json::Value;
+use smol_str::SmolStr;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 #[cfg(test)]
 use std::sync::Arc;
 
-pub(crate) use crate::entity_builder::trusted_issuer_index::TrustedIssuerIndex;
-pub(crate) use build_multi_issuer_entity::{
-    MultiIssuerEntityError, MultiIssuerSetupEntities, is_valid_issuer_id, sanitize_issuer_name,
-    simplify_token_type,
-};
+pub(crate) use build_multi_issuer_entity::{MultiIssuerEntityError, MultiIssuerSetupEntities};
 pub(crate) use built_entities::BuiltEntities;
 
 pub(crate) use error::*;
@@ -53,24 +48,31 @@ pub(crate) struct EntityBuilder {
     schema: Option<MappingSchema>,
     default_entities: DefaultEntities,
     /// Kept so tests can build tokens that carry a configured issuer.
+    /// `context.tokens` key of every configured token type, by request mapping.
+    context_keys: HashMap<String, SmolStr>,
+    /// Kept so tests can build tokens that carry a configured issuer.
     #[cfg(test)]
-    issuers_index: TrustedIssuerIndex,
+    jwt_issuers: Vec<Arc<TrustedIssuer>>,
 }
 
 impl EntityBuilder {
     pub(super) fn new(
-        issuers_index: &TrustedIssuerIndex,
+        token_types: &TokenTypes,
         schema: Option<&ValidatorSchema>,
         default_entities: DefaultEntities,
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
+        // Sorted so the same misconfiguration is always reported the same way.
+        let mut issuers: Vec<&TrustedIssuer> = token_types.jwt_issuers().values().collect();
+        issuers.sort_by(|a, b| a.name.cmp(&b.name));
+
         if let Some(schema) = schema.as_ref() {
-            Self::validate_iss_types(issuers_index, schema)?;
+            Self::validate_iss_types(&issuers, schema)?;
         }
 
-        let (ok, errs) = issuers_index
-            .values()
+        let (ok, errs) = issuers
+            .iter()
             .map(|iss| {
                 let iss_id = iss.iss_claim();
 
@@ -93,12 +95,20 @@ impl EntityBuilder {
             .map(|entity: Entity| (entity.uid(), entity))
             .collect::<HashMap<EntityUid, Entity>>();
 
+        let context_keys = token_types
+            .iter()
+            .map(|(entity_type, token_type)| {
+                (entity_type.to_string(), token_type.context_key.clone())
+            })
+            .collect();
+
         Ok(Self {
             iss_entities,
             schema,
             default_entities,
+            context_keys,
             #[cfg(test)]
-            issuers_index: issuers_index.clone(),
+            jwt_issuers: issuers.into_iter().cloned().map(Arc::new).collect(),
         })
     }
 
@@ -128,12 +138,12 @@ impl EntityBuilder {
 
     /// Rejects a token whose schema `iss` type cannot match what the builder emits.
     fn validate_iss_types(
-        issuers_index: &TrustedIssuerIndex,
+        issuers: &[&TrustedIssuer],
         schema: &MappingSchema,
     ) -> Result<(), InitEntityBuilderError> {
         const ISS_CLAIM: &str = "iss";
 
-        for iss in issuers_index.values() {
+        for iss in issuers {
             let expected_iss_type = Self::trusted_issuer_typename(&iss.name);
 
             for entity_type_name in iss.token_metadata.keys() {
@@ -177,7 +187,11 @@ impl EntityBuilder {
     #[cfg(test)]
     // is used only for testing to get trusted issuer
     fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
-        self.issuers_index.find(&IssClaim::new(issuer)).cloned()
+        let issuer = IssClaim::new(issuer);
+        self.jwt_issuers
+            .iter()
+            .find(|iss| iss.iss_claim() == issuer)
+            .cloned()
     }
 }
 
@@ -326,7 +340,7 @@ mod test {
 
         let schema = ValidatorSchema::from_str(SCHEMA).expect("valid schema");
         let err = EntityBuilder::new(
-            &TrustedIssuerIndex::new(&issuers),
+            &TokenTypes::build(issuers.into_values(), []).expect("test token types should build"),
             Some(&schema),
             DefaultEntities::default(),
         )

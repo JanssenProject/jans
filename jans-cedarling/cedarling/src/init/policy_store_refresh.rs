@@ -8,7 +8,7 @@
 //! On each tick the worker sends a conditional GET to the configured URL,
 //! handling `304 Not Modified` cheaply. When the upstream returns a new body
 //! and it parses successfully, the worker builds a new [`Authz`] (reusing the
-//! existing [`JwtService`] when `trusted_issuers` is unchanged) and publishes it via
+//! existing [`JwtService`] when the JWT issuers are unchanged) and publishes it via
 //! [`ArcSwap`] so in-flight authorizations are unaffected. Any failure leaves
 //! the previously loaded [`Authz`] in place.
 //!
@@ -236,16 +236,19 @@ pub(crate) struct AuthzRebuilder {
 
 impl AuthzRebuilder {
     /// Build a new [`Authz`] from `policy_store`, reusing `prior_authz`'s
-    /// [`JwtService`] when `trusted_issuers` is unchanged (avoids OIDC/JWKS
+    /// [`JwtService`] when the JWT issuers are unchanged (avoids OIDC/JWKS
     /// refetch on policy-only updates). [`EntityBuilder`] is always rebuilt.
     pub(crate) async fn rebuild(
         &self,
         policy_store: PolicyStoreWithID,
         prior_authz: &Authz,
     ) -> Result<Authz, RebuildError> {
+        // The token types are rebuilt with the store, but a reused `JwtService`
+        // keeps its token cache, so cached custom tokens can outlive a tightening
+        // custom-issuer change until `CEDARLING_TOKEN_CACHE_MAX_TTL` lapses.
         let prior_jwt = if issuers_unchanged(
             prior_authz.trusted_issuers(),
-            policy_store.trusted_issuers.as_ref(),
+            policy_store.token_types.jwt_issuers(),
         ) {
             Some(prior_authz.clone_jwt_service())
         } else {
@@ -268,8 +271,8 @@ impl AuthzRebuilder {
 
 /// `true` when both issuer maps are equal; `false` triggers a [`JwtService`] rebuild.
 fn issuers_unchanged(
-    prior: Option<&std::collections::HashMap<String, TrustedIssuer>>,
-    new: Option<&std::collections::HashMap<String, TrustedIssuer>>,
+    prior: &std::collections::HashMap<String, TrustedIssuer>,
+    new: &std::collections::HashMap<String, TrustedIssuer>,
 ) -> bool {
     prior == new
 }
@@ -1066,7 +1069,7 @@ mod tests {
         let a = one_issuer();
         let b = one_issuer();
         assert!(
-            issuers_unchanged(Some(&a), Some(&b)),
+            issuers_unchanged(&a, &b),
             "identical issuer maps must signal reuse so JwtService is not rebuilt",
         );
     }
@@ -1075,11 +1078,11 @@ mod tests {
     fn empty_vs_some_issuer_signals_rebuild() {
         let o = one_issuer();
         assert!(
-            !issuers_unchanged(None, Some(&o)),
+            !issuers_unchanged(&HashMap::new(), &o),
             "going from no issuers to some issuers must signal a JwtService rebuild",
         );
         assert!(
-            !issuers_unchanged(Some(&o), None),
+            !issuers_unchanged(&o, &HashMap::new()),
             "removing all issuers must signal a JwtService rebuild",
         );
     }
@@ -1090,7 +1093,7 @@ mod tests {
         let mut expanded = one_issuer();
         expanded.insert("issuer_b".to_string(), TrustedIssuer::default());
         assert!(
-            !issuers_unchanged(Some(&base), Some(&expanded)),
+            !issuers_unchanged(&base, &expanded),
             "adding a new issuer must signal a JwtService rebuild",
         );
     }
@@ -1101,7 +1104,7 @@ mod tests {
         two.insert("issuer_b".to_string(), TrustedIssuer::default());
         let one = one_issuer();
         assert!(
-            !issuers_unchanged(Some(&two), Some(&one)),
+            !issuers_unchanged(&two, &one),
             "removing an issuer must signal a JwtService rebuild",
         );
     }

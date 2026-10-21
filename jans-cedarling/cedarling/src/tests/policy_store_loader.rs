@@ -280,9 +280,10 @@ fn create_jwt_trusted_issuer_json(oidc_endpoint: &str) -> String {
     )
 }
 
-/// Creates a trusted issuer JSON with a custom issuer ID and token metadata.
+/// Creates a trusted issuer JSON with a custom issuer ID, name and token metadata.
 fn create_jwt_trusted_issuer_json_with_id(
     issuer_id: &str,
+    name: &str,
     oidc_endpoint: &str,
     token_metadata: &str,
 ) -> String {
@@ -290,7 +291,7 @@ fn create_jwt_trusted_issuer_json_with_id(
         serde_json::from_str(token_metadata).expect("token_metadata must be valid JSON");
     let value = json!({
         "id": issuer_id,
-        "name": "Jans",
+        "name": name,
         "description": "Test issuer for JWT validation",
         "configuration_endpoint": oidc_endpoint,
         "token_metadata": token_metadata
@@ -351,6 +352,9 @@ const SCHEMA: &str = r#"namespace Jans {
         resource: [Resource],
         context: {}
     };
+}
+namespace Failing {
+    entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
 }
 "#;
 
@@ -457,7 +461,8 @@ permit(
 
     // Test TrustedIssuerLoadingInfo trait methods
     // Should have 1 trusted issuer defined
-    assert!(cedarling.is_trusted_issuer_loaded_by_name("mock_issuer"));
+    // Issuers are identified by name, not by their file id.
+    assert!(cedarling.is_trusted_issuer_loaded_by_name("Jans"));
     assert!(!cedarling.is_trusted_issuer_loaded_by_name("NonExistent"));
 
     // Check by iss claim
@@ -470,7 +475,7 @@ permit(
     // Loaded and failed IDs
     let loaded_ids = cedarling.loaded_trusted_issuer_ids();
     assert_eq!(loaded_ids.len(), 1);
-    assert!(loaded_ids.contains("mock_issuer"));
+    assert!(loaded_ids.contains("Jans"));
 
     let failed_ids = cedarling.failed_trusted_issuer_ids();
     assert!(failed_ids.is_empty());
@@ -631,6 +636,7 @@ async fn test_trusted_issuer_loading_info_failed_issuer() {
     // two issuers claiming the same Cedar entity type.
     let working_issuer_json = create_jwt_trusted_issuer_json_with_id(
         "working_issuer",
+        "Jans",
         &working_oidc_endpoint,
         r#"{
             "access_token": { "entity_type_name": "Jans::Access_token" },
@@ -646,9 +652,10 @@ async fn test_trusted_issuer_loading_info_failed_issuer() {
     let failing_oidc_endpoint = format!("{failing_issuer_url}/.well-known/openid-configuration");
     let failing_issuer_json = create_jwt_trusted_issuer_json_with_id(
         "failing_issuer",
+        "Failing",
         &failing_oidc_endpoint,
         r#"{
-            "userinfo_token": { "entity_type_name": "Jans::Userinfo_token" }
+            "userinfo_token": { "entity_type_name": "Failing::Userinfo_token" }
         }"#,
     );
 
@@ -710,8 +717,9 @@ permit(
 
     // Test TrustedIssuerLoadingInfo trait methods for mixed results
     // Working issuer should be loaded
-    assert!(cedarling.is_trusted_issuer_loaded_by_name("working_issuer"));
-    assert!(!cedarling.is_trusted_issuer_loaded_by_name("failing_issuer"));
+    // Issuers are identified by name, not by their file id.
+    assert!(cedarling.is_trusted_issuer_loaded_by_name("Jans"));
+    assert!(!cedarling.is_trusted_issuer_loaded_by_name("Failing"));
     assert!(!cedarling.is_trusted_issuer_loaded_by_name("NonExistent"));
 
     // Check by iss claim
@@ -725,13 +733,13 @@ permit(
     // Loaded and failed IDs
     let loaded_ids = cedarling.loaded_trusted_issuer_ids();
     assert_eq!(loaded_ids.len(), 1);
-    assert!(loaded_ids.contains("working_issuer"));
-    assert!(!loaded_ids.contains("failing_issuer"));
+    assert!(loaded_ids.contains("Jans"));
+    assert!(!loaded_ids.contains("Failing"));
 
     let failed_ids = cedarling.failed_trusted_issuer_ids();
     assert_eq!(failed_ids.len(), 1);
-    assert!(failed_ids.contains("failing_issuer"));
-    assert!(!failed_ids.contains("working_issuer"));
+    assert!(failed_ids.contains("Failing"));
+    assert!(!failed_ids.contains("Jans"));
 }
 
 /// Test that write action is denied for guest users when loaded from directory.
