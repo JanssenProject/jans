@@ -291,7 +291,7 @@ impl WarningDedup {
     /// Starts from what bootstrap already logged, so the first refresh is quiet.
     fn seeded(format: &FormatReport) -> Self {
         Self {
-            logged: format.warnings.iter().copied().collect(),
+            logged: format.warnings.iter().cloned().collect(),
             last_spec_version: format.spec_version,
         }
     }
@@ -308,8 +308,8 @@ impl WarningDedup {
         format
             .warnings
             .iter()
-            .filter(|warning| self.logged.insert(**warning))
-            .copied()
+            .filter(|warning| self.logged.insert((*warning).clone()))
+            .cloned()
             .collect()
     }
 }

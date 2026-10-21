@@ -243,9 +243,11 @@ async fn test_validate_reports_outdated_spec_version_as_warning() {
 async fn test_validate_current_spec_version_has_no_warnings() {
     let http_client_config = crate::http::HttpClientConfig::default();
 
-    let report = Cedarling::validate_policy_store(&archive_source(Some(1)), &http_client_config)
-        .await
-        .expect("infra layer ok");
+    let current = crate::common::policy_store::formats::CURRENT_FORMAT_VERSION;
+    let report =
+        Cedarling::validate_policy_store(&archive_source(Some(current)), &http_client_config)
+            .await
+            .expect("infra layer ok");
 
     assert!(
         report.is_ok(),

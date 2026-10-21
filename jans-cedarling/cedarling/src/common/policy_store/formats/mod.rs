@@ -21,14 +21,12 @@ pub(crate) mod datetime;
 pub(crate) mod file_id;
 pub(crate) mod v0;
 pub(crate) mod v1;
-// Readable once v1 stores migrate to it; until then only its tests use it.
-#[cfg(test)]
 pub(crate) mod v2;
 
 /// The current spec version: the only one that converts into runtime types,
 /// and the one every older version migrates to. Bumping the version points
 /// this at the new module.
-pub(super) use v1 as current;
+pub(super) use v2 as current;
 
 use std::borrow::Cow;
 use std::fmt;
@@ -40,7 +38,7 @@ use super::PolicyStoreWithID;
 use super::errors::{PolicyStoreError, ValidationError};
 use super::loader::{StoreFile, StoreFs};
 use super::manager::ConversionError;
-use super::migration::IntoCurrent;
+use super::migration::{IntoCurrent, MigrationError};
 use super::schema_parser::ParsedSchema;
 
 /// Where every spec version keeps its metadata.
@@ -137,12 +135,19 @@ pub(crate) struct StoreContent {
 }
 
 /// Non-fatal findings from parsing a store; logged by the caller.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum PolicyStoreWarning {
     /// `metadata.json` has no `policy_store_spec_version`.
     MissingSpecVersion { assumed: u32, current: u32 },
     /// The store declares a supported but older spec version.
     OutdatedSpecVersion { found: u32, current: u32 },
+    /// A directory an earlier version kept issuers in, ignored by this one.
+    IgnoredIssuerDir { dir: &'static str },
+    /// A migrated custom token was `required`; every token is optional now.
+    RequiredIgnored { file: String, entity_type: String },
+    /// A migrated issuer's `iss` keeps the path its endpoint had, where v1 kept
+    /// only the origin; its `TrustedIssuer` entity id changes with it.
+    IssPathKept { file: String, iss: String },
 }
 
 impl fmt::Display for PolicyStoreWarning {
@@ -158,6 +163,22 @@ impl fmt::Display for PolicyStoreWarning {
                 f,
                 "policy store format is outdated: policy_store_spec_version is {found}; \
                  please update the policy store to spec version {current}"
+            ),
+            Self::IgnoredIssuerDir { dir } => write!(
+                f,
+                "policy store directory '{dir}/' is ignored: this spec version reads \
+                 trusted issuers from trusted-issuers.json only"
+            ),
+            Self::RequiredIgnored { file, entity_type } => write!(
+                f,
+                "'required' on custom token '{entity_type}' in '{file}' is ignored: every \
+                 token is optional; require it in policy with \
+                 `forbid (principal, action, resource) unless {{ context has tokens.<key> }};`"
+            ),
+            Self::IssPathKept { file, iss } => write!(
+                f,
+                "issuer in '{file}' is now matched against iss '{iss}', path included, \
+                 and its TrustedIssuer entity id carries the path; v1 used only the origin"
             ),
         }
     }
@@ -181,6 +202,8 @@ pub(crate) enum ReadStoreError {
     Read(#[from] PolicyStoreError),
     #[error(transparent)]
     Parse(#[from] ParseStoreError),
+    #[error(transparent)]
+    Migration(#[from] MigrationError),
 }
 
 /// Reads only `policy_store_spec_version` out of `metadata.json`, skipping every
@@ -256,6 +279,7 @@ fn probe_spec_version(metadata_json: &str) -> Result<Option<u32>, ValidationErro
 enum FormatVersion {
     V0,
     V1,
+    V2,
 }
 
 /// The format version a store resolved to.
@@ -277,6 +301,7 @@ fn select_version(metadata_json: &str) -> Result<SelectedVersion, ValidationErro
     let format = match spec_version {
         v0::SPEC_VERSION => FormatVersion::V0,
         v1::SPEC_VERSION => FormatVersion::V1,
+        v2::SPEC_VERSION => FormatVersion::V2,
         found if found > CURRENT_FORMAT_VERSION => {
             return Err(ValidationError::SpecVersionTooNew {
                 found,
@@ -352,11 +377,19 @@ pub(super) fn read_policy_store(
     strict_schema_validation: bool,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     let (metadata_json, selected) = read_metadata(fs)?;
+    let strict = strict_schema_validation;
 
+    let mut warnings = warnings_for(selected.declared);
     let doc = match selected.format {
-        FormatVersion::V0 => v0::read(fs, metadata_json, strict_schema_validation)?.into_current(),
-        FormatVersion::V1 => v1::read(fs, metadata_json, strict_schema_validation)?.into_current(),
+        FormatVersion::V0 => v0::read(fs, metadata_json, strict)?.into_current(&mut warnings)?,
+        FormatVersion::V1 => v1::read(fs, metadata_json, strict)?.into_current(&mut warnings)?,
+        FormatVersion::V2 => v2::read(fs, metadata_json, strict)?.into_current(&mut warnings)?,
     };
+    warnings.extend(
+        doc.ignored_dirs
+            .iter()
+            .map(|dir| PolicyStoreWarning::IgnoredIssuerDir { dir }),
+    );
 
     let (store, metadata) = current::into_runtime(doc)?;
 
@@ -368,7 +401,7 @@ pub(super) fn read_policy_store(
         },
         format: FormatReport {
             spec_version: Some(selected.spec_version),
-            warnings: warnings_for(selected.declared),
+            warnings,
         },
     })
 }
@@ -438,7 +471,50 @@ mod tests {
             ),
             (
                 "custom-issuers/acme.json",
-                r#"{ "tokens_mappings": { "Acme::Custom": { "required": true } } }"#,
+                r#"{ "tokens_mappings": { "Acme::Custom": {} } }"#,
+            ),
+        ] {
+            vfs.create_file(path, content.as_bytes())
+                .expect("in-memory test file should be created");
+        }
+        let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
+        read_policy_store(&fs, false)
+    }
+
+    /// Reads a store in the v2 layout, describing the same token types as the
+    /// store [`read`] builds.
+    fn read_v2(metadata_json: &str) -> Result<ParsedPolicyStore, ReadStoreError> {
+        read_v2_with(metadata_json, &[])
+    }
+
+    /// [`read_v2`] with `extra` files added to the store.
+    fn read_v2_with(
+        metadata_json: &str,
+        extra: &[(&str, &str)],
+    ) -> Result<ParsedPolicyStore, ReadStoreError> {
+        let vfs = MemoryVfs::new();
+        for (path, content) in extra {
+            vfs.create_file(path, content.as_bytes())
+                .expect("in-memory test file should be created");
+        }
+        for (path, content) in [
+            (METADATA_FILE, metadata_json),
+            (
+                "policies/allow.cedar",
+                "permit(principal, action, resource);",
+            ),
+            (
+                "trusted-issuers.json",
+                r#"{
+                    "Jans::Access_token": {
+                        "type": "jwt",
+                        "issuer": "Jans",
+                        "configuration_endpoints": {
+                            "configuration": "https://jans.test/.well-known/openid-configuration"
+                        }
+                    },
+                    "Acme::Custom": { "type": "custom", "issuer": "acme" }
+                }"#,
             ),
         ] {
             vfs.create_file(path, content.as_bytes())
@@ -584,7 +660,7 @@ mod tests {
 
     #[test]
     fn current_version_parses_without_warnings() {
-        let parsed = read(&metadata_with_version(&CURRENT_FORMAT_VERSION.to_string()))
+        let parsed = read_v2(&metadata_with_version(&CURRENT_FORMAT_VERSION.to_string()))
             .expect("a current-version store should parse");
         assert_eq!(
             parsed.format.spec_version,
@@ -599,12 +675,29 @@ mod tests {
     }
 
     #[test]
+    fn leftover_issuer_directory_in_v2_store_warns() {
+        let parsed = read_v2_with(
+            &metadata_with_version("2"),
+            &[("custom-issuers/acme.json", r#"{ "tokens_mappings": {} }"#)],
+        )
+        .expect("a v2 store with a leftover directory should still load");
+        assert_eq!(
+            parsed.format.warnings,
+            vec![PolicyStoreWarning::IgnoredIssuerDir {
+                dir: "custom-issuers"
+            }],
+            "the leftover directory should be reported"
+        );
+    }
+
+    #[test]
     fn every_version_produces_the_same_runtime_store() {
         let from_missing = read(V0_METADATA).expect("store without a version should parse");
         let from_v0 = read(&metadata_with_version("0")).expect("v0 store should parse");
         let from_v1 = read(&metadata_with_version("1")).expect("v1 store should parse");
+        let from_v2 = read_v2(&metadata_with_version("2")).expect("v2 store should parse");
 
-        for (label, parsed) in [("v0", &from_v0), ("v1", &from_v1)] {
+        for (label, parsed) in [("v0", &from_v0), ("v1", &from_v1), ("v2", &from_v2)] {
             assert_eq!(
                 parsed.store.store, from_missing.store.store,
                 "{label} should build the same runtime store as an unversioned one"

@@ -12,27 +12,60 @@
 //! is dispatched.
 
 pub(crate) mod v0_to_v1;
+pub(crate) mod v1_to_v2;
 
-use crate::common::policy_store::formats::current;
+use crate::common::policy_store::InvalidConfigurationEndpoint;
+use crate::common::policy_store::formats::{PolicyStoreWarning, current};
 
 /// The doc of the current spec version, the only one that converts into
 /// runtime types.
 pub(super) type CurrentDoc = current::PolicyStoreDoc;
 
+/// A store that cannot be expressed in the next spec version.
+#[derive(Debug, thiserror::Error)]
+pub enum MigrationError {
+    #[error(
+        "issuer '{name}' in '{file}' must be a single Cedar identifier to migrate: it is the \
+         namespace of its TrustedIssuer entity and the prefix of its context.tokens keys"
+    )]
+    InvalidIssuerName { file: String, name: String },
+    #[error("'{entity_type}' in '{file}' is not a valid Cedar entity type: {reason}")]
+    InvalidEntityType {
+        file: String,
+        entity_type: String,
+        reason: String,
+    },
+    #[error("invalid issuer in '{file}': {source}")]
+    InvalidConfigurationEndpoint {
+        file: String,
+        source: InvalidConfigurationEndpoint,
+    },
+    #[error("entity type '{entity_type}' is declared in both '{file_a}' and '{file_b}'")]
+    DuplicateEntityType {
+        entity_type: String,
+        file_a: String,
+        file_b: String,
+    },
+}
+
 /// One migration step, from a spec version's doc to the next version's.
 ///
 /// Written by hand for each step: how fields map between two versions is a
-/// decision, not something to derive.
+/// decision, not something to derive. A step reports what it had to change in
+/// behavior through `warnings`, and fails when the store cannot be expressed.
 pub(super) trait Upgrade {
     type Next;
 
-    fn upgrade(self) -> Self::Next;
+    fn upgrade(self, warnings: &mut Vec<PolicyStoreWarning>) -> Result<Self::Next, MigrationError>;
 }
 
 /// Brings the doc of any supported spec version up to [`CurrentDoc`] by
 /// applying each [`Upgrade`] step in turn.
 pub(super) trait IntoCurrent {
-    fn into_current(self) -> CurrentDoc;
+    fn into_current(
+        self,
+        warnings: &mut Vec<PolicyStoreWarning>,
+    ) -> Result<CurrentDoc, MigrationError>;
 }
 
 /// The chain ends at the current version.
@@ -42,8 +75,11 @@ pub(super) trait IntoCurrent {
 /// there is no version to upgrade it to. Each bump moves both the `Upgrade`
 /// impl and this one forward together.
 impl IntoCurrent for CurrentDoc {
-    fn into_current(self) -> CurrentDoc {
-        self
+    fn into_current(
+        self,
+        _warnings: &mut Vec<PolicyStoreWarning>,
+    ) -> Result<CurrentDoc, MigrationError> {
+        Ok(self)
     }
 }
 
@@ -52,7 +88,10 @@ where
     T: Upgrade,
     T::Next: IntoCurrent,
 {
-    fn into_current(self) -> CurrentDoc {
-        self.upgrade().into_current()
+    fn into_current(
+        self,
+        warnings: &mut Vec<PolicyStoreWarning>,
+    ) -> Result<CurrentDoc, MigrationError> {
+        self.upgrade(warnings)?.into_current(warnings)
     }
 }

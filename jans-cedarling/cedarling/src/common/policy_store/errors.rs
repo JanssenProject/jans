@@ -425,37 +425,4 @@ pub enum CustomIssuerParseError {
 
     #[error("custom issuer '{id}' in '{file}' has a token with an empty entity type name")]
     EmptyEntityTypeName { id: String, file: String },
-
-    #[error("Duplicate custom issuer ID '{id}' found in files '{first_file}' and '{second_file}'")]
-    DuplicateId {
-        id: String,
-        first_file: String,
-        second_file: String,
-    },
-}
-
-/// Conflict between trusted issuers declared across files.
-#[derive(Debug, thiserror::Error)]
-pub enum TrustedIssuerValidateError {
-    #[error("Duplicate issuer ID '{id}' found in files '{first_file}' and '{second_file}'")]
-    DuplicateId {
-        id: String,
-        first_file: String,
-        second_file: String,
-    },
-    #[error(
-        "Entity type '{entity_type_name}' declared by token_metadata keys '{key_a}' and \
-         '{key_b}' in file '{file}'"
-    )]
-    DuplicateEntityType {
-        entity_type_name: String,
-        key_a: String,
-        key_b: String,
-        file: String,
-    },
-    #[error("Invalid issuer in file '{file}': {source}")]
-    InvalidConfigurationEndpoint {
-        file: String,
-        source: super::InvalidConfigurationEndpoint,
-    },
 }

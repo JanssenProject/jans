@@ -51,17 +51,9 @@ pub enum ConversionError {
         source: Box<super::errors::PolicyStoreError>,
     },
 
-    /// Trusted issuers conflict across files
-    #[error("Failed to convert trusted issuers: {}", join_errors(.0))]
-    TrustedIssuerValidation(Vec<super::errors::TrustedIssuerValidateError>),
-
     /// A custom issuer file could not be parsed
     #[error(transparent)]
     CustomIssuerParse(#[from] super::errors::CustomIssuerParseError),
-
-    /// Custom issuers conflict across files
-    #[error("Failed to convert custom issuers: {}", join_errors(.0))]
-    CustomIssuerValidation(Vec<super::errors::CustomIssuerParseError>),
 
     /// `trusted-issuers.json` could not be parsed
     #[error("Failed to parse '{file}': {source}")]
@@ -82,15 +74,6 @@ pub enum ConversionError {
     /// Policy set creation failed
     #[error("Failed to create policy set: {0}")]
     PolicySetCreation(String),
-}
-
-/// Renders several errors as one line, so an aggregate variant stays readable.
-fn join_errors<E: std::fmt::Display>(errors: &[E]) -> String {
-    errors
-        .iter()
-        .map(std::string::ToString::to_string)
-        .collect::<Vec<_>>()
-        .join("; ")
 }
 
 /// Policy Store Manager converts loaded stores into the runtime [`PolicyStore`].

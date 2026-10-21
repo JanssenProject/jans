@@ -14,6 +14,7 @@ use crate::common::policy_store::formats::{
 };
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
 use crate::common::policy_store::loader;
+use crate::common::policy_store::migration::MigrationError;
 use crate::common::policy_store::validator::MetadataValidator;
 use crate::common::policy_store::{ConversionError, PolicyStore, PolicyStoreWithID};
 use crate::http::cache_headers::CacheHeadersState;
@@ -49,6 +50,9 @@ pub enum PolicyStoreLoadError {
     /// Failed to parse the policy store from file.
     #[error("Failed to convert loaded policy store: {0}")]
     Conversion(#[from] ConversionError),
+    /// The store could not be migrated to the current spec version.
+    #[error("Failed to migrate the policy store: {0}")]
+    Migration(MigrationError),
     /// Failed to load policy store from archive.
     #[error("Failed to load policy store from archive: {0}")]
     Archive(String),
@@ -533,6 +537,7 @@ fn map_read_err(e: ReadStoreError, is_archive: bool) -> PolicyStoreLoadError {
         ReadStoreError::Parse(ParseStoreError::Conversion(e)) => {
             PolicyStoreLoadError::Conversion(e)
         },
+        ReadStoreError::Migration(e) => PolicyStoreLoadError::Migration(e),
         ReadStoreError::Read(PolicyStoreError::CedarParsing { file, detail }) => {
             PolicyStoreLoadError::InvalidStore(format!("Cedar parse error in {file}: {detail}"))
         },

@@ -132,10 +132,6 @@ pub(crate) enum KeySource {
     /// OIDC discovery; keys come from the discovered `jwks_uri`.
     Discovery { configuration: Url },
     /// Keys fetched straight from a JWKS URL, with no discovery request.
-    #[cfg_attr(
-        not(test),
-        expect(dead_code, reason = "only the v2 format builds static issuers")
-    )]
     Static { jwks: Url },
 }
 
@@ -214,6 +210,7 @@ impl TrustedIssuer {
 
     /// An issuer loaded through OIDC discovery, with `iss` derived offline
     /// from `configuration`.
+    #[cfg(test)]
     pub(crate) fn from_configuration(
         name: String,
         description: String,
