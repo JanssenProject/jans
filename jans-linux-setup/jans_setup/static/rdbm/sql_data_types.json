@@ -990,6 +990,36 @@
       "type": "VARCHAR"
     }
   },
+  "jansRequestId": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansPolicyStoreId": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansPolicyStoreVersion": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
   "jansTracePolicyStoreId": {
     "mysql": {
       "size": 255,

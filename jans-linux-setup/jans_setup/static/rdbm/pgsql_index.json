@@ -253,7 +253,10 @@
   },
   "jansLogEntry": {
     "fields": [
-      "eventTime"
+      "eventTime",
+      "jansRequestId",
+      "jansPolicyStoreId",
+      "jansPolicyStoreVersion"
     ]
   },
   "jansTelemetryEntry": {

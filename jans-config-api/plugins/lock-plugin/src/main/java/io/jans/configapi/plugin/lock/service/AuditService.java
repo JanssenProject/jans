@@ -35,6 +35,9 @@ public class AuditService {
     
 
     public static final String EVENT_TIME = "eventTime";
+    public static final String REQUEST_ID = "jansRequestId";
+    public static final String POLICY_STORE_ID = "jansPolicyStoreId";
+    public static final String POLICY_STORE_VERSION = "jansPolicyStoreVersion";
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
@@ -233,6 +236,7 @@ public class AuditService {
         if (logEntry == null) {
             return logEntry;
         }
+        logEntry.indexContextInformation();
         String inum = logEntry.getInum();
         if (StringUtils.isBlank(inum)) {
             inum = this.generateInumForEntry("log", LogEntry.class);
@@ -246,21 +250,33 @@ public class AuditService {
         return logEntry;
     }
 
-    public List<LogEntry> getLogEntrysByRange(Date eventDateStart, Date eventDateEnd, int sizeLimit) {
-        logger.debug("Search LogEntrys by event range: [{}, {}], sizeLimit:{}", eventDateStart, eventDateEnd, sizeLimit);
+    public List<LogEntry> getLogEntrysByRange(Date eventDateStart, Date eventDateEnd, String requestId,
+            String policyStoreId, String policyStoreVersion, int sizeLimit) {
+        logger.debug("Search LogEntrys by event range: [{}, {}], requestId:{}, policyStoreId:{}, policyStoreVersion:{}, sizeLimit:{}",
+                eventDateStart, eventDateEnd, requestId, policyStoreId, policyStoreVersion, sizeLimit);
 
         String baseDn = getDnForLogEntry(null);
-        
-        Filter eventDateStartFilter = Filter.createGreaterOrEqualFilter(EVENT_TIME, persistenceEntryManager.encodeTime(baseDn, eventDateStart));
-        Filter eventDateEndFilter = Filter.createLessOrEqualFilter(EVENT_TIME, persistenceEntryManager.encodeTime(baseDn, eventDateEnd));
-        
-        Filter searchFilter = Filter.createANDFilter(eventDateStartFilter, eventDateEndFilter);
+
+        List<Filter> filters = new ArrayList<>();
+        filters.add(Filter.createGreaterOrEqualFilter(EVENT_TIME, persistenceEntryManager.encodeTime(baseDn, eventDateStart)));
+        filters.add(Filter.createLessOrEqualFilter(EVENT_TIME, persistenceEntryManager.encodeTime(baseDn, eventDateEnd)));
+        addEqualityFilter(filters, REQUEST_ID, requestId);
+        addEqualityFilter(filters, POLICY_STORE_ID, policyStoreId);
+        addEqualityFilter(filters, POLICY_STORE_VERSION, policyStoreVersion);
+
+        Filter searchFilter = Filter.createANDFilter(filters);
 
         logger.debug("Search LogEntrys with searchFilter: {}", searchFilter);
         return persistenceEntryManager.findEntries(baseDn, LogEntry.class, searchFilter,
                 sizeLimit);
     }
    
+    private static void addEqualityFilter(List<Filter> filters, String attribute, String value) {
+        if (StringUtils.isNotBlank(value)) {
+            filters.add(Filter.createEqualityFilter(attribute, value.trim()));
+        }
+    }
+
     public LogEntry getLogEntryByDn(String dn) {
         try {
             return persistenceEntryManager.find(LogEntry.class, dn);
