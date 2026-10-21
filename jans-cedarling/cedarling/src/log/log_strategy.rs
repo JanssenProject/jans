@@ -3,8 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-#[cfg(not(target_arch = "wasm32"))]
-use std::sync::Arc;
 use std::sync::RwLock;
 
 use super::LogLevel;
@@ -16,8 +14,6 @@ use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
 use crate::lock::AuditItem;
 use crate::lock::LockService;
-#[cfg(not(target_arch = "wasm32"))]
-use crate::lock::TraceSink;
 use crate::lock::health_registry::HealthRegistry;
 use crate::log::BaseLogEntry;
 use crate::log::loggable_fn::LoggableFn;
@@ -173,19 +169,6 @@ impl LogStrategy {
             .as_ref()
             .and_then(|ls| ls.health_registry())
             .cloned()
-    }
-
-    #[cfg(not(target_arch = "wasm32"))]
-    #[expect(
-        dead_code,
-        reason = "consumed by the TRACE emitter; remove when it is wired in"
-    )]
-    pub(crate) fn trace_sink(&self) -> Option<Arc<TraceSink>> {
-        self.lock_service
-            .read()
-            .expect("obtain lock_service read lock")
-            .as_ref()
-            .and_then(LockService::trace_sink)
     }
 
     pub(crate) fn policy_store_bearer_for(&self, uri: &str) -> Option<String> {

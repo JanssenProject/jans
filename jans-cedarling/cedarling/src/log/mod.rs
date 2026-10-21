@@ -81,6 +81,8 @@ pub(crate) use log_strategy::LogStrategy;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::log_config::LogConfig;
+#[cfg(not(target_arch = "wasm32"))]
+use crate::lock::TraceSink;
 use crate::lock::{InitLockServiceError, LockService};
 use crate::{HttpClientConfig, LockServiceConfig, TraceEndpoint};
 
@@ -92,6 +94,15 @@ pub(crate) type LoggerWeak = Weak<LogStrategy>;
 #[cfg(test)]
 pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(init_test_logger);
 
+/// What [`init_logger`] sets up: the logger, which owns the Lock service, and
+/// the TRACE sink that service created. The sink is handed out here rather than
+/// read back through the logger, because sending TRACE records is not logging.
+pub(crate) struct InitializedLogger {
+    pub(crate) log: Logger,
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(crate) trace_sink: Option<Arc<TraceSink>>,
+}
+
 /// Initialize logger.
 /// entry point for initialize logger
 pub(crate) async fn init_logger(
@@ -102,9 +113,11 @@ pub(crate) async fn init_logger(
     metrics: Arc<MetricsCollector>,
     http_conf: HttpClientConfig,
     trace: Option<&TraceEndpoint>,
-) -> Result<Logger, InitLockServiceError> {
+) -> Result<InitializedLogger, InitLockServiceError> {
     let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name.clone()));
     let logger_weak = Arc::downgrade(&logger);
+    #[cfg(not(target_arch = "wasm32"))]
+    let mut trace_sink = None;
     if let Some(lock_config) = lock_config {
         let lock_service = LockService::new(
             pdp_id,
@@ -116,9 +129,17 @@ pub(crate) async fn init_logger(
             trace,
         )
         .await?;
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            trace_sink = lock_service.trace_sink();
+        }
         logger.set_lock_service(lock_service);
     }
-    Ok(logger)
+    Ok(InitializedLogger {
+        log: logger,
+        #[cfg(not(target_arch = "wasm32"))]
+        trace_sink,
+    })
 }
 
 #[allow(dead_code)]

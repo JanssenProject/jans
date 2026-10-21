@@ -222,7 +222,7 @@ impl Cedarling {
         );
         let metrics = Arc::new(MetricsCollector::new(metrics_mode));
 
-        let log = crate::log::init_logger(
+        let initialized = crate::log::init_logger(
             &config.log_config,
             pdp_id,
             app_name,
@@ -232,6 +232,10 @@ impl Cedarling {
             config.trace_config.as_ref().map(|trace| &trace.endpoint),
         )
         .await?;
+        let log = initialized.log;
+        // Handed to the TRACE emitter.
+        #[cfg(not(target_arch = "wasm32"))]
+        let _trace_sink = initialized.trace_sink;
 
         log.log_any(
             LogEntry::new(BaseLogEntry::new_system_opt_request_id(
