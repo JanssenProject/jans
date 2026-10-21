@@ -18,6 +18,7 @@ import io.jans.core.cedarling.service.policy.PolicyDownloadService;
 import io.jans.core.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
 import io.jans.core.cedarling.service.policy.PolicySnapshotEvent;
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.model.PolicyRef;
@@ -32,7 +33,7 @@ import jakarta.inject.Inject;
  * has served under the same {@code policy_store_id}. Every node records the releases it serves in
  * the shared TRACE store when it publishes a reload, so the history covers all replicas and
  * survives restarts. A release is acceptable when this node serves it now, or when some node
- * served it within the effective grace period before the time the record is judged at. A store
+ * served it within the acceptance window before the time the record is judged at. A store
  * this node does not serve is never a mismatch, because producers may load stores from
  * elsewhere. The check is best-effort: a failure never rejects or flags a record.
  */
@@ -45,7 +46,15 @@ public class PolicyMismatchCheck {
 
 	static final int CACHE_MAX_ENTRIES = 1_000;
 
-	private static final long MAX_SERVED_UPDATE_INTERVAL_MS = 60_000L;
+	static final long SERVED_UPDATE_INTERVAL_MS = 60_000L;
+
+	/**
+	 * How far a stored last-served time can trail the moment a node last served the release: one
+	 * update interval, plus a reload interval before the node notices and one more before it
+	 * publishes, plus the cache lifetime on the judging node.
+	 */
+	static final long LAST_SERVED_STALENESS_MS = SERVED_UPDATE_INTERVAL_MS
+			+ 2_000L * PolicyDownloadService.RELOAD_INTERVAL_SECONDS + CACHE_TTL_MS;
 
 	@Inject
 	private Logger log;
@@ -94,7 +103,7 @@ public class PolicyMismatchCheck {
 	/**
 	 * @param judgedAtMs the time the record is judged at, epoch milliseconds
 	 * @return {@code true} when the record names a store this node serves with a release that no
-	 *         node served at or within the effective grace period before {@code judgedAtMs}, or
+	 *         node served at or within the acceptance window before {@code judgedAtMs}, or
 	 *         with a different {@code policy_store_version}
 	 */
 	public boolean check(PolicyRef policy, long judgedAtMs) {
@@ -111,7 +120,7 @@ public class PolicyMismatchCheck {
 			}
 			Optional<TracePolicyReleaseEntry> release = findRelease(policy.getPolicyStoreId(), policy.getBundleHash());
 			if (!release.isPresent() || release.get().getLastServedAtMs() == null
-					|| release.get().getLastServedAtMs() + effectiveGraceMs() < judgedAtMs) {
+					|| release.get().getLastServedAtMs() + acceptanceWindowMs() < judgedAtMs) {
 				return true;
 			}
 			return versionDiffers(release.get().getPolicyStoreVersion(), policy);
@@ -122,18 +131,15 @@ public class PolicyMismatchCheck {
 	}
 
 	/**
-	 * @return {@code policyMismatchGraceSeconds}, but at least two reload intervals, so a release
-	 *         another node still serves never looks retired between its updates
+	 * @return how long after its stored last-served time a release still matches: the larger of
+	 *         {@code policyMismatchGraceSeconds} and {@code latenessThresholdSeconds} (a record
+	 *         judged at receipt may arrive that much after it was signed), plus
+	 *         {@link #LAST_SERVED_STALENESS_MS}
 	 */
-	long effectiveGraceMs() {
-		long graceSeconds = Math.max(appConfiguration.getTraceConfiguration().getPolicyMismatchGraceSeconds(),
-				2L * PolicyDownloadService.RELOAD_INTERVAL_SECONDS);
-		return graceSeconds * 1000L;
-	}
-
-	long servedUpdateIntervalMs() {
-		return Math.min(MAX_SERVED_UPDATE_INTERVAL_MS,
-				appConfiguration.getTraceConfiguration().getPolicyMismatchGraceSeconds() * 1000L / 2);
+	long acceptanceWindowMs() {
+		TraceConfiguration config = appConfiguration.getTraceConfiguration();
+		long seconds = Math.max(config.getPolicyMismatchGraceSeconds(), config.getLatenessThresholdSeconds());
+		return seconds * 1000L + LAST_SERVED_STALENESS_MS;
 	}
 
 	private void recordServed(String policyStoreId, LoadedPolicySource source, long servedAtMs) {
@@ -172,7 +178,7 @@ public class PolicyMismatchCheck {
 	private boolean needsUpdate(TracePolicyReleaseEntry release, long servedAtMs) {
 		Long lastServedAtMs = release.getLastServedAtMs();
 		Long firstServedAtMs = release.getFirstServedAtMs();
-		return lastServedAtMs == null || servedAtMs - lastServedAtMs >= servedUpdateIntervalMs()
+		return lastServedAtMs == null || servedAtMs - lastServedAtMs >= SERVED_UPDATE_INTERVAL_MS
 				|| firstServedAtMs == null || servedAtMs < firstServedAtMs;
 	}
 

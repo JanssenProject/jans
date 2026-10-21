@@ -122,17 +122,31 @@ class PolicyMismatchCheckTest {
 	}
 
 	@Test
-	void testCheck_RetiredReleaseWithinGrace_NoMismatch() {
+	void testCheck_RetiredReleaseWithinWindow_NoMismatch() {
 		rollOutSecondRelease();
 
-		assertFalse(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + GRACE_MS));
+		assertFalse(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + check.acceptanceWindowMs()));
 	}
 
 	@Test
-	void testCheck_RetiredReleaseAfterGrace_Mismatch() {
+	void testCheck_ClearlyStaleRelease_Mismatch() {
 		rollOutSecondRelease();
 
-		assertTrue(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + GRACE_MS + 1));
+		assertTrue(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + check.acceptanceWindowMs() + 1));
+	}
+
+	@Test
+	void testCheck_DefaultsLateUploadAfterRollout_NoMismatch() {
+		appConfiguration = new AppConfiguration();
+		check = node(served);
+		long lastBump = T0;
+		long retiredAt = lastBump + 80_000L;
+		long receivedAt = retiredAt + 270_000L;
+		publish(check, Map.of(), FIRST, lastBump);
+		served.archive(STORE, "2.0.0", NEXT_HASH);
+		publish(check, FIRST, SECOND, retiredAt);
+
+		assertFalse(check.check(new PolicyRef(STORE, "1.0.0", HASH), receivedAt));
 	}
 
 	@Test
@@ -210,13 +224,16 @@ class PolicyMismatchCheckTest {
 	}
 
 	@Test
-	void testCheck_ZeroGraceStillCoversTwoReloadIntervals() {
-		appConfiguration.getTraceConfiguration().setPolicyMismatchGraceSeconds(0);
-		rollOutSecondRelease();
-		long reloadWindowMs = 2_000L * PolicyDownloadService.RELOAD_INTERVAL_SECONDS;
+	void testCheck_SmallGraceReleaseServedElsewhere_NoMismatch() {
+		appConfiguration.getTraceConfiguration().setPolicyMismatchGraceSeconds(60);
+		appConfiguration.getTraceConfiguration().setLatenessThresholdSeconds(60);
+		PolicyMismatchCheck nodeA = node(new StaticPolicyDownloadService().archive(STORE, "2.0.0", NEXT_HASH));
+		publish(nodeA, Map.of(), SECOND, T0);
 
-		assertFalse(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + reloadWindowMs));
-		assertTrue(node(served).check(new PolicyRef(STORE, "1.0.0", HASH), T0 + reloadWindowMs + 1));
+		assertFalse(check.check(new PolicyRef(STORE, "2.0.0", NEXT_HASH),
+				T0 + 60_000L + PolicyMismatchCheck.LAST_SERVED_STALENESS_MS));
+		assertTrue(node(served).check(new PolicyRef(STORE, "2.0.0", NEXT_HASH),
+				T0 + 60_000L + PolicyMismatchCheck.LAST_SERVED_STALENESS_MS + 1));
 	}
 
 	@Test
