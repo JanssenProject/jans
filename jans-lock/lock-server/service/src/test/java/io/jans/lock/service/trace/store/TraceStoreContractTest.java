@@ -19,6 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -408,6 +410,18 @@ public abstract class TraceStoreContractTest {
 		Optional<TraceReceiptEntry> found = store.findReceipt(DOMAIN, 1L);
 		assertTrue(found.isPresent());
 		assertEquals(TraceReceiptState.COMMITTED, found.get().getReceiptStateEnum());
+	}
+
+	@Test
+	void testFindReceipts_returnsExistingSequencesOfTheDomainOnly() throws Exception {
+		store.insertReceipt(newReceiptRow(1L, 1000L, "producer-1", "record-1", TraceReceiptState.COMMITTED));
+		store.insertReceipt(newReceiptRow(2L, 2000L, "producer-1", "record-2", TraceReceiptState.PENDING));
+		store.insertReceipt(newReceiptRow(3L, 3000L, "producer-1", "record-3", TraceReceiptState.COMMITTED));
+
+		List<TraceReceiptEntry> found = store.findReceipts(DOMAIN, List.of(1L, 3L, 99L, 1L));
+
+		assertEquals(Set.of(1L, 3L), found.stream().map(TraceReceiptEntry::getReceiptSeq).collect(Collectors.toSet()));
+		assertTrue(store.findReceipts("other-domain", List.of(1L)).isEmpty());
 	}
 
 	@Test

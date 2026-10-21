@@ -19,6 +19,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -63,6 +64,7 @@ import io.jans.lock.service.trace.ingest.TraceIngestionService;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.ReceiptEntry;
+import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.VerificationResult;
 import io.jans.lock.service.trace.retrieve.TraceRetrievalService;
@@ -228,7 +230,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 			TraceRequestContext context = resolveContext();
 			StoredTraceRecord stored = retrievalService.findRecord(context.getEvidenceDomainId(), recordId, producerId);
 
-			response = Response.ok(toRecordResponse(stored)).cacheControl(ServerUtil.cacheControl(true))
+			response = Response.ok(toRecordResponse(stored, retrievalService.findReceiptState(stored))).cacheControl(ServerUtil.cacheControl(true))
 					.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE).build();
 			return response;
 		} catch (RuntimeException ex) {
@@ -270,7 +272,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 					new PolicyRecordQuery(storeId, version, hash, fromMs, toMs), start, count);
 
 			TraceRecordSearchResponse dto = new TraceRecordSearchResponse();
-			dto.setRecords(records.stream().map(this::toRecordResponse).collect(Collectors.toList()));
+			dto.setRecords(toRecordResponses(records));
 			response = Response.ok(dto).cacheControl(ServerUtil.cacheControl(true))
 					.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE).build();
 			return response;
@@ -598,11 +600,17 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		TraceExecutionResponse dto = new TraceExecutionResponse();
 		dto.setExecutionAuthority(executionAuthority);
 		dto.setTraceExecutionId(traceExecutionId);
-		dto.setRecords(records.stream().map(this::toRecordResponse).collect(Collectors.toList()));
+		dto.setRecords(toRecordResponses(records));
 		return dto;
 	}
 
-	private TraceRecordResponse toRecordResponse(StoredTraceRecord stored) {
+	private List<TraceRecordResponse> toRecordResponses(List<StoredTraceRecord> records) {
+		Map<RecordIdentity, String> receiptStates = retrievalService.findReceiptStates(records);
+		return records.stream().map(r -> toRecordResponse(r, receiptStates.get(r.getIdentity())))
+				.collect(Collectors.toList());
+	}
+
+	private TraceRecordResponse toRecordResponse(StoredTraceRecord stored, String receiptState) {
 		TraceRecordResponse dto = new TraceRecordResponse();
 		dto.setProducerId(stored.getIdentity().getProducerId());
 		dto.setRecordId(stored.getIdentity().getRecordId());
@@ -610,8 +618,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		dto.setAssertionRaw(stored.getAssertionRaw());
 		dto.setContentDigest(stored.getContentDigest());
 		dto.setVerification(toVerificationResponse(stored.getVerification()));
-		dto.setIngestion(toIngestionResponse(stored.getReceipt(), stored.getFlags(),
-				retrievalService.findReceiptState(stored)));
+		dto.setIngestion(toIngestionResponse(stored.getReceipt(), stored.getFlags(), receiptState));
 		return dto;
 	}
 

@@ -7,6 +7,7 @@
 package io.jans.lock.service.trace.store;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -14,12 +15,14 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import io.jans.lock.model.trace.entity.TraceChainEntry;
@@ -67,6 +70,8 @@ public class InMemoryTraceStore implements TraceStore {
 	private final ConcurrentHashMap<String, StoredTraceRecord> recordsByKey = new ConcurrentHashMap<>();
 
 	private final ConcurrentHashMap<String, TraceReceiptEntry> receiptsByKey = new ConcurrentHashMap<>();
+
+	private final AtomicInteger receiptLookups = new AtomicInteger();
 
 	private final ConcurrentHashMap<String, TraceChainEntry> chainsByKey = new ConcurrentHashMap<>();
 
@@ -332,6 +337,18 @@ public class InMemoryTraceStore implements TraceStore {
 	public Optional<TraceReceiptEntry> findReceipt(String domainId, long receiptSequence) {
 		return Optional.ofNullable(receiptsByKey.get(traceKeys.receiptKey(domainId, receiptSequence)))
 				.map(InMemoryTraceStore::copyOf);
+	}
+
+	@Override
+	public List<TraceReceiptEntry> findReceipts(String domainId, Collection<Long> receiptSequences) {
+		receiptLookups.incrementAndGet();
+		return receiptSequences.stream().distinct().map(seq -> receiptsByKey.get(traceKeys.receiptKey(domainId, seq)))
+				.filter(Objects::nonNull).map(InMemoryTraceStore::copyOf).collect(Collectors.toList());
+	}
+
+	/** @return how many batched receipt lookups were made */
+	public int getReceiptLookups() {
+		return receiptLookups.get();
 	}
 
 	@Override

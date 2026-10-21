@@ -6,7 +6,10 @@
 
 package io.jans.lock.service.trace.retrieve;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -77,6 +80,30 @@ public class TraceRetrievalService {
 	public String findReceiptState(StoredTraceRecord stored) {
 		return traceStore.findReceipt(stored.getIdentity().getDomainId(), stored.getReceipt().getReceiptSequence())
 				.map(TraceReceiptEntry::getReceiptState).orElse(null);
+	}
+
+	/**
+	 * {@link #findReceiptState} for a page of records, with one store lookup per evidence domain.
+	 *
+	 * @return receipt state names by record identity; a record without a receipt row is absent
+	 */
+	public Map<RecordIdentity, String> findReceiptStates(List<StoredTraceRecord> records) {
+		Map<String, List<StoredTraceRecord>> byDomain = records.stream()
+				.collect(Collectors.groupingBy(r -> r.getIdentity().getDomainId()));
+		Map<RecordIdentity, String> states = new HashMap<>();
+		byDomain.forEach((domainId, domainRecords) -> {
+			Map<Long, String> bySequence = new HashMap<>();
+			traceStore.findReceipts(domainId, domainRecords.stream().map(r -> r.getReceipt().getReceiptSequence())
+					.collect(Collectors.toList()))
+					.forEach(receipt -> bySequence.put(receipt.getReceiptSeq(), receipt.getReceiptState()));
+			domainRecords.forEach(r -> {
+				String state = bySequence.get(r.getReceipt().getReceiptSequence());
+				if (state != null) {
+					states.put(r.getIdentity(), state);
+				}
+			});
+		});
+		return states;
 	}
 
 	/**

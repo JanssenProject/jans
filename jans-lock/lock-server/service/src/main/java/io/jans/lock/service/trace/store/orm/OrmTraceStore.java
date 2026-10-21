@@ -7,6 +7,7 @@
 package io.jans.lock.service.trace.store.orm;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -66,6 +67,8 @@ public class OrmTraceStore implements TraceStore {
 	private static final String ATTR_CHAIN_POS_KEY = "jansTraceChainPosKey";
 	private static final String ATTR_TOKEN_KEYS = "jansTraceTokenKeys";
 	private static final String ATTR_RECEIPT_SEQ = "jansTraceReceiptSeq";
+
+	private static final int RECEIPT_LOOKUP_BATCH = 100;
 	private static final String ATTR_RECEIPT_HASH = "jansTraceReceiptHash";
 	private static final String ATTR_RECEIPT_STATE = "jansTraceReceiptState";
 	private static final String ATTR_RECEIVED_AT_MS = "jansTraceReceivedAtMs";
@@ -373,6 +376,21 @@ public class OrmTraceStore implements TraceStore {
 			log.debug("TRACE receipt {} disappeared before read", key);
 			return Optional.empty();
 		}
+	}
+
+	@Override
+	public List<TraceReceiptEntry> findReceipts(String domainId, Collection<Long> receiptSequences) {
+		List<Long> sequences = new ArrayList<>(new LinkedHashSet<>(receiptSequences));
+		List<TraceReceiptEntry> result = new ArrayList<>(sequences.size());
+		for (int from = 0; from < sequences.size(); from += RECEIPT_LOOKUP_BATCH) {
+			List<Filter> sequenceFilters = sequences.subList(from, Math.min(sequences.size(), from + RECEIPT_LOOKUP_BATCH))
+					.stream().map(seq -> Filter.createEqualityFilter(ATTR_RECEIPT_SEQ, seq)).collect(Collectors.toList());
+			Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
+					Filter.createORFilter(sequenceFilters));
+			result.addAll(persistenceEntryManager.findEntries(receiptsBase(), TraceReceiptEntry.class, filter,
+					sequenceFilters.size()));
+		}
+		return result;
 	}
 
 	@Override

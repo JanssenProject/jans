@@ -497,6 +497,22 @@ class TraceRetrievalRestTest extends BaseLockServiceTest {
 	}
 
 	@Test
+	void testSearchRecords_ReceiptStatesReadInOneLookup() throws Exception {
+		insertPolicyRecord("domain-a", "record-1", 1, 1000L, "store-1", "1.0.0", HASH_A);
+		insertPolicyRecord("domain-a", "record-2", 2, 2000L, "store-1", "1.0.0", HASH_A);
+		traceStore.insertReceipt(receiptRow("domain-a", 1L, TraceReceiptState.COMMITTED));
+		traceStore.insertReceipt(receiptRow("domain-a", 2L, TraceReceiptState.PENDING));
+		boundToDomain("domain-a");
+
+		TraceRecordSearchResponse dto = (TraceRecordSearchResponse) impl
+				.searchRecords("store-1", null, null, null, null, 0, 100).getEntity();
+
+		assertEquals(List.of("COMMITTED", "PENDING"), dto.getRecords().stream()
+				.map(r -> r.getIngestion().getReceiptState()).collect(java.util.stream.Collectors.toList()));
+		assertEquals(1, traceStore.getReceiptLookups());
+	}
+
+	@Test
 	void testSearchRecords_ReceivedRange_IsInclusive() throws Exception {
 		insertPolicyRecord("domain-a", "record-1", 1, 1000L, "store-1", "1.0.0", HASH_A);
 		insertPolicyRecord("domain-a", "record-2", 2, 2000L, "store-1", "1.0.0", HASH_A);

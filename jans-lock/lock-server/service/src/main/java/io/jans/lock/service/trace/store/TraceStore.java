@@ -6,6 +6,7 @@
 
 package io.jans.lock.service.trace.store;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -137,6 +138,12 @@ public interface TraceStore {
 	Optional<ReceiptHead> findReceiptHead(String domainId);
 
 	Optional<TraceReceiptEntry> findReceipt(String domainId, long receiptSequence);
+
+	/**
+	 * @return the domain's receipts at the given sequences, in one lookup; sequences without a
+	 *         receipt are absent from the result
+	 */
+	List<TraceReceiptEntry> findReceipts(String domainId, Collection<Long> receiptSequences);
 
 	/**
 	 * @return {@code PENDING} receipts received strictly before {@code cutoffMs} (a receipt
