@@ -6,28 +6,84 @@
 //! Where TRACE records go and the token they go with. TRACE always uses REST:
 //! Lock has no TRACE endpoint over gRPC.
 
+// Driven by the TRACE emitter, not wired in yet. Remove this attribute with it: `expect`
+// turns into a warning as soon as the items are used.
+#![cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "consumed by the TRACE emitter; remove when it is wired in"
+    )
+)]
+
 use std::fmt;
 
+use async_trait::async_trait;
+use reqwest::StatusCode;
+use reqwest::header::CONTENT_TYPE;
+use serde::Deserialize;
 use tokio::sync::RwLock;
 
-use super::register_client::TokenSource;
+use super::register_client::{TokenSource, request_access_token};
 use super::{InitLockServiceError, LockAccessToken};
 use crate::TraceEndpoint;
 use crate::http::HttpClient;
+
+/// Acceptance flags that point at a problem on the producer's side. Coverage
+/// gaps and lateness are expected after a loss or a retry, so they are not kept.
+const PROBLEM_FLAGS: [&str; 4] = [
+    "chain_link_failure_flag",
+    "equivocation_flag",
+    "policy_mismatch_flag",
+    "reserved_member_flag",
+];
+
+/// Sends one bulk body to Lock. A trait so the emitter is tested without HTTP.
+#[async_trait]
+pub(crate) trait BulkSink: Send + Sync {
+    /// Results of a processed request, in request order.
+    async fn post_bulk(&self, body: &str) -> Result<Vec<BulkItemResult>, PostBulkError>;
+}
+
+/// What Lock did with one record of a processed bulk request.
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct BulkItemResult {
+    pub(crate) index: usize,
+    pub(crate) accepted: bool,
+    /// Error id from the Lock error catalog when the record was rejected.
+    pub(crate) error: Option<String>,
+    pub(crate) reason: Option<String>,
+    /// Names of the [`PROBLEM_FLAGS`] Lock set on an accepted record.
+    pub(crate) flags: Vec<&'static str>,
+}
+
+/// Why a bulk request has no per-record results.
+#[derive(Debug, Clone, PartialEq, thiserror::Error)]
+pub(crate) enum PostBulkError {
+    /// The request did not reach Lock or Lock failed: the same bytes may go again.
+    #[error("TRACE bulk request failed: {0}")]
+    Retryable(String),
+    /// Lock refused the whole request; the same bytes get the same answer.
+    #[error(
+        "Lock Server rejected the TRACE bulk request with HTTP {status} (error: {}, reason: {})",
+        error.as_deref().unwrap_or("none"),
+        reason.as_deref().unwrap_or("none")
+    )]
+    Rejected {
+        status: u16,
+        /// Error id from the Lock error catalog.
+        error: Option<String>,
+        reason: Option<String>,
+    },
+}
 
 /// The Lock TRACE bulk endpoint and the client that posts to it. Holds its own
 /// copy of the token, so a `401` can swap in a reissued one.
 pub(crate) struct TraceSink {
     pub(super) endpoint: url::Url,
-    #[expect(
-        dead_code,
-        reason = "used to post bulk requests; remove with that code"
-    )]
     pub(super) http: HttpClient,
-    #[expect(
-        dead_code,
-        reason = "used to post bulk requests; remove with that code"
-    )]
+    /// Shared by every bulk request until Lock answers `401`; then replaced by
+    /// the reissued token, which the following requests use in turn.
     pub(super) token: RwLock<LockAccessToken>,
     /// `None` when the token was given as is and cannot be reissued.
     pub(super) source: Option<TokenSource>,
@@ -39,6 +95,144 @@ impl fmt::Debug for TraceSink {
             .field("endpoint", &self.endpoint.as_str())
             .field("source", &self.source)
             .finish_non_exhaustive()
+    }
+}
+
+/// Answer to one attempt, before a `401` is handled.
+enum Attempt {
+    Results(Vec<BulkItemResult>),
+    Unauthorized,
+}
+
+#[async_trait]
+impl BulkSink for TraceSink {
+    /// The token is not requested per call: the stored one is used, and a new one
+    /// is requested only when Lock answers `401`, i.e. about once per token
+    /// lifetime. Then the same bytes go again, once; a second `401` is final, so
+    /// a token Lock never accepts (e.g. without `trace.write`) costs one extra
+    /// token request per call, not a loop. A pre-issued token cannot be
+    /// reissued, so its `401` is final at once.
+    async fn post_bulk(&self, body: &str) -> Result<Vec<BulkItemResult>, PostBulkError> {
+        if let Attempt::Results(results) = self.post_once(body).await? {
+            return Ok(results);
+        }
+        let Some(source) = &self.source else {
+            return Err(unauthorized());
+        };
+        // Stored for the following calls, so they do not hit `401` again.
+        let token = request_access_token(&self.http, source)
+            .await
+            .map_err(|err| {
+                PostBulkError::Retryable(format!("reissuing the Lock Server token failed: {err}"))
+            })?;
+        *self.token.write().await = LockAccessToken(token);
+        match self.post_once(body).await? {
+            Attempt::Results(results) => Ok(results),
+            Attempt::Unauthorized => Err(unauthorized()),
+        }
+    }
+}
+
+impl TraceSink {
+    async fn post_once(&self, body: &str) -> Result<Attempt, PostBulkError> {
+        let token = self.token.read().await.0.clone();
+        let response = self
+            .http
+            .raw_client
+            .post(self.endpoint.clone())
+            .bearer_auth(token)
+            .header(CONTENT_TYPE, "application/json")
+            .body(body.to_string())
+            .send()
+            .await
+            .map_err(|err| PostBulkError::Retryable(err.to_string()))?;
+        let status = response.status();
+        if status == StatusCode::UNAUTHORIZED {
+            return Ok(Attempt::Unauthorized);
+        }
+        if status.is_server_error() {
+            return Err(PostBulkError::Retryable(format!("HTTP {status}")));
+        }
+        let bytes = self
+            .http
+            .read_response_capped(response)
+            .await
+            .map_err(|err| PostBulkError::Retryable(err.to_string()))?;
+        if status == StatusCode::MULTI_STATUS {
+            return parse_results(&bytes).map(Attempt::Results);
+        }
+        let error = serde_json::from_slice::<ErrorBody>(&bytes).ok();
+        Err(PostBulkError::Rejected {
+            status: status.as_u16(),
+            error: error.as_ref().map(|body| body.error.clone()),
+            reason: error.and_then(|body| body.reason),
+        })
+    }
+}
+
+fn unauthorized() -> PostBulkError {
+    PostBulkError::Rejected {
+        status: StatusCode::UNAUTHORIZED.as_u16(),
+        error: None,
+        reason: None,
+    }
+}
+
+fn parse_results(bytes: &[u8]) -> Result<Vec<BulkItemResult>, PostBulkError> {
+    let response: BulkResponse =
+        serde_json::from_slice(bytes).map_err(|err| PostBulkError::Rejected {
+            status: StatusCode::MULTI_STATUS.as_u16(),
+            error: None,
+            reason: Some(format!("unreadable bulk response: {err}")),
+        })?;
+    Ok(response
+        .results
+        .into_iter()
+        .map(BulkItemResult::from)
+        .collect())
+}
+
+/// Lock's `207` body.
+#[derive(Deserialize)]
+struct BulkResponse {
+    results: Vec<RawItem>,
+}
+
+#[derive(Deserialize)]
+struct RawItem {
+    index: usize,
+    accepted: bool,
+    #[serde(default)]
+    error: Option<ErrorBody>,
+    #[serde(flatten)]
+    members: serde_json::Map<String, serde_json::Value>,
+}
+
+/// Lock's structured error, for a rejected record or a rejected request.
+#[derive(Deserialize)]
+struct ErrorBody {
+    error: String,
+    #[serde(default)]
+    reason: Option<String>,
+}
+
+impl From<RawItem> for BulkItemResult {
+    fn from(item: RawItem) -> Self {
+        let flags = PROBLEM_FLAGS
+            .into_iter()
+            .filter(|flag| item.members.get(*flag) == Some(&serde_json::Value::Bool(true)))
+            .collect();
+        let (error, reason) = match item.error {
+            Some(body) => (Some(body.error), body.reason),
+            None => (None, None),
+        };
+        Self {
+            index: item.index,
+            accepted: item.accepted,
+            error,
+            reason,
+            flags,
+        }
     }
 }
 
@@ -58,5 +252,218 @@ pub(super) fn resolve_trace_endpoint(
         scheme => Err(InitLockServiceError::InvalidTraceEndpointScheme(
             scheme.to_string(),
         )),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use mockito::{Matcher, Mock, Server, ServerGuard};
+    use serde_json::json;
+
+    use super::*;
+    use crate::HttpClientConfig;
+
+    const BODY: &str = r#"[{"producer":"cedarling-fleet-1"},{"producer":"cedarling-fleet-1"}]"#;
+    const BULK_PATH: &str = "/jans-lock/api/v1/audit/trace/bulk";
+
+    fn sink(server: &ServerGuard, source: Option<TokenSource>) -> TraceSink {
+        TraceSink {
+            endpoint: format!("{}{BULK_PATH}", server.url())
+                .parse()
+                .expect("valid URL"),
+            http: HttpClient::new(HttpClientConfig::default()).expect("HTTP client"),
+            token: RwLock::new(LockAccessToken("old-token".to_string())),
+            source,
+        }
+    }
+
+    fn source(server: &ServerGuard) -> TokenSource {
+        TokenSource {
+            token_endpoint: format!("{}/token", server.url()),
+            client_id: "cedarling-client".to_string(),
+            client_secret: "secret".to_string(),
+            scope: "https://jans.io/oauth/lock/trace.write".to_string(),
+        }
+    }
+
+    fn bulk(server: &mut ServerGuard, token: &str, status: usize, body: &str) -> Mock {
+        server
+            .mock("POST", BULK_PATH)
+            .match_header("authorization", format!("Bearer {token}").as_str())
+            .match_body(Matcher::Exact(BODY.to_string()))
+            .with_status(status)
+            .with_body(body)
+            .create()
+    }
+
+    fn token_endpoint(server: &mut ServerGuard, expected_calls: usize) -> Mock {
+        server
+            .mock("POST", "/token")
+            .with_body(json!({"access_token": "new-token"}).to_string())
+            .expect(expected_calls)
+            .create()
+    }
+
+    #[tokio::test]
+    async fn multi_status_maps_results_in_order() {
+        let mut server = Server::new_async().await;
+        let results = json!({"results": [
+            {"index": 0, "accepted": true, "policy_mismatch_flag": true,
+             "chain_link_failure_flag": false, "coverage_gap_flag": true},
+            {"index": 1, "accepted": false,
+             "error": {"error": "invalid_signature", "reason": "signature_mismatch"}},
+        ]});
+        let _bulk = bulk(&mut server, "old-token", 207, &results.to_string());
+
+        let items = sink(&server, None)
+            .post_bulk(BODY)
+            .await
+            .expect("a 207 response should be read per record");
+
+        assert_eq!(
+            items,
+            vec![
+                BulkItemResult {
+                    index: 0,
+                    accepted: true,
+                    error: None,
+                    reason: None,
+                    flags: vec!["policy_mismatch_flag"],
+                },
+                BulkItemResult {
+                    index: 1,
+                    accepted: false,
+                    error: Some("invalid_signature".to_string()),
+                    reason: Some("signature_mismatch".to_string()),
+                    flags: vec![],
+                },
+            ],
+            "results keep request order; only flags that point at a problem are kept"
+        );
+    }
+
+    #[tokio::test]
+    async fn multi_status_with_bad_body_is_rejected() {
+        let mut server = Server::new_async().await;
+        let _bulk = bulk(&mut server, "old-token", 207, "not json");
+
+        let err = sink(&server, None)
+            .post_bulk(BODY)
+            .await
+            .expect_err("an unreadable 207 body should be an error");
+        assert!(
+            matches!(err, PostBulkError::Rejected { status: 207, .. }),
+            "expected Rejected {{ status: 207 }}, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn server_error_is_retryable() {
+        let mut server = Server::new_async().await;
+        let _bulk = bulk(&mut server, "old-token", 503, "");
+
+        let err = sink(&server, None)
+            .post_bulk(BODY)
+            .await
+            .expect_err("a 5xx response should be an error");
+        assert!(
+            matches!(err, PostBulkError::Retryable(_)),
+            "expected Retryable, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn unreachable_endpoint_is_retryable() {
+        let server = Server::new_async().await;
+        let mut sink = sink(&server, None);
+        sink.endpoint = "http://127.0.0.1:1/bulk".parse().expect("valid URL");
+
+        let err = sink
+            .post_bulk(BODY)
+            .await
+            .expect_err("a connection failure should be an error");
+        assert!(
+            matches!(err, PostBulkError::Retryable(_)),
+            "expected Retryable, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn bad_request_is_rejected_with_error_id() {
+        let mut server = Server::new_async().await;
+        let body = json!({"error": "invalid_request", "reason": "bulk_body_too_large"});
+        let _bulk = bulk(&mut server, "old-token", 400, &body.to_string());
+
+        let err = sink(&server, None)
+            .post_bulk(BODY)
+            .await
+            .expect_err("a 4xx response should be an error");
+        assert!(
+            matches!(
+                err,
+                PostBulkError::Rejected { status: 400, ref error, ref reason }
+                    if error.as_deref() == Some("invalid_request")
+                        && reason.as_deref() == Some("bulk_body_too_large")
+            ),
+            "expected Rejected {{ 400, invalid_request, bulk_body_too_large }}, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn unauthorized_reissues_token_and_resends_same_body() {
+        let mut server = Server::new_async().await;
+        let old = bulk(&mut server, "old-token", 401, "").expect(1);
+        let new = bulk(&mut server, "new-token", 207, r#"{"results": []}"#).expect(1);
+        let token = token_endpoint(&mut server, 1);
+        let source = source(&server);
+
+        sink(&server, Some(source))
+            .post_bulk(BODY)
+            .await
+            .expect("a reissued token should get the same body through");
+
+        old.assert_async().await;
+        new.assert_async().await;
+        token.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn unauthorized_twice_is_rejected() {
+        let mut server = Server::new_async().await;
+        let old = bulk(&mut server, "old-token", 401, "").expect(1);
+        let new = bulk(&mut server, "new-token", 401, "").expect(1);
+        let token = token_endpoint(&mut server, 1);
+        let source = source(&server);
+
+        let err = sink(&server, Some(source))
+            .post_bulk(BODY)
+            .await
+            .expect_err("a 401 after reissue should be an error");
+
+        assert!(
+            matches!(err, PostBulkError::Rejected { status: 401, .. }),
+            "expected Rejected {{ status: 401 }}, got {err:?}"
+        );
+        old.assert_async().await;
+        new.assert_async().await;
+        token.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn unauthorized_without_token_source_is_rejected() {
+        let mut server = Server::new_async().await;
+        let _bulk = bulk(&mut server, "old-token", 401, "").expect(1);
+        let token = token_endpoint(&mut server, 0);
+
+        let err = sink(&server, None)
+            .post_bulk(BODY)
+            .await
+            .expect_err("a pre-issued token cannot be reissued");
+
+        assert!(
+            matches!(err, PostBulkError::Rejected { status: 401, .. }),
+            "expected Rejected {{ status: 401 }}, got {err:?}"
+        );
+        token.assert_async().await;
     }
 }

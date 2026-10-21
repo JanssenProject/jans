@@ -117,10 +117,10 @@ pub(super) struct ClientCredentials {
 /// The registered client and the token endpoint, kept so a token can be reissued.
 #[derive(PartialEq, Clone)]
 pub(super) struct TokenSource {
-    token_endpoint: String,
-    client_id: String,
-    client_secret: String,
-    scope: String,
+    pub(super) token_endpoint: String,
+    pub(super) client_id: String,
+    pub(super) client_secret: String,
+    pub(super) scope: String,
 }
 
 impl std::fmt::Debug for TokenSource {
