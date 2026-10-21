@@ -12,6 +12,7 @@ import java.util.Objects;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.Version;
 import io.jans.orm.model.base.BaseEntry;
 
 /**
@@ -36,11 +37,15 @@ public class TracePolicyReleaseEntry extends BaseEntry implements Serializable {
     @AttributeName(name = "jansTracePolicyStoreVersion")
     private String policyStoreVersion;
 
-    @AttributeName(name = "jansTraceFirstServedAtMs", ignoreDuringUpdate = true)
+    @AttributeName(name = "jansTraceFirstServedAtMs")
     private Long firstServedAtMs;
 
     @AttributeName(name = "jansTraceLastServedAtMs")
     private Long lastServedAtMs;
+
+    @Version
+    @AttributeName(name = "jansVersion", ignoreDuringUpdate = true)
+    private Long version;
 
     public String getId() {
         return id;
@@ -88,6 +93,14 @@ public class TracePolicyReleaseEntry extends BaseEntry implements Serializable {
 
     public void setLastServedAtMs(Long lastServedAtMs) {
         this.lastServedAtMs = lastServedAtMs;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     @Override

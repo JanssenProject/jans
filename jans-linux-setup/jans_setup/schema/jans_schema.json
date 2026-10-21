@@ -7176,7 +7176,8 @@
         "jansTraceBundleHash",
         "jansTracePolicyStoreVersion",
         "jansTraceFirstServedAtMs",
-        "jansTraceLastServedAtMs"
+        "jansTraceLastServedAtMs",
+        "jansVersion"
       ],
       "must": [
         "objectclass"

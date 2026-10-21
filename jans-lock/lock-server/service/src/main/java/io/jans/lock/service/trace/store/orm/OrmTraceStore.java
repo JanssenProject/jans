@@ -37,6 +37,7 @@ import io.jans.lock.service.trace.model.ReceiptHead;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
+import io.jans.lock.service.trace.store.PolicyReleaseServed;
 import io.jans.lock.service.trace.store.TraceKeys;
 import io.jans.lock.service.trace.store.TraceStore;
 import io.jans.orm.PersistenceEntryManager;
@@ -418,25 +419,33 @@ public class OrmTraceStore implements TraceStore {
 		String dn = TraceKeys.policyReleaseDn(baseDn(), key);
 		entry.setId(key);
 		entry.setDn(dn);
+		entry.setVersion(0L);
 		duplicateSafeInsert(dn, TracePolicyReleaseEntry.class, entry, key);
 	}
 
 	@Override
-	public boolean updatePolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
-			long lastServedAtMs) throws TraceStorageException {
-		Optional<TracePolicyReleaseEntry> found = findPolicyRelease(policyStoreId, bundleHash);
-		if (!found.isPresent()) {
-			return false;
+	public boolean recordPolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
+			long servedAtMs) throws TraceStorageException {
+		for (int attempt = 0; attempt < INTERNAL_CAS_RETRY_LIMIT; attempt++) {
+			Optional<TracePolicyReleaseEntry> found = findPolicyRelease(policyStoreId, bundleHash);
+			if (!found.isPresent()) {
+				return false;
+			}
+			TracePolicyReleaseEntry entry = found.get();
+			if (!PolicyReleaseServed.apply(entry, policyStoreVersion, servedAtMs)) {
+				return true;
+			}
+			try {
+				persistenceEntryManager.updateWithVersion(entry);
+				return true;
+			} catch (VersionMismatchException e) {
+				log.debug("TRACE policy release {} changed concurrently, retrying", entry.getId());
+			} catch (EntryPersistenceException e) {
+				throw new TraceStorageException("merge_failed", "Failed to update policy release " + entry.getId(), e);
+			}
 		}
-		TracePolicyReleaseEntry entry = found.get();
-		entry.setPolicyStoreVersion(policyStoreVersion);
-		entry.setLastServedAtMs(lastServedAtMs);
-		try {
-			persistenceEntryManager.merge(entry);
-			return true;
-		} catch (EntryPersistenceException e) {
-			throw new TraceStorageException("merge_failed", "Failed to update policy release " + entry.getId(), e);
-		}
+		throw new TraceStorageException(TraceStore.VERSION_CONFLICT_REASON, "Failed to update policy release for "
+				+ policyStoreId + " after " + INTERNAL_CAS_RETRY_LIMIT + " retries");
 	}
 
 	@Override

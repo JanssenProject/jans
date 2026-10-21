@@ -373,20 +373,18 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
-	public boolean updatePolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
-			long lastServedAtMs) {
+	public boolean recordPolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
+			long servedAtMs) {
 		TracePolicyReleaseEntry updated = policyReleasesByKey.computeIfPresent(
 				traceKeys.policyReleaseKey(policyStoreId, bundleHash), (key, current) -> {
 					TracePolicyReleaseEntry next = copyOf(current);
-					next.setPolicyStoreVersion(policyStoreVersion);
-					next.setLastServedAtMs(lastServedAtMs);
+					if (!PolicyReleaseServed.apply(next, policyStoreVersion, servedAtMs)) {
+						return current;
+					}
+					policyReleaseWrites.incrementAndGet();
 					return next;
 				});
-		if (updated == null) {
-			return false;
-		}
-		policyReleaseWrites.incrementAndGet();
-		return true;
+		return updated != null;
 	}
 
 	/** @return how many policy release inserts and updates were made */

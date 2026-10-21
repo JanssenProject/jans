@@ -20,6 +20,7 @@ import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.model.PolicyRef;
+import io.jans.lock.service.trace.store.PolicyReleaseServed;
 import io.jans.lock.service.trace.store.TraceStore;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -124,8 +125,7 @@ public class PolicyMismatchCheck {
 		String bundleHash = source.getBundleHash();
 		String version = source.getPolicyStoreVersion();
 		CachedRelease cached = cache.get(cacheKey(policyStoreId, bundleHash));
-		if (cached != null && cached.release.getLastServedAtMs() != null
-				&& servedAtMs - cached.release.getLastServedAtMs() < servedUpdateIntervalMs()) {
+		if (cached != null && !needsUpdate(cached.release, servedAtMs)) {
 			return;
 		}
 		Optional<TracePolicyReleaseEntry> stored = store.findPolicyRelease(policyStoreId, bundleHash);
@@ -146,14 +146,19 @@ public class PolicyMismatchCheck {
 		}
 		if (stored.isPresent()) {
 			TracePolicyReleaseEntry entry = stored.get();
-			Long lastServedAtMs = entry.getLastServedAtMs();
-			if (lastServedAtMs == null || servedAtMs - lastServedAtMs >= servedUpdateIntervalMs()) {
-				store.updatePolicyReleaseServed(policyStoreId, bundleHash, version, servedAtMs);
-				entry.setPolicyStoreVersion(version);
-				entry.setLastServedAtMs(servedAtMs);
+			if (needsUpdate(entry, servedAtMs)) {
+				store.recordPolicyReleaseServed(policyStoreId, bundleHash, version, servedAtMs);
+				PolicyReleaseServed.apply(entry, version, servedAtMs);
 			}
 			remember(policyStoreId, bundleHash, entry);
 		}
+	}
+
+	private boolean needsUpdate(TracePolicyReleaseEntry release, long servedAtMs) {
+		Long lastServedAtMs = release.getLastServedAtMs();
+		Long firstServedAtMs = release.getFirstServedAtMs();
+		return lastServedAtMs == null || servedAtMs - lastServedAtMs >= servedUpdateIntervalMs()
+				|| firstServedAtMs == null || servedAtMs < firstServedAtMs;
 	}
 
 	private Optional<TracePolicyReleaseEntry> findRelease(String policyStoreId, String bundleHash) {

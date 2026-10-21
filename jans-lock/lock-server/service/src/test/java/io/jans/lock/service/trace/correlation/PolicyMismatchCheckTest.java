@@ -174,6 +174,16 @@ class PolicyMismatchCheckTest {
 	}
 
 	@Test
+	void testOnPolicySnapshot_LaggingNodeCannotMoveLastServedBack() {
+		publish(check, Map.of(), FIRST, T0 + 100_000L);
+		PolicyMismatchCheck lagging = node(new StaticPolicyDownloadService().archive(STORE, "1.0.0", HASH));
+		publish(lagging, Map.of(), FIRST, T0);
+
+		assertEquals(T0 + 100_000L, store.findPolicyRelease(STORE, HASH).orElseThrow().getLastServedAtMs());
+		assertEquals(T0, store.findPolicyRelease(STORE, HASH).orElseThrow().getFirstServedAtMs());
+	}
+
+	@Test
 	void testCheck_ZeroGraceStillCoversTwoReloadIntervals() {
 		appConfiguration.getTraceConfiguration().setPolicyMismatchGraceSeconds(0);
 		rollOutSecondRelease();

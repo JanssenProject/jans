@@ -440,14 +440,28 @@ public abstract class TraceStoreContractTest {
 		String hash = "sha256:" + "a".repeat(64);
 		store.insertPolicyRelease(policyRelease(hash, 1000L));
 
-		assertTrue(store.updatePolicyReleaseServed("store-1", hash, "1.0.1", 5000L));
+		assertTrue(store.recordPolicyReleaseServed("store-1", hash, "1.0.1", 5000L));
 		TracePolicyReleaseEntry found = store.findPolicyRelease("store-1", hash).orElseThrow();
 
 		assertEquals(1000L, found.getFirstServedAtMs());
 		assertEquals(5000L, found.getLastServedAtMs());
 		assertEquals("1.0.1", found.getPolicyStoreVersion());
 		assertFalse(store.findPolicyRelease("store-1", "sha256:" + "b".repeat(64)).isPresent());
-		assertFalse(store.updatePolicyReleaseServed("store-2", hash, "1.0.0", 5000L));
+		assertFalse(store.recordPolicyReleaseServed("store-2", hash, "1.0.0", 5000L));
+	}
+
+	@Test
+	void testPolicyRelease_servedTimesOnlyWiden() throws Exception {
+		String hash = "sha256:" + "d".repeat(64);
+		store.insertPolicyRelease(policyRelease(hash, 5000L));
+
+		assertTrue(store.recordPolicyReleaseServed("store-1", hash, "0.9.0", 3000L));
+		assertTrue(store.recordPolicyReleaseServed("store-1", hash, "1.0.0", 4000L));
+		TracePolicyReleaseEntry found = store.findPolicyRelease("store-1", hash).orElseThrow();
+
+		assertEquals(3000L, found.getFirstServedAtMs());
+		assertEquals(5000L, found.getLastServedAtMs());
+		assertEquals("1.0.0", found.getPolicyStoreVersion());
 	}
 
 	@Test

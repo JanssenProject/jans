@@ -158,12 +158,14 @@ public interface TraceStore {
 	void insertPolicyRelease(TracePolicyReleaseEntry entry) throws DuplicateEntryException, TraceStorageException;
 
 	/**
-	 * Sets the release's last-served time and version.
+	 * Records that a node served the release at {@code servedAtMs}: the last-served time only moves
+	 * forward (and the version with it), the first-served time only moves back. Concurrent callers
+	 * keep the maximum and the minimum.
 	 *
 	 * @return {@code false} when no such release is stored
 	 */
-	boolean updatePolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
-			long lastServedAtMs) throws TraceStorageException;
+	boolean recordPolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
+			long servedAtMs) throws TraceStorageException;
 
 	/**
 	 * @return {@code PENDING} receipts received strictly before {@code cutoffMs} (a receipt
