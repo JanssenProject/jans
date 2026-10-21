@@ -6,7 +6,10 @@
 //! TRACE producer: everything Cedarling needs to sign `AUTHORIZATION_DECISION`
 //! records. Cryptography lives in `jans-trace-core`.
 
+#[cfg(not(target_arch = "wasm32"))]
 mod chain;
+#[cfg(not(target_arch = "wasm32"))]
+mod emitter;
 #[cfg(not(target_arch = "wasm32"))]
 mod key;
 mod producer_id;
@@ -23,4 +26,4 @@ pub use producer_id::{ParseProducerIdError, ProducerId};
 pub(crate) use record::{DecisionFacts, DraftError, Outcome, TokenRef};
 pub(crate) use recorder::{TraceRecorder, token_facts};
 pub use signing_kid::{ParseTraceSigningKidError, TraceSigningKid};
-pub(crate) use status::TraceRecordStatus;
+pub(crate) use status::{EmitterEvent, TraceRecordStatus};

@@ -7,16 +7,6 @@
 //! record takes the next position and carries the `content_digest` of the one
 //! before, so Lock sees a gap or a fork.
 
-// Driven by the TRACE emitter, not wired in yet. Remove this attribute with it: `expect` turns
-// into a warning as soon as the items are used.
-#![cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "consumed by the TRACE emitter; remove when it is wired in"
-    )
-)]
-
 use jans_trace_core::assertion::{
     ParseUnsignedAssertionError, SignError, SignedAssertion, UnsignedAssertion,
 };
@@ -67,6 +57,16 @@ impl ProducerChain {
             next_sequence: 1,
             prev_record_hash: Digest::GENESIS,
         }
+    }
+
+    /// Id of this chain, `producer_chain_id` in every record of it.
+    pub(crate) fn chain_id(&self) -> Uuid {
+        self.chain_id
+    }
+
+    /// `sequence_number` the next signed record gets; the first record is `1`.
+    pub(crate) fn next_sequence(&self) -> u64 {
+        self.next_sequence
     }
 
     /// The position advances only after the record is signed, so a record that

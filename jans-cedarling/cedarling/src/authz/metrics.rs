@@ -28,7 +28,7 @@ use crate::{
     authz::error_metrics::ErrorMetricKey,
     init::policy_store_refresh::{RefreshOutcome, RefreshStrategy},
     log::Decision,
-    trace::TraceRecordStatus,
+    trace::{EmitterEvent, TraceRecordStatus},
 };
 
 const INTERVAL_LOCK_POISONED: &str = "interval lock poisoned";
@@ -272,6 +272,8 @@ struct IntervalState {
 
     /// One counter per [`TraceRecordStatus::ALL`] entry, in the same order.
     trace_record_statuses: [AtomicI64; TraceRecordStatus::ALL.len()],
+    /// One counter per [`EmitterEvent::ALL`] entry, in the same order.
+    trace_emitter_events: [AtomicI64; EmitterEvent::ALL.len()],
 
     policy_stats: RwLock<HashMap<String, PolicyStats>>,
     error_counters: RwLock<HashMap<String, i64>>,
@@ -310,6 +312,7 @@ impl IntervalState {
             data_get_ops: AtomicI64::new(0),
             data_remove_ops: AtomicI64::new(0),
             trace_record_statuses: Default::default(),
+            trace_emitter_events: Default::default(),
             policy_stats: RwLock::new(HashMap::new()),
             error_counters: RwLock::new(HashMap::new()),
         }
@@ -968,6 +971,23 @@ impl MetricsCollector {
         }
     }
 
+    /// Counts `count` occurrences of what the TRACE emitter did.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(crate) fn record_trace_emitter(&self, event: EmitterEvent, count: usize) {
+        if !self.mode.collects() {
+            return;
+        }
+
+        let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
+        if let Some((_, counter)) = EmitterEvent::ALL
+            .iter()
+            .zip(&interval.trace_emitter_events)
+            .find(|(known, _)| **known == event)
+        {
+            counter.fetch_add(saturating_usize_to_i64(count), Ordering::Relaxed);
+        }
+    }
+
     pub(crate) fn set_policy_count(&self, count: usize) {
         if !self.mode.collects() {
             return;
@@ -1032,6 +1052,9 @@ impl MetricsCollector {
             .zip(&old.trace_record_statuses)
         {
             insert_if_nonzero(&mut ops, status.metric_key(), counter);
+        }
+        for (event, counter) in EmitterEvent::ALL.iter().zip(&old.trace_emitter_events) {
+            insert_if_nonzero(&mut ops, event.metric_key(), counter);
         }
 
         MetricsSnapshot {

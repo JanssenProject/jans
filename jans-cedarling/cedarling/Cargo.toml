@@ -118,7 +118,7 @@ sigstore-verifier = { workspace = true, features = ["test-support"] }
 jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = { workspace = true }
 criterion = { version = "0.8.2", features = ["async_tokio"] }
-tokio = { workspace = true, features = ["rt-multi-thread"] }
+tokio = { workspace = true, features = ["rt-multi-thread", "test-util"] }
 stats_alloc = "0.1.10"
 tempfile = "3.8"
 tokio-stream = "0.1.18"

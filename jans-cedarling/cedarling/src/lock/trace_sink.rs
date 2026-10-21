@@ -6,16 +6,6 @@
 //! Where TRACE records go and the token they go with. TRACE always uses REST:
 //! Lock has no TRACE endpoint over gRPC.
 
-// Driven by the TRACE emitter, not wired in yet. Remove this attribute with it: `expect`
-// turns into a warning as soon as the items are used.
-#![cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "consumed by the TRACE emitter; remove when it is wired in"
-    )
-)]
-
 use std::fmt;
 
 use async_trait::async_trait;

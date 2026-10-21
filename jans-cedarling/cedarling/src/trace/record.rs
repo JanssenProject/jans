@@ -44,6 +44,8 @@ impl Outcome {
         if allowed { Self::Allow } else { Self::Deny }
     }
 
+    /// Read only by the producer chain, which signs on native targets only.
+    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) fn as_str(self) -> &'static str {
         match self {
             Self::Allow => "ALLOW",
@@ -581,6 +583,7 @@ mod tests {
         );
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn outcome_serializes_as_lock_vocabulary() {
         assert_eq!(Outcome::Allow.as_str(), "ALLOW", "allow outcome");

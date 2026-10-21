@@ -48,3 +48,41 @@ impl TraceRecordStatus {
         }
     }
 }
+
+/// What the TRACE emitter did with records after the authorize path handed them
+/// over, counted in the metrics.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum EmitterEvent {
+    /// Lock accepted the record.
+    Accepted,
+    /// Lock refused the record for good, alone or with its whole request.
+    Rejected,
+    /// The record was given up after its retries, or discarded with its lost chain.
+    Dropped,
+    /// The draft could not be signed.
+    SignFailed,
+    /// A chain opened to replace one whose genesis record was lost.
+    ChainOpened,
+}
+
+impl EmitterEvent {
+    /// Every event, each with its own counter.
+    pub(crate) const ALL: [Self; 5] = [
+        Self::Accepted,
+        Self::Rejected,
+        Self::Dropped,
+        Self::SignFailed,
+        Self::ChainOpened,
+    ];
+
+    /// Key of the event counter in the metrics `operational_stats`.
+    pub(crate) fn metric_key(self) -> &'static str {
+        match self {
+            Self::Accepted => "trace.accepted",
+            Self::Rejected => "trace.rejected",
+            Self::Dropped => "trace.dropped",
+            Self::SignFailed => "trace.sign_failed",
+            Self::ChainOpened => "trace.chains_opened",
+        }
+    }
+}

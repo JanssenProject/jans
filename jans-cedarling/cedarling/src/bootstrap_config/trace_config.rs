@@ -39,7 +39,7 @@ impl TraceConfig {
     pub(super) const DEFAULT_BULK_MAX_BYTES: NonZeroUsize = NonZeroUsize::new(4_194_304).unwrap();
     /// Lock's default `maxRequestBytes` for one record, plus the `[` and `]` of a
     /// bulk body: a smaller bulk limit could never send the largest record.
-    const MIN_BULK_MAX_BYTES: usize = 262_144 + 2;
+    pub(crate) const MIN_BULK_MAX_BYTES: usize = 262_144 + 2;
 }
 
 /// Where the TRACE signing key comes from: an unencrypted PKCS#8 PEM Ed25519
