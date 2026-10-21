@@ -82,7 +82,7 @@ use crate::app_types::{ApplicationName, PdpID};
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::log_config::LogConfig;
 use crate::lock::{InitLockServiceError, LockService};
-use crate::{HttpClientConfig, LockServiceConfig};
+use crate::{HttpClientConfig, LockServiceConfig, TraceEndpoint};
 
 /// Type alias for logger that is used in application
 pub(crate) type Logger = Arc<LogStrategy>;
@@ -101,6 +101,7 @@ pub(crate) async fn init_logger(
     lock_config: Option<&LockServiceConfig>,
     metrics: Arc<MetricsCollector>,
     http_conf: HttpClientConfig,
+    trace: Option<&TraceEndpoint>,
 ) -> Result<Logger, InitLockServiceError> {
     let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name.clone()));
     let logger_weak = Arc::downgrade(&logger);
@@ -112,6 +113,7 @@ pub(crate) async fn init_logger(
             metrics,
             app_name,
             http_conf,
+            trace,
         )
         .await?;
         logger.set_lock_service(lock_service);
