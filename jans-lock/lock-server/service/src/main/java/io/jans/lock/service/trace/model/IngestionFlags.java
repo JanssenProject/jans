@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import io.jans.lock.service.trace.TraceConstants;
+
 /**
  * The Lock-derived ingestion flags on a TRACE record (design §10). Unlike the other
  * store value types this class is a mutable, copy-able bag: {@code coverageGap},
@@ -22,7 +24,7 @@ import java.util.Objects;
  */
 public final class IngestionFlags {
 
-	public static final int MAX_RESERVED_MEMBERS = 32;
+	public static final int MAX_RESERVED_MEMBERS = TraceConstants.MAX_RESERVED_MEMBERS;
 
 	private boolean coverageGap;
 

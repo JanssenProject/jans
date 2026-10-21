@@ -38,6 +38,7 @@ import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.BaseLockServiceTest;
+import io.jans.lock.service.trace.TraceConstants;
 
 /**
  * Tests for {@link CommonAssertionValidator}: design §7.1 common-field validation. Each rule gets
@@ -534,6 +535,24 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 		event.putArray("decisions").addObject().set("late_flag", TextNode.valueOf("x"));
 
 		assertEquals(List.of("trace.event.decisions[0].late_flag"), reservedMembersOf(root));
+	}
+
+	@Test
+	void testValidate_manyLockDerivedMembers_cappedButCounted() throws IOException {
+		ObjectNode root = loadFixture();
+		ObjectNode event = (ObjectNode) root.get("trace").get("event");
+		event.remove("decision");
+		ArrayNode decisions = event.putArray("decisions");
+		for (int i = 0; i < 40; i++) {
+			decisions.addObject().set("late_flag", TextNode.valueOf("x"));
+		}
+		ParsedAssertion assertion = assertionOf(root);
+
+		validator.validate(assertion);
+
+		assertEquals(TraceConstants.MAX_RESERVED_MEMBERS, assertion.getReservedMembers().size());
+		assertEquals(40, assertion.getReservedMemberCount());
+		assertEquals("trace.event.decisions[0].late_flag", assertion.getReservedMembers().get(0));
 	}
 
 	@Test

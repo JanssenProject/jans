@@ -44,7 +44,7 @@ public abstract class TraceFlagsResponse {
 	private boolean reservedMemberFlag;
 
 	@JsonProperty("reserved_members")
-	@Schema(description = "Paths of the ignored Lock-derived members, for example trace.trust_tier; their values inside assertion are producer-supplied and unused")
+	@Schema(description = "The first 32 paths of the ignored Lock-derived members, for example trace.trust_tier; their values inside assertion are producer-supplied and unused")
 	private List<String> reservedMembers = new ArrayList<>();
 
 	public boolean isCoverageGapFlag() {

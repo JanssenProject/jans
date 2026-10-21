@@ -122,8 +122,9 @@ public class TraceCorrelationService {
 		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late, policyMismatch);
 		List<String> reservedMembers = verified.getParsed().getReservedMembers();
 		if (!reservedMembers.isEmpty()) {
-			log.warn("TRACE record carries Lock-derived members, ignored: producer={}, record_id={}, members={}",
-					verified.getProducer(), verified.getRecordId(), reservedMembers);
+			log.warn("TRACE record carries {} Lock-derived members, ignored: producer={}, record_id={}, first={}",
+					verified.getParsed().getReservedMemberCount(), verified.getProducer(), verified.getRecordId(),
+					reservedMembers);
 			flags.setReservedMembers(reservedMembers);
 		}
 

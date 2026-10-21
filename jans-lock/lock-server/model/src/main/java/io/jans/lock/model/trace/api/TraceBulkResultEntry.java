@@ -88,7 +88,7 @@ public class TraceBulkResultEntry {
 	private Boolean reservedMemberFlag;
 
 	@JsonProperty("reserved_members")
-	@Schema(description = "Present when accepted: paths of the ignored Lock-derived members")
+	@Schema(description = "Present when accepted: the first 32 paths of the ignored Lock-derived members")
 	private List<String> reservedMembers;
 
 	@JsonProperty("error")

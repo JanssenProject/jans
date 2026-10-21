@@ -65,7 +65,7 @@ public class CommonAssertionValidator {
 	public void validate(ParsedAssertion assertion) {
 		ObjectNode root = assertion.getRoot();
 
-		List<String> reservedMembers = findReservedMembers(root);
+		ReservedMemberPaths reservedMembers = findReservedMembers(root);
 
 		ObjectNode trace = requireObject(root, TRACE, TRACE);
 		ObjectNode producerChainNode = requireObject(root, "producer_chain", "producer_chain");
@@ -160,7 +160,7 @@ public class CommonAssertionValidator {
 				producerChainId, sequenceNumber, prevRecordHash));
 		assertion.setParentRecordIds(parentRecordIds);
 		assertion.setSignature(signature);
-		assertion.setReservedMembers(reservedMembers);
+		assertion.setReservedMembers(reservedMembers.getPaths(), reservedMembers.getTotal());
 	}
 
 	/**
@@ -331,8 +331,8 @@ public class CommonAssertionValidator {
 	 * and Lock's own values are used. Members of other objects (parent edges, {@code tokens[]})
 	 * are not reserved. A non-object container is skipped and left to the shape checks.
 	 */
-	private List<String> findReservedMembers(ObjectNode root) {
-		List<String> found = new ArrayList<>();
+	private ReservedMemberPaths findReservedMembers(ObjectNode root) {
+		ReservedMemberPaths found = new ReservedMemberPaths();
 		collectReservedMembers(root, "", found);
 		JsonNode trace = root.get(TRACE);
 		if (trace == null || !trace.isObject()) {
@@ -359,13 +359,13 @@ public class CommonAssertionValidator {
 		return found;
 	}
 
-	private static void collectReservedMembersOfObject(JsonNode node, String pathPrefix, List<String> found) {
+	private static void collectReservedMembersOfObject(JsonNode node, String pathPrefix, ReservedMemberPaths found) {
 		if (node != null && node.isObject()) {
 			collectReservedMembers(node, pathPrefix, found);
 		}
 	}
 
-	private static void collectReservedMembers(JsonNode node, String pathPrefix, List<String> found) {
+	private static void collectReservedMembers(JsonNode node, String pathPrefix, ReservedMemberPaths found) {
 		if (node.has(TraceConstants.DOMAIN_FIELD)) {
 			found.add(pathPrefix + TraceConstants.DOMAIN_FIELD);
 		}

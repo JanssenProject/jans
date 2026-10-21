@@ -1587,8 +1587,8 @@ components:
             body (for example evidence_domain_id or trust_tier) were ignored
         reserved_members:
           type: array
-          description: "Paths of the ignored Lock-derived members, for example trace.trust_tier;\
-            \ their values inside assertion are producer-supplied and unused"
+          description: "The first 32 paths of the ignored Lock-derived members, for example\
+            \ trace.trust_tier; their values inside assertion are producer-supplied and unused"
           items:
             type: string
       description: Receipt-chain position and ingestion flags for a TRACE record
@@ -1742,7 +1742,8 @@ components:
             \ were ignored"
         reserved_members:
           type: array
-          description: "Present when accepted: paths of the ignored Lock-derived members"
+          description: "Present when accepted: the first 32 paths of the ignored Lock-derived\
+            \ members"
           items:
             type: string
         error:
@@ -1807,8 +1808,8 @@ components:
             body (for example evidence_domain_id or trust_tier) were ignored
         reserved_members:
           type: array
-          description: "Paths of the ignored Lock-derived members, for example trace.trust_tier;\
-            \ their values inside assertion are producer-supplied and unused"
+          description: "The first 32 paths of the ignored Lock-derived members, for example\
+            \ trace.trust_tier; their values inside assertion are producer-supplied and unused"
           items:
             type: string
       description: TRACE record acceptance response

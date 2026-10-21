@@ -73,6 +73,9 @@ public final class TraceConstants {
 	/** Name of the top-level signature field, excluded from the JCS signature input. */
 	public static final String SIGNATURE_FIELD = "signature";
 
+	/** Most Lock-derived member paths kept, logged, stored and returned for one record. */
+	public static final int MAX_RESERVED_MEMBERS = 32;
+
 	/** Path prefix of members of {@code trace.event}, used in error reasons and reserved-member paths. */
 	public static final String TRACE_EVENT_PATH = "trace.event.";
 
