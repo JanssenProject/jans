@@ -12,16 +12,13 @@ use cedar_policy::Entity;
 use serde_json::{Value, json};
 use smol_str::ToSmolStr;
 use std::collections::{HashMap, HashSet};
-use url::Origin;
 
 pub(super) fn build_iss_entity(
     iss_type_name: &str,
     id: &str,
     iss: &TrustedIssuer,
     schema: Option<&MappingSchema>,
-) -> Result<(Origin, Entity), BuildEntityError> {
-    let origin = iss.iss().origin();
-
+) -> Result<Entity, BuildEntityError> {
     let attrs_shape = schema
         .as_ref()
         .map(|s| {
@@ -37,8 +34,7 @@ pub(super) fn build_iss_entity(
     )
     .map_err(|e| BuildEntityErrorKind::from(e).while_building(iss_type_name))?;
 
-    let entity = build_cedar_entity(iss_type_name, id, attrs, HashSet::new())?;
-    Ok((origin, entity))
+    build_cedar_entity(iss_type_name, id, attrs, HashSet::new())
 }
 
 impl TrustedIssuer {
@@ -53,7 +49,7 @@ impl TrustedIssuer {
             "issuer_entity_id".into(),
             json!({
                 "host": iss.host().map(|h| h.to_smolstr()),
-                "path": "/",
+                "path": iss.path(),
                 "protocol": iss.scheme(),
             }),
         )])
@@ -87,11 +83,8 @@ mod test {
         let schema: MappingSchema = (&*CEDARLING_VALIDATOR_SCHEMA)
             .try_into()
             .expect("should initialize mapping schema");
-        let (origin, iss_entity) =
-            build_iss_entity("Jans::TrustedIssuer", "some_iss", &iss, Some(&schema))
-                .expect("should build TrustedIssuer entity");
-
-        assert_eq!(origin.ascii_serialization(), "https://test.jans.org");
+        let iss_entity = build_iss_entity("Jans::TrustedIssuer", "some_iss", &iss, Some(&schema))
+            .expect("should build TrustedIssuer entity");
 
         assert_entity_eq(
             &iss_entity,
@@ -113,10 +106,8 @@ mod test {
     #[test]
     fn can_build_trusted_issuer_entity_without_schema() {
         let iss = test_trusted_issuer();
-        let (origin, iss_entity) = build_iss_entity("TrustedIssuer", "some_iss", &iss, None)
+        let iss_entity = build_iss_entity("TrustedIssuer", "some_iss", &iss, None)
             .expect("should build TrustedIssuer entity");
-
-        assert_eq!(origin.ascii_serialization(), "https://test.jans.org");
 
         assert_entity_eq(
             &iss_entity,
@@ -133,5 +124,36 @@ mod test {
             }),
             None,
         );
+    }
+
+    /// Path-based issuers on one origin keep their own path.
+    #[test]
+    fn issuer_entity_id_keeps_the_iss_path() {
+        for path in ["/realms/a", "/realms/b"] {
+            let iss = TrustedIssuer::discovery_at(
+                "Kc".to_string(),
+                String::new(),
+                Url::parse(&format!("https://kc.example{path}")).unwrap(),
+                HashMap::new(),
+            );
+            let iss_entity = build_iss_entity("TrustedIssuer", "kc", &iss, None)
+                .expect("should build TrustedIssuer entity");
+
+            assert_entity_eq(
+                &iss_entity,
+                &json!({
+                    "uid": {"type": "TrustedIssuer", "id": "kc"},
+                    "attrs": {
+                        "issuer_entity_id": {
+                            "protocol": "https",
+                            "host": "kc.example",
+                            "path": path,
+                        },
+                    },
+                    "parents": [],
+                }),
+                None,
+            );
+        }
     }
 }

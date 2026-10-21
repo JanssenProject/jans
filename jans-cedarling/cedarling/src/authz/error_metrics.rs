@@ -7,7 +7,7 @@ use crate::{
     AuthorizeError, DataError,
     authz::{BatchValidationError, BuildContextError, MultiIssuerValidationError},
     entity_builder::{BuildUnsignedEntityError, MultiIssuerEntityError},
-    jwt::{CustomTokenError, TrustedIssuerError, UnknownTokenMapping, ValidateJwtError},
+    jwt::{CustomTokenError, UnknownTokenMapping, ValidateJwtError},
 };
 
 /// Trait for error types that map to a telemetry metric key.
@@ -109,7 +109,6 @@ impl ErrorMetricKey for ValidateJwtError {
             Self::GetJwtStatus(_) | Self::DeserializeStatusClaim(_) => "jwt.status_check_failed",
             Self::RejectJwtStatus(_) => "jwt.status_rejected",
             Self::MissingStatusList => "jwt.missing_status_list",
-            Self::TrustedIssuerValidation(e) => e.metric_key(),
         }
     }
 }
@@ -123,15 +122,6 @@ impl ErrorMetricKey for DataError {
             Self::TTLExceeded { .. } => "data.ttl_exceeded",
             Self::ValueTooLarge { .. } => "data.value_too_large",
             Self::SerializationError(_) => "data.serialization",
-        }
-    }
-}
-
-impl ErrorMetricKey for TrustedIssuerError {
-    fn metric_key(&self) -> &'static str {
-        match self {
-            Self::UntrustedIssuer(_) => "jwt.untrusted_issuer",
-            Self::MissingRequiredClaim { .. } => "jwt.missing_required_claim",
         }
     }
 }

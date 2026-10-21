@@ -3,36 +3,16 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Trusted issuer JWT validation module.
-//!
-//! This module provides standalone functionality to validate JWT tokens against configured
-//! trusted issuers, including issuer matching, required claims validation, JWKS fetching,
-//! and signature verification.
-//!
-//! ## Features
-//!
-//! - **Issuer matching**: Validates that JWT tokens come from configured trusted issuers
-//! - **Required claims validation**: Ensures tokens contain all claims specified in issuer configuration
-//! - **Signature verification**: Validates JWT signatures using cached JWKS keys
-
-use std::collections::HashMap;
-use std::sync::Arc;
+//! Validation of a JWT against its trusted issuer's per-token configuration.
 
 use serde_json::Value as JsonValue;
 use thiserror::Error;
 
-use crate::common::{
-    issuer_utils::IssClaim,
-    policy_store::{TokenEntityMetadata, TrustedIssuer},
-};
+use crate::common::policy_store::TokenEntityMetadata;
 
 /// Errors that can occur during trusted issuer validation.
 #[derive(Debug, Error)]
-pub enum TrustedIssuerError {
-    /// Token issuer is not in the list of trusted issuers
-    #[error("Untrusted issuer: '{0}'")]
-    UntrustedIssuer(String),
-
+pub(crate) enum TrustedIssuerError {
     /// Token is missing a required claim
     #[error("Missing required claim: '{claim}' for token type '{token_type}'")]
     MissingRequiredClaim {
@@ -46,52 +26,8 @@ pub enum TrustedIssuerError {
 /// Result type for trusted issuer validation operations.
 type Result<T> = std::result::Result<T, TrustedIssuerError>;
 
-/// Validator for JWT tokens against trusted issuer configurations.
-///
-/// This validator provides the following functionality:
-/// - Issuer matching against configured trusted issuers
-/// - Required claims validation based on token metadata
-/// - JWKS fetching and caching with configurable TTL
-/// - JWT signature verification
-pub(crate) struct TrustedIssuerValidator {
-    /// Reverse lookup map: OIDC base URL -> issuer
-    /// This optimizes issuer lookup when dealing with hundreds of trusted issuers
-    url_to_issuer: HashMap<IssClaim, Arc<TrustedIssuer>>,
-}
-
-impl TrustedIssuerValidator {
-    /// Creates a new trusted issuer validator with a logger.
-    pub(crate) fn new(trusted_issuers: HashMap<String, TrustedIssuer>) -> Self {
-        // Build reverse lookup map: OIDC base URL -> issuer
-        let mut url_to_issuer = HashMap::with_capacity(trusted_issuers.len());
-        for issuer in trusted_issuers.into_values().map(Arc::new) {
-            url_to_issuer.insert(issuer.iss_claim(), issuer);
-        }
-
-        Self { url_to_issuer }
-    }
-
-    /// Finds a trusted issuer by the issuer claim value.
-    ///
-    /// This method matches the token's `iss` claim against the configured trusted issuers.
-    /// The matching is done by comparing the issuer URL or issuer ID.
-    pub(crate) fn find_trusted_issuer(
-        &self,
-        issuer_claim: &IssClaim,
-    ) -> Result<Arc<TrustedIssuer>> {
-        if let Some(issuer) = self.url_to_issuer.get(issuer_claim) {
-            return Ok(issuer.clone());
-        }
-
-        Err(TrustedIssuerError::UntrustedIssuer(
-            issuer_claim.to_string(),
-        ))
-    }
-}
-
 /// Validates that a token contains all required claims based on token metadata.
 ///
-/// This is a standalone function that can be used independently of `TrustedIssuerValidator`.
 /// It validates:
 /// - All claims in `required_claims` set exist
 ///
@@ -126,58 +62,9 @@ pub(crate) fn validate_required_claims(
 
 #[cfg(test)]
 mod tests {
-    use url::Url;
-
     use super::*;
     use crate::common::policy_store::TokenEntityMetadata;
     use std::collections::HashSet;
-
-    fn create_test_issuer(id: &str, endpoint: &str) -> TrustedIssuer {
-        let mut token_metadata = HashMap::new();
-        token_metadata.insert(
-            "access_token".to_string(),
-            TokenEntityMetadata::access_token(),
-        );
-        token_metadata.insert("id_token".to_string(), TokenEntityMetadata::id_token());
-
-        TrustedIssuer::from_configuration(
-            format!("Test Issuer {id}"),
-            "Test issuer for validation".to_string(),
-            Url::parse(endpoint).unwrap(),
-            token_metadata,
-        )
-        .expect("test configuration endpoint should derive an iss")
-    }
-
-    #[test]
-    fn test_find_trusted_issuer_by_url() {
-        let issuers = HashMap::from([(
-            "issuer1".to_string(),
-            create_test_issuer("1", "https://issuer1.com/.well-known/openid-configuration"),
-        )]);
-
-        let validator = TrustedIssuerValidator::new(issuers);
-
-        let result = validator.find_trusted_issuer(&IssClaim::new("https://issuer1.com"));
-        assert!(result.is_ok());
-        assert_eq!(result.unwrap().name, "Test Issuer 1");
-    }
-
-    #[test]
-    fn test_untrusted_issuer() {
-        let issuers = HashMap::from([(
-            "issuer1".to_string(),
-            create_test_issuer("1", "https://issuer1.com/.well-known/openid-configuration"),
-        )]);
-
-        let validator = TrustedIssuerValidator::new(issuers);
-
-        let result = validator.find_trusted_issuer(&IssClaim::new("https://evil.com"));
-        assert!(
-            matches!(result.unwrap_err(), TrustedIssuerError::UntrustedIssuer(_)),
-            "expected UntrustedIssuer error"
-        );
-    }
 
     #[test]
     fn test_validate_required_claims_success() {

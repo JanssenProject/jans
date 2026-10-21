@@ -96,17 +96,9 @@ impl PolicyStore {
 fn validate_trusted_issuers_config(
     trusted_issuers: Option<&HashMap<String, TrustedIssuer>>,
 ) -> Result<(), TrustedIssuersValidationError> {
-    let mut key_source_owners: HashMap<&Url, &str> = HashMap::new();
     let mut entity_type_owners: HashMap<&str, &str> = HashMap::new();
 
     for (issuer_id, trusted_issuer) in trusted_issuers.into_iter().flatten() {
-        let url = trusted_issuer.key_source.url();
-        if key_source_owners.insert(url, issuer_id).is_some() {
-            return Err(TrustedIssuersValidationError::DuplicateKeySource {
-                url: url.to_string(),
-            });
-        }
-
         for entity_type_name in trusted_issuer.token_metadata.keys() {
             match entity_type_owners.entry(entity_type_name) {
                 Entry::Vacant(entry) => {
@@ -128,8 +120,6 @@ fn validate_trusted_issuers_config(
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum TrustedIssuersValidationError {
-    #[error("key source '{url}' is used by more than one issuer")]
-    DuplicateKeySource { url: String },
     #[error(
         "Entity type '{entity_type_name}' declared by more than one issuer: \
          '{issuer_a}' and '{issuer_b}'"
@@ -198,16 +188,6 @@ pub(crate) enum KeySource {
         expect(dead_code, reason = "only the v2 format builds static issuers")
     )]
     Static { jwks: Url },
-}
-
-impl KeySource {
-    /// The URL the issuer is loaded from.
-    pub(crate) fn url(&self) -> &Url {
-        match self {
-            Self::Discovery { configuration } => configuration,
-            Self::Static { jwks } => jwks,
-        }
-    }
 }
 
 /// Represents a trusted issuer that can provide JWTs.
@@ -1060,6 +1040,19 @@ mod validate_trusted_issuers_tests {
         );
     }
 
+    /// One identity provider serving two apps with different schemas.
+    #[test]
+    fn accepts_issuers_sharing_one_discovery_endpoint() {
+        let oidc = "https://idp.example/.well-known/openid-configuration";
+        let issuers = HashMap::from([
+            ("alpha".to_string(), issuer(oidc, &["Alpha::Access_token"])),
+            ("beta".to_string(), issuer(oidc, &["Beta::Access_token"])),
+        ]);
+
+        validate_trusted_issuers_config(Some(&issuers))
+            .expect("issuers sharing an iss and its keys should be accepted");
+    }
+
     #[test]
     fn rejects_entity_type_shared_across_issuers() {
         // Unbuildable once `iss` is declared: the shared type can only name one
@@ -1090,25 +1083,6 @@ mod validate_trusted_issuers_tests {
                     if entity_type_name == "Jans::Access_token"
             ),
             "expected DuplicateEntityType for Jans::Access_token, got: {err}"
-        );
-    }
-
-    #[test]
-    fn rejects_duplicate_key_source() {
-        let oidc = "https://idp.example/.well-known/openid-configuration";
-        let issuers = HashMap::from([
-            ("alpha".to_string(), issuer(oidc, &["Jans::Access_token"])),
-            ("beta".to_string(), issuer(oidc, &["Jans::Access_token"])),
-        ]);
-
-        let err = validate_trusted_issuers_config(Some(&issuers))
-            .expect_err("duplicate key source must be rejected");
-        assert!(
-            matches!(
-                &err,
-                TrustedIssuersValidationError::DuplicateKeySource { url } if url == oidc
-            ),
-            "expected DuplicateKeySource naming the endpoint, got: {err}"
         );
     }
 }

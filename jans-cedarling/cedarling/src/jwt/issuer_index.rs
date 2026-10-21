@@ -3,7 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::{issuer_utils::IssClaim, policy_store::TrustedIssuer};
+use crate::common::issuer_utils::IssClaim;
+#[cfg(test)]
+use crate::common::policy_store::TrustedIssuer;
 
 use super::IssuerConfig;
 use ahash::{HashMap, HashMapExt};
@@ -52,14 +54,16 @@ impl IssuerIndex {
     }
 
     /// Get the `TrustedIssuer` for a given iss claim, if it exists
+    #[cfg(test)]
     pub(super) fn get_trusted_issuer(&self, iss: &IssClaim) -> Option<Arc<TrustedIssuer>> {
         let index = self.iss_index.read().expect(MUTEX_POISONED_ERR);
         index.get(iss).map(|config| config.policy.clone())
     }
 
-    /// Get the number of issuer configurations in the index
+    /// Get the number of issuer configurations in the index; counted by issuer
+    /// id, since several issuers may share one `iss`.
     pub(super) fn len(&self) -> usize {
-        let index = self.iss_index.read().expect(MUTEX_POISONED_ERR);
+        let index = self.issuer_idx.read().expect(MUTEX_POISONED_ERR);
         index.len()
     }
 
@@ -81,10 +85,7 @@ impl IssuerIndex {
 
     /// Get all issuer IDs in the index of loaded trusted issuers
     pub(super) fn loaded_issuer_ids(&self) -> HashSet<String> {
-        let index = self.iss_index.read().expect(MUTEX_POISONED_ERR);
-        index
-            .values()
-            .map(|config| config.issuer_id.clone())
-            .collect()
+        let index = self.issuer_idx.read().expect(MUTEX_POISONED_ERR);
+        index.keys().cloned().collect()
     }
 }

@@ -36,7 +36,6 @@ use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 #[cfg(test)]
 use std::sync::Arc;
-use url::Origin;
 
 pub(crate) use crate::entity_builder::trusted_issuer_index::TrustedIssuerIndex;
 pub(crate) use build_multi_issuer_entity::{
@@ -48,22 +47,26 @@ pub(crate) use built_entities::BuiltEntities;
 pub(crate) use error::*;
 
 pub(crate) struct EntityBuilder {
-    iss_entities: HashMap<Origin, Entity>,
+    /// One per issuer identity `{name}::TrustedIssuer::"<iss>"`, so issuers
+    /// sharing an origin or an `iss` do not overwrite each other.
+    iss_entities: HashMap<EntityUid, Entity>,
     schema: Option<MappingSchema>,
     default_entities: DefaultEntities,
+    /// Kept so tests can build tokens that carry a configured issuer.
+    #[cfg(test)]
     issuers_index: TrustedIssuerIndex,
 }
 
 impl EntityBuilder {
     pub(super) fn new(
-        issuers_index: TrustedIssuerIndex,
+        issuers_index: &TrustedIssuerIndex,
         schema: Option<&ValidatorSchema>,
         default_entities: DefaultEntities,
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
         if let Some(schema) = schema.as_ref() {
-            Self::validate_iss_types(&issuers_index, schema)?;
+            Self::validate_iss_types(issuers_index, schema)?;
         }
 
         let (ok, errs) = issuers_index
@@ -85,13 +88,17 @@ impl EntityBuilder {
             return Err(InitEntityBuilderError::BuildIssEntities(errs.into()));
         }
 
-        let iss_entities = ok.into_iter().collect::<HashMap<Origin, Entity>>();
+        let iss_entities = ok
+            .into_iter()
+            .map(|entity: Entity| (entity.uid(), entity))
+            .collect::<HashMap<EntityUid, Entity>>();
 
         Ok(Self {
             iss_entities,
             schema,
             default_entities,
-            issuers_index,
+            #[cfg(test)]
+            issuers_index: issuers_index.clone(),
         })
     }
 
@@ -319,7 +326,7 @@ mod test {
 
         let schema = ValidatorSchema::from_str(SCHEMA).expect("valid schema");
         let err = EntityBuilder::new(
-            TrustedIssuerIndex::new(&issuers, None),
+            &TrustedIssuerIndex::new(&issuers),
             Some(&schema),
             DefaultEntities::default(),
         )

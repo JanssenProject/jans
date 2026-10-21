@@ -10,7 +10,6 @@ use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
 use crate::jwt::decode::{DecodeJwtError, DecodedJwt};
 use crate::jwt::key_service::DecodingKeyInfo;
-use crate::jwt::validation::TrustedIssuerError;
 use crate::jwt::{
     Arc, JwtStatus, JwtStatusError, OwnedValidatorInfo, StatusListCache, TokenKind, ValidatorInfo,
 };
@@ -367,8 +366,6 @@ pub enum ValidateJwtError {
     MissingStatusList,
     #[error("failed to deserialize the JWT's status claim: {0}")]
     DeserializeStatusClaim(#[from] serde_json::Error),
-    #[error("failed to validate the JWT's trusted issuer: {0}")]
-    TrustedIssuerValidation(#[source] TrustedIssuerError),
 }
 
 #[cfg(test)]

@@ -109,11 +109,11 @@ pub(crate) async fn build_authz(
     };
 
     let issuers_map = trusted_issuers.unwrap_or_default();
-    let issuers_index = TrustedIssuerIndex::new(&issuers_map, Some(log));
+    let issuers_index = TrustedIssuerIndex::new(&issuers_map);
     let schema = policy_store.schema.as_ref().map(|s| &s.validator_schema);
     let entity_builder = Arc::new(
         EntityBuilder::new(
-            issuers_index,
+            &issuers_index,
             if authorization_config.strict_schema_validation {
                 schema
             } else {
