@@ -102,7 +102,7 @@ public class AuthClientFactory {
             final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
                     tokenRequest.getParameters());
             response = request.post(Entity.form(multivaluedHashMap));
-            log.trace("Response for Access Token -  response:{}", response);
+            log.trace("Response for Access Token ");
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
                 TokenResponse tokenResponse = new TokenResponse();
@@ -121,22 +121,20 @@ public class AuthClientFactory {
 
     public static Response revokeToken(final String revokeUrl, final String clientId, final String token,
             final String tokenTypeHint) {
-        log.debug("Request for Access Token -  revokeUrl:{}, clientId:{}, token:{} , tokenTypeHint:{}", revokeUrl,
-                clientId, token, tokenTypeHint);
+        log.debug("Request for Access Token -  revokeUrl:{}, clientId:{}, tokenTypeHint:{}", revokeUrl,
+                clientId, tokenTypeHint);
 
         Builder request = getClientBuilder(revokeUrl);
         request.header(AUTHORIZATION, token);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-        log.debug(" request:{}}", request);
         MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>();
         multivaluedHashMap.add("token", token);
         multivaluedHashMap.add("token_type_hint", tokenTypeHint);
         multivaluedHashMap.add("client_id", clientId);
 
         Response response = request.post(Entity.entity(Entity.form(multivaluedHashMap), MediaType.APPLICATION_JSON));
-        log.debug(" response:{}", response);
-
+     
         return response;
     }
 
