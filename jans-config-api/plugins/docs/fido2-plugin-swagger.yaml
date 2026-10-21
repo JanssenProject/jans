@@ -1812,6 +1812,38 @@ components:
         lastUpdated:
           type: string
           format: date-time
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        period:
+          type: string
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
+        authenticationAvgDuration:
+          type: number
+          format: double
+        authenticationSuccessRate:
+          type: number
+          format: double
+        registrationAvgDuration:
+          type: number
+          format: double
         registrationSuccesses:
           type: integer
           format: int64
@@ -1821,50 +1853,18 @@ components:
         registrationFailures:
           type: integer
           format: int64
-        authenticationAvgDuration:
-          type: number
-          format: double
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        authenticationFailures:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
-        registrationSuccessRate:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
         authenticationAttempts:
           type: integer
           format: int64
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        fallbackEvents:
+        authenticationFailures:
           type: integer
           format: int64
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        period:
-          type: string
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationSuccesses:
+          type: integer
+          format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

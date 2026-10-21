@@ -84,6 +84,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         logger.info("Verify if JWT");
         String acccessToken = token.substring("Bearer".length()).trim();
         boolean isJwtToken = false;
+        List<String> tokenScopes = null;
         try {
             isJwtToken = jwtUtil.isJwt(acccessToken);
 
@@ -91,8 +92,8 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
                 logger.info("Since token is JWT Validate it");
                 jwtUtil.parse(acccessToken);
-                List<String> tokenScopes = jwtUtil.validateToken(acccessToken);
-                logger.debug(" tokenScopes:{} ", tokenScopes);
+                tokenScopes = jwtUtil.validateToken(acccessToken);
+                logger.debug("JWT tokenScopes:{} ", tokenScopes);
               
             }
         } catch (InvalidJwtException exp) {
@@ -104,30 +105,31 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
-        logger.info("Introspecting Token ");
-        IntrospectionResponse introspectionResponse = null;
-        try {
-            introspectionResponse = openIdService.getIntrospectionResponse(token,
-                    acccessToken, issuer);
-        } catch (JsonProcessingException ex) {
-            logger.error("Error while token Introspection exception - ", ex);
-            throw new WebApplicationException("IntrospectionResponse - Jwt Token is Invalid.",
-                    Response.status(Response.Status.UNAUTHORIZED).build());
-        }
+        if (!isJwtToken) {
+            logger.info("Non JWT Token Introspection");
+            IntrospectionResponse introspectionResponse = null;
+            try {
+                introspectionResponse = openIdService.getIntrospectionResponse(token, acccessToken, issuer);
+            } catch (JsonProcessingException ex) {
+                logger.error("Error while token Introspection exception - ", ex);
+                throw new WebApplicationException("IntrospectionResponse - Jwt Token is Invalid.",
+                        Response.status(Response.Status.UNAUTHORIZED).build());
+            }
 
-        logger.trace("oAuth  Authorization introspectionResponse:{}", introspectionResponse);
-        if (introspectionResponse == null || !introspectionResponse.isActive()) {
-            logger.error("Token is Invalid.");
-            throw new WebApplicationException("Token is Invalid.",
-                    Response.status(Response.Status.UNAUTHORIZED).build());
-        }
+            logger.trace("oAuth  Authorization introspectionResponse:{}", introspectionResponse);
+            if (introspectionResponse == null || !introspectionResponse.isActive()) {
+                logger.error("Token is Invalid.");
+                throw new WebApplicationException("Token is Invalid.",
+                        Response.status(Response.Status.UNAUTHORIZED).build());
+            }
 
-        List<String> tokenScopes = introspectionResponse.getScope();
+            tokenScopes = introspectionResponse.getScope();
+        }
         
         // Validate Scopes
         acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer, httpHeaders);
 
-        boolean isAuthorized = externalAuthorization(token, issuer, method, path);
+        boolean isAuthorized = externalAuthorization(acccessToken, issuer, method, path);
         logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
         if (!isAuthorized) {
             throw new WebApplicationException("Authorization denied by external script",
