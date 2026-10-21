@@ -7,7 +7,7 @@
 package io.jans.lock.service.trace.validate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -127,7 +127,11 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	private TraceValidationException validateAndCapture(ObjectNode root) {
-		return assertThrows(TraceValidationException.class, () -> registry.validate(parseAndCommonValidate(root)));
+		return assertThrows(TraceValidationException.class, () -> validateFully(root));
+	}
+
+	private CorrelationInputs validateFully(ObjectNode root) {
+		return registry.validate(parseAndCommonValidate(root));
 	}
 
 	// -- Optional GovOps profile members ------------------------------------------------------
@@ -890,7 +894,7 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		TokenRef first = result.getTokenRefs().get(0);
 		TokenRef sameJtiDifferentIssuer = result.getTokenRefs().get(1);
 		assertEquals(first.getJti(), sameJtiDifferentIssuer.getJti());
-		assertFalse(first.getIssuer().equals(sameJtiDifferentIssuer.getIssuer()));
+		assertNotEquals(first.getIssuer(), sameJtiDifferentIssuer.getIssuer());
 	}
 
 	// -- registry ---------------------------------------------------------------------------------

@@ -74,8 +74,8 @@ class PolicyMismatchCheckTest {
 	void testCheck_RejectEnabled_MismatchThrowsInvalidAssertion() {
 		appConfiguration.getTraceConfiguration().setRejectPolicyMismatch(true);
 
-		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> check.check(new PolicyRef(STORE, "1.0.0", OTHER_HASH)));
+		PolicyRef policy = new PolicyRef(STORE, "1.0.0", OTHER_HASH);
+		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> check.check(policy));
 
 		assertEquals(TraceErrorResponseType.INVALID_ASSERTION, ex.getErrorId());
 		assertEquals(PolicyMismatchCheck.REASON_POLICY_MISMATCH, ex.getReason());

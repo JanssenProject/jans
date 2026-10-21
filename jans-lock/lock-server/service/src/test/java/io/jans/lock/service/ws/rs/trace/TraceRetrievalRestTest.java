@@ -331,8 +331,9 @@ class TraceRetrievalRestTest extends BaseLockServiceTest {
 	void testGetRecord_RecordIdTooLong_Returns400() {
 		boundToDomain("domain-a");
 
+		String recordId = "x".repeat(129);
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.getRecord("x".repeat(129), null));
+				() -> impl.getRecord(recordId, null));
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(submitterIdentityService, org.mockito.Mockito.never()).resolve(any());
 	}

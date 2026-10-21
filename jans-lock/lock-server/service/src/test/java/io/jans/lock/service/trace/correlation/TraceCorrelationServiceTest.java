@@ -62,7 +62,6 @@ import io.jans.lock.service.trace.parse.ParsedAssertion;
 import io.jans.lock.service.trace.parse.TraceAssertionParser;
 import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
-import io.jans.lock.service.trace.store.TraceKeys;
 import io.jans.lock.service.trace.testkit.PolicyMismatchChecks;
 import io.jans.lock.service.trace.testkit.SignedAssertionFactory;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
@@ -182,13 +181,13 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 
 	private StoredTraceRecord insertRecord(String recordId, String contentDigest, long sequenceNumber,
 			String prevRecordHash, IngestionFlags flags) throws DuplicateEntryException {
-		StoredTraceRecord record = StoredTraceRecordFactory.builder().domainId(DOMAIN).producerId(PRODUCER)
+		StoredTraceRecord stored = StoredTraceRecordFactory.builder().domainId(DOMAIN).producerId(PRODUCER)
 				.producerInstanceId(INSTANCE).producerChainId(CHAIN).recordId(recordId).contentDigest(contentDigest)
 				.sequenceNumber(sequenceNumber).prevRecordHash(prevRecordHash).coverageGap(flags.isCoverageGap())
 				.chainLinkFailure(flags.isChainLinkFailure()).equivocation(flags.isEquivocation())
 				.late(flags.isLate()).build();
-		store.insertRecord(record);
-		return record;
+		store.insertRecord(stored);
+		return stored;
 	}
 
 	private static String digest(String tag) {
@@ -213,8 +212,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
 		VerifiedAssertion verified = buildVerified(json, context());
 
+		TraceRequestContext ctx = context();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, context()));
+				() -> service.plan(verified, ctx));
 
 		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 	}
@@ -226,8 +226,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 				.prevRecordHash(TraceConstants.ZERO_HASH).unsignedJson();
 		VerifiedAssertion verified = buildVerified(json, context());
 
+		TraceRequestContext ctx = context();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, context()));
+				() -> service.plan(verified, ctx));
 
 		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
 	}
@@ -276,8 +277,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 				.producerChainId(CHAIN).recordId(recordId()).genesis().unsignedJson();
 		VerifiedAssertion verified = buildVerified(json, context());
 
+		TraceRequestContext ctx = context();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, context()));
+				() -> service.plan(verified, ctx));
 
 		assertEquals(TraceErrorResponseType.INVALID_ASSERTION, ex.getErrorId());
 		assertEquals(PolicyMismatchCheck.REASON_POLICY_MISMATCH, ex.getReason());
@@ -317,8 +319,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 				.prevRecordHash(digest("1")).unsignedJson();
 		VerifiedAssertion verified = buildVerified(json, context());
 
+		TraceRequestContext ctx = context();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, context()));
+				() -> service.plan(verified, ctx));
 
 		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 		assertFalse(store.findChain(chainIdentity()).isPresent());
@@ -331,8 +334,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 				.prevRecordHash(digest("1")).unsignedJson();
 		VerifiedAssertion verified = buildVerified(json, context());
 
+		TraceRequestContext ctx = context();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, context()));
+				() -> service.plan(verified, ctx));
 
 		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
 		assertFalse(store.findChain(chainIdentity()).isPresent());
@@ -347,8 +351,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		VerifiedAssertion verified = buildVerified(json, context());
 
 		for (int i = 0; i < 2; i++) {
+			TraceRequestContext ctx = context();
 			TraceValidationException ex = assertThrows(TraceValidationException.class,
-					() -> service.plan(verified, context()));
+					() -> service.plan(verified, ctx));
 			assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 		}
 
@@ -361,8 +366,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
 		VerifiedAssertion verified = buildVerified(json, context());
 
+		TraceRequestContext ctx = context();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, context()));
+				() -> service.plan(verified, ctx));
 
 		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 		assertFalse(store.findChain(chainIdentity()).isPresent());
@@ -522,7 +528,6 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 	@Test
 	void testAfterInsert_OutOfOrderArrival_SuccessorCoverageGapClearedAndLinkFailureSetOnMismatch() throws DuplicateEntryException {
 		registerChain();
-		String digest1 = digest("1");
 		String successorRecordId = recordId();
 		insertRecord(successorRecordId, digest("2"), 2L, digest("mismatch"),
 				new IngestionFlags(true, false, false, false));
@@ -735,8 +740,8 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		}
 
 		@Override
-		public void insertRecord(StoredTraceRecord record) throws DuplicateEntryException {
-			delegate.insertRecord(record);
+		public void insertRecord(StoredTraceRecord traceRecord) throws DuplicateEntryException {
+			delegate.insertRecord(traceRecord);
 		}
 
 	}

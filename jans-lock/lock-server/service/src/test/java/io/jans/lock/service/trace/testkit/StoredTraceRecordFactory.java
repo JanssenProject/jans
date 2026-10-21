@@ -256,12 +256,12 @@ public final class StoredTraceRecordFactory {
 		ExecutionIdentity execution = new ExecutionIdentity(domainId, executionAuthority, traceExecutionId);
 		ChainIdentity chainIdentity = new ChainIdentity(domainId, producerId, producerInstanceId, producerChainId);
 		ChainPosition chainPosition = new ChainPosition(chainIdentity, sequenceNumber);
-		VerificationResult verification = this.verification != null ? this.verification
+		VerificationResult verificationResult = this.verification != null ? this.verification
 				: new VerificationResult(true, "kid-1", receivedAtMs, "Ed25519");
 		ReceiptEntry receipt = new ReceiptEntry(receiptSequence, receivedAtMs, prevReceiptHash, receiptHash);
 		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late, policyMismatch);
 
-		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verification, receipt, flags,
+		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verificationResult, receipt, flags,
 				execution, chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs, version,
 				policy);
 	}

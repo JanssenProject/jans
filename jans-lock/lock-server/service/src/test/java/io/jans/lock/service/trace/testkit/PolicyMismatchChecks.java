@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.jans.core.cedarling.service.policy.PolicyDownloadService;
-import io.jans.core.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.trace.correlation.PolicyMismatchCheck;
 

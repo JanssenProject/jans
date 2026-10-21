@@ -255,7 +255,9 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
 				.sign(otherKeyPair.getPrivate());
 
-		assertThrows(TraceValidationException.class, () -> service.ingest(body(json), ctx()));
+		InputStream jsonBody = body(json);
+		TraceRequestContext jsonCtx = ctx();
+		assertThrows(TraceValidationException.class, () -> service.ingest(jsonBody, jsonCtx));
 
 		assertTrue(store.snapshot().isEmpty());
 		assertFalse(store.findReceiptHead(DOMAIN).isPresent());
@@ -296,8 +298,10 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 
 		AcceptanceResult accepted = service.ingest(body(first), ctx());
 
+		InputStream resignedBody = body(resigned);
+		TraceRequestContext resignedCtx = ctx();
 		TraceConflictException ex = assertThrows(TraceConflictException.class,
-				() -> service.ingest(body(resigned), ctx()));
+				() -> service.ingest(resignedBody, resignedCtx));
 		assertEquals(TraceErrorResponseType.RECORD_CONFLICT, ex.getErrorId());
 
 		StoredTraceRecord stored = store.findRecord(new RecordIdentity(DOMAIN, PRODUCER, recordId)).orElseThrow();
@@ -351,7 +355,9 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 				.sign(keyPair.getPrivate());
 		store.failNextInsertRecord();
 
-		assertThrows(TraceStorageException.class, () -> service.ingest(body(json), ctx()));
+		InputStream jsonBody = body(json);
+		TraceRequestContext jsonCtx = ctx();
+		assertThrows(TraceStorageException.class, () -> service.ingest(jsonBody, jsonCtx));
 
 		assertTrue(store.snapshot().isEmpty());
 		TraceReceiptEntry receipt = store.findReceipt(DOMAIN, 1L).orElseThrow();
@@ -441,8 +447,10 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).sequenceNumber(2)
 				.prevRecordHash(TraceConstants.HASH_PREFIX + "1".repeat(64)).sign(keyPair.getPrivate());
 
+		InputStream jsonBody = body(json);
+		TraceRequestContext jsonCtx = ctx();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.ingest(body(json), ctx()));
+				() -> service.ingest(jsonBody, jsonCtx));
 
 		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 		assertTrue(store.findChains(DOMAIN, null).isEmpty());
@@ -456,8 +464,10 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).sequenceNumber(1)
 				.prevRecordHash(TraceConstants.HASH_PREFIX + "1".repeat(64)).sign(keyPair.getPrivate());
 
+		InputStream jsonBody = body(json);
+		TraceRequestContext jsonCtx = ctx();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.ingest(body(json), ctx()));
+				() -> service.ingest(jsonBody, jsonCtx));
 
 		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
 		assertTrue(store.findChains(DOMAIN, null).isEmpty());
@@ -470,8 +480,10 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).sequenceNumber(2)
 				.prevRecordHash(TraceConstants.ZERO_HASH).sign(keyPair.getPrivate());
 
+		InputStream jsonBody = body(json);
+		TraceRequestContext jsonCtx = ctx();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.ingest(body(json), ctx()));
+				() -> service.ingest(jsonBody, jsonCtx));
 
 		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
 		assertTrue(store.findChains(DOMAIN, null).isEmpty());
@@ -485,18 +497,23 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 
 		String badSignature = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
 				.sign(otherKeyPair.getPrivate());
-		assertThrows(TraceValidationException.class, () -> service.ingest(body(badSignature), ctx()));
+		InputStream badSignatureBody = body(badSignature);
+		TraceRequestContext badSignatureCtx = ctx();
+		assertThrows(TraceValidationException.class, () -> service.ingest(badSignatureBody, badSignatureCtx));
 
 		String unknownKid = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
 				.kid("no-such-kid").sign(keyPair.getPrivate());
-		assertThrows(TraceValidationException.class, () -> service.ingest(body(unknownKid), ctx()));
+		InputStream unknownKidBody = body(unknownKid);
+		TraceRequestContext unknownKidCtx = ctx();
+		assertThrows(TraceValidationException.class, () -> service.ingest(unknownKidBody, unknownKidCtx));
 
 		String notAllowed = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
 				.sign(keyPair.getPrivate());
 		TraceRequestContext forbiddenForProducer = new TraceRequestContext(CLIENT_ID, DOMAIN,
 				Collections.singletonList("some-other-producer"), RECEIVED_AT_MS, NODE_ID);
+		InputStream notAllowedBody = body(notAllowed);
 		TraceValidationException forbidden = assertThrows(TraceValidationException.class,
-				() -> service.ingest(body(notAllowed), forbiddenForProducer));
+				() -> service.ingest(notAllowedBody, forbiddenForProducer));
 		assertEquals(TraceErrorResponseType.PRODUCER_NOT_ALLOWED, forbidden.getErrorId());
 
 		assertTrue(store.findChains(DOMAIN, null).isEmpty());
@@ -513,8 +530,10 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
 				.sign(keyPair.getPrivate());
 
+		InputStream jsonBody = body(json);
+		TraceRequestContext jsonCtx = ctx();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.ingest(body(json), ctx()));
+				() -> service.ingest(jsonBody, jsonCtx));
 
 		assertEquals(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY, ex.getErrorId());
 		assertTrue(store.findChains(DOMAIN, null).isEmpty());
@@ -542,8 +561,10 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		String json = SignedAssertionFactory.authorizationDecision().recordId(recordId()).genesis()
 				.sign(keyPair.getPrivate());
 
+		InputStream jsonBody = body(json);
+		TraceRequestContext jsonCtx = ctx();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.ingest(body(json), ctx()));
+				() -> service.ingest(jsonBody, jsonCtx));
 
 		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 		assertTrue(store.findChains(DOMAIN, null).isEmpty());

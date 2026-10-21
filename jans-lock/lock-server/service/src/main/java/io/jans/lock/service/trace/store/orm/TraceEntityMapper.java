@@ -61,11 +61,11 @@ final class TraceEntityMapper {
 
 	// -- records ------------------------------------------------------------------------------
 
-	static TraceRecordEntry toEntity(StoredTraceRecord record, String dn, TraceKeys traceKeys) {
-		RecordIdentity identity = record.getIdentity();
-		ChainPosition chainPosition = record.getChainPosition();
-		ReceiptEntry receipt = record.getReceipt();
-		IngestionFlags flags = record.getFlags();
+	static TraceRecordEntry toEntity(StoredTraceRecord stored, String dn, TraceKeys traceKeys) {
+		RecordIdentity identity = stored.getIdentity();
+		ChainPosition chainPosition = stored.getChainPosition();
+		ReceiptEntry receipt = stored.getReceipt();
+		IngestionFlags flags = stored.getFlags();
 
 		TraceRecordEntry entity = new TraceRecordEntry();
 		entity.setDn(dn);
@@ -73,20 +73,20 @@ final class TraceEntityMapper {
 		entity.setDomainId(identity.getDomainId());
 		entity.setProducerId(identity.getProducerId());
 		entity.setRecordId(identity.getRecordId());
-		entity.setEventKind(record.getEventKind());
-		entity.setSignedAt(record.getSignedAt());
-		entity.setExecKey(traceKeys.executionKey(record.getExecution()));
-		entity.setExecId(record.getExecution().getTraceExecutionId());
-		entity.setExecAuthority(record.getExecution().getExecutionAuthority());
+		entity.setEventKind(stored.getEventKind());
+		entity.setSignedAt(stored.getSignedAt());
+		entity.setExecKey(traceKeys.executionKey(stored.getExecution()));
+		entity.setExecId(stored.getExecution().getTraceExecutionId());
+		entity.setExecAuthority(stored.getExecution().getExecutionAuthority());
 		entity.setChainKey(traceKeys.chainKey(chainPosition.getChainIdentity()));
 		entity.setChainPosKey(traceKeys.chainPositionKey(chainPosition));
 		entity.setSeqNum(chainPosition.getSequenceNumber());
-		entity.setPrevRecordHash(record.getPrevRecordHash());
-		entity.setTokenKeys(record.getTokenRefs().stream()
+		entity.setPrevRecordHash(stored.getPrevRecordHash());
+		entity.setTokenKeys(stored.getTokenRefs().stream()
 				.map(tokenRef -> traceKeys.tokenKey(identity.getDomainId(), tokenRef)).collect(Collectors.toList()));
-		entity.setAssertion(record.getAssertionRaw());
-		entity.setContentDigest(record.getContentDigest());
-		entity.setVerification(toVerificationPojo(record.getVerification()));
+		entity.setAssertion(stored.getAssertionRaw());
+		entity.setContentDigest(stored.getContentDigest());
+		entity.setVerification(toVerificationPojo(stored.getVerification()));
 		entity.setReceiptSeq(receipt.getReceiptSequence());
 		entity.setReceivedAt(new Date(receipt.getReceivedAtMs()));
 		entity.setReceivedAtMs(receipt.getReceivedAtMs());
@@ -97,15 +97,15 @@ final class TraceEntityMapper {
 		entity.setEquivocation(flags.isEquivocation());
 		entity.setLate(flags.isLate());
 		entity.setPolicyMismatch(flags.isPolicyMismatch());
-		entity.setNodeId(record.getNodeId());
-		PolicyRef policy = record.getPolicy();
+		entity.setNodeId(stored.getNodeId());
+		PolicyRef policy = stored.getPolicy();
 		if (policy != null) {
 			entity.setPolicyStoreId(policy.getPolicyStoreId());
 			entity.setPolicyStoreVersion(policy.getPolicyStoreVersion());
 			entity.setBundleHash(policy.getBundleHash());
 		}
-		entity.setVersion(record.getVersion());
-		entity.setCreationDate(new Date(record.getCreatedAtMs()));
+		entity.setVersion(stored.getVersion());
+		entity.setCreationDate(new Date(stored.getCreatedAtMs()));
 		return entity;
 	}
 

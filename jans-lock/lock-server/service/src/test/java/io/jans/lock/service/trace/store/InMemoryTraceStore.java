@@ -147,14 +147,14 @@ public class InMemoryTraceStore implements TraceStore {
 	// -- records --------------------------------------------------------------------------------
 
 	@Override
-	public void insertRecord(StoredTraceRecord record) throws DuplicateEntryException, TraceStorageException {
+	public void insertRecord(StoredTraceRecord stored) throws DuplicateEntryException, TraceStorageException {
 		if (failNextInsertRecord.getAndSet(false)) {
 			throw new TraceStorageException("test_fail_next_insert_record", "Forced test failure");
 		}
 		awaitInsertRecordBarrier();
 
-		String key = traceKeys.recordKey(record.getIdentity());
-		StoredTraceRecord existing = recordsByKey.putIfAbsent(key, record.copy());
+		String key = traceKeys.recordKey(stored.getIdentity());
+		StoredTraceRecord existing = recordsByKey.putIfAbsent(key, stored.copy());
 		if (existing != null) {
 			throw new DuplicateEntryException(key);
 		}

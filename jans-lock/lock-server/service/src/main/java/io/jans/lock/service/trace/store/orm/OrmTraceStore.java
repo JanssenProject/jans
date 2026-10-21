@@ -149,10 +149,10 @@ public class OrmTraceStore implements TraceStore {
 	// -- records ------------------------------------------------------------------------------
 
 	@Override
-	public void insertRecord(StoredTraceRecord record) throws DuplicateEntryException, TraceStorageException {
-		String key = traceKeys.recordKey(record.getIdentity());
+	public void insertRecord(StoredTraceRecord stored) throws DuplicateEntryException, TraceStorageException {
+		String key = traceKeys.recordKey(stored.getIdentity());
 		String dn = TraceKeys.recordDn(baseDn(), key);
-		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, dn, traceKeys);
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(stored, dn, traceKeys);
 		duplicateSafeInsert(dn, TraceRecordEntry.class, entity, key);
 	}
 

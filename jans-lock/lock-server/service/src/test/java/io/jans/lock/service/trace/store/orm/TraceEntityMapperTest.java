@@ -75,38 +75,38 @@ class TraceEntityMapperTest {
 
 	@Test
 	void testToEntity_thenToStoredTraceRecord_roundTripsIdentityAndCoreFields() {
-		StoredTraceRecord record = newRecord(ASSERTION);
+		StoredTraceRecord stored = newRecord(ASSERTION);
 
-		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(stored, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
 		StoredTraceRecord roundTripped = TraceEntityMapper.toStoredTraceRecord(entity);
 
-		assertEquals(record.getIdentity(), roundTripped.getIdentity());
-		assertEquals(record.getContentDigest(), roundTripped.getContentDigest());
-		assertEquals(record.getAssertionRaw(), roundTripped.getAssertionRaw());
-		assertEquals(record.getExecution(), roundTripped.getExecution());
-		assertEquals(record.getChainPosition().getChainIdentity(), roundTripped.getChainPosition().getChainIdentity());
-		assertEquals(record.getChainPosition().getSequenceNumber(), roundTripped.getChainPosition().getSequenceNumber());
-		assertEquals(record.getTokenRefs(), roundTripped.getTokenRefs());
-		assertEquals(record.getEventKind(), roundTripped.getEventKind());
-		assertEquals(record.getSignedAt(), roundTripped.getSignedAt());
-		assertEquals(record.getNodeId(), roundTripped.getNodeId());
-		assertEquals(record.getCreatedAtMs(), roundTripped.getCreatedAtMs());
-		assertEquals(record.getVerification(), roundTripped.getVerification());
-		assertEquals(record.getFlags(), roundTripped.getFlags());
-		assertEquals(record.getVersion(), roundTripped.getVersion());
+		assertEquals(stored.getIdentity(), roundTripped.getIdentity());
+		assertEquals(stored.getContentDigest(), roundTripped.getContentDigest());
+		assertEquals(stored.getAssertionRaw(), roundTripped.getAssertionRaw());
+		assertEquals(stored.getExecution(), roundTripped.getExecution());
+		assertEquals(stored.getChainPosition().getChainIdentity(), roundTripped.getChainPosition().getChainIdentity());
+		assertEquals(stored.getChainPosition().getSequenceNumber(), roundTripped.getChainPosition().getSequenceNumber());
+		assertEquals(stored.getTokenRefs(), roundTripped.getTokenRefs());
+		assertEquals(stored.getEventKind(), roundTripped.getEventKind());
+		assertEquals(stored.getSignedAt(), roundTripped.getSignedAt());
+		assertEquals(stored.getNodeId(), roundTripped.getNodeId());
+		assertEquals(stored.getCreatedAtMs(), roundTripped.getCreatedAtMs());
+		assertEquals(stored.getVerification(), roundTripped.getVerification());
+		assertEquals(stored.getFlags(), roundTripped.getFlags());
+		assertEquals(stored.getVersion(), roundTripped.getVersion());
 	}
 
 	@Test
 	void testToEntity_policyReleaseAndMismatchFlag_roundTrip() {
 		StoredTraceRecord base = newRecord(ASSERTION);
 		PolicyRef policy = new PolicyRef("store-1", "1.2.3", "sha256:" + "c".repeat(64));
-		StoredTraceRecord record = new StoredTraceRecord(base.getIdentity(), base.getAssertionRaw(),
+		StoredTraceRecord stored = new StoredTraceRecord(base.getIdentity(), base.getAssertionRaw(),
 				base.getContentDigest(), base.getVerification(), base.getReceipt(),
 				new IngestionFlags(false, false, false, false, true), base.getExecution(), base.getChainPosition(),
 				base.getPrevRecordHash(), base.getTokenRefs(), base.getEventKind(), base.getSignedAt(),
 				base.getNodeId(), base.getCreatedAtMs(), base.getVersion(), policy);
 
-		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(stored, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
 		StoredTraceRecord roundTripped = TraceEntityMapper.toStoredTraceRecord(entity);
 
 		assertEquals("store-1", entity.getPolicyStoreId());
@@ -132,9 +132,9 @@ class TraceEntityMapperTest {
 	void testToEntity_verificationBlockWithThumbprintAndKeyAuthorized_roundTrips() {
 		VerificationResult verification = new VerificationResult(true, "kid-1", 1000L, "Ed25519",
 				"sha256:" + "a".repeat(64), Boolean.TRUE);
-		StoredTraceRecord record = newRecord(ASSERTION, verification);
+		StoredTraceRecord stored = newRecord(ASSERTION, verification);
 
-		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(stored, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
 		StoredTraceRecord roundTripped = TraceEntityMapper.toStoredTraceRecord(entity);
 
 		assertEquals("sha256:" + "a".repeat(64), entity.getVerification().getKeyThumbprint());
@@ -144,8 +144,8 @@ class TraceEntityMapperTest {
 
 	@Test
 	void testToStoredTraceRecord_legacyVerificationWithoutNewMembers_mapsWithNulls() {
-		StoredTraceRecord record = newRecord(ASSERTION);
-		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
+		StoredTraceRecord stored = newRecord(ASSERTION);
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(stored, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
 		TraceVerification legacy = new TraceVerification();
 		legacy.setSignatureValid(true);
 		legacy.setKeyId("kid-1");
@@ -162,14 +162,14 @@ class TraceEntityMapperTest {
 
 	@Test
 	void testToEntity_computesHashedKeysFromRawValues() {
-		StoredTraceRecord record = newRecord(ASSERTION);
+		StoredTraceRecord stored = newRecord(ASSERTION);
 
-		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(stored, "jansId=x,ou=records,ou=trace,ou=lock,o=jans", TRACE_KEYS);
 
-		assertEquals(TRACE_KEYS.recordKey(record.getIdentity()), entity.getId());
-		assertEquals(TRACE_KEYS.chainKey(record.getChainPosition().getChainIdentity()), entity.getChainKey());
-		assertEquals(TRACE_KEYS.chainPositionKey(record.getChainPosition()), entity.getChainPosKey());
-		assertEquals(Arrays.asList(TRACE_KEYS.tokenKey(DOMAIN, record.getTokenRefs().get(0))), entity.getTokenKeys());
+		assertEquals(TRACE_KEYS.recordKey(stored.getIdentity()), entity.getId());
+		assertEquals(TRACE_KEYS.chainKey(stored.getChainPosition().getChainIdentity()), entity.getChainKey());
+		assertEquals(TRACE_KEYS.chainPositionKey(stored.getChainPosition()), entity.getChainPosKey());
+		assertEquals(Arrays.asList(TRACE_KEYS.tokenKey(DOMAIN, stored.getTokenRefs().get(0))), entity.getTokenKeys());
 	}
 
 	@Test

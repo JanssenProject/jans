@@ -56,7 +56,7 @@ public interface TraceStore {
 	 *                                  exists
 	 * @throws TraceStorageException   on any other persistence failure
 	 */
-	void insertRecord(StoredTraceRecord record) throws DuplicateEntryException, TraceStorageException;
+	void insertRecord(StoredTraceRecord stored) throws DuplicateEntryException, TraceStorageException;
 
 	/**
 	 * Replaces the three mutable correlation flags ({@code coverageGap}, {@code chainLinkFailure},

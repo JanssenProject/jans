@@ -8,6 +8,7 @@ package io.jans.lock.service.trace.store;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -144,21 +145,21 @@ public abstract class TraceStoreContractTest {
 
 	@Test
 	void testInsertRecord_thenFindRecord_returnsEqualRecord() throws Exception {
-		StoredTraceRecord record = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
+		StoredTraceRecord stored = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
 
-		store.insertRecord(record);
+		store.insertRecord(stored);
 
-		Optional<StoredTraceRecord> found = store.findRecord(record.getIdentity());
+		Optional<StoredTraceRecord> found = store.findRecord(stored.getIdentity());
 		assertTrue(found.isPresent());
-		assertEquals(record.getIdentity(), found.get().getIdentity());
-		assertEquals(record.getContentDigest(), found.get().getContentDigest());
-		assertEquals(record.getAssertionRaw(), found.get().getAssertionRaw());
+		assertEquals(stored.getIdentity(), found.get().getIdentity());
+		assertEquals(stored.getContentDigest(), found.get().getContentDigest());
+		assertEquals(stored.getAssertionRaw(), found.get().getAssertionRaw());
 	}
 
 	@Test
 	void testInsertRecord_duplicateIdentity_throwsDuplicateEntryException() throws Exception {
-		StoredTraceRecord record = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
-		store.insertRecord(record);
+		StoredTraceRecord stored = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
+		store.insertRecord(stored);
 
 		StoredTraceRecord conflicting = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 2L);
 
@@ -174,13 +175,13 @@ public abstract class TraceStoreContractTest {
 
 	@Test
 	void testFindRecord_returnsDeepCopy_mutatingFlagsDoesNotAffectStore() throws Exception {
-		StoredTraceRecord record = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
-		store.insertRecord(record);
+		StoredTraceRecord stored = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
+		store.insertRecord(stored);
 
-		StoredTraceRecord found = store.findRecord(record.getIdentity()).get();
+		StoredTraceRecord found = store.findRecord(stored.getIdentity()).get();
 		found.getFlags().setCoverageGap(true);
 
-		StoredTraceRecord foundAgain = store.findRecord(record.getIdentity()).get();
+		StoredTraceRecord foundAgain = store.findRecord(stored.getIdentity()).get();
 		assertFalse(foundAgain.getFlags().isCoverageGap());
 	}
 
@@ -188,22 +189,22 @@ public abstract class TraceStoreContractTest {
 
 	@Test
 	void testUpdateRecordFlags_onlyChangesFlags_preservesLateAndEverythingElse() throws Exception {
-		StoredTraceRecord record = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
-		store.insertRecord(record);
+		StoredTraceRecord stored = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
+		store.insertRecord(stored);
 
 		IngestionFlags newFlags = new IngestionFlags(true, true, true, true);
-		boolean updated = store.updateRecordFlags(record.getIdentity(), newFlags, record.getVersion());
+		boolean updated = store.updateRecordFlags(stored.getIdentity(), newFlags, stored.getVersion());
 
 		assertTrue(updated);
-		StoredTraceRecord found = store.findRecord(record.getIdentity()).get();
+		StoredTraceRecord found = store.findRecord(stored.getIdentity()).get();
 		assertTrue(found.getFlags().isCoverageGap());
 		assertTrue(found.getFlags().isChainLinkFailure());
 		assertTrue(found.getFlags().isEquivocation());
 		// jansTraceLate is immutable after ingestion (design §10): the store must not adopt
 		// the incoming value even though IngestionFlags carries one.
 		assertFalse(found.getFlags().isLate());
-		assertEquals(record.getContentDigest(), found.getContentDigest());
-		assertEquals(record.getAssertionRaw(), found.getAssertionRaw());
+		assertEquals(stored.getContentDigest(), found.getContentDigest());
+		assertEquals(stored.getAssertionRaw(), found.getAssertionRaw());
 	}
 
 	@Test
@@ -218,33 +219,34 @@ public abstract class TraceStoreContractTest {
 
 	@Test
 	void testUpdateRecordFlags_matchingVersion_succeedsAndIncrementsVersion() throws Exception {
-		StoredTraceRecord record = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
-		store.insertRecord(record);
-		long initialVersion = store.findRecord(record.getIdentity()).get().getVersion();
+		StoredTraceRecord stored = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
+		store.insertRecord(stored);
+		long initialVersion = store.findRecord(stored.getIdentity()).get().getVersion();
 
-		boolean updated = store.updateRecordFlags(record.getIdentity(), new IngestionFlags(true, false, false, false),
+		boolean updated = store.updateRecordFlags(stored.getIdentity(), new IngestionFlags(true, false, false, false),
 				initialVersion);
 
 		assertTrue(updated);
-		assertEquals(initialVersion + 1, store.findRecord(record.getIdentity()).get().getVersion());
+		assertEquals(initialVersion + 1, store.findRecord(stored.getIdentity()).get().getVersion());
 	}
 
 	@Test
 	void testUpdateRecordFlags_staleVersion_throwsVersionConflictReason() throws Exception {
-		StoredTraceRecord record = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
-		store.insertRecord(record);
-		long initialVersion = store.findRecord(record.getIdentity()).get().getVersion();
+		StoredTraceRecord stored = newRecord("producer-1", "record-1", "authority-1", "exec-1", 1L, 1L);
+		store.insertRecord(stored);
+		long initialVersion = store.findRecord(stored.getIdentity()).get().getVersion();
 		// Advance the stored version once so the caller's expectation below is stale.
-		store.updateRecordFlags(record.getIdentity(), new IngestionFlags(true, false, false, false), initialVersion);
+		store.updateRecordFlags(stored.getIdentity(), new IngestionFlags(true, false, false, false), initialVersion);
 
+		RecordIdentity identity = stored.getIdentity();
+		IngestionFlags staleFlags = new IngestionFlags(false, true, false, false);
 		TraceStorageException ex = assertThrows(TraceStorageException.class,
-				() -> store.updateRecordFlags(record.getIdentity(), new IngestionFlags(false, true, false, false),
-						initialVersion));
+				() -> store.updateRecordFlags(identity, staleFlags, initialVersion));
 
 		assertEquals(TraceStore.VERSION_CONFLICT_REASON, ex.getReason());
 		// The losing writer's flags must never have been applied.
-		assertTrue(store.findRecord(record.getIdentity()).get().getFlags().isCoverageGap());
-		assertFalse(store.findRecord(record.getIdentity()).get().getFlags().isChainLinkFailure());
+		assertTrue(store.findRecord(stored.getIdentity()).get().getFlags().isCoverageGap());
+		assertFalse(store.findRecord(stored.getIdentity()).get().getFlags().isChainLinkFailure());
 	}
 
 	// -- records: execution ordering -----------------------------------------------------------
@@ -528,7 +530,7 @@ public abstract class TraceStoreContractTest {
 		assertTrue(found.isPresent());
 		assertEquals("kid-1", found.get().getKid());
 		assertEquals(Arrays.asList("AUTHORIZATION_DECISION", "RUNTIME_EFFECT"), found.get().getAuthorizedEventKinds());
-		assertFalse(found.get().getRevokedAtMs() != null);
+		assertNull(found.get().getRevokedAtMs());
 	}
 
 	@Test

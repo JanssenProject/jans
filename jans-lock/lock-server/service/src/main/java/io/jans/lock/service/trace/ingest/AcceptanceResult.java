@@ -23,6 +23,8 @@ import io.jans.lock.service.trace.model.StoredTraceRecord;
  */
 public final class AcceptanceResult {
 
+	private static final boolean ACCEPTED = true;
+
 	private final String producerId;
 
 	private final String recordId;
@@ -78,7 +80,7 @@ public final class AcceptanceResult {
 	 * @return always {@code true}; every rejection path throws instead of returning a result
 	 */
 	public boolean isAccepted() {
-		return true;
+		return ACCEPTED;
 	}
 
 	public String getProducerId() {

@@ -51,12 +51,12 @@ public final class PolicyRecordQuery {
 		return receivedToMs;
 	}
 
-	public boolean matches(StoredTraceRecord record) {
-		PolicyRef policy = record.getPolicy();
+	public boolean matches(StoredTraceRecord stored) {
+		PolicyRef policy = stored.getPolicy();
 		if (policy == null) {
 			return false;
 		}
-		long receivedAtMs = record.getReceipt().getReceivedAtMs();
+		long receivedAtMs = stored.getReceipt().getReceivedAtMs();
 		return (policyStoreId == null || policyStoreId.equals(policy.getPolicyStoreId()))
 				&& (policyStoreVersion == null || policyStoreVersion.equals(policy.getPolicyStoreVersion()))
 				&& (bundleHash == null || bundleHash.equals(policy.getBundleHash()))

@@ -26,7 +26,6 @@ import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
-import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.store.TraceKeys;
@@ -181,8 +180,8 @@ public class TraceCorrelationService {
 	}
 
 	private void updatePeer(RecordIdentity insertedId, RecordIdentity peerId) {
-		updateFlags(peerId, record -> {
-			IngestionFlags flags = record.getFlags();
+		updateFlags(peerId, stored -> {
+			IngestionFlags flags = stored.getFlags();
 			if (flags.isEquivocation()) {
 				return null;
 			}
@@ -192,8 +191,8 @@ public class TraceCorrelationService {
 	}
 
 	private void updateSuccessor(StoredTraceRecord inserted, RecordIdentity successorId) {
-		updateFlags(successorId, record -> {
-			IngestionFlags flags = record.getFlags();
+		updateFlags(successorId, stored -> {
+			IngestionFlags flags = stored.getFlags();
 			boolean changed = false;
 			if (flags.isCoverageGap()) {
 				flags.setCoverageGap(false);
@@ -201,7 +200,7 @@ public class TraceCorrelationService {
 			}
 			// design §8: chainLinkFailure is never self-clearing, only ever set here.
 			if (!flags.isChainLinkFailure()
-					&& ProducerChainRules.successorLinkBroken(record.getPrevRecordHash(), inserted.getContentDigest())) {
+					&& ProducerChainRules.successorLinkBroken(stored.getPrevRecordHash(), inserted.getContentDigest())) {
 				flags.setChainLinkFailure(true);
 				changed = true;
 			}
@@ -225,15 +224,15 @@ public class TraceCorrelationService {
 			if (!current.isPresent()) {
 				return;
 			}
-			StoredTraceRecord record = current.get();
+			StoredTraceRecord stored = current.get();
 			int retryLimit = appConfiguration.getTraceConfiguration().getCorrelationRetryLimit();
 			for (int attempt = 0; attempt <= retryLimit; attempt++) {
-				IngestionFlags newFlags = mutator.apply(record);
+				IngestionFlags newFlags = mutator.apply(stored);
 				if (newFlags == null) {
 					return;
 				}
 				try {
-					store.updateRecordFlags(targetId, newFlags, record.getVersion());
+					store.updateRecordFlags(targetId, newFlags, stored.getVersion());
 					return;
 				} catch (TraceStorageException ex) {
 					if (!TraceStore.VERSION_CONFLICT_REASON.equals(ex.getReason())) {
@@ -249,7 +248,7 @@ public class TraceCorrelationService {
 					if (!refreshed.isPresent()) {
 						return;
 					}
-					record = refreshed.get();
+					stored = refreshed.get();
 				}
 			}
 		} catch (RuntimeException ex) {

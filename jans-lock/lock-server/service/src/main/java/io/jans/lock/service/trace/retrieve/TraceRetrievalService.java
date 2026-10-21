@@ -74,8 +74,8 @@ public class TraceRetrievalService {
 	 * {@code PENDING} one during the short window before the claim is settled; a {@code VOID}
 	 * entry never belongs to a stored record (design §9).
 	 */
-	public String findReceiptState(StoredTraceRecord record) {
-		return traceStore.findReceipt(record.getIdentity().getDomainId(), record.getReceipt().getReceiptSequence())
+	public String findReceiptState(StoredTraceRecord stored) {
+		return traceStore.findReceipt(stored.getIdentity().getDomainId(), stored.getReceipt().getReceiptSequence())
 				.map(TraceReceiptEntry::getReceiptState).orElse(null);
 	}
 

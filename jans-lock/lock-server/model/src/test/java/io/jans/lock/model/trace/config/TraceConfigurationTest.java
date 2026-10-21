@@ -28,12 +28,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Janssen Project
  */
-public class TraceConfigurationTest {
+class TraceConfigurationTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void testDeserialize_fullBlock_allValuesSet() throws Exception {
+    void testDeserialize_fullBlock_allValuesSet() throws Exception {
         String json = "{"
                 + "\"traceConfiguration\": {"
                 + "  \"enabled\": false,"
@@ -88,7 +88,7 @@ public class TraceConfigurationTest {
     }
 
     @Test
-    public void testDeserialize_missingBlock_defaultsApplied() throws Exception {
+    void testDeserialize_missingBlock_defaultsApplied() throws Exception {
         AppConfiguration appConfiguration = mapper.readValue("{}", AppConfiguration.class);
 
         TraceConfiguration traceConfiguration = appConfiguration.getTraceConfiguration();
@@ -115,7 +115,7 @@ public class TraceConfigurationTest {
     }
 
     @Test
-    public void testGetters_nonPositiveLimits_fallBackToDefaults() {
+    void testGetters_nonPositiveLimits_fallBackToDefaults() {
         TraceConfiguration traceConfiguration = new TraceConfiguration();
 
         traceConfiguration.setLatenessThresholdSeconds(0);
@@ -146,7 +146,7 @@ public class TraceConfigurationTest {
     }
 
     @Test
-    public void testGetMaxBulkRequestBytes_configuredAboveCeiling_clampsToHardMax() {
+    void testGetMaxBulkRequestBytes_configuredAboveCeiling_clampsToHardMax() {
         TraceConfiguration traceConfiguration = new TraceConfiguration();
         traceConfiguration.setMaxBulkRequestBytes(TraceConfiguration.HARD_MAX_BULK_REQUEST_BYTES + 1_000_000);
 
@@ -154,13 +154,13 @@ public class TraceConfigurationTest {
     }
 
     @Test
-    public void testCryptoProvider_defaultIsJava() {
+    void testCryptoProvider_defaultIsJava() {
         assertEquals("JAVA", TraceConfiguration.DEFAULT_CRYPTO_PROVIDER);
         assertEquals("JAVA", new TraceConfiguration().getCryptoProvider());
     }
 
     @Test
-    public void testCryptoProvider_jacksonRoundTrip() throws Exception {
+    void testCryptoProvider_jacksonRoundTrip() throws Exception {
         TraceConfiguration traceConfiguration = new TraceConfiguration();
         traceConfiguration.setCryptoProvider("NATIVE");
 
@@ -172,7 +172,7 @@ public class TraceConfigurationTest {
     }
 
     @Test
-    public void testCryptoProvider_nullOrBlank_fallsBackToDefault() {
+    void testCryptoProvider_nullOrBlank_fallsBackToDefault() {
         TraceConfiguration traceConfiguration = new TraceConfiguration();
 
         traceConfiguration.setCryptoProvider(null);

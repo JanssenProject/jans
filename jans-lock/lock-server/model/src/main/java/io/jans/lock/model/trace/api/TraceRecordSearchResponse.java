@@ -21,16 +21,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TraceRecordSearchResponse {
 
-	@JsonProperty("ordering")
-	@Schema(description = "Fixed: records are ordered by receipt_sequence", example = "receipt_sequence")
-	private final String ordering = "receipt_sequence";
+	private static final String ORDERING = "receipt_sequence";
 
 	@JsonProperty("records")
 	@Schema(description = "Matching records, ordered by receipt_sequence")
 	private List<TraceRecordResponse> records = new ArrayList<>();
 
+	@JsonProperty("ordering")
+	@Schema(description = "Fixed: records are ordered by receipt_sequence", example = "receipt_sequence")
 	public String getOrdering() {
-		return ordering;
+		return ORDERING;
 	}
 
 	public List<TraceRecordResponse> getRecords() {

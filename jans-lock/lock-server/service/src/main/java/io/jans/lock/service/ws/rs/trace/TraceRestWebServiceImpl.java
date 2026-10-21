@@ -223,12 +223,12 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		try {
 			log.debug("Retrieving TRACE record, recordId: {}", recordId);
 			checkEnabled();
-			requireMaxLength(recordId, MAX_RECORD_ID_LENGTH, "record_id");
+			requireMaxLength(recordId, MAX_RECORD_ID_LENGTH, FIELD_RECORD_ID);
 
 			TraceRequestContext context = resolveContext();
-			StoredTraceRecord record = retrievalService.findRecord(context.getEvidenceDomainId(), recordId, producerId);
+			StoredTraceRecord stored = retrievalService.findRecord(context.getEvidenceDomainId(), recordId, producerId);
 
-			response = Response.ok(toRecordResponse(record)).cacheControl(ServerUtil.cacheControl(true))
+			response = Response.ok(toRecordResponse(stored)).cacheControl(ServerUtil.cacheControl(true))
 					.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE).build();
 			return response;
 		} catch (RuntimeException ex) {
@@ -594,16 +594,16 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		return dto;
 	}
 
-	private TraceRecordResponse toRecordResponse(StoredTraceRecord record) {
+	private TraceRecordResponse toRecordResponse(StoredTraceRecord stored) {
 		TraceRecordResponse dto = new TraceRecordResponse();
-		dto.setProducerId(record.getIdentity().getProducerId());
-		dto.setRecordId(record.getIdentity().getRecordId());
-		dto.setAssertion(parseAssertion(record.getAssertionRaw()));
-		dto.setAssertionRaw(record.getAssertionRaw());
-		dto.setContentDigest(record.getContentDigest());
-		dto.setVerification(toVerificationResponse(record.getVerification()));
-		dto.setIngestion(toIngestionResponse(record.getReceipt(), record.getFlags(),
-				retrievalService.findReceiptState(record)));
+		dto.setProducerId(stored.getIdentity().getProducerId());
+		dto.setRecordId(stored.getIdentity().getRecordId());
+		dto.setAssertion(parseAssertion(stored.getAssertionRaw()));
+		dto.setAssertionRaw(stored.getAssertionRaw());
+		dto.setContentDigest(stored.getContentDigest());
+		dto.setVerification(toVerificationResponse(stored.getVerification()));
+		dto.setIngestion(toIngestionResponse(stored.getReceipt(), stored.getFlags(),
+				retrievalService.findReceiptState(stored)));
 		return dto;
 	}
 
