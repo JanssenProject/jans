@@ -1158,6 +1158,12 @@ components:
           description: "How producer chains come to exist: PRE_REGISTERED (admin API\
             \ only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers\
             \ it); an unknown value is treated as PRE_REGISTERED"
+        cryptoProvider:
+          type: string
+          description: "TRACE cryptography implementation: JAVA (BouncyCastle, in-process)\
+            \ or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown\
+            \ value is treated as JAVA"
+          default: JAVA
       description: TRACE evidence ingestion configuration
     JsonPatch:
       type: object

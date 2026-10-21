@@ -103,6 +103,7 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
   "maxBulkRequestBytes": 4194304,
   "correlationRetryLimit": 3,
   "chainRegistrationMode": "PRE_REGISTERED",
+  "cryptoProvider": "JAVA",
   "receiptAllocationRetryLimit": 8,
   "receiptRepairIntervalSeconds": 300,
   "pendingReceiptTimeoutSeconds": 120
@@ -122,6 +123,19 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
 **Neighbor-update retries.** After a record is stored, Lock updates derived flags on neighboring records. Each update is a compare-and-swap write against the neighbor's version. On a version conflict, Lock re-reads the neighbor, recomputes the flag from its current state and retries, up to `correlationRetryLimit` times. When the budget is exhausted Lock logs a warning and gives up on that update. It never fails the request.
 
 **Chain registration mode.** `chainRegistrationMode` is `PRE_REGISTERED` (default) or `FIRST_OBSERVED`. See [Chain registration modes](#chain-registration-modes). A value that is not one of the two names is treated as `PRE_REGISTERED` and logged once at `WARN`.
+
+**Crypto provider.** `cryptoProvider` selects the implementation that parses producer keys, canonicalizes assertions, verifies signatures and computes receipt hashes. Values are matched case-insensitively:
+
+- `JAVA` (default): BouncyCastle, in the Lock process. This is the implementation Lock shipped with.
+- `NATIVE`: `jans-trace-core`, the Rust library that producers such as Cedarling sign with, reached through the `jans-trace-java` binding.
+
+Both providers produce the same `content_digest`, key thumbprint, receipt hash and storage keys. Switching the provider does not invalidate the stored receipt chain.
+
+Lock fails closed. When the selected provider is not available, because the native library is missing or its self-test fails, every TRACE submission returns `500 crypto_unavailable`. Lock never falls back to the other provider. Look for the startup log line `TRACE crypto provider: type=<type> available=<true|false> detail=<detail>`. The FIPS WAR ships without the native provider, so `NATIVE` fails closed there.
+
+`NATIVE` rejects small-order Ed25519 public keys that BouncyCastle accepts. After you switch to `NATIVE`, a registered key of that kind fails with `unknown_producer_key` or `stored_key_unusable`. Check registered keys before you switch.
+
+A value that is not one of the two names is treated as `JAVA` and logged once at `WARN`: `Unknown traceConfiguration.cryptoProvider '<value>', using JAVA`.
 
 **Timers.** The receipt repair timer runs every `receiptRepairIntervalSeconds`. It settles receipt claims that stayed `PENDING` longer than `pendingReceiptTimeoutSeconds` (see [Deployment constraints](#deployment-constraints)). Setting `enabled` to `false` makes every TRACE endpoint return a structured `invalid_request` error with reason `trace_disabled` and stops the timer.
 
@@ -443,7 +457,7 @@ Errors use the structured body `{"error": "<id>", "error_description": "<text>",
 | `chain_already_exists` | 409 | Admin: duplicate chain registration. |
 | `invalid_key` | 400 | Admin: the JWK is not a 32-byte Ed25519 OKP key, the dates are invalid, or `authorized_event_kinds` is missing, empty, unknown or duplicated. |
 | `storage_failure` | 500 | Persistence failed, or receipt allocation ran out of retries. |
-| `crypto_unavailable` | 500 | The security provider has no Ed25519 support. Lock fails closed. |
+| `crypto_unavailable` | 500 | The selected crypto provider (`cryptoProvider`) is not available or has no Ed25519 support. Lock fails closed and does not fall back to the other provider. |
 
 ### Canonical propagation wire profile
 

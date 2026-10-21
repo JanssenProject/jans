@@ -11,12 +11,7 @@ import java.io.InputStream;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
-import io.jans.lock.service.trace.canon.JcsException;
-import io.jans.lock.service.trace.crypto.Ed25519Capability;
-import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
-import io.jans.lock.service.trace.crypto.Ed25519Verifier;
-import io.jans.lock.service.trace.crypto.StrictBase64Url;
-import io.jans.lock.service.trace.error.TraceCryptoException;
+import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.identity.ForwardingPolicy;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
@@ -28,6 +23,10 @@ import io.jans.lock.service.trace.parse.TraceAssertionParser;
 import io.jans.lock.service.trace.registry.ProducerKeyRegistry;
 import io.jans.lock.service.trace.validate.CorrelationInputs;
 import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
+import io.jans.lock.trace.crypto.StrictBase64Url;
+import io.jans.lock.trace.crypto.TraceCryptoException;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
+import io.jans.lock.trace.crypto.TraceSignedRecord;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -38,7 +37,7 @@ import jakarta.inject.Inject;
  *
  * <p>The order is normative (cheap checks before crypto, design §5):
  * <ol>
- * <li>{@link Ed25519Capability#requireAvailable()} — fail closed before reading the body;</li>
+ * <li>{@link TraceCryptoProvider#requireAvailable()} — fail closed before reading the body;</li>
  * <li>bounded parse ({@link TraceAssertionParser});</li>
  * <li>§7.1 common validation ({@link CommonAssertionValidator});</li>
  * <li>forwarding check ({@link ForwardingPolicy}) — the signed {@code producer} is
@@ -46,8 +45,8 @@ import jakarta.inject.Inject;
  * <li>§7.2/§7.3 event-kind validation ({@link EventKindValidatorRegistry});</li>
  * <li>key resolution with validity evaluation at {@code ctx.receivedAtMs};</li>
  * <li>event-kind scope of the key, before any signature work;</li>
- * <li>Ed25519 verification over {@code JCS(assertion without "signature")};</li>
- * <li>content digest over {@code JCS(full assertion)}.</li>
+ * <li>Ed25519 verification over {@code JCS(assertion without "signature")} and content digest
+ * over {@code JCS(full assertion)}, both through {@link TraceCryptoProvider#verifyAndDigest}.</li>
  * </ol>
  *
  * <p>Logging: one DEBUG line per verified record (producer, kid, record_id, event_kind); every
@@ -69,7 +68,7 @@ public class TraceVerificationService {
 	private Logger log;
 
 	@Inject
-	private Ed25519Capability capability;
+	private TraceCryptoProvider cryptoProvider;
 
 	@Inject
 	private TraceAssertionParser parser;
@@ -82,9 +81,6 @@ public class TraceVerificationService {
 
 	@Inject
 	private ProducerKeyRegistry keyRegistry;
-
-	@Inject
-	private Ed25519Verifier verifier;
 
 	/**
 	 * @param body the raw request body; read at most once, bounded by {@code maxRequestBytes}
@@ -114,7 +110,7 @@ public class TraceVerificationService {
 
 	private VerifiedAssertion doVerify(InputStream body, TraceRequestContext ctx) {
 		// 1. Fail closed before touching the body.
-		capability.requireAvailable();
+		cryptoProvider.requireAvailable();
 
 		// 2. Bounded parse under the request limits.
 		ParsedAssertion parsed = parser.parse(body);
@@ -143,33 +139,29 @@ public class TraceVerificationService {
 			throw new TraceValidationException(TraceErrorResponseType.INVALID_SIGNATURE, REASON_SIGNATURE_FORMAT, ex);
 		}
 
-		byte[] signatureInput;
-		try {
-			signatureInput = parsed.signatureInput();
-		} catch (JcsException ex) {
-			throw new TraceValidationException(TraceErrorResponseType.INVALID_ASSERTION, REASON_CANONICALIZATION_FAILED,
-					ex);
-		}
-
-		if (!verifier.verify(key.getPublicKey(), signatureInput, signature)) {
-			throw new TraceValidationException(TraceErrorResponseType.INVALID_SIGNATURE, REASON_SIGNATURE_MISMATCH);
-		}
-
-		// 8. Digest over JCS(full assertion).
+		// 8. Digest over JCS(full assertion), computed by the same call.
 		String contentDigest;
 		try {
-			contentDigest = parsed.contentDigest();
-		} catch (JcsException ex) {
-			throw new TraceValidationException(TraceErrorResponseType.INVALID_ASSERTION, REASON_CANONICALIZATION_FAILED,
-					ex);
+			contentDigest = cryptoProvider.verifyAndDigest(new TraceSignedRecord(parsed.getRawText(),
+					parsed.getRoot(), parsed.getProducer(), parsed.getKid()), signature, key.getVerificationKey());
+		} catch (TraceCryptoException ex) {
+			if (TraceCryptoException.REASON_SIGNATURE_MISMATCH.equals(ex.getReason())) {
+				throw new TraceValidationException(TraceErrorResponseType.INVALID_SIGNATURE,
+						REASON_SIGNATURE_MISMATCH);
+			}
+			if (TraceCryptoException.REASON_CANONICALIZATION_FAILED.equals(ex.getReason())) {
+				throw new TraceValidationException(TraceErrorResponseType.INVALID_ASSERTION,
+						REASON_CANONICALIZATION_FAILED, ex);
+			}
+			throw ex;
 		}
 
 		// 9. Assemble. verified_at is the same instant the key validity was evaluated at.
 		// Every admission check passed above (a failing record is rejected, never stored), so
 		// key_authorized is true; both new members are computed here once and never again on read.
-		String keyThumbprint = Ed25519PublicKeys.thumbprint(key.getKey().getPublicKeyJwk());
+		String keyThumbprint = key.getVerificationKey().thumbprint();
 		VerificationResult verification = new VerificationResult(true, key.getKey().getKid(), ctx.getReceivedAtMs(),
-				Ed25519PublicKeys.ALGORITHM, keyThumbprint, Boolean.TRUE);
+				TraceConstants.SIGNATURE_ALGORITHM, keyThumbprint, Boolean.TRUE);
 		RecordIdentity identity = new RecordIdentity(ctx.getEvidenceDomainId(), parsed.getProducer(),
 				parsed.getRecordId());
 

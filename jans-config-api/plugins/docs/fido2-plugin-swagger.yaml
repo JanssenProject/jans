@@ -1816,27 +1816,31 @@ components:
           type: object
           additionalProperties:
             type: object
-        fallbackEvents:
-          type: integer
-          format: int64
-        period:
-          type: string
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
+        period:
+          type: string
+        registrationAttempts:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
         authenticationAttempts:
           type: integer
           format: int64
         authenticationSuccesses:
           type: integer
           format: int64
-        registrationAttempts:
+        authenticationFailures:
+          type: integer
+          format: int64
+        fallbackEvents:
           type: integer
           format: int64
         registrationSuccessRate:
@@ -1845,15 +1849,6 @@ components:
         authenticationSuccessRate:
           type: number
           format: double
-        registrationFailures:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
         registrationAvgDuration:
           type: number
           format: double
@@ -1861,6 +1856,11 @@ components:
           type: number
           format: double
         deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        errorCounts:
           type: object
           additionalProperties:
             type: integer

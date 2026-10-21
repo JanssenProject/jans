@@ -35,6 +35,8 @@ import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.parse.CommonAssertionValidator;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 import io.jans.lock.service.trace.parse.TraceAssertionParser;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
 import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
 
 /**
@@ -46,7 +48,7 @@ import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
  * {@code CommonAssertionValidatorTest} and {@code EventKindValidatorsTest}.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TraceNegativeSchemaTest extends BaseLockServiceTest {
+public class TraceNegativeSchemaTest extends BaseLockServiceTest {
 
 	private static final String NEGATIVE_ROOT = "/trace/negative/";
 
@@ -58,12 +60,18 @@ class TraceNegativeSchemaTest extends BaseLockServiceTest {
 
 	private EventKindValidatorRegistry registry;
 
+	/** Override to run the same fixtures against another {@code TraceCryptoProvider}. */
+	protected TraceCryptoProvider cryptoProvider() {
+		return TraceTestCrypto.javaProvider();
+	}
+
 	@BeforeEach
 	void setUp() {
 		AppConfiguration appConfiguration = new AppConfiguration();
 
 		parser = new TraceAssertionParser();
 		setField(parser, "appConfiguration", appConfiguration);
+		setField(parser, "cryptoProvider", cryptoProvider());
 
 		commonValidator = new CommonAssertionValidator();
 		setField(commonValidator, "appConfiguration", appConfiguration);

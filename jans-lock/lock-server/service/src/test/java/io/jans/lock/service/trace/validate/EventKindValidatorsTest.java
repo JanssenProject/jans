@@ -39,6 +39,7 @@ import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.parse.CommonAssertionValidator;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 import io.jans.lock.service.trace.parse.TraceAssertionParser;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 
 /**
  * Tests for the {@code EventKindValidator} implementations and {@link EventKindValidatorRegistry}
@@ -69,6 +70,7 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 
 		parser = new TraceAssertionParser();
 		setField(parser, "appConfiguration", appConfiguration);
+		setField(parser, "cryptoProvider", TraceTestCrypto.javaProvider());
 
 		commonValidator = new CommonAssertionValidator();
 		setField(commonValidator, "appConfiguration", appConfiguration);
