@@ -1812,41 +1812,23 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        fallbackEvents:
-          type: integer
-          format: int64
-        period:
-          type: string
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        registrationFailures:
-          type: integer
-          format: int64
         registrationSuccesses:
           type: integer
           format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
-        authenticationFailures:
+        registrationFailures:
           type: integer
           format: int64
-        authenticationAvgDuration:
-          type: number
-          format: double
         registrationAttempts:
+          type: integer
+          format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        authenticationFailures:
           type: integer
           format: int64
         registrationSuccessRate:
@@ -1855,16 +1837,34 @@ components:
         authenticationSuccessRate:
           type: number
           format: double
-        authenticationAttempts:
-          type: integer
-          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
         authenticationSuccesses:
           type: integer
           format: int64
-        performanceMetrics:
+        metricsData:
           type: object
           additionalProperties:
             type: object
+        period:
+          type: string
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
