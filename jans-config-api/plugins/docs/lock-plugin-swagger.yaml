@@ -1133,7 +1133,8 @@ components:
           type: integer
           description: Seconds after the last Lock node stops serving a policy store
             release during which records judged under it are not flagged policy_mismatch_flag;
-            at least 60 in effect
+            the check uses the larger of this and latenessThresholdSeconds, plus about 130
+            seconds for update and cache lag
           format: int32
         policyReleaseRetentionDays:
           type: integer

@@ -267,7 +267,8 @@ verification. See [TRACE Evidence](./trace.md) for the feature description and A
 | `defaultAllowedProducerIds` | array | `[]` | Producer ids a client without a binding may submit records for in the default evidence domain. Empty means such a client can submit nothing (`producer_not_allowed`). Read and admin paths are unaffected. |
 | `clientDomainBindings` | array | `[]` | List of `{ clientId, evidenceDomainId, allowedProducerIds[] }` bindings. A client without a binding and without `defaultEvidenceDomainId` set is rejected with `client_not_bound`. `allowedProducerIds` may contain `"*"` to allow any producer. |
 | `latenessThresholdSeconds` | integer | `300` | Seconds after `signed_at` a record may still be accepted before it is flagged `late_flag: true`. |
-| `policyMismatchGraceSeconds` | integer | `300` | Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged `policy_mismatch_flag`; at least 60 seconds in effect. See [TRACE](./trace.md#policy-store-release-check). |
+| `policyMismatchGraceSeconds` | integer | `300` | Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged `policy_mismatch_flag`. The check uses the larger of this and `latenessThresholdSeconds`, plus about 130 seconds for update and cache lag. See [TRACE](./trace.md#policy-store-release-check). |
+| `policyReleaseRetentionDays` | integer | `30` | Days a policy store release no node serves any more is kept before it is deleted; never less than the check's acceptance window. |
 | `maxFutureSkewSeconds` | integer | `300` | Seconds `signed_at` may be ahead of Lock's clock. A later `signed_at` is rejected with `invalid_assertion` (`signed_at_in_future`). |
 | `maxRequestBytes` | integer | `262144` | Maximum accepted TRACE request body size, in bytes. |
 | `maxJsonDepth` | integer | `32` | Maximum accepted JSON nesting depth of a TRACE assertion. |

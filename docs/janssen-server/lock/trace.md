@@ -98,6 +98,7 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
   ],
   "latenessThresholdSeconds": 300,
   "policyMismatchGraceSeconds": 300,
+  "policyReleaseRetentionDays": 30,
   "maxFutureSkewSeconds": 300,
   "maxRequestBytes": 262144,
   "maxBulkRecords": 100,
@@ -138,7 +139,7 @@ Lock fails closed. When the selected provider is not available, because the nati
 
 A value that is not one of the two names is treated as `JAVA` and logged once at `WARN`: `Unknown traceConfiguration.cryptoProvider '<value>', using JAVA`.
 
-**Policy store release check.** `policyMismatchGraceSeconds` (default `300`, at least 60 seconds in effect) is how long after the last node stops serving a policy store release records judged under it still count as matching. A mismatch only sets `policy_mismatch_flag`; it never rejects a record. See [Policy store release check](#policy-store-release-check).
+**Policy store release check.** `policyMismatchGraceSeconds` (default `300`) is how long after the last node stops serving a policy store release records judged under it still count as matching; see the acceptance window below. `policyReleaseRetentionDays` (default `30`) is how long a release no node serves any more is kept before it is deleted. A mismatch only sets `policy_mismatch_flag`; it never rejects a record. See [Policy store release check](#policy-store-release-check).
 
 **Timers.** The receipt repair timer runs every `receiptRepairIntervalSeconds`. It settles receipt claims that stayed `PENDING` longer than `pendingReceiptTimeoutSeconds` (see [Deployment constraints](#deployment-constraints)). Setting `enabled` to `false` makes every TRACE endpoint return a structured `invalid_request` error with reason `trace_disabled` and stops the timer.
 
@@ -581,12 +582,12 @@ A producer-chain break or gap is a statement about the records Lock has received
 
 ## Policy store release check
 
-Lock serves policy store archives to producers (`GET /policy`, `GET /policy/stores`) and computes each archive's `bundle_hash` as `sha256:` plus the lowercase hex SHA-256 of the archive bytes. Lock reloads policy stores every 30 seconds. On every reload each node records the releases it serves in the shared TRACE store (`jansTracePolicyRelease`, one row per `policy_store_id` and `bundle_hash`, not scoped to an evidence domain): the first time a release is served it is inserted, and after that its last-served time moves forward at most once per `min(60 s, policyMismatchGraceSeconds / 2)`. Updates use optimistic locking and never move the last-served time back or the first-served time forward, so a replica with a lagging clock cannot shorten a release's history. A release that is no longer served stops moving forward. Because the history is in the database, every replica sees the same releases, and it survives restarts and rolling updates.
+Lock serves policy store archives to producers (`GET /policy`, `GET /policy/stores`) and computes each archive's `bundle_hash` as `sha256:` plus the lowercase hex SHA-256 of the archive bytes. Lock reloads policy stores every 30 seconds. On every reload each node records the releases it serves in the shared TRACE store (`jansTracePolicyRelease`, one row per `policy_store_id` and `bundle_hash`, not scoped to an evidence domain): the first time a release is served it is inserted, and after that its last-served time moves forward at most once a minute. Updates use optimistic locking and never move the last-served time back or the first-served time forward, so a replica with a lagging clock cannot shorten a release's history. A release that is no longer served stops moving forward. Because the history is in the database, every replica sees the same releases, and it survives restarts and rolling updates.
 
 When an accepted record's `trace.policy.policy_store_id` is a store this node serves as an archive, Lock judges the record's release at its `received_at`, or at its `signed_at` when the record is flagged `late_flag`. Using the receipt time means a producer cannot backdate `signed_at` to slip a retired release past the check; it can shift the time by at most `latenessThresholdSeconds`, and beyond that the record is flagged late. The release is accepted when:
 
 - this node serves that `bundle_hash` now; or
-- some node served it no longer than the effective grace period before that time. The effective grace period is `policyMismatchGraceSeconds`, but at least two reload intervals (60 seconds), so a release another replica still serves never looks retired between its updates.
+- its stored last-served time is within the acceptance window before that time. The window is the larger of `policyMismatchGraceSeconds` and `latenessThresholdSeconds`, plus 130 seconds: a stored last-served time can trail the real one by the one-minute update interval, two 30-second reloads and the 10-second cache. With the defaults the window is 430 seconds, so a record signed just before a rollout and received up to five minutes later still matches, and a release another replica still serves never looks retired.
 
 Otherwise, and also when a matching release has a known `policy_store_version` that differs from the record's, the record is flagged `policy_mismatch_flag`. A record signed under the previous release during a rollout, or uploaded shortly after it, is not flagged. The record is always accepted.
 
@@ -594,7 +595,8 @@ Limits:
 
 - Before the first policy store load, Lock serves no archive and flags nothing.
 - A store this node does not serve is never compared, because producers may load stores from other sources.
-- Lock caches found history rows for 10 seconds, so a later last-served time written by another replica can take that long to be seen. A release this node has not found is read from the store on every check.
+- Lock caches found history rows for 10 seconds (at most 1000, least recently used evicted). A release it has not found is remembered as missing for one second, or until this node publishes a reload, so a release another replica starts serving is seen within a second and an unknown hash repeated by a producer costs at most one store read per second.
+- Releases no node has served for `policyReleaseRetentionDays` are deleted by the receipt repair timer, 500 per run, except a release this node serves. A record later naming a deleted release is flagged.
 - The check is best-effort: if it or the store fails, Lock logs a warning and accepts the record without the flag.
 
 The flag is a statement about what Lock served. It does not show that the producer used a tampered policy.
