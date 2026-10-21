@@ -10,10 +10,11 @@ use std::collections::HashSet;
 use std::time::Duration;
 
 use cedarling::{
-    AuthorizationConfig, AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest,
-    BatchAuthorizeUnsignedRequest, BatchItem, BootstrapConfig, Cedarling, DataStoreConfig,
-    EntityData, HttpClientConfig, InitCedarlingError, JwtConfig, LogConfig, LogLevel,
-    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned, TokenInput,
+    AuthorizationConfig, AuthorizeMultiIssuerRequest, AuthorizeOptions,
+    BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest, BatchItem, BootstrapConfig,
+    Cedarling, DataStoreConfig, EntityData, HttpClientConfig, InitCedarlingError, JwtConfig,
+    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    TokenInput,
 };
 use criterion::measurement::WallTime;
 use criterion::{
@@ -57,6 +58,7 @@ fn unsigned_batch_vs_sequence(c: &mut Criterion) {
                 action: item.action.clone(),
                 resource: item.resource.clone(),
                 context: item.context.clone(),
+                options: AuthorizeOptions::default(),
             })
             .collect();
 
@@ -281,6 +283,7 @@ async fn prepare_unsigned_cedarling() -> Result<Cedarling, InitCedarlingError> {
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
+        trace_config: None,
     };
     Cedarling::new(&bootstrap_config).await
 }
@@ -308,6 +311,7 @@ fn prepare_unsigned_request() -> RequestUnsigned {
         action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
         context: json!({}),
         resource,
+        options: AuthorizeOptions::default(),
     }
 }
 
@@ -348,6 +352,7 @@ async fn prepare_multi_issuer_cedarling(
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
+        trace_config: None,
     };
     Cedarling::new(&bootstrap_config).await
 }

@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Caller-chosen bounds for untrusted input (core design §11, decision R16).
+//! Caller-chosen bounds for untrusted input (core design §11).
 
 use crate::ErrorCode;
 use crate::error_code::HasErrorCode;
@@ -139,7 +139,7 @@ impl Limits {
 }
 
 impl Default for Limits {
-    /// Decision R16: generous MVP values; Lock's record limit for the input size. Batch bounds
+    /// Generous MVP values; Lock's record limit for the input size. Batch bounds
     /// are the values proposed to Lock (500 records, 8 MiB) until Lock confirms its own.
     fn default() -> Self {
         Self {
@@ -296,7 +296,7 @@ mod tests {
         assert_eq!(
             actual,
             [256 * 1024, 32, 1024, 1024, 64 * 1024, 512 * 1024],
-            "defaults from decision R16 (notes 13 §5)"
+            "MVP defaults"
         );
     }
 
