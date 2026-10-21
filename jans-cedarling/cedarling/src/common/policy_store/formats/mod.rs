@@ -21,6 +21,9 @@ pub(crate) mod datetime;
 pub(crate) mod file_id;
 pub(crate) mod v0;
 pub(crate) mod v1;
+// Readable once v1 stores migrate to it; until then only its tests use it.
+#[cfg(test)]
+pub(crate) mod v2;
 
 /// The current spec version: the only one that converts into runtime types,
 /// and the one every older version migrates to. Bumping the version points
@@ -63,8 +66,6 @@ pub(super) struct Layout {
     pub(super) policies_dir: &'static str,
     pub(super) templates_dir: &'static str,
     pub(super) entities_dir: &'static str,
-    pub(super) trusted_issuers_dir: &'static str,
-    pub(super) custom_issuers_dir: &'static str,
 }
 
 /// The raw files of a store, read from a version's [`Layout`].
@@ -79,8 +80,6 @@ pub(super) struct Files {
     pub(super) policies: Vec<StoreFile>,
     pub(super) templates: Vec<StoreFile>,
     pub(super) entities: Vec<StoreFile>,
-    pub(super) trusted_issuers: Vec<StoreFile>,
-    pub(super) custom_issuers: Vec<StoreFile>,
 }
 
 /// Reads a store's files from the layout its version declares.
@@ -100,8 +99,30 @@ pub(super) fn read_files(
         policies: fs.cedar_files(layout.policies_dir)?,
         templates: fs.optional_cedar_files(layout.templates_dir)?,
         entities: fs.optional_json_files(layout.entities_dir)?,
-        trusted_issuers: fs.optional_json_files(layout.trusted_issuers_dir)?,
-        custom_issuers: fs.optional_json_files(layout.custom_issuers_dir)?,
+    })
+}
+
+/// Where a version keeps one JSON file per issuer, in a directory per kind.
+pub(super) struct IssuerDirs {
+    pub(super) trusted_issuers: &'static str,
+    pub(super) custom_issuers: &'static str,
+}
+
+/// The issuer files read from [`IssuerDirs`].
+#[derive(Debug)]
+pub(super) struct IssuerDirFiles {
+    pub(super) trusted_issuers: Vec<StoreFile>,
+    pub(super) custom_issuers: Vec<StoreFile>,
+}
+
+/// Reads the issuer files of a version that keeps them in [`IssuerDirs`].
+pub(super) fn read_issuer_dirs(
+    fs: &StoreFs<'_>,
+    dirs: &IssuerDirs,
+) -> Result<IssuerDirFiles, PolicyStoreError> {
+    Ok(IssuerDirFiles {
+        trusted_issuers: fs.optional_json_files(dirs.trusted_issuers)?,
+        custom_issuers: fs.optional_json_files(dirs.custom_issuers)?,
     })
 }
 
@@ -352,11 +373,21 @@ pub(super) fn read_policy_store(
     })
 }
 
+/// The raw files of a v0 store, for tests of the v0 layout.
+#[cfg(test)]
+#[derive(Debug, derive_more::Deref)]
+pub(super) struct V0Files {
+    #[deref]
+    pub(super) files: Files,
+    pub(super) trusted_issuers: Vec<StoreFile>,
+    pub(super) custom_issuers: Vec<StoreFile>,
+}
+
 /// Reads the raw files of a v0 store without parsing them, for tests of the
 /// v0 layout. Runs the same metadata and version checks as
 /// [`read_policy_store`].
 #[cfg(test)]
-pub(super) fn read_v0_files(fs: &StoreFs<'_>, strict: bool) -> Result<Files, PolicyStoreError> {
+pub(super) fn read_v0_files(fs: &StoreFs<'_>, strict: bool) -> Result<V0Files, PolicyStoreError> {
     let (metadata_json, selected) = read_metadata(fs)?;
     assert_eq!(
         selected.format,
@@ -694,6 +725,14 @@ mod tests {
             ("v1/trusted_issuer.rs", include_str!("v1/trusted_issuer.rs")),
             ("v1/custom_issuer.rs", include_str!("v1/custom_issuer.rs")),
         ];
+        let v2_sources = [
+            ("v2/mod.rs", include_str!("v2/mod.rs")),
+            ("v2/metadata.rs", include_str!("v2/metadata.rs")),
+            (
+                "v2/trusted_issuers.rs",
+                include_str!("v2/trusted_issuers.rs"),
+            ),
+        ];
         let runtime_sources = [
             ("policy_store.rs", include_str!("../../policy_store.rs")),
             ("metadata.rs", include_str!("../metadata.rs")),
@@ -719,7 +758,9 @@ mod tests {
             }
         };
         check(&v0_sources, &["v1::", "current::", "migration::"]);
-        check(&v1_sources, &["v0::", "current::", "migration::"]);
+        check(&v0_sources, &["v2::"]);
+        check(&v1_sources, &["v0::", "v2::", "current::", "migration::"]);
+        check(&v2_sources, &["v0::", "v1::", "current::", "migration::"]);
         check(&runtime_sources, &["formats::v", "migration::"]);
     }
 }

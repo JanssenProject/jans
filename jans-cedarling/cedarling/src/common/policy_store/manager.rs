@@ -63,6 +63,14 @@ pub enum ConversionError {
     #[error("Failed to convert custom issuers: {}", join_errors(.0))]
     CustomIssuerValidation(Vec<super::errors::CustomIssuerParseError>),
 
+    /// `trusted-issuers.json` could not be parsed
+    #[error("Failed to parse '{file}': {source}")]
+    TrustedIssuersFile {
+        file: String,
+        #[source]
+        source: serde_json::Error,
+    },
+
     /// Token types conflict across issuers
     #[error("Invalid token types: {0}")]
     TokenTypes(#[from] super::TokenTypesError),
