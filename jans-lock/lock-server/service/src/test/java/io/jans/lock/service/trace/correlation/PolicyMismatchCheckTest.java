@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 
 import io.jans.core.cedarling.service.policy.PolicyDownloadService;
 import io.jans.core.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
+import io.jans.core.cedarling.service.policy.PolicySnapshotEvent;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.testkit.PolicyMismatchChecks;
@@ -126,6 +127,37 @@ class PolicyMismatchCheckTest {
 		served.archive(STORE, "2.0.0", NEXT_HASH);
 
 		assertTrue(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0));
+	}
+
+	private void publish(Map<String, LoadedPolicySource> previous, Map<String, LoadedPolicySource> current,
+			long epochSeconds) {
+		check.onPolicySnapshot(new PolicySnapshotEvent(previous, current, epochSeconds * 1000L));
+	}
+
+	@Test
+	void testCheck_RolloutWithoutTraffic_RecordWithinGraceNotFlagged() {
+		Map<String, LoadedPolicySource> first = Map.of(STORE, PolicyMismatchChecks.archiveSource(STORE, "1.0.0", HASH));
+		Map<String, LoadedPolicySource> second = Map.of(STORE,
+				PolicyMismatchChecks.archiveSource(STORE, "2.0.0", NEXT_HASH));
+		publish(Map.of(), first, T0);
+		publish(first, second, T0 + 60);
+		served.archive(STORE, "2.0.0", NEXT_HASH);
+		at(T0 + 3600);
+
+		assertFalse(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + 60 + GRACE_SECONDS));
+	}
+
+	@Test
+	void testCheck_RolloutWithoutTraffic_RecordAfterGraceFlagged() {
+		Map<String, LoadedPolicySource> first = Map.of(STORE, PolicyMismatchChecks.archiveSource(STORE, "1.0.0", HASH));
+		Map<String, LoadedPolicySource> second = Map.of(STORE,
+				PolicyMismatchChecks.archiveSource(STORE, "2.0.0", NEXT_HASH));
+		publish(Map.of(), first, T0);
+		publish(first, second, T0 + 60);
+		served.archive(STORE, "2.0.0", NEXT_HASH);
+		at(T0 + 3600);
+
+		assertTrue(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + 60 + GRACE_SECONDS + 1));
 	}
 
 	@Test

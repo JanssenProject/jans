@@ -14,10 +14,12 @@ import org.slf4j.Logger;
 
 import io.jans.core.cedarling.service.policy.PolicyDownloadService;
 import io.jans.core.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
+import io.jans.core.cedarling.service.policy.PolicySnapshotEvent;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.trace.correlation.PolicyReleaseHistory.ServedRelease;
 import io.jans.lock.service.trace.model.PolicyRef;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 
 /**
@@ -26,7 +28,9 @@ import jakarta.inject.Inject;
  * mismatch, because producers may load stores from elsewhere. A release Lock stopped serving
  * stays acceptable for {@code policyMismatchGraceSeconds} after it was retired, measured
  * against the record's {@code signed_at}, so records signed during a rollout are not flagged.
- * The check is best-effort: a failure never rejects or flags a record.
+ * Releases are recorded when {@link PolicyDownloadService} publishes them; each check also
+ * records what is served at that moment, in case a publication was missed. The check is
+ * best-effort: a failure never rejects or flags a record.
  */
 @ApplicationScoped
 public class PolicyMismatchCheck {
@@ -43,6 +47,19 @@ public class PolicyMismatchCheck {
 	private final PolicyReleaseHistory history = new PolicyReleaseHistory();
 
 	private Clock clock = Clock.systemUTC();
+
+	/**
+	 * Records the releases served before and after a publication, retiring at the publication
+	 * time those no longer served.
+	 */
+	public void onPolicySnapshot(@Observes PolicySnapshotEvent event) {
+		try {
+			history.observe(event.getPrevious(), event.getPublishedAtMs());
+			history.observe(event.getCurrent(), event.getPublishedAtMs());
+		} catch (RuntimeException ex) {
+			log.warn("TRACE policy release history not updated", ex);
+		}
+	}
 
 	/**
 	 * @param signedAtSeconds the record's {@code trace.signed_at}

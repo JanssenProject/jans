@@ -15,6 +15,7 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 
 import io.jans.core.cedarling.service.policy.PolicyDownloadService;
+import io.jans.core.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.trace.correlation.PolicyMismatchCheck;
 
@@ -22,6 +23,8 @@ import io.jans.lock.service.trace.correlation.PolicyMismatchCheck;
  * Builds a {@link PolicyMismatchCheck} over a fixed set of served policy stores.
  */
 public final class PolicyMismatchChecks {
+
+	private static final PolicyDownloadService SOURCE_OWNER = new PolicyDownloadService();
 
 	private PolicyMismatchChecks() {
 	}
@@ -42,6 +45,13 @@ public final class PolicyMismatchChecks {
 		return check;
 	}
 
+	public static LoadedPolicySource archiveSource(String policyStoreId, String version, String bundleHash) {
+		LoadedPolicySource source = SOURCE_OWNER.new LoadedPolicySource(policyStoreId, new byte[] { 1 }, bundleHash,
+				"https://policy.example.org/" + policyStoreId);
+		source.setPolicyStoreVersion(version);
+		return source;
+	}
+
 	public static void setClock(PolicyMismatchCheck check, Clock clock) {
 		setField(check, "clock", clock);
 	}
@@ -51,10 +61,7 @@ public final class PolicyMismatchChecks {
 		private final Map<String, LoadedPolicySource> policies = new HashMap<>();
 
 		public StaticPolicyDownloadService archive(String policyStoreId, String version, String bundleHash) {
-			LoadedPolicySource source = new LoadedPolicySource(policyStoreId, new byte[] { 1 }, bundleHash,
-					"https://policy.example.org/" + policyStoreId);
-			source.setPolicyStoreVersion(version);
-			policies.put(policyStoreId, source);
+			policies.put(policyStoreId, archiveSource(policyStoreId, version, bundleHash));
 			return this;
 		}
 

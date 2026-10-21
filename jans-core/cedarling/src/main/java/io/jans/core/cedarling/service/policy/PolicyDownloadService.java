@@ -84,6 +84,9 @@ public class PolicyDownloadService {
 	@Inject
 	private Event<TimerEvent> timerEvent;
 
+	@Inject
+	private Event<PolicySnapshotEvent> policySnapshotEvent;
+
     @Inject
 	private CedarlingConfiguration cedarlingConfiguration;
 
@@ -169,8 +172,7 @@ public class PolicyDownloadService {
 			}
 		}
 
-		// Readers see either the previous or the new set, never a partial reload
-		loadedPolicySourcesUris.set(Collections.unmodifiableMap(reloaded));
+		publish(Collections.unmodifiableMap(reloaded));
 
 		log.debug("End URIs policies reload. Count policies: {}", reloaded.size());
 	}
@@ -424,7 +426,20 @@ public class PolicyDownloadService {
 	}
 
 	private void cleanAllPolicies() {
-		loadedPolicySourcesUris.set(Collections.emptyMap());
+		publish(Collections.emptyMap());
+	}
+
+	/**
+	 * Swaps in the new set atomically, so readers see either the previous or the new one, then
+	 * tells observers. An observer failure is logged and never undoes the swap.
+	 */
+	private void publish(Map<String, LoadedPolicySource> snapshot) {
+		Map<String, LoadedPolicySource> previous = loadedPolicySourcesUris.getAndSet(snapshot);
+		try {
+			policySnapshotEvent.fire(new PolicySnapshotEvent(previous, snapshot, System.currentTimeMillis()));
+		} catch (RuntimeException ex) {
+			log.error("Policy snapshot observer failed", ex);
+		}
 	}
 
 	public Map<String, LoadedPolicySource> getLoadedPolicies() {
