@@ -585,6 +585,7 @@ The audit log and TRACE search filters need new columns and indexes, and the pol
         "jansTracePolicyStoreVersion" VARCHAR(255),
         "jansTraceFirstServedAtMs" BIGINT,
         "jansTraceLastServedAtMs" BIGINT,
+        "jansVersion" BIGINT,
         PRIMARY KEY (doc_id)
     );
     CREATE INDEX "jansTracePolicyRelease_jansTracePolicyStoreId" ON "jansTracePolicyRelease" ("jansTracePolicyStoreId");
@@ -619,6 +620,7 @@ The audit log and TRACE search filters need new columns and indexes, and the pol
         jansTracePolicyStoreVersion VARCHAR(255),
         jansTraceFirstServedAtMs BIGINT,
         jansTraceLastServedAtMs BIGINT,
+        jansVersion BIGINT,
         PRIMARY KEY (doc_id),
         INDEX jansTracePolicyRelease_jansTracePolicyStoreId (jansTracePolicyStoreId)
     );

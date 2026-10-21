@@ -581,7 +581,7 @@ A producer-chain break or gap is a statement about the records Lock has received
 
 ## Policy store release check
 
-Lock serves policy store archives to producers (`GET /policy`, `GET /policy/stores`) and computes each archive's `bundle_hash` as `sha256:` plus the lowercase hex SHA-256 of the archive bytes. Lock reloads policy stores every 30 seconds. On every reload each node records the releases it serves in the shared TRACE store (`jansTracePolicyRelease`, one row per `policy_store_id` and `bundle_hash`, not scoped to an evidence domain): the first time a release is served it is inserted, and after that its last-served time moves forward at most once per `min(60 s, policyMismatchGraceSeconds / 2)`. A release that is no longer served stops moving forward. Because the history is in the database, every replica sees the same releases, and it survives restarts and rolling updates.
+Lock serves policy store archives to producers (`GET /policy`, `GET /policy/stores`) and computes each archive's `bundle_hash` as `sha256:` plus the lowercase hex SHA-256 of the archive bytes. Lock reloads policy stores every 30 seconds. On every reload each node records the releases it serves in the shared TRACE store (`jansTracePolicyRelease`, one row per `policy_store_id` and `bundle_hash`, not scoped to an evidence domain): the first time a release is served it is inserted, and after that its last-served time moves forward at most once per `min(60 s, policyMismatchGraceSeconds / 2)`. Updates use optimistic locking and never move the last-served time back or the first-served time forward, so a replica with a lagging clock cannot shorten a release's history. A release that is no longer served stops moving forward. Because the history is in the database, every replica sees the same releases, and it survives restarts and rolling updates.
 
 When an accepted record's `trace.policy.policy_store_id` is a store this node serves as an archive, Lock judges the record's release at its `received_at`, or at its `signed_at` when the record is flagged `late_flag`. Using the receipt time means a producer cannot backdate `signed_at` to slip a retired release past the check; it can shift the time by at most `latenessThresholdSeconds`, and beyond that the record is flagged late. The release is accepted when:
 
@@ -594,7 +594,7 @@ Limits:
 
 - Before the first policy store load, Lock serves no archive and flags nothing.
 - A store this node does not serve is never compared, because producers may load stores from other sources.
-- Lock caches history reads for 10 seconds, so a release another replica starts serving can take that long to be seen.
+- Lock caches found history rows for 10 seconds, so a later last-served time written by another replica can take that long to be seen. A release this node has not found is read from the store on every check.
 - The check is best-effort: if it or the store fails, Lock logs a warning and accepts the record without the flag.
 
 The flag is a statement about what Lock served. It does not show that the producer used a tampered policy.
