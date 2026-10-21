@@ -10,8 +10,6 @@ import java.util.Map;
 
 import io.jans.core.cedarling.service.policy.PolicyDownloadService;
 import io.jans.core.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
-import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.PolicyRef;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -24,29 +22,17 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class PolicyMismatchCheck {
 
-	public static final String REASON_POLICY_MISMATCH = "policy_mismatch:trace.policy";
-
 	@Inject
 	private PolicyDownloadService policyDownloadService;
 
-	@Inject
-	private AppConfiguration appConfiguration;
-
 	/**
 	 * @return {@code true} when the record names a served store with a different release
-	 * @throws TraceValidationException {@code invalid_assertion} on a mismatch when
-	 *                                  {@code rejectPolicyMismatch} is enabled
 	 */
 	public boolean check(PolicyRef policy) {
 		if (policy == null) {
 			return false;
 		}
-		boolean mismatch = isMismatch(policy, policyDownloadService.getLoadedPolicies());
-		if (mismatch && appConfiguration.getTraceConfiguration().isRejectPolicyMismatch()) {
-			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
-					REASON_POLICY_MISMATCH);
-		}
-		return mismatch;
+		return isMismatch(policy, policyDownloadService.getLoadedPolicies());
 	}
 
 	static boolean isMismatch(PolicyRef policy, Map<String, LoadedPolicySource> served) {

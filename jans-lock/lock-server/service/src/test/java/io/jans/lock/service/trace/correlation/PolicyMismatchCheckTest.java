@@ -6,17 +6,12 @@
 
 package io.jans.lock.service.trace.correlation;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.model.error.TraceErrorResponseType;
-import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.testkit.PolicyMismatchChecks;
 import io.jans.lock.service.trace.testkit.PolicyMismatchChecks.StaticPolicyDownloadService;
@@ -29,14 +24,11 @@ class PolicyMismatchCheckTest {
 
 	private static final String OTHER_HASH = "sha256:" + "b".repeat(64);
 
-	private AppConfiguration appConfiguration;
-
 	private PolicyMismatchCheck check;
 
 	@BeforeEach
 	void setUp() {
-		appConfiguration = new AppConfiguration();
-		check = PolicyMismatchChecks.serving(appConfiguration,
+		check = PolicyMismatchChecks.serving(
 				new StaticPolicyDownloadService().archive(STORE, "1.0.0", HASH).json("https://policy.example.org/json"));
 	}
 
@@ -68,25 +60,6 @@ class PolicyMismatchCheckTest {
 	@Test
 	void testCheck_NoPolicy_NoMismatch() {
 		assertFalse(check.check(null));
-	}
-
-	@Test
-	void testCheck_RejectEnabled_MismatchThrowsInvalidAssertion() {
-		appConfiguration.getTraceConfiguration().setRejectPolicyMismatch(true);
-
-		PolicyRef policy = new PolicyRef(STORE, "1.0.0", OTHER_HASH);
-		TraceValidationException ex = assertThrows(TraceValidationException.class, () -> check.check(policy));
-
-		assertEquals(TraceErrorResponseType.INVALID_ASSERTION, ex.getErrorId());
-		assertEquals(PolicyMismatchCheck.REASON_POLICY_MISMATCH, ex.getReason());
-	}
-
-	@Test
-	void testCheck_RejectEnabled_MatchingOrUnservedReleaseAccepted() {
-		appConfiguration.getTraceConfiguration().setRejectPolicyMismatch(true);
-
-		assertFalse(check.check(new PolicyRef(STORE, "1.0.0", HASH)));
-		assertFalse(check.check(new PolicyRef("store-elsewhere", "1.0.0", OTHER_HASH)));
 	}
 
 }

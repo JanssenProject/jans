@@ -142,7 +142,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		setField(service, "chainRegistry", chainRegistry);
 		setField(service, "appConfiguration", appConfiguration);
 		setField(service, "traceKeys", TraceTestCrypto.traceKeys());
-		setField(service, "policyMismatchCheck", PolicyMismatchChecks.none(appConfiguration));
+		setField(service, "policyMismatchCheck", PolicyMismatchChecks.none());
 	}
 
 	// -- fixtures ---------------------------------------------------------------------------------
@@ -238,9 +238,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 	private static final String SERVED_STORE = "https://example.org/policy-stores/payments";
 
 	private void servePolicyStore(String version, String bundleHash) {
-		AppConfiguration checkConfiguration = mock(AppConfiguration.class);
-		when(checkConfiguration.getTraceConfiguration()).thenReturn(traceConfiguration);
-		setField(service, "policyMismatchCheck", PolicyMismatchChecks.serving(checkConfiguration,
+		setField(service, "policyMismatchCheck", PolicyMismatchChecks.serving(
 				new PolicyMismatchChecks.StaticPolicyDownloadService().archive(SERVED_STORE, version, bundleHash)));
 	}
 
@@ -269,21 +267,16 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testPlan_RejectPolicyMismatch_RejectsBeforeFirstObservedRegistration() {
+	void testPlan_PolicyMismatchUnderFirstObserved_AcceptedWithFlagAndChainRegistered() {
 		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
-		traceConfiguration.setRejectPolicyMismatch(true);
 		servePolicyStore("1.2.3", "sha256:" + "f".repeat(64));
 		String json = SignedAssertionFactory.authorizationDecision().producer(PRODUCER).producerInstanceId(INSTANCE)
 				.producerChainId(CHAIN).recordId(recordId()).genesis().unsignedJson();
-		VerifiedAssertion verified = buildVerified(json, context());
 
-		TraceRequestContext ctx = context();
-		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, ctx));
+		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
 
-		assertEquals(TraceErrorResponseType.INVALID_ASSERTION, ex.getErrorId());
-		assertEquals(PolicyMismatchCheck.REASON_POLICY_MISMATCH, ex.getReason());
-		assertFalse(store.findChain(chainIdentity()).isPresent());
+		assertTrue(plan.getFlags().isPolicyMismatch());
+		assertTrue(store.findChain(chainIdentity()).isPresent());
 	}
 
 	// -- plan: chain registration mode -------------------------------------

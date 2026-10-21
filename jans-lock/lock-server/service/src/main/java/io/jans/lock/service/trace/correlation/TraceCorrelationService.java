@@ -78,8 +78,8 @@ public class TraceCorrelationService {
 	private volatile String warnedChainRegistrationMode;
 
 	/**
-	 * @throws io.jans.lock.service.trace.error.TraceValidationException {@code chain_not_registered},
-	 * {@code invalid_genesis}, or {@code invalid_assertion} for a rejected policy mismatch
+	 * @throws io.jans.lock.service.trace.error.TraceValidationException {@code chain_not_registered}
+	 * or {@code invalid_genesis}
 	 */
 	public CorrelationPlan plan(VerifiedAssertion verified, TraceRequestContext ctx) {
 		CorrelationInputs inputs = verified.getInputs();

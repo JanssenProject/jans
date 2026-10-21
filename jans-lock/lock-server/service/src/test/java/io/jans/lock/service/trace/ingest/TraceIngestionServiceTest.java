@@ -157,7 +157,7 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		setField(correlation, "chainRegistry", chainRegistry);
 		setField(correlation, "appConfiguration", appConfiguration);
 		setField(correlation, "traceKeys", traceKeys);
-		setField(correlation, "policyMismatchCheck", PolicyMismatchChecks.none(appConfiguration));
+		setField(correlation, "policyMismatchCheck", PolicyMismatchChecks.none());
 
 		TraceReceiptChain receiptChain = new TraceReceiptChain();
 		setField(receiptChain, "log", LoggerFactory.getLogger(TraceReceiptChain.class));

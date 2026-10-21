@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.jans.core.cedarling.service.policy.PolicyDownloadService;
-import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.trace.correlation.PolicyMismatchCheck;
 
 /**
@@ -23,14 +22,13 @@ public final class PolicyMismatchChecks {
 	private PolicyMismatchChecks() {
 	}
 
-	public static PolicyMismatchCheck none(AppConfiguration appConfiguration) {
-		return serving(appConfiguration, new StaticPolicyDownloadService());
+	public static PolicyMismatchCheck none() {
+		return serving(new StaticPolicyDownloadService());
 	}
 
-	public static PolicyMismatchCheck serving(AppConfiguration appConfiguration, StaticPolicyDownloadService served) {
+	public static PolicyMismatchCheck serving(StaticPolicyDownloadService served) {
 		PolicyMismatchCheck check = new PolicyMismatchCheck();
 		setField(check, "policyDownloadService", served);
-		setField(check, "appConfiguration", appConfiguration);
 		return check;
 	}
 
