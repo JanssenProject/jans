@@ -54,8 +54,7 @@ public class AuthClientFactory {
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
             boolean followRedirects) {
-        log.debug("Introspect Token - url:{}, header:{}, token:{} ,followRedirects:{} ", url, header, token,
-                followRedirects);
+        log.debug("Introspect Token - url:{}, ", url);
         ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient()
                 .property(CONTENT_TYPE, MediaType.APPLICATION_JSON).target(url);
         IntrospectionService proxy = target.proxy(IntrospectionService.class);
