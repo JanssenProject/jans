@@ -1810,6 +1810,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Retrieval">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search-by-policy-store-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Search by policy store release
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1817,6 +1834,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Flags explained
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-store-release-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Policy store release check
       </span>
     </span>
   </a>
@@ -2395,6 +2423,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Retrieval">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search-by-policy-store-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Search by policy store release
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2402,6 +2447,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Flags explained
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-store-release-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Policy store release check
       </span>
     </span>
   </a>
@@ -2624,7 +2680,7 @@
 </ol>
 <p>The Lock Server provides attributable, tamper-evident records and basic correlation. The core evidence path is:</p>
 <p><code>authorization decision → capability invocation → optional runtime effect</code></p>
-<p>Cedarling, or another policy decision point (PDP), records what was authorized (<code>AUTHORIZATION_DECISION</code>). The enforcement point, agent gateway, or tool gateway that mediates the action records <code>CAPABILITY_INVOKED</code>. An agent's own statement that it invoked a capability is not equivalent to enforcement-point evidence. An observer can record <code>RUNTIME_EFFECT</code>.</p>
+<p>A policy decision point (PDP) records what was authorized (<code>AUTHORIZATION_DECISION</code>). Cedarling support for producing TRACE records is in progress. The enforcement point, agent gateway, or tool gateway that mediates the action records <code>CAPABILITY_INVOKED</code>. An agent's own statement that it invoked a capability is not equivalent to enforcement-point evidence. An observer can record <code>RUNTIME_EFFECT</code>.</p>
 <h3 id="what-trace-does-not-claim">What TRACE does not claim<a class="headerlink" href="#what-trace-does-not-claim" title="Permanent link">#</a></h3>
 <ul>
 <li><strong>No completeness.</strong> TRACE does not claim that an execution's evidence is complete or that a producer reported every event.</li>
@@ -2674,7 +2730,7 @@
 </thead>
 <tbody>
 <tr>
-<td>Policy decision point (PDP), for example Cedarling</td>
+<td>Policy decision point (PDP), for example Cedarling (TRACE support in progress)</td>
 <td>Decides whether a capability is allowed and signs an <code>AUTHORIZATION_DECISION</code> record.</td>
 </tr>
 <tr>
@@ -2737,7 +2793,7 @@
 </tr>
 <tr>
 <td><code>https://jans.io/oauth/lock/trace.readonly</code></td>
-<td><code>GET /audit/trace/records/{record_id}</code>, <code>GET /audit/trace/executions/{trace_execution_id}</code></td>
+<td><code>GET /audit/trace/records</code>, <code>GET /audit/trace/records/{record_id}</code>, <code>GET /audit/trace/executions/{trace_execution_id}</code></td>
 </tr>
 <tr>
 <td><code>https://jans.io/oauth/lock/trace.admin</code></td>
@@ -2753,7 +2809,7 @@
 <li>A key registered in one domain gives no authority in another. A producer that serves several domains needs an explicit registration in each.</li>
 <li>Readers and administrators see only the domain their client is bound to. Lock never searches other domains.</li>
 <li>A client with no <code>clientDomainBindings</code> entry falls back to <code>defaultEvidenceDomainId</code> only for its domain. It gets no forwarding permission: see "Default-domain fallback" under <a href="#configuration">Configuration</a>.</li>
-<li>A request body that contains <code>evidence_domain_id</code> (top level or inside <code>trace</code>) is rejected with <code>domain_field_forbidden</code>.</li>
+<li>A signed <code>evidence_domain_id</code> in the body is ignored and the record is flagged <code>reserved_member_flag</code> (see <a href="#single-record">Single record</a>). Lock never uses it for routing or storage.</li>
 </ul>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
 <p>TRACE is configured in the <code>traceConfiguration</code> block of the Lock Server dynamic configuration. The full property table is in <a href=".././lock-server/#trace-configuration">Lock Server Configuration and Operation</a>. The values that matter most:</p>
@@ -2769,6 +2825,8 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;latenessThresholdSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;policyMismatchGraceSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;policyReleaseRetentionDays&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;maxFutureSkewSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;maxRequestBytes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">262144</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;maxBulkRecords&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
@@ -2791,12 +2849,13 @@
 <p><strong>Crypto provider.</strong> <code>cryptoProvider</code> selects the implementation that parses producer keys, canonicalizes assertions, verifies signatures and computes receipt hashes. Values are matched case-insensitively:</p>
 <ul>
 <li><code>JAVA</code> (default): BouncyCastle, in the Lock process. This is the implementation Lock shipped with.</li>
-<li><code>NATIVE</code>: <code>jans-trace-core</code>, the Rust library that producers such as Cedarling sign with, reached through the <code>jans-trace-java</code> binding.</li>
+<li><code>NATIVE</code>: <code>jans-trace-core</code>, the Rust TRACE library intended for producers, reached through the <code>jans-trace-java</code> binding.</li>
 </ul>
 <p>Both providers produce the same <code>content_digest</code>, key thumbprint, receipt hash and storage keys. Switching the provider does not invalidate the stored receipt chain.</p>
 <p>Lock fails closed. When the selected provider is not available, because the native library is missing or its self-test fails, every TRACE submission returns <code>500 crypto_unavailable</code>. Lock never falls back to the other provider. Look for the startup log line <code>TRACE crypto provider: type=&lt;type&gt; available=&lt;true|false&gt; detail=&lt;detail&gt;</code>. The FIPS WAR ships without the native provider, so <code>NATIVE</code> fails closed there.</p>
 <p><code>NATIVE</code> rejects small-order Ed25519 public keys that BouncyCastle accepts. After you switch to <code>NATIVE</code>, a registered key of that kind fails with <code>unknown_producer_key</code> or <code>stored_key_unusable</code>. Check registered keys before you switch.</p>
 <p>A value that is not one of the two names is treated as <code>JAVA</code> and logged once at <code>WARN</code>: <code>Unknown traceConfiguration.cryptoProvider '&lt;value&gt;', using JAVA</code>.</p>
+<p><strong>Policy store release check.</strong> <code>policyMismatchGraceSeconds</code> (default <code>300</code>) is how long after the last node stops serving a policy store release records judged under it still count as matching; see the acceptance window below. <code>policyReleaseRetentionDays</code> (default <code>30</code>) is how long a release no node serves any more is kept before it is deleted. A mismatch only sets <code>policy_mismatch_flag</code>; it never rejects a record. See <a href="#policy-store-release-check">Policy store release check</a>.</p>
 <p><strong>Timers.</strong> The receipt repair timer runs every <code>receiptRepairIntervalSeconds</code>. It settles receipt claims that stayed <code>PENDING</code> longer than <code>pendingReceiptTimeoutSeconds</code> (see <a href="#deployment-constraints">Deployment constraints</a>). Setting <code>enabled</code> to <code>false</code> makes every TRACE endpoint return a structured <code>invalid_request</code> error with reason <code>trace_disabled</code> and stops the timer.</p>
 <h2 id="registering-producer-keys-and-chains">Registering producer keys and chains<a class="headerlink" href="#registering-producer-keys-and-chains" title="Permanent link">#</a></h2>
 <p>Lock accepts a producer key only through the admin API. It never accepts a public key because it accompanied a record. Possession of a signing key does not let the holder define its own producer identity. Registration, in the administrator's evidence domain, grants the authority.</p>
@@ -2965,11 +3024,12 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <ul>
 <li><code>producer</code> is the stable logical producer identifier. It must equal <code>producer_chain.producer_id</code> byte for byte. <code>kid</code> is part of the signed content. <code>producer_version</code>, when present, is a string of 1 to 255 characters. It is signed and stored unchanged, and Lock does not interpret it.</li>
 <li><code>record_id</code> is a producer-generated UUID or ULID. Record identity is <code>(evidence domain, producer, record_id)</code>, so two producers can use the same <code>record_id</code>.</li>
+<li><code>trace.policy.policy_store_id</code>, <code>policy_store_version</code> and <code>bundle_hash</code> are at most 255 characters each (<code>length:&lt;path&gt;</code>). Lock indexes them for <a href="#search-by-policy-store-release">search by policy store release</a>.</li>
 <li><code>trace_execution_id</code> and <code>execution_authority</code> are required and travel together. Lock correlates records by them. Lock neither creates them nor authorizes the execution. They are different from <code>subject.workload_id</code>: the authority scopes the execution identifier, and the workload is the subject that takes part in it.</li>
 <li><code>trace.subject.workload_id</code> is required (non-empty string, at most 255 characters) for <code>AUTHORIZATION_DECISION</code> and <code>CAPABILITY_INVOKED</code>. <code>workload_instance_id</code> is optional. For <code>RUNTIME_EFFECT</code> the subject is optional and is validated when present.</li>
 <li>Producers sign capability <em>facts</em>, not a governance label. An <code>AUTHORIZATION_DECISION</code> carries a singular <code>decision</code> and a <code>CAPABILITY_INVOKED</code> carries a singular <code>invocation</code>. Each has <code>action</code> and <code>resource_type</code> (the Cedar action and resource type, never a resource id) and an <code>outcome</code>. See <a href="#event-kinds">Event kinds</a>. Lock does not resolve capability ids.</li>
 <li><code>tokens[]</code> holds references only: <code>issuer</code>, <code>token_type</code>, and either <code>jti</code> or <code>fingerprint</code>. Never send a raw bearer token. Lock rejects material that looks like a JWT. Token identity is <code>(domain, issuer, jti)</code>, never a bare <code>jti</code>.</li>
-<li>A signed body must not carry a member that Lock derives or assigns itself. The reserved members are <code>cnf</code>, <code>content_digest</code>, <code>receipt_sequence</code>, <code>received_at</code>, <code>prev_receipt_hash</code>, <code>coverage_gap_flag</code>, <code>chain_link_failure_flag</code>, <code>equivocation_flag</code>, <code>late_flag</code>, <code>unattributed_flag</code>, <code>candidate_flag</code>, <code>key_resolved</code>, <code>key_temporally_valid</code>, <code>key_not_revoked</code>, <code>key_authorized_for_producer</code>, <code>producer_authorized_for_claim</code>, <code>key_thumbprint</code>, <code>key_authorization_ref</code>, <code>verified_at</code>, <code>trust_tier</code>, <code>capability_resolution</code>, <code>capability_id</code> and <code>capability_ids</code>. Lock checks the top level, <code>trace</code>, <code>trace.event</code> and each <code>decision</code> or <code>invocation</code> fact. A body that carries one is rejected with <code>400 invalid_assertion</code> and reason <code>forbidden:&lt;path&gt;</code> (for example <code>forbidden:cnf</code> or <code>forbidden:trace.trust_tier</code>). Lock never stores it. Lock resolves the verification key only from the producer key registry, never from a key in the body.</li>
+<li>A producer should not sign a member that Lock derives or assigns itself: <code>evidence_domain_id</code>, <code>cnf</code>, <code>content_digest</code>, <code>receipt_sequence</code>, <code>received_at</code>, <code>prev_receipt_hash</code>, <code>coverage_gap_flag</code>, <code>chain_link_failure_flag</code>, <code>equivocation_flag</code>, <code>late_flag</code>, <code>policy_mismatch_flag</code>, <code>reserved_member_flag</code>, <code>unattributed_flag</code>, <code>candidate_flag</code>, <code>key_resolved</code>, <code>key_temporally_valid</code>, <code>key_not_revoked</code>, <code>key_authorized_for_producer</code>, <code>producer_authorized_for_claim</code>, <code>key_thumbprint</code>, <code>key_authorization_ref</code>, <code>verified_at</code>, <code>trust_tier</code>, <code>capability_resolution</code>, <code>capability_id</code> and <code>capability_ids</code>. Lock checks the top level, <code>trace</code>, <code>trace.policy</code>, <code>trace.event</code> and each <code>decision</code> or <code>invocation</code> fact. A record that carries one is not rejected: the member is ignored, Lock uses its own derived values, and the record is accepted with <code>reserved_member_flag: true</code> (GovOps profile §12). The member stays in the stored and returned <code>assertion</code>, because the signature covers it; its value there is producer-supplied and ignored, and Lock's own values are in <code>ingestion</code> and <code>verification</code>. The paths are stored and returned as <code>reserved_members</code>, for example <code>["trace.trust_tier"]</code>. Only the first 32 are kept; Lock logs the total count. Lock resolves the verification key only from the producer key registry, never from a key in the body.</li>
 <li><code>producer_chain</code> can carry an optional <code>chain_link</code> member that references the previous chain head. It must be a JSON object, and only a genesis record (<code>sequence_number</code> 1) can carry it. On any other record Lock returns <code>400 invalid_genesis</code> with reason <code>chain_link_on_non_genesis</code>. Lock checks that <code>prev_producer_chain_id</code>, when present, is a non-empty string. It keeps the member unchanged inside the signed assertion, returns it unchanged on retrieval, and does not validate the link against the prior chain.</li>
 <li>The first record of a chain has <code>sequence_number</code> 1 and <code>prev_record_hash</code> set to <code>sha256:</code> followed by 64 zeros. Any other record needs the previous record's <code>content_digest</code> in <code>prev_record_hash</code>.</li>
 </ul>
@@ -3069,7 +3129,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <li>For <code>AUTHORIZATION_DECISION</code>, <code>outcome</code> is <code>ALLOW</code> or <code>DENY</code>. For <code>CAPABILITY_INVOKED</code>, <code>outcome</code> is <code>SUCCESS</code> or <code>FAILURE</code>. The vocabularies are distinct, so an invocation with <code>ALLOW</code> or a decision with <code>SUCCESS</code> returns <code>400 invalid_assertion</code> with reason <code>invalid:trace.event.invocation.outcome</code> (or <code>invalid:trace.event.decision.outcome</code>, or the indexed plural path such as <code>invalid:trace.event.invocations[0].outcome</code>).</li>
 <li>An atomic batch evaluation can use the plural form instead. Each entry carries a <code>decision_id</code> or <code>invocation_id</code> (non-empty, at most 256 characters, unique within the array) and repeats <code>action</code>, <code>resource_type</code> and <code>outcome</code>. The record-level <code>trace.event.outcome</code> is not allowed in either form.</li>
 <li>Operation-binding digests are optional members of <code>trace.event</code>: <code>request_digest</code>, <code>input_digest</code> and <code>tool_call_digest</code> on <code>AUTHORIZATION_DECISION</code>, and <code>request_digest</code>, <code>tool_call_digest</code> and <code>result_digest</code> on <code>CAPABILITY_INVOKED</code> (and <code>result_digest</code> on <code>RUNTIME_EFFECT</code>). A present digest is <code>sha256:</code> followed by 64 lowercase hex characters. Any other string returns <code>400 invalid_assertion</code> with reason <code>invalid:trace.event.&lt;member&gt;</code>, and a non-string value returns <code>type:trace.event.&lt;member&gt;</code>. Lock stores them in the signed assertion and does not interpret them. <code>trace.policy.bundle_hash</code> keeps its own rule, which also accepts other <code>algorithm:digest</code> forms.</li>
-<li>Both the singular and the plural member in one record, <code>capability_ids</code> anywhere, and a <code>resource_id</code> inside a fact are rejected with <code>400 invalid_assertion</code> (reason such as <code>forbidden:trace.event.capability_ids</code>).</li>
+<li>Both the singular and the plural member in one record, and a <code>resource_id</code> inside a fact, are rejected with <code>400 invalid_assertion</code> (reason such as <code>forbidden:trace.event.decisions</code>). A signed <code>capability_ids</code> is a Lock-derived member: it is ignored and flagged with <code>reserved_member_flag</code>.</li>
 </ul>
 <p>Lock validates the schema for the declared kind and rejects fields that contradict it. Lock does not infer that an authorization caused an invocation because their timestamps are close. Producers state causal relationships in <code>parent_record_ids</code>.</p>
 <h3 id="signature-scope-and-digest-scope">Signature scope and digest scope<a class="headerlink" href="#signature-scope-and-digest-scope" title="Permanent link">#</a></h3>
@@ -3105,7 +3165,10 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <span class="w">  </span><span class="nt">&quot;coverage_gap_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;chain_link_failure_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;equivocation_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;late_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">  </span><span class="nt">&quot;late_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;policy_mismatch_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;reserved_member_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;reserved_members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><code>202 Accepted</code> means the record was verified and durably stored. Lock verifies in a fixed order: OAuth check, domain derivation, JSON structure and limits, forwarding check, key resolution (validity window, then event-kind scope), signature verification, digest, then the idempotency, chain, and equivocation checks. A record that fails verification never enters storage or any retrieval index.</p>
@@ -3156,7 +3219,8 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <span class="w">      </span><span class="nt">&quot;producer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling-fleet-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;content_digest&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;receipt_sequence&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">108422</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;received_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-11T00:41:02.123Z&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;idempotent_replay&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;coverage_gap_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;chain_link_failure_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;equivocation_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;late_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">      </span><span class="nt">&quot;equivocation_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;late_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;policy_mismatch_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;reserved_member_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;reserved_members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;accepted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
@@ -3187,17 +3251,12 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <tr>
 <td><code>invalid_assertion</code></td>
 <td>400</td>
-<td>A schema violation in the assertion, or a member reserved for Lock such as <code>cnf</code> or <code>trust_tier</code> (reason <code>forbidden:&lt;path&gt;</code>). <code>reason</code> names the field.</td>
+<td>A schema violation in the assertion. <code>reason</code> names the field.</td>
 </tr>
 <tr>
 <td><code>unsupported_profile</code></td>
 <td>400</td>
 <td><code>trace.eat_profile</code> is not <code>tag:jans.io,2026:trace-v1</code>.</td>
-</tr>
-<tr>
-<td><code>domain_field_forbidden</code></td>
-<td>400</td>
-<td>The body contains <code>evidence_domain_id</code>.</td>
 </tr>
 <tr>
 <td><code>producer_mismatch</code></td>
@@ -3333,7 +3392,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 </ul>
 <p>The component that creates the governed unit of work (an agent runtime, a gateway, a PEP, an application host or a scheduler) creates the identifier pair and propagates it. Neither Cedarling nor Lock generates it.</p>
 <h2 id="retrieval">Retrieval<a class="headerlink" href="#retrieval" title="Permanent link">#</a></h2>
-<p>Both endpoints need the <code>trace.readonly</code> scope and read only the caller's evidence domain.</p>
+<p>All retrieval endpoints need the <code>trace.readonly</code> scope and read only the caller's evidence domain.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># One record. producer_id should be supplied.</span>
 curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/records/9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41?producer_id=cedarling-fleet-1&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$READ_TOKEN</span><span class="s2">&quot;</span>
@@ -3366,7 +3425,10 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <span class="w">    </span><span class="nt">&quot;coverage_gap_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;chain_link_failure_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;equivocation_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;late_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="nt">&quot;late_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;policy_mismatch_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;reserved_member_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;reserved_members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -3378,6 +3440,42 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <li><code>ingestion</code> is Lock-derived metadata.</li>
 </ul>
 <p>If <code>producer_id</code> (or <code>execution_authority</code>) is omitted and the bare identifier matches more than one producer (or authority) in the domain, Lock returns <code>409 ambiguous_identifier</code>. It never guesses.</p>
+<h3 id="search-by-policy-store-release">Search by policy store release<a class="headerlink" href="#search-by-policy-store-release" title="Permanent link">#</a></h3>
+<p><code>GET /audit/trace/records</code> (no <code>record_id</code>) returns the records whose <code>trace.policy</code> names a policy store release. Use it to answer "which decisions were made with release X".</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API</span><span class="s2">/records?policy_store_id=https%3A%2F%2Fexample.org%2Fpolicy-stores%2Fpayments&amp;policy_store_version=1.2.3&amp;received_from=2026-06-01T00:00:00Z&amp;start=0&amp;count=100&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$READ_TOKEN</span><span class="s2">&quot;</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>policy_store_id</code></td>
+<td>Exact <code>trace.policy.policy_store_id</code>.</td>
+</tr>
+<tr>
+<td><code>policy_store_version</code></td>
+<td>Exact <code>trace.policy.policy_store_version</code>.</td>
+</tr>
+<tr>
+<td><code>bundle_hash</code></td>
+<td>Exact <code>trace.policy.bundle_hash</code>.</td>
+</tr>
+<tr>
+<td><code>received_from</code>, <code>received_to</code></td>
+<td>Inclusive bounds on <code>received_at</code>, RFC 3339.</td>
+</tr>
+<tr>
+<td><code>start</code>, <code>count</code></td>
+<td>Paging, as for executions.</td>
+</tr>
+</tbody>
+</table>
+<p>At least one of <code>policy_store_id</code> or <code>bundle_hash</code> is required; otherwise Lock returns <code>400 invalid_request</code> with reason <code>missing:policy_store_id</code>. The response is <code>{"ordering": "receipt_sequence", "records": [...]}</code> with record envelopes in receipt order. No match returns <code>200</code> with an empty list. Only records that carry <code>trace.policy</code> (<code>AUTHORIZATION_DECISION</code>, and <code>CAPABILITY_INVOKED</code> when present) are indexed. Records stored before this index existed are not returned.</p>
 <p>The execution response carries <code>execution_authority</code>, <code>trace_execution_id</code>, <code>"ordering": "receipt_sequence"</code>, <code>"completeness": "not_assessed"</code>, and <code>records</code>, ordered by Lock receipt sequence. <code>start</code> (default 0) and <code>count</code> (default 100, maximum 1000) page the list. The execution view contains the directly associated records only. It claims no global event order, does not traverse child executions, and does not assess completeness.</p>
 <h2 id="flags-explained">Flags explained<a class="headerlink" href="#flags-explained" title="Permanent link">#</a></h2>
 <p>Flags are Lock-derived findings about a record. Lock flags a condition instead of silently dropping or rejecting the record.</p>
@@ -3410,10 +3508,37 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <td>Lock received the record more than <code>latenessThresholdSeconds</code> after its <code>signed_at</code>. Fixed at ingestion.</td>
 <td>No.</td>
 </tr>
+<tr>
+<td><code>policy_mismatch_flag</code></td>
+<td>The record's <code>trace.policy</code> names a policy store Lock serves, with a release this node did not serve at <code>signed_at</code> or within <code>policyMismatchGraceSeconds</code> before it. Fixed at ingestion. See <a href="#policy-store-release-check">Policy store release check</a>.</td>
+<td>No.</td>
+</tr>
+<tr>
+<td><code>reserved_member_flag</code></td>
+<td>The producer signed a member Lock derives itself, such as <code>evidence_domain_id</code> or <code>trust_tier</code>. Lock ignored it and used its own values; <code>reserved_members</code> lists the paths. Fixed at ingestion.</td>
+<td>No.</td>
+</tr>
 </tbody>
 </table>
 <p>Lock updates the flags on neighboring records after it stores a new record. These updates are best-effort and eventually consistent. If one fails, Lock logs it and still accepts the new record. A reader can see a flag change shortly after a record is accepted.</p>
 <p>A producer-chain break or gap is a statement about the records Lock has received. It is not a statement about what the producer did.</p>
+<h2 id="policy-store-release-check">Policy store release check<a class="headerlink" href="#policy-store-release-check" title="Permanent link">#</a></h2>
+<p>Lock serves policy store archives to producers (<code>GET /policy</code>, <code>GET /policy/stores</code>) and computes each archive's <code>bundle_hash</code> as <code>sha256:</code> plus the lowercase hex SHA-256 of the archive bytes. Lock reloads policy stores every 30 seconds. On every reload each node records the releases it serves in the shared TRACE store (<code>jansTracePolicyRelease</code>, one row per <code>policy_store_id</code> and <code>bundle_hash</code>, not scoped to an evidence domain): the first time a release is served it is inserted, and after that its last-served time moves forward at most once a minute. Updates use optimistic locking and never move the last-served time back or the first-served time forward, so a replica with a lagging clock cannot shorten a release's history. A release that is no longer served stops moving forward. Because the history is in the database, every replica sees the same releases, and it survives restarts and rolling updates.</p>
+<p>When an accepted record's <code>trace.policy.policy_store_id</code> is a store this node serves as an archive, Lock judges the record's release at its <code>received_at</code>, or at its <code>signed_at</code> when the record is flagged <code>late_flag</code>. Using the receipt time means a producer cannot backdate <code>signed_at</code> to slip a retired release past the check; it can shift the time by at most <code>latenessThresholdSeconds</code>, and beyond that the record is flagged late. The release is accepted when:</p>
+<ul>
+<li>this node serves that <code>bundle_hash</code> now; or</li>
+<li>its stored last-served time is within the acceptance window before that time. The window is the larger of <code>policyMismatchGraceSeconds</code> and <code>latenessThresholdSeconds</code>, plus 130 seconds: a stored last-served time can trail the real one by the one-minute update interval, two 30-second reloads and the 10-second cache. With the defaults the window is 430 seconds, so a record signed just before a rollout and received up to five minutes later still matches, and a release another replica still serves never looks retired.</li>
+</ul>
+<p>Otherwise, and also when a matching release has a known <code>policy_store_version</code> that differs from the record's, the record is flagged <code>policy_mismatch_flag</code>. A record signed under the previous release during a rollout, or uploaded shortly after it, is not flagged. The record is always accepted.</p>
+<p>Limits:</p>
+<ul>
+<li>Before the first policy store load, Lock serves no archive and flags nothing.</li>
+<li>A store this node does not serve is never compared, because producers may load stores from other sources.</li>
+<li>Lock caches found history rows for 10 seconds (at most 1000, least recently used evicted). A release it has not found is remembered as missing for one second, or until this node publishes a reload, so a release another replica starts serving is seen within a second and an unknown hash repeated by a producer costs at most one store read per second.</li>
+<li>Releases no node has served for <code>policyReleaseRetentionDays</code> are deleted by the receipt repair timer, 500 per run, except a release this node serves. Each delete only removes the row if it is still that old, so a release another replica refreshed in the meantime is kept, and replicas pruning at the same time do not interfere. A record later naming a deleted release is flagged.</li>
+<li>The check is best-effort: if it or the store fails, Lock logs a warning and accepts the record without the flag.</li>
+</ul>
+<p>The flag is a statement about what Lock served. It does not show that the producer used a tampered policy.</p>
 <h2 id="receipt-chain">Receipt chain<a class="headerlink" href="#receipt-chain" title="Permanent link">#</a></h2>
 <p>For every accepted record Lock assigns, within the evidence domain:</p>
 <ul>
@@ -3441,6 +3566,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <p>A node that stops between steps leaves a <code>PENDING</code> claim. The repair timer settles claims older than <code>pendingReceiptTimeoutSeconds</code>: <code>COMMITTED</code> if the record exists, otherwise <code>VOID</code>. <code>VOID</code> entries keep the chain dense and verifiable, because the receipt state is not part of the receipt hash. A claim without a record is never returned by any API.</p>
 <p>The database ORM has no transactions, so storing the record and appending its receipt entry is not a single atomic write. A failed request leaves no stored record, no index entry, and no <code>COMMITTED</code> receipt entry. It can leave a <code>VOID</code> receipt entry at the allocated position, and a <code>PENDING</code> entry is visible between the claim and its settlement. After a node stops, a <code>PENDING</code> entry stays until the repair timer settles it. That takes up to <code>pendingReceiptTimeoutSeconds</code> plus <code>receiptRepairIntervalSeconds</code>. A <code>VOID</code> entry stays in the chain permanently, because the <code>prev_receipt_hash</code> of the next entry binds its hash.</p>
 <p><strong>Request size and column size.</strong> <code>maxRequestBytes</code> limits the size of one request body. The stored assertion is kept as text in a <code>MEDIUMTEXT</code> column on MySQL and a <code>TEXT</code> column on PostgreSQL. Keep <code>maxRequestBytes</code> and the per-record limit inside the bulk path well below the size of that column type for your database, and raise the limits only after checking it. Many TRACE identifiers are stored in <code>VARCHAR</code> columns of fixed width, which Lock's validation keeps the values within.</p>
+<p><strong>Upgrading.</strong> Search by policy store release, <code>policy_mismatch_flag</code> and <code>reserved_member_flag</code> use columns added in this release. An existing VM install must add them once; see <a href=".././lock-server/#upgrading-an-existing-deployment">Upgrading an Existing Deployment</a>.</p>
 <p><strong>Time.</strong> Lock uses <code>received_at</code> for receipt order and treats <code>signed_at</code> as a producer claim. Keep node clocks synchronized.</p>
 <h2 id="deferred-features">Deferred features<a class="headerlink" href="#deferred-features" title="Permanent link">#</a></h2>
 <p>The current release does not implement:</p>
@@ -3529,7 +3655,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 20, 2026
+    October 21, 2026
   </span>
 
     
