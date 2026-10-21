@@ -1267,12 +1267,6 @@
         <loc>https://docs.jans.io/head/cedarling/developer/mobile-apps/cedarling-ios/</loc>
       </url>
       <url>
-        <loc>https://docs.jans.io/head/cedarling/developer/sidecar/cedarling-sidecar-overview/</loc>
-      </url>
-      <url>
-        <loc>https://docs.jans.io/head/cedarling/developer/sidecar/cedarling-sidecar-tutorial/</loc>
-      </url>
-      <url>
         <loc>https://docs.jans.io/head/cedarling/integrations/cedarling-krakend/</loc>
       </url>
       <url>
@@ -1289,5 +1283,11 @@
       </url>
       <url>
         <loc>https://docs.jans.io/head/cedarling/integrations/terraform-authz-jwt/</loc>
+      </url>
+      <url>
+        <loc>https://docs.jans.io/head/cedarling/sidecar/cedarling-sidecar-overview/</loc>
+      </url>
+      <url>
+        <loc>https://docs.jans.io/head/cedarling/sidecar/cedarling-sidecar-tutorial/</loc>
       </url>
 </urlset>

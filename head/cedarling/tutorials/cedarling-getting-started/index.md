@@ -15,7 +15,7 @@ You can integrate Cedarling into your application using the following language l
 - [Golang](./go.md)
 - [Java](./java.md)
 
-Alternatively, you can use the [Cedarling Sidecar](../developer/sidecar/cedarling-sidecar-overview.md) for a drop-in deployment.
+Alternatively, you can use the [Cedarling Sidecar](../sidecar/cedarling-sidecar-overview.md) for a drop-in deployment.
 
 From here, you can either jump directly to the language-specific examples above or continue reading for a high-level overview of how Cedarling works.
 
@@ -406,5 +406,5 @@ You're now ready to dive deeper into Cedarling. From here, you could either:
 
 - See how you can use [RBAC with Cedarling using signed tokens (TBAC)](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac) — the recommended starting point.
 - Explore how to use [Cedarling's Unsigned interface](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity) for custom auth flows or testing.
-- Use the [Cedarling Sidecar](../developer/sidecar/cedarling-sidecar-overview.md) for a quick, zero-code deployment.
+- Use the [Cedarling Sidecar](../sidecar/cedarling-sidecar-overview.md) for a quick, zero-code deployment.
 - Learn more about [why Cedarling exists](../README.md#why-zero-trust-needs-cedarlings) and the problems it solves.
