@@ -23,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -442,8 +441,12 @@ public class PolicyDownloadService {
 		}
 	}
 
+	/**
+	 * @return the current snapshot, unmodifiable; a reload publishes a new map instead of
+	 *         changing this one
+	 */
 	public Map<String, LoadedPolicySource> getLoadedPolicies() {
-		return new HashMap<>(loadedPolicySourcesUris.get());
+		return loadedPolicySourcesUris.get();
 	}
 
 	public class LoadedPolicySource {
