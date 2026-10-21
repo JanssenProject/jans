@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -94,7 +95,8 @@ public class PolicyDownloadService {
 
 	private ObjectMapper objectMapper;
 
-	private volatile Map<String, LoadedPolicySource> loadedPolicySourcesUris = Collections.emptyMap();
+	private final AtomicReference<Map<String, LoadedPolicySource>> loadedPolicySourcesUris = new AtomicReference<>(
+			Collections.emptyMap());
 
 	private AtomicBoolean isActive;
 
@@ -104,7 +106,7 @@ public class PolicyDownloadService {
 		this.isActive = new AtomicBoolean(false);
 
 		this.objectMapper = new ObjectMapper();	
-		this.loadedPolicySourcesUris = Collections.emptyMap();
+		this.loadedPolicySourcesUris.set(Collections.emptyMap());
 	}
 
 	public void initTimer() {
@@ -168,7 +170,7 @@ public class PolicyDownloadService {
 		}
 
 		// Readers see either the previous or the new set, never a partial reload
-		loadedPolicySourcesUris = Collections.unmodifiableMap(reloaded);
+		loadedPolicySourcesUris.set(Collections.unmodifiableMap(reloaded));
 
 		log.debug("End URIs policies reload. Count policies: {}", reloaded.size());
 	}
@@ -422,11 +424,11 @@ public class PolicyDownloadService {
 	}
 
 	private void cleanAllPolicies() {
-		loadedPolicySourcesUris = Collections.emptyMap();
+		loadedPolicySourcesUris.set(Collections.emptyMap());
 	}
 
 	public Map<String, LoadedPolicySource> getLoadedPolicies() {
-		return new HashMap<>(loadedPolicySourcesUris);
+		return new HashMap<>(loadedPolicySourcesUris.get());
 	}
 
 	public class LoadedPolicySource {
