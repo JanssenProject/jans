@@ -124,7 +124,7 @@ public class PolicyMismatchCheck {
 		String bundleHash = source.getBundleHash();
 		String version = source.getPolicyStoreVersion();
 		CachedRelease cached = cache.get(cacheKey(policyStoreId, bundleHash));
-		if (cached != null && cached.release != null && cached.release.getLastServedAtMs() != null
+		if (cached != null && cached.release.getLastServedAtMs() != null
 				&& servedAtMs - cached.release.getLastServedAtMs() < servedUpdateIntervalMs()) {
 			return;
 		}
@@ -161,10 +161,10 @@ public class PolicyMismatchCheck {
 		long now = clock.millis();
 		CachedRelease cached = cache.get(key);
 		if (cached != null && now - cached.fetchedAtMs < CACHE_TTL_MS) {
-			return Optional.ofNullable(cached.release);
+			return Optional.of(cached.release);
 		}
 		Optional<TracePolicyReleaseEntry> release = store.findPolicyRelease(policyStoreId, bundleHash);
-		remember(policyStoreId, bundleHash, release.orElse(null));
+		release.ifPresent(found -> remember(policyStoreId, bundleHash, found));
 		return release;
 	}
 

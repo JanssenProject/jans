@@ -144,6 +144,17 @@ class PolicyMismatchCheckTest {
 	}
 
 	@Test
+	void testCheck_UnknownReleaseNotCached_SeenOnceAnotherNodeRecordsIt() {
+		PolicyRef second = new PolicyRef(STORE, "2.0.0", NEXT_HASH);
+		assertTrue(check.check(second, T0));
+
+		PolicyMismatchCheck nodeA = node(new StaticPolicyDownloadService().archive(STORE, "2.0.0", NEXT_HASH));
+		publish(nodeA, Map.of(), SECOND, T0);
+
+		assertFalse(check.check(second, T0 + 1_000L));
+	}
+
+	@Test
 	void testCheck_HistorySurvivesRestart_NoMismatch() {
 		rollOutSecondRelease();
 		PolicyMismatchCheck restarted = node(served);
