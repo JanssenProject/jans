@@ -51,7 +51,7 @@ tags:
 | metricReporterKeepDataDays | The days to keep metric reported data | [Details](#metricreporterkeepdatadays) |
 | openIdIssuer | OpenID issuer URL | [Details](#openidissuer) |
 | pendingReceiptTimeoutSeconds | Seconds a PENDING receipt may stay unresolved before the repair timer settles it | [Details](#pendingreceipttimeoutseconds) |
-| policyMismatchGraceSeconds | Seconds after Lock stops serving a policy store release during which records signed under it are not flagged policy_mismatch_flag | [Details](#policymismatchgraceseconds) |
+| policyMismatchGraceSeconds | Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; at least 60 in effect | [Details](#policymismatchgraceseconds) |
 | protectionMode | Protection mode for the Lock server (OAuth or Cedarling) | [Details](#protectionmode) |
 | receiptAllocationRetryLimit | Maximum retries when allocating a receipt-chain sequence number | [Details](#receiptallocationretrylimit) |
 | receiptRepairIntervalSeconds | Interval in seconds between receipt repair timer runs | [Details](#receiptrepairintervalseconds) |
@@ -436,7 +436,7 @@ tags:
 
 ## policyMismatchGraceSeconds
 
-- Description: Seconds after Lock stops serving a policy store release during which records signed under it are not flagged policy_mismatch_flag
+- Description: Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; at least 60 in effect
 
 - Required: No
 

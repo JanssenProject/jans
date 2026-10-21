@@ -267,7 +267,7 @@ verification. See [TRACE Evidence](./trace.md) for the feature description and A
 | `defaultAllowedProducerIds` | array | `[]` | Producer ids a client without a binding may submit records for in the default evidence domain. Empty means such a client can submit nothing (`producer_not_allowed`). Read and admin paths are unaffected. |
 | `clientDomainBindings` | array | `[]` | List of `{ clientId, evidenceDomainId, allowedProducerIds[] }` bindings. A client without a binding and without `defaultEvidenceDomainId` set is rejected with `client_not_bound`. `allowedProducerIds` may contain `"*"` to allow any producer. |
 | `latenessThresholdSeconds` | integer | `300` | Seconds after `signed_at` a record may still be accepted before it is flagged `late_flag: true`. |
-| `policyMismatchGraceSeconds` | integer | `300` | Seconds after Lock stops serving a policy store release during which records signed under it are not flagged `policy_mismatch_flag`. See [TRACE](./trace.md#policy-store-release-check). |
+| `policyMismatchGraceSeconds` | integer | `300` | Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged `policy_mismatch_flag`; at least 60 seconds in effect. See [TRACE](./trace.md#policy-store-release-check). |
 | `maxFutureSkewSeconds` | integer | `300` | Seconds `signed_at` may be ahead of Lock's clock. A later `signed_at` is rejected with `invalid_assertion` (`signed_at_in_future`). |
 | `maxRequestBytes` | integer | `262144` | Maximum accepted TRACE request body size, in bytes. |
 | `maxJsonDepth` | integer | `32` | Maximum accepted JSON nesting depth of a TRACE assertion. |
@@ -554,7 +554,7 @@ With `auditPersistenceMode` set to `internal`, Lock stores decision logs in the 
 
 ### Upgrading an Existing Deployment
 
-The audit log and TRACE search filters need new columns and indexes. Container and Kubernetes deployments get them automatically: the persistence loader adds missing columns and indexes on its next run. An existing VM install needs them added once, by hand. Back up the database first.
+The audit log and TRACE search filters need new columns and indexes, and the policy release check needs the `jansTracePolicyRelease` table. Container and Kubernetes deployments get them automatically: the persistence loader adds missing columns and indexes on its next run. An existing VM install needs them added once, by hand. Back up the database first.
 
 === "PostgreSQL"
 
@@ -574,6 +574,20 @@ The audit log and TRACE search filters need new columns and indexes. Container a
     CREATE INDEX "jansTraceRecord_jansTracePolicyStoreId" ON "jansTraceRecord" ("jansTracePolicyStoreId");
     CREATE INDEX "jansTraceRecord_jansTracePolicyStoreVersion" ON "jansTraceRecord" ("jansTracePolicyStoreVersion");
     CREATE INDEX "jansTraceRecord_jansTraceBundleHash" ON "jansTraceRecord" ("jansTraceBundleHash");
+
+    CREATE TABLE "jansTracePolicyRelease" (
+        doc_id VARCHAR(64) NOT NULL UNIQUE,
+        "objectClass" VARCHAR(48),
+        dn VARCHAR(128),
+        "jansId" VARCHAR(128),
+        "jansTracePolicyStoreId" VARCHAR(255),
+        "jansTraceBundleHash" VARCHAR(255),
+        "jansTracePolicyStoreVersion" VARCHAR(255),
+        "jansTraceFirstServedAtMs" BIGINT,
+        "jansTraceLastServedAtMs" BIGINT,
+        PRIMARY KEY (doc_id)
+    );
+    CREATE INDEX "jansTracePolicyRelease_jansTracePolicyStoreId" ON "jansTracePolicyRelease" ("jansTracePolicyStoreId");
     ```
 
 === "MySQL"
@@ -594,6 +608,20 @@ The audit log and TRACE search filters need new columns and indexes. Container a
     ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreId (jansTracePolicyStoreId);
     ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreVersion (jansTracePolicyStoreVersion);
     ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTraceBundleHash (jansTraceBundleHash);
+
+    CREATE TABLE jansTracePolicyRelease (
+        doc_id VARCHAR(64) NOT NULL UNIQUE,
+        objectClass VARCHAR(48),
+        dn VARCHAR(128),
+        jansId VARCHAR(128),
+        jansTracePolicyStoreId VARCHAR(255),
+        jansTraceBundleHash VARCHAR(255),
+        jansTracePolicyStoreVersion VARCHAR(255),
+        jansTraceFirstServedAtMs BIGINT,
+        jansTraceLastServedAtMs BIGINT,
+        PRIMARY KEY (doc_id),
+        INDEX jansTracePolicyRelease_jansTracePolicyStoreId (jansTracePolicyStoreId)
+    );
     ```
 
 Records and log entries stored before the upgrade have empty values in the new columns, so release search and log filters do not return them.

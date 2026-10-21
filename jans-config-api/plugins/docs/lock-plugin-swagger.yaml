@@ -1131,8 +1131,9 @@ components:
           format: int32
         policyMismatchGraceSeconds:
           type: integer
-          description: Seconds after Lock stops serving a policy store release during
-            which records signed under it are not flagged policy_mismatch_flag
+          description: Seconds after the last Lock node stops serving a policy store
+            release during which records judged under it are not flagged policy_mismatch_flag;
+            at least 60 in effect
           format: int32
         maxFutureSkewSeconds:
           type: integer

@@ -64,8 +64,8 @@ public class TraceConfiguration {
     @Schema(description = "Seconds after signed_at a record is accepted before being flagged late")
     private int latenessThresholdSeconds = DEFAULT_LATENESS_THRESHOLD_SECONDS;
 
-    @DocProperty(description = "Seconds after Lock stops serving a policy store release during which records signed under it are not flagged policy_mismatch_flag", defaultValue = "300")
-    @Schema(description = "Seconds after Lock stops serving a policy store release during which records signed under it are not flagged policy_mismatch_flag")
+    @DocProperty(description = "Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; at least 60 in effect", defaultValue = "300")
+    @Schema(description = "Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; at least 60 in effect")
     private int policyMismatchGraceSeconds = DEFAULT_POLICY_MISMATCH_GRACE_SECONDS;
 
     @DocProperty(description = "Seconds a signed_at may be ahead of Lock's clock before the record is rejected", defaultValue = "300")
