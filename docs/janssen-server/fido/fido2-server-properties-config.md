@@ -217,6 +217,9 @@ ceremony. When an origin is rejected, the server log says which RPs were conside
 apps are not matched against it, to make that visible. An RP with neither list behaves exactly as it did before
 these fields existed, and nothing needs changing on upgrade.
 
+To check that the `assetlinks.json` and `apple-app-site-association` files an RP has deployed match these
+entries, see [Native App Readiness](native-app-readiness.md).
+
 ### Native app readiness
 
 The `nativeReadiness*` properties control a check that compares the `assetlinks.json` and
