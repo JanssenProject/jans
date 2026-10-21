@@ -162,6 +162,13 @@ class LogEntryTest {
 	}
 
 	@Test
+	void json_nullContextInformation_staysNull() throws Exception {
+		LogEntry entry = new ObjectMapper().readValue("{\"context_information\":null}", LogEntry.class);
+
+		assertNull(entry.getContextInformation());
+	}
+
+	@Test
 	void json_readsIndexedMembers() throws Exception {
 		LogEntry entry = new ObjectMapper().readValue(
 				"{\"requestId\":\"r1\",\"policyStoreId\":\"s1\",\"policyStoreVersion\":\"2\"}", LogEntry.class);

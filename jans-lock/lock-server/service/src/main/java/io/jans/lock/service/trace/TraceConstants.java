@@ -73,6 +73,9 @@ public final class TraceConstants {
 	/** Name of the top-level signature field, excluded from the JCS signature input. */
 	public static final String SIGNATURE_FIELD = "signature";
 
+	/** Path prefix of members of {@code trace.event}, used in error reasons and reserved-member paths. */
+	public static final String TRACE_EVENT_PATH = "trace.event.";
+
 	/** Name of the partition field Lock derives; a producer-supplied value is ignored and flagged. */
 	public static final String DOMAIN_FIELD = "evidence_domain_id";
 

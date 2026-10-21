@@ -25,10 +25,7 @@ public class ContextInformationDeserializer extends JsonDeserializer<Map<String,
 	@Override
 	public Map<String, String> deserialize(JsonParser parser, DeserializationContext context) throws IOException {
 		JsonNode node = parser.readValueAsTree();
-		if (node == null || node.isNull()) {
-			return null;
-		}
-		if (!node.isObject()) {
+		if (node == null || !node.isObject()) {
 			return context.reportInputMismatch(Map.class, "contextInformation must be a JSON object");
 		}
 		Map<String, String> result = new LinkedHashMap<>();
@@ -37,11 +34,6 @@ public class ContextInformationDeserializer extends JsonDeserializer<Map<String,
 			result.put(field.getKey(), value.isTextual() ? value.textValue() : value.toString());
 		}
 		return result;
-	}
-
-	@Override
-	public Map<String, String> getNullValue(DeserializationContext context) {
-		return null;
 	}
 
 }

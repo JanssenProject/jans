@@ -52,6 +52,10 @@ public class CommonAssertionValidator {
 	@Inject
 	private AppConfiguration appConfiguration;
 
+	private static final String TRACE = "trace";
+
+	private static final String RECORD_ID = "record_id";
+
 	private Clock clock = Clock.systemUTC();
 
 	/**
@@ -63,12 +67,12 @@ public class CommonAssertionValidator {
 
 		List<String> reservedMembers = findReservedMembers(root);
 
-		ObjectNode trace = requireObject(root, "trace", "trace");
+		ObjectNode trace = requireObject(root, TRACE, TRACE);
 		ObjectNode producerChainNode = requireObject(root, "producer_chain", "producer_chain");
 
 		String producer = requireNonEmptyString(root, "producer", "producer", null);
 		String kid = requireNonEmptyString(root, "kid", "kid", null);
-		String recordId = requireNonEmptyString(root, "record_id", "record_id", null);
+		String recordId = requireNonEmptyString(root, RECORD_ID, RECORD_ID, null);
 		if (!isUuid(recordId) && !isUlid(recordId)) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "record_id_format");
 		}
@@ -168,25 +172,8 @@ public class CommonAssertionValidator {
 			optionalNonEmptyString(trace, field, "trace." + field, MAX_SHORT_STRING);
 		}
 
-		JsonNode operationIds = trace.get("operation_ids");
-		if (isPresent(operationIds)) {
-			if (!operationIds.isArray()) {
-				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
-						"type:trace.operation_ids");
-			}
-			for (int i = 0; i < operationIds.size(); i++) {
-				checkNonEmptyString(operationIds.get(i), "trace.operation_ids[" + i + "]", null);
-			}
-		}
-
-		optionalNonEmptyString(trace, "session_id", "trace.session_id", null);
-		if (isPresent(trace.get("session_id")) || isPresent(trace.get("session_issuer"))) {
-			String sessionIssuer = requireNonEmptyString(trace, "session_issuer", "trace.session_issuer", null);
-			if (!TraceIssuers.isValid(sessionIssuer)) {
-				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
-						"invalid:trace.session_issuer");
-			}
-		}
+		validateOperationIds(trace.get("operation_ids"));
+		validateSession(trace);
 
 		optionalNonEmptyString(trace, "evidence_origin", "trace.evidence_origin", null);
 		optionalNonEmptyString(trace, "measurement_point", "trace.measurement_point", null);
@@ -199,19 +186,42 @@ public class CommonAssertionValidator {
 
 		optionalObject(trace, "attestation_ref", "trace.attestation_ref");
 
-		JsonNode workloadAuthentication = optionalObject(trace, "workload_authentication",
-				"trace.workload_authentication");
-		if (workloadAuthentication != null) {
-			for (String field : new String[] { "authentication_layer", "method", "authenticated_workload_id",
-					"proof_ref" }) {
-				optionalString(workloadAuthentication, field, "trace.workload_authentication." + field);
-			}
-		}
+		optionalStrings(optionalObject(trace, "workload_authentication", "trace.workload_authentication"),
+				"trace.workload_authentication.", "authentication_layer", "method", "authenticated_workload_id",
+				"proof_ref");
+		optionalStrings(optionalObject(trace, "model", "trace.model"), "trace.model.", "provider", "model_id",
+				"version");
+	}
 
-		JsonNode model = optionalObject(trace, "model", "trace.model");
-		if (model != null) {
-			for (String field : new String[] { "provider", "model_id", "version" }) {
-				optionalString(model, field, "trace.model." + field);
+	private void optionalStrings(JsonNode node, String pathPrefix, String... fields) {
+		if (node == null) {
+			return;
+		}
+		for (String field : fields) {
+			optionalString(node, field, pathPrefix + field);
+		}
+	}
+
+	private void validateOperationIds(JsonNode operationIds) {
+		if (!isPresent(operationIds)) {
+			return;
+		}
+		if (!operationIds.isArray()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"type:trace.operation_ids");
+		}
+		for (int i = 0; i < operationIds.size(); i++) {
+			checkNonEmptyString(operationIds.get(i), "trace.operation_ids[" + i + "]", null);
+		}
+	}
+
+	private void validateSession(ObjectNode trace) {
+		optionalNonEmptyString(trace, "session_id", "trace.session_id", null);
+		if (isPresent(trace.get("session_id")) || isPresent(trace.get("session_issuer"))) {
+			String sessionIssuer = requireNonEmptyString(trace, "session_issuer", "trace.session_issuer", null);
+			if (!TraceIssuers.isValid(sessionIssuer)) {
+				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+						"invalid:trace.session_issuer");
 			}
 		}
 	}
@@ -324,7 +334,7 @@ public class CommonAssertionValidator {
 	private List<String> findReservedMembers(ObjectNode root) {
 		List<String> found = new ArrayList<>();
 		collectReservedMembers(root, "", found);
-		JsonNode trace = root.get("trace");
+		JsonNode trace = root.get(TRACE);
 		if (trace == null || !trace.isObject()) {
 			return found;
 		}
@@ -334,15 +344,15 @@ public class CommonAssertionValidator {
 		if (event == null || !event.isObject()) {
 			return found;
 		}
-		collectReservedMembers(event, "trace.event.", found);
+		collectReservedMembers(event, TraceConstants.TRACE_EVENT_PATH, found);
 		for (String field : new String[] { "decision", "invocation" }) {
-			collectReservedMembersOfObject(event.get(field), "trace.event." + field + ".", found);
+			collectReservedMembersOfObject(event.get(field), TraceConstants.TRACE_EVENT_PATH + field + ".", found);
 		}
 		for (String field : new String[] { "decisions", "invocations" }) {
 			JsonNode entries = event.get(field);
 			if (entries != null && entries.isArray()) {
 				for (int i = 0; i < entries.size(); i++) {
-					collectReservedMembersOfObject(entries.get(i), "trace.event." + field + "[" + i + "].", found);
+					collectReservedMembersOfObject(entries.get(i), TraceConstants.TRACE_EVENT_PATH + field + "[" + i + "].", found);
 				}
 			}
 		}
@@ -384,7 +394,7 @@ public class CommonAssertionValidator {
 						"type:" + path);
 			}
 			String producerId = requireNonEmptyString(entry, "producer_id", path + ".producer_id", null);
-			String recordId = requireNonEmptyString(entry, "record_id", path + ".record_id", null);
+			String recordId = requireNonEmptyString(entry, RECORD_ID, path + "." + RECORD_ID, null);
 			String relationshipType = requireNonEmptyString(entry, "relationship_type", path + ".relationship_type",
 					null);
 			result.add(new ParsedAssertion.ParentRecordId(producerId, recordId, relationshipType));
