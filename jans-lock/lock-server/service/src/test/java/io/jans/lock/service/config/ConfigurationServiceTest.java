@@ -63,6 +63,15 @@ class ConfigurationServiceTest {
 	}
 
 	@Test
+	void getLockConfiguration_publishesConfigEndpoints() {
+		JsonNode config = configurationService.getLockConfiguration().path("config");
+
+		assertTrue(config.isObject());
+		assertEquals(BASE + "/policy", config.path("policy_endpoint").asText());
+		assertFalse(config.has("sse_endpoint"));
+	}
+
+	@Test
 	void getLockConfiguration_traceEnabled_publishesTraceEndpoints() {
 		traceConfiguration.setEnabled(true);
 

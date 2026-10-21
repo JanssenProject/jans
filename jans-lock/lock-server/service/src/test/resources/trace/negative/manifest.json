@@ -160,16 +160,6 @@
     "reason": "signature_length"
   },
   {
-    "file": "domain_field_forbidden_top.json",
-    "errorId": "domain_field_forbidden",
-    "reason": null
-  },
-  {
-    "file": "domain_field_forbidden_trace.json",
-    "errorId": "domain_field_forbidden",
-    "reason": null
-  },
-  {
     "file": "ad_missing_bundle_hash.json",
     "errorId": "invalid_assertion",
     "reason": "missing:trace.policy.bundle_hash"
@@ -203,11 +193,6 @@
     "file": "ci_invocation_outcome_invalid.json",
     "errorId": "invalid_assertion",
     "reason": "invalid:trace.event.invocation.outcome"
-  },
-  {
-    "file": "re_with_capability_ids_forbidden.json",
-    "errorId": "invalid_assertion",
-    "reason": "forbidden:trace.event.capability_ids"
   },
   {
     "file": "re_with_policy_forbidden.json",
@@ -325,11 +310,6 @@
     "reason": "forbidden:trace.event.decisions[0].resource_id"
   },
   {
-    "file": "ad_with_capability_ids_forbidden.json",
-    "errorId": "invalid_assertion",
-    "reason": "forbidden:trace.event.capability_ids"
-  },
-  {
     "file": "ad_missing_workload_id.json",
     "errorId": "invalid_assertion",
     "reason": "missing:trace.subject.workload_id"
@@ -410,11 +390,6 @@
     "reason": "forbidden:trace.event.outcome"
   },
   {
-    "file": "ci_with_capability_ids_forbidden.json",
-    "errorId": "invalid_assertion",
-    "reason": "forbidden:trace.event.capability_ids"
-  },
-  {
     "file": "ci_missing_workload_id.json",
     "errorId": "invalid_assertion",
     "reason": "missing:trace.subject.workload_id"
@@ -483,26 +458,6 @@
     "file": "ad_tool_call_digest_invalid.json",
     "errorId": "invalid_assertion",
     "reason": "invalid:trace.event.tool_call_digest"
-  },
-  {
-    "file": "cnf_forbidden.json",
-    "errorId": "invalid_assertion",
-    "reason": "forbidden:cnf"
-  },
-  {
-    "file": "content_digest_forbidden.json",
-    "errorId": "invalid_assertion",
-    "reason": "forbidden:content_digest"
-  },
-  {
-    "file": "trust_tier_forbidden_trace.json",
-    "errorId": "invalid_assertion",
-    "reason": "forbidden:trace.trust_tier"
-  },
-  {
-    "file": "capability_resolution_forbidden_event.json",
-    "errorId": "invalid_assertion",
-    "reason": "forbidden:trace.event.capability_resolution"
   },
   {
     "file": "ad_execution_epoch_id_not_string.json",

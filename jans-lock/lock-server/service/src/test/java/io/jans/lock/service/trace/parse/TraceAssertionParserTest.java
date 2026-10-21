@@ -43,8 +43,11 @@ class TraceAssertionParserTest {
 	private TraceConfiguration traceConfiguration;
 
 	@BeforeEach
-	void setUp() {
+	void setUp() throws ReflectiveOperationException {
 		MockitoAnnotations.openMocks(this);
+		java.lang.reflect.Field cryptoField = TraceAssertionParser.class.getDeclaredField("cryptoProvider");
+		cryptoField.setAccessible(true);
+		cryptoField.set(parser, io.jans.lock.service.trace.testkit.TraceTestCrypto.javaProvider());
 		traceConfiguration = new TraceConfiguration();
 		org.mockito.Mockito.when(appConfiguration.getTraceConfiguration()).thenReturn(traceConfiguration);
 	}

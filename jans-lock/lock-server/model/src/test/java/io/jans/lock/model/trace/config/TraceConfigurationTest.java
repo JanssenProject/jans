@@ -28,12 +28,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Janssen Project
  */
-public class TraceConfigurationTest {
+class TraceConfigurationTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void testDeserialize_fullBlock_allValuesSet() throws Exception {
+    void testDeserialize_fullBlock_allValuesSet() throws Exception {
         String json = "{"
                 + "\"traceConfiguration\": {"
                 + "  \"enabled\": false,"
@@ -41,6 +41,8 @@ public class TraceConfigurationTest {
                 + "  \"defaultAllowedProducerIds\": [\"prod-a\", \"prod-b\"],"
                 + "  \"clientDomainBindings\": [ { \"clientId\": \"2200.abc\", \"evidenceDomainId\": \"default\", \"allowedProducerIds\": [\"*\"] } ],"
                 + "  \"latenessThresholdSeconds\": 120,"
+                + "  \"policyMismatchGraceSeconds\": 600,"
+                + "  \"policyReleaseRetentionDays\": 7,"
                 + "  \"maxFutureSkewSeconds\": 45,"
                 + "  \"maxRequestBytes\": 1024,"
                 + "  \"maxJsonDepth\": 4,"
@@ -51,7 +53,8 @@ public class TraceConfigurationTest {
                 + "  \"receiptRepairIntervalSeconds\": 60,"
                 + "  \"pendingReceiptTimeoutSeconds\": 30,"
                 + "  \"maxBulkRecords\": 10,"
-                + "  \"maxBulkRequestBytes\": 2048"
+                + "  \"maxBulkRequestBytes\": 2048,"
+                + "  \"cryptoProvider\": \"NATIVE\""
                 + "}"
                 + "}";
 
@@ -70,6 +73,8 @@ public class TraceConfigurationTest {
         assertEquals(Collections.singletonList("*"), binding.getAllowedProducerIds());
 
         assertEquals(120, traceConfiguration.getLatenessThresholdSeconds());
+        assertEquals(600, traceConfiguration.getPolicyMismatchGraceSeconds());
+        assertEquals(7, traceConfiguration.getPolicyReleaseRetentionDays());
         assertEquals(45, traceConfiguration.getMaxFutureSkewSeconds());
         assertEquals(1024, traceConfiguration.getMaxRequestBytes());
         assertEquals(4, traceConfiguration.getMaxJsonDepth());
@@ -81,10 +86,11 @@ public class TraceConfigurationTest {
         assertEquals(30, traceConfiguration.getPendingReceiptTimeoutSeconds());
         assertEquals(10, traceConfiguration.getMaxBulkRecords());
         assertEquals(2048, traceConfiguration.getMaxBulkRequestBytes());
+        assertEquals("NATIVE", traceConfiguration.getCryptoProvider());
     }
 
     @Test
-    public void testDeserialize_missingBlock_defaultsApplied() throws Exception {
+    void testDeserialize_missingBlock_defaultsApplied() throws Exception {
         AppConfiguration appConfiguration = mapper.readValue("{}", AppConfiguration.class);
 
         TraceConfiguration traceConfiguration = appConfiguration.getTraceConfiguration();
@@ -95,6 +101,8 @@ public class TraceConfigurationTest {
         assertTrue(traceConfiguration.getDefaultAllowedProducerIds().isEmpty());
         assertTrue(traceConfiguration.getClientDomainBindings().isEmpty());
         assertEquals(TraceConfiguration.DEFAULT_LATENESS_THRESHOLD_SECONDS, traceConfiguration.getLatenessThresholdSeconds());
+        assertEquals(TraceConfiguration.DEFAULT_POLICY_MISMATCH_GRACE_SECONDS, traceConfiguration.getPolicyMismatchGraceSeconds());
+        assertEquals(TraceConfiguration.DEFAULT_POLICY_RELEASE_RETENTION_DAYS, traceConfiguration.getPolicyReleaseRetentionDays());
         assertEquals(TraceConfiguration.DEFAULT_MAX_FUTURE_SKEW_SECONDS, traceConfiguration.getMaxFutureSkewSeconds());
         assertEquals(TraceConfiguration.DEFAULT_MAX_REQUEST_BYTES, traceConfiguration.getMaxRequestBytes());
         assertEquals(TraceConfiguration.DEFAULT_MAX_JSON_DEPTH, traceConfiguration.getMaxJsonDepth());
@@ -106,13 +114,16 @@ public class TraceConfigurationTest {
         assertEquals(TraceConfiguration.DEFAULT_PENDING_RECEIPT_TIMEOUT_SECONDS, traceConfiguration.getPendingReceiptTimeoutSeconds());
         assertEquals(TraceConfiguration.DEFAULT_MAX_BULK_RECORDS, traceConfiguration.getMaxBulkRecords());
         assertEquals(TraceConfiguration.DEFAULT_MAX_BULK_REQUEST_BYTES, traceConfiguration.getMaxBulkRequestBytes());
+        assertEquals("JAVA", traceConfiguration.getCryptoProvider());
     }
 
     @Test
-    public void testGetters_nonPositiveLimits_fallBackToDefaults() {
+    void testGetters_nonPositiveLimits_fallBackToDefaults() {
         TraceConfiguration traceConfiguration = new TraceConfiguration();
 
         traceConfiguration.setLatenessThresholdSeconds(0);
+        traceConfiguration.setPolicyMismatchGraceSeconds(-1);
+        traceConfiguration.setPolicyReleaseRetentionDays(0);
         traceConfiguration.setMaxFutureSkewSeconds(0);
         traceConfiguration.setMaxRequestBytes(-1);
         traceConfiguration.setMaxJsonDepth(0);
@@ -126,6 +137,8 @@ public class TraceConfigurationTest {
         traceConfiguration.setMaxBulkRequestBytes(0);
 
         assertEquals(TraceConfiguration.DEFAULT_LATENESS_THRESHOLD_SECONDS, traceConfiguration.getLatenessThresholdSeconds());
+        assertEquals(TraceConfiguration.DEFAULT_POLICY_MISMATCH_GRACE_SECONDS, traceConfiguration.getPolicyMismatchGraceSeconds());
+        assertEquals(TraceConfiguration.DEFAULT_POLICY_RELEASE_RETENTION_DAYS, traceConfiguration.getPolicyReleaseRetentionDays());
         assertEquals(TraceConfiguration.DEFAULT_MAX_FUTURE_SKEW_SECONDS, traceConfiguration.getMaxFutureSkewSeconds());
         assertEquals(TraceConfiguration.DEFAULT_MAX_REQUEST_BYTES, traceConfiguration.getMaxRequestBytes());
         assertEquals(TraceConfiguration.DEFAULT_MAX_JSON_DEPTH, traceConfiguration.getMaxJsonDepth());
@@ -140,11 +153,40 @@ public class TraceConfigurationTest {
     }
 
     @Test
-    public void testGetMaxBulkRequestBytes_configuredAboveCeiling_clampsToHardMax() {
+    void testGetMaxBulkRequestBytes_configuredAboveCeiling_clampsToHardMax() {
         TraceConfiguration traceConfiguration = new TraceConfiguration();
         traceConfiguration.setMaxBulkRequestBytes(TraceConfiguration.HARD_MAX_BULK_REQUEST_BYTES + 1_000_000);
 
         assertEquals(TraceConfiguration.HARD_MAX_BULK_REQUEST_BYTES, traceConfiguration.getMaxBulkRequestBytes());
+    }
+
+    @Test
+    void testCryptoProvider_defaultIsJava() {
+        assertEquals("JAVA", TraceConfiguration.DEFAULT_CRYPTO_PROVIDER);
+        assertEquals("JAVA", new TraceConfiguration().getCryptoProvider());
+    }
+
+    @Test
+    void testCryptoProvider_jacksonRoundTrip() throws Exception {
+        TraceConfiguration traceConfiguration = new TraceConfiguration();
+        traceConfiguration.setCryptoProvider("NATIVE");
+
+        String json = mapper.writeValueAsString(traceConfiguration);
+        TraceConfiguration restored = mapper.readValue(json, TraceConfiguration.class);
+
+        assertTrue(json.contains("\"cryptoProvider\":\"NATIVE\""));
+        assertEquals("NATIVE", restored.getCryptoProvider());
+    }
+
+    @Test
+    void testCryptoProvider_nullOrBlank_fallsBackToDefault() {
+        TraceConfiguration traceConfiguration = new TraceConfiguration();
+
+        traceConfiguration.setCryptoProvider(null);
+        assertEquals("JAVA", traceConfiguration.getCryptoProvider());
+
+        traceConfiguration.setCryptoProvider("   ");
+        assertEquals("JAVA", traceConfiguration.getCryptoProvider());
     }
 
 }
