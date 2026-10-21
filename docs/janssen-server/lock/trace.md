@@ -24,7 +24,7 @@ The Lock Server provides attributable, tamper-evident records and basic correlat
 
 `authorization decision → capability invocation → optional runtime effect`
 
-Cedarling, or another policy decision point (PDP), records what was authorized (`AUTHORIZATION_DECISION`). The enforcement point, agent gateway, or tool gateway that mediates the action records `CAPABILITY_INVOKED`. An agent's own statement that it invoked a capability is not equivalent to enforcement-point evidence. An observer can record `RUNTIME_EFFECT`.
+A policy decision point (PDP) records what was authorized (`AUTHORIZATION_DECISION`). Cedarling support for producing TRACE records is in progress. The enforcement point, agent gateway, or tool gateway that mediates the action records `CAPABILITY_INVOKED`. An agent's own statement that it invoked a capability is not equivalent to enforcement-point evidence. An observer can record `RUNTIME_EFFECT`.
 
 ### What TRACE does not claim
 
@@ -46,7 +46,7 @@ Each record kind establishes one narrow claim and nothing stronger:
 
 | Party | Responsibility |
 |---|---|
-| Policy decision point (PDP), for example Cedarling | Decides whether a capability is allowed and signs an `AUTHORIZATION_DECISION` record. |
+| Policy decision point (PDP), for example Cedarling (TRACE support in progress) | Decides whether a capability is allowed and signs an `AUTHORIZATION_DECISION` record. |
 | Enforcement point (PEP, agent gateway, tool gateway) | Mediates the action and signs a `CAPABILITY_INVOKED` record. |
 | Evidence producer | Signs the record it creates. A PDP or enforcement point is the producer of its own records. |
 | Submitting client | The OAuth client that sends a signed record to Lock. Usually the producer. An approved forwarder may submit for a producer if its binding allows that producer. |
@@ -65,7 +65,7 @@ Three independent checks apply. Do not confuse them:
 | Scope | Endpoints |
 |---|---|
 | `https://jans.io/oauth/lock/trace.write` | `POST /audit/trace`, `POST /audit/trace/bulk` |
-| `https://jans.io/oauth/lock/trace.readonly` | `GET /audit/trace/records/{record_id}`, `GET /audit/trace/executions/{trace_execution_id}` |
+| `https://jans.io/oauth/lock/trace.readonly` | `GET /audit/trace/records`, `GET /audit/trace/records/{record_id}`, `GET /audit/trace/executions/{trace_execution_id}` |
 | `https://jans.io/oauth/lock/trace.admin` | `/audit/trace/admin/*` (producer keys and chains) |
 
 The client created by the Lock setup script receives scopes from the config-api Lock plugin, not from the Lock Server's own OpenAPI file. A client that uses TRACE needs these three scopes granted to it explicitly.
@@ -78,7 +78,7 @@ An evidence domain is the isolation boundary inside one Lock deployment. Lock de
 - A key registered in one domain gives no authority in another. A producer that serves several domains needs an explicit registration in each.
 - Readers and administrators see only the domain their client is bound to. Lock never searches other domains.
 - A client with no `clientDomainBindings` entry falls back to `defaultEvidenceDomainId` only for its domain. It gets no forwarding permission: see "Default-domain fallback" under [Configuration](#configuration).
-- A request body that contains `evidence_domain_id` (top level or inside `trace`) is rejected with `domain_field_forbidden`.
+- A signed `evidence_domain_id` in the body is ignored and the record is flagged `reserved_member_flag` (see [Single record](#single-record)). Lock never uses it for routing or storage.
 
 ## Configuration
 
@@ -97,6 +97,8 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
     }
   ],
   "latenessThresholdSeconds": 300,
+  "policyMismatchGraceSeconds": 300,
+  "policyReleaseRetentionDays": 30,
   "maxFutureSkewSeconds": 300,
   "maxRequestBytes": 262144,
   "maxBulkRecords": 100,
@@ -127,7 +129,7 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
 **Crypto provider.** `cryptoProvider` selects the implementation that parses producer keys, canonicalizes assertions, verifies signatures and computes receipt hashes. Values are matched case-insensitively:
 
 - `JAVA` (default): BouncyCastle, in the Lock process. This is the implementation Lock shipped with.
-- `NATIVE`: `jans-trace-core`, the Rust library that producers such as Cedarling sign with, reached through the `jans-trace-java` binding.
+- `NATIVE`: `jans-trace-core`, the Rust TRACE library intended for producers, reached through the `jans-trace-java` binding.
 
 Both providers produce the same `content_digest`, key thumbprint, receipt hash and storage keys. Switching the provider does not invalidate the stored receipt chain.
 
@@ -136,6 +138,8 @@ Lock fails closed. When the selected provider is not available, because the nati
 `NATIVE` rejects small-order Ed25519 public keys that BouncyCastle accepts. After you switch to `NATIVE`, a registered key of that kind fails with `unknown_producer_key` or `stored_key_unusable`. Check registered keys before you switch.
 
 A value that is not one of the two names is treated as `JAVA` and logged once at `WARN`: `Unknown traceConfiguration.cryptoProvider '<value>', using JAVA`.
+
+**Policy store release check.** `policyMismatchGraceSeconds` (default `300`) is how long after the last node stops serving a policy store release records judged under it still count as matching; see the acceptance window below. `policyReleaseRetentionDays` (default `30`) is how long a release no node serves any more is kept before it is deleted. A mismatch only sets `policy_mismatch_flag`; it never rejects a record. See [Policy store release check](#policy-store-release-check).
 
 **Timers.** The receipt repair timer runs every `receiptRepairIntervalSeconds`. It settles receipt claims that stayed `PENDING` longer than `pendingReceiptTimeoutSeconds` (see [Deployment constraints](#deployment-constraints)). Setting `enabled` to `false` makes every TRACE endpoint return a structured `invalid_request` error with reason `trace_disabled` and stops the timer.
 
@@ -313,11 +317,12 @@ Key points:
 
 - `producer` is the stable logical producer identifier. It must equal `producer_chain.producer_id` byte for byte. `kid` is part of the signed content. `producer_version`, when present, is a string of 1 to 255 characters. It is signed and stored unchanged, and Lock does not interpret it.
 - `record_id` is a producer-generated UUID or ULID. Record identity is `(evidence domain, producer, record_id)`, so two producers can use the same `record_id`.
+- `trace.policy.policy_store_id`, `policy_store_version` and `bundle_hash` are at most 255 characters each (`length:<path>`). Lock indexes them for [search by policy store release](#search-by-policy-store-release).
 - `trace_execution_id` and `execution_authority` are required and travel together. Lock correlates records by them. Lock neither creates them nor authorizes the execution. They are different from `subject.workload_id`: the authority scopes the execution identifier, and the workload is the subject that takes part in it.
 - `trace.subject.workload_id` is required (non-empty string, at most 255 characters) for `AUTHORIZATION_DECISION` and `CAPABILITY_INVOKED`. `workload_instance_id` is optional. For `RUNTIME_EFFECT` the subject is optional and is validated when present.
 - Producers sign capability *facts*, not a governance label. An `AUTHORIZATION_DECISION` carries a singular `decision` and a `CAPABILITY_INVOKED` carries a singular `invocation`. Each has `action` and `resource_type` (the Cedar action and resource type, never a resource id) and an `outcome`. See [Event kinds](#event-kinds). Lock does not resolve capability ids.
 - `tokens[]` holds references only: `issuer`, `token_type`, and either `jti` or `fingerprint`. Never send a raw bearer token. Lock rejects material that looks like a JWT. Token identity is `(domain, issuer, jti)`, never a bare `jti`.
-- A signed body must not carry a member that Lock derives or assigns itself. The reserved members are `cnf`, `content_digest`, `receipt_sequence`, `received_at`, `prev_receipt_hash`, `coverage_gap_flag`, `chain_link_failure_flag`, `equivocation_flag`, `late_flag`, `unattributed_flag`, `candidate_flag`, `key_resolved`, `key_temporally_valid`, `key_not_revoked`, `key_authorized_for_producer`, `producer_authorized_for_claim`, `key_thumbprint`, `key_authorization_ref`, `verified_at`, `trust_tier`, `capability_resolution`, `capability_id` and `capability_ids`. Lock checks the top level, `trace`, `trace.event` and each `decision` or `invocation` fact. A body that carries one is rejected with `400 invalid_assertion` and reason `forbidden:<path>` (for example `forbidden:cnf` or `forbidden:trace.trust_tier`). Lock never stores it. Lock resolves the verification key only from the producer key registry, never from a key in the body.
+- A producer should not sign a member that Lock derives or assigns itself: `evidence_domain_id`, `cnf`, `content_digest`, `receipt_sequence`, `received_at`, `prev_receipt_hash`, `coverage_gap_flag`, `chain_link_failure_flag`, `equivocation_flag`, `late_flag`, `policy_mismatch_flag`, `reserved_member_flag`, `unattributed_flag`, `candidate_flag`, `key_resolved`, `key_temporally_valid`, `key_not_revoked`, `key_authorized_for_producer`, `producer_authorized_for_claim`, `key_thumbprint`, `key_authorization_ref`, `verified_at`, `trust_tier`, `capability_resolution`, `capability_id` and `capability_ids`. Lock checks the top level, `trace`, `trace.policy`, `trace.event` and each `decision` or `invocation` fact. A record that carries one is not rejected: the member is ignored, Lock uses its own derived values, and the record is accepted with `reserved_member_flag: true` (GovOps profile §12). The member stays in the stored and returned `assertion`, because the signature covers it; its value there is producer-supplied and ignored, and Lock's own values are in `ingestion` and `verification`. The paths are stored and returned as `reserved_members`, for example `["trace.trust_tier"]`. Only the first 32 are kept; Lock logs the total count. Lock resolves the verification key only from the producer key registry, never from a key in the body.
 - `producer_chain` can carry an optional `chain_link` member that references the previous chain head. It must be a JSON object, and only a genesis record (`sequence_number` 1) can carry it. On any other record Lock returns `400 invalid_genesis` with reason `chain_link_on_non_genesis`. Lock checks that `prev_producer_chain_id`, when present, is a non-empty string. It keeps the member unchanged inside the signed assertion, returns it unchanged on retrieval, and does not validate the link against the prior chain.
 - The first record of a chain has `sequence_number` 1 and `prev_record_hash` set to `sha256:` followed by 64 zeros. Any other record needs the previous record's `content_digest` in `prev_record_hash`.
 
@@ -352,7 +357,7 @@ Rules for the capability facts:
 - For `AUTHORIZATION_DECISION`, `outcome` is `ALLOW` or `DENY`. For `CAPABILITY_INVOKED`, `outcome` is `SUCCESS` or `FAILURE`. The vocabularies are distinct, so an invocation with `ALLOW` or a decision with `SUCCESS` returns `400 invalid_assertion` with reason `invalid:trace.event.invocation.outcome` (or `invalid:trace.event.decision.outcome`, or the indexed plural path such as `invalid:trace.event.invocations[0].outcome`).
 - An atomic batch evaluation can use the plural form instead. Each entry carries a `decision_id` or `invocation_id` (non-empty, at most 256 characters, unique within the array) and repeats `action`, `resource_type` and `outcome`. The record-level `trace.event.outcome` is not allowed in either form.
 - Operation-binding digests are optional members of `trace.event`: `request_digest`, `input_digest` and `tool_call_digest` on `AUTHORIZATION_DECISION`, and `request_digest`, `tool_call_digest` and `result_digest` on `CAPABILITY_INVOKED` (and `result_digest` on `RUNTIME_EFFECT`). A present digest is `sha256:` followed by 64 lowercase hex characters. Any other string returns `400 invalid_assertion` with reason `invalid:trace.event.<member>`, and a non-string value returns `type:trace.event.<member>`. Lock stores them in the signed assertion and does not interpret them. `trace.policy.bundle_hash` keeps its own rule, which also accepts other `algorithm:digest` forms.
-- Both the singular and the plural member in one record, `capability_ids` anywhere, and a `resource_id` inside a fact are rejected with `400 invalid_assertion` (reason such as `forbidden:trace.event.capability_ids`).
+- Both the singular and the plural member in one record, and a `resource_id` inside a fact, are rejected with `400 invalid_assertion` (reason such as `forbidden:trace.event.decisions`). A signed `capability_ids` is a Lock-derived member: it is ignored and flagged with `reserved_member_flag`.
 
 Lock validates the schema for the declared kind and rejects fields that contradict it. Lock does not infer that an authorization caused an invocation because their timestamps are close. Producers state causal relationships in `parent_record_ids`.
 
@@ -381,7 +386,10 @@ The two scopes are intentionally different:
   "coverage_gap_flag": false,
   "chain_link_failure_flag": false,
   "equivocation_flag": false,
-  "late_flag": false
+  "late_flag": false,
+  "policy_mismatch_flag": false,
+  "reserved_member_flag": false,
+  "reserved_members": []
 }
 ```
 
@@ -416,7 +424,8 @@ A processed batch returns `207 Multi-Status`, whatever the per-item results. Acc
       "producer_id": "cedarling-fleet-1", "record_id": "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41",
       "content_digest": "sha256:...", "receipt_sequence": 108422, "received_at": "2026-06-11T00:41:02.123Z",
       "idempotent_replay": false, "coverage_gap_flag": false, "chain_link_failure_flag": false,
-      "equivocation_flag": false, "late_flag": false
+      "equivocation_flag": false, "late_flag": false, "policy_mismatch_flag": false,
+      "reserved_member_flag": false, "reserved_members": []
     },
     {
       "index": 1, "accepted": false,
@@ -438,9 +447,8 @@ Errors use the structured body `{"error": "<id>", "error_description": "<text>",
 | Error id | HTTP | When |
 |---|---|---|
 | `invalid_request` | 400 | Malformed JSON, a limit exceeded, an unreadable body, bad query parameters, TRACE disabled (`trace_disabled`), or a bulk envelope problem such as `bulk_mixed_producers` (see [Bulk submission](#bulk-submission)). |
-| `invalid_assertion` | 400 | A schema violation in the assertion, or a member reserved for Lock such as `cnf` or `trust_tier` (reason `forbidden:<path>`). `reason` names the field. |
+| `invalid_assertion` | 400 | A schema violation in the assertion. `reason` names the field. |
 | `unsupported_profile` | 400 | `trace.eat_profile` is not `tag:jans.io,2026:trace-v1`. |
-| `domain_field_forbidden` | 400 | The body contains `evidence_domain_id`. |
 | `producer_mismatch` | 400 | `producer` does not equal `producer_chain.producer_id`. |
 | `unknown_producer_key` | 400 | No registered key for the domain, producer, and `kid`, or the record's `event_kind` is outside the key's `authorized_event_kinds` (reason `event_kind_not_authorized`). |
 | `key_not_valid` | 400 | The key is outside its validity window or revoked. |
@@ -480,7 +488,7 @@ The component that creates the governed unit of work (an agent runtime, a gatewa
 
 ## Retrieval
 
-Both endpoints need the `trace.readonly` scope and read only the caller's evidence domain.
+All retrieval endpoints need the `trace.readonly` scope and read only the caller's evidence domain.
 
 ```bash
 # One record. producer_id should be supplied.
@@ -518,7 +526,10 @@ A record response has three separate parts: the assertion (in a parsed form and 
     "coverage_gap_flag": false,
     "chain_link_failure_flag": false,
     "equivocation_flag": false,
-    "late_flag": false
+    "late_flag": false,
+    "policy_mismatch_flag": false,
+    "reserved_member_flag": false,
+    "reserved_members": []
   }
 }
 ```
@@ -530,6 +541,25 @@ A record response has three separate parts: the assertion (in a parsed form and 
 - `ingestion` is Lock-derived metadata.
 
 If `producer_id` (or `execution_authority`) is omitted and the bare identifier matches more than one producer (or authority) in the domain, Lock returns `409 ambiguous_identifier`. It never guesses.
+
+### Search by policy store release
+
+`GET /audit/trace/records` (no `record_id`) returns the records whose `trace.policy` names a policy store release. Use it to answer "which decisions were made with release X".
+
+```bash
+curl -s "$API/records?policy_store_id=https%3A%2F%2Fexample.org%2Fpolicy-stores%2Fpayments&policy_store_version=1.2.3&received_from=2026-06-01T00:00:00Z&start=0&count=100" \
+  -H "Authorization: Bearer $READ_TOKEN"
+```
+
+| Parameter | Meaning |
+|---|---|
+| `policy_store_id` | Exact `trace.policy.policy_store_id`. |
+| `policy_store_version` | Exact `trace.policy.policy_store_version`. |
+| `bundle_hash` | Exact `trace.policy.bundle_hash`. |
+| `received_from`, `received_to` | Inclusive bounds on `received_at`, RFC 3339. |
+| `start`, `count` | Paging, as for executions. |
+
+At least one of `policy_store_id` or `bundle_hash` is required; otherwise Lock returns `400 invalid_request` with reason `missing:policy_store_id`. The response is `{"ordering": "receipt_sequence", "records": [...]}` with record envelopes in receipt order. No match returns `200` with an empty list. Only records that carry `trace.policy` (`AUTHORIZATION_DECISION`, and `CAPABILITY_INVOKED` when present) are indexed. Records stored before this index existed are not returned.
 
 The execution response carries `execution_authority`, `trace_execution_id`, `"ordering": "receipt_sequence"`, `"completeness": "not_assessed"`, and `records`, ordered by Lock receipt sequence. `start` (default 0) and `count` (default 100, maximum 1000) page the list. The execution view contains the directly associated records only. It claims no global event order, does not traverse child executions, and does not assess completeness.
 
@@ -543,10 +573,33 @@ Flags are Lock-derived findings about a record. Lock flags a condition instead o
 | `chain_link_failure_flag` | The predecessor is present but its `content_digest` does not match this record's `prev_record_hash`. A genuine break in the chain. | No. The conflicting predecessor already exists, so later arrivals cannot resolve it. It stays visible as an integrity finding. |
 | `equivocation_flag` | Two or more records with different `record_id` values claim the same chain position. Lock stores and flags all of them and never selects a winner. | No. |
 | `late_flag` | Lock received the record more than `latenessThresholdSeconds` after its `signed_at`. Fixed at ingestion. | No. |
+| `policy_mismatch_flag` | The record's `trace.policy` names a policy store Lock serves, with a release this node did not serve at `signed_at` or within `policyMismatchGraceSeconds` before it. Fixed at ingestion. See [Policy store release check](#policy-store-release-check). | No. |
+| `reserved_member_flag` | The producer signed a member Lock derives itself, such as `evidence_domain_id` or `trust_tier`. Lock ignored it and used its own values; `reserved_members` lists the paths. Fixed at ingestion. | No. |
 
 Lock updates the flags on neighboring records after it stores a new record. These updates are best-effort and eventually consistent. If one fails, Lock logs it and still accepts the new record. A reader can see a flag change shortly after a record is accepted.
 
 A producer-chain break or gap is a statement about the records Lock has received. It is not a statement about what the producer did.
+
+## Policy store release check
+
+Lock serves policy store archives to producers (`GET /policy`, `GET /policy/stores`) and computes each archive's `bundle_hash` as `sha256:` plus the lowercase hex SHA-256 of the archive bytes. Lock reloads policy stores every 30 seconds. On every reload each node records the releases it serves in the shared TRACE store (`jansTracePolicyRelease`, one row per `policy_store_id` and `bundle_hash`, not scoped to an evidence domain): the first time a release is served it is inserted, and after that its last-served time moves forward at most once a minute. Updates use optimistic locking and never move the last-served time back or the first-served time forward, so a replica with a lagging clock cannot shorten a release's history. A release that is no longer served stops moving forward. Because the history is in the database, every replica sees the same releases, and it survives restarts and rolling updates.
+
+When an accepted record's `trace.policy.policy_store_id` is a store this node serves as an archive, Lock judges the record's release at its `received_at`, or at its `signed_at` when the record is flagged `late_flag`. Using the receipt time means a producer cannot backdate `signed_at` to slip a retired release past the check; it can shift the time by at most `latenessThresholdSeconds`, and beyond that the record is flagged late. The release is accepted when:
+
+- this node serves that `bundle_hash` now; or
+- its stored last-served time is within the acceptance window before that time. The window is the larger of `policyMismatchGraceSeconds` and `latenessThresholdSeconds`, plus 130 seconds: a stored last-served time can trail the real one by the one-minute update interval, two 30-second reloads and the 10-second cache. With the defaults the window is 430 seconds, so a record signed just before a rollout and received up to five minutes later still matches, and a release another replica still serves never looks retired.
+
+Otherwise, and also when a matching release has a known `policy_store_version` that differs from the record's, the record is flagged `policy_mismatch_flag`. A record signed under the previous release during a rollout, or uploaded shortly after it, is not flagged. The record is always accepted.
+
+Limits:
+
+- Before the first policy store load, Lock serves no archive and flags nothing.
+- A store this node does not serve is never compared, because producers may load stores from other sources.
+- Lock caches found history rows for 10 seconds (at most 1000, least recently used evicted). A release it has not found is remembered as missing for one second, or until this node publishes a reload, so a release another replica starts serving is seen within a second and an unknown hash repeated by a producer costs at most one store read per second.
+- Releases no node has served for `policyReleaseRetentionDays` are deleted by the receipt repair timer, 500 per run, except a release this node serves. Each delete only removes the row if it is still that old, so a release another replica refreshed in the meantime is kept, and replicas pruning at the same time do not interfere. A record later naming a deleted release is flagged.
+- The check is best-effort: if it or the store fails, Lock logs a warning and accepts the record without the flag.
+
+The flag is a statement about what Lock served. It does not show that the producer used a tampered policy.
 
 ## Receipt chain
 
@@ -584,6 +637,8 @@ A node that stops between steps leaves a `PENDING` claim. The repair timer settl
 The database ORM has no transactions, so storing the record and appending its receipt entry is not a single atomic write. A failed request leaves no stored record, no index entry, and no `COMMITTED` receipt entry. It can leave a `VOID` receipt entry at the allocated position, and a `PENDING` entry is visible between the claim and its settlement. After a node stops, a `PENDING` entry stays until the repair timer settles it. That takes up to `pendingReceiptTimeoutSeconds` plus `receiptRepairIntervalSeconds`. A `VOID` entry stays in the chain permanently, because the `prev_receipt_hash` of the next entry binds its hash.
 
 **Request size and column size.** `maxRequestBytes` limits the size of one request body. The stored assertion is kept as text in a `MEDIUMTEXT` column on MySQL and a `TEXT` column on PostgreSQL. Keep `maxRequestBytes` and the per-record limit inside the bulk path well below the size of that column type for your database, and raise the limits only after checking it. Many TRACE identifiers are stored in `VARCHAR` columns of fixed width, which Lock's validation keeps the values within.
+
+**Upgrading.** Search by policy store release, `policy_mismatch_flag` and `reserved_member_flag` use columns added in this release. An existing VM install must add them once; see [Upgrading an Existing Deployment](./lock-server.md#upgrading-an-existing-deployment).
 
 **Time.** Lock uses `received_at` for receipt order and treats `signed_at` as a producer claim. Keep node clocks synchronized.
 

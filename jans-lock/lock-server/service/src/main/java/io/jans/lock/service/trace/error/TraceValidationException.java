@@ -38,9 +38,6 @@ public class TraceValidationException extends RuntimeException {
 	/** {@code trace.eat_profile} is not the supported TRACE profile. */
 	public static final TraceErrorResponseType ERROR_UNSUPPORTED_PROFILE = TraceErrorResponseType.UNSUPPORTED_PROFILE;
 
-	/** The body carries a top-level or {@code trace}-level {@code evidence_domain_id}. */
-	public static final TraceErrorResponseType ERROR_DOMAIN_FIELD_FORBIDDEN = TraceErrorResponseType.DOMAIN_FIELD_FORBIDDEN;
-
 	/** {@code producer} does not equal {@code producer_chain.producer_id} byte-for-byte. */
 	public static final TraceErrorResponseType ERROR_PRODUCER_MISMATCH = TraceErrorResponseType.PRODUCER_MISMATCH;
 

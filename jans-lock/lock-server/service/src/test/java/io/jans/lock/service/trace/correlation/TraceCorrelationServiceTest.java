@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.core.cedarling.service.policy.PolicySnapshotEvent;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceConfiguration;
@@ -62,7 +64,7 @@ import io.jans.lock.service.trace.parse.ParsedAssertion;
 import io.jans.lock.service.trace.parse.TraceAssertionParser;
 import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
-import io.jans.lock.service.trace.store.TraceKeys;
+import io.jans.lock.service.trace.testkit.PolicyMismatchChecks;
 import io.jans.lock.service.trace.testkit.SignedAssertionFactory;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
 import io.jans.lock.service.trace.testkit.TraceTestCrypto;
@@ -142,6 +144,7 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		setField(service, "chainRegistry", chainRegistry);
 		setField(service, "appConfiguration", appConfiguration);
 		setField(service, "traceKeys", TraceTestCrypto.traceKeys());
+		setField(service, "policyMismatchCheck", PolicyMismatchChecks.none());
 	}
 
 	// -- fixtures ---------------------------------------------------------------------------------
@@ -180,13 +183,13 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 
 	private StoredTraceRecord insertRecord(String recordId, String contentDigest, long sequenceNumber,
 			String prevRecordHash, IngestionFlags flags) throws DuplicateEntryException {
-		StoredTraceRecord record = StoredTraceRecordFactory.builder().domainId(DOMAIN).producerId(PRODUCER)
+		StoredTraceRecord stored = StoredTraceRecordFactory.builder().domainId(DOMAIN).producerId(PRODUCER)
 				.producerInstanceId(INSTANCE).producerChainId(CHAIN).recordId(recordId).contentDigest(contentDigest)
 				.sequenceNumber(sequenceNumber).prevRecordHash(prevRecordHash).coverageGap(flags.isCoverageGap())
 				.chainLinkFailure(flags.isChainLinkFailure()).equivocation(flags.isEquivocation())
 				.late(flags.isLate()).build();
-		store.insertRecord(record);
-		return record;
+		store.insertRecord(stored);
+		return stored;
 	}
 
 	private static String digest(String tag) {
@@ -211,8 +214,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
 		VerifiedAssertion verified = buildVerified(json, context());
 
+		TraceRequestContext ctx = context();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, context()));
+				() -> service.plan(verified, ctx));
 
 		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 	}
@@ -224,10 +228,57 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 				.prevRecordHash(TraceConstants.ZERO_HASH).unsignedJson();
 		VerifiedAssertion verified = buildVerified(json, context());
 
+		TraceRequestContext ctx = context();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, context()));
+				() -> service.plan(verified, ctx));
 
 		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
+	}
+
+	// -- plan: policy store release check ------------------------------------
+
+	private static final String SERVED_STORE = "https://example.org/policy-stores/payments";
+
+	private void servePolicyStore(String version, String bundleHash) {
+		setField(service, "policyMismatchCheck", PolicyMismatchChecks.serving(
+				new PolicyMismatchChecks.StaticPolicyDownloadService().archive(SERVED_STORE, version, bundleHash)));
+	}
+
+	@Test
+	void testPlan_DecisionNamesServedStoreWithOtherBundleHash_FlagsPolicyMismatch() {
+		registerChain();
+		servePolicyStore("1.2.3", "sha256:" + "f".repeat(64));
+		String json = SignedAssertionFactory.authorizationDecision().producer(PRODUCER).producerInstanceId(INSTANCE)
+				.producerChainId(CHAIN).recordId(recordId()).genesis().unsignedJson();
+
+		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
+
+		assertTrue(plan.getFlags().isPolicyMismatch());
+	}
+
+	@Test
+	void testPlan_DecisionNamesServedStoreWithSameRelease_NoPolicyMismatch() {
+		registerChain();
+		servePolicyStore("1.2.3", "sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf7");
+		String json = SignedAssertionFactory.authorizationDecision().producer(PRODUCER).producerInstanceId(INSTANCE)
+				.producerChainId(CHAIN).recordId(recordId()).genesis().unsignedJson();
+
+		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
+
+		assertFalse(plan.getFlags().isPolicyMismatch());
+	}
+
+	@Test
+	void testPlan_PolicyMismatchUnderFirstObserved_AcceptedWithFlagAndChainRegistered() {
+		traceConfiguration.setChainRegistrationMode("FIRST_OBSERVED");
+		servePolicyStore("1.2.3", "sha256:" + "f".repeat(64));
+		String json = SignedAssertionFactory.authorizationDecision().producer(PRODUCER).producerInstanceId(INSTANCE)
+				.producerChainId(CHAIN).recordId(recordId()).genesis().unsignedJson();
+
+		CorrelationPlan plan = service.plan(buildVerified(json, context()), context());
+
+		assertTrue(plan.getFlags().isPolicyMismatch());
+		assertTrue(store.findChain(chainIdentity()).isPresent());
 	}
 
 	// -- plan: chain registration mode -------------------------------------
@@ -263,8 +314,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 				.prevRecordHash(digest("1")).unsignedJson();
 		VerifiedAssertion verified = buildVerified(json, context());
 
+		TraceRequestContext ctx = context();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, context()));
+				() -> service.plan(verified, ctx));
 
 		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 		assertFalse(store.findChain(chainIdentity()).isPresent());
@@ -277,8 +329,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 				.prevRecordHash(digest("1")).unsignedJson();
 		VerifiedAssertion verified = buildVerified(json, context());
 
+		TraceRequestContext ctx = context();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, context()));
+				() -> service.plan(verified, ctx));
 
 		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
 		assertFalse(store.findChain(chainIdentity()).isPresent());
@@ -293,8 +346,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		VerifiedAssertion verified = buildVerified(json, context());
 
 		for (int i = 0; i < 2; i++) {
+			TraceRequestContext ctx = context();
 			TraceValidationException ex = assertThrows(TraceValidationException.class,
-					() -> service.plan(verified, context()));
+					() -> service.plan(verified, ctx));
 			assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 		}
 
@@ -307,8 +361,9 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
 		VerifiedAssertion verified = buildVerified(json, context());
 
+		TraceRequestContext ctx = context();
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> service.plan(verified, context()));
+				() -> service.plan(verified, ctx));
 
 		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
 		assertFalse(store.findChain(chainIdentity()).isPresent());
@@ -435,6 +490,47 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertEquals(2, plan.getTokenKeys().size());
 	}
 
+	private static final String FIXTURE_BUNDLE_HASH = "sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf7";
+
+	private void serveNewReleaseAfterFixtureRelease(long fixtureReleaseLastServedMs) {
+		PolicyMismatchCheck check = PolicyMismatchChecks.serving(
+				new PolicyMismatchChecks.StaticPolicyDownloadService().archive(SERVED_STORE, "1.2.4", "sha256:" + "f".repeat(64)));
+		check.onPolicySnapshot(new PolicySnapshotEvent(Map.of(),
+				Map.of(SERVED_STORE, PolicyMismatchChecks.archiveSource(SERVED_STORE, "1.2.3", FIXTURE_BUNDLE_HASH)),
+				fixtureReleaseLastServedMs));
+		setField(service, "policyMismatchCheck", check);
+	}
+
+	@Test
+	void testPlan_BackdatedNonLateRecordUnderRetiredRelease_JudgedAtReceiptAndFlagged() {
+		registerChain();
+		traceConfiguration.setLatenessThresholdSeconds(3600);
+		long nowSeconds = Instant.now().getEpochSecond();
+		serveNewReleaseAfterFixtureRelease((nowSeconds - 1000) * 1000L);
+		String json = SignedAssertionFactory.authorizationDecision().producer(PRODUCER).producerInstanceId(INSTANCE)
+				.producerChainId(CHAIN).recordId(recordId()).genesis().signedAt(nowSeconds - 900).unsignedJson();
+
+		CorrelationPlan plan = service.plan(buildVerified(json, context(nowSeconds * 1000)), context(nowSeconds * 1000));
+
+		assertFalse(plan.getFlags().isLate());
+		assertTrue(plan.getFlags().isPolicyMismatch());
+	}
+
+	@Test
+	void testPlan_LateRecordUnderRetiredRelease_JudgedAtSignedAtAndNotFlagged() {
+		registerChain();
+		traceConfiguration.setLatenessThresholdSeconds(60);
+		long nowSeconds = Instant.now().getEpochSecond();
+		serveNewReleaseAfterFixtureRelease((nowSeconds - 1000) * 1000L);
+		String json = SignedAssertionFactory.authorizationDecision().producer(PRODUCER).producerInstanceId(INSTANCE)
+				.producerChainId(CHAIN).recordId(recordId()).genesis().signedAt(nowSeconds - 900).unsignedJson();
+
+		CorrelationPlan plan = service.plan(buildVerified(json, context(nowSeconds * 1000)), context(nowSeconds * 1000));
+
+		assertTrue(plan.getFlags().isLate());
+		assertFalse(plan.getFlags().isPolicyMismatch());
+	}
+
 	// -- plan: lateness wiring (exhaustive matrix in ProducerChainRulesTest) ---
 
 	@Test
@@ -468,7 +564,6 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 	@Test
 	void testAfterInsert_OutOfOrderArrival_SuccessorCoverageGapClearedAndLinkFailureSetOnMismatch() throws DuplicateEntryException {
 		registerChain();
-		String digest1 = digest("1");
 		String successorRecordId = recordId();
 		insertRecord(successorRecordId, digest("2"), 2L, digest("mismatch"),
 				new IngestionFlags(true, false, false, false));
@@ -681,8 +776,8 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		}
 
 		@Override
-		public void insertRecord(StoredTraceRecord record) throws DuplicateEntryException {
-			delegate.insertRecord(record);
+		public void insertRecord(StoredTraceRecord traceRecord) throws DuplicateEntryException {
+			delegate.insertRecord(traceRecord);
 		}
 
 	}
