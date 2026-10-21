@@ -25,6 +25,7 @@ public class TraceConfiguration {
 
     public static final int DEFAULT_LATENESS_THRESHOLD_SECONDS = 300;
     public static final int DEFAULT_POLICY_MISMATCH_GRACE_SECONDS = 300;
+    public static final int DEFAULT_POLICY_RELEASE_RETENTION_DAYS = 30;
     public static final int DEFAULT_MAX_FUTURE_SKEW_SECONDS = 300;
     public static final int DEFAULT_MAX_REQUEST_BYTES = 262144;
     public static final int DEFAULT_MAX_JSON_DEPTH = 32;
@@ -67,6 +68,10 @@ public class TraceConfiguration {
     @DocProperty(description = "Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; at least 60 in effect", defaultValue = "300")
     @Schema(description = "Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; at least 60 in effect")
     private int policyMismatchGraceSeconds = DEFAULT_POLICY_MISMATCH_GRACE_SECONDS;
+
+    @DocProperty(description = "Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window", defaultValue = "30")
+    @Schema(description = "Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window")
+    private int policyReleaseRetentionDays = DEFAULT_POLICY_RELEASE_RETENTION_DAYS;
 
     @DocProperty(description = "Seconds a signed_at may be ahead of Lock's clock before the record is rejected", defaultValue = "300")
     @Schema(description = "Seconds a signed_at may be ahead of Lock's clock before the record is rejected")
@@ -170,6 +175,14 @@ public class TraceConfiguration {
 
     public void setPolicyMismatchGraceSeconds(int policyMismatchGraceSeconds) {
         this.policyMismatchGraceSeconds = policyMismatchGraceSeconds;
+    }
+
+    public int getPolicyReleaseRetentionDays() {
+        return policyReleaseRetentionDays > 0 ? policyReleaseRetentionDays : DEFAULT_POLICY_RELEASE_RETENTION_DAYS;
+    }
+
+    public void setPolicyReleaseRetentionDays(int policyReleaseRetentionDays) {
+        this.policyReleaseRetentionDays = policyReleaseRetentionDays;
     }
 
     public int getMaxFutureSkewSeconds() {
@@ -301,6 +314,7 @@ public class TraceConfiguration {
         return "TraceConfiguration [enabled=" + enabled + ", defaultEvidenceDomainId=" + defaultEvidenceDomainId
                 + ", defaultAllowedProducerIds=" + defaultAllowedProducerIds + ", clientDomainBindings=" + clientDomainBindings + ", latenessThresholdSeconds="
                 + getLatenessThresholdSeconds() + ", policyMismatchGraceSeconds=" + getPolicyMismatchGraceSeconds()
+                + ", policyReleaseRetentionDays=" + getPolicyReleaseRetentionDays()
                 + ", maxFutureSkewSeconds=" + getMaxFutureSkewSeconds()
                 + ", maxRequestBytes=" + getMaxRequestBytes() + ", maxJsonDepth="
                 + getMaxJsonDepth() + ", maxStringLength=" + getMaxStringLength() + ", maxArrayLength="

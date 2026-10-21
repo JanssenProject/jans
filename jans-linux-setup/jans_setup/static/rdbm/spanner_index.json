@@ -283,7 +283,8 @@
   },
   "jansTracePolicyRelease": {
     "fields": [
-      "jansTracePolicyStoreId"
+      "jansTracePolicyStoreId",
+      "jansTraceLastServedAtMs"
     ]
   },
   "jansTraceChain": {

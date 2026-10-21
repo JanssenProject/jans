@@ -390,6 +390,18 @@ public class InMemoryTraceStore implements TraceStore {
 		return updated != null;
 	}
 
+	@Override
+	public List<TracePolicyReleaseEntry> findPolicyReleasesLastServedBefore(long cutoffMs, int limit) {
+		return policyReleasesByKey.values().stream()
+				.filter(r -> r.getLastServedAtMs() != null && r.getLastServedAtMs() < cutoffMs).limit(limit)
+				.map(InMemoryTraceStore::copyOf).collect(Collectors.toList());
+	}
+
+	@Override
+	public void removePolicyRelease(String policyStoreId, String bundleHash) {
+		policyReleasesByKey.remove(traceKeys.policyReleaseKey(policyStoreId, bundleHash));
+	}
+
 	/** @return how many policy release reads were made */
 	public int getPolicyReleaseReads() {
 		return policyReleaseReads.get();

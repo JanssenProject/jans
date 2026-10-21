@@ -1135,6 +1135,12 @@ components:
             release during which records judged under it are not flagged policy_mismatch_flag;
             at least 60 in effect
           format: int32
+        policyReleaseRetentionDays:
+          type: integer
+          description: Days a policy store release no node serves any more is kept for
+            the policy release check before it is deleted; never less than the check's
+            acceptance window
+          format: int32
         maxFutureSkewSeconds:
           type: integer
           description: Seconds a signed_at may be ahead of Lock's clock before the

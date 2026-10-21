@@ -41,6 +41,7 @@ import io.jans.lock.service.trace.store.PolicyReleaseServed;
 import io.jans.lock.service.trace.store.TraceKeys;
 import io.jans.lock.service.trace.store.TraceStore;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.VersionMismatchException;
 import io.jans.orm.model.PagedResult;
@@ -78,6 +79,7 @@ public class OrmTraceStore implements TraceStore {
 	private static final String ATTR_POLICY_STORE_ID = "jansTracePolicyStoreId";
 	private static final String ATTR_POLICY_STORE_VERSION = "jansTracePolicyStoreVersion";
 	private static final String ATTR_BUNDLE_HASH = "jansTraceBundleHash";
+	private static final String ATTR_LAST_SERVED_AT_MS = "jansTraceLastServedAtMs";
 
 	/**
 	 * Bound on {@code updateReceiptState}/{@code revokeProducerKey}'s internal, caller-invisible
@@ -131,6 +133,10 @@ public class OrmTraceStore implements TraceStore {
 
 	private String keysBase() {
 		return "ou=keys," + baseDn();
+	}
+
+	private String policyReleasesBase() {
+		return "ou=policyReleases," + baseDn();
 	}
 
 	private String policyReleaseDn(String policyStoreId, String bundleHash) {
@@ -450,6 +456,25 @@ public class OrmTraceStore implements TraceStore {
 		}
 		throw new TraceStorageException(TraceStore.VERSION_CONFLICT_REASON, "Failed to update policy release for "
 				+ policyStoreId + " after " + INTERNAL_CAS_RETRY_LIMIT + " retries");
+	}
+
+	@Override
+	public List<TracePolicyReleaseEntry> findPolicyReleasesLastServedBefore(long cutoffMs, int limit) {
+		if (limit <= 0) {
+			return Collections.emptyList();
+		}
+		Filter filter = Filter.createLessOrEqualFilter(ATTR_LAST_SERVED_AT_MS, cutoffMs - 1);
+		return persistenceEntryManager.findEntries(policyReleasesBase(), TracePolicyReleaseEntry.class, filter, limit);
+	}
+
+	@Override
+	public void removePolicyRelease(String policyStoreId, String bundleHash) throws TraceStorageException {
+		String dn = policyReleaseDn(policyStoreId, bundleHash);
+		try {
+			persistenceEntryManager.remove(dn, TracePolicyReleaseEntry.class);
+		} catch (BasePersistenceException e) {
+			throw new TraceStorageException("delete_failed", "Failed to remove policy release " + dn, e);
+		}
 	}
 
 	@Override

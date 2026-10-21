@@ -128,6 +128,11 @@ final class FakeEntryManagerBehavior {
 		}).when(mock).merge(any());
 
 		doAnswer(inv -> {
+			storeFor(inv.getArgument(1)).remove((String) inv.getArgument(0));
+			return null;
+		}).when(mock).remove(anyString(), any(Class.class));
+
+		doAnswer(inv -> {
 			Object entity = inv.getArgument(0);
 			String dn = dnOf(entity);
 			Class<?> entryClass = entity.getClass();

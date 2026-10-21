@@ -258,6 +258,25 @@ class PolicyMismatchCheckTest {
 	}
 
 	@Test
+	void testPruneExpiredReleases_RemovesOnlyOldUnservedReleases() {
+		long day = 86_400_000L;
+		long retention = appConfiguration.getTraceConfiguration().getPolicyReleaseRetentionDays() * day;
+		Map<String, LoadedPolicySource> old = Map.of("store-old",
+				PolicyMismatchChecks.archiveSource("store-old", "1.0.0", NEXT_HASH));
+		publish(check, Map.of(), old, T0 - retention - day);
+		publish(check, Map.of(), FIRST, T0 - retention - day);
+		Map<String, LoadedPolicySource> recent = Map.of("store-recent",
+				PolicyMismatchChecks.archiveSource("store-recent", "1.0.0", NEXT_HASH));
+		publish(check, Map.of(), recent, T0 - day);
+
+		assertEquals(1, check.pruneExpiredReleases());
+
+		assertFalse(store.findPolicyRelease("store-old", NEXT_HASH).isPresent());
+		assertTrue(store.findPolicyRelease(STORE, HASH).isPresent());
+		assertTrue(store.findPolicyRelease("store-recent", NEXT_HASH).isPresent());
+	}
+
+	@Test
 	void testCheck_LoadedPoliciesFails_NoMismatch() {
 		PolicyDownloadService failing = new PolicyDownloadService() {
 			@Override

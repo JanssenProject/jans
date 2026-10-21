@@ -465,6 +465,22 @@ public abstract class TraceStoreContractTest {
 	}
 
 	@Test
+	void testPolicyRelease_findOldAndRemove() throws Exception {
+		String oldHash = "sha256:" + "1".repeat(64);
+		String recentHash = "sha256:" + "2".repeat(64);
+		store.insertPolicyRelease(policyRelease(oldHash, 1000L));
+		store.insertPolicyRelease(policyRelease(recentHash, 9000L));
+
+		List<TracePolicyReleaseEntry> old = store.findPolicyReleasesLastServedBefore(5000L, 10);
+
+		assertEquals(List.of(oldHash), old.stream().map(TracePolicyReleaseEntry::getBundleHash).collect(Collectors.toList()));
+		store.removePolicyRelease("store-1", oldHash);
+		assertFalse(store.findPolicyRelease("store-1", oldHash).isPresent());
+		assertTrue(store.findPolicyRelease("store-1", recentHash).isPresent());
+		assertTrue(store.findPolicyReleasesLastServedBefore(5000L, 0).isEmpty());
+	}
+
+	@Test
 	void testPolicyRelease_secondInsertIsDuplicate() throws Exception {
 		String hash = "sha256:" + "c".repeat(64);
 		store.insertPolicyRelease(policyRelease(hash, 1000L));

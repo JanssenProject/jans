@@ -44,6 +44,8 @@ public class PolicyMismatchCheck {
 
 	static final long NEGATIVE_CACHE_TTL_MS = 1_000L;
 
+	static final int PRUNE_BATCH_LIMIT = 500;
+
 	static final int CACHE_MAX_ENTRIES = 1_000;
 
 	static final long SERVED_UPDATE_INTERVAL_MS = 60_000L;
@@ -173,6 +175,32 @@ public class PolicyMismatchCheck {
 			}
 			remember(policyStoreId, bundleHash, entry);
 		}
+	}
+
+	/**
+	 * Deletes up to {@value #PRUNE_BATCH_LIMIT} releases no node has served for
+	 * {@code policyReleaseRetentionDays} (never less than the acceptance window), skipping any
+	 * release this node serves now.
+	 *
+	 * @return how many releases were deleted
+	 */
+	public int pruneExpiredReleases() {
+		long retentionMs = Math.max(
+				appConfiguration.getTraceConfiguration().getPolicyReleaseRetentionDays() * 86_400_000L,
+				acceptanceWindowMs());
+		Map<String, LoadedPolicySource> served = policyDownloadService.getLoadedPolicies();
+		int removed = 0;
+		for (TracePolicyReleaseEntry release : store
+				.findPolicyReleasesLastServedBefore(clock.millis() - retentionMs, PRUNE_BATCH_LIMIT)) {
+			LoadedPolicySource source = served.get(release.getPolicyStoreId());
+			if (isComparable(source) && source.getBundleHash().equals(release.getBundleHash())) {
+				continue;
+			}
+			store.removePolicyRelease(release.getPolicyStoreId(), release.getBundleHash());
+			cache.remove(cacheKey(release.getPolicyStoreId(), release.getBundleHash()));
+			removed++;
+		}
+		return removed;
 	}
 
 	private boolean needsUpdate(TracePolicyReleaseEntry release, long servedAtMs) {

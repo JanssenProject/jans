@@ -167,6 +167,11 @@ public interface TraceStore {
 	boolean recordPolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
 			long servedAtMs) throws TraceStorageException;
 
+	/** @return up to {@code limit} releases whose last-served time is before {@code cutoffMs} */
+	List<TracePolicyReleaseEntry> findPolicyReleasesLastServedBefore(long cutoffMs, int limit);
+
+	void removePolicyRelease(String policyStoreId, String bundleHash) throws TraceStorageException;
+
 	/**
 	 * @return {@code PENDING} receipts received strictly before {@code cutoffMs} (a receipt
 	 *         received exactly at {@code cutoffMs} is excluded), across every domain, oldest

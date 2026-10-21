@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.service.event.TraceReceiptRepairEvent;
+import io.jans.lock.service.trace.correlation.PolicyMismatchCheck;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.store.TraceStore;
 import io.jans.service.cdi.async.Asynchronous;
@@ -59,6 +60,9 @@ public class TraceReceiptRepairTimer {
 	@Inject
 	private TraceReceiptChain receiptChain;
 
+	@Inject
+	private PolicyMismatchCheck policyMismatchCheck;
+
 	private AtomicBoolean isActive;
 
 	private long lastFinishedTime;
@@ -90,6 +94,7 @@ public class TraceReceiptRepairTimer {
 				return;
 			}
 			repairPendingReceipts();
+			prunePolicyReleases();
 			this.lastFinishedTime = System.currentTimeMillis();
 		} catch (Exception ex) {
 			log.error("Exception happened while repairing TRACE receipts", ex);
@@ -105,6 +110,17 @@ public class TraceReceiptRepairTimer {
 		long intervalMs = appConfiguration.getTraceConfiguration().getReceiptRepairIntervalSeconds() * 1000L;
 		long timeDiff = System.currentTimeMillis() - this.lastFinishedTime;
 		return timeDiff >= intervalMs;
+	}
+
+	private void prunePolicyReleases() {
+		try {
+			int removed = policyMismatchCheck.pruneExpiredReleases();
+			if (removed > 0) {
+				log.info("TRACE policy release retention: removed={}", removed);
+			}
+		} catch (RuntimeException ex) {
+			log.warn("TRACE policy release retention failed", ex);
+		}
 	}
 
 	/**
