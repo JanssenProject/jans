@@ -390,6 +390,13 @@
     },
 
     {
+        "attribute": "jansTraceLastServedAtMs",
+        "type": "integer",
+        "index": ["equality", "ordering"],
+        "backend": ["userRoot"]
+    },
+
+    {
         "attribute": "jansTracePolicyStoreId",
         "type": "string",
         "index": ["equality"],
