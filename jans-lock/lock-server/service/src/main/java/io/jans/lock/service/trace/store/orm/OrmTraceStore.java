@@ -399,17 +399,21 @@ public class OrmTraceStore implements TraceStore {
 		return result;
 	}
 
+	/**
+	 * One lookup by DN. The SQL and Spanner managers report a missing DN as an
+	 * {@link EntryPersistenceException} without a cause and wrap any backend failure as its cause,
+	 * so only the former means "not found".
+	 */
 	@Override
 	public Optional<TracePolicyReleaseEntry> findPolicyRelease(String policyStoreId, String bundleHash) {
 		String dn = policyReleaseDn(policyStoreId, bundleHash);
-		if (!persistenceEntryManager.contains(dn, TracePolicyReleaseEntry.class)) {
-			return Optional.empty();
-		}
 		try {
-			return Optional.of(persistenceEntryManager.find(dn, TracePolicyReleaseEntry.class, null));
+			return Optional.ofNullable(persistenceEntryManager.find(dn, TracePolicyReleaseEntry.class, null));
 		} catch (EntryPersistenceException e) {
-			log.debug("TRACE policy release {} disappeared before read", dn);
-			return Optional.empty();
+			if (e.getCause() == null) {
+				return Optional.empty();
+			}
+			throw new TraceStorageException("read_failed", "Failed to read policy release " + dn, e);
 		}
 	}
 
