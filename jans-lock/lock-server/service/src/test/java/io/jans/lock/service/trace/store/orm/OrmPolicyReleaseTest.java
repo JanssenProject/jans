@@ -11,11 +11,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,16 +26,16 @@ import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.store.TraceStore;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.search.filter.Filter;
 
 class OrmPolicyReleaseTest {
 
 	private static final String HASH = "sha256:" + "a".repeat(64);
 
 	@Test
-	void findPolicyRelease_missingDn_empty() {
+	void findPolicyRelease_noMatch_empty() {
 		PersistenceEntryManager manager = mock(PersistenceEntryManager.class);
-		when(manager.find(anyString(), any(Class.class), any()))
-				.thenThrow(new EntryPersistenceException("Failed to find entry"));
+		when(manager.findEntries(anyString(), any(Class.class), any(Filter.class), anyInt())).thenReturn(List.of());
 		TraceStore store = OrmTraceStores.create(manager);
 
 		assertFalse(store.findPolicyRelease("store-1", HASH).isPresent());
@@ -42,8 +44,8 @@ class OrmPolicyReleaseTest {
 	@Test
 	void findPolicyRelease_backendFailure_throwsStorageException() {
 		PersistenceEntryManager manager = mock(PersistenceEntryManager.class);
-		when(manager.find(anyString(), any(Class.class), any()))
-				.thenThrow(new EntryPersistenceException("Failed to find entry", new SQLException("connection lost")));
+		when(manager.findEntries(anyString(), any(Class.class), any(Filter.class), anyInt()))
+				.thenThrow(new EntryPersistenceException("Failed to find entries", new SQLException("connection lost")));
 		TraceStore store = OrmTraceStores.create(manager);
 
 		TraceStorageException ex = assertThrows(TraceStorageException.class,
@@ -57,7 +59,7 @@ class OrmPolicyReleaseTest {
 		PersistenceEntryManager manager = mock(PersistenceEntryManager.class);
 		TracePolicyReleaseEntry entry = new TracePolicyReleaseEntry();
 		entry.setBundleHash(HASH);
-		when(manager.find(anyString(), any(Class.class), any())).thenReturn(entry);
+		when(manager.findEntries(anyString(), any(Class.class), any(Filter.class), anyInt())).thenReturn(List.of(entry));
 		TraceStore store = OrmTraceStores.create(manager);
 
 		assertEquals(HASH, store.findPolicyRelease("store-1", HASH).orElseThrow().getBundleHash());

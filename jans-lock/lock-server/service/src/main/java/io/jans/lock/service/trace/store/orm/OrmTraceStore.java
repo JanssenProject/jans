@@ -62,6 +62,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class OrmTraceStore implements TraceStore {
 
+	private static final String ATTR_ID = "jansId";
 	private static final String ATTR_DOMAIN_ID = "jansTraceDomainId";
 	private static final String ATTR_RECORD_ID = "jansTraceRecordId";
 	private static final String ATTR_EXEC_KEY = "jansTraceExecKey";
@@ -406,20 +407,17 @@ public class OrmTraceStore implements TraceStore {
 	}
 
 	/**
-	 * One lookup by DN. The SQL and Spanner managers report a missing DN as an
-	 * {@link EntryPersistenceException} without a cause and wrap any backend failure as its cause,
-	 * so only the former means "not found".
+	 * One search by key, so "not found" is an empty result and any exception is a real failure.
 	 */
 	@Override
 	public Optional<TracePolicyReleaseEntry> findPolicyRelease(String policyStoreId, String bundleHash) {
-		String dn = policyReleaseDn(policyStoreId, bundleHash);
+		String key = traceKeys.policyReleaseKey(policyStoreId, bundleHash);
 		try {
-			return Optional.ofNullable(persistenceEntryManager.find(dn, TracePolicyReleaseEntry.class, null));
-		} catch (EntryPersistenceException e) {
-			if (e.getCause() == null) {
-				return Optional.empty();
-			}
-			throw new TraceStorageException("read_failed", "Failed to read policy release " + dn, e);
+			List<TracePolicyReleaseEntry> found = persistenceEntryManager.findEntries(policyReleasesBase(),
+					TracePolicyReleaseEntry.class, Filter.createEqualityFilter(ATTR_ID, key), 1);
+			return found.isEmpty() ? Optional.empty() : Optional.of(found.get(0));
+		} catch (BasePersistenceException e) {
+			throw new TraceStorageException("read_failed", "Failed to read policy release " + key, e);
 		}
 	}
 
