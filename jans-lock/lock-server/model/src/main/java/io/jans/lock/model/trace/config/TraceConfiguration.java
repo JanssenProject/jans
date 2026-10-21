@@ -37,6 +37,7 @@ public class TraceConfiguration {
     public static final int DEFAULT_MAX_BULK_RECORDS = 100;
     public static final int DEFAULT_MAX_BULK_REQUEST_BYTES = 4_194_304;
     public static final String DEFAULT_CHAIN_REGISTRATION_MODE = "PRE_REGISTERED";
+    public static final String DEFAULT_CRYPTO_PROVIDER = "JAVA";
     /** Ceiling {@link #getMaxBulkRequestBytes()} clamps to regardless of configuration, so a
      *  careless value can never make the bulk endpoint buffer an unbounded amount of memory per
      *  request (CWE-770). Not itself configurable. */
@@ -113,6 +114,10 @@ public class TraceConfiguration {
     @DocProperty(description = "How producer chains come to exist: PRE_REGISTERED (admin API only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers it); an unknown value is treated as PRE_REGISTERED", defaultValue = "PRE_REGISTERED")
     @Schema(description = "How producer chains come to exist: PRE_REGISTERED (admin API only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers it); an unknown value is treated as PRE_REGISTERED")
     private String chainRegistrationMode = DEFAULT_CHAIN_REGISTRATION_MODE;
+
+    @DocProperty(description = "TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA", defaultValue = "JAVA")
+    @Schema(description = "TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA")
+    private String cryptoProvider = DEFAULT_CRYPTO_PROVIDER;
 
     public boolean isEnabled() {
         return enabled;
@@ -268,6 +273,16 @@ public class TraceConfiguration {
         this.chainRegistrationMode = chainRegistrationMode;
     }
 
+    public String getCryptoProvider() {
+        return cryptoProvider == null || cryptoProvider.trim().isEmpty()
+                ? DEFAULT_CRYPTO_PROVIDER
+                : cryptoProvider;
+    }
+
+    public void setCryptoProvider(String cryptoProvider) {
+        this.cryptoProvider = cryptoProvider;
+    }
+
     @Override
     public String toString() {
         return "TraceConfiguration [enabled=" + enabled + ", defaultEvidenceDomainId=" + defaultEvidenceDomainId
@@ -281,7 +296,8 @@ public class TraceConfiguration {
                 + ", receiptRepairIntervalSeconds=" + getReceiptRepairIntervalSeconds()
                 + ", pendingReceiptTimeoutSeconds=" + getPendingReceiptTimeoutSeconds() + ", maxBulkRecords="
                 + getMaxBulkRecords() + ", maxBulkRequestBytes=" + getMaxBulkRequestBytes()
-                + ", chainRegistrationMode=" + getChainRegistrationMode() + "]";
+                + ", chainRegistrationMode=" + getChainRegistrationMode()
+                + ", cryptoProvider=" + getCryptoProvider() + "]";
     }
 
 }

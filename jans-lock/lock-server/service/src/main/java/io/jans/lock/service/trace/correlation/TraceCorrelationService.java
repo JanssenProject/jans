@@ -69,6 +69,9 @@ public class TraceCorrelationService {
 	@Inject
 	private AppConfiguration appConfiguration;
 
+	@Inject
+	private TraceKeys traceKeys;
+
 	/** Last unknown {@code chainRegistrationMode} value already reported, so it is logged once. */
 	private volatile String warnedChainRegistrationMode;
 
@@ -117,7 +120,7 @@ public class TraceCorrelationService {
 		ExecutionIdentity execution = new ExecutionIdentity(domainId, inputs.getExecutionAuthority(),
 				inputs.getTraceExecutionId());
 
-		List<String> tokenKeys = dedupKeys(inputs.getTokenRefs(), token -> TraceKeys.tokenKey(domainId, token));
+		List<String> tokenKeys = dedupKeys(inputs.getTokenRefs(), token -> traceKeys.tokenKey(domainId, token));
 
 		return new CorrelationPlan(flags, position, execution, tokenKeys, equivocationPeers,
 				successors, inputs.getWarnings());

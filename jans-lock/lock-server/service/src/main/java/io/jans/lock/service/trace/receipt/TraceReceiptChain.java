@@ -27,6 +27,8 @@ import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.receipt.ChainVerificationReport.Entry;
 import io.jans.lock.service.trace.receipt.ChainVerificationReport.EntryStatus;
 import io.jans.lock.service.trace.store.TraceStore;
+import io.jans.lock.trace.crypto.TraceCryptoException;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -56,6 +58,9 @@ public class TraceReceiptChain {
 	@Inject
 	private AppConfiguration appConfiguration;
 
+	@Inject
+	private TraceCryptoProvider cryptoProvider;
+
 	private final ConcurrentHashMap<String, ReentrantLock> domainLocks = new ConcurrentHashMap<>();
 
 	/**
@@ -77,7 +82,7 @@ public class TraceReceiptChain {
 				Optional<ReceiptHead> head = store.findReceiptHead(domainId);
 				long seq = head.map(h -> h.getReceiptSequence() + 1).orElse(1L);
 				String prevReceiptHash = head.map(ReceiptHead::getReceiptHash).orElse(TraceConstants.ZERO_HASH);
-				String receiptHash = ReceiptHashes.receiptHash(domainId, seq, receivedAtMs, producerId, recordId,
+				String receiptHash = cryptoProvider.receiptHash(domainId, seq, receivedAtMs, producerId, recordId,
 						contentDigest, prevReceiptHash);
 
 				TraceReceiptEntry row = new TraceReceiptEntry();
@@ -168,12 +173,20 @@ public class TraceReceiptChain {
 
 			TraceReceiptEntry receipt = receiptOpt.get();
 			TraceReceiptState state = receipt.getReceiptStateEnum();
-			String recomputedHash = ReceiptHashes.receiptHash(domainId, seq, receipt.getReceivedAtMs(),
-					receipt.getProducerId(), receipt.getRecordId(), receipt.getContentDigest(),
-					receipt.getPrevReceiptHash());
-
+			String recomputedHash = null;
+			try {
+				recomputedHash = cryptoProvider.receiptHash(domainId, seq, receipt.getReceivedAtMs(),
+						receipt.getProducerId(), receipt.getRecordId(), receipt.getContentDigest(),
+						receipt.getPrevReceiptHash());
+			} catch (TraceCryptoException ex) {
+				if (TraceCryptoException.REASON_CRYPTO_UNAVAILABLE.equals(ex.getReason())) {
+					throw ex;
+				}
+				log.debug("receipt hash not recomputable: domain={}, seq={}, reason={}", domainId, seq,
+						ex.getReason());
+			}
 			EntryStatus status;
-			if (!recomputedHash.equals(receipt.getReceiptHash())) {
+			if (recomputedHash == null || !recomputedHash.equals(receipt.getReceiptHash())) {
 				status = EntryStatus.HASH_MISMATCH;
 			} else if (!expectedPrevHash.equals(receipt.getPrevReceiptHash())) {
 				status = EntryStatus.PREV_HASH_MISMATCH;

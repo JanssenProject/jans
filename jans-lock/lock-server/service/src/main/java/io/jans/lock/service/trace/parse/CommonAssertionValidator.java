@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.TraceIssuers;
-import io.jans.lock.service.trace.crypto.StrictBase64Url;
+import io.jans.lock.trace.crypto.StrictBase64Url;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

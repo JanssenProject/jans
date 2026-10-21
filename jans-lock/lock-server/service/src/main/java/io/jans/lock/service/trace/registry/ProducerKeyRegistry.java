@@ -6,7 +6,6 @@
 
 package io.jans.lock.service.trace.registry;
 
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -23,10 +22,11 @@ import org.slf4j.Logger;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.service.trace.TraceConstants;
-import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceConflictException;
-import io.jans.lock.service.trace.error.TraceCryptoException;
+import io.jans.lock.trace.crypto.TraceCryptoException;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
+import io.jans.lock.trace.crypto.TraceVerificationKey;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.store.TraceStore;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -80,6 +80,9 @@ public class ProducerKeyRegistry {
 	@Inject
 	private TraceStore traceStore;
 
+	@Inject
+	private TraceCryptoProvider cryptoProvider;
+
 	/**
 	 * Resolves the key that must verify a record's signature and evaluates its validity window at
 	 * {@code nowMs}.
@@ -106,17 +109,19 @@ public class ProducerKeyRegistry {
 			throw new TraceValidationException(TraceErrorResponseType.KEY_NOT_VALID, REASON_REVOKED);
 		}
 
-		PublicKey publicKey;
+		TraceVerificationKey verificationKey;
 		try {
-			publicKey = Ed25519PublicKeys.fromJwk(key.getPublicKeyJwk());
+			verificationKey = cryptoProvider.parseKey(key.getPublicKeyJwk());
 		} catch (TraceCryptoException ex) {
+			if (TraceCryptoException.REASON_CRYPTO_UNAVAILABLE.equals(ex.getReason())) {
+				throw ex;
+			}
 			log.error("Stored producer key is unusable: domainId={}, producerId={}, kid={}, reason={}", domainId,
 					producerId, kid, ex.getReason());
 			throw new TraceValidationException(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY, REASON_STORED_KEY_UNUSABLE,
 					ex);
 		}
-
-		return new ResolvedKey(key, publicKey);
+		return new ResolvedKey(key, verificationKey);
 	}
 
 	/**
@@ -153,7 +158,7 @@ public class ProducerKeyRegistry {
 	 */
 	public TraceProducerKeyEntry register(String domainId, String producerId, String kid, Map<String, String> jwk,
 			List<String> authorizedEventKinds, long validFromMs, Long validUntilMs, String registeredBy, long nowMs) {
-		Ed25519PublicKeys.fromJwk(jwk);
+		cryptoProvider.parseKey(jwk);
 
 		if (validUntilMs != null && validUntilMs <= validFromMs) {
 			throw new TraceValidationException(TraceErrorResponseType.INVALID_KEY, REASON_VALIDITY_WINDOW);
@@ -222,26 +227,26 @@ public class ProducerKeyRegistry {
 	}
 
 	/**
-	 * A producer key together with the {@link PublicKey} built from its stored JWK, returned by
+	 * A producer key together with the {@link TraceVerificationKey} built from its stored JWK, returned by
 	 * {@link #resolveForVerification} so callers never re-parse the JWK.
 	 */
 	public static final class ResolvedKey {
 
 		private final TraceProducerKeyEntry key;
 
-		private final PublicKey publicKey;
+		private final TraceVerificationKey verificationKey;
 
-		ResolvedKey(TraceProducerKeyEntry key, PublicKey publicKey) {
+		ResolvedKey(TraceProducerKeyEntry key, TraceVerificationKey verificationKey) {
 			this.key = Objects.requireNonNull(key, "key");
-			this.publicKey = Objects.requireNonNull(publicKey, "publicKey");
+			this.verificationKey = Objects.requireNonNull(verificationKey, "verificationKey");
 		}
 
 		public TraceProducerKeyEntry getKey() {
 			return key;
 		}
 
-		public PublicKey getPublicKey() {
-			return publicKey;
+		public TraceVerificationKey getVerificationKey() {
+			return verificationKey;
 		}
 
 		/**
