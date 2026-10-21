@@ -466,6 +466,23 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	}
 
 	@Test
+	void testSubmitBulkRecords_ScalarAndMultibyteElements_ForwardedWithExactSourceText() throws Exception {
+		when(ingestionService.ingest(any(), eq(context)))
+				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
+
+		String scalar = "42";
+		String multibyte = "{ \"note\" : \"caf\u00e9 \u65e5\u672c \uD83D\uDE00\" }";
+		impl.submitBulkRecords(body("[" + scalar + ",  " + multibyte + "]"), httpServletRequest, null);
+
+		ArgumentCaptor<InputStream> captor = ArgumentCaptor.forClass(InputStream.class);
+		verify(ingestionService, times(2)).ingest(captor.capture(), eq(context));
+
+		List<InputStream> slices = captor.getAllValues();
+		assertEquals(scalar, readAll(slices.get(0)));
+		assertEquals(multibyte, readAll(slices.get(1)));
+	}
+
+	@Test
 	void testSubmitBulkRecords_EmptyArray_Returns400() {
 		InputStream requestBody = body("[]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
