@@ -54,6 +54,7 @@ tags:
 | protectionMode | Protection mode for the Lock server (OAuth or Cedarling) | [Details](#protectionmode) |
 | receiptAllocationRetryLimit | Maximum retries when allocating a receipt-chain sequence number | [Details](#receiptallocationretrylimit) |
 | receiptRepairIntervalSeconds | Interval in seconds between receipt repair timer runs | [Details](#receiptrepairintervalseconds) |
+| rejectPolicyMismatch | Reject an AUTHORIZATION_DECISION or CAPABILITY_INVOKED record whose trace.policy names a policy store Lock serves but whose bundle_hash or policy_store_version differs from the served release; when false such records are accepted with policy_mismatch_flag | [Details](#rejectpolicymismatch) |
 | serverMode | gRPC server mode | [Details](#servermode) |
 | statEnabled | Active stat enabled | [Details](#statenabled) |
 | statTimerIntervalInSeconds | Statistical data capture time interval | [Details](#stattimerintervalinseconds) |
@@ -458,6 +459,15 @@ tags:
 - Required: No
 
 - Default value: 300
+
+
+## rejectPolicyMismatch
+
+- Description: Reject an AUTHORIZATION_DECISION or CAPABILITY_INVOKED record whose trace.policy names a policy store Lock serves but whose bundle_hash or policy_store_version differs from the served release; when false such records are accepted with policy_mismatch_flag
+
+- Required: No
+
+- Default value: false
 
 
 ## serverMode

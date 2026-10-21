@@ -281,6 +281,7 @@ verification. See [TRACE Evidence](./trace.md) for the feature description and A
 | `maxBulkRequestBytes` | integer | `4194304` | Maximum total body size, in bytes, buffered for one `POST /audit/trace/bulk` request. Independent of `maxRequestBytes`/`maxBulkRecords`, and always clamped to 16777216 regardless of configuration. |
 | `chainRegistrationMode` | string | `PRE_REGISTERED` | How producer chains come to exist. `PRE_REGISTERED`: a chain must be registered through the admin API before its records are accepted. `FIRST_OBSERVED`: a record with `sequence_number` 1 and the all-zero `prev_record_hash` on an unregistered chain registers the chain, after the key, event-kind and signature checks pass. Any other record on an unregistered chain is still rejected with `chain_not_registered`. A value that is not a mode name is treated as `PRE_REGISTERED` and logged once at `WARN`. Changing the mode affects only later submissions; existing chains are not rewritten. |
 | `cryptoProvider` | string | `JAVA` | TRACE cryptography implementation. `JAVA`: BouncyCastle, in-process. `NATIVE`: `jans-trace-core` through the `jans-trace-java` binding. Both produce the same digests, thumbprints and receipt hashes, so switching does not invalidate the stored receipt chain. When the selected provider is not available, every TRACE submission fails with `crypto_unavailable`; Lock never falls back to the other provider. A value that is not a provider name is treated as `JAVA` and logged once at `WARN`. See [TRACE](./trace.md#configuration). |
+| `rejectPolicyMismatch` | boolean | `false` | When `true`, a record whose `trace.policy` names a policy store Lock serves but with a different `bundle_hash` or `policy_store_version` is rejected with `invalid_assertion` (`policy_mismatch:trace.policy`). When `false`, it is accepted with `policy_mismatch_flag: true`. See [TRACE](./trace.md#policy-store-release-check). |
 
 Every numeric limit above falls back to its default when configured with a value `<= 0`.
 
@@ -435,32 +436,33 @@ Content-Type: application/json
 
 #### Lock Server Configuration
 ```http
-GET /.well-known/lock-master-configuration
+GET /.well-known/lock-server-configuration
 ```
 
 **Response:**
 ```json
 {
-  "issuer": "https://lock-server.example.com",
-  "policy_store_endpoint": "https://lock-server.example.com/policy-store",
-  "policy_stores_endpoint": "https://lock-server.example.com/policy-stores",
-  "audit_endpoint": "https://lock-server.example.com/audit",
-
-  "jwks_uri": "https://auth.example.com/.well-known/jwks",
-  "scopes_supported": [
-    "https://jans.io/oauth/lock/policy-store.read",
-    "https://jans.io/oauth/lock/log.write",
-    "https://jans.io/oauth/lock/health.write",
-    "https://jans.io/oauth/lock/telemetry.write"
-  ],
-  "features_supported": [
-    "policy-store-retrieval",
-    "audit-collection",
-    "health-monitoring",
-    "telemetry-collection"
-  ]
+  "version": "1.0",
+  "issuer": "lock-server.example.com",
+  "audit": {
+    "health_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/health",
+    "health_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/health/bulk",
+    "log_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/log",
+    "log_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/log/bulk",
+    "telemetry_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/telemetry",
+    "telemetry_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/telemetry/bulk",
+    "trace_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace",
+    "trace_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace/bulk",
+    "trace_record_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace/records",
+    "trace_execution_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace/executions"
+  },
+  "config": {
+    "policy_endpoint": "https://lock-server.example.com/jans-lock/api/v1/policy"
+  }
 }
 ```
+
+The `trace_*` members appear only when TRACE is enabled.
 
 ## OAuth Security
 
@@ -475,7 +477,7 @@ The Lock Server uses OAuth 2.0 scopes to control access to different endpoints:
 | `https://jans.io/oauth/lock/health.write` | `/audit/health` | Submit health status information |
 | `https://jans.io/oauth/lock/telemetry.write` | `/audit/telemetry` | Submit telemetry and metrics data |
 | `https://jans.io/oauth/lock/trace.write` | `/audit/trace` | Submit TRACE evidence records |
-| `https://jans.io/oauth/lock/trace.readonly` | `/audit/trace/records/*`, `/audit/trace/executions/*` | Read TRACE records and executions |
+| `https://jans.io/oauth/lock/trace.readonly` | `/audit/trace/records`, `/audit/trace/records/*`, `/audit/trace/executions/*` | Read and search TRACE records and executions |
 | `https://jans.io/oauth/lock/trace.admin` | `/audit/trace/admin/*` | Manage TRACE producer keys and chains |
 
 ## Logging and Monitoring

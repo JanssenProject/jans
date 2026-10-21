@@ -24,7 +24,7 @@ The Lock Server provides attributable, tamper-evident records and basic correlat
 
 `authorization decision → capability invocation → optional runtime effect`
 
-Cedarling, or another policy decision point (PDP), records what was authorized (`AUTHORIZATION_DECISION`). The enforcement point, agent gateway, or tool gateway that mediates the action records `CAPABILITY_INVOKED`. An agent's own statement that it invoked a capability is not equivalent to enforcement-point evidence. An observer can record `RUNTIME_EFFECT`.
+A policy decision point (PDP) records what was authorized (`AUTHORIZATION_DECISION`). Cedarling support for producing TRACE records is in progress. The enforcement point, agent gateway, or tool gateway that mediates the action records `CAPABILITY_INVOKED`. An agent's own statement that it invoked a capability is not equivalent to enforcement-point evidence. An observer can record `RUNTIME_EFFECT`.
 
 ### What TRACE does not claim
 
@@ -46,7 +46,7 @@ Each record kind establishes one narrow claim and nothing stronger:
 
 | Party | Responsibility |
 |---|---|
-| Policy decision point (PDP), for example Cedarling | Decides whether a capability is allowed and signs an `AUTHORIZATION_DECISION` record. |
+| Policy decision point (PDP), for example Cedarling (TRACE support in progress) | Decides whether a capability is allowed and signs an `AUTHORIZATION_DECISION` record. |
 | Enforcement point (PEP, agent gateway, tool gateway) | Mediates the action and signs a `CAPABILITY_INVOKED` record. |
 | Evidence producer | Signs the record it creates. A PDP or enforcement point is the producer of its own records. |
 | Submitting client | The OAuth client that sends a signed record to Lock. Usually the producer. An approved forwarder may submit for a producer if its binding allows that producer. |
@@ -65,7 +65,7 @@ Three independent checks apply. Do not confuse them:
 | Scope | Endpoints |
 |---|---|
 | `https://jans.io/oauth/lock/trace.write` | `POST /audit/trace`, `POST /audit/trace/bulk` |
-| `https://jans.io/oauth/lock/trace.readonly` | `GET /audit/trace/records/{record_id}`, `GET /audit/trace/executions/{trace_execution_id}` |
+| `https://jans.io/oauth/lock/trace.readonly` | `GET /audit/trace/records`, `GET /audit/trace/records/{record_id}`, `GET /audit/trace/executions/{trace_execution_id}` |
 | `https://jans.io/oauth/lock/trace.admin` | `/audit/trace/admin/*` (producer keys and chains) |
 
 The client created by the Lock setup script receives scopes from the config-api Lock plugin, not from the Lock Server's own OpenAPI file. A client that uses TRACE needs these three scopes granted to it explicitly.
@@ -104,6 +104,7 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
   "correlationRetryLimit": 3,
   "chainRegistrationMode": "PRE_REGISTERED",
   "cryptoProvider": "JAVA",
+  "rejectPolicyMismatch": false,
   "receiptAllocationRetryLimit": 8,
   "receiptRepairIntervalSeconds": 300,
   "pendingReceiptTimeoutSeconds": 120
@@ -127,7 +128,7 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
 **Crypto provider.** `cryptoProvider` selects the implementation that parses producer keys, canonicalizes assertions, verifies signatures and computes receipt hashes. Values are matched case-insensitively:
 
 - `JAVA` (default): BouncyCastle, in the Lock process. This is the implementation Lock shipped with.
-- `NATIVE`: `jans-trace-core`, the Rust library that producers such as Cedarling sign with, reached through the `jans-trace-java` binding.
+- `NATIVE`: `jans-trace-core`, the Rust TRACE library intended for producers, reached through the `jans-trace-java` binding.
 
 Both providers produce the same `content_digest`, key thumbprint, receipt hash and storage keys. Switching the provider does not invalidate the stored receipt chain.
 
@@ -136,6 +137,8 @@ Lock fails closed. When the selected provider is not available, because the nati
 `NATIVE` rejects small-order Ed25519 public keys that BouncyCastle accepts. After you switch to `NATIVE`, a registered key of that kind fails with `unknown_producer_key` or `stored_key_unusable`. Check registered keys before you switch.
 
 A value that is not one of the two names is treated as `JAVA` and logged once at `WARN`: `Unknown traceConfiguration.cryptoProvider '<value>', using JAVA`.
+
+**Policy store release check.** `rejectPolicyMismatch` (default `false`) controls what happens when a record's `trace.policy` names a `policy_store_id` that Lock itself serves as a policy store archive, but its `bundle_hash` or `policy_store_version` differs from the release Lock currently serves. With `false` the record is accepted and flagged `policy_mismatch_flag: true`. With `true` it is rejected with `400 invalid_assertion` and reason `policy_mismatch:trace.policy`. A store that Lock does not serve is never compared, because producers may load policy stores from other sources. Lock compares against the release it serves when the record arrives, so records signed under the previous release during a rollout are flagged (or rejected with `true`). See [Policy store release check](#policy-store-release-check).
 
 **Timers.** The receipt repair timer runs every `receiptRepairIntervalSeconds`. It settles receipt claims that stayed `PENDING` longer than `pendingReceiptTimeoutSeconds` (see [Deployment constraints](#deployment-constraints)). Setting `enabled` to `false` makes every TRACE endpoint return a structured `invalid_request` error with reason `trace_disabled` and stops the timer.
 
@@ -313,6 +316,7 @@ Key points:
 
 - `producer` is the stable logical producer identifier. It must equal `producer_chain.producer_id` byte for byte. `kid` is part of the signed content. `producer_version`, when present, is a string of 1 to 255 characters. It is signed and stored unchanged, and Lock does not interpret it.
 - `record_id` is a producer-generated UUID or ULID. Record identity is `(evidence domain, producer, record_id)`, so two producers can use the same `record_id`.
+- `trace.policy.policy_store_id`, `policy_store_version` and `bundle_hash` are at most 255 characters each (`length:<path>`). Lock indexes them for [search by policy store release](#search-by-policy-store-release).
 - `trace_execution_id` and `execution_authority` are required and travel together. Lock correlates records by them. Lock neither creates them nor authorizes the execution. They are different from `subject.workload_id`: the authority scopes the execution identifier, and the workload is the subject that takes part in it.
 - `trace.subject.workload_id` is required (non-empty string, at most 255 characters) for `AUTHORIZATION_DECISION` and `CAPABILITY_INVOKED`. `workload_instance_id` is optional. For `RUNTIME_EFFECT` the subject is optional and is validated when present.
 - Producers sign capability *facts*, not a governance label. An `AUTHORIZATION_DECISION` carries a singular `decision` and a `CAPABILITY_INVOKED` carries a singular `invocation`. Each has `action` and `resource_type` (the Cedar action and resource type, never a resource id) and an `outcome`. See [Event kinds](#event-kinds). Lock does not resolve capability ids.
@@ -381,7 +385,8 @@ The two scopes are intentionally different:
   "coverage_gap_flag": false,
   "chain_link_failure_flag": false,
   "equivocation_flag": false,
-  "late_flag": false
+  "late_flag": false,
+  "policy_mismatch_flag": false
 }
 ```
 
@@ -416,7 +421,7 @@ A processed batch returns `207 Multi-Status`, whatever the per-item results. Acc
       "producer_id": "cedarling-fleet-1", "record_id": "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41",
       "content_digest": "sha256:...", "receipt_sequence": 108422, "received_at": "2026-06-11T00:41:02.123Z",
       "idempotent_replay": false, "coverage_gap_flag": false, "chain_link_failure_flag": false,
-      "equivocation_flag": false, "late_flag": false
+      "equivocation_flag": false, "late_flag": false, "policy_mismatch_flag": false
     },
     {
       "index": 1, "accepted": false,
@@ -438,7 +443,7 @@ Errors use the structured body `{"error": "<id>", "error_description": "<text>",
 | Error id | HTTP | When |
 |---|---|---|
 | `invalid_request` | 400 | Malformed JSON, a limit exceeded, an unreadable body, bad query parameters, TRACE disabled (`trace_disabled`), or a bulk envelope problem such as `bulk_mixed_producers` (see [Bulk submission](#bulk-submission)). |
-| `invalid_assertion` | 400 | A schema violation in the assertion, or a member reserved for Lock such as `cnf` or `trust_tier` (reason `forbidden:<path>`). `reason` names the field. |
+| `invalid_assertion` | 400 | A schema violation in the assertion, a member reserved for Lock such as `cnf` or `trust_tier` (reason `forbidden:<path>`), or a policy store release mismatch when `rejectPolicyMismatch` is `true` (reason `policy_mismatch:trace.policy`). `reason` names the field. |
 | `unsupported_profile` | 400 | `trace.eat_profile` is not `tag:jans.io,2026:trace-v1`. |
 | `domain_field_forbidden` | 400 | The body contains `evidence_domain_id`. |
 | `producer_mismatch` | 400 | `producer` does not equal `producer_chain.producer_id`. |
@@ -480,7 +485,7 @@ The component that creates the governed unit of work (an agent runtime, a gatewa
 
 ## Retrieval
 
-Both endpoints need the `trace.readonly` scope and read only the caller's evidence domain.
+All retrieval endpoints need the `trace.readonly` scope and read only the caller's evidence domain.
 
 ```bash
 # One record. producer_id should be supplied.
@@ -518,7 +523,8 @@ A record response has three separate parts: the assertion (in a parsed form and 
     "coverage_gap_flag": false,
     "chain_link_failure_flag": false,
     "equivocation_flag": false,
-    "late_flag": false
+    "late_flag": false,
+    "policy_mismatch_flag": false
   }
 }
 ```
@@ -530,6 +536,25 @@ A record response has three separate parts: the assertion (in a parsed form and 
 - `ingestion` is Lock-derived metadata.
 
 If `producer_id` (or `execution_authority`) is omitted and the bare identifier matches more than one producer (or authority) in the domain, Lock returns `409 ambiguous_identifier`. It never guesses.
+
+### Search by policy store release
+
+`GET /audit/trace/records` (no `record_id`) returns the records whose `trace.policy` names a policy store release. Use it to answer "which decisions were made with release X".
+
+```bash
+curl -s "$API/records?policy_store_id=https%3A%2F%2Fexample.org%2Fpolicy-stores%2Fpayments&policy_store_version=1.2.3&received_from=2026-06-01T00:00:00Z&start=0&count=100" \
+  -H "Authorization: Bearer $READ_TOKEN"
+```
+
+| Parameter | Meaning |
+|---|---|
+| `policy_store_id` | Exact `trace.policy.policy_store_id`. |
+| `policy_store_version` | Exact `trace.policy.policy_store_version`. |
+| `bundle_hash` | Exact `trace.policy.bundle_hash`. |
+| `received_from`, `received_to` | Inclusive bounds on `received_at`, RFC 3339. |
+| `start`, `count` | Paging, as for executions. |
+
+At least one of `policy_store_id` or `bundle_hash` is required; otherwise Lock returns `400 invalid_request` with reason `missing:policy_store_id`. The response is `{"ordering": "receipt_sequence", "records": [...]}` with record envelopes in receipt order. No match returns `200` with an empty list. Only records that carry `trace.policy` (`AUTHORIZATION_DECISION`, and `CAPABILITY_INVOKED` when present) are indexed. Records stored before this index existed are not returned.
 
 The execution response carries `execution_authority`, `trace_execution_id`, `"ordering": "receipt_sequence"`, `"completeness": "not_assessed"`, and `records`, ordered by Lock receipt sequence. `start` (default 0) and `count` (default 100, maximum 1000) page the list. The execution view contains the directly associated records only. It claims no global event order, does not traverse child executions, and does not assess completeness.
 
@@ -543,10 +568,17 @@ Flags are Lock-derived findings about a record. Lock flags a condition instead o
 | `chain_link_failure_flag` | The predecessor is present but its `content_digest` does not match this record's `prev_record_hash`. A genuine break in the chain. | No. The conflicting predecessor already exists, so later arrivals cannot resolve it. It stays visible as an integrity finding. |
 | `equivocation_flag` | Two or more records with different `record_id` values claim the same chain position. Lock stores and flags all of them and never selects a winner. | No. |
 | `late_flag` | Lock received the record more than `latenessThresholdSeconds` after its `signed_at`. Fixed at ingestion. | No. |
+| `policy_mismatch_flag` | The record's `trace.policy` names a policy store Lock serves, but its `bundle_hash` or `policy_store_version` differs from the release Lock served when it received the record. Fixed at ingestion. See [Policy store release check](#policy-store-release-check). | No. |
 
 Lock updates the flags on neighboring records after it stores a new record. These updates are best-effort and eventually consistent. If one fails, Lock logs it and still accepts the new record. A reader can see a flag change shortly after a record is accepted.
 
 A producer-chain break or gap is a statement about the records Lock has received. It is not a statement about what the producer did.
+
+## Policy store release check
+
+Lock serves policy store archives to producers (`GET /policy`, `GET /policy/stores`) and computes each archive's `bundle_hash` as `sha256:` plus the lowercase hex SHA-256 of the archive bytes. When an accepted record's `trace.policy.policy_store_id` equals the id of an archive Lock serves, Lock compares the record's `bundle_hash` and `policy_store_version` with that archive. A difference sets `policy_mismatch_flag`, or rejects the record when `rejectPolicyMismatch` is `true`. The check runs before a `FIRST_OBSERVED` chain is registered, so a rejected record never registers a chain.
+
+The flag is a statement about what Lock served at receipt time. It does not show that the producer used a tampered policy: the producer may have loaded the store from another source, or signed the record before Lock picked up a new release.
 
 ## Receipt chain
 
