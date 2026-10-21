@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import io.jans.lock.model.config.BaseDnConfiguration;
 import io.jans.lock.model.config.StaticConfiguration;
 import io.jans.lock.model.trace.entity.TraceChainEntry;
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
@@ -129,6 +130,10 @@ public class OrmTraceStore implements TraceStore {
 
 	private String keysBase() {
 		return "ou=keys," + baseDn();
+	}
+
+	private String policyReleaseDn(String policyStoreId, String bundleHash) {
+		return TraceKeys.policyReleaseDn(baseDn(), traceKeys.policyReleaseKey(policyStoreId, bundleHash));
 	}
 
 	// -- duplicate-safe insert -------------------------------------------
@@ -391,6 +396,47 @@ public class OrmTraceStore implements TraceStore {
 					sequenceFilters.size()));
 		}
 		return result;
+	}
+
+	@Override
+	public Optional<TracePolicyReleaseEntry> findPolicyRelease(String policyStoreId, String bundleHash) {
+		String dn = policyReleaseDn(policyStoreId, bundleHash);
+		if (!persistenceEntryManager.contains(dn, TracePolicyReleaseEntry.class)) {
+			return Optional.empty();
+		}
+		try {
+			return Optional.of(persistenceEntryManager.find(dn, TracePolicyReleaseEntry.class, null));
+		} catch (EntryPersistenceException e) {
+			log.debug("TRACE policy release {} disappeared before read", dn);
+			return Optional.empty();
+		}
+	}
+
+	@Override
+	public void insertPolicyRelease(TracePolicyReleaseEntry entry) throws DuplicateEntryException, TraceStorageException {
+		String key = traceKeys.policyReleaseKey(entry.getPolicyStoreId(), entry.getBundleHash());
+		String dn = TraceKeys.policyReleaseDn(baseDn(), key);
+		entry.setId(key);
+		entry.setDn(dn);
+		duplicateSafeInsert(dn, TracePolicyReleaseEntry.class, entry, key);
+	}
+
+	@Override
+	public boolean updatePolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
+			long lastServedAtMs) throws TraceStorageException {
+		Optional<TracePolicyReleaseEntry> found = findPolicyRelease(policyStoreId, bundleHash);
+		if (!found.isPresent()) {
+			return false;
+		}
+		TracePolicyReleaseEntry entry = found.get();
+		entry.setPolicyStoreVersion(policyStoreVersion);
+		entry.setLastServedAtMs(lastServedAtMs);
+		try {
+			persistenceEntryManager.merge(entry);
+			return true;
+		} catch (EntryPersistenceException e) {
+			throw new TraceStorageException("merge_failed", "Failed to update policy release " + entry.getId(), e);
+		}
 	}
 
 	@Override

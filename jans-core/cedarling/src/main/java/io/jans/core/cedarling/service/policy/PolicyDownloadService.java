@@ -67,7 +67,8 @@ import jakarta.ws.rs.core.MediaType;
 @ApplicationScoped
 public class PolicyDownloadService {
 
-	private static final int DEFAULT_INTERVAL = 30;
+	/** Seconds between policy store reloads; each reload publishes a {@link PolicySnapshotEvent}. */
+	public static final int RELOAD_INTERVAL_SECONDS = 30;
 
 	public static final MediaType APPLICATION_ZIP_TYPE = new MediaType("application", "zip");
 
@@ -115,7 +116,7 @@ public class PolicyDownloadService {
 		log.debug("Initializing Policy Download Service Timer");
 
 		final int delay = 30;
-		final int interval = DEFAULT_INTERVAL;
+		final int interval = RELOAD_INTERVAL_SECONDS;
 
 		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new PolicyDownloadEvent(),
 				Scheduled.Literal.INSTANCE));

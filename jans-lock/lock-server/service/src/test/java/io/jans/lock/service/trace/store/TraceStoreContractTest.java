@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import io.jans.lock.model.trace.entity.TraceChainEntry;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.trace.TraceConstants;
@@ -422,6 +423,41 @@ public abstract class TraceStoreContractTest {
 
 		assertEquals(Set.of(1L, 3L), found.stream().map(TraceReceiptEntry::getReceiptSeq).collect(Collectors.toSet()));
 		assertTrue(store.findReceipts("other-domain", List.of(1L)).isEmpty());
+	}
+
+	private static TracePolicyReleaseEntry policyRelease(String hash, long servedAtMs) {
+		TracePolicyReleaseEntry entry = new TracePolicyReleaseEntry();
+		entry.setPolicyStoreId("store-1");
+		entry.setBundleHash(hash);
+		entry.setPolicyStoreVersion("1.0.0");
+		entry.setFirstServedAtMs(servedAtMs);
+		entry.setLastServedAtMs(servedAtMs);
+		return entry;
+	}
+
+	@Test
+	void testPolicyRelease_insertFindUpdate() throws Exception {
+		String hash = "sha256:" + "a".repeat(64);
+		store.insertPolicyRelease(policyRelease(hash, 1000L));
+
+		assertTrue(store.updatePolicyReleaseServed("store-1", hash, "1.0.1", 5000L));
+		TracePolicyReleaseEntry found = store.findPolicyRelease("store-1", hash).orElseThrow();
+
+		assertEquals(1000L, found.getFirstServedAtMs());
+		assertEquals(5000L, found.getLastServedAtMs());
+		assertEquals("1.0.1", found.getPolicyStoreVersion());
+		assertFalse(store.findPolicyRelease("store-1", "sha256:" + "b".repeat(64)).isPresent());
+		assertFalse(store.updatePolicyReleaseServed("store-2", hash, "1.0.0", 5000L));
+	}
+
+	@Test
+	void testPolicyRelease_secondInsertIsDuplicate() throws Exception {
+		String hash = "sha256:" + "c".repeat(64);
+		store.insertPolicyRelease(policyRelease(hash, 1000L));
+		TracePolicyReleaseEntry again = policyRelease(hash, 2000L);
+
+		assertThrows(DuplicateEntryException.class, () -> store.insertPolicyRelease(again));
+		assertEquals(1000L, store.findPolicyRelease("store-1", hash).orElseThrow().getLastServedAtMs());
 	}
 
 	@Test

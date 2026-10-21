@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import io.jans.lock.model.trace.entity.TraceChainEntry;
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
@@ -144,6 +145,25 @@ public interface TraceStore {
 	 *         receipt are absent from the result
 	 */
 	List<TraceReceiptEntry> findReceipts(String domainId, Collection<Long> receiptSequences);
+
+	// -- policy store releases (shared by every node, not domain-scoped) ------------------------
+
+	Optional<TracePolicyReleaseEntry> findPolicyRelease(String policyStoreId, String bundleHash);
+
+	/**
+	 * Stores a release first seen by this node; the entry's id and DN are derived here.
+	 *
+	 * @throws DuplicateEntryException another node stored it first
+	 */
+	void insertPolicyRelease(TracePolicyReleaseEntry entry) throws DuplicateEntryException, TraceStorageException;
+
+	/**
+	 * Sets the release's last-served time and version.
+	 *
+	 * @return {@code false} when no such release is stored
+	 */
+	boolean updatePolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
+			long lastServedAtMs) throws TraceStorageException;
 
 	/**
 	 * @return {@code PENDING} receipts received strictly before {@code cutoffMs} (a receipt

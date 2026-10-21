@@ -6,8 +6,12 @@
 
 package io.jans.lock.service.trace.correlation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -21,7 +25,10 @@ import io.jans.core.cedarling.service.policy.PolicyDownloadService;
 import io.jans.core.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
 import io.jans.core.cedarling.service.policy.PolicySnapshotEvent;
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.PolicyRef;
+import io.jans.lock.service.trace.store.InMemoryTraceStore;
+import io.jans.lock.service.trace.store.TraceStore;
 import io.jans.lock.service.trace.testkit.PolicyMismatchChecks;
 import io.jans.lock.service.trace.testkit.PolicyMismatchChecks.StaticPolicyDownloadService;
 
@@ -33,13 +40,21 @@ class PolicyMismatchCheckTest {
 
 	private static final String NEXT_HASH = "sha256:" + "b".repeat(64);
 
-	private static final long T0 = 1_781_000_000L;
+	private static final long T0 = 1_781_000_000_000L;
 
-	private static final int GRACE_SECONDS = 300;
+	private static final long GRACE_MS = 300_000L;
+
+	private static final Map<String, LoadedPolicySource> FIRST = Map.of(STORE,
+			PolicyMismatchChecks.archiveSource(STORE, "1.0.0", HASH));
+
+	private static final Map<String, LoadedPolicySource> SECOND = Map.of(STORE,
+			PolicyMismatchChecks.archiveSource(STORE, "2.0.0", NEXT_HASH));
 
 	private StaticPolicyDownloadService served;
 
 	private AppConfiguration appConfiguration;
+
+	private InMemoryTraceStore store;
 
 	private PolicyMismatchCheck check;
 
@@ -47,21 +62,26 @@ class PolicyMismatchCheckTest {
 	void setUp() {
 		served = new StaticPolicyDownloadService().archive(STORE, "1.0.0", HASH).json("https://policy.example.org/json");
 		appConfiguration = new AppConfiguration();
-		appConfiguration.getTraceConfiguration().setPolicyMismatchGraceSeconds(GRACE_SECONDS);
-		check = PolicyMismatchChecks.serving(served, appConfiguration);
-		at(T0);
+		appConfiguration.getTraceConfiguration().setPolicyMismatchGraceSeconds((int) (GRACE_MS / 1000));
+		store = new InMemoryTraceStore();
+		check = node(served);
 	}
 
-	private void at(long epochSeconds) {
-		PolicyMismatchChecks.setClock(check, Clock.fixed(Instant.ofEpochSecond(epochSeconds), ZoneOffset.UTC));
+	private PolicyMismatchCheck node(PolicyDownloadService nodeServed) {
+		PolicyMismatchCheck node = PolicyMismatchChecks.serving(nodeServed, appConfiguration, store);
+		PolicyMismatchChecks.setClock(node, Clock.fixed(Instant.ofEpochMilli(T0), ZoneOffset.UTC));
+		return node;
 	}
 
-	private void rollOutNextRelease(long epochSeconds) {
-		at(T0);
-		check.check(new PolicyRef(STORE, "1.0.0", HASH), T0);
+	private static void publish(PolicyMismatchCheck node, Map<String, LoadedPolicySource> previous,
+			Map<String, LoadedPolicySource> current, long atMs) {
+		node.onPolicySnapshot(new PolicySnapshotEvent(previous, current, atMs));
+	}
+
+	private void rollOutSecondRelease() {
+		publish(check, Map.of(), FIRST, T0);
 		served.archive(STORE, "2.0.0", NEXT_HASH);
-		at(epochSeconds);
-		check.check(new PolicyRef(STORE, "2.0.0", NEXT_HASH), epochSeconds);
+		publish(check, FIRST, SECOND, T0 + 60_000L);
 	}
 
 	@Test
@@ -102,62 +122,54 @@ class PolicyMismatchCheckTest {
 	}
 
 	@Test
-	void testCheck_LateRecordUnderRetiredReleaseWithinGrace_NoMismatch() {
-		rollOutNextRelease(T0 + 60);
+	void testCheck_RetiredReleaseWithinGrace_NoMismatch() {
+		rollOutSecondRelease();
 
-		assertFalse(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + 60 + GRACE_SECONDS));
+		assertFalse(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + GRACE_MS));
 	}
 
 	@Test
-	void testCheck_RecordSignedAfterGraceUnderRetiredRelease_Mismatch() {
-		rollOutNextRelease(T0 + 60);
+	void testCheck_RetiredReleaseAfterGrace_Mismatch() {
+		rollOutSecondRelease();
 
-		assertTrue(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + 60 + GRACE_SECONDS + 1));
+		assertTrue(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + GRACE_MS + 1));
 	}
 
 	@Test
-	void testCheck_NewReleaseAfterRollout_NoMismatch() {
-		rollOutNextRelease(T0 + 60);
+	void testCheck_ReleaseServedByAnotherNode_NoMismatch() {
+		PolicyMismatchCheck nodeA = node(new StaticPolicyDownloadService().archive(STORE, "2.0.0", NEXT_HASH));
+		publish(nodeA, Map.of(), SECOND, T0);
 
-		assertFalse(check.check(new PolicyRef(STORE, "2.0.0", NEXT_HASH), T0 + 120));
+		assertFalse(check.check(new PolicyRef(STORE, "2.0.0", NEXT_HASH), T0 + 10_000L));
 	}
 
 	@Test
-	void testCheck_ReleaseRetiredBeforeRestart_Mismatch() {
-		served.archive(STORE, "2.0.0", NEXT_HASH);
+	void testCheck_HistorySurvivesRestart_NoMismatch() {
+		rollOutSecondRelease();
+		PolicyMismatchCheck restarted = node(served);
 
-		assertTrue(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0));
-	}
-
-	private void publish(Map<String, LoadedPolicySource> previous, Map<String, LoadedPolicySource> current,
-			long epochSeconds) {
-		check.onPolicySnapshot(new PolicySnapshotEvent(previous, current, epochSeconds * 1000L));
+		assertFalse(restarted.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + 100_000L));
 	}
 
 	@Test
-	void testCheck_RolloutWithoutTraffic_RecordWithinGraceNotFlagged() {
-		Map<String, LoadedPolicySource> first = Map.of(STORE, PolicyMismatchChecks.archiveSource(STORE, "1.0.0", HASH));
-		Map<String, LoadedPolicySource> second = Map.of(STORE,
-				PolicyMismatchChecks.archiveSource(STORE, "2.0.0", NEXT_HASH));
-		publish(Map.of(), first, T0);
-		publish(first, second, T0 + 60);
-		served.archive(STORE, "2.0.0", NEXT_HASH);
-		at(T0 + 3600);
+	void testOnPolicySnapshot_LastServedUpdateIsThrottled() {
+		publish(check, Map.of(), FIRST, T0);
+		publish(check, FIRST, FIRST, T0 + 30_000L);
+		publish(check, FIRST, FIRST, T0 + 70_000L);
 
-		assertFalse(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + 60 + GRACE_SECONDS));
+		assertEquals(2, store.getPolicyReleaseWrites());
+		assertEquals(T0 + 70_000L, store.findPolicyRelease(STORE, HASH).orElseThrow().getLastServedAtMs());
+		assertEquals(T0, store.findPolicyRelease(STORE, HASH).orElseThrow().getFirstServedAtMs());
 	}
 
 	@Test
-	void testCheck_RolloutWithoutTraffic_RecordAfterGraceFlagged() {
-		Map<String, LoadedPolicySource> first = Map.of(STORE, PolicyMismatchChecks.archiveSource(STORE, "1.0.0", HASH));
-		Map<String, LoadedPolicySource> second = Map.of(STORE,
-				PolicyMismatchChecks.archiveSource(STORE, "2.0.0", NEXT_HASH));
-		publish(Map.of(), first, T0);
-		publish(first, second, T0 + 60);
-		served.archive(STORE, "2.0.0", NEXT_HASH);
-		at(T0 + 3600);
+	void testCheck_ZeroGraceStillCoversTwoReloadIntervals() {
+		appConfiguration.getTraceConfiguration().setPolicyMismatchGraceSeconds(0);
+		rollOutSecondRelease();
+		long reloadWindowMs = 2_000L * PolicyDownloadService.RELOAD_INTERVAL_SECONDS;
 
-		assertTrue(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + 60 + GRACE_SECONDS + 1));
+		assertFalse(check.check(new PolicyRef(STORE, "1.0.0", HASH), T0 + reloadWindowMs));
+		assertTrue(node(served).check(new PolicyRef(STORE, "1.0.0", HASH), T0 + reloadWindowMs + 1));
 	}
 
 	@Test
@@ -168,9 +180,19 @@ class PolicyMismatchCheckTest {
 				throw new IllegalStateException("reload in progress");
 			}
 		};
-		PolicyMismatchCheck failingCheck = PolicyMismatchChecks.serving(failing, appConfiguration);
 
-		assertFalse(failingCheck.check(new PolicyRef(STORE, "1.0.0", NEXT_HASH), T0));
+		assertFalse(node(failing).check(new PolicyRef(STORE, "1.0.0", NEXT_HASH), T0));
+	}
+
+	@Test
+	void testCheck_StoreFails_NoMismatch() {
+		TraceStore failingStore = mock(TraceStore.class);
+		when(failingStore.findPolicyRelease(anyString(), anyString()))
+				.thenThrow(new TraceStorageException("read_failed", "database down"));
+		PolicyMismatchCheck node = PolicyMismatchChecks.serving(served, appConfiguration, failingStore);
+
+		assertFalse(node.check(new PolicyRef(STORE, "1.0.0", NEXT_HASH), T0));
+		publish(node, Map.of(), FIRST, T0);
 	}
 
 }

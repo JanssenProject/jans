@@ -18,6 +18,8 @@ import io.jans.core.cedarling.service.policy.PolicyDownloadService;
 import io.jans.core.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.trace.correlation.PolicyMismatchCheck;
+import io.jans.lock.service.trace.store.InMemoryTraceStore;
+import io.jans.lock.service.trace.store.TraceStore;
 
 /**
  * Builds a {@link PolicyMismatchCheck} over a fixed set of served policy stores.
@@ -38,9 +40,15 @@ public final class PolicyMismatchChecks {
 	}
 
 	public static PolicyMismatchCheck serving(PolicyDownloadService served, AppConfiguration appConfiguration) {
+		return serving(served, appConfiguration, new InMemoryTraceStore());
+	}
+
+	public static PolicyMismatchCheck serving(PolicyDownloadService served, AppConfiguration appConfiguration,
+			TraceStore store) {
 		PolicyMismatchCheck check = new PolicyMismatchCheck();
 		setField(check, "policyDownloadService", served);
 		setField(check, "appConfiguration", appConfiguration);
+		setField(check, "store", store);
 		setField(check, "log", LoggerFactory.getLogger(PolicyMismatchCheck.class));
 		return check;
 	}

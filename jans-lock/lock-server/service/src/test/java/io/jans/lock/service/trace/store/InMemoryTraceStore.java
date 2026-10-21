@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import io.jans.lock.model.trace.entity.TraceChainEntry;
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
@@ -72,6 +73,10 @@ public class InMemoryTraceStore implements TraceStore {
 	private final ConcurrentHashMap<String, TraceReceiptEntry> receiptsByKey = new ConcurrentHashMap<>();
 
 	private final AtomicInteger receiptLookups = new AtomicInteger();
+
+	private final ConcurrentHashMap<String, TracePolicyReleaseEntry> policyReleasesByKey = new ConcurrentHashMap<>();
+
+	private final AtomicInteger policyReleaseWrites = new AtomicInteger();
 
 	private final ConcurrentHashMap<String, TraceChainEntry> chainsByKey = new ConcurrentHashMap<>();
 
@@ -349,6 +354,55 @@ public class InMemoryTraceStore implements TraceStore {
 	/** @return how many batched receipt lookups were made */
 	public int getReceiptLookups() {
 		return receiptLookups.get();
+	}
+
+	@Override
+	public Optional<TracePolicyReleaseEntry> findPolicyRelease(String policyStoreId, String bundleHash) {
+		return Optional.ofNullable(policyReleasesByKey.get(traceKeys.policyReleaseKey(policyStoreId, bundleHash)))
+				.map(InMemoryTraceStore::copyOf);
+	}
+
+	@Override
+	public void insertPolicyRelease(TracePolicyReleaseEntry entry) throws DuplicateEntryException {
+		String key = traceKeys.policyReleaseKey(entry.getPolicyStoreId(), entry.getBundleHash());
+		entry.setId(key);
+		if (policyReleasesByKey.putIfAbsent(key, copyOf(entry)) != null) {
+			throw new DuplicateEntryException(key);
+		}
+		policyReleaseWrites.incrementAndGet();
+	}
+
+	@Override
+	public boolean updatePolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
+			long lastServedAtMs) {
+		TracePolicyReleaseEntry updated = policyReleasesByKey.computeIfPresent(
+				traceKeys.policyReleaseKey(policyStoreId, bundleHash), (key, current) -> {
+					TracePolicyReleaseEntry next = copyOf(current);
+					next.setPolicyStoreVersion(policyStoreVersion);
+					next.setLastServedAtMs(lastServedAtMs);
+					return next;
+				});
+		if (updated == null) {
+			return false;
+		}
+		policyReleaseWrites.incrementAndGet();
+		return true;
+	}
+
+	/** @return how many policy release inserts and updates were made */
+	public int getPolicyReleaseWrites() {
+		return policyReleaseWrites.get();
+	}
+
+	private static TracePolicyReleaseEntry copyOf(TracePolicyReleaseEntry source) {
+		TracePolicyReleaseEntry copy = new TracePolicyReleaseEntry();
+		copy.setId(source.getId());
+		copy.setPolicyStoreId(source.getPolicyStoreId());
+		copy.setBundleHash(source.getBundleHash());
+		copy.setPolicyStoreVersion(source.getPolicyStoreVersion());
+		copy.setFirstServedAtMs(source.getFirstServedAtMs());
+		copy.setLastServedAtMs(source.getLastServedAtMs());
+		return copy;
 	}
 
 	@Override

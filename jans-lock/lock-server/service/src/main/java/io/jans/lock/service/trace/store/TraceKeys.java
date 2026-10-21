@@ -105,6 +105,16 @@ public class TraceKeys {
 		return key("rcpt", domainId, Long.toString(receiptSequence));
 	}
 
+	/** Key type {@code prel}: {@code (policy_store_id, bundle_hash)}; not domain-scoped. */
+	public String policyReleaseKey(String policyStoreId, String bundleHash) {
+		return key("prel", policyStoreId, bundleHash);
+	}
+
+	/** {@code jansId=<key>,ou=policyReleases,<baseDn>}. */
+	public static String policyReleaseDn(String baseDn, String key) {
+		return dn(baseDn, "policyReleases", key);
+	}
+
 	/** {@code jansId=<key>,ou=records,<baseDn>}. */
 	public static String recordDn(String baseDn, String key) {
 		return dn(baseDn, "records", key);

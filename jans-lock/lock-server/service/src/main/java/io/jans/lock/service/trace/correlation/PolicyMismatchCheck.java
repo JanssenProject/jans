@@ -9,6 +9,7 @@ package io.jans.lock.service.trace.correlation;
 import java.time.Clock;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 
@@ -16,24 +17,31 @@ import io.jans.core.cedarling.service.policy.PolicyDownloadService;
 import io.jans.core.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
 import io.jans.core.cedarling.service.policy.PolicySnapshotEvent;
 import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.service.trace.correlation.PolicyReleaseHistory.ServedRelease;
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
+import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.model.PolicyRef;
+import io.jans.lock.service.trace.store.TraceStore;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 
 /**
- * Compares a record's {@code trace.policy} release with the policy store archives this node has
- * served under the same {@code policy_store_id}. A store Lock does not serve is never a
- * mismatch, because producers may load stores from elsewhere. A release Lock stopped serving
- * stays acceptable for {@code policyMismatchGraceSeconds} after it was retired, measured
- * against the record's {@code signed_at}, so records signed during a rollout are not flagged.
- * Releases are recorded when {@link PolicyDownloadService} publishes them; each check also
- * records what is served at that moment, in case a publication was missed. The check is
- * best-effort: a failure never rejects or flags a record.
+ * Compares a record's {@code trace.policy} release with the policy store archive releases Lock
+ * has served under the same {@code policy_store_id}. Every node records the releases it serves in
+ * the shared TRACE store when it publishes a reload, so the history covers all replicas and
+ * survives restarts. A release is acceptable when this node serves it now, or when some node
+ * served it within the effective grace period before the time the record is judged at. A store
+ * this node does not serve is never a mismatch, because producers may load stores from
+ * elsewhere. The check is best-effort: a failure never rejects or flags a record.
  */
 @ApplicationScoped
 public class PolicyMismatchCheck {
+
+	static final long CACHE_TTL_MS = 10_000L;
+
+	static final int CACHE_MAX_ENTRIES = 1_000;
+
+	private static final long MAX_SERVED_UPDATE_INTERVAL_MS = 60_000L;
 
 	@Inject
 	private Logger log;
@@ -44,57 +52,152 @@ public class PolicyMismatchCheck {
 	@Inject
 	private AppConfiguration appConfiguration;
 
-	private final PolicyReleaseHistory history = new PolicyReleaseHistory();
+	@Inject
+	private TraceStore store;
+
+	private final Map<String, CachedRelease> cache = new ConcurrentHashMap<>();
 
 	private Clock clock = Clock.systemUTC();
 
 	/**
-	 * Records the releases served before and after a publication, retiring at the publication
-	 * time those no longer served.
+	 * Records the releases this node serves after a publication. A new release is inserted; a
+	 * known one has its last-served time moved forward at most once per update interval.
 	 */
 	public void onPolicySnapshot(@Observes PolicySnapshotEvent event) {
-		try {
-			history.observe(event.getPrevious(), event.getPublishedAtMs());
-			history.observe(event.getCurrent(), event.getPublishedAtMs());
-		} catch (RuntimeException ex) {
-			log.warn("TRACE policy release history not updated", ex);
-		}
+		event.getCurrent().forEach((policyStoreId, source) -> {
+			if (isComparable(source)) {
+				try {
+					recordServed(policyStoreId, source, event.getPublishedAtMs());
+				} catch (RuntimeException ex) {
+					log.warn("TRACE policy release not recorded: policy_store_id={}", policyStoreId, ex);
+				}
+			}
+		});
 	}
 
 	/**
-	 * @param signedAtSeconds the record's {@code trace.signed_at}
-	 * @return {@code true} when the record names a served store with a release this node did not
-	 *         serve at or shortly before {@code signed_at}
+	 * @param judgedAtMs the time the record is judged at, epoch milliseconds
+	 * @return {@code true} when the record names a store this node serves with a release that no
+	 *         node served at or within the effective grace period before {@code judgedAtMs}, or
+	 *         with a different {@code policy_store_version}
 	 */
-	public boolean check(PolicyRef policy, long signedAtSeconds) {
+	public boolean check(PolicyRef policy, long judgedAtMs) {
 		if (policy == null) {
 			return false;
 		}
 		try {
-			Map<String, LoadedPolicySource> served = policyDownloadService.getLoadedPolicies();
-			history.observe(served, clock.millis());
-			return isMismatch(policy, signedAtSeconds, served);
+			LoadedPolicySource source = policyDownloadService.getLoadedPolicies().get(policy.getPolicyStoreId());
+			if (!isComparable(source)) {
+				return false;
+			}
+			if (source.getBundleHash().equals(policy.getBundleHash())) {
+				return versionDiffers(source.getPolicyStoreVersion(), policy);
+			}
+			Optional<TracePolicyReleaseEntry> release = findRelease(policy.getPolicyStoreId(), policy.getBundleHash());
+			if (!release.isPresent() || release.get().getLastServedAtMs() == null
+					|| release.get().getLastServedAtMs() + effectiveGraceMs() < judgedAtMs) {
+				return true;
+			}
+			return versionDiffers(release.get().getPolicyStoreVersion(), policy);
 		} catch (RuntimeException ex) {
 			log.warn("TRACE policy release check skipped: policy_store_id={}", policy.getPolicyStoreId(), ex);
 			return false;
 		}
 	}
 
-	private boolean isMismatch(PolicyRef policy, long signedAtSeconds, Map<String, LoadedPolicySource> served) {
-		LoadedPolicySource source = served.get(policy.getPolicyStoreId());
-		if (source == null || !source.isArchive() || source.getBundleHash() == null) {
-			return false;
+	/**
+	 * @return {@code policyMismatchGraceSeconds}, but at least two reload intervals, so a release
+	 *         another node still serves never looks retired between its updates
+	 */
+	long effectiveGraceMs() {
+		long graceSeconds = Math.max(appConfiguration.getTraceConfiguration().getPolicyMismatchGraceSeconds(),
+				2L * PolicyDownloadService.RELOAD_INTERVAL_SECONDS);
+		return graceSeconds * 1000L;
+	}
+
+	long servedUpdateIntervalMs() {
+		return Math.min(MAX_SERVED_UPDATE_INTERVAL_MS,
+				appConfiguration.getTraceConfiguration().getPolicyMismatchGraceSeconds() * 1000L / 2);
+	}
+
+	private void recordServed(String policyStoreId, LoadedPolicySource source, long servedAtMs) {
+		String bundleHash = source.getBundleHash();
+		String version = source.getPolicyStoreVersion();
+		CachedRelease cached = cache.get(cacheKey(policyStoreId, bundleHash));
+		if (cached != null && cached.release != null && cached.release.getLastServedAtMs() != null
+				&& servedAtMs - cached.release.getLastServedAtMs() < servedUpdateIntervalMs()) {
+			return;
 		}
-		Optional<ServedRelease> found = history.find(policy.getPolicyStoreId(), policy.getBundleHash());
-		if (!found.isPresent()) {
-			return true;
+		Optional<TracePolicyReleaseEntry> stored = store.findPolicyRelease(policyStoreId, bundleHash);
+		if (!stored.isPresent()) {
+			TracePolicyReleaseEntry entry = new TracePolicyReleaseEntry();
+			entry.setPolicyStoreId(policyStoreId);
+			entry.setBundleHash(bundleHash);
+			entry.setPolicyStoreVersion(version);
+			entry.setFirstServedAtMs(servedAtMs);
+			entry.setLastServedAtMs(servedAtMs);
+			try {
+				store.insertPolicyRelease(entry);
+				remember(policyStoreId, bundleHash, entry);
+				return;
+			} catch (DuplicateEntryException ex) {
+				stored = store.findPolicyRelease(policyStoreId, bundleHash);
+			}
 		}
-		ServedRelease release = found.get();
-		long graceMs = appConfiguration.getTraceConfiguration().getPolicyMismatchGraceSeconds() * 1000L;
-		if (!release.isCurrent() && release.getRetiredAtMs() + graceMs < signedAtSeconds * 1000L) {
-			return true;
+		if (stored.isPresent()) {
+			TracePolicyReleaseEntry entry = stored.get();
+			Long lastServedAtMs = entry.getLastServedAtMs();
+			if (lastServedAtMs == null || servedAtMs - lastServedAtMs >= servedUpdateIntervalMs()) {
+				store.updatePolicyReleaseServed(policyStoreId, bundleHash, version, servedAtMs);
+				entry.setPolicyStoreVersion(version);
+				entry.setLastServedAtMs(servedAtMs);
+			}
+			remember(policyStoreId, bundleHash, entry);
 		}
-		return release.getVersion() != null && !release.getVersion().equals(policy.getPolicyStoreVersion());
+	}
+
+	private Optional<TracePolicyReleaseEntry> findRelease(String policyStoreId, String bundleHash) {
+		String key = cacheKey(policyStoreId, bundleHash);
+		long now = clock.millis();
+		CachedRelease cached = cache.get(key);
+		if (cached != null && now - cached.fetchedAtMs < CACHE_TTL_MS) {
+			return Optional.ofNullable(cached.release);
+		}
+		Optional<TracePolicyReleaseEntry> release = store.findPolicyRelease(policyStoreId, bundleHash);
+		remember(policyStoreId, bundleHash, release.orElse(null));
+		return release;
+	}
+
+	private void remember(String policyStoreId, String bundleHash, TracePolicyReleaseEntry release) {
+		if (cache.size() >= CACHE_MAX_ENTRIES) {
+			cache.clear();
+		}
+		cache.put(cacheKey(policyStoreId, bundleHash), new CachedRelease(release, clock.millis()));
+	}
+
+	private static String cacheKey(String policyStoreId, String bundleHash) {
+		return policyStoreId + '\n' + bundleHash;
+	}
+
+	private static boolean isComparable(LoadedPolicySource source) {
+		return source != null && source.isArchive() && source.getBundleHash() != null;
+	}
+
+	private static boolean versionDiffers(String servedVersion, PolicyRef policy) {
+		return servedVersion != null && !servedVersion.equals(policy.getPolicyStoreVersion());
+	}
+
+	private static final class CachedRelease {
+
+		private final TracePolicyReleaseEntry release;
+
+		private final long fetchedAtMs;
+
+		private CachedRelease(TracePolicyReleaseEntry release, long fetchedAtMs) {
+			this.release = release;
+			this.fetchedAtMs = fetchedAtMs;
+		}
+
 	}
 
 }

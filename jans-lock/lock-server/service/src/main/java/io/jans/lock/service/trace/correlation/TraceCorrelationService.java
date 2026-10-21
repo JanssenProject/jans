@@ -86,7 +86,7 @@ public class TraceCorrelationService {
 		ParsedAssertion.ProducerChain producerChain = inputs.getChainPosition();
 		String domainId = ctx.getEvidenceDomainId();
 
-		boolean policyMismatch = policyMismatchCheck.check(inputs.getPolicy(), inputs.getSignedAt());
+		boolean policyMismatch = policyMismatchCheck.check(inputs.getPolicy(), inputs.getSignedAt() * 1000L);
 
 		ChainIdentity chainIdentity = new ChainIdentity(domainId, producerChain.getProducerId(),
 				producerChain.getProducerInstanceId(), producerChain.getProducerChainId());

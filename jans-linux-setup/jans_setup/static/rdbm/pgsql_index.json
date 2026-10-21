@@ -290,6 +290,11 @@
       "jansTraceReceiptState"
     ]
   },
+  "jansTracePolicyRelease": {
+    "fields": [
+      "jansTracePolicyStoreId"
+    ]
+  },
   "jansTraceChain": {
     "fields": [
       "jansTraceDomainId",
