@@ -64,8 +64,8 @@ public class AuthClientFactory {
     public static JsonNode getStatResponse(String url, String token, String month, String startMonth, String endMonth,
             String format) {
         if (log.isDebugEnabled()) {
-            log.debug("Stat Response Token - url:{}, token:{}, month:{}, startMonth:{}, endMonth:{}, format:{} ",
-                    escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
+            log.debug("Stat Response Token - url:{}, month:{}, startMonth:{}, endMonth:{}, format:{} ",
+                    escapeLog(url), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
                     escapeLog(format));
         }
         ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient().target(url);
@@ -88,8 +88,8 @@ public class AuthClientFactory {
 
     public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
-        log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
-                clientId, clientSecret, scope);
+        log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, scope:{} ", tokenUrl,
+                clientId, scope);
         Response response = null;
         try {
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);

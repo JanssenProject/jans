@@ -99,7 +99,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             throw new WebApplicationException("InvalidJwtException - Jwt Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         } catch (JsonProcessingException ex) {
-            logger.error("Error while parsing Jwt exception:{} ", ex);
+            logger.error("Error while parsing Jwt exception ", ex);
             throw new WebApplicationException("Jwt Token is Invalid - JsonProcessingException.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }

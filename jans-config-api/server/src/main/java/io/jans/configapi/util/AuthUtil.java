@@ -358,7 +358,7 @@ public class AuthUtil {
         log.info("Request for AccessToken - clientId:{}, scope:{} ", clientId, scope);
         String tokenUrl = getTokenEndpoint();
         Token token = getAccessToken(tokenUrl, clientId, scope);
-        log.debug("oAuth AccessToken response - token:{}", token);
+        log.debug("oAuth AccessToken response ");
         if (token != null) {
             return token.getAccessToken();
         }
