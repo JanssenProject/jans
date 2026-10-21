@@ -20,7 +20,7 @@ mod test_utils;
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) use key::ProducerKey;
 pub use producer_id::{ParseProducerIdError, ProducerId};
-pub(crate) use record::{DecisionFacts, Outcome};
+pub(crate) use record::{DecisionFacts, DraftError, Outcome, TokenRef};
 pub(crate) use recorder::{TraceRecorder, token_facts};
 pub use signing_kid::{ParseTraceSigningKidError, TraceSigningKid};
 pub(crate) use status::TraceRecordStatus;
