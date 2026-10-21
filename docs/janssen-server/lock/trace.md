@@ -596,7 +596,7 @@ Limits:
 - Before the first policy store load, Lock serves no archive and flags nothing.
 - A store this node does not serve is never compared, because producers may load stores from other sources.
 - Lock caches found history rows for 10 seconds (at most 1000, least recently used evicted). A release it has not found is remembered as missing for one second, or until this node publishes a reload, so a release another replica starts serving is seen within a second and an unknown hash repeated by a producer costs at most one store read per second.
-- Releases no node has served for `policyReleaseRetentionDays` are deleted by the receipt repair timer, 500 per run, except a release this node serves. A record later naming a deleted release is flagged.
+- Releases no node has served for `policyReleaseRetentionDays` are deleted by the receipt repair timer, 500 per run, except a release this node serves. Each delete only removes the row if it is still that old, so a release another replica refreshed in the meantime is kept, and replicas pruning at the same time do not interfere. A record later naming a deleted release is flagged.
 - The check is best-effort: if it or the store fails, Lock logs a warning and accepts the record without the flag.
 
 The flag is a statement about what Lock served. It does not show that the producer used a tampered policy.
