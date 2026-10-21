@@ -169,7 +169,6 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 
 		Response response = null;
 		try {
-			logEntry.indexContextInformation();
 			// Report statistics for single log entry
 			reportLogStat(logEntry);
 			response = processAuditRequest(logEntry, AuditEndpointType.LOG);
@@ -203,7 +202,6 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 		try {
 			// Report statistics for bulk log entries
 			for (LogEntry entry : logEntries) {
-				entry.indexContextInformation();
 				reportLogStat(entry);
 			}
 			response = processBulkAuditRequest(logEntries, AuditEndpointType.LOG_BULK);

@@ -123,17 +123,17 @@ public class LogEntry extends BaseEntry implements Serializable {
     private Map<String, String> contextInformation;
 
     @JsonProperty("requestId")
-    @Schema(description = "Cedarling request_id of the decision, indexed from contextInformation when absent", example = "0198a5e2-7c1f-7b3e-9d2a-3f4e5a6b7c8d")
+    @Schema(description = "Cedarling request_id of the decision; contextInformation request_id wins when present", example = "0198a5e2-7c1f-7b3e-9d2a-3f4e5a6b7c8d")
     @AttributeName(name = "jansRequestId")
     private String requestId;
 
     @JsonProperty("policyStoreId")
-    @Schema(description = "Policy store id used for the decision, indexed from contextInformation policystore_id when absent", example = "a1bf63d5a5e4a0b7d0d5c9e3")
+    @Schema(description = "Policy store id used for the decision; contextInformation policystore_id wins when present", example = "a1bf63d5a5e4a0b7d0d5c9e3")
     @AttributeName(name = "jansPolicyStoreId")
     private String policyStoreId;
 
     @JsonProperty("policyStoreVersion")
-    @Schema(description = "Policy store version used for the decision, indexed from contextInformation policystore_version when absent", example = "1.2.3")
+    @Schema(description = "Policy store version used for the decision; contextInformation policystore_version wins when present", example = "1.2.3")
     @AttributeName(name = "jansPolicyStoreVersion")
     private String policyStoreVersion;
 
@@ -249,48 +249,46 @@ public class LogEntry extends BaseEntry implements Serializable {
 		this.contextInformation = contextInformation;
 	}
 
+	/**
+	 * @return {@code request_id} from {@code contextInformation} when present and at most
+	 *         {@value #MAX_REQUEST_ID_LENGTH} characters, else the explicit value under the same
+	 *         limit, else {@code null}. Persistence and JSON output read this getter.
+	 */
 	public String getRequestId() {
-		return requestId;
+		return indexed(CONTEXT_REQUEST_ID, requestId, MAX_REQUEST_ID_LENGTH);
 	}
 
 	public void setRequestId(String requestId) {
 		this.requestId = requestId;
 	}
 
+	/**
+	 * @return {@code policystore_id} from {@code contextInformation}, else the explicit value;
+	 *         each only when at most {@value #MAX_POLICY_STORE_FIELD_LENGTH} characters
+	 */
 	public String getPolicyStoreId() {
-		return policyStoreId;
+		return indexed(CONTEXT_POLICY_STORE_ID, policyStoreId, MAX_POLICY_STORE_FIELD_LENGTH);
 	}
 
 	public void setPolicyStoreId(String policyStoreId) {
 		this.policyStoreId = policyStoreId;
 	}
 
+	/**
+	 * @return {@code policystore_version} from {@code contextInformation}, else the explicit
+	 *         value; each only when at most {@value #MAX_POLICY_STORE_FIELD_LENGTH} characters
+	 */
 	public String getPolicyStoreVersion() {
-		return policyStoreVersion;
+		return indexed(CONTEXT_POLICY_STORE_VERSION, policyStoreVersion, MAX_POLICY_STORE_FIELD_LENGTH);
 	}
 
 	public void setPolicyStoreVersion(String policyStoreVersion) {
 		this.policyStoreVersion = policyStoreVersion;
 	}
 
-	/**
-	 * Settles the indexed members before persistence. An explicit value is kept when it fits its
-	 * column; otherwise {@code request_id}, {@code policystore_id} or {@code policystore_version}
-	 * from {@code contextInformation} is used when it fits. A value that is empty or longer than
-	 * its column is never indexed.
-	 */
-	public void indexContextInformation() {
-		requestId = indexed(requestId, CONTEXT_REQUEST_ID, MAX_REQUEST_ID_LENGTH);
-		policyStoreId = indexed(policyStoreId, CONTEXT_POLICY_STORE_ID, MAX_POLICY_STORE_FIELD_LENGTH);
-		policyStoreVersion = indexed(policyStoreVersion, CONTEXT_POLICY_STORE_VERSION, MAX_POLICY_STORE_FIELD_LENGTH);
-	}
-
-	private String indexed(String explicit, String contextKey, int maxLength) {
-		String value = indexable(explicit, maxLength);
-		if (value == null && contextInformation != null) {
-			value = indexable(contextInformation.get(contextKey), maxLength);
-		}
-		return value;
+	private String indexed(String contextKey, String explicit, int maxLength) {
+		String value = contextInformation == null ? null : indexable(contextInformation.get(contextKey), maxLength);
+		return value != null ? value : indexable(explicit, maxLength);
 	}
 
 	private static String indexable(String value, int maxLength) {
@@ -315,16 +313,16 @@ public class LogEntry extends BaseEntry implements Serializable {
                 Objects.equals(clientId, logEntry.clientId) &&
                 Objects.equals(jti, logEntry.jti) &&
                 Objects.equals(contextInformation, logEntry.contextInformation) &&
-                Objects.equals(requestId, logEntry.requestId) &&
-                Objects.equals(policyStoreId, logEntry.policyStoreId) &&
-                Objects.equals(policyStoreVersion, logEntry.policyStoreVersion);
+                Objects.equals(getRequestId(), logEntry.getRequestId()) &&
+                Objects.equals(getPolicyStoreId(), logEntry.getPolicyStoreId()) &&
+                Objects.equals(getPolicyStoreVersion(), logEntry.getPolicyStoreVersion());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(creationDate, eventTime, service, nodeName, eventType, 
                 severityLevel, action, decisionResult, requestedResource, 
-                principalId, clientId, jti, contextInformation, requestId, policyStoreId, policyStoreVersion);
+                principalId, clientId, jti, contextInformation, getRequestId(), getPolicyStoreId(), getPolicyStoreVersion());
     }
 
     @Override
@@ -343,9 +341,9 @@ public class LogEntry extends BaseEntry implements Serializable {
                 ", clientId='" + clientId + '\'' +
                 ", jti='" + jti + '\'' +
                 ", contextInformation=" + contextInformation +
-                ", requestId='" + requestId + '\'' +
-                ", policyStoreId='" + policyStoreId + '\'' +
-                ", policyStoreVersion='" + policyStoreVersion + '\'' +
+                ", requestId='" + getRequestId() + '\'' +
+                ", policyStoreId='" + getPolicyStoreId() + '\'' +
+                ", policyStoreVersion='" + getPolicyStoreVersion() + '\'' +
                 '}';
     }
 }

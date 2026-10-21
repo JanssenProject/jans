@@ -842,18 +842,18 @@ components:
           description: Additional context information as key-value pairs
         requestId:
           type: string
-          description: "Cedarling request_id of the decision, indexed from contextInformation\
-            \ when absent"
+          description: "Cedarling request_id of the decision; contextInformation request_id\
+            \ wins when present"
           example: 0198a5e2-7c1f-7b3e-9d2a-3f4e5a6b7c8d
         policyStoreId:
           type: string
-          description: "Policy store id used for the decision, indexed from contextInformation\
-            \ policystore_id when absent"
+          description: "Policy store id used for the decision; contextInformation policystore_id\
+            \ wins when present"
           example: a1bf63d5a5e4a0b7d0d5c9e3
         policyStoreVersion:
           type: string
-          description: "Policy store version used for the decision, indexed from contextInformation\
-            \ policystore_version when absent"
+          description: "Policy store version used for the decision; contextInformation policystore_version\
+            \ wins when present"
           example: 1.2.3
       description: Log audit entry
     TelemetryEntry:

@@ -15,8 +15,11 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+
+import io.jans.orm.reflect.util.ReflectHelper;
 
 class LogEntryTest {
 
@@ -26,82 +29,82 @@ class LogEntryTest {
 		return entry;
 	}
 
-	@Test
-	void indexContextInformation_copiesDecisionLogKeys() {
+	private static Map<String, String> decisionContext() {
 		Map<String, String> context = new HashMap<>();
-		context.put("request_id", "0198a5e2-7c1f-7b3e-9d2a-3f4e5a6b7c8d");
-		context.put("policystore_id", "store-1");
+		context.put("request_id", "from-context");
+		context.put("policystore_id", "context-store");
 		context.put("policystore_version", "1.2.3");
-		LogEntry entry = withContext(context);
+		return context;
+	}
 
-		entry.indexContextInformation();
+	@Test
+	void indexedMembers_contextWinsOverExplicit() {
+		LogEntry entry = withContext(decisionContext());
+		entry.setRequestId("explicit");
+		entry.setPolicyStoreId("explicit-store");
+		entry.setPolicyStoreVersion("9.9.9");
 
-		assertEquals("0198a5e2-7c1f-7b3e-9d2a-3f4e5a6b7c8d", entry.getRequestId());
-		assertEquals("store-1", entry.getPolicyStoreId());
+		assertEquals("from-context", entry.getRequestId());
+		assertEquals("context-store", entry.getPolicyStoreId());
 		assertEquals("1.2.3", entry.getPolicyStoreVersion());
 	}
 
 	@Test
-	void indexContextInformation_keepsExplicitValues() {
-		Map<String, String> context = new HashMap<>();
-		context.put("request_id", "from-context");
-		context.put("policystore_id", "context-store");
-		LogEntry entry = withContext(context);
+	void indexedMembers_explicitUsedWhenContextLacksKey() {
+		LogEntry entry = withContext(new HashMap<>());
 		entry.setRequestId("explicit");
-
-		entry.indexContextInformation();
-
-		assertEquals("explicit", entry.getRequestId());
-		assertEquals("context-store", entry.getPolicyStoreId());
-		assertNull(entry.getPolicyStoreVersion());
-	}
-
-	@Test
-	void indexContextInformation_skipsEmptyAndOversizedValues() {
-		Map<String, String> context = new HashMap<>();
-		context.put("request_id", "x".repeat(LogEntry.MAX_REQUEST_ID_LENGTH + 1));
-		context.put("policystore_id", "");
-		context.put("policystore_version", "v".repeat(LogEntry.MAX_POLICY_STORE_FIELD_LENGTH + 1));
-		LogEntry entry = withContext(context);
-
-		entry.indexContextInformation();
-
-		assertNull(entry.getRequestId());
-		assertNull(entry.getPolicyStoreId());
-		assertNull(entry.getPolicyStoreVersion());
-	}
-
-	@Test
-	void indexContextInformation_oversizedExplicitValues_replacedFromContextOrDropped() {
-		Map<String, String> context = new HashMap<>();
-		context.put("request_id", "from-context");
-		LogEntry entry = withContext(context);
-		entry.setRequestId("r".repeat(LogEntry.MAX_REQUEST_ID_LENGTH + 1));
-		entry.setPolicyStoreId("s".repeat(LogEntry.MAX_POLICY_STORE_FIELD_LENGTH + 1));
-
-		entry.indexContextInformation();
-
-		assertEquals("from-context", entry.getRequestId());
-		assertNull(entry.getPolicyStoreId());
-	}
-
-	@Test
-	void indexContextInformation_noContext_keepsFittingExplicitValue() {
-		LogEntry entry = new LogEntry();
 		entry.setPolicyStoreVersion("1.0.0");
 
-		entry.indexContextInformation();
-
+		assertEquals("explicit", entry.getRequestId());
+		assertNull(entry.getPolicyStoreId());
 		assertEquals("1.0.0", entry.getPolicyStoreVersion());
 	}
 
 	@Test
-	void indexContextInformation_noContext_noChange() {
-		LogEntry entry = new LogEntry();
+	void indexedMembers_oversizedOrEmptyContextFallsBackToExplicit() {
+		Map<String, String> context = new HashMap<>();
+		context.put("request_id", "x".repeat(LogEntry.MAX_REQUEST_ID_LENGTH + 1));
+		context.put("policystore_id", "");
+		LogEntry entry = withContext(context);
+		entry.setRequestId("explicit");
+		entry.setPolicyStoreId("explicit-store");
 
-		entry.indexContextInformation();
+		assertEquals("explicit", entry.getRequestId());
+		assertEquals("explicit-store", entry.getPolicyStoreId());
+	}
+
+	@Test
+	void indexedMembers_oversizedExplicitDropped() {
+		LogEntry entry = new LogEntry();
+		entry.setRequestId("r".repeat(LogEntry.MAX_REQUEST_ID_LENGTH + 1));
+		entry.setPolicyStoreVersion("v".repeat(LogEntry.MAX_POLICY_STORE_FIELD_LENGTH + 1));
 
 		assertNull(entry.getRequestId());
+		assertNull(entry.getPolicyStoreVersion());
+	}
+
+	@Test
+	void orm_readsDerivedValuesThroughGetters() {
+		LogEntry entry = withContext(decisionContext());
+		entry.setRequestId("r".repeat(LogEntry.MAX_REQUEST_ID_LENGTH + 1));
+
+		assertEquals("from-context", ReflectHelper.getGetter(LogEntry.class, "requestId").get(entry));
+		assertEquals("context-store", ReflectHelper.getGetter(LogEntry.class, "policyStoreId").get(entry));
+		assertEquals("1.2.3", ReflectHelper.getGetter(LogEntry.class, "policyStoreVersion").get(entry));
+	}
+
+	@Test
+	void json_writesDerivedValuesAndRoundTrips() throws Exception {
+		ObjectMapper mapper = new ObjectMapper();
+		LogEntry entry = withContext(decisionContext());
+		entry.setRequestId("p".repeat(LogEntry.MAX_REQUEST_ID_LENGTH + 1));
+
+		JsonNode json = mapper.readTree(mapper.writeValueAsString(entry));
+		LogEntry copy = mapper.readValue(json.toString(), LogEntry.class);
+
+		assertEquals("from-context", json.get("requestId").asText());
+		assertEquals("context-store", json.get("policyStoreId").asText());
+		assertEquals(entry, copy);
 	}
 
 	private static final String CEDARLING_DECISION_LOG = "{"
@@ -144,8 +147,6 @@ class LogEntryTest {
 		assertEquals("{\"access_token\":{\"jti\":\"9c9f2e77\"}}", context.get("tokens"));
 		assertEquals("42", context.get("decision_time_micro_sec"));
 		assertEquals("null", context.get("batch_id"));
-
-		entry.indexContextInformation();
 
 		assertEquals("0195c6f2-8d1a-7c3e-9b4f-2a6d8e0f1b3e", entry.getRequestId());
 		assertEquals("test-store", entry.getPolicyStoreId());
