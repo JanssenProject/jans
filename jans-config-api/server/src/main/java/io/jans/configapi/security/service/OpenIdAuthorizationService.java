@@ -127,7 +127,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         // Validate Scopes
         acccessToken = validateScope(token, tokenScopes, resourceInfo, issuer, httpHeaders);
 
-        boolean isAuthorized = externalAuthorization(acccessToken, issuer, method, path);
+        boolean isAuthorized = externalAuthorization(token, issuer, method, path);
         logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
         if (!isAuthorized) {
             throw new WebApplicationException("Authorization denied by external script",
