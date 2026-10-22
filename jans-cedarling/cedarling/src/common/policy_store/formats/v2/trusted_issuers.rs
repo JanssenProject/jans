@@ -112,6 +112,12 @@ impl<'de> Visitor<'de> for KeySourceVisitor {
             let url = Url::parse(&value).map_err(|e| {
                 de::Error::custom(format!("`{key}` is not a valid URL '{value}': {e}"))
             })?;
+            // Keys and discovery are only fetched over HTTP; `http` is kept for local setups.
+            if !matches!(url.scheme(), "http" | "https") {
+                return Err(de::Error::custom(format!(
+                    "`{key}` must be an http or https URL, got '{value}'"
+                )));
+            }
             *slot = Some(url);
         }
 
@@ -127,6 +133,12 @@ impl<'de> Visitor<'de> for KeySourceVisitor {
                 Ok(KeySourceDoc::Discovery { configuration, iss })
             },
             (None, Some(_), None) => Err(de::Error::custom("`jwks` requires `iss`")),
+            (None, Some(_), Some(iss)) if iss.query().is_some() || iss.fragment().is_some() => {
+                // An issuer identifier has no query or fragment (RFC 8414 §2).
+                Err(de::Error::custom(format!(
+                    "`iss` must not have a query or fragment, got '{iss}'"
+                )))
+            },
             (None, Some(jwks), Some(iss)) => Ok(KeySourceDoc::Static { jwks, iss }),
             (None, None, Some(_)) => Err(de::Error::custom("`iss` requires `jwks`")),
             (None, None, None) => Err(de::Error::custom("expected `configuration` or `jwks`")),
@@ -408,6 +420,30 @@ mod tests {
             (
                 json!({ "jwks": "not a url", "iss": "https://a" }),
                 "`jwks` is not a valid URL",
+            ),
+            (
+                json!({ "configuration": "file:///.well-known/openid-configuration" }),
+                "`configuration` must be an http or https URL, got 'file:///.well-known/openid-configuration'",
+            ),
+            (
+                json!({ "configuration": "ftp://a/.well-known/openid-configuration" }),
+                "`configuration` must be an http or https URL",
+            ),
+            (
+                json!({ "jwks": "file:///etc/passwd", "iss": "https://a" }),
+                "`jwks` must be an http or https URL, got 'file:///etc/passwd'",
+            ),
+            (
+                json!({ "jwks": "https://a/keys", "iss": "urn:example:a" }),
+                "`iss` must be an http or https URL",
+            ),
+            (
+                json!({ "jwks": "https://a/keys", "iss": "https://idp.x/a?x=1" }),
+                "`iss` must not have a query or fragment, got 'https://idp.x/a?x=1'",
+            ),
+            (
+                json!({ "jwks": "https://a/keys", "iss": "https://idp.x/a#f" }),
+                "`iss` must not have a query or fragment, got 'https://idp.x/a#f'",
             ),
         ] {
             assert_rejected(&jwt(endpoints), expected);

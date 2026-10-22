@@ -281,6 +281,9 @@ These rules are checked when the store loads, and a violation fails the load:
   number of tokens in the request.
 - An entry uses exactly one key-source form: `configuration` together with
   `jwks`, or `jwks` without `iss`, is rejected.
+- `configuration`, `jwks` and `iss` must be `http` or `https` URLs; `http` is
+  accepted for local setups only and should not be used in production. A static
+  `iss` must not have a query or fragment, as an issuer identifier never does.
 
 Two key sources that only turn out to share an `iss` after discovery, with
 different JWKS, are both rejected: there is no order between them, so neither
