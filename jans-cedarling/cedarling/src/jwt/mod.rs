@@ -863,8 +863,8 @@ impl Drop for JwtService {
 }
 
 impl TrustedIssuerLoadingInfo for JwtService {
-    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.issuer_configs.is_issuer_id_present(issuer_id)
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
+        self.issuer_configs.is_issuer_id_present(issuer_name)
     }
 
     fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {

@@ -11,9 +11,9 @@ use std::collections::HashSet;
 /// loading trusted issuers, including which issuers are loaded, which have failed,
 /// and overall loading statistics.
 pub trait TrustedIssuerLoadingInfo {
-    /// Returns `true` if the trusted issuer with the given ID (policy store key) is loaded.
+    /// Returns `true` if the trusted issuer with the given name (its `issuer`) is loaded.
     #[must_use]
-    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool;
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool;
 
     /// Returns `true` if the trusted issuer with the given iss claim is loaded.
     #[must_use]

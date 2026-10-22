@@ -411,8 +411,8 @@ console.log("Loaded issuers", cedarling.loadedTrustedIssuerIds());
 console.log("Failed issuers", cedarling.failedTrustedIssuerIds());
 ```
 
-To check one issuer, pass its configured identifier to
-`cedarling.isTrustedIssuerLoadedByName(issuerId)`.
+To check one issuer, pass its name (the `issuer` of its token types) to
+`cedarling.isTrustedIssuerLoadedByName(issuerName)`.
 
 ### Policy Annotations
 

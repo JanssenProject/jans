@@ -377,7 +377,7 @@ cedarling_clear_last_error();
 
 | Function | Description |
 |----------|-------------|
-| `cedarling_is_trusted_issuer_loaded_by_name(instance_id, issuer_id, out_result)` | Check loaded status by issuer name |
+| `cedarling_is_trusted_issuer_loaded_by_name(instance_id, issuer_name, out_result)` | Check loaded status by issuer name |
 | `cedarling_is_trusted_issuer_loaded_by_iss(instance_id, iss_claim, out_result)` | Check loaded status by issuer `iss` claim |
 | `cedarling_total_issuers(instance_id, out_count)` | Get total number of discovered trusted issuers |
 | `cedarling_loaded_trusted_issuers_count(instance_id, out_count)` | Get number of successfully loaded trusted issuers |
