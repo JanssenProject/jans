@@ -37,14 +37,24 @@ function trustedIssuersJson(issuers) {
   return entries;
 }
 
-export async function createPolicyArchive(fixturePath, outputDirectory, name) {
+// `specVersion` 0 writes the unversioned layout, for Cedarling releases that
+// predate spec v2; 2 writes a `trusted-issuers.json`.
+export async function createPolicyArchive(
+  fixturePath,
+  outputDirectory,
+  name,
+  { specVersion = 2 } = {},
+) {
+  if (specVersion !== 0 && specVersion !== 2) {
+    throw new Error(`unsupported policy store spec version ${specVersion}`);
+  }
   const fixture = parseYaml(await readFile(fixturePath, "utf8"));
   const [[storeId, store]] = Object.entries(fixture.policy_stores);
   const source = join(outputDirectory, name);
   const archive = join(outputDirectory, `${name}.cjar`);
   const files = {
     "metadata.json": JSON.stringify({
-      policy_store_spec_version: 2,
+      ...(specVersion === 2 && { policy_store_spec_version: 2 }),
       cedar_version: fixture.cedar_version,
       policy_store: { id: storeId, name: store.name, version: "1.0.0" },
     }),
@@ -57,9 +67,15 @@ export async function createPolicyArchive(fixturePath, outputDirectory, name) {
   if (Object.keys(store.custom_issuers ?? {}).length > 0) {
     throw new Error(`${fixturePath}: custom_issuers are not supported`);
   }
-  const trustedIssuers = trustedIssuersJson(store.trusted_issuers ?? {});
-  if (Object.keys(trustedIssuers).length > 0) {
-    files["trusted-issuers.json"] = JSON.stringify(trustedIssuers);
+  if (specVersion === 0) {
+    for (const [id, issuer] of Object.entries(store.trusted_issuers ?? {})) {
+      files[`trusted-issuers/${id}.json`] = JSON.stringify(issuer);
+    }
+  } else {
+    const trustedIssuers = trustedIssuersJson(store.trusted_issuers ?? {});
+    if (Object.keys(trustedIssuers).length > 0) {
+      files["trusted-issuers.json"] = JSON.stringify(trustedIssuers);
+    }
   }
 
   await rm(source, { force: true, recursive: true });
