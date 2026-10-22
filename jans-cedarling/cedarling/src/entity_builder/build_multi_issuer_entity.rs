@@ -24,6 +24,9 @@ pub enum MultiIssuerEntityError {
     #[error("Missing issuer claim in JWT")]
     MissingIssuer,
 
+    #[error("token type '{0}' is not configured, so it has no context.tokens key")]
+    MissingContextKey(String),
+
     #[error("Missing exp claim in JWT")]
     MissingExpClaim,
 
@@ -497,7 +500,7 @@ impl EntityBuilder {
         self.context_keys
             .get(token_name)
             .map(ToString::to_string)
-            .ok_or(MultiIssuerEntityError::MissingIssuer)
+            .ok_or_else(|| MultiIssuerEntityError::MissingContextKey(token_name.to_string()))
     }
 }
 
@@ -823,8 +826,8 @@ mod tests {
             .generate_entity_key("Custom::Employee_Token")
             .expect_err("an unconfigured token type must not get a key");
         assert!(
-            matches!(err, MultiIssuerEntityError::MissingIssuer),
-            "expected MissingIssuer, got {err:?}"
+            matches!(&err, MultiIssuerEntityError::MissingContextKey(name) if name == "Custom::Employee_Token"),
+            "expected MissingContextKey, got {err:?}"
         );
     }
 

@@ -561,6 +561,7 @@ mod tests {
                 issuer: "Acme".into(),
                 entity_type_a: "Acme::Access_token".into(),
                 entity_type_b: "Acme::Id_token".into(),
+                difference: "iss 'https://idp.acme.com' and 'https://other.acme.com'".into(),
             }
         );
     }

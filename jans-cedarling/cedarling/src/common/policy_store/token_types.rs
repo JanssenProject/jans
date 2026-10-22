@@ -154,12 +154,14 @@ pub enum TokenTypesError {
     },
     #[error(
         "issuer '{issuer}' is described differently by '{entity_type_a}' and \
-         '{entity_type_b}': one issuer has exactly one iss and one key source"
+         '{entity_type_b}' ({difference}): one issuer has exactly one iss and one key source"
     )]
     IssuerConflict {
         issuer: String,
         entity_type_a: String,
         entity_type_b: String,
+        /// What differs, with both values.
+        difference: String,
     },
     #[error(
         "issuer '{issuer}' has JWT token '{jwt_entity_type}' and custom token \
@@ -170,11 +172,16 @@ pub enum TokenTypesError {
         jwt_entity_type: String,
         custom_entity_type: String,
     },
-    #[error("issuers '{issuer_a}' and '{issuer_b}' declare iss '{iss}' with different JWKS")]
+    #[error(
+        "issuers '{issuer_a}' and '{issuer_b}' declare iss '{iss}' with different JWKS \
+         ('{jwks_a}' and '{jwks_b}')"
+    )]
     ConflictingJwks {
         iss: String,
         issuer_a: String,
+        jwks_a: String,
         issuer_b: String,
+        jwks_b: String,
     },
     #[error(
         "entity types '{entity_type_a}' and '{entity_type_b}' share the context.tokens key \
@@ -311,13 +318,27 @@ impl TokenTypes {
             },
             Entry::Occupied(mut existing) => {
                 let existing = existing.get_mut();
-                if existing.iss_claim() != issuer.iss_claim()
-                    || existing.key_source != issuer.key_source
-                {
+                let difference = if existing.iss_claim() != issuer.iss_claim() {
+                    Some(format!(
+                        "iss '{}' and '{}'",
+                        existing.iss_claim(),
+                        issuer.iss_claim()
+                    ))
+                } else if existing.key_source != issuer.key_source {
+                    Some(format!(
+                        "key source {} and {}",
+                        describe_key_source(&existing.key_source),
+                        describe_key_source(&issuer.key_source)
+                    ))
+                } else {
+                    None
+                };
+                if let Some(difference) = difference {
                     return Err(TokenTypesError::IssuerConflict {
                         issuer: issuer.name.clone(),
                         entity_type_a: any_entity_type(existing),
                         entity_type_b: any_entity_type(&issuer),
+                        difference,
                     });
                 }
                 existing.token_metadata.extend(issuer.token_metadata);
@@ -348,7 +369,9 @@ impl TokenTypes {
                         return Err(TokenTypesError::ConflictingJwks {
                             iss: issuer.iss_claim().to_string(),
                             issuer_a: (*existing_name).to_string(),
+                            jwks_a: existing_jwks.to_string(),
                             issuer_b: issuer.name.clone(),
+                            jwks_b: jwks.to_string(),
                         });
                     }
                 },
@@ -370,6 +393,14 @@ impl TokenTypes {
     /// JWT issuers by name.
     pub(crate) fn jwt_issuers(&self) -> &HashMap<String, TrustedIssuer> {
         &self.jwt_issuers
+    }
+}
+
+/// Names a key source and its URL in an error.
+fn describe_key_source(key_source: &KeySource) -> String {
+    match key_source {
+        KeySource::Discovery { configuration } => format!("configuration '{configuration}'"),
+        KeySource::Static { jwks } => format!("jwks '{jwks}'"),
     }
 }
 
@@ -608,6 +639,7 @@ mod tests {
                 issuer: "Acme".into(),
                 entity_type_a: "Acme::Access_token".into(),
                 entity_type_b: "Acme::Id_token".into(),
+                difference: "iss 'https://idp.acme.com' and 'https://idp.beta.com'".into(),
             }
         );
     }
@@ -627,9 +659,17 @@ mod tests {
             [],
         )
         .expect_err("one issuer must have one key source");
-        assert!(
-            matches!(&err, TokenTypesError::IssuerConflict { issuer, .. } if issuer == "Acme"),
-            "expected IssuerConflict for Acme, got {err:?}"
+        assert_eq!(
+            err,
+            TokenTypesError::IssuerConflict {
+                issuer: "Acme".into(),
+                entity_type_a: "Acme::Access_token".into(),
+                entity_type_b: "Acme::Id_token".into(),
+                difference: "key source configuration \
+                             'https://idp.acme.com/.well-known/openid-configuration' and jwks \
+                             'https://idp.acme.com/keys'"
+                    .into(),
+            }
         );
     }
 
@@ -676,7 +716,9 @@ mod tests {
             TokenTypesError::ConflictingJwks {
                 iss: "https://auth.partner.io".into(),
                 issuer_a: "Other".into(),
+                jwks_a: "https://evil.example/keys".into(),
                 issuer_b: "Partner".into(),
+                jwks_b: "https://auth.partner.io/keys".into(),
             }
         );
     }
@@ -708,7 +750,9 @@ mod tests {
             TokenTypesError::ConflictingJwks {
                 iss: "https://idp.x/realms/a".into(),
                 issuer_a: "Other".into(),
+                jwks_a: "https://evil.example/keys".into(),
                 issuer_b: "Partner".into(),
+                jwks_b: "https://idp.x/keys".into(),
             }
         );
     }
@@ -766,6 +810,7 @@ mod tests {
                 issuer: "Partner".into(),
                 entity_type_a: "Partner::Access_token".into(),
                 entity_type_b: "Partner::Id_token".into(),
+                difference: "iss 'https://idp.x/realms/a' and 'https://idp.x/realms/b'".into(),
             }
         );
     }
