@@ -9,13 +9,15 @@
 //! never signed, so the producer chain gets no gap. Lengths are
 //! counted in UTF-16 units, because Lock counts Java `String` length.
 
+use std::sync::Arc;
+
 use jans_trace_core::Digest;
 use jans_trace_core::inputs::token_fingerprint;
 use url::Url;
 use uuid7::Uuid;
 
 use crate::authz::TraceContext;
-use crate::common::policy_store::PolicyStoreWithID;
+use crate::common::policy_store::PolicyStoreMetadata;
 
 /// Lock `MAX_FACT_TEXT_LENGTH` for `action` and `resource_type`
 /// (`EventKindValidationSupport`).
@@ -130,9 +132,12 @@ pub(crate) struct PolicyFacts {
 impl PolicyFacts {
     /// `None` when the store cannot back a record: no `.cjar` (`bundle_hash`),
     /// no metadata, or an empty id or version, all of which Lock requires.
-    pub(crate) fn from_store(store: &PolicyStoreWithID) -> Option<Self> {
-        let bundle_hash = store.bundle_hash()?;
-        let metadata = store.metadata.as_ref()?;
+    pub(crate) fn from_archive(
+        bundle_hash: Option<Digest>,
+        metadata: Option<&PolicyStoreMetadata>,
+    ) -> Option<Self> {
+        let bundle_hash = bundle_hash?;
+        let metadata = metadata?;
         let non_empty = |value: &str| (!value.is_empty()).then(|| value.to_string());
         Some(Self {
             store_id: non_empty(metadata.id())?,
@@ -152,7 +157,7 @@ pub(crate) struct RecordDraft {
     pub(crate) signed_at: u64,
     pub(crate) trace: TraceContext,
     pub(crate) decision: DecisionFacts,
-    pub(crate) policy: PolicyFacts,
+    pub(crate) policy: Arc<PolicyFacts>,
 }
 
 /// Why no record is built. Each maps to a `trace_record_status`:
@@ -178,7 +183,7 @@ impl RecordDraft {
         signed_at: u64,
         trace: &TraceContext,
         decision: DecisionFacts,
-        policy: PolicyFacts,
+        policy: Arc<PolicyFacts>,
     ) -> Result<Self, DraftError> {
         require_context(&trace.execution_id, "execution_id")?;
         require_context(&trace.execution_authority, "execution_authority")?;
@@ -293,6 +298,7 @@ mod tests {
     use jans_trace_core::inputs::token_fingerprint;
 
     use super::*;
+    use crate::common::policy_store::PolicyStoreWithID;
     use crate::common::policy_store::test_utils::fixtures;
     use crate::log::gen_uuid7;
     use crate::trace::test_utils::{CjarStore, cjar_store};
@@ -339,7 +345,13 @@ mod tests {
         trace: &TraceContext,
         decision: DecisionFacts,
     ) -> Result<RecordDraft, DraftError> {
-        RecordDraft::new(gen_uuid7(), 1_700_000_000, trace, decision, policy())
+        RecordDraft::new(
+            gen_uuid7(),
+            1_700_000_000,
+            trace,
+            decision,
+            Arc::new(policy()),
+        )
     }
 
     fn draft(decision: DecisionFacts) -> Result<RecordDraft, DraftError> {
@@ -600,7 +612,9 @@ mod tests {
     fn policy_facts_from_cjar_store() {
         let CjarStore { store, bundle_hash } =
             cjar_store(&fixtures::minimal_valid().with_version("2.1.0"));
-        let facts = PolicyFacts::from_store(&store).expect("a .cjar store has policy facts");
+        let facts = store
+            .trace_policy()
+            .expect("a .cjar store has policy facts");
         assert_eq!(
             facts.bundle_hash, bundle_hash,
             "bundle_hash comes from the store"
@@ -629,8 +643,17 @@ mod tests {
             archived.metadata.clone(),
         );
         assert!(
-            PolicyFacts::from_store(&store).is_none(),
+            store.trace_policy().is_none(),
             "a store without bundle_hash cannot back a TRACE record"
+        );
+    }
+
+    #[test]
+    fn policy_facts_none_without_store_version() {
+        let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid().with_version(""));
+        assert!(
+            store.trace_policy().is_none(),
+            "a .cjar whose metadata has no policy store version cannot back a TRACE record"
         );
     }
 }

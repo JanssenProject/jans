@@ -16,7 +16,7 @@ use tokio::sync::mpsc::error::TrySendError;
 use uuid7::Uuid;
 
 use super::record::{
-    DecisionFacts, DraftError, PolicyFacts, RawTokenInField, RecordDraft, TokenRef, is_lock_issuer,
+    DecisionFacts, DraftError, RawTokenInField, RecordDraft, TokenRef, is_lock_issuer,
 };
 use super::status::TraceRecordStatus;
 use crate::authz::AuthorizeOptions;
@@ -51,6 +51,25 @@ impl TraceRecorder {
         Self { tx, log, metrics }
     }
 
+    /// Warns that `store` cannot back a record. Called when an `Authz` is built
+    /// on the store, so decisions on it only count the status.
+    pub(crate) fn warn_if_untraceable(&self, store: &PolicyStoreWithID) {
+        if store.trace_policy().is_some() {
+            return;
+        }
+        self.log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(
+                "TRACE records will not be emitted: `trace.policy` needs a policy store loaded \
+                 from a .cjar, with an id and a version"
+                    .to_string(),
+            ),
+        );
+    }
+
     /// Hands the record of one decision to the emitter and counts the status.
     /// `facts` runs only when the host passed a TRACE context, so a call without
     /// one does not pay for reading its tokens.
@@ -76,16 +95,12 @@ impl TraceRecorder {
         let Some(trace) = &options.trace else {
             return TraceRecordStatus::NotEmittedMissingContext;
         };
-        let Some(policy) = PolicyFacts::from_store(policy_store) else {
-            self.warn(
-                request_id,
-                "`trace.policy` needs a policy store loaded from a .cjar, with an id and a \
-                 version",
-            );
+        // Warned once, when the `Authz` was built on this store.
+        let Some(policy) = policy_store.trace_policy() else {
             return TraceRecordStatus::NotEmittedInvalidField;
         };
         let draft = facts().and_then(|decision| {
-            RecordDraft::new(request_id, signed_at(), trace, decision, policy)
+            RecordDraft::new(request_id, signed_at(), trace, decision, Arc::clone(policy))
         });
         let draft = match draft {
             Ok(draft) => draft,
@@ -222,6 +237,10 @@ mod tests {
         ))
     }
 
+    fn minimal_store() -> PolicyStoreWithID {
+        cjar_store(&fixtures::minimal_valid()).store
+    }
+
     fn facts(tokens: Vec<TokenRef>) -> DecisionFacts {
         DecisionFacts {
             action: "TestApp::Action::\"read\"".to_string(),
@@ -307,7 +326,7 @@ mod tests {
         let status = recorder.record(
             gen_uuid7(),
             &AuthorizeOptions::default(),
-            &cjar_store(&fixtures::minimal_valid()).store,
+            &minimal_store(),
             || {
                 built.set(true);
                 Ok(facts(Vec::new()))
@@ -364,7 +383,7 @@ mod tests {
         let status = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics()).record(
             gen_uuid7(),
             &options(),
-            &cjar_store(&fixtures::minimal_valid()).store,
+            &minimal_store(),
             || Ok(facts(Vec::new())),
         );
         assert_eq!(
@@ -380,7 +399,7 @@ mod tests {
         let status = TraceRecorder::new(None, TEST_LOGGER.clone(), metrics.clone()).record(
             gen_uuid7(),
             &options(),
-            &cjar_store(&fixtures::minimal_valid()).store,
+            &minimal_store(),
             || Ok(facts(Vec::new())),
         );
         assert_eq!(
@@ -399,7 +418,29 @@ mod tests {
     }
 
     #[test]
-    fn store_without_bundle_hash_is_invalid_field() {
+    fn records_of_one_store_share_its_policy_facts() {
+        let (tx, mut rx) = mpsc::channel(2);
+        let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid());
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics());
+        for _ in 0..2 {
+            let status = recorder.record(gen_uuid7(), &options(), &store, || Ok(facts(Vec::new())));
+            assert_eq!(status, TraceRecordStatus::Emitted, "both records are sent");
+        }
+
+        let policy = store
+            .trace_policy()
+            .expect("a .cjar store has policy facts");
+        for _ in 0..2 {
+            let draft = rx.try_recv().expect("the record is sent");
+            assert!(
+                Arc::ptr_eq(&draft.policy, policy),
+                "a record should share the policy facts of its store instead of copying them"
+            );
+        }
+    }
+
+    #[test]
+    fn store_without_bundle_hash_warns_once_and_is_invalid_field() {
         let CjarStore {
             store: archived, ..
         } = cjar_store(&fixtures::minimal_valid());
@@ -409,20 +450,24 @@ mod tests {
             archived.metadata.clone(),
         );
         let log = memory_log();
-        let status = TraceRecorder::new(None, log.clone(), metrics()).record(
-            gen_uuid7(),
-            &options(),
-            &store,
-            || Ok(facts(Vec::new())),
-        );
-        assert_eq!(
-            status,
-            TraceRecordStatus::NotEmittedInvalidField,
-            "a store not loaded from .cjar cannot back a record"
-        );
+        let recorder = TraceRecorder::new(None, log.clone(), metrics());
+        recorder.warn_if_untraceable(&store);
         assert!(
             warned(&log, "trace.policy"),
-            "the warning should name the field"
+            "a store that cannot back a record should be warned about, naming the field"
+        );
+
+        for _ in 0..2 {
+            let status = recorder.record(gen_uuid7(), &options(), &store, || Ok(facts(Vec::new())));
+            assert_eq!(
+                status,
+                TraceRecordStatus::NotEmittedInvalidField,
+                "a store not loaded from .cjar cannot back a record"
+            );
+        }
+        assert!(
+            !warned(&log, "trace.policy"),
+            "decisions should not repeat the warning given when the store was loaded"
         );
     }
 
@@ -433,7 +478,7 @@ mod tests {
         let status = TraceRecorder::new(None, log.clone(), metrics()).record(
             request_id,
             &options(),
-            &cjar_store(&fixtures::minimal_valid()).store,
+            &minimal_store(),
             || {
                 let mut facts = facts(Vec::new());
                 facts.action = "a".repeat(513);
@@ -544,7 +589,7 @@ mod tests {
         let status = TraceRecorder::new(None, log.clone(), metrics()).record(
             gen_uuid7(),
             &options(),
-            &cjar_store(&fixtures::minimal_valid()).store,
+            &minimal_store(),
             || Ok(facts(refs)),
         );
         assert_eq!(

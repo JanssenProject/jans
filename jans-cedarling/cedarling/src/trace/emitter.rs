@@ -826,12 +826,12 @@ mod tests {
             outcome: Outcome::Allow,
             tokens,
         };
-        let policy = PolicyFacts {
+        let policy = Arc::new(PolicyFacts {
             store_id: "store-1".to_string(),
             store_version: "1.0.0".to_string(),
             language_version: "4.4".to_string(),
             bundle_hash: compute_bundle_hash(b"archive"),
-        };
+        });
         RecordDraft::new(gen_uuid7(), 1_781_138_542, &trace, decision, policy)
             .expect("test draft builds")
     }
@@ -1180,8 +1180,8 @@ mod tests {
         params.max_retries = 1;
         let (tx, rx) = mpsc::channel(4);
         let handle = spawn_emitter(params, rx).expect("the emitter should start");
-        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics);
         let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid());
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics);
         let options = AuthorizeOptions::with_trace(TraceContext::new(
             "exec-1".to_string(),
             "https://gateway.example.com".to_string(),

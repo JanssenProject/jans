@@ -1897,6 +1897,53 @@ type Context = {
     }
 
     #[tokio::test]
+    async fn untraceable_store_is_warned_once_when_authz_is_built() {
+        let log = memory_log();
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let recorder = TraceRecorder::new(None, log.clone(), metrics.clone());
+        let rebuilder = rebuilder(log.clone(), metrics);
+        let store = parsed_store(&fixtures::minimal_valid().with_version(""))
+            .await
+            .store;
+        let is_store_warning = |entry: &serde_json::Value| {
+            entry["level"] == "WARN"
+                && entry["msg"]
+                    .as_str()
+                    .is_some_and(|message| message.contains("trace.policy"))
+        };
+
+        let authz = bootstrap(&rebuilder, store, Some(recorder)).await;
+        assert_eq!(
+            log.pop_logs()
+                .iter()
+                .filter(|entry| is_store_warning(entry))
+                .count(),
+            1,
+            "building an Authz on a store that cannot back a record should warn once"
+        );
+
+        for _ in 0..2 {
+            authz
+                .authorize_unsigned(&request(with_trace()))
+                .expect("the decision should be made");
+            let logs = log.pop_logs();
+            let status = logs
+                .iter()
+                .find(|entry| entry["log_kind"] == "Decision")
+                .and_then(|entry| entry["trace_record_status"].as_str());
+            assert_eq!(
+                status,
+                Some("not_emitted_invalid_field"),
+                "the store cannot back a record"
+            );
+            assert!(
+                !logs.iter().any(is_store_warning),
+                "a decision should not repeat the warning given when the Authz was built"
+            );
+        }
+    }
+
+    #[tokio::test]
     async fn decision_log_carries_status_only_with_trace() {
         for (trace, expected) in [(true, Some("not_emitted_no_endpoint")), (false, None)] {
             let log = memory_log();

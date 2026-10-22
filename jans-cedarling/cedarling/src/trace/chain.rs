@@ -164,6 +164,7 @@ fn token(token: &TokenRef) -> Value {
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeSet;
+    use std::sync::Arc;
 
     use jans_trace_core::assertion::{
         ParseUnsignedAssertionError, SignError, SignedAssertion, VerificationContext, VerifyError,
@@ -217,12 +218,12 @@ mod tests {
             outcome: Outcome::Allow,
             tokens,
         };
-        let policy = PolicyFacts {
+        let policy = Arc::new(PolicyFacts {
             store_id: "store-1".to_string(),
             store_version: "1.0.0".to_string(),
             language_version: "4.4".to_string(),
             bundle_hash: jans_trace_core::inputs::compute_bundle_hash(b"archive"),
-        };
+        });
         RecordDraft::new(gen_uuid7(), 1_781_138_542, &trace, decision, policy)
             .expect("test draft should build")
     }

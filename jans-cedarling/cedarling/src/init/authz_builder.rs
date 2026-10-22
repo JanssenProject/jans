@@ -127,6 +127,9 @@ pub(crate) async fn build_authz(
         .map_err(|e| BuildAuthzError::EntityBuilder(e.to_string()))?,
     );
 
+    if let Some(recorder) = &trace {
+        recorder.warn_if_untraceable(&policy_store);
+    }
     let config = AuthzConfig {
         log_service: log.clone(),
         policy_store,
