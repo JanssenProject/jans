@@ -9,6 +9,7 @@ import io.jans.agama.dsl.TranspilerException;
 import io.jans.agama.dsl.error.SyntaxException;
 import io.jans.agama.engine.misc.FlowUtils;
 import io.jans.agama.engine.service.AgamaPersistenceService;
+import io.jans.agama.model.EngineConfig;
 import io.jans.agama.model.Flow;
 import io.jans.agama.model.Flow.ATTR_NAMES;
 import io.jans.agama.model.FlowMetadata;
@@ -25,10 +26,7 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -56,6 +54,9 @@ public class Transpilation {
     
     @Inject
     private FlowUtils futils;
+    
+    @Inject
+    private EngineConfig engineConfig;
 
     private AtomicBoolean isActive;
     
@@ -124,13 +125,23 @@ public class Transpilation {
                     //A newcomer. This script was enabled recently
                     candidates.add(name);
                     traces.put(name, rev);
-                } else if (
-                    //there might be a compilation of this script running already.
-                    //If the node in charge of this crashed before completion, the random 
-                    //condition helps to get the job done by another node in the near future
-                    (pfl.getTransHash() == null && Math.random() < PR) ||
-                    (rev < 0 || rev > traces.get(name))) {
-                    candidates.add(name);
+                } else {
+                    String th = pfl.getTransHash();
+                    //the compiled code might have been generated using a version of the
+                    //transpiler that is not the latest
+                    boolean upgrade = th != null && !th.equals(Transpiler.VERSION) &&
+                            !Optional.ofNullable(engineConfig.getDisableTCHV()).orElse(false); 
+
+                    if (upgrade ||
+                    //there might be a compilation of this Agama flow running already. If the node
+                    //in charge of it shutdown or crashed before completion, the random condition 
+                    //below helps to get the job re-tried by another node in the near future 
+                    th == null && Math.random() < PR ||
+                    //revision is negative or was manually increased in DB
+                    rev < 0 || rev > traces.get(name)) {
+
+                        candidates.add(name);
+                    }
                 }
             }
         }
@@ -169,7 +180,7 @@ public class Transpilation {
                 String compiled = result.getCode();
                 fl.setMetadata(meta);
                 fl.setTranspiled(compiled);
-                fl.setTransHash(futils.hash(compiled));
+                fl.setTransHash(Transpiler.VERSION);
                 fl.setCodeError(null);
                 
                 logger.debug("Persisting changes...");
