@@ -41,18 +41,25 @@ impl IssuerName {
 impl FromStr for IssuerName {
     type Err = TokenTypesError;
 
-    /// Accepts a single Cedar identifier: `^[A-Za-z_][A-Za-z0-9_]*$`.
+    /// Accepts a single Cedar identifier, `^[A-Za-z_][A-Za-z0-9_]*$`, that Cedar
+    /// also accepts as a namespace, so reserved words such as `if` are refused.
     fn from_str(name: &str) -> Result<Self, Self::Err> {
+        let invalid = |reason: String| TokenTypesError::InvalidIssuerName {
+            name: name.to_string(),
+            reason,
+        };
         let mut chars = name.chars();
-        let valid = chars
+        let identifier = chars
             .next()
             .is_some_and(|c| c.is_ascii_alphabetic() || c == '_')
             && chars.all(|c| c.is_ascii_alphanumeric() || c == '_');
-        if valid {
-            Ok(Self(name.to_smolstr()))
-        } else {
-            Err(TokenTypesError::InvalidIssuerName(name.to_string()))
+        if !identifier {
+            return Err(invalid("expected ^[A-Za-z_][A-Za-z0-9_]*$".to_string()));
         }
+        // The issuer is the namespace of its `TrustedIssuer` entity type.
+        cedar_policy::EntityTypeName::from_str(&format!("{name}::TrustedIssuer"))
+            .map_err(|e| invalid(e.to_string()))?;
+        Ok(Self(name.to_smolstr()))
     }
 }
 
@@ -134,8 +141,8 @@ pub(crate) struct TokenTypes {
 /// A conflict in the token-type configuration, found before anything loads.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub enum TokenTypesError {
-    #[error("issuer '{0}' must be a single Cedar identifier (^[A-Za-z_][A-Za-z0-9_]*$)")]
-    InvalidIssuerName(String),
+    #[error("issuer '{name}' must be a single Cedar identifier usable as a namespace: {reason}")]
+    InvalidIssuerName { name: String, reason: String },
     #[error("'{entity_type}' is not a valid Cedar entity type: {reason}")]
     InvalidEntityType { entity_type: String, reason: String },
     #[error("entity type '{entity_type}' is declared by issuers '{issuer_a}' and '{issuer_b}'")]
@@ -497,11 +504,30 @@ mod tests {
         for name in ["Acme Incorporated", "Acme::Corp", "1acme", ""] {
             let err = TokenTypes::build([jwt(name, ACME, &["Acme::Access_token"])], [])
                 .expect_err("a name that is not one identifier must be rejected");
-            assert_eq!(
-                err,
-                TokenTypesError::InvalidIssuerName(name.to_string()),
-                "{name:?} should be rejected by name"
+            assert!(
+                matches!(&err, TokenTypesError::InvalidIssuerName { name: n, .. } if n == name),
+                "{name:?} should be rejected by name, got {err:?}"
             );
+        }
+    }
+
+    /// The issuer becomes a Cedar namespace, so a word Cedar reserves is refused
+    /// when the store loads rather than when entities are first built.
+    #[test]
+    fn rejects_issuer_name_cedar_reserves() {
+        for name in [
+            "if", "true", "in", "is", "has", "like", "then", "else", "__cedar",
+        ] {
+            let jwt_err = TokenTypes::build([jwt(name, ACME, &["Acme::Access_token"])], [])
+                .expect_err("a reserved JWT issuer name must be rejected");
+            let custom_err = TokenTypes::build([], [custom(name, &["Acme::Api_key"])])
+                .expect_err("a reserved custom issuer name must be rejected");
+            for err in [jwt_err, custom_err] {
+                assert!(
+                    matches!(&err, TokenTypesError::InvalidIssuerName { name: n, .. } if n == name),
+                    "{name:?} should be rejected as an issuer name, got {err:?}"
+                );
+            }
         }
     }
 

@@ -254,7 +254,7 @@ accepts no tokens.
 | --- | --- | --- | --- |
 | key | all | yes | Cedar entity type. A request `TokenInput.mapping` must equal it exactly. Its last segment, lowercased, is the type part of the `context.tokens` key. |
 | `type` | all | yes | `jwt` or `custom`; selects which other fields are allowed. |
-| `issuer` | all | yes | Issuer identity, a single Cedar identifier (`^[A-Za-z_][A-Za-z0-9_]*$`). It is the namespace of the issuer's `TrustedIssuer` entity (`Acme::TrustedIssuer`) and, lowercased, the prefix of its `context.tokens` keys (`acme_access_token`), so renaming it changes what policies see. |
+| `issuer` | all | yes | Issuer identity, a single Cedar identifier (`^[A-Za-z_][A-Za-z0-9_]*$`) that is not a Cedar reserved word (`if`, `true`, `in`, `__cedar`, ...). It is the namespace of the issuer's `TrustedIssuer` entity (`Acme::TrustedIssuer`) and, lowercased, the prefix of its `context.tokens` keys (`acme_access_token`), so renaming it changes what policies see. |
 | `configuration_endpoints.configuration` | jwt | one of two forms | OIDC discovery URL: the issuer URL followed by `/.well-known/openid-configuration`. The expected `iss` is that issuer URL, path included; keys come from the discovered `jwks_uri`. |
 | `configuration_endpoints.jwks` + `configuration_endpoints.iss` | jwt | one of two forms | Static form, without discovery: keys come from `jwks`, and the expected `iss` is given explicitly. |
 | `token_id` | jwt | no, default `jti` | Claim used as the token entity id. |

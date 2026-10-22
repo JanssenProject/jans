@@ -372,7 +372,7 @@ mod tests {
 
     #[test]
     fn rejects_issuer_that_is_not_one_identifier() {
-        for issuer in ["Acme Incorporated", "Acme::Corp"] {
+        for issuer in ["Acme Incorporated", "Acme::Corp", "if", "__cedar"] {
             assert_rejected(
                 &json!({ "type": "custom", "issuer": issuer }),
                 &format!("issuer '{issuer}' must be a single Cedar identifier"),
