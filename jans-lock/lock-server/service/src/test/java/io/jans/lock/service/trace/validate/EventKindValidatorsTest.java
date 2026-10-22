@@ -7,13 +7,14 @@
 package io.jans.lock.service.trace.validate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -34,11 +36,13 @@ import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.trace.error.TraceValidationException;
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.parse.CommonAssertionValidator;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 import io.jans.lock.service.trace.parse.TraceAssertionParser;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 
 /**
  * Tests for the {@code EventKindValidator} implementations and {@link EventKindValidatorRegistry}
@@ -69,6 +73,7 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 
 		parser = new TraceAssertionParser();
 		setField(parser, "appConfiguration", appConfiguration);
+		setField(parser, "cryptoProvider", TraceTestCrypto.javaProvider());
 
 		commonValidator = new CommonAssertionValidator();
 		setField(commonValidator, "appConfiguration", appConfiguration);
@@ -124,7 +129,11 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	private TraceValidationException validateAndCapture(ObjectNode root) {
-		return assertThrows(TraceValidationException.class, () -> registry.validate(parseAndCommonValidate(root)));
+		return assertThrows(TraceValidationException.class, () -> validateFully(root));
+	}
+
+	private CorrelationInputs validateFully(ObjectNode root) {
+		return registry.validate(parseAndCommonValidate(root));
 	}
 
 	// -- Optional GovOps profile members ------------------------------------------------------
@@ -204,6 +213,31 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		assertEquals(1, result.getTokenRefs().size());
 		assertEquals("https://accounts.example.org", result.getTokenRefs().get(0).getIssuer());
 		assertEquals("9c9f2e77-9a3e-4b62-9a2a-2f6e6e2a9f3e", result.getTokenRefs().get(0).getJti());
+	}
+
+	@Test
+	void testAuthorizationDecision_policyRelease_populatesCorrelationInputs() throws IOException {
+		CorrelationInputs result = registry.validate(parseAndCommonValidate(loadFixture("authorization_decision_valid.json")));
+
+		assertEquals(new PolicyRef("https://example.org/policy-stores/payments", "1.2.3",
+				"sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf7"), result.getPolicy());
+	}
+
+	@Test
+	void testRuntimeEffect_noPolicy_policyAbsent() throws IOException {
+		CorrelationInputs result = registry.validate(parseAndCommonValidate(loadFixture("runtime_effect_valid.json")));
+
+		assertNull(result.getPolicy());
+	}
+
+	@Test
+	void testAuthorizationDecision_policyStoreIdTooLong_throwsLength() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		set(root, TextNode.valueOf("s".repeat(256)), "trace", "policy", "policy_store_id");
+
+		TraceValidationException ex = validateAndCapture(root);
+
+		assertEquals("length:trace.policy.policy_store_id", ex.getReason());
 	}
 
 	@Test
@@ -387,13 +421,20 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testAuthorizationDecision_capabilityIds_forbidden() throws IOException {
+	void testAuthorizationDecision_capabilityIds_ignoredAndListed() throws IOException {
 		ObjectNode root = loadFixture("authorization_decision_valid.json");
 		((ObjectNode) at(root, "trace", "event")).set("capability_ids", MAPPER.createArrayNode()
 				.add(MAPPER.createObjectNode().put("capability_id", "invoke:payment-authorization")
 						.put("outcome", "ALLOW")));
 
-		assertRejected(root, "forbidden:trace.event.capability_ids");
+		assertCapabilityIdsIgnored(root);
+	}
+
+	private void assertCapabilityIdsIgnored(ObjectNode root) {
+		ParsedAssertion assertion = parseAndCommonValidate(root);
+		registry.validate(assertion);
+
+		assertEquals(List.of("trace.event.capability_ids"), assertion.getReservedMembers());
 	}
 
 	@Test
@@ -630,12 +671,12 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testCapabilityInvoked_capabilityIdsAndResourceId_forbidden() throws IOException {
+	void testCapabilityInvoked_capabilityIdsIgnoredAndResourceIdForbidden() throws IOException {
 		ObjectNode legacy = loadFixture("capability_invoked_valid.json");
 		((ObjectNode) at(legacy, "trace", "event")).set("capability_ids", MAPPER.createArrayNode()
 				.add(MAPPER.createObjectNode().put("capability_id", "invoke:payment-authorization")
 						.put("outcome", "ALLOW")));
-		assertRejected(legacy, "forbidden:trace.event.capability_ids");
+		assertCapabilityIdsIgnored(legacy);
 
 		ObjectNode resourceId = loadFixture("capability_invoked_valid.json");
 		set(resourceId, TextNode.valueOf("x"), "trace", "event", "invocation", "resource_id");
@@ -655,7 +696,7 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testRuntimeEffect_withCapabilityIds_throwsForbidden() throws IOException {
+	void testRuntimeEffect_withCapabilityIds_ignoredAndListed() throws IOException {
 		ObjectNode root = loadFixture("runtime_effect_valid.json");
 		ArrayNode capabilityIds = MAPPER.createArrayNode();
 		ObjectNode entry = MAPPER.createObjectNode();
@@ -664,10 +705,7 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		capabilityIds.add(entry);
 		set(root, capabilityIds, "trace", "event", "capability_ids");
 
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("forbidden:trace.event.capability_ids", ex.getReason());
+		assertCapabilityIdsIgnored(root);
 	}
 
 	@Test
@@ -765,15 +803,20 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 
 	// -- tokens[] (common to every kind) ---------------------------------------------------------
 
-	@Test
-	void testTokens_bothJtiAndFingerprintPresent_throwsTokenRefIdentity() throws IOException {
+	@ParameterizedTest(name = "{0}")
+	@CsvSource({
+			"fingerprint, abcdefghijklmnopqrst, token_ref_identity",
+			"issuer, http://accounts.example.org, invalid:trace.event.tokens[0].issuer",
+			"jti, eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dGhpc2lzYXNpZ25hdHVyZQ, raw_token_material" })
+	void testTokens_invalidTokenMember_throwsInvalidAssertion(String member, String value, String reason)
+			throws IOException {
 		ObjectNode root = loadFixture("authorization_decision_valid.json");
-		set(root, TextNode.valueOf("abcdefghijklmnopqrst"), "trace", "event", "tokens", "0", "fingerprint");
+		set(root, TextNode.valueOf(value), "trace", "event", "tokens", "0", member);
 
 		TraceValidationException ex = validateAndCapture(root);
 
 		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("token_ref_identity", ex.getReason());
+		assertEquals(reason, ex.getReason());
 	}
 
 	@Test
@@ -813,17 +856,6 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testTokens_issuerHttpNonLocalhost_throwsInvalid() throws IOException {
-		ObjectNode root = loadFixture("authorization_decision_valid.json");
-		set(root, TextNode.valueOf("http://accounts.example.org"), "trace", "event", "tokens", "0", "issuer");
-
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("invalid:trace.event.tokens[0].issuer", ex.getReason());
-	}
-
-	@Test
 	void testTokens_issuerHttpLocalhost_accepted() throws IOException {
 		ObjectNode root = loadFixture("authorization_decision_valid.json");
 		set(root, TextNode.valueOf("http://localhost:8080"), "trace", "event", "tokens", "0", "issuer");
@@ -831,18 +863,6 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		ParsedAssertion assertion = parseAndCommonValidate(root);
 
 		registry.validate(assertion);
-	}
-
-	@Test
-	void testTokens_rawJwtAsJti_throwsRawTokenMaterial() throws IOException {
-		ObjectNode root = loadFixture("authorization_decision_valid.json");
-		set(root, TextNode.valueOf("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dGhpc2lzYXNpZ25hdHVyZQ"), "trace",
-				"event", "tokens", "0", "jti");
-
-		TraceValidationException ex = validateAndCapture(root);
-
-		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
-		assertEquals("raw_token_material", ex.getReason());
 	}
 
 	@Test
@@ -862,7 +882,7 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		TokenRef first = result.getTokenRefs().get(0);
 		TokenRef sameJtiDifferentIssuer = result.getTokenRefs().get(1);
 		assertEquals(first.getJti(), sameJtiDifferentIssuer.getJti());
-		assertFalse(first.getIssuer().equals(sameJtiDifferentIssuer.getIssuer()));
+		assertNotEquals(first.getIssuer(), sameJtiDifferentIssuer.getIssuer());
 	}
 
 	// -- registry ---------------------------------------------------------------------------------

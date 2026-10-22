@@ -23,12 +23,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -68,7 +67,8 @@ import jakarta.ws.rs.core.MediaType;
 @ApplicationScoped
 public class PolicyDownloadService {
 
-	private static final int DEFAULT_INTERVAL = 30;
+	/** Seconds between policy store reloads; each reload publishes a {@link PolicySnapshotEvent}. */
+	public static final int RELOAD_INTERVAL_SECONDS = 30;
 
 	public static final MediaType APPLICATION_ZIP_TYPE = new MediaType("application", "zip");
 
@@ -84,6 +84,9 @@ public class PolicyDownloadService {
 	@Inject
 	private Event<TimerEvent> timerEvent;
 
+	@Inject
+	private Event<PolicySnapshotEvent> policySnapshotEvent;
+
     @Inject
 	private CedarlingConfiguration cedarlingConfiguration;
 
@@ -95,7 +98,8 @@ public class PolicyDownloadService {
 
 	private ObjectMapper objectMapper;
 
-	private Map<String, LoadedPolicySource> loadedPolicySourcesUris;
+	private final AtomicReference<Map<String, LoadedPolicySource>> loadedPolicySourcesUris = new AtomicReference<>(
+			Collections.emptyMap());
 
 	private AtomicBoolean isActive;
 
@@ -105,14 +109,14 @@ public class PolicyDownloadService {
 		this.isActive = new AtomicBoolean(false);
 
 		this.objectMapper = new ObjectMapper();	
-		this.loadedPolicySourcesUris = new HashMap<>();
+		this.loadedPolicySourcesUris.set(Collections.emptyMap());
 	}
 
 	public void initTimer() {
 		log.debug("Initializing Policy Download Service Timer");
 
 		final int delay = 30;
-		final int interval = DEFAULT_INTERVAL;
+		final int interval = RELOAD_INTERVAL_SECONDS;
 
 		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new PolicyDownloadEvent(),
 				Scheduled.Literal.INSTANCE));
@@ -152,7 +156,7 @@ public class PolicyDownloadService {
 			return;
 		}
 
-		List<String> downloadedPolicies = new ArrayList<>();
+		Map<String, LoadedPolicySource> reloaded = new LinkedHashMap<>();
 		for(PolicySource policySource : cedarlingConfiguration.getPolicySources()) {
 			// Load policy source from specified source
 			List<LoadedPolicySource> loadedPolicySources = loadPolicy(policySource);
@@ -162,27 +166,15 @@ public class PolicyDownloadService {
 
 			for(LoadedPolicySource loadedPolicySource : loadedPolicySources) {
 				String policyStoreUri = loadedPolicySource.getPolicyStoreUri();
-				if (downloadedPolicies.contains(policyStoreUri)) {
+				if (reloaded.put(policyStoreUri, loadedPolicySource) != null) {
 					log.warn("Policy '{}' from '{}' replaces a policy loaded from another source", policyStoreUri, loadedPolicySource.getSourceUri());
 				}
-
-				// Collect list of policyStoreUris
-				downloadedPolicies.add(policyStoreUri);
-
-				// Update loadedPolicySourcesUris
-				loadedPolicySourcesUris.put(policyStoreUri, loadedPolicySource);
 			}
 		}
 
-		// Remove unloaded policy Uris 
-		for (Iterator<Entry<String, LoadedPolicySource>> it = loadedPolicySourcesUris.entrySet().iterator(); it.hasNext();) {
-			Entry<String, LoadedPolicySource> item = it.next();
-			if (!downloadedPolicies.contains(item.getKey())) {
-				it.remove();
-			}
-		}
+		publish(Collections.unmodifiableMap(reloaded));
 
-		log.debug("End URIs policies reload. Count policies: {}", loadedPolicySourcesUris.size());
+		log.debug("End URIs policies reload. Count policies: {}", reloaded.size());
 	}
 
 	private List<LoadedPolicySource> loadPolicy(PolicySource policySource) {
@@ -434,15 +426,28 @@ public class PolicyDownloadService {
 	}
 
 	private void cleanAllPolicies() {
-		loadedPolicySourcesUris.clear();
+		publish(Collections.emptyMap());
 	}
 
-	public Map<String, LoadedPolicySource> getLoadedPolicies() {
-		if (loadedPolicySourcesUris == null) {
-			return new HashMap<>();
+	/**
+	 * Swaps in the new set atomically, so readers see either the previous or the new one, then
+	 * tells observers. An observer failure is logged and never undoes the swap.
+	 */
+	private void publish(Map<String, LoadedPolicySource> snapshot) {
+		Map<String, LoadedPolicySource> previous = loadedPolicySourcesUris.getAndSet(snapshot);
+		try {
+			policySnapshotEvent.fire(new PolicySnapshotEvent(previous, snapshot, System.currentTimeMillis()));
+		} catch (RuntimeException ex) {
+			log.error("Policy snapshot observer failed", ex);
 		}
+	}
 
-		return new HashMap<>(loadedPolicySourcesUris);
+	/**
+	 * @return the current snapshot, unmodifiable; a reload publishes a new map instead of
+	 *         changing this one
+	 */
+	public Map<String, LoadedPolicySource> getLoadedPolicies() {
+		return loadedPolicySourcesUris.get();
 	}
 
 	public class LoadedPolicySource {

@@ -20,7 +20,7 @@ import io.jans.lock.service.trace.parse.ParsedAssertion;
 /**
  * Validates {@code RUNTIME_EFFECT} records (design §7.2): an observed effect, with {@code outcome}
  * as the only hard requirement, matching the full design's intentionally minimal schema for this
- * kind. {@code capability_ids}, the {@code decision}/{@code decisions} and
+ * kind. The {@code decision}/{@code decisions} and
  * {@code invocation}/{@code invocations} facts and {@code trace.policy} contradict this kind and
  * are rejected; {@code trace.subject} is optional and validated when present. A
  * missing {@code produced_effect} parent edge is a warning, not a rejection: the design describes
@@ -49,7 +49,6 @@ public final class RuntimeEffectValidator implements EventKindValidator {
 
 		EventKindValidationSupport.requireNonEmptyString(event, "outcome", "trace.event.outcome", null);
 
-		EventKindValidationSupport.forbidField(event, "capability_ids", "trace.event.capability_ids");
 		for (String field : new String[] { "decision", "decisions", "invocation", "invocations" }) {
 			EventKindValidationSupport.forbidField(event, field, "trace.event." + field);
 		}

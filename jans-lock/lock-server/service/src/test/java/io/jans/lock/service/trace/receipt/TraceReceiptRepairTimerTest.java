@@ -22,6 +22,7 @@ import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 
 /**
  * Tests for {@link TraceReceiptRepairTimer#repairPendingReceipts()}, called directly (not through the CDI timer event): a stale {@code PENDING} claim settles to
@@ -55,6 +56,7 @@ class TraceReceiptRepairTimerTest extends BaseLockServiceTest {
 		setField(receiptChain, "log", LoggerFactory.getLogger(TraceReceiptChain.class));
 		setField(receiptChain, "store", store);
 		setField(receiptChain, "appConfiguration", appConfiguration);
+		setField(receiptChain, "cryptoProvider", TraceTestCrypto.javaProvider());
 
 		timer = new TraceReceiptRepairTimer();
 		setField(timer, "log", LoggerFactory.getLogger(TraceReceiptRepairTimer.class));

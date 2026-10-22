@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.TraceIssuers;
-import io.jans.lock.service.trace.crypto.StrictBase64Url;
+import io.jans.lock.trace.crypto.StrictBase64Url;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -52,6 +52,10 @@ public class CommonAssertionValidator {
 	@Inject
 	private AppConfiguration appConfiguration;
 
+	private static final String TRACE = "trace";
+
+	private static final String RECORD_ID = "record_id";
+
 	private Clock clock = Clock.systemUTC();
 
 	/**
@@ -61,15 +65,14 @@ public class CommonAssertionValidator {
 	public void validate(ParsedAssertion assertion) {
 		ObjectNode root = assertion.getRoot();
 
-		rejectDomainField(root);
-		rejectLockDerivedMembers(root);
+		ReservedMemberPaths reservedMembers = findReservedMembers(root);
 
-		ObjectNode trace = requireObject(root, "trace", "trace");
+		ObjectNode trace = requireObject(root, TRACE, TRACE);
 		ObjectNode producerChainNode = requireObject(root, "producer_chain", "producer_chain");
 
 		String producer = requireNonEmptyString(root, "producer", "producer", null);
 		String kid = requireNonEmptyString(root, "kid", "kid", null);
-		String recordId = requireNonEmptyString(root, "record_id", "record_id", null);
+		String recordId = requireNonEmptyString(root, RECORD_ID, RECORD_ID, null);
 		if (!isUuid(recordId) && !isUlid(recordId)) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "record_id_format");
 		}
@@ -157,6 +160,7 @@ public class CommonAssertionValidator {
 				producerChainId, sequenceNumber, prevRecordHash));
 		assertion.setParentRecordIds(parentRecordIds);
 		assertion.setSignature(signature);
+		assertion.setReservedMembers(reservedMembers.getPaths(), reservedMembers.getTotal());
 	}
 
 	/**
@@ -168,25 +172,8 @@ public class CommonAssertionValidator {
 			optionalNonEmptyString(trace, field, "trace." + field, MAX_SHORT_STRING);
 		}
 
-		JsonNode operationIds = trace.get("operation_ids");
-		if (isPresent(operationIds)) {
-			if (!operationIds.isArray()) {
-				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
-						"type:trace.operation_ids");
-			}
-			for (int i = 0; i < operationIds.size(); i++) {
-				checkNonEmptyString(operationIds.get(i), "trace.operation_ids[" + i + "]", null);
-			}
-		}
-
-		optionalNonEmptyString(trace, "session_id", "trace.session_id", null);
-		if (isPresent(trace.get("session_id")) || isPresent(trace.get("session_issuer"))) {
-			String sessionIssuer = requireNonEmptyString(trace, "session_issuer", "trace.session_issuer", null);
-			if (!TraceIssuers.isValid(sessionIssuer)) {
-				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
-						"invalid:trace.session_issuer");
-			}
-		}
+		validateOperationIds(trace.get("operation_ids"));
+		validateSession(trace);
 
 		optionalNonEmptyString(trace, "evidence_origin", "trace.evidence_origin", null);
 		optionalNonEmptyString(trace, "measurement_point", "trace.measurement_point", null);
@@ -199,19 +186,42 @@ public class CommonAssertionValidator {
 
 		optionalObject(trace, "attestation_ref", "trace.attestation_ref");
 
-		JsonNode workloadAuthentication = optionalObject(trace, "workload_authentication",
-				"trace.workload_authentication");
-		if (workloadAuthentication != null) {
-			for (String field : new String[] { "authentication_layer", "method", "authenticated_workload_id",
-					"proof_ref" }) {
-				optionalString(workloadAuthentication, field, "trace.workload_authentication." + field);
-			}
-		}
+		optionalStrings(optionalObject(trace, "workload_authentication", "trace.workload_authentication"),
+				"trace.workload_authentication.", "authentication_layer", "method", "authenticated_workload_id",
+				"proof_ref");
+		optionalStrings(optionalObject(trace, "model", "trace.model"), "trace.model.", "provider", "model_id",
+				"version");
+	}
 
-		JsonNode model = optionalObject(trace, "model", "trace.model");
-		if (model != null) {
-			for (String field : new String[] { "provider", "model_id", "version" }) {
-				optionalString(model, field, "trace.model." + field);
+	private void optionalStrings(JsonNode node, String pathPrefix, String... fields) {
+		if (node == null) {
+			return;
+		}
+		for (String field : fields) {
+			optionalString(node, field, pathPrefix + field);
+		}
+	}
+
+	private void validateOperationIds(JsonNode operationIds) {
+		if (!isPresent(operationIds)) {
+			return;
+		}
+		if (!operationIds.isArray()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"type:trace.operation_ids");
+		}
+		for (int i = 0; i < operationIds.size(); i++) {
+			checkNonEmptyString(operationIds.get(i), "trace.operation_ids[" + i + "]", null);
+		}
+	}
+
+	private void validateSession(ObjectNode trace) {
+		optionalNonEmptyString(trace, "session_id", "trace.session_id", null);
+		if (isPresent(trace.get("session_id")) || isPresent(trace.get("session_issuer"))) {
+			String sessionIssuer = requireNonEmptyString(trace, "session_issuer", "trace.session_issuer", null);
+			if (!TraceIssuers.isValid(sessionIssuer)) {
+				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+						"invalid:trace.session_issuer");
 			}
 		}
 	}
@@ -313,55 +323,55 @@ public class CommonAssertionValidator {
 		}
 	}
 
-	private void rejectDomainField(ObjectNode root) {
-		if (root.has(TraceConstants.DOMAIN_FIELD) || root.path("trace").has(TraceConstants.DOMAIN_FIELD)) {
-			throw new TraceValidationException(TraceValidationException.ERROR_DOMAIN_FIELD_FORBIDDEN,
-					TraceConstants.DOMAIN_FIELD);
-		}
-	}
-
 	/**
-	 * Rejects any {@link TraceConstants#LOCK_DERIVED_MEMBERS} member at the top level, in
-	 * {@code trace}, in {@code trace.event} and in each {@code decision}/{@code invocation} fact.
-	 * Members of other objects (parent edges, {@code tokens[]}) are not reserved. Shape errors are
-	 * left to the later checks, so a non-object container is skipped here.
+	 * Lists the paths of members Lock derives itself ({@link TraceConstants#DOMAIN_FIELD} and
+	 * {@link TraceConstants#LOCK_DERIVED_MEMBERS}) found at the top level, in {@code trace},
+	 * {@code trace.policy}, {@code trace.event} and in each {@code decision}/{@code invocation}
+	 * fact (GovOps profile §12). Such members are ignored, never rejected: the record is flagged
+	 * and Lock's own values are used. Members of other objects (parent edges, {@code tokens[]})
+	 * are not reserved. A non-object container is skipped and left to the shape checks.
 	 */
-	private void rejectLockDerivedMembers(ObjectNode root) {
-		rejectLockDerivedMembers(root, "");
-		JsonNode trace = root.get("trace");
+	private ReservedMemberPaths findReservedMembers(ObjectNode root) {
+		ReservedMemberPaths found = new ReservedMemberPaths();
+		collectReservedMembers(root, "", found);
+		JsonNode trace = root.get(TRACE);
 		if (trace == null || !trace.isObject()) {
-			return;
+			return found;
 		}
-		rejectLockDerivedMembers(trace, "trace.");
+		collectReservedMembers(trace, "trace.", found);
+		collectReservedMembersOfObject(trace.get("policy"), "trace.policy.", found);
 		JsonNode event = trace.get("event");
 		if (event == null || !event.isObject()) {
-			return;
+			return found;
 		}
-		rejectLockDerivedMembers(event, "trace.event.");
+		collectReservedMembers(event, TraceConstants.TRACE_EVENT_PATH, found);
 		for (String field : new String[] { "decision", "invocation" }) {
-			JsonNode fact = event.get(field);
-			if (fact != null && fact.isObject()) {
-				rejectLockDerivedMembers(fact, "trace.event." + field + ".");
-			}
+			collectReservedMembersOfObject(event.get(field), TraceConstants.TRACE_EVENT_PATH + field + ".", found);
 		}
 		for (String field : new String[] { "decisions", "invocations" }) {
 			JsonNode entries = event.get(field);
-			if (entries == null || !entries.isArray()) {
-				continue;
-			}
-			for (int i = 0; i < entries.size(); i++) {
-				if (entries.get(i).isObject()) {
-					rejectLockDerivedMembers(entries.get(i), "trace.event." + field + "[" + i + "].");
+			if (entries != null && entries.isArray()) {
+				for (int i = 0; i < entries.size(); i++) {
+					collectReservedMembersOfObject(entries.get(i), TraceConstants.TRACE_EVENT_PATH + field + "[" + i + "].", found);
 				}
 			}
 		}
+		return found;
 	}
 
-	private void rejectLockDerivedMembers(JsonNode node, String pathPrefix) {
+	private static void collectReservedMembersOfObject(JsonNode node, String pathPrefix, ReservedMemberPaths found) {
+		if (node != null && node.isObject()) {
+			collectReservedMembers(node, pathPrefix, found);
+		}
+	}
+
+	private static void collectReservedMembers(JsonNode node, String pathPrefix, ReservedMemberPaths found) {
+		if (node.has(TraceConstants.DOMAIN_FIELD)) {
+			found.add(pathPrefix + TraceConstants.DOMAIN_FIELD);
+		}
 		for (String member : TraceConstants.LOCK_DERIVED_MEMBERS) {
 			if (node.has(member)) {
-				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
-						"forbidden:" + pathPrefix + member);
+				found.add(pathPrefix + member);
 			}
 		}
 	}
@@ -384,7 +394,7 @@ public class CommonAssertionValidator {
 						"type:" + path);
 			}
 			String producerId = requireNonEmptyString(entry, "producer_id", path + ".producer_id", null);
-			String recordId = requireNonEmptyString(entry, "record_id", path + ".record_id", null);
+			String recordId = requireNonEmptyString(entry, RECORD_ID, path + "." + RECORD_ID, null);
 			String relationshipType = requireNonEmptyString(entry, "relationship_type", path + ".relationship_type",
 					null);
 			result.add(new ParsedAssertion.ParentRecordId(producerId, recordId, relationshipType));
