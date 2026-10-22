@@ -40,8 +40,8 @@ pub(crate) struct TraceRecorder {
 
 impl TraceRecorder {
     #[cfg_attr(
-        not(test),
-        expect(dead_code, reason = "built at startup together with the TRACE emitter")
+        target_arch = "wasm32",
+        expect(dead_code, reason = "TRACE is not started on WASM")
     )]
     pub(crate) fn new(
         tx: Option<mpsc::Sender<RecordDraft>>,

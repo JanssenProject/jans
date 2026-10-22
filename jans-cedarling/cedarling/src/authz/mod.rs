@@ -1727,12 +1727,10 @@ mod trace_record_tests {
     use super::*;
     use crate::app_types::PdpID;
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
-    use crate::authz::request::{
-        BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest, TokenInput,
-    };
-    use crate::common::policy_store::test_utils::{PolicyStoreTestBuilder, fixtures};
+    use crate::authz::request::{BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest};
+    use crate::common::policy_store::test_utils::fixtures;
     use crate::log::{LogStrategy, TEST_LOGGER};
-    use crate::trace::test_utils::CjarStore;
+    use crate::trace::test_utils::{CjarStore, dolphin_token, multi_issuer_store};
     use crate::trace::{Outcome, TraceRecorder};
     use crate::{LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig};
 
@@ -1775,65 +1773,6 @@ mod trace_record_tests {
             vec![read_item("r1"), read_item("r2"), read_item("r3")],
         )
         .with_options(options)
-    }
-
-    /// A `.cjar` store with one JWT issuer, so a multi-issuer decision has a
-    /// `bundle_hash` to record.
-    fn multi_issuer_store() -> PolicyStoreTestBuilder {
-        fixtures::minimal_valid()
-            .with_schema(
-                r#"namespace Dolphin {
-  entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
-  entity Access_Token = {
-    token_type: String,
-    jti: String,
-    iss: TrustedIssuer,
-    validated_at: Long,
-    exp: Long,
-    sub?: String,
-  } tags Set<String>;
-  entity Resource;
-  entity Any;
-  action "Read" appliesTo {
-    principal: [Any],
-    resource: [Resource],
-    context: Context
-  };
-}
-namespace Jans {
-  type Url = {"host": String, "path": String, "protocol": String};
-}
-type Context = {
-  tokens: {
-    dolphin_access_token?: Dolphin::Access_Token,
-    total_token_count: Long
-  }
-};
-"#,
-            )
-            .with_trusted_issuer(
-                "dolphin",
-                json!({
-                    "name": "Dolphin",
-                    "openid_configuration_endpoint":
-                        "https://idp.dolphin.sea/.well-known/openid-configuration",
-                    "token_metadata": {
-                        "access_token": {"entity_type_name": "Dolphin::Access_Token"}
-                    }
-                })
-                .to_string(),
-            )
-    }
-
-    fn dolphin_token() -> TokenInput {
-        let payload = test_utils::token_claims::generate_token_using_claims(json!({
-            "iss": "https://idp.dolphin.sea",
-            "jti": "dolphin-1",
-            "sub": "u1",
-            "exp": 2_000_000_000,
-            "iat": 1_516_239_022,
-        }));
-        TokenInput::new("Dolphin::Access_Token".to_string(), payload)
     }
 
     fn dolphin_item(action: &str, resource_id: &str) -> BatchItem {

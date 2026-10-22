@@ -12,16 +12,6 @@
 //! but not yet accepted. While Lock is down the channel fills up and the
 //! authorize path stops handing records over, so the chain gets no gap.
 
-// Started together with Cedarling, which does not do it yet. Remove this attribute with
-// that: `expect` turns into a warning as soon as the items are used.
-#![cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "started together with Cedarling; remove when it is wired in"
-    )
-)]
-
 use std::borrow::Borrow;
 use std::collections::{HashMap, VecDeque};
 use std::num::NonZeroUsize;
@@ -70,14 +60,17 @@ pub(crate) struct EmitterParams {
 
 /// Why the emitter did not start.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
-pub(crate) enum EmitterInitError {
+pub enum EmitterInitError {
     /// Checked here as well as when the configuration is read, so a
     /// `BootstrapConfig` built directly cannot skip it.
     #[error(
         "`CEDARLING_TRACE_BULK_MAX_BYTES` must be at least {min}: a smaller bulk request \
          cannot carry the largest record Lock accepts"
     )]
-    BulkMaxBytesTooSmall { min: usize },
+    BulkMaxBytesTooSmall {
+        /// The smallest limit that carries the largest record.
+        min: usize,
+    },
 }
 
 /// The running emitter. Dropping it stops the emitter, which still sends what

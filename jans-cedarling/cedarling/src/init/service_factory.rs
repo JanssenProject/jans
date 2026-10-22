@@ -92,7 +92,10 @@ impl<'a> ServiceFactory<'a> {
 
     /// Sets the recorder the `Authz` built next records TRACE with; `None`
     /// leaves TRACE disabled.
-    #[expect(dead_code, reason = "set at startup together with the TRACE emitter")]
+    #[cfg_attr(
+        target_arch = "wasm32",
+        expect(dead_code, reason = "TRACE is not started on WASM")
+    )]
     pub(crate) fn set_trace_recorder(&mut self, trace: Option<TraceRecorder>) {
         self.trace = trace;
     }

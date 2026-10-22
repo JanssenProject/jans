@@ -21,6 +21,10 @@ mod status;
 pub(crate) mod test_utils;
 
 #[cfg(not(target_arch = "wasm32"))]
+pub use emitter::EmitterInitError;
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) use emitter::{EmitterHandle, EmitterParams, spawn_emitter};
+#[cfg(not(target_arch = "wasm32"))]
 pub(crate) use key::ProducerKey;
 pub use producer_id::{ParseProducerIdError, ProducerId};
 pub(crate) use record::{DecisionFacts, DraftError, Outcome, PolicyFacts, TokenRef};
