@@ -96,13 +96,13 @@ namespace CI {
     // URL type for TrustedIssuer's issuer_entity_id attribute.
     type Url = {"host": String, "path": String, "protocol": String};
 
-    // Cedarling builds one TrustedIssuer entity per issuer in policy-store/trusted-issuers/.
-    // The issuer name field must equal the Cedar namespace ("CI") so the entity type resolves correctly.
+    // Cedarling builds one TrustedIssuer entity per issuer in policy-store/trusted-issuers.json.
+    // Its "issuer" ("CI") is the namespace of that entity type.
     entity TrustedIssuer = {"issuer_entity_id": Url};
 
     // A GitHub Actions workflow run authenticated via OIDC JWT.
     // Cedarling maps verified JWT claims to these attributes when the token mapping
-    // is "CI::GitHubWorkflow" (see policy-store/trusted-issuers/github-actions.json).
+    // is "CI::GitHubWorkflow" (see policy-store/trusted-issuers.json).
     entity GitHubWorkflow {
         iss:          TrustedIssuer,
         sub:          String,
@@ -277,23 +277,19 @@ The `mapping` field tells Cedarling which Cedar entity type to instantiate from 
 Key differences from the unsigned config:
 
 - `CEDARLING_JWT_SIG_VALIDATION: "enabled"` — Cedarling fetches GitHub's JWKS and validates every token's signature.
-- Trusted issuer configuration lives in `policy-store/trusted-issuers/github-actions.json`, not in the OPA bootstrap config. That file declares GitHub's OIDC endpoint (`https://token.actions.githubusercontent.com`) as the trusted issuer and specifies which entity type (`CI::GitHubWorkflow`) to build from the token claims. Cedarling discovers the JWKS automatically via the issuer's OpenID Connect discovery document.
+- Trusted issuer configuration lives in `policy-store/trusted-issuers.json`, not in the OPA bootstrap config. That file declares the entity type (`CI::GitHubWorkflow`) to build from the token claims and GitHub's OIDC discovery endpoint, whose issuer `https://token.actions.githubusercontent.com` every token must carry. Cedarling discovers the JWKS automatically via the issuer's OpenID Connect discovery document.
 
 ### Trusted issuer file format
 
-`policy-store/trusted-issuers/github-actions.json`:
+`policy-store/trusted-issuers.json`:
 
 ```json
 {
-  "name": "CI",
-  "description": "GitHub Actions OIDC token issuer. The name 'CI' must match the Cedar namespace so Cedarling can build the CI::TrustedIssuer entity. Cedarling locates this issuer by matching the JWT iss claim against the origin of configuration_endpoint.",
-  "configuration_endpoint": "https://token.actions.githubusercontent.com/.well-known/openid-configuration",
-  "token_metadata": {
-    "CI::GitHubWorkflow": {
-      "trusted": true,
-      "entity_type_name": "CI::GitHubWorkflow",
-      "token_id": "jti",
-      "required_claims": []
+  "CI::GitHubWorkflow": {
+    "type": "jwt",
+    "issuer": "CI",
+    "configuration_endpoints": {
+      "configuration": "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
     }
   }
 }
@@ -303,14 +299,14 @@ Field reference:
 
 | Field | Description |
 |---|---|
-| `name` | Must match the Cedar namespace used in your policies and schema (e.g. `CI` maps to `CI::*` entity types). Cedarling also uses this value when constructing the `CI::TrustedIssuer` entity. |
-| `configuration_endpoint` | URL of the issuer's OpenID Connect discovery document (`.well-known/openid-configuration`). Cedarling fetches the `jwks_uri` from this document and uses it to validate JWT signatures automatically. To use a different issuer (GitLab, Okta, etc.) replace this URL with the issuer's own discovery endpoint. |
-| `token_metadata` | A map from Cedar entity type name to per-token settings. Each key must be a fully-qualified Cedar entity type (e.g. `CI::GitHubWorkflow`). |
-| `entity_type_name` | The Cedar entity type Cedarling instantiates from the verified JWT claims. Must match the key in `token_metadata` and the type declared in your Cedar schema. |
-| `token_id` | JWT claim used as the Cedar entity's unique ID (typically `jti`). |
-| `required_claims` | List of JWT claim names that must be present for the token to be considered valid. Set to `[]` to enforce no additional claims beyond signature validation. |
+| key | The Cedar entity type Cedarling instantiates from the verified JWT claims (`CI::GitHubWorkflow`). It must be declared in your Cedar schema, and the token `mapping` sent by the wrapper must equal it. |
+| `type` | `jwt` for a signed token validated by Cedarling. |
+| `issuer` | The issuer identity. It is the namespace of the `TrustedIssuer` entity (`CI::TrustedIssuer`) and, lowercased, the prefix of the `context.tokens` key (`ci_githubworkflow`). |
+| `configuration_endpoints.configuration` | URL of the issuer's OpenID Connect discovery document. The URL without `/.well-known/openid-configuration` is the `iss` every token must carry, and the discovery document must declare the same issuer. Cedarling fetches the `jwks_uri` from this document and uses it to validate JWT signatures automatically. |
+| `token_id` | Optional JWT claim used as the Cedar entity's unique ID; defaults to `jti`. |
+| `required_claims` | Optional list of JWT claim names that must be present for the token to be considered valid; defaults to none. |
 
-To adapt this configuration for another issuer, create a new JSON file in `policy-store/trusted-issuers/` (one file per issuer), update `name` to the Cedar namespace you want to use, point `configuration_endpoint` at the new issuer's discovery URL, and adjust `entity_type_name` to match the Cedar entity type declared in your schema.
+To adapt this configuration for another issuer (GitLab, Okta, etc.), add an entry keyed by the Cedar entity type declared in your schema, set `issuer` to the Cedar namespace you want for its `TrustedIssuer` entity, and point `configuration_endpoints.configuration` at the new issuer's discovery URL. See [`trusted-issuers.json`](../reference/cedarling-policy-store.md#trusted-issuersjson) for every field.
 
 ## The Authorization Wrapper
 
@@ -446,7 +442,7 @@ See the [demo README](https://github.com/JanssenProject/jans/tree/main/jans-ceda
 |---|---|---|
 | **Identity source** | Environment variables (self-asserted) | GitHub OIDC token (cryptographically signed) |
 | **Signature validation** | None — `CEDARLING_JWT_SIG_VALIDATION: "disabled"` | Enabled — Cedarling fetches GitHub's JWKS and verifies every token |
-| **Trusted issuer config** | Not required — no `trusted-issuers/` directory needed | Required — `policy-store/trusted-issuers/github-actions.json` declares the issuer |
+| **Trusted issuer config** | Not required — no `trusted-issuers.json` needed | Required — `policy-store/trusted-issuers.json` declares the issuer |
 | **Cedarling built-in** | `authorize_unsigned` | `authorize_multi_issuer` |
 | **OPA endpoint** | `/v1/data/infra/terraform` | `/v1/data/infra/terraform_jwt` |
 | **Cedar namespace** | `Infra` | `CI` |

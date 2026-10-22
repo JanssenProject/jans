@@ -32,7 +32,7 @@ Two Terraform authorization demos are available. Use this table to decide which 
 |---|---|---|
 | **Identity source** | Environment variables asserted by the caller | Signed GitHub Actions OIDC token |
 | **Signature validation** | None — `CEDARLING_JWT_SIG_VALIDATION: "disabled"` | Cryptographic — Cedarling fetches GitHub's JWKS and verifies every token |
-| **Trusted issuer config** | Not required — no `trusted-issuers/` directory needed | Required — `policy-store/trusted-issuers/github-actions.json` must declare the issuer endpoint |
+| **Trusted issuer config** | Not required — no `trusted-issuers.json` needed | Required — `policy-store/trusted-issuers.json` must declare the issuer endpoint |
 | **Principal model** | `Infra::User` with asserted `role` attribute | `CI::GitHubWorkflow` with verified JWT claims (`repository`, `ref`, `environment`) |
 | **Cedarling built-in** | `authorize_unsigned` | `authorize_multi_issuer` |
 | **Secret management** | Requires `TF_USER_ID` / `TF_USER_ROLES` set by the operator | No secrets — GitHub issues the OIDC token automatically |
@@ -211,12 +211,12 @@ The `cedarling.opa.authorize_unsigned` built-in is the right choice here because
 
 ### No trusted issuer file needed
 
-The JWT-based demo ([`terraform-authz-jwt.md`](./terraform-authz-jwt.md)) requires a `policy-store/trusted-issuers/` directory so Cedarling can fetch and validate the signing keys for the incoming OIDC token. This unsigned demo does not need that directory because:
+The JWT-based demo ([`terraform-authz-jwt.md`](./terraform-authz-jwt.md)) requires a `policy-store/trusted-issuers.json` so Cedarling can fetch and validate the signing keys for the incoming OIDC token. This unsigned demo does not need that file because:
 
 - `CEDARLING_JWT_SIG_VALIDATION: "disabled"` — no signature is checked.
 - Identity is asserted directly in the `authorize_unsigned` payload (via the `principal` object in the OPA `input`) rather than carried inside a signed JWT.
 
-The policy-store directory for this demo therefore contains only `metadata.json`, `schema.cedarschema`, and `policies/`. If you later switch to signed tokens, add a `trusted-issuers/` subdirectory with one JSON file per issuer — see the [trusted issuer file format](./terraform-authz-jwt.md#trusted-issuer-file-format) in the JWT guide for the exact schema and field reference.
+The policy-store directory for this demo therefore contains only `metadata.json`, `schema.cedarschema`, and `policies/`. If you later switch to signed tokens, add a `trusted-issuers.json` declaring each token type — see the [trusted issuer file format](./terraform-authz-jwt.md#trusted-issuer-file-format) in the JWT guide for the exact schema and field reference.
 
 ## The Authorization Wrapper
 
