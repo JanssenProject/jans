@@ -16,6 +16,8 @@ use std::str::FromStr;
 
 use smol_str::{SmolStr, ToSmolStr};
 
+use crate::common::issuer_utils::IssClaim;
+
 use super::{
     CustomIssuerMetadata, CustomTokenMetadata, KeySource, TokenEntityMetadata, TrustedIssuer,
 };
@@ -280,7 +282,8 @@ impl TokenTypes {
     }
 
     /// Adds `issuer`'s token types to the issuer of the same name, which must
-    /// carry the same `iss` and key source.
+    /// carry the same `iss` and key source. `iss` is compared normalized, as
+    /// tokens are matched against it.
     fn merge_jwt_issuer(&mut self, issuer: TrustedIssuer) -> Result<(), TokenTypesError> {
         match self.jwt_issuers.entry(issuer.name.clone()) {
             Entry::Vacant(slot) => {
@@ -289,7 +292,9 @@ impl TokenTypes {
             },
             Entry::Occupied(mut existing) => {
                 let existing = existing.get_mut();
-                if existing.iss() != issuer.iss() || existing.key_source != issuer.key_source {
+                if existing.iss_claim() != issuer.iss_claim()
+                    || existing.key_source != issuer.key_source
+                {
                     return Err(TokenTypesError::IssuerConflict {
                         issuer: issuer.name.clone(),
                         entity_type_a: any_entity_type(existing),
@@ -303,17 +308,18 @@ impl TokenTypes {
     }
 
     /// Rejects two static issuers with one `iss` but different JWKS, which would
-    /// let one plant keys under the other's `iss`.
+    /// let one plant keys under the other's `iss`. Keys are stored per
+    /// normalized `iss`, so that is what is compared.
     fn check_static_jwks(&self) -> Result<(), TokenTypesError> {
         let mut issuers: Vec<&TrustedIssuer> = self.jwt_issuers.values().collect();
         issuers.sort_by(|a, b| a.name.cmp(&b.name));
 
-        let mut jwks_by_iss: HashMap<&url::Url, (&url::Url, &str)> = HashMap::new();
+        let mut jwks_by_iss: HashMap<IssClaim, (&url::Url, &str)> = HashMap::new();
         for issuer in issuers {
             let KeySource::Static { jwks } = &issuer.key_source else {
                 continue;
             };
-            match jwks_by_iss.entry(issuer.iss()) {
+            match jwks_by_iss.entry(issuer.iss_claim()) {
                 Entry::Vacant(slot) => {
                     slot.insert((jwks, &issuer.name));
                 },
@@ -321,7 +327,7 @@ impl TokenTypes {
                     let (existing_jwks, existing_name) = existing.get();
                     if *existing_jwks != jwks {
                         return Err(TokenTypesError::ConflictingJwks {
-                            iss: issuer.iss().to_string(),
+                            iss: issuer.iss_claim().to_string(),
                             issuer_a: (*existing_name).to_string(),
                             issuer_b: issuer.name.clone(),
                         });
@@ -630,9 +636,98 @@ mod tests {
         assert_eq!(
             err,
             TokenTypesError::ConflictingJwks {
-                iss: "https://auth.partner.io/".into(),
+                iss: "https://auth.partner.io".into(),
                 issuer_a: "Other".into(),
                 issuer_b: "Partner".into(),
+            }
+        );
+    }
+
+    /// A trailing slash does not make a different `iss`: tokens are matched
+    /// against the normalized value, so the checks compare that too.
+    #[test]
+    fn rejects_static_issuers_whose_iss_differs_only_by_trailing_slash() {
+        let err = TokenTypes::build(
+            [
+                static_jwt(
+                    "Partner",
+                    "https://idp.x/realms/a",
+                    "https://idp.x/keys",
+                    "Partner::Access_token",
+                ),
+                static_jwt(
+                    "Other",
+                    "https://idp.x/realms/a/",
+                    "https://evil.example/keys",
+                    "Other::Access_token",
+                ),
+            ],
+            [],
+        )
+        .expect_err("a trailing slash must not hide a second key set for one iss");
+        assert_eq!(
+            err,
+            TokenTypesError::ConflictingJwks {
+                iss: "https://idp.x/realms/a".into(),
+                issuer_a: "Other".into(),
+                issuer_b: "Partner".into(),
+            }
+        );
+    }
+
+    #[test]
+    fn merges_entries_whose_iss_differs_only_by_trailing_slash() {
+        let types = TokenTypes::build(
+            [
+                static_jwt(
+                    "Partner",
+                    "https://idp.x/realms/a",
+                    "https://idp.x/keys",
+                    "Partner::Access_token",
+                ),
+                static_jwt(
+                    "Partner",
+                    "https://idp.x/realms/a/",
+                    "https://idp.x/keys",
+                    "Partner::Id_token",
+                ),
+            ],
+            [],
+        )
+        .expect("entries naming one iss with and without a trailing slash are one issuer");
+        assert_eq!(
+            types.jwt_issuers()["Partner"].token_metadata.len(),
+            2,
+            "both token types should belong to the one issuer"
+        );
+    }
+
+    #[test]
+    fn rejects_one_issuer_with_two_iss_differing_by_path() {
+        let err = TokenTypes::build(
+            [
+                static_jwt(
+                    "Partner",
+                    "https://idp.x/realms/a",
+                    "https://idp.x/keys",
+                    "Partner::Access_token",
+                ),
+                static_jwt(
+                    "Partner",
+                    "https://idp.x/realms/b/",
+                    "https://idp.x/keys",
+                    "Partner::Id_token",
+                ),
+            ],
+            [],
+        )
+        .expect_err("one issuer must have one iss");
+        assert_eq!(
+            err,
+            TokenTypesError::IssuerConflict {
+                issuer: "Partner".into(),
+                entity_type_a: "Partner::Access_token".into(),
+                entity_type_b: "Partner::Id_token".into(),
             }
         );
     }
