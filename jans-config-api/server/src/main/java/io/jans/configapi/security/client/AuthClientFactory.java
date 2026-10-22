@@ -52,8 +52,7 @@ public class AuthClientFactory {
         return createIntrospectionService(url, followRedirects);
     }
 
-    public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
-            boolean followRedirects) {
+    public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token) {
         log.debug("Introspect Token - url:{}, ", url);
         ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient()
                 .property(CONTENT_TYPE, MediaType.APPLICATION_JSON).target(url);
@@ -133,9 +132,8 @@ public class AuthClientFactory {
         multivaluedHashMap.add("token_type_hint", tokenTypeHint);
         multivaluedHashMap.add("client_id", clientId);
 
-        Response response = request.post(Entity.entity(Entity.form(multivaluedHashMap), MediaType.APPLICATION_JSON));
+        return request.post(Entity.entity(Entity.form(multivaluedHashMap), MediaType.APPLICATION_JSON));
      
-        return response;
     }
 
     public static String getIntrospectionEndpoint(String issuer) throws JsonProcessingException {

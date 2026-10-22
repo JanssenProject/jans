@@ -55,7 +55,7 @@ public class OpenIdService implements Serializable {
         }
 
         log.info("oAuth Final introspectionUrl:{} ", introspectionUrl);
-        return AuthClientFactory.getIntrospectionResponse(introspectionUrl, header, token, false);
+        return AuthClientFactory.getIntrospectionResponse(introspectionUrl, header, token);
     }
 
     public String requestAccessToken(final String clientId, final List<String> scope) {

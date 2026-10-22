@@ -1747,19 +1747,6 @@ components:
         lockAuditFlushInterval:
           type: integer
           format: int32
-        nativeReadinessEnabled:
-          type: boolean
-        nativeReadinessAllowExternalFetch:
-          type: boolean
-        nativeReadinessMaxResponseBytes:
-          type: integer
-          format: int32
-        nativeReadinessTimeoutMs:
-          type: integer
-          format: int32
-        nativeReadinessCacheTtlSeconds:
-          type: integer
-          format: int32
         rp:
           type: array
           items:
@@ -1825,16 +1812,30 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        metricsData:
+        performanceMetrics:
           type: object
           additionalProperties:
             type: object
         period:
           type: string
-        registrationAttempts:
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        fallbackEvents:
           type: integer
           format: int64
-        registrationSuccesses:
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        registrationAttempts:
           type: integer
           format: int64
         registrationFailures:
@@ -1849,12 +1850,6 @@ components:
         authenticationFailures:
           type: integer
           format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
         authenticationSuccessRate:
           type: number
           format: double
@@ -1864,20 +1859,12 @@ components:
         authenticationAvgDuration:
           type: number
           format: double
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

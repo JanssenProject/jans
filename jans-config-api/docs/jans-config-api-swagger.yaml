@@ -5209,7 +5209,6 @@ paths:
                   - modify_ssa_response
                   - fido2_extension
                   - lock_extension
-                  - shib_post_authn_approval
               examples:
                 Response json example:
                   description: Response json example
@@ -15695,19 +15694,19 @@ components:
           type: string
         selected:
           type: boolean
+        whitePagesCanView:
+          type: boolean
         userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16851,8 +16850,6 @@ components:
           type: object
           additionalProperties:
             type: string
-        trackingSettings:
-          $ref: "#/components/schemas/TrackingSettings"
     KeyExtractor:
       type: object
       properties:
@@ -16973,11 +16970,6 @@ components:
           type: string
         sharedSecret:
           type: string
-    TrackingSettings:
-      type: object
-      properties:
-        enabled:
-          type: boolean
     TrustedIssuerConfig:
       type: object
       properties:
@@ -18062,7 +18054,6 @@ components:
           - modify_ssa_response
           - fido2_extension
           - lock_extension
-          - shib_post_authn_approval
         programmingLanguage:
           type: string
           enum:
