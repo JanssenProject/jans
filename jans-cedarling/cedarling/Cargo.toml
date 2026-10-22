@@ -27,6 +27,7 @@ serde = { workspace = true }
 serde_json = { workspace = true, features = ["raw_value"] }
 serde-saphyr = "1.3.0"
 thiserror = { workspace = true }
+jans-trace-core = { workspace = true }
 uuid7 = { version = "1.8.0", features = [
     "serde",
     "uuid",

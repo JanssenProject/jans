@@ -159,6 +159,8 @@ type RequestUnsigned struct {
 	Action    string
 	Resource  EntityData
 	Context   any
+	// Options is per-call metadata such as a TRACE context; nil means none.
+	Options *AuthorizeOptions
 }
 
 func (r RequestUnsigned) MarshalJSON() ([]byte, error) {
@@ -168,18 +170,37 @@ func (r RequestUnsigned) MarshalJSON() ([]byte, error) {
 	}
 
 	aux := struct {
-		Principal *EntityData `json:"principal,omitempty"`
-		Action    string      `json:"action"`
-		Resource  EntityData  `json:"resource"`
-		Context   any         `json:"context"`
+		Principal *EntityData       `json:"principal,omitempty"`
+		Action    string            `json:"action"`
+		Resource  EntityData        `json:"resource"`
+		Context   any               `json:"context"`
+		Options   *AuthorizeOptions `json:"options,omitempty"`
 	}{
 		Principal: r.Principal,
 		Action:    r.Action,
 		Resource:  r.Resource,
 		Context:   context,
+		Options:   r.Options,
 	}
 	return json.Marshal(aux)
 
+}
+
+// TraceContext is the TRACE execution context of a call, already normalized by
+// the host. Cedarling never generates ExecutionID: the execution initiator
+// (gateway, PEP, host) owns it together with ExecutionAuthority.
+type TraceContext struct {
+	ExecutionID        string  `json:"execution_id"`
+	ExecutionAuthority string  `json:"execution_authority"`
+	WorkloadID         string  `json:"workload_id"`
+	WorkloadInstanceID *string `json:"workload_instance_id,omitempty"`
+}
+
+// AuthorizeOptions is per-call metadata of an authorization request. None of
+// it takes part in policy evaluation: the decision is the same with or without
+// options. A nil Trace means the host has no execution context.
+type AuthorizeOptions struct {
+	Trace *TraceContext `json:"trace,omitempty"`
 }
 
 // TokenInput represents a JWT token with explicit type mapping
@@ -194,6 +215,8 @@ type AuthorizeMultiIssuerRequest struct {
 	Resource EntityData   `json:"resource"`
 	Action   string       `json:"action"`
 	Context  any          `json:"context"`
+	// Options is per-call metadata such as a TRACE context; nil means none.
+	Options *AuthorizeOptions `json:"options,omitempty"`
 }
 
 func (r AuthorizeMultiIssuerRequest) MarshalJSON() ([]byte, error) {
@@ -203,15 +226,17 @@ func (r AuthorizeMultiIssuerRequest) MarshalJSON() ([]byte, error) {
 	}
 
 	aux := struct {
-		Tokens   []TokenInput `json:"tokens"`
-		Resource EntityData   `json:"resource"`
-		Action   string       `json:"action"`
-		Context  any          `json:"context"`
+		Tokens   []TokenInput      `json:"tokens"`
+		Resource EntityData        `json:"resource"`
+		Action   string            `json:"action"`
+		Context  any               `json:"context"`
+		Options  *AuthorizeOptions `json:"options,omitempty"`
 	}{
 		Tokens:   r.Tokens,
 		Resource: r.Resource,
 		Action:   r.Action,
 		Context:  context,
+		Options:  r.Options,
 	}
 	return json.Marshal(aux)
 }
@@ -274,12 +299,16 @@ func (b BatchItem) MarshalJSON() ([]byte, error) {
 type BatchAuthorizeUnsignedRequest struct {
 	Principal *EntityData `json:"principal,omitempty"`
 	Items     []BatchItem `json:"items"`
+	// Options applies to the whole batch, not to individual items.
+	Options *AuthorizeOptions `json:"options,omitempty"`
 }
 
 // BatchAuthorizeMultiIssuerRequest bundles one token set with N BatchItems.
 type BatchAuthorizeMultiIssuerRequest struct {
 	Tokens []TokenInput `json:"tokens"`
 	Items  []BatchItem  `json:"items"`
+	// Options applies to the whole batch, not to individual items.
+	Options *AuthorizeOptions `json:"options,omitempty"`
 }
 
 // BatchItemError is the per-item build failure surfaced inside a batch

@@ -126,7 +126,7 @@ public class TraceConfiguration {
     private String chainRegistrationMode = DEFAULT_CHAIN_REGISTRATION_MODE;
 
     @DocProperty(description = "TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA", defaultValue = "JAVA")
-    @Schema(description = "TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA")
+    @Schema(description = "TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA", defaultValue = "JAVA")
     private String cryptoProvider = DEFAULT_CRYPTO_PROVIDER;
 
     public boolean isEnabled() {

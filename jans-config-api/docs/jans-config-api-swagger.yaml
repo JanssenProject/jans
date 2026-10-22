@@ -5209,6 +5209,7 @@ paths:
                   - modify_ssa_response
                   - fido2_extension
                   - lock_extension
+                  - shib_post_authn_approval
               examples:
                 Response json example:
                   description: Response json example
@@ -16850,6 +16851,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        trackingSettings:
+          $ref: "#/components/schemas/TrackingSettings"
     KeyExtractor:
       type: object
       properties:
@@ -16970,6 +16973,11 @@ components:
           type: string
         sharedSecret:
           type: string
+    TrackingSettings:
+      type: object
+      properties:
+        enabled:
+          type: boolean
     TrustedIssuerConfig:
       type: object
       properties:
@@ -18054,6 +18062,7 @@ components:
           - modify_ssa_response
           - fido2_extension
           - lock_extension
+          - shib_post_authn_approval
         programmingLanguage:
           type: string
           enum:

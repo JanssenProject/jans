@@ -20,7 +20,7 @@ use tokio::test;
 use super::utils::*;
 use crate::authz::request::EntityData;
 use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
-use crate::{DataApi, RequestUnsigned};
+use crate::{AuthorizeOptions, DataApi, RequestUnsigned};
 
 // Policy store that includes policies checking context.data
 static POLICY_STORE_WITH_DATA_ACCESS: &str = r#"
@@ -140,6 +140,7 @@ fn create_test_request(action: &str) -> RequestUnsigned {
             }
         }))
         .unwrap(),
+        options: AuthorizeOptions::default(),
     }
 }
 

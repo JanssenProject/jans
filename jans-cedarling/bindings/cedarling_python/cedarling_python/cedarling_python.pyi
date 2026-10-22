@@ -584,6 +584,7 @@ class RequestUnsigned:
     action: str
     resource: EntityData
     context: Dict[str, Any]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
@@ -591,7 +592,33 @@ class RequestUnsigned:
         resource: EntityData,
         context: Dict[str, Any],
         principal: Optional[EntityData] = None,
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
+
+@final
+class TraceContext:
+    """TRACE execution context, already normalized by the host."""
+
+    execution_id: str
+    execution_authority: str
+    workload_id: str
+    workload_instance_id: Optional[str]
+
+    def __init__(
+        self,
+        execution_id: str,
+        execution_authority: str,
+        workload_id: str,
+        workload_instance_id: Optional[str] = None,
+    ) -> None: ...
+
+@final
+class AuthorizeOptions:
+    """Per-call metadata of a request; never changes the decision."""
+
+    trace: Optional[TraceContext]
+
+    def __init__(self, trace: Optional[TraceContext] = None) -> None: ...
 
 @final
 class CedarEntityMapping:
@@ -664,6 +691,7 @@ class AuthorizeMultiIssuerRequest:
     action: str
     resource: EntityData
     context: Dict[str, Any]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
@@ -671,6 +699,7 @@ class AuthorizeMultiIssuerRequest:
         action: str,
         resource: EntityData,
         context: Dict[str, Any] | None = None,
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
 
 @final
@@ -717,11 +746,13 @@ class BatchAuthorizeUnsignedRequest:
 
     principal: Optional[EntityData]
     items: List[BatchItem]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
         items: List[BatchItem],
         principal: Optional[EntityData] = None,
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
 
 @final
@@ -730,11 +761,13 @@ class BatchAuthorizeMultiIssuerRequest:
 
     tokens: List[TokenInput]
     items: List[BatchItem]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
         tokens: List[TokenInput],
         items: List[BatchItem],
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
 
 @final

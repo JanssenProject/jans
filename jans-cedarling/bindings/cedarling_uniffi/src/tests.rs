@@ -64,6 +64,7 @@ fn test_authorize_unsigned_success() {
             JsonValue {
                 value: "{}".to_string(),
             },
+            None,
         )
         .expect("Should be executed successfully.");
 
@@ -562,7 +563,7 @@ fn test_authorize_unsigned_batch_ordered_mixed_decisions() {
     let items = vec![ok_item, bad_item, batch_item("ok-2")];
 
     let response = cedarling
-        .authorize_unsigned_batch(Some(batch_principal(true)), items)
+        .authorize_unsigned_batch(Some(batch_principal(true)), items, None)
         .expect("batch call should succeed");
 
     assert_eq!(response.results.len(), 3, "N=3 items → N=3 results");
@@ -599,7 +600,7 @@ fn test_authorize_unsigned_batch_empty_items_rejected() {
     let cedarling = create_test_cedarling();
 
     let err = cedarling
-        .authorize_unsigned_batch(Some(batch_principal(true)), Vec::new())
+        .authorize_unsigned_batch(Some(batch_principal(true)), Vec::new(), None)
         .expect_err("empty items must be rejected");
     let msg = format!("{err:?}");
     assert!(
@@ -618,7 +619,7 @@ fn test_authorize_unsigned_batch_context_defaults_when_none() {
     };
 
     let response = cedarling
-        .authorize_unsigned_batch(Some(batch_principal(true)), vec![item])
+        .authorize_unsigned_batch(Some(batch_principal(true)), vec![item], None)
         .expect("batch call should succeed");
 
     assert_eq!(
@@ -690,7 +691,7 @@ fn test_authorize_multi_issuer_batch_ordered_results() {
         .collect();
 
     let response = cedarling
-        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items)
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items, None)
         .expect("batch call should succeed at the UniFFI boundary");
 
     assert_eq!(
@@ -709,7 +710,7 @@ fn test_authorize_multi_issuer_batch_empty_tokens_rejected() {
     let cedarling = create_test_cedarling();
 
     let err = cedarling
-        .authorize_multi_issuer_batch(Vec::new(), vec![multi_issuer_item("x")])
+        .authorize_multi_issuer_batch(Vec::new(), vec![multi_issuer_item("x")], None)
         .expect_err("empty tokens must be rejected");
     let msg = format!("{err:?}");
     assert!(
@@ -723,7 +724,7 @@ fn test_authorize_multi_issuer_batch_empty_items_rejected() {
     let cedarling = create_test_cedarling();
 
     let err = cedarling
-        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], Vec::new())
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], Vec::new(), None)
         .expect_err("empty items must be rejected");
     let msg = format!("{err:?}");
     assert!(
@@ -742,7 +743,7 @@ fn test_authorize_multi_issuer_batch_context_none_defaults() {
     };
 
     let response = cedarling
-        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], vec![item])
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], vec![item], None)
         .expect("None context should default to {} and marshal cleanly");
 
     assert_eq!(
@@ -774,7 +775,7 @@ fn test_authorize_multi_issuer_batch_bad_action_surfaces_error_at_that_item() {
     ];
 
     let response = cedarling
-        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items)
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items, None)
         .expect("batch call should succeed at the UniFFI boundary");
 
     assert_eq!(
@@ -864,6 +865,7 @@ fn test_drain_metrics_local_mode_snapshot_and_reset() {
             JsonValue {
                 value: "{}".to_string(),
             },
+            None,
         )
         .expect("authz should be executed successfully");
     assert!(result.decision, "authz result should be ALLOW: {result:?}");

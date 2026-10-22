@@ -204,7 +204,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let identity: &AssertionIdentity = received.identity();
 
     // Normally `PublicKey::from_jwk(registered_jwk_text)` at key registration.
-    let public_key: PublicKey = PublicKey::from_bytes(&signer.public_key_bytes())?;
+    let public_key: PublicKey = signer.public_key();
 
     let context: VerificationContext = VerificationContext {
         expected_producer: identity.producer().to_owned(),
@@ -236,7 +236,7 @@ Shared types live at the crate root: `Digest` (`sha256:<hex>`, strict `FromStr`,
 | Module | Items | Who calls it |
 |---|---|---|
 | `assertion` | `UnsignedAssertion` (`parse`, `sign`), `SignedAssertion` (`parse`, `verify`, `as_str`, `content_digest`, `signing_input`), `parse_batch`, `batch_body`, `VerifiedAssertion`, `VerificationContext`, `AssertionIdentity` | producers parse, sign and build bulk bodies; Lock splits bulk bodies, parses and verifies; tooling reads signing input |
-| `signature` | `TraceSigner`, `Ed25519Signer` (`from_pkcs8_pem`, `from_secret_bytes`, `public_key_bytes`), `SignatureValue` | producers |
+| `signature` | `TraceSigner`, `Ed25519Signer` (`from_pkcs8_pem`, `from_secret_bytes`, `public_key`, `public_key_bytes`), `SignatureValue` | producers |
 | `key` | `PublicKey` (`from_jwk`, `from_bytes`, `to_bytes`, `thumbprint`) | Lock key registry, tooling |
 | `receipt` | `ReceivedAt`, `ReceiptPosition`, `ReceiptCommitment` (`for_assertion`, `from_stored`, field accessors, `receipt_hash`, `verify_link`), `StoredReceipt`, `ChainHead` (`empty`, `resume`, `append`), `RECEIPT_PROFILE`, `ASSERTION_PROFILE` | Lock, auditors |
 | `inputs` | `compute_bundle_hash`, `token_fingerprint` | producers (PEPs too), Lock later |
