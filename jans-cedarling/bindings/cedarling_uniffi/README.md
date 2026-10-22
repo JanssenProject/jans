@@ -286,7 +286,7 @@ policy-store/
 │   └── deny-guest.cedar
 ├── templates/              # Optional: .cedar template files
 ├── entities/               # Optional: .json entity files
-└── trusted-issuers/        # Optional: .json issuer configurations
+└── trusted-issuers.json    # Optional: accepted token types and their issuers
 ```
 
 **metadata.json structure:**
@@ -619,11 +619,11 @@ The data is injected into the evaluation context before policy evaluation, allow
 
 UniFFI `Cedarling` exposes trusted issuer loading status methods:
 
-- `isTrustedIssuerLoadedByName(issuerId: String): Boolean`
+- `isTrustedIssuerLoadedByName(issuerName: String): Boolean`
 - `isTrustedIssuerLoadedByIss(issClaim: String): Boolean`
 - `totalIssuers(): Long`
 - `loadedTrustedIssuersCount(): Long`
 - `loadedTrustedIssuerIds(): List<String>`
 - `failedTrustedIssuerIds(): List<String>`
 
-Use these APIs to inspect trusted issuer loading outcomes when your policy store contains `trusted-issuers/` definitions.
+Use these APIs to inspect trusted issuer loading outcomes when your policy store declares JWT issuers in `trusted-issuers.json`. Issuers are identified by their `issuer` name in the policy store's `trusted-issuers.json`.
