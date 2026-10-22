@@ -93,8 +93,6 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 logger.info("Since token is JWT Validate it");
                 jwtUtil.parse(acccessToken);
                 tokenScopes = jwtUtil.validateToken(acccessToken);
-                logger.debug("JWT tokenScopes:{} ", tokenScopes);
-
             }
         } catch (InvalidJwtException exp) {
             throw new WebApplicationException("InvalidJwtException - Jwt Token is Invalid.",
