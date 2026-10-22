@@ -16,6 +16,7 @@ use std::str::FromStr;
 
 use smol_str::{SmolStr, ToSmolStr};
 
+use crate::authz::RESERVED_TOKEN_KEYS;
 use crate::common::issuer_utils::IssClaim;
 
 use super::{
@@ -184,6 +185,11 @@ pub enum TokenTypesError {
         entity_type_a: String,
         entity_type_b: String,
     },
+    #[error(
+        "entity type '{entity_type}' derives the context.tokens key '{key}', which Cedarling \
+         reserves"
+    )]
+    ReservedContextKey { key: String, entity_type: String },
 }
 
 impl TokenTypes {
@@ -263,6 +269,12 @@ impl TokenTypes {
             simplify_token_type(entity_type.as_str())
         )
         .to_smolstr();
+        if RESERVED_TOKEN_KEYS.contains(&context_key.as_str()) {
+            return Err(TokenTypesError::ReservedContextKey {
+                key: context_key.to_string(),
+                entity_type: entity_type.to_string(),
+            });
+        }
 
         match self.tokens.entry(entity_type.clone()) {
             Entry::Occupied(existing) => Err(TokenTypesError::DuplicateEntityType {
@@ -787,6 +799,21 @@ mod tests {
                 key: "acme_access_token".into(),
                 entity_type_a: "Other::Access_token".into(),
                 entity_type_b: "Acme::Access_token".into(),
+            }
+        );
+    }
+
+    /// `total_token_count` is filled by Cedarling after the token keys, so a token
+    /// type deriving it would be overwritten and `has` would always hold.
+    #[test]
+    fn rejects_token_type_deriving_a_reserved_context_key() {
+        let err = TokenTypes::build([], [custom("total", &["A::Token_count"])])
+            .expect_err("a token type must not derive a reserved context.tokens key");
+        assert_eq!(
+            err,
+            TokenTypesError::ReservedContextKey {
+                key: "total_token_count".into(),
+                entity_type: "A::Token_count".into(),
             }
         );
     }

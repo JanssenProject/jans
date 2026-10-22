@@ -277,6 +277,8 @@ These rules are checked when the store loads, and a violation fails the load:
   different `jwks` are rejected.
 - Every `context.tokens` key is unique: `Acme` and `ACME` would both produce
   `acme_access_token`.
+- No token type may derive `total_token_count`, which Cedarling reserves for the
+  number of tokens in the request.
 - An entry uses exactly one key-source form: `configuration` together with
   `jwks`, or `jwks` without `iss`, is rejected.
 

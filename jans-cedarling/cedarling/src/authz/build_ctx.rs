@@ -15,6 +15,12 @@ use std::collections::HashMap;
 
 use super::errors::BuildContextError;
 
+/// The `context.tokens` key holding the number of tokens in the request.
+const TOTAL_TOKEN_COUNT_KEY: &str = "total_token_count";
+
+/// `context.tokens` keys Cedarling fills itself, which no token type may derive.
+pub(crate) const RESERVED_TOKEN_KEYS: &[&str] = &[TOTAL_TOKEN_COUNT_KEY];
+
 /// Constructs the authorization context by dispatching to schema or no-schema implementation.
 ///
 /// When a schema is available, entity references from tokens are injected into the context
@@ -194,7 +200,10 @@ pub(super) fn build_multi_issuer_context(
     }
 
     // Add total token count as specified in design
-    tokens_context.insert("total_token_count".to_string(), json!(token_entities.len()));
+    tokens_context.insert(
+        TOTAL_TOKEN_COUNT_KEY.to_string(),
+        json!(token_entities.len()),
+    );
 
     // Merge tokens into request context, checking for conflicts
     let tokens_value = Value::Object(tokens_context);
