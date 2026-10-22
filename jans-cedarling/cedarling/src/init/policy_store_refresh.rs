@@ -769,6 +769,7 @@ async fn parse_swap_and_record(
     // swap — otherwise the gauge would stay pinned to the bootstrap value
     // forever even though authorization decisions use the new set.
     let new_policy_count = parsed.store.policies.get_set().num_of_policies();
+    let bundle_hash_note_val = bundle_hash_note(parsed.store.bundle_hash());
 
     let prior_authz = ctx.authz_swap.load_full();
     let new_authz = match ctx.rebuilder.rebuild(parsed.store, &prior_authz).await {
@@ -806,13 +807,21 @@ async fn parse_swap_and_record(
         ))
         .set_message(match signed_by {
             Some(signed_by) => format!(
-                "policy store refresh: swapped new store from {url} in {elapsed} ms, signature verified: {signed_by}"
+                "policy store refresh: swapped new store from {url} in {elapsed} ms{bundle_hash_note_val}, signature verified: {signed_by}"
             ),
-            None => format!("policy store refresh: swapped new store from {url} in {elapsed} ms"),
+            None => format!(
+                "policy store refresh: swapped new store from {url} in {elapsed} ms{bundle_hash_note_val}"
+            ),
         }),
     );
 
     RefreshOutcome::Success
+}
+
+/// Logged with every swap, as at startup, so operators can compare the new store
+/// with the `bundle_hash` Lock serves for it.
+fn bundle_hash_note(bundle_hash: Option<jans_trace_core::Digest>) -> String {
+    bundle_hash.map_or_else(String::new, |hash| format!(", bundle_hash: {hash}"))
 }
 
 /// A failed signature check keeps its own outcome so it is not mistaken for a broken store.
@@ -920,6 +929,21 @@ mod tests {
             spec_version: Some(spec_version),
             warnings: warnings.to_vec(),
         }
+    }
+
+    #[test]
+    fn swap_log_names_bundle_hash() {
+        let hash = jans_trace_core::inputs::compute_bundle_hash(b"archive");
+        assert_eq!(
+            bundle_hash_note(Some(hash)),
+            format!(", bundle_hash: {hash}"),
+            "a refreshed .cjar store should log its bundle_hash for comparison with Lock"
+        );
+        assert_eq!(
+            bundle_hash_note(None),
+            "",
+            "a store that is not an archive has no bundle_hash to log"
+        );
     }
 
     #[test]

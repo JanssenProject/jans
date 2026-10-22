@@ -26,6 +26,9 @@
 
 use std::path::Path;
 
+use jans_trace_core::Digest;
+use jans_trace_core::inputs::compute_bundle_hash;
+
 use super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::errors::{PolicyStoreError, ValidationError};
 use super::formats::{self, ParsedPolicyStore, ReadStoreError};
@@ -48,7 +51,7 @@ pub(crate) fn read_policy_store_directory(
         })?;
 
     let vfs = super::vfs_adapter::PhysicalVfs::new();
-    read_from_vfs(&vfs, path_str, strict)
+    read_from_vfs(&vfs, path_str, strict, None)
 }
 
 /// Read a policy store from a directory path (WASM stub).
@@ -61,20 +64,6 @@ pub(crate) fn read_policy_store_directory(
     _strict: bool,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     Err(PolicyStoreError::from(super::errors::ArchiveError::WasmUnsupported).into())
-}
-
-/// Read a policy store from a Cedar Archive (.cjar) file.
-///
-/// This function uses `ArchiveVfs` to read from a zip archive.
-/// It is only available on native platforms (not WASM).
-#[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn read_policy_store_archive(
-    path: &Path,
-    strict: bool,
-    limits: ArchiveLimits,
-) -> Result<ParsedPolicyStore, ReadStoreError> {
-    let archive_vfs = ArchiveVfs::from_file(path, limits).map_err(PolicyStoreError::from)?;
-    read_from_vfs(&archive_vfs, ".", strict)
 }
 
 /// Read a policy store from a Cedar Archive (.cjar) file (WASM stub).
@@ -102,8 +91,11 @@ pub(crate) fn read_policy_store_archive_bytes(
     strict: bool,
     limits: ArchiveLimits,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
+    // Hashed here, the one place `.cjar` bytes become a store, so no archive
+    // store exists without its `bundle_hash`.
+    let bundle_hash = compute_bundle_hash(&bytes);
     let archive_vfs = ArchiveVfs::from_buffer(bytes, limits).map_err(PolicyStoreError::from)?;
-    read_from_vfs(&archive_vfs, ".", strict)
+    read_from_vfs(&archive_vfs, ".", strict, Some(bundle_hash))
 }
 
 /// Read a policy store rooted at `dir` from any VFS backend into its runtime
@@ -113,8 +105,9 @@ pub(super) fn read_from_vfs(
     vfs: &dyn VfsFileSystem,
     dir: &str,
     strict: bool,
+    bundle_hash: Option<Digest>,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
-    formats::read_policy_store(&StoreFs::open(vfs, dir)?, strict)
+    formats::read_policy_store(&StoreFs::open(vfs, dir)?, strict, bundle_hash)
 }
 
 /// One file read from a store: a policy, template, entity or issuer file.

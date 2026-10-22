@@ -858,7 +858,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     assert!(ids.contains(&"google_oauth".to_string()));
 
     // Build the runtime store and check the issuer map
-    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false)
+    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
         .expect("store with two issuers should parse")
         .store;
     // Google's only token is `trusted: false`, so nothing of it is migrated.
@@ -906,7 +906,7 @@ fn test_load_custom_issuers_end_to_end() {
 
     // Manager half: convert wires it into PolicyStore.custom_issuers.
     // strict=false so the assertion does not depend on a schema being present.
-    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false)
+    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
         .expect("conversion should succeed")
         .store;
     assert_acme_custom_token(&store);
@@ -989,7 +989,7 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
         "ArchiveVfs: should discover 1 custom issuer file"
     );
 
-    let store = read_from_vfs(&archive_vfs, ".", false)
+    let store = read_from_vfs(&archive_vfs, ".", false, None)
         .expect("reading the archive should succeed")
         .store;
     assert_acme_custom_token(&store);
@@ -1068,7 +1068,7 @@ fn test_load_custom_issuers_shared_id_merges() {
     .unwrap();
 
     let store_vfs = PhysicalVfs::new();
-    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false)
+    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
         .expect("custom issuers sharing an id should load")
         .store;
     for entity_type in ["A::Alpha", "B::Beta"] {
@@ -1232,7 +1232,7 @@ action "read" appliesTo {
     )
     .unwrap();
 
-    let store = read_from_vfs(&vfs, "/", false)
+    let store = read_from_vfs(&vfs, "/", false, None)
         .expect("issuers sharing a v1 id should load")
         .store;
     let issuers = store.token_types.jwt_issuers();
@@ -1401,7 +1401,7 @@ fn test_complete_policy_store_with_issuers() {
     assert_eq!(entity_store.iter().count(), 1);
     assert_ne!(format!("{:?}", parsed_schema.get_schema()), "");
 
-    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false)
+    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
         .expect("complete store should parse")
         .store;
     let issuer_map = store.token_types.jwt_issuers();
@@ -2291,7 +2291,7 @@ fn test_load_schema_from_schemas_dir_shared_namespace_full_pipeline() {
     )
     .expect("Should create test.cedar");
 
-    let policy_store = read_from_vfs(&vfs, ".", false)
+    let policy_store = read_from_vfs(&vfs, ".", false, None)
         .expect("the store should read with shared namespaces across files")
         .store;
 
@@ -2362,7 +2362,7 @@ fn test_archive_shared_namespace_full_pipeline() {
     let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
         .expect("Should create ArchiveVfs from bytes");
 
-    let policy_store = read_from_vfs(&archive_vfs, ".", false)
+    let policy_store = read_from_vfs(&archive_vfs, ".", false, None)
         .expect("the archive should read with shared namespaces")
         .store;
 

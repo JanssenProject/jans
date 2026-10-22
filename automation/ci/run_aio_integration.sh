@@ -202,16 +202,18 @@ else
     }
   done
   [ "$img_rc" -eq 0 ] || exit 1
-  # The images pin jans-linux-setup at JANS_SOURCE_VERSION, so this checkout's schema must be
-  # overlaid or the loader creates the tables from the pinned one.
+  # The images pin jans-linux-setup at JANS_SOURCE_VERSION, so this checkout's schema and SQL
+  # column types/indexes must be overlaid or the loader creates the tables from the pinned ones.
   for svc in persistence-loader config-api auth-server scim fido2; do
-    docker build -q -t "local/$svc:ci" -f - jans-linux-setup/jans_setup/schema >/dev/null <<EOF
+    docker build -q -t "local/$svc:ci" -f - jans-linux-setup/jans_setup >/dev/null <<EOF
 FROM local/$svc:ci
-COPY jans_schema.json custom_schema.json /app/schema/
+COPY schema/jans_schema.json schema/custom_schema.json /app/schema/
+COPY static/rdbm/sql_data_types.json /app/static/rdbm/
 EOF
   done
   docker build -q -t local/persistence-loader:ci -f - jans-linux-setup/jans_setup >/dev/null <<EOF
 FROM local/persistence-loader:ci
+COPY static/rdbm /app/static/rdbm
 COPY templates/test /app/templates/test
 COPY schema/jans_test_schema.json /app/templates/test/
 EOF

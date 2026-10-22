@@ -106,11 +106,11 @@ fn extract_first_policy_store(
                     },
                 };
 
-                Ok(PolicyStoreWithID {
-                    id: k.to_owned(),
+                Ok(PolicyStoreWithID::without_archive(
+                    k.to_owned(),
                     store,
-                    metadata: Some(metadata),
-                })
+                    Some(metadata),
+                ))
             },
         )
         .next()
@@ -340,6 +340,8 @@ async fn load_policy_store_from_uri(
 /// Parses `.cjar` archive bytes, fetched or supplied, into a [`PolicyStoreWithID`].
 ///
 /// Takes the bytes by value so the archive is read in place rather than copied.
+/// Every `.cjar` source, refresh included, passes through here, so every one gets
+/// a `bundle_hash` of exactly the bytes that are parsed.
 pub(crate) async fn parse_cjar_bytes(
     bytes: Vec<u8>,
     strict_schema_validation: bool,
@@ -392,25 +394,12 @@ async fn load_policy_store_from_cjar_file(
     limits: ArchiveLimits,
     verifier: Option<&ArchiveVerifier>,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
-    let (parsed, signed_by) = if let Some(verifier) = verifier {
-        let bytes = read_cjar_file(path, limits)?;
-        let signed_by = verifier
-            .check(http_client, Some(&path.to_string_lossy()), &bytes)
-            .await?;
-        let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
-        (parsed, Some(signed_by))
-    } else {
-        let path = path.to_path_buf();
-        let parsed = read_store_offloaded(
-            move || {
-                loader::read_policy_store_archive(&path, strict_schema_validation, limits)
-                    .map_err(|e| map_read_err(e, true))
-            },
-            PolicyStoreLoadError::Archive,
-        )
-        .await?;
-        (parsed, None)
-    };
+    // Read whole, like every other `.cjar` source: the verified bytes, the
+    // hashed bytes (`bundle_hash`) and the parsed bytes are the same bytes.
+    let bytes = read_cjar_file_offloaded(path, limits).await?;
+    let signed_by =
+        check_if_enabled(verifier, http_client, Some(&path.to_string_lossy()), &bytes).await?;
+    let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
     Ok(LoadedPolicyStore {
         store: parsed.store,
         format: parsed.format,
@@ -418,6 +407,21 @@ async fn load_policy_store_from_cjar_file(
         validators: CacheHeadersState::default(),
         signed_by,
     })
+}
+
+/// [`read_cjar_file`] on the blocking pool, so a large archive does not stall a
+/// runtime worker.
+#[cfg(not(target_arch = "wasm32"))]
+async fn read_cjar_file_offloaded(
+    path: &Path,
+    limits: ArchiveLimits,
+) -> Result<Vec<u8>, PolicyStoreLoadError> {
+    let path = path.to_path_buf();
+    tokio::task::spawn_blocking(move || read_cjar_file(&path, limits))
+        .await
+        .map_err(|e| {
+            PolicyStoreLoadError::Archive(format!("Policy store read task panicked: {e}"))
+        })?
 }
 
 /// Reads a `.cjar` into memory, so the verified bytes are the parsed bytes.
@@ -1342,5 +1346,126 @@ mod signature_tests {
         load_from_url(source(), Some(&verifier(&signer, &with_uri)))
             .await
             .expect("in-memory bytes load with a configured bundle");
+    }
+}
+
+#[cfg(test)]
+mod bundle_hash_tests {
+    use std::fmt::Write as _;
+    use std::io::Write as _;
+    use std::sync::LazyLock;
+    use std::time::Duration;
+
+    use jans_trace_core::inputs::compute_bundle_hash;
+    use mockito::Server;
+    use sha2::{Digest as _, Sha256};
+
+    use super::*;
+    use crate::common::policy_store::test_utils::fixtures;
+    use crate::http::HttpClientConfig;
+
+    static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(1),
+            request_timeout: Duration::from_secs(2),
+            max_response_size_bytes: None,
+        })
+        .expect("http client should be constructed")
+    });
+
+    fn archive() -> Vec<u8> {
+        fixtures::minimal_valid()
+            .build_archive()
+            .expect("test archive builds")
+    }
+
+    async fn load(source: PolicyStoreSource) -> PolicyStoreWithID {
+        let config = PolicyStoreConfig {
+            source,
+            ..Default::default()
+        };
+        load_policy_store(&config, &HTTP_CLIENT, false)
+            .await
+            .expect("test policy store should load")
+            .store
+    }
+
+    #[tokio::test]
+    async fn cjar_bytes_store_has_bundle_hash() {
+        let bytes = archive();
+        let store = load(PolicyStoreSource::ArchiveBytes(bytes.clone())).await;
+        let hash = store
+            .bundle_hash()
+            .expect("a store loaded from .cjar bytes should carry bundle_hash");
+        assert_eq!(
+            hash,
+            compute_bundle_hash(&bytes),
+            "bundle_hash should be the core hash of the archive bytes"
+        );
+        // Independent of core: `sha256sum store.cjar` with the TRACE prefix.
+        let sha256sum = Sha256::digest(&bytes)
+            .iter()
+            .fold(String::new(), |mut hex, b| {
+                let _ = write!(hex, "{b:02x}");
+                hex
+            });
+        assert_eq!(
+            hash.to_string(),
+            format!("sha256:{sha256sum}"),
+            "bundle_hash should be SHA-256 of the raw .cjar bytes"
+        );
+    }
+
+    #[tokio::test]
+    async fn cjar_file_and_url_hash_same_bytes_equally() {
+        let bytes = archive();
+
+        let mut file = tempfile::Builder::new()
+            .suffix(".cjar")
+            .tempfile()
+            .expect("temp file should be created");
+        file.write_all(&bytes).expect("archive should be written");
+        let file_store = load(PolicyStoreSource::CjarFile(file.path().to_path_buf())).await;
+
+        let mut server = Server::new_async().await;
+        server
+            .mock("GET", "/store.cjar")
+            .with_body(bytes.clone())
+            .create_async()
+            .await;
+        let url = format!("{}/store.cjar", server.url());
+        let url_store = load(PolicyStoreSource::CjarUrl(url.clone())).await;
+        let generic_uri_store = load(PolicyStoreSource::Uri(url)).await;
+
+        let expected = Some(compute_bundle_hash(&bytes));
+        assert_eq!(
+            file_store.bundle_hash(),
+            expected,
+            "CjarFile should hash the file bytes"
+        );
+        assert_eq!(
+            url_store.bundle_hash(),
+            expected,
+            "CjarUrl should hash the fetched bytes"
+        );
+        assert_eq!(
+            generic_uri_store.bundle_hash(),
+            expected,
+            "Uri should hash the fetched bytes"
+        );
+    }
+
+    #[tokio::test]
+    async fn yaml_store_has_no_bundle_hash() {
+        let store = load(PolicyStoreSource::Yaml(
+            include_str!("../../../test_files/policy-store_ok.yaml").to_string(),
+        ))
+        .await;
+        assert_eq!(
+            store.bundle_hash(),
+            None,
+            "a YAML store has no archive, so no bundle_hash"
+        );
     }
 }

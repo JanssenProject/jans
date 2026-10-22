@@ -13,7 +13,7 @@ public final class Limits {
 
     private final io.jans.trace.uniffi.Limits inner;
 
-    /** The library defaults (decision R16). */
+    /** The library defaults. */
     public Limits() {
         this(new io.jans.trace.uniffi.Limits());
     }
