@@ -1,0 +1,9 @@
+# osv-scanner.toml — read by OSV-Scanner and the OpenSSF Scorecard "Vulnerabilities"
+# check. Must live next to the go.mod it applies to; does NOT propagate to parent/child dirs.
+
+[[PackageOverrides]]
+name = "stdlib"
+ecosystem = "Go"
+ignore = true
+effectiveUntil = 2027-02-01
+reason = "The `go 1.22.9` directive is not the runtime Go. A KrakenD plugin must be built with the exact Go toolchain of the KrakenD binary that loads it (krakend/builder:2.9.0 in build-packages.yml), and runs inside that host process, so the stdlib in effect is KrakenD's. Stdlib fixes arrive by moving the pinned KrakenD builder/runtime version, not by editing this go.mod; a `toolchain` line here would make the plugin fail to load. Third-party module vulns are still scanned."
