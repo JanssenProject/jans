@@ -83,7 +83,10 @@ use init::policy_store_refresh::{
 };
 use init::policy_store_signature::ArchiveVerifier;
 use init::service_config::{ServiceConfig, ServiceConfigError};
+use init::service_factory::ServiceFactoryParams;
 use init::service_factory::ServiceInitError;
+#[cfg(not(target_arch = "wasm32"))]
+use init::service_factory::StartTraceError;
 #[cfg(not(target_arch = "wasm32"))]
 pub use init::service_factory::{InvalidTraceKeyError, LoadProducerKeyError};
 use lock::InitLockServiceError;
@@ -92,9 +95,9 @@ use log::interface::LogWriter;
 use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
 #[cfg(not(target_arch = "wasm32"))]
-pub use trace::EmitterInitError;
+use trace::EmitterHandle;
 #[cfg(not(target_arch = "wasm32"))]
-use trace::{EmitterHandle, EmitterParams, ProducerKey, TraceRecorder, spawn_emitter};
+pub use trace::EmitterInitError;
 pub use trace::{ParseProducerIdError, ParseTraceSigningKidError, ProducerId, TraceSigningKid};
 
 use semver::Version;
@@ -154,6 +157,16 @@ pub enum InitCedarlingError {
     #[cfg(not(target_arch = "wasm32"))]
     #[error(transparent)]
     TraceEmitter(#[from] EmitterInitError),
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl From<StartTraceError> for InitCedarlingError {
+    fn from(err: StartTraceError) -> Self {
+        match err {
+            StartTraceError::Key(err) => Self::TraceKey(err),
+            StartTraceError::Emitter(err) => Self::TraceEmitter(err),
+        }
+    }
 }
 
 /// Sized wrapper around the custom token processor trait object so it can be
@@ -269,33 +282,20 @@ impl Cedarling {
             metrics.clone(),
         )?);
 
-        let mut service_factory = ServiceFactory::new(
-            config,
+        let mut service_factory = ServiceFactory::new(ServiceFactoryParams {
+            bootstrap_config: config,
             service_config,
-            log.clone(),
-            data.clone(),
-            metrics.clone(),
-        );
+            log_service: log.clone(),
+            data_store: data.clone(),
+            metrics: metrics.clone(),
+            #[cfg(not(target_arch = "wasm32"))]
+            trace_sink: initialized.trace_sink,
+            #[cfg(not(target_arch = "wasm32"))]
+            pdp_id,
+        });
 
         #[cfg(not(target_arch = "wasm32"))]
-        let trace_emitter = {
-            let trace_key = service_factory.trace_key().await?;
-            let started = start_trace(TraceStart {
-                config,
-                key: trace_key,
-                sink: initialized.trace_sink,
-                pdp_id,
-                log: &log,
-                metrics: &metrics,
-            })?;
-            match started {
-                Some(StartedTrace { recorder, emitter }) => {
-                    service_factory.set_trace_recorder(Some(recorder));
-                    emitter
-                },
-                None => None,
-            }
-        };
+        let trace_emitter = service_factory.start_trace().await?;
 
         // Log policy store metadata if available (new format only)
         if let Some(metadata) = service_factory.policy_store_metadata() {
@@ -769,78 +769,6 @@ fn maybe_spawn_refresh_worker(
 /// Log detailed information about the loaded policy store metadata, including
 /// ID, version, description, Cedar version, timestamps, and compatibility with
 /// the runtime Cedar version.
-/// What TRACE starts from, gathered during `Cedarling::new`.
-#[cfg(not(target_arch = "wasm32"))]
-struct TraceStart<'a> {
-    config: &'a BootstrapConfig,
-    key: Option<Arc<ProducerKey>>,
-    sink: Option<Arc<lock::TraceSink>>,
-    pdp_id: app_types::PdpID,
-    log: &'a log::Logger,
-    metrics: &'a Arc<MetricsCollector>,
-}
-
-/// TRACE as started: every decision is recorded, and records are sent when
-/// Lock has a TRACE endpoint.
-#[cfg(not(target_arch = "wasm32"))]
-struct StartedTrace {
-    recorder: TraceRecorder,
-    /// `None` when Lock has no TRACE endpoint, so decisions only count
-    /// `not_emitted_no_endpoint`.
-    emitter: Option<Arc<EmitterHandle>>,
-}
-
-/// Starts the TRACE emitter; `None` when TRACE is disabled. The queue between
-/// the authorize path and the emitter holds as many records as the Lock log
-/// channel holds log entries, and a request is retried as often as a log batch.
-#[cfg(not(target_arch = "wasm32"))]
-fn start_trace(start: TraceStart<'_>) -> Result<Option<StartedTrace>, EmitterInitError> {
-    let TraceStart {
-        config,
-        key,
-        sink,
-        pdp_id,
-        log,
-        metrics,
-    } = start;
-    let Some(trace) = &config.trace_config else {
-        return Ok(None);
-    };
-    // `trace_key` loads a key whenever TRACE is configured, and `new` checks
-    // first that TRACE has Lock, so neither is missing here.
-    let Some(key) = key else {
-        return Ok(None);
-    };
-    let Some(lock) = &config.lock_config else {
-        return Ok(None);
-    };
-    let Some(sink) = sink else {
-        return Ok(Some(StartedTrace {
-            recorder: TraceRecorder::new(None, log.clone(), metrics.clone()),
-            emitter: None,
-        }));
-    };
-    let (tx, rx) = tokio::sync::mpsc::channel(lock.log_channel_capacity.get());
-    let emitter = spawn_emitter(
-        EmitterParams {
-            producer_id: trace.producer_id.clone(),
-            pdp_id,
-            signer: key,
-            sink,
-            bulk_max_records: trace.bulk_max_records,
-            bulk_max_bytes: trace.bulk_max_bytes,
-            max_retries: lock.log_max_retries,
-            log: log.clone(),
-            metrics: metrics.clone(),
-        },
-        rx,
-    )?;
-    Ok(Some(StartedTrace {
-        recorder: TraceRecorder::new(Some(tx), log.clone(), metrics.clone()),
-        emitter: Some(Arc::new(emitter)),
-    }))
-}
-
 fn log_policy_store_metadata(
     log: &log::Logger,
     metadata: &crate::common::policy_store::PolicyStoreMetadata,
