@@ -137,9 +137,10 @@ impl<'a> ServiceFactory<'a> {
                 None,
             ))
             .set_message(format!(
-                "Policy store loaded: {} policies, {} issuers, {} entities",
+                "Policy store loaded: {} policies, {} JWT issuers, {} custom issuers, {} entities",
                 policy_store.policies.get_set().policies().count(),
                 policy_store.token_types.jwt_issuers().len(),
+                policy_store.token_types.custom_issuer_count(),
                 policy_store.default_entities.entities().len(),
             )),
         );

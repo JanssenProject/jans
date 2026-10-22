@@ -10,8 +10,8 @@
 //! unique `context.tokens` keys.
 
 use std::borrow::Borrow;
-use std::collections::HashMap;
 use std::collections::hash_map::Entry;
+use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
 use smol_str::{SmolStr, ToSmolStr};
@@ -394,6 +394,16 @@ impl TokenTypes {
     pub(crate) fn jwt_issuers(&self) -> &HashMap<String, TrustedIssuer> {
         &self.jwt_issuers
     }
+
+    /// How many custom issuers declare at least one token type.
+    pub(crate) fn custom_issuer_count(&self) -> usize {
+        self.tokens
+            .values()
+            .filter(|token| matches!(token.kind, TokenTypeKind::Custom(_)))
+            .map(|token| &token.issuer)
+            .collect::<HashSet<_>>()
+            .len()
+    }
 }
 
 /// Names a key source and its URL in an error.
@@ -422,7 +432,6 @@ mod tests {
     fn jwt(name: &str, configuration: &str, entity_types: &[&str]) -> TrustedIssuer {
         TrustedIssuer::from_configuration(
             name.to_string(),
-            String::new(),
             Url::parse(configuration).expect("valid url"),
             entity_types
                 .iter()
@@ -435,7 +444,6 @@ mod tests {
     fn static_jwt(name: &str, iss: &str, jwks: &str, entity_type: &str) -> TrustedIssuer {
         TrustedIssuer::new(
             name.to_string(),
-            String::new(),
             Url::parse(iss).expect("valid url"),
             KeySource::Static {
                 jwks: Url::parse(jwks).expect("valid url"),
@@ -496,6 +504,20 @@ mod tests {
             types.get("Nope::Token").is_none(),
             "an unknown mapping should not resolve"
         );
+    }
+
+    #[test]
+    fn counts_custom_issuers_once_each() {
+        let types = TokenTypes::build(
+            [jwt("Acme", ACME, &["Acme::Access_token"])],
+            [
+                custom("Dolphin", &["Dolphin::Api_key", "Dolphin::Session"]),
+                custom("Orca", &["Orca::Api_key"]),
+            ],
+        )
+        .expect("a consistent configuration should build");
+        assert_eq!(types.jwt_issuers().len(), 1, "one JWT issuer");
+        assert_eq!(types.custom_issuer_count(), 2, "two custom issuers");
     }
 
     #[test]

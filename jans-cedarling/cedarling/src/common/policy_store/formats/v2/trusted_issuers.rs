@@ -235,7 +235,6 @@ impl TrustedIssuersDoc {
                     // `TokenTypes::build` merges entries of one issuer.
                     jwt_issuers.push(TrustedIssuer::new(
                         jwt.issuer.to_string(),
-                        String::new(),
                         iss,
                         key_source,
                         HashMap::from([(entity_type.to_string(), token)]),

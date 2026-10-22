@@ -5,7 +5,7 @@
 
 use chrono::Utc;
 use std::{
-    collections::HashMap,
+    collections::{HashMap, hash_map::Entry},
     sync::{Arc, Mutex},
     time::Duration,
 };
@@ -415,7 +415,8 @@ async fn install_trusted_issuer(
     Ok(())
 }
 
-/// Starts the background task that keeps the JWKS of `iss` fresh.
+/// Starts the background task that keeps the JWKS of `iss` fresh, once per `iss`:
+/// issuers sharing an `iss` share its keys, as conflicting JWKS were rejected.
 fn spawn_jwks_refresh(loader: &TrustedIssuerLoader, iss: IssClaim, jwks_uri: url::Url) {
     let notify = Arc::new(Notify::new());
 
@@ -433,7 +434,12 @@ fn spawn_jwks_refresh(loader: &TrustedIssuerLoader, iss: IssClaim, jwks_uri: url
             .jwks_refresh_notifiers
             .lock()
             .expect("acquire jwks_refresh_notifiers lock");
-        notifiers.insert(iss.clone(), notify.clone());
+        match notifiers.entry(iss.clone()) {
+            Entry::Occupied(_) => return,
+            Entry::Vacant(slot) => {
+                slot.insert(notify.clone());
+            },
+        }
     }
 
     spawn_task(keep_jwks_updated(JwksRefreshParams {
@@ -1111,7 +1117,6 @@ mod test {
         let iss = Url::parse(&server.url()).expect("valid url");
         let issuer = TrustedIssuer::new(
             "Partner".into(),
-            String::new(),
             iss.clone(),
             KeySource::Static {
                 jwks: Url::parse(&(server.url() + "/keys")).expect("valid url"),
@@ -1168,7 +1173,6 @@ mod test {
     fn static_issuer(name: &str, iss: &str, jwks: &str) -> TrustedIssuer {
         TrustedIssuer::new(
             name.into(),
-            String::new(),
             Url::parse(iss).expect("valid url"),
             KeySource::Static {
                 jwks: Url::parse(jwks).expect("valid url"),
@@ -1267,6 +1271,34 @@ mod test {
             loader.issuer_configs.loaded_issuer_ids(),
             HashSet::from(["Acme".to_string(), "Beta".to_string()]),
             "both issuers should be loaded"
+        );
+    }
+
+    /// Issuers sharing an `iss` get one JWKS refresh task, so the notifier that
+    /// wakes it is never replaced by one no task listens on.
+    #[tokio::test]
+    async fn one_jwks_refresh_per_iss() {
+        let loader = create_loader(sig_validation_config(), 2);
+        let iss = IssClaim::new("https://idp.example");
+        let jwks = Url::parse("https://idp.example/keys").expect("valid url");
+        let notifier = || {
+            loader
+                .jwks_refresh_notifiers
+                .lock()
+                .expect("acquire jwks_refresh_notifiers lock")
+                .get(&iss)
+                .cloned()
+                .expect("a refresh should be registered for the iss")
+        };
+
+        spawn_jwks_refresh(&loader, iss.clone(), jwks.clone());
+        let first = notifier();
+        spawn_jwks_refresh(&loader, iss.clone(), jwks);
+        loader.jwks_cancel_token.cancel();
+
+        assert!(
+            Arc::ptr_eq(&first, &notifier()),
+            "a second issuer for the iss should reuse the running refresh"
         );
     }
 

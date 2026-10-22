@@ -170,8 +170,6 @@ pub(crate) struct TrustedIssuer {
     /// The name of the trusted issuer.
     /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
     pub(crate) name: String,
-    /// A brief description of the trusted issuer.
-    pub(crate) description: String,
     /// The `iss` its tokens must carry.
     // Private to force usage of `iss_claim` method to get normalized iss claim
     iss: Url,
@@ -187,7 +185,6 @@ impl Default for TrustedIssuer {
     fn default() -> Self {
         Self {
             name: "Jans".to_string(),
-            description: String::default(),
             // This will only really be called during testing so we just put this test value
             iss: Url::parse("https://test.jans.org").unwrap(),
             key_source: KeySource::Discovery {
@@ -221,14 +218,12 @@ impl Default for &TrustedIssuer {
 impl TrustedIssuer {
     pub(crate) fn new(
         name: String,
-        description: String,
         iss: Url,
         key_source: KeySource,
         metadata: HashMap<String, TokenEntityMetadata>,
     ) -> Self {
         Self {
             name,
-            description,
             iss,
             key_source,
             token_metadata: metadata,
@@ -240,14 +235,12 @@ impl TrustedIssuer {
     #[cfg(test)]
     pub(crate) fn from_configuration(
         name: String,
-        description: String,
         configuration: Url,
         metadata: HashMap<String, TokenEntityMetadata>,
     ) -> Result<Self, InvalidConfigurationEndpoint> {
         let iss = iss_from_configuration(&configuration)?;
         Ok(Self::new(
             name,
-            description,
             iss,
             KeySource::Discovery { configuration },
             metadata,
@@ -259,7 +252,6 @@ impl TrustedIssuer {
     #[cfg(test)]
     pub(crate) fn discovery_at(
         name: String,
-        description: String,
         iss: Url,
         metadata: HashMap<String, TokenEntityMetadata>,
     ) -> Self {
@@ -268,13 +260,7 @@ impl TrustedIssuer {
             iss.as_str().trim_end_matches('/')
         ))
         .expect("test configuration endpoint should be a valid url");
-        Self::new(
-            name,
-            description,
-            iss,
-            KeySource::Discovery { configuration },
-            metadata,
-        )
+        Self::new(name, iss, KeySource::Discovery { configuration }, metadata)
     }
 
     /// Points the issuer at another discovery endpoint, re-deriving `iss`.

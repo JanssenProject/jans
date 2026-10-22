@@ -333,7 +333,6 @@ mod test {
 
         let ti = TrustedIssuer::from_configuration(
             "some_iss".into(),
-            "is a trusted issuer".into(),
             mock_server.openid_config_endpoint().unwrap(),
             HashMap::default(),
         )
@@ -453,7 +452,6 @@ mod test {
 
         let ti = TrustedIssuer::from_configuration(
             "some_iss".into(),
-            "is a trusted issuer".into(),
             mock_server.openid_config_endpoint().unwrap(),
             HashMap::default(),
         )
@@ -542,7 +540,6 @@ mod test {
 
         let ti = TrustedIssuer::from_configuration(
             "some_iss".into(),
-            "is a trusted issuer".into(),
             mock_server.openid_config_endpoint().unwrap(),
             HashMap::default(),
         )
@@ -642,7 +639,6 @@ mod test {
 
         let ti = TrustedIssuer::from_configuration(
             "some_iss".into(),
-            "is a trusted issuer".into(),
             mock_server.openid_config_endpoint().unwrap(),
             HashMap::default(),
         )

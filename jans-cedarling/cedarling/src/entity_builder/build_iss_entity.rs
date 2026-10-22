@@ -71,7 +71,6 @@ mod test {
     fn test_trusted_issuer() -> TrustedIssuer {
         TrustedIssuer::discovery_at(
             "some_iss".to_string(),
-            "some_desc".to_string(),
             Url::parse("https://test.jans.org").unwrap(),
             HashMap::new(),
         )
@@ -132,7 +131,6 @@ mod test {
         for path in ["/realms/a", "/realms/b"] {
             let iss = TrustedIssuer::discovery_at(
                 "Kc".to_string(),
-                String::new(),
                 Url::parse(&format!("https://kc.example{path}")).unwrap(),
                 HashMap::new(),
             );

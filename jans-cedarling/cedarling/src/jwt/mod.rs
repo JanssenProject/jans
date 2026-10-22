@@ -1626,7 +1626,6 @@ mod test {
         let iss = server.url();
         let issuer = TrustedIssuer::new(
             "Partner".into(),
-            String::new(),
             Url::parse(&iss).expect("valid url"),
             KeySource::Static {
                 jwks: Url::parse(&format!("{iss}/keys")).expect("valid url"),
@@ -1709,7 +1708,6 @@ mod test {
         let iss = server.url();
         let issuer = TrustedIssuer::new(
             "Partner".into(),
-            String::new(),
             Url::parse(&iss).expect("valid url"),
             KeySource::Static {
                 jwks: Url::parse(&format!("{iss}/keys")).expect("valid url"),

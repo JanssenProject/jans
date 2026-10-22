@@ -332,7 +332,6 @@ mod test {
             iss_name.to_lowercase(),
             TrustedIssuer::discovery_at(
                 iss_name.to_string(),
-                String::default(),
                 Url::parse("https://idp.example/auth").expect("valid url"),
                 token_metadata,
             ),

@@ -551,7 +551,6 @@ mod tests {
         // Add Acme issuer
         let acme_issuer = TrustedIssuer::discovery_at(
             "Acme".to_string(),
-            "Acme Corporation".to_string(),
             Url::parse("https://idp.acme.com/auth").unwrap(),
             tokens(&[
                 "Jans::Access_Token",
@@ -564,7 +563,6 @@ mod tests {
         // Add Dolphin issuer
         let dolphin_issuer = TrustedIssuer::discovery_at(
             "Dolphin".to_string(),
-            "Dolphin Sea Services".to_string(),
             Url::parse("https://idp.dolphin.sea/auth").unwrap(),
             tokens(&["Acme::DolphinToken"]),
         );
@@ -573,7 +571,6 @@ mod tests {
         // Add Microsoft issuer
         let microsoft_issuer = TrustedIssuer::discovery_at(
             "Microsoft".to_string(),
-            "Microsoft Azure AD".to_string(),
             Url::parse("https://login.microsoftonline.com/tenant").unwrap(),
             HashMap::new(),
         );
@@ -582,7 +579,6 @@ mod tests {
         // Add Company issuer
         let company_issuer = TrustedIssuer::discovery_at(
             "Company".to_string(),
-            "Company Internal Auth".to_string(),
             Url::parse("https://auth.company.internal:8443/oauth").unwrap(),
             HashMap::new(),
         );
@@ -636,7 +632,6 @@ mod tests {
         let trusted_issuers = issuers.iter().map(|(name, iss, entity_type)| {
             TrustedIssuer::discovery_at(
                 (*name).to_string(),
-                String::new(),
                 Url::parse(iss).expect("valid url"),
                 tokens(&[entity_type]),
             )
@@ -971,7 +966,6 @@ mod tests {
 
         let ti = TrustedIssuer::discovery_at(
             "Jans".to_string(),
-            String::new(),
             Url::parse("https://test.issuer.com").unwrap(),
             HashMap::default(),
         );
@@ -1153,7 +1147,6 @@ mod tests {
 
         let ti = TrustedIssuer::from_configuration(
             "Jans".to_string(),
-            String::new(),
             Url::parse("https://test.issuer.com/.well-known/openid-configuration")
                 .expect("url should be parsed"),
             HashMap::new(),
@@ -1236,7 +1229,6 @@ mod tests {
         token_metadata.insert("Jans::Access_Token".into(), tkn_meta);
         let ti = TrustedIssuer::discovery_at(
             "TestIssuer".to_string(),
-            String::new(),
             Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
             token_metadata,
         );
@@ -1340,7 +1332,6 @@ mod tests {
         token_metadata.insert("Jans::Access_Token".into(), tkn_meta);
         let ti = TrustedIssuer::discovery_at(
             "Jans".to_string(),
-            String::new(),
             Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
             token_metadata,
         );
@@ -1464,7 +1455,6 @@ mod tests {
         token_metadata.insert("Jans::Access_Token".into(), tkn_meta);
         let ti = TrustedIssuer::discovery_at(
             "Jans".to_string(),
-            String::new(),
             Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
             token_metadata,
         );

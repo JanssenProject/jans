@@ -174,7 +174,6 @@ impl From<LegacyTrustedIssuer> for super::TrustedIssuer {
     fn from(v: LegacyTrustedIssuer) -> Self {
         super::TrustedIssuer::new(
             v.name,
-            v.description,
             v.discovery.iss,
             super::KeySource::Discovery {
                 configuration: v.discovery.configuration,
