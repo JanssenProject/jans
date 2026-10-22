@@ -7,6 +7,29 @@ import { parse as parseYaml } from "yaml";
 
 const execute = promisify(execFile);
 
+// The Agama issuers of a YAML fixture as a v2 `trusted-issuers.json`: one
+// entry per trusted token type, keyed by its entity type.
+export function trustedIssuersJson(issuers) {
+  const entries = {};
+  for (const issuer of Object.values(issuers)) {
+    const configuration =
+      issuer.openid_configuration_endpoint ?? issuer.configuration_endpoint;
+    for (const token of Object.values(issuer.token_metadata ?? {})) {
+      if (token.trusted === false) continue;
+      entries[token.entity_type_name] = {
+        type: "jwt",
+        issuer: issuer.name,
+        configuration_endpoints: { configuration },
+        ...(token.token_id && { token_id: token.token_id }),
+        ...(token.required_claims && {
+          required_claims: token.required_claims,
+        }),
+      };
+    }
+  }
+  return entries;
+}
+
 export async function createPolicyArchive(fixturePath, outputDirectory, name) {
   const fixture = parseYaml(await readFile(fixturePath, "utf8"));
   const [[storeId, store]] = Object.entries(fixture.policy_stores);
@@ -14,6 +37,7 @@ export async function createPolicyArchive(fixturePath, outputDirectory, name) {
   const archive = join(outputDirectory, `${name}.cjar`);
   const files = {
     "metadata.json": JSON.stringify({
+      policy_store_spec_version: 2,
       cedar_version: fixture.cedar_version,
       policy_store: { id: storeId, name: store.name, version: "1.0.0" },
     }),
@@ -22,8 +46,9 @@ export async function createPolicyArchive(fixturePath, outputDirectory, name) {
   for (const [id, policy] of Object.entries(store.policies)) {
     files[`policies/${id}.cedar`] = policy.policy_content.body;
   }
-  for (const [id, issuer] of Object.entries(store.trusted_issuers ?? {})) {
-    files[`trusted-issuers/${id}.json`] = JSON.stringify(issuer);
+  const trustedIssuers = trustedIssuersJson(store.trusted_issuers ?? {});
+  if (Object.keys(trustedIssuers).length > 0) {
+    files["trusted-issuers.json"] = JSON.stringify(trustedIssuers);
   }
 
   await rm(source, { force: true, recursive: true });
