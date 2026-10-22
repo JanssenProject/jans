@@ -216,7 +216,7 @@ mod tests {
             action: ACTION.to_string(),
             resource_type: "Jans::Issue".to_string(),
             outcome: Outcome::Allow,
-            tokens,
+            tokens: tokens.into(),
         };
         let policy = Arc::new(PolicyFacts {
             store_id: "store-1".to_string(),
@@ -224,8 +224,14 @@ mod tests {
             language_version: "4.4".to_string(),
             bundle_hash: jans_trace_core::inputs::compute_bundle_hash(b"archive"),
         });
-        RecordDraft::new(gen_uuid7(), 1_781_138_542, &trace, decision, policy)
-            .expect("test draft should build")
+        RecordDraft::new(
+            gen_uuid7(),
+            1_781_138_542,
+            &Arc::new(trace),
+            decision,
+            policy,
+        )
+        .expect("test draft should build")
     }
 
     fn tokens() -> Vec<TokenRef> {

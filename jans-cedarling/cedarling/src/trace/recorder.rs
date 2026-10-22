@@ -19,7 +19,7 @@ use super::record::{
     DecisionFacts, DraftError, RawTokenInField, RecordDraft, TokenRef, is_lock_issuer,
 };
 use super::status::TraceRecordStatus;
-use crate::authz::AuthorizeOptions;
+use crate::authz::TraceContext;
 use crate::authz::metrics::MetricsCollector;
 use crate::authz::request::TokenInput;
 use crate::common::policy_store::PolicyStoreWithID;
@@ -76,11 +76,11 @@ impl TraceRecorder {
     pub(crate) fn record(
         &self,
         request_id: Uuid,
-        options: &AuthorizeOptions,
+        trace_context: Option<&Arc<TraceContext>>,
         policy_store: &PolicyStoreWithID,
         facts: impl FnOnce() -> Result<DecisionFacts, DraftError>,
     ) -> TraceRecordStatus {
-        let status = self.try_record(request_id, options, policy_store, facts);
+        let status = self.try_record(request_id, trace_context, policy_store, facts);
         self.metrics.record_trace_status(status);
         status
     }
@@ -88,11 +88,11 @@ impl TraceRecorder {
     fn try_record(
         &self,
         request_id: Uuid,
-        options: &AuthorizeOptions,
+        trace_context: Option<&Arc<TraceContext>>,
         policy_store: &PolicyStoreWithID,
         facts: impl FnOnce() -> Result<DecisionFacts, DraftError>,
     ) -> TraceRecordStatus {
-        let Some(trace) = &options.trace else {
+        let Some(trace) = trace_context else {
             return TraceRecordStatus::NotEmittedMissingContext;
         };
         // Warned once, when the `Authz` was built on this store.
@@ -216,8 +216,8 @@ mod tests {
 
     use super::*;
     use crate::app_types::PdpID;
+    use crate::authz::TraceContext;
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
-    use crate::authz::{AuthorizeOptions, TraceContext};
     use crate::common::policy_store::TrustedIssuer;
     use crate::common::policy_store::test_utils::fixtures;
     use crate::jwt::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer, ValidatedToken};
@@ -229,8 +229,8 @@ mod tests {
 
     const ISSUER: &str = "https://idp.example.com";
 
-    fn options() -> AuthorizeOptions {
-        AuthorizeOptions::with_trace(TraceContext::new(
+    fn trace() -> Arc<TraceContext> {
+        Arc::new(TraceContext::new(
             "exec-1".to_string(),
             "https://gateway.example.com".to_string(),
             "workload-1".to_string(),
@@ -246,7 +246,7 @@ mod tests {
             action: "TestApp::Action::\"read\"".to_string(),
             resource_type: "TestApp::Resource".to_string(),
             outcome: Outcome::Allow,
-            tokens,
+            tokens: tokens.into(),
         }
     }
 
@@ -323,15 +323,10 @@ mod tests {
         let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
         let built = Cell::new(false);
 
-        let status = recorder.record(
-            gen_uuid7(),
-            &AuthorizeOptions::default(),
-            &minimal_store(),
-            || {
-                built.set(true);
-                Ok(facts(Vec::new()))
-            },
-        );
+        let status = recorder.record(gen_uuid7(), None, &minimal_store(), || {
+            built.set(true);
+            Ok(facts(Vec::new()))
+        });
 
         assert_eq!(
             status,
@@ -359,14 +354,18 @@ mod tests {
         let log = memory_log();
         let recorder = TraceRecorder::new(Some(tx), log.clone(), metrics());
         let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid());
-        let first = recorder.record(gen_uuid7(), &options(), &store, || Ok(facts(Vec::new())));
+        let first = recorder.record(gen_uuid7(), Some(&trace()), &store, || {
+            Ok(facts(Vec::new()))
+        });
         assert_eq!(
             first,
             TraceRecordStatus::Emitted,
             "the first record should fill the channel"
         );
 
-        let status = recorder.record(gen_uuid7(), &options(), &store, || Ok(facts(Vec::new())));
+        let status = recorder.record(gen_uuid7(), Some(&trace()), &store, || {
+            Ok(facts(Vec::new()))
+        });
 
         assert_eq!(
             status,
@@ -382,7 +381,7 @@ mod tests {
         drop(rx);
         let status = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics()).record(
             gen_uuid7(),
-            &options(),
+            Some(&trace()),
             &minimal_store(),
             || Ok(facts(Vec::new())),
         );
@@ -398,7 +397,7 @@ mod tests {
         let metrics = metrics();
         let status = TraceRecorder::new(None, TEST_LOGGER.clone(), metrics.clone()).record(
             gen_uuid7(),
-            &options(),
+            Some(&trace()),
             &minimal_store(),
             || Ok(facts(Vec::new())),
         );
@@ -423,7 +422,9 @@ mod tests {
         let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid());
         let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics());
         for _ in 0..2 {
-            let status = recorder.record(gen_uuid7(), &options(), &store, || Ok(facts(Vec::new())));
+            let status = recorder.record(gen_uuid7(), Some(&trace()), &store, || {
+                Ok(facts(Vec::new()))
+            });
             assert_eq!(status, TraceRecordStatus::Emitted, "both records are sent");
         }
 
@@ -458,7 +459,9 @@ mod tests {
         );
 
         for _ in 0..2 {
-            let status = recorder.record(gen_uuid7(), &options(), &store, || Ok(facts(Vec::new())));
+            let status = recorder.record(gen_uuid7(), Some(&trace()), &store, || {
+                Ok(facts(Vec::new()))
+            });
             assert_eq!(
                 status,
                 TraceRecordStatus::NotEmittedInvalidField,
@@ -477,7 +480,7 @@ mod tests {
         let request_id = gen_uuid7();
         let status = TraceRecorder::new(None, log.clone(), metrics()).record(
             request_id,
-            &options(),
+            Some(&trace()),
             &minimal_store(),
             || {
                 let mut facts = facts(Vec::new());
@@ -531,7 +534,7 @@ mod tests {
             let (tx, mut rx) = mpsc::channel(1);
             let status = TraceRecorder::new(Some(tx), log, metrics()).record(
                 gen_uuid7(),
-                &options(),
+                Some(&trace()),
                 &store,
                 || Ok(facts(refs)),
             );
@@ -588,7 +591,7 @@ mod tests {
 
         let status = TraceRecorder::new(None, log.clone(), metrics()).record(
             gen_uuid7(),
-            &options(),
+            Some(&trace()),
             &minimal_store(),
             || Ok(facts(refs)),
         );

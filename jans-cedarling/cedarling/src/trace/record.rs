@@ -63,7 +63,7 @@ pub(crate) struct DecisionFacts {
     pub(crate) resource_type: String,
     pub(crate) outcome: Outcome,
     /// Empty for `authorize_unsigned`, which uses no tokens.
-    pub(crate) tokens: Vec<TokenRef>,
+    pub(crate) tokens: Arc<[TokenRef]>,
 }
 
 /// A token reference: never the token itself, which must not leave Cedarling.
@@ -155,7 +155,7 @@ impl PolicyFacts {
 pub(crate) struct RecordDraft {
     pub(crate) record_id: Uuid,
     pub(crate) signed_at: u64,
-    pub(crate) trace: TraceContext,
+    pub(crate) trace: Arc<TraceContext>,
     pub(crate) decision: DecisionFacts,
     pub(crate) policy: Arc<PolicyFacts>,
 }
@@ -181,7 +181,7 @@ impl RecordDraft {
     pub(crate) fn new(
         record_id: Uuid,
         signed_at: u64,
-        trace: &TraceContext,
+        trace: &Arc<TraceContext>,
         decision: DecisionFacts,
         policy: Arc<PolicyFacts>,
     ) -> Result<Self, DraftError> {
@@ -229,7 +229,7 @@ impl RecordDraft {
         Ok(Self {
             record_id,
             signed_at,
-            trace: trace.clone(),
+            trace: Arc::clone(trace),
             decision,
             policy,
         })
@@ -328,7 +328,7 @@ mod tests {
             action: action.to_string(),
             resource_type: "Jans::Issue".to_string(),
             outcome: Outcome::Allow,
-            tokens,
+            tokens: tokens.into(),
         }
     }
 
@@ -348,7 +348,7 @@ mod tests {
         RecordDraft::new(
             gen_uuid7(),
             1_700_000_000,
-            trace,
+            &Arc::new(trace.clone()),
             decision,
             Arc::new(policy()),
         )

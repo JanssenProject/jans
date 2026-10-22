@@ -673,8 +673,8 @@ mod tests {
     use tokio::sync::{mpsc, watch};
 
     use super::*;
+    use crate::authz::TraceContext;
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
-    use crate::authz::{AuthorizeOptions, TraceContext};
     use crate::bootstrap_config::TraceConfig;
     use crate::common::app_types::PdpID;
     use crate::common::policy_store::test_utils::fixtures;
@@ -824,7 +824,7 @@ mod tests {
             action: "Jans::Action::\"Read\"".to_string(),
             resource_type: "Jans::Issue".to_string(),
             outcome: Outcome::Allow,
-            tokens,
+            tokens: tokens.into(),
         };
         let policy = Arc::new(PolicyFacts {
             store_id: "store-1".to_string(),
@@ -832,8 +832,14 @@ mod tests {
             language_version: "4.4".to_string(),
             bundle_hash: compute_bundle_hash(b"archive"),
         });
-        RecordDraft::new(gen_uuid7(), 1_781_138_542, &trace, decision, policy)
-            .expect("test draft builds")
+        RecordDraft::new(
+            gen_uuid7(),
+            1_781_138_542,
+            &Arc::new(trace),
+            decision,
+            policy,
+        )
+        .expect("test draft builds")
     }
 
     fn draft() -> RecordDraft {
@@ -1182,18 +1188,18 @@ mod tests {
         let handle = spawn_emitter(params, rx).expect("the emitter should start");
         let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid());
         let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics);
-        let options = AuthorizeOptions::with_trace(TraceContext::new(
+        let trace = Arc::new(TraceContext::new(
             "exec-1".to_string(),
             "https://gateway.example.com".to_string(),
             "workload-1".to_string(),
         ));
         let record = || {
-            recorder.record(gen_uuid7(), &options, &store, || {
+            recorder.record(gen_uuid7(), Some(&trace), &store, || {
                 Ok(DecisionFacts {
                     action: "TestApp::Action::\"read\"".to_string(),
                     resource_type: "TestApp::Resource".to_string(),
                     outcome: Outcome::Allow,
-                    tokens: Vec::new(),
+                    tokens: Arc::from([]),
                 })
             })
         };

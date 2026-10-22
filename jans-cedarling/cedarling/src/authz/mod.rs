@@ -368,11 +368,14 @@ impl Authz {
 
         let trace_record_status = self.record_trace(
             request_id,
-            &request.options,
+            self.trace_context(&request.options).as_ref(),
             &request.action,
             &resource_uid,
             result.decision,
-            || token_facts(&validated_tokens, &request.tokens, &self.config.log_service),
+            || {
+                token_facts(&validated_tokens, &request.tokens, &self.config.log_service)
+                    .map(Arc::from)
+            },
         );
 
         // Decision log
@@ -497,9 +500,11 @@ impl Authz {
             trace_tokens
                 .get_or_init(|| {
                     token_facts(&validated_tokens, &request.tokens, &self.config.log_service)
+                        .map(Arc::from)
                 })
                 .clone()
         };
+        let trace_context = self.trace_context(&request.options);
 
         let mut results = Vec::with_capacity(request.items.len());
         for (item_index, item) in request.items.iter().enumerate() {
@@ -545,7 +550,7 @@ impl Authz {
 
             let trace_record_status = self.record_trace(
                 item_request_id,
-                &request.options,
+                trace_context.as_ref(),
                 &item.action,
                 &resource_uid,
                 decision,
@@ -775,11 +780,11 @@ impl Authz {
 
         let trace_record_status = self.record_trace(
             request_id,
-            &request.options,
+            self.trace_context(&request.options).as_ref(),
             &request.action,
             &resource_uid,
             result.decision,
-            || Ok(Vec::new()),
+            || Ok(Arc::from([])),
         );
 
         // Decision log
@@ -877,6 +882,7 @@ impl Authz {
 
         let schema = &self.config.policy_store.schema;
         let schema_ref = schema.as_ref().map(|s| &s.schema);
+        let trace_context = self.trace_context(&request.options);
 
         let mut results = Vec::with_capacity(request.items.len());
         for (item_index, item) in request.items.iter().enumerate() {
@@ -924,11 +930,11 @@ impl Authz {
 
             let trace_record_status = self.record_trace(
                 item_request_id,
-                &request.options,
+                trace_context.as_ref(),
                 &item.action,
                 &resource_uid,
                 decision,
-                || Ok(Vec::new()),
+                || Ok(Arc::from([])),
             );
 
             self.log_decision(
@@ -1235,20 +1241,29 @@ impl Authz {
         self.config.log_service.log_any(log_entry);
     }
 
+    /// The host's TRACE context, shared by the records of one request; `None`
+    /// when TRACE is disabled or the host passed no context.
+    fn trace_context(&self, options: &AuthorizeOptions) -> Option<Arc<TraceContext>> {
+        if self.config.trace.is_none() {
+            return None;
+        }
+        options.trace.clone().map(Arc::new)
+    }
+
     /// Hands the TRACE record of one decision to the emitter; `None` when TRACE is
     /// disabled. `tokens` runs only when the record is built.
     fn record_trace(
         &self,
         request_id: Uuid,
-        options: &AuthorizeOptions,
+        trace_context: Option<&Arc<TraceContext>>,
         action: &str,
         resource: &EntityUid,
         allowed: bool,
-        tokens: impl FnOnce() -> Result<Vec<TokenRef>, DraftError>,
+        tokens: impl FnOnce() -> Result<Arc<[TokenRef]>, DraftError>,
     ) -> Option<TraceRecordStatus> {
         let trace = self.config.trace.as_ref()?;
         Some(
-            trace.record(request_id, options, &self.config.policy_store, || {
+            trace.record(request_id, trace_context, &self.config.policy_store, || {
                 Ok(DecisionFacts {
                     action: action.to_string(),
                     resource_type: resource.type_name().to_string(),
@@ -2095,6 +2110,71 @@ type Context = {
             tokens,
             [("https://idp.dolphin.sea", "Dolphin::Access_Token")],
             "the record references the token the decision used"
+        );
+    }
+
+    #[tokio::test]
+    async fn unsigned_batch_records_share_the_trace_context() {
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let (tx, mut rx) = mpsc::channel(4);
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&fixtures::minimal_valid()).await.store,
+            Some(recorder),
+        )
+        .await;
+
+        authz
+            .authorize_unsigned_batch(&unsigned_batch(with_trace()))
+            .expect("the batch should be decided");
+
+        let drafts = drain(&mut rx);
+        assert_eq!(drafts.len(), 3, "every item should have a record");
+        assert!(
+            drafts
+                .iter()
+                .all(|draft| Arc::ptr_eq(&draft.trace, &drafts[0].trace)),
+            "records of one batch should share its trace context instead of copying it"
+        );
+    }
+
+    #[tokio::test]
+    async fn multi_issuer_batch_records_share_the_trace_context_and_tokens() {
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let (tx, mut rx) = mpsc::channel(4);
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&multi_issuer_store()).await.store,
+            Some(recorder),
+        )
+        .await;
+        let request = BatchAuthorizeMultiIssuerRequest::new(
+            vec![dolphin_token()],
+            vec![
+                dolphin_item("Dolphin::Action::\"Read\"", "d1"),
+                dolphin_item("Dolphin::Action::\"Read\"", "d2"),
+            ],
+        )
+        .with_options(with_trace());
+
+        authz
+            .authorize_multi_issuer_batch(&request, None)
+            .await
+            .expect("the batch should be decided");
+
+        let drafts = drain(&mut rx);
+        assert_eq!(drafts.len(), 2, "every item should have a record");
+        assert!(
+            Arc::ptr_eq(&drafts[0].trace, &drafts[1].trace),
+            "records of one batch should share its trace context instead of copying it"
+        );
+        assert!(
+            Arc::ptr_eq(&drafts[0].decision.tokens, &drafts[1].decision.tokens),
+            "records of one batch should share its token references instead of copying them"
         );
     }
 
