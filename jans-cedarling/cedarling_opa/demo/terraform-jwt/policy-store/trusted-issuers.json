@@ -1,0 +1,9 @@
+{
+  "CI::GitHubWorkflow": {
+    "type": "jwt",
+    "issuer": "CI",
+    "configuration_endpoints": {
+      "configuration": "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
+    }
+  }
+}
