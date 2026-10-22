@@ -280,9 +280,10 @@ These rules are checked when the store loads, and a violation fails the load:
 - An entry uses exactly one key-source form: `configuration` together with
   `jwks`, or `jwks` without `iss`, is rejected.
 
-Two key sources that only turn out to share an `iss` after discovery are not
-both loaded: the later one fails (logged at `ERROR`), like an unreachable
-endpoint.
+Two key sources that only turn out to share an `iss` after discovery, with
+different JWKS, are both rejected: there is no order between them, so neither
+issuer loads, and each is logged at `ERROR` naming the issuers and both JWKS.
+An issuer whose discovery fails takes no part in this check.
 
 A JWT is accepted only for its entry's issuer: its `iss` must equal the expected
 `iss`, and the discovery document's `issuer` must equal it too, or that issuer

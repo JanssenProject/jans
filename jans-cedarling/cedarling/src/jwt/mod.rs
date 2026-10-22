@@ -303,7 +303,6 @@ impl JwtService {
             loading_state: loading_state.clone(),
             http_client,
             jwks_refresh_notifiers: jwks_refresh_notifiers.clone(),
-            jwks_by_iss: Arc::new(Mutex::new(HashMap::new())),
             jwks_cancel_token: jwks_cancel_token.clone(),
         };
 
