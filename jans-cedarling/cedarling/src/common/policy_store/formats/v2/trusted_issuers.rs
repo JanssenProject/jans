@@ -41,9 +41,9 @@ pub(crate) struct JwtTokenConfig {
     #[serde(deserialize_with = "de_issuer")]
     pub(crate) issuer: IssuerName,
     pub(crate) configuration_endpoints: KeySourceDoc,
-    #[serde(default = "default_token_id")]
+    #[serde(default = "default_token_id", deserialize_with = "de_token_id")]
     pub(crate) token_id: String,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "de_required_claims")]
     pub(crate) required_claims: HashSet<String>,
 }
 
@@ -52,13 +52,42 @@ pub(crate) struct JwtTokenConfig {
 pub(crate) struct CustomTokenConfig {
     #[serde(deserialize_with = "de_issuer")]
     pub(crate) issuer: IssuerName,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "de_required_claims")]
     pub(crate) required_claims: HashSet<String>,
 }
 
 // Frozen v2 default; independent of the runtime `DEFAULT_TKN_ID`.
 fn default_token_id() -> String {
     "jti".to_string()
+}
+
+fn de_token_id<'de, D: Deserializer<'de>>(deserializer: D) -> Result<String, D::Error> {
+    let token_id = String::deserialize(deserializer)?;
+    if token_id.is_empty() {
+        return Err(de::Error::custom("`token_id` must not be empty"));
+    }
+    Ok(token_id)
+}
+
+/// A set would silently merge a repeated claim, so it is rejected instead.
+fn de_required_claims<'de, D: Deserializer<'de>>(
+    deserializer: D,
+) -> Result<HashSet<String>, D::Error> {
+    let claims = Vec::<String>::deserialize(deserializer)?;
+    let mut unique = HashSet::with_capacity(claims.len());
+    for claim in claims {
+        if claim.is_empty() {
+            return Err(de::Error::custom(
+                "`required_claims` must not contain an empty claim name",
+            ));
+        }
+        if let Some(claim) = unique.replace(claim) {
+            return Err(de::Error::custom(format!(
+                "`required_claims` lists '{claim}' more than once"
+            )));
+        }
+    }
+    Ok(unique)
 }
 
 fn de_issuer<'de, D: Deserializer<'de>>(deserializer: D) -> Result<IssuerName, D::Error> {
@@ -383,6 +412,44 @@ mod tests {
     }
 
     #[test]
+    fn rejects_empty_token_id() {
+        assert_rejected(
+            &json!({
+                "type": "jwt",
+                "issuer": "Acme",
+                "configuration_endpoints": { "jwks": "https://a/k", "iss": "https://a" },
+                "token_id": ""
+            }),
+            "`token_id` must not be empty",
+        );
+    }
+
+    #[test]
+    fn rejects_empty_or_repeated_required_claims() {
+        let jwt = |claims: serde_json::Value| {
+            json!({
+                "type": "jwt",
+                "issuer": "Acme",
+                "configuration_endpoints": { "jwks": "https://a/k", "iss": "https://a" },
+                "required_claims": claims
+            })
+        };
+        let custom = |claims: serde_json::Value| json!({ "type": "custom", "issuer": "Acme", "required_claims": claims });
+        for entry in [jwt(json!(["sub", ""])), custom(json!([""]))] {
+            assert_rejected(
+                &entry,
+                "`required_claims` must not contain an empty claim name",
+            );
+        }
+        for entry in [
+            jwt(json!(["sub", "exp", "sub"])),
+            custom(json!(["sub", "sub"])),
+        ] {
+            assert_rejected(&entry, "`required_claims` lists 'sub' more than once");
+        }
+    }
+
+    #[test]
     fn rejects_issuer_that_is_not_one_identifier() {
         for issuer in ["Acme Incorporated", "Acme::Corp", "if", "__cedar"] {
             assert_rejected(
@@ -496,5 +563,134 @@ mod tests {
                 entity_type_b: "Acme::Id_token".into(),
             }
         );
+    }
+
+    /// `schema/trusted_issuers_schema.json`, the published shape of this file.
+    fn schema_validator() -> jsonschema::Validator {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../schema/trusted_issuers_schema.json");
+        let schema: serde_json::Value = serde_json::from_str(
+            &std::fs::read_to_string(&path).expect("the schema file should be readable"),
+        )
+        .expect("the schema should be JSON");
+        jsonschema::draft202012::new(&schema).expect("the schema should compile")
+    }
+
+    /// The example and every v2 fixture in the repository pass the schema and load.
+    #[test]
+    fn schema_and_parser_accept_the_fixtures() {
+        let validator = schema_validator();
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+        let mut stores = vec![("example".to_string(), example())];
+        for fixture in [
+            "bindings/cedarling-java/src/test/resources/config/multiIssuer/policy-store",
+            "bindings/cedarling_python/example_files/policy-store-multi-issuer",
+            "cedarling_opa/demo/terraform-jwt/policy-store",
+            "flask-sidecar/tests/integration/policy-store-multi-issuer",
+        ] {
+            let path = root.join(fixture).join("trusted-issuers.json");
+            let json = std::fs::read_to_string(&path).expect("the fixture should be readable");
+            stores.push((
+                fixture.to_string(),
+                serde_json::from_str(&json).expect("the fixture should be JSON"),
+            ));
+        }
+
+        for (name, store) in stores {
+            let errors: Vec<String> = validator
+                .iter_errors(&store)
+                .map(|e| e.to_string())
+                .collect();
+            assert!(
+                errors.is_empty(),
+                "{name} should pass the schema: {errors:?}"
+            );
+            parse(&store.to_string())
+                .unwrap_or_else(|e| panic!("{name} should parse: {e}"))
+                .into_runtime()
+                .unwrap_or_else(|e| panic!("{name} should convert: {e}"));
+        }
+    }
+
+    /// Entries the schema can judge on their own are rejected by both, so the two
+    /// cannot drift apart unnoticed.
+    #[test]
+    fn schema_and_parser_reject_the_same_entries() {
+        let validator = schema_validator();
+        let jwt = |extra: serde_json::Value| {
+            let mut entry = json!({
+                "type": "jwt",
+                "issuer": "Acme",
+                "configuration_endpoints": { "jwks": "https://a/k", "iss": "https://a" }
+            });
+            entry
+                .as_object_mut()
+                .expect("an object")
+                .extend(extra.as_object().expect("an object").clone());
+            entry
+        };
+        let endpoints =
+            |endpoints: serde_json::Value| jwt(json!({ "configuration_endpoints": endpoints }));
+        for (label, entry) in [
+            ("empty token_id", jwt(json!({ "token_id": "" }))),
+            ("empty claim", jwt(json!({ "required_claims": [""] }))),
+            (
+                "repeated claim",
+                jwt(json!({ "required_claims": ["sub", "sub"] })),
+            ),
+            ("unknown field", jwt(json!({ "trusted": true }))),
+            ("reserved issuer", jwt(json!({ "issuer": "if" }))),
+            ("issuer with ::", jwt(json!({ "issuer": "Acme::Corp" }))),
+            (
+                "missing key source",
+                json!({ "type": "jwt", "issuer": "Acme" }),
+            ),
+            ("unknown type", json!({ "type": "saml", "issuer": "Acme" })),
+            (
+                "custom with key source",
+                json!({
+                    "type": "custom",
+                    "issuer": "Acme",
+                    "configuration_endpoints": { "jwks": "https://a/k", "iss": "https://a" }
+                }),
+            ),
+            (
+                "jwks without iss",
+                endpoints(json!({ "jwks": "https://a/k" })),
+            ),
+            (
+                "both forms",
+                endpoints(json!({
+                    "configuration": "https://a/.well-known/openid-configuration",
+                    "jwks": "https://a/k"
+                })),
+            ),
+            (
+                "not a discovery URL",
+                endpoints(json!({ "configuration": "https://a/config" })),
+            ),
+            (
+                "file scheme",
+                endpoints(json!({ "jwks": "file:///etc/passwd", "iss": "https://a" })),
+            ),
+            (
+                "iss with query",
+                endpoints(json!({ "jwks": "https://a/k", "iss": "https://a?x=1" })),
+            ),
+            (
+                "iss with fragment",
+                endpoints(json!({ "jwks": "https://a/k", "iss": "https://a#f" })),
+            ),
+        ] {
+            let store = json!({ "Acme::Access_token": entry });
+            assert!(
+                !validator.is_valid(&store),
+                "the schema should reject {label}"
+            );
+            assert!(
+                parse(&store.to_string()).is_err(),
+                "the parser should reject {label}"
+            );
+        }
     }
 }
