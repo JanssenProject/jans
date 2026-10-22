@@ -127,7 +127,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         // Validate Scopes
-        acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer, httpHeaders);
+        acccessToken = validateScope(token, tokenScopes, resourceInfo, issuer, httpHeaders);
 
         boolean isAuthorized = externalAuthorization(acccessToken, issuer, method, path);
         logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
@@ -173,8 +173,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                     logger.info("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
                             tokenScopes);
                     throw new WebApplicationException("Insufficient scopes! , Required scope: " + resourceScopes
-                            + ", however token scopes: " + tokenScopes,
-                            Response.status(Response.Status.UNAUTHORIZED).build());
+                            + ", token scopes: " + tokenScopes, Response.status(Response.Status.UNAUTHORIZED).build());
                 }
 
                 return AUTHENTICATION_SCHEME + accessToken;
@@ -187,8 +186,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 logger.error("Insufficient scopes!! Required scope:{}, , however token scopes:{} ", resourceScopes,
                         tokenScopes);
                 throw new WebApplicationException("Insufficient scopes!! , Required scope: " + resourceScopes
-                        + ", however token scopes: " + tokenScopes,
-                        Response.status(Response.Status.UNAUTHORIZED).build());
+                        + ", but token scopes: " + tokenScopes, Response.status(Response.Status.UNAUTHORIZED).build());
             }
 
             // If no scope is missing
@@ -212,14 +210,8 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
             return AUTHENTICATION_SCHEME + accessToken;
         } catch (WebApplicationException we) {
-            if (logger.isErrorEnabled()) {
-                logger.error("WebApplicationException exception:{} ", we.getMessage());
-            }
             throw we;
         } catch (Exception ex) {
-            if (logger.isErrorEnabled()) {
-                logger.error("oAuth authorization error:{} ", ex.getMessage());
-            }
             throw new WebApplicationException("oAuth authorization error " + ex.getMessage(),
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
         }
