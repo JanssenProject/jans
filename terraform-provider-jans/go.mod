@@ -2,7 +2,7 @@ module github.com/jans/terraform-provider-jans
 
 go 1.26.0
 
-toolchain go1.26.9
+toolchain go1.26.10
 
 require github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.0
 
