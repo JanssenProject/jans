@@ -17,7 +17,7 @@ This page is the starting point for gating Terraform operations with Cedar polic
 |---|---|---|
 | **Identity source** | Environment variables asserted by the caller | Signed GitHub Actions OIDC token |
 | **Signature validation** | None — `CEDARLING_JWT_SIG_VALIDATION: "disabled"` | Cryptographic — Cedarling fetches GitHub's JWKS and verifies every token |
-| **Trusted issuer config** | Not required — no `trusted-issuers.json` needed | Required — `policy-store/trusted-issuers.json` must declare the issuer endpoint |
+| **Trusted issuer config** | Not required — no `trusted-issuers/` directory needed | Required — `policy-store/trusted-issuers/github-actions.json` must declare the issuer endpoint |
 | **Principal model** | `Infra::User` with asserted `role` attribute | `CI::GitHubWorkflow` with verified JWT claims (`repository`, `ref`, `environment`) |
 | **Cedarling built-in** | `authorize_unsigned` | `authorize_multi_issuer` |
 | **Secret management** | Requires `TF_USER_ID` / `TF_USER_ROLES` set by the operator | No secrets — GitHub issues the OIDC token automatically |

@@ -26,7 +26,8 @@ terraform-jwt/
 ├── policy-store/                      Cedar policy store (directory-based format)
 │   ├── metadata.json                  Policy store metadata
 │   ├── schema.cedarschema             Cedar entity schema (CI namespace)
-│   ├── trusted-issuers.json           Trusted issuer config for authorize_multi_issuer
+│   ├── trusted-issuers/
+│   │   └── github-actions.json        Trusted issuer config for authorize_multi_issuer
 │   └── policies/
 │       ├── ci-permit-plan.cedar                      Plan from trusted repo (any branch)
 │       ├── ci-permit-apply-main-non-prod.cedar        Apply from main to non-prod
@@ -44,7 +45,7 @@ terraform-jwt/
 └── example.tf                         Minimal Terraform config (no cloud credentials needed)
 ```
 
-> **Trusted issuers for `authorize_multi_issuer`** are read from `policy-store/trusted-issuers.json`, not from the OPA config file. Its `CI::GitHubWorkflow` entry declares the token type, its issuer `CI` and the GitHub Actions OIDC discovery endpoint. The OPA config files (`opa-config.json`, `opa-config-demo.json`) only control Cedarling startup behaviour (log level, sig validation, policy store path).
+> **Trusted issuers for `authorize_multi_issuer`** are read from `policy-store/trusted-issuers/`, not from the OPA config file. The `github-actions.json` file there defines the issuer name, OIDC discovery endpoint, and token-to-entity mapping. The OPA config files (`opa-config.json`, `opa-config-demo.json`) only control Cedarling startup behaviour (log level, sig validation, policy store path).
 
 ## How It Works
 

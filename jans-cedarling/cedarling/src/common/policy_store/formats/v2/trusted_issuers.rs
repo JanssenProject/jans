@@ -585,7 +585,6 @@ mod tests {
         for fixture in [
             "bindings/cedarling-java/src/test/resources/config/multiIssuer/policy-store",
             "bindings/cedarling_python/example_files/policy-store-multi-issuer",
-            "cedarling_opa/demo/terraform-jwt/policy-store",
         ] {
             let path = root.join(fixture).join("trusted-issuers.json");
             let json = std::fs::read_to_string(&path).expect("the fixture should be readable");
