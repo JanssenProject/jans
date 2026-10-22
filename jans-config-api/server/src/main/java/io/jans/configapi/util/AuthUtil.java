@@ -385,8 +385,7 @@ public class AuthUtil {
                 scope.toString());
         if (tokenResponse != null) {
 
-            log.debug("Token Response - tokenScope: {}, tokenAccessToken: {} ", tokenResponse.getScope(),
-                    tokenResponse.getAccessToken());
+            log.debug("Token Response - tokenScope: {} ", tokenResponse.getScope());
             final String accessToken = tokenResponse.getAccessToken();
             final Integer expiresIn = tokenResponse.getExpiresIn();
             if (Util.allNotBlank(accessToken)) {
