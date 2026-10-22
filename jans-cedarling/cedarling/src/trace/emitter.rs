@@ -27,6 +27,7 @@ use std::collections::{HashMap, VecDeque};
 use std::num::NonZeroUsize;
 use std::sync::{Arc, Mutex, PoisonError};
 
+use bytes::Bytes;
 use jans_trace_core::Limits;
 use jans_trace_core::assertion::{SignedAssertion, batch_body};
 use jans_trace_core::signature::TraceSigner;
@@ -161,7 +162,7 @@ enum GenesisState {
 
 /// The next bulk request: its body and the records joined into it, in order.
 struct BulkRequest {
-    body: String,
+    body: Bytes,
     records: Vec<Pending>,
 }
 
@@ -378,7 +379,7 @@ impl Emitter {
         }
         match batch_body(&batch, &self.limits) {
             Ok(body) => Some(BulkRequest {
-                body,
+                body: Bytes::from(body),
                 records: batch,
             }),
             Err(err) => {
@@ -399,7 +400,7 @@ impl Emitter {
     /// Posts `body`, retrying a failed request with the same bytes.
     async fn send(
         &mut self,
-        body: &str,
+        body: &Bytes,
         records: usize,
         cancel: Option<&CancellationToken>,
     ) -> Sent {
@@ -730,7 +731,8 @@ mod tests {
 
     #[async_trait]
     impl BulkSink for FakeLock {
-        async fn post_bulk(&self, body: &str) -> Result<Vec<BulkItemResult>, PostBulkError> {
+        async fn post_bulk(&self, body: &Bytes) -> Result<Vec<BulkItemResult>, PostBulkError> {
+            let body = std::str::from_utf8(body).expect("a bulk body is UTF-8");
             let count = records(body).len();
             self.bodies
                 .send_modify(|bodies| bodies.push(body.to_string()));

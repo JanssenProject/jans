@@ -9,6 +9,7 @@
 use std::fmt;
 
 use async_trait::async_trait;
+use bytes::Bytes;
 use reqwest::StatusCode;
 use reqwest::header::CONTENT_TYPE;
 use serde::Deserialize;
@@ -32,7 +33,7 @@ const PROBLEM_FLAGS: [&str; 4] = [
 #[async_trait]
 pub(crate) trait BulkSink: Send + Sync {
     /// Results of a processed request, in request order.
-    async fn post_bulk(&self, body: &str) -> Result<Vec<BulkItemResult>, PostBulkError>;
+    async fn post_bulk(&self, body: &Bytes) -> Result<Vec<BulkItemResult>, PostBulkError>;
 }
 
 /// What Lock did with one record of a processed bulk request.
@@ -102,7 +103,7 @@ impl BulkSink for TraceSink {
     /// a token Lock never accepts (e.g. without `trace.write`) costs one extra
     /// token request per call, not a loop. A pre-issued token cannot be
     /// reissued, so its `401` is final at once.
-    async fn post_bulk(&self, body: &str) -> Result<Vec<BulkItemResult>, PostBulkError> {
+    async fn post_bulk(&self, body: &Bytes) -> Result<Vec<BulkItemResult>, PostBulkError> {
         if let Attempt::Results(results) = self.post_once(body).await? {
             return Ok(results);
         }
@@ -124,15 +125,21 @@ impl BulkSink for TraceSink {
 }
 
 impl TraceSink {
-    async fn post_once(&self, body: &str) -> Result<Attempt, PostBulkError> {
-        let token = self.token.read().await.0.clone();
-        let response = self
-            .http
+    /// The bulk request carrying `body`. `Bytes` clones share the buffer, so a
+    /// retry or a resend after `401` does not copy the batch.
+    fn bulk_request(&self, token: String, body: &Bytes) -> reqwest::RequestBuilder {
+        self.http
             .raw_client
             .post(self.endpoint.clone())
             .bearer_auth(token)
             .header(CONTENT_TYPE, "application/json")
-            .body(body.to_string())
+            .body(body.clone())
+    }
+
+    async fn post_once(&self, body: &Bytes) -> Result<Attempt, PostBulkError> {
+        let token = self.token.read().await.0.clone();
+        let response = self
+            .bulk_request(token, body)
             .send()
             .await
             .map_err(|err| PostBulkError::Retryable(err.to_string()))?;
@@ -256,6 +263,10 @@ mod tests {
     const BODY: &str = r#"[{"producer":"cedarling-fleet-1"},{"producer":"cedarling-fleet-1"}]"#;
     const BULK_PATH: &str = "/jans-lock/api/v1/audit/trace/bulk";
 
+    fn bulk_body() -> Bytes {
+        Bytes::from_static(BODY.as_bytes())
+    }
+
     fn sink(server: &ServerGuard, source: Option<TokenSource>) -> TraceSink {
         TraceSink {
             endpoint: format!("{}{BULK_PATH}", server.url())
@@ -295,6 +306,29 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn every_attempt_sends_the_body_without_copying_it() {
+        let server = Server::new_async().await;
+        let sink = sink(&server, None);
+        let body = bulk_body();
+
+        for attempt in ["first", "repeated"] {
+            let request = sink
+                .bulk_request("token".to_string(), &body)
+                .build()
+                .expect("the bulk request builds");
+            let sent = request
+                .body()
+                .and_then(reqwest::Body::as_bytes)
+                .expect("the bulk body is in memory");
+            assert_eq!(
+                sent.as_ptr(),
+                body.as_ptr(),
+                "the {attempt} attempt should send the batch's bytes, not a copy"
+            );
+        }
+    }
+
+    #[tokio::test]
     async fn multi_status_maps_results_in_order() {
         let mut server = Server::new_async().await;
         let results = json!({"results": [
@@ -306,7 +340,7 @@ mod tests {
         let _bulk = bulk(&mut server, "old-token", 207, &results.to_string());
 
         let items = sink(&server, None)
-            .post_bulk(BODY)
+            .post_bulk(&bulk_body())
             .await
             .expect("a 207 response should be read per record");
 
@@ -338,7 +372,7 @@ mod tests {
         let _bulk = bulk(&mut server, "old-token", 207, "not json");
 
         let err = sink(&server, None)
-            .post_bulk(BODY)
+            .post_bulk(&bulk_body())
             .await
             .expect_err("an unreadable 207 body should be an error");
         assert!(
@@ -353,7 +387,7 @@ mod tests {
         let _bulk = bulk(&mut server, "old-token", 503, "");
 
         let err = sink(&server, None)
-            .post_bulk(BODY)
+            .post_bulk(&bulk_body())
             .await
             .expect_err("a 5xx response should be an error");
         assert!(
@@ -369,7 +403,7 @@ mod tests {
         sink.endpoint = "http://127.0.0.1:1/bulk".parse().expect("valid URL");
 
         let err = sink
-            .post_bulk(BODY)
+            .post_bulk(&bulk_body())
             .await
             .expect_err("a connection failure should be an error");
         assert!(
@@ -385,7 +419,7 @@ mod tests {
         let _bulk = bulk(&mut server, "old-token", 400, &body.to_string());
 
         let err = sink(&server, None)
-            .post_bulk(BODY)
+            .post_bulk(&bulk_body())
             .await
             .expect_err("a 4xx response should be an error");
         assert!(
@@ -408,7 +442,7 @@ mod tests {
         let source = source(&server);
 
         sink(&server, Some(source))
-            .post_bulk(BODY)
+            .post_bulk(&bulk_body())
             .await
             .expect("a reissued token should get the same body through");
 
@@ -426,7 +460,7 @@ mod tests {
         let source = source(&server);
 
         let err = sink(&server, Some(source))
-            .post_bulk(BODY)
+            .post_bulk(&bulk_body())
             .await
             .expect_err("a 401 after reissue should be an error");
 
@@ -446,7 +480,7 @@ mod tests {
         let token = token_endpoint(&mut server, 0);
 
         let err = sink(&server, None)
-            .post_bulk(BODY)
+            .post_bulk(&bulk_body())
             .await
             .expect_err("a pre-issued token cannot be reissued");
 

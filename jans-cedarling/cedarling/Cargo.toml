@@ -39,6 +39,7 @@ base64 = { workspace = true, features = ["std", "simd-unsafe"] }
 url = "2.5.8"
 jsonwebtoken = { workspace = true }
 reqwest = { workspace = true }
+bytes = "1.12.1"
 typed-builder = "0.23.2"
 semver = { version = "1.0.28", features = ["serde"] }
 derive_more = { workspace = true, features = [
