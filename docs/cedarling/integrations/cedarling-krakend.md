@@ -27,10 +27,10 @@ cedarling-krakend-<architecture>-<krakend version and platform>-<Janssen version
 
 Use the following table to find which build you need:
 
-|            | amd64                                        | arm64                                        |
-| ---------- | -------------------------------------------- | -------------------------------------------- |
-| Docker     | `amd64-builder-2.9.0-0.0.0.so`               | `arm64-builder-2.9.0-0.0.0.so`               |
-| On-premise | `amd64-builder-2.9.0-linux-generic-0.0.0.so` | `arm64-builder-2.9.0-linux-generic-0.0.0.so` |
+|            | amd64                                          | arm64                                          |
+| ---------- | ---------------------------------------------- | ---------------------------------------------- |
+| Docker     | `amd64-builder-2.13.11-0.0.0.so`               | `arm64-builder-2.13.11-0.0.0.so`               |
+| On-premise | `amd64-builder-2.13.11-linux-generic-0.0.0.so` | `arm64-builder-2.13.11-linux-generic-0.0.0.so` |
 
 If you are running a different version of KrakenD, you can use the following steps to build the plugin yourself.
 
