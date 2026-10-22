@@ -8,14 +8,21 @@ import { parse as parseYaml } from "yaml";
 const execute = promisify(execFile);
 
 // The Agama issuers of a YAML fixture as a v2 `trusted-issuers.json`: one
-// entry per trusted token type, keyed by its entity type.
-export function trustedIssuersJson(issuers) {
+// entry per trusted token type, keyed by its entity type, which must be unique.
+function trustedIssuersJson(issuers) {
   const entries = {};
   for (const issuer of Object.values(issuers)) {
     const configuration =
       issuer.openid_configuration_endpoint ?? issuer.configuration_endpoint;
     for (const token of Object.values(issuer.token_metadata ?? {})) {
       if (token.trusted === false) continue;
+      const existing = entries[token.entity_type_name];
+      if (existing) {
+        throw new Error(
+          `entity type '${token.entity_type_name}' is declared by issuers ` +
+            `'${existing.issuer}' and '${issuer.name}'`,
+        );
+      }
       entries[token.entity_type_name] = {
         type: "jwt",
         issuer: issuer.name,
@@ -45,6 +52,10 @@ export async function createPolicyArchive(fixturePath, outputDirectory, name) {
   };
   for (const [id, policy] of Object.entries(store.policies)) {
     files[`policies/${id}.cedar`] = policy.policy_content.body;
+  }
+  // Only JWT issuers are converted; fail rather than drop custom ones.
+  if (Object.keys(store.custom_issuers ?? {}).length > 0) {
+    throw new Error(`${fixturePath}: custom_issuers are not supported`);
   }
   const trustedIssuers = trustedIssuersJson(store.trusted_issuers ?? {});
   if (Object.keys(trustedIssuers).length > 0) {
