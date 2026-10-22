@@ -209,7 +209,7 @@ mod tests {
     use crate::log::{LogStrategy, Logger, TEST_LOGGER, gen_uuid7};
     use crate::trace::TraceRecordStatus;
     use crate::trace::record::{DecisionFacts, DraftError, Outcome, TokenId};
-    use crate::trace::test_utils::cjar_store;
+    use crate::trace::test_utils::{CjarStore, cjar_store};
     use crate::{LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig, TokenInput};
 
     const ISSUER: &str = "https://idp.example.com";
@@ -259,29 +259,31 @@ mod tests {
         })
     }
 
-    fn validated(
-        mapping: &str,
-        claims: Value,
-        iss: TokenIssuer,
-        index: usize,
-    ) -> (String, ValidatedToken) {
+    fn validated(mapping: &str, claims: Value, iss: TokenIssuer, index: usize) -> ValidatedToken {
         let claims = TokenClaims::try_from(claims).expect("test claims are a JSON object");
         let token = Token::new(mapping, claims, Some(iss));
-        (
-            mapping.to_string(),
-            ValidatedToken {
-                token: Arc::new(token),
-                index,
-            },
-        )
+        ValidatedToken {
+            token: Arc::new(token),
+            index,
+        }
     }
 
-    fn jwt(mapping: &str, claims: Value, index: usize) -> (String, ValidatedToken) {
+    /// Validated tokens keyed by their mapping, as multi-issuer validation returns them.
+    fn by_mapping(
+        tokens: impl IntoIterator<Item = ValidatedToken>,
+    ) -> HashMap<String, ValidatedToken> {
+        tokens
+            .into_iter()
+            .map(|validated| (validated.token.name.clone(), validated))
+            .collect()
+    }
+
+    fn jwt(mapping: &str, claims: Value, index: usize) -> ValidatedToken {
         let issuer = TokenIssuer::Jwt(Arc::new(TrustedIssuer::default()));
         validated(mapping, claims, issuer, index)
     }
 
-    fn custom(mapping: &str, claims: Value, index: usize) -> (String, ValidatedToken) {
+    fn custom(mapping: &str, claims: Value, index: usize) -> ValidatedToken {
         let issuer = TokenIssuer::Custom(CustomTokenIssuerMeta {
             issuer_id: "dolphin".to_string(),
             entity_type_name: Some(mapping.to_string()),
@@ -305,7 +307,7 @@ mod tests {
         let status = recorder.record(
             gen_uuid7(),
             &AuthorizeOptions::default(),
-            &cjar_store(&fixtures::minimal_valid()).0,
+            &cjar_store(&fixtures::minimal_valid()).store,
             || {
                 built.set(true);
                 Ok(facts(Vec::new()))
@@ -337,7 +339,7 @@ mod tests {
         let (tx, _rx) = mpsc::channel(1);
         let log = memory_log();
         let recorder = TraceRecorder::new(Some(tx), log.clone(), metrics());
-        let (store, _) = cjar_store(&fixtures::minimal_valid());
+        let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid());
         let first = recorder.record(gen_uuid7(), &options(), &store, || Ok(facts(Vec::new())));
         assert_eq!(
             first,
@@ -362,7 +364,7 @@ mod tests {
         let status = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics()).record(
             gen_uuid7(),
             &options(),
-            &cjar_store(&fixtures::minimal_valid()).0,
+            &cjar_store(&fixtures::minimal_valid()).store,
             || Ok(facts(Vec::new())),
         );
         assert_eq!(
@@ -378,7 +380,7 @@ mod tests {
         let status = TraceRecorder::new(None, TEST_LOGGER.clone(), metrics.clone()).record(
             gen_uuid7(),
             &options(),
-            &cjar_store(&fixtures::minimal_valid()).0,
+            &cjar_store(&fixtures::minimal_valid()).store,
             || Ok(facts(Vec::new())),
         );
         assert_eq!(
@@ -398,7 +400,9 @@ mod tests {
 
     #[test]
     fn store_without_bundle_hash_is_invalid_field() {
-        let (archived, _) = cjar_store(&fixtures::minimal_valid());
+        let CjarStore {
+            store: archived, ..
+        } = cjar_store(&fixtures::minimal_valid());
         let store = PolicyStoreWithID::without_archive(
             archived.id.clone(),
             archived.store.clone(),
@@ -429,7 +433,7 @@ mod tests {
         let status = TraceRecorder::new(None, log.clone(), metrics()).record(
             request_id,
             &options(),
-            &cjar_store(&fixtures::minimal_valid()).0,
+            &cjar_store(&fixtures::minimal_valid()).store,
             || {
                 let mut facts = facts(Vec::new());
                 facts.action = "a".repeat(513);
@@ -456,14 +460,14 @@ mod tests {
 
     #[test]
     fn custom_token_without_lock_issuer_is_left_out() {
-        let (store, _) = cjar_store(&fixtures::minimal_valid());
+        let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid());
         for claims in [json!({"sub": "d1"}), json!({"iss": "dolphin", "sub": "d1"})] {
             let log = memory_log();
             let inputs = [
                 input("Jans::Access_Token", "header.payload.sig"),
                 input("Acme::DolphinToken", "dolphin-opaque"),
             ];
-            let tokens = HashMap::from([
+            let tokens = by_mapping([
                 jwt(
                     "Jans::Access_Token",
                     json!({"iss": ISSUER, "jti": "jti-1"}),
@@ -509,7 +513,7 @@ mod tests {
     #[test]
     fn custom_token_with_lock_issuer_is_kept() {
         let inputs = [input("Acme::DolphinToken", "dolphin-opaque")];
-        let tokens = HashMap::from([custom(
+        let tokens = by_mapping([custom(
             "Acme::DolphinToken",
             json!({"iss": "https://dolphin.example.com", "jti": "d-1"}),
             0,
@@ -531,7 +535,7 @@ mod tests {
     #[test]
     fn jwt_without_lock_issuer_is_invalid_field() {
         let inputs = [input("Jans::Access_Token", "header.payload.sig")];
-        let tokens = HashMap::from([jwt("Jans::Access_Token", json!({"jti": "jti-1"}), 0)]);
+        let tokens = by_mapping([jwt("Jans::Access_Token", json!({"jti": "jti-1"}), 0)]);
         let log = memory_log();
         let refs = token_facts(&tokens, &inputs, &log)
             .expect("a JWT stays in the list even without an issuer");
@@ -540,7 +544,7 @@ mod tests {
         let status = TraceRecorder::new(None, log.clone(), metrics()).record(
             gen_uuid7(),
             &options(),
-            &cjar_store(&fixtures::minimal_valid()).0,
+            &cjar_store(&fixtures::minimal_valid()).store,
             || Ok(facts(refs)),
         );
         assert_eq!(
@@ -558,7 +562,7 @@ mod tests {
     fn token_without_jti_uses_fingerprint() {
         let raw = "header.payload.sig";
         let inputs = [input("Jans::Access_Token", raw)];
-        let tokens = HashMap::from([jwt("Jans::Access_Token", json!({"iss": ISSUER}), 0)]);
+        let tokens = by_mapping([jwt("Jans::Access_Token", json!({"iss": ISSUER}), 0)]);
         let refs = token_facts(&tokens, &inputs, &TEST_LOGGER).expect("token facts build");
         assert_eq!(
             refs[0].id,
@@ -575,7 +579,7 @@ mod tests {
             input("B::T", "raw-b"),
             input("C::T", "raw-c"),
         ];
-        let tokens = HashMap::from([
+        let tokens = by_mapping([
             jwt("C::T", json!({"iss": ISSUER, "jti": "c"}), 2),
             jwt("A::T", json!({"iss": ISSUER, "jti": "a"}), 0),
             jwt("B::T", json!({"iss": ISSUER, "jti": "b"}), 1),
@@ -593,7 +597,7 @@ mod tests {
     fn raw_token_in_jti_is_invalid_field() {
         let raw = "header.payload.sig";
         let inputs = [input("Jans::Access_Token", raw)];
-        let tokens = HashMap::from([jwt(
+        let tokens = by_mapping([jwt(
             "Jans::Access_Token",
             json!({"iss": ISSUER, "jti": raw}),
             0,

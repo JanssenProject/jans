@@ -681,7 +681,7 @@ mod tests {
     use crate::lock::{BulkItemResult, BulkSink, PostBulkError};
     use crate::log::{TEST_LOGGER, gen_uuid7};
     use crate::trace::record::{DecisionFacts, Outcome, PolicyFacts, RecordDraft, TokenRef};
-    use crate::trace::test_utils::cjar_store;
+    use crate::trace::test_utils::{CjarStore, cjar_store};
     use crate::trace::{ProducerKey, TraceRecordStatus, TraceRecorder};
 
     /// RFC 8410 section 10.3 example key: public test vector, not a secret.
@@ -1181,7 +1181,7 @@ mod tests {
         let (tx, rx) = mpsc::channel(4);
         let handle = spawn_emitter(params, rx).expect("the emitter should start");
         let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics);
-        let (store, _) = cjar_store(&fixtures::minimal_valid());
+        let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid());
         let options = AuthorizeOptions::with_trace(TraceContext::new(
             "exec-1".to_string(),
             "https://gateway.example.com".to_string(),

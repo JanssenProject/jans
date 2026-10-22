@@ -1605,19 +1605,18 @@ mod bundle_hash_tests {
     use crate::init::policy_store_refresh::AuthzRebuilder;
     use crate::log::TEST_LOGGER;
     use crate::trace::TraceRecorder;
+    use crate::trace::test_utils::CjarStore;
     use crate::{AuthorizationConfig, JwtConfig};
 
-    /// `builder`'s archive parsed the way bootstrap parses it, and its `bundle_hash`.
-    pub(super) async fn parsed_store(
-        builder: &PolicyStoreTestBuilder,
-    ) -> (PolicyStoreWithID, jans_trace_core::Digest) {
+    /// `builder`'s archive parsed the way bootstrap parses it.
+    pub(super) async fn parsed_store(builder: &PolicyStoreTestBuilder) -> CjarStore {
         let bytes = builder.build_archive().expect("test archive builds");
-        let hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
+        let bundle_hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
         let store = parse_cjar_bytes(bytes, false, ArchiveLimits::default())
             .await
             .expect("test archive parses")
             .store;
-        (store, hash)
+        CjarStore { store, bundle_hash }
     }
 
     /// What the refresh worker rebuilds `Authz` with, around `log` and `metrics`.
@@ -1666,9 +1665,14 @@ mod bundle_hash_tests {
     /// snapshot taken before the swap keeps the hash of the store it decided with.
     #[tokio::test]
     async fn refresh_with_new_archive_changes_bundle_hash() {
-        let (first, first_hash) = parsed_store(&fixtures::minimal_valid()).await;
-        let (second, second_hash) =
-            parsed_store(&fixtures::minimal_valid().with_version("2.0.0")).await;
+        let CjarStore {
+            store: first,
+            bundle_hash: first_hash,
+        } = parsed_store(&fixtures::minimal_valid()).await;
+        let CjarStore {
+            store: second,
+            bundle_hash: second_hash,
+        } = parsed_store(&fixtures::minimal_valid().with_version("2.0.0")).await;
         assert_ne!(first_hash, second_hash, "the two archives should differ");
 
         let rebuilder = rebuilder(
@@ -1713,6 +1717,7 @@ mod trace_record_tests {
     };
     use crate::common::policy_store::test_utils::{PolicyStoreTestBuilder, fixtures};
     use crate::log::{LogStrategy, TEST_LOGGER};
+    use crate::trace::test_utils::CjarStore;
     use crate::trace::{Outcome, TraceRecorder};
     use crate::{LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig};
 
@@ -1851,7 +1856,7 @@ type Context = {
         let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics.clone());
         let authz = bootstrap(
             &rebuilder,
-            parsed_store(&fixtures::minimal_valid()).await.0,
+            parsed_store(&fixtures::minimal_valid()).await.store,
             Some(recorder),
         )
         .await;
@@ -1900,7 +1905,7 @@ type Context = {
             let rebuilder = rebuilder(log.clone(), metrics);
             let authz = bootstrap(
                 &rebuilder,
-                parsed_store(&fixtures::minimal_valid()).await.0,
+                parsed_store(&fixtures::minimal_valid()).await.store,
                 recorder,
             )
             .await;
@@ -1931,7 +1936,7 @@ type Context = {
         let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics.clone());
         let authz = bootstrap(
             &rebuilder,
-            parsed_store(&fixtures::minimal_valid()).await.0,
+            parsed_store(&fixtures::minimal_valid()).await.store,
             None,
         )
         .await;
@@ -1964,7 +1969,7 @@ type Context = {
         let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
         let authz = bootstrap(
             &rebuilder,
-            parsed_store(&fixtures::minimal_valid()).await.0,
+            parsed_store(&fixtures::minimal_valid()).await.store,
             Some(recorder),
         )
         .await;
@@ -2005,7 +2010,7 @@ type Context = {
         let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
         let authz = bootstrap(
             &rebuilder,
-            parsed_store(&multi_issuer_store()).await.0,
+            parsed_store(&multi_issuer_store()).await.store,
             Some(recorder),
         )
         .await;
@@ -2054,7 +2059,7 @@ type Context = {
         let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
         let authz = bootstrap(
             &rebuilder,
-            parsed_store(&multi_issuer_store()).await.0,
+            parsed_store(&multi_issuer_store()).await.store,
             Some(recorder),
         )
         .await;
@@ -2121,7 +2126,7 @@ type Context = {
         let rebuilder = rebuilder(log.clone(), metrics);
         let authz = bootstrap(
             &rebuilder,
-            parsed_store(&fixtures::minimal_valid()).await.0,
+            parsed_store(&fixtures::minimal_valid()).await.store,
             Some(recorder),
         )
         .await;
@@ -2150,9 +2155,11 @@ type Context = {
 
     #[tokio::test]
     async fn refreshed_authz_keeps_recorder() {
-        let (first, _) = parsed_store(&fixtures::minimal_valid()).await;
-        let (second, second_hash) =
-            parsed_store(&fixtures::minimal_valid().with_version("2.0.0")).await;
+        let CjarStore { store: first, .. } = parsed_store(&fixtures::minimal_valid()).await;
+        let CjarStore {
+            store: second,
+            bundle_hash: second_hash,
+        } = parsed_store(&fixtures::minimal_valid().with_version("2.0.0")).await;
         let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
         let (tx, mut rx) = mpsc::channel(1);
         let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());

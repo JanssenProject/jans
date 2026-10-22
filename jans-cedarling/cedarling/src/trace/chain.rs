@@ -245,18 +245,32 @@ mod tests {
         serde_json::from_str(signed.as_str()).expect("signed record should be JSON")
     }
 
-    fn position(signed: &SignedAssertion) -> (u64, String) {
+    /// Where a record sits in its chain.
+    #[derive(Debug, PartialEq)]
+    struct ChainPosition {
+        sequence: u64,
+        prev_record_hash: String,
+    }
+
+    fn position(signed: &SignedAssertion) -> ChainPosition {
         let record = json(signed);
         let chain = &record["producer_chain"];
-        (
-            chain["sequence_number"]
+        ChainPosition {
+            sequence: chain["sequence_number"]
                 .as_u64()
                 .expect("sequence_number should be an integer"),
-            chain["prev_record_hash"]
+            prev_record_hash: chain["prev_record_hash"]
                 .as_str()
                 .expect("prev_record_hash should be a string")
                 .to_string(),
-        )
+        }
+    }
+
+    fn genesis_position() -> ChainPosition {
+        ChainPosition {
+            sequence: 1,
+            prev_record_hash: Digest::GENESIS.to_string(),
+        }
     }
 
     fn member_names(value: &Value, names: &mut BTreeSet<String>) {
@@ -291,7 +305,7 @@ mod tests {
             .expect("first record should be signed");
         assert_eq!(
             position(&signed),
-            (1, Digest::GENESIS.to_string()),
+            genesis_position(),
             "a new chain should start at sequence 1 with the genesis hash"
         );
     }
@@ -307,7 +321,10 @@ mod tests {
                 .expect("record should be signed");
             assert_eq!(
                 position(&signed),
-                (sequence, prev.to_string()),
+                ChainPosition {
+                    sequence,
+                    prev_record_hash: prev.to_string(),
+                },
                 "record {sequence} should link to the content digest of the one before"
             );
             prev = signed.content_digest();
@@ -475,7 +492,7 @@ mod tests {
             .expect("next record should be signed");
         assert_eq!(
             position(&signed),
-            (1, Digest::GENESIS.to_string()),
+            genesis_position(),
             "a failed signature should not take a chain position"
         );
     }
@@ -502,7 +519,7 @@ mod tests {
             .expect("next record should be signed");
         assert_eq!(
             position(&signed),
-            (1, Digest::GENESIS.to_string()),
+            genesis_position(),
             "an oversized record should not take a chain position"
         );
     }

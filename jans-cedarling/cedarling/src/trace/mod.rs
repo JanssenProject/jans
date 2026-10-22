@@ -18,7 +18,7 @@ mod recorder;
 mod signing_kid;
 mod status;
 #[cfg(test)]
-mod test_utils;
+pub(crate) mod test_utils;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) use key::ProducerKey;
