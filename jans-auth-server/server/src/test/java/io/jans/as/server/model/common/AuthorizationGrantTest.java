@@ -156,10 +156,13 @@ public class AuthorizationGrantTest {
     @Test
     public void getSub_whenTwoGrantsOfEphemeralClient_shouldReturnDifferentValues() {
         final SimpleAuthorizationGrant other = new SimpleAuthorizationGrant();
-        authorizationGrant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, ephemeralClient(), new Date());
-        other.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, ephemeralClient(), new Date());
+        final User user = new User();
+        final Client client = ephemeralClient();
+        authorizationGrant.init(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
+        other.init(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
 
         assertFalse(authorizationGrant.getEphemeralSub().equals(other.getEphemeralSub()));
+        assertFalse(authorizationGrant.getSub().equals(other.getSub()));
     }
 
     private static Client ephemeralClient() {
