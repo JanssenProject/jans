@@ -372,6 +372,8 @@
       
         
       
+        
+      
     
     
     
@@ -1812,6 +1814,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#policymismatchgraceseconds" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        policyMismatchGraceSeconds
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policyreleaseretentiondays" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        policyReleaseRetentionDays
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#protectionmode" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2579,6 +2603,8 @@
       
         
       
+        
+      
     
     
     
@@ -3097,6 +3123,28 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         pendingReceiptTimeoutSeconds
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policymismatchgraceseconds" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        policyMismatchGraceSeconds
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policyreleaseretentiondays" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        policyReleaseRetentionDays
       </span>
     </span>
   </a>
@@ -3681,6 +3729,16 @@
 <td><a href="#pendingreceipttimeoutseconds">Details</a></td>
 </tr>
 <tr>
+<td>policyMismatchGraceSeconds</td>
+<td>Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag</td>
+<td><a href="#policymismatchgraceseconds">Details</a></td>
+</tr>
+<tr>
+<td>policyReleaseRetentionDays</td>
+<td>Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window</td>
+<td><a href="#policyreleaseretentiondays">Details</a></td>
+</tr>
+<tr>
 <td>protectionMode</td>
 <td>Protection mode for the Lock server (OAuth or Cedarling)</td>
 <td><a href="#protectionmode">Details</a></td>
@@ -4229,6 +4287,30 @@
 <p>Default value: 120</p>
 </li>
 </ul>
+<h2 id="policymismatchgraceseconds">policyMismatchGraceSeconds<a class="headerlink" href="#policymismatchgraceseconds" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 300</p>
+</li>
+</ul>
+<h2 id="policyreleaseretentiondays">policyReleaseRetentionDays<a class="headerlink" href="#policyreleaseretentiondays" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 30</p>
+</li>
+</ul>
 <h2 id="protectionmode">protectionMode<a class="headerlink" href="#protectionmode" title="Permanent link">#</a></h2>
 <ul>
 <li>
@@ -4417,7 +4499,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 20, 2026
+    October 21, 2026
   </span>
 
     

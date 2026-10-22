@@ -143,7 +143,7 @@ Select the deployment method that best fits your environment and requirements.
 === "Kubernetes"
 
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
     ```
     
     [Complete Kubernetes Setup Guide](janssen-server/install/helm-install/README.md)
@@ -153,7 +153,7 @@ Select the deployment method that best fits your environment and requirements.
     **For Testing and Development Only**
     
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/start_janssen_aio_demo.sh && chmod u+x start_janssen_aio_demo.sh && sudo bash start_janssen_aio_demo.sh demoexample.jans.io MYSQL "" <VM_IP>
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh && chmod u+x start_janssen_aio_demo.sh && sudo bash start_janssen_aio_demo.sh demoexample.jans.io MYSQL "" <VM_IP>
     ```
     
     [Complete Docker Setup Guide](janssen-server/install/docker-install/quick-start.md)
@@ -163,7 +163,7 @@ Select the deployment method that best fits your environment and requirements.
     **For Testing and Development Only**
     
     ```bash
-    curl https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py > install.py
+    curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py > install.py
     sudo python3 install.py
     ```
     
@@ -600,7 +600,7 @@ configuration JSON response, which you can find at `.well-known/openid-configura
 in your specific deployment. Typically, it is
 `https://{hostname}/jans-auth/restv1/register`
 
-The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation,
+The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation,
 which aligns with the requirements of OpenID Connect dynamic client
 registration. Also, check the
 [Registration Endpoint documentation](../endpoints/client-registration.md) for
@@ -3865,7 +3865,7 @@ If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP stat
 Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).
 
 More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
 
 Sample request
 ```
@@ -4644,7 +4644,7 @@ https://janssen.server.host/jans-auth/restv1/authorize
 ```
 
 More information about request and response of the authorization endpoint can be found in the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Authorization).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization).
 
 
 ## Configuration Properties
@@ -5966,7 +5966,7 @@ https://janssen.server.host/jans-auth/restv1/clientinfo
 
 Since clientinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to
 access the endpoint. More information about request and response of the clientinfo endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Client_Info).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Client_Info).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -6179,7 +6179,7 @@ Refer to [this](https://gluu.org/docs/gluu-server/4.4/operation/logout/#openid-c
 Gluu Server documentation to understand how end session endpoint works in Janssen Server.
 
 More information about request and response of the end session endpoint can be found in the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
 
 
 ## Disabling The Endpoint Using Feature Flag
@@ -6257,7 +6257,7 @@ https://janssen.server.host/jans-auth/restv1/global-token-revocation
 ```
 
 More information about request and response of the global token revocation endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
 
 ## Usage
 
@@ -6579,7 +6579,7 @@ can be found by checking the `introspection_endpoint` claim of the OpenID Connec
  "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `
 
 More information about request and response of the Introspection endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
 
 **Request parameters**
 
@@ -6851,7 +6851,7 @@ methods used are same as the ones used for client authentication at [token endpo
 
 More information about request and response of the PAR endpoint can be found in
 the OpenAPI specification of
-[jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/0.0.0-nightly/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
+[jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -7003,7 +7003,7 @@ https://janssen.server.host/jans-auth/restv1/ssa
 
 More information about request and response of the revocation endpoint can be found in
 the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/SSA).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/SSA).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -7550,7 +7550,7 @@ https://jans-dynamic-mysql/jans-auth/restv1/revoke
 ```
 
 More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/revoke).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke).
 
 
 
@@ -7657,7 +7657,7 @@ sample response. Actual response can greatly vary in its contents based on reque
 ```
 
 More information about request and response of the token endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/post-token).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/post-token).
 
 ## Configuration Properties
 
@@ -7795,7 +7795,7 @@ User Info response should contain: `sub`, `jti` and `client_id` claims.
 
 Since userinfo endpoint is an OAuth2-protected resource, a valid access token with appropriate scope is required to
 access the endpoint. More information about request and response of the userinfo endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/User_Info).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info).
 
 
 ## Disabling The Endpoint Using Feature Flag
@@ -14315,7 +14315,7 @@ Command will be similar to the one below:
 ALTER TABLE  jansPerson  ADD COLUMN <claimName> <dataType>
 ```
 
-[Restart](https://docs.jans.io/nightly/janssen-server/vm-ops/jans-command/#restart) the Janssen services below in order to make this change effective:
+[Restart](https://docs.jans.io/vreplace-janssen-version/janssen-server/vm-ops/jans-command/#restart) the Janssen services below in order to make this change effective:
 
 ```
 jans-auth.service
@@ -16009,7 +16009,7 @@ Operation ID: patch-config-jwks
 
 To use this operation, specify the id of the key that needs to be updated using the `--url-suffix`
 and the property and the new value using the [JSON Patch ](https://jsonpatch.com/#the-patch).
-Refer [here](https://docs.jans.io/nightly/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
+Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
 
 In this example; We will change the value of the property `use` from `enc` to `sig`.
 
@@ -17303,7 +17303,7 @@ Operation ID: patch-oauth-uma-resources-by-id
 
 To use this operation, specify the id of the Uma that needs to be updated using the `--url-suffix`
 and the property and the new value using the [JSON Patch ](https://jsonpatch.com/#the-patch).
-Refer [here](https://docs.jans.io/nightly/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
+Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
 
 In this example; We will change the value of the property `name` from `uma resource` to `UMA`.
 
@@ -18071,7 +18071,7 @@ Another example is to delete session with **sid=c190667e-a186-421d-8679-420e8261
 curl -k -X DELETE "https://example.jans.io/jans-config-api/api/v1/jans-auth-server/session/sid/c190667e-a186-421d-8679-420e82615a38" -H "Authorization: Bearer 5abf61a6-b86f-49d7-8134-77168303d0f9"
 ```
 
-Navigate to **Auth - Session Management** for other endpoints of managing sessions in config-api [swagger file](https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml).
+Navigate to **Auth - Session Management** for other endpoints of managing sessions in config-api [swagger file](https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml).
 
 # SSA Configuration
 
@@ -18688,7 +18688,7 @@ are published in the [Swagger document](./../../reference/openapi.md), see endpo
 [Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) provides a central place to manage and configure jans modules.
 It helps in configuring auth-server, users, fido2 and scim modules.
 
-Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
+Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
 
 ![Config-API-Architecture](../../../../assets/config-api-architecture.png)
 
@@ -20076,7 +20076,7 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 
 # Config-api
 
-[Jans Config Api](https://github.com/JanssenProject/jans/tree/nightly/jans-config-api) is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server).
+[Jans Config Api](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-config-api) is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server).
 
 ## Jans Config API Plugins
 Jans Config API follow a flexible plugin architecture in which the new features can be added using extensions called plugins without altering the application itself. In this section, we will discuss the steps to develop and add plugins in Jans Config API.
@@ -20599,7 +20599,7 @@ Janssen Config API endpoints are OAuth protected. It supports basic token as wel
 
 ### Invoking API using curl
 
-Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
+Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
 
 #### Prerequisites
 
@@ -20610,7 +20610,7 @@ You will need:
 
 #### Steps
 
- * Refer to [API documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml) to know the endpoint path and required OAuth scopes to access that 
+ * Refer to [API documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) to know the endpoint path and required OAuth scopes to access that 
  endpoint. Example: Attribute Endpoint.
 
     ![image](../../../assets/jans-attribute.png)
@@ -29086,7 +29086,7 @@ For details on the technical architecture of the FIDO ecosystem, see the [FIDO2 
 Janssen provides native, out-of-the-box support for passkeys, offering users seamless cross-device synchronization and platform-level biometrics. To get started with passkey deployment, refer to the [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md).
 
 ### FIDO Metric API 
-Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
+Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
 
 - Number of active registrations
 - Registration requests
@@ -30462,7 +30462,7 @@ The telemetry API is a set of read-only `GET` endpoints grouped as raw entries,
 aggregations, analytics, and utility (`config`, `health`). For the complete list of paths,
 parameters, and response schemas, use the Swagger spec:
 
-- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml)**
+- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)**
 
 | Group | Endpoints |
 |---|---|
@@ -31283,7 +31283,7 @@ System should meet the following requirements:
 To deploy the AIO Janssen Server, first download the installation script and make it executable:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/start_janssen_aio_demo.sh 
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh 
 chmod u+x start_janssen_aio_demo.sh
 ```
 
@@ -31340,7 +31340,7 @@ Janssen Server can be configured using the Text-based User Interface (TUI).
 1. Download the `jans-cli-tui` from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example:
 
     ```bash
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-cli-tui-linux-ubuntu-X86-64.pyz
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz
     ```
 
 2. To connect to the TUI, you need your FQDN, Client ID, and Client Secret. Since the AIO deployment stores configurations in Consul and Vault, you can extract these credentials directly from the running Docker containers. 
@@ -31493,7 +31493,7 @@ For production environments, use a managed database service:
 Deploy PostgreSQL on your cluster for testing:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
 kubectl apply -f pgsql.yaml
 ```
 
@@ -31520,7 +31520,7 @@ config:
 Deploy MySQL on your cluster for testing:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
 kubectl apply -f mysql.yaml
 ```
 
@@ -32006,7 +32006,7 @@ Start a fresh Ubuntu VM with ports 443 and 80 open, then run:
 
 ```bash
 sudo su -
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
 
 This installs Docker, MicroK8s, Helm, and Janssen with default settings.
@@ -32124,14 +32124,14 @@ Open a kubectl shell from the top right navigation menu `>_` and run:
 === "MySQL"
 
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
     kubectl apply -f mysql.yaml # adjust values as preferred
     ```
 
 === "PostgreSQL"
 
     ```bash 
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
     kubectl apply -f pgsql.yaml # adjust values as preferred
     ```
 
@@ -32541,7 +32541,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.debian13_amd64.deb -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.debian13_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
@@ -32558,17 +32558,17 @@ Before you install, check the [VM system requirements](vm-requirements.md).
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-debian13-0.0.0-nightly.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-debian13-replace-janssen-version-stable.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-debian13-0.0.0-nightly.bundle \
+          --bundle jans-debian13-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_0.0.0-nightly.debian13_amd64.deb
+          jans_replace-janssen-version-stable.debian13_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -32580,19 +32580,19 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans_0.0.0-nightly.debian13_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.debian13_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.debian13_amd64.deb.sha256sum
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.debian13_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
-    jans_0.0.0-nightly.debian13_amd64.deb: OK
+    jans_replace-janssen-version-stable.debian13_amd64.deb: OK
     ```
 
 - Install the package
 
 ```shell title="Command"
-sudo apt install ./jans_0.0.0-nightly.debian13_amd64.deb
+sudo apt install ./jans_replace-janssen-version-stable.debian13_amd64.deb
 ```
 
 ## Run the setup script
@@ -32702,7 +32702,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~debian13_amd64) ...
+Removing jans (replace-janssen-version~debian13_amd64) ...
 Checking to make sure service is down...
 ```
 
@@ -32726,7 +32726,7 @@ System should meet [minimum VM system requirements](vm-requirements.md)
 
 1. Download the installer
 ```
-curl https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py > install.py
+curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py > install.py
 ```
 
 1. Execute Installer
@@ -32792,7 +32792,7 @@ sudo yum -y install mod_auth_openidc
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el9.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -32803,17 +32803,17 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-el9-0.0.0-nightly.bundle -P ~/
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version-stable.bundle -P ~/
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle ~/jans-el9-0.0.0-nightly.bundle \
+          --bundle ~/jans-el9-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          ~/jans-0.0.0-nightly.el9.x86_64.rpm
+          ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -32825,19 +32825,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-   echo 'paste-release-sha256sum jans-0.0.0-nightly.el9.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum
+   echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el9.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
       ```text
-      jans-0.0.0-nightly.el9.x86_64.rpm: OK
+      jans-replace-janssen-version-stable.el9.x86_64.rpm: OK
       ```
 
 - Install the package
 
 ```
-sudo yum install ~/jans-0.0.0-nightly.el9.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
 ```
 
 ### RHEL 10
@@ -32853,7 +32853,7 @@ sudo yum -y install mod_auth_openidc
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el10.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -32864,17 +32864,17 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-el10-0.0.0-nightly.bundle -P ~/
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version-stable.bundle -P ~/
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle ~/jans-el10-0.0.0-nightly.bundle \
+          --bundle ~/jans-el10-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-         ~/jans-0.0.0-nightly.el10.x86_64.rpm
+         ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -32886,19 +32886,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans-0.0.0-nightly.el10.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum
+    echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el10.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
       ```text
-      jans-0.0.0-nightly.el10.x86_64.rpm: OK
+      jans-replace-janssen-version-stable.el10.x86_64.rpm: OK
       ```
 
 - Install the package
 
 ```
-sudo yum install ~/jans-0.0.0-nightly.el10.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
 ```
 
 ## Run the setup script
@@ -33054,7 +33054,7 @@ sudo SUSEConnect -p PackageHub/15.5/x86_64
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```shell
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.suse16.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse16.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -33065,17 +33065,17 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-suse16-0.0.0-nightly.bundle
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-suse16-replace-janssen-version-stable.bundle
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-suse16-0.0.0-nightly.bundle \
+          --bundle jans-suse16-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans-0.0.0-nightly.suse16.x86_64.rpm
+          jans-replace-janssen-version-stable.suse16.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33087,19 +33087,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans-0.0.0-nightly.suse16.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.suse16.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.suse16.x86_64.rpm.sha256sum
+    echo 'paste-release-sha256sum jans-replace-janssen-version-stable.suse16.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
       ```text
-      jans-0.0.0-nightly.suse16.x86_64.rpm: OK
+      jans-replace-janssen-version-stable.suse16.x86_64.rpm: OK
       ```
 
 - Install the package
 
 ```
-sudo zypper install ~/jans-0.0.0-nightly.suse16.x86_64.rpm
+sudo zypper install ~/jans-replace-janssen-version-stable.suse16.x86_64.rpm
 ```
 
 !!! note "Expected zypper prompt during install"
@@ -33247,7 +33247,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu24.04_amd64.deb -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
@@ -33264,17 +33264,17 @@ Before you install, check the [VM system requirements](vm-requirements.md).
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu24-0.0.0-nightly.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu24-replace-janssen-version-stable.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-ubuntu24-0.0.0-nightly.bundle \
+          --bundle jans-ubuntu24-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_0.0.0-nightly.ubuntu24.04_amd64.deb
+          jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33286,19 +33286,19 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
-    jans_0.0.0-nightly.ubuntu24.04_amd64.deb: OK
+    jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
     ```
 
 - Install the package
 
 ```shell title="Command"
-sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 ```
 
 ### Ubuntu 22.04
@@ -33307,7 +33307,7 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu22.04_amd64.deb -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
@@ -33324,17 +33324,17 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu22-0.0.0-nightly.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu22-replace-janssen-version-stable.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-ubuntu22-0.0.0-nightly.bundle \
+          --bundle jans-ubuntu22-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_0.0.0-nightly.ubuntu22.04_amd64.deb
+          jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33346,19 +33346,19 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
-    jans_0.0.0-nightly.ubuntu22.04_amd64.deb: OK
+    jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
     ```
 
 - Install the package
 
 ```shell title="Command"
-sudo apt install  ./jans_0.0.0-nightly.ubuntu22.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 ```
 
 Or,
@@ -33480,7 +33480,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~ubuntu20.04) ...
+Removing jans (replace-janssen-version~ubuntu20.04) ...
 Checking to make sure service is down...
 ```
 
@@ -33651,7 +33651,7 @@ kubectl get secret cn -n <namespace> -o yaml > secret-backup.yaml
 helm list -n <namespace>
 ```
 
-Keep note of the chart version. For example: `0.0.0-nightly`
+Keep note of the chart version. For example: `replace-janssen-version`
 
 ### Manual Restore
 
@@ -33673,7 +33673,7 @@ kubectl create -f secret-backup.yaml
 4.  Insall jans using the override or user supplied values with the same chart version:
 
 ```bash
-helm install <release-name> janssen/janssen -f values.yaml --version=<0.0.0-nightly> -n <namespace>
+helm install <release-name> janssen/janssen -f values.yaml --version=<replace-janssen-version> -n <namespace>
 ```
 
 ## Automatic Backup and Restore
@@ -33721,7 +33721,7 @@ Rotating Certificates and Keys in Kubernetes setup
           restartPolicy: Never
           containers:
             - name: web-key-rotation
-              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm # This may be different in Helm
@@ -33773,7 +33773,7 @@ Rotating Certificates and Keys in Kubernetes setup
                   path: web_https.key
           containers:
             - name: load-web-key-rotation
-              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm  #This may be different in Helm
@@ -33860,7 +33860,7 @@ Ingress or Gateway API controllers may use TLS secret named `tls-certificate` in
             spec:
               containers:
                 - name: auth-key-rotation
-                  image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+                  image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
                   resources:
                     requests:
                       memory: "300Mi"
@@ -33911,7 +33911,7 @@ Changing FQDN in Kubernetes setup
           restartPolicy: Never
           containers:
             - name: change-fqdn
-              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm # This may be different in Helm
@@ -35219,7 +35219,7 @@ kubectl scale --replicas=3 deployment/auth-server -n <namespace>
 
 1. Download the `jans-cli-tui` from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example: 
 
-    `wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-cli-tui-linux-ubuntu-X86-64.pyz`
+    `wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz`
 
     Now we have `jans-cli-tui-linux-ubuntu-X86-64.pyz` downloaded.
 
@@ -35248,7 +35248,7 @@ This guide shows how to upgrade a Janssen helm deployment.
 
 4.  Apply your upgrade:
 
-    `helm upgrade <janssen-release-name> janssen/janssen -n <namespace> -f override.yaml --version=0.0.0-nightly`
+    `helm upgrade <janssen-release-name> janssen/janssen -n <namespace> -f override.yaml --version=replace-janssen-version`
 
 # Janssen Lock Guide
 
@@ -35650,6 +35650,8 @@ verification. See [TRACE Evidence](./trace.md) for the feature description and A
 | `defaultAllowedProducerIds` | array | `[]` | Producer ids a client without a binding may submit records for in the default evidence domain. Empty means such a client can submit nothing (`producer_not_allowed`). Read and admin paths are unaffected. |
 | `clientDomainBindings` | array | `[]` | List of `{ clientId, evidenceDomainId, allowedProducerIds[] }` bindings. A client without a binding and without `defaultEvidenceDomainId` set is rejected with `client_not_bound`. `allowedProducerIds` may contain `"*"` to allow any producer. |
 | `latenessThresholdSeconds` | integer | `300` | Seconds after `signed_at` a record may still be accepted before it is flagged `late_flag: true`. |
+| `policyMismatchGraceSeconds` | integer | `300` | Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged `policy_mismatch_flag`. The check uses the larger of this and `latenessThresholdSeconds`, plus about 130 seconds for update and cache lag. See [TRACE](./trace.md#policy-store-release-check). |
+| `policyReleaseRetentionDays` | integer | `30` | Days a policy store release no node serves any more is kept before it is deleted; never less than the check's acceptance window. |
 | `maxFutureSkewSeconds` | integer | `300` | Seconds `signed_at` may be ahead of Lock's clock. A later `signed_at` is rejected with `invalid_assertion` (`signed_at_in_future`). |
 | `maxRequestBytes` | integer | `262144` | Maximum accepted TRACE request body size, in bytes. |
 | `maxJsonDepth` | integer | `32` | Maximum accepted JSON nesting depth of a TRACE assertion. |
@@ -35747,32 +35749,47 @@ Authorization: Bearer <access_token>
 ### Audit Endpoints
 
 #### Submit Audit Logs
+
 ```http
-POST /audit/logs
+POST /api/v1/audit/log
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 {
-  "logs": [
-    {
-      "request_id": "req-123456",
-      "timestamp": "2024-01-01T12:00:00Z",
-      "log_kind": "Decision",
-      "pdp_id": "cedarling-001",
-      "policy_store_id": "app-policies",
-      "decision": "ALLOW",
-      "principal": "Jans::User::\"user123\"",
-      "action": "Jans::Action::\"read\"",
-      "resource": "Jans::Application::\"app001\"",
-      "diagnostics": {
-        "reason": ["policy-001"],
-        "errors": []
-      },
-      "decision_time_ms": 15
-    }
-  ]
+  "creation_date": "2026-03-23T11:50:37.504Z",
+  "event_time": "2026-03-23T11:50:37.504Z",
+  "service": "my_app",
+  "node_name": "0195c6f2-8d1a-7c3e-9b4f-2a6d8e0f1b3c",
+  "event_type": "Decision",
+  "severity_level": "INFO",
+  "action": "Jans::Action::\"Update\"",
+  "decision_result": "ALLOW",
+  "requested_resource": "Jans::Issue::\"random_id\"",
+  "principal_id": "Jans::User, Jans::Workload",
+  "client_id": "lock-client-123",
+  "context_information": {
+    "request_id": "0195c6f2-8d1a-7c3e-9b4f-2a6d8e0f1b3e",
+    "policystore_id": "a1bf63d5a5e4a0b7d0d5c9e3",
+    "policystore_version": "1.0.0",
+    "diagnostics": { "reason": [], "errors": [] },
+    "decision_time_micro_sec": 42
+  }
 }
 ```
+
+This is the shape Cedarling sends. `POST /audit/log/bulk` takes an array of the same objects. Both need the `https://jans.io/oauth/lock/log.write` scope. Lock also accepts the camelCase member names it returns (`creationDate`, `eventTime`, `nodeName`, `contextInformation`, and so on). `contextInformation` is stored as a flat string map: a string value is kept as is, and an object, array, number or boolean value is stored as its JSON text, as on the gRPC path.
+
+#### Search Audit Logs
+
+Config API serves stored decision logs at `GET /jans-config-api/lock/audit/log/search`. `eventStartDate` and `eventEndDate` (ISO 8601) are required. Optional exact-match filters:
+
+| Parameter | Matches |
+|---|---|
+| `requestId` | Cedarling `request_id` of the decision |
+| `policyStoreId` | Policy store id used for the decision |
+| `policyStoreVersion` | Policy store version used for the decision |
+
+A stored entry takes these from the `request_id`, `policystore_id` and `policystore_version` keys of `contextInformation` when present, and otherwise from the entry's own `requestId`, `policyStoreId` and `policyStoreVersion`. A `request_id` longer than 64 characters or a policy store value longer than 255 characters is not indexed. Entries stored before this release are not indexed and match only the date range.
 
 #### Submit Health Status
 ```http
@@ -35818,32 +35835,33 @@ Content-Type: application/json
 
 #### Lock Server Configuration
 ```http
-GET /.well-known/lock-master-configuration
+GET /.well-known/lock-server-configuration
 ```
 
 **Response:**
 ```json
 {
-  "issuer": "https://lock-server.example.com",
-  "policy_store_endpoint": "https://lock-server.example.com/policy-store",
-  "policy_stores_endpoint": "https://lock-server.example.com/policy-stores",
-  "audit_endpoint": "https://lock-server.example.com/audit",
-
-  "jwks_uri": "https://auth.example.com/.well-known/jwks",
-  "scopes_supported": [
-    "https://jans.io/oauth/lock/policy-store.read",
-    "https://jans.io/oauth/lock/log.write",
-    "https://jans.io/oauth/lock/health.write",
-    "https://jans.io/oauth/lock/telemetry.write"
-  ],
-  "features_supported": [
-    "policy-store-retrieval",
-    "audit-collection",
-    "health-monitoring",
-    "telemetry-collection"
-  ]
+  "version": "1.0",
+  "issuer": "lock-server.example.com",
+  "audit": {
+    "health_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/health",
+    "health_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/health/bulk",
+    "log_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/log",
+    "log_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/log/bulk",
+    "telemetry_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/telemetry",
+    "telemetry_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/telemetry/bulk",
+    "trace_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace",
+    "trace_bulk_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace/bulk",
+    "trace_record_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace/records",
+    "trace_execution_endpoint": "https://lock-server.example.com/jans-lock/api/v1/audit/trace/executions"
+  },
+  "config": {
+    "policy_endpoint": "https://lock-server.example.com/jans-lock/api/v1/policy"
+  }
 }
 ```
+
+The `trace_*` members appear only when TRACE is enabled.
 
 ## OAuth Security
 
@@ -35858,7 +35876,7 @@ The Lock Server uses OAuth 2.0 scopes to control access to different endpoints:
 | `https://jans.io/oauth/lock/health.write` | `/audit/health` | Submit health status information |
 | `https://jans.io/oauth/lock/telemetry.write` | `/audit/telemetry` | Submit telemetry and metrics data |
 | `https://jans.io/oauth/lock/trace.write` | `/audit/trace` | Submit TRACE evidence records |
-| `https://jans.io/oauth/lock/trace.readonly` | `/audit/trace/records/*`, `/audit/trace/executions/*` | Read TRACE records and executions |
+| `https://jans.io/oauth/lock/trace.readonly` | `/audit/trace/records`, `/audit/trace/records/*`, `/audit/trace/executions/*` | Read and search TRACE records and executions |
 | `https://jans.io/oauth/lock/trace.admin` | `/audit/trace/admin/*` | Manage TRACE producer keys and chains |
 
 ## Logging and Monitoring
@@ -35903,28 +35921,100 @@ Tracks JWT token validation and processing:
 
 ### RDBMS Audit Storage
 
-For enterprise deployments, audit logs can be stored in a relational database:
+With `auditPersistenceMode` set to `internal`, Lock stores decision logs in the `jansLogEntry` table of the Janssen database (entries under `ou=log` of the audit base DN). With `config-api`, Lock forwards them to Config API, which stores them in the same table.
 
-```sql
-CREATE TABLE audit_logs (
-    id VARCHAR(255) PRIMARY KEY,
-    client_id VARCHAR(255),
-    request_id VARCHAR(255),
-    timestamp TIMESTAMP,
-    log_kind VARCHAR(50),
-    pdp_id VARCHAR(255),
-    policy_store_id VARCHAR(255),
-    decision VARCHAR(10),
-    principal TEXT,
-    action TEXT,
-    resource TEXT,
-    diagnostics JSON,
-    decision_time_ms BIGINT,
-    INDEX idx_timestamp (timestamp),
-    INDEX idx_client_id (client_id),
-    INDEX idx_policy_store_id (policy_store_id)
-);
-```
+| Column | Source |
+|---|---|
+| `inum` | Generated by Lock |
+| `creationDate`, `eventTime` | `creation_date`, `event_time` |
+| `jansService`, `jansNodeName` | `service`, `node_name` |
+| `eventType`, `severityLevel` | `event_type`, `severity_level` |
+| `actionName`, `decisionResult`, `requestedResource` | `action`, `decision_result`, `requested_resource` |
+| `principalId`, `clientId`, `jti` | `principal_id`, `client_id`, `jti` |
+| `contextInformation` | `context_information`, as a JSON object of strings |
+| `jansRequestId`, `jansPolicyStoreId`, `jansPolicyStoreVersion` | Indexed copies of `request_id`, `policystore_id`, `policystore_version` (see [Search Audit Logs](#search-audit-logs)) |
+
+`eventTime`, `jansRequestId`, `jansPolicyStoreId` and `jansPolicyStoreVersion` are indexed.
+
+### Upgrading an Existing Deployment
+
+The audit log and TRACE search filters need new columns and indexes, and the policy release check needs the `jansTracePolicyRelease` table. Container and Kubernetes deployments get them automatically: the persistence loader adds missing columns and indexes on its next run. An existing VM install needs them added once, by hand. Back up the database first.
+
+=== "PostgreSQL"
+
+    ```sql
+    ALTER TABLE "jansLogEntry" ADD COLUMN "jansRequestId" VARCHAR(64);
+    ALTER TABLE "jansLogEntry" ADD COLUMN "jansPolicyStoreId" VARCHAR(255);
+    ALTER TABLE "jansLogEntry" ADD COLUMN "jansPolicyStoreVersion" VARCHAR(255);
+    CREATE INDEX "jansLogEntry_jansRequestId" ON "jansLogEntry" ("jansRequestId");
+    CREATE INDEX "jansLogEntry_jansPolicyStoreId" ON "jansLogEntry" ("jansPolicyStoreId");
+    CREATE INDEX "jansLogEntry_jansPolicyStoreVersion" ON "jansLogEntry" ("jansPolicyStoreVersion");
+
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyStoreId" VARCHAR(255);
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyStoreVersion" VARCHAR(255);
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTraceBundleHash" VARCHAR(255);
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTracePolicyMismatch" BOOLEAN;
+    ALTER TABLE "jansTraceRecord" ADD COLUMN "jansTraceReservedMembers" JSONB;
+    CREATE INDEX "jansTraceRecord_jansTracePolicyStoreId" ON "jansTraceRecord" ("jansTracePolicyStoreId");
+    CREATE INDEX "jansTraceRecord_jansTracePolicyStoreVersion" ON "jansTraceRecord" ("jansTracePolicyStoreVersion");
+    CREATE INDEX "jansTraceRecord_jansTraceBundleHash" ON "jansTraceRecord" ("jansTraceBundleHash");
+
+    CREATE TABLE "jansTracePolicyRelease" (
+        doc_id VARCHAR(64) NOT NULL UNIQUE,
+        "objectClass" VARCHAR(48),
+        dn VARCHAR(128),
+        "jansId" VARCHAR(128),
+        "jansTracePolicyStoreId" VARCHAR(255),
+        "jansTraceBundleHash" VARCHAR(255),
+        "jansTracePolicyStoreVersion" VARCHAR(255),
+        "jansTraceFirstServedAtMs" BIGINT,
+        "jansTraceLastServedAtMs" BIGINT,
+        "jansVersion" BIGINT,
+        PRIMARY KEY (doc_id)
+    );
+    CREATE INDEX "jansTracePolicyRelease_jansId" ON "jansTracePolicyRelease" ("jansId");
+    CREATE INDEX "jansTracePolicyRelease_jansTracePolicyStoreId" ON "jansTracePolicyRelease" ("jansTracePolicyStoreId");
+    CREATE INDEX "jansTracePolicyRelease_jansTraceLastServedAtMs" ON "jansTracePolicyRelease" ("jansTraceLastServedAtMs");
+    ```
+
+=== "MySQL"
+
+    ```sql
+    ALTER TABLE jansLogEntry ADD COLUMN jansRequestId VARCHAR(64);
+    ALTER TABLE jansLogEntry ADD COLUMN jansPolicyStoreId VARCHAR(255);
+    ALTER TABLE jansLogEntry ADD COLUMN jansPolicyStoreVersion VARCHAR(255);
+    ALTER TABLE jansLogEntry ADD INDEX jansLogEntry_jansRequestId (jansRequestId);
+    ALTER TABLE jansLogEntry ADD INDEX jansLogEntry_jansPolicyStoreId (jansPolicyStoreId);
+    ALTER TABLE jansLogEntry ADD INDEX jansLogEntry_jansPolicyStoreVersion (jansPolicyStoreVersion);
+
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyStoreId VARCHAR(255);
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyStoreVersion VARCHAR(255);
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTraceBundleHash VARCHAR(255);
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTracePolicyMismatch SMALLINT;
+    ALTER TABLE jansTraceRecord ADD COLUMN jansTraceReservedMembers JSON;
+    ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreId (jansTracePolicyStoreId);
+    ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTracePolicyStoreVersion (jansTracePolicyStoreVersion);
+    ALTER TABLE jansTraceRecord ADD INDEX jansTraceRecord_jansTraceBundleHash (jansTraceBundleHash);
+
+    CREATE TABLE jansTracePolicyRelease (
+        doc_id VARCHAR(64) NOT NULL UNIQUE,
+        objectClass VARCHAR(48),
+        dn VARCHAR(128),
+        jansId VARCHAR(128),
+        jansTracePolicyStoreId VARCHAR(255),
+        jansTraceBundleHash VARCHAR(255),
+        jansTracePolicyStoreVersion VARCHAR(255),
+        jansTraceFirstServedAtMs BIGINT,
+        jansTraceLastServedAtMs BIGINT,
+        jansVersion BIGINT,
+        PRIMARY KEY (doc_id),
+        INDEX jansTracePolicyRelease_jansId (jansId),
+        INDEX jansTracePolicyRelease_jansTracePolicyStoreId (jansTracePolicyStoreId),
+        INDEX jansTracePolicyRelease_jansTraceLastServedAtMs (jansTraceLastServedAtMs)
+    );
+    ```
+
+Records and log entries stored before the upgrade have empty values in the new columns, so release search and log filters do not return them.
 
 ### Metrics and Monitoring
 
@@ -36125,7 +36215,7 @@ The Lock Server provides attributable, tamper-evident records and basic correlat
 
 `authorization decision → capability invocation → optional runtime effect`
 
-Cedarling, or another policy decision point (PDP), records what was authorized (`AUTHORIZATION_DECISION`). The enforcement point, agent gateway, or tool gateway that mediates the action records `CAPABILITY_INVOKED`. An agent's own statement that it invoked a capability is not equivalent to enforcement-point evidence. An observer can record `RUNTIME_EFFECT`.
+A policy decision point (PDP) records what was authorized (`AUTHORIZATION_DECISION`). Cedarling support for producing TRACE records is in progress. The enforcement point, agent gateway, or tool gateway that mediates the action records `CAPABILITY_INVOKED`. An agent's own statement that it invoked a capability is not equivalent to enforcement-point evidence. An observer can record `RUNTIME_EFFECT`.
 
 ### What TRACE does not claim
 
@@ -36147,7 +36237,7 @@ Each record kind establishes one narrow claim and nothing stronger:
 
 | Party | Responsibility |
 |---|---|
-| Policy decision point (PDP), for example Cedarling | Decides whether a capability is allowed and signs an `AUTHORIZATION_DECISION` record. |
+| Policy decision point (PDP), for example Cedarling (TRACE support in progress) | Decides whether a capability is allowed and signs an `AUTHORIZATION_DECISION` record. |
 | Enforcement point (PEP, agent gateway, tool gateway) | Mediates the action and signs a `CAPABILITY_INVOKED` record. |
 | Evidence producer | Signs the record it creates. A PDP or enforcement point is the producer of its own records. |
 | Submitting client | The OAuth client that sends a signed record to Lock. Usually the producer. An approved forwarder may submit for a producer if its binding allows that producer. |
@@ -36166,7 +36256,7 @@ Three independent checks apply. Do not confuse them:
 | Scope | Endpoints |
 |---|---|
 | `https://jans.io/oauth/lock/trace.write` | `POST /audit/trace`, `POST /audit/trace/bulk` |
-| `https://jans.io/oauth/lock/trace.readonly` | `GET /audit/trace/records/{record_id}`, `GET /audit/trace/executions/{trace_execution_id}` |
+| `https://jans.io/oauth/lock/trace.readonly` | `GET /audit/trace/records`, `GET /audit/trace/records/{record_id}`, `GET /audit/trace/executions/{trace_execution_id}` |
 | `https://jans.io/oauth/lock/trace.admin` | `/audit/trace/admin/*` (producer keys and chains) |
 
 The client created by the Lock setup script receives scopes from the config-api Lock plugin, not from the Lock Server's own OpenAPI file. A client that uses TRACE needs these three scopes granted to it explicitly.
@@ -36179,7 +36269,7 @@ An evidence domain is the isolation boundary inside one Lock deployment. Lock de
 - A key registered in one domain gives no authority in another. A producer that serves several domains needs an explicit registration in each.
 - Readers and administrators see only the domain their client is bound to. Lock never searches other domains.
 - A client with no `clientDomainBindings` entry falls back to `defaultEvidenceDomainId` only for its domain. It gets no forwarding permission: see "Default-domain fallback" under [Configuration](#configuration).
-- A request body that contains `evidence_domain_id` (top level or inside `trace`) is rejected with `domain_field_forbidden`.
+- A signed `evidence_domain_id` in the body is ignored and the record is flagged `reserved_member_flag` (see [Single record](#single-record)). Lock never uses it for routing or storage.
 
 ## Configuration
 
@@ -36198,6 +36288,8 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
     }
   ],
   "latenessThresholdSeconds": 300,
+  "policyMismatchGraceSeconds": 300,
+  "policyReleaseRetentionDays": 30,
   "maxFutureSkewSeconds": 300,
   "maxRequestBytes": 262144,
   "maxBulkRecords": 100,
@@ -36228,7 +36320,7 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
 **Crypto provider.** `cryptoProvider` selects the implementation that parses producer keys, canonicalizes assertions, verifies signatures and computes receipt hashes. Values are matched case-insensitively:
 
 - `JAVA` (default): BouncyCastle, in the Lock process. This is the implementation Lock shipped with.
-- `NATIVE`: `jans-trace-core`, the Rust library that producers such as Cedarling sign with, reached through the `jans-trace-java` binding.
+- `NATIVE`: `jans-trace-core`, the Rust TRACE library intended for producers, reached through the `jans-trace-java` binding.
 
 Both providers produce the same `content_digest`, key thumbprint, receipt hash and storage keys. Switching the provider does not invalidate the stored receipt chain.
 
@@ -36237,6 +36329,8 @@ Lock fails closed. When the selected provider is not available, because the nati
 `NATIVE` rejects small-order Ed25519 public keys that BouncyCastle accepts. After you switch to `NATIVE`, a registered key of that kind fails with `unknown_producer_key` or `stored_key_unusable`. Check registered keys before you switch.
 
 A value that is not one of the two names is treated as `JAVA` and logged once at `WARN`: `Unknown traceConfiguration.cryptoProvider '<value>', using JAVA`.
+
+**Policy store release check.** `policyMismatchGraceSeconds` (default `300`) is how long after the last node stops serving a policy store release records judged under it still count as matching; see the acceptance window below. `policyReleaseRetentionDays` (default `30`) is how long a release no node serves any more is kept before it is deleted. A mismatch only sets `policy_mismatch_flag`; it never rejects a record. See [Policy store release check](#policy-store-release-check).
 
 **Timers.** The receipt repair timer runs every `receiptRepairIntervalSeconds`. It settles receipt claims that stayed `PENDING` longer than `pendingReceiptTimeoutSeconds` (see [Deployment constraints](#deployment-constraints)). Setting `enabled` to `false` makes every TRACE endpoint return a structured `invalid_request` error with reason `trace_disabled` and stops the timer.
 
@@ -36414,11 +36508,12 @@ Key points:
 
 - `producer` is the stable logical producer identifier. It must equal `producer_chain.producer_id` byte for byte. `kid` is part of the signed content. `producer_version`, when present, is a string of 1 to 255 characters. It is signed and stored unchanged, and Lock does not interpret it.
 - `record_id` is a producer-generated UUID or ULID. Record identity is `(evidence domain, producer, record_id)`, so two producers can use the same `record_id`.
+- `trace.policy.policy_store_id`, `policy_store_version` and `bundle_hash` are at most 255 characters each (`length:<path>`). Lock indexes them for [search by policy store release](#search-by-policy-store-release).
 - `trace_execution_id` and `execution_authority` are required and travel together. Lock correlates records by them. Lock neither creates them nor authorizes the execution. They are different from `subject.workload_id`: the authority scopes the execution identifier, and the workload is the subject that takes part in it.
 - `trace.subject.workload_id` is required (non-empty string, at most 255 characters) for `AUTHORIZATION_DECISION` and `CAPABILITY_INVOKED`. `workload_instance_id` is optional. For `RUNTIME_EFFECT` the subject is optional and is validated when present.
 - Producers sign capability *facts*, not a governance label. An `AUTHORIZATION_DECISION` carries a singular `decision` and a `CAPABILITY_INVOKED` carries a singular `invocation`. Each has `action` and `resource_type` (the Cedar action and resource type, never a resource id) and an `outcome`. See [Event kinds](#event-kinds). Lock does not resolve capability ids.
 - `tokens[]` holds references only: `issuer`, `token_type`, and either `jti` or `fingerprint`. Never send a raw bearer token. Lock rejects material that looks like a JWT. Token identity is `(domain, issuer, jti)`, never a bare `jti`.
-- A signed body must not carry a member that Lock derives or assigns itself. The reserved members are `cnf`, `content_digest`, `receipt_sequence`, `received_at`, `prev_receipt_hash`, `coverage_gap_flag`, `chain_link_failure_flag`, `equivocation_flag`, `late_flag`, `unattributed_flag`, `candidate_flag`, `key_resolved`, `key_temporally_valid`, `key_not_revoked`, `key_authorized_for_producer`, `producer_authorized_for_claim`, `key_thumbprint`, `key_authorization_ref`, `verified_at`, `trust_tier`, `capability_resolution`, `capability_id` and `capability_ids`. Lock checks the top level, `trace`, `trace.event` and each `decision` or `invocation` fact. A body that carries one is rejected with `400 invalid_assertion` and reason `forbidden:<path>` (for example `forbidden:cnf` or `forbidden:trace.trust_tier`). Lock never stores it. Lock resolves the verification key only from the producer key registry, never from a key in the body.
+- A producer should not sign a member that Lock derives or assigns itself: `evidence_domain_id`, `cnf`, `content_digest`, `receipt_sequence`, `received_at`, `prev_receipt_hash`, `coverage_gap_flag`, `chain_link_failure_flag`, `equivocation_flag`, `late_flag`, `policy_mismatch_flag`, `reserved_member_flag`, `unattributed_flag`, `candidate_flag`, `key_resolved`, `key_temporally_valid`, `key_not_revoked`, `key_authorized_for_producer`, `producer_authorized_for_claim`, `key_thumbprint`, `key_authorization_ref`, `verified_at`, `trust_tier`, `capability_resolution`, `capability_id` and `capability_ids`. Lock checks the top level, `trace`, `trace.policy`, `trace.event` and each `decision` or `invocation` fact. A record that carries one is not rejected: the member is ignored, Lock uses its own derived values, and the record is accepted with `reserved_member_flag: true` (GovOps profile §12). The member stays in the stored and returned `assertion`, because the signature covers it; its value there is producer-supplied and ignored, and Lock's own values are in `ingestion` and `verification`. The paths are stored and returned as `reserved_members`, for example `["trace.trust_tier"]`. Only the first 32 are kept; Lock logs the total count. Lock resolves the verification key only from the producer key registry, never from a key in the body.
 - `producer_chain` can carry an optional `chain_link` member that references the previous chain head. It must be a JSON object, and only a genesis record (`sequence_number` 1) can carry it. On any other record Lock returns `400 invalid_genesis` with reason `chain_link_on_non_genesis`. Lock checks that `prev_producer_chain_id`, when present, is a non-empty string. It keeps the member unchanged inside the signed assertion, returns it unchanged on retrieval, and does not validate the link against the prior chain.
 - The first record of a chain has `sequence_number` 1 and `prev_record_hash` set to `sha256:` followed by 64 zeros. Any other record needs the previous record's `content_digest` in `prev_record_hash`.
 
@@ -36453,7 +36548,7 @@ Rules for the capability facts:
 - For `AUTHORIZATION_DECISION`, `outcome` is `ALLOW` or `DENY`. For `CAPABILITY_INVOKED`, `outcome` is `SUCCESS` or `FAILURE`. The vocabularies are distinct, so an invocation with `ALLOW` or a decision with `SUCCESS` returns `400 invalid_assertion` with reason `invalid:trace.event.invocation.outcome` (or `invalid:trace.event.decision.outcome`, or the indexed plural path such as `invalid:trace.event.invocations[0].outcome`).
 - An atomic batch evaluation can use the plural form instead. Each entry carries a `decision_id` or `invocation_id` (non-empty, at most 256 characters, unique within the array) and repeats `action`, `resource_type` and `outcome`. The record-level `trace.event.outcome` is not allowed in either form.
 - Operation-binding digests are optional members of `trace.event`: `request_digest`, `input_digest` and `tool_call_digest` on `AUTHORIZATION_DECISION`, and `request_digest`, `tool_call_digest` and `result_digest` on `CAPABILITY_INVOKED` (and `result_digest` on `RUNTIME_EFFECT`). A present digest is `sha256:` followed by 64 lowercase hex characters. Any other string returns `400 invalid_assertion` with reason `invalid:trace.event.<member>`, and a non-string value returns `type:trace.event.<member>`. Lock stores them in the signed assertion and does not interpret them. `trace.policy.bundle_hash` keeps its own rule, which also accepts other `algorithm:digest` forms.
-- Both the singular and the plural member in one record, `capability_ids` anywhere, and a `resource_id` inside a fact are rejected with `400 invalid_assertion` (reason such as `forbidden:trace.event.capability_ids`).
+- Both the singular and the plural member in one record, and a `resource_id` inside a fact, are rejected with `400 invalid_assertion` (reason such as `forbidden:trace.event.decisions`). A signed `capability_ids` is a Lock-derived member: it is ignored and flagged with `reserved_member_flag`.
 
 Lock validates the schema for the declared kind and rejects fields that contradict it. Lock does not infer that an authorization caused an invocation because their timestamps are close. Producers state causal relationships in `parent_record_ids`.
 
@@ -36482,7 +36577,10 @@ The two scopes are intentionally different:
   "coverage_gap_flag": false,
   "chain_link_failure_flag": false,
   "equivocation_flag": false,
-  "late_flag": false
+  "late_flag": false,
+  "policy_mismatch_flag": false,
+  "reserved_member_flag": false,
+  "reserved_members": []
 }
 ```
 
@@ -36517,7 +36615,8 @@ A processed batch returns `207 Multi-Status`, whatever the per-item results. Acc
       "producer_id": "cedarling-fleet-1", "record_id": "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41",
       "content_digest": "sha256:...", "receipt_sequence": 108422, "received_at": "2026-06-11T00:41:02.123Z",
       "idempotent_replay": false, "coverage_gap_flag": false, "chain_link_failure_flag": false,
-      "equivocation_flag": false, "late_flag": false
+      "equivocation_flag": false, "late_flag": false, "policy_mismatch_flag": false,
+      "reserved_member_flag": false, "reserved_members": []
     },
     {
       "index": 1, "accepted": false,
@@ -36539,9 +36638,8 @@ Errors use the structured body `{"error": "<id>", "error_description": "<text>",
 | Error id | HTTP | When |
 |---|---|---|
 | `invalid_request` | 400 | Malformed JSON, a limit exceeded, an unreadable body, bad query parameters, TRACE disabled (`trace_disabled`), or a bulk envelope problem such as `bulk_mixed_producers` (see [Bulk submission](#bulk-submission)). |
-| `invalid_assertion` | 400 | A schema violation in the assertion, or a member reserved for Lock such as `cnf` or `trust_tier` (reason `forbidden:<path>`). `reason` names the field. |
+| `invalid_assertion` | 400 | A schema violation in the assertion. `reason` names the field. |
 | `unsupported_profile` | 400 | `trace.eat_profile` is not `tag:jans.io,2026:trace-v1`. |
-| `domain_field_forbidden` | 400 | The body contains `evidence_domain_id`. |
 | `producer_mismatch` | 400 | `producer` does not equal `producer_chain.producer_id`. |
 | `unknown_producer_key` | 400 | No registered key for the domain, producer, and `kid`, or the record's `event_kind` is outside the key's `authorized_event_kinds` (reason `event_kind_not_authorized`). |
 | `key_not_valid` | 400 | The key is outside its validity window or revoked. |
@@ -36581,7 +36679,7 @@ The component that creates the governed unit of work (an agent runtime, a gatewa
 
 ## Retrieval
 
-Both endpoints need the `trace.readonly` scope and read only the caller's evidence domain.
+All retrieval endpoints need the `trace.readonly` scope and read only the caller's evidence domain.
 
 ```bash
 # One record. producer_id should be supplied.
@@ -36619,7 +36717,10 @@ A record response has three separate parts: the assertion (in a parsed form and 
     "coverage_gap_flag": false,
     "chain_link_failure_flag": false,
     "equivocation_flag": false,
-    "late_flag": false
+    "late_flag": false,
+    "policy_mismatch_flag": false,
+    "reserved_member_flag": false,
+    "reserved_members": []
   }
 }
 ```
@@ -36631,6 +36732,25 @@ A record response has three separate parts: the assertion (in a parsed form and 
 - `ingestion` is Lock-derived metadata.
 
 If `producer_id` (or `execution_authority`) is omitted and the bare identifier matches more than one producer (or authority) in the domain, Lock returns `409 ambiguous_identifier`. It never guesses.
+
+### Search by policy store release
+
+`GET /audit/trace/records` (no `record_id`) returns the records whose `trace.policy` names a policy store release. Use it to answer "which decisions were made with release X".
+
+```bash
+curl -s "$API/records?policy_store_id=https%3A%2F%2Fexample.org%2Fpolicy-stores%2Fpayments&policy_store_version=1.2.3&received_from=2026-06-01T00:00:00Z&start=0&count=100" \
+  -H "Authorization: Bearer $READ_TOKEN"
+```
+
+| Parameter | Meaning |
+|---|---|
+| `policy_store_id` | Exact `trace.policy.policy_store_id`. |
+| `policy_store_version` | Exact `trace.policy.policy_store_version`. |
+| `bundle_hash` | Exact `trace.policy.bundle_hash`. |
+| `received_from`, `received_to` | Inclusive bounds on `received_at`, RFC 3339. |
+| `start`, `count` | Paging, as for executions. |
+
+At least one of `policy_store_id` or `bundle_hash` is required; otherwise Lock returns `400 invalid_request` with reason `missing:policy_store_id`. The response is `{"ordering": "receipt_sequence", "records": [...]}` with record envelopes in receipt order. No match returns `200` with an empty list. Only records that carry `trace.policy` (`AUTHORIZATION_DECISION`, and `CAPABILITY_INVOKED` when present) are indexed. Records stored before this index existed are not returned.
 
 The execution response carries `execution_authority`, `trace_execution_id`, `"ordering": "receipt_sequence"`, `"completeness": "not_assessed"`, and `records`, ordered by Lock receipt sequence. `start` (default 0) and `count` (default 100, maximum 1000) page the list. The execution view contains the directly associated records only. It claims no global event order, does not traverse child executions, and does not assess completeness.
 
@@ -36644,10 +36764,33 @@ Flags are Lock-derived findings about a record. Lock flags a condition instead o
 | `chain_link_failure_flag` | The predecessor is present but its `content_digest` does not match this record's `prev_record_hash`. A genuine break in the chain. | No. The conflicting predecessor already exists, so later arrivals cannot resolve it. It stays visible as an integrity finding. |
 | `equivocation_flag` | Two or more records with different `record_id` values claim the same chain position. Lock stores and flags all of them and never selects a winner. | No. |
 | `late_flag` | Lock received the record more than `latenessThresholdSeconds` after its `signed_at`. Fixed at ingestion. | No. |
+| `policy_mismatch_flag` | The record's `trace.policy` names a policy store Lock serves, with a release this node did not serve at `signed_at` or within `policyMismatchGraceSeconds` before it. Fixed at ingestion. See [Policy store release check](#policy-store-release-check). | No. |
+| `reserved_member_flag` | The producer signed a member Lock derives itself, such as `evidence_domain_id` or `trust_tier`. Lock ignored it and used its own values; `reserved_members` lists the paths. Fixed at ingestion. | No. |
 
 Lock updates the flags on neighboring records after it stores a new record. These updates are best-effort and eventually consistent. If one fails, Lock logs it and still accepts the new record. A reader can see a flag change shortly after a record is accepted.
 
 A producer-chain break or gap is a statement about the records Lock has received. It is not a statement about what the producer did.
+
+## Policy store release check
+
+Lock serves policy store archives to producers (`GET /policy`, `GET /policy/stores`) and computes each archive's `bundle_hash` as `sha256:` plus the lowercase hex SHA-256 of the archive bytes. Lock reloads policy stores every 30 seconds. On every reload each node records the releases it serves in the shared TRACE store (`jansTracePolicyRelease`, one row per `policy_store_id` and `bundle_hash`, not scoped to an evidence domain): the first time a release is served it is inserted, and after that its last-served time moves forward at most once a minute. Updates use optimistic locking and never move the last-served time back or the first-served time forward, so a replica with a lagging clock cannot shorten a release's history. A release that is no longer served stops moving forward. Because the history is in the database, every replica sees the same releases, and it survives restarts and rolling updates.
+
+When an accepted record's `trace.policy.policy_store_id` is a store this node serves as an archive, Lock judges the record's release at its `received_at`, or at its `signed_at` when the record is flagged `late_flag`. Using the receipt time means a producer cannot backdate `signed_at` to slip a retired release past the check; it can shift the time by at most `latenessThresholdSeconds`, and beyond that the record is flagged late. The release is accepted when:
+
+- this node serves that `bundle_hash` now; or
+- its stored last-served time is within the acceptance window before that time. The window is the larger of `policyMismatchGraceSeconds` and `latenessThresholdSeconds`, plus 130 seconds: a stored last-served time can trail the real one by the one-minute update interval, two 30-second reloads and the 10-second cache. With the defaults the window is 430 seconds, so a record signed just before a rollout and received up to five minutes later still matches, and a release another replica still serves never looks retired.
+
+Otherwise, and also when a matching release has a known `policy_store_version` that differs from the record's, the record is flagged `policy_mismatch_flag`. A record signed under the previous release during a rollout, or uploaded shortly after it, is not flagged. The record is always accepted.
+
+Limits:
+
+- Before the first policy store load, Lock serves no archive and flags nothing.
+- A store this node does not serve is never compared, because producers may load stores from other sources.
+- Lock caches found history rows for 10 seconds (at most 1000, least recently used evicted). A release it has not found is remembered as missing for one second, or until this node publishes a reload, so a release another replica starts serving is seen within a second and an unknown hash repeated by a producer costs at most one store read per second.
+- Releases no node has served for `policyReleaseRetentionDays` are deleted by the receipt repair timer, 500 per run, except a release this node serves. Each delete only removes the row if it is still that old, so a release another replica refreshed in the meantime is kept, and replicas pruning at the same time do not interfere. A record later naming a deleted release is flagged.
+- The check is best-effort: if it or the store fails, Lock logs a warning and accepts the record without the flag.
+
+The flag is a statement about what Lock served. It does not show that the producer used a tampered policy.
 
 ## Receipt chain
 
@@ -36685,6 +36828,8 @@ A node that stops between steps leaves a `PENDING` claim. The repair timer settl
 The database ORM has no transactions, so storing the record and appending its receipt entry is not a single atomic write. A failed request leaves no stored record, no index entry, and no `COMMITTED` receipt entry. It can leave a `VOID` receipt entry at the allocated position, and a `PENDING` entry is visible between the claim and its settlement. After a node stops, a `PENDING` entry stays until the repair timer settles it. That takes up to `pendingReceiptTimeoutSeconds` plus `receiptRepairIntervalSeconds`. A `VOID` entry stays in the chain permanently, because the `prev_receipt_hash` of the next entry binds its hash.
 
 **Request size and column size.** `maxRequestBytes` limits the size of one request body. The stored assertion is kept as text in a `MEDIUMTEXT` column on MySQL and a `TEXT` column on PostgreSQL. Keep `maxRequestBytes` and the per-record limit inside the bulk path well below the size of that column type for your database, and raise the limits only after checking it. Many TRACE identifiers are stored in `VARCHAR` columns of fixed width, which Lock's validation keeps the values within.
+
+**Upgrading.** Search by policy store release, `policy_mismatch_flag` and `reserved_member_flag` use columns added in this release. An existing VM install must add them once; see [Upgrading an Existing Deployment](./lock-server.md#upgrading-an-existing-deployment).
 
 **Time.** Lock uses `received_at` for receipt order and treats `signed_at` as a producer claim. Keep node clocks synchronized.
 
@@ -36780,13 +36925,13 @@ In cloud-native architecture, the load testing is executed via k8s pods.
 
 ### Authorization Code Flow jmeter load test
 
-For load testing with Authorization Code Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/authorization_code_flow.jmx) is used.
+For load testing with Authorization Code Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/authorization_code_flow.jmx) is used.
 
 See [Authorization code flow recipe](../recipes/benchmark.md#authorization-code-flow) for details.
 
 ### Resource Owner Password Grant (ROPC) Flow jmeter load test
 
-For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx) is used.
+For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx) is used.
 
 See [ROPC flow recipe](../recipes/benchmark.md#resource-owner-password-credentials-ropc-flow) for details.
 
@@ -37763,7 +37908,7 @@ credentials on one page.
 
 You can build a page like Google on your own website. You need to be able to
 list, add, and remove 2FA credentials for a given user's account. But another
-good option is the [Jans Casa](https://docs.jans.io/nightly/casa) web application.
+good option is the [Jans Casa](https://docs.jans.io/vreplace-janssen-version/casa) web application.
 
 The holy grail of security policies since the introduction of RSA OTP tokens,
 stepped-up authentication is when the subject is presented with an additional
@@ -38225,13 +38370,13 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
 
 3. Make sure [helm](https://helm.sh/docs/intro/install/) is installed.
 
-4. Prepare your [override.yaml](../install/helm-install/README.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `0.0.0-nightly_dev` which are the bleeding edge images for release `0.0.0-nightly`. Stable images such as `0.0.0-nightly-1` should be used.
+4. Prepare your [override.yaml](../install/helm-install/README.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `replace-janssen-version_dev` which are the bleeding edge images for release `replace-janssen-version`. Stable images such as `replace-janssen-version-1` should be used.
    
    ```yaml
    config:
       image:
         repository: ghcr.io/janssenproject/jans/configurator
-        tag: 0.0.0-nightly_dev 
+        tag: replace-janssen-version_dev 
       countryCode: US
       email: support@gluu.org
       orgName: Gluu
@@ -38275,17 +38420,17 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/auth-server
-       tag: 0.0.0-nightly_dev
+       tag: replace-janssen-version_dev
    config-api:
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/config-api
-       tag: 0.0.0-nightly_dev
+       tag: replace-janssen-version_dev
    persistence:
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/persistence-loader
-       tag: 0.0.0-nightly_dev 
+       tag: replace-janssen-version_dev 
    nginx-ingress:
      ingress:
        path: /
@@ -38319,7 +38464,7 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     mkdir -p add_users && cd add_users
     ```
 
-2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
+2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
 
 3.  Open the file and modify the required parameters. Note that the following environments can be used as configmaps data to configure the pod.
 
@@ -38413,7 +38558,7 @@ Create the client needed to run the test by executing the following. Make sure t
     }
     EOF
     ```
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder. You may run the soak auth code test by copying the [soak_test_auth_code.yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml) instead. 
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder. You may run the soak auth code test by copying the [soak_test_auth_code.yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml) instead. 
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
@@ -38505,7 +38650,7 @@ Create the client needed to run the test by executing the following. Make sure t
     EOF
     ```
 
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
@@ -38593,7 +38738,7 @@ Create the client needed to run the test by executing the following. Make sure t
     EOF
     ```
 
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
 
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
@@ -48193,6 +48338,8 @@ If you’d like to contribute to this document, get started with the [Contributi
 | metricReporterKeepDataDays | The days to keep metric reported data | [Details](#metricreporterkeepdatadays) |
 | openIdIssuer | OpenID issuer URL | [Details](#openidissuer) |
 | pendingReceiptTimeoutSeconds | Seconds a PENDING receipt may stay unresolved before the repair timer settles it | [Details](#pendingreceipttimeoutseconds) |
+| policyMismatchGraceSeconds | Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag | [Details](#policymismatchgraceseconds) |
+| policyReleaseRetentionDays | Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window | [Details](#policyreleaseretentiondays) |
 | protectionMode | Protection mode for the Lock server (OAuth or Cedarling) | [Details](#protectionmode) |
 | receiptAllocationRetryLimit | Maximum retries when allocating a receipt-chain sequence number | [Details](#receiptallocationretrylimit) |
 | receiptRepairIntervalSeconds | Interval in seconds between receipt repair timer runs | [Details](#receiptrepairintervalseconds) |
@@ -48575,6 +48722,24 @@ If you’d like to contribute to this document, get started with the [Contributi
 - Default value: 120
 
 
+## policyMismatchGraceSeconds
+
+- Description: Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag
+
+- Required: No
+
+- Default value: 300
+
+
+## policyReleaseRetentionDays
+
+- Description: Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window
+
+- Required: No
+
+- Default value: 30
+
+
 ## protectionMode
 
 - Description: Protection mode for the Lock server (OAuth or Cedarling)
@@ -48904,22 +49069,22 @@ This Reference guide helps you learn about the components and architecture of Ja
 # Image references
 | Image                                                                                                                          |
 |--------------------------------------------------------------------------------------------------------------------------------|
-| [jans-all-in-one](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-all-in-one/README.md)       |
-| [jans-auth-server](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-auth-server/README.md)     |
-| [jans-casa](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-casa/README.md)                   |
-| [jans-cloudtools](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-cloudtools/README.md)       |
-| [jans-config-api](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-config-api/README.md)       |
-| [jans-configurator](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-configurator/README.md)   |
-| [jans-fido2](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-fido2/README.md)                 |
-| [jans-persistence](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-persistence/README.md)     |
-| [jans-saml](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-saml/README.md)                   |
-| [jans-scim](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-scim/README.md)                   |
+| [jans-all-in-one](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-all-in-one/README.md)       |
+| [jans-auth-server](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-auth-server/README.md)     |
+| [jans-casa](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-casa/README.md)                   |
+| [jans-cloudtools](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-cloudtools/README.md)       |
+| [jans-config-api](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-config-api/README.md)       |
+| [jans-configurator](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-configurator/README.md)   |
+| [jans-fido2](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-fido2/README.md)                 |
+| [jans-persistence](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-persistence/README.md)     |
+| [jans-saml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-saml/README.md)                   |
+| [jans-scim](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-scim/README.md)                   |
 
 # Helm Chart references
 | Helm Chart                                                                                                                   |
 |------------------------------------------------------------------------------------------------------------------------------|
-| [All In One Chart](https://github.com/JanssenProject/jans/blob/nightly/charts/janssen-all-in-one/README.md) |
-| [Microservices Chart](https://github.com/JanssenProject/jans/blob/nightly/charts/janssen/README.md)         |
+| [All In One Chart](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/charts/janssen-all-in-one/README.md) |
+| [Microservices Chart](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/charts/janssen/README.md)         |
 
 
 ## Architectural diagram of Janssen
@@ -49673,12 +49838,12 @@ Follow the links below to access respective documentation.
 
 | Service          | REST API                                                                                                                                                                              |
 |------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml)                         |
-| Jans Config API  | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml)          |
+| Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml)                         |
+| Jans Config API  | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml)          |
 | Jans Core        | NA                                                                                                                                                                                    |
-| Jans FIDO 2      | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml)                      |
-| Jans SCIM API    | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-scim/server/src/main/resources/jans-scim-openapi.yaml)                      |
-| Jans Lock Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-lock/lock-server.yaml) |
+| Jans FIDO 2      | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)                      |
+| Jans SCIM API    | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-scim/server/src/main/resources/jans-scim-openapi.yaml)                      |
+| Jans Lock Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-lock/lock-server.yaml) |
 
 ## Javadocs
 
@@ -53252,11 +53417,11 @@ This guide shows how to upgrade a Janssen VM deployment.
     Custom scripts are considered external configuration and are not updated automatically during an upgrade.
     Please review and adapt your custom scripts to work with the newer version of the Janssen Server.
 
-Let's assume we are upgrading Jans VM installation from `current version` to `nightly`
+Let's assume we are upgrading Jans VM installation from `current version` to `vreplace-janssen-version`
 
 1. Keep the old VM installation running.
 
-2. [Install](../install/vm-install/README.md) on a separate VM the target new Jans installation, i.e. `nightly`.
+2. [Install](../install/vm-install/README.md) on a separate VM the target new Jans installation, i.e. `vreplace-janssen-version`.
 
     You can install with a test client. For example:
 
@@ -53264,11 +53429,11 @@ Let's assume we are upgrading Jans VM installation from `current version` to `ni
 
     This `client-id` and `client-pw` will then be used to import Terraform configurations
 
-3. Use our Terraform [docs](../terraform/README.md) on the new installation, i.e. `nightly` to:
+3. Use our Terraform [docs](../terraform/README.md) on the new installation, i.e. `vreplace-janssen-version` to:
     - import all the global configurations from the new installation using `terraform import`
     - define all the custom IDP configurations and apply them using `terraform apply`
 
-4. At this point there should be two versions up, `old version` and `nightly`.
+4. At this point there should be two versions up, `old version` and `vreplace-janssen-version`.
 
 5. Traffic should be switched gradually from the old setup to the new setup.
    Once confidence is gained, drain the old VM.
@@ -54926,7 +55091,7 @@ Use this guide to install and configure your Casa deployment.
 
 ## Installation
 
-Jans Casa can be used with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org). At [installation](https://docs.jans.io/nightly/admin/install/) time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.
+Jans Casa can be used with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org). At [installation](https://docs.jans.io/vreplace-janssen-version/admin/install/) time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.
 
 ## Configuration
 
@@ -55013,7 +55178,7 @@ The _casa_ project allows to onboard new types of second factors (authentication
 
 ### Flow requisites
 
-To code the flow corresponding to the authentication method to add, you can use the Agama project found  [here](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
+To code the flow corresponding to the authentication method to add, you can use the Agama project found  [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
 
 The flow will be passed an Agama _map_ containing information of the person attempting the authentication. This input parameter will contain at least three keys: `uid`, `inum`, and `name`. `uid` and `inum` map directly to attributes stored in the user's profile and are never empty, `name` is a displayable name which may come from attribute `givenName` or `displayName`. All values are _strings_.
 
@@ -55140,7 +55305,7 @@ Depending on the answers, you may like to start instead with plugin development 
 
 ## Enrollment plugin
 
-Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred#readme) as a template to start the work. Ensure you have:
+Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred#readme) as a template to start the work. Ensure you have:
 
 - A Jans Server installation that includes Jans Casa - prefer a VM environment over the CN edition for development purposes. Also, you'll need a way to connect to your server via SSH
 
@@ -55233,15 +55398,15 @@ Acquaintance with the following technologies is recommended:
 ### Sample plugins
 
 The best way to start learning Casa plugin development is by playing with the sample plugins you can find [here](
-https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples). Clone the repository (a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
+https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples). Clone the repository (a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
 
 ## Configuration management
 
-Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description  can be found [here](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml). Note all endpoints are protected by OAuth tokens which must have the `https://jans.io/casa.config` scope.
+Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description  can be found [here](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml). Note all endpoints are protected by OAuth tokens which must have the `https://jans.io/casa.config` scope.
 
 ## Credentials enrollment
 
-Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
+Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
 
 - Phone numbers for SMS OTP
 - OTP apps or tokens  
@@ -55281,7 +55446,7 @@ Given the warning above, there has to be a way to launch a different Agama flow 
 
 Regardless of the customization required, it is desirable to get acquaintance with Agama [framework](../../agama/introduction.md). This is a good time to go through the Agama developer guide pages found in the  Administration section of Jans Server docs. Specifically, several of the Agama [advanced usages](../../janssen-server/developer/agama/advanced-usages.md#advanced-usages) will help you materialize your requirements.
 
-Extract [the Agama project](https://github.com/JanssenProject/jans/releases/download/nightly/casa-agama-nightly-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
+Extract [the Agama project](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/casa-agama-vreplace-janssen-version-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
 
 ### Page customizations
 
@@ -55372,7 +55537,7 @@ Additional authenticators and use cases can be supported via [custom plugins](#e
 
 ## 2FA enrollment APIs
 
-To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
+To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
 
 - Phone numbers for SMS OTP
 - OTP apps, cards, or dongles  
@@ -55380,7 +55545,7 @@ To facilitate 2FA device enrollment during account registration, or elsewhere in
 
 ## Configuration via APIs
 
-Besides a comprehensive graphical [admin console](./administration/admin-console.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml).
+Besides a comprehensive graphical [admin console](./administration/admin-console.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml).
 
 ## Existing plugins
 
@@ -55475,7 +55640,7 @@ A device/location is considered trustworthy when the user has presented a strong
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/strong-authn-settings-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/strong-authn-settings-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Log in to Casa using an administrator account
 
@@ -55499,7 +55664,7 @@ For regular users, proper details appear in the widget where 2FA is turned on.
 
 ## API
 
-Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
+Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
 
 # Accounts Linking Plugin
 
@@ -55537,9 +55702,9 @@ Most of work is demanded on setting up project _c_, where configuration of ident
 
 In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and `git` installed.
 
-1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/nightly/acct-linking-0.0.0-nightly-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`
+1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`
 
-1. Download the utility jar file `https://github.com/JanssenProject/jans/releases/download/nightly/agama-inbound-0.0.0-nightly.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
+1. Download the utility jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/agama-inbound-replace-janssen-version.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
 
 1. In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly. Also, add the scope `https://jans.io/oauth/config/agama.readonly` to the list of scopes  
 
@@ -55551,7 +55716,7 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
     zip -r inbound.zip *
     ```
 
-1. Download the Casa accounts linking Agama project `https://github.com/JanssenProject/jans/releases/download/nightly/acct-linking-agama-0.0.0-nightly-project.zip`
+1. Download the Casa accounts linking Agama project `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip`
 
 1. Transfer the two zip files to a location in the server, deploy both archives separately using TUI (Agama menu -> "Add a New Project" ). So, there will be two projects: `casa-account-linking` and `agama-inbound-oauth`. 
 
@@ -55879,7 +56044,7 @@ The instructions to setup this URL vary depending on the TLS version required an
 
     This configuration requires creating a subdomain or opening a new port for serving HTTPs. There will be only one URL served in this case, e.g. `https://acme.co:444/`; all other content will respond with HTTP 404 (not found). Hitting this URL will bring up the native web browser dialog for selecting a user certificate.  
 
-    The easiest way to set this up is adding a `VirtualHost` directive associated to a new port, for instance 444. This [snippet](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf) exemplifies a safe way to do so. Note you have to edit accordingly:
+    The easiest way to set this up is adding a `VirtualHost` directive associated to a new port, for instance 444. This [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf) exemplifies a safe way to do so. Note you have to edit accordingly:
 
     - The server name
     - The paths to the SSL certificate. This is the web serving certificate and is unrelated to the certificates used for authentication
@@ -55888,7 +56053,7 @@ The instructions to setup this URL vary depending on the TLS version required an
 
 === "Apache 2.4 with TLS 1.2"
 
-    This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in  `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
+    This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in  `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
 
     In this case your cert pickup URL is `https://<your-host-name>/jans-casa/pl/cert-authn/index.zul`.
 
@@ -55917,7 +56082,7 @@ Offering users the login page and the account onboarding regarded above is up to
 !!! Note
     Instructions provided here assume usage of TUI. Do the equivalent in admin-ui or other configuration mechanism
 
-1. Download the certificate authentication Agama project archive: `https://github.com/JanssenProject/jans/releases/download/nightly/cert-authn-agama-0.0.0-nightly-project.zip`
+1. Download the certificate authentication Agama project archive: `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip`
 
 1. Transfer the zip file to a location in the server and deploy it. For example, if using TUI, go to Agama menu -> "Upload project". Wait one minute
 
@@ -55957,7 +56122,7 @@ The next **optional** step is assigning an icon to certificate authentication fo
 
 ## Install the cert-authn plugin
 
-1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/nightly/cert-authn-0.0.0-nightly-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
+1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
 
 1. Wait one minute. In the admin console, navigate to the "Authentication methods" page. A new "User certificates" widget will appear. Enable the authentication method, drag it to the location (priority) desired, and hit "Save"
 
@@ -55969,7 +56134,7 @@ This step is required only if account onboarding via certificate attributes is d
 
 Note these instructions apply for VM-based installations. On containers-based environments, please open a GitHub discussion or a support ticket.
 
-1. Download file `https://github.com/JanssenProject/jans/releases/download/nightly/jans-scim-model-0.0.0-nightly.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
+1. Download file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-scim-model-replace-janssen-version.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
 
 1. Edit the file `/etc/default/jans-casa`: locate a segment that reads `-Dacr=` and assign `agama_io.jans.casa.cert.oneStepAuthn` as new value. Save the change
 
@@ -56123,7 +56288,7 @@ The Consent Management plugin gives end-users the ability to view and revoke pre
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/authorized-clients-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/authorized-clients-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Login to Casa using an administrator account
 
@@ -56149,7 +56314,7 @@ This plugin allows admins to apply a design customization by choosing colors, fa
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/custom-branding-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/custom-branding-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Login to Casa using an administrator account
 
@@ -56182,7 +56347,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 ### Plugin
 
-1. Download the plugin [jar](https://github.com/JanssenProject/jans/releases/download/nightly/email_2fa-0.0.0-nightly-jar-with-dependencies.jar) file
+1. Download the plugin [jar](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-replace-janssen-version-jar-with-dependencies.jar) file
 
 1. Login to Casa using an administrative account
 
@@ -56198,7 +56363,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 ### Agama project
 
-1. Download the project [archive](https://github.com/JanssenProject/jans/releases/download/nightly/email_2fa-agama-0.0.0-nightly-project.zip)
+1. Download the project [archive](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-agama-replace-janssen-version-project.zip)
 
 1. Deploy the project onto the server - you can use TUI for this task
 
@@ -57120,7 +57285,7 @@ let config = BootstrapConfig {
 - [Getting Started with Cedarling Rust](../tutorials/rust.md)
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
-- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
+- [Cedarling Sidecar Tutorial](../sidecar/cedarling-sidecar-tutorial.md)
 - [Cedarling Properties](../reference/cedarling-properties.md)
 
 # Using UniFFI binding Android App
@@ -57463,555 +57628,6 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
   val logs = cedarling.getLogsByRequestId("12434-32323-43434", "Decision")
 
   ```
-
-# Sidecar Overview
-
-The sidecar is a containerized Flask project that uses the `cedarling_python` binding and implements the [AuthZen](https://openid.github.io/authzen/) specification. This image can run alongside another service and uses cedarling to validate evaluation requests against a policy store.
-
-## Docker setup
-
-- Ensure that you have installed [docker](https://docs.docker.com/engine/install/)
-- Create a file called `bootstrap.json`. You may use this [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/demo/bootstrap.json) file.
-- Modify the bootstrap file to your specifications. In particular you need to provide a link to your policy store in `CEDARLING_POLICY_STORE_URI`. The configuration keys are described [here](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi#L10).
-- Pull the docker image:
-  ```
-  docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
-  ```
-- Run the docker image, replacing `</absolute/path/to/bootstrap.json>` with the absolute path to your bootstrap file:
-
-    ```bash
-    docker run -d \
-      -e APP_MODE='development' \
-      -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
-      -e SIDECAR_DEBUG_RESPONSE=False \
-      --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
-      -p 5000:5000\
-      ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
-    ```
-
-    - `-d` runs the sidecar in daemon mode in the background. Omit this if you want to run the sidecar in the foreground to monitor logs in real time.
-    - `SIDECAR_DEBUG_RESPONSE` will cause the sidecar to return extra diagnostic information for each query if set to `True`. This may be useful to check which policies are being used to reach a decision.
-    - Take note of the output of the command. This is the container ID of the sidecar.
-    - The sidecar runs in the background on port 5000. OpenAPI documentation is available at `http://0.0.0.0:5000/swagger-ui`
-    - To stop the sidecar, run `docker container stop <container ID>`
-
-## Usage
-
-The sidecar has one endpoint: `/cedarling/evaluation`.
-
-Example request to the evaluation endpoint:
-
-!!! NOTE
-    The request shown below is designed against the AuthZen specification and should not be used for a regular cedarling deployment.
-
-```json
-{
-  "subject": {
-    "type": "JWT",
-    "id": "",
-    "properties": {
-      "tokens": [
-        {
-          "mapping": "Jans::Access_Token",
-          "payload": "eyJhbGciOiJIUzI1NiIs..."
-        },
-        {
-          "mapping": "Jans::Id_Token",
-          "payload": "eyJhbGciOiJFZERTQSIs..."
-        },
-        {
-          "mapping": "Acme::DolphinToken",
-          "payload": "ey1b6cfMef21084633a7..."
-        }
-      ]
-    }
-  },
-  "resource": {
-    "type": "Application",
-    "id": "",
-    "properties": {
-      "cedar_entity_mapping": {
-        "entity_type": "Jans::Application",
-        "id": "some_id"
-      },
-      "app_id": "application_id",
-      "name": "Some Application",
-      "url": {
-        "host": "jans.test",
-        "path": "/protected-endpoint",
-        "protocol": "http"
-      }
-    }
-  },
-  "action": {
-    "name": "Jans::Action::\"Read\""
-  },
-  "context": {
-    "device_health": [
-      "Healthy"
-    ],
-    "fraud_indicators": [
-      "Allowed"
-    ],
-    "geolocation": [
-      "America"
-    ],
-    "network": "127.0.0.1",
-    "network_type": "Local",
-    "operating_system": "Linux",
-    "user_agent": "Linux",
-    "current_time": 1
-  }
-}
-```
-
-Cedarling requires OpenID tokens from one or more trusted issuers to perform authorization, as described [here](../../reference/cedarling-authz.md). These values are sent in the subject field's properties. A more detailed example of creating an AuthZen request can be seen in the [gateway example](./cedarling-sidecar-tutorial.md#setup-test-gateway).
-
-Upon creating the principal, action, resource, and context entities, cedarling will evaluate these entities against the policies defined in the policy store. Then it will return a true/false decision. If the decision is false, the sidecar will analyze cedarling diagnostics and provide additional information for the admin.
-
-Example of `true` case:
-
-```json
-{
-  "decision": true
-}
-```
-
-Example of `false` case:
-
-```json
-{
-  "context": {
-    "reason_admin": {
-      "authorize_reason": ["DENY"],
-      "authorize_error": []
-    }
-  },
-  "decision": false
-}
-```
-
-In this example the evaluation was `DENY`, so the decision was false. Additional information is returned in the `context` field.
-
-### TRACE correlation
-
-Callers that take part in Lock TRACE can send the correlation fields as headers on `/cedarling/evaluation`:
-
-| Header | TRACE field |
-| --- | --- |
-| `Audit-Trace-ID` | `trace_execution_id` |
-| `Audit-Execution-Authority` | `execution_authority` |
-| `Audit-Workload-ID` | `workload_id` (optional) |
-| `Audit-Workload-Instance-ID` | `workload_instance_id` (optional) |
-
-`Audit-Trace-ID` and `Audit-Execution-Authority` must be sent together, otherwise the request is rejected with `400`. Each value is at most 255 characters. The component that owns the unit of work creates these values; the sidecar does not generate them. They do not take part in the Cedar evaluation. When present, `trace_execution_id` is returned in the response `context`.
-
-# Cedarling Sidecar Tutorial
-
-## Introduction
-
-The goal of this tutorial is to show how to use the Cedarling Sidecar. To demonstrate this,
-we'll build a very simple Python Flask API Gateway that calls the Cedarling sidecar Authzen
-REST endpoint to authorize access based on the content of a JWT access token.
-
-### Sequence diagram
-
-```mermaid
-sequenceDiagram
-title API Gateway
-actor User
-participant Gateway
-participant Sidecar
-
-User->Gateway: GET /protected\nAuthorization: Bearer ...
-Gateway->Sidecar: POST /cedarling/evaluation\n{"subject": {"type": "JWT", "id": "cedarling", "properties": {"tokens": []} }}
-Sidecar->Sidecar: cedarling.authorize_multi_issuer(tokens)
-
-alt ALLOW
-    Sidecar->Gateway: {"decision": true}
-    Gateway->User: 200 {"result": "protected resource"}
-else DENY
-    Sidecar->Gateway: {"decision": false, "context": {...}}
-    Gateway->User: 403 Forbidden
-end
-
-```
-
-### Sample Authzen request
-
-!!! NOTE
-    The request shown below is designed against the AuthZen specification and should not be used for a regular cedarling deployment.
-
-```json
-{
-  "subject": {
-    "type": "token_bundle",
-    "id": "",
-    "properties": {
-      "tokens": []
-    }
-  },
-  "resource": {
-    "type": "Request",
-    "id": "",
-    "properties": {
-      "cedar_entity_mapping": {
-        "entity_type": "Jans::HTTP_Request",
-        "id": "some_id"
-      },
-      "header": {},
-      "url": {
-        "protocol": "http",
-        "host": "www.acme.tld",
-        "path": "/protected"
-      }
-    }
-  },
-  "action": {
-    "name": "Jans::Action::\"GET\""
-  },
-  "context": {}
-}
-```
-
-## Prerequisites
-
-Before you begin, make sure you have the following:
-
-- `Docker` installed on your machine
-- `Python 3.11` and `uv` if you are not using Docker
-
-## Policy Store Setup (Agama Lab)
-
-To begin using Cedarling, you need to set up a policy store. We'll use this [Agama Lab](https://cloud.gluu.org/agama-lab/login) for this purpose.
-
-1. Sign in to [Agama Lab](https://cloud.gluu.org/agama-lab/login) using your GitHub account and click on Policy Designer.
-   ![image](../../../assets/cedarling-policy-designer.png)
-2. Choose a repository to store your Cedarling policies and schemas. Ensure that the repository has at least one commit on the default branch.
-   ![image](../../../assets/cedarling-select-repo.png)
-3. After initialization, create a policy store named `gatewayDemo`.
-   ![image](../../../assets/cedarling-policy-store-name.png)
-4. Open the policy store and navigate to `Schema`
-5. Under `Common Types`, find `TokensContext`. Open it and add the following:
-
-    - Attribute name: `jans_access_token`
-    - Type: `EntityOrCommon`
-    - Entity name: `Access_token`
-    - Mandatory: No
-
-6. Save your schema channges
-7. Navigate to Policies.
-8. Click `Add Policy`
-9. Paste the following Cedar policy:
-
-    ```bash
-    @id("allow_one")
-    permit(
-      principal,
-      action,
-      resource is Jans::HTTP_Request
-    )
-    when {
-      context has tokens.jans_access_token &&
-      context.tokens.jans_access_token.hasTag("scope") &&
-      context.tokens.jans_access_token.getTag("scope").contains("openid")
-    };
-   ```
-
-10. Name it `add_one` and click `Save`. Agama Lab will validate your policy.
-11. Next, click on `Trusted Issuers` and add the following issuer:
-
-    - Name: `Jans`
-    - Description: `Jans`
-    - OpenID Configuration Endpoint: `https://account.gluu.org/.well-known/openid-configuration`
-    - Base Schema: `Jans`
-    - Save your changes
-
-12. Click on `Release`, choose `pre-release` and give it a version number.
-13. Navigate to the releases section of your Github repository, find your pre-release and copy the URL to the CJAR asset. 
-
-## Deploy Cedarling Sidecar
-
-### Docker Instructions
-
-Create a file named `bootstrap.json`. You may use the [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/secrets/bootstrap.json) file.
-
-- Set `CEDARLING_POLICY_STORE_URI` to the URL you copied.
-
-Pull the Docker image:
-
-```bash
-docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
-```
-
-Run the Docker image, replacing `</absolute/path/to/bootstrap.json>` with the absolute path to your bootstrap file:
-
-```bash
-docker run -d \
-  -e APP_MODE='development' \
-  -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
-  -e SIDECAR_DEBUG_RESPONSE=True \
-  --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
-  -p 5000:5000\
-  ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
-```
-
-The sidecar is now running on [http://127.0.0.1:5000](http://127.0.0.1:5000). Keep track of the output of the previous command,
-it is your Docker container ID.
-
-### Python instructions (if Docker is unavailable)
-
-Python 3.11 is required for this approach.
-
-- Clone the Janssen repository and navigate to `jans/jans-cedarling/flask-sidecar`.
-- Run `uv sync --locked --python 3.11` to install dependencies.
-
-- Modify `secrets/bootstrap.json` to your specifications.
-
-- Activate the virtual environment: `source .venv/bin/activate`
-
-- Navigate to `jans/jans-cedarling/flask-sidecar/main`
-
-- Create a file called `.env` and paste in the following content. Alternatively, set the following environment variables:
-
-```
-APP_MODE=development
-CEDARLING_BOOTSTRAP_CONFIG_FILE=../secrets/bootstrap.json
-SIDECAR_DEBUG_RESPONSE=False
-```
-
-- Run the sidecar: `flask run`
-
-- The sidecar is now running on [http://127.0.0.1:5000](http://127.0.0.1:5000)
-
-## Setup Test Gateway
-
-We will use Flask to create a simple API Gateway.
-
-- Create a folder called `demo` and navigate to it.
-- Create a virtual environment and activate it:
-
-```bash
-python -m venv venv
-source venv/bin/activate
-```
-
-- Install Flask and requests.
-
-```bash
-pip install flask requests
-
-```
-
-- Create a file called `gateway.py` with the following content:
-
-```python
-from flask import Flask, abort, request
-import requests
-import json
-
-app = Flask(__name__)
-
-@app.route("/protected")
-def protected():
-    token = request.headers.get("Authorization")
-    if token is None:
-        abort(403)
-    token_jwt = token.split(" ")[1]
-    subject_properties = {
-        "tokens": [
-          {"mapping": "Jans::Access_token", "payload": token_jwt}
-        ]
-    }
-    resource_properties = {
-        "cedar_entity_mapping": {
-            "entity_type": "Jans::HTTP_Request",
-            "id": "some_id"
-        },
-        "header": {},
-        "url": {
-            "protocol": "http",
-            "host": "www.acme.tld",
-            "path": "/protected"
-        }
-    }
-    payload = {
-        "subject": {
-            "type": "token_bundle",
-            "id": "",
-            "properties": subject_properties 
-        },
-        "resource": {
-            "type": "type",
-            "id": "",
-            "properties": resource_properties 
-        },
-        "action": {
-            "name": "Jans::Action::\"GET\""
-        },
-        "context": {}
-    }
-    response = requests.post("http://127.0.0.1:5000/cedarling/evaluation", json=payload)
-    if response.ok and response.json()["decision"] == True:
-        return {"protected_content": "secret"}
-    abort(403)
-
-if __name__ == '__main__':
-    app.run(port=5001)
-
-```
-
-- Run the gateway:
-
-```bash
-flask --app gateway run --port 5001
-```
-
-## Test the Setup
-
-- Access the protected endpoint via browser: [http://127.0.0.1:5001/protected](http://127.0.0.1:5001/protected).
-  You should get a 403 Forbidden response.
-
-- Access the protected endpoint via curl with the provided JWT:
-
-```bash
-curl http://127.0.0.1:5001/protected -H "Authorization: Bearer eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiY29kZSI6IjNlMmEyMDEyLTA5OWMtNDY0Zi04OTBiLTQ0ODE2MGMyYWIyNSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhdWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsIng1dCNTMjU2IjoiIiwibmJmIjoxNzMxOTUzMDMwLCJzY29wZSI6WyJyb2xlIiwib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTczMTk1MzAyNywiZXhwIjoxNzMyMTIxNDYwLCJpYXQiOjE3MzE5NTMwMzAsImp0aSI6InVaVWgxaERVUW82UEZrQlBud3BHemciLCJ1c2VybmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMwNiwidXJpIjoiaHR0cHM6Ly9qYW5zLnRlc3QvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.Pt-Y7F-hfde_WP7ZYwyvvSS11rKYQWGZXTzjH_aJKC5VPxzOjAXqI3Igr6gJLsP1aOd9WJvOPchflZYArctopXMWClbX_TxpmADqyCMsz78r4P450TaMKj-WKEa9cL5KtgnFa0fmhZ1ZWolkDTQ_M00Xr4EIvv4zf-92Wu5fOrdjmsIGFot0jt-12WxQlJFfs5qVZ9P-cDjxvQSrO1wbyKfHQ_txkl1GDATXsw5SIpC5wct92vjAVm5CJNuv_PE8dHAY-KfPTxOuDYBuWI5uA2Yjd1WUFyicbJgcmYzUSVt03xZ0kQX9dxKExwU2YnpDorfwebaAPO7G114Bkw208g"
-```
-
-- If the JWT is valid and the policy allows access, you should receive the following response:
-
-```json
-{
-  "protected_content": "secret"
-}
-```
-
-## Check Logs
-
-The cedarling decision log will be outputted by the Docker container or directly by the API to stdout. In the case of Docker, this can be retrieved like so:
-
-```bash
-$ docker logs <container ID>
-```
-
-```json
-{
-  "request_id": "0194cdbc-b8c7-798d-8cc8-fb483448e6fa",
-  "timestamp": "2025-02-03T21:34:44.935Z",
-  "log_kind": "Decision",
-  "pdp_id": "e122cc37-14f7-4033-a547-6791f339218b",
-  "policystore_id": "c92b24bb010b772e7702811ae0725986bf7d3b39656e",
-  "policystore_version": "1.6.15",
-  "principal": "Workload",
-  "Workload": { "client_id": "slkacm3cv5-vat1u~elog" },
-  "diagnostics": {
-    "reason": ["840da5d85403f35ea76519ed1a18a33989f855bf1cf8"],
-    "errors": []
-  },
-  "action": "Jans::Action::\"GET\"",
-  "resource": "Jans::HTTP_Request::\"some_id\"",
-  "decision": "ALLOW",
-  "tokens": {
-    "access_token": {
-      "jti": "uZUh1hDUQo6PFkBPnwpGzg"
-    }
-  },
-  "decision_time_ms": 0
-}
-```
-
-## Customizing the policy
-
-Let's add one more check in the policy. This time we want to check if the `acr`
-in the access token matches a particular value, for example `simple_password_auth`.
-This change will essentially involve two changes.
-
-1. Update the schema
-2. Update the policy
-
-Let's update the schema first using steps the below:
-
-1. Go to the `Policy Designer`.
-2. Navigate to `Schema` → `Entity Types`.
-3. Edit the `access_token` entity type.
-4. Add a new field `acr` with the type set to `String`.
-5. Save the schema.
-
-Once the schema has been updated, your new updated Access_token entity type
-json should be similar to the one below:
-
-```json
-{
-  "shape": {
-    "type": "Record",
-    "attributes": {
-      "aud": {
-        "type": "EntityOrCommon",
-        "name": "String"
-      },
-      "exp": {
-        "type": "EntityOrCommon",
-        "name": "Long"
-      },
-      "iat": {
-        "type": "EntityOrCommon",
-        "name": "Long"
-      },
-      "iss": {
-        "type": "EntityOrCommon",
-        "name": "TrustedIssuer"
-      },
-      "jti": {
-        "type": "EntityOrCommon",
-        "required": false,
-        "name": "String"
-      },
-      "nbf": {
-        "type": "EntityOrCommon",
-        "required": false,
-        "name": "Long"
-      },
-      "scope": {
-        "type": "Set",
-        "required": false,
-        "element": {
-          "type": "EntityOrCommon",
-          "name": "String"
-        }
-      },
-      "acr": {
-        "type": "String",
-        "required": false
-      }
-    }
-  },
-  "tags": {
-    "type": "Set",
-    "element": {
-    "type": "EntityOrCommon",
-      "name": "String"
-    }
-  }
-}
-```
-
-Let's make the corresponding changes in the policy.
-
-```cedar
-@id("allow_one")
-permit(
-  principal,
-  action,
-  resource is Jans::HTTP_Request
-)
-when {
-  context has tokens.jans_access_token &&
-  context.tokens.jans_access_token.hasTag("acr") &&
-  context.tokens.jans_access_token.getTag("acr").contains("simple_password_auth")
-};
-```
-
-The policy now checks whether the `acr` value in the access token is present and matches `simple_password_auth`.
 
 # Cedarling KrakenD Plugin
 
@@ -58703,7 +58319,7 @@ with the `student` entity type in the schema:
 }
 ```
 
-For this, follow the steps found [here](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. 
+For this, follow the steps found [here](https://docs.jans.io/vreplace-janssen-version/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. 
 
 For the short of time, there is a readily available policy store [here](https://github.com/jgomer2001/CedarlingQuickstart/releases/download/v0.0.2/tarpDemo.cjar).
 
@@ -60861,6 +60477,79 @@ response.results.forEach((r, i) => {
 ```
 
 Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer Authorization](#multi-issuer-authorization-authorize_multi_issuer-recommended) for the token contract.
+
+## Authorize options and TRACE context
+
+Every request type (`RequestUnsigned`, `AuthorizeMultiIssuerRequest`, `BatchAuthorizeUnsignedRequest`, `BatchAuthorizeMultiIssuerRequest`) has an optional `options` field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. A request without `options` behaves exactly as before. In a batch request, `options` applies to the whole call, not to individual items.
+
+The only option today is `trace`, the TRACE execution context of the call. TRACE is still in development: Cedarling accepts the context but does not emit TRACE records yet (see [TRACE properties](./cedarling-properties.md#trace-properties)).
+
+| Field | Required | Meaning |
+|---|---|---|
+| `execution_id` | yes | `trace_execution_id` issued by the execution initiator (gateway, PEP, host, agent runtime or scheduler) |
+| `execution_authority` | yes | Authority that issued `execution_id`; always passed together with it |
+| `workload_id` | yes | Stable id of the workload the decision is made for |
+| `workload_instance_id` | no | Instance of the workload, when the host distinguishes instances |
+
+The host passes already normalized values. Cedarling does not parse HTTP headers, tokens or baggage to find the context, and it never generates `execution_id` itself. A missing `trace`, or an empty required field, means the call has no execution context: no TRACE record is produced for that decision, and the decision is returned as usual. When TRACE is disabled, `options` has no effect at all.
+
+```json
+{
+  "principal": { "cedar_entity_mapping": { "entity_type": "Jans::User", "id": "1" } },
+  "action": "Jans::Action::\"Read\"",
+  "resource": { "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": "2" } },
+  "context": {},
+  "options": {
+    "trace": {
+      "execution_id": "01J9Z3K4N6Q8R0S2T4V6W8X0Y2",
+      "execution_authority": "https://gateway.example.com",
+      "workload_id": "billing-service",
+      "workload_instance_id": "billing-service-7f9c"
+    }
+  }
+}
+```
+
+In Rust, attach options with `with_options`:
+
+```rust
+let request = request.with_options(AuthorizeOptions::with_trace(TraceContext::new(
+    execution_id,
+    execution_authority,
+    workload_id,
+)));
+```
+
+In Python, pass `options` to the request constructor:
+
+```python
+from cedarling_python import AuthorizeOptions, RequestUnsigned, TraceContext
+
+options = AuthorizeOptions(trace=TraceContext(execution_id, execution_authority, workload_id))
+request = RequestUnsigned(action=action, resource=resource, context={}, options=options)
+```
+
+In Java, every `CedarlingAdapter.authorize*` method has an overload with a trailing `AuthorizeOptions` argument; the overloads without it pass `null`. The UniFFI methods (Kotlin, Swift) take `options` as an optional last parameter that defaults to none. Java does not see Kotlin default arguments, so Java code that calls the generated `Cedarling` class directly must pass the last argument itself (`null` for no options); `CedarlingAdapter` keeps the overloads without it:
+
+```java
+AuthorizeOptions options = new AuthorizeOptions(
+        new TraceContext(executionId, executionAuthority, workloadId, null));
+AuthorizeResult result = adapter.authorizeUnsigned(principalJson, action, resource, context, options);
+```
+
+The WASM and C bindings take the request as JSON, so `options` is the member shown above. In Go, set the `Options` field of the request struct:
+
+```go
+request := cedarling_go.RequestUnsigned{
+    Action:   action,
+    Resource: resource,
+    Options: &cedarling_go.AuthorizeOptions{Trace: &cedarling_go.TraceContext{
+        ExecutionID:        executionID,
+        ExecutionAuthority: executionAuthority,
+        WorkloadID:         workloadID,
+    }},
+}
+```
 
 ## Policy Introspection
 
@@ -65014,6 +64703,35 @@ The following bootstrap properties are only needed for the Lock Server Integrati
 - **`CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`** : Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. Default is `100`.
 - **`CEDARLING_LOCK_LOG_MAX_RETRIES`** : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff strategy. Default is `5`.
 
+### TRACE properties
+
+!!! note "In development"
+    TRACE is still in development. In this release Cedarling validates the TRACE configuration and loads the signing key at startup, but does not build or send TRACE records yet.
+
+With TRACE enabled, Cedarling signs an `AUTHORIZATION_DECISION` TRACE record for each authorization decision that carries a TRACE context (see [Authorize options and TRACE context](./cedarling-authz.md#authorize-options-and-trace-context)) and sends it to Lock Server. TRACE never changes the decision. An invalid TRACE configuration stops Cedarling at startup.
+
+TRACE requires:
+
+- `CEDARLING_LOCK` set to `enabled`: records are sent to Lock Server.
+- A `.cjar` policy store (local `.cjar` file, `.cjar` URL, Lock Server or policy store URI). Each record carries `bundle_hash`, the SHA-256 of the `.cjar` bytes Cedarling loaded, so a directory or YAML policy store cannot be used.
+- A signing key (`CEDARLING_TRACE_SIGNING_KEY` or `CEDARLING_TRACE_SIGNING_KEY_PEM`).
+- A native build. TRACE is not supported on WASM.
+
+Properties:
+
+- **`CEDARLING_TRACE`** : `enabled` | `disabled`. Default is `disabled`.
+- **`CEDARLING_TRACE_PRODUCER_ID`** : Stable producer id signed into every record and registered in Lock. 1 to 255 ASCII characters: a letter or digit, then letters, digits or `._:/-`. Default is the value of `CEDARLING_APPLICATION_NAME`, which must then satisfy the same rule (the default `My App` does not, because of the space).
+- **`CEDARLING_TRACE_SIGNING_KEY`** : Path to the Ed25519 private key as an unencrypted PKCS#8 PEM file, for example created with `openssl genpkey -algorithm ed25519 -out trace-key.pem`. Prefer a file (for example a mounted Kubernetes or Docker secret with restricted permissions): it keeps the secret out of the bootstrap configuration. If `CEDARLING_TRACE` == `enabled`, this property or `CEDARLING_TRACE_SIGNING_KEY_PEM` is required; when both are set, this one is used.
+- **`CEDARLING_TRACE_SIGNING_KEY_PEM`** : The same key as PEM text in the property value, for hosts that inject secrets as values rather than files. Used only when `CEDARLING_TRACE_SIGNING_KEY` is not set. Prefer `CEDARLING_TRACE_SIGNING_KEY` where the host can provide a file: a key inlined in the configuration can leak through environment dumps, process listings or configuration files kept under version control. Treat a configuration that contains this property as a secret.
+- **`CEDARLING_TRACE_SIGNING_KID`** : `kid` the key is registered under in Lock, at most 255 UTF-16 code units (Lock counts Java string length). If unset or blank, the `kid` is the RFC 7638 thumbprint of the public key (`sha256:<hex>`). Cedarling logs the producer id, `kid` and thumbprint at startup, so the admin can register the key in Lock.
+- **`CEDARLING_TRACE_ENDPOINT`** : `discovered` or a URL of the TRACE bulk endpoint. `discovered` (the default) takes `trace_bulk_endpoint` from the Lock Server well-known configuration.
+- **`CEDARLING_TRACE_BULK_MAX_RECORDS`** : Maximum number of records in one bulk request. Must be greater than 0. Default is `100`, the Lock Server default.
+- **`CEDARLING_TRACE_BULK_MAX_BYTES`** : Maximum size in bytes of one bulk request. Must be greater than 0. Default is `4194304` (4 MiB), the Lock Server default.
+
+Two properties from the TRACE design are intentionally absent, because in this release each has a single possible value: `CEDARLING_TRACE_CHAIN_GENESIS` (a new producer chain always starts as `first_observed` at each start) and `CEDARLING_TRACE_EMISSION` (every decision with a TRACE context is emitted).
+
+**Limitation: TRACE fully describes JWT tokens only.** A record lists the tokens of an `authorize_multi_issuer` call by issuer, token type and `jti` (or a fingerprint when there is no `jti`). The token type is the request `mapping` as is, for example `Jans::Access_Token`. Lock accepts only an `https` issuer, or `http` with host `localhost`. A custom (non-JWT) token handled by a [custom token processor](./cedarling-multi-issuer.md#custom-non-jwt-token-processing) is listed only when the processor returns such an issuer as the `iss` claim. Otherwise the token is left out of the record and Cedarling logs a warning; the record is still sent. A JWT whose `iss` Lock would reject means no record for that decision.
+
 
 ## authorize_multi_issuer method properties
 
@@ -65046,6 +64764,555 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
 **Decision logging for tokens:**
 
 - **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : JWT claim name used to identify tokens in decision logs. Default is `jti`. Override with any claim name (e.g., `sub`, `sid`) if your tokens lack a `jti` claim, or you need a different identifier.
+
+# Sidecar Overview
+
+The sidecar is a containerized Flask project that uses the `cedarling_python` binding and implements the [AuthZen](https://openid.github.io/authzen/) specification. This image can run alongside another service and uses cedarling to validate evaluation requests against a policy store.
+
+## Docker setup
+
+- Ensure that you have installed [docker](https://docs.docker.com/engine/install/)
+- Create a file called `bootstrap.json`. You may use this [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/demo/bootstrap.json) file.
+- Modify the bootstrap file to your specifications. In particular you need to provide a link to your policy store in `CEDARLING_POLICY_STORE_URI`. The configuration keys are described in the [Python binding configuration keys](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python/cedarling_python.pyi#L10).
+- Pull the docker image:
+  ```
+  docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+  ```
+- Run the docker image, replacing `</absolute/path/to/bootstrap.json>` with the absolute path to your bootstrap file:
+
+    ```bash
+    docker run -d \
+      -e APP_MODE='development' \
+      -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
+      -e SIDECAR_DEBUG_RESPONSE=False \
+      --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
+      -p 5000:5000\
+      ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+    ```
+
+    - `-d` runs the sidecar in daemon mode in the background. Omit this if you want to run the sidecar in the foreground to monitor logs in real time.
+    - `SIDECAR_DEBUG_RESPONSE` will cause the sidecar to return extra diagnostic information for each query if set to `True`. This may be useful to check which policies are being used to reach a decision.
+    - Take note of the output of the command. This is the container ID of the sidecar.
+    - The sidecar runs in the background on port 5000. OpenAPI documentation is available at `http://0.0.0.0:5000/swagger-ui`
+    - To stop the sidecar, run `docker container stop <container ID>`
+
+## Usage
+
+The sidecar has one endpoint: `/cedarling/evaluation`.
+
+Example request to the evaluation endpoint:
+
+!!! NOTE
+    The request shown below is designed against the AuthZen specification and should not be used for a regular cedarling deployment.
+
+```json
+{
+  "subject": {
+    "type": "JWT",
+    "id": "",
+    "properties": {
+      "tokens": [
+        {
+          "mapping": "Jans::Access_Token",
+          "payload": "eyJhbGciOiJIUzI1NiIs..."
+        },
+        {
+          "mapping": "Jans::Id_Token",
+          "payload": "eyJhbGciOiJFZERTQSIs..."
+        },
+        {
+          "mapping": "Acme::DolphinToken",
+          "payload": "ey1b6cfMef21084633a7..."
+        }
+      ]
+    }
+  },
+  "resource": {
+    "type": "Application",
+    "id": "",
+    "properties": {
+      "cedar_entity_mapping": {
+        "entity_type": "Jans::Application",
+        "id": "some_id"
+      },
+      "app_id": "application_id",
+      "name": "Some Application",
+      "url": {
+        "host": "jans.test",
+        "path": "/protected-endpoint",
+        "protocol": "http"
+      }
+    }
+  },
+  "action": {
+    "name": "Jans::Action::\"Read\""
+  },
+  "context": {
+    "device_health": [
+      "Healthy"
+    ],
+    "fraud_indicators": [
+      "Allowed"
+    ],
+    "geolocation": [
+      "America"
+    ],
+    "network": "127.0.0.1",
+    "network_type": "Local",
+    "operating_system": "Linux",
+    "user_agent": "Linux",
+    "current_time": 1
+  }
+}
+```
+
+Cedarling requires OpenID tokens from one or more trusted issuers to perform authorization, as described [Cedarling authorization reference](../reference/cedarling-authz.md). These values are sent in the subject field's properties. A more detailed example of creating an AuthZen request can be seen in the [gateway example](./cedarling-sidecar-tutorial.md#setup-test-gateway).
+
+Upon creating the principal, action, resource, and context entities, cedarling will evaluate these entities against the policies defined in the policy store. Then it will return a true/false decision. If the decision is false, the sidecar will analyze cedarling diagnostics and provide additional information for the admin.
+
+Example of `true` case:
+
+```json
+{
+  "decision": true
+}
+```
+
+Example of `false` case:
+
+```json
+{
+  "context": {
+    "reason_admin": {
+      "authorize_reason": ["DENY"],
+      "authorize_error": []
+    }
+  },
+  "decision": false
+}
+```
+
+In this example the evaluation was `DENY`, so the decision was false. Additional information is returned in the `context` field.
+
+### TRACE correlation
+
+Callers that take part in Lock TRACE can send the correlation fields as headers on `/cedarling/evaluation`:
+
+| Header | TRACE field |
+| --- | --- |
+| `Audit-Trace-ID` | `trace_execution_id` |
+| `Audit-Execution-Authority` | `execution_authority` |
+| `Audit-Workload-ID` | `workload_id` (optional) |
+| `Audit-Workload-Instance-ID` | `workload_instance_id` (optional) |
+
+`Audit-Trace-ID` and `Audit-Execution-Authority` must be sent together, otherwise the request is rejected with `400`. Each value is at most 255 characters. The component that owns the unit of work creates these values; the sidecar does not generate them. They do not take part in the Cedar evaluation. When present, `trace_execution_id` is returned in the response `context`.
+
+# Cedarling Sidecar Tutorial
+
+## Introduction
+
+The goal of this tutorial is to show how to use the Cedarling Sidecar. To demonstrate this,
+we'll build a very simple Python Flask API Gateway that calls the Cedarling sidecar Authzen
+REST endpoint to authorize access based on the content of a JWT access token.
+
+### Sequence diagram
+
+```mermaid
+sequenceDiagram
+title API Gateway
+actor User
+participant Gateway
+participant Sidecar
+
+User->Gateway: GET /protected\nAuthorization: Bearer ...
+Gateway->Sidecar: POST /cedarling/evaluation\n{"subject": {"type": "JWT", "id": "cedarling", "properties": {"tokens": []} }}
+Sidecar->Sidecar: cedarling.authorize_multi_issuer(tokens)
+
+alt ALLOW
+    Sidecar->Gateway: {"decision": true}
+    Gateway->User: 200 {"result": "protected resource"}
+else DENY
+    Sidecar->Gateway: {"decision": false, "context": {...}}
+    Gateway->User: 403 Forbidden
+end
+
+```
+
+### Sample Authzen request
+
+!!! NOTE
+    The request shown below is designed against the AuthZen specification and should not be used for a regular cedarling deployment.
+
+```json
+{
+  "subject": {
+    "type": "token_bundle",
+    "id": "",
+    "properties": {
+      "tokens": []
+    }
+  },
+  "resource": {
+    "type": "Request",
+    "id": "",
+    "properties": {
+      "cedar_entity_mapping": {
+        "entity_type": "Jans::HTTP_Request",
+        "id": "some_id"
+      },
+      "header": {},
+      "url": {
+        "protocol": "http",
+        "host": "www.acme.tld",
+        "path": "/protected"
+      }
+    }
+  },
+  "action": {
+    "name": "Jans::Action::\"GET\""
+  },
+  "context": {}
+}
+```
+
+## Prerequisites
+
+Before you begin, make sure you have the following:
+
+- `Docker` installed on your machine
+- `Python 3.11` and `uv` if you are not using Docker
+
+## Policy Store Setup (Agama Lab)
+
+To begin using Cedarling, you need to set up a policy store. We'll use this [Agama Lab](https://cloud.gluu.org/agama-lab/login) for this purpose.
+
+1. Sign in to [Agama Lab](https://cloud.gluu.org/agama-lab/login) using your GitHub account and click on Policy Designer.
+   ![image](../../../assets/cedarling-policy-designer.png)
+2. Choose a repository to store your Cedarling policies and schemas. Ensure that the repository has at least one commit on the default branch.
+   ![image](../../../assets/cedarling-select-repo.png)
+3. After initialization, create a policy store named `gatewayDemo`.
+   ![image](../../../assets/cedarling-policy-store-name.png)
+4. Open the policy store and navigate to `Schema`
+5. Under `Common Types`, find `TokensContext`. Open it and add the following:
+
+    - Attribute name: `jans_access_token`
+    - Type: `EntityOrCommon`
+    - Entity name: `Access_token`
+    - Mandatory: No
+
+6. Save your schema channges
+7. Navigate to Policies.
+8. Click `Add Policy`
+9. Paste the following Cedar policy:
+
+    ```bash
+    @id("allow_one")
+    permit(
+      principal,
+      action,
+      resource is Jans::HTTP_Request
+    )
+    when {
+      context has tokens.jans_access_token &&
+      context.tokens.jans_access_token.hasTag("scope") &&
+      context.tokens.jans_access_token.getTag("scope").contains("openid")
+    };
+   ```
+
+10. Name it `add_one` and click `Save`. Agama Lab will validate your policy.
+11. Next, click on `Trusted Issuers` and add the following issuer:
+
+    - Name: `Jans`
+    - Description: `Jans`
+    - OpenID Configuration Endpoint: `https://account.gluu.org/.well-known/openid-configuration`
+    - Base Schema: `Jans`
+    - Save your changes
+
+12. Click on `Release`, choose `pre-release` and give it a version number.
+13. Navigate to the releases section of your Github repository, find your pre-release and copy the URL to the CJAR asset. 
+
+## Deploy Cedarling Sidecar
+
+### Docker Instructions
+
+Create a file named `bootstrap.json`. You may use the [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/demo/bootstrap.json) file.
+
+- Set `CEDARLING_POLICY_STORE_URI` to the URL you copied.
+
+Pull the Docker image:
+
+```bash
+docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+```
+
+Run the Docker image, replacing `</absolute/path/to/bootstrap.json>` with the absolute path to your bootstrap file:
+
+```bash
+docker run -d \
+  -e APP_MODE='development' \
+  -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
+  -e SIDECAR_DEBUG_RESPONSE=True \
+  --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
+  -p 5000:5000\
+  ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
+```
+
+The sidecar is now running on [http://127.0.0.1:5000](http://127.0.0.1:5000). Keep track of the output of the previous command,
+it is your Docker container ID.
+
+### Python instructions (if Docker is unavailable)
+
+Python 3.11 is required for this approach.
+
+- Clone the Janssen repository and navigate to `jans/jans-cedarling/flask-sidecar`.
+- Run `uv sync --locked --python 3.11` to install dependencies.
+
+- Modify `secrets/bootstrap.json` to your specifications.
+
+- Activate the virtual environment: `source .venv/bin/activate`
+
+- Navigate to `jans/jans-cedarling/flask-sidecar/main`
+
+- Create a file called `.env` and paste in the following content. Alternatively, set the following environment variables:
+
+```
+APP_MODE=development
+CEDARLING_BOOTSTRAP_CONFIG_FILE=../secrets/bootstrap.json
+SIDECAR_DEBUG_RESPONSE=False
+```
+
+- Run the sidecar: `flask run`
+
+- The sidecar is now running on [http://127.0.0.1:5000](http://127.0.0.1:5000)
+
+## Setup Test Gateway
+
+We will use Flask to create a simple API Gateway.
+
+- Create a folder called `demo` and navigate to it.
+- Create a virtual environment and activate it:
+
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+- Install Flask and requests.
+
+```bash
+pip install flask requests
+
+```
+
+- Create a file called `gateway.py` with the following content:
+
+```python
+from flask import Flask, abort, request
+import requests
+import json
+
+app = Flask(__name__)
+
+@app.route("/protected")
+def protected():
+    token = request.headers.get("Authorization")
+    if token is None:
+        abort(403)
+    token_jwt = token.split(" ")[1]
+    subject_properties = {
+        "tokens": [
+          {"mapping": "Jans::Access_token", "payload": token_jwt}
+        ]
+    }
+    resource_properties = {
+        "cedar_entity_mapping": {
+            "entity_type": "Jans::HTTP_Request",
+            "id": "some_id"
+        },
+        "header": {},
+        "url": {
+            "protocol": "http",
+            "host": "www.acme.tld",
+            "path": "/protected"
+        }
+    }
+    payload = {
+        "subject": {
+            "type": "token_bundle",
+            "id": "",
+            "properties": subject_properties 
+        },
+        "resource": {
+            "type": "type",
+            "id": "",
+            "properties": resource_properties 
+        },
+        "action": {
+            "name": "Jans::Action::\"GET\""
+        },
+        "context": {}
+    }
+    response = requests.post("http://127.0.0.1:5000/cedarling/evaluation", json=payload)
+    if response.ok and response.json()["decision"] == True:
+        return {"protected_content": "secret"}
+    abort(403)
+
+if __name__ == '__main__':
+    app.run(port=5001)
+
+```
+
+- Run the gateway:
+
+```bash
+flask --app gateway run --port 5001
+```
+
+## Test the Setup
+
+- Access the protected endpoint via browser: [http://127.0.0.1:5001/protected](http://127.0.0.1:5001/protected).
+  You should get a 403 Forbidden response.
+
+- Access the protected endpoint via curl with the provided JWT:
+
+```bash
+curl http://127.0.0.1:5001/protected -H "Authorization: Bearer eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiY29kZSI6IjNlMmEyMDEyLTA5OWMtNDY0Zi04OTBiLTQ0ODE2MGMyYWIyNSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhdWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsIng1dCNTMjU2IjoiIiwibmJmIjoxNzMxOTUzMDMwLCJzY29wZSI6WyJyb2xlIiwib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTczMTk1MzAyNywiZXhwIjoxNzMyMTIxNDYwLCJpYXQiOjE3MzE5NTMwMzAsImp0aSI6InVaVWgxaERVUW82UEZrQlBud3BHemciLCJ1c2VybmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMwNiwidXJpIjoiaHR0cHM6Ly9qYW5zLnRlc3QvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.Pt-Y7F-hfde_WP7ZYwyvvSS11rKYQWGZXTzjH_aJKC5VPxzOjAXqI3Igr6gJLsP1aOd9WJvOPchflZYArctopXMWClbX_TxpmADqyCMsz78r4P450TaMKj-WKEa9cL5KtgnFa0fmhZ1ZWolkDTQ_M00Xr4EIvv4zf-92Wu5fOrdjmsIGFot0jt-12WxQlJFfs5qVZ9P-cDjxvQSrO1wbyKfHQ_txkl1GDATXsw5SIpC5wct92vjAVm5CJNuv_PE8dHAY-KfPTxOuDYBuWI5uA2Yjd1WUFyicbJgcmYzUSVt03xZ0kQX9dxKExwU2YnpDorfwebaAPO7G114Bkw208g"
+```
+
+- If the JWT is valid and the policy allows access, you should receive the following response:
+
+```json
+{
+  "protected_content": "secret"
+}
+```
+
+## Check Logs
+
+The cedarling decision log will be outputted by the Docker container or directly by the API to stdout. In the case of Docker, this can be retrieved like so:
+
+```bash
+$ docker logs <container ID>
+```
+
+```json
+{
+  "request_id": "0194cdbc-b8c7-798d-8cc8-fb483448e6fa",
+  "timestamp": "2025-02-03T21:34:44.935Z",
+  "log_kind": "Decision",
+  "pdp_id": "e122cc37-14f7-4033-a547-6791f339218b",
+  "policystore_id": "c92b24bb010b772e7702811ae0725986bf7d3b39656e",
+  "policystore_version": "1.6.15",
+  "principal": "Workload",
+  "Workload": { "client_id": "slkacm3cv5-vat1u~elog" },
+  "diagnostics": {
+    "reason": ["840da5d85403f35ea76519ed1a18a33989f855bf1cf8"],
+    "errors": []
+  },
+  "action": "Jans::Action::\"GET\"",
+  "resource": "Jans::HTTP_Request::\"some_id\"",
+  "decision": "ALLOW",
+  "tokens": {
+    "access_token": {
+      "jti": "uZUh1hDUQo6PFkBPnwpGzg"
+    }
+  },
+  "decision_time_ms": 0
+}
+```
+
+## Customizing the policy
+
+Let's add one more check in the policy. This time we want to check if the `acr`
+in the access token matches a particular value, for example `simple_password_auth`.
+This change will essentially involve two changes.
+
+1. Update the schema
+2. Update the policy
+
+Let's update the schema first using steps the below:
+
+1. Go to the `Policy Designer`.
+2. Navigate to `Schema` → `Entity Types`.
+3. Edit the `access_token` entity type.
+4. Add a new field `acr` with the type set to `String`.
+5. Save the schema.
+
+Once the schema has been updated, your new updated Access_token entity type
+json should be similar to the one below:
+
+```json
+{
+  "shape": {
+    "type": "Record",
+    "attributes": {
+      "aud": {
+        "type": "EntityOrCommon",
+        "name": "String"
+      },
+      "exp": {
+        "type": "EntityOrCommon",
+        "name": "Long"
+      },
+      "iat": {
+        "type": "EntityOrCommon",
+        "name": "Long"
+      },
+      "iss": {
+        "type": "EntityOrCommon",
+        "name": "TrustedIssuer"
+      },
+      "jti": {
+        "type": "EntityOrCommon",
+        "required": false,
+        "name": "String"
+      },
+      "nbf": {
+        "type": "EntityOrCommon",
+        "required": false,
+        "name": "Long"
+      },
+      "scope": {
+        "type": "Set",
+        "required": false,
+        "element": {
+          "type": "EntityOrCommon",
+          "name": "String"
+        }
+      },
+      "acr": {
+        "type": "String",
+        "required": false
+      }
+    }
+  },
+  "tags": {
+    "type": "Set",
+    "element": {
+    "type": "EntityOrCommon",
+      "name": "String"
+    }
+  }
+}
+```
+
+Let's make the corresponding changes in the policy.
+
+```cedar
+@id("allow_one")
+permit(
+  principal,
+  action,
+  resource is Jans::HTTP_Request
+)
+when {
+  context has tokens.jans_access_token &&
+  context.tokens.jans_access_token.hasTag("acr") &&
+  context.tokens.jans_access_token.getTag("acr").contains("simple_password_auth")
+};
+```
+
+The policy now checks whether the `acr` value in the access token is present and matches `simple_password_auth`.
 
 # Getting Started with Cedarling C Bindings
 
@@ -65623,7 +65890,7 @@ You can integrate Cedarling into your application using the following language l
 - [Golang](./go.md)
 - [Java](./java.md)
 
-Alternatively, you can use the [Cedarling Sidecar](../developer/sidecar/cedarling-sidecar-overview.md) for a drop-in deployment.
+Alternatively, you can use the [Cedarling Sidecar](../sidecar/cedarling-sidecar-overview.md) for a drop-in deployment.
 
 From here, you can either jump directly to the language-specific examples above or continue reading for a high-level overview of how Cedarling works.
 
@@ -66014,7 +66281,7 @@ You're now ready to dive deeper into Cedarling. From here, you could either:
 
 - See how you can use [RBAC with Cedarling using signed tokens (TBAC)](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac) — the recommended starting point.
 - Explore how to use [Cedarling's Unsigned interface](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity) for custom auth flows or testing.
-- Use the [Cedarling Sidecar](../developer/sidecar/cedarling-sidecar-overview.md) for a quick, zero-code deployment.
+- Use the [Cedarling Sidecar](../sidecar/cedarling-sidecar-overview.md) for a quick, zero-code deployment.
 - Learn more about [why Cedarling exists](../README.md#why-zero-trust-needs-cedarlings) and the problems it solves.
 
 # Getting Started with Cedarling Go Bindings
@@ -67142,7 +67409,7 @@ See the Cedarling references for [authorization](../reference/cedarling-authz.md
 
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
-- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
+- [Cedarling Sidecar Tutorial](../sidecar/cedarling-sidecar-tutorial.md)
 
 # Getting Started with Cedarling Kotlin
 
@@ -67877,7 +68144,7 @@ logs: dict = cedarling.get_log_by_id(request_id)
 
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
-- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
+- [Cedarling Sidecar Tutorial](../sidecar/cedarling-sidecar-tutorial.md)
 - [Multi-Issuer Authorization Details](../reference/cedarling-authz.md#multi-issuer-authorization-authorize_multi_issuer-recommended)
 
 # Getting Started with Cedarling in a Rust app
@@ -68257,7 +68524,7 @@ For a narrative walkthrough of the core types, see the
 - [Cedarling Rust Developer Guide](../developer/cedarling-rust.md)
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
-- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
+- [Cedarling Sidecar Tutorial](../sidecar/cedarling-sidecar-tutorial.md)
 
 # Getting Started with Cedarling Swift
 
@@ -69455,7 +69722,7 @@ This installation uses Gluu Testing certificate.
 ### Download Installer
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py -O install.py
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py -O install.py
 ```
 
 ### Execute Installer
@@ -73417,7 +73684,7 @@ The Janssen Authorization Server uses **interception scripts** to enable you to 
 
 ## Configuration Prerequisites
 - A Janssen Authorization Server installation
-- [Client Registration script](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py) - included in the default Janssen OpenBanking distribution
+- [Client Registration script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py) - included in the default Janssen OpenBanking distribution
 - Setting configuration parameters
 - Setting third party library (Jose4j) in classpath 
 
@@ -74032,9 +74299,9 @@ To access information in your Agama consent flow related to the user attempting 
 
 |Method|Description|Reference class|
 |-|-|-|
-|`getClient`|Gets a reference to the OAuth client associated to the authentication request|[Client](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java)|
-|`getScopes`|A list of OAuth scopes requested|[Scope](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java)|
-|`getUser`|A reference to the user attempting authentication|[User](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java) / [SimpleUser](https://github.com/JanssenProject/jans/tree/nightly/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java)|
+|`getClient`|Gets a reference to the OAuth client associated to the authentication request|[Client](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java)|
+|`getScopes`|A list of OAuth scopes requested|[Scope](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java)|
+|`getUser`|A reference to the user attempting authentication|[User](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java) / [SimpleUser](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java)|
 |`getSessionAttributes`|A map containing the parameters of the OAuth authentication request issued||
 
 Java example code:
@@ -75514,7 +75781,7 @@ The ParType interception script also adds the following method(s):
 
 # Persistence Script
 
-By overriding the interface methods in [PersistenceType](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java) inside a custom script you can
+By overriding the interface methods in [PersistenceType](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java) inside a custom script you can
 
 1. Load initialization data from DB or initialize services after the creation of Entry Manager. 
 2. Release resources, terminate services etc. after the destruction of Entry Manager.
@@ -75601,7 +75868,7 @@ The custom script has the following properties:
 |`apple_client_id`		|Name of Service ID on developer.apple.com. 	| `com.company.name`|
 |`apple_jwks`		| Apple’s public JWK to validate Apple Identity Token | `https://appleid.apple.com/auth/keys`|
 
-To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
+To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
 
 ### Enable Sign-in with Apple Authentication script
 By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.
@@ -75617,7 +75884,7 @@ Now Sign-in with Apple is an available authentication mechanism for your Janssen
 
 ### Make Sign-in with Apple Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `apple-auth-default.json` with the following contents
@@ -75646,7 +75913,7 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 ## Integrating DUO's Universal Prompt as an authentication method in Janssen server
 
-[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.
+[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.
 
 ## Authentication flow
 ```mermaid
@@ -75673,7 +75940,7 @@ Jans AS->>RP: 10. write Jans session cookie
 ```
 
 ## Administrator prerequisites
-- [Duo interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
+- [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
 - An account with [Duo Security](https://duo.com/).   
 
 ## User prerequisites
@@ -75787,7 +76054,7 @@ Now Duo is an available authentication mechanism for your Janssen Server. This m
     To make sure Duo has been enabled successfully, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"duo"`.
 
 ## Make Duo the Default Authentication Mechanism
-For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/nightly/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
+For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
 
 Steps:
 1. Create a file say `duo-auth-default.json` with the following contents
@@ -75845,8 +76112,8 @@ An out-of-the-box feature, the Google Authentication script is a `PersonAuthenti
 
 ## Prerequisites
 
-- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/nightly/jans-linux-setup#readme))    
-- The [Google authentication script](https://github.com/JanssenProject/jans/tree/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Jans-auth Server distribution);   
+- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-linux-setup#readme))    
+- The [Google authentication script](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Jans-auth Server distribution);   
 - A [Google account](https://accounts.google.com/).     
 - Google API jars namely [google-api-client](https://repo1.maven.org/maven2/com/google/api-client/google-api-client/1.33.2/google-api-client-1.33.2.jar), [google-oauth-client](https://repo1.maven.org/maven2/com/google/oauth-client/google-oauth-client/1.33.1/google-oauth-client-1.33.1.jar) and [google-http-client-jackson2](https://repo1.maven.org/maven2/com/google/http-client/google-http-client-jackson2/1.41.5/google-http-client-jackson2-1.41.5.jar) added to jans-auth-server
 
@@ -75895,7 +76162,7 @@ The custom script has the following properties:
 |-----------------------|-------------------------------|---------------|
 |`google_creds_file`		|Details of the client created on https://console.cloud.google.com/apis/credentials. See [this](https://github.com/maduvena/jans-docs/wiki/Google-Authentication-Script/_edit#download-google-client-json-file) step.		| `/etc/certs/google_client_secret.json`|
 
-To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
+To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
 
 ### Enable Sign-in with Google Authentication script
 By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.
@@ -75911,7 +76178,7 @@ Now Google is an available authentication mechanism for your Janssen Server. Thi
 
 ### Make Sign-in with Google Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `google-auth-default.json` with the following contents
@@ -77518,7 +77785,7 @@ SMS to the person's mobile number.
 
 Script contents [here](https://github.com/JanssenProject/jans/jans-linux-setup/static/extension/person_authentication/twilio2FA.py)
 
-Script contents [here](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
+Script contents [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
 
 This is a person authentication script for jans-auth-server that enables [UAF](https://www.noknok.com) for user authentication.
 
@@ -77541,7 +77808,7 @@ The module has a few properties:
 5) qr_options - Specify width and height of QR image. It's optional property.
     Example: qr_options: { width: 400, height: 400 }
 
-Script contents [here](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
+Script contents [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
 
 This is a person authentication script for jans-auth-server that enables [UAF](https://www.noknok.com) for user authentication.
 
@@ -77874,13 +78141,13 @@ can be used in place of the password of the users for authentication.
 FIDO2 is comprised of the [W3C’s Web Authentication specification (WebAuthn)](https://www.w3.org/TR/webauthn/) and FIDO’s corresponding [Client-to-Authenticator Protocol (CTAP)](https://fidoalliance.org/specs/fido-v2.0-ps-20170927/fido-client-to-authenticator-protocol-v2.0-ps-20170927.html). WebAuthn defines a standard web API that can be built into browsers and related web platform infrastructure to enable online services to use FIDO Authentication. CTAP enables external devices such as mobile handsets or FIDO Security Keys to work with WebAuthn and serve as authenticators to desktop applications and web services.
 
 This document explains how to use the Janssen Auth Server's built-in
-[Passkey Interception Script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py)
+[Passkey Interception Script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py)
 to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
 
 ## Prerequisites
 
 - A Janssen Server ([installation instructions](https://github.com/JanssenProject/jans#installation))      
-- [Passkey Interception Script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) (included in the default Janssen Server distribution);     
+- [Passkey Interception Script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) (included in the default Janssen Server distribution);     
 - At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices).
 
 ### FIDO2 devices
@@ -77920,7 +78187,7 @@ Now FIDO2 is an available authentication mechanism for your Janssen Server. This
     Find `"acr_values_supported":` and you should see `"fido2"`.
 
 ## Enable FIDO2 Script as default authentication script:
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 Follow the steps below to enable FIDO2 authentication:
 1. Create a file say `fido2-auth-default.json` with the following contents
 ```
@@ -77950,9 +78217,9 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 ## FIDO2 login page
 Below is an illustration of the Janssen Server's default FIDO2 login page:
 
-![fido2](https://github.com/JanssenProject/jans/raw/nightly/docs/assets/image_fido2.png)
+![fido2](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/image_fido2.png)
 
-The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/nightly/admin/developer/customization/customize-web-pages/).
+The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/vreplace-janssen-version/admin/developer/customization/customize-web-pages/).
 
 ## Using FIDO2 tokens
 
@@ -77969,7 +78236,7 @@ All subsequent FIDO2 authentications for that user account will require the enro
 ### FIDO2 credential management
 A user's FIDO2 devices can be removed by a Janssen administrator in LDAP under the user entry as shown in the below screenshot.
 
-![fido2](https://github.com/JanssenProject/jans/raw/nightly/docs/assets/image-fido2-ldap-structure.png)
+![fido2](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/image-fido2-ldap-structure.png)
 Diagram source in mermaid.live
 ```
 graph TD
@@ -78801,7 +79068,7 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 
 ### Make Sign-in with Super-Gluu Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `sg-auth-default.json` with the following contents
@@ -78825,9 +79092,9 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 ### Customizations to Super Gluu Login Pages
 
-The Gluu Server includes a [default public-facing pages for Super Gluu ](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
+The Gluu Server includes a [default public-facing pages for Super Gluu ](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
 
-To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/nightly/docs/admin/developer/customization/customize-web-pages.md).
+To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/developer/customization/customize-web-pages.md).
 
 ### Self-service
 To offer end-users a portal where they can manage their own account security preferences, including two-factor authentication credentials like Super Gluu, check out our new app, [Gluu Casa](https://casa.gluu.org).
@@ -78905,7 +79172,7 @@ By default, users will get the default authentication mechanism as specified abo
 
 e.g : `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION` , `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
 
-2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
+2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
 
 Now `twilio_sms` is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect `acr_values`, applications can now request `twilio_sms` authentication for users.
 
@@ -78916,7 +79183,7 @@ Now `twilio_sms` is an available authentication mechanism for your Janssen Serve
 
 ## Enable `twilio_sms` Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 Follow the steps below to enable `twilio_sms` authentication:
 1. Create a file say `twilio_sms` -auth-default.json` with the following contents
 ```
@@ -79133,7 +79400,7 @@ Resource Owner Password Credentials script allows modifying the behavior of Reso
 The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via `context.setUser(user)`).
 
 ## Interface
-The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java) interface. This extends methods from the base script type in addition to adding new method:
+The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java) interface. This extends methods from the base script type in addition to adding new method:
 
 ### Inherited Methods
 | Method header | Method description |
@@ -79150,10 +79417,10 @@ The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://gi
 ### Objects
 | Object name | Object description |
 |:-----|:------|
-|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
+|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
 |`configurationAttributes`| `configurationProperties` passed in when adding custom script. `Map<String, SimpleCustomProperty> configurationAttributes` |
-|`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
-| `context` | [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java) |
+|`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
+| `context` | [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java) |
 
 ## Use case: Basic ROPC authentication script
 
@@ -80766,13 +81033,13 @@ Above command contains references to the release number at two places. `v1.1.4` 
 name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
 make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.
 
-To avoid this manual, error-prone approach the Janssen Project uses a release marker, `0.0.0-nightly` instead
+To avoid this manual, error-prone approach the Janssen Project uses a release marker, `replace-janssen-version` instead
 of writing actual release numbers in the `head`(latest) documentation branch. So, when there is a need to mention the release number, instead of
 writing the actual release number, use the release marker. Let's see how to document the above command (at the `head` version)
 so that it stays up-to-date release after release.
 
 ```bash
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu20.04_amd64.deb -P /tmp
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
 ```
 
 !!! Warning
