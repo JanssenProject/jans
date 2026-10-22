@@ -76,9 +76,8 @@ pub(crate) struct StatusListCache {
 impl StatusListCache {
     /// Initializes the statuslist for the given issuer
     ///
-    /// If the issuer's `OpenID` configuration does not include a
-    /// `status_list_endpoint`, the initialization is silently skipped with a
-    /// WARN-level log message rather than failing.
+    /// An issuer with no `status_list_endpoint`, including every static-form
+    /// issuer, is skipped with a WARN log; its tokens carrying `status` are rejected.
     pub(crate) async fn init_for_iss(
         &self,
         iss_config: &IssuerConfig,
@@ -93,22 +92,22 @@ impl StatusListCache {
             refresh_interval_max,
             cancel_tkn,
         } = args;
-        let Some(openid_config) = iss_config.openid_config.as_ref() else {
+        let Some(status_list_url) = iss_config
+            .openid_config
+            .as_ref()
+            .and_then(|openid_config| openid_config.status_list_endpoint.as_ref())
+        else {
             if let Some(logger) = &logger {
-                logger.log_any(JwtLogEntry::new(
-                    "issuer has no OpenID configuration; status validation skipped".into(),
-                    Some(LogLevel::WARN),
-                ));
-            }
-            return Ok(());
-        };
-        let Some(status_list_url) = openid_config.status_list_endpoint.as_ref() else {
-            if let Some(logger) = &logger {
+                let source = if iss_config.openid_config.is_some() {
+                    "its discovery document has no status_list_endpoint"
+                } else {
+                    "its static JWKS comes with no status list"
+                };
                 logger.log_any(JwtLogEntry::new(
                     format!(
-                        "issuer '{}' does not publish a status_list_endpoint; \
-                         status validation skipped",
-                        openid_config.issuer,
+                        "trusted issuer '{}': {source}; with status validation on, its tokens \
+                         that carry a `status` claim will be rejected",
+                        iss_config.issuer_id,
                     ),
                     Some(LogLevel::WARN),
                 ));

@@ -256,7 +256,7 @@ accepts no tokens.
 | `type` | all | yes | `jwt` or `custom`; selects which other fields are allowed. |
 | `issuer` | all | yes | Issuer identity, a single Cedar identifier (`^[A-Za-z_][A-Za-z0-9_]*$`) that is not a Cedar reserved word (`if`, `true`, `in`, `__cedar`, ...). It is the namespace of the issuer's `TrustedIssuer` entity (`Acme::TrustedIssuer`) and, lowercased, the prefix of its `context.tokens` keys (`acme_access_token`), so renaming it changes what policies see. |
 | `configuration_endpoints.configuration` | jwt | one of two forms | OIDC discovery URL: the issuer URL followed by `/.well-known/openid-configuration`. The expected `iss` is that issuer URL, path included; keys come from the discovered `jwks_uri`. |
-| `configuration_endpoints.jwks` + `configuration_endpoints.iss` | jwt | one of two forms | Static form, without discovery: keys come from `jwks`, and the expected `iss` is given explicitly. |
+| `configuration_endpoints.jwks` + `configuration_endpoints.iss` | jwt | one of two forms | Static form, without discovery: keys come from `jwks`, and the expected `iss` is given explicitly. It has no status list: with `CEDARLING_JWT_STATUS_VALIDATION` on, a token from it that carries a `status` claim is rejected, and the load logs a warning naming the issuer. |
 | `token_id` | jwt | no, default `jti` | Claim used as the token entity id. |
 | `required_claims` | all | no, default `[]` | JWT: the claims must be present, and registered claims ([RFC 7519 §4.1](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1)) such as `exp` or `nbf` are validated. Custom: the claims must be present in the processor output. |
 

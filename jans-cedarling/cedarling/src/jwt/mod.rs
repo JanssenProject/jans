@@ -919,6 +919,7 @@ mod test {
     use super::test_utils::*;
     use super::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims, Token, TokenIssuer};
     use crate::JwtConfig;
+    use crate::app_types::PdpID;
     use crate::authz::MultiIssuerValidationError;
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
     use crate::authz::request::TokenInput;
@@ -929,7 +930,10 @@ mod test {
     };
     use crate::http::HttpClient;
     use crate::http::HttpClientConfig;
-    use crate::{DropReason, DroppedToken};
+    use crate::log::{LogStrategy, Logger};
+    use crate::{
+        DropReason, DroppedToken, LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig,
+    };
     use async_trait::async_trait;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
@@ -1686,6 +1690,107 @@ mod test {
         );
         jwks.assert();
         discovery.assert();
+    }
+
+    /// A static issuer has no status list, so with status validation on its tokens
+    /// that carry `status` are dropped, and the load warning says so by name.
+    #[test]
+    async fn static_issuer_with_status_validation_drops_tokens_with_status() {
+        let mut server = mockito::Server::new_async().await;
+        let keys = generate_keypair_hs256(Some("static_key")).expect("should generate keys");
+        server
+            .mock("GET", "/keys")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                json!({ "keys": generate_jwks(std::slice::from_ref(&keys)).keys }).to_string(),
+            )
+            .create();
+        let iss = server.url();
+        let issuer = TrustedIssuer::new(
+            "Partner".into(),
+            String::new(),
+            Url::parse(&iss).expect("valid url"),
+            KeySource::Static {
+                jwks: Url::parse(&format!("{iss}/keys")).expect("valid url"),
+            },
+            HashMap::from([(
+                "Partner::Access_token".to_string(),
+                TokenEntityMetadata::builder().build(),
+            )]),
+        );
+        let logger: Logger = Arc::new(LogStrategy::new(
+            &LogConfig {
+                log_level: LogLevel::WARN,
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_items: None,
+                    max_item_size: None,
+                }),
+            },
+            PdpID::new(),
+            None,
+        ));
+        let svc = JwtService::new(
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: true,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
+            },
+            Some(HashMap::from([("Partner".to_string(), issuer)])),
+            Some(logger.clone()),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            HTTP_CLIENT.clone(),
+        )
+        .await
+        .expect("a static issuer should load with status validation on");
+
+        let warning = "trusted issuer 'Partner': its static JWKS comes with no status list; \
+                       with status validation on, its tokens that carry a `status` claim will \
+                       be rejected";
+        assert!(
+            logger
+                .pop_logs()
+                .iter()
+                .any(|log| log.get("msg").and_then(|m| m.as_str()) == Some(warning)),
+            "the load should warn about the static issuer by name"
+        );
+
+        let token = |claims: serde_json::Value| {
+            generate_token_using_claims(&claims, &keys).expect("should sign token")
+        };
+        let claims = json!({ "iss": iss, "sub": "user", "jti": "1", "exp": u64::MAX });
+        let mut with_status = claims.clone();
+        with_status["status"] =
+            json!({ "status_list": { "idx": 0, "uri": format!("{iss}/status") } });
+        let tokens = vec![
+            TokenInput::new("Partner::Access_token".to_string(), token(with_status)),
+            TokenInput::new("Partner::Access_token".to_string(), token(claims)),
+        ];
+
+        let out = svc
+            .validate_multi_issuer_tokens(&tokens, None, &TokenTypes::default(), None)
+            .await
+            .expect("the token without `status` should validate");
+        assert_eq!(
+            out.tokens.get("Partner::Access_token").map(|t| t.index),
+            Some(1),
+            "the token without `status` should be kept"
+        );
+        assert!(
+            matches!(
+                &out.dropped[..],
+                [DroppedToken {
+                    index: 0,
+                    reason: DropReason::JwtValidationFailed,
+                    ..
+                }]
+            ),
+            "the token with `status` should be dropped, got {:?}",
+            out.dropped
+        );
     }
 
     #[test]
