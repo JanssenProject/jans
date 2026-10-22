@@ -13,9 +13,14 @@ Token endpoint is defined in the [OAuth 2.0 framework](https://datatracker.ietf.
 [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) specification and other specifications relevant
 to them.
 
-Tokens granted by this endpoint depends on grant type and scopes that are specified in the token request. The token
-endpoint is used with every authorization grant type except for the implicit grant type (since an access token is issued
-directly).
+Tokens issued by this endpoint depend on the grant type, requested scopes,
+and applicable client and server configuration. The endpoint processes
+grant types supported and enabled by the running server.
+
+The Implicit Grant is a legacy flow in which access tokens are issued
+directly from the authorization endpoint rather than the token endpoint.
+It is not recommended for new integrations and is not included in the
+default supported grant types.
 
 Based on request, this endpoint can grant following types of tokens:
 

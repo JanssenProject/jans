@@ -117,8 +117,31 @@ Typical parameters are the same as standard authorization requests, with added J
 - `response_type`
 - `scope`
 - `state`
-- `nonce` (required for relevant OIDC/implicit-hybrid flows)
 - `response_mode=query.jwt|fragment.jwt|form_post.jwt|jwt`
+- `code_challenge` (for Authorization Code Flow with PKCE)
+- `code_challenge_method` (`S256` is recommended)
+
+For new integrations using the Authorization Code Flow, use PKCE with
+`code_challenge_method=S256`. JARM protects the authorization response,
+while PKCE protects the authorization code against interception and
+unauthorized redemption. The client must provide the corresponding
+`code_verifier` when exchanging the authorization code at the token
+endpoint.
+
+For example:
+
+```text
+GET https://<your-domain>/jans-auth/restv1/authorize?
+    response_type=code&
+    client_id=<CLIENT_ID>&
+    redirect_uri=<URL_ENCODED_REDIRECT_URI>&
+    scope=openid&
+    state=<STATE>&
+    response_mode=query.jwt&
+    code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM&
+    code_challenge_method=S256
+```
+
 
 ### Authorization response
 
