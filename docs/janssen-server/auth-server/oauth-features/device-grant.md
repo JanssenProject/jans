@@ -8,40 +8,48 @@ tags:
   - grant
 ---
 
-# OAuth 2.0 Device Authorization Grant
+# Device Authorization Grant
 
-This OAuth 2.0 protocol extension enables OAuth clients to request user authorization from applications on devices (e.g. smart TVs, media consoles, printers) that  are **input-constrained** or **browser-less** . The authorization flow defined by this [RFC 8628](https://tools.ietf.org/html/rfc8628), sometimes referred to as the "device flow", instructs the user to review the authorization request on a secondary device, such as a smartphone or a personal computer, which has the requisite input and browser capabilities to complete the user interaction.
+The [OAuth 2.0 Device Authorization Grant (RFC 8628)](https://datatracker.ietf.org/doc/html/rfc8628) enables applications running on input-constrained or browserless devices, such as smart TVs, media consoles, and printers, to obtain user authorization.
+
+In this flow, the device requests authorization from the Janssen Authentication Server and displays a verification URL and user code. The user opens the verification URL on another device, such as a smartphone or computer, to authenticate and approve the request. Meanwhile, the requesting device polls the Janssen token endpoint until authorization is completed or the request expires.
 
 ### Sequence Diagram
-![](https://github.com/JanssenProject/jans/raw/main/docs/assets/device_auth_flow.png)
 
-Paste the following source text of the sequence diagram on [sequencediagram.org](https://sequencediagram.org/)
-```
-title Oauth2.0 Device Authorization flow
+```mermaid
 
-participant User
-participant Browser on Computer / Smartphone
-participant Device App
-participant Jans AS
-participant Third Party App
+sequenceDiagram
+    title OAuth 2.0 Device Authorization Flow
+    autonumber
 
-User->Device App:Opens an app on device
-Device App->Jans AS:Sends authorization request \n"jans-server.com/jans-auth/restv1/device_authorization"
-Jans AS->Device App:Response - \nuser_code, device_code, verification_url, interval, expiration
-Device App ->User: Instructs the user to access Verification URL \nand enter user_code
-note over Device App:Device App will keep polling AS for Access Token \nuntil device authorization is completed
-loop till Device App recieves Access Token:
-Device App->Jans AS:request Access Token
-Jans AS->Device App:Response - \naccess_denied \nOR expired_token \nOR authorization_pending \nOR Access token
-end 
-User->Browser on Computer / Smartphone:Opens a browser \nand access verification URL
-Browser on Computer / Smartphone->Jans AS:send user_code to verification URL
-Browser on Computer / Smartphone <-Jans AS:Login and authorization prompt
-Browser on Computer / Smartphone->Jans AS:Authentication and consent
-Jans AS->Jans AS: Mark device as Authorized
-note over Jans AS:Subsequent polling by the Device App \nwill return an Access Token as indicated \nby the loop above
-Device App->Third Party App:Invoke API with Access Token
-Third Party App->Device App: return Response
+    participant User
+    participant Browser as User's Browser
+    participant Device as Device App
+    participant Jans as Jans AS
+    participant ThirdParty as Third Party App
+
+    User->>Device: Opens an app on device
+    Device->>Jans: Device authorization request
+    Jans-->>Device: user_code, device_code, verification_uri, interval, expires_in
+    Device-->>User: Display verification URI and user_code
+
+    Note over Device,Jans: Device polls the token endpoint at the required interval
+
+    Device->>Jans: Token request with device_code
+    Jans-->>Device: authorization_pending
+
+    User->>Browser: Opens verification URI
+    Browser->>Jans: Submits user_code
+    Jans-->>Browser: Login and authorization prompt
+    Browser->>Jans: Authentication and consent
+    Jans->>Jans: Mark device as authorized
+
+    Device->>Jans: Poll token endpoint with device_code
+    Jans-->>Device: Access token
+
+    Device->>ThirdParty: Invoke API with access token
+    ThirdParty-->>Device: API response
+
 ```
 
 ## User Experience
@@ -144,7 +152,7 @@ The user will need to put `user_code` value in the browser and after that, he wi
 
 Since the user will be using a separate device to navigate to the `verification_url` and grant or deny access, the requesting device is not automatically notified when the user responds to the access request. For that reason, the requesting device needs to poll the Jans Server to determine when the user has responded to the request.
 
-The requesting device should continue sending polling requests until it receives a response indicating that the user has responded to the access request or until the `device_code` expires. The parameter `interval` returned in step 2 specifies the amount of time, in seconds, to wait between requests.
+The requesting device continues polling the token endpoint while authorization is pending, until it receives a successful token response, a terminal error, or the `device_code` expires. The `interval` parameter returned by the device authorization endpoint specifies the minimum number of seconds between polling requests. If the server returns a `slow_down` error, the device must increase the polling interval by at least five seconds.
 
 The URL of the endpoint to poll is `/jans-auth/restv1/token`. The polling request contains the following parameters:
 
@@ -175,9 +183,9 @@ The Jans authorization server responds to each polling request with one of the f
 
 **Access granted**
 
-If the user granted access to the device (by clicking `Allow` on the consent screen), then the response contains an access token and a refresh token. The tokens enable the device to access to the resource server on the user's behalf.
+If the user grants access to the device, the Janssen Authentication Server returns an access token. A refresh token and an ID token may also be issued, depending on the requested scopes and server configuration.
 
-In this case, the server responds with all tokens required and allowed to be issued depending on the configuration in the server.
+The device can use the access token to access protected resources on the user's behalf.
 
 Example:
 
@@ -250,4 +258,5 @@ Server: Jetty(9.4.19.v20190610)
 This token endpoint can return any error code already defined, for example whether client can't be authenticated or the grant type sent is invalid. Some of them could be: `invalid_client`, `invalid_grant`, `invalid_request` and others.
 
 ### Customizing Device Grant page
-More about customising [this page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/device_authorization.xhtml)  to include your organization's stylesheets, images and content in this [article](https://jans.io/docs/developer/customization/customize-web-pages.md)
+
+To customize the Device Authorization page with your organization's stylesheets, images, and content, refer to the [Device Authorization page source](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/device_authorization.xhtml) and the [Customize Web Pages guide](../../developer/customization/customize-web-pages.md).
