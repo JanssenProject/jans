@@ -22,7 +22,7 @@ use crate::common::policy_store::formats::v2::trusted_issuers::{
 };
 use crate::common::policy_store::formats::{v1, v2};
 use crate::common::policy_store::token_types::{
-    EntityTypeName, InvalidEntityType, InvalidIssuerName, IssuerName, sanitize_issuer_name,
+    EntityTypeName, InvalidEntityType, InvalidIssuerName, IssuerName,
 };
 use crate::common::policy_store::{InvalidConfigurationEndpoint, iss_from_configuration};
 
@@ -211,6 +211,12 @@ fn migrate_trusted_issuer(
         entries.insert(&file, &token.entity_type_name, config)?;
     }
     Ok(())
+}
+
+/// The v1 rule that turns an issuer name into its `context.tokens` prefix,
+/// kept for stores that still name issuers that way.
+pub(crate) fn sanitize_issuer_name(name: &str) -> String {
+    name.replace(['.', ' ', '-'], "_").to_lowercase()
 }
 
 fn migrate_custom_issuer(

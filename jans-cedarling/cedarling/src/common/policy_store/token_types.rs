@@ -262,12 +262,6 @@ impl Borrow<str> for ContextKey {
     }
 }
 
-/// The v1 rule that turns an issuer name into its `context.tokens` prefix,
-/// kept for stores that still name issuers that way.
-pub(crate) fn sanitize_issuer_name(name: &str) -> String {
-    name.replace(['.', ' ', '-'], "_").to_lowercase()
-}
-
 /// Simplify token type for Cedar compatibility
 fn simplify_token_type(mapping: &str) -> String {
     // Split by namespace separator and use the last part

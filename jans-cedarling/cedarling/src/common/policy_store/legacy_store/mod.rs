@@ -29,9 +29,8 @@ use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::{
     DefaultEntitiesWithWarns, parse_default_entities_with_warns,
 };
-use crate::common::policy_store::token_types::{
-    EntityTypeName, IssuerName, TokenTypesBuilder, sanitize_issuer_name,
-};
+use crate::common::policy_store::migration::v1_to_v2::sanitize_issuer_name;
+use crate::common::policy_store::token_types::{EntityTypeName, IssuerName, TokenTypesBuilder};
 
 #[derive(Debug, Copy, Clone, PartialEq, Deserialize)]
 enum Encoding {
