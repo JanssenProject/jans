@@ -4,6 +4,8 @@ public class ApiTokenRequest {
 
     private String ujwt;
 
+    private String refreshToken;
+
     /**
      * Retrieves the UJWT token value.
      *
@@ -15,5 +17,13 @@ public class ApiTokenRequest {
 
     public void setUjwt(String ujwt) {
         this.ujwt = ujwt;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

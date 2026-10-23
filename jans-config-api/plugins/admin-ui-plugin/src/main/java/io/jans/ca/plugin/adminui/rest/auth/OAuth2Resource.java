@@ -102,7 +102,7 @@ public class OAuth2Resource {
                             "; HttpOnly" +
                             "; Secure" +
                             "; SameSite=Strict";
-            oAuth2Service.setAdminUISession(sessionId, apiTokenRequest.getUjwt());
+            oAuth2Service.setAdminUISession(sessionId, apiTokenRequest.getUjwt(), apiTokenRequest.getRefreshToken());
 
             return Response.ok(CommonUtils.createGenericResponse(true, 200, "Admin UI Session created successfully."))
                     .header(HttpHeaders.SET_COOKIE, cookie)
