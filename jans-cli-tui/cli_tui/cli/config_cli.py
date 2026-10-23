@@ -63,6 +63,8 @@ success_color = 10
 bold_color = 15
 grey_color = 242
 file_data_type = '/path/to/file'
+jans_config_api_url_prefix = 'jans-config-api'
+jans_config_api_usermgt_url_prefix = f'/{jans_config_api_url_prefix}/mgt/'
 
 def clear():
     if not debug:
@@ -286,7 +288,6 @@ debug = get_bool(debug)
 
 session = requests.Session()
 session.headers.update({'Jans-Client':'jans-tui'})
-
 AUTH_DISCOVERY_ENDPOINT = '.well-known/openid-configuration'
 
 class JCA_CLI:
@@ -339,7 +340,7 @@ class JCA_CLI:
 
         # URLs
         self.auth_url = auth_url or f'https://{self.idp_host}/jans-auth/'
-        self.config_url = config_url or f'https://{self.idp_host}/jans-config-api/'
+        self.config_url = config_url or f'https://{self.idp_host}/{jans_config_api_url_prefix}/'
         self.scim_url = scim_url or f'https://{self.idp_host}/jans-scim/restv1/v2/'
         self.auth_url_token_endpoint_postfix = 'restv1/token'
         self.jwt_validation_url = urljoin(self.config_url, 'api/v1/acrs')
@@ -501,9 +502,8 @@ class JCA_CLI:
             self.mtls_client_cert = (args.config_api_mtls_client_cert, args.config_api_mtls_client_key)
 
 
-    def get_request_header(self, headers=None, access_token=None):
-        if headers is None:
-            headers = {}
+    def get_request_header(self, headers=None, access_token=None, endpoint_path=None):
+        headers = dict(headers or {})
 
         if not access_token:
             access_token = self.access_token
@@ -511,10 +511,19 @@ class JCA_CLI:
             user = self.get_user_info()
             if 'inum' in user:
                 headers['User-inum'] = user['inum']
-                headers['User-inum'] = user['inum']
 
         ret_val = {'Authorization': 'Bearer {}'.format(access_token)}
         ret_val.update(headers)
+
+        if (
+            self.my_op_mode == 'jca'
+            and endpoint_path
+            and endpoint_path.lstrip('/').startswith('mgt/')
+        ):
+            user_data = config['DEFAULT'].get('user_data')
+            if user_data:
+                ret_val['User-Info-JWT'] = user_data
+
         return ret_val
 
     def get_openid_configuration(self):
@@ -938,7 +947,7 @@ class JCA_CLI:
 
         self.get_access_token(security)
 
-        headers=self.get_request_header({'Accept': 'application/json'})
+        headers = self.get_request_header({'Accept': 'application/json'}, endpoint_path=endpoint.path)
         url_param_name = self.get_url_param(endpoint.path)
         url = self.get_url_for_endpoint(endpoint.path)
 
@@ -1051,11 +1060,11 @@ class JCA_CLI:
                     multi_part_fields[prop] = (None, json.dumps(data_js[prop]), 'application/json')
             data = MultipartEncoder(fields=multi_part_fields)
 
-            headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': data.content_type})
+            headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': data.content_type}, endpoint_path=endpoint.path)
             mime_type = data.content_type
         else:
             mime_type = self.get_mime_for_endpoint(endpoint)
-            headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
+            headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type}, endpoint_path=endpoint.path)
 
         if params and url_param_name in params:
             url = url.format(**{url_param_name: params.pop(url_param_name)})
@@ -1119,7 +1128,7 @@ class JCA_CLI:
 
         response = session.delete(
             url=url,
-            headers=self.get_request_header({'Accept': 'application/json'}),
+            headers=self.get_request_header({'Accept': 'application/json'}, endpoint_path=endpoint.path),
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
             )
@@ -1137,7 +1146,7 @@ class JCA_CLI:
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
         mime_type = self.get_mime_for_endpoint(endpoint)
-        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
+        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type}, endpoint_path=endpoint.path)
 
         self.cli_logger.debug("Patch request: %s", url)
 
@@ -1457,7 +1466,7 @@ class JCA_CLI:
             self.exit_with_error(
             f"This operation requires a value for url-suffix {path['__urlsuffix__']}\n"
             f"For example: --url-suffix=\"{path['__urlsuffix__']}:{suffix_str}\""
-            
+
             )
 
         op_path = {}
