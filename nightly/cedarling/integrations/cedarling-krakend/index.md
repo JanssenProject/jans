@@ -12,7 +12,7 @@ This is a [KrakenD HTTP server plugin](https://www.krakend.io/docs/extending/htt
 
 ## Downloading
 
-The cedarling-krakend plugin builds are available via [Janssen releases](https://github.com/JanssenProject/jans/releases/latest). Please note that builds are architecture, platform, and KrakenD version specific. This means that builds compiled against KrakenD version `2.9.0` for Windows will not work on other versions or operating systems. The build tags are formatted as follows:
+The cedarling-krakend plugin builds are available via [Janssen releases](https://github.com/JanssenProject/jans/releases/latest). Please note that builds are architecture, platform, and KrakenD version specific. This means that builds compiled against KrakenD version `2.13.11` for Windows will not work on other versions or operating systems. The build tags are formatted as follows:
 
 ```
 cedarling-krakend-<architecture>-<krakend version and platform>-<Janssen version>.so
@@ -20,10 +20,10 @@ cedarling-krakend-<architecture>-<krakend version and platform>-<Janssen version
 
 Use the following table to find which build you need:
 
-|            | amd64                                        | arm64                                        |
-| ---------- | -------------------------------------------- | -------------------------------------------- |
-| Docker     | `amd64-builder-2.9.0-0.0.0.so`               | `arm64-builder-2.9.0-0.0.0.so`               |
-| On-premise | `amd64-builder-2.9.0-linux-generic-0.0.0.so` | `arm64-builder-2.9.0-linux-generic-0.0.0.so` |
+|            | amd64                                                            | arm64                                                            |
+| ---------- | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Docker     | `cedarling-krakend-amd64-builder-2.13.11-0.0.0.so`               | `cedarling-krakend-arm64-builder-2.13.11-0.0.0.so`               |
+| On-premise | `cedarling-krakend-amd64-builder-2.13.11-linux-generic-0.0.0.so` | `cedarling-krakend-arm64-builder-2.13.11-linux-generic-0.0.0.so` |
 
 If you are running a different version of KrakenD, you can use the following steps to build the plugin yourself.
 

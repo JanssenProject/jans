@@ -43,6 +43,11 @@
 | metricReporterEnabled | Boolean value specifying whether metric reporter is enabled | [Details](#metricreporterenabled) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep report data | [Details](#metricreporterkeepdatadays) |
+| nativeReadinessAllowExternalFetch | Boolean value indicating whether the native app readiness checks may make outbound requests to a relying party's /.well-known files. Outbound requests need both nativeReadinessEnabled and this property | [Details](#nativereadinessallowexternalfetch) |
+| nativeReadinessCacheTtlSeconds | Time in seconds a native app readiness result is served from cache before the association files are fetched again | [Details](#nativereadinesscachettlseconds) |
+| nativeReadinessEnabled | Boolean value indicating whether the native app readiness endpoint is available. When false the endpoint does no work | [Details](#nativereadinessenabled) |
+| nativeReadinessMaxResponseBytes | Maximum number of bytes read from one association file by the native app readiness checks. The server also enforces a fixed upper bound | [Details](#nativereadinessmaxresponsebytes) |
+| nativeReadinessTimeoutMs | Overall deadline in milliseconds for fetching one association file in the native app readiness checks. The server also enforces a fixed upper bound | [Details](#nativereadinesstimeoutms) |
 | packageName | Android application package name, e.g. com.example.app. Not enforced by the server; used to generate assetlinks.json. | [Details](#packagename) |
 | personCustomObjectClassList | Custom object class list for dynamic person enrolment | [Details](#personcustomobjectclasslist) |
 | recordAbandonedAssertions | Boolean value indicating whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled | [Details](#recordabandonedassertions) |
@@ -424,6 +429,51 @@
 - Required: No
 
 - Default value: None
+
+
+## nativeReadinessAllowExternalFetch
+
+- Description: Boolean value indicating whether the native app readiness checks may make outbound requests to a relying party's /.well-known files. Outbound requests need both nativeReadinessEnabled and this property
+
+- Required: No
+
+- Default value: false
+
+
+## nativeReadinessCacheTtlSeconds
+
+- Description: Time in seconds a native app readiness result is served from cache before the association files are fetched again
+
+- Required: No
+
+- Default value: 3600
+
+
+## nativeReadinessEnabled
+
+- Description: Boolean value indicating whether the native app readiness endpoint is available. When false the endpoint does no work
+
+- Required: No
+
+- Default value: false
+
+
+## nativeReadinessMaxResponseBytes
+
+- Description: Maximum number of bytes read from one association file by the native app readiness checks. The server also enforces a fixed upper bound
+
+- Required: No
+
+- Default value: 131072
+
+
+## nativeReadinessTimeoutMs
+
+- Description: Overall deadline in milliseconds for fetching one association file in the native app readiness checks. The server also enforces a fixed upper bound
+
+- Required: No
+
+- Default value: 3000
 
 
 ## packageName

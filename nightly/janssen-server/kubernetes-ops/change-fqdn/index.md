@@ -27,7 +27,7 @@ Changing FQDN in Kubernetes setup
           restartPolicy: Never
           containers:
             - name: change-fqdn
-              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm # This may be different in Helm
