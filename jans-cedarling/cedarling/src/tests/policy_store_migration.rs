@@ -206,8 +206,9 @@ async fn migrated_required_custom_token_is_optional_and_reported() {
         .filter_map(|log| log["msg"].as_str().map(str::to_string))
         .collect();
     assert!(
-        warnings.iter().any(|msg| msg.contains(
-            "'required' on custom token 'Acme::Api_key' in 'custom-issuers/acme.json' is ignored"
+        warnings.iter().any(|msg| msg.starts_with(
+            "spec version 1 to 2: 'required' on custom token 'Acme::Api_key' in \
+             'custom-issuers/acme.json' is ignored"
         )),
         "the migration should report the ignored `required`, got: {warnings:?}"
     );

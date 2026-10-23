@@ -16,26 +16,71 @@ use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::str::FromStr;
 
-use super::{MigrationError, Upgrade};
+use super::Upgrade;
 use crate::common::policy_store::formats::v2::trusted_issuers::{
     CustomTokenConfig, JwtTokenConfig, KeySourceDoc, TokenTypeConfig, TrustedIssuersDoc,
 };
-use crate::common::policy_store::formats::{PolicyStoreWarning, v1, v2};
-use crate::common::policy_store::iss_from_configuration;
+use crate::common::policy_store::formats::{v1, v2};
 use crate::common::policy_store::token_types::{EntityTypeName, IssuerName, sanitize_issuer_name};
+use crate::common::policy_store::{InvalidConfigurationEndpoint, iss_from_configuration};
 
 /// Where v1 kept each kind of issuer, for naming files in messages.
 const TRUSTED_ISSUERS_DIR: &str = "trusted-issuers";
 const CUSTOM_ISSUERS_DIR: &str = "custom-issuers";
 
+/// A v1 store that cannot be expressed in v2.
+#[derive(Debug, thiserror::Error)]
+pub enum V1ToV2Error {
+    #[error(
+        "issuer '{name}' in '{file}' must be a single Cedar identifier to migrate: it is the \
+         namespace of its TrustedIssuer entity and the prefix of its context.tokens keys"
+    )]
+    InvalidIssuerName { file: String, name: String },
+    #[error("'{entity_type}' in '{file}' is not a valid Cedar entity type: {reason}")]
+    InvalidEntityType {
+        file: String,
+        entity_type: String,
+        reason: String,
+    },
+    #[error("invalid issuer in '{file}': {source}")]
+    InvalidConfigurationEndpoint {
+        file: String,
+        source: InvalidConfigurationEndpoint,
+    },
+    #[error("entity type '{entity_type}' is declared in both '{file_a}' and '{file_b}'")]
+    DuplicateEntityType {
+        entity_type: String,
+        file_a: String,
+        file_b: String,
+    },
+}
+
+/// A behavior change the v1 to v2 migration made to a store.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, derive_more::Display)]
+pub(crate) enum V1ToV2Warning {
+    /// A custom token was `required`; every token is optional in v2.
+    #[display(
+        "'required' on custom token '{entity_type}' in '{file}' is ignored: every token is \
+         optional; require it in policy with \
+         `forbid (principal, action, resource) unless {{ context has tokens.<key> }};`"
+    )]
+    RequiredIgnored { file: String, entity_type: String },
+    /// An issuer's `iss` keeps the path its endpoint had, where v1 kept only the
+    /// origin; its `TrustedIssuer` entity id changes with it.
+    #[display(
+        "issuer in '{file}' is now matched against iss '{iss}', path included, and its \
+         TrustedIssuer entity id carries the path; v1 used only the origin"
+    )]
+    IssPathKept { file: String, iss: String },
+}
+
 /// Migrates a whole v1 store to v2.
 impl Upgrade for v1::PolicyStoreDoc {
     type Next = v2::PolicyStoreDoc;
+    type Error = V1ToV2Error;
+    type Warning = V1ToV2Warning;
 
-    fn upgrade(
-        self,
-        warnings: &mut Vec<PolicyStoreWarning>,
-    ) -> Result<v2::PolicyStoreDoc, MigrationError> {
+    fn upgrade(self, warnings: &mut Vec<V1ToV2Warning>) -> Result<v2::PolicyStoreDoc, V1ToV2Error> {
         let mut entries = Entries::default();
 
         let mut trusted_issuers = self.trusted_issuers;
@@ -54,7 +99,6 @@ impl Upgrade for v1::PolicyStoreDoc {
             metadata: migrate_metadata(self.metadata),
             trusted_issuers: TrustedIssuersDoc(entries.entries),
             content: self.content,
-            ignored_dirs: Vec::new(),
         })
     }
 }
@@ -74,16 +118,15 @@ impl Entries {
         file: &str,
         entity_type: &str,
         config: TokenTypeConfig,
-    ) -> Result<(), MigrationError> {
-        let entity_type = EntityTypeName::from_str(entity_type).map_err(|e| {
-            MigrationError::InvalidEntityType {
+    ) -> Result<(), V1ToV2Error> {
+        let entity_type =
+            EntityTypeName::from_str(entity_type).map_err(|e| V1ToV2Error::InvalidEntityType {
                 file: file.to_string(),
                 entity_type: entity_type.to_string(),
                 reason: e.to_string(),
-            }
-        })?;
+            })?;
         match self.files.entry(entity_type.clone()) {
-            Entry::Occupied(first) => Err(MigrationError::DuplicateEntityType {
+            Entry::Occupied(first) => Err(V1ToV2Error::DuplicateEntityType {
                 entity_type: entity_type.to_string(),
                 file_a: first.get().clone(),
                 file_b: file.to_string(),
@@ -116,25 +159,24 @@ fn migrate_metadata(doc: v1::metadata::MetadataDoc) -> v2::metadata::MetadataDoc
 fn migrate_trusted_issuer(
     parsed: v1::trusted_issuer::ParsedIssuer,
     entries: &mut Entries,
-    warnings: &mut Vec<PolicyStoreWarning>,
-) -> Result<(), MigrationError> {
+    warnings: &mut Vec<V1ToV2Warning>,
+) -> Result<(), V1ToV2Error> {
     let file = format!("{TRUSTED_ISSUERS_DIR}/{}", parsed.filename);
     let doc = parsed.issuer;
 
-    let issuer =
-        IssuerName::from_str(&doc.name).map_err(|_| MigrationError::InvalidIssuerName {
-            file: file.clone(),
-            name: doc.name.clone(),
-        })?;
+    let issuer = IssuerName::from_str(&doc.name).map_err(|_| V1ToV2Error::InvalidIssuerName {
+        file: file.clone(),
+        name: doc.name.clone(),
+    })?;
     let configuration = doc.oidc_endpoint;
     let iss = iss_from_configuration(&configuration).map_err(|source| {
-        MigrationError::InvalidConfigurationEndpoint {
+        V1ToV2Error::InvalidConfigurationEndpoint {
             file: file.clone(),
             source,
         }
     })?;
     if iss.path() != "/" {
-        warnings.push(PolicyStoreWarning::IssPathKept {
+        warnings.push(V1ToV2Warning::IssPathKept {
             file: file.clone(),
             iss: iss.to_string(),
         });
@@ -165,13 +207,13 @@ fn migrate_trusted_issuer(
 fn migrate_custom_issuer(
     parsed: v1::custom_issuer::ParsedCustomIssuer,
     entries: &mut Entries,
-    warnings: &mut Vec<PolicyStoreWarning>,
-) -> Result<(), MigrationError> {
+    warnings: &mut Vec<V1ToV2Warning>,
+) -> Result<(), V1ToV2Error> {
     let file = format!("{CUSTOM_ISSUERS_DIR}/{}", parsed.filename);
     // The sanitized id was the v1 `context.tokens` prefix; keeping it as the
     // issuer keeps every key.
     let issuer = IssuerName::from_str(&sanitize_issuer_name(&parsed.id)).map_err(|_| {
-        MigrationError::InvalidIssuerName {
+        V1ToV2Error::InvalidIssuerName {
             file: file.clone(),
             name: parsed.id.clone(),
         }
@@ -182,7 +224,7 @@ fn migrate_custom_issuer(
     tokens.sort_by(|a, b| a.0.cmp(&b.0));
     for (entity_type, token) in tokens {
         if token.required {
-            warnings.push(PolicyStoreWarning::RequiredIgnored {
+            warnings.push(V1ToV2Warning::RequiredIgnored {
                 file: file.clone(),
                 entity_type: entity_type.clone(),
             });
@@ -295,10 +337,7 @@ mod tests {
 
     fn migrate(
         doc: v1::PolicyStoreDoc,
-    ) -> (
-        Result<v2::PolicyStoreDoc, MigrationError>,
-        Vec<PolicyStoreWarning>,
-    ) {
+    ) -> (Result<v2::PolicyStoreDoc, V1ToV2Error>, Vec<V1ToV2Warning>) {
         let mut warnings = Vec::new();
         let result = doc.upgrade(&mut warnings);
         (result, warnings)
@@ -398,7 +437,7 @@ mod tests {
         doc.expect("the store should migrate");
         assert_eq!(
             warnings,
-            vec![PolicyStoreWarning::RequiredIgnored {
+            vec![V1ToV2Warning::RequiredIgnored {
                 file: "custom-issuers/acme.json".to_string(),
                 entity_type: "Acme::Api_key".to_string(),
             }]
@@ -419,7 +458,7 @@ mod tests {
         doc.expect("the store should migrate");
         assert_eq!(
             warnings,
-            vec![PolicyStoreWarning::IssPathKept {
+            vec![V1ToV2Warning::IssPathKept {
                 file: "trusted-issuers/kc.json".to_string(),
                 iss: "https://kc.test/realms/a".to_string(),
             }]
@@ -440,7 +479,7 @@ mod tests {
             ));
             let err = doc.expect_err("the name cannot become a v2 issuer");
             assert!(
-                matches!(&err, MigrationError::InvalidIssuerName { file, name: n }
+                matches!(&err, V1ToV2Error::InvalidIssuerName { file, name: n }
                     if file == "trusted-issuers/gluu.json" && n == name),
                 "expected InvalidIssuerName for {name:?}, got: {err:?}"
             );
@@ -460,7 +499,7 @@ mod tests {
         ));
         let err = doc.expect_err("the iss cannot be derived");
         assert!(
-            matches!(&err, MigrationError::InvalidConfigurationEndpoint { file, .. }
+            matches!(&err, V1ToV2Error::InvalidConfigurationEndpoint { file, .. }
                 if file == "trusted-issuers/gluu.json"),
             "expected InvalidConfigurationEndpoint, got: {err:?}"
         );
@@ -474,7 +513,7 @@ mod tests {
         ));
         let err = doc.expect_err("an invalid entity type cannot be a v2 key");
         assert!(
-            matches!(&err, MigrationError::InvalidEntityType { file, entity_type, .. }
+            matches!(&err, V1ToV2Error::InvalidEntityType { file, entity_type, .. }
                 if file == "custom-issuers/acme.json" && entity_type == "Acme Key"),
             "expected InvalidEntityType, got: {err:?}"
         );
@@ -497,7 +536,7 @@ mod tests {
         ));
         let err = doc.expect_err("two files cannot both declare an entity type");
         assert!(
-            matches!(&err, MigrationError::DuplicateEntityType { entity_type, file_a, file_b }
+            matches!(&err, V1ToV2Error::DuplicateEntityType { entity_type, file_a, file_b }
                 if entity_type == "Jans::Access_token"
                     && file_a == "trusted-issuers/gluu.json"
                     && file_b == "custom-issuers/acme.json"),

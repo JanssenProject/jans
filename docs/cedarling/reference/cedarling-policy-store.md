@@ -566,19 +566,19 @@ policy store format is outdated: policy_store_spec_version is 1; please update t
 When migrating a version 1 custom token that was `required`:
 
 ```text
-'required' on custom token '<entity type>' in 'custom-issuers/<file>' is ignored: every token is optional; require it in policy with `forbid (principal, action, resource) unless { context has tokens.<key> };`
+spec version 1 to 2: 'required' on custom token '<entity type>' in 'custom-issuers/<file>' is ignored: every token is optional; require it in policy with `forbid (principal, action, resource) unless { context has tokens.<key> };`
 ```
 
 When migrating a version 1 issuer whose endpoint has a path:
 
 ```text
-issuer in 'trusted-issuers/<file>' is now matched against iss '<iss>', path included, and its TrustedIssuer entity id carries the path; v1 used only the origin
+spec version 1 to 2: issuer in 'trusted-issuers/<file>' is now matched against iss '<iss>', path included, and its TrustedIssuer entity id carries the path; v1 used only the origin
 ```
 
 When a version 2 store still contains `trusted-issuers/` or `custom-issuers/`:
 
 ```text
-policy store directory 'trusted-issuers/' is ignored: this spec version reads trusted issuers from trusted-issuers.json only
+spec version 2: policy store directory 'trusted-issuers/' is ignored: this spec version reads trusted issuers from trusted-issuers.json only
 ```
 
 ### Errors
@@ -604,8 +604,10 @@ A version 0 or 1 store that cannot be expressed in version 2 (see the
 [migration table](#version-2)) fails with:
 
 ```text
-Failed to migrate the policy store: <reason naming the file>
+Failed to migrate the policy store: spec version 1 to 2: <reason naming the file>
 ```
+
+The message names the migration step that failed.
 
 ## Advanced: Loading from Bytes
 

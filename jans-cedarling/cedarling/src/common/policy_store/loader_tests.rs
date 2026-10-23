@@ -13,6 +13,7 @@ use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationEr
 use super::super::formats::ReadStoreError;
 use super::super::formats::v1::trusted_issuer::IssuerParser;
 use super::super::migration::MigrationError;
+use super::super::migration::v1_to_v2::V1ToV2Error;
 use super::super::policy_parser;
 use super::super::test_utils::read_v0_files;
 use super::super::vfs_adapter::{DirEntry, MemoryVfs, PhysicalVfs, VfsFileSystem};
@@ -1022,12 +1023,18 @@ fn test_load_custom_issuers_archive_vfs_duplicate_entity_type_errors() {
     assert!(
         matches!(
             &err,
-            ReadStoreError::Migration(MigrationError::DuplicateEntityType { entity_type, file_a, file_b })
+            ReadStoreError::Migration(MigrationError::V1ToV2(
+                V1ToV2Error::DuplicateEntityType { entity_type, file_a, file_b }
+            ))
                 if entity_type == "A::T"
                     && file_a == "custom-issuers/a.json"
                     && file_b == "custom-issuers/b.json"
         ),
         "expected DuplicateEntityType naming both files, got: {err:?}"
+    );
+    assert!(
+        err.to_string().starts_with("spec version 1 to 2: "),
+        "the message should name the migration step that failed, got: {err}"
     );
 }
 

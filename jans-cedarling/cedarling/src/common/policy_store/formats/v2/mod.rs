@@ -38,20 +38,34 @@ const TRUSTED_ISSUERS_FILE: &str = "trusted-issuers.json";
 /// behind by a manual migration is likely a mistake.
 const LEGACY_ISSUER_DIRS: [&str; 2] = ["trusted-issuers", "custom-issuers"];
 
+/// What reading a v2 store reports without failing.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, derive_more::Display)]
+pub(crate) enum V2Warning {
+    /// A directory an earlier version kept issuers in, ignored by this one.
+    #[display(
+        "policy store directory '{dir}/' is ignored: this spec version reads trusted issuers \
+         from trusted-issuers.json only"
+    )]
+    IgnoredIssuerDir { dir: &'static str },
+}
+
 /// Reads a v2 store and parses its files; `metadata_json` has already been
 /// read by the caller to pick this version.
 pub(super) fn read(
     fs: &StoreFs<'_>,
     metadata_json: String,
     strict: bool,
+    warnings: &mut Vec<V2Warning>,
 ) -> Result<PolicyStoreDoc, ReadStoreError> {
     let files = super::read_files(fs, &LAYOUT, metadata_json, strict)?;
     let trusted_issuers = fs.optional_file(TRUSTED_ISSUERS_FILE)?;
-    let ignored_dirs = LEGACY_ISSUER_DIRS
-        .into_iter()
-        .filter(|dir| fs.has_dir(dir))
-        .collect();
-    Ok(parse(files, trusted_issuers.as_deref(), ignored_dirs)?)
+    warnings.extend(
+        LEGACY_ISSUER_DIRS
+            .into_iter()
+            .filter(|dir| fs.has_dir(dir))
+            .map(|dir| V2Warning::IgnoredIssuerDir { dir }),
+    );
+    Ok(parse(files, trusted_issuers.as_deref())?)
 }
 
 /// A whole v2 store, parsed but not yet converted into runtime types.
@@ -60,15 +74,12 @@ pub(crate) struct PolicyStoreDoc {
     pub(crate) metadata: MetadataDoc,
     pub(crate) trusted_issuers: TrustedIssuersDoc,
     pub(crate) content: StoreContent,
-    /// Issuer directories of earlier versions found in the store, ignored.
-    pub(crate) ignored_dirs: Vec<&'static str>,
 }
 
 /// Parses the raw files of a v2 store.
 fn parse(
     files: Files,
     trusted_issuers_json: Option<&str>,
-    ignored_dirs: Vec<&'static str>,
 ) -> Result<PolicyStoreDoc, ParseStoreError> {
     let Files {
         metadata_json,
@@ -99,7 +110,6 @@ fn parse(
             templates,
             entities,
         },
-        ignored_dirs,
     })
 }
 
@@ -144,7 +154,9 @@ mod tests {
     }"#;
 
     /// Reads a v2 store made of `files` plus metadata and one policy.
-    fn read_store(files: &[(&str, &str)]) -> Result<PolicyStoreDoc, ReadStoreError> {
+    fn read_store(
+        files: &[(&str, &str)],
+    ) -> Result<(PolicyStoreDoc, Vec<V2Warning>), ReadStoreError> {
         let vfs = MemoryVfs::new();
         for (path, content) in [
             (METADATA_FILE, METADATA),
@@ -163,19 +175,21 @@ mod tests {
         let metadata_json = fs
             .read_required_file(METADATA_FILE)
             .expect("metadata should be readable");
-        read(&fs, metadata_json, false)
+        let mut warnings = Vec::new();
+        let doc = read(&fs, metadata_json, false, &mut warnings)?;
+        Ok((doc, warnings))
     }
 
     /// Golden v2 store: both token kinds reach the runtime store.
     #[test]
     fn golden_store_converts_to_runtime() {
-        let doc = read_store(&[(TRUSTED_ISSUERS_FILE, TRUSTED_ISSUERS)])
+        let (doc, warnings) = read_store(&[(TRUSTED_ISSUERS_FILE, TRUSTED_ISSUERS)])
             .expect("golden v2 store should read");
         assert_eq!(
             doc.metadata.policy_store_spec_version, SPEC_VERSION,
             "spec version should be read from metadata.json"
         );
-        assert!(doc.ignored_dirs.is_empty(), "nothing should be ignored");
+        assert!(warnings.is_empty(), "nothing should be ignored");
 
         let (store, metadata) = into_runtime(doc).expect("golden v2 store should convert");
         assert_eq!(
@@ -202,7 +216,7 @@ mod tests {
 
     #[test]
     fn missing_file_means_no_trusted_issuers() {
-        let doc = read_store(&[]).expect("a store without trusted-issuers.json should read");
+        let (doc, _) = read_store(&[]).expect("a store without trusted-issuers.json should read");
         let (store, _) = into_runtime(doc).expect("it should convert");
         assert!(
             store.token_types.jwt_issuers().is_empty()
@@ -213,7 +227,7 @@ mod tests {
 
     #[test]
     fn leftover_issuer_directories_are_ignored_and_reported() {
-        let doc = read_store(&[
+        let (doc, warnings) = read_store(&[
             (TRUSTED_ISSUERS_FILE, TRUSTED_ISSUERS),
             ("trusted-issuers/old.json", r#"{ "name": "Old" }"#),
             ("custom-issuers/old.json", "not even json"),
@@ -221,8 +235,15 @@ mod tests {
         .expect("a v2 store with leftover directories should still read");
 
         assert_eq!(
-            doc.ignored_dirs,
-            vec!["trusted-issuers", "custom-issuers"],
+            warnings,
+            vec![
+                V2Warning::IgnoredIssuerDir {
+                    dir: "trusted-issuers"
+                },
+                V2Warning::IgnoredIssuerDir {
+                    dir: "custom-issuers"
+                },
+            ],
             "both leftover directories should be reported"
         );
         let (store, _) = into_runtime(doc).expect("it should convert");
@@ -250,7 +271,7 @@ mod tests {
 
     #[test]
     fn conflicting_entries_fail_to_convert() {
-        let doc = read_store(&[(
+        let (doc, _) = read_store(&[(
             TRUSTED_ISSUERS_FILE,
             r#"{
                 "Acme::Access_token": { "type": "custom", "issuer": "Acme" },

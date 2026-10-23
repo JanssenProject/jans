@@ -14,38 +14,29 @@
 pub(crate) mod v0_to_v1;
 pub(crate) mod v1_to_v2;
 
-use crate::common::policy_store::InvalidConfigurationEndpoint;
+use std::convert::Infallible;
+
 use crate::common::policy_store::formats::{PolicyStoreWarning, current};
 
 /// The doc of the current spec version, the only one that converts into
 /// runtime types.
 pub(super) type CurrentDoc = current::PolicyStoreDoc;
 
-/// A store that cannot be expressed in the next spec version.
+/// A store that cannot be expressed in a later spec version, by the step that
+/// failed. Each step owns its error type, so dropping a version removes its
+/// step module and its variant here. The message names the step, so a store
+/// migrated through several of them shows where it stopped.
 #[derive(Debug, thiserror::Error)]
 pub enum MigrationError {
-    #[error(
-        "issuer '{name}' in '{file}' must be a single Cedar identifier to migrate: it is the \
-         namespace of its TrustedIssuer entity and the prefix of its context.tokens keys"
-    )]
-    InvalidIssuerName { file: String, name: String },
-    #[error("'{entity_type}' in '{file}' is not a valid Cedar entity type: {reason}")]
-    InvalidEntityType {
-        file: String,
-        entity_type: String,
-        reason: String,
-    },
-    #[error("invalid issuer in '{file}': {source}")]
-    InvalidConfigurationEndpoint {
-        file: String,
-        source: InvalidConfigurationEndpoint,
-    },
-    #[error("entity type '{entity_type}' is declared in both '{file_a}' and '{file_b}'")]
-    DuplicateEntityType {
-        entity_type: String,
-        file_a: String,
-        file_b: String,
-    },
+    #[error("spec version 1 to 2: {0}")]
+    V1ToV2(#[from] v1_to_v2::V1ToV2Error),
+}
+
+/// A step that cannot fail converts with no variant here.
+impl From<Infallible> for MigrationError {
+    fn from(never: Infallible) -> Self {
+        match never {}
+    }
 }
 
 /// One migration step, from a spec version's doc to the next version's.
@@ -53,10 +44,13 @@ pub enum MigrationError {
 /// Written by hand for each step: how fields map between two versions is a
 /// decision, not something to derive. A step reports what it had to change in
 /// behavior through `warnings`, and fails when the store cannot be expressed.
+/// Both use the step's own types, so they leave with the step.
 pub(super) trait Upgrade {
     type Next;
+    type Error: Into<MigrationError>;
+    type Warning: Into<PolicyStoreWarning>;
 
-    fn upgrade(self, warnings: &mut Vec<PolicyStoreWarning>) -> Result<Self::Next, MigrationError>;
+    fn upgrade(self, warnings: &mut Vec<Self::Warning>) -> Result<Self::Next, Self::Error>;
 }
 
 /// Brings the doc of any supported spec version up to [`CurrentDoc`] by
@@ -92,6 +86,9 @@ where
         self,
         warnings: &mut Vec<PolicyStoreWarning>,
     ) -> Result<CurrentDoc, MigrationError> {
-        self.upgrade(warnings)?.into_current(warnings)
+        let mut step_warnings = Vec::new();
+        let next = self.upgrade(&mut step_warnings).map_err(Into::into)?;
+        warnings.extend(step_warnings.into_iter().map(Into::into));
+        next.into_current(warnings)
     }
 }

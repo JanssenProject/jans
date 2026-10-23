@@ -9,17 +9,19 @@
 //! copied field by field. Nothing is lost: v0 already ignores unknown keys at
 //! parse time, exactly as v1 does.
 
-use super::{MigrationError, Upgrade};
-use crate::common::policy_store::formats::{PolicyStoreWarning, v0, v1};
+use std::convert::Infallible;
+
+use super::Upgrade;
+use crate::common::policy_store::formats::{v0, v1};
 
 /// Migrates a whole v0 store to v1.
 impl Upgrade for v0::PolicyStoreDoc {
     type Next = v1::PolicyStoreDoc;
+    // v1 only adds a field, so nothing can fail or change behavior.
+    type Error = Infallible;
+    type Warning = Infallible;
 
-    fn upgrade(
-        self,
-        _warnings: &mut Vec<PolicyStoreWarning>,
-    ) -> Result<v1::PolicyStoreDoc, MigrationError> {
+    fn upgrade(self, _warnings: &mut Vec<Infallible>) -> Result<v1::PolicyStoreDoc, Infallible> {
         Ok(v1::PolicyStoreDoc {
             metadata: migrate_metadata(self.metadata),
             trusted_issuers: self

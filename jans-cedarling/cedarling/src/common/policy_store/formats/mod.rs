@@ -29,6 +29,7 @@ pub(crate) mod v2;
 pub(super) use v2 as current;
 
 use std::borrow::Cow;
+use std::convert::Infallible;
 use std::fmt;
 
 use jans_trace_core::Digest;
@@ -39,6 +40,7 @@ use super::PolicyStoreWithID;
 use super::errors::{PolicyStoreError, ValidationError};
 use super::loader::{StoreFile, StoreFs};
 use super::manager::ConversionError;
+use super::migration::v1_to_v2::V1ToV2Warning;
 use super::migration::{IntoCurrent, MigrationError};
 use super::schema_parser::ParsedSchema;
 
@@ -136,52 +138,39 @@ pub(crate) struct StoreContent {
 }
 
 /// Non-fatal findings from parsing a store; logged by the caller.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+///
+/// What a single version or migration step reports lives in that version's or
+/// step's own type, so dropping a version removes its variant here. The message
+/// names the version or step it came from.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, derive_more::From)]
 pub(crate) enum PolicyStoreWarning {
     /// `metadata.json` has no `policy_store_spec_version`.
+    #[display(
+        "policy store format is outdated: metadata.json has no policy_store_spec_version, so \
+         it was read as spec version {assumed}; please update the policy store to spec \
+         version {current}"
+    )]
+    #[from(ignore)]
     MissingSpecVersion { assumed: u32, current: u32 },
     /// The store declares a supported but older spec version.
+    #[display(
+        "policy store format is outdated: policy_store_spec_version is {found}; please update \
+         the policy store to spec version {current}"
+    )]
+    #[from(ignore)]
     OutdatedSpecVersion { found: u32, current: u32 },
-    /// A directory an earlier version kept issuers in, ignored by this one.
-    IgnoredIssuerDir { dir: &'static str },
-    /// A migrated custom token was `required`; every token is optional now.
-    RequiredIgnored { file: String, entity_type: String },
-    /// A migrated issuer's `iss` keeps the path its endpoint had, where v1 kept
-    /// only the origin; its `TrustedIssuer` entity id changes with it.
-    IssPathKept { file: String, iss: String },
+    /// Reported while reading a v2 store.
+    #[display("spec version 2: {_0}")]
+    V2(v2::V2Warning),
+    /// Reported while migrating a v1 store to v2.
+    #[display("spec version 1 to 2: {_0}")]
+    V1ToV2(V1ToV2Warning),
 }
 
-impl fmt::Display for PolicyStoreWarning {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::MissingSpecVersion { assumed, current } => write!(
-                f,
-                "policy store format is outdated: metadata.json has no \
-                 policy_store_spec_version, so it was read as spec version {assumed}; \
-                 please update the policy store to spec version {current}"
-            ),
-            Self::OutdatedSpecVersion { found, current } => write!(
-                f,
-                "policy store format is outdated: policy_store_spec_version is {found}; \
-                 please update the policy store to spec version {current}"
-            ),
-            Self::IgnoredIssuerDir { dir } => write!(
-                f,
-                "policy store directory '{dir}/' is ignored: this spec version reads \
-                 trusted issuers from trusted-issuers.json only"
-            ),
-            Self::RequiredIgnored { file, entity_type } => write!(
-                f,
-                "'required' on custom token '{entity_type}' in '{file}' is ignored: every \
-                 token is optional; require it in policy with \
-                 `forbid (principal, action, resource) unless {{ context has tokens.<key> }};`"
-            ),
-            Self::IssPathKept { file, iss } => write!(
-                f,
-                "issuer in '{file}' is now matched against iss '{iss}', path included, \
-                 and its TrustedIssuer entity id carries the path; v1 used only the origin"
-            ),
-        }
+/// A step that reports nothing converts with no variant here.
+impl From<Infallible> for PolicyStoreWarning {
+    fn from(never: Infallible) -> Self {
+        match never {}
     }
 }
 
@@ -386,13 +375,13 @@ pub(super) fn read_policy_store(
     let doc = match selected.format {
         FormatVersion::V0 => v0::read(fs, metadata_json, strict)?.into_current(&mut warnings)?,
         FormatVersion::V1 => v1::read(fs, metadata_json, strict)?.into_current(&mut warnings)?,
-        FormatVersion::V2 => v2::read(fs, metadata_json, strict)?.into_current(&mut warnings)?,
+        FormatVersion::V2 => {
+            let mut v2_warnings = Vec::new();
+            let doc = v2::read(fs, metadata_json, strict, &mut v2_warnings)?;
+            warnings.extend(v2_warnings.into_iter().map(PolicyStoreWarning::from));
+            doc.into_current(&mut warnings)?
+        },
     };
-    warnings.extend(
-        doc.ignored_dirs
-            .iter()
-            .map(|dir| PolicyStoreWarning::IgnoredIssuerDir { dir }),
-    );
 
     let (store, metadata) = current::into_runtime(doc)?;
 
@@ -687,10 +676,17 @@ mod tests {
         .expect("a v2 store with a leftover directory should still load");
         assert_eq!(
             parsed.format.warnings,
-            vec![PolicyStoreWarning::IgnoredIssuerDir {
+            vec![PolicyStoreWarning::V2(v2::V2Warning::IgnoredIssuerDir {
                 dir: "custom-issuers"
-            }],
+            })],
             "the leftover directory should be reported"
+        );
+        assert!(
+            parsed.format.warnings[0]
+                .to_string()
+                .starts_with("spec version 2: "),
+            "the message should name the spec version that reported it, got: {}",
+            parsed.format.warnings[0]
         );
     }
 
