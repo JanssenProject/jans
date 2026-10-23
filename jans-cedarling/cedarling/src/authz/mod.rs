@@ -12,6 +12,7 @@ use crate::EntityData;
 use crate::TrustedIssuerLoadingInfo;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
+use crate::common::policy_store::token_types::EntityTypeName;
 use crate::common::policy_store::{ContextKey, PolicyStoreWithID, TokenTypes};
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{
@@ -1031,7 +1032,11 @@ impl Authz {
         // this map for both single and batch paths) never logs the same
         // mapping under both `tokens` and `dropped_tokens`.
         let entity_build_drops = std::mem::take(&mut setup_entities.dropped);
-        validated_tokens.retain(|name, _| !entity_build_drops.iter().any(|d| d.mapping == *name));
+        validated_tokens.retain(|name, _| {
+            !entity_build_drops
+                .iter()
+                .any(|d| d.mapping == name.as_str())
+        });
 
         // Order is not guaranteed: entity-build drops append after validation
         // drops; callers correlate entries by `index`.
@@ -1262,7 +1267,7 @@ impl Authz {
             .tokens
             .keys()
             .map(|mapping| {
-                cedar_policy::EntityTypeName::from_str(mapping)
+                cedar_policy::EntityTypeName::from_str(mapping.as_str())
                     .map_err(|e| AuthorizeError::IdentifierParsing(e.into()))
             })
             .collect::<Result<_, _>>()?;
@@ -1436,7 +1441,7 @@ struct UnsignedSetup {
 /// that [`LogTokensInfo`] can be produced from the same snapshot the entities
 /// were built from.
 struct MultiIssuerSetup {
-    validated_tokens: HashMap<String, crate::jwt::ValidatedToken>,
+    validated_tokens: HashMap<EntityTypeName, crate::jwt::ValidatedToken>,
     entities: MultiIssuerSetupEntities,
     /// Tokens dropped across validation and entity building. Order is not
     /// guaranteed; use each entry's `index` to correlate with the request

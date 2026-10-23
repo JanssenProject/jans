@@ -7,7 +7,7 @@ use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::{BuildEntityError, BuiltEntities, EntityBuilder};
 use crate::authz::{DropReason, DroppedToken};
 use crate::common::default_entities::DefaultEntities;
-use crate::common::policy_store::token_types::TokenType;
+use crate::common::policy_store::token_types::{self, TokenType};
 use crate::common::policy_store::{ContextKey, TokenTypeKind};
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
 use crate::jwt::{Token, TokenIssuer, ValidatedToken};
@@ -21,10 +21,10 @@ use std::str::FromStr;
 /// Errors that can occur during multi-issuer entity building
 #[derive(Debug, thiserror::Error)]
 pub enum MultiIssuerEntityError {
-    /// A validated token always has a configured type, unless the store changed
-    /// under a cached token.
-    #[error("token type '{0}' is not configured")]
-    UnconfiguredTokenType(String),
+    /// A token validated as a JWT whose token type is custom, which
+    /// `JwtService` never produces.
+    #[error("token '{0}' was validated as a JWT but its token type is custom")]
+    JwtWithCustomTokenType(String),
 
     #[error("Missing exp claim in JWT")]
     MissingExpClaim,
@@ -209,7 +209,7 @@ impl EntityBuilder {
     /// [`Self::build_resource_entity`] call to complete each decision.
     pub(crate) fn build_multi_issuer_setup_entities(
         &self,
-        tokens: &HashMap<String, ValidatedToken>,
+        tokens: &HashMap<token_types::EntityTypeName, ValidatedToken>,
         log_service: &impl LogWriter,
     ) -> Result<MultiIssuerSetupEntities, MultiIssuerEntityError> {
         let mut built_entities = BuiltEntities::from(&self.iss_entities);
@@ -217,32 +217,12 @@ impl EntityBuilder {
         let mut token_entities = HashMap::new();
         let mut dropped = Vec::new();
         for (token_name, entry) in tokens {
-            let token = &entry.token;
-            match self.build_single_token_entity(token, &built_entities) {
-                Ok(entity) => match self.generate_entity_key(token_name) {
-                    // Keys cannot collide: each mapping names one token type,
-                    // and `TokenTypes` gives every token type its own key.
-                    Ok(entity_key) => {
-                        built_entities.insert(&entity.uid());
-                        token_entities.insert(entity_key, entity);
-                    },
-                    Err(e) => {
-                        log_service.log_any(
-                            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                                LogLevel::ERROR,
-                                None,
-                            ))
-                            .set_message(format!(
-                                "Failed to generate entity key for token '{token_name}'"
-                            ))
-                            .set_error(e.to_string()),
-                        );
-                        dropped.push(DroppedToken::new(
-                            token_name.as_str(),
-                            entry.index,
-                            DropReason::EntityBuildFailed,
-                        ));
-                    },
+            match self.build_single_token_entity(&entry.token, &entry.token_type, &built_entities) {
+                // Keys cannot collide: each mapping names one token type, and
+                // `TokenTypes` gives every token type its own key.
+                Ok(entity) => {
+                    built_entities.insert(&entity.uid());
+                    token_entities.insert(entry.token_type.context_key.clone(), entity);
                 },
                 Err(e) => {
                     log_service.log_any(
@@ -290,6 +270,7 @@ impl EntityBuilder {
     fn build_single_token_entity(
         &self,
         token: &Token,
+        token_type: &TokenType,
         built_entities: &BuiltEntities,
     ) -> Result<Entity, MultiIssuerEntityError> {
         // The mapping is the configured Cedar entity type, for JWT and custom alike.
@@ -300,26 +281,22 @@ impl EntityBuilder {
         // - Custom tokens: the processor supplies the id value directly
         //   (`CustomTokenIssuerMeta::token_id`); no claim lookup is performed.
         // - JWT tokens: `token_id` of the token type names the *claim* to read.
-        let entity_id = if let TokenIssuer::Custom(meta) = &token.iss {
-            meta.token_id.clone()
-        } else {
-            let Some(TokenType {
-                kind: TokenTypeKind::Jwt { metadata, .. },
-                ..
-            }) = self.token_types.get(&token.name)
-            else {
-                return Err(MultiIssuerEntityError::UnconfiguredTokenType(
+        let entity_id = match (&token.iss, &token_type.kind) {
+            (TokenIssuer::Custom(meta), _) => meta.token_id.clone(),
+            (TokenIssuer::Jwt(_), TokenTypeKind::Jwt { metadata, .. }) => {
+                let entity_id_srcs = [EntityIdSrc::Token {
+                    token,
+                    claim: metadata.token_id.as_str(),
+                }];
+                get_first_valid_entity_id(&entity_id_srcs)
+                    .map_err(|e| MultiIssuerEntityError::InvalidEntityUid(e.to_string()))?
+                    .to_string()
+            },
+            (TokenIssuer::Jwt(_), TokenTypeKind::Custom(_)) => {
+                return Err(MultiIssuerEntityError::JwtWithCustomTokenType(
                     token.name.clone(),
                 ));
-            };
-            let token_id_claim = metadata.token_id.as_str();
-            let entity_id_srcs = [EntityIdSrc::Token {
-                token,
-                claim: token_id_claim,
-            }];
-            get_first_valid_entity_id(&entity_id_srcs)
-                .map_err(|e| MultiIssuerEntityError::InvalidEntityUid(e.to_string()))?
-                .to_string()
+            },
         };
 
         // Get attribute shape from schema if available
@@ -427,23 +404,15 @@ impl EntityBuilder {
 
         Ok(entity)
     }
-
-    /// The precomputed `context.tokens` key of a token type.
-    fn generate_entity_key(&self, token_name: &str) -> Result<ContextKey, MultiIssuerEntityError> {
-        self.token_types
-            .get(token_name)
-            .map(|token_type| token_type.context_key.clone())
-            .ok_or_else(|| MultiIssuerEntityError::UnconfiguredTokenType(token_name.to_string()))
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::common::default_entities::DefaultEntities;
-    use crate::common::policy_store::TrustedIssuer;
     use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
     use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata, TokenTypes};
+    use crate::common::policy_store::{IssuerName, TrustedIssuer};
     use crate::jwt::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer};
     use crate::log::NopLogger;
     use cedar_policy::EvalResult;
@@ -453,14 +422,42 @@ mod tests {
     use std::sync::Arc;
     use url::Url;
 
-    /// Wrap test tokens as validated entries with arbitrary distinct indexes.
-    fn into_validated(tokens: HashMap<String, Token>) -> HashMap<String, ValidatedToken> {
+    impl EntityBuilder {
+        /// The token type `mapping` names, resolved as `JwtService` does.
+        fn token_type_of(&self, mapping: &str) -> Arc<TokenType> {
+            let (_, token_type) = self
+                .token_types
+                .resolve(mapping)
+                .expect("the test token type should be configured");
+            Arc::clone(token_type)
+        }
+
+        /// Builds `token`'s entity with the token type its name maps to.
+        fn build_token_entity(
+            &self,
+            token: &Token,
+            built_entities: &BuiltEntities,
+        ) -> Result<Entity, MultiIssuerEntityError> {
+            self.build_single_token_entity(token, &self.token_type_of(&token.name), built_entities)
+        }
+    }
+
+    /// Wrap test tokens, keyed by mapping, as validated entries with arbitrary
+    /// distinct indexes.
+    fn into_validated(
+        builder: &EntityBuilder,
+        tokens: HashMap<String, Token>,
+    ) -> HashMap<token_types::EntityTypeName, ValidatedToken> {
         tokens
             .into_iter()
             .enumerate()
-            .map(|(index, (name, token))| {
-                let token = Arc::new(token);
-                (name, ValidatedToken { token, index })
+            .map(|(index, (mapping, token))| {
+                let validated = ValidatedToken {
+                    token: Arc::new(token),
+                    index,
+                    token_type: builder.token_type_of(&mapping),
+                };
+                (token_types::EntityTypeName::for_test(&mapping), validated)
             })
             .collect()
     }
@@ -640,11 +637,12 @@ mod tests {
             ("Acme::Access_token", "acme_access_token"),
             ("Beta::Access_token", "beta_access_token"),
         ] {
+            let (_, token_type) = builder
+                .token_types
+                .resolve(mapping)
+                .expect("a configured token type should resolve");
             assert_eq!(
-                builder
-                    .generate_entity_key(mapping)
-                    .expect("a configured token type should have a key")
-                    .as_str(),
+                token_type.context_key.as_str(),
                 key,
                 "the key prefix should be the issuer the mapping names, not the iss"
             );
@@ -669,7 +667,7 @@ mod tests {
 
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let entity = builder
-            .build_single_token_entity(&token, &built_entities)
+            .build_token_entity(&token, &built_entities)
             .expect("custom token entity should build");
 
         // Entity id is the processor's token_id (no jti/sub claim was provided).
@@ -723,9 +721,14 @@ mod tests {
             }),
         );
 
+        let token_type = TokenType {
+            issuer: IssuerName::for_test("acmekeys"),
+            context_key: ContextKey::for_test("acmekeys_customtoken"),
+            kind: TokenTypeKind::Custom(CustomTokenMetadata::default()),
+        };
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let entity = builder
-            .build_single_token_entity(&token, &built_entities)
+            .build_single_token_entity(&token, &token_type, &built_entities)
             .expect("custom token with required iss/exp schema should build");
 
         assert!(
@@ -736,35 +739,6 @@ mod tests {
         );
         assert!(
             matches!(entity.attr("jti").expect("jti").expect("val"), EvalResult::String(ref s) if s == "tok-1"),
-        );
-    }
-
-    #[test]
-    fn test_entity_key_generation() {
-        let builder = create_test_entity_builder();
-
-        let key = builder
-            .generate_entity_key("Jans::Access_Token")
-            .expect("a configured token type should have a key");
-        assert_eq!(
-            key.as_str(),
-            "acme_access_token",
-            "the key should be the issuer prefix and the simplified type"
-        );
-    }
-
-    /// Keys only ever come from config: an unconfigured token type has no
-    /// `context.tokens` key, rather than one made up from its `iss`.
-    #[test]
-    fn test_entity_key_generation_with_unknown_issuer() {
-        let builder = create_test_entity_builder();
-
-        let err = builder
-            .generate_entity_key("Custom::Employee_Token")
-            .expect_err("an unconfigured token type must not get a key");
-        assert!(
-            matches!(&err, MultiIssuerEntityError::UnconfiguredTokenType(name) if name == "Custom::Employee_Token"),
-            "expected UnconfiguredTokenType, got {err:?}"
         );
     }
 
@@ -784,7 +758,7 @@ mod tests {
         let token_two = create_test_token("https://idp.acme.com/auth", "token2", claims2, &builder);
         tokens.insert("Jans::Access_Token2".to_string(), token_two);
 
-        let tokens = into_validated(tokens);
+        let tokens = into_validated(&builder, tokens);
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
@@ -821,7 +795,7 @@ mod tests {
             create_test_token("https://idp.acme.com/auth", "token3", claims3, &builder);
         tokens.insert("Jans::Id_Token".to_string(), token_three);
 
-        let tokens = into_validated(tokens);
+        let tokens = into_validated(&builder, tokens);
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
@@ -844,9 +818,7 @@ mod tests {
         let token = create_test_token("https://idp.acme.com/auth", "token123", claims, &builder);
 
         let built_entities = BuiltEntities::from(&builder.iss_entities);
-        let entity = builder
-            .build_single_token_entity(&token, &built_entities)
-            .unwrap();
+        let entity = builder.build_token_entity(&token, &built_entities).unwrap();
 
         // Check entity type - should match the token name
         assert_eq!(entity.uid().type_name().to_string(), "Jans::Access_Token");
@@ -876,7 +848,7 @@ mod tests {
         let token = Token::new("Jans::Access_Token", token_claims, acme_issuer(&builder));
 
         let built_entities = BuiltEntities::from(&builder.iss_entities);
-        let result = builder.build_single_token_entity(&token, &built_entities);
+        let result = builder.build_token_entity(&token, &built_entities);
 
         assert!(
             matches!(
@@ -942,9 +914,7 @@ mod tests {
         );
 
         let built_entities = BuiltEntities::from(&builder.iss_entities);
-        let entity = builder
-            .build_single_token_entity(&token, &built_entities)
-            .unwrap();
+        let entity = builder.build_token_entity(&token, &built_entities).unwrap();
 
         // Schema-based processing should preserve types according to schema
         // Check that tags exist for schema-defined claims
@@ -1014,7 +984,7 @@ mod tests {
             create_test_token("https://idp.dolphin.sea/auth", "token3", claims3, &builder);
         tokens.insert("Acme::DolphinToken".to_string(), token_three);
 
-        let tokens = into_validated(tokens);
+        let tokens = into_validated(&builder, tokens);
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
@@ -1058,7 +1028,7 @@ mod tests {
         let token_two = Token::new("Jans::Id_Token", token_claims2, acme_issuer(&builder));
         tokens.insert("Jans::Id_Token".to_string(), token_two);
 
-        let tokens = into_validated(tokens);
+        let tokens = into_validated(&builder, tokens);
 
         let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
 
@@ -1111,9 +1081,7 @@ mod tests {
         let token = create_test_token("https://test.issuer.com", "test-jti-123", claims, &builder);
 
         let built_entities = BuiltEntities::from(&builder.iss_entities);
-        let entity = builder
-            .build_single_token_entity(&token, &built_entities)
-            .unwrap();
+        let entity = builder.build_token_entity(&token, &built_entities).unwrap();
 
         // Schema-defined claims should be processed according to schema
         assert!(entity.tag("sub").is_some());
@@ -1202,7 +1170,7 @@ mod tests {
         );
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let entity = builder
-            .build_single_token_entity(&token, &built_entities)
+            .build_token_entity(&token, &built_entities)
             .expect("should build token entity without schema");
 
         // ── Verify jti attr = entity_id (NOT the raw jwt jti) ─────────
@@ -1310,7 +1278,7 @@ mod tests {
         );
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let entity = builder
-            .build_single_token_entity(&token, &built_entities)
+            .build_token_entity(&token, &built_entities)
             .expect("should build token entity with schema path");
 
         // ── Prove the schema path was actually taken ──────────────────
@@ -1436,7 +1404,7 @@ mod tests {
         // This must NOT fail — the closure should fall back to entity_id
         // so the schema path doesn't choke on missing required `jti`.
         let entity = builder
-            .build_single_token_entity(&token, &built_entities)
+            .build_token_entity(&token, &built_entities)
             .expect("should succeed even without jti claim — closure falls back to entity_id");
 
         // jti attribute should be set to entity_id by add_reserved_claims

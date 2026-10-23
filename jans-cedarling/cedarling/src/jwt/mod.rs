@@ -203,21 +203,23 @@ enum TokenOutcome {
 /// decision log. Access the fields explicitly (e.g. `result.tokens`).
 #[derive(Debug)]
 pub(crate) struct ValidatedMultiIssuerTokens {
-    /// Validated tokens keyed by their mapping (token name). Each entry carries
-    /// the token alongside its original request index so callers never need a
-    /// separate index lookup.
-    pub tokens: HashMap<String, ValidatedToken>,
+    /// Validated tokens keyed by the entity type their mapping names. Each entry
+    /// carries the token alongside its original request index and token type, so
+    /// callers never look either up again.
+    pub tokens: HashMap<EntityTypeName, ValidatedToken>,
     /// Tokens dropped during validation.
     pub dropped: Vec<DroppedToken>,
 }
 
-/// A validated token with its original request index.
+/// A validated token with its original request index and token type.
 #[derive(Debug, Clone)]
 pub(crate) struct ValidatedToken {
     /// Validated Cedar token.
     pub token: Arc<Token>,
     /// Zero-based position in the request's `tokens` array.
     pub index: usize,
+    /// The token type the token was validated as.
+    pub token_type: Arc<TokenType>,
 }
 
 impl JwtService {
@@ -380,7 +382,7 @@ impl JwtService {
             return Err(MultiIssuerValidationError::EmptyTokenArray);
         }
 
-        let mut validated_tokens: HashMap<String, ValidatedToken> = HashMap::new();
+        let mut validated_tokens: HashMap<EntityTypeName, ValidatedToken> = HashMap::new();
         let mut dropped = Vec::new();
         let mut seen_combinations = HashSet::new();
 
@@ -403,9 +405,6 @@ impl JwtService {
                 continue;
             }
 
-            // Create Token with the mapping as the name
-            let token_name = token.mapping.clone();
-
             // Custom-token dispatch: a mapping that routes to a custom issuer is
             // never handled by the JWT path.
             //
@@ -425,47 +424,48 @@ impl JwtService {
                 now,
                 seen_combinations: &mut seen_combinations,
             };
-            let result = match token_types.get(&token.mapping) {
-                Some(TokenType {
-                    issuer,
-                    kind: TokenTypeKind::Custom(token_meta),
-                    ..
-                }) => {
-                    let target = CustomTarget { issuer, token_meta };
+            let Some((entity_type, token_type)) = token_types.resolve(&token.mapping) else {
+                let reason = self.drop_unknown_mapping(&ctx);
+                dropped.push(DroppedToken::new(token.mapping.clone(), index, reason));
+                continue;
+            };
+            let result = match &token_type.kind {
+                TokenTypeKind::Custom(token_meta) => {
+                    let target = CustomTarget {
+                        issuer: &token_type.issuer,
+                        token_meta,
+                    };
                     self.handle_custom_token(custom_processor, target, custom_timeout, &mut ctx)
                         .await
                 },
-                Some(TokenType {
-                    kind: TokenTypeKind::Jwt { issuer, .. },
-                    ..
-                }) => self.validate_jwt_token(issuer, &mut ctx)?,
-                None => self.drop_unknown_mapping(&ctx),
+                TokenTypeKind::Jwt { issuer, .. } => self.validate_jwt_token(issuer, &mut ctx)?,
             };
 
             match result {
                 TokenOutcome::Validated(cedar_token) => {
-                    if let Some(prior) = validated_tokens.get(&token_name) {
+                    if let Some(prior) = validated_tokens.get(entity_type) {
                         let prior_index = prior.index;
                         if let Some(logger) = &self.logger {
                             logger.log_any(JwtLogEntry::new(
                                 format!(
-                                    "Duplicate mapping detected: '{token_name}' \
+                                    "Duplicate mapping detected: '{entity_type}' \
                                     at index {index} replaces index {prior_index} (last wins)"
                                 ),
                                 Some(LogLevel::WARN),
                             ));
                         }
                         dropped.push(DroppedToken::new(
-                            token_name.clone(),
+                            token.mapping.clone(),
                             prior_index,
                             DropReason::DuplicateMapping,
                         ));
                     }
                     validated_tokens.insert(
-                        token_name.clone(),
+                        entity_type.clone(),
                         ValidatedToken {
                             token: cedar_token,
                             index,
+                            token_type: Arc::clone(token_type),
                         },
                     );
                 },
@@ -590,8 +590,8 @@ impl JwtService {
         }
     }
 
-    /// Drops a token whose mapping no token type declares.
-    fn drop_unknown_mapping(&self, ctx: &TokenCallCtx<'_>) -> TokenOutcome {
+    /// Reports a token whose mapping no token type declares, which is dropped.
+    fn drop_unknown_mapping(&self, ctx: &TokenCallCtx<'_>) -> DropReason {
         let err = UnknownTokenMapping(ctx.token.mapping.clone());
         self.metrics.record_error(&err);
         if let Some(logger) = &self.logger {
@@ -600,7 +600,7 @@ impl JwtService {
                 Some(LogLevel::WARN),
             ));
         }
-        TokenOutcome::Dropped(DropReason::JwtValidationFailed)
+        DropReason::JwtValidationFailed
     }
 
     /// Validates a token as a JWT of `trusted_iss`, the issuer its mapping
@@ -1192,7 +1192,10 @@ mod test {
             .await
             .expect("a custom failure must not fail the whole request");
         assert_eq!(
-            out.tokens.keys().collect::<Vec<_>>(),
+            out.tokens
+                .keys()
+                .map(crate::common::policy_store::token_types::EntityTypeName::as_str)
+                .collect::<Vec<_>>(),
             vec!["Ok::T"],
             "only the succeeding custom token should be kept"
         );

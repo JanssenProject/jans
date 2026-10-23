@@ -46,7 +46,9 @@ pub(crate) struct EntityBuilder {
     iss_entities: HashMap<EntityUid, Entity>,
     schema: Option<MappingSchema>,
     default_entities: DefaultEntities,
-    /// Every configured token type, for its `context.tokens` key and token id.
+    /// The token types the builder was made from, so tests can resolve a
+    /// token's type as `JwtService` does.
+    #[cfg(test)]
     token_types: TokenTypes,
 }
 
@@ -98,6 +100,7 @@ impl EntityBuilder {
             iss_entities,
             schema,
             default_entities,
+            #[cfg(test)]
             token_types: token_types.clone(),
         })
     }

@@ -223,7 +223,7 @@ pub(crate) struct TokenType {
 #[derive(Debug, Clone, Default)]
 #[cfg_attr(test, derive(PartialEq))]
 pub(crate) struct TokenTypes {
-    tokens: HashMap<EntityTypeName, TokenType>,
+    tokens: HashMap<EntityTypeName, Arc<TokenType>>,
     /// JWT issuers by name; their token types are in `tokens`.
     jwt_issuers: HashMap<IssuerName, Arc<TrustedIssuer>>,
 }
@@ -292,7 +292,7 @@ pub enum TokenTypesError {
 #[derive(Default)]
 pub(crate) struct TokenTypesBuilder {
     /// Every token type added so far, JWT and custom, by entity type.
-    tokens: HashMap<EntityTypeName, TokenType>,
+    tokens: HashMap<EntityTypeName, Arc<TokenType>>,
     /// JWT issuers by name; their token types are in `tokens`.
     jwt_issuers: HashMap<IssuerName, Arc<TrustedIssuer>>,
     /// Custom issuers by name, each with one of its entity types to name in a
@@ -429,11 +429,11 @@ impl TokenTypesBuilder {
                         entity_type_b: slot.key().to_string(),
                     });
                 }
-                slot.insert(TokenType {
+                slot.insert(Arc::new(TokenType {
                     issuer,
                     context_key,
                     kind,
-                });
+                }));
                 Ok(())
             },
         }
@@ -556,8 +556,15 @@ impl TokenTypes {
     }
 
     /// The token type a request `mapping` names.
+    #[cfg(test)]
     pub(crate) fn get(&self, mapping: &str) -> Option<&TokenType> {
-        self.tokens.get(mapping)
+        self.tokens.get(mapping).map(AsRef::as_ref)
+    }
+
+    /// The entity type and token type a request `mapping` names, for a
+    /// validated token to carry instead of being looked up again.
+    pub(crate) fn resolve(&self, mapping: &str) -> Option<(&EntityTypeName, &Arc<TokenType>)> {
+        self.tokens.get_key_value(mapping)
     }
 
     /// JWT issuers by name.
@@ -583,7 +590,7 @@ impl TokenTypes {
     /// Whether both have the same JWT issuers and JWT token types, so whatever
     /// was loaded for one, keys and validators, serves the other too.
     pub(crate) fn same_jwt_config(&self, other: &Self) -> bool {
-        fn jwt_tokens(types: &TokenTypes) -> HashMap<&EntityTypeName, &TokenType> {
+        fn jwt_tokens(types: &TokenTypes) -> HashMap<&EntityTypeName, &Arc<TokenType>> {
             types
                 .tokens
                 .iter()
