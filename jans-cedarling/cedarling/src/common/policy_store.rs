@@ -36,7 +36,9 @@ use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use url::Url;
 
-pub(crate) use custom_issuer_metadata::{CustomIssuerMetadata, CustomTokenMetadata};
+#[cfg(test)]
+pub(crate) use custom_issuer_metadata::CustomIssuerMetadata;
+pub(crate) use custom_issuer_metadata::CustomTokenMetadata;
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
 pub(crate) use token_types::{TokenTypeKind, TokenTypes, TokenTypesError};
 

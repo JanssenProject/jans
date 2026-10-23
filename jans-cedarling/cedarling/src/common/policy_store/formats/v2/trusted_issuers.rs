@@ -8,7 +8,7 @@
 //! The file is one JSON object keyed by Cedar entity type; each entry fully
 //! describes one token type, including its issuer and kind.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::fmt;
 use std::str::FromStr;
 
@@ -16,10 +16,10 @@ use serde::Deserialize;
 use serde::de::{self, Deserializer, MapAccess, Visitor};
 use url::Url;
 
-use crate::common::policy_store::token_types::{EntityTypeName, IssuerName};
+use crate::common::policy_store::token_types::{EntityTypeName, IssuerName, TokenTypesBuilder};
 use crate::common::policy_store::{
-    CustomIssuerMetadata, CustomTokenMetadata, KeySource, TokenEntityMetadata, TokenTypes,
-    TokenTypesError, TrustedIssuer, iss_from_configuration,
+    CustomTokenMetadata, KeySource, TokenEntityMetadata, TokenTypes, TokenTypesError,
+    iss_from_configuration,
 };
 
 /// The whole file, in file order. Duplicate keys are rejected while parsing:
@@ -215,9 +215,7 @@ pub(crate) fn parse(json: &str) -> Result<TrustedIssuersDoc, serde_json::Error> 
 impl TrustedIssuersDoc {
     /// Validates the entries as a whole and converts them into runtime types.
     pub(crate) fn into_runtime(self) -> Result<TokenTypes, TokenTypesError> {
-        let mut jwt_issuers = Vec::new();
-        let mut custom_issuers: HashMap<String, CustomIssuerMetadata> = HashMap::new();
-
+        let mut builder = TokenTypesBuilder::default();
         for (entity_type, config) in self.0 {
             match config {
                 TokenTypeConfig::Jwt(jwt) => {
@@ -232,32 +230,17 @@ impl TrustedIssuersDoc {
                         .token_id(jwt.token_id)
                         .required_claims(jwt.required_claims)
                         .build();
-                    // `TokenTypes::build` merges entries of one issuer.
-                    jwt_issuers.push(TrustedIssuer::new(
-                        jwt.issuer.to_string(),
-                        iss,
-                        key_source,
-                        HashMap::from([(entity_type.to_string(), token)]),
-                    ));
+                    builder.add_jwt(entity_type, jwt.issuer, iss, key_source, token)?;
                 },
                 TokenTypeConfig::Custom(custom) => {
-                    custom_issuers
-                        .entry(custom.issuer.to_string())
-                        .or_insert_with(|| CustomIssuerMetadata {
-                            tokens_mappings: HashMap::new(),
-                        })
-                        .tokens_mappings
-                        .insert(
-                            entity_type.to_string(),
-                            CustomTokenMetadata {
-                                required_claims: custom.required_claims,
-                            },
-                        );
+                    let token = CustomTokenMetadata {
+                        required_claims: custom.required_claims,
+                    };
+                    builder.add_custom(entity_type, custom.issuer, token)?;
                 },
             }
         }
-
-        TokenTypes::build(jwt_issuers, custom_issuers)
+        builder.finish()
     }
 }
 

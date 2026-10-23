@@ -353,6 +353,49 @@ fn test_trusted_issuer_entity_type_declared_twice_is_rejected() {
     );
 }
 
+/// An issuer whose tokens are all untrusted declares nothing, as a migrated v1
+/// store would: it is not loaded and gets no `TrustedIssuer` entity.
+#[test]
+fn test_issuer_with_only_untrusted_tokens_declares_nothing() {
+    let json = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": null,
+                "policies": {},
+                "trusted_issuers": {
+                    "jans": {
+                        "name": "Jans",
+                        "description": "test",
+                        "openid_configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
+                        "token_metadata": {
+                            "access_token": {
+                                "trusted": false,
+                                "entity_type_name": "Jans::Access_token"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    let agama = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string())
+        .expect("the store should deserialize");
+    let legacy_store = agama.policy_stores["test"].clone();
+    let store =
+        super::super::PolicyStore::try_from(legacy_store).expect("the store should convert");
+    assert!(
+        store.token_types.jwt_issuers().is_empty(),
+        "an issuer without trusted tokens should not be loaded"
+    );
+    assert!(
+        store.token_types.get("Jans::Access_token").is_none(),
+        "an untrusted token type should not be accepted"
+    );
+}
+
 #[test]
 fn test_trusted_issuer_endpoint_without_discovery_suffix_is_rejected() {
     let schema = base64::prelude::BASE64_STANDARD.encode("{}");

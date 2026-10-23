@@ -14,6 +14,7 @@
 mod test;
 
 use std::collections::{HashMap, HashSet};
+use std::str::FromStr;
 
 use base64::prelude::*;
 use cedar_policy::{Policy, PolicyId};
@@ -27,6 +28,9 @@ use crate::common::PartitionResult;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::{
     DefaultEntitiesWithWarns, parse_default_entities_with_warns,
+};
+use crate::common::policy_store::token_types::{
+    EntityTypeName, IssuerName, TokenTypesBuilder, sanitize_issuer_name,
 };
 
 #[derive(Debug, Copy, Clone, PartialEq, Deserialize)]
@@ -85,23 +89,6 @@ pub(crate) struct LegacyCustomTokenMetadata {
     pub(crate) required: bool,
     #[serde(default)]
     pub(crate) required_claims: HashSet<String>,
-}
-
-impl From<LegacyCustomIssuerMetadata> for super::CustomIssuerMetadata {
-    fn from(v: LegacyCustomIssuerMetadata) -> Self {
-        Self {
-            tokens_mappings: v
-                .tokens_mappings
-                .into_iter()
-                .map(|(mapping, token)| {
-                    let token = super::CustomTokenMetadata {
-                        required_claims: token.required_claims,
-                    };
-                    (mapping, token)
-                })
-                .collect(),
-        }
-    }
 }
 
 impl From<LegacyTokenEntityMetadata> for super::TokenEntityMetadata {
@@ -170,21 +157,57 @@ where
     Ok(DiscoveryEndpoint { configuration, iss })
 }
 
-impl From<LegacyTrustedIssuer> for super::TrustedIssuer {
-    fn from(v: LegacyTrustedIssuer) -> Self {
-        super::TrustedIssuer::new(
-            v.name,
-            v.discovery.iss,
-            super::KeySource::Discovery {
-                configuration: v.discovery.configuration,
-            },
-            v.token_metadata
-                .into_values()
-                .filter(|token| token.trusted)
-                .map(|token| (token.entity_type_name.clone(), token.into()))
-                .collect(),
-        )
+/// Adds the token types of the Agama-format issuers to `builder`, the way a v1
+/// store is migrated: untrusted tokens are dropped, so an issuer with none
+/// declares nothing, and a custom issuer is identified by its sanitized name.
+/// Sorted so the same conflict is always reported the same way.
+fn add_legacy_issuers(
+    builder: &mut TokenTypesBuilder,
+    trusted_issuers: HashMap<String, LegacyTrustedIssuer>,
+    custom_issuers: HashMap<String, LegacyCustomIssuerMetadata>,
+) -> Result<(), super::TokenTypesError> {
+    let mut trusted_issuers: Vec<LegacyTrustedIssuer> = trusted_issuers.into_values().collect();
+    trusted_issuers.sort_by(|a, b| (&a.name, &a.discovery.iss).cmp(&(&b.name, &b.discovery.iss)));
+    for issuer in trusted_issuers {
+        let name = IssuerName::from_str(&issuer.name)?;
+        let mut tokens: Vec<LegacyTokenEntityMetadata> = issuer
+            .token_metadata
+            .into_values()
+            .filter(|token| token.trusted)
+            .collect();
+        tokens.sort_by(|a, b| a.entity_type_name.cmp(&b.entity_type_name));
+        for token in tokens {
+            builder.add_jwt(
+                EntityTypeName::from_str(&token.entity_type_name)?,
+                name.clone(),
+                issuer.discovery.iss.clone(),
+                super::KeySource::Discovery {
+                    configuration: issuer.discovery.configuration.clone(),
+                },
+                token.into(),
+            )?;
+        }
     }
+
+    let mut custom_issuers: Vec<(String, LegacyCustomIssuerMetadata)> =
+        custom_issuers.into_iter().collect();
+    custom_issuers.sort_by(|a, b| a.0.cmp(&b.0));
+    for (name, issuer) in custom_issuers {
+        let name = IssuerName::from_str(&sanitize_issuer_name(&name))?;
+        let mut tokens: Vec<(String, LegacyCustomTokenMetadata)> =
+            issuer.tokens_mappings.into_iter().collect();
+        tokens.sort_by(|a, b| a.0.cmp(&b.0));
+        for (entity_type, token) in tokens {
+            builder.add_custom(
+                EntityTypeName::from_str(&entity_type)?,
+                name.clone(),
+                super::CustomTokenMetadata {
+                    required_claims: token.required_claims,
+                },
+            )?;
+        }
+    }
+    Ok(())
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -608,22 +631,13 @@ impl TryFrom<LegacyPolicyStore> for super::PolicyStore {
 
     fn try_from(v: LegacyPolicyStore) -> Result<Self, Self::Error> {
         let schema: Option<super::CedarSchema> = v.schema.map(std::convert::Into::into);
-        // A custom issuer is identified by its sanitized name, as in v1.
-        let token_types = super::TokenTypes::build(
-            v.trusted_issuers
-                .unwrap_or_default()
-                .into_values()
-                .map(super::TrustedIssuer::from),
-            v.custom_issuers
-                .unwrap_or_default()
-                .into_iter()
-                .map(|(name, issuer)| {
-                    (
-                        super::token_types::sanitize_issuer_name(&name),
-                        issuer.into(),
-                    )
-                }),
+        let mut builder = TokenTypesBuilder::default();
+        add_legacy_issuers(
+            &mut builder,
+            v.trusted_issuers.unwrap_or_default(),
+            v.custom_issuers.unwrap_or_default(),
         )?;
+        let token_types = builder.finish()?;
         Ok(super::PolicyStore {
             version: v.version,
             schema_source_exists: schema.is_some(),

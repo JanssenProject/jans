@@ -11,10 +11,13 @@
 //! issuer has no `openid_configuration_endpoint` and its `token_id` is supplied
 //! by the processor (not read from a claim).
 
-use std::collections::{HashMap, HashSet};
+#[cfg(test)]
+use std::collections::HashMap;
+use std::collections::HashSet;
 
-/// Configuration for a single custom issuer, keyed by issuer name in the policy
-/// store's `custom_issuers` map.
+/// Configuration for a single custom issuer, keyed by issuer name. Only tests
+/// still describe custom issuers this way, through `TokenTypes::build`.
+#[cfg(test)]
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct CustomIssuerMetadata {
     /// Token types this issuer emits, keyed by the request `TokenInput.mapping`

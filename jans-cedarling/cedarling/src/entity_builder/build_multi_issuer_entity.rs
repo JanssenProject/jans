@@ -967,7 +967,7 @@ mod tests {
         let ti = TrustedIssuer::discovery_at(
             "Jans".to_string(),
             Url::parse("https://test.issuer.com").unwrap(),
-            HashMap::default(),
+            tokens(&["Jans::Access_Token"]),
         );
         let trusted_issuers: HashMap<String, TrustedIssuer> =
             HashMap::from_iter(vec![("Jans".to_string(), ti)]);
@@ -1149,7 +1149,7 @@ mod tests {
             "Jans".to_string(),
             Url::parse("https://test.issuer.com/.well-known/openid-configuration")
                 .expect("url should be parsed"),
-            HashMap::new(),
+            tokens(&["Jans::Access_Token"]),
         )
         .expect("test configuration endpoint should derive an iss");
 
