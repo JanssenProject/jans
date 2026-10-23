@@ -162,7 +162,7 @@ impl TokenCache {
         // marker index so `clear_custom_tokens` can flush them without touching JWTs.
         let mut index_keys =
             vec![IndexKey::Iss(token.normalized_issuer().into_owned()).index_value()];
-        if matches!(kind, TokenKind::AuthorizeCustom(_)) {
+        if matches!(kind, TokenKind::AuthorizeCustom { .. }) {
             index_keys.push(IndexKey::Custom.index_value());
         }
 
@@ -354,7 +354,10 @@ mod tests {
         let token = token_with_exp(now, 3600);
 
         let jwt_kind = TokenKind::AuthorizeMultiIssuer("Acme::Access_Token".into());
-        let custom_kind = TokenKind::AuthorizeCustom("Acme::ApiKey".into());
+        let custom_kind = TokenKind::AuthorizeCustom {
+            mapping: "Acme::ApiKey".into(),
+            generation: 1,
+        };
 
         cache.save(&jwt_kind, "jwt-payload", token.clone(), now);
         cache.save(&custom_kind, "custom-payload", token, now);

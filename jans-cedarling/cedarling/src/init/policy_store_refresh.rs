@@ -243,8 +243,9 @@ impl AuthzRebuilder {
         policy_store: PolicyStoreWithID,
         prior_authz: &Authz,
     ) -> Result<Authz, RebuildError> {
-        // A reused `JwtService` keeps its token cache; `swap_authz` flushes its
-        // custom-token verdicts once the new store is live.
+        // A reused `JwtService` keeps its token cache. JWT entries were validated
+        // under the same JWT config; custom entries are keyed by the token types'
+        // generation, so none made under the previous store is served under this one.
         let prior_jwt = if prior_authz
             .token_types()
             .same_jwt_config(&policy_store.token_types)
@@ -269,22 +270,6 @@ impl AuthzRebuilder {
 }
 
 pub(crate) type RebuildError = BuildAuthzError;
-
-/// Publish `new_authz` and flush cached custom-token verdicts.
-///
-/// Custom cache entries key only on mapping and payload, so a verdict cached under
-/// the previous store's custom token types would otherwise be served from a reused
-/// `JwtService` until `CEDARLING_TOKEN_CACHE_MAX_TTL` lapses. Flushing after the
-/// store keeps the window for in-flight requests to re-cache an old verdict short.
-/// JWT entries stay: the `JwtService` is reused only when the JWT config is
-/// unchanged, so they were validated under the same rules.
-pub(crate) fn swap_authz(authz_swap: &ArcSwap<Authz>, new_authz: Arc<Authz>) {
-    authz_swap.store(new_authz);
-    authz_swap
-        .load()
-        .clone_jwt_service()
-        .clear_custom_token_cache();
-}
 
 /// Remembers which policy-store format warnings have already been logged, so a
 /// periodic refresh landing on the same store does not repeat them every tick.
@@ -796,7 +781,7 @@ async fn parse_swap_and_record(
         },
     };
 
-    swap_authz(&ctx.authz_swap, Arc::new(new_authz));
+    ctx.authz_swap.store(Arc::new(new_authz));
     // Keep the `instance.policy_count` gauge in sync with the freshly-swapped
     // store. Before this update the gauge reported the bootstrap count
     // indefinitely, diverging silently from what the authz engine actually

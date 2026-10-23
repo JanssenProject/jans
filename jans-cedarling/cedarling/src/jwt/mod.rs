@@ -170,6 +170,8 @@ struct IssuerConfig {
 struct CustomTarget<'a> {
     issuer: &'a IssuerName,
     token_meta: &'a CustomTokenMetadata,
+    /// [`TokenTypes::generation`] of the store the token is checked against.
+    generation: u64,
 }
 
 struct TokenCallCtx<'a> {
@@ -434,6 +436,7 @@ impl JwtService {
                     let target = CustomTarget {
                         issuer: &token_type.issuer,
                         token_meta,
+                        generation: token_types.generation(),
                     };
                     self.handle_custom_token(custom_processor, target, custom_timeout, &mut ctx)
                         .await
@@ -699,7 +702,13 @@ impl JwtService {
         timeout: Option<Duration>,
         now: chrono::DateTime<Utc>,
     ) -> Result<Arc<Token>, MultiIssuerValidationError> {
-        let token_kind = TokenKind::AuthorizeCustom(Cow::Borrowed(input.mapping.as_str()));
+        // Keyed by the store generation too: a request that started on the
+        // previous store finishes under its rules, but its result stays invisible
+        // to requests on the new one.
+        let token_kind = TokenKind::AuthorizeCustom {
+            mapping: Cow::Borrowed(input.mapping.as_str()),
+            generation: target.generation,
+        };
 
         // Serve a still-valid cached result if present.
         if let Some(cached) = self.token_cache.find(&token_kind, &input.payload) {
@@ -1069,6 +1078,7 @@ mod test {
         let target = super::CustomTarget {
             issuer: &token_type.issuer,
             token_meta,
+            generation: index.generation(),
         };
         svc.process_custom_token(&processor, target, &input, timeout, chrono::Utc::now())
             .await
@@ -1118,6 +1128,53 @@ mod test {
             1,
             "a cacheable custom token must be processed only once; the second call should hit the token cache"
         );
+    }
+
+    /// A refresh that reuses the `JwtService` keeps its cache, and a request that
+    /// started on the previous store may cache its result after the swap. That
+    /// result serves only requests on the store it was checked against.
+    #[test]
+    async fn custom_token_cache_is_per_store_generation() {
+        let svc = custom_only_service().await;
+        let calls = Arc::new(AtomicUsize::new(0));
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: calls.clone(),
+            behavior: StubBehavior::Ok { cacheable: true },
+        });
+        let previous = custom_index(&[("Acme", "Acme::CustomToken")]);
+        let refreshed = custom_index(&[("Acme", "Acme::CustomToken")]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        for (store, expected_calls, what) in [
+            (
+                &previous,
+                1,
+                "the first request on the previous store is processed",
+            ),
+            (
+                &refreshed,
+                2,
+                "a result cached under the previous store is not served",
+            ),
+            (
+                &refreshed,
+                2,
+                "a result cached under the refreshed store is served",
+            ),
+            (
+                &previous,
+                2,
+                "a late request on the previous store still gets its result",
+            ),
+        ] {
+            svc.validate_multi_issuer_tokens(&tokens, Some(&processor), store, None)
+                .await
+                .expect("custom token should validate");
+            assert_eq!(calls.load(Ordering::SeqCst), expected_calls, "{what}");
+        }
     }
 
     #[test]

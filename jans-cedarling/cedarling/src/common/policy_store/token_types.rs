@@ -15,6 +15,7 @@ use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 use std::str::FromStr;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use smol_str::{SmolStr, ToSmolStr};
 use url::Url;
@@ -290,11 +291,24 @@ pub(crate) struct TokenType {
 
 /// The validated token types of a policy store, keyed by entity type.
 #[derive(Debug, Clone, Default)]
-#[cfg_attr(test, derive(PartialEq))]
 pub(crate) struct TokenTypes {
     tokens: HashMap<EntityTypeName, Arc<TokenType>>,
     /// JWT issuers by name; their token types are in `tokens`.
     jwt_issuers: HashMap<IssuerName, Arc<TrustedIssuer>>,
+    /// Unique to each build, so a result cached under one store is never served
+    /// under another, even to a request that started before a refresh.
+    generation: u64,
+}
+
+/// The generation the next built [`TokenTypes`] gets.
+static NEXT_GENERATION: AtomicU64 = AtomicU64::new(1);
+
+// Tests compare what two stores accept, not which build they come from.
+#[cfg(test)]
+impl PartialEq for TokenTypes {
+    fn eq(&self, other: &Self) -> bool {
+        self.tokens == other.tokens && self.jwt_issuers == other.jwt_issuers
+    }
 }
 
 /// A conflict in the token-type configuration, found before anything loads.
@@ -464,6 +478,7 @@ impl TokenTypesBuilder {
         Ok(TokenTypes {
             tokens: self.tokens,
             jwt_issuers: self.jwt_issuers,
+            generation: NEXT_GENERATION.fetch_add(1, Ordering::Relaxed),
         })
     }
 
@@ -634,6 +649,11 @@ impl TokenTypes {
     /// validated token to carry instead of being looked up again.
     pub(crate) fn resolve(&self, mapping: &str) -> Option<(&EntityTypeName, &Arc<TokenType>)> {
         self.tokens.get_key_value(mapping)
+    }
+
+    /// Which build these token types come from; see the field.
+    pub(crate) fn generation(&self) -> u64 {
+        self.generation
     }
 
     /// JWT issuers by name.
