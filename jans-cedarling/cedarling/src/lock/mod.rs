@@ -413,7 +413,6 @@ impl LockService {
     ///    client credentials grant.
     ///
     /// If both are set, `access_token_jwt` takes precedence and a warning is emitted.
-    ///
     async fn acquire_access_token(
         pdp_id: PdpID,
         bootstrap_conf: &LockServiceConfig,
