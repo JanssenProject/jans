@@ -276,6 +276,8 @@ pub(crate) type RebuildError = BuildAuthzError;
 /// the previous store's custom token types would otherwise be served from a reused
 /// `JwtService` until `CEDARLING_TOKEN_CACHE_MAX_TTL` lapses. Flushing after the
 /// store keeps the window for in-flight requests to re-cache an old verdict short.
+/// JWT entries stay: the `JwtService` is reused only when the JWT config is
+/// unchanged, so they were validated under the same rules.
 pub(crate) fn swap_authz(authz_swap: &ArcSwap<Authz>, new_authz: Arc<Authz>) {
     authz_swap.store(new_authz);
     authz_swap
