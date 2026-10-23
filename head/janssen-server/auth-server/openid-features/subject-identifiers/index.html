@@ -1100,6 +1100,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ephemeral-subject-identifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Ephemeral Subject Identifiers
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ephemeral Subject Identifiers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enabling" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Enabling
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Behavior
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#properties" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2238,6 +2277,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ephemeral-subject-identifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Ephemeral Subject Identifiers
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ephemeral Subject Identifiers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enabling" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Enabling
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Behavior
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#properties" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2458,8 +2536,11 @@ instance and it is shared with the client (or clients) via ID token or access to
 is used for the same end-user across multiple clients depends on the kind of subject identifier configured for a particular
 client.</p>
 <h2 id="types-of-subject-identifiers">Types of Subject Identifiers<a class="headerlink" href="#types-of-subject-identifiers" title="Permanent link">#</a></h2>
-<p>Janssen Server supports both subject identifier types, <code>public</code> and <code>pairwise</code>, as specified in OpenID Connect
-specification. For a particular Janssen Server deployment, the supported types are listed in the response of Janssen
+<p>Janssen Server supports the subject identifier types <code>public</code> and <code>pairwise</code>, as specified in OpenID Connect
+specification, and the <code>ephemeral</code> type, as specified in
+<a href="https://openid.net/specs/openid-connect-ephemeral-subject-identifier-1_0.html">OpenID Connect Ephemeral Subject Identifier 1.0</a>.
+The <code>ephemeral</code> type is disabled by default. See <a href="#ephemeral-subject-identifiers">Ephemeral Subject Identifiers</a>
+to enable it. For a particular Janssen Server deployment, the supported types are listed in the response of Janssen
 Server's well-known configuration endpoint is given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
 </code></pre></div>
@@ -2501,6 +2582,37 @@ initial inputs to generate pairwise identifiers. This input is then signed with 
 a pairwise identifier.</p>
 <p>Sector identifier configuration influences how pairwise identifiers are calculated. See
 <a href="../../client-management/sector-identifiers/">this</a> document for more details.</p>
+<h2 id="ephemeral-subject-identifiers">Ephemeral Subject Identifiers<a class="headerlink" href="#ephemeral-subject-identifiers" title="Permanent link">#</a></h2>
+<p>An <code>ephemeral</code> subject identifier is a random value that stays constant for one authentication session and differs for
+every new authentication request. A client can't link two visits of the same end-user, and colluding clients can't
+link two authentication responses.</p>
+<p>Janssen Server implements
+<a href="https://openid.net/specs/openid-connect-ephemeral-subject-identifier-1_0.html">OpenID Connect Ephemeral Subject Identifier 1.0</a>.</p>
+<h3 id="enabling">Enabling<a class="headerlink" href="#enabling" title="Permanent link">#</a></h3>
+<p>The <code>ephemeral</code> type is disabled by default. To enable it:</p>
+<ol>
+<li>Add <code>ephemeral</code> to the
+   <a href="../../../reference/json/properties/janssenauthserver-properties/#subjecttypessupported">subjectTypesSupported</a>
+   property. The value is then advertised in <code>subject_types_supported</code> of the
+   <a href="../../endpoints/configuration/">well-known configuration</a>.</li>
+<li>Register the client with <code>"subject_type": "ephemeral"</code>, for example via
+   <a href="../../endpoints/client-registration/">Dynamic Client Registration</a>.</li>
+</ol>
+<p>Example discovery response fragment:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;subject_types_supported&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;public&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;pairwise&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ephemeral&quot;</span><span class="p">]</span>
+</code></pre></div>
+<h3 id="behavior">Behavior<a class="headerlink" href="#behavior" title="Permanent link">#</a></h3>
+<ul>
+<li>Janssen Server generates the identifier with a cryptographically secure random generator. It has 256 bits of entropy
+  and is encoded as base64url.</li>
+<li>The identifier is created when the authorization grant is created and stored in the grant attributes. The ID token,
+  UserInfo response, access token, introspection response and refresh token flow of that grant all return the same
+  <code>sub</code>.</li>
+<li>A new authentication request creates a new grant and a new identifier. Janssen Server never reuses a value.</li>
+<li>No sector identifier is required for clients with the <code>ephemeral</code> type.</li>
+<li>Back-channel <code>logout_token</code> does not contain <code>sub</code> for these clients, because no grant exists at logout time. Use
+  <code>sid</code> to correlate the session.</li>
+</ul>
 <h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">#</a></h2>
 <p>Janssen Server allows customization concerning subject identifiers using the properties below:</p>
 <ul>
@@ -2580,7 +2692,7 @@ a pairwise identifier.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 15, 2025
+    October 23, 2026
   </span>
 
     
