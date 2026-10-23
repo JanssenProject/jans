@@ -1266,11 +1266,8 @@ impl Authz {
         let principal_types: HashSet<cedar_policy::EntityTypeName> = validated_tokens
             .tokens
             .keys()
-            .map(|mapping| {
-                cedar_policy::EntityTypeName::from_str(mapping.as_str())
-                    .map_err(|e| AuthorizeError::IdentifierParsing(e.into()))
-            })
-            .collect::<Result<_, _>>()?;
+            .map(|entity_type| entity_type.cedar().clone())
+            .collect();
 
         let action_uids = parse_action_uids(actions)?;
         let resource_types = entity_data_to_type_names(resources)?;

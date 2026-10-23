@@ -12,6 +12,7 @@
 use std::borrow::Borrow;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};
+use std::hash::{Hash, Hasher};
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -26,8 +27,15 @@ use super::{CustomTokenMetadata, KeySource, TokenEntityMetadata, TrustedIssuer};
 
 /// An issuer's identity: the namespace of its `TrustedIssuer` entity and,
 /// lowercased, the prefix of its `context.tokens` keys.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, derive_more::Display)]
-pub(crate) struct IssuerName(SmolStr);
+///
+/// Keeps the parsed `{name}::TrustedIssuer` type, so each token's `iss` entity
+/// is built without parsing it again.
+#[derive(Debug, Clone, derive_more::Display)]
+#[display("{name}")]
+pub(crate) struct IssuerName {
+    name: SmolStr,
+    trusted_issuer_type: cedar_policy::EntityTypeName,
+}
 
 impl IssuerName {
     /// Parses a name that a test writes as a valid one.
@@ -39,7 +47,12 @@ impl IssuerName {
 
     /// The `context.tokens` key prefix of this issuer's tokens.
     pub(crate) fn key_prefix(&self) -> String {
-        self.0.to_lowercase()
+        self.name.to_lowercase()
+    }
+
+    /// `{name}::TrustedIssuer`, the type of this issuer's entity.
+    pub(crate) fn trusted_issuer_type(&self) -> &cedar_policy::EntityTypeName {
+        &self.trusted_issuer_type
     }
 }
 
@@ -60,13 +73,45 @@ impl FromStr for IssuerName {
             });
         }
         // The issuer is the namespace of its `TrustedIssuer` entity type.
-        cedar_policy::EntityTypeName::from_str(&format!("{name}::TrustedIssuer")).map_err(
-            |source| InvalidIssuerName::NotNamespace {
-                name: name.to_string(),
-                source: Box::new(source),
-            },
-        )?;
-        Ok(Self(name.to_smolstr()))
+        let trusted_issuer_type = cedar_policy::EntityTypeName::from_str(&format!(
+            "{name}::TrustedIssuer"
+        ))
+        .map_err(|source| InvalidIssuerName::NotNamespace {
+            name: name.to_string(),
+            source: Box::new(source),
+        })?;
+        Ok(Self {
+            name: name.to_smolstr(),
+            trusted_issuer_type,
+        })
+    }
+}
+
+// Equal, ordered and hashed as the name alone: the parsed type follows from it,
+// and `Borrow<str>` needs the hash of the name.
+impl PartialEq for IssuerName {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
+}
+
+impl Eq for IssuerName {}
+
+impl PartialOrd for IssuerName {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for IssuerName {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.name.cmp(&other.name)
+    }
+}
+
+impl Hash for IssuerName {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
     }
 }
 
@@ -86,13 +131,20 @@ pub enum InvalidIssuerName {
 // Hashes as the inner string, so an issuer can be looked up by its name as text.
 impl Borrow<str> for IssuerName {
     fn borrow(&self) -> &str {
-        &self.0
+        &self.name
     }
 }
 
 /// A Cedar entity type name, written exactly as a request `mapping` names it.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, derive_more::Display)]
-pub(crate) struct EntityTypeName(SmolStr);
+///
+/// Keeps Cedar's parsed form next to the text, so building an entity or matching
+/// policies never parses it again.
+#[derive(Debug, Clone, derive_more::Display)]
+#[display("{name}")]
+pub(crate) struct EntityTypeName {
+    name: SmolStr,
+    cedar: cedar_policy::EntityTypeName,
+}
 
 impl EntityTypeName {
     /// Parses an entity type that a test writes as a valid one.
@@ -104,7 +156,11 @@ impl EntityTypeName {
     }
 
     pub(crate) fn as_str(&self) -> &str {
-        &self.0
+        &self.name
+    }
+
+    pub(crate) fn cedar(&self) -> &cedar_policy::EntityTypeName {
+        &self.cedar
     }
 }
 
@@ -114,13 +170,32 @@ impl FromStr for EntityTypeName {
     /// Accepts what Cedar accepts, which includes only its canonical spelling, so
     /// that config and request agree on what a valid entity type is.
     fn from_str(entity_type: &str) -> Result<Self, Self::Err> {
-        cedar_policy::EntityTypeName::from_str(entity_type).map_err(|source| {
+        let cedar = cedar_policy::EntityTypeName::from_str(entity_type).map_err(|source| {
             InvalidEntityType {
                 entity_type: entity_type.to_string(),
                 source: Box::new(source),
             }
         })?;
-        Ok(Self(entity_type.to_smolstr()))
+        Ok(Self {
+            name: entity_type.to_smolstr(),
+            cedar,
+        })
+    }
+}
+
+// Equal and hashed as the text alone: the parsed form follows from it, and
+// `Borrow<str>` needs the hash of the text.
+impl PartialEq for EntityTypeName {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
+}
+
+impl Eq for EntityTypeName {}
+
+impl Hash for EntityTypeName {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
     }
 }
 
@@ -133,11 +208,11 @@ pub struct InvalidEntityType {
     source: Box<cedar_policy::ParseErrors>,
 }
 
-// Hashes as the inner string, so a request `mapping` can look up an entry
-// without being parsed.
+// Hashes as the text, so a request `mapping` can look up an entry without being
+// parsed.
 impl Borrow<str> for EntityTypeName {
     fn borrow(&self) -> &str {
-        &self.0
+        &self.name
     }
 }
 

@@ -169,14 +169,16 @@ impl EntityBuilder {
     }
 
     pub(super) fn trusted_issuer_typename(namespace: &IssuerName) -> String {
-        format!("{namespace}::TrustedIssuer")
+        namespace.trusted_issuer_type().to_string()
     }
 
     pub(super) fn trusted_issuer_cedar_uid(
         namespace: &IssuerName,
         iss_url: &IssClaim,
-    ) -> Result<EntityUid, BuildEntityError> {
-        build_cedar_uid(&format!("{namespace}::TrustedIssuer"), iss_url.as_str())
+    ) -> EntityUid {
+        // EntityId::from_str returns Result<_, Infallible>, so parsing never fails
+        let entity_id = EntityId::from_str(iss_url.as_str()).unwrap_or_else(|e| match e {});
+        EntityUid::from_type_name_and_id(namespace.trusted_issuer_type().clone(), entity_id)
     }
 
     #[cfg(test)]
