@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
-use super::{BuildEntityError, BuiltEntities, EntityBuilder};
+use super::{BuiltEntities, EntityBuilder};
 use crate::authz::{DropReason, DroppedToken};
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::token_types::{EntityTypeName, TokenType};
@@ -21,10 +21,10 @@ use std::str::FromStr;
 /// Errors that can occur during multi-issuer entity building
 #[derive(Debug, thiserror::Error)]
 pub enum MultiIssuerEntityError {
-    /// A token validated as a JWT whose token type is custom, which
-    /// `JwtService` never produces.
-    #[error("token '{0}' was validated as a JWT but its token type is custom")]
-    JwtWithCustomTokenType(String),
+    /// A token validated as one kind, JWT or custom, whose token type is the
+    /// other, which `JwtService` never produces.
+    #[error("token '{0}' was validated as a different kind than its token type")]
+    TokenKindMismatch(String),
 
     #[error("Missing exp claim in JWT")]
     MissingExpClaim,
@@ -37,9 +37,6 @@ pub enum MultiIssuerEntityError {
 
     #[error("No valid tokens found")]
     NoValidTokens,
-
-    #[error("Could not create cedar uid for trusted issuer: {0}")]
-    BuildTrustedIssuerUid(#[from] BuildEntityError),
 
     #[error("Could not build entity attributes: {0}")]
     BuildAttrs(#[from] BuildAttrsErrorVec),
@@ -281,7 +278,7 @@ impl EntityBuilder {
         //   (`CustomTokenIssuerMeta::token_id`); no claim lookup is performed.
         // - JWT tokens: `token_id` of the token type names the *claim* to read.
         let entity_id = match (&token.iss, &token_type.kind) {
-            (TokenIssuer::Custom(meta), _) => meta.token_id.clone(),
+            (TokenIssuer::Custom(meta), TokenTypeKind::Custom(_)) => meta.token_id.clone(),
             (TokenIssuer::Jwt(_), TokenTypeKind::Jwt { metadata, .. }) => {
                 let entity_id_srcs = [EntityIdSrc::Token {
                     token,
@@ -292,8 +289,9 @@ impl EntityBuilder {
                     .map_err(|e| MultiIssuerEntityError::InvalidEntityUid(e.to_string()))?
                     .to_string()
             },
-            (TokenIssuer::Jwt(_), TokenTypeKind::Custom(_)) => {
-                return Err(MultiIssuerEntityError::JwtWithCustomTokenType(
+            (TokenIssuer::Jwt(_), TokenTypeKind::Custom(_))
+            | (TokenIssuer::Custom(_), TokenTypeKind::Jwt { .. }) => {
+                return Err(MultiIssuerEntityError::TokenKindMismatch(
                     entity_type.to_string(),
                 ));
             },
@@ -655,6 +653,44 @@ mod tests {
                 token_type.context_key.as_str(),
                 key,
                 "the key prefix should be the issuer the mapping names, not the iss"
+            );
+        }
+    }
+
+    /// A token's kind and its token type's kind always agree for tokens from
+    /// `JwtService`; a mismatch either way is reported rather than built.
+    #[test]
+    fn token_kind_mismatch_is_rejected() {
+        let builder = create_test_entity_builder();
+        let built_entities = BuiltEntities::from(&builder.iss_entities);
+        let custom_token = Token::new(
+            TokenClaims::from(HashMap::new()),
+            TokenIssuer::Custom(CustomTokenIssuerMeta {
+                issuer_id: "acmekeys".to_string(),
+                token_id: "id-1".to_string(),
+                expiration: None,
+            }),
+        );
+        let jwt_token = Token::new(TokenClaims::from(HashMap::new()), acme_issuer(&builder));
+
+        for (mapping, token, what) in [
+            (
+                "Jans::Access_Token",
+                &custom_token,
+                "a custom token typed as a JWT",
+            ),
+            (
+                "Acme::CustomToken",
+                &jwt_token,
+                "a JWT typed as a custom token",
+            ),
+        ] {
+            let err = builder
+                .build_token_entity(mapping, token, &built_entities)
+                .expect_err("a kind mismatch must not build an entity");
+            assert!(
+                matches!(&err, MultiIssuerEntityError::TokenKindMismatch(name) if name == mapping),
+                "{what} should be a TokenKindMismatch, got {err:?}"
             );
         }
     }
