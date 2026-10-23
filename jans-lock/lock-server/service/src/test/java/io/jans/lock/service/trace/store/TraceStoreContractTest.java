@@ -40,6 +40,7 @@ import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.ReceiptHead;
+import io.jans.lock.service.trace.model.ReceiptSettlement;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -402,12 +403,12 @@ public abstract class TraceStoreContractTest {
 	}
 
 	@Test
-	void testUpdateReceiptState_thenFindReceipt_reflectsNewState() throws Exception {
+	void testSettleReceipt_thenFindReceipt_reflectsNewState() throws Exception {
 		store.insertReceipt(newReceiptRow(1L, 1000L, "producer-1", "record-1", TraceReceiptState.PENDING));
 
-		boolean updated = store.updateReceiptState(DOMAIN, 1L, TraceReceiptState.COMMITTED);
+		ReceiptSettlement settled = store.settleReceipt(DOMAIN, 1L, TraceReceiptState.COMMITTED);
 
-		assertTrue(updated);
+		assertEquals(ReceiptSettlement.SETTLED, settled);
 		Optional<TraceReceiptEntry> found = store.findReceipt(DOMAIN, 1L);
 		assertTrue(found.isPresent());
 		assertEquals(TraceReceiptState.COMMITTED, found.get().getReceiptStateEnum());
@@ -493,10 +494,39 @@ public abstract class TraceStoreContractTest {
 	}
 
 	@Test
-	void testUpdateReceiptState_unknownSequence_returnsFalse() throws Exception {
-		boolean updated = store.updateReceiptState(DOMAIN, 999L, TraceReceiptState.VOID);
+	void testSettleReceipt_unknownSequence_notFound() throws Exception {
+		assertEquals(ReceiptSettlement.NOT_FOUND, store.settleReceipt(DOMAIN, 999L, TraceReceiptState.VOID));
+	}
 
-		assertFalse(updated);
+	@Test
+	void testSettleReceipt_pendingTarget_rejected() throws Exception {
+		store.insertReceipt(newReceiptRow(1L, 1000L, "producer-1", "record-1", TraceReceiptState.PENDING));
+
+		assertThrows(IllegalArgumentException.class, () -> store.settleReceipt(DOMAIN, 1L, TraceReceiptState.PENDING));
+		assertEquals(TraceReceiptState.PENDING, store.findReceipt(DOMAIN, 1L).get().getReceiptStateEnum());
+	}
+
+	@Test
+	void testSettleReceipt_sameTerminalStateTwice_alreadySettled() throws Exception {
+		store.insertReceipt(newReceiptRow(1L, 1000L, "producer-1", "record-1", TraceReceiptState.PENDING));
+
+		assertEquals(ReceiptSettlement.SETTLED, store.settleReceipt(DOMAIN, 1L, TraceReceiptState.VOID));
+		assertEquals(ReceiptSettlement.ALREADY_SETTLED, store.settleReceipt(DOMAIN, 1L, TraceReceiptState.VOID));
+		assertEquals(TraceReceiptState.VOID, store.findReceipt(DOMAIN, 1L).get().getReceiptStateEnum());
+	}
+
+	@Test
+	void testSettleReceipt_otherTerminalState_conflictAndUnchanged() throws Exception {
+		store.insertReceipt(newReceiptRow(1L, 1000L, "producer-1", "record-1", TraceReceiptState.PENDING));
+		store.insertReceipt(newReceiptRow(2L, 2000L, "producer-1", "record-2", TraceReceiptState.PENDING));
+
+		assertEquals(ReceiptSettlement.SETTLED, store.settleReceipt(DOMAIN, 1L, TraceReceiptState.COMMITTED));
+		assertEquals(ReceiptSettlement.CONFLICT, store.settleReceipt(DOMAIN, 1L, TraceReceiptState.VOID));
+		assertEquals(TraceReceiptState.COMMITTED, store.findReceipt(DOMAIN, 1L).get().getReceiptStateEnum());
+
+		assertEquals(ReceiptSettlement.SETTLED, store.settleReceipt(DOMAIN, 2L, TraceReceiptState.VOID));
+		assertEquals(ReceiptSettlement.CONFLICT, store.settleReceipt(DOMAIN, 2L, TraceReceiptState.COMMITTED));
+		assertEquals(TraceReceiptState.VOID, store.findReceipt(DOMAIN, 2L).get().getReceiptStateEnum());
 	}
 
 	// -- receipts: head across states --------------------------------------------------------------

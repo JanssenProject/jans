@@ -38,6 +38,7 @@ import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.ReceiptHead;
+import io.jans.lock.service.trace.model.ReceiptSettlement;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -56,7 +57,7 @@ import io.jans.lock.service.trace.testkit.TraceTestCrypto;
  * holds (design rule 4: immutability of evidence).
  *
  * <p>Test hooks: {@link #failNextInsertRecord()}, {@link #failNextInsertReceipt()},
- * {@link #failNextUpdateReceiptState()} make the next matching call throw
+ * {@link #failNextSettleReceipt()}, {@link #failNextFindRecord()} make the next matching call throw
  * {@link TraceStorageException} instead of touching any map (auto-resetting, one-shot);
  * {@link #setInsertRecordBarrier(CountDownLatch, long, TimeUnit)} lets a race test rendezvous two
  * threads immediately before the {@code insertRecord} map mutation; {@link #snapshot()} returns an
@@ -88,7 +89,13 @@ public class InMemoryTraceStore implements TraceStore {
 
 	private final AtomicBoolean failNextInsertReceipt = new AtomicBoolean(false);
 
-	private final AtomicBoolean failNextUpdateReceiptState = new AtomicBoolean(false);
+	private final AtomicBoolean failNextSettleReceipt = new AtomicBoolean(false);
+
+	private final AtomicBoolean failNextFindRecord = new AtomicBoolean(false);
+
+	private final AtomicBoolean failAfterNextInsertRecord = new AtomicBoolean(false);
+
+	private volatile Runnable beforeInsertRecord;
 
 	private volatile CountDownLatch insertRecordBarrier;
 
@@ -113,17 +120,39 @@ public class InMemoryTraceStore implements TraceStore {
 		failNextInsertRecord.set(true);
 	}
 
+	/**
+	 * The next {@link #insertRecord(StoredTraceRecord)} call stores the record and then throws
+	 * {@link TraceStorageException}, like a database commit whose acknowledgement was lost.
+	 */
+	public void failAfterNextInsertRecord() {
+		failAfterNextInsertRecord.set(true);
+	}
+
+	/** The next {@link #findRecord(RecordIdentity)} call throws {@link TraceStorageException}. */
+	public void failNextFindRecord() {
+		failNextFindRecord.set(true);
+	}
+
+	/**
+	 * Runs {@code hook} at the start of every {@link #insertRecord(StoredTraceRecord)}, before the
+	 * record becomes visible, to interleave another actor (for example the repair timer) with a
+	 * paused writer. Pass {@code null} to remove it.
+	 */
+	public void setBeforeInsertRecord(Runnable hook) {
+		this.beforeInsertRecord = hook;
+	}
+
 	/** The next {@link #insertReceipt(TraceReceiptEntry)} call throws {@link TraceStorageException}. */
 	public void failNextInsertReceipt() {
 		failNextInsertReceipt.set(true);
 	}
 
 	/**
-	 * The next {@link #updateReceiptState(String, long, TraceReceiptState)} call throws
+	 * The next {@link #settleReceipt(String, long, TraceReceiptState)} call throws
 	 * {@link TraceStorageException}.
 	 */
-	public void failNextUpdateReceiptState() {
-		failNextUpdateReceiptState.set(true);
+	public void failNextSettleReceipt() {
+		failNextSettleReceipt.set(true);
 	}
 
 	/**
@@ -163,12 +192,19 @@ public class InMemoryTraceStore implements TraceStore {
 		if (failNextInsertRecord.getAndSet(false)) {
 			throw new TraceStorageException("test_fail_next_insert_record", "Forced test failure");
 		}
+		Runnable hook = beforeInsertRecord;
+		if (hook != null) {
+			hook.run();
+		}
 		awaitInsertRecordBarrier();
 
 		String key = traceKeys.recordKey(stored.getIdentity());
 		StoredTraceRecord existing = recordsByKey.putIfAbsent(key, stored.copy());
 		if (existing != null) {
 			throw new DuplicateEntryException(key);
+		}
+		if (failAfterNextInsertRecord.getAndSet(false)) {
+			throw new TraceStorageException("test_fail_after_next_insert_record", "Forced test failure after insert");
 		}
 	}
 
@@ -239,6 +275,9 @@ public class InMemoryTraceStore implements TraceStore {
 
 	@Override
 	public Optional<StoredTraceRecord> findRecord(RecordIdentity id) {
+		if (failNextFindRecord.getAndSet(false)) {
+			throw new TraceStorageException("test_fail_next_find_record", "Forced test failure");
+		}
 		StoredTraceRecord found = recordsByKey.get(traceKeys.recordKey(id));
 		return Optional.ofNullable(found).map(StoredTraceRecord::copy);
 	}
@@ -317,20 +356,32 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
-	public boolean updateReceiptState(String domainId, long receiptSequence, TraceReceiptState state)
+	public ReceiptSettlement settleReceipt(String domainId, long receiptSequence, TraceReceiptState target)
 			throws TraceStorageException {
-		if (failNextUpdateReceiptState.getAndSet(false)) {
-			throw new TraceStorageException("test_fail_next_update_receipt_state", "Forced test failure");
+		if (target == null || target == TraceReceiptState.PENDING) {
+			throw new IllegalArgumentException("A receipt settles to COMMITTED or VOID, not " + target);
+		}
+		if (failNextSettleReceipt.getAndSet(false)) {
+			throw new TraceStorageException("test_fail_next_settle_receipt", "Forced test failure");
 		}
 		String key = traceKeys.receiptKey(domainId, receiptSequence);
-		TraceReceiptEntry[] holder = new TraceReceiptEntry[1];
+		ReceiptSettlement[] outcome = { ReceiptSettlement.NOT_FOUND };
 		receiptsByKey.computeIfPresent(key, (k, existing) -> {
+			TraceReceiptState current = existing.getReceiptStateEnum();
+			if (current == target) {
+				outcome[0] = ReceiptSettlement.ALREADY_SETTLED;
+				return existing;
+			}
+			if (current != TraceReceiptState.PENDING) {
+				outcome[0] = ReceiptSettlement.CONFLICT;
+				return existing;
+			}
 			TraceReceiptEntry replacement = copyOf(existing);
-			replacement.setReceiptStateEnum(state);
-			holder[0] = replacement;
+			replacement.setReceiptStateEnum(target);
+			outcome[0] = ReceiptSettlement.SETTLED;
 			return replacement;
 		});
-		return holder[0] != null;
+		return outcome[0];
 	}
 
 	@Override
