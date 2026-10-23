@@ -393,8 +393,13 @@ fn test_fields_without_a_v2_counterpart_are_rejected() {
         let mut token = json!({ "entity_type_name": "Jans::Access_token" });
         token
             .as_object_mut()
-            .unwrap()
-            .extend(extra_token.as_object().unwrap().clone());
+            .expect("token should be a JSON object")
+            .extend(
+                extra_token
+                    .as_object()
+                    .expect("extra token fields should be an object")
+                    .clone(),
+            );
         let mut issuer = json!({
             "name": "Jans",
             "openid_configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
@@ -402,8 +407,13 @@ fn test_fields_without_a_v2_counterpart_are_rejected() {
         });
         issuer
             .as_object_mut()
-            .unwrap()
-            .extend(extra_issuer.as_object().unwrap().clone());
+            .expect("issuer should be a JSON object")
+            .extend(
+                extra_issuer
+                    .as_object()
+                    .expect("extra issuer fields should be an object")
+                    .clone(),
+            );
         json!({
             "cedar_version": "v4.0.0",
             "policy_stores": {

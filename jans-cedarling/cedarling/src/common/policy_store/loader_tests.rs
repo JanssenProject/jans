@@ -859,9 +859,14 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     assert!(ids.contains(&"google_oauth".to_string()));
 
     // Build the runtime store and check the issuer map
-    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
-        .expect("store with two issuers should parse")
-        .store;
+    let store = read_from_vfs(
+        &store_vfs,
+        dir.to_str().expect("temp dir should be UTF-8"),
+        false,
+        None,
+    )
+    .expect("store with two issuers should parse")
+    .store;
     // Google's only token is `trusted: false`, so nothing of it is migrated.
     let issuer_map = store.token_types.jwt_issuers();
     assert_eq!(
@@ -1415,8 +1420,15 @@ fn test_complete_policy_store_with_issuers() {
         .expect("complete store should parse")
         .store;
     let issuer_map = store.token_types.jwt_issuers();
-    assert_eq!(issuer_map.len(), 1);
-    assert!(issuer_map.contains_key("Main"));
+    assert_eq!(
+        issuer_map.len(),
+        1,
+        "only the issuer with tokens should load"
+    );
+    assert!(
+        issuer_map.contains_key("Main"),
+        "the issuer should be named Main"
+    );
 }
 
 #[test]

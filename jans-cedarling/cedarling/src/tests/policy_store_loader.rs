@@ -463,20 +463,39 @@ permit(
     // Test TrustedIssuerLoadingInfo trait methods
     // Should have 1 trusted issuer defined
     // Issuers are identified by name, not by their file id.
-    assert!(cedarling.is_trusted_issuer_loaded_by_name("Jans"));
-    assert!(!cedarling.is_trusted_issuer_loaded_by_name("NonExistent"));
+    assert!(
+        cedarling.is_trusted_issuer_loaded_by_name("Jans"),
+        "the issuer should be loaded under its name"
+    );
+    assert!(
+        !cedarling.is_trusted_issuer_loaded_by_name("NonExistent"),
+        "an unknown name should not be reported as loaded"
+    );
 
     // Check by iss claim
-    assert!(cedarling.is_trusted_issuer_loaded_by_iss(issuer_url.as_str()));
-    assert!(!cedarling.is_trusted_issuer_loaded_by_iss("https://nonexistent.com"));
+    assert!(
+        cedarling.is_trusted_issuer_loaded_by_iss(issuer_url.as_str()),
+        "the issuer should be loaded under its iss"
+    );
+    assert!(
+        !cedarling.is_trusted_issuer_loaded_by_iss("https://nonexistent.com"),
+        "an unknown iss should not be reported as loaded"
+    );
 
     // Count and percentage
-    assert_eq!(cedarling.loaded_trusted_issuers_count(), 1);
+    assert_eq!(
+        cedarling.loaded_trusted_issuers_count(),
+        1,
+        "one issuer should load"
+    );
 
     // Loaded and failed IDs
     let loaded_ids = cedarling.loaded_trusted_issuer_ids();
-    assert_eq!(loaded_ids.len(), 1);
-    assert!(loaded_ids.contains("Jans"));
+    assert_eq!(loaded_ids.len(), 1, "one issuer id should be loaded");
+    assert!(
+        loaded_ids.contains("Jans"),
+        "the loaded id should be the issuer name"
+    );
 
     let failed_ids = cedarling.failed_trusted_issuer_ids();
     assert!(failed_ids.is_empty());
@@ -620,12 +639,31 @@ async fn test_policy_store_id_malformed_fails_to_load() {
     );
 }
 
+/// Waits until `total` issuers have either loaded or failed.
+#[cfg(not(target_arch = "wasm32"))]
+async fn wait_until_issuers_processed(cedarling: &crate::Cedarling, total: usize) {
+    use std::time::{Duration, Instant};
+
+    let start = Instant::now();
+    loop {
+        let loaded = cedarling.loaded_trusted_issuers_count();
+        let failed = cedarling.failed_trusted_issuer_ids().len();
+        if loaded + failed == total {
+            return;
+        }
+        assert!(
+            start.elapsed() <= Duration::from_secs(5),
+            "Timeout waiting for trusted issuers to load. Loaded: {loaded}, Failed: {failed}"
+        );
+        tokio::time::sleep(Duration::from_millis(1)).await;
+    }
+}
+
 /// Test that the `TrustedIssuerLoadingInfo` trait correctly tracks failed issuers on `Cedarling`.
 #[test]
 #[cfg(not(target_arch = "wasm32"))]
 async fn test_trusted_issuer_loading_info_failed_issuer() {
     use crate::jwt::test_utils::MockServer;
-    use std::time::{Duration, Instant};
 
     // Create a working mock server for successful issuer loading
     let working_mock_server = MockServer::new_with_defaults()
@@ -698,49 +736,38 @@ permit(
         "Total issuers should be 2 (working and failing)"
     );
 
-    // Poll for loading completion with timeout
-    let start = Instant::now();
-    let timeout = Duration::from_secs(5);
-    loop {
-        let loaded = cedarling.loaded_trusted_issuers_count();
-        let failed = cedarling.failed_trusted_issuer_ids().len();
-        let total = loaded + failed;
-        if total == 2 {
-            // Both issuers have been processed (one loaded, one failed)
-            break;
-        }
-        assert!(
-            (start.elapsed() <= timeout),
-            "Timeout waiting for trusted issuers to load. Loaded: {loaded}, Failed: {failed}"
-        );
-        tokio::time::sleep(Duration::from_millis(1)).await;
-    }
+    wait_until_issuers_processed(&cedarling, 2).await;
 
-    // Test TrustedIssuerLoadingInfo trait methods for mixed results
-    // Working issuer should be loaded
     // Issuers are identified by name, not by their file id.
-    assert!(cedarling.is_trusted_issuer_loaded_by_name("Jans"));
-    assert!(!cedarling.is_trusted_issuer_loaded_by_name("Failing"));
-    assert!(!cedarling.is_trusted_issuer_loaded_by_name("NonExistent"));
-
-    // Check by iss claim
-    assert!(cedarling.is_trusted_issuer_loaded_by_iss(working_issuer_url.as_str()));
-    assert!(!cedarling.is_trusted_issuer_loaded_by_iss(failing_issuer_url.as_str()));
-
-    // Count and percentage
-    assert_eq!(cedarling.loaded_trusted_issuers_count(), 1);
-    assert_eq!(cedarling.failed_trusted_issuer_ids().len(), 1);
-
-    // Loaded and failed IDs
-    let loaded_ids = cedarling.loaded_trusted_issuer_ids();
-    assert_eq!(loaded_ids.len(), 1);
-    assert!(loaded_ids.contains("Jans"));
-    assert!(!loaded_ids.contains("Failing"));
-
-    let failed_ids = cedarling.failed_trusted_issuer_ids();
-    assert_eq!(failed_ids.len(), 1);
-    assert!(failed_ids.contains("Failing"));
-    assert!(!failed_ids.contains("Jans"));
+    for (name, loaded) in [("Jans", true), ("Failing", false), ("NonExistent", false)] {
+        assert_eq!(
+            cedarling.is_trusted_issuer_loaded_by_name(name),
+            loaded,
+            "issuer {name} loaded by name"
+        );
+    }
+    for (iss, loaded) in [(&working_issuer_url, true), (&failing_issuer_url, false)] {
+        assert_eq!(
+            cedarling.is_trusted_issuer_loaded_by_iss(iss.as_str()),
+            loaded,
+            "issuer {iss} loaded by iss"
+        );
+    }
+    assert_eq!(
+        cedarling.loaded_trusted_issuer_ids(),
+        std::collections::HashSet::from(["Jans".to_string()]),
+        "only the working issuer should be loaded"
+    );
+    assert_eq!(
+        cedarling.failed_trusted_issuer_ids(),
+        std::collections::HashSet::from(["Failing".to_string()]),
+        "only the failing issuer should be reported as failed"
+    );
+    assert_eq!(
+        cedarling.loaded_trusted_issuers_count(),
+        1,
+        "one issuer should load"
+    );
 }
 
 /// Test that write action is denied for guest users when loaded from directory.

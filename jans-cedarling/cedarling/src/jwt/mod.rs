@@ -1380,7 +1380,9 @@ mod test {
 
     #[test]
     async fn test_validate_multi_issuer_tokens_success() {
-        let mut server = MockServer::new_with_defaults().await.unwrap();
+        let mut server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
 
         // Create tokens with different issuers
         let mut access_tkn_claims = json!({
@@ -1462,7 +1464,9 @@ mod test {
     /// each token keeping the issuer its mapping names.
     #[test]
     async fn issuers_sharing_one_iss_keep_their_own_tokens() {
-        let mut server = MockServer::new_with_defaults().await.unwrap();
+        let mut server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let issuer = |name: &str, entity_type: &str| {
             let mut issuer = server.trusted_issuer();
             issuer.name = IssuerName::for_test(name);
@@ -1722,7 +1726,9 @@ mod test {
 
     #[test]
     async fn test_validate_multi_issuer_tokens_empty_array() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let iss = server
             .trusted_issuer()
             .with_tokens(TestJwtIssuer::default().tokens);
@@ -1756,7 +1762,9 @@ mod test {
 
     #[test]
     async fn test_validate_multi_issuer_tokens_invalid_token_format() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let iss = server
             .trusted_issuer()
             .with_tokens(TestJwtIssuer::default().tokens);
@@ -1796,7 +1804,9 @@ mod test {
 
     #[test]
     async fn test_validate_multi_issuer_tokens_graceful_validation() {
-        let mut server = MockServer::new_with_defaults().await.unwrap();
+        let mut server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
 
         // Create valid token
         let mut valid_claims = json!({
@@ -1863,7 +1873,9 @@ mod test {
 
     #[test]
     async fn test_validate_multi_issuer_tokens_non_deterministic_graceful() {
-        let mut server = MockServer::new_with_defaults().await.unwrap();
+        let mut server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
 
         // Create two tokens with same issuer and type (non-deterministic)
         let mut claims1 = json!({
@@ -1943,7 +1955,9 @@ mod test {
 
     #[test]
     async fn test_validate_multi_issuer_tokens_missing_issuer() {
-        let mut server = MockServer::new_with_defaults().await.unwrap();
+        let mut server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
 
         // Create token without issuer claim
         let mut claims = json!({
@@ -2161,7 +2175,9 @@ mod test {
 
     #[test]
     async fn test_trusted_issuer_loading_info() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let iss = server
             .trusted_issuer()
             .with_tokens(TestJwtIssuer::default().tokens);

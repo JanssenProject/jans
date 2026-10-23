@@ -586,7 +586,10 @@ mod tests {
         let store = result.unwrap();
         assert_eq!(store.version, Some("1.0.0".to_string()));
         assert!(!store.policies.get_set().is_empty());
-        assert!(store.token_types.jwt_issuers().is_empty());
+        assert!(
+            store.token_types.jwt_issuers().is_empty(),
+            "a store without issuers should declare none"
+        );
         assert_eq!(store.default_entities.entities().len(), 0);
     }
 
@@ -627,7 +630,10 @@ mod tests {
 
         let store = result.unwrap();
         assert!(store.default_entities.entities().len() > 0);
-        assert!(store.token_types.jwt_issuers().contains_key("Jans"));
+        assert!(
+            store.token_types.jwt_issuers().contains_key("Jans"),
+            "the Jans issuer should be loaded"
+        );
 
         assert_eq!(store.default_entities.entities().len(), 1);
     }

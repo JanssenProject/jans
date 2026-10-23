@@ -526,13 +526,15 @@ mod tests {
         let mut trusted_issuers = HashMap::new();
 
         // Add Acme issuer
-        let acme_issuer =
-            TrustedIssuer::discovery_at("Acme", Url::parse("https://idp.acme.com/auth").unwrap())
-                .with_tokens(tokens(&[
-                    "Jans::Access_Token",
-                    "Jans::Access_Token2",
-                    "Jans::Id_Token",
-                ]));
+        let acme_issuer = TrustedIssuer::discovery_at(
+            "Acme",
+            Url::parse("https://idp.acme.com/auth").expect("test iss should be a valid url"),
+        )
+        .with_tokens(tokens(&[
+            "Jans::Access_Token",
+            "Jans::Access_Token2",
+            "Jans::Id_Token",
+        ]));
         trusted_issuers.insert("acme".to_string(), acme_issuer);
 
         // Add Dolphin issuer
@@ -955,9 +957,11 @@ mod tests {
         let validator_schema = cedar_policy_core::validator::ValidatorSchema::from_str(schema_src)
             .expect("should parse schema");
 
-        let ti =
-            TrustedIssuer::discovery_at("Jans", Url::parse("https://test.issuer.com").unwrap())
-                .with_tokens(tokens(&["Jans::Access_Token"]));
+        let ti = TrustedIssuer::discovery_at(
+            "Jans",
+            Url::parse("https://test.issuer.com").expect("test iss should be a valid url"),
+        )
+        .with_tokens(tokens(&["Jans::Access_Token"]));
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = TestBuilder::new(
             TokenTypes::build(trusted_issuers.into_values(), [])

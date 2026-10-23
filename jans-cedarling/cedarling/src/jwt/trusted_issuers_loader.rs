@@ -699,7 +699,9 @@ mod test {
     /// and that the issuer configuration is properly inserted into the index.
     #[tokio::test]
     async fn load_single_trusted_issuer_sync() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let trusted_issuer = server.trusted_issuer();
 
         let jwt_config = JwtConfig {
@@ -740,8 +742,12 @@ mod test {
     #[tokio::test]
     async fn load_multiple_trusted_issuers_async() {
         // Create two mock servers
-        let server1 = MockServer::new_with_defaults().await.unwrap();
-        let server2 = MockServer::new_with_defaults().await.unwrap();
+        let server1 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
+        let server2 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
 
         let trusted_issuer_1 = server1.trusted_issuer();
         let trusted_issuer_2 = server2.trusted_issuer();
@@ -913,7 +919,9 @@ mod test {
     /// the key service when signature validation is enabled.
     #[tokio::test]
     async fn load_with_jwks_config() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let trusted_issuer = server.trusted_issuer();
 
         // Provide JWKS directly in config (invalid key but parsing will succeed)
@@ -975,7 +983,9 @@ mod test {
     /// are properly fetched and stored in the key service.
     #[tokio::test]
     async fn load_trusted_issuer_with_signature_validation() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let trusted_issuer = server.trusted_issuer();
 
         let jwt_config = JwtConfig {
@@ -1369,7 +1379,9 @@ mod test {
 
     #[tokio::test]
     async fn issuer_with_several_tokens_is_fetched_once() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let issuer = server.trusted_issuer().with_tokens(
             [
                 "Jans::Access_token",
@@ -1404,7 +1416,9 @@ mod test {
     /// for the issuer and contains the expected status list.
     #[tokio::test]
     async fn load_trusted_issuer_with_status_validation_sync() {
-        let mut server = MockServer::new_with_defaults().await.unwrap();
+        let mut server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         // Generate status list endpoint before creating trusted issuer
         // First consume the default OIDC mock to allow clean replacement
         let client = reqwest::Client::new();
@@ -1457,8 +1471,12 @@ mod test {
     #[tokio::test]
     async fn load_multiple_trusted_issuers_async_with_signature_validation() {
         // Create two mock servers
-        let server1 = MockServer::new_with_defaults().await.unwrap();
-        let server2 = MockServer::new_with_defaults().await.unwrap();
+        let server1 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
+        let server2 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
 
         let trusted_issuer_1 = server1.trusted_issuer();
         let trusted_issuer_2 = server2.trusted_issuer();
@@ -1548,7 +1566,11 @@ mod test {
         const NUM_ISSUERS: usize = 10;
         let mut servers = Vec::new();
         for _ in 0..NUM_ISSUERS {
-            servers.push(MockServer::new_with_defaults().await.unwrap());
+            servers.push(
+                MockServer::new_with_defaults()
+                    .await
+                    .expect("mock server should start"),
+            );
         }
 
         let jwt_config = JwtConfig {
@@ -1601,7 +1623,11 @@ mod test {
         const NUM_ISSUERS: usize = 5;
         let mut servers = Vec::new();
         for _ in 0..NUM_ISSUERS {
-            servers.push(MockServer::new_with_defaults().await.unwrap());
+            servers.push(
+                MockServer::new_with_defaults()
+                    .await
+                    .expect("mock server should start"),
+            );
         }
 
         let jwt_config = JwtConfig {
@@ -1647,7 +1673,9 @@ mod test {
     /// quickly (within a short timeout) while issuer loading continues in the background.
     #[tokio::test]
     async fn async_loading_returns_immediately() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let trusted_issuer = server.trusted_issuer();
 
         let jwt_config = JwtConfig {
@@ -1704,7 +1732,9 @@ mod test {
     #[tokio::test]
     async fn load_trusted_issuer_with_invalid_url_sync() {
         // Create a valid mock server for successful issuer
-        let valid_server = MockServer::new_with_defaults().await.unwrap();
+        let valid_server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let valid_issuer = valid_server.trusted_issuer();
 
         // Create an invalid issuer with a URL that will fail to fetch
@@ -1747,8 +1777,12 @@ mod test {
     #[tokio::test]
     async fn load_trusted_issuer_with_invalid_url_async() {
         // Create two valid mock servers for successful issuers
-        let valid_server1 = MockServer::new_with_defaults().await.unwrap();
-        let valid_server2 = MockServer::new_with_defaults().await.unwrap();
+        let valid_server1 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
+        let valid_server2 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let valid_issuer1 = valid_server1.trusted_issuer();
         let valid_issuer2 = valid_server2.trusted_issuer();
 
@@ -1808,7 +1842,9 @@ mod test {
     #[tokio::test]
     async fn failed_trusted_issuer_ids_tracks_failures() {
         // Create a mix of successful and failing issuers
-        let valid_server = MockServer::new_with_defaults().await.unwrap();
+        let valid_server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let valid_issuer = valid_server.trusted_issuer();
 
         let failing_server = MockServer::new_with_failing_oidc().await.unwrap();
@@ -1885,7 +1921,9 @@ mod test {
     #[tokio::test]
     async fn failed_trusted_issuer_ids_async_mode() {
         // Create a mix of successful and failing issuers
-        let valid_server = MockServer::new_with_defaults().await.unwrap();
+        let valid_server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let valid_issuer = valid_server.trusted_issuer();
 
         let failing_issuer = create_failing_trusted_issuer("failing_issuer");

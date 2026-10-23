@@ -189,10 +189,10 @@ impl Default for TrustedIssuer {
     fn default() -> Self {
         Self::new(
             IssuerName::for_test("Jans"),
-            Url::parse("https://test.jans.org").unwrap(),
+            Url::parse("https://test.jans.org").expect("test iss should be a valid url"),
             KeySource::Discovery {
                 configuration: Url::parse("https://test.jans.org/.well-known/openid-configuration")
-                    .unwrap(),
+                    .expect("test configuration endpoint should be a valid url"),
             },
         )
     }
