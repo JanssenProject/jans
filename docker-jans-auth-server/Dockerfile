@@ -106,7 +106,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ARG JANS_SOURCE_VERSION=1f1c8a6188b23f1f41e8df01a516be2302a5dd95
+ARG JANS_SOURCE_VERSION=8576be3d502239a87cf709b0c18683bf4815144d
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
