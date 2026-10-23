@@ -294,7 +294,7 @@ class CustomJansCLISession(requests.Session):
 
 
     def request(self, method, url, *args, **kwargs):
-        if jans_config_api_usermgt_url_prefix in url:
+        if jans_config_api_usermgt_url_prefix in url and 'DEFAULT' in config and config['DEFAULT'].get('user_data'):
             kwargs['headers']["User-Info-JWT"] = config['DEFAULT']['user_data']
 
         return super().request(method, url, *args, **kwargs)
