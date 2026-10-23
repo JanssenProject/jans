@@ -17,7 +17,6 @@ use crate::common::policy_store::PolicyStoreMetadata;
 use crate::context_data_api::DataStore;
 use crate::log::interface::LogWriter;
 use crate::log::{self, BaseLogEntry, LogEntry};
-use std::collections::HashMap;
 use std::sync::Arc;
 #[cfg(not(target_arch = "wasm32"))]
 use std::{fs, io, path::PathBuf};
@@ -138,12 +137,10 @@ impl<'a> ServiceFactory<'a> {
                 None,
             ))
             .set_message(format!(
-                "Policy store loaded: {} policies, {} issuers, {} entities",
+                "Policy store loaded: {} policies, {} JWT issuers, {} custom issuers, {} entities",
                 policy_store.policies.get_set().policies().count(),
-                policy_store
-                    .trusted_issuers
-                    .as_ref()
-                    .map_or(0, HashMap::len),
+                policy_store.token_types.jwt_issuers().len(),
+                policy_store.token_types.custom_issuer_count(),
                 policy_store.default_entities.entities().len(),
             )),
         );

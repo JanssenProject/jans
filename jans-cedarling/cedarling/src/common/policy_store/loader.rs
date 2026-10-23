@@ -212,6 +212,20 @@ impl<'a> StoreFs<'a> {
         self.read_text(&path)
     }
 
+    /// Reads a file the store may contain; `None` when it is absent.
+    pub(super) fn optional_file(&self, relative: &str) -> Result<Option<String>, PolicyStoreError> {
+        let path = self.path(relative);
+        if !self.vfs.exists(&path) {
+            return Ok(None);
+        }
+        self.read_text(&path).map(Some)
+    }
+
+    /// Whether the store contains the directory.
+    pub(super) fn has_dir(&self, relative: &str) -> bool {
+        self.vfs.is_dir(&self.path(relative))
+    }
+
     /// Fails unless the store contains the directory.
     pub(super) fn require_dir(&self, relative: &str) -> Result<(), PolicyStoreError> {
         let path = self.path(relative);

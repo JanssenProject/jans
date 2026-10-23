@@ -372,7 +372,7 @@ The data is injected into the evaluation context before policy evaluation, allow
 `Cedarling` exposes trusted issuer loading status APIs:
 
 ```python
-loaded_by_name = instance.is_trusted_issuer_loaded_by_name("issuer_id")
+loaded_by_name = instance.is_trusted_issuer_loaded_by_name("Acme")
 loaded_by_iss = instance.is_trusted_issuer_loaded_by_iss("https://issuer.example.org")
 total = instance.total_issuers()
 loaded_count = instance.loaded_trusted_issuers_count()
@@ -380,7 +380,7 @@ loaded_ids = instance.loaded_trusted_issuer_ids()
 failed_ids = instance.failed_trusted_issuer_ids()
 ```
 
-These values are meaningful when your policy store defines a `trusted-issuers/` section.
+These values are meaningful when your policy store declares JWT issuers in `trusted-issuers.json`. Issuers are identified by their `issuer` name in the policy store's `trusted-issuers.json`.
 
 ## Building the Python Library
 

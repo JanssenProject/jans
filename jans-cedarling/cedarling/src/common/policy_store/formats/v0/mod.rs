@@ -17,7 +17,9 @@ use custom_issuer::{CustomIssuerParser, ParsedCustomIssuer};
 use metadata::MetadataDoc;
 use trusted_issuer::{IssuerParser, ParsedIssuer};
 
-use super::{Files, Layout, ParseStoreError, ReadStoreError, StoreContent};
+use super::{
+    Files, IssuerDirFiles, IssuerDirs, Layout, ParseStoreError, ReadStoreError, StoreContent,
+};
 #[cfg(test)]
 use crate::common::policy_store::errors::PolicyStoreError;
 use crate::common::policy_store::loader::StoreFs;
@@ -34,8 +36,11 @@ const LAYOUT: Layout = Layout {
     policies_dir: "policies",
     templates_dir: "templates",
     entities_dir: "entities",
-    trusted_issuers_dir: "trusted-issuers",
-    custom_issuers_dir: "custom-issuers",
+};
+
+const ISSUER_DIRS: IssuerDirs = IssuerDirs {
+    trusted_issuers: "trusted-issuers",
+    custom_issuers: "custom-issuers",
 };
 
 /// Reads the raw files of a v0 store through the shared reader, for tests of
@@ -45,8 +50,14 @@ pub(super) fn files(
     fs: &StoreFs<'_>,
     metadata_json: String,
     strict: bool,
-) -> Result<Files, PolicyStoreError> {
-    super::read_files(fs, &LAYOUT, metadata_json, strict)
+) -> Result<super::V0Files, PolicyStoreError> {
+    let files = super::read_files(fs, &LAYOUT, metadata_json, strict)?;
+    let issuers = super::read_issuer_dirs(fs, &ISSUER_DIRS)?;
+    Ok(super::V0Files {
+        files,
+        trusted_issuers: issuers.trusted_issuers,
+        custom_issuers: issuers.custom_issuers,
+    })
 }
 
 /// Reads a v0 store and parses its files; `metadata_json` has already been
@@ -57,7 +68,8 @@ pub(super) fn read(
     strict: bool,
 ) -> Result<PolicyStoreDoc, ReadStoreError> {
     let files = super::read_files(fs, &LAYOUT, metadata_json, strict)?;
-    Ok(parse(files)?)
+    let issuers = super::read_issuer_dirs(fs, &ISSUER_DIRS)?;
+    Ok(parse(files, issuers)?)
 }
 
 /// A whole v0 store, parsed but not yet migrated.
@@ -70,7 +82,7 @@ pub(crate) struct PolicyStoreDoc {
 }
 
 /// Parses the raw files of a v0 store.
-fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
+fn parse(files: Files, issuers: IssuerDirFiles) -> Result<PolicyStoreDoc, ParseStoreError> {
     let Files {
         metadata_json,
         schema,
@@ -78,9 +90,11 @@ fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
         policies,
         templates,
         entities,
+    } = files;
+    let IssuerDirFiles {
         trusted_issuers,
         custom_issuers,
-    } = files;
+    } = issuers;
 
     let metadata = metadata::parse(&metadata_json)?;
 
@@ -140,6 +154,8 @@ mod tests {
             }],
             templates: vec![],
             entities: vec![],
+        };
+        let issuers = IssuerDirFiles {
             trusted_issuers: vec![StoreFile {
                 name: "jans.json".to_string(),
                 content: r#"{
@@ -160,7 +176,7 @@ mod tests {
             }],
         };
 
-        let doc = parse(loaded).expect("golden v0 store should parse");
+        let doc = parse(loaded, issuers).expect("golden v0 store should parse");
 
         assert_eq!(
             doc.metadata.policy_store.name, "Golden v0",

@@ -15,7 +15,6 @@ use std::collections::{HashMap, HashSet};
 
 use crate::common::policy_store::errors::CustomIssuerParseError;
 use crate::common::policy_store::formats::file_id::id_from_filename;
-use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata};
 use serde::Deserialize;
 use serde_json::Value as JsonValue;
 
@@ -29,28 +28,11 @@ pub(crate) struct CustomIssuerDoc {
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct CustomTokenDoc {
+    /// Still accepted, but ignored: every custom token is optional.
     #[serde(default)]
     pub(crate) required: bool,
     #[serde(default)]
     pub(crate) required_claims: HashSet<String>,
-}
-
-impl From<CustomIssuerDoc> for CustomIssuerMetadata {
-    fn from(doc: CustomIssuerDoc) -> Self {
-        Self {
-            tokens_mappings: doc
-                .tokens_mappings
-                .into_iter()
-                .map(|(mapping, token)| {
-                    let token = CustomTokenMetadata {
-                        required: token.required,
-                        required_claims: token.required_claims,
-                    };
-                    (mapping, token)
-                })
-                .collect(),
-        }
-    }
 }
 
 /// A parsed custom issuer configuration with its resolved id and source filename.
@@ -135,46 +117,6 @@ impl CustomIssuerParser {
             meta,
             filename: filename.to_string(),
         })
-    }
-
-    /// Reject duplicate issuer ids across files.
-    pub(crate) fn validate(
-        issuers: &[ParsedCustomIssuer],
-    ) -> Result<(), Vec<CustomIssuerParseError>> {
-        let mut errors = Vec::new();
-        let mut seen: HashMap<&str, &str> = HashMap::with_capacity(issuers.len());
-
-        for parsed in issuers {
-            if let Some(existing_file) = seen.get(parsed.id.as_str()) {
-                errors.push(CustomIssuerParseError::DuplicateId {
-                    id: parsed.id.clone(),
-                    first_file: (*existing_file).to_string(),
-                    second_file: parsed.filename.clone(),
-                });
-            } else {
-                seen.insert(&parsed.id, &parsed.filename);
-            }
-        }
-
-        if errors.is_empty() {
-            Ok(())
-        } else {
-            Err(errors)
-        }
-    }
-
-    /// Consolidate parsed issuers into a map keyed by id (first occurrence wins;
-    /// duplicates are expected to be caught by [`validate`](Self::validate)).
-    pub(crate) fn create_map(
-        issuers: Vec<ParsedCustomIssuer>,
-    ) -> HashMap<String, CustomIssuerMetadata> {
-        let mut map = HashMap::with_capacity(issuers.len());
-        for parsed in issuers {
-            if let std::collections::hash_map::Entry::Vacant(e) = map.entry(parsed.id.clone()) {
-                e.insert(parsed.meta.into());
-            }
-        }
-        map
     }
 }
 
@@ -364,65 +306,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn validate_detects_duplicate_ids() {
-        let issuers = vec![
-            CustomIssuerParser::parse(
-                r#"{ "id": "a", "tokens_mappings": { "M::T": {} } }"#,
-                "f1.json",
-            )
-            .expect("the first issuer file should parse"),
-            CustomIssuerParser::parse(
-                r#"{ "id": "a", "tokens_mappings": { "M::U": {} } }"#,
-                "f2.json",
-            )
-            .expect("the second issuer file should parse"),
-        ];
-        let errors = CustomIssuerParser::validate(&issuers)
-            .expect_err("two files sharing an id must be rejected");
-        assert_eq!(
-            errors.len(),
-            1,
-            "validate should report exactly one duplicate-id error for two files sharing id 'a'"
-        );
-        assert!(
-            matches!(&errors[0], CustomIssuerParseError::DuplicateId { id, first_file, second_file }
-                if id == "a" && first_file == "f1.json" && second_file == "f2.json"),
-            "expected DuplicateId naming the id and both files, got: {:?}",
-            errors[0]
-        );
-    }
-
-    #[test]
-    fn create_map_keys_by_id() {
-        let issuers = vec![
-            CustomIssuerParser::parse(
-                r#"{ "id": "a", "tokens_mappings": { "M::T": {} } }"#,
-                "f1.json",
-            )
-            .expect("the first issuer file should parse"),
-            CustomIssuerParser::parse(
-                r#"{ "id": "b", "tokens_mappings": { "M::U": {} } }"#,
-                "f2.json",
-            )
-            .expect("the second issuer file should parse"),
-        ];
-        let map = CustomIssuerParser::create_map(issuers);
-        assert_eq!(
-            map.len(),
-            2,
-            "map should contain one entry per parsed issuer id ('a' and 'b')"
-        );
-        assert!(
-            map["a"].tokens_mappings.contains_key("M::T"),
-            "map entry for id 'a' should preserve its declared token types"
-        );
-        assert!(
-            map["b"].tokens_mappings.contains_key("M::U"),
-            "map entry for id 'b' should preserve its declared token types"
-        );
-    }
-    /// A file named only `.json` leaves nothing to derive an id from.
     #[test]
     fn parse_rejects_id_derived_from_bare_extension() {
         let err = CustomIssuerParser::parse(&one_token("Acme::CustomToken"), ".json")

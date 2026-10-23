@@ -18,6 +18,7 @@ mod context_data_api;
 mod custom_token_processor;
 mod metrics_snapshot;
 mod policy_store_loader;
+mod policy_store_migration;
 mod ssa_validation_integration;
 mod success_test_json;
 #[cfg(not(target_arch = "wasm32"))]

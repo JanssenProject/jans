@@ -12,7 +12,8 @@ use crate::EntityData;
 use crate::TrustedIssuerLoadingInfo;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
-use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
+use crate::common::policy_store::token_types::EntityTypeName;
+use crate::common::policy_store::{ContextKey, PolicyStoreWithID, TokenTypes};
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{
     BuiltEntities, EntityBuilder, MultiIssuerSetupEntities, UnsignedPrincipalBuild,
@@ -59,16 +60,6 @@ pub(crate) struct AuthzConfig {
     pub policy_store: PolicyStoreWithID,
     pub jwt_service: Arc<jwt::JwtService>,
     pub entity_builder: Arc<EntityBuilder>,
-    /// Index of configured custom (non-JWT) issuers. Rebuilt on every policy-store
-    /// swap so the *index* is never stale, and consulted to route tokens to a
-    /// registered [`CustomTokenProcessor`](crate::CustomTokenProcessor).
-    ///
-    /// Note this does not extend to already-cached processing *results*: the
-    /// `JwtService` (and its `TokenCache`) is reused across swaps when
-    /// `trusted_issuers` is unchanged, so cached custom tokens can outlive a
-    /// tightening `custom_issuers` change until `CEDARLING_TOKEN_CACHE_MAX_TTL`
-    /// lapses.
-    pub custom_issuer_index: Arc<jwt::CustomIssuerIndex>,
     pub authorization: AuthorizationConfig,
     /// Data store for pushed data that gets injected into context
     pub data_store: Arc<DataStore>,
@@ -167,8 +158,8 @@ impl Authz {
         }
     }
 
-    pub(crate) fn trusted_issuers(&self) -> Option<&HashMap<String, TrustedIssuer>> {
-        self.config.policy_store.trusted_issuers.as_ref()
+    pub(crate) fn token_types(&self) -> &TokenTypes {
+        &self.config.policy_store.token_types
     }
 
     /// Returns the ID of the currently loaded policy store, if it carries one.
@@ -1012,7 +1003,7 @@ impl Authz {
             .validate_multi_issuer_tokens(
                 tokens,
                 custom_processor,
-                &self.config.custom_issuer_index,
+                &self.config.policy_store.token_types,
                 custom_timeout,
             )
             .await
@@ -1041,7 +1032,11 @@ impl Authz {
         // this map for both single and batch paths) never logs the same
         // mapping under both `tokens` and `dropped_tokens`.
         let entity_build_drops = std::mem::take(&mut setup_entities.dropped);
-        validated_tokens.retain(|name, _| !entity_build_drops.iter().any(|d| d.mapping == *name));
+        validated_tokens.retain(|name, _| {
+            !entity_build_drops
+                .iter()
+                .any(|d| d.mapping == name.as_str())
+        });
 
         // Order is not guaranteed: entity-build drops append after validation
         // drops; callers correlate entries by `index`.
@@ -1263,7 +1258,7 @@ impl Authz {
             .validate_multi_issuer_tokens(
                 tokens,
                 custom_processor,
-                &self.config.custom_issuer_index,
+                &self.config.policy_store.token_types,
                 custom_timeout,
             )
             .await?;
@@ -1271,11 +1266,8 @@ impl Authz {
         let principal_types: HashSet<cedar_policy::EntityTypeName> = validated_tokens
             .tokens
             .keys()
-            .map(|mapping| {
-                cedar_policy::EntityTypeName::from_str(mapping)
-                    .map_err(|e| AuthorizeError::IdentifierParsing(e.into()))
-            })
-            .collect::<Result<_, _>>()?;
+            .map(|entity_type| entity_type.cedar().clone())
+            .collect();
 
         let action_uids = parse_action_uids(actions)?;
         let resource_types = entity_data_to_type_names(resources)?;
@@ -1352,10 +1344,10 @@ fn parse_action_uids(actions: &[String]) -> Result<HashSet<EntityUid>, Authorize
 }
 
 impl TrustedIssuerLoadingInfo for Authz {
-    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
         self.config
             .jwt_service
-            .is_trusted_issuer_loaded_by_name(issuer_id)
+            .is_trusted_issuer_loaded_by_name(issuer_name)
     }
 
     fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
@@ -1446,7 +1438,7 @@ struct UnsignedSetup {
 /// that [`LogTokensInfo`] can be produced from the same snapshot the entities
 /// were built from.
 struct MultiIssuerSetup {
-    validated_tokens: HashMap<String, crate::jwt::ValidatedToken>,
+    validated_tokens: HashMap<EntityTypeName, crate::jwt::ValidatedToken>,
     entities: MultiIssuerSetupEntities,
     /// Tokens dropped across validation and entity building. Order is not
     /// guaranteed; use each entry's `index` to correlate with the request
@@ -1458,7 +1450,7 @@ struct MultiIssuerSetup {
 #[derive(Debug)]
 pub(super) struct AuthorizeEntitiesData {
     pub issuers: HashSet<Entity>,
-    pub tokens: HashMap<String, Entity>,
+    pub tokens: HashMap<ContextKey, Entity>,
     pub resource: Entity,
     pub default_entities: DefaultEntities,
 }
@@ -1681,7 +1673,7 @@ mod tests {
     fn default_takes_precedence_over_token_on_uid_collision() {
         let mut tokens = HashMap::new();
         tokens.insert(
-            "tok1".to_string(),
+            ContextKey::for_test("tok1"),
             to_entity(json!({"uid": {"type": "Jans::access_token", "id": "tok1"}, "attrs": {"scope": "evil"}, "parents": []})),
         );
         let data = AuthorizeEntitiesData {

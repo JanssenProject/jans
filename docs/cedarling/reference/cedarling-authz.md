@@ -199,20 +199,13 @@ permit(
 
 The Cedarling uses a deterministic algorithm to generate token collection field names. The final key is always **lowercase** and uses only **underscores** as separators, making it a valid Cedar identifier.
 
-**Pattern**: `{issuer_name}_{token_type}`
+**Pattern**: `{issuer}_{token_type}`
 
-Both components are individually normalized, then joined with a single underscore.
+The key is derived once, when the policy store loads, from the
+`trusted-issuers.json` entry the token's `mapping` names. The token's `iss` claim
+plays no part in it.
 
-**Step 1 — Issuer Name Resolution**:
-
-1. Look up the JWT's `iss` claim in the trusted issuer configuration from the policy store
-2. If a matching trusted issuer is found, use its `name` field (e.g., `"Acme"`)
-3. If no trusted issuer matches, extract the hostname from the `iss` URL:
-    - Strip the protocol (`https://`, `http://`)
-    - Take everything before the first `/`
-    - Strip port numbers (everything after `:`)
-    - Example: `https://unknown.issuer.com:8080/auth` → `unknown.issuer.com`
-4. **Sanitize**: replace all `.` (dots), ` ` (spaces), and `-` (hyphens) with `_`, then convert to **lowercase**
+**Step 1 — Issuer**: the entry's `issuer`, lowercased (e.g. `"Acme"` --> `acme`).
 
 **Step 2 — Token Type Simplification**:
 
@@ -221,24 +214,26 @@ Both components are individually normalized, then joined with a single underscor
 3. Convert to **lowercase**
 4. Underscores within the token type name are preserved
 
-**Step 3 — Combine**:
-
-Join the sanitized issuer name and simplified token type with `_`:
+**Step 3 — Combine** with `_`:
 
 ```text
-{sanitized_issuer}_{simplified_token_type}
+{lowercase_issuer}_{simplified_token_type}
 ```
 
 **Examples**:
 
-| JWT `iss` claim | Trusted issuer `name` | Token `mapping` | Resulting key |
-|---|---|---|---|
-| `https://idp.acme.com/auth` | `"Acme"` | `Jans::Access_Token` | `acme_access_token` |
-| `https://idp.acme.com/auth` | `"Acme"` | `Jans::Id_Token` | `acme_id_token` |
-| `https://idp.dolphin.sea/auth` | `"Dolphin"` | `Jans::Access_Token` | `dolphin_access_token` |
-| `https://idp.dolphin.sea/auth` | `"Dolphin"` | `Acme::DolphinToken` | `dolphin_dolphintoken` |
-| `https://unknown.issuer.com/auth` | _(not configured)_ | `Custom::Employee_Token` | `unknown_issuer_com_employee_token` |
-| `https://login.microsoftonline.com/tenant` | `"Microsoft"` | `Jans::Id_Token` | `microsoft_id_token` |
+| Entry `issuer` | Token `mapping` | Resulting key |
+|---|---|---|
+| `"Acme"` | `Acme::Access_Token` | `acme_access_token` |
+| `"Acme"` | `Acme::Id_Token` | `acme_id_token` |
+| `"Dolphin"` | `Dolphin::Access_Token` | `dolphin_access_token` |
+| `"Dolphin"` | `Acme::DolphinToken` | `dolphin_dolphintoken` |
+| `"Microsoft"` | `Microsoft::Id_Token` | `microsoft_id_token` |
+
+Each entity type belongs to one issuer, so a mapping names exactly one entry. A
+mapping with no entry gets no key: the token is dropped. A store where two
+token types derive the same key, or one derives `total_token_count`, does not
+load.
 
 Tokens are then accessible in Cedar policies as `context.tokens.{key}`, e.g.:
 
@@ -256,8 +251,8 @@ context.tokens.acme_access_token.hasTag("scope")
 
 **Non-Deterministic Token Detection**:
 
-- System rejects requests with multiple tokens of the same type from the same issuer
-- Example: Two "Jans::Access_Token" from "Acme" issuer will fail
+- Only one token per mapping is used: the first accepted one
+- Later tokens for the same mapping are dropped as `duplicate_token` and logged
 - This prevents ambiguous policy evaluation
 
 ### Use Cases

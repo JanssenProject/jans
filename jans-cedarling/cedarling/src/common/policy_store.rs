@@ -10,6 +10,7 @@ pub(crate) mod log_entry;
 #[cfg(test)]
 pub(crate) mod test_utils;
 pub(crate) mod token_entity_metadata;
+pub(crate) mod token_types;
 
 use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
 
@@ -32,11 +33,19 @@ pub(crate) mod vfs_adapter;
 use super::cedar_schema::CedarSchema;
 use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy, PolicyId};
 use serde::Serialize;
-use std::collections::{HashMap, HashSet, hash_map::Entry};
+use std::collections::{HashMap, HashSet};
 use url::Url;
 
-pub(crate) use custom_issuer_metadata::{CustomIssuerMetadata, CustomTokenMetadata};
+#[cfg(test)]
+pub(crate) use custom_issuer_metadata::CustomIssuerMetadata;
+pub(crate) use custom_issuer_metadata::CustomTokenMetadata;
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
+#[cfg(test)]
+pub(crate) use token_types::TestJwtIssuer;
+pub(crate) use token_types::{
+    ContextKey, InvalidEntityType, InvalidIssuerName, IssuerName, TokenTypeKind, TokenTypes,
+    TokenTypesError,
+};
 
 // Re-export types used by init/policy_store.rs and external consumers
 pub(crate) use manager::ConversionError;
@@ -64,17 +73,9 @@ pub(crate) struct PolicyStore {
     /// Cedar policy set
     pub(crate) policies: PoliciesContainer,
 
-    /// An optional `HashMap` of trusted issuers.
-    ///
-    /// This field may contain issuers that are trusted to provide tokens, allowing for additional
-    /// verification and security when handling JWTs.
-    pub(crate) trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
-
-    /// Custom (non-JWT) issuers, keyed by issuer name. Tokens whose request
-    /// `mapping` matches a custom issuer's `entity_type_name` are validated by a
-    /// registered [`CustomTokenProcessor`](crate::CustomTokenProcessor) rather
-    /// than the JWT pipeline. Empty when no custom issuers are configured.
-    pub(crate) custom_issuers: HashMap<String, CustomIssuerMetadata>,
+    /// Every accepted token type, JWT and custom, keyed by the entity type a
+    /// request `mapping` names.
+    pub(crate) token_types: TokenTypes,
 
     /// Default entities for the policy store.
     pub(crate) default_entities: DefaultEntitiesWithWarns,
@@ -84,76 +85,6 @@ impl PolicyStore {
     pub(crate) fn get_store_version(&self) -> &str {
         self.version.as_deref().unwrap_or("undefined")
     }
-
-    pub(crate) fn validate_trusted_issuers(&self) -> Result<(), TrustedIssuersValidationError> {
-        validate_trusted_issuers_config(self.trusted_issuers.as_ref())
-    }
-}
-
-/// The token (`token_metadata` key + issuer id) that first claimed a given entity
-/// type, used to report a later duplicate.
-#[derive(Clone, Copy)]
-struct EntityTypeBinding<'a> {
-    token_key: &'a str,
-    issuer_id: &'a str,
-}
-
-/// Validates the trusted-issuer configuration before any service is built from it.
-///
-/// Enforces that each Cedar entity type is owned by exactly one token.
-fn validate_trusted_issuers_config(
-    trusted_issuers: Option<&HashMap<String, TrustedIssuer>>,
-) -> Result<(), TrustedIssuersValidationError> {
-    let mut oidc_to_issuer: HashMap<String, &str> = HashMap::new();
-    let mut entity_type_owners: HashMap<&str, EntityTypeBinding> = HashMap::new();
-
-    for (issuer_id, trusted_issuer) in trusted_issuers.into_iter().flatten() {
-        let oidc_url = trusted_issuer.oidc_endpoint.to_string();
-        if oidc_to_issuer.insert(oidc_url.clone(), issuer_id).is_some() {
-            return Err(TrustedIssuersValidationError::DuplicateOidcEndpoint { oidc_url });
-        }
-
-        for (token_key, token_metadata) in &trusted_issuer.token_metadata {
-            let entity_type_name = token_metadata.entity_type_name.as_str();
-            match entity_type_owners.entry(entity_type_name) {
-                Entry::Vacant(entry) => {
-                    entry.insert(EntityTypeBinding {
-                        token_key,
-                        issuer_id,
-                    });
-                },
-                Entry::Occupied(entry) => {
-                    let first = entry.get();
-                    return Err(TrustedIssuersValidationError::DuplicateEntityType {
-                        entity_type_name: entity_type_name.to_string(),
-                        key_a: first.token_key.to_string(),
-                        issuer_a: first.issuer_id.to_string(),
-                        key_b: token_key.clone(),
-                        issuer_b: issuer_id.clone(),
-                    });
-                },
-            }
-        }
-    }
-
-    Ok(())
-}
-
-#[derive(Debug, thiserror::Error)]
-pub(crate) enum TrustedIssuersValidationError {
-    #[error("openid_configuration_endpoint '{oidc_url}' is used by more than one issuer")]
-    DuplicateOidcEndpoint { oidc_url: String },
-    #[error(
-        "Entity type '{entity_type_name}' declared by conflicting tokens: \
-         key '{key_a}' (issuer '{issuer_a}') and key '{key_b}' (issuer '{issuer_b}')"
-    )]
-    DuplicateEntityType {
-        entity_type_name: String,
-        key_a: String,
-        issuer_a: String,
-        key_b: String,
-        issuer_b: String,
-    },
 }
 
 /// Wrapper around [`PolicyStore`] to have access to it and ID of policy store.
@@ -200,44 +131,70 @@ impl PolicyStoreWithID {
     }
 }
 
+/// Path suffix that turns an issuer URL into its discovery URL (OIDC Discovery §4).
+const DISCOVERY_SUFFIX: &str = "/.well-known/openid-configuration";
+
+/// A configuration endpoint the expected `iss` cannot be derived from.
+#[derive(Debug, Clone, PartialEq, thiserror::Error)]
+#[error(
+    "configuration endpoint '{0}' must be the issuer URL followed by \
+     `/.well-known/openid-configuration`, without query or fragment"
+)]
+pub struct InvalidConfigurationEndpoint(String);
+
+/// Derives the expected `iss` from an OIDC discovery URL, keeping any path
+/// before the well-known suffix (OIDC Discovery §4).
+pub(crate) fn iss_from_configuration(
+    configuration: &Url,
+) -> Result<Url, InvalidConfigurationEndpoint> {
+    let invalid = || InvalidConfigurationEndpoint(configuration.to_string());
+    if configuration.query().is_some() || configuration.fragment().is_some() {
+        return Err(invalid());
+    }
+    let issuer_path = configuration
+        .path()
+        .strip_suffix(DISCOVERY_SUFFIX)
+        .ok_or_else(invalid)?;
+    let mut iss = configuration.clone();
+    iss.set_path(issuer_path);
+    Ok(iss)
+}
+
+/// Where an issuer's signing keys come from.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) enum KeySource {
+    /// OIDC discovery; keys come from the discovered `jwks_uri`.
+    Discovery { configuration: Url },
+    /// Keys fetched straight from a JWKS URL, with no discovery request.
+    Static { jwks: Url },
+}
+
 /// Represents a trusted issuer that can provide JWTs.
 ///
-/// This struct includes the issuer's name, description, and the `OpenID` configuration endpoint
-/// for discovering issuer-related information.
+/// Holds the `iss` its tokens must carry and where its signing keys come from.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct TrustedIssuer {
-    /// The name of the trusted issuer.
-    /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
-    pub(crate) name: String,
-    /// A brief description of the trusted issuer.
-    pub(crate) description: String,
-    /// The `OpenID` configuration endpoint for the issuer.
-    ///
-    /// This endpoint is used to obtain information about the issuer's capabilities.
-    // Private to force usage of `iss_claim` method to get normalized iss claim
-    oidc_endpoint: Url,
-    /// Metadata for tokens issued by the trusted issuer.
-    pub(crate) token_metadata: HashMap<String, TokenEntityMetadata>,
+    /// The issuer's name: the namespace of its `TrustedIssuer` entity.
+    pub(crate) name: IssuerName,
+    /// The `iss` its tokens must carry.
+    iss: Url,
+    /// `iss` normalized once, as every token's `iss` is compared against it.
+    iss_claim: IssClaim,
+    /// Where the issuer's signing keys come from.
+    pub(crate) key_source: KeySource,
 }
 
 #[cfg(test)]
 impl Default for TrustedIssuer {
     fn default() -> Self {
-        Self {
-            name: "Jans".to_string(),
-            description: String::default(),
-            // This will only really be called during testing so we just put this test value
-            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
-                .unwrap(),
-            token_metadata: HashMap::from([
-                ("access_token".into(), TokenEntityMetadata::access_token()),
-                ("id_token".into(), TokenEntityMetadata::id_token()),
-                (
-                    "userinfo_token".into(),
-                    TokenEntityMetadata::userinfo_token(),
-                ),
-            ]),
-        }
+        Self::new(
+            IssuerName::for_test("Jans"),
+            Url::parse("https://test.jans.org").expect("test iss should be a valid url"),
+            KeySource::Discovery {
+                configuration: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+                    .expect("test configuration endpoint should be a valid url"),
+            },
+        )
     }
 }
 
@@ -251,35 +208,80 @@ impl Default for &TrustedIssuer {
 }
 
 impl TrustedIssuer {
-    pub(crate) fn new(
-        name: String,
-        description: String,
-        oidc_endpoint: Url,
-        metadata: HashMap<String, TokenEntityMetadata>,
-    ) -> Self {
+    pub(crate) fn new(name: IssuerName, iss: Url, key_source: KeySource) -> Self {
+        let iss_claim = IssClaim::new(iss.as_str());
         Self {
             name,
-            description,
-            oidc_endpoint,
-            token_metadata: metadata,
+            iss,
+            iss_claim,
+            key_source,
         }
     }
 
+    /// An issuer loaded through OIDC discovery, with `iss` derived offline
+    /// from `configuration`.
     #[cfg(test)]
-    pub(crate) fn set_oidc_endpoint(&mut self, url: Url) {
-        self.oidc_endpoint = url;
+    pub(crate) fn from_configuration(
+        name: impl AsRef<str>,
+        configuration: Url,
+    ) -> Result<Self, InvalidConfigurationEndpoint> {
+        let iss = iss_from_configuration(&configuration)?;
+        Ok(Self::new(
+            IssuerName::for_test(name.as_ref()),
+            iss,
+            KeySource::Discovery { configuration },
+        ))
     }
 
-    /// Get the OIDC endpoint URL.
-    /// Should be used when we need to make requests to the OIDC endpoint.
-    ///
-    /// If you need comparison with `iss` claim, use `iss_claim` method instead.
-    pub(crate) fn get_oidc_endpoint(&self) -> &Url {
-        &self.oidc_endpoint
+    /// A discovery issuer whose configuration endpoint is `iss` plus the
+    /// well-known suffix.
+    #[cfg(test)]
+    pub(crate) fn discovery_at(name: impl AsRef<str>, iss: Url) -> Self {
+        let configuration = Url::parse(&format!(
+            "{}{DISCOVERY_SUFFIX}",
+            iss.as_str().trim_end_matches('/')
+        ))
+        .expect("test configuration endpoint should be a valid url");
+        Self::new(
+            IssuerName::for_test(name.as_ref()),
+            iss,
+            KeySource::Discovery { configuration },
+        )
     }
 
-    pub(crate) fn iss_claim(&self) -> IssClaim {
-        IssClaim::new(&self.oidc_endpoint.origin().ascii_serialization())
+    /// This issuer declaring `tokens`, keyed by entity type, for building
+    /// [`TokenTypes`] in tests.
+    #[cfg(test)]
+    pub(crate) fn with_tokens(
+        self,
+        tokens: HashMap<String, TokenEntityMetadata>,
+    ) -> token_types::TestJwtIssuer {
+        token_types::TestJwtIssuer {
+            issuer: self,
+            tokens,
+        }
+    }
+
+    /// Points the issuer at another discovery endpoint, re-deriving `iss`.
+    #[cfg(test)]
+    pub(crate) fn set_configuration_endpoint(&mut self, configuration: Url) {
+        let iss = iss_from_configuration(&configuration)
+            .expect("test configuration endpoint should derive an iss");
+        *self = Self::new(
+            self.name.clone(),
+            iss,
+            KeySource::Discovery { configuration },
+        );
+    }
+
+    /// The `iss` its tokens must carry.
+    pub(crate) fn iss(&self) -> &Url {
+        &self.iss
+    }
+
+    /// The normalized `iss` its tokens must carry.
+    pub(crate) fn iss_claim(&self) -> &IssClaim {
+        &self.iss_claim
     }
 }
 
@@ -952,171 +954,63 @@ mod policy_metadata_tests {
 }
 
 #[cfg(test)]
-mod validate_trusted_issuers_tests {
+mod iss_from_configuration_tests {
     use super::*;
 
-    /// Builds a [`TrustedIssuer`] with `(token_metadata key, entity_type_name)` pairs.
-    fn issuer(oidc_endpoint: &str, token_metadata: &[(&str, &str)]) -> TrustedIssuer {
-        TrustedIssuer::new(
-            "Test".to_string(),
-            String::default(),
-            Url::parse(oidc_endpoint).expect("test oidc endpoint should be a valid url"),
-            token_metadata
-                .iter()
-                .map(|(key, entity_type_name)| {
-                    (
-                        (*key).to_string(),
-                        TokenEntityMetadata::builder()
-                            .entity_type_name((*entity_type_name).to_string())
-                            .build(),
-                    )
-                })
-                .collect(),
-        )
+    fn derive(configuration: &str) -> Result<Url, InvalidConfigurationEndpoint> {
+        iss_from_configuration(&Url::parse(configuration).expect("test url should parse"))
     }
 
     #[test]
-    fn accepts_distinct_entity_types_per_issuer_namespace() {
-        // The supported multi-issuer setup: each issuer owns its own entity types
-        // in its own namespace.
-        let issuers = HashMap::from([
-            (
-                "alpha".to_string(),
-                issuer(
-                    "https://idp.alpha.example/.well-known/openid-configuration",
-                    &[
-                        ("access_token", "Alpha::Access_token"),
-                        ("id_token", "Alpha::Id_token"),
-                    ],
-                ),
-            ),
-            (
-                "beta".to_string(),
-                issuer(
-                    "https://idp.beta.example/.well-known/openid-configuration",
-                    &[
-                        ("access_token", "Beta::Access_token"),
-                        ("id_token", "Beta::Id_token"),
-                    ],
-                ),
-            ),
-        ]);
-
-        assert!(
-            validate_trusted_issuers_config(Some(&issuers)).is_ok(),
-            "a distinct-per-namespace multi-issuer mapping is expected to be valid"
+    fn root_issuer_keeps_origin() {
+        let iss = derive("https://idp.example/.well-known/openid-configuration")
+            .expect("a root discovery URL should derive an iss");
+        assert_eq!(
+            IssClaim::new(iss.as_str()),
+            IssClaim::new("https://idp.example"),
+            "a root issuer should derive its origin"
         );
     }
 
     #[test]
-    fn rejects_entity_type_shared_across_issuers() {
-        // Same entity type under the same key: unbuildable once `iss` is declared,
-        // because the shared type can only name one issuer namespace.
-        let issuers = HashMap::from([
+    fn path_before_suffix_is_kept() {
+        for (configuration, expected) in [
             (
-                "alpha".to_string(),
-                issuer(
-                    "https://idp.alpha.example/.well-known/openid-configuration",
-                    &[("access_token", "Jans::Access_token")],
-                ),
+                "https://kc.example/realms/a/.well-known/openid-configuration",
+                "https://kc.example/realms/a",
             ),
             (
-                "beta".to_string(),
-                issuer(
-                    "https://idp.beta.example/.well-known/openid-configuration",
-                    &[("access_token", "Jans::Access_token")],
-                ),
+                "https://login.microsoftonline.com/tenant-1/v2.0/.well-known/openid-configuration",
+                "https://login.microsoftonline.com/tenant-1/v2.0",
             ),
-        ]);
-
-        let err = validate_trusted_issuers_config(Some(&issuers))
-            .expect_err("an entity type shared across issuers must be rejected");
-        assert!(
-            matches!(
-                &err,
-                TrustedIssuersValidationError::DuplicateEntityType { entity_type_name, .. }
-                    if entity_type_name == "Jans::Access_token"
-            ),
-            "expected DuplicateEntityType for Jans::Access_token, got: {err}"
-        );
+        ] {
+            let iss = derive(configuration).expect("a path-based discovery URL should derive");
+            assert_eq!(
+                iss.as_str(),
+                expected,
+                "{configuration} should keep the issuer path"
+            );
+        }
     }
 
     #[test]
-    fn rejects_entity_type_shared_across_issuers_with_different_keys() {
-        let issuers = HashMap::from([
-            (
-                "alpha".to_string(),
-                issuer(
-                    "https://idp.alpha.example/.well-known/openid-configuration",
-                    &[("access_token", "Jans::Access_token")],
+    fn rejects_url_not_of_discovery_shape() {
+        for configuration in [
+            "https://idp.example",
+            "https://idp.example/auth",
+            "https://idp.example/.well-known/openid-configuration/extra",
+            "https://idp.example/.well-known/openid-configuration?tenant=a",
+            "https://idp.example/.well-known/openid-configuration#frag",
+        ] {
+            let err = derive(configuration)
+                .expect_err("a URL not of the discovery shape must be rejected");
+            assert_eq!(
+                err,
+                InvalidConfigurationEndpoint(
+                    Url::parse(configuration).expect("valid url").to_string()
                 ),
-            ),
-            (
-                "beta".to_string(),
-                issuer(
-                    "https://idp.beta.example/.well-known/openid-configuration",
-                    &[("at", "Jans::Access_token")],
-                ),
-            ),
-        ]);
-
-        let err = validate_trusted_issuers_config(Some(&issuers))
-            .expect_err("an entity type shared across issuers must be rejected");
-        assert!(
-            matches!(
-                &err,
-                TrustedIssuersValidationError::DuplicateEntityType { .. }
-            ),
-            "expected DuplicateEntityType, got: {err}"
-        );
-    }
-
-    #[test]
-    fn rejects_duplicate_entity_type_within_issuer() {
-        let issuers = HashMap::from([(
-            "alpha".to_string(),
-            issuer(
-                "https://idp.alpha.example/.well-known/openid-configuration",
-                &[
-                    ("access_token", "Jans::Access_token"),
-                    ("at", "Jans::Access_token"),
-                ],
-            ),
-        )]);
-
-        let err = validate_trusted_issuers_config(Some(&issuers))
-            .expect_err("two keys mapping to one entity type within an issuer must be rejected");
-        assert!(
-            matches!(
-                &err,
-                TrustedIssuersValidationError::DuplicateEntityType { .. }
-            ),
-            "expected DuplicateEntityType, got: {err}"
-        );
-    }
-
-    #[test]
-    fn rejects_duplicate_oidc_endpoint() {
-        let oidc = "https://idp.example/.well-known/openid-configuration";
-        let issuers = HashMap::from([
-            (
-                "alpha".to_string(),
-                issuer(oidc, &[("access_token", "Jans::Access_token")]),
-            ),
-            (
-                "beta".to_string(),
-                issuer(oidc, &[("access_token", "Jans::Access_token")]),
-            ),
-        ]);
-
-        let err = validate_trusted_issuers_config(Some(&issuers))
-            .expect_err("duplicate oidc endpoint must be rejected");
-        assert!(
-            matches!(
-                &err,
-                TrustedIssuersValidationError::DuplicateOidcEndpoint { .. }
-            ),
-            "expected TrustedIssuersValidationError::DuplicateOidcEndpoint, got: {err}"
-        );
+                "the error should name {configuration}"
+            );
+        }
     }
 }

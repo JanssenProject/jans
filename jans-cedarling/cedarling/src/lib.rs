@@ -534,10 +534,10 @@ impl Cedarling {
 }
 
 impl TrustedIssuerLoadingInfo for Cedarling {
-    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
         self.authz
             .load()
-            .is_trusted_issuer_loaded_by_name(issuer_id)
+            .is_trusted_issuer_loaded_by_name(issuer_name)
     }
 
     fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
@@ -1006,6 +1006,7 @@ impl Cedarling {
                     PolicyStoreLoadError::LegacyJsonNotSupported
                         | PolicyStoreLoadError::ParseYaml(_)
                         | PolicyStoreLoadError::Conversion(_)
+                        | PolicyStoreLoadError::Migration(_)
                         | PolicyStoreLoadError::InvalidStore(_)
                 );
 

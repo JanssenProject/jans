@@ -26,20 +26,7 @@ policy_stores:
     trusted_issuers:
       7ca8ccc6e8682ad91f47e651cf7e3dcea4f8133663ae:
         name: Test
-        description: '1'
         openid_configuration_endpoint: https://test-casa.gluu.info/.well-known/openid-configuration
-        access_tokens:
-          trusted: true
-          token_id: ''
-        id_tokens:
-          trusted: true
-          token_id: sub
-        userinfo_tokens:
-          trusted: true
-          token_id: ''
-        tx_tokens:
-          trusted: true
-          token_id: ''
     schema:
       encoding: none
       content_type: cedar
