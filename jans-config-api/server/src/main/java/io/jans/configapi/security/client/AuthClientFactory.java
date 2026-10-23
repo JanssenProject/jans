@@ -52,10 +52,8 @@ public class AuthClientFactory {
         return createIntrospectionService(url, followRedirects);
     }
 
-    public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
-            boolean followRedirects) {
-        log.debug("Introspect Token - url:{}, header:{}, token:{} ,followRedirects:{} ", url, header, token,
-                followRedirects);
+    public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token) {
+        log.debug("Introspect Token - url:{}, ", url);
         ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient()
                 .property(CONTENT_TYPE, MediaType.APPLICATION_JSON).target(url);
         IntrospectionService proxy = target.proxy(IntrospectionService.class);
@@ -65,8 +63,8 @@ public class AuthClientFactory {
     public static JsonNode getStatResponse(String url, String token, String month, String startMonth, String endMonth,
             String format) {
         if (log.isDebugEnabled()) {
-            log.debug("Stat Response Token - url:{}, token:{}, month:{}, startMonth:{}, endMonth:{}, format:{} ",
-                    escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
+            log.debug("Stat Response Token - url:{}, month:{}, startMonth:{}, endMonth:{}, format:{} ",
+                    escapeLog(url), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
                     escapeLog(format));
         }
         ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient().target(url);
@@ -89,8 +87,8 @@ public class AuthClientFactory {
 
     public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
-        log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
-                clientId, clientSecret, scope);
+        log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, scope:{} ", tokenUrl,
+                clientId, scope);
         Response response = null;
         try {
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
@@ -103,7 +101,7 @@ public class AuthClientFactory {
             final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
                     tokenRequest.getParameters());
             response = request.post(Entity.form(multivaluedHashMap));
-            log.trace("Response for Access Token -  response:{}", response);
+            log.trace("Response for Access Token ");
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
                 TokenResponse tokenResponse = new TokenResponse();
@@ -122,23 +120,20 @@ public class AuthClientFactory {
 
     public static Response revokeToken(final String revokeUrl, final String clientId, final String token,
             final String tokenTypeHint) {
-        log.debug("Request for Access Token -  revokeUrl:{}, clientId:{}, token:{} , tokenTypeHint:{}", revokeUrl,
-                clientId, token, tokenTypeHint);
+        log.debug("Request for Access Token -  revokeUrl:{}, clientId:{}, tokenTypeHint:{}", revokeUrl,
+                clientId, tokenTypeHint);
 
         Builder request = getClientBuilder(revokeUrl);
         request.header(AUTHORIZATION, token);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-        log.debug(" request:{}}", request);
         MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>();
         multivaluedHashMap.add("token", token);
         multivaluedHashMap.add("token_type_hint", tokenTypeHint);
         multivaluedHashMap.add("client_id", clientId);
 
-        Response response = request.post(Entity.entity(Entity.form(multivaluedHashMap), MediaType.APPLICATION_JSON));
-        log.debug(" response:{}", response);
-
-        return response;
+        return request.post(Entity.entity(Entity.form(multivaluedHashMap), MediaType.APPLICATION_JSON));
+     
     }
 
     public static String getIntrospectionEndpoint(String issuer) throws JsonProcessingException {
