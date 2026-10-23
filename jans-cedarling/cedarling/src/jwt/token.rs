@@ -44,18 +44,13 @@ pub(crate) struct CustomTokenIssuerMeta {
 /// names.
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) struct Token {
-    pub name: String,
     pub iss: TokenIssuer,
     pub(crate) claims: TokenClaims,
 }
 
 impl Token {
-    pub(crate) fn new(name: &str, claims: TokenClaims, iss: TokenIssuer) -> Token {
-        Self {
-            name: name.to_string(),
-            iss,
-            claims,
-        }
+    pub(crate) fn new(claims: TokenClaims, iss: TokenIssuer) -> Token {
+        Self { iss, claims }
     }
 
     pub(crate) fn get_claim_val(&self, name: &str) -> Option<&Value> {

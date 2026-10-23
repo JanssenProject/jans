@@ -64,6 +64,7 @@ const RESERVED_CLAIMS: [&str; 3] = ["iss", "jti", "exp"];
 /// Add reserved claims to entity attributes based on schema shape.
 fn add_reserved_claims(
     attrs: &mut HashMap<String, RestrictedExpression>,
+    entity_type: &EntityTypeName,
     token: &Token,
     entity_id: &str,
     attrs_shape_opt: Option<&HashMap<smol_str::SmolStr, schema::AttrsShape>>,
@@ -81,7 +82,7 @@ fn add_reserved_claims(
     if shape_present(TOKEN_TYPE) {
         attrs.insert(
             TOKEN_TYPE.to_string(),
-            RestrictedExpression::new_string(token.name.clone()),
+            RestrictedExpression::new_string(entity_type.to_string()),
         );
     }
 
@@ -284,6 +285,7 @@ impl EntityBuilder {
             (TokenIssuer::Jwt(_), TokenTypeKind::Jwt { metadata, .. }) => {
                 let entity_id_srcs = [EntityIdSrc::Token {
                     token,
+                    entity_type: entity_type.as_str(),
                     claim: metadata.token_id.as_str(),
                 }];
                 get_first_valid_entity_id(&entity_id_srcs)
@@ -292,7 +294,7 @@ impl EntityBuilder {
             },
             (TokenIssuer::Jwt(_), TokenTypeKind::Custom(_)) => {
                 return Err(MultiIssuerEntityError::JwtWithCustomTokenType(
-                    token.name.clone(),
+                    entity_type.to_string(),
                 ));
             },
         };
@@ -319,7 +321,7 @@ impl EntityBuilder {
         // avoiding a full clone of every claim into a temporary HashMap.
         // No-schema path: fall back to the existing iter-all flow.
         let mut attrs = if let Some(shape) = attrs_shape {
-            let token_type_val = Value::String(token.name.clone());
+            let token_type_val = Value::String(entity_type.to_string());
             let validated_at_val = Value::Number(validated_at_ts.into());
             // `jti` may be required by the schema but absent from the JWT
             // claims (e.g. when token_id is sourced from `sub`).  The
@@ -357,7 +359,10 @@ impl EntityBuilder {
             // Rare path: no schema. Materialize the merged map only here.
             let mut all_claims = HashMap::with_capacity(claims.len() + 2);
             all_claims.extend(claims.iter().map(|(k, v)| (k.clone(), v.clone())));
-            all_claims.insert("token_type".to_string(), Value::String(token.name.clone()));
+            all_claims.insert(
+                "token_type".to_string(),
+                Value::String(entity_type.to_string()),
+            );
             all_claims.insert(
                 "validated_at".to_string(),
                 Value::Number(validated_at_ts.into()),
@@ -375,7 +380,14 @@ impl EntityBuilder {
         // If you change the closure above to pre-resolve any of these keys
         // you will create dead work and confuse future readers: the value
         // will be computed twice and the second result (here) wins.
-        add_reserved_claims(&mut attrs, token, &entity_id, attrs_shape, validated_at_ts)?;
+        add_reserved_claims(
+            &mut attrs,
+            entity_type,
+            token,
+            &entity_id,
+            attrs_shape,
+            validated_at_ts,
+        )?;
 
         // Create entity tags for non-reserved JWT claims.
         let mut tags = HashMap::new();
@@ -428,16 +440,17 @@ mod tests {
             Arc::clone(token_type)
         }
 
-        /// Builds `token`'s entity with the token type its name maps to.
+        /// Builds `token`'s entity as the token type `mapping` names.
         fn build_token_entity(
             &self,
+            mapping: &str,
             token: &Token,
             built_entities: &BuiltEntities,
         ) -> Result<Entity, MultiIssuerEntityError> {
             self.build_single_token_entity(
-                &EntityTypeName::for_test(&token.name),
+                &EntityTypeName::for_test(mapping),
                 token,
-                &self.token_type_of(&token.name),
+                &self.token_type_of(mapping),
                 built_entities,
             )
         }
@@ -551,11 +564,7 @@ mod tests {
             .expect("the test issuer should be configured");
 
         let token_claims = TokenClaims::from(all_claims);
-        Token::new(
-            "Jans::Access_Token",
-            token_claims,
-            TokenIssuer::Jwt(trusted_issuer),
-        )
+        Token::new(token_claims, TokenIssuer::Jwt(trusted_issuer))
     }
 
     /// The `Acme` issuer of [`create_test_entity_builder`].
@@ -657,7 +666,6 @@ mod tests {
         let mut claims = HashMap::new();
         claims.insert("scope".to_string(), json!("admin"));
         let token = Token::new(
-            "Acme::CustomToken",
             TokenClaims::from(claims),
             TokenIssuer::Custom(CustomTokenIssuerMeta {
                 issuer_id: "acmekeys".to_string(),
@@ -668,7 +676,7 @@ mod tests {
 
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let entity = builder
-            .build_token_entity(&token, &built_entities)
+            .build_token_entity("Acme::CustomToken", &token, &built_entities)
             .expect("custom token entity should build");
 
         // Entity id is the processor's token_id (no jti/sub claim was provided).
@@ -713,7 +721,6 @@ mod tests {
         let mut claims = HashMap::new();
         claims.insert("scope".to_string(), json!("admin"));
         let token = Token::new(
-            "Acme::CustomToken",
             TokenClaims::from(claims),
             TokenIssuer::Custom(CustomTokenIssuerMeta {
                 issuer_id: "acmekeys".to_string(),
@@ -824,7 +831,9 @@ mod tests {
         let token = create_test_token("https://idp.acme.com/auth", "token123", claims, &builder);
 
         let built_entities = BuiltEntities::from(&builder.iss_entities);
-        let entity = builder.build_token_entity(&token, &built_entities).unwrap();
+        let entity = builder
+            .build_token_entity("Jans::Access_Token", &token, &built_entities)
+            .unwrap();
 
         // Check entity type - should match the token name
         assert_eq!(entity.uid().type_name().to_string(), "Jans::Access_Token");
@@ -851,10 +860,10 @@ mod tests {
         claims.insert("sub".to_string(), json!("user123"));
         // Note: no "jti" claim
         let token_claims = TokenClaims::from(claims);
-        let token = Token::new("Jans::Access_Token", token_claims, acme_issuer(&builder));
+        let token = Token::new(token_claims, acme_issuer(&builder));
 
         let built_entities = BuiltEntities::from(&builder.iss_entities);
-        let result = builder.build_token_entity(&token, &built_entities);
+        let result = builder.build_token_entity("Jans::Access_Token", &token, &built_entities);
 
         assert!(
             matches!(
@@ -910,7 +919,6 @@ mod tests {
         );
         let token_claims = TokenClaims::from(claims);
         let token = Token::new(
-            "Jans::Access_Token",
             token_claims,
             TokenIssuer::Jwt(
                 builder
@@ -920,7 +928,9 @@ mod tests {
         );
 
         let built_entities = BuiltEntities::from(&builder.iss_entities);
-        let entity = builder.build_token_entity(&token, &built_entities).unwrap();
+        let entity = builder
+            .build_token_entity("Jans::Access_Token", &token, &built_entities)
+            .unwrap();
 
         // Schema-based processing should preserve types according to schema
         // Check that tags exist for schema-defined claims
@@ -980,7 +990,7 @@ mod tests {
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
         let token_claims2 = TokenClaims::from(claims2);
-        let token_two = Token::new("Jans::Id_Token", token_claims2, acme_issuer(&builder));
+        let token_two = Token::new(token_claims2, acme_issuer(&builder));
         tokens.insert("Jans::Id_Token".to_string(), token_two);
 
         // Another valid token
@@ -1024,14 +1034,14 @@ mod tests {
         let mut claims1 = HashMap::new();
         claims1.insert("sub".to_string(), json!("user1"));
         let token_claims1 = TokenClaims::from(claims1);
-        let token_one = Token::new("Jans::Access_Token", token_claims1, acme_issuer(&builder));
+        let token_one = Token::new(token_claims1, acme_issuer(&builder));
         tokens.insert("Jans::Access_Token".to_string(), token_one);
 
         // Invalid token 2 (missing jti)
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
         let token_claims2 = TokenClaims::from(claims2);
-        let token_two = Token::new("Jans::Id_Token", token_claims2, acme_issuer(&builder));
+        let token_two = Token::new(token_claims2, acme_issuer(&builder));
         tokens.insert("Jans::Id_Token".to_string(), token_two);
 
         let tokens = into_validated(&builder, tokens);
@@ -1087,7 +1097,9 @@ mod tests {
         let token = create_test_token("https://test.issuer.com", "test-jti-123", claims, &builder);
 
         let built_entities = BuiltEntities::from(&builder.iss_entities);
-        let entity = builder.build_token_entity(&token, &built_entities).unwrap();
+        let entity = builder
+            .build_token_entity("Jans::Access_Token", &token, &built_entities)
+            .unwrap();
 
         // Schema-defined claims should be processed according to schema
         assert!(entity.tag("sub").is_some());
@@ -1166,7 +1178,6 @@ mod tests {
             json!(chrono::Utc::now().timestamp() + 3600),
         );
         let token = Token::new(
-            "Jans::Access_Token",
             TokenClaims::from(claims),
             TokenIssuer::Jwt(
                 builder
@@ -1176,7 +1187,7 @@ mod tests {
         );
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let entity = builder
-            .build_token_entity(&token, &built_entities)
+            .build_token_entity("Jans::Access_Token", &token, &built_entities)
             .expect("should build token entity without schema");
 
         // ── Verify jti attr = entity_id (NOT the raw jwt jti) ─────────
@@ -1274,7 +1285,6 @@ mod tests {
         // it would become an attribute.  We assert it is absent below.
         claims.insert("extra_test_claim".to_string(), json!("should-not-be-attr"));
         let token = Token::new(
-            "Jans::Access_Token",
             TokenClaims::from(claims),
             TokenIssuer::Jwt(
                 builder
@@ -1284,7 +1294,7 @@ mod tests {
         );
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let entity = builder
-            .build_token_entity(&token, &built_entities)
+            .build_token_entity("Jans::Access_Token", &token, &built_entities)
             .expect("should build token entity with schema path");
 
         // ── Prove the schema path was actually taken ──────────────────
@@ -1397,7 +1407,6 @@ mod tests {
         );
 
         let token = Token::new(
-            "Jans::Access_Token",
             TokenClaims::from(claims),
             TokenIssuer::Jwt(
                 builder
@@ -1410,7 +1419,7 @@ mod tests {
         // This must NOT fail — the closure should fall back to entity_id
         // so the schema path doesn't choke on missing required `jti`.
         let entity = builder
-            .build_token_entity(&token, &built_entities)
+            .build_token_entity("Jans::Access_Token", &token, &built_entities)
             .expect("should succeed even without jti claim — closure falls back to entity_id");
 
         // jti attribute should be set to entity_id by add_reserved_claims

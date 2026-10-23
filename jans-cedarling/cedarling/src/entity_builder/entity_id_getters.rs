@@ -9,7 +9,12 @@ use smol_str::{SmolStr, ToSmolStr};
 use std::fmt::Display;
 
 pub(super) enum EntityIdSrc<'a> {
-    Token { token: &'a Token, claim: &'a str },
+    Token {
+        token: &'a Token,
+        /// The token's entity type, to name it in an error.
+        entity_type: &'a str,
+        claim: &'a str,
+    },
     String(&'a str),
 }
 
@@ -23,11 +28,12 @@ pub(super) fn get_first_valid_entity_id(
         match src {
             EntityIdSrc::Token {
                 token,
+                entity_type,
                 claim: claim_name,
             } => {
                 let Some(claim) = token.get_claim_val(claim_name) else {
                     errors.push(GetEntityIdError {
-                        token: token.name.clone(),
+                        token: (*entity_type).to_string(),
                         claim: (*claim_name).to_string(),
                         reason: GetEntityIdErrorReason::MissingClaim,
                     });
@@ -39,7 +45,7 @@ pub(super) fn get_first_valid_entity_id(
 
                 if id.is_empty() {
                     errors.push(GetEntityIdError {
-                        token: token.name.clone(),
+                        token: (*entity_type).to_string(),
                         claim: (*claim_name).to_string(),
                         reason: GetEntityIdErrorReason::EmptyString,
                     });
@@ -116,7 +122,6 @@ mod test {
         let expected_client_id = "some_client_id";
 
         let token = Token::new(
-            "test_token",
             HashMap::from([("aud".into(), json!(expected_aud))]).into(),
             test_issuer(),
         );
@@ -124,6 +129,7 @@ mod test {
         // Using the token's aud
         let id = get_first_valid_entity_id(&[EntityIdSrc::Token {
             token: &token,
+            entity_type: "test_token",
             claim: "aud",
         }])
         .expect("should get entity id from token's aud");
@@ -133,10 +139,12 @@ mod test {
         let id = get_first_valid_entity_id(&[
             EntityIdSrc::Token {
                 token: &token,
+                entity_type: "test_token",
                 claim: "client_id",
             },
             EntityIdSrc::Token {
                 token: &token,
+                entity_type: "test_token",
                 claim: "aud",
             },
         ])
@@ -144,7 +152,6 @@ mod test {
         assert_eq!(id, expected_aud);
 
         let token = Token::new(
-            "test_token",
             HashMap::from([
                 ("aud".into(), json!(expected_aud)),
                 ("client_id".into(), json!(expected_client_id)),
@@ -157,10 +164,12 @@ mod test {
         let id = get_first_valid_entity_id(&[
             EntityIdSrc::Token {
                 token: &token,
+                entity_type: "test_token",
                 claim: "client_id",
             },
             EntityIdSrc::Token {
                 token: &token,
+                entity_type: "test_token",
                 claim: "aud",
             },
         ])
@@ -168,7 +177,6 @@ mod test {
         assert_eq!(id, expected_client_id);
 
         let token = Token::new(
-            "test_token",
             HashMap::from([("empty".into(), json!(""))]).into(),
             test_issuer(),
         );
@@ -177,10 +185,12 @@ mod test {
         let err = get_first_valid_entity_id(&[
             EntityIdSrc::Token {
                 token: &token,
+                entity_type: "test_token",
                 claim: "empty",
             },
             EntityIdSrc::Token {
                 token: &token,
+                entity_type: "test_token",
                 claim: "missing",
             },
         ])

@@ -336,7 +336,7 @@ mod tests {
     }
 
     fn token(claims: HashMap<String, Value>) -> Arc<Token> {
-        Arc::new(Token::new("test", TokenClaims::from(claims), test_issuer()))
+        Arc::new(Token::new(TokenClaims::from(claims), test_issuer()))
     }
 
     fn token_with_exp(now: DateTime<Utc>, duration_secs: i64) -> Arc<Token> {
@@ -431,11 +431,7 @@ mod tests {
     fn explicit_expiration_used_when_no_exp_claim() {
         let now = Utc::now();
         let cache = token_cache(0);
-        let token = Arc::new(Token::new(
-            "access_token",
-            TokenClaims::default(),
-            test_issuer(),
-        ));
+        let token = Arc::new(Token::new(TokenClaims::default(), test_issuer()));
 
         assert_eq!(
             cache.cache_duration(TokenCache::effective_exp(

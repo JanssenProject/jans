@@ -637,11 +637,8 @@ impl JwtService {
                 let claims = TokenClaims::try_from(validated_jwt.claims)
                     .map_err(MultiIssuerValidationError::InvalidClaims)?;
 
-                let cedar_token = Arc::new(Token::new(
-                    &ctx.token.mapping,
-                    claims,
-                    TokenIssuer::Jwt(trusted_iss.clone()),
-                ));
+                let cedar_token =
+                    Arc::new(Token::new(claims, TokenIssuer::Jwt(trusted_iss.clone())));
 
                 self.token_cache.save(
                     &token_kind,
@@ -758,11 +755,7 @@ impl JwtService {
             };
             let cacheable = processed.cacheable;
             let claims = TokenClaims::from(processed.claims);
-            let cedar_token = Arc::new(Token::new(
-                &input.mapping,
-                claims,
-                TokenIssuer::Custom(meta),
-            ));
+            let cedar_token = Arc::new(Token::new(claims, TokenIssuer::Custom(meta)));
 
             if cacheable {
                 self.token_cache.save_with_expiration(
