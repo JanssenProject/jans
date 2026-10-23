@@ -1,4 +1,4 @@
-ruamel.yaml>=0.16.10
+ruamel.yaml>=0.19.1
 python-dateutil
 dockerfile-parse
 requests-html
