@@ -397,7 +397,7 @@ impl JwtService {
             // so it has to be shared or split. Worth its own PR with that covered
             // by tests, not a drive-by.
             let ctx = TokenCallCtx { token, index, now };
-            let Some((entity_type, token_type)) = token_types.resolve(&token.mapping) else {
+            let Some(token_type) = token_types.resolve(&token.mapping) else {
                 let reason = self.drop_unknown_mapping(&ctx);
                 dropped.push(DroppedToken::new(token.mapping.clone(), index, reason));
                 continue;
@@ -405,6 +405,7 @@ impl JwtService {
             // A mapping names one token type of one issuer, so a second token for
             // it cannot be told apart from the first: the first accepted one wins,
             // and later ones are dropped before being validated or processed.
+            let entity_type = token_type.entity_type();
             if let Some(accepted) = validated_tokens.get(entity_type) {
                 if let Some(logger) = &self.logger {
                     logger.log_any(JwtLogEntry::new(
@@ -423,10 +424,13 @@ impl JwtService {
                 ));
                 continue;
             }
-            let result = match &token_type.kind {
-                TokenTypeKind::Custom(token_meta) => {
+            let result = match token_type.kind() {
+                TokenTypeKind::Custom {
+                    issuer,
+                    metadata: token_meta,
+                } => {
                     let target = CustomTarget {
-                        issuer: &token_type.issuer,
+                        issuer,
                         token_meta,
                         generation: token_types.generation(),
                     };
@@ -982,11 +986,15 @@ mod test {
         let token_type = index
             .get(&input.mapping)
             .expect("Acme::CustomToken should be configured");
-        let TokenTypeKind::Custom(token_meta) = &token_type.kind else {
+        let TokenTypeKind::Custom {
+            issuer,
+            metadata: token_meta,
+        } = token_type.kind()
+        else {
             unreachable!("Acme::CustomToken is configured as a custom token")
         };
         let target = super::CustomTarget {
-            issuer: &token_type.issuer,
+            issuer,
             token_meta,
             generation: index.generation(),
         };

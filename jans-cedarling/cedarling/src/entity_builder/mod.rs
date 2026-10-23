@@ -132,8 +132,8 @@ impl EntityBuilder {
         for iss in issuers {
             let expected_iss_type = Self::trusted_issuer_typename(&iss.name);
 
-            for (entity_type_name, _) in token_types.jwt_tokens_of(&iss.name) {
-                let entity_type_name = entity_type_name.as_str();
+            for token in token_types.jwt_tokens_of(&iss.name) {
+                let entity_type_name = token.entity_type.as_str();
                 let Some(shape) = schema.get_entity_shape(entity_type_name) else {
                     continue;
                 };

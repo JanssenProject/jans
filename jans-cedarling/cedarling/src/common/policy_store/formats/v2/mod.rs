@@ -200,7 +200,7 @@ mod tests {
             store
                 .token_types
                 .get("Acme::Access_token")
-                .map(|t| t.context_key.as_str()),
+                .map(|t| t.context_key().as_str()),
             Some("acme_access_token"),
             "the JWT token type should be converted"
         );
@@ -208,7 +208,7 @@ mod tests {
             store
                 .token_types
                 .get("Dolphin::Dolphin_token")
-                .map(|t| t.context_key.as_str()),
+                .map(|t| t.context_key().as_str()),
             Some("dolphin_dolphin_token"),
             "the custom token type should be converted"
         );

@@ -25,7 +25,16 @@ use crate::common::policy_store::{
 /// The whole file, in file order. Duplicate keys are rejected while parsing:
 /// a plain map would silently keep the last one.
 #[derive(Debug, Clone, Default, PartialEq)]
-pub(crate) struct TrustedIssuersDoc(pub(crate) Vec<(EntityTypeName, TokenTypeConfig)>);
+pub(crate) struct TrustedIssuersDoc {
+    pub(crate) entries: Vec<TrustedIssuerEntry>,
+}
+
+/// One key of the file and its entry.
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct TrustedIssuerEntry {
+    pub(crate) entity_type: EntityTypeName,
+    pub(crate) config: TokenTypeConfig,
+}
 
 /// One token type; `type` selects which fields are allowed.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -201,9 +210,12 @@ impl<'de> Visitor<'de> for TrustedIssuersVisitor {
             let config = map
                 .next_value::<TokenTypeConfig>()
                 .map_err(|e| de::Error::custom(format!("invalid entry '{key}': {e}")))?;
-            entries.push((entity_type, config));
+            entries.push(TrustedIssuerEntry {
+                entity_type,
+                config,
+            });
         }
-        Ok(TrustedIssuersDoc(entries))
+        Ok(TrustedIssuersDoc { entries })
     }
 }
 
@@ -216,7 +228,11 @@ impl TrustedIssuersDoc {
     /// Validates the entries as a whole and converts them into runtime types.
     pub(crate) fn into_runtime(self) -> Result<TokenTypes, TokenTypesError> {
         let mut builder = TokenTypesBuilder::default();
-        for (entity_type, config) in self.0 {
+        for TrustedIssuerEntry {
+            entity_type,
+            config,
+        } in self.entries
+        {
             match config {
                 TokenTypeConfig::Jwt(jwt) => {
                     let jwt = *jwt;
@@ -336,17 +352,17 @@ mod tests {
 
         let id_token = types.get("Acme::Id_token").expect("Acme::Id_token");
         assert!(
-            matches!(&id_token.kind, TokenTypeKind::Jwt { metadata, .. } if metadata.token_id == "jti"),
+            matches!(id_token.kind(), TokenTypeKind::Jwt { metadata, .. } if metadata.token_id == "jti"),
             "token_id should default to jti"
         );
         let dolphin = types.get("Dolphin::Dolphin_token").expect("Dolphin token");
         assert_eq!(
-            dolphin.context_key.as_str(),
+            dolphin.context_key().as_str(),
             "dolphin_dolphin_token",
             "custom key"
         );
         assert!(
-            matches!(&dolphin.kind, TokenTypeKind::Custom(token) if token.required_claims.contains("sub")),
+            matches!(dolphin.kind(), TokenTypeKind::Custom { metadata, .. } if metadata.required_claims.contains("sub")),
             "a custom entry should keep its required claims"
         );
     }

@@ -277,7 +277,7 @@ fn simplify_token_type(mapping: &str) -> String {
     mapping.split("::").last().unwrap_or(mapping).to_lowercase()
 }
 
-/// How a token type is validated.
+/// How a token type is validated, with the issuer it belongs to.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum TokenTypeKind {
     /// Validated as a JWT of `issuer`, which every token type of that issuer shares.
@@ -285,15 +285,73 @@ pub(crate) enum TokenTypeKind {
         issuer: Arc<TrustedIssuer>,
         metadata: TokenEntityMetadata,
     },
-    Custom(CustomTokenMetadata),
+    /// Validated by the custom token processor on behalf of `issuer`.
+    Custom {
+        issuer: IssuerName,
+        metadata: CustomTokenMetadata,
+    },
 }
 
-/// One accepted token type.
+impl TokenTypeKind {
+    fn issuer(&self) -> &IssuerName {
+        match self {
+            Self::Jwt { issuer, .. } => &issuer.name,
+            Self::Custom { issuer, .. } => issuer,
+        }
+    }
+}
+
+/// One accepted token type. Built only by [`TokenTypesBuilder`], so the context
+/// key always follows from the issuer and entity type.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct TokenType {
-    pub(crate) issuer: IssuerName,
-    pub(crate) context_key: ContextKey,
-    pub(crate) kind: TokenTypeKind,
+    entity_type: EntityTypeName,
+    context_key: ContextKey,
+    kind: TokenTypeKind,
+}
+
+impl TokenType {
+    fn new(entity_type: EntityTypeName, kind: TokenTypeKind) -> Self {
+        Self {
+            context_key: ContextKey::derive(kind.issuer(), &entity_type),
+            entity_type,
+            kind,
+        }
+    }
+
+    /// A custom token type that a test builds without a store.
+    #[cfg(test)]
+    pub(crate) fn custom_for_test(entity_type: &str, issuer: &str) -> Self {
+        Self::new(
+            EntityTypeName::for_test(entity_type),
+            TokenTypeKind::Custom {
+                issuer: IssuerName::for_test(issuer),
+                metadata: CustomTokenMetadata::default(),
+            },
+        )
+    }
+
+    pub(crate) fn entity_type(&self) -> &EntityTypeName {
+        &self.entity_type
+    }
+
+    pub(crate) fn context_key(&self) -> &ContextKey {
+        &self.context_key
+    }
+
+    pub(crate) fn kind(&self) -> &TokenTypeKind {
+        &self.kind
+    }
+
+    pub(crate) fn issuer(&self) -> &IssuerName {
+        self.kind.issuer()
+    }
+}
+
+/// A JWT token type of one issuer, as [`TokenTypes::jwt_tokens_of`] lists it.
+pub(crate) struct JwtTokenType<'a> {
+    pub(crate) entity_type: &'a EntityTypeName,
+    pub(crate) metadata: &'a TokenEntityMetadata,
 }
 
 /// The validated token types of a policy store, keyed by entity type.
@@ -412,14 +470,12 @@ impl TokenTypesBuilder {
             });
         }
 
-        let trusted_issuer = match self.jwt_issuers.entry(issuer.clone()) {
-            Entry::Vacant(slot) => slot
-                .insert(Arc::new(TrustedIssuer::new(
-                    issuer.clone(),
-                    iss,
-                    key_source,
-                )))
-                .clone(),
+        let trusted_issuer = match self.jwt_issuers.entry(issuer) {
+            Entry::Vacant(slot) => {
+                let issuer = slot.key().clone();
+                slot.insert(Arc::new(TrustedIssuer::new(issuer, iss, key_source)))
+                    .clone()
+            },
             Entry::Occupied(existing) => {
                 let existing = existing.get().clone();
                 let difference = if *existing.iss_claim() != IssClaim::new(iss.as_str()) {
@@ -439,8 +495,8 @@ impl TokenTypesBuilder {
                 };
                 if let Some(difference) = difference {
                     return Err(TokenTypesError::IssuerConflict {
-                        issuer: issuer.to_string(),
-                        entity_type_a: self.any_jwt_entity_type(&issuer),
+                        issuer: existing.name.to_string(),
+                        entity_type_a: self.any_jwt_entity_type(&existing.name),
                         entity_type_b: entity_type.to_string(),
                         difference,
                     });
@@ -453,7 +509,7 @@ impl TokenTypesBuilder {
             issuer: trusted_issuer,
             metadata: token,
         };
-        self.insert_token(entity_type, issuer, kind)
+        self.insert_token(TokenType::new(entity_type, kind))
     }
 
     /// Adds a custom token type of `issuer`.
@@ -470,11 +526,11 @@ impl TokenTypesBuilder {
                 custom_entity_type: entity_type.to_string(),
             });
         }
-        self.insert_token(
-            entity_type.clone(),
-            issuer.clone(),
-            TokenTypeKind::Custom(token),
-        )?;
+        let kind = TokenTypeKind::Custom {
+            issuer: issuer.clone(),
+            metadata: token,
+        };
+        self.insert_token(TokenType::new(entity_type.clone(), kind))?;
         self.custom_issuers.entry(issuer).or_insert(entity_type);
         Ok(())
     }
@@ -489,42 +545,32 @@ impl TokenTypesBuilder {
         })
     }
 
-    fn insert_token(
-        &mut self,
-        entity_type: EntityTypeName,
-        issuer: IssuerName,
-        kind: TokenTypeKind,
-    ) -> Result<(), TokenTypesError> {
-        let context_key = ContextKey::derive(&issuer, &entity_type);
-        if context_key.is_reserved() {
+    fn insert_token(&mut self, token: TokenType) -> Result<(), TokenTypesError> {
+        if token.context_key.is_reserved() {
             return Err(TokenTypesError::ReservedContextKey {
-                key: context_key.to_string(),
-                entity_type: entity_type.to_string(),
+                key: token.context_key.to_string(),
+                entity_type: token.entity_type.to_string(),
             });
         }
 
-        match self.tokens.entry(entity_type) {
+        match self.tokens.entry(token.entity_type.clone()) {
             Entry::Occupied(existing) => Err(TokenTypesError::DuplicateEntityType {
                 entity_type: existing.key().to_string(),
-                issuer_a: existing.get().issuer.to_string(),
-                issuer_b: issuer.to_string(),
+                issuer_a: existing.get().issuer().to_string(),
+                issuer_b: token.issuer().to_string(),
             }),
             Entry::Vacant(slot) => {
                 if let Some(owner) = self
                     .context_keys
-                    .insert(context_key.clone(), slot.key().clone())
+                    .insert(token.context_key.clone(), token.entity_type.clone())
                 {
                     return Err(TokenTypesError::DuplicateContextKey {
-                        key: context_key.to_string(),
+                        key: token.context_key.to_string(),
                         entity_type_a: owner.to_string(),
-                        entity_type_b: slot.key().to_string(),
+                        entity_type_b: token.entity_type.to_string(),
                     });
                 }
-                slot.insert(Arc::new(TokenType {
-                    issuer,
-                    context_key,
-                    kind,
-                }));
+                slot.insert(Arc::new(token));
                 Ok(())
             },
         }
@@ -533,11 +579,11 @@ impl TokenTypesBuilder {
     /// Names one of `issuer`'s JWT entity types in an error, or `<none>`.
     fn any_jwt_entity_type(&self, issuer: &IssuerName) -> String {
         self.tokens
-            .iter()
-            .filter(|(_, token)| {
-                &token.issuer == issuer && matches!(token.kind, TokenTypeKind::Jwt { .. })
+            .values()
+            .filter(|token| {
+                token.issuer() == issuer && matches!(token.kind, TokenTypeKind::Jwt { .. })
             })
-            .map(|(entity_type, _)| entity_type.as_str())
+            .map(|token| token.entity_type.as_str())
             .min()
             .map_or_else(|| "<none>".to_string(), ToString::to_string)
     }
@@ -652,10 +698,10 @@ impl TokenTypes {
         self.tokens.get(mapping).map(AsRef::as_ref)
     }
 
-    /// The entity type and token type a request `mapping` names, for a
-    /// validated token to carry instead of being looked up again.
-    pub(crate) fn resolve(&self, mapping: &str) -> Option<(&EntityTypeName, &Arc<TokenType>)> {
-        self.tokens.get_key_value(mapping)
+    /// The token type a request `mapping` names, for a validated token to carry
+    /// instead of being looked up again.
+    pub(crate) fn resolve(&self, mapping: &str) -> Option<&Arc<TokenType>> {
+        self.tokens.get(mapping)
     }
 
     /// Which build these token types come from; see the field.
@@ -668,17 +714,21 @@ impl TokenTypes {
         &self.jwt_issuers
     }
 
-    /// The JWT token types of the issuer named `issuer`, by entity type.
+    /// The JWT token types of the issuer named `issuer`.
     pub(crate) fn jwt_tokens_of<'a>(
         &'a self,
         issuer: &'a IssuerName,
-    ) -> impl Iterator<Item = (&'a EntityTypeName, &'a TokenEntityMetadata)> {
+    ) -> impl Iterator<Item = JwtTokenType<'a>> {
         self.tokens
-            .iter()
-            .filter_map(move |(entity_type, token)| match &token.kind {
-                TokenTypeKind::Jwt { metadata, .. } if &token.issuer == issuer => {
-                    Some((entity_type, metadata))
-                },
+            .values()
+            .filter_map(move |token| match &token.kind {
+                TokenTypeKind::Jwt {
+                    issuer: owner,
+                    metadata,
+                } if &owner.name == issuer => Some(JwtTokenType {
+                    entity_type: &token.entity_type,
+                    metadata,
+                }),
                 _ => None,
             })
     }
@@ -700,8 +750,10 @@ impl TokenTypes {
     pub(crate) fn custom_issuer_count(&self) -> usize {
         self.tokens
             .values()
-            .filter(|token| matches!(token.kind, TokenTypeKind::Custom(_)))
-            .map(|token| &token.issuer)
+            .filter_map(|token| match &token.kind {
+                TokenTypeKind::Custom { issuer, .. } => Some(issuer),
+                TokenTypeKind::Jwt { .. } => None,
+            })
             .collect::<HashSet<_>>()
             .len()
     }
@@ -778,7 +830,7 @@ mod tests {
                 .get(entity_type)
                 .expect("token type should be indexed");
             assert_eq!(
-                token.issuer.to_string(),
+                token.issuer().to_string(),
                 issuer,
                 "{entity_type} issuer mismatch"
             );
@@ -791,7 +843,7 @@ mod tests {
         assert!(
             matches!(
                 types.get("Dolphin::Dolphin_token").map(|t| &t.kind),
-                Some(TokenTypeKind::Custom(_))
+                Some(TokenTypeKind::Custom { .. })
             ),
             "a custom token type should keep its kind"
         );

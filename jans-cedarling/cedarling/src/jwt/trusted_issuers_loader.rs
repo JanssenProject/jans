@@ -129,7 +129,7 @@ fn unresolved_issuers(token_types: &TokenTypes) -> Vec<IssuerConfig> {
             policy: issuer.clone(),
             tokens: token_types
                 .jwt_tokens_of(name)
-                .map(|(entity_type, metadata)| (entity_type.clone(), metadata.clone()))
+                .map(|token| (token.entity_type.clone(), token.metadata.clone()))
                 .collect(),
             openid_config: None,
         })

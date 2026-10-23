@@ -18,7 +18,8 @@ use std::str::FromStr;
 
 use super::Upgrade;
 use crate::common::policy_store::formats::v2::trusted_issuers::{
-    CustomTokenConfig, JwtTokenConfig, KeySourceDoc, TokenTypeConfig, TrustedIssuersDoc,
+    CustomTokenConfig, JwtTokenConfig, KeySourceDoc, TokenTypeConfig, TrustedIssuerEntry,
+    TrustedIssuersDoc,
 };
 use crate::common::policy_store::formats::{v1, v2};
 use crate::common::policy_store::token_types::{
@@ -104,7 +105,9 @@ impl Upgrade for v1::PolicyStoreDoc {
 
         Ok(v2::PolicyStoreDoc {
             metadata: migrate_metadata(self.metadata),
-            trusted_issuers: TrustedIssuersDoc(entries.entries),
+            trusted_issuers: TrustedIssuersDoc {
+                entries: entries.entries,
+            },
             content: self.content,
         })
     }
@@ -113,7 +116,7 @@ impl Upgrade for v1::PolicyStoreDoc {
 /// The merged entries, and the file each entity type came from.
 #[derive(Default)]
 struct Entries {
-    entries: Vec<(EntityTypeName, TokenTypeConfig)>,
+    entries: Vec<TrustedIssuerEntry>,
     files: HashMap<EntityTypeName, String>,
 }
 
@@ -140,7 +143,10 @@ impl Entries {
             }),
             Entry::Vacant(slot) => {
                 slot.insert(file.to_string());
-                self.entries.push((entity_type, config));
+                self.entries.push(TrustedIssuerEntry {
+                    entity_type,
+                    config,
+                });
                 Ok(())
             },
         }
@@ -362,11 +368,11 @@ mod tests {
     /// The entry migrated for `entity_type`.
     fn entry<'a>(doc: &'a v2::PolicyStoreDoc, entity_type: &str) -> &'a TokenTypeConfig {
         &doc.trusted_issuers
-            .0
+            .entries
             .iter()
-            .find(|(key, _)| key.as_str() == entity_type)
+            .find(|entry| entry.entity_type.as_str() == entity_type)
             .unwrap_or_else(|| panic!("{entity_type} should be migrated"))
-            .1
+            .config
     }
 
     #[test]
@@ -435,9 +441,9 @@ mod tests {
         let doc = doc.expect("the store should migrate");
         assert_eq!(
             doc.trusted_issuers
-                .0
+                .entries
                 .iter()
-                .map(|(key, _)| key.as_str())
+                .map(|entry| entry.entity_type.as_str())
                 .collect::<Vec<_>>(),
             vec!["Jans::Access_token"],
             "a `trusted: false` token should not be migrated"

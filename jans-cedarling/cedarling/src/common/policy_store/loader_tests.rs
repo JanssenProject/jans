@@ -928,12 +928,12 @@ fn assert_acme_custom_token(store: &crate::common::policy_store::PolicyStoreWith
         .get("Acme::CustomToken")
         .expect("acme should declare the Acme::CustomToken type");
     assert_eq!(
-        token.issuer.to_string(),
+        token.issuer().to_string(),
         "acme",
         "issuer should be the file id"
     );
     assert!(
-        matches!(&token.kind, crate::common::policy_store::TokenTypeKind::Custom(token) if token.required_claims.contains("sub")),
+        matches!(token.kind(), crate::common::policy_store::TokenTypeKind::Custom { metadata, .. } if metadata.required_claims.contains("sub")),
         "required_claims should be converted"
     );
 }
@@ -1092,7 +1092,7 @@ fn test_load_custom_issuers_shared_id_merges() {
             .get(entity_type)
             .expect("both token types should be kept");
         assert_eq!(
-            token.issuer.to_string(),
+            token.issuer().to_string(),
             "dup",
             "{entity_type} issuer mismatch"
         );
