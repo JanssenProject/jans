@@ -629,7 +629,7 @@ impl JwtService {
 
                 // Check for non-deterministic tokens (graceful validation); the
                 // validator has checked the `iss` claim against this issuer.
-                if !self.mark_jwt_seen(ctx, &trusted_iss.iss_claim()) {
+                if !self.mark_jwt_seen(ctx, trusted_iss.iss_claim()) {
                     return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
                 }
 

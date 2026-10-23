@@ -327,7 +327,7 @@ async fn resolve_trusted_issuer(
     http_client: &HttpClient,
 ) -> Result<ResolvedIssuer, JwtServiceInitError> {
     // this is what we expect to find in the JWT `iss` claim
-    let iss_claim = config.policy.iss_claim();
+    let iss_claim = config.policy.iss_claim().clone();
 
     if let KeySource::Discovery { configuration } = &config.policy.key_source
         && (loader.jwt_config.jwt_sig_validation || loader.jwt_config.jwt_status_validation)

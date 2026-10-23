@@ -117,7 +117,7 @@ impl StatusListCache {
         let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url, &http_client)
             .await
             .map_err(UpdateStatusListError::GetStatusListJwt)?;
-        let iss = iss_config.policy.iss_claim();
+        let iss = iss_config.policy.iss_claim().clone();
 
         let decoded_jwt = decode_jwt(&status_list_jwt.0)?;
 

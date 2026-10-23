@@ -177,8 +177,9 @@ pub(crate) struct TrustedIssuer {
     /// The issuer's name: the namespace of its `TrustedIssuer` entity.
     pub(crate) name: IssuerName,
     /// The `iss` its tokens must carry.
-    // Private to force usage of `iss_claim` method to get normalized iss claim
     iss: Url,
+    /// `iss` normalized once, as every token's `iss` is compared against it.
+    iss_claim: IssClaim,
     /// Where the issuer's signing keys come from.
     pub(crate) key_source: KeySource,
 }
@@ -186,15 +187,14 @@ pub(crate) struct TrustedIssuer {
 #[cfg(test)]
 impl Default for TrustedIssuer {
     fn default() -> Self {
-        Self {
-            name: IssuerName::for_test("Jans"),
-            // This will only really be called during testing so we just put this test value
-            iss: Url::parse("https://test.jans.org").unwrap(),
-            key_source: KeySource::Discovery {
+        Self::new(
+            IssuerName::for_test("Jans"),
+            Url::parse("https://test.jans.org").unwrap(),
+            KeySource::Discovery {
                 configuration: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                     .unwrap(),
             },
-        }
+        )
     }
 }
 
@@ -209,9 +209,11 @@ impl Default for &TrustedIssuer {
 
 impl TrustedIssuer {
     pub(crate) fn new(name: IssuerName, iss: Url, key_source: KeySource) -> Self {
+        let iss_claim = IssClaim::new(iss.as_str());
         Self {
             name,
             iss,
+            iss_claim,
             key_source,
         }
     }
@@ -263,9 +265,13 @@ impl TrustedIssuer {
     /// Points the issuer at another discovery endpoint, re-deriving `iss`.
     #[cfg(test)]
     pub(crate) fn set_configuration_endpoint(&mut self, configuration: Url) {
-        self.iss = iss_from_configuration(&configuration)
+        let iss = iss_from_configuration(&configuration)
             .expect("test configuration endpoint should derive an iss");
-        self.key_source = KeySource::Discovery { configuration };
+        *self = Self::new(
+            self.name.clone(),
+            iss,
+            KeySource::Discovery { configuration },
+        );
     }
 
     /// The `iss` its tokens must carry.
@@ -273,8 +279,9 @@ impl TrustedIssuer {
         &self.iss
     }
 
-    pub(crate) fn iss_claim(&self) -> IssClaim {
-        IssClaim::new(self.iss.as_str())
+    /// The normalized `iss` its tokens must carry.
+    pub(crate) fn iss_claim(&self) -> &IssClaim {
+        &self.iss_claim
     }
 }
 

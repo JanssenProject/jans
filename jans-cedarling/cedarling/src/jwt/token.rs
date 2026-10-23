@@ -6,7 +6,7 @@
 use crate::common::{issuer_utils::IssClaim, policy_store::TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
-use std::{collections::HashMap, sync::Arc};
+use std::{borrow::Cow, collections::HashMap, sync::Arc};
 
 /// Identifies where a validated [`Token`] came from.
 ///
@@ -67,10 +67,10 @@ impl Token {
 
     /// The normalized issuer of the token: the configured `iss` of a JWT issuer,
     /// which a validated JWT's `iss` claim equals, or a custom issuer's id.
-    pub(crate) fn normalized_issuer(&self) -> IssClaim {
+    pub(crate) fn normalized_issuer(&self) -> Cow<'_, IssClaim> {
         match &self.iss {
-            TokenIssuer::Jwt(trusted_issuer) => trusted_issuer.iss_claim(),
-            TokenIssuer::Custom(meta) => IssClaim::new(meta.issuer_id.as_str()),
+            TokenIssuer::Jwt(trusted_issuer) => Cow::Borrowed(trusted_issuer.iss_claim()),
+            TokenIssuer::Custom(meta) => Cow::Owned(IssClaim::new(meta.issuer_id.as_str())),
         }
     }
 }

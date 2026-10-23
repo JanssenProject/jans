@@ -160,7 +160,8 @@ impl TokenCache {
 
         // Extract issuer for indexing; custom-token entries additionally carry a
         // marker index so `clear_custom_tokens` can flush them without touching JWTs.
-        let mut index_keys = vec![IndexKey::Iss(token.normalized_issuer()).index_value()];
+        let mut index_keys =
+            vec![IndexKey::Iss(token.normalized_issuer().into_owned()).index_value()];
         if matches!(kind, TokenKind::AuthorizeCustom(_)) {
             index_keys.push(IndexKey::Custom.index_value());
         }

@@ -407,7 +407,7 @@ impl TokenTypesBuilder {
                 .clone(),
             Entry::Occupied(existing) => {
                 let existing = existing.get().clone();
-                let difference = if existing.iss_claim() != IssClaim::new(iss.as_str()) {
+                let difference = if *existing.iss_claim() != IssClaim::new(iss.as_str()) {
                     Some(format!(
                         "iss '{}' and '{}'",
                         existing.iss_claim(),
@@ -533,7 +533,7 @@ impl TokenTypesBuilder {
         let mut issuers: Vec<&Arc<TrustedIssuer>> = self.jwt_issuers.values().collect();
         issuers.sort_by(|a, b| a.name.cmp(&b.name));
 
-        let mut jwks_by_iss: HashMap<IssClaim, (&Url, &IssuerName)> = HashMap::new();
+        let mut jwks_by_iss: HashMap<&IssClaim, (&Url, &IssuerName)> = HashMap::new();
         for issuer in issuers {
             let KeySource::Static { jwks } = &issuer.key_source else {
                 continue;

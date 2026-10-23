@@ -188,7 +188,7 @@ impl EntityBuilder {
         self.token_types
             .jwt_issuers()
             .values()
-            .find(|iss| iss.iss_claim() == issuer)
+            .find(|iss| *iss.iss_claim() == issuer)
             .cloned()
     }
 }

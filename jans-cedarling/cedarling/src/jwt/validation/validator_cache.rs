@@ -67,7 +67,7 @@ impl JwtValidatorCache {
 
             for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
                 let (validator, key) = JwtValidator::new_multi_issuer_tkn_validator(
-                    Some(&iss),
+                    Some(iss),
                     entity_type.as_str(),
                     tkn_metadata,
                     algorithm,
@@ -88,7 +88,7 @@ impl JwtValidatorCache {
                     .and_then(|conf| conf.status_list_endpoint.as_ref())
                     .map(std::string::ToString::to_string);
                 let (validator, key) = JwtValidator::new_status_list_tkn_validator(
-                    Some(&iss),
+                    Some(iss),
                     status_list_uri,
                     algorithm,
                     jwt_config.jwt_sig_validation,

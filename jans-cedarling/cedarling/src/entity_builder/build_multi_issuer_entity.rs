@@ -123,7 +123,7 @@ fn add_iss_claim(attrs: &mut HashMap<String, RestrictedExpression>, token: &Toke
 
     let iss = match &token.iss {
         TokenIssuer::Jwt(token_iss) => RestrictedExpression::new_entity_uid(
-            EntityBuilder::trusted_issuer_cedar_uid(&token_iss.name, &token_iss.iss_claim()),
+            EntityBuilder::trusted_issuer_cedar_uid(&token_iss.name, token_iss.iss_claim()),
         ),
         TokenIssuer::Custom(meta) => RestrictedExpression::new_string(meta.issuer_id.clone()),
     };
