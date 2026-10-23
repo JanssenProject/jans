@@ -53,7 +53,8 @@ To allow an Access token like the one below to be used for authorization:
 {
   "iss": "https://test.issuer.com",
   "aud": "abc123",
-  "exp": 1234567890
+  "client_id": "abc123",
+  "exp": 4102444800
 }
 ```
 
@@ -87,8 +88,8 @@ In summary, for a token to be validated by Cedarling, two conditions must be met
   const result = await cedarling.authorizeMultiIssuer(
     JSON.stringify({
       tokens: [
-        { mapping: "Jans::Access_Token", payload: "<access_token>" }, // will be validated
-        { mapping: "Jans::Id_Token", payload: "<id_token>" }, // dropped unless declared in trusted-issuers.json
+        { mapping: "Jans::Access_token", payload: "<access_token>" }, // will be validated
+        { mapping: "Jans::Id_token", payload: "<id_token>" }, // dropped unless declared in trusted-issuers.json
       ],
       // ...
     }),

@@ -293,6 +293,7 @@ policy-store/
 
 ```json
 {
+  "policy_store_spec_version": 2,
   "cedar_version": "4.4.0",
   "policy_store": {
     "id": "abc123def456",
