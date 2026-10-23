@@ -32,8 +32,6 @@ use schema::MappingSchema;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
-#[cfg(test)]
-use std::sync::Arc;
 
 pub(crate) use build_multi_issuer_entity::{MultiIssuerEntityError, MultiIssuerSetupEntities};
 pub(crate) use built_entities::BuiltEntities;
@@ -46,10 +44,6 @@ pub(crate) struct EntityBuilder {
     iss_entities: HashMap<EntityUid, Entity>,
     schema: Option<MappingSchema>,
     default_entities: DefaultEntities,
-    /// The token types the builder was made from, so tests can resolve a
-    /// token's type as `JwtService` does.
-    #[cfg(test)]
-    token_types: TokenTypes,
 }
 
 impl EntityBuilder {
@@ -100,8 +94,6 @@ impl EntityBuilder {
             iss_entities,
             schema,
             default_entities,
-            #[cfg(test)]
-            token_types: token_types.clone(),
         })
     }
 
@@ -179,17 +171,6 @@ impl EntityBuilder {
         // EntityId::from_str returns Result<_, Infallible>, so parsing never fails
         let entity_id = EntityId::from_str(iss_url.as_str()).unwrap_or_else(|e| match e {});
         EntityUid::from_type_name_and_id(namespace.trusted_issuer_type().clone(), entity_id)
-    }
-
-    #[cfg(test)]
-    // is used only for testing to get trusted issuer
-    fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
-        let issuer = IssClaim::new(issuer);
-        self.token_types
-            .jwt_issuers()
-            .values()
-            .find(|iss| *iss.iss_claim() == issuer)
-            .cloned()
     }
 }
 

@@ -416,6 +416,7 @@ impl EntityBuilder {
 mod tests {
     use super::*;
     use crate::common::default_entities::DefaultEntities;
+    use crate::common::issuer_utils::IssClaim;
     use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
     use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata, TokenTypes};
     use crate::common::policy_store::{IssuerName, TrustedIssuer};
@@ -428,7 +429,41 @@ mod tests {
     use std::sync::Arc;
     use url::Url;
 
-    impl EntityBuilder {
+    /// An entity builder with the token types it was made from, so tests can
+    /// resolve tokens against them as `JwtService` does.
+    struct TestBuilder {
+        builder: EntityBuilder,
+        token_types: TokenTypes,
+    }
+
+    impl std::ops::Deref for TestBuilder {
+        type Target = EntityBuilder;
+
+        fn deref(&self) -> &EntityBuilder {
+            &self.builder
+        }
+    }
+
+    impl TestBuilder {
+        fn new(token_types: TokenTypes, schema: Option<&ValidatorSchema>) -> Self {
+            let builder = EntityBuilder::new(&token_types, schema, DefaultEntities::default())
+                .expect("test entity builder should build");
+            Self {
+                builder,
+                token_types,
+            }
+        }
+
+        /// The configured JWT issuer whose `iss` is `iss`.
+        fn find_trusted_issuer_by_iss(&self, iss: &str) -> Option<Arc<TrustedIssuer>> {
+            let iss = IssClaim::new(iss);
+            self.token_types
+                .jwt_issuers()
+                .values()
+                .find(|issuer| *issuer.iss_claim() == iss)
+                .cloned()
+        }
+
         /// The token type `mapping` names, resolved as `JwtService` does.
         fn token_type_of(&self, mapping: &str) -> Arc<TokenType> {
             let (_, token_type) = self
@@ -457,7 +492,7 @@ mod tests {
     /// Wrap test tokens, keyed by mapping, as validated entries with arbitrary
     /// distinct indexes.
     fn into_validated(
-        builder: &EntityBuilder,
+        builder: &TestBuilder,
         tokens: HashMap<String, Token>,
     ) -> HashMap<EntityTypeName, ValidatedToken> {
         tokens
@@ -487,7 +522,7 @@ mod tests {
             .collect()
     }
 
-    fn create_test_entity_builder() -> EntityBuilder {
+    fn create_test_entity_builder() -> TestBuilder {
         let mut trusted_issuers = HashMap::new();
 
         // Add Acme issuer
@@ -534,20 +569,18 @@ mod tests {
             },
         )];
 
-        EntityBuilder::new(
-            &TokenTypes::build(trusted_issuers.into_values(), custom_issuers)
+        TestBuilder::new(
+            TokenTypes::build(trusted_issuers.into_values(), custom_issuers)
                 .expect("test token types should build"),
             None,
-            DefaultEntities::default(),
         )
-        .unwrap()
     }
 
     fn create_test_token(
         issuer: &str,
         jti: &str,
         claims: HashMap<String, Value>,
-        builder: &EntityBuilder,
+        builder: &TestBuilder,
     ) -> Token {
         let mut all_claims = claims;
         all_claims.insert("iss".to_string(), json!(issuer));
@@ -566,7 +599,7 @@ mod tests {
     }
 
     /// The `Acme` issuer of [`create_test_entity_builder`].
-    fn acme_issuer(builder: &EntityBuilder) -> TokenIssuer {
+    fn acme_issuer(builder: &TestBuilder) -> TokenIssuer {
         TokenIssuer::Jwt(
             builder
                 .find_trusted_issuer_by_iss("https://idp.acme.com/auth")
@@ -575,17 +608,15 @@ mod tests {
     }
 
     /// Builds an entity builder from `(name, iss, entity type)` triples.
-    fn builder_with_issuers(issuers: &[(&str, &str, &str)]) -> EntityBuilder {
+    fn builder_with_issuers(issuers: &[(&str, &str, &str)]) -> TestBuilder {
         let trusted_issuers = issuers.iter().map(|(name, iss, entity_type)| {
             TrustedIssuer::discovery_at(*name, Url::parse(iss).expect("valid url"))
                 .with_tokens(tokens(&[entity_type]))
         });
-        EntityBuilder::new(
-            &TokenTypes::build(trusted_issuers, []).expect("test token types should build"),
+        TestBuilder::new(
+            TokenTypes::build(trusted_issuers, []).expect("test token types should build"),
             None,
-            DefaultEntities::default(),
         )
-        .expect("entity builder should build")
     }
 
     /// Issuer entity uids, sorted.
@@ -746,12 +777,7 @@ mod tests {
         }
         ";
         let validator = ValidatorSchema::from_str(schema_src).expect("valid schema");
-        let builder = EntityBuilder::new(
-            &TokenTypes::default(),
-            Some(&validator),
-            DefaultEntities::default(),
-        )
-        .expect("builder with schema");
+        let builder = TestBuilder::new(TokenTypes::default(), Some(&validator));
 
         let exp = chrono::Utc::now().timestamp() + 3600;
         let mut claims = HashMap::new();
@@ -933,13 +959,11 @@ mod tests {
             TrustedIssuer::discovery_at("Jans", Url::parse("https://test.issuer.com").unwrap())
                 .with_tokens(tokens(&["Jans::Access_Token"]));
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
-        let builder = EntityBuilder::new(
-            &TokenTypes::build(trusted_issuers.into_values(), [])
+        let builder = TestBuilder::new(
+            TokenTypes::build(trusted_issuers.into_values(), [])
                 .expect("test token types should build"),
             Some(&validator_schema),
-            DefaultEntities::default(),
-        )
-        .expect("could not build EntityBuilder");
+        );
 
         let iss = "https://test.issuer.com";
         let mut claims = HashMap::new();
@@ -1116,13 +1140,11 @@ mod tests {
         .with_tokens(tokens(&["Jans::Access_Token"]));
 
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
-        let builder = EntityBuilder::new(
-            &TokenTypes::build(trusted_issuers.into_values(), [])
+        let builder = TestBuilder::new(
+            TokenTypes::build(trusted_issuers.into_values(), [])
                 .expect("test token types should build"),
             Some(&validator_schema),
-            DefaultEntities::default(),
-        )
-        .unwrap();
+        );
 
         let mut claims = HashMap::new();
         claims.insert("sub".to_string(), json!("user123"));
@@ -1195,13 +1217,11 @@ mod tests {
         )
         .with_tokens(token_metadata);
         let trusted_issuers = HashMap::from([("TestIssuer".to_string(), ti)]);
-        let builder = EntityBuilder::new(
-            &TokenTypes::build(trusted_issuers.into_values(), [])
+        let builder = TestBuilder::new(
+            TokenTypes::build(trusted_issuers.into_values(), [])
                 .expect("test token types should build"),
-            None, // no schema — exercises the no-schema path
-            DefaultEntities::default(),
-        )
-        .expect("should create entity builder without schema");
+            None,
+        );
 
         // ── Token: jti and sub are deliberately different ──────────────
         let iss = "https://test.issuer.com";
@@ -1299,13 +1319,11 @@ mod tests {
         )
         .with_tokens(token_metadata);
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
-        let builder = EntityBuilder::new(
-            &TokenTypes::build(trusted_issuers.into_values(), [])
+        let builder = TestBuilder::new(
+            TokenTypes::build(trusted_issuers.into_values(), [])
                 .expect("test token types should build"),
             Some(&validator_schema),
-            DefaultEntities::default(),
-        )
-        .expect("should create entity builder with schema");
+        );
 
         let iss = "https://test.issuer.com";
         let mut claims = HashMap::new();
@@ -1423,13 +1441,11 @@ mod tests {
         )
         .with_tokens(token_metadata);
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
-        let builder = EntityBuilder::new(
-            &TokenTypes::build(trusted_issuers.into_values(), [])
+        let builder = TestBuilder::new(
+            TokenTypes::build(trusted_issuers.into_values(), [])
                 .expect("test token types should build"),
             Some(&validator_schema),
-            DefaultEntities::default(),
-        )
-        .expect("should create entity builder with schema for missing jti test");
+        );
 
         let iss = "https://test.issuer.com";
         let mut claims = HashMap::new();
