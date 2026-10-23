@@ -56,18 +56,13 @@ enum PolicyContentType {
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct LegacyTokenEntityMetadata {
-    #[serde(default = "default_trusted")]
-    pub(crate) trusted: bool,
     pub(crate) entity_type_name: String,
     #[serde(default = "default_token_id")]
     pub(crate) token_id: String,
     #[serde(default)]
     pub(crate) required_claims: HashSet<String>,
-}
-
-fn default_trusted() -> bool {
-    true
 }
 
 fn default_token_id() -> String {
@@ -84,9 +79,6 @@ pub(crate) struct LegacyCustomIssuerMetadata {
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct LegacyCustomTokenMetadata {
-    /// Still accepted, but ignored: every custom token is optional.
-    #[serde(default)]
-    pub(crate) required: bool,
     #[serde(default)]
     pub(crate) required_claims: HashSet<String>,
 }
@@ -101,9 +93,9 @@ impl From<LegacyTokenEntityMetadata> for super::TokenEntityMetadata {
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct LegacyTrustedIssuer {
     pub(crate) name: String,
-    pub(crate) description: String,
     #[serde(
         rename = "openid_configuration_endpoint",
         alias = "configuration_endpoint",
@@ -179,9 +171,9 @@ impl From<LegacyIssuersError> for super::ConversionError {
 }
 
 /// Adds the token types of the Agama-format issuers to `builder`, the way a v1
-/// store is migrated: untrusted tokens are dropped, so an issuer with none
-/// declares nothing, and a custom issuer is identified by its sanitized name.
-/// Sorted so the same conflict is always reported the same way.
+/// store is migrated: an issuer with no tokens declares nothing, and a custom
+/// issuer is identified by its sanitized name. Sorted so the same conflict is
+/// always reported the same way.
 fn add_legacy_issuers(
     builder: &mut TokenTypesBuilder,
     trusted_issuers: HashMap<String, LegacyTrustedIssuer>,
@@ -191,11 +183,8 @@ fn add_legacy_issuers(
     trusted_issuers.sort_by(|a, b| (&a.name, &a.discovery.iss).cmp(&(&b.name, &b.discovery.iss)));
     for issuer in trusted_issuers {
         let name = IssuerName::from_str(&issuer.name)?;
-        let mut tokens: Vec<LegacyTokenEntityMetadata> = issuer
-            .token_metadata
-            .into_values()
-            .filter(|token| token.trusted)
-            .collect();
+        let mut tokens: Vec<LegacyTokenEntityMetadata> =
+            issuer.token_metadata.into_values().collect();
         tokens.sort_by(|a, b| a.entity_type_name.cmp(&b.entity_type_name));
         for token in tokens {
             builder.add_jwt(

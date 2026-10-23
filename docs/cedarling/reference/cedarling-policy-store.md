@@ -754,7 +754,7 @@ validated.
 - **policies** : (_Object_) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
 - **schema** : (_String_ | _Object_) Base64 encoded JSON Object. See [schema](#schema) below.
 - **trusted_issuers** : (_Object of {unique_id => IdentitySource}_) Metadata for JWT issuers. See [Trusted Issuers Schema](#trusted-issuers-schema).
-- **custom_issuers** : (_Object of {issuer_name => CustomIssuer}_) Optional map of custom (non-JWT) issuers validated by a registered `CustomTokenProcessor`, each `{ "tokens_mappings": { "<entity type>": { "required_claims": [...] } } }`. The issuer is identified by its name, sanitized (lowercased, with `.`, space and `-` replaced by `_`), which is also its `context.tokens` key prefix. `required` is accepted but ignored. See [Custom (Non-JWT) Token Processing](./cedarling-multi-issuer.md#custom-non-jwt-token-processing).
+- **custom_issuers** : (_Object of {issuer_name => CustomIssuer}_) Optional map of custom (non-JWT) issuers validated by a registered `CustomTokenProcessor`, each `{ "tokens_mappings": { "<entity type>": { "required_claims": [...] } } }`. The issuer is identified by its name, sanitized (lowercased, with `.`, space and `-` replaced by `_`), which is also its `context.tokens` key prefix. See [Custom (Non-JWT) Token Processing](./cedarling-multi-issuer.md#custom-non-jwt-token-processing).
 - **default_entities** : (_Object_) Optional map of entity IDs to encoded/default entity payloads. See [Default Entities](#default-entities).
 
 ### `schema`
@@ -922,17 +922,14 @@ This record contains the information needed to validate tokens from this issuer:
 "trusted_issuers": {
   "trusted_issuer_id" : {
     "name": "name_of_the_trusted_issuer",
-    "description": "description for the trusted issuer",
     "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
     "token_metadata": {
-      "access_tokens": {
-        "trusted": true,
+      "access_token": {
+        "entity_type_name": "Acme::Access_token",
         "token_id": "jti",
         ...
       },
-      "id_tokens": { ... },
-      "userinfo_tokens": { ... },
-      "tx_tokens": { ... },
+      "id_token": { ... },
       ...
     }
   },
@@ -944,10 +941,11 @@ This record contains the information needed to validate tokens from this issuer:
 ```
 
 - **name** : (_String_) The issuer identity: a single Cedar identifier, used as the `issuer` of each of its token types.
-- **description** : (_String_) A brief description of the trusted issuer, providing context for administrators.
 - **openid_configuration_endpoint** : (_String_) The OpenID Connect discovery URL: the issuer URL followed by `/.well-known/openid-configuration`. The issuer URL, path included, is the expected `iss`.
 - **trusted_issuer_id** : (_Object_, _optional_) Metadata related to a particular issuer. You can add as many trusted issuers you want. The key itself is not used.
-- **token_metadata** : (_Object_, _optional_) Tokens metadata in a map of _token name_ -> _token metadata_. See [Token Metadata Schema](#token-metadata-schema).
+- **token_metadata** : (_Object_, _optional_) Tokens metadata in a map of _token name_ -> _token metadata_. See [Token Metadata Schema](#token-metadata-schema). An issuer without token types is not loaded.
+
+Any other field is rejected, including `description` on the issuer and `trusted` on a token, which older fixtures used.
 
 ### Token Metadata Schema
 
@@ -955,14 +953,12 @@ The Token Entity Metadata Schema defines how tokens are mapped and validated wit
 
 ```json
 {
-  "trusted": true,
   "entity_type_name": "Acme::Access_token",
   "token_id": "jti",
   "required_claims": ["iss", "exp", "some_custom_claim"]
 }
 ```
 
-- `"trusted"` (bool, Default: true): Allows toggling configuration without deleting the object. When set to `false`, tokens of this type will be ignored.
 - `"entity_type_name"` (string, required): The type name of the Cedar Entity that will be created from the token; for example: `"Acme::Access_token"`. A request `mapping` must equal it, and it must be unique across all issuers.
 - `"token_id"` (string, Default: `"jti"`): The JWT claim that will be used as the ID for the Token Entity.
 - `"required_claims"` (array[string], Default: `[]`): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under [RFC 7519 Section 4.1](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) (e.g., `exp`, `nbf`), the claim will also be validated according to the standard.
@@ -984,21 +980,17 @@ Here is a non-normative example of the legacy single-file structure (supported i
   "trusted_issuers": {
     "08c6c18a654f492adcf3fe069d729b4d9e6bf82605cb": {
       "name": "Google",
-      "description": "Consumer IDP",
       "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
       "token_metadata": {
         "access_token": {
-          "trusted": true,
           "entity_type_name": "Jans::Access_token",
           "token_id": "jti"
         },
         "id_token": {
-          "trusted": true,
           "entity_type_name": "Jans::Id_token",
           "token_id": "jti"
         },
         "userinfo_token": {
-          "trusted": true,
           "entity_type_name": "Jans::Userinfo_token",
           "token_id": "jti"
         }

@@ -331,7 +331,6 @@ fn test_trusted_issuer_entity_type_declared_twice_is_rejected() {
                 "trusted_issuers": {
                     "jans": {
                         "name": "Jans",
-                        "description": "test",
                         "openid_configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
                         "token_metadata": {
                             "access_token": { "entity_type_name": "Jans::Access_token" },
@@ -353,10 +352,10 @@ fn test_trusted_issuer_entity_type_declared_twice_is_rejected() {
     );
 }
 
-/// An issuer whose tokens are all untrusted declares nothing, as a migrated v1
+/// An issuer that declares no token types declares nothing, as a migrated v1
 /// store would: it is not loaded and gets no `TrustedIssuer` entity.
 #[test]
-fn test_issuer_with_only_untrusted_tokens_declares_nothing() {
+fn test_issuer_without_tokens_declares_nothing() {
     let json = json!({
         "cedar_version": "v4.0.0",
         "policy_stores": {
@@ -367,14 +366,8 @@ fn test_issuer_with_only_untrusted_tokens_declares_nothing() {
                 "trusted_issuers": {
                     "jans": {
                         "name": "Jans",
-                        "description": "test",
                         "openid_configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
-                        "token_metadata": {
-                            "access_token": {
-                                "trusted": false,
-                                "entity_type_name": "Jans::Access_token"
-                            }
-                        }
+                        "token_metadata": {}
                     }
                 }
             }
@@ -388,12 +381,71 @@ fn test_issuer_with_only_untrusted_tokens_declares_nothing() {
         super::super::PolicyStore::try_from(legacy_store).expect("the store should convert");
     assert!(
         store.token_types.jwt_issuers().is_empty(),
-        "an issuer without trusted tokens should not be loaded"
+        "an issuer without tokens should not be loaded"
     );
-    assert!(
-        store.token_types.get("Jans::Access_token").is_none(),
-        "an untrusted token type should not be accepted"
-    );
+}
+
+/// Fields v2 has no place for are rejected rather than ignored, so a fixture
+/// that still relies on them, such as `trusted: false`, fails loudly.
+#[test]
+fn test_fields_without_a_v2_counterpart_are_rejected() {
+    let issuer = |extra_issuer: serde_json::Value, extra_token: serde_json::Value| {
+        let mut token = json!({ "entity_type_name": "Jans::Access_token" });
+        token
+            .as_object_mut()
+            .unwrap()
+            .extend(extra_token.as_object().unwrap().clone());
+        let mut issuer = json!({
+            "name": "Jans",
+            "openid_configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
+            "token_metadata": { "access_token": token }
+        });
+        issuer
+            .as_object_mut()
+            .unwrap()
+            .extend(extra_issuer.as_object().unwrap().clone());
+        json!({
+            "cedar_version": "v4.0.0",
+            "policy_stores": {
+                "test": {
+                    "name": "test",
+                    "schema": null,
+                    "policies": {},
+                    "trusted_issuers": { "jans": issuer }
+                }
+            }
+        })
+    };
+    let custom = json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": null,
+                "policies": {},
+                "custom_issuers": {
+                    "acme": { "tokens_mappings": { "Acme::Api_key": { "required": true } } }
+                }
+            }
+        }
+    });
+
+    for (field, store) in [
+        (
+            "description",
+            issuer(json!({ "description": "test" }), json!({})),
+        ),
+        ("trusted", issuer(json!({}), json!({ "trusted": false }))),
+        ("required", custom),
+    ] {
+        let err = serde_json::from_str::<LegacyAgamaPolicyStore>(&store.to_string())
+            .expect_err("a field without a v2 counterpart must be rejected");
+        assert!(
+            err.to_string()
+                .contains(&format!("unknown field `{field}`")),
+            "`{field}` should be reported as unknown, got: {err}"
+        );
+    }
 }
 
 #[test]
@@ -409,7 +461,6 @@ fn test_trusted_issuer_endpoint_without_discovery_suffix_is_rejected() {
                 "trusted_issuers": {
                     "jans": {
                         "name": "Jans",
-                        "description": "test",
                         "openid_configuration_endpoint": "https://jans.test/auth"
                     }
                 }
@@ -439,7 +490,6 @@ fn test_invalid_trusted_issuers_format() {
                 "trusted_issuers": {
                     "invalid_issuer": {
                         "name": "test",
-                        "description": "test",
                         "openid_configuration_endpoint": "invalid_url"
                     }
                 }

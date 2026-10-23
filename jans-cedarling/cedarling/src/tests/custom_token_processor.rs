@@ -602,7 +602,6 @@ policy_stores:
     trusted_issuers:
       AcmeIssuer:
         name: "Acme"
-        description: ""
         openid_configuration_endpoint: "https://acme.example/.well-known/openid-configuration"
         token_metadata:
           access_token:
