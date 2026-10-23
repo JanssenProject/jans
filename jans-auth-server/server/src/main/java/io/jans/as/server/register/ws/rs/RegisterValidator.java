@@ -449,6 +449,17 @@ public class RegisterValidator {
         }
     }
 
+    public void validateEphemeralSubjectTypeBackchannelLogout(RegisterRequest registerRequest) {
+        if (registerRequest.getSubjectType() == SubjectType.EPHEMERAL
+                && StringUtils.isNotBlank(registerRequest.getBackchannelLogoutUri())) {
+            throw errorResponseFactory.createWebApplicationException(
+                    Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA,
+                    "Back-channel logout is not supported for clients with ephemeral subject type."
+            );
+        }
+    }
+
     public void validateAuthorizationAccessToken(String accessToken, String clientId) {
         if (isFalse(appConfiguration.getDcrAuthorizationWithClientCredentials())) {
             return;

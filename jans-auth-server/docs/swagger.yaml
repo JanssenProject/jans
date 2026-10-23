@@ -1594,7 +1594,7 @@ paths:
                   description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
                 subject_type:
                   type: string
-                  description: Subject type requested for the Client ID. Valid types include pairwise and public.
+                  description: Subject type requested for the Client ID. Valid types include pairwise, public and ephemeral (ephemeral must be enabled in subjectTypesSupported).
                 rpt_as_jwt:
                   type: boolean
                   description: Specifies whether RPT should be return as signed JWT.
@@ -2085,7 +2085,7 @@ paths:
                   description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
                 subject_type:
                   type: string
-                  description: Subject type requested for the Client ID. Valid types include pairwise and public.
+                  description: Subject type requested for the Client ID. Valid types include pairwise, public and ephemeral (ephemeral must be enabled in subjectTypesSupported).
                 rpt_as_jwt:
                   type: boolean
                   description: Specifies whether RPT should be return as signed JWT.
@@ -2556,7 +2556,7 @@ paths:
                     description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
                   subject_type:
                     type: string
-                    description: Subject type requested for the Client ID. Valid types include pairwise and public.
+                    description: Subject type requested for the Client ID. Valid types include pairwise, public and ephemeral (ephemeral must be enabled in subjectTypesSupported).
                   rpt_as_jwt:
                     type: boolean
                     description: Specifies whether RPT should be return as signed JWT.

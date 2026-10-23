@@ -65,8 +65,8 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path, HttpHeaders httpHeaders) throws WebApplicationException {
-        logger.info("oAuth  Authorization parameters , issuer:{}, resourceInfo:{}, method: {}, path: {} ",
-                 issuer, resourceInfo, method, path);
+        logger.info("oAuth  Authorization parameters , issuer:{}, resourceInfo:{}, method: {}, path: {} ", issuer,
+                resourceInfo, method, path);
 
         if (StringUtils.isBlank(token)) {
             logger.info("Token is blank !!!");
@@ -84,6 +84,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         logger.info("Verify if JWT");
         String acccessToken = token.substring("Bearer".length()).trim();
         boolean isJwtToken = false;
+        List<String> tokenScopes = null;
         try {
             isJwtToken = jwtUtil.isJwt(acccessToken);
 
@@ -91,48 +92,46 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
                 logger.info("Since token is JWT Validate it");
                 jwtUtil.parse(acccessToken);
-                List<String> tokenScopes = jwtUtil.validateToken(acccessToken);
-                logger.debug(" tokenScopes:{} ", tokenScopes);
-                // Validate Scopes
-                return this.validateScope(acccessToken, tokenScopes, resourceInfo, issuer, httpHeaders);
+                tokenScopes = jwtUtil.validateToken(acccessToken);
             }
         } catch (InvalidJwtException exp) {
-            logger.error("oAuth Invalid Jwt token:{}, exception:{} ", token, exp);
             throw new WebApplicationException("InvalidJwtException - Jwt Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         } catch (JsonProcessingException ex) {
-            logger.error("Error while parsing Jwt token:{}, exception:{} ", token, ex);
+            logger.error("Error while parsing Jwt exception ", ex);
             throw new WebApplicationException("Jwt Token is Invalid - JsonProcessingException.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
-        logger.info("Token is NOT JWT hence introspecting it as Reference token ");
-        IntrospectionResponse introspectionResponse = null;
-        try {
-            introspectionResponse = openIdService.getIntrospectionResponse(token,
-                    token.substring("Bearer".length()).trim(), issuer);
-        } catch (JsonProcessingException ex) {
-            logger.error("Error while token Introspection token:{}, exception:{} ", token, ex);
-            throw new WebApplicationException("IntrospectionResponse - Jwt Token is Invalid.",
-                    Response.status(Response.Status.UNAUTHORIZED).build());
+        if (!isJwtToken) {
+            logger.info("Non JWT Token Introspection");
+            IntrospectionResponse introspectionResponse = null;
+            try {
+                introspectionResponse = openIdService.getIntrospectionResponse(token, acccessToken, issuer);
+            } catch (JsonProcessingException ex) {
+                logger.error("Error while token Introspection exception - ", ex);
+                throw new WebApplicationException("IntrospectionResponse - Jwt Token is Invalid.",
+                        Response.status(Response.Status.UNAUTHORIZED).build());
+            }
+
+            logger.trace("oAuth  Authorization introspectionResponse:{}", introspectionResponse);
+            if (introspectionResponse == null || !introspectionResponse.isActive()) {
+                logger.error("Token is Invalid.");
+                throw new WebApplicationException("Token is Invalid.",
+                        Response.status(Response.Status.UNAUTHORIZED).build());
+            }
+
+            tokenScopes = introspectionResponse.getScope();
         }
 
-        logger.trace("oAuth  Authorization introspectionResponse:{}", introspectionResponse);
-        if (introspectionResponse == null || !introspectionResponse.isActive()) {
-            logger.error("Token is Invalid.");
-            throw new WebApplicationException("Token is Invalid.",
-                    Response.status(Response.Status.UNAUTHORIZED).build());
-        }
-
-        List<String> tokenScopes = introspectionResponse.getScope();
         // Validate Scopes
-        acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer, httpHeaders);
+        acccessToken = validateScope(token, tokenScopes, resourceInfo, issuer, httpHeaders);
 
         boolean isAuthorized = externalAuthorization(token, issuer, method, path);
         logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
         if (!isAuthorized) {
             throw new WebApplicationException("Authorization denied by external script",
-                Response.status(Response.Status.UNAUTHORIZED).build());
+                    Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         return acccessToken;
@@ -140,8 +139,9 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     private String validateScope(String accessToken, List<String> tokenScopes, ResourceInfo resourceInfo, String issuer,
             HttpHeaders httpHeaders) throws WebApplicationException {
-        if(logger.isInfoEnabled()) {
-        logger.info("Validate scope, issuer: {}, User-inum:{}", escapeLog(issuer), escapeLog(httpHeaders.getHeaderString("User-inum")));
+        if (logger.isInfoEnabled()) {
+            logger.info("Validate scope, issuer: {}, User-inum:{}", escapeLog(issuer),
+                    escapeLog(httpHeaders.getHeaderString("User-inum")));
         }
         try {
             // Get resource scope
@@ -171,8 +171,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                     logger.info("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
                             tokenScopes);
                     throw new WebApplicationException("Insufficient scopes! , Required scope: " + resourceScopes
-                            + ", however token scopes: " + tokenScopes,
-                            Response.status(Response.Status.UNAUTHORIZED).build());
+                            + ", token scopes: " + tokenScopes, Response.status(Response.Status.UNAUTHORIZED).build());
                 }
 
                 return AUTHENTICATION_SCHEME + accessToken;
@@ -185,8 +184,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 logger.error("Insufficient scopes!! Required scope:{}, , however token scopes:{} ", resourceScopes,
                         tokenScopes);
                 throw new WebApplicationException("Insufficient scopes!! , Required scope: " + resourceScopes
-                        + ", however token scopes: " + tokenScopes,
-                        Response.status(Response.Status.UNAUTHORIZED).build());
+                        + ", but token scopes: " + tokenScopes, Response.status(Response.Status.UNAUTHORIZED).build());
             }
 
             // If no scope is missing
@@ -200,7 +198,6 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             // Generate token with required resourceScopes
             resourceScopes.addAll(authSpecificScope);
             accessToken = openIdService.requestAccessToken(authUtil.getClientId(), resourceScopes);
-            logger.debug("Introspecting new accessToken:{}", accessToken);
 
             // Introspect
             IntrospectionResponse introspectionResponse = openIdService
@@ -209,23 +206,22 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             // Validate Token Scope
             validateIntrospectionResponse(introspectionResponse, resourceScopes);
 
-            logger.info("Token scopes Valid Returning accessToken:{}", accessToken);
-           
             return AUTHENTICATION_SCHEME + accessToken;
+        } catch (WebApplicationException we) {
+            throw we;
         } catch (Exception ex) {
-            if (logger.isErrorEnabled()) {
-                logger.error("oAuth authorization error:{} ", ex.getMessage());
-            }
             throw new WebApplicationException("oAuth authorization error " + ex.getMessage(),
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
         }
     }
 
-    private void validateIntrospectionResponse(IntrospectionResponse introspectionResponse, List<String> resourceScopes) {
+    private void validateIntrospectionResponse(IntrospectionResponse introspectionResponse,
+            List<String> resourceScopes) {
         if (introspectionResponse == null) {
-            throw new WebApplicationException("Token Introspection response not valid", Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+            throw new WebApplicationException("Token Introspection response not valid",
+                    Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
         }
-        
+
         // Validate Token Scope
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
             logger.error("Insufficient scopes!!! for new token as well - Required scope:{}, token scopes:{}",
@@ -236,12 +232,9 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
     }
-    
-    
+
     private boolean externalAuthorization(String token, String issuer, String method, String path) {
-        logger.debug(
-                "External Authorization script params -  request:{}, response:{}, token:{}, issuer:{}, method:{}, path:{} ",
-                request, response, token, issuer, method, path);
+        logger.debug("External Authorization script params -  issuer:{}, method:{}, path:{} ", issuer, method, path);
         Map<String, Object> requestParameters = new HashMap<>();
         requestParameters.put("ISSUER", issuer);
         requestParameters.put("TOKEN", token);
