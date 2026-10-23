@@ -44,28 +44,43 @@ impl IssuerName {
 }
 
 impl FromStr for IssuerName {
-    type Err = TokenTypesError;
+    type Err = InvalidIssuerName;
 
     /// Accepts a single Cedar identifier, `^[A-Za-z_][A-Za-z0-9_]*$`, that Cedar
     /// also accepts as a namespace, so reserved words such as `if` are refused.
     fn from_str(name: &str) -> Result<Self, Self::Err> {
-        let invalid = |reason: String| TokenTypesError::InvalidIssuerName {
-            name: name.to_string(),
-            reason,
-        };
         let mut chars = name.chars();
         let identifier = chars
             .next()
             .is_some_and(|c| c.is_ascii_alphabetic() || c == '_')
             && chars.all(|c| c.is_ascii_alphanumeric() || c == '_');
         if !identifier {
-            return Err(invalid("expected ^[A-Za-z_][A-Za-z0-9_]*$".to_string()));
+            return Err(InvalidIssuerName::NotIdentifier {
+                name: name.to_string(),
+            });
         }
         // The issuer is the namespace of its `TrustedIssuer` entity type.
-        cedar_policy::EntityTypeName::from_str(&format!("{name}::TrustedIssuer"))
-            .map_err(|e| invalid(e.to_string()))?;
+        cedar_policy::EntityTypeName::from_str(&format!("{name}::TrustedIssuer")).map_err(
+            |source| InvalidIssuerName::NotNamespace {
+                name: name.to_string(),
+                source: Box::new(source),
+            },
+        )?;
         Ok(Self(name.to_smolstr()))
     }
+}
+
+/// Why a string is not an [`IssuerName`].
+#[derive(Debug, thiserror::Error)]
+pub enum InvalidIssuerName {
+    #[error("issuer '{name}' must be a single Cedar identifier, ^[A-Za-z_][A-Za-z0-9_]*$")]
+    NotIdentifier { name: String },
+    #[error("issuer '{name}' must be a single Cedar identifier usable as a namespace: {source}")]
+    NotNamespace {
+        name: String,
+        #[source]
+        source: Box<cedar_policy::ParseErrors>,
+    },
 }
 
 // Hashes as the inner string, so an issuer can be looked up by its name as text.
@@ -80,28 +95,42 @@ impl Borrow<str> for IssuerName {
 pub(crate) struct EntityTypeName(SmolStr);
 
 impl EntityTypeName {
+    /// Parses an entity type that a test writes as a valid one.
+    #[cfg(test)]
+    pub(crate) fn for_test(entity_type: &str) -> Self {
+        entity_type
+            .parse()
+            .expect("test entity type should be a canonical Cedar entity type")
+    }
+
     pub(crate) fn as_str(&self) -> &str {
         &self.0
     }
 }
 
 impl FromStr for EntityTypeName {
-    type Err = TokenTypesError;
+    type Err = InvalidEntityType;
 
-    /// Accepts what Cedar accepts, in its canonical spelling, so that config and
-    /// request agree on what a valid entity type is.
+    /// Accepts what Cedar accepts, which includes only its canonical spelling, so
+    /// that config and request agree on what a valid entity type is.
     fn from_str(entity_type: &str) -> Result<Self, Self::Err> {
-        let invalid = |reason: String| TokenTypesError::InvalidEntityType {
-            entity_type: entity_type.to_string(),
-            reason,
-        };
-        let parsed = cedar_policy::EntityTypeName::from_str(entity_type)
-            .map_err(|e| invalid(e.to_string()))?;
-        if parsed.to_string() != entity_type {
-            return Err(invalid(format!("must be written as '{parsed}'")));
-        }
+        cedar_policy::EntityTypeName::from_str(entity_type).map_err(|source| {
+            InvalidEntityType {
+                entity_type: entity_type.to_string(),
+                source: Box::new(source),
+            }
+        })?;
         Ok(Self(entity_type.to_smolstr()))
     }
+}
+
+/// A string that is not an [`EntityTypeName`].
+#[derive(Debug, thiserror::Error)]
+#[error("'{entity_type}' is not a valid Cedar entity type: {source}")]
+pub struct InvalidEntityType {
+    pub(crate) entity_type: String,
+    #[source]
+    source: Box<cedar_policy::ParseErrors>,
 }
 
 // Hashes as the inner string, so a request `mapping` can look up an entry
@@ -163,10 +192,6 @@ pub(crate) struct TokenTypes {
 /// A conflict in the token-type configuration, found before anything loads.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub enum TokenTypesError {
-    #[error("issuer '{name}' must be a single Cedar identifier usable as a namespace: {reason}")]
-    InvalidIssuerName { name: String, reason: String },
-    #[error("'{entity_type}' is not a valid Cedar entity type: {reason}")]
-    InvalidEntityType { entity_type: String, reason: String },
     #[error("entity type '{entity_type}' is declared by issuers '{issuer_a}' and '{issuer_b}'")]
     DuplicateEntityType {
         entity_type: String,
@@ -473,7 +498,7 @@ impl TokenTypes {
             tokens.sort_by(|a, b| a.0.cmp(&b.0));
             for (entity_type, token) in tokens {
                 builder.add_jwt(
-                    EntityTypeName::from_str(&entity_type)?,
+                    EntityTypeName::for_test(&entity_type),
                     name.clone(),
                     issuer.iss.clone(),
                     issuer.key_source.clone(),
@@ -485,11 +510,11 @@ impl TokenTypes {
         let mut custom_issuers: Vec<_> = custom_issuers.into_iter().collect();
         custom_issuers.sort_by(|a, b| a.0.cmp(&b.0));
         for (name, issuer) in custom_issuers {
-            let name = IssuerName::from_str(&name)?;
+            let name = IssuerName::for_test(&name);
             let mut tokens: Vec<_> = issuer.tokens_mappings.into_iter().collect();
             tokens.sort_by(|a, b| a.0.cmp(&b.0));
             for (entity_type, token) in tokens {
-                builder.add_custom(EntityTypeName::from_str(&entity_type)?, name.clone(), token)?;
+                builder.add_custom(EntityTypeName::for_test(&entity_type), name.clone(), token)?;
             }
         }
 
@@ -699,8 +724,8 @@ mod tests {
             let err = IssuerName::from_str(name)
                 .expect_err("a name that is not one identifier must be rejected");
             assert!(
-                matches!(&err, TokenTypesError::InvalidIssuerName { name: n, .. } if n == name),
-                "{name:?} should be rejected by name, got {err:?}"
+                matches!(&err, InvalidIssuerName::NotIdentifier { name: n } if n == name),
+                "{name:?} should be rejected as not one identifier, got {err:?}"
             );
         }
     }
@@ -715,8 +740,8 @@ mod tests {
             let err =
                 IssuerName::from_str(name).expect_err("a reserved issuer name must be rejected");
             assert!(
-                matches!(&err, TokenTypesError::InvalidIssuerName { name: n, .. } if n == name),
-                "{name:?} should be rejected as an issuer name, got {err:?}"
+                matches!(&err, InvalidIssuerName::NotNamespace { name: n, .. } if n == name),
+                "{name:?} should be rejected as a Cedar namespace, got {err:?}"
             );
         }
     }
@@ -724,11 +749,11 @@ mod tests {
     #[test]
     fn rejects_invalid_entity_type() {
         for entity_type in ["Acme Token", "Acme::", "Acme :: Token"] {
-            let err = TokenTypes::build([], [custom("acme", &[entity_type])])
+            let err = EntityTypeName::from_str(entity_type)
                 .expect_err("an invalid entity type must be rejected");
-            assert!(
-                matches!(&err, TokenTypesError::InvalidEntityType { entity_type: t, .. } if t == entity_type),
-                "{entity_type:?} should be rejected as an entity type, got {err:?}"
+            assert_eq!(
+                err.entity_type, entity_type,
+                "{entity_type:?} should be rejected as an entity type"
             );
         }
     }

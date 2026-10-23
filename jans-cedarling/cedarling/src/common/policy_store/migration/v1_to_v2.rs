@@ -21,7 +21,9 @@ use crate::common::policy_store::formats::v2::trusted_issuers::{
     CustomTokenConfig, JwtTokenConfig, KeySourceDoc, TokenTypeConfig, TrustedIssuersDoc,
 };
 use crate::common::policy_store::formats::{v1, v2};
-use crate::common::policy_store::token_types::{EntityTypeName, IssuerName, sanitize_issuer_name};
+use crate::common::policy_store::token_types::{
+    EntityTypeName, InvalidEntityType, InvalidIssuerName, IssuerName, sanitize_issuer_name,
+};
 use crate::common::policy_store::{InvalidConfigurationEndpoint, iss_from_configuration};
 
 /// Where v1 kept each kind of issuer, for naming files in messages.
@@ -32,15 +34,20 @@ const CUSTOM_ISSUERS_DIR: &str = "custom-issuers";
 #[derive(Debug, thiserror::Error)]
 pub enum V1ToV2Error {
     #[error(
-        "issuer '{name}' in '{file}' must be a single Cedar identifier to migrate: it is the \
-         namespace of its TrustedIssuer entity and the prefix of its context.tokens keys"
+        "issuer '{name}' in '{file}' cannot migrate: it is the namespace of its TrustedIssuer \
+         entity and the prefix of its context.tokens keys: {source}"
     )]
-    InvalidIssuerName { file: String, name: String },
-    #[error("'{entity_type}' in '{file}' is not a valid Cedar entity type: {reason}")]
+    InvalidIssuerName {
+        file: String,
+        name: String,
+        #[source]
+        source: InvalidIssuerName,
+    },
+    #[error("invalid entity type in '{file}': {source}")]
     InvalidEntityType {
         file: String,
-        entity_type: String,
-        reason: String,
+        #[source]
+        source: InvalidEntityType,
     },
     #[error("invalid issuer in '{file}': {source}")]
     InvalidConfigurationEndpoint {
@@ -119,12 +126,12 @@ impl Entries {
         entity_type: &str,
         config: TokenTypeConfig,
     ) -> Result<(), V1ToV2Error> {
-        let entity_type =
-            EntityTypeName::from_str(entity_type).map_err(|e| V1ToV2Error::InvalidEntityType {
+        let entity_type = EntityTypeName::from_str(entity_type).map_err(|source| {
+            V1ToV2Error::InvalidEntityType {
                 file: file.to_string(),
-                entity_type: entity_type.to_string(),
-                reason: e.to_string(),
-            })?;
+                source,
+            }
+        })?;
         match self.files.entry(entity_type.clone()) {
             Entry::Occupied(first) => Err(V1ToV2Error::DuplicateEntityType {
                 entity_type: entity_type.to_string(),
@@ -164,10 +171,12 @@ fn migrate_trusted_issuer(
     let file = format!("{TRUSTED_ISSUERS_DIR}/{}", parsed.filename);
     let doc = parsed.issuer;
 
-    let issuer = IssuerName::from_str(&doc.name).map_err(|_| V1ToV2Error::InvalidIssuerName {
-        file: file.clone(),
-        name: doc.name.clone(),
-    })?;
+    let issuer =
+        IssuerName::from_str(&doc.name).map_err(|source| V1ToV2Error::InvalidIssuerName {
+            file: file.clone(),
+            name: doc.name.clone(),
+            source,
+        })?;
     let configuration = doc.oidc_endpoint;
     let iss = iss_from_configuration(&configuration).map_err(|source| {
         V1ToV2Error::InvalidConfigurationEndpoint {
@@ -212,10 +221,11 @@ fn migrate_custom_issuer(
     let file = format!("{CUSTOM_ISSUERS_DIR}/{}", parsed.filename);
     // The sanitized id was the v1 `context.tokens` prefix; keeping it as the
     // issuer keeps every key.
-    let issuer = IssuerName::from_str(&sanitize_issuer_name(&parsed.id)).map_err(|_| {
+    let issuer = IssuerName::from_str(&sanitize_issuer_name(&parsed.id)).map_err(|source| {
         V1ToV2Error::InvalidIssuerName {
             file: file.clone(),
             name: parsed.id.clone(),
+            source,
         }
     })?;
 
@@ -479,7 +489,7 @@ mod tests {
             ));
             let err = doc.expect_err("the name cannot become a v2 issuer");
             assert!(
-                matches!(&err, V1ToV2Error::InvalidIssuerName { file, name: n }
+                matches!(&err, V1ToV2Error::InvalidIssuerName { file, name: n, .. }
                     if file == "trusted-issuers/gluu.json" && n == name),
                 "expected InvalidIssuerName for {name:?}, got: {err:?}"
             );
@@ -513,8 +523,8 @@ mod tests {
         ));
         let err = doc.expect_err("an invalid entity type cannot be a v2 key");
         assert!(
-            matches!(&err, V1ToV2Error::InvalidEntityType { file, entity_type, .. }
-                if file == "custom-issuers/acme.json" && entity_type == "Acme Key"),
+            matches!(&err, V1ToV2Error::InvalidEntityType { file, source }
+                if file == "custom-issuers/acme.json" && source.entity_type == "Acme Key"),
             "expected InvalidEntityType, got: {err:?}"
         );
     }

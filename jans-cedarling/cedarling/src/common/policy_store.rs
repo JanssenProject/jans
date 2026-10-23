@@ -42,7 +42,9 @@ pub(crate) use custom_issuer_metadata::CustomTokenMetadata;
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
 #[cfg(test)]
 pub(crate) use token_types::TestJwtIssuer;
-pub(crate) use token_types::{IssuerName, TokenTypeKind, TokenTypes, TokenTypesError};
+pub(crate) use token_types::{
+    InvalidEntityType, InvalidIssuerName, IssuerName, TokenTypeKind, TokenTypes, TokenTypesError,
+};
 
 // Re-export types used by init/policy_store.rs and external consumers
 pub(crate) use manager::ConversionError;

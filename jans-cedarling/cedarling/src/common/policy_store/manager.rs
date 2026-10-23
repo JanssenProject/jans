@@ -67,6 +67,14 @@ pub enum ConversionError {
     #[error("Invalid token types: {0}")]
     TokenTypes(#[from] super::TokenTypesError),
 
+    /// An issuer name is not a valid issuer identity
+    #[error("Invalid issuer: {0}")]
+    InvalidIssuerName(#[from] super::InvalidIssuerName),
+
+    /// A token type is not a valid Cedar entity type
+    #[error("Invalid token type: {0}")]
+    InvalidEntityType(#[from] super::InvalidEntityType),
+
     /// Entity conversion failed
     #[error("Failed to convert entities: {0}")]
     EntityConversion(String),

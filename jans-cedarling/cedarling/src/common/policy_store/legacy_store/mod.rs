@@ -157,6 +157,27 @@ where
     Ok(DiscoveryEndpoint { configuration, iss })
 }
 
+/// Why the issuers of an Agama-format store cannot be loaded.
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum LegacyIssuersError {
+    #[error(transparent)]
+    InvalidIssuerName(#[from] super::InvalidIssuerName),
+    #[error(transparent)]
+    InvalidEntityType(#[from] super::InvalidEntityType),
+    #[error(transparent)]
+    TokenTypes(#[from] super::TokenTypesError),
+}
+
+impl From<LegacyIssuersError> for super::ConversionError {
+    fn from(err: LegacyIssuersError) -> Self {
+        match err {
+            LegacyIssuersError::InvalidIssuerName(e) => e.into(),
+            LegacyIssuersError::InvalidEntityType(e) => e.into(),
+            LegacyIssuersError::TokenTypes(e) => e.into(),
+        }
+    }
+}
+
 /// Adds the token types of the Agama-format issuers to `builder`, the way a v1
 /// store is migrated: untrusted tokens are dropped, so an issuer with none
 /// declares nothing, and a custom issuer is identified by its sanitized name.
@@ -165,7 +186,7 @@ fn add_legacy_issuers(
     builder: &mut TokenTypesBuilder,
     trusted_issuers: HashMap<String, LegacyTrustedIssuer>,
     custom_issuers: HashMap<String, LegacyCustomIssuerMetadata>,
-) -> Result<(), super::TokenTypesError> {
+) -> Result<(), LegacyIssuersError> {
     let mut trusted_issuers: Vec<LegacyTrustedIssuer> = trusted_issuers.into_values().collect();
     trusted_issuers.sort_by(|a, b| (&a.name, &a.discovery.iss).cmp(&(&b.name, &b.discovery.iss)));
     for issuer in trusted_issuers {
@@ -627,7 +648,7 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
 }
 
 impl TryFrom<LegacyPolicyStore> for super::PolicyStore {
-    type Error = super::TokenTypesError;
+    type Error = LegacyIssuersError;
 
     fn try_from(v: LegacyPolicyStore) -> Result<Self, Self::Error> {
         let schema: Option<super::CedarSchema> = v.schema.map(std::convert::Into::into);
