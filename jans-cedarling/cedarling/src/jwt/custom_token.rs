@@ -115,7 +115,9 @@ pub enum CustomTokenError {
     #[error("custom token processing timed out after {0:?}")]
     Timeout(Duration),
 
-    /// No registered custom issuer declares the requested token type.
+    /// No custom issuer declares the requested token type. Cedarling itself no
+    /// longer returns this: an undeclared mapping is dropped before any processor
+    /// runs. A processor may still return it; kept so existing processors build.
     #[error("no custom issuer declares token type '{0}'")]
     UnknownMapping(String),
 
