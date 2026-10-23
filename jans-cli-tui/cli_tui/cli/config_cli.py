@@ -63,6 +63,8 @@ success_color = 10
 bold_color = 15
 grey_color = 242
 file_data_type = '/path/to/file'
+jans_config_api_url_prefix = 'jans-config-api'
+jans_config_api_usermgt_url_prefix = f'/{jans_config_api_url_prefix}/mgt/'
 
 def clear():
     if not debug:
@@ -284,8 +286,22 @@ def write_config():
 
 debug = get_bool(debug)
 
-session = requests.Session()
-session.headers.update({'Jans-Client':'jans-tui'})
+
+class CustomJansCLISession(requests.Session):
+    def __init__(self):
+        super().__init__()
+        self.headers.update({'Jans-Client':'jans-tui'})
+
+
+    def request(self, method, url, *args, **kwargs):
+        if jans_config_api_usermgt_url_prefix in url:
+            kwargs['headers']["User-Info-JWT"] = config['DEFAULT']['user_data']
+
+        return super().request(method, url, *args, **kwargs)
+
+
+
+session = CustomJansCLISession()
 
 AUTH_DISCOVERY_ENDPOINT = '.well-known/openid-configuration'
 
@@ -339,7 +355,7 @@ class JCA_CLI:
 
         # URLs
         self.auth_url = auth_url or f'https://{self.idp_host}/jans-auth/'
-        self.config_url = config_url or f'https://{self.idp_host}/jans-config-api/'
+        self.config_url = config_url or f'https://{self.idp_host}/{jans_config_api_url_prefix}/'
         self.scim_url = scim_url or f'https://{self.idp_host}/jans-scim/restv1/v2/'
         self.auth_url_token_endpoint_postfix = 'restv1/token'
         self.jwt_validation_url = urljoin(self.config_url, 'api/v1/acrs')
@@ -1457,7 +1473,7 @@ class JCA_CLI:
             self.exit_with_error(
             f"This operation requires a value for url-suffix {path['__urlsuffix__']}\n"
             f"For example: --url-suffix=\"{path['__urlsuffix__']}:{suffix_str}\""
-            
+
             )
 
         op_path = {}
