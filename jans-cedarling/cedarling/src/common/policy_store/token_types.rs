@@ -16,7 +16,6 @@ use std::str::FromStr;
 
 use smol_str::{SmolStr, ToSmolStr};
 
-use crate::authz::RESERVED_TOKEN_KEYS;
 use crate::common::issuer_utils::IssClaim;
 
 use super::{
@@ -100,6 +99,12 @@ impl Borrow<str> for EntityTypeName {
         &self.0
     }
 }
+
+/// The `context.tokens` key holding the number of tokens in the request.
+pub(crate) const TOTAL_TOKEN_COUNT_KEY: &str = "total_token_count";
+
+/// `context.tokens` keys Cedarling fills itself, which no token type may derive.
+const RESERVED_TOKEN_KEYS: &[&str] = &[TOTAL_TOKEN_COUNT_KEY];
 
 /// The v1 rule that turns an issuer name into its `context.tokens` prefix,
 /// kept for stores that still name issuers that way.

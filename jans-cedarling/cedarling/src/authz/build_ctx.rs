@@ -6,6 +6,7 @@
 use super::AuthzConfig;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+use crate::common::policy_store::token_types::TOTAL_TOKEN_COUNT_KEY;
 use crate::entity_builder::BuiltEntities;
 use cedar_policy::Entity;
 use cedar_policy::EntityTypeName;
@@ -14,12 +15,6 @@ use smol_str::ToSmolStr;
 use std::collections::HashMap;
 
 use super::errors::BuildContextError;
-
-/// The `context.tokens` key holding the number of tokens in the request.
-const TOTAL_TOKEN_COUNT_KEY: &str = "total_token_count";
-
-/// `context.tokens` keys Cedarling fills itself, which no token type may derive.
-pub(crate) const RESERVED_TOKEN_KEYS: &[&str] = &[TOTAL_TOKEN_COUNT_KEY];
 
 /// Constructs the authorization context by dispatching to schema or no-schema implementation.
 ///
