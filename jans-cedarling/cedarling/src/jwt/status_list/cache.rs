@@ -334,13 +334,13 @@ mod test {
         let ti = TrustedIssuer::from_configuration(
             "some_iss".into(),
             mock_server.openid_config_endpoint().unwrap(),
-            HashMap::default(),
         )
         .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
             issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
+            tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
         };
         validators.init_for_iss(
@@ -453,13 +453,13 @@ mod test {
         let ti = TrustedIssuer::from_configuration(
             "some_iss".into(),
             mock_server.openid_config_endpoint().unwrap(),
-            HashMap::default(),
         )
         .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
             issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
+            tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
         };
         validators.init_for_iss(
@@ -541,13 +541,13 @@ mod test {
         let ti = TrustedIssuer::from_configuration(
             "some_iss".into(),
             mock_server.openid_config_endpoint().unwrap(),
-            HashMap::default(),
         )
         .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
             issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
+            tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
         };
         validators.init_for_iss(
@@ -640,13 +640,13 @@ mod test {
         let ti = TrustedIssuer::from_configuration(
             "some_iss".into(),
             mock_server.openid_config_endpoint().unwrap(),
-            HashMap::default(),
         )
         .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
             issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
+            tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
         };
         validators.init_for_iss(

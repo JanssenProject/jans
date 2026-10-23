@@ -56,7 +56,7 @@ impl JwtValidatorCache {
         // The loader rejects a discovery document whose `issuer` differs from this.
         let iss = iss_config.policy.iss_claim();
 
-        for (entity_type, tkn_metadata) in &iss_config.policy.token_metadata {
+        for (entity_type, tkn_metadata) in &iss_config.tokens {
             logger.log_any(JwtLogEntry::new(
                     format!(
                         "creating validators for token: {entity_type} under issuer: {iss} with algorithms: {:?}",
@@ -68,7 +68,7 @@ impl JwtValidatorCache {
             for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
                 let (validator, key) = JwtValidator::new_multi_issuer_tkn_validator(
                     Some(&iss),
-                    entity_type,
+                    entity_type.as_str(),
                     tkn_metadata,
                     algorithm,
                     status_lists.clone(),

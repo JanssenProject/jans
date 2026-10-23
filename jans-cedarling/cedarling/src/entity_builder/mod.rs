@@ -30,7 +30,6 @@ use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpres
 use cedar_policy_core::validator::ValidatorSchema;
 use schema::MappingSchema;
 use serde_json::Value;
-use smol_str::SmolStr;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 #[cfg(test)]
@@ -47,11 +46,8 @@ pub(crate) struct EntityBuilder {
     iss_entities: HashMap<EntityUid, Entity>,
     schema: Option<MappingSchema>,
     default_entities: DefaultEntities,
-    /// `context.tokens` key of every configured token type, by request mapping.
-    context_keys: HashMap<String, SmolStr>,
-    /// Kept so tests can build tokens that carry a configured issuer.
-    #[cfg(test)]
-    jwt_issuers: Vec<Arc<TrustedIssuer>>,
+    /// Every configured token type, for its `context.tokens` key and token id.
+    token_types: TokenTypes,
 }
 
 impl EntityBuilder {
@@ -63,11 +59,15 @@ impl EntityBuilder {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
         // Sorted so the same misconfiguration is always reported the same way.
-        let mut issuers: Vec<&TrustedIssuer> = token_types.jwt_issuers().values().collect();
+        let mut issuers: Vec<&TrustedIssuer> = token_types
+            .jwt_issuers()
+            .values()
+            .map(AsRef::as_ref)
+            .collect();
         issuers.sort_by(|a, b| a.name.cmp(&b.name));
 
         if let Some(schema) = schema.as_ref() {
-            Self::validate_iss_types(&issuers, schema)?;
+            Self::validate_iss_types(token_types, &issuers, schema)?;
         }
 
         let (ok, errs) = issuers
@@ -94,20 +94,11 @@ impl EntityBuilder {
             .map(|entity: Entity| (entity.uid(), entity))
             .collect::<HashMap<EntityUid, Entity>>();
 
-        let context_keys = token_types
-            .iter()
-            .map(|(entity_type, token_type)| {
-                (entity_type.to_string(), token_type.context_key.clone())
-            })
-            .collect();
-
         Ok(Self {
             iss_entities,
             schema,
             default_entities,
-            context_keys,
-            #[cfg(test)]
-            jwt_issuers: issuers.into_iter().cloned().map(Arc::new).collect(),
+            token_types: token_types.clone(),
         })
     }
 
@@ -137,6 +128,7 @@ impl EntityBuilder {
 
     /// Rejects a token whose schema `iss` type cannot match what the builder emits.
     fn validate_iss_types(
+        token_types: &TokenTypes,
         issuers: &[&TrustedIssuer],
         schema: &MappingSchema,
     ) -> Result<(), InitEntityBuilderError> {
@@ -145,7 +137,8 @@ impl EntityBuilder {
         for iss in issuers {
             let expected_iss_type = Self::trusted_issuer_typename(&iss.name);
 
-            for entity_type_name in iss.token_metadata.keys() {
+            for (entity_type_name, _) in token_types.jwt_tokens_of(&iss.name) {
+                let entity_type_name = entity_type_name.as_str();
                 let Some(shape) = schema.get_entity_shape(entity_type_name) else {
                     continue;
                 };
@@ -187,8 +180,9 @@ impl EntityBuilder {
     // is used only for testing to get trusted issuer
     fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
         let issuer = IssClaim::new(issuer);
-        self.jwt_issuers
-            .iter()
+        self.token_types
+            .jwt_issuers()
+            .values()
             .find(|iss| iss.iss_claim() == issuer)
             .cloned()
     }
@@ -332,8 +326,8 @@ mod test {
             TrustedIssuer::discovery_at(
                 iss_name.to_string(),
                 Url::parse("https://idp.example/auth").expect("valid url"),
-                token_metadata,
-            ),
+            )
+            .with_tokens(token_metadata),
         )]);
 
         let schema = ValidatorSchema::from_str(SCHEMA).expect("valid schema");

@@ -58,7 +58,6 @@ impl TrustedIssuer {
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
 
     use serde_json::json;
     use url::Url;
@@ -72,7 +71,6 @@ mod test {
         TrustedIssuer::discovery_at(
             "some_iss".to_string(),
             Url::parse("https://test.jans.org").unwrap(),
-            HashMap::new(),
         )
     }
 
@@ -132,7 +130,6 @@ mod test {
             let iss = TrustedIssuer::discovery_at(
                 "Kc".to_string(),
                 Url::parse(&format!("https://kc.example{path}")).unwrap(),
-                HashMap::new(),
             );
             let iss_entity = build_iss_entity("TrustedIssuer", "kc", &iss, None)
                 .expect("should build TrustedIssuer entity");

@@ -316,7 +316,7 @@ mod tests {
             "iss is derived"
         );
         assert_eq!(
-            acme.token_metadata.len(),
+            types.jwt_tokens_of("Acme").count(),
             2,
             "both Acme entries share one issuer"
         );
@@ -336,7 +336,7 @@ mod tests {
 
         let id_token = types.get("Acme::Id_token").expect("Acme::Id_token");
         assert!(
-            matches!(&id_token.kind, TokenTypeKind::Jwt(token) if token.token_id == "jti"),
+            matches!(&id_token.kind, TokenTypeKind::Jwt { metadata, .. } if metadata.token_id == "jti"),
             "token_id should default to jti"
         );
         let dolphin = types.get("Dolphin::Dolphin_token").expect("Dolphin token");

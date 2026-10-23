@@ -612,7 +612,7 @@ mod tests {
         };
 
         let token_types =
-            TokenTypes::build([crate::common::policy_store::TrustedIssuer::default()], [])
+            TokenTypes::build([crate::common::policy_store::TestJwtIssuer::default()], [])
                 .expect("the default issuer should be valid");
         let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), token_types);
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());

@@ -8,8 +8,8 @@ use std::collections::HashSet;
 
 use typed_builder::TypedBuilder;
 
-/// Validation settings for one JWT token type, keyed by its Cedar entity type
-/// in [`TrustedIssuer::token_metadata`](super::TrustedIssuer::token_metadata).
+/// Validation settings for one JWT token type, held by its
+/// [`TokenTypeKind::Jwt`](super::TokenTypeKind::Jwt) entry.
 #[derive(Debug, PartialEq, Clone, TypedBuilder)]
 pub(crate) struct TokenEntityMetadata {
     /// An optional string representing the principal identifier (e.g., `jti`).

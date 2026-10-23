@@ -33,9 +33,9 @@ use crate::async_sleep::sleep;
 use crate::authz::Authz;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
+use crate::common::policy_store::PolicyStoreWithID;
 use crate::common::policy_store::archive_handler::ArchiveLimits;
 use crate::common::policy_store::formats::{FormatReport, ParsedPolicyStore, PolicyStoreWarning};
-use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::context_data_api::DataStore;
 use crate::http::cache_headers::CacheHeadersState;
 use crate::http::{ConditionalFetch, HeadOutcome, HttpClient};
@@ -246,10 +246,10 @@ impl AuthzRebuilder {
         // The token types are rebuilt with the store, but a reused `JwtService`
         // keeps its token cache, so cached custom tokens can outlive a tightening
         // custom-issuer change until `CEDARLING_TOKEN_CACHE_MAX_TTL` lapses.
-        let prior_jwt = if issuers_unchanged(
-            prior_authz.trusted_issuers(),
-            policy_store.token_types.jwt_issuers(),
-        ) {
+        let prior_jwt = if prior_authz
+            .token_types()
+            .same_jwt_config(&policy_store.token_types)
+        {
             Some(prior_authz.clone_jwt_service())
         } else {
             None
@@ -267,14 +267,6 @@ impl AuthzRebuilder {
         )
         .await
     }
-}
-
-/// `true` when both issuer maps are equal; `false` triggers a [`JwtService`] rebuild.
-fn issuers_unchanged(
-    prior: &std::collections::HashMap<String, TrustedIssuer>,
-    new: &std::collections::HashMap<String, TrustedIssuer>,
-) -> bool {
-    prior == new
 }
 
 pub(crate) type RebuildError = BuildAuthzError;
@@ -912,6 +904,10 @@ fn etag_opaque_tag(etag: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::common::policy_store::{
+        CustomIssuerMetadata, CustomTokenMetadata, TestJwtIssuer, TokenEntityMetadata, TokenTypes,
+        TrustedIssuer,
+    };
     use std::collections::HashMap;
 
     const MISSING: PolicyStoreWarning = PolicyStoreWarning::MissingSpecVersion {
@@ -1082,54 +1078,95 @@ mod tests {
         assert_eq!(state.upgrade_to_head_transitions, 0);
     }
 
-    fn one_issuer() -> HashMap<String, TrustedIssuer> {
-        let mut m = HashMap::new();
-        m.insert("issuer_a".to_string(), TrustedIssuer::default());
-        m
+    /// A JWT issuer named `name` declaring `{name}::Access_token` with
+    /// `required_claims`.
+    fn jwt_issuer(name: &str, required_claims: &[&str]) -> TestJwtIssuer {
+        let mut issuer = TrustedIssuer::default();
+        issuer.name = name.to_string();
+        let token = TokenEntityMetadata::builder()
+            .required_claims(required_claims.iter().map(ToString::to_string).collect())
+            .build();
+        issuer.with_tokens(HashMap::from([(format!("{name}::Access_token"), token)]))
+    }
+
+    /// Token types with one [`jwt_issuer`] per name.
+    fn jwt_types(names: &[&str], required_claims: &[&str]) -> TokenTypes {
+        TokenTypes::build(
+            names.iter().map(|name| jwt_issuer(name, required_claims)),
+            [],
+        )
+        .expect("test token types should build")
     }
 
     #[test]
-    fn identical_issuer_maps_signal_reuse() {
-        let a = one_issuer();
-        let b = one_issuer();
+    fn identical_jwt_config_signals_reuse() {
         assert!(
-            issuers_unchanged(&a, &b),
-            "identical issuer maps must signal reuse so JwtService is not rebuilt",
+            jwt_types(&["IssuerA"], &[]).same_jwt_config(&jwt_types(&["IssuerA"], &[])),
+            "identical JWT issuers and token types must signal reuse so JwtService is not rebuilt",
         );
     }
 
     #[test]
     fn empty_vs_some_issuer_signals_rebuild() {
-        let o = one_issuer();
+        let some = jwt_types(&["IssuerA"], &[]);
         assert!(
-            !issuers_unchanged(&HashMap::new(), &o),
+            !TokenTypes::default().same_jwt_config(&some),
             "going from no issuers to some issuers must signal a JwtService rebuild",
         );
         assert!(
-            !issuers_unchanged(&o, &HashMap::new()),
+            !some.same_jwt_config(&TokenTypes::default()),
             "removing all issuers must signal a JwtService rebuild",
         );
     }
 
     #[test]
     fn added_issuer_signals_rebuild() {
-        let base = one_issuer();
-        let mut expanded = one_issuer();
-        expanded.insert("issuer_b".to_string(), TrustedIssuer::default());
         assert!(
-            !issuers_unchanged(&base, &expanded),
+            !jwt_types(&["IssuerA"], &[]).same_jwt_config(&jwt_types(&["IssuerA", "IssuerB"], &[])),
             "adding a new issuer must signal a JwtService rebuild",
         );
     }
 
     #[test]
     fn removed_issuer_signals_rebuild() {
-        let mut two = one_issuer();
-        two.insert("issuer_b".to_string(), TrustedIssuer::default());
-        let one = one_issuer();
         assert!(
-            !issuers_unchanged(&two, &one),
+            !jwt_types(&["IssuerA", "IssuerB"], &[]).same_jwt_config(&jwt_types(&["IssuerA"], &[])),
             "removing an issuer must signal a JwtService rebuild",
+        );
+    }
+
+    /// The validators of a reused `JwtService` were built from the old token
+    /// types, so a changed `required_claims` must rebuild it.
+    #[test]
+    fn changed_jwt_token_type_signals_rebuild() {
+        assert!(
+            !jwt_types(&["IssuerA"], &[]).same_jwt_config(&jwt_types(&["IssuerA"], &["sub"])),
+            "changing a JWT token type must signal a JwtService rebuild",
+        );
+    }
+
+    /// Custom token types are read from the new store on every request, so
+    /// changing only them keeps the JWT keys and validators.
+    #[test]
+    fn changed_custom_token_type_signals_reuse() {
+        let custom = |entity_type: &str| {
+            TokenTypes::build(
+                [jwt_issuer("IssuerA", &[])],
+                [(
+                    "Dolphin".to_string(),
+                    CustomIssuerMetadata {
+                        tokens_mappings: HashMap::from([(
+                            entity_type.to_string(),
+                            CustomTokenMetadata::default(),
+                        )]),
+                    },
+                )],
+            )
+            .expect("test token types should build")
+        };
+        assert!(
+            custom("Dolphin::Api_key").same_jwt_config(&custom("Dolphin::Session_key")),
+            "changing only custom token types must keep the JwtService",
         );
     }
 

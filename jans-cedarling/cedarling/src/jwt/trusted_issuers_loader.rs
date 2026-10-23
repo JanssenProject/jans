@@ -19,7 +19,7 @@ use crate::{
     async_sleep::sleep,
     common::{
         issuer_utils::IssClaim,
-        policy_store::{KeySource, TrustedIssuer},
+        policy_store::{KeySource, TokenTypes},
     },
     http::HttpClient,
     jwt::{
@@ -82,8 +82,9 @@ impl TrustedIssuerLoader {
     /// Load trusted issuers either synchronously or asynchronously based on configuration.
     pub(super) async fn load_trusted_issuers(
         &self,
-        trusted_issuers: HashMap<String, TrustedIssuer>,
+        token_types: &TokenTypes,
     ) -> Result<(), JwtServiceInitError> {
+        let trusted_issuers = unresolved_issuers(token_types);
         match self.jwt_config.trusted_issuer_loader {
             TrustedIssuerLoaderConfig::Sync { workers } => {
                 load_trusted_issuers(self, trusted_issuers, workers.get())
@@ -119,12 +120,29 @@ impl TrustedIssuerLoader {
     }
 }
 
+/// Every JWT issuer of `token_types` with its token types, not yet resolved.
+fn unresolved_issuers(token_types: &TokenTypes) -> Vec<IssuerConfig> {
+    token_types
+        .jwt_issuers()
+        .iter()
+        .map(|(name, issuer)| IssuerConfig {
+            issuer_id: name.clone(),
+            policy: issuer.clone(),
+            tokens: token_types
+                .jwt_tokens_of(name)
+                .map(|(entity_type, metadata)| (entity_type.clone(), metadata.clone()))
+                .collect(),
+            openid_config: None,
+        })
+        .collect()
+}
+
 /// Loads every issuer in two phases. Key sources are resolved first, so that
 /// issuers whose keys would collide under one `iss` are all rejected before any
 /// of them is installed; the outcome then does not depend on task order.
 async fn load_trusted_issuers(
     loader: &TrustedIssuerLoader,
-    trusted_issuers: HashMap<String, TrustedIssuer>,
+    trusted_issuers: Vec<IssuerConfig>,
     workers: usize,
 ) -> Result<(), JwtServiceInitError> {
     let semaphore = Arc::new(tokio::sync::Semaphore::new(workers));
@@ -141,13 +159,13 @@ async fn load_trusted_issuers(
     }
 
     let mut handles = Vec::new();
-    for (issuer_id, iss) in trusted_issuers {
+    for issuer in trusted_issuers {
         let permit = acquire(&semaphore).await?;
         let loader = loader.clone();
         handles.push(spawn_task(async move {
             let http_client = loader.http_client.clone();
-            let resolved =
-                resolve_trusted_issuer(&loader, issuer_id.clone(), iss, &http_client).await;
+            let issuer_id = issuer.issuer_id.clone();
+            let resolved = resolve_trusted_issuer(&loader, issuer, &http_client).await;
             drop(permit);
             (issuer_id, resolved)
         }));
@@ -294,11 +312,10 @@ fn reject_conflicting_key_sources(
 #[cfg(test)]
 pub(super) async fn load_trusted_issuer(
     loader: &TrustedIssuerLoader,
-    issuer_id: String,
-    iss: TrustedIssuer,
+    issuer: IssuerConfig,
     http_client: HttpClient,
 ) -> Result<(), JwtServiceInitError> {
-    let resolved = resolve_trusted_issuer(loader, issuer_id, iss, &http_client).await?;
+    let resolved = resolve_trusted_issuer(loader, issuer, &http_client).await?;
     install_trusted_issuer(loader, resolved).await
 }
 
@@ -306,18 +323,11 @@ pub(super) async fn load_trusted_issuer(
 /// against the expected `iss`, or its static JWKS.
 async fn resolve_trusted_issuer(
     loader: &TrustedIssuerLoader,
-    issuer_id: String,
-    iss: TrustedIssuer,
+    mut config: IssuerConfig,
     http_client: &HttpClient,
 ) -> Result<ResolvedIssuer, JwtServiceInitError> {
     // this is what we expect to find in the JWT `iss` claim
-    let iss_claim = iss.iss_claim();
-
-    let mut config = IssuerConfig {
-        issuer_id,
-        policy: Arc::new(iss),
-        openid_config: None,
-    };
+    let iss_claim = config.policy.iss_claim();
 
     if let KeySource::Discovery { configuration } = &config.policy.key_source
         && (loader.jwt_config.jwt_sig_validation || loader.jwt_config.jwt_status_validation)
@@ -596,7 +606,7 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::common::policy_store::TokenEntityMetadata;
+    use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
     use crate::http::HttpClientConfig;
     use crate::jwt::key_service::DecodingKeyInfo;
     use crate::jwt::test_utils::{
@@ -641,6 +651,30 @@ mod test {
         panic!("{message} (failed after {max_retries} retries)");
     }
 
+    /// Token types with each issuer named by its key and declaring one token
+    /// type in its own namespace, so issuers loaded together never conflict.
+    fn token_types(issuers: HashMap<String, TrustedIssuer>) -> TokenTypes {
+        TokenTypes::build(
+            issuers.into_iter().map(|(id, mut issuer)| {
+                let tokens = HashMap::from([(
+                    format!("{id}::Access_token"),
+                    TokenEntityMetadata::builder().build(),
+                )]);
+                issuer.name = id;
+                issuer.with_tokens(tokens)
+            }),
+            [],
+        )
+        .expect("test token types should build")
+    }
+
+    /// One issuer ready to load, named `id`.
+    fn unresolved(id: &str, issuer: TrustedIssuer) -> IssuerConfig {
+        let token_types = token_types(HashMap::from([(id.to_string(), issuer)]));
+        let mut issuers = unresolved_issuers(&token_types);
+        issuers.pop().expect("one issuer should be loaded")
+    }
+
     /// Helper to create a `TrustedIssuerLoader` with proper loading state initialized
     /// with the given number of issuers.
     fn create_loader(jwt_config: JwtConfig, issuer_count: usize) -> TrustedIssuerLoader {
@@ -680,7 +714,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load single trusted issuer successfully in sync mode");
 
         // Verify issuer config was inserted
@@ -726,7 +762,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load multiple trusted issuers successfully in async mode");
 
         // Verify both issuers were loaded with retry for async operations
@@ -791,7 +829,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect_err(
             "should fail to load trusted issuer when OpenID endpoint is unreachable in sync mode",
         );
@@ -825,7 +865,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         // Async mode should not return error for individual failures
         result.expect("async mode should not fail entire load process when individual issuers cannot be loaded");
     }
@@ -902,7 +944,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect(
             "should load trusted issuer successfully when JWKS is provided in configuration",
         );
@@ -957,7 +1001,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load trusted issuer successfully with signature validation enabled");
 
         // Verify issuer config was inserted
@@ -1042,7 +1088,7 @@ mod test {
         );
         let loader = create_loader(sig_validation_config(), 1);
 
-        let err = load_trusted_issuer(&loader, "jans".into(), issuer, HTTP_CLIENT.clone())
+        let err = load_trusted_issuer(&loader, unresolved("jans", issuer), HTTP_CLIENT.clone())
             .await
             .expect_err("a discovery document for another issuer must not load");
         assert!(
@@ -1088,7 +1134,7 @@ mod test {
         );
         let loader = create_loader(sig_validation_config(), 1);
 
-        load_trusted_issuer(&loader, "jans".into(), issuer, HTTP_CLIENT.clone())
+        load_trusted_issuer(&loader, unresolved("jans", issuer), HTTP_CLIENT.clone())
             .await
             .expect("a path-based issuer whose discovery matches should load");
         assert!(
@@ -1121,11 +1167,10 @@ mod test {
             KeySource::Static {
                 jwks: Url::parse(&(server.url() + "/keys")).expect("valid url"),
             },
-            HashMap::new(),
         );
         let loader = create_loader(sig_validation_config(), 1);
 
-        load_trusted_issuer(&loader, "partner".into(), issuer, HTTP_CLIENT.clone())
+        load_trusted_issuer(&loader, unresolved("partner", issuer), HTTP_CLIENT.clone())
             .await
             .expect("a static issuer should load");
 
@@ -1158,7 +1203,7 @@ mod test {
             .into_iter()
             .map(|(id, issuer)| (id.to_string(), issuer))
             .collect();
-        let result = loader.load_trusted_issuers(issuers).await;
+        let result = loader.load_trusted_issuers(&token_types(issuers)).await;
         (loader, result)
     }
 
@@ -1177,7 +1222,6 @@ mod test {
             KeySource::Static {
                 jwks: Url::parse(jwks).expect("valid url"),
             },
-            HashMap::new(),
         )
     }
 
@@ -1344,20 +1388,21 @@ mod test {
     #[tokio::test]
     async fn issuer_with_several_tokens_is_fetched_once() {
         let server = MockServer::new_with_defaults().await.unwrap();
-        let mut issuer = server.trusted_issuer();
-        for entity_type in [
-            "Jans::Access_token",
-            "Jans::Id_token",
-            "Jans::Userinfo_token",
-        ] {
-            issuer
-                .token_metadata
-                .insert(entity_type.into(), TokenEntityMetadata::builder().build());
-        }
+        let issuer = server.trusted_issuer().with_tokens(
+            [
+                "Jans::Access_token",
+                "Jans::Id_token",
+                "Jans::Userinfo_token",
+            ]
+            .into_iter()
+            .map(|entity_type| (entity_type.into(), TokenEntityMetadata::builder().build()))
+            .collect(),
+        );
+        let token_types = TokenTypes::build([issuer], []).expect("test token types should build");
         let loader = create_loader(sig_validation_config(), 1);
 
         loader
-            .load_trusted_issuers(HashMap::from([("jans".to_string(), issuer)]))
+            .load_trusted_issuers(&token_types)
             .await
             .expect("issuer should load");
 
@@ -1402,7 +1447,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load trusted issuer successfully with status validation enabled");
 
         // Verify issuer config was inserted
@@ -1450,7 +1497,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load multiple trusted issuers successfully in async mode with signature validation");
 
         // Verify both issuers were loaded with retry for async operations
@@ -1547,7 +1596,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load multiple trusted issuers successfully with max workers");
 
         // Verify all issuers were loaded with retry for async operations
@@ -1603,7 +1654,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load many trusted issuers successfully with single worker");
 
         // Verify all issuers were loaded
@@ -1654,7 +1707,9 @@ mod test {
         // in `impl GetFromUrl<OpenIdConfig> for OpenIdConfig{`
         // we have 5ms delay (for tests), so if initialization is sync it should take at least 5ms.
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("async loading should return Ok immediately");
 
         let expected_start_delay = Duration::from_millis(1);
@@ -1713,7 +1768,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         // Should return error because at least one issuer failed
         result.expect_err("sync mode should return error when an issuer has invalid URL");
 
@@ -1762,7 +1819,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         // Async mode should return Ok immediately even if some issuers fail
         result.expect(
             "async mode should not fail entire load process when an issuer has invalid URL",
@@ -1827,7 +1886,9 @@ mod test {
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
         // In sync mode, load_trusted_issuers returns error, but some issuers may still be loaded
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         // Should return error because at least one issuer failed
         result.expect_err("sync mode should return error when issuers fail");
 
@@ -1903,7 +1964,9 @@ mod test {
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
         // Async mode should return Ok immediately
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("async mode should not fail entire load process");
 
         // Wait for async loading to complete

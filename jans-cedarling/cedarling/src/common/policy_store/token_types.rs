@@ -13,6 +13,7 @@ use std::borrow::Borrow;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
+use std::sync::Arc;
 
 use smol_str::{SmolStr, ToSmolStr};
 use url::Url;
@@ -123,7 +124,11 @@ pub(crate) fn simplify_token_type(mapping: &str) -> String {
 /// How a token type is validated.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum TokenTypeKind {
-    Jwt(TokenEntityMetadata),
+    /// Validated as a JWT of `issuer`, which every token type of that issuer shares.
+    Jwt {
+        issuer: Arc<TrustedIssuer>,
+        metadata: TokenEntityMetadata,
+    },
     Custom(CustomTokenMetadata),
 }
 
@@ -141,8 +146,8 @@ pub(crate) struct TokenType {
 #[cfg_attr(test, derive(PartialEq))]
 pub(crate) struct TokenTypes {
     tokens: HashMap<EntityTypeName, TokenType>,
-    /// JWT issuers by name, each holding every token type it issues.
-    jwt_issuers: HashMap<String, TrustedIssuer>,
+    /// JWT issuers by name; their token types are in `tokens`.
+    jwt_issuers: HashMap<String, Arc<TrustedIssuer>>,
 }
 
 /// A conflict in the token-type configuration, found before anything loads.
@@ -214,8 +219,8 @@ pub enum TokenTypesError {
 pub(crate) struct TokenTypesBuilder {
     /// Every token type added so far, JWT and custom, by entity type.
     tokens: HashMap<EntityTypeName, TokenType>,
-    /// JWT issuers by name, each with the token types added for it.
-    jwt_issuers: HashMap<String, TrustedIssuer>,
+    /// JWT issuers by name; their token types are in `tokens`.
+    jwt_issuers: HashMap<String, Arc<TrustedIssuer>>,
     /// Custom issuers by name, each with one of its entity types to name in a
     /// kind conflict.
     custom_issuers: HashMap<IssuerName, EntityTypeName>,
@@ -243,17 +248,16 @@ impl TokenTypesBuilder {
             });
         }
 
-        match self.jwt_issuers.entry(issuer.to_string()) {
-            Entry::Vacant(slot) => {
-                slot.insert(TrustedIssuer::new(
+        let trusted_issuer = match self.jwt_issuers.entry(issuer.to_string()) {
+            Entry::Vacant(slot) => slot
+                .insert(Arc::new(TrustedIssuer::new(
                     issuer.to_string(),
                     iss,
                     key_source,
-                    HashMap::new(),
-                ));
-            },
+                )))
+                .clone(),
             Entry::Occupied(existing) => {
-                let existing = existing.get();
+                let existing = existing.get().clone();
                 let difference = if existing.iss_claim() != IssClaim::new(iss.as_str()) {
                     Some(format!(
                         "iss '{}' and '{}'",
@@ -272,21 +276,20 @@ impl TokenTypesBuilder {
                 if let Some(difference) = difference {
                     return Err(TokenTypesError::IssuerConflict {
                         issuer: issuer.to_string(),
-                        entity_type_a: any_entity_type(existing),
+                        entity_type_a: self.any_jwt_entity_type(&issuer),
                         entity_type_b: entity_type.to_string(),
                         difference,
                     });
                 }
+                existing
             },
-        }
+        };
 
-        let token_key = entity_type.to_string();
-        let issuer_key = issuer.to_string();
-        self.insert_token(entity_type, issuer, TokenTypeKind::Jwt(token.clone()))?;
-        if let Some(trusted_issuer) = self.jwt_issuers.get_mut(&issuer_key) {
-            trusted_issuer.token_metadata.insert(token_key, token);
-        }
-        Ok(())
+        let kind = TokenTypeKind::Jwt {
+            issuer: trusted_issuer,
+            metadata: token,
+        };
+        self.insert_token(entity_type, issuer, kind)
     }
 
     /// Adds a custom token type of `issuer`.
@@ -296,10 +299,10 @@ impl TokenTypesBuilder {
         issuer: IssuerName,
         token: CustomTokenMetadata,
     ) -> Result<(), TokenTypesError> {
-        if let Some(jwt) = self.jwt_issuers.get(issuer.as_str()) {
+        if self.jwt_issuers.contains_key(issuer.as_str()) {
             return Err(TokenTypesError::MixedIssuerKinds {
                 issuer: issuer.to_string(),
-                jwt_entity_type: any_entity_type(jwt),
+                jwt_entity_type: self.any_jwt_entity_type(&issuer),
                 custom_entity_type: entity_type.to_string(),
             });
         }
@@ -367,11 +370,23 @@ impl TokenTypesBuilder {
         }
     }
 
+    /// Names one of `issuer`'s JWT entity types in an error, or `<none>`.
+    fn any_jwt_entity_type(&self, issuer: &IssuerName) -> String {
+        self.tokens
+            .iter()
+            .filter(|(_, token)| {
+                &token.issuer == issuer && matches!(token.kind, TokenTypeKind::Jwt { .. })
+            })
+            .map(|(entity_type, _)| entity_type.as_str())
+            .min()
+            .map_or_else(|| "<none>".to_string(), ToString::to_string)
+    }
+
     /// Rejects two static issuers with one `iss` but different JWKS, which would
     /// let one plant keys under the other's `iss`. Keys are stored per
     /// normalized `iss`, so that is what is compared.
     fn check_static_jwks(&self) -> Result<(), TokenTypesError> {
-        let mut issuers: Vec<&TrustedIssuer> = self.jwt_issuers.values().collect();
+        let mut issuers: Vec<&Arc<TrustedIssuer>> = self.jwt_issuers.values().collect();
         issuers.sort_by(|a, b| a.name.cmp(&b.name));
 
         let mut jwks_by_iss: HashMap<IssClaim, (&Url, &str)> = HashMap::new();
@@ -401,21 +416,50 @@ impl TokenTypesBuilder {
     }
 }
 
+/// A JWT issuer with the token types it declares, keyed by entity type, as
+/// tests describe one for [`TokenTypes::build`].
+#[cfg(test)]
+#[derive(Debug, Clone)]
+pub(crate) struct TestJwtIssuer {
+    pub(crate) issuer: TrustedIssuer,
+    pub(crate) tokens: HashMap<String, TokenEntityMetadata>,
+}
+
+/// The `Jans` test issuer with access, id and userinfo tokens.
+#[cfg(test)]
+impl Default for TestJwtIssuer {
+    fn default() -> Self {
+        TrustedIssuer::default().with_tokens(HashMap::from([
+            (
+                "Jans::Access_token".into(),
+                TokenEntityMetadata::access_token(),
+            ),
+            ("Jans::Id_token".into(), TokenEntityMetadata::id_token()),
+            (
+                "Jans::Userinfo_token".into(),
+                TokenEntityMetadata::userinfo_token(),
+            ),
+        ]))
+    }
+}
+
 impl TokenTypes {
     /// Builds token types from JWT issuers and custom issuers, in a stable
     /// order. Test shorthand for [`TokenTypesBuilder`].
     #[cfg(test)]
     pub(crate) fn build(
-        jwt_issuers: impl IntoIterator<Item = TrustedIssuer>,
+        jwt_issuers: impl IntoIterator<Item = TestJwtIssuer>,
         custom_issuers: impl IntoIterator<Item = (String, CustomIssuerMetadata)>,
     ) -> Result<Self, TokenTypesError> {
         let mut builder = TokenTypesBuilder::default();
 
-        let mut jwt_issuers: Vec<TrustedIssuer> = jwt_issuers.into_iter().collect();
-        jwt_issuers.sort_by(|a, b| (&a.name, a.iss()).cmp(&(&b.name, b.iss())));
-        for issuer in jwt_issuers {
+        let mut jwt_issuers: Vec<TestJwtIssuer> = jwt_issuers.into_iter().collect();
+        jwt_issuers.sort_by(|a, b| {
+            (&a.issuer.name, a.issuer.iss()).cmp(&(&b.issuer.name, b.issuer.iss()))
+        });
+        for TestJwtIssuer { issuer, tokens } in jwt_issuers {
             let name = IssuerName::from_str(&issuer.name)?;
-            let mut tokens: Vec<_> = issuer.token_metadata.into_iter().collect();
+            let mut tokens: Vec<_> = tokens.into_iter().collect();
             tokens.sort_by(|a, b| a.0.cmp(&b.0));
             for (entity_type, token) in tokens {
                 builder.add_jwt(
@@ -447,14 +491,37 @@ impl TokenTypes {
         self.tokens.get(mapping)
     }
 
-    /// Every token type, keyed by entity type.
-    pub(crate) fn iter(&self) -> impl Iterator<Item = (&EntityTypeName, &TokenType)> {
-        self.tokens.iter()
+    /// JWT issuers by name.
+    pub(crate) fn jwt_issuers(&self) -> &HashMap<String, Arc<TrustedIssuer>> {
+        &self.jwt_issuers
     }
 
-    /// JWT issuers by name.
-    pub(crate) fn jwt_issuers(&self) -> &HashMap<String, TrustedIssuer> {
-        &self.jwt_issuers
+    /// The JWT token types of the issuer named `issuer`, by entity type.
+    pub(crate) fn jwt_tokens_of<'a>(
+        &'a self,
+        issuer: &'a str,
+    ) -> impl Iterator<Item = (&'a EntityTypeName, &'a TokenEntityMetadata)> {
+        self.tokens
+            .iter()
+            .filter_map(move |(entity_type, token)| match &token.kind {
+                TokenTypeKind::Jwt { metadata, .. } if token.issuer.as_str() == issuer => {
+                    Some((entity_type, metadata))
+                },
+                _ => None,
+            })
+    }
+
+    /// Whether both have the same JWT issuers and JWT token types, so whatever
+    /// was loaded for one, keys and validators, serves the other too.
+    pub(crate) fn same_jwt_config(&self, other: &Self) -> bool {
+        fn jwt_tokens(types: &TokenTypes) -> HashMap<&EntityTypeName, &TokenType> {
+            types
+                .tokens
+                .iter()
+                .filter(|(_, token)| matches!(token.kind, TokenTypeKind::Jwt { .. }))
+                .collect()
+        }
+        self.jwt_issuers == other.jwt_issuers && jwt_tokens(self) == jwt_tokens(other)
     }
 
     /// How many custom issuers declare at least one token type.
@@ -476,45 +543,38 @@ fn describe_key_source(key_source: &KeySource) -> String {
     }
 }
 
-/// Names one of an issuer's entity types in an error, or `<none>`.
-fn any_entity_type(issuer: &TrustedIssuer) -> String {
-    issuer
-        .token_metadata
-        .keys()
-        .min()
-        .map_or_else(|| "<none>".to_string(), Clone::clone)
-}
-
 #[cfg(test)]
 mod tests {
     use url::Url;
 
     use super::*;
 
-    fn jwt(name: &str, configuration: &str, entity_types: &[&str]) -> TrustedIssuer {
+    fn jwt(name: &str, configuration: &str, entity_types: &[&str]) -> TestJwtIssuer {
         TrustedIssuer::from_configuration(
             name.to_string(),
             Url::parse(configuration).expect("valid url"),
+        )
+        .expect("test configuration endpoint should derive an iss")
+        .with_tokens(
             entity_types
                 .iter()
                 .map(|t| ((*t).to_string(), TokenEntityMetadata::builder().build()))
                 .collect(),
         )
-        .expect("test configuration endpoint should derive an iss")
     }
 
-    fn static_jwt(name: &str, iss: &str, jwks: &str, entity_type: &str) -> TrustedIssuer {
+    fn static_jwt(name: &str, iss: &str, jwks: &str, entity_type: &str) -> TestJwtIssuer {
         TrustedIssuer::new(
             name.to_string(),
             Url::parse(iss).expect("valid url"),
             KeySource::Static {
                 jwks: Url::parse(jwks).expect("valid url"),
             },
-            HashMap::from([(
-                entity_type.to_string(),
-                TokenEntityMetadata::builder().build(),
-            )]),
         )
+        .with_tokens(HashMap::from([(
+            entity_type.to_string(),
+            TokenEntityMetadata::builder().build(),
+        )]))
     }
 
     fn custom(name: &str, entity_types: &[&str]) -> (String, CustomIssuerMetadata) {
@@ -607,7 +667,7 @@ mod tests {
 
         assert_eq!(types.jwt_issuers().len(), 1, "one issuer should remain");
         assert_eq!(
-            types.jwt_issuers()["Acme"].token_metadata.len(),
+            types.jwt_tokens_of("Acme").count(),
             2,
             "the merged issuer should carry both token types"
         );
@@ -862,7 +922,7 @@ mod tests {
         )
         .expect("entries naming one iss with and without a trailing slash are one issuer");
         assert_eq!(
-            types.jwt_issuers()["Partner"].token_metadata.len(),
+            types.jwt_tokens_of("Partner").count(),
             2,
             "both token types should belong to the one issuer"
         );

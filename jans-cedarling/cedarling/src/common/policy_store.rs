@@ -40,6 +40,8 @@ use url::Url;
 pub(crate) use custom_issuer_metadata::CustomIssuerMetadata;
 pub(crate) use custom_issuer_metadata::CustomTokenMetadata;
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
+#[cfg(test)]
+pub(crate) use token_types::TestJwtIssuer;
 pub(crate) use token_types::{TokenTypeKind, TokenTypes, TokenTypesError};
 
 // Re-export types used by init/policy_store.rs and external consumers
@@ -177,9 +179,6 @@ pub(crate) struct TrustedIssuer {
     iss: Url,
     /// Where the issuer's signing keys come from.
     pub(crate) key_source: KeySource,
-    /// Metadata for tokens issued by the trusted issuer, keyed by Cedar entity
-    /// type (the request `TokenInput.mapping`).
-    pub(crate) token_metadata: HashMap<String, TokenEntityMetadata>,
 }
 
 #[cfg(test)]
@@ -193,17 +192,6 @@ impl Default for TrustedIssuer {
                 configuration: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                     .unwrap(),
             },
-            token_metadata: HashMap::from([
-                (
-                    "Jans::Access_token".into(),
-                    TokenEntityMetadata::access_token(),
-                ),
-                ("Jans::Id_token".into(), TokenEntityMetadata::id_token()),
-                (
-                    "Jans::Userinfo_token".into(),
-                    TokenEntityMetadata::userinfo_token(),
-                ),
-            ]),
         }
     }
 }
@@ -218,17 +206,11 @@ impl Default for &TrustedIssuer {
 }
 
 impl TrustedIssuer {
-    pub(crate) fn new(
-        name: String,
-        iss: Url,
-        key_source: KeySource,
-        metadata: HashMap<String, TokenEntityMetadata>,
-    ) -> Self {
+    pub(crate) fn new(name: String, iss: Url, key_source: KeySource) -> Self {
         Self {
             name,
             iss,
             key_source,
-            token_metadata: metadata,
         }
     }
 
@@ -238,31 +220,34 @@ impl TrustedIssuer {
     pub(crate) fn from_configuration(
         name: String,
         configuration: Url,
-        metadata: HashMap<String, TokenEntityMetadata>,
     ) -> Result<Self, InvalidConfigurationEndpoint> {
         let iss = iss_from_configuration(&configuration)?;
-        Ok(Self::new(
-            name,
-            iss,
-            KeySource::Discovery { configuration },
-            metadata,
-        ))
+        Ok(Self::new(name, iss, KeySource::Discovery { configuration }))
     }
 
     /// A discovery issuer whose configuration endpoint is `iss` plus the
     /// well-known suffix.
     #[cfg(test)]
-    pub(crate) fn discovery_at(
-        name: String,
-        iss: Url,
-        metadata: HashMap<String, TokenEntityMetadata>,
-    ) -> Self {
+    pub(crate) fn discovery_at(name: String, iss: Url) -> Self {
         let configuration = Url::parse(&format!(
             "{}{DISCOVERY_SUFFIX}",
             iss.as_str().trim_end_matches('/')
         ))
         .expect("test configuration endpoint should be a valid url");
-        Self::new(name, iss, KeySource::Discovery { configuration }, metadata)
+        Self::new(name, iss, KeySource::Discovery { configuration })
+    }
+
+    /// This issuer declaring `tokens`, keyed by entity type, for building
+    /// [`TokenTypes`] in tests.
+    #[cfg(test)]
+    pub(crate) fn with_tokens(
+        self,
+        tokens: HashMap<String, TokenEntityMetadata>,
+    ) -> token_types::TestJwtIssuer {
+        token_types::TestJwtIssuer {
+            issuer: self,
+            tokens,
+        }
     }
 
     /// Points the issuer at another discovery endpoint, re-deriving `iss`.

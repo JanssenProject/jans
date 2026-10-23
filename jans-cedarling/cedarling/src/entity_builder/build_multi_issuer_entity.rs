@@ -8,7 +8,9 @@ use super::{BuildEntityError, BuiltEntities, EntityBuilder};
 use crate::authz::{DropReason, DroppedToken};
 use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
+use crate::common::policy_store::TokenTypeKind;
 use crate::common::policy_store::token_entity_metadata::DEFAULT_TKN_ID;
+use crate::common::policy_store::token_types::TokenType;
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
 use crate::jwt::{Token, TokenIssuer, ValidatedToken};
 use crate::log::interface::LogWriter;
@@ -368,16 +370,16 @@ impl EntityBuilder {
         //
         // - Custom tokens: the processor supplies the id value directly
         //   (`CustomTokenIssuerMeta::token_id`); no claim lookup is performed.
-        // - JWT tokens: `token_id` in the issuer's `token_metadata` names the
-        //   *claim* to read, falling back to `DEFAULT_TKN_ID`.
+        // - JWT tokens: `token_id` of the token type names the *claim* to read,
+        //   falling back to `DEFAULT_TKN_ID`.
         let entity_id = if let Some(TokenIssuer::Custom(meta)) = &token.iss {
             meta.token_id.clone()
         } else {
-            let token_id_claim: &str = match &token.iss {
-                Some(TokenIssuer::Jwt(iss)) => iss
-                    .token_metadata
-                    .get(&token.name)
-                    .map_or(DEFAULT_TKN_ID, |m| m.token_id.as_str()),
+            let token_id_claim: &str = match self.token_types.get(&token.name) {
+                Some(TokenType {
+                    kind: TokenTypeKind::Jwt { metadata, .. },
+                    ..
+                }) => metadata.token_id.as_str(),
                 _ => DEFAULT_TKN_ID,
             };
             let entity_id_srcs = [EntityIdSrc::Token {
@@ -497,9 +499,9 @@ impl EntityBuilder {
 
     /// The precomputed `context.tokens` key of a token type.
     fn generate_entity_key(&self, token_name: &str) -> Result<String, MultiIssuerEntityError> {
-        self.context_keys
+        self.token_types
             .get(token_name)
-            .map(ToString::to_string)
+            .map(|token_type| token_type.context_key.to_string())
             .ok_or_else(|| MultiIssuerEntityError::MissingContextKey(token_name.to_string()))
     }
 }
@@ -552,36 +554,36 @@ mod tests {
         let acme_issuer = TrustedIssuer::discovery_at(
             "Acme".to_string(),
             Url::parse("https://idp.acme.com/auth").unwrap(),
-            tokens(&[
-                "Jans::Access_Token",
-                "Jans::Access_Token2",
-                "Jans::Id_Token",
-            ]),
-        );
+        )
+        .with_tokens(tokens(&[
+            "Jans::Access_Token",
+            "Jans::Access_Token2",
+            "Jans::Id_Token",
+        ]));
         trusted_issuers.insert("acme".to_string(), acme_issuer);
 
         // Add Dolphin issuer
         let dolphin_issuer = TrustedIssuer::discovery_at(
             "Dolphin".to_string(),
             Url::parse("https://idp.dolphin.sea/auth").unwrap(),
-            tokens(&["Acme::DolphinToken"]),
-        );
+        )
+        .with_tokens(tokens(&["Acme::DolphinToken"]));
         trusted_issuers.insert("dolphin".to_string(), dolphin_issuer);
 
         // Add Microsoft issuer
         let microsoft_issuer = TrustedIssuer::discovery_at(
             "Microsoft".to_string(),
             Url::parse("https://login.microsoftonline.com/tenant").unwrap(),
-            HashMap::new(),
-        );
+        )
+        .with_tokens(HashMap::new());
         trusted_issuers.insert("microsoft".to_string(), microsoft_issuer);
 
         // Add Company issuer
         let company_issuer = TrustedIssuer::discovery_at(
             "Company".to_string(),
             Url::parse("https://auth.company.internal:8443/oauth").unwrap(),
-            HashMap::new(),
-        );
+        )
+        .with_tokens(HashMap::new());
         trusted_issuers.insert("company".to_string(), company_issuer);
 
         let custom_issuers = [(
@@ -630,11 +632,8 @@ mod tests {
     /// Builds an entity builder from `(name, iss, entity type)` triples.
     fn builder_with_issuers(issuers: &[(&str, &str, &str)]) -> EntityBuilder {
         let trusted_issuers = issuers.iter().map(|(name, iss, entity_type)| {
-            TrustedIssuer::discovery_at(
-                (*name).to_string(),
-                Url::parse(iss).expect("valid url"),
-                tokens(&[entity_type]),
-            )
+            TrustedIssuer::discovery_at((*name).to_string(), Url::parse(iss).expect("valid url"))
+                .with_tokens(tokens(&[entity_type]))
         });
         EntityBuilder::new(
             &TokenTypes::build(trusted_issuers, []).expect("test token types should build"),
@@ -967,10 +966,9 @@ mod tests {
         let ti = TrustedIssuer::discovery_at(
             "Jans".to_string(),
             Url::parse("https://test.issuer.com").unwrap(),
-            tokens(&["Jans::Access_Token"]),
-        );
-        let trusted_issuers: HashMap<String, TrustedIssuer> =
-            HashMap::from_iter(vec![("Jans".to_string(), ti)]);
+        )
+        .with_tokens(tokens(&["Jans::Access_Token"]));
+        let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
             &TokenTypes::build(trusted_issuers.into_values(), [])
                 .expect("test token types should build"),
@@ -1149,9 +1147,9 @@ mod tests {
             "Jans".to_string(),
             Url::parse("https://test.issuer.com/.well-known/openid-configuration")
                 .expect("url should be parsed"),
-            tokens(&["Jans::Access_Token"]),
         )
-        .expect("test configuration endpoint should derive an iss");
+        .expect("test configuration endpoint should derive an iss")
+        .with_tokens(tokens(&["Jans::Access_Token"]));
 
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
@@ -1230,8 +1228,8 @@ mod tests {
         let ti = TrustedIssuer::discovery_at(
             "TestIssuer".to_string(),
             Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
-            token_metadata,
-        );
+        )
+        .with_tokens(token_metadata);
         let trusted_issuers = HashMap::from([("TestIssuer".to_string(), ti)]);
         let builder = EntityBuilder::new(
             &TokenTypes::build(trusted_issuers.into_values(), [])
@@ -1333,8 +1331,8 @@ mod tests {
         let ti = TrustedIssuer::discovery_at(
             "Jans".to_string(),
             Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
-            token_metadata,
-        );
+        )
+        .with_tokens(token_metadata);
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
             &TokenTypes::build(trusted_issuers.into_values(), [])
@@ -1456,8 +1454,8 @@ mod tests {
         let ti = TrustedIssuer::discovery_at(
             "Jans".to_string(),
             Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
-            token_metadata,
-        );
+        )
+        .with_tokens(token_metadata);
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
             &TokenTypes::build(trusted_issuers.into_values(), [])

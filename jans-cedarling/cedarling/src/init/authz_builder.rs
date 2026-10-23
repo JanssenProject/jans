@@ -49,7 +49,7 @@ pub(crate) async fn build_authz(
         None => Arc::new(
             JwtService::new(
                 jwt_config,
-                Some(policy_store.token_types.jwt_issuers().clone()),
+                &policy_store.token_types,
                 Some(log.clone()),
                 metrics.clone(),
                 http_client,

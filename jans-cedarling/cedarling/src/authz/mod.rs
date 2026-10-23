@@ -12,7 +12,7 @@ use crate::EntityData;
 use crate::TrustedIssuerLoadingInfo;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
-use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
+use crate::common::policy_store::{PolicyStoreWithID, TokenTypes};
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{
     BuiltEntities, EntityBuilder, MultiIssuerSetupEntities, UnsignedPrincipalBuild,
@@ -157,8 +157,8 @@ impl Authz {
         }
     }
 
-    pub(crate) fn trusted_issuers(&self) -> &HashMap<String, TrustedIssuer> {
-        self.config.policy_store.token_types.jwt_issuers()
+    pub(crate) fn token_types(&self) -> &TokenTypes {
+        &self.config.policy_store.token_types
     }
 
     /// Returns the ID of the currently loaded policy store, if it carries one.
