@@ -163,7 +163,7 @@ The authorization call only hands its record to a queue and returns; it never wa
 
 TRACE reuses two Lock log properties:
 
-- `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY` is the size of the queue. When it is full, for example while Lock Server is down, the decision is still returned and its record is not emitted (`not_emitted_queue_full`). A record is signed only when the emitter takes it from the queue, so a record that never got into the queue leaves no gap in the producer chain.
+- `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY` is the size of the queue. When it is full, for example while Lock Server is down, the decision is still returned and its record is not emitted (`not_emitted_queue_full`). A record is signed only when the emitter takes it from the queue, so a record that never got into the queue leaves no gap in the producer chain. Cedarling logs a `WARN` when the queue fills and, when it has room again, an `INFO` with the number of records not emitted meanwhile.
 - `CEDARLING_LOCK_LOG_MAX_RETRIES` is how many times a failed bulk request is retried, with exponential backoff doubling from 10 seconds up to 5 minutes, and how many times one record is resent.
 
 `CEDARLING_LOCK_LOG_INTERVAL` does not apply to TRACE: records are sent as soon as the emitter takes them.

@@ -8,6 +8,7 @@
 
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
 use chrono::Utc;
 use serde_json::Value;
@@ -36,6 +37,18 @@ pub(crate) struct TraceRecorder {
     tx: Option<mpsc::Sender<RecordDraft>>,
     log: Logger,
     metrics: Arc<MetricsCollector>,
+    /// Shared by the clones, so all of them log one full queue once.
+    queue: Arc<QueueState>,
+}
+
+/// Whether the emitter queue turns records away. Under a steady load above
+/// what Lock takes it stays full, so it is logged when it fills and when it
+/// has room again, not for every decision: the decision log and the metrics
+/// already carry the status of each one.
+#[derive(Default)]
+struct QueueState {
+    full: AtomicBool,
+    turned_away: AtomicU64,
 }
 
 impl TraceRecorder {
@@ -48,7 +61,12 @@ impl TraceRecorder {
         log: Logger,
         metrics: Arc<MetricsCollector>,
     ) -> Self {
-        Self { tx, log, metrics }
+        Self {
+            tx,
+            log,
+            metrics,
+            queue: Arc::default(),
+        }
     }
 
     /// Warns that `store` cannot back a record. Called when an `Authz` is built
@@ -120,16 +138,51 @@ impl TraceRecorder {
             return TraceRecordStatus::NotEmittedNoEndpoint;
         };
         match tx.try_send(draft) {
-            Ok(()) => TraceRecordStatus::Emitted,
+            Ok(()) => {
+                self.queue_has_room();
+                TraceRecordStatus::Emitted
+            },
             Err(TrySendError::Full(_)) => {
-                self.warn(request_id, "the emitter queue is full");
+                self.turned_away(
+                    request_id,
+                    "the emitter queue is full; records are not emitted until it has room",
+                );
                 TraceRecordStatus::NotEmittedQueueFull
             },
             Err(TrySendError::Closed(_)) => {
-                self.warn(request_id, "the emitter has stopped");
+                self.turned_away(request_id, "the emitter has stopped");
                 TraceRecordStatus::NotEmittedQueueFull
             },
         }
+    }
+
+    /// Counts a record the queue turned away and warns only for the first one.
+    fn turned_away(&self, request_id: Uuid, reason: &str) {
+        self.queue.turned_away.fetch_add(1, Ordering::Relaxed);
+        if !self.queue.full.swap(true, Ordering::Relaxed) {
+            self.warn(request_id, reason);
+        }
+    }
+
+    /// Ends a full queue, if there was one. The `load` keeps the common case
+    /// to one read on the authorize path.
+    fn queue_has_room(&self) {
+        if !self.queue.full.load(Ordering::Relaxed)
+            || !self.queue.full.swap(false, Ordering::Relaxed)
+        {
+            return;
+        }
+        let turned_away = self.queue.turned_away.swap(0, Ordering::Relaxed);
+        self.log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::INFO,
+                None,
+            ))
+            .set_message(format!(
+                "TRACE emitter queue has room again; {turned_away} records were not emitted \
+                 while it was full"
+            )),
+        );
     }
 
     fn warn(&self, request_id: Uuid, reason: &str) {
@@ -348,31 +401,93 @@ mod tests {
         );
     }
 
+    /// Messages of the entries logged at `level` since the last call.
+    fn messages(log: &Logger, level: &str) -> Vec<String> {
+        log.pop_logs()
+            .iter()
+            .filter(|entry| entry["level"] == level)
+            .filter_map(|entry| entry["msg"].as_str().map(str::to_string))
+            .collect()
+    }
+
     #[test]
-    fn full_channel_is_queue_full() {
+    fn full_channel_is_queue_full_and_warned_once() {
         let (tx, _rx) = mpsc::channel(1);
         let log = memory_log();
         let recorder = TraceRecorder::new(Some(tx), log.clone(), metrics());
+        let clone = recorder.clone();
         let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid());
-        let first = recorder.record(gen_uuid7(), Some(&trace()), &store, || {
-            Ok(facts(Vec::new()))
-        });
+        let record = |recorder: &TraceRecorder| {
+            recorder.record(gen_uuid7(), Some(&trace()), &store, || {
+                Ok(facts(Vec::new()))
+            })
+        };
         assert_eq!(
-            first,
+            record(&recorder),
             TraceRecordStatus::Emitted,
             "the first record should fill the channel"
         );
 
-        let status = recorder.record(gen_uuid7(), Some(&trace()), &store, || {
-            Ok(facts(Vec::new()))
-        });
+        let statuses = [record(&recorder), record(&clone), record(&recorder)];
 
         assert_eq!(
-            status,
-            TraceRecordStatus::NotEmittedQueueFull,
+            statuses,
+            [TraceRecordStatus::NotEmittedQueueFull; 3],
             "a full channel should not block the decision"
         );
-        assert!(warned(&log, "queue"), "a dropped record should be warned");
+        let warnings = messages(&log, "WARN");
+        assert_eq!(
+            warnings.len(),
+            1,
+            "a full queue is warned once, not per decision, also through a clone: {warnings:?}"
+        );
+        assert!(
+            warnings[0].contains("queue is full"),
+            "the warning names the full queue: {}",
+            warnings[0]
+        );
+    }
+
+    #[test]
+    fn queue_with_room_again_is_logged_with_the_count() {
+        let (tx, mut rx) = mpsc::channel(1);
+        let log = memory_log();
+        let recorder = TraceRecorder::new(Some(tx), log.clone(), metrics());
+        let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid());
+        let record = || {
+            recorder.record(gen_uuid7(), Some(&trace()), &store, || {
+                Ok(facts(Vec::new()))
+            })
+        };
+        record();
+        record();
+        record();
+        log.pop_logs();
+
+        rx.try_recv().expect("the channel holds the first record");
+        assert_eq!(
+            record(),
+            TraceRecordStatus::Emitted,
+            "the drained channel takes a record"
+        );
+        let infos = messages(&log, "INFO");
+        assert!(
+            infos
+                .iter()
+                .any(|message| message.contains("room again") && message.contains('2')),
+            "the end of a full queue is logged with how many records it turned away: {infos:?}"
+        );
+
+        assert_eq!(
+            record(),
+            TraceRecordStatus::NotEmittedQueueFull,
+            "the channel is full again"
+        );
+        assert_eq!(
+            messages(&log, "WARN").len(),
+            1,
+            "a queue that fills again is warned again"
+        );
     }
 
     #[test]
