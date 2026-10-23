@@ -340,7 +340,11 @@ mod tests {
             "token_id should default to jti"
         );
         let dolphin = types.get("Dolphin::Dolphin_token").expect("Dolphin token");
-        assert_eq!(dolphin.context_key, "dolphin_dolphin_token", "custom key");
+        assert_eq!(
+            dolphin.context_key.as_str(),
+            "dolphin_dolphin_token",
+            "custom key"
+        );
         assert!(
             matches!(&dolphin.kind, TokenTypeKind::Custom(token) if token.required_claims.contains("sub")),
             "a custom entry should keep its required claims"

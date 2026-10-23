@@ -7,8 +7,8 @@ use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::{BuildEntityError, BuiltEntities, EntityBuilder};
 use crate::authz::{DropReason, DroppedToken};
 use crate::common::default_entities::DefaultEntities;
-use crate::common::policy_store::TokenTypeKind;
 use crate::common::policy_store::token_types::TokenType;
+use crate::common::policy_store::{ContextKey, TokenTypeKind};
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
 use crate::jwt::{Token, TokenIssuer, ValidatedToken};
 use crate::log::interface::LogWriter;
@@ -193,7 +193,7 @@ fn convert_claim_to_string_set(value: &Value) -> RestrictedExpression {
 /// resource entity by the caller.
 #[derive(Debug, Clone)]
 pub(crate) struct MultiIssuerSetupEntities {
-    pub tokens: HashMap<String, Entity>,
+    pub tokens: HashMap<ContextKey, Entity>,
     pub issuers: HashSet<Entity>,
     pub default_entities: DefaultEntities,
     /// Validated tokens that could not be turned into a Cedar entity, each
@@ -222,7 +222,7 @@ impl EntityBuilder {
 
         let mut token_entities = HashMap::new();
         let mut dropped = Vec::new();
-        let mut entity_key_owners: HashMap<String, EntityKeyOwner<'_>> = HashMap::new();
+        let mut entity_key_owners: HashMap<ContextKey, EntityKeyOwner<'_>> = HashMap::new();
         for (token_name, entry) in tokens {
             let token = &entry.token;
             match self.build_single_token_entity(token, &built_entities) {
@@ -458,10 +458,10 @@ impl EntityBuilder {
     }
 
     /// The precomputed `context.tokens` key of a token type.
-    fn generate_entity_key(&self, token_name: &str) -> Result<String, MultiIssuerEntityError> {
+    fn generate_entity_key(&self, token_name: &str) -> Result<ContextKey, MultiIssuerEntityError> {
         self.token_types
             .get(token_name)
-            .map(|token_type| token_type.context_key.to_string())
+            .map(|token_type| token_type.context_key.clone())
             .ok_or_else(|| MultiIssuerEntityError::UnconfiguredTokenType(token_name.to_string()))
     }
 }
@@ -672,7 +672,8 @@ mod tests {
             assert_eq!(
                 builder
                     .generate_entity_key(mapping)
-                    .expect("a configured token type should have a key"),
+                    .expect("a configured token type should have a key")
+                    .as_str(),
                 key,
                 "the key prefix should be the issuer the mapping names, not the iss"
             );
@@ -774,7 +775,11 @@ mod tests {
         let key = builder
             .generate_entity_key("Jans::Access_Token")
             .expect("a configured token type should have a key");
-        assert_eq!(key, "acme_access_token");
+        assert_eq!(
+            key.as_str(),
+            "acme_access_token",
+            "the key should be the issuer prefix and the simplified type"
+        );
     }
 
     /// Keys only ever come from config: an unconfigured token type has no

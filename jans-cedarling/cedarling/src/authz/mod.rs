@@ -12,7 +12,7 @@ use crate::EntityData;
 use crate::TrustedIssuerLoadingInfo;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
-use crate::common::policy_store::{PolicyStoreWithID, TokenTypes};
+use crate::common::policy_store::{ContextKey, PolicyStoreWithID, TokenTypes};
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{
     BuiltEntities, EntityBuilder, MultiIssuerSetupEntities, UnsignedPrincipalBuild,
@@ -1448,7 +1448,7 @@ struct MultiIssuerSetup {
 #[derive(Debug)]
 pub(super) struct AuthorizeEntitiesData {
     pub issuers: HashSet<Entity>,
-    pub tokens: HashMap<String, Entity>,
+    pub tokens: HashMap<ContextKey, Entity>,
     pub resource: Entity,
     pub default_entities: DefaultEntities,
 }
@@ -1671,7 +1671,7 @@ mod tests {
     fn default_takes_precedence_over_token_on_uid_collision() {
         let mut tokens = HashMap::new();
         tokens.insert(
-            "tok1".to_string(),
+            ContextKey::for_test("tok1"),
             to_entity(json!({"uid": {"type": "Jans::access_token", "id": "tok1"}, "attrs": {"scope": "evil"}, "parents": []})),
         );
         let data = AuthorizeEntitiesData {

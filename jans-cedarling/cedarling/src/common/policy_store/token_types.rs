@@ -147,6 +147,46 @@ pub(crate) const TOTAL_TOKEN_COUNT_KEY: &str = "total_token_count";
 /// `context.tokens` keys Cedarling fills itself, which no token type may derive.
 const RESERVED_TOKEN_KEYS: &[&str] = &[TOTAL_TOKEN_COUNT_KEY];
 
+/// A token type's key under `context.tokens`, derived once when the store loads
+/// so that every request puts the token where policies expect it.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, derive_more::Display)]
+pub(crate) struct ContextKey(SmolStr);
+
+impl ContextKey {
+    /// `{lowercase(issuer)}_{simplified type}`.
+    fn derive(issuer: &IssuerName, entity_type: &EntityTypeName) -> Self {
+        Self(
+            format!(
+                "{}_{}",
+                issuer.key_prefix(),
+                simplify_token_type(entity_type.as_str())
+            )
+            .to_smolstr(),
+        )
+    }
+
+    /// A key a test writes as already derived.
+    #[cfg(test)]
+    pub(crate) fn for_test(key: &str) -> Self {
+        Self(key.to_smolstr())
+    }
+
+    pub(crate) fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    fn is_reserved(&self) -> bool {
+        RESERVED_TOKEN_KEYS.contains(&self.as_str())
+    }
+}
+
+// Hashes as the inner string, so a token entity can be looked up by its key as text.
+impl Borrow<str> for ContextKey {
+    fn borrow(&self) -> &str {
+        &self.0
+    }
+}
+
 /// The v1 rule that turns an issuer name into its `context.tokens` prefix,
 /// kept for stores that still name issuers that way.
 pub(crate) fn sanitize_issuer_name(name: &str) -> String {
@@ -154,7 +194,7 @@ pub(crate) fn sanitize_issuer_name(name: &str) -> String {
 }
 
 /// Simplify token type for Cedar compatibility
-pub(crate) fn simplify_token_type(mapping: &str) -> String {
+fn simplify_token_type(mapping: &str) -> String {
     // Split by namespace separator and use the last part
     // Keep underscores in token type names as specified in design
     mapping.split("::").last().unwrap_or(mapping).to_lowercase()
@@ -175,8 +215,7 @@ pub(crate) enum TokenTypeKind {
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct TokenType {
     pub(crate) issuer: IssuerName,
-    /// Key under `context.tokens`: `{lowercase(issuer)}_{simplified type}`.
-    pub(crate) context_key: SmolStr,
+    pub(crate) context_key: ContextKey,
     pub(crate) kind: TokenTypeKind,
 }
 
@@ -260,7 +299,7 @@ pub(crate) struct TokenTypesBuilder {
     /// kind conflict.
     custom_issuers: HashMap<IssuerName, EntityTypeName>,
     /// The entity type that derives each `context.tokens` key.
-    context_keys: HashMap<SmolStr, EntityTypeName>,
+    context_keys: HashMap<ContextKey, EntityTypeName>,
 }
 
 impl TokenTypesBuilder {
@@ -365,13 +404,8 @@ impl TokenTypesBuilder {
         issuer: IssuerName,
         kind: TokenTypeKind,
     ) -> Result<(), TokenTypesError> {
-        let context_key = format!(
-            "{}_{}",
-            issuer.key_prefix(),
-            simplify_token_type(entity_type.as_str())
-        )
-        .to_smolstr();
-        if RESERVED_TOKEN_KEYS.contains(&context_key.as_str()) {
+        let context_key = ContextKey::derive(&issuer, &entity_type);
+        if context_key.is_reserved() {
             return Err(TokenTypesError::ReservedContextKey {
                 key: context_key.to_string(),
                 entity_type: entity_type.to_string(),
@@ -645,7 +679,11 @@ mod tests {
                 issuer,
                 "{entity_type} issuer mismatch"
             );
-            assert_eq!(token.context_key, key, "{entity_type} key mismatch");
+            assert_eq!(
+                token.context_key.as_str(),
+                key,
+                "{entity_type} key mismatch"
+            );
         }
         assert!(
             matches!(
