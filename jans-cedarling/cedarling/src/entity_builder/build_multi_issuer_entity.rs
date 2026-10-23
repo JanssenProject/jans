@@ -202,12 +202,6 @@ pub(crate) struct MultiIssuerSetupEntities {
     pub dropped: Vec<DroppedToken>,
 }
 
-/// Token that owns a `context.tokens` entity key within one request.
-struct EntityKeyOwner<'a> {
-    mapping: &'a str,
-    index: usize,
-}
-
 impl EntityBuilder {
     /// Build the resource-independent multi-issuer entities (tokens + issuers +
     /// default entities). Used by both single-item and batch multi-issuer
@@ -222,37 +216,14 @@ impl EntityBuilder {
 
         let mut token_entities = HashMap::new();
         let mut dropped = Vec::new();
-        let mut entity_key_owners: HashMap<ContextKey, EntityKeyOwner<'_>> = HashMap::new();
         for (token_name, entry) in tokens {
             let token = &entry.token;
             match self.build_single_token_entity(token, &built_entities) {
                 Ok(entity) => match self.generate_entity_key(token_name) {
+                    // Keys cannot collide: each mapping names one token type,
+                    // and `TokenTypes` gives every token type its own key.
                     Ok(entity_key) => {
                         built_entities.insert(&entity.uid());
-                        let owner = EntityKeyOwner {
-                            mapping: token_name,
-                            index: entry.index,
-                        };
-                        if let Some(displaced) = entity_key_owners.insert(entity_key.clone(), owner)
-                        {
-                            log_service.log_any(
-                                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                                    LogLevel::WARN,
-                                    None,
-                                ))
-                                .set_message(format!(
-                                    "Entity key collision for token '{token_name}': \
-                                    replaces '{}'",
-                                    displaced.mapping
-                                ))
-                                .set_error(format!("duplicate entity key '{entity_key}'")),
-                            );
-                            dropped.push(DroppedToken::new(
-                                displaced.mapping,
-                                displaced.index,
-                                DropReason::EntityBuildFailed,
-                            ));
-                        }
                         token_entities.insert(entity_key, entity);
                     },
                     Err(e) => {
