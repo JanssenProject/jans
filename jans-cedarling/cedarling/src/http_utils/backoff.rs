@@ -6,6 +6,9 @@
 use std::time::Duration;
 use tokio::time::sleep;
 
+/// The longest delay of [`Backoff::new_exponential`].
+const MAX_EXPONENTIAL_DELAY: Duration = Duration::from_secs(300);
+
 /// Implements a backoff strategy for retrying operations.
 pub(crate) struct Backoff {
     attempts: u32,
@@ -15,12 +18,20 @@ pub(crate) struct Backoff {
 }
 
 impl Backoff {
-    /// Creates an exponenital backoff strategy
+    /// Creates an exponential backoff strategy: the delay doubles from
+    /// `base_delay` up to [`MAX_EXPONENTIAL_DELAY`] (or `base_delay`, if
+    /// longer), so a long outage is retried every few minutes rather than
+    /// after delays of days, and a high attempt count cannot overflow.
     ///
     /// Set `max_attempts` to [`None`] to retry indefinitely.
     #[must_use]
     pub(crate) fn new_exponential(base_delay: Duration, max_attempts: Option<u32>) -> Self {
-        let backoff_dur_calc = Box::new(move |attempts| base_delay * 2u32.pow(attempts));
+        let cap = MAX_EXPONENTIAL_DELAY.max(base_delay);
+        let backoff_dur_calc = Box::new(move |attempts| {
+            2u32.checked_pow(attempts)
+                .and_then(|factor| base_delay.checked_mul(factor))
+                .map_or(cap, |delay| delay.min(cap))
+        });
         Self {
             attempts: 0,
             max_attempts,
@@ -67,5 +78,52 @@ impl Backoff {
     /// Resets `attempts` to `0`.
     pub(crate) fn reset(&mut self) {
         self.attempts = 0;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn delays(backoff: &Backoff, attempts: impl IntoIterator<Item = u32>) -> Vec<Duration> {
+        attempts
+            .into_iter()
+            .map(|attempt| (backoff.backoff_duration)(attempt))
+            .collect()
+    }
+
+    #[test]
+    fn exponential_delay_doubles_until_capped() {
+        let backoff = Backoff::new_exponential(Duration::from_secs(10), None);
+        let secs: Vec<u64> = delays(&backoff, 0..8)
+            .iter()
+            .map(Duration::as_secs)
+            .collect();
+        assert_eq!(
+            secs,
+            [10, 20, 40, 80, 160, 300, 300, 300],
+            "the delay doubles from the base, then stays at five minutes"
+        );
+    }
+
+    #[test]
+    fn exponential_delay_does_not_overflow() {
+        let backoff = Backoff::new_exponential(Duration::from_secs(10), None);
+        assert_eq!(
+            delays(&backoff, [31, 32, 64, u32::MAX]),
+            [Duration::from_secs(300); 4],
+            "a high attempt count waits the capped delay, never zero"
+        );
+    }
+
+    #[test]
+    fn exponential_cap_does_not_shorten_a_longer_base() {
+        let base = Duration::from_secs(600);
+        let backoff = Backoff::new_exponential(base, None);
+        assert_eq!(
+            delays(&backoff, [0, 3]),
+            [base, base],
+            "a base delay above the cap is kept"
+        );
     }
 }
