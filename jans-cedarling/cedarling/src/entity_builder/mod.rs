@@ -23,7 +23,7 @@ use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
-use crate::common::policy_store::{TokenTypes, TrustedIssuer};
+use crate::common::policy_store::{IssuerName, TokenTypes, TrustedIssuer};
 use build_entity_attrs::build_entity_attrs;
 use build_iss_entity::build_iss_entity;
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
@@ -154,7 +154,7 @@ impl EntityBuilder {
                     && schema_iss_type.as_str() != expected_iss_type
                 {
                     return Err(InitEntityBuilderError::IssTypeMismatch {
-                        issuer_name: iss.name.clone(),
+                        issuer_name: iss.name.to_string(),
                         schema_iss_type: schema_iss_type.to_string(),
                         expected_iss_type,
                     });
@@ -165,12 +165,12 @@ impl EntityBuilder {
         Ok(())
     }
 
-    pub(super) fn trusted_issuer_typename(namespace: &str) -> String {
+    pub(super) fn trusted_issuer_typename(namespace: &IssuerName) -> String {
         format!("{namespace}::TrustedIssuer")
     }
 
     pub(super) fn trusted_issuer_cedar_uid(
-        namespace: &str,
+        namespace: &IssuerName,
         iss_url: &IssClaim,
     ) -> Result<EntityUid, BuildEntityError> {
         build_cedar_uid(&format!("{namespace}::TrustedIssuer"), iss_url.as_str())
@@ -324,7 +324,7 @@ mod test {
         let issuers = HashMap::from([(
             iss_name.to_lowercase(),
             TrustedIssuer::discovery_at(
-                iss_name.to_string(),
+                iss_name,
                 Url::parse("https://idp.example/auth").expect("valid url"),
             )
             .with_tokens(token_metadata),

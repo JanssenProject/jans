@@ -42,7 +42,7 @@ pub(crate) use custom_issuer_metadata::CustomTokenMetadata;
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
 #[cfg(test)]
 pub(crate) use token_types::TestJwtIssuer;
-pub(crate) use token_types::{TokenTypeKind, TokenTypes, TokenTypesError};
+pub(crate) use token_types::{IssuerName, TokenTypeKind, TokenTypes, TokenTypesError};
 
 // Re-export types used by init/policy_store.rs and external consumers
 pub(crate) use manager::ConversionError;
@@ -171,9 +171,8 @@ pub(crate) enum KeySource {
 /// Holds the `iss` its tokens must carry and where its signing keys come from.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct TrustedIssuer {
-    /// The name of the trusted issuer.
-    /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
-    pub(crate) name: String,
+    /// The issuer's name: the namespace of its `TrustedIssuer` entity.
+    pub(crate) name: IssuerName,
     /// The `iss` its tokens must carry.
     // Private to force usage of `iss_claim` method to get normalized iss claim
     iss: Url,
@@ -185,7 +184,7 @@ pub(crate) struct TrustedIssuer {
 impl Default for TrustedIssuer {
     fn default() -> Self {
         Self {
-            name: "Jans".to_string(),
+            name: IssuerName::for_test("Jans"),
             // This will only really be called during testing so we just put this test value
             iss: Url::parse("https://test.jans.org").unwrap(),
             key_source: KeySource::Discovery {
@@ -206,7 +205,7 @@ impl Default for &TrustedIssuer {
 }
 
 impl TrustedIssuer {
-    pub(crate) fn new(name: String, iss: Url, key_source: KeySource) -> Self {
+    pub(crate) fn new(name: IssuerName, iss: Url, key_source: KeySource) -> Self {
         Self {
             name,
             iss,
@@ -218,23 +217,31 @@ impl TrustedIssuer {
     /// from `configuration`.
     #[cfg(test)]
     pub(crate) fn from_configuration(
-        name: String,
+        name: impl AsRef<str>,
         configuration: Url,
     ) -> Result<Self, InvalidConfigurationEndpoint> {
         let iss = iss_from_configuration(&configuration)?;
-        Ok(Self::new(name, iss, KeySource::Discovery { configuration }))
+        Ok(Self::new(
+            IssuerName::for_test(name.as_ref()),
+            iss,
+            KeySource::Discovery { configuration },
+        ))
     }
 
     /// A discovery issuer whose configuration endpoint is `iss` plus the
     /// well-known suffix.
     #[cfg(test)]
-    pub(crate) fn discovery_at(name: String, iss: Url) -> Self {
+    pub(crate) fn discovery_at(name: impl AsRef<str>, iss: Url) -> Self {
         let configuration = Url::parse(&format!(
             "{}{DISCOVERY_SUFFIX}",
             iss.as_str().trim_end_matches('/')
         ))
         .expect("test configuration endpoint should be a valid url");
-        Self::new(name, iss, KeySource::Discovery { configuration })
+        Self::new(
+            IssuerName::for_test(name.as_ref()),
+            iss,
+            KeySource::Discovery { configuration },
+        )
     }
 
     /// This issuer declaring `tokens`, keyed by entity type, for building

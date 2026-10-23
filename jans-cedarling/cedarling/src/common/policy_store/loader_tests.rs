@@ -865,7 +865,10 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     // Google's only token is `trusted: false`, so nothing of it is migrated.
     let issuer_map = store.token_types.jwt_issuers();
     assert_eq!(
-        issuer_map.keys().collect::<Vec<_>>(),
+        issuer_map
+            .keys()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>(),
         vec!["Jans"],
         "only the issuer with trusted tokens should remain"
     );
@@ -920,7 +923,7 @@ fn assert_acme_custom_token(store: &crate::common::policy_store::PolicyStoreWith
         .get("Acme::CustomToken")
         .expect("acme should declare the Acme::CustomToken type");
     assert_eq!(
-        token.issuer.as_str(),
+        token.issuer.to_string(),
         "acme",
         "issuer should be the file id"
     );
@@ -1084,7 +1087,7 @@ fn test_load_custom_issuers_shared_id_merges() {
             .get(entity_type)
             .expect("both token types should be kept");
         assert_eq!(
-            token.issuer.as_str(),
+            token.issuer.to_string(),
             "dup",
             "{entity_type} issuer mismatch"
         );

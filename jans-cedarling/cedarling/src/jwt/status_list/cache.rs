@@ -332,7 +332,7 @@ mod test {
         let status_list = StatusListCache::default();
 
         let ti = TrustedIssuer::from_configuration(
-            "some_iss".into(),
+            "some_iss",
             mock_server.openid_config_endpoint().unwrap(),
         )
         .expect("test configuration endpoint should derive an iss");
@@ -451,7 +451,7 @@ mod test {
         let status_list = StatusListCache::default();
 
         let ti = TrustedIssuer::from_configuration(
-            "some_iss".into(),
+            "some_iss",
             mock_server.openid_config_endpoint().unwrap(),
         )
         .expect("test configuration endpoint should derive an iss");
@@ -539,7 +539,7 @@ mod test {
         let status_list = StatusListCache::default();
 
         let ti = TrustedIssuer::from_configuration(
-            "some_iss".into(),
+            "some_iss",
             mock_server.openid_config_endpoint().unwrap(),
         )
         .expect("test configuration endpoint should derive an iss");
@@ -638,7 +638,7 @@ mod test {
         let status_list = StatusListCache::default();
 
         let ti = TrustedIssuer::from_configuration(
-            "some_iss".into(),
+            "some_iss",
             mock_server.openid_config_endpoint().unwrap(),
         )
         .expect("test configuration endpoint should derive an iss");

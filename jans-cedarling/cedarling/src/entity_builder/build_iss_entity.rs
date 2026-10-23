@@ -68,10 +68,7 @@ mod test {
     use crate::entity_builder::schema::MappingSchema;
 
     fn test_trusted_issuer() -> TrustedIssuer {
-        TrustedIssuer::discovery_at(
-            "some_iss".to_string(),
-            Url::parse("https://test.jans.org").unwrap(),
-        )
+        TrustedIssuer::discovery_at("some_iss", Url::parse("https://test.jans.org").unwrap())
     }
 
     #[test]
@@ -128,7 +125,7 @@ mod test {
     fn issuer_entity_id_keeps_the_iss_path() {
         for path in ["/realms/a", "/realms/b"] {
             let iss = TrustedIssuer::discovery_at(
-                "Kc".to_string(),
+                "Kc",
                 Url::parse(&format!("https://kc.example{path}")).unwrap(),
             );
             let iss_entity = build_iss_entity("TrustedIssuer", "kc", &iss, None)

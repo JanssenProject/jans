@@ -316,7 +316,7 @@ mod tests {
             "iss is derived"
         );
         assert_eq!(
-            types.jwt_tokens_of("Acme").count(),
+            types.jwt_tokens_of(&IssuerName::for_test("Acme")).count(),
             2,
             "both Acme entries share one issuer"
         );

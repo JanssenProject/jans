@@ -905,8 +905,8 @@ fn etag_opaque_tag(etag: &str) -> &str {
 mod tests {
     use super::*;
     use crate::common::policy_store::{
-        CustomIssuerMetadata, CustomTokenMetadata, TestJwtIssuer, TokenEntityMetadata, TokenTypes,
-        TrustedIssuer,
+        CustomIssuerMetadata, CustomTokenMetadata, IssuerName, TestJwtIssuer, TokenEntityMetadata,
+        TokenTypes, TrustedIssuer,
     };
     use std::collections::HashMap;
 
@@ -1082,7 +1082,7 @@ mod tests {
     /// `required_claims`.
     fn jwt_issuer(name: &str, required_claims: &[&str]) -> TestJwtIssuer {
         let mut issuer = TrustedIssuer::default();
-        issuer.name = name.to_string();
+        issuer.name = IssuerName::for_test(name);
         let token = TokenEntityMetadata::builder()
             .required_claims(required_claims.iter().map(ToString::to_string).collect())
             .build();

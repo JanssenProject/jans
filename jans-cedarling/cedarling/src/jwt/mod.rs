@@ -895,12 +895,12 @@ mod test {
     use crate::authz::MultiIssuerValidationError;
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
     use crate::authz::request::TokenInput;
-    use crate::common::policy_store::TestJwtIssuer;
     use crate::common::policy_store::TokenEntityMetadata;
     use crate::common::policy_store::{
         CustomIssuerMetadata, CustomTokenMetadata, KeySource, TokenTypeKind, TokenTypes,
         TrustedIssuer,
     };
+    use crate::common::policy_store::{IssuerName, TestJwtIssuer};
     use crate::http::HttpClient;
     use crate::http::HttpClientConfig;
     use crate::log::{LogStrategy, Logger};
@@ -1518,7 +1518,7 @@ mod test {
         let mut server = MockServer::new_with_defaults().await.unwrap();
         let issuer = |name: &str, entity_type: &str| {
             let mut issuer = server.trusted_issuer();
-            issuer.name = name.to_string();
+            issuer.name = IssuerName::for_test(name);
             issuer.with_tokens(HashMap::from([(
                 entity_type.to_string(),
                 TokenEntityMetadata::builder().build(),
@@ -1571,7 +1571,7 @@ mod test {
         ] {
             let iss = &out.tokens[mapping].token.iss;
             assert!(
-                matches!(iss, Some(TokenIssuer::Jwt(issuer)) if issuer.name == name),
+                matches!(iss, Some(TokenIssuer::Jwt(issuer)) if issuer.name.to_string() == name),
                 "{mapping} should keep the issuer its mapping names, got {iss:?}"
             );
         }
@@ -1603,7 +1603,7 @@ mod test {
             .create();
         let iss = server.url();
         let issuer = TrustedIssuer::new(
-            "Partner".into(),
+            IssuerName::for_test("Partner"),
             Url::parse(&iss).expect("valid url"),
             KeySource::Static {
                 jwks: Url::parse(&format!("{iss}/keys")).expect("valid url"),
@@ -1686,7 +1686,7 @@ mod test {
             .create();
         let iss = server.url();
         let issuer = TrustedIssuer::new(
-            "Partner".into(),
+            IssuerName::for_test("Partner"),
             Url::parse(&iss).expect("valid url"),
             KeySource::Static {
                 jwks: Url::parse(&format!("{iss}/keys")).expect("valid url"),

@@ -126,7 +126,7 @@ fn unresolved_issuers(token_types: &TokenTypes) -> Vec<IssuerConfig> {
         .jwt_issuers()
         .iter()
         .map(|(name, issuer)| IssuerConfig {
-            issuer_id: name.clone(),
+            issuer_id: name.to_string(),
             policy: issuer.clone(),
             tokens: token_types
                 .jwt_tokens_of(name)
@@ -606,7 +606,7 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
+    use crate::common::policy_store::{IssuerName, TokenEntityMetadata, TrustedIssuer};
     use crate::http::HttpClientConfig;
     use crate::jwt::key_service::DecodingKeyInfo;
     use crate::jwt::test_utils::{
@@ -660,7 +660,7 @@ mod test {
                     format!("{id}::Access_token"),
                     TokenEntityMetadata::builder().build(),
                 )]);
-                issuer.name = id;
+                issuer.name = IssuerName::for_test(&id);
                 issuer.with_tokens(tokens)
             }),
             [],
@@ -1162,7 +1162,7 @@ mod test {
         let jwks = mock_jwks(&mut server, "/keys", 1);
         let iss = Url::parse(&server.url()).expect("valid url");
         let issuer = TrustedIssuer::new(
-            "Partner".into(),
+            IssuerName::for_test("Partner"),
             iss.clone(),
             KeySource::Static {
                 jwks: Url::parse(&(server.url() + "/keys")).expect("valid url"),
@@ -1217,7 +1217,7 @@ mod test {
 
     fn static_issuer(name: &str, iss: &str, jwks: &str) -> TrustedIssuer {
         TrustedIssuer::new(
-            name.into(),
+            IssuerName::for_test(name),
             Url::parse(iss).expect("valid url"),
             KeySource::Static {
                 jwks: Url::parse(jwks).expect("valid url"),
@@ -1227,7 +1227,7 @@ mod test {
 
     fn discovery_issuer(name: &str, iss: &str) -> TrustedIssuer {
         let mut issuer = TrustedIssuer::default();
-        issuer.name = name.into();
+        issuer.name = IssuerName::for_test(name);
         issuer.set_configuration_endpoint(
             Url::parse(&format!("{iss}/.well-known/openid-configuration")).expect("valid url"),
         );
