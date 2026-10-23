@@ -721,9 +721,8 @@ mod test {
 
         // Verify issuer config was inserted
         let issuer_claim = server.issuer();
-        let trusted_issuer_from_index = loader.issuer_configs.get_trusted_issuer(&issuer_claim);
         assert!(
-            trusted_issuer_from_index.is_some(),
+            loader.issuer_configs.contains_iss(&issuer_claim),
             "trusted issuer should be inserted into issuer index"
         );
 
@@ -771,24 +770,14 @@ mod test {
         let issuer_claim1 = server1.issuer();
         let issuer_claim2 = server2.issuer();
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim1)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&issuer_claim1) },
             20,
             10,
             "first trusted issuer should be inserted into issuer index",
         )
         .await;
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim2)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&issuer_claim2) },
             20,
             10,
             "second trusted issuer should be inserted into issuer index",
@@ -1008,9 +997,8 @@ mod test {
 
         // Verify issuer config was inserted
         let issuer_claim = server.issuer();
-        let trusted_issuer_from_index = loader.issuer_configs.get_trusted_issuer(&issuer_claim);
         assert!(
-            trusted_issuer_from_index.is_some(),
+            loader.issuer_configs.contains_iss(&issuer_claim),
             "trusted issuer should be inserted into issuer index"
         );
 
@@ -1102,10 +1090,9 @@ mod test {
             "expected DiscoveryIssuerMismatch naming both issuers, got: {err:?}"
         );
         assert!(
-            loader
+            !loader
                 .issuer_configs
-                .get_trusted_issuer(&IssClaim::new(&server.url()))
-                .is_none(),
+                .contains_iss(&IssClaim::new(&server.url())),
             "a mismatched issuer must not be indexed"
         );
         assert!(
@@ -1138,10 +1125,7 @@ mod test {
             .await
             .expect("a path-based issuer whose discovery matches should load");
         assert!(
-            loader
-                .issuer_configs
-                .get_trusted_issuer(&IssClaim::new(&iss))
-                .is_some(),
+            loader.issuer_configs.contains_iss(&IssClaim::new(&iss)),
             "the issuer should be indexed by its full iss, path included"
         );
         discovery.assert();
@@ -1281,10 +1265,7 @@ mod test {
             );
         }
         assert!(
-            loader
-                .issuer_configs
-                .get_trusted_issuer(&IssClaim::new(&iss))
-                .is_none(),
+            !loader.issuer_configs.contains_iss(&IssClaim::new(&iss)),
             "neither issuer should be loaded"
         );
         assert_eq!(
@@ -1454,9 +1435,8 @@ mod test {
 
         // Verify issuer config was inserted
         let issuer_claim = server.issuer();
-        let trusted_issuer_from_index = loader.issuer_configs.get_trusted_issuer(&issuer_claim);
         assert!(
-            trusted_issuer_from_index.is_some(),
+            loader.issuer_configs.contains_iss(&issuer_claim),
             "trusted issuer should be inserted into issuer index"
         );
 
@@ -1506,24 +1486,14 @@ mod test {
         let issuer_claim1 = server1.issuer();
         let issuer_claim2 = server2.issuer();
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim1)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&issuer_claim1) },
             20,
             10,
             "first trusted issuer should be inserted into issuer index",
         )
         .await;
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim2)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&issuer_claim2) },
             20,
             10,
             "second trusted issuer should be inserted into issuer index",
@@ -1605,12 +1575,7 @@ mod test {
         for (i, server) in servers.iter().enumerate() {
             let issuer_claim = server.issuer();
             retry_assert(
-                || async {
-                    loader
-                        .issuer_configs
-                        .get_trusted_issuer(&issuer_claim)
-                        .is_some()
-                },
+                || async { loader.issuer_configs.contains_iss(&issuer_claim) },
                 20,
                 10,
                 &format!("trusted issuer {i} should be inserted into issuer index"),
@@ -1663,10 +1628,7 @@ mod test {
         for (i, server) in servers.iter().enumerate() {
             let issuer_claim = server.issuer();
             assert!(
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim)
-                    .is_some(),
+                loader.issuer_configs.contains_iss(&issuer_claim),
                 "trusted issuer {i} should be inserted into issuer index"
             );
         }
@@ -1726,12 +1688,7 @@ mod test {
         // but eventually loads within a reasonable time
         let issuer_claim = server.issuer();
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&issuer_claim) },
             20,
             10,
             "trusted issuer should eventually be inserted into issuer index via async loading",
@@ -1777,10 +1734,7 @@ mod test {
         // Verify valid issuer was loaded despite the error
         let valid_issuer_claim = valid_server.issuer();
         assert!(
-            loader
-                .issuer_configs
-                .get_trusted_issuer(&valid_issuer_claim)
-                .is_some(),
+            loader.issuer_configs.contains_iss(&valid_issuer_claim),
             "valid issuer should be loaded even when another issuer fails in sync mode"
         );
     }
@@ -1831,24 +1785,14 @@ mod test {
         let valid_issuer_claim1 = valid_server1.issuer();
         let valid_issuer_claim2 = valid_server2.issuer();
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&valid_issuer_claim1)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&valid_issuer_claim1) },
             20,
             10,
             "first valid issuer should be inserted into issuer index",
         )
         .await;
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&valid_issuer_claim2)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&valid_issuer_claim2) },
             20,
             10,
             "second valid issuer should be inserted into issuer index",
@@ -1895,10 +1839,7 @@ mod test {
         // Verify valid issuer was loaded
         let valid_issuer_claim = valid_server.issuer();
         assert!(
-            loader
-                .issuer_configs
-                .get_trusted_issuer(&valid_issuer_claim)
-                .is_some(),
+            loader.issuer_configs.contains_iss(&valid_issuer_claim),
             "valid issuer should be loaded even when other issuers fail"
         );
 
@@ -1972,12 +1913,7 @@ mod test {
         // Wait for async loading to complete
         let valid_issuer_claim = valid_server.issuer();
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&valid_issuer_claim)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&valid_issuer_claim) },
             20,
             10,
             "valid issuer should eventually be loaded via async loading",
