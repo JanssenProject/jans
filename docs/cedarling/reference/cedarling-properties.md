@@ -213,6 +213,13 @@ Lock Server accepts TRACE records only with an access token that has the `https:
 - In the Auth Server, add `https://jans.io/oauth/lock/trace.write` to the software roles of the SSA and to the `scope_list` of the interception script that adds the Cedarling scopes. The scope is created when Lock Server is installed.
 - In Lock Server, enable TRACE, so that it publishes `trace_bulk_endpoint`, and register the producer key: Cedarling logs the producer id, `kid` and thumbprint at startup.
 
+In the Lock Server `traceConfiguration` (see [Lock Server TRACE configuration](../../janssen-server/lock/trace.md#configuration)), Cedarling also needs:
+
+- `chainRegistrationMode: FIRST_OBSERVED`. Cedarling opens a new producer chain at every start and registers it with its first record. In the default `PRE_REGISTERED` mode, Lock Server refuses every record with `chain_not_registered` (see [Chain registration modes](../../janssen-server/lock/trace.md#chain-registration-modes)).
+- Permission for the Cedarling client to submit for its producer id (`CEDARLING_TRACE_PRODUCER_ID`): list the producer id in `defaultAllowedProducerIds`, or give the client an entry in `clientDomainBindings` whose `allowedProducerIds` contains it. Otherwise Lock Server refuses every record with `producer_not_allowed`.
+
+To see why Lock Server refused a record, set `errorReasonEnabled: true` in the Lock Server configuration: Cedarling then logs Lock Server's `reason` with the error, for example `event_kind_not_authorized`. Lock Server reads this setting only at startup.
+
 A token set with `CEDARLING_LOCK_ACCESS_TOKEN_JWT` must already carry the `trace.write` scope.
 
 
