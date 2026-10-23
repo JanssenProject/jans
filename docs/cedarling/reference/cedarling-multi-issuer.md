@@ -614,7 +614,7 @@ cedarling.set_custom_token_processor(None);
 
 ### 4. Write the policy
 
-A custom token becomes a Cedar entity at `context.tokens.{issuer}_{token_type}` issuer `CustomIssuerName` + mapping `Custom::ApiKey` → `customissuername_apikey`. Claims are tags; the token entity's `iss` attribute is the **sanitized issuer name as a plain string** (there is no `TrustedIssuer` entity for a custom issuer).
+A custom token becomes a Cedar entity at `context.tokens.{issuer}_{token_type}`: issuer `CustomIssuerName` + mapping `Custom::ApiKey` --> `customissuername_apikey`. Claims are tags; the token entity's `iss` attribute is the **lowercased issuer name as a plain string** (there is no `TrustedIssuer` entity for a custom issuer).
 
 ```cedar
 permit(

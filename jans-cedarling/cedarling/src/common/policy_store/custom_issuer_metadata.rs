@@ -7,9 +7,8 @@
 //!
 //! A custom issuer's tokens are validated by a registered
 //! [`CustomTokenProcessor`](crate::CustomTokenProcessor) rather than the JWT
-//! pipeline. Unlike [`TokenEntityMetadata`](super::TokenEntityMetadata), a custom
-//! issuer has no `openid_configuration_endpoint` and its `token_id` is supplied
-//! by the processor (not read from a claim).
+//! pipeline. Unlike a JWT issuer, a custom issuer has no `iss` or key source, and
+//! its `token_id` is supplied by the processor (not read from a claim).
 
 #[cfg(test)]
 use std::collections::HashMap;

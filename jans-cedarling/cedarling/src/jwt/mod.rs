@@ -216,18 +216,9 @@ pub(crate) struct ValidatedToken {
 }
 
 impl JwtService {
-    /// Creates a new JWT service with the given configuration.
-    ///
-    /// # Arguments
-    ///
-    /// * `jwt_config` - JWT validation configuration (signature validation, algorithms, etc.)
-    /// * `trusted_issuers` - Optional map of trusted issuer configurations from the policy store
-    /// * `logger` - Optional logger for diagnostic messages
-    /// * `metrics` - Shared metrics collector for telemetry
-    ///
-    /// # Errors
-    ///
-    /// Returns `JwtServiceInitError` if initialization fails (e.g., failed to fetch OIDC config)
+    /// Creates a JWT service for the JWT issuers of `token_types`, loading their
+    /// keys (and OIDC discovery) as `jwt_config` requires; fails if that cannot be
+    /// done, e.g. discovery is unreachable.
     pub(crate) async fn new(
         jwt_config: &JwtConfig,
         token_types: &TokenTypes,

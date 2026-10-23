@@ -504,12 +504,15 @@ and `"policy_store_spec_version": 2` in `metadata.json`.
 
 - **A request `mapping` must equal a configured entity type.** There is no
   fallback from token names such as `access_token` to default entity types.
-- **`iss` keeps its path.** Version 1 matched tokens against the origin of the
-  configuration endpoint only. Version 2 expects the endpoint without
-  `/.well-known/openid-configuration`, path included, so path-based issuers
-  (Keycloak realms, `login.microsoftonline.com/{tenant}/v2.0`) are told apart.
-  For those issuers the `TrustedIssuer` entity id and `issuer_entity_id.path` now
-  carry the path. Issuers at the origin root are unaffected.
+- **`iss` keeps its path.** Version 1 identified an issuer by the origin of its
+  configuration endpoint: the `TrustedIssuer` entity id and `issuer_entity_id`
+  had no path, and tokens were matched to issuers by origin (with signature
+  validation on, the full `iss` was still checked against discovery). Version 2
+  expects the endpoint without `/.well-known/openid-configuration`, path
+  included, so path-based issuers (Keycloak realms,
+  `login.microsoftonline.com/{tenant}/v2.0`) are told apart. For those issuers
+  the `TrustedIssuer` entity id and `issuer_entity_id.path` now carry the path.
+  Issuers at the origin root are unaffected.
 - **Discovery must match.** The discovery document's `issuer` must equal the
   expected `iss`, or that issuer fails to load.
 - **Issuers are identified by name.** `TrustedIssuerLoadingInfo`
@@ -572,7 +575,7 @@ spec version 1 to 2: 'required' on custom token '<entity type>' in 'custom-issue
 When migrating a version 1 issuer whose endpoint has a path:
 
 ```text
-spec version 1 to 2: issuer in 'trusted-issuers/<file>' is now matched against iss '<iss>', path included, and its TrustedIssuer entity id carries the path; v1 used only the origin
+spec version 1 to 2: issuer in 'trusted-issuers/<file>' now has iss '<iss>', path included: its TrustedIssuer entity id and issuer_entity_id.path carry the path, where v1 used the origin
 ```
 
 When a version 2 store still contains `trusted-issuers/` or `custom-issuers/`:

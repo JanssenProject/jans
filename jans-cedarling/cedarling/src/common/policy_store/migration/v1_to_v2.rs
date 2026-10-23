@@ -72,11 +72,11 @@ pub(crate) enum V1ToV2Warning {
          `forbid (principal, action, resource) unless {{ context has tokens.<key> }};`"
     )]
     RequiredIgnored { file: String, entity_type: String },
-    /// An issuer's `iss` keeps the path its endpoint had, where v1 kept only the
-    /// origin; its `TrustedIssuer` entity id changes with it.
+    /// An issuer's `iss` keeps the path its endpoint had, where v1 identified the
+    /// issuer by the origin; its `TrustedIssuer` entity id changes with it.
     #[display(
-        "issuer in '{file}' is now matched against iss '{iss}', path included, and its \
-         TrustedIssuer entity id carries the path; v1 used only the origin"
+        "issuer in '{file}' now has iss '{iss}', path included: its TrustedIssuer entity id \
+         and issuer_entity_id.path carry the path, where v1 used the origin"
     )]
     IssPathKept { file: String, iss: String },
 }
