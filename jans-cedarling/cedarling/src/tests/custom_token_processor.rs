@@ -13,6 +13,7 @@ use std::time::Duration;
 
 use super::utils::cedarling_util::{get_cedarling_with_callback, get_config};
 use super::utils::*;
+use crate::init::policy_store_refresh::swap_authz;
 use crate::{
     AuthorizeError, CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims,
     authz::{
@@ -445,6 +446,39 @@ async fn set_custom_token_processor_swap_invalidates_cache() {
         first_calls.load(Ordering::SeqCst),
         1,
         "the replaced processor must not be consulted after the swap"
+    );
+}
+
+/// A policy-store refresh that reuses the `JwtService` flushes cached custom
+/// verdicts, so the next request is checked against the new custom token types.
+#[tokio::test]
+async fn policy_store_swap_invalidates_custom_cache() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+        |_| {},
+    )
+    .await;
+    let calls = Arc::new(AtomicUsize::new(0));
+    cedarling.set_custom_token_processor(Some(Arc::new(CountingProcessor {
+        calls: calls.clone(),
+        cacheable: true,
+    })));
+    cedarling
+        .authorize_multi_issuer(read_doc_request("secret-admin-key"))
+        .await
+        .expect("custom token should authorize before the swap");
+
+    // Republishing the same `Authz` is a refresh that reuses its `JwtService`.
+    swap_authz(&cedarling.authz, cedarling.authz.load_full());
+    cedarling
+        .authorize_multi_issuer(read_doc_request("secret-admin-key"))
+        .await
+        .expect("custom token should authorize after the swap");
+
+    assert_eq!(
+        calls.load(Ordering::SeqCst),
+        2,
+        "the swap must flush the cached verdict so the processor runs again"
     );
 }
 
