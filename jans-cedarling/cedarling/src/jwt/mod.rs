@@ -316,12 +316,12 @@ impl JwtService {
         })
     }
 
-    /// Validates a single JWT as a token of `trusted_iss`, the issuer its mapping
-    /// names, and returns the decoded claims.
+    /// Validates a single JWT with the validator of its `iss` and mapping, and
+    /// returns the decoded claims. Only the issuer the mapping names has such a
+    /// validator, so a token of another issuer fails here.
     fn validate_single_token(
         &self,
         token_kind: &TokenKind,
-        trusted_iss: &Arc<TrustedIssuer>,
         jwt: &str,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
         let decoded_jwt = decode_jwt(jwt)?;
@@ -352,12 +352,8 @@ impl JwtService {
         // validate JWT
         // NOTE: the JWT will be validated depending on the validator's settings that
         // was set on initialization
-        let mut validated_jwt = validator.validate_jwt(jwt, decoding_key)?;
-        // The validator for this `iss` and mapping has already required the
-        // token type's `required_claims`.
-        validated_jwt.trusted_iss = Some(trusted_iss.clone());
-
-        Ok(validated_jwt)
+        // The validator has also required the token type's `required_claims`.
+        validator.validate_jwt(jwt, decoding_key)
     }
 
     /// Flush cached custom-token verdicts, leaving JWT cache entries intact.
@@ -544,10 +540,7 @@ impl JwtService {
             .await
         {
             Ok(cedar_token) => {
-                let issuer = cedar_token
-                    .extract_normalized_issuer()
-                    .map(|i| SmolStr::from(i.as_str()))
-                    .unwrap_or_default();
+                let issuer = SmolStr::from(cedar_token.normalized_issuer().as_str());
                 if ctx.seen_combinations.insert(SeenToken {
                     issuer,
                     mapping: SmolStr::from(ctx.token.mapping.as_str()),
@@ -623,29 +616,20 @@ impl JwtService {
         let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(&ctx.token.mapping));
 
         if let Some(cedar_token) = self.token_cache.find(&token_kind, &ctx.token.payload) {
-            let issuer = cedar_token
-                .get_claim_val("iss")
-                .and_then(|iss| iss.as_str())
-                .ok_or(MultiIssuerValidationError::MissingIssuer)?;
-            if !self.mark_jwt_seen(ctx, issuer) {
+            if !self.mark_jwt_seen(ctx, &cedar_token.normalized_issuer()) {
                 return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
             }
             return Ok(TokenOutcome::Validated(cedar_token));
         }
 
         // Validate JWT using existing single token validation
-        match self.validate_single_token(&token_kind, trusted_iss, &ctx.token.payload) {
+        match self.validate_single_token(&token_kind, &ctx.token.payload) {
             Ok(validated_jwt) => {
                 self.metrics.record_jwt_validation(true);
-                // Extract issuer for non-deterministic check
-                let issuer = validated_jwt
-                    .claims
-                    .get("iss")
-                    .and_then(|iss| iss.as_str())
-                    .ok_or(MultiIssuerValidationError::MissingIssuer)?;
 
-                // Check for non-deterministic tokens (graceful validation)
-                if !self.mark_jwt_seen(ctx, issuer) {
+                // Check for non-deterministic tokens (graceful validation); the
+                // validator has checked the `iss` claim against this issuer.
+                if !self.mark_jwt_seen(ctx, &trusted_iss.iss_claim()) {
                     return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
                 }
 
@@ -656,7 +640,7 @@ impl JwtService {
                 let cedar_token = Arc::new(Token::new(
                     &ctx.token.mapping,
                     claims,
-                    validated_jwt.trusted_iss.map(TokenIssuer::Jwt),
+                    TokenIssuer::Jwt(trusted_iss.clone()),
                 ));
 
                 self.token_cache.save(
@@ -685,9 +669,9 @@ impl JwtService {
     /// Record the JWT's `(issuer, mapping)` pair as seen in this request.
     /// Returns `false` and logs a warning when the pair was already accepted,
     /// so the caller drops the token as [`DropReason::DuplicateToken`].
-    fn mark_jwt_seen(&self, ctx: &mut TokenCallCtx<'_>, issuer: &str) -> bool {
+    fn mark_jwt_seen(&self, ctx: &mut TokenCallCtx<'_>, issuer: &IssClaim) -> bool {
         let inserted = ctx.seen_combinations.insert(SeenToken {
-            issuer: SmolStr::from(issuer),
+            issuer: SmolStr::from(issuer.as_str()),
             mapping: SmolStr::from(ctx.token.mapping.as_str()),
         });
         if !inserted && let Some(logger) = &self.logger {
@@ -769,7 +753,6 @@ impl JwtService {
 
             let meta = CustomTokenIssuerMeta {
                 issuer_id: target.issuer.key_prefix(),
-                entity_type_name: Some(input.mapping.clone()),
                 token_id: processed.token_id.clone(),
                 expiration,
             };
@@ -778,7 +761,7 @@ impl JwtService {
             let cedar_token = Arc::new(Token::new(
                 &input.mapping,
                 claims,
-                Some(TokenIssuer::Custom(meta)),
+                TokenIssuer::Custom(meta),
             ));
 
             if cacheable {
@@ -1571,7 +1554,7 @@ mod test {
         ] {
             let iss = &out.tokens[mapping].token.iss;
             assert!(
-                matches!(iss, Some(TokenIssuer::Jwt(issuer)) if issuer.name.to_string() == name),
+                matches!(iss, TokenIssuer::Jwt(issuer) if issuer.name.to_string() == name),
                 "{mapping} should keep the issuer its mapping names, got {iss:?}"
             );
         }

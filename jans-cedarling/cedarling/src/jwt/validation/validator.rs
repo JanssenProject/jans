@@ -7,7 +7,7 @@ use std::borrow::Cow;
 use std::collections::HashSet;
 
 use crate::common::issuer_utils::IssClaim;
-use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
+use crate::common::policy_store::TokenEntityMetadata;
 use crate::jwt::decode::{DecodeJwtError, DecodedJwt};
 use crate::jwt::key_service::DecodingKeyInfo;
 use crate::jwt::{
@@ -22,8 +22,6 @@ use serde_json::Value;
 pub(crate) struct ValidatedJwt {
     #[serde(flatten)]
     pub claims: Value,
-    #[serde(skip)]
-    pub trusted_iss: Option<Arc<TrustedIssuer>>,
 }
 
 impl ValidatedJwt {
@@ -339,7 +337,6 @@ impl TryFrom<DecodedJwt> for ValidatedJwt {
     fn try_from(decoded_jwt: DecodedJwt) -> Result<Self, Self::Error> {
         Ok(Self {
             claims: decoded_jwt.claims.inner,
-            trusted_iss: None,
         })
     }
 }
@@ -425,10 +422,7 @@ mod test {
             .validate_jwt(&token, Some(decoding_key))
             .expect("should validate JWT");
 
-        let expected = ValidatedJwt {
-            claims,
-            trusted_iss: None,
-        };
+        let expected = ValidatedJwt { claims };
 
         assert_eq!(result, expected);
     }
@@ -502,10 +496,7 @@ mod test {
             .validate_jwt(&token, Some(decoding_key))
             .expect("Should successfully process JWT");
 
-        let expected = ValidatedJwt {
-            claims,
-            trusted_iss: None,
-        };
+        let expected = ValidatedJwt { claims };
 
         assert_eq!(result, expected);
     }
@@ -545,10 +536,7 @@ mod test {
             .validate_jwt(&token, Some(decoding_key))
             .expect("trailing-slash iss must validate against canonical expected iss");
 
-        let expected = ValidatedJwt {
-            claims,
-            trusted_iss: None,
-        };
+        let expected = ValidatedJwt { claims };
         assert_eq!(
             result, expected,
             "validate_jwt should accept trailing-slash iss and produce expected ValidatedJwt with claims and no trusted_iss"
@@ -727,10 +715,7 @@ mod test {
             .validate_jwt(&token, Some(decoding_key.clone()))
             .expect("Should process JWT successfully");
 
-        let expected = ValidatedJwt {
-            claims,
-            trusted_iss: None,
-        };
+        let expected = ValidatedJwt { claims };
 
         assert_eq!(result, expected);
 

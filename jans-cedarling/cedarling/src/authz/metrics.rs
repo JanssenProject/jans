@@ -1149,7 +1149,7 @@ mod tests {
         collector.record_error(&TestError("jwt.decode_failed"));
         collector.record_error(&TestError("data.invalid_key"));
         collector.record_error(&MultiIssuerValidationError::EmptyTokenArray);
-        collector.record_error(&MultiIssuerValidationError::MissingIssuer);
+        collector.record_error(&MultiIssuerValidationError::InvalidContextJson);
         collector.increment_error("data.invalid_key");
 
         let snap = collector.snapshot_and_reset();
@@ -1170,9 +1170,9 @@ mod tests {
             "multi_issuer.empty_token_array count must be 1"
         );
         assert_eq!(
-            snap.error_counters.get("multi_issuer.missing_issuer"),
+            snap.error_counters.get("multi_issuer.invalid_context"),
             Some(&1),
-            "multi_issuer.missing_issuer count must be 1"
+            "multi_issuer.invalid_context count must be 1"
         );
     }
 

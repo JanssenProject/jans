@@ -100,8 +100,15 @@ impl GetEntityIdErrors {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::common::policy_store::TrustedIssuer;
+    use crate::jwt::TokenIssuer;
     use serde_json::json;
     use std::collections::HashMap;
+    use std::sync::Arc;
+
+    fn test_issuer() -> TokenIssuer {
+        TokenIssuer::Jwt(Arc::new(TrustedIssuer::default()))
+    }
 
     #[test]
     fn can_get_first_valid_eid() {
@@ -111,7 +118,7 @@ mod test {
         let token = Token::new(
             "test_token",
             HashMap::from([("aud".into(), json!(expected_aud))]).into(),
-            None,
+            test_issuer(),
         );
 
         // Using the token's aud
@@ -143,7 +150,7 @@ mod test {
                 ("client_id".into(), json!(expected_client_id)),
             ])
             .into(),
-            None,
+            test_issuer(),
         );
 
         // Using the first valid id even if others are also valid
@@ -163,7 +170,7 @@ mod test {
         let token = Token::new(
             "test_token",
             HashMap::from([("empty".into(), json!(""))]).into(),
-            None,
+            test_issuer(),
         );
 
         // Errors when no valid ids found
