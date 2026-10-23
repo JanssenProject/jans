@@ -9,7 +9,7 @@ use super::feature_types::FeatureToggle;
 use crate::common::policy_store::archive_handler::ArchiveLimits;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::log::StdOutLoggerMode;
-use crate::{HttpClientConfig, JwtConfig, lock_config::LockServiceConfig};
+use crate::{HttpClientConfig, JwtConfig, TraceConfig, lock_config::LockServiceConfig};
 
 use std::num::NonZeroUsize;
 
@@ -57,6 +57,14 @@ pub(super) fn default_log_channel_capacity() -> NonZeroUsize {
 
 pub(super) fn default_log_max_retries() -> u32 {
     LockServiceConfig::DEFAULT_LOG_MAX_RETRIES
+}
+
+pub(super) fn default_trace_bulk_max_records() -> usize {
+    TraceConfig::DEFAULT_BULK_MAX_RECORDS.get()
+}
+
+pub(super) fn default_trace_bulk_max_bytes() -> usize {
+    TraceConfig::DEFAULT_BULK_MAX_BYTES.get()
 }
 
 #[cfg(not(target_arch = "wasm32"))]

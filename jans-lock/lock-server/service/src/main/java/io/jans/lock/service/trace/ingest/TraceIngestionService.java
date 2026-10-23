@@ -29,6 +29,7 @@ import io.jans.lock.service.trace.store.TraceKeys;
 import io.jans.lock.service.trace.store.TraceStore;
 import io.jans.lock.service.trace.verify.TraceVerificationService;
 import io.jans.lock.service.trace.verify.VerifiedAssertion;
+import io.jans.lock.trace.crypto.TraceCryptoException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -67,6 +68,9 @@ public class TraceIngestionService {
 	@Inject
 	private TraceStore store;
 
+	@Inject
+	private TraceKeys traceKeys;
+
 	/**
 	 * @throws io.jans.lock.service.trace.error.TraceCryptoException     {@code crypto_unavailable}
 	 * @throws io.jans.lock.service.trace.error.TraceValidationException every verification,
@@ -89,14 +93,14 @@ public class TraceIngestionService {
 		CorrelationPlan plan = correlation.plan(verified, ctx);
 
 		String domainId = ctx.getEvidenceDomainId();
-		String recordKey = TraceKeys.recordKey(identity);
+		String recordKey = traceKeys.recordKey(identity);
 		ReceiptClaim claim = receiptChain.claim(domainId, verified.getProducer(), verified.getRecordId(), recordKey,
 				verified.getContentDigest(), ctx.getReceivedAtMs(), ctx.getNodeId());
 
-		StoredTraceRecord record = buildRecord(verified, ctx, plan, claim);
+		StoredTraceRecord stored = buildRecord(verified, ctx, plan, claim);
 
 		try {
-			store.insertRecord(record);
+			store.insertRecord(stored);
 		} catch (DuplicateEntryException ex) {
 			receiptChain.voidClaim(domainId, claim.getSeq());
 			Optional<StoredTraceRecord> raced = store.findRecord(identity);
@@ -111,10 +115,10 @@ public class TraceIngestionService {
 		}
 
 		receiptChain.commit(domainId, claim.getSeq());
-		correlation.afterInsert(record, plan);
+		correlation.afterInsert(stored, plan);
 
-		logAcceptance(record, false);
-		return AcceptanceResult.fromStored(record, false);
+		logAcceptance(stored, false);
+		return AcceptanceResult.fromStored(stored, false);
 	}
 
 	private AcceptanceResult classifyAgainstExisting(StoredTraceRecord existing, String contentDigest) {
@@ -136,17 +140,19 @@ public class TraceIngestionService {
 				plan.getExecution(), plan.getPosition(), verified.getInputs().getChainPosition().getPrevRecordHash(),
 				verified.getInputs().getTokenRefs(),
 				verified.getInputs().getEventKind(), verified.getInputs().getSignedAt(), ctx.getNodeId(),
-				ctx.getReceivedAtMs(), 0L);
+				ctx.getReceivedAtMs(), 0L, verified.getInputs().getPolicy());
 	}
 
-	private void logAcceptance(StoredTraceRecord record, boolean replay) {
+	private void logAcceptance(StoredTraceRecord stored, boolean replay) {
 		log.info(
 				"TRACE record accepted: producer={}, record_id={}, receipt_sequence={}, coverage_gap={}, "
-						+ "chain_link_failure={}, equivocation={}, late={}, replay={}",
-				record.getIdentity().getProducerId(), record.getIdentity().getRecordId(),
-				record.getReceipt().getReceiptSequence(), record.getFlags().isCoverageGap(),
-				record.getFlags().isChainLinkFailure(), record.getFlags().isEquivocation(),
-				record.getFlags().isLate(), replay);
+						+ "chain_link_failure={}, equivocation={}, late={}, policy_mismatch={}, reserved_member={}, "
+						+ "replay={}",
+				stored.getIdentity().getProducerId(), stored.getIdentity().getRecordId(),
+				stored.getReceipt().getReceiptSequence(), stored.getFlags().isCoverageGap(),
+				stored.getFlags().isChainLinkFailure(), stored.getFlags().isEquivocation(),
+				stored.getFlags().isLate(), stored.getFlags().isPolicyMismatch(),
+				stored.getFlags().isReservedMember(), replay);
 	}
 
 	private static boolean digestsEqual(String a, String b) {

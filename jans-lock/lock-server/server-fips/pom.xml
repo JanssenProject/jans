@@ -90,7 +90,9 @@
 						WEB-INF/lib/bcpkix-jdk18on-*.jar,
 						WEB-INF/lib/bcprov-jdk18on-*.jar,
 						WEB-INF/lib/bcutil-jdk18on-*.jar,
-						WEB-INF/lib/bcmail-jdk18on-*.jar
+						WEB-INF/lib/bcmail-jdk18on-*.jar,
+						WEB-INF/lib/jans-lock-trace-crypto-native-*.jar,
+						WEB-INF/lib/jans-trace-java-*.jar
 					</packagingExcludes>
 				</configuration>
 			</plugin>

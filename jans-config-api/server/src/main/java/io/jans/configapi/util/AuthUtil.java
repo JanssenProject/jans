@@ -358,7 +358,7 @@ public class AuthUtil {
         log.info("Request for AccessToken - clientId:{}, scope:{} ", clientId, scope);
         String tokenUrl = getTokenEndpoint();
         Token token = getAccessToken(tokenUrl, clientId, scope);
-        log.debug("oAuth AccessToken response - token:{}", token);
+        log.debug("oAuth AccessToken response ");
         if (token != null) {
             return token.getAccessToken();
         }
@@ -385,8 +385,7 @@ public class AuthUtil {
                 scope.toString());
         if (tokenResponse != null) {
 
-            log.debug("Token Response - tokenScope: {}, tokenAccessToken: {} ", tokenResponse.getScope(),
-                    tokenResponse.getAccessToken());
+            log.debug("Token Response - tokenScope: {} ", tokenResponse.getScope());
             final String accessToken = tokenResponse.getAccessToken();
             final Integer expiresIn = tokenResponse.getExpiresIn();
             if (Util.allNotBlank(accessToken)) {
@@ -774,7 +773,7 @@ public class AuthUtil {
 
     public IntrospectionResponse getIntrospectionResponse(String token) {
         return AuthClientFactory.getIntrospectionResponse(token,
-                token.substring("Bearer".length()).trim(), this.getIssuer(),false);
+                token.substring("Bearer".length()).trim(), this.getIssuer());
     }
 
     public String getJsonNodeKeyValue(JsonNode jsonNode, String key) {

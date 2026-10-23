@@ -40,14 +40,18 @@ use uuid7::Uuid;
 
 mod authorize_result;
 mod build_ctx;
+mod dropped_token;
 mod error_metrics;
 mod errors;
 pub(crate) mod metrics;
+mod options;
 
 pub(crate) mod request;
 
 pub use authorize_result::{AuthorizeResult, MultiIssuerAuthorizeResult};
+pub use dropped_token::{DropReason, DroppedToken};
 pub use errors::*;
+pub use options::{AuthorizeOptions, TraceContext};
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -228,6 +232,7 @@ impl Authz {
         let MultiIssuerSetup {
             validated_tokens,
             entities: setup_entities,
+            dropped_tokens,
         } = self
             .multi_issuer_setup(&request.tokens, custom_processor)
             .await?;
@@ -327,7 +332,8 @@ impl Authz {
         // clone cost is excluded from the latency measurement
         let decision_time_micro_sec = calculate_elapsed_time(start_time);
 
-        let result = MultiIssuerAuthorizeResult::new(authz_result.clone(), request_id);
+        let result =
+            MultiIssuerAuthorizeResult::new(authz_result.clone(), request_id, dropped_tokens);
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
@@ -365,6 +371,7 @@ impl Authz {
                 decision: result.decision,
                 pushed_data: pushed_data_info,
                 batch_id: None,
+                dropped_tokens: &result.dropped_tokens,
             },
         );
 
@@ -443,6 +450,7 @@ impl Authz {
         let MultiIssuerSetup {
             validated_tokens,
             entities: setup_entities,
+            dropped_tokens,
         } = self
             .multi_issuer_setup(&request.tokens, custom_processor)
             .await?;
@@ -515,6 +523,7 @@ impl Authz {
                     principal: DecisionLogEntry::principal(false, false),
                     pushed_data: pushed_data_info.clone(),
                     batch_id: Some(batch_id),
+                    dropped_tokens: &dropped_tokens,
                 },
             );
 
@@ -537,6 +546,7 @@ impl Authz {
             results.push(Ok(MultiIssuerAuthorizeResult::new(
                 response,
                 item_request_id,
+                dropped_tokens.clone(),
             )));
         }
 
@@ -735,6 +745,7 @@ impl Authz {
                 principal: DecisionLogEntry::all_principals(logged_principals),
                 pushed_data: pushed_data_info,
                 batch_id: None,
+                dropped_tokens: &[],
             },
         );
 
@@ -874,6 +885,7 @@ impl Authz {
                     principal: DecisionLogEntry::all_principals(&logged_principals),
                     pushed_data: pushed_data_info.clone(),
                     batch_id: Some(batch_id),
+                    dropped_tokens: &[],
                 },
             );
 
@@ -994,7 +1006,7 @@ impl Authz {
         custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<MultiIssuerSetup, AuthorizeError> {
         let custom_timeout = self.custom_token_timeout();
-        let validated_tokens = self
+        let validated = self
             .config
             .jwt_service
             .validate_multi_issuer_tokens(
@@ -1009,19 +1021,36 @@ impl Authz {
                 self.config.metrics.record_authz_error();
             })?;
 
-        let setup_entities = self
+        let mut setup_entities = self
             .config
             .entity_builder
-            .build_multi_issuer_setup_entities(&validated_tokens, self.config.log_service.as_ref())
+            .build_multi_issuer_setup_entities(&validated.tokens, self.config.log_service.as_ref())
             .map_err(|e| {
                 self.config.metrics.record_error(&e);
                 self.config.metrics.record_authz_error();
                 AuthorizeError::MultiIssuerEntity(e)
             })?;
 
+        let crate::jwt::ValidatedMultiIssuerTokens {
+            tokens: mut validated_tokens,
+            dropped: mut dropped_tokens,
+        } = validated;
+
+        // A token that failed entity building must not also be reported as
+        // used: drop it from the validated map so `LogTokensInfo` (built from
+        // this map for both single and batch paths) never logs the same
+        // mapping under both `tokens` and `dropped_tokens`.
+        let entity_build_drops = std::mem::take(&mut setup_entities.dropped);
+        validated_tokens.retain(|name, _| !entity_build_drops.iter().any(|d| d.mapping == *name));
+
+        // Order is not guaranteed: entity-build drops append after validation
+        // drops; callers correlate entries by `index`.
+        dropped_tokens.extend(entity_build_drops);
+
         Ok(MultiIssuerSetup {
             validated_tokens,
             entities: setup_entities,
+            dropped_tokens,
         })
     }
 
@@ -1163,6 +1192,7 @@ impl Authz {
             diagnostics: DiagnosticsSummary::from_diagnostics(metadata.decision_diagnostics),
             pushed_data: metadata.pushed_data.clone(),
             batch_id: metadata.batch_id,
+            dropped_tokens: metadata.dropped_tokens.to_vec(),
         });
         self.config.log_service.log_fn(entry);
     }
@@ -1239,6 +1269,7 @@ impl Authz {
             .await?;
 
         let principal_types: HashSet<cedar_policy::EntityTypeName> = validated_tokens
+            .tokens
             .keys()
             .map(|mapping| {
                 cedar_policy::EntityTypeName::from_str(mapping)
@@ -1375,6 +1406,9 @@ struct DecisionLogMetadata<'a> {
     /// Shared correlation id when this entry is part of a batch call.
     /// Indexed in the decision-log entry — see [`DecisionLogEntry::batch_id`].
     batch_id: Option<Uuid>,
+    /// Tokens dropped from a multi-issuer decision. Empty (and omitted from the
+    /// logged entry) for single-issuer and unsigned paths.
+    dropped_tokens: &'a [DroppedToken],
 }
 
 /// Helper struct to hold named parameters for [`Authz::log_debug`] method.
@@ -1412,8 +1446,12 @@ struct UnsignedSetup {
 /// that [`LogTokensInfo`] can be produced from the same snapshot the entities
 /// were built from.
 struct MultiIssuerSetup {
-    validated_tokens: HashMap<String, Arc<crate::jwt::Token>>,
+    validated_tokens: HashMap<String, crate::jwt::ValidatedToken>,
     entities: MultiIssuerSetupEntities,
+    /// Tokens dropped across validation and entity building. Order is not
+    /// guaranteed; use each entry's `index` to correlate with the request
+    /// `tokens` array. Shared by every item in a batch.
+    dropped_tokens: Vec<DroppedToken>,
 }
 
 /// Structure to hold entites created from tokens
@@ -1462,6 +1500,96 @@ impl AuthorizeEntitiesData {
         schema: Option<&cedar_policy::Schema>,
     ) -> Result<cedar_policy::Entities, Box<cedar_policy::entities_errors::EntitiesError>> {
         Entities::from_entities(self.into_iter(), schema).map_err(Box::new)
+    }
+}
+
+#[cfg(test)]
+mod bundle_hash_tests {
+    use std::sync::Arc;
+    use std::time::Duration;
+
+    use super::*;
+    use crate::authz::metrics::{MetricsCollector, MetricsMode};
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
+    use crate::common::policy_store::test_utils::fixtures;
+    use crate::context_data_api::{DataStore, DataStoreConfig};
+    use crate::http::{HttpClient, HttpClientConfig};
+    use crate::init::authz_builder::build_authz;
+    use crate::init::policy_store::parse_cjar_bytes;
+    use crate::init::policy_store_refresh::AuthzRebuilder;
+    use crate::log::TEST_LOGGER;
+    use crate::{AuthorizationConfig, JwtConfig};
+
+    async fn parsed_store(version: &str) -> (PolicyStoreWithID, jans_trace_core::Digest) {
+        let bytes = fixtures::minimal_valid()
+            .with_version(version)
+            .build_archive()
+            .expect("test archive builds");
+        let hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
+        let store = parse_cjar_bytes(bytes, false, ArchiveLimits::default())
+            .await
+            .expect("test archive parses")
+            .store;
+        (store, hash)
+    }
+
+    /// A refreshed store carries its own `bundle_hash`, while an `Authz`
+    /// snapshot taken before the swap keeps the hash of the store it decided with.
+    #[tokio::test]
+    async fn refresh_with_new_archive_changes_bundle_hash() {
+        let (first, first_hash) = parsed_store("1.0.0").await;
+        let (second, second_hash) = parsed_store("2.0.0").await;
+        assert_ne!(first_hash, second_hash, "the two archives should differ");
+
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let rebuilder = AuthzRebuilder {
+            jwt_config: JwtConfig::new_without_validation(),
+            authorization_config: AuthorizationConfig::default(),
+            http_client: HttpClient::new(HttpClientConfig {
+                max_retries: 0,
+                retry_delay: Duration::from_millis(1),
+                request_timeout: Duration::from_secs(2),
+                max_response_size_bytes: None,
+            })
+            .expect("http client should be constructed"),
+            log: TEST_LOGGER.clone(),
+            data_store: Arc::new(
+                DataStore::new(DataStoreConfig::default(), metrics.clone())
+                    .expect("data store should be created"),
+            ),
+            metrics,
+        };
+        let bootstrap = build_authz(
+            first,
+            &rebuilder.jwt_config,
+            &rebuilder.authorization_config,
+            rebuilder.http_client.clone(),
+            &rebuilder.log,
+            rebuilder.data_store.clone(),
+            rebuilder.metrics.clone(),
+            None,
+        )
+        .await
+        .expect("bootstrap Authz should build");
+        let swap = arc_swap::ArcSwap::from_pointee(bootstrap);
+
+        let snapshot = swap.load_full();
+        let refreshed = rebuilder
+            .rebuild(second, &snapshot)
+            .await
+            .expect("refreshed Authz should build");
+        swap.store(Arc::new(refreshed));
+
+        assert_eq!(
+            swap.load().config.policy_store.bundle_hash(),
+            Some(second_hash),
+            "the refreshed Authz should carry the new archive's bundle_hash"
+        );
+        assert_eq!(
+            snapshot.config.policy_store.bundle_hash(),
+            Some(first_hash),
+            "a snapshot held across the refresh keeps the old bundle_hash"
+        );
     }
 }
 

@@ -7,6 +7,7 @@
 
 use pyo3::prelude::*;
 
+use super::authorize_options::{self, AuthorizeOptions};
 use super::batch_item::BatchItem;
 use super::token_input::TokenInput;
 
@@ -21,6 +22,7 @@ use super::token_input::TokenInput;
 /// ----------
 /// :param tokens: List of `TokenInput` shared across every item.
 /// :param items: List of `BatchItem` objects, evaluated in input order.
+/// :param options: Optional `AuthorizeOptions`, e.g. a TRACE context.
 ///
 /// Example
 /// -------
@@ -40,13 +42,26 @@ pub(crate) struct BatchAuthorizeMultiIssuerRequest {
     /// silently discarded — reassign to mutate.
     #[pyo3(get)]
     pub items: Vec<BatchItem>,
+    /// Per-call options; never change the decision. The getter returns a copy,
+    /// so mutating `req.options.trace` is discarded; assign new options instead.
+    #[pyo3(get, set)]
+    pub options: Option<AuthorizeOptions>,
 }
 
 #[pymethods]
 impl BatchAuthorizeMultiIssuerRequest {
     #[new]
-    fn new(tokens: Vec<TokenInput>, items: Vec<BatchItem>) -> Self {
-        Self { tokens, items }
+    #[pyo3(signature = (tokens, items, options=None))]
+    fn new(
+        tokens: Vec<TokenInput>,
+        items: Vec<BatchItem>,
+        options: Option<AuthorizeOptions>,
+    ) -> Self {
+        Self {
+            tokens,
+            items,
+            options,
+        }
     }
 
     /// Setter for `tokens`; assignment fully replaces the list.
@@ -77,6 +92,10 @@ impl BatchAuthorizeMultiIssuerRequest {
             .iter()
             .map(BatchItem::to_cedarling)
             .collect::<Result<Vec<_>, _>>()?;
-        Ok(cedarling::BatchAuthorizeMultiIssuerRequest { tokens, items })
+        Ok(cedarling::BatchAuthorizeMultiIssuerRequest {
+            tokens,
+            items,
+            options: authorize_options::to_cedarling(self.options.as_ref()),
+        })
     }
 }

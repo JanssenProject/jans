@@ -55,6 +55,7 @@
 						</goals>
 						<configuration>
 							<protocVersion>3.25.1</protocVersion>
+							<protocArtifact>com.google.protobuf:protoc:3.25.1</protocArtifact>
 							<!-- Bundle google/protobuf/timestamp.proto into the descriptor. -->
 							<includeStdTypes>true</includeStdTypes>
 							<inputDirectories>

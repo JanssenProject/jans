@@ -52,6 +52,21 @@ To load the policy store, one of the following properties must be set:
 
     This limit is independent of `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`, which bounds the compressed archive while it is downloaded. Serving a `.cjar` over HTTP whose compressed size exceeds `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES` (10 MB by default) requires raising that property as well.
 
+### Verifying policy store signatures
+
+- **`CEDARLING_POLICY_STORE_SIGSTORE_MODE`** : `disabled` (default) or `enforce`. With `enforce`, Cedarling loads a `.cjar` policy store only if its Sigstore (cosign keyless) bundle verifies against the signer below; otherwise loading fails and, on refresh, the current store is kept. Only `.cjar` sources can be signed, so `enforce` with a directory or YAML policy store fails at startup. Each verified load and refresh is logged at `INFO` with the signer identity, issuer, archive SHA-256 and Rekor timestamp.
+- **`CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY`** : Expected signer identity (the certificate SAN), matched exactly. Required with `enforce`.
+- **`CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER`** : Expected OIDC issuer of the signing certificate, matched exactly. Required with `enforce`.
+- **`CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI`** : Location of the bundle, as a URL for remote stores or a path for a local `.cjar`. Defaults to the policy store location with `.sigstore.json` appended. Required for archives passed as bytes (`initFromArchiveBytes`, `load_from_json_with_archive_bytes`), which have no location of their own.
+
+These match the `cosign verify-blob` flags. For a policy store published by Agama Lab:
+
+```json
+"CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+"CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+"CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com"
+```
+
 ### Optional properties
 
 Properties listed here are optional. If a property value is not set, 
@@ -115,6 +130,35 @@ The following bootstrap properties are only needed for the Lock Server Integrati
 - **`CEDARLING_LOCK_TRANSPORT`** : `rest` | `grpc`: Controls the transport protocol used to communicate with the Lock server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled. Default value is `rest`.
 - **`CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`** : Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. Default is `100`.
 - **`CEDARLING_LOCK_LOG_MAX_RETRIES`** : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff strategy. Default is `5`.
+
+### TRACE properties
+
+!!! note "In development"
+    TRACE is still in development. In this release Cedarling validates the TRACE configuration and loads the signing key at startup, but does not build or send TRACE records yet.
+
+With TRACE enabled, Cedarling signs an `AUTHORIZATION_DECISION` TRACE record for each authorization decision that carries a TRACE context (see [Authorize options and TRACE context](./cedarling-authz.md#authorize-options-and-trace-context)) and sends it to Lock Server. TRACE never changes the decision. An invalid TRACE configuration stops Cedarling at startup.
+
+TRACE requires:
+
+- `CEDARLING_LOCK` set to `enabled`: records are sent to Lock Server.
+- A `.cjar` policy store (local `.cjar` file, `.cjar` URL, Lock Server or policy store URI). Each record carries `bundle_hash`, the SHA-256 of the `.cjar` bytes Cedarling loaded, so a directory or YAML policy store cannot be used.
+- A signing key (`CEDARLING_TRACE_SIGNING_KEY` or `CEDARLING_TRACE_SIGNING_KEY_PEM`).
+- A native build. TRACE is not supported on WASM.
+
+Properties:
+
+- **`CEDARLING_TRACE`** : `enabled` | `disabled`. Default is `disabled`.
+- **`CEDARLING_TRACE_PRODUCER_ID`** : Stable producer id signed into every record and registered in Lock. 1 to 255 ASCII characters: a letter or digit, then letters, digits or `._:/-`. Default is the value of `CEDARLING_APPLICATION_NAME`, which must then satisfy the same rule (the default `My App` does not, because of the space).
+- **`CEDARLING_TRACE_SIGNING_KEY`** : Path to the Ed25519 private key as an unencrypted PKCS#8 PEM file, for example created with `openssl genpkey -algorithm ed25519 -out trace-key.pem`. Prefer a file (for example a mounted Kubernetes or Docker secret with restricted permissions): it keeps the secret out of the bootstrap configuration. If `CEDARLING_TRACE` == `enabled`, this property or `CEDARLING_TRACE_SIGNING_KEY_PEM` is required; when both are set, this one is used.
+- **`CEDARLING_TRACE_SIGNING_KEY_PEM`** : The same key as PEM text in the property value, for hosts that inject secrets as values rather than files. Used only when `CEDARLING_TRACE_SIGNING_KEY` is not set. Prefer `CEDARLING_TRACE_SIGNING_KEY` where the host can provide a file: a key inlined in the configuration can leak through environment dumps, process listings or configuration files kept under version control. Treat a configuration that contains this property as a secret.
+- **`CEDARLING_TRACE_SIGNING_KID`** : `kid` the key is registered under in Lock, at most 255 UTF-16 code units (Lock counts Java string length). If unset or blank, the `kid` is the RFC 7638 thumbprint of the public key (`sha256:<hex>`). Cedarling logs the producer id, `kid` and thumbprint at startup, so the admin can register the key in Lock.
+- **`CEDARLING_TRACE_ENDPOINT`** : `discovered` or a URL of the TRACE bulk endpoint. `discovered` (the default) takes `trace_bulk_endpoint` from the Lock Server well-known configuration.
+- **`CEDARLING_TRACE_BULK_MAX_RECORDS`** : Maximum number of records in one bulk request. Must be greater than 0. Default is `100`, the Lock Server default.
+- **`CEDARLING_TRACE_BULK_MAX_BYTES`** : Maximum size in bytes of one bulk request. Must be greater than 0. Default is `4194304` (4 MiB), the Lock Server default.
+
+Two properties from the TRACE design are intentionally absent, because in this release each has a single possible value: `CEDARLING_TRACE_CHAIN_GENESIS` (a new producer chain always starts as `first_observed` at each start) and `CEDARLING_TRACE_EMISSION` (every decision with a TRACE context is emitted).
+
+**Limitation: TRACE fully describes JWT tokens only.** A record lists the tokens of an `authorize_multi_issuer` call by issuer, token type and `jti` (or a fingerprint when there is no `jti`). The token type is the request `mapping` as is, for example `Jans::Access_Token`. Lock accepts only an `https` issuer, or `http` with host `localhost`. A custom (non-JWT) token handled by a [custom token processor](./cedarling-multi-issuer.md#custom-non-jwt-token-processing) is listed only when the processor returns such an issuer as the `iss` claim. Otherwise the token is left out of the record and Cedarling logs a warning; the record is still sent. A JWT whose `iss` Lock would reject means no record for that decision.
 
 
 ## authorize_multi_issuer method properties

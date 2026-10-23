@@ -23,6 +23,7 @@ tags:
 | clientId | OAuth client id bound to the evidence domain | [Details](#clientid) |
 | clientPassword | Lock client password | [Details](#clientpassword) |
 | correlationRetryLimit | Maximum retries when a correlation neighbor update hits a version conflict | [Details](#correlationretrylimit) |
+| cryptoProvider | TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA | [Details](#cryptoprovider) |
 | defaultAllowedProducerIds | Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none | [Details](#defaultallowedproducerids) |
 | defaultEvidenceDomainId | Evidence domain id used when a submitting client has no explicit binding | [Details](#defaultevidencedomainid) |
 | disableExternalLoggerConfiguration | Choose whether to disable external log4j configuration override | [Details](#disableexternalloggerconfiguration) |
@@ -50,6 +51,8 @@ tags:
 | metricReporterKeepDataDays | The days to keep metric reported data | [Details](#metricreporterkeepdatadays) |
 | openIdIssuer | OpenID issuer URL | [Details](#openidissuer) |
 | pendingReceiptTimeoutSeconds | Seconds a PENDING receipt may stay unresolved before the repair timer settles it | [Details](#pendingreceipttimeoutseconds) |
+| policyMismatchGraceSeconds | Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag | [Details](#policymismatchgraceseconds) |
+| policyReleaseRetentionDays | Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window | [Details](#policyreleaseretentiondays) |
 | protectionMode | Protection mode for the Lock server (OAuth or Cedarling) | [Details](#protectionmode) |
 | receiptAllocationRetryLimit | Maximum retries when allocating a receipt-chain sequence number | [Details](#receiptallocationretrylimit) |
 | receiptRepairIntervalSeconds | Interval in seconds between receipt repair timer runs | [Details](#receiptrepairintervalseconds) |
@@ -178,6 +181,15 @@ tags:
 - Required: No
 
 - Default value: 3
+
+
+## cryptoProvider
+
+- Description: TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA
+
+- Required: No
+
+- Default value: JAVA
 
 
 ## defaultAllowedProducerIds
@@ -421,6 +433,24 @@ tags:
 - Required: No
 
 - Default value: 120
+
+
+## policyMismatchGraceSeconds
+
+- Description: Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag
+
+- Required: No
+
+- Default value: 300
+
+
+## policyReleaseRetentionDays
+
+- Description: Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window
+
+- Required: No
+
+- Default value: 30
 
 
 ## protectionMode

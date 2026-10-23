@@ -3,8 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Hashes of decision inputs that are not the record itself: the policy store and tokens
-//! (notes 14, decisions R21, R22).
+//! Hashes of decision inputs that are not the record itself: the policy store and tokens.
 
 use crate::Digest;
 
@@ -16,11 +15,13 @@ pub fn compute_bundle_hash(archive: &[u8]) -> Digest {
     Digest::sha256(archive)
 }
 
-/// Identity of a token without `jti`: SHA-256 of the token exactly as received, compact JWT
-/// or not. Every producer uses this one function, so `(issuer, fingerprint)` correlates.
+/// Identity of a token without `jti`: SHA-256 of the UTF-8 text of the token exactly as
+/// received, compact JWT or not. Tokens travel as text (RFC 6749 tokens, compact JWTs), so the
+/// input is text too and no binding can pick a wrong charset. Every producer uses this one
+/// function, so `(issuer, fingerprint)` correlates.
 #[must_use]
-pub fn token_fingerprint(token: &[u8]) -> Digest {
-    Digest::sha256(token)
+pub fn token_fingerprint(token: &str) -> Digest {
+    Digest::sha256(token.as_bytes())
 }
 
 #[cfg(test)]
@@ -49,9 +50,9 @@ mod tests {
     #[test]
     fn token_fingerprint_is_sha256_of_the_token_as_received() {
         assert_eq!(
-            token_fingerprint(b"eyJhbGciOiJub25lIn0.e30.").to_string(),
+            token_fingerprint("eyJhbGciOiJub25lIn0.e30.").to_string(),
             "sha256:4badc4f0c891b654107a33eb52b94a3d31ef3bd9dbba322958019ad1a9cc07bb",
-            "whole compact token, not only its payload (notes 14 §2)"
+            "whole compact token, not only its payload"
         );
     }
 }

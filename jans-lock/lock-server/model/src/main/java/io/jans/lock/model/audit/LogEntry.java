@@ -11,9 +11,11 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -30,17 +32,26 @@ public class LogEntry extends BaseEntry implements Serializable {
 
 	private static final long serialVersionUID = -7086771090254438974L;
 
+	public static final String CONTEXT_REQUEST_ID = "request_id";
+	public static final String CONTEXT_POLICY_STORE_ID = "policystore_id";
+	public static final String CONTEXT_POLICY_STORE_VERSION = "policystore_version";
+
+	public static final int MAX_REQUEST_ID_LENGTH = 64;
+	public static final int MAX_POLICY_STORE_FIELD_LENGTH = 255;
+
     @JsonProperty("inum")
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String inum;
 
     @JsonProperty("creationDate")
+    @JsonAlias("creation_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     @Schema(description = "Creation date of the entry", example = "2026-07-24T15:33:02.937Z")
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
     @JsonProperty("eventTime")
+    @JsonAlias("event_time")
     @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     @Schema(description = "Time when the event occurred", example = "2026-07-24T15:33:02.937Z")
     @AttributeName(name = "eventTime")
@@ -52,16 +63,19 @@ public class LogEntry extends BaseEntry implements Serializable {
     private String service;
 
     @JsonProperty("nodeName")
+    @JsonAlias("node_name")
     @Schema(description = "Node name or identifier", example = "04bbe9ef-a853-417c-a2b8-5328b62936e2")
     @AttributeName(name = "jansNodeName")
     private String nodeName;
 
     @JsonProperty("eventType")
+    @JsonAlias("event_type")
     @Schema(description = "Type of event", example = "Decision")
     @AttributeName(name = "eventType")
     private String eventType;
 
     @JsonProperty("severityLevel")
+    @JsonAlias("severity_level")
     @Schema(description = "Severity level", example = "warning", allowableValues = {"info", "warning", "error", "critical"})
     @AttributeName(name = "severityLevel")
     private String severityLevel;
@@ -72,21 +86,25 @@ public class LogEntry extends BaseEntry implements Serializable {
     private String action;
 
     @JsonProperty("decisionResult")
+    @JsonAlias("decision_result")
     @Schema(description = "Decision result", example = "ALLOW", allowableValues = {"ALLOW", "DENY"})
     @AttributeName(name = "decisionResult")
     private String decisionResult;
 
     @JsonProperty("requestedResource")
+    @JsonAlias("requested_resource")
     @Schema(description = "Requested resource identifier", example = "Jans::HTTP_Request::\"lock_audit_log_write\"")
     @AttributeName(name = "requestedResource")
     private String requestedResource;
 
     @JsonProperty("principalId")
+    @JsonAlias("principal_id")
     @Schema(description = "Principal (user) identifier", example = "ACC0001")
     @AttributeName(name = "principalId")
     private String principalId;
 
     @JsonProperty("clientId")
+    @JsonAlias("client_id")
     @Schema(description = "Client identifier", example = "CLI001")
     @AttributeName(name = "clientId")
     private String clientId;
@@ -97,10 +115,33 @@ public class LogEntry extends BaseEntry implements Serializable {
     private String jti;
 
     @JsonProperty("contextInformation")
+    @JsonAlias("context_information")
+    @JsonDeserialize(using = ContextInformationDeserializer.class)
     @Schema(description = "Additional context information as key-value pairs")
     @JsonObject
     @AttributeName(name = "contextInformation")
     private Map<String, String> contextInformation;
+
+    @JsonProperty("requestId")
+    @Schema(description = "Cedarling request_id of the decision; contextInformation request_id wins when present", example = "0198a5e2-7c1f-7b3e-9d2a-3f4e5a6b7c8d")
+    @AttributeName(name = "jansRequestId")
+    private String requestId;
+
+    @JsonProperty("policyStoreId")
+    @Schema(description = "Policy store id used for the decision; contextInformation policystore_id wins when present", example = "a1bf63d5a5e4a0b7d0d5c9e3")
+    @AttributeName(name = "jansPolicyStoreId")
+    private String policyStoreId;
+
+    @JsonProperty("policyStoreVersion")
+    @Schema(description = "Policy store version used for the decision; contextInformation policystore_version wins when present", example = "1.2.3")
+    @AttributeName(name = "jansPolicyStoreVersion")
+    private String policyStoreVersion;
+
+    private transient String explicitRequestId;
+
+    private transient String explicitPolicyStoreId;
+
+    private transient String explicitPolicyStoreVersion;
 
 	public String getInum() {
 		return inum;
@@ -210,8 +251,72 @@ public class LogEntry extends BaseEntry implements Serializable {
 		return contextInformation;
 	}
 
+	/**
+	 * Also recomputes {@code requestId}, {@code policyStoreId} and {@code policyStoreVersion}: a
+	 * value under {@code request_id}, {@code policystore_id} or {@code policystore_version} here
+	 * takes precedence over the explicit one.
+	 */
 	public void setContextInformation(Map<String, String> contextInformation) {
 		this.contextInformation = contextInformation;
+		refreshIndexedMembers();
+	}
+
+	public String getRequestId() {
+		return requestId;
+	}
+
+	/**
+	 * Sets the explicit value. The stored {@code requestId} is {@code request_id} from
+	 * {@code contextInformation} when present and at most {@value #MAX_REQUEST_ID_LENGTH}
+	 * characters, else this value under the same limit, else {@code null}.
+	 */
+	public void setRequestId(String requestId) {
+		this.explicitRequestId = requestId;
+		refreshIndexedMembers();
+	}
+
+	public String getPolicyStoreId() {
+		return policyStoreId;
+	}
+
+	/**
+	 * Sets the explicit value. The stored {@code policyStoreId} is {@code policystore_id} from
+	 * {@code contextInformation} when present, else this value; each only when at most
+	 * {@value #MAX_POLICY_STORE_FIELD_LENGTH} characters.
+	 */
+	public void setPolicyStoreId(String policyStoreId) {
+		this.explicitPolicyStoreId = policyStoreId;
+		refreshIndexedMembers();
+	}
+
+	public String getPolicyStoreVersion() {
+		return policyStoreVersion;
+	}
+
+	/**
+	 * Sets the explicit value. The stored {@code policyStoreVersion} is {@code policystore_version}
+	 * from {@code contextInformation} when present, else this value; each only when at most
+	 * {@value #MAX_POLICY_STORE_FIELD_LENGTH} characters.
+	 */
+	public void setPolicyStoreVersion(String policyStoreVersion) {
+		this.explicitPolicyStoreVersion = policyStoreVersion;
+		refreshIndexedMembers();
+	}
+
+	private void refreshIndexedMembers() {
+		requestId = indexed(CONTEXT_REQUEST_ID, explicitRequestId, MAX_REQUEST_ID_LENGTH);
+		policyStoreId = indexed(CONTEXT_POLICY_STORE_ID, explicitPolicyStoreId, MAX_POLICY_STORE_FIELD_LENGTH);
+		policyStoreVersion = indexed(CONTEXT_POLICY_STORE_VERSION, explicitPolicyStoreVersion,
+				MAX_POLICY_STORE_FIELD_LENGTH);
+	}
+
+	private String indexed(String contextKey, String explicit, int maxLength) {
+		String value = contextInformation == null ? null : indexable(contextInformation.get(contextKey), maxLength);
+		return value != null ? value : indexable(explicit, maxLength);
+	}
+
+	private static String indexable(String value, int maxLength) {
+		return value != null && !value.isEmpty() && value.length() <= maxLength ? value : null;
 	}
 
     @Override
@@ -231,14 +336,17 @@ public class LogEntry extends BaseEntry implements Serializable {
                 Objects.equals(principalId, logEntry.principalId) &&
                 Objects.equals(clientId, logEntry.clientId) &&
                 Objects.equals(jti, logEntry.jti) &&
-                Objects.equals(contextInformation, logEntry.contextInformation);
+                Objects.equals(contextInformation, logEntry.contextInformation) &&
+                Objects.equals(requestId, logEntry.requestId) &&
+                Objects.equals(policyStoreId, logEntry.policyStoreId) &&
+                Objects.equals(policyStoreVersion, logEntry.policyStoreVersion);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(creationDate, eventTime, service, nodeName, eventType, 
                 severityLevel, action, decisionResult, requestedResource, 
-                principalId, clientId, jti, contextInformation);
+                principalId, clientId, jti, contextInformation, requestId, policyStoreId, policyStoreVersion);
     }
 
     @Override
@@ -257,6 +365,9 @@ public class LogEntry extends BaseEntry implements Serializable {
                 ", clientId='" + clientId + '\'' +
                 ", jti='" + jti + '\'' +
                 ", contextInformation=" + contextInformation +
+                ", requestId='" + requestId + '\'' +
+                ", policyStoreId='" + policyStoreId + '\'' +
+                ", policyStoreVersion='" + policyStoreVersion + '\'' +
                 '}';
     }
 }

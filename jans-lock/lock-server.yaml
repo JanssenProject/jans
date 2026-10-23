@@ -917,6 +917,85 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/trace.readonly
+  /api/v1/audit/trace/records:
+    get:
+      tags:
+      - Lock - Audit Trace
+      summary: Search TRACE records by policy store release
+      description: "Records whose trace.policy names the given policy store id, version\
+        \ or bundle hash, optionally within a receipt time range, ordered by receipt\
+        \ sequence"
+      operationId: searchRecords
+      parameters:
+      - name: policy_store_id
+        in: query
+        description: trace.policy.policy_store_id to match
+        schema:
+          type: string
+      - name: policy_store_version
+        in: query
+        description: trace.policy.policy_store_version to match
+        schema:
+          type: string
+      - name: bundle_hash
+        in: query
+        description: trace.policy.bundle_hash to match
+        schema:
+          type: string
+      - name: received_from
+        in: query
+        description: "Earliest received_at, RFC 3339, inclusive"
+        schema:
+          type: string
+      - name: received_to
+        in: query
+        description: "Latest received_at, RFC 3339, inclusive"
+        schema:
+          type: string
+      - name: start
+        in: query
+        description: Paging offset
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: count
+        in: query
+        description: "Paging size, 1-1000"
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceRecordSearchResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.readonly
   /api/v1/audit/trace/bulk:
     post:
       tags:
@@ -1026,10 +1105,6 @@ components:
     HealthEntry:
       type: object
       properties:
-        dn:
-          type: string
-        baseDn:
-          type: string
         inum:
           type: string
         creationDate:
@@ -1062,10 +1137,6 @@ components:
     LogEntry:
       type: object
       properties:
-        dn:
-          type: string
-        baseDn:
-          type: string
         inum:
           type: string
         creationDate:
@@ -1132,14 +1203,25 @@ components:
             type: string
             description: Additional context information as key-value pairs
           description: Additional context information as key-value pairs
+        requestId:
+          type: string
+          description: Cedarling request_id of the decision; contextInformation request_id
+            wins when present
+          example: 0198a5e2-7c1f-7b3e-9d2a-3f4e5a6b7c8d
+        policyStoreId:
+          type: string
+          description: Policy store id used for the decision; contextInformation policystore_id
+            wins when present
+          example: a1bf63d5a5e4a0b7d0d5c9e3
+        policyStoreVersion:
+          type: string
+          description: Policy store version used for the decision; contextInformation
+            policystore_version wins when present
+          example: 1.2.3
       description: Log audit entry
     TelemetryEntry:
       type: object
       properties:
-        dn:
-          type: string
-        baseDn:
-          type: string
         inum:
           type: string
         creationDate:
@@ -1468,6 +1550,25 @@ components:
           type: boolean
           description: True when the record arrived after the configured lateness
             threshold
+        policy_mismatch_flag:
+          type: boolean
+          description: True when trace.policy names a policy store Lock serves with
+            a release this node did not serve at signed_at or within policyMismatchGraceSeconds
+            before it
+        reserved_member_flag:
+          type: boolean
+          description: True when Lock-derived members the producer placed in its signed
+            body (for example evidence_domain_id or trust_tier) were ignored
+        reserved_members:
+          type: array
+          description: "The first 32 paths of the ignored Lock-derived members, for\
+            \ example trace.trust_tier; their values inside assertion are producer-supplied\
+            \ and unused"
+          items:
+            type: string
+            description: "The first 32 paths of the ignored Lock-derived members,\
+              \ for example trace.trust_tier; their values inside assertion are producer-supplied\
+              \ and unused"
       description: Receipt-chain position and ingestion flags for a TRACE record
     TraceRecordResponse:
       type: object
@@ -1541,6 +1642,20 @@ components:
             \ is enabled"
           example: missing:trace.signed_at
       description: Structured TRACE error response
+    TraceRecordSearchResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          description: "Matching records, ordered by receipt_sequence"
+          items:
+            $ref: "#/components/schemas/TraceRecordResponse"
+        ordering:
+          type: string
+          description: "Fixed: records are ordered by receipt_sequence"
+          example: receipt_sequence
+      description: "TRACE records matching a policy store release search, ordered\
+        \ by receipt sequence"
     TraceBulkIngestionResponse:
       type: object
       properties:
@@ -1607,6 +1722,24 @@ components:
           type: boolean
           description: "Present when accepted: true when the record arrived after\
             \ the configured lateness threshold"
+        policy_mismatch_flag:
+          type: boolean
+          description: "Present when accepted: true when trace.policy names a policy\
+            \ store Lock serves with a release this node did not serve at signed_at\
+            \ or within policyMismatchGraceSeconds before it"
+        reserved_member_flag:
+          type: boolean
+          description: "Present when accepted: true when Lock-derived members the\
+            \ producer placed in its signed body (for example evidence_domain_id or\
+            \ trust_tier) were ignored"
+        reserved_members:
+          type: array
+          description: "Present when accepted: the first 32 paths of the ignored Lock-derived\
+            \ members"
+          items:
+            type: string
+            description: "Present when accepted: the first 32 paths of the ignored\
+              \ Lock-derived members"
         error:
           $ref: "#/components/schemas/TraceErrorResponse"
       description: One item's outcome within a TRACE bulk ingestion response
@@ -1658,6 +1791,25 @@ components:
           type: boolean
           description: True when the record arrived after the configured lateness
             threshold
+        policy_mismatch_flag:
+          type: boolean
+          description: True when trace.policy names a policy store Lock serves with
+            a release this node did not serve at signed_at or within policyMismatchGraceSeconds
+            before it
+        reserved_member_flag:
+          type: boolean
+          description: True when Lock-derived members the producer placed in its signed
+            body (for example evidence_domain_id or trust_tier) were ignored
+        reserved_members:
+          type: array
+          description: "The first 32 paths of the ignored Lock-derived members, for\
+            \ example trace.trust_tier; their values inside assertion are producer-supplied\
+            \ and unused"
+          items:
+            type: string
+            description: "The first 32 paths of the ignored Lock-derived members,\
+              \ for example trace.trust_tier; their values inside assertion are producer-supplied\
+              \ and unused"
       description: TRACE record acceptance response
   securitySchemes:
     oauth2:

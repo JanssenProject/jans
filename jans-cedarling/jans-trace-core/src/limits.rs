@@ -3,8 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Caller-chosen bounds for untrusted input (core design §11, decision R16).
+//! Caller-chosen bounds for untrusted input (core design §11).
 
+use crate::ErrorCode;
+use crate::error_code::HasErrorCode;
 use thiserror::Error;
 
 /// Bounds applied before and during parsing, so hostile input is rejected without unbounded
@@ -137,7 +139,7 @@ impl Limits {
 }
 
 impl Default for Limits {
-    /// Decision R16: generous MVP values; Lock's record limit for the input size. Batch bounds
+    /// Generous MVP values; Lock's record limit for the input size. Batch bounds
     /// are the values proposed to Lock (500 records, 8 MiB) until Lock confirms its own.
     fn default() -> Self {
         Self {
@@ -194,14 +196,15 @@ impl SizeLimitError {
     }
 
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        "SIZE_LIMIT_EXCEEDED"
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{LimitKind, Limits, SizeLimitError};
+    use crate::ErrorCode;
 
     #[test]
     fn display_names_the_limit() {
@@ -274,7 +277,7 @@ mod tests {
     fn code_is_stable() {
         assert_eq!(
             SizeLimitError::new(LimitKind::Depth, 1).code(),
-            "SIZE_LIMIT_EXCEEDED",
+            ErrorCode::SizeLimitExceeded,
             "stable code from core design §10"
         );
     }
@@ -293,7 +296,7 @@ mod tests {
         assert_eq!(
             actual,
             [256 * 1024, 32, 1024, 1024, 64 * 1024, 512 * 1024],
-            "defaults from decision R16 (notes 13 §5)"
+            "MVP defaults"
         );
     }
 

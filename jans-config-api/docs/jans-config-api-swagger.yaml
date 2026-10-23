@@ -5209,6 +5209,7 @@ paths:
                   - modify_ssa_response
                   - fido2_extension
                   - lock_extension
+                  - shib_post_authn_approval
               examples:
                 Response json example:
                   description: Response json example
@@ -15694,19 +15695,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
-          type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanView:
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
+        adminCanView:
+          type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16453,6 +16454,8 @@ components:
           type: boolean
         removeRefreshTokensForClientOnLogout:
           type: boolean
+        allowStartupOnJwksUriFetchFailure:
+          type: boolean
         skipRefreshTokenDuringRefreshing:
           type: boolean
         refreshTokenExtendLifetimeOnRotation:
@@ -16682,8 +16685,6 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16693,6 +16694,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -16848,6 +16851,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        trackingSettings:
+          $ref: "#/components/schemas/TrackingSettings"
     KeyExtractor:
       type: object
       properties:
@@ -16968,6 +16973,11 @@ components:
           type: string
         sharedSecret:
           type: string
+    TrackingSettings:
+      type: object
+      properties:
+        enabled:
+          type: boolean
     TrustedIssuerConfig:
       type: object
       properties:
@@ -18052,6 +18062,7 @@ components:
           - modify_ssa_response
           - fido2_extension
           - lock_extension
+          - shib_post_authn_approval
         programmingLanguage:
           type: string
           enum:

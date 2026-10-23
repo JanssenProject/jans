@@ -6,11 +6,12 @@
 - An initial underscore in variables and function names prevent flow writers to use variables with the same names in their DSL code
 -->
 //Generated at ${.now?iso_utc}
-<#assign fqname = flow.@fqname>
 function ${flow.@fun}<#recurse flow>
     <#-- see header macro -->
 } catch (_e) {
-    return _makeJavaException(_fqname, _e)   <#-- See jans#6530 -->
+    _it = _makeJavaException(_fqname, _e)
+    _track(_fqname, _lnos, _it)
+    return _it    <#-- See jans#6530 -->
 }
 
 }
@@ -22,8 +23,9 @@ function ${flow.@fun}<#recurse flow>
     , ${.node.inputs.short_var?join(", ")}
 </#if>
 ) {
-const _fqname = "${fqname}", _basePath = ${.node.base.STRING}
-let _it = null, _it2 = null
+const _fqname = "${.node?parent.@fqname}", _basePath = ${.node.base.STRING}
+
+let _it = null, _it2 = null, _lnos = []
 <#-- idx is accessible to flow writers (it's not underscore-prefixed). It allows to access the status of loops -->
 let idx = [], _items = []
 
@@ -31,6 +33,8 @@ try {
 </#macro>
 
 <#macro statement>
+
+    _lnos.push(${.node.@line})
     <#recurse>
 </#macro>
 
@@ -39,20 +43,27 @@ try {
 
 <#macro rrf_call>
     <#local hasbool = .node.BOOL?size gt 0>
-
     <#if .node.variable?size == 0>
         _it = {}
     <#else>
         _it = ${.node.variable}
     </#if>
 
-    _it = _renderReplyFetch(_basePath, ${.node.STRING}, ${hasbool?then(.node.BOOL, "false")}, _it)
+    _it2 = _lnos.pop()
+    _track(_fqname, _lnos, null)
+    _lnos = [ _it2 ]
+
+    _it = _renderReplyFetch(_basePath, ${.node.STRING}, ${hasbool?then(.node.BOOL, "false")}, _it, _fqname, _it2)
     <#-- See FlowService#continueFlow > scriptCtx#resumeContinuation
     string parsing via JS was preferred over returning a Java Map directly because it feels more
     natural for RRF to return a native JS object; it creates the illusion there was no Java involved -->
     _it2 = JSON.parse(_it.second)
     _it = _it.first
-    if (!_isNil(_it)) return _abort(_it, _it2)
+
+    if (!_isNil(_it)) {
+        _track(_fqname, _lnos, null)
+        return _abort(_it, _it2)
+    }
 
     <@util_preassign node=.node /> _it2
     <#-- Clear temp variables to make serialization lighter (in the next RRF call) -->
@@ -69,14 +80,17 @@ try {
     <#else>
         ${.node.oo_call.variable}, null, "${.node.oo_call.ALPHANUM}"
         , <@util_argslist node=.node.oo_call />
-    </#if>    
+    </#if>
     )
     
     _it2 = _it.second
     <#if catch>
         var ${.node.preassign_catch.short_var} = _it2
     <#else>
-        if (!_isNil(_it2)) return _it2   <#-- "propagate exception" to parent, see jans#6530 -->
+        if (!_isNil(_it2)) {
+            _track(_fqname, _lnos, _it2)
+            return _it2   <#-- "propagate exception" to parent, see jans#6530 -->
+        }
     </#if>
 
     if (_isNil(_it2)) <@util_preassign node=.node /> _it.first
@@ -86,7 +100,6 @@ try {
 
 <#macro flow_call>
     <#local catch=.node.preassign_catch?size gt 0>
-
     <#if .node.variable?size gt 0>
         _it = ${.node.variable}
     <#else>
@@ -95,7 +108,10 @@ try {
 
     _it = _flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_argslist node=.node />)
 
-    if (_it.bubbleUp) return _it.value
+    if (_it.bubbleUp) {
+        _track(_fqname, _lnos, null)
+        return _it.value
+    }
 
     _it = _it.value
     _it2 = _isJavaException(_it)
@@ -103,11 +119,14 @@ try {
     <#if catch>
         var ${.node.preassign_catch.short_var} = _it2 ? _it : null
     <#else>
-        if (_it2) return _it  <#-- "propagate exception" to parent -->
+        if (_it2) {
+            _track(_fqname, _lnos, _it)
+            return _it  <#-- "propagate exception" to parent -->
+        }
     </#if>
-    
+
     if (!_it2) <@util_preassign node=.node /> _it
-    
+
     _it = null
 </#macro>
 
@@ -117,7 +136,12 @@ try {
 <#else>
     _it = ${.node.variable}
 </#if>
-    <@util_preassign node=.node /> _redirectFetchAtCallback(_it)
+
+    _it2 = _lnos.pop()
+    _track(_fqname, _lnos, null)
+    _lnos = [ _it2 ]
+
+    <@util_preassign node=.node /> _redirectFetchAtCallback(_it, _fqname, _it2)
 </#macro>
 
 <#macro finish>
@@ -128,7 +152,10 @@ try {
 <#else>
     _it = ${.node.STRING}
 </#if>
-return _finish(_it)
+
+_it = _finish(_it)
+_track(_fqname, _lnos, null)
+return _it
 </#macro>
 
 <#macro loopy>
@@ -174,26 +201,30 @@ _it = idx.pop()
 <#macro ifelse>
 if (<#recurse .node.caseof>) {
     <#list .node.statement as st>
-        <#recurse st>
+        <#visit st>
     </#list>
 }
 <@util_else node=.node.elseblock />
 </#macro>
 
 <#macro quit_stmt>
+_lnos.push(${.node.@line})
 if (<#recurse .node.caseof>) break
 
 <#list .node.statement as st>
-    <#recurse st>
+    <#visit st>
 </#list>
 </#macro>
 
 <#macro choice>
+_lnos.pop()  <#-- The opening of the Match directive is not tracked -->
     <#list .node.option as case>
         <#if case?index gt 0>else </#if>
-if (_equals(${.node.simple_expr }, ${case.simple_expr})) {
+<#-- The first boolean expression in the Javascript conditional below will always evaluate true.
+It is a trick to append to _lnos array without extra complexity for generating the if/else's -->
+if (_lnos.push(${case.@line}) > 0 && _equals(${.node.simple_expr }, ${case.simple_expr})) {
         <#list case.statement as st>
-            <#recurse st>
+            <#visit st>
         </#list>
 }
     </#list>
@@ -220,7 +251,7 @@ _log2(_fqname, <@util_argslist node=.node />)
 
 <#macro util_loop_body node>
     <#list .node.statement as st>
-        <#recurse st>
+        <#visit st>
     </#list>
 
     <#if .node.quit_stmt?size gt 0><#visit .node.quit_stmt></#if>
