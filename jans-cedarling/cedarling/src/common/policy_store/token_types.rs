@@ -35,6 +35,8 @@ use super::{CustomTokenMetadata, KeySource, TokenEntityMetadata, TrustedIssuer};
 #[display("{name}")]
 pub(crate) struct IssuerName {
     name: SmolStr,
+    /// The name lowercased, kept since every custom token carries it.
+    key_prefix: SmolStr,
     trusted_issuer_type: cedar_policy::EntityTypeName,
 }
 
@@ -46,9 +48,13 @@ impl IssuerName {
             .expect("test issuer name should be a single Cedar identifier")
     }
 
+    pub(crate) fn as_str(&self) -> &str {
+        &self.name
+    }
+
     /// The `context.tokens` key prefix of this issuer's tokens.
-    pub(crate) fn key_prefix(&self) -> String {
-        self.name.to_lowercase()
+    pub(crate) fn key_prefix(&self) -> &SmolStr {
+        &self.key_prefix
     }
 
     /// `{name}::TrustedIssuer`, the type of this issuer's entity.
@@ -83,6 +89,7 @@ impl FromStr for IssuerName {
         })?;
         Ok(Self {
             name: name.to_smolstr(),
+            key_prefix: name.to_lowercase().to_smolstr(),
             trusted_issuer_type,
         })
     }

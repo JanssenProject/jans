@@ -126,7 +126,6 @@ fn unresolved_issuers(token_types: &TokenTypes) -> Vec<IssuerConfig> {
         .jwt_issuers()
         .iter()
         .map(|(name, issuer)| IssuerConfig {
-            issuer_id: name.to_string(),
             policy: issuer.clone(),
             tokens: token_types
                 .jwt_tokens_of(name)
@@ -164,7 +163,7 @@ async fn load_trusted_issuers(
         let loader = loader.clone();
         handles.push(spawn_task(async move {
             let http_client = loader.http_client.clone();
-            let issuer_id = issuer.issuer_id.clone();
+            let issuer_id = issuer.policy.name.to_string();
             let resolved = resolve_trusted_issuer(&loader, issuer, &http_client).await;
             drop(permit);
             (issuer_id, resolved)
@@ -201,7 +200,7 @@ async fn load_trusted_issuers(
         let permit = acquire(&semaphore).await?;
         let loader = loader.clone();
         handles.push(spawn_task(async move {
-            let issuer_id = issuer.config.issuer_id.clone();
+            let issuer_id = issuer.config.policy.name.to_string();
             let installed = install_trusted_issuer(&loader, issuer).await;
             drop(permit);
             (issuer_id, installed)
@@ -273,7 +272,7 @@ fn reject_conflicting_key_sources(
             sources_by_iss
                 .entry(&issuer.iss)
                 .or_default()
-                .push((&issuer.config.issuer_id, jwks_uri));
+                .push((issuer.config.policy.name.as_str(), jwks_uri));
         }
     }
 
@@ -302,7 +301,7 @@ fn reject_conflicting_key_sources(
                 issuers,
                 jwks,
             };
-            (issuer.config.issuer_id, error)
+            (issuer.config.policy.name.to_string(), error)
         })
         .collect();
     (kept, rejected)
@@ -336,7 +335,7 @@ async fn resolve_trusted_issuer(
             discover(
                 configuration,
                 &iss_claim,
-                &config.issuer_id,
+                config.policy.name.as_str(),
                 loader.logger.as_ref(),
                 http_client,
             )

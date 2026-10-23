@@ -6,6 +6,7 @@
 use crate::common::{issuer_utils::IssClaim, policy_store::TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
+use smol_str::SmolStr;
 use std::{borrow::Cow, collections::HashMap, sync::Arc};
 
 /// Identifies where a validated [`Token`] came from.
@@ -25,9 +26,8 @@ pub(crate) enum TokenIssuer {
 /// a [`TrustedIssuer`].
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) struct CustomTokenIssuerMeta {
-    /// Sanitized issuer id. Used directly for the `context.tokens.{issuer}_{type}`
-    /// key, so it is expected to already be collision-checked at init.
-    pub issuer_id: String,
+    /// The issuer name lowercased, given as the token's `iss`.
+    pub issuer_id: SmolStr,
     /// The id used as the token entity id (supplied by the processor).
     pub token_id: String,
     /// Effective expiration (unix seconds) the processor reported, via

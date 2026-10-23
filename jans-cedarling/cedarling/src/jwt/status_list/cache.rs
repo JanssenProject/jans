@@ -107,7 +107,7 @@ impl StatusListCache {
                     format!(
                         "trusted issuer '{}': {source}; with status validation on, its tokens \
                          that carry a `status` claim will be rejected",
-                        iss_config.issuer_id,
+                        iss_config.policy.name,
                     ),
                     Some(LogLevel::WARN),
                 ));
@@ -338,7 +338,6 @@ mod test {
         .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
-            issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
             tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
@@ -457,7 +456,6 @@ mod test {
         .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
-            issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
             tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
@@ -545,7 +543,6 @@ mod test {
         .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
-            issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
             tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
@@ -644,7 +641,6 @@ mod test {
         .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
-            issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
             tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),

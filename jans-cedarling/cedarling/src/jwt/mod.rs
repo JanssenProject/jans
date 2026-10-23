@@ -155,7 +155,6 @@ pub(crate) struct JwtService {
 }
 
 struct IssuerConfig {
-    issuer_id: String,
     /// The [`TrustedIssuer`] config loaded from the policy store
     policy: Arc<TrustedIssuer>,
     /// The JWT token types this issuer declares, by entity type.
@@ -669,7 +668,7 @@ impl JwtService {
             }
 
             let meta = CustomTokenIssuerMeta {
-                issuer_id: target.issuer.key_prefix(),
+                issuer_id: target.issuer.key_prefix().clone(),
                 token_id: processed.token_id.clone(),
                 expiration,
             };

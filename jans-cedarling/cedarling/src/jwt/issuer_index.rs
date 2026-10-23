@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::common::issuer_utils::IssClaim;
+use crate::common::policy_store::IssuerName;
 
 use super::IssuerConfig;
 use ahash::{HashMap, HashMapExt};
@@ -20,7 +21,7 @@ const MUTEX_POISONED_ERR: &str =
 ///
 /// Thread-safe for concurrent reads and writes.
 pub(super) struct IssuerIndex {
-    issuer_idx: RwLock<HashMap<String, Arc<IssuerConfig>>>,
+    issuer_idx: RwLock<HashMap<IssuerName, Arc<IssuerConfig>>>,
     iss_index: RwLock<HashSet<IssClaim>>,
 }
 
@@ -38,7 +39,7 @@ impl IssuerIndex {
         self.issuer_idx
             .write()
             .expect(MUTEX_POISONED_ERR)
-            .insert(config.issuer_id.clone(), Arc::new(config));
+            .insert(config.policy.name.clone(), Arc::new(config));
 
         self.iss_index
             .write()
@@ -72,6 +73,6 @@ impl IssuerIndex {
     /// Get all issuer IDs in the index of loaded trusted issuers
     pub(super) fn loaded_issuer_ids(&self) -> HashSet<String> {
         let index = self.issuer_idx.read().expect(MUTEX_POISONED_ERR);
-        index.keys().cloned().collect()
+        index.keys().map(ToString::to_string).collect()
     }
 }

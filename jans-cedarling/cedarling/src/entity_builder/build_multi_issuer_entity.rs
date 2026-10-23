@@ -122,7 +122,7 @@ fn add_iss_claim(attrs: &mut HashMap<String, RestrictedExpression>, token: &Toke
         TokenIssuer::Jwt(token_iss) => RestrictedExpression::new_entity_uid(
             EntityBuilder::trusted_issuer_cedar_uid(&token_iss.name, token_iss.iss_claim()),
         ),
-        TokenIssuer::Custom(meta) => RestrictedExpression::new_string(meta.issuer_id.clone()),
+        TokenIssuer::Custom(meta) => RestrictedExpression::new_string(meta.issuer_id.to_string()),
     };
     attrs.insert(ISS_CLAIM.to_string(), iss);
 }
@@ -336,7 +336,7 @@ impl EntityBuilder {
             // overwrites with the final typed value afterwards.
             let (iss_val, exp_val) = match &token.iss {
                 TokenIssuer::Custom(meta) => (
-                    Some(Value::String(meta.issuer_id.clone())),
+                    Some(Value::String(meta.issuer_id.to_string())),
                     meta.expiration.map(Value::from),
                 ),
                 TokenIssuer::Jwt(_) => (None, None),
@@ -699,7 +699,7 @@ mod tests {
         let custom_token = Token::new(
             TokenClaims::from(HashMap::new()),
             TokenIssuer::Custom(CustomTokenIssuerMeta {
-                issuer_id: "acmekeys".to_string(),
+                issuer_id: "acmekeys".into(),
                 token_id: "id-1".to_string(),
                 expiration: None,
             }),
@@ -737,7 +737,7 @@ mod tests {
         let token = Token::new(
             TokenClaims::from(claims),
             TokenIssuer::Custom(CustomTokenIssuerMeta {
-                issuer_id: "acmekeys".to_string(),
+                issuer_id: "acmekeys".into(),
                 token_id: "processor-supplied-id".to_string(),
                 expiration: None,
             }),
@@ -787,7 +787,7 @@ mod tests {
         let token = Token::new(
             TokenClaims::from(claims),
             TokenIssuer::Custom(CustomTokenIssuerMeta {
-                issuer_id: "acmekeys".to_string(),
+                issuer_id: "acmekeys".into(),
                 token_id: "tok-1".to_string(),
                 expiration: Some(exp),
             }),
