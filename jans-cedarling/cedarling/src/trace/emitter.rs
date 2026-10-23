@@ -151,6 +151,10 @@ enum GenesisState {
     /// Lost for good, so Lock will never register the chain: it is replaced
     /// before more records are signed into it.
     Lost,
+    /// Accepted, but Lock later refused a record with `chain_not_registered`:
+    /// it no longer knows the chain (a restored database, the client moved to
+    /// another evidence domain), so the chain is replaced like a lost one.
+    Unregistered,
 }
 
 /// The next bulk request: its body and the records joined into it, in order.
@@ -279,7 +283,10 @@ impl Emitter {
                 Sent::Interrupted => self.put_back(request.records),
             }
         }
-        if self.genesis == GenesisState::Lost {
+        if matches!(
+            self.genesis,
+            GenesisState::Lost | GenesisState::Unregistered
+        ) {
             chain = self.replace_chain();
         }
         if resend {
@@ -454,18 +461,28 @@ impl Emitter {
                 continue;
             }
             let error = result.error.as_deref().unwrap_or("none");
-            let resendable = TRANSIENT_ERRORS.contains(&error)
-                || (error == CHAIN_NOT_REGISTERED && self.awaits_genesis(&record));
+            let unregistered = error == CHAIN_NOT_REGISTERED;
+            let resendable =
+                TRANSIENT_ERRORS.contains(&error) || (unregistered && self.awaits_genesis(&record));
             if !resendable {
+                // Lock opens a chain from its genesis record only in this mode.
+                let hint = if unregistered && self.is_current_genesis(&record) {
+                    "; Lock Server needs `chainRegistrationMode: FIRST_OBSERVED`"
+                } else {
+                    ""
+                };
                 self.log(
                     LogLevel::ERROR,
                     Some(record.record_id),
                     format!(
-                        "Lock Server rejected the TRACE record (error: {error}, reason: {})",
+                        "Lock Server rejected the TRACE record (error: {error}, reason: {}){hint}",
                         result.reason.as_deref().unwrap_or("none")
                     ),
                 );
                 self.count(EmitterEvent::Rejected, 1);
+                if unregistered {
+                    self.unregistered(&record);
+                }
                 self.forget(&record);
                 continue;
             }
@@ -515,9 +532,21 @@ impl Emitter {
         }
     }
 
-    /// Whether `record` belongs to the current chain, which Lock has not registered.
+    /// Whether `record` follows the genesis record of the current chain, which
+    /// Lock has not registered yet. Lock refusing the genesis record itself
+    /// with `chain_not_registered` never registers the chain.
     fn awaits_genesis(&self, record: &Pending) -> bool {
-        record.chain_id == self.chain_id && self.genesis != GenesisState::Accepted
+        record.chain_id == self.chain_id
+            && self.genesis != GenesisState::Accepted
+            && !self.is_current_genesis(record)
+    }
+
+    /// Notes a `chain_not_registered` refusal of a record of the current chain
+    /// after Lock had registered it.
+    fn unregistered(&mut self, record: &Pending) {
+        if record.chain_id == self.chain_id && self.genesis == GenesisState::Accepted {
+            self.genesis = GenesisState::Unregistered;
+        }
     }
 
     fn is_current_genesis(&self, record: &Pending) -> bool {
@@ -545,20 +574,24 @@ impl Emitter {
         }
     }
 
-    /// Opens a chain in place of the current one, whose genesis record is lost:
-    /// Lock would refuse every other record of it. Those records are dropped
+    /// Opens a chain in place of the current one, which Lock does not know:
+    /// it would refuse every other record of it. Those records are dropped
     /// rather than signed again.
     fn replace_chain(&mut self) -> ProducerChain {
         let lost = self.chain_id;
         let before = self.pending.len();
         self.pending.retain(|record| record.chain_id != lost);
         let dropped = before - self.pending.len();
+        let cause = match self.genesis {
+            GenesisState::Unregistered => "is no longer registered in Lock Server",
+            _ => "lost its genesis record",
+        };
         self.log(
             LogLevel::WARN,
             None,
             format!(
-                "TRACE producer chain {lost} lost its genesis record; {dropped} more of its \
-                 records are dropped and a new chain is opened"
+                "TRACE producer chain {lost} {cause}; {dropped} more of its records are \
+                 dropped and a new chain is opened"
             ),
         );
         self.count(EmitterEvent::Dropped, dropped);
@@ -1137,7 +1170,48 @@ mod tests {
     }
 
     #[tokio::test(start_paused = true)]
-    async fn chain_not_registered_after_genesis_accepted_is_rejected() {
+    async fn genesis_chain_not_registered_is_final() {
+        // Lock in `PRE_REGISTERED` mode refuses the genesis record itself.
+        let lock = FakeLock::new([Reply::PerRecord(vec![
+            Some("chain_not_registered"),
+            Some("chain_not_registered"),
+        ])]);
+        let metrics = metrics();
+        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft(), draft()]);
+
+        let old_chain = position(&records(&lock.bodies(1).await[0])[0]).chain_id;
+        emitter
+            .tx
+            .send(draft())
+            .await
+            .expect("the emitter is running");
+        let bodies = lock.bodies(2).await;
+        let second = records(&bodies[1]);
+        assert_eq!(second.len(), 1, "the refused chain is not sent again");
+        let position = position(&second[0]);
+        assert_ne!(
+            position.chain_id, old_chain,
+            "the next record starts a new chain"
+        );
+        assert_eq!(position.sequence, 1, "the new chain starts at its genesis");
+        let stats = metrics.snapshot_and_reset().operational_stats;
+        assert_eq!(stats.get("trace.rejected"), Some(&1), "the genesis record");
+        assert_eq!(
+            stats.get("trace.dropped"),
+            Some(&1),
+            "the tail of the chain"
+        );
+        assert_eq!(
+            stats.get("trace.chains_opened"),
+            Some(&1),
+            "one chain replaced"
+        );
+        emitter.handle.shut_down().await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn chain_not_registered_after_genesis_accepted_opens_new_chain() {
+        // Lock accepted the genesis record, then lost the chain's registration.
         let lock = FakeLock::new([
             Reply::AcceptAll,
             Reply::PerRecord(vec![Some("chain_not_registered")]),
@@ -1145,7 +1219,7 @@ mod tests {
         let metrics = metrics();
         let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft()]);
 
-        lock.bodies(1).await;
+        let old_chain = position(&records(&lock.bodies(1).await[0])[0]).chain_id;
         emitter
             .tx
             .send(draft())
@@ -1163,12 +1237,20 @@ mod tests {
         assert_ne!(
             third[0].as_str(),
             refused,
-            "once the chain is registered, `chain_not_registered` is final"
+            "the refused record is not resent"
         );
+        let position = position(&third[0]);
+        assert_ne!(
+            position.chain_id, old_chain,
+            "a chain Lock no longer knows is replaced"
+        );
+        assert_eq!(position.sequence, 1, "the new chain starts at its genesis");
+        let stats = metrics.snapshot_and_reset().operational_stats;
+        assert_eq!(stats.get("trace.rejected"), Some(&1), "the refused record");
         assert_eq!(
-            counter(&metrics, "trace.rejected"),
-            Some(1),
-            "the refused record is counted"
+            stats.get("trace.chains_opened"),
+            Some(&1),
+            "one chain replaced"
         );
         emitter.handle.shut_down().await;
     }

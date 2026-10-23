@@ -61,7 +61,8 @@ pub(crate) enum EmitterEvent {
     Dropped,
     /// The draft could not be signed.
     SignFailed,
-    /// A chain opened to replace one whose genesis record was lost.
+    /// A chain opened to replace one whose genesis record was lost or that
+    /// Lock no longer knows.
     ChainOpened,
 }
 

@@ -173,9 +173,9 @@ What is retried:
 - A request that does not reach Lock Server, or gets an HTTP `5xx`, is retried with the same bytes. After the last retry its records are dropped.
 - HTTP `401`: when Cedarling obtained its token through DCR, it requests a new token and sends the same request once more; a second `401` is final. A token set with `CEDARLING_LOCK_ACCESS_TOKEN_JWT` cannot be renewed, so its `401` is final at once.
 - Any other refusal of the whole request is final: its records are logged at `ERROR` and dropped. This includes HTTP `403`, which Lock Server returns for an expired token and for a token without the `trace.write` scope (see [Lock Server setup for TRACE](#lock-server-setup-for-trace)), and `400` with `bulk_body_too_large`.
-- Per record, Lock Server answers in a `207` response. A record refused with `storage_failure` or `crypto_unavailable` is resent, after a 10-second pause, together with the next request. A record refused with `chain_not_registered` is resent only while Lock Server has not yet accepted the first record (genesis) of the chain; after that it is final. Every other refusal is final and logged at `ERROR`.
+- Per record, Lock Server answers in a `207` response. A record refused with `storage_failure` or `crypto_unavailable` is resent, after a 10-second pause, together with the next request. A record refused with `chain_not_registered` is resent only while Lock Server has not yet accepted the first record (genesis) of the chain. When Lock Server refuses the genesis record itself with `chain_not_registered`, it registers chains only through its admin API: Cedarling needs `chainRegistrationMode: FIRST_OBSERVED` (see [Lock Server setup for TRACE](#lock-server-setup-for-trace)). Every other refusal is final and logged at `ERROR`.
 
-If the genesis record of the producer chain is lost (refused or dropped), Lock Server would refuse every later record of that chain. Cedarling then logs a `WARN`, drops the records of that chain it still holds and opens a new chain.
+If the genesis record of the producer chain is lost (refused or dropped), or Lock Server refuses a record with `chain_not_registered` after it accepted the genesis record (for example, its database was restored), Lock Server would refuse every later record of that chain. Cedarling then logs a `WARN`, drops the records of that chain it still holds and opens a new chain.
 
 `Cedarling::shut_down` stops the emitter before the log. On shut down the emitter sends every record it still holds, with all retries, so stopping Cedarling while Lock Server is down can take as long as the retries.
 
@@ -200,9 +200,9 @@ With metrics enabled, `operational_stats` counts each status under `trace.<statu
 
 - `trace.accepted`: records Lock Server accepted.
 - `trace.rejected`: records Lock Server refused for good, alone or with their whole request.
-- `trace.dropped`: records given up after their retries, or dropped with a chain whose genesis record was lost.
+- `trace.dropped`: records given up after their retries, or dropped with a chain that was replaced.
 - `trace.sign_failed`: records that could not be signed.
-- `trace.chains_opened`: chains opened to replace one whose genesis record was lost.
+- `trace.chains_opened`: chains opened to replace one whose genesis record was lost or that Lock Server no longer knows.
 
 A counter appears only after it is first incremented.
 
