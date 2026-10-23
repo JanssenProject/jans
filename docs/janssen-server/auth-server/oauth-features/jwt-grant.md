@@ -8,16 +8,17 @@ tags:
   - jwt-grant
 ---
 
-# OAuth 2.0 JWT Grant
+# JWT Bearer Grant
 
-The [JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants spec](https://datatracker.ietf.org/doc/html/rfc7523).
+The [JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants (RFC 7523)](https://datatracker.ietf.org/doc/html/rfc7523) defines how JWT assertions can be used to request access tokens from an authorization server.
 
-JWT Grant is identified by `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer` at Token Endpoint.
+The Janssen Authentication Server supports the JWT Bearer Grant using `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer` at the token endpoint. The client submits a signed JWT assertion, which Janssen validates before issuing an access token.
 
-AS requires client authentication during JWT Grant usage.
+Janssen requires client authentication when using the JWT Bearer Grant.
 
-**Assertion validation**
-1. Client's `jwks` or `jwks_uri` is used to get keys for `assertion` signature validation
+### Assertion Validation
+
+1. Janssen validates the JWT assertion's signature using the public keys obtained from the client's configured `jwks` or `jwks_uri`.
 2. `aud` claim of `assertion` must contain AS `issuer` or otherwise any `aud` claim value must starts from AS `issuer` (for example if Token Endpoint address is set in `aud` claim value)
 3. `iss` must not be blank. If AS `trustedSsaIssuers` configuration property is set then AS will validate `iss` value against `trustedSsaIssuers` configuration property.
 4. AS validates `exp` on expiration

@@ -6,9 +6,17 @@ tags:
   - feature
 ---
 
-# OpenID Connect Provider (OP)
-The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/main/jans-auth-server) has core OAuth 2.0 support as well as many other related specs:
+# OAuth 2.0 and OAuth 2.1
 
+The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/main/jans-auth-server) supports OAuth 2.0 and OAuth 2.1-aligned authorization flows, along with related specifications and extensions.
+
+Janssen uses OAuth 2.1 security practices by default, including requiring Proof Key for Code Exchange (PKCE) with the `S256` challenge method for the Authorization Code Grant. The Implicit Grant and Resource Owner Password Credentials (ROPC) Grant are disabled by default, as these grant types are not included in OAuth 2.1.
+
+For backward compatibility, Janssen retains configuration options for legacy OAuth 2.0 functionality. Administrators can configure supported grant types and security settings according to their application requirements.
+
+The Janssen Authentication Server supports the following OAuth specifications and related extensions:
+
+- The OAuth 2.1 Authorization Framework [(spec draft)](https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/)
 - The OAuth 2.0 Authorization Framework [(spec)](https://datatracker.ietf.org/doc/html/rfc6749)
 - The OAuth 2.0 Authorization Framework: Bearer Token Usage [(spec)](https://datatracker.ietf.org/doc/html/rfc6750)
 - JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens [(spec)](https://datatracker.ietf.org/doc/html/rfc9068)
@@ -18,11 +26,11 @@ The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/
 - OAuth 2.0 Token Revocation [(spec)](https://datatracker.ietf.org/doc/html/rfc7009)
 - Proof Key for Code Exchange by OAuth Public Clients (PKCE) [(spec)](https://datatracker.ietf.org/doc/html/rfc7636)
 - OAuth 2.0 for Native Apps [(spec)](https://datatracker.ietf.org/doc/html/rfc8252)
-- OAuth 2.0 Token Exchange [(spec)](https://datatracker.ietf.org/doc/html/rfc8252)
+- OAuth 2.0 Token Exchange [(spec)](https://datatracker.ietf.org/doc/html/rfc8693)
 - OAuth 2.0 Authorization Server Metadata [(spec)](https://datatracker.ietf.org/doc/html/rfc8414)
 - OAuth 2.0 Dynamic Client Registration Protocol [(spec)](https://datatracker.ietf.org/doc/html/rfc7591)
 - OAuth 2.0 Pushed Authorization Requests [(spec)](https://datatracker.ietf.org/doc/html/rfc9126)
-- OAuth 2.0 Demonstrating Proof-of-Possession at the Application Layer (DPoP) [(spec)](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-dpop)
+- OAuth 2.0 Demonstrating Proof-of-Possession (DPoP) [(spec)](https://datatracker.ietf.org/doc/html/rfc9449)
 - OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens [(spec)](https://datatracker.ietf.org/doc/html/rfc8705)
 - Assertion Framework for OAuth 2.0 Client Authentication and Authorization Grants [(spec)](https://www.rfc-editor.org/rfc/rfc7521.html)
 - JWT Secured Authorization Response Mode for OAuth 2.0 (JARM) [(spec)](https://openid.net/specs/oauth-v2-jarm.html)
@@ -37,9 +45,11 @@ The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/
 
 ## Protocol Overview
 
-OAuth 2.0 is the industry-standard protocol for authorization. OAuth 2.0 focuses on client developer simplicity providing specific authorization flows for different applications (e.g. web applications, desktop applications, mobile phones, and other devices).
+OAuth 2.0 is an authorization framework that enables applications to obtain limited access to protected resources. OAuth 2.1 builds on OAuth 2.0 by incorporating updated security requirements and recommended practices for securing authorization flows.
 
-It's handy to know some OAuth 2.0 terminology:
+The Janssen Authentication Server supports OAuth 2.1-aligned authorization flows while retaining configurable legacy OAuth 2.0 functionality for backward compatibility. For new applications, the Authorization Code Grant with Proof Key for Code Exchange (PKCE) is recommended. Legacy grant types, such as the Implicit Grant and Resource Owner Password Credentials Grant, are disabled by default.
+
+OAuth defines the following four primary roles:
 
 - **resource owner** - An entity capable of granting access to a protected resource.
                        When the resource owner is a person, it is referred to as an end-user.

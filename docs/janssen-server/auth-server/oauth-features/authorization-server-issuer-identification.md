@@ -11,8 +11,8 @@ tags:
 # Authorization Server Issuer Identification (RFC 9207)
 
 Janssen Server supports OAuth 2.0 Authorization Server Issuer Identification as defined in
-[RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207). When enabled, the authorization
-server includes its own issuer identifier (`iss`) in every authorization response — both
+[RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207). By default, the authorization
+server includes its own issuer identifier (`iss`) in authorization responses — both
 successful responses and redirect-based error responses — so that clients can detect and
 reject mix-up attacks.
 
@@ -30,9 +30,9 @@ expected, and rejects the response if they do not match.
 
 ## How It Works
 
-When `authorizationResponseIssParameterSupported` is set to `true` in Janssen Server
+When `authorizationResponseIssParameterSupported` is `true` in Janssen Server
 configuration, the `iss` parameter is appended to every authorization redirect sent back to
-the client's `redirect_uri`.
+the client's `redirect_uri`. This is the default.
 
 ### Successful Authorization Response
 
@@ -68,11 +68,11 @@ sequenceDiagram
     participant AS as Authorization Server
 
     Client->>UA: Redirect to /authorize
-    UA->>AS: GET /authorize?response_type=code&client_id=...&state=xyz
+    UA->>AS: GET /authorize?response_type=code&client_id=...&state=xyz&code_challenge=...&code_challenge_method=S256
     AS->>UA: 302 redirect_uri?code=...&state=xyz&iss=https://server.example.com
     UA->>Client: code + state + iss
     Client->>Client: Verify iss == expected issuer
-    Client->>AS: POST /token (code exchange)
+    Client->>AS: POST /token (code + code_verifier)
     AS->>Client: access_token
 ```
 
@@ -105,17 +105,18 @@ The issuer is already secured inside the JWT.
 
 ## Configuring Janssen Server
 
-Issuer identification is **opt-in** and disabled by default so that existing deployments
-are unaffected. To enable it, set the following property:
+Issuer identification is enabled by default. To disable it for compatibility with clients
+that cannot process the parameter, set the following property:
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `authorizationResponseIssParameterSupported` | Boolean | `false` | When `true`, the `iss` parameter is added to all authorization redirect responses per RFC 9207. |
+| `authorizationResponseIssParameterSupported` | Boolean | `true` | When `true`, the `iss` parameter is added to authorization redirect responses per RFC 9207. |
 
 ### Using the TUI
 
 Navigate to **Auth Server → Configuration → Properties** and set
-`authorizationResponseIssParameterSupported` to `true`.
+`authorizationResponseIssParameterSupported` to `false` only when compatibility requires
+disabling issuer identification.
 
 ### Using the Config API
 
@@ -123,7 +124,7 @@ Navigate to **Auth Server → Configuration → Properties** and set
 curl -X PATCH https://<jans-host>/jans-config-api/api/v1/jans-auth-server/config \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json-patch+json" \
-  -d '[{"op":"replace","path":"/authorizationResponseIssParameterSupported","value":true}]'
+  -d '[{"op":"replace","path":"/authorizationResponseIssParameterSupported","value":false}]'
 ```
 
 See the [configuration reference](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#authorizationresponseissparametersupported)

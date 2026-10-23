@@ -307,6 +307,10 @@ Create the client needed to run the test by executing the following. Make sure t
 
 #### Resource Owner Password Credentials (ROPC) flow
 
+This benchmark exercises the legacy Resource Owner Password Credentials grant. It is
+not enabled in the default supported grant types and should be used only in a test
+deployment explicitly configured for this grant, not as a production recommendation.
+
 ##### Resources needed for ROPC client jmeter test
 
  The below resources were [calculated](#kubernetes-cluster-load-test-resources) when creating the nodes above.
