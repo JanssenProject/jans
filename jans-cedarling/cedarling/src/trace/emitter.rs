@@ -163,6 +163,16 @@ struct BulkRequest {
     records: Vec<Pending>,
 }
 
+/// How a round treats a request or record that failed for a reason that may pass.
+#[derive(Clone, Copy)]
+enum Mode<'a> {
+    /// Retries up to `max_retries`; the token cuts waits short.
+    Running(&'a CancellationToken),
+    /// Shutting down: each batch goes once, without retries or pauses, so
+    /// stopping while Lock is down does not take as long as the retries.
+    Stopping,
+}
+
 /// How a bulk request ended.
 enum Sent {
     /// Lock answered for each record.
@@ -241,11 +251,10 @@ impl Emitter {
                 let Ok(draft) = rx.try_recv() else { break };
                 drafts.push(draft);
             }
-            chain = self.round(chain, drafts, Some(&cancel)).await;
+            chain = self.round(chain, drafts, Mode::Running(&cancel)).await;
         }
 
-        // Stopping: send everything, with retries that are no longer cut short,
-        // so no signed record is left behind.
+        // Stopping: send everything once; what Lock does not take is dropped.
         rx.close();
         let mut rest = Vec::new();
         while let Ok(draft) = rx.try_recv() {
@@ -254,7 +263,7 @@ impl Emitter {
         let mut rest = rest.into_iter();
         while !self.pending.is_empty() || rest.len() > 0 {
             let drafts = rest.by_ref().take(self.room()).collect();
-            chain = self.round(chain, drafts, None).await;
+            chain = self.round(chain, drafts, Mode::Stopping).await;
         }
     }
 
@@ -263,23 +272,22 @@ impl Emitter {
         self.max_records.saturating_sub(self.pending.len())
     }
 
-    /// Signs `drafts`, sends one request and applies Lock's answer. `cancel`
-    /// cuts waits short; without it every retry runs to its limit.
+    /// Signs `drafts`, sends one request and applies Lock's answer.
     async fn round(
         &mut self,
         chain: ProducerChain,
         drafts: Vec<RecordDraft>,
-        cancel: Option<&CancellationToken>,
+        mode: Mode<'_>,
     ) -> ProducerChain {
         let mut chain = self.sign(chain, drafts).await;
         let mut resend = false;
         if let Some(request) = self.next_request() {
-            match self
-                .send(&request.body, request.records.len(), cancel)
-                .await
-            {
-                Sent::Results(results) => resend = self.settle(request.records, results),
-                Sent::Lost => self.lose(&request.records),
+            match self.send(&request.body, request.records.len(), mode).await {
+                Sent::Results(results) => resend = self.settle(request.records, results, mode),
+                Sent::Lost => request
+                    .records
+                    .iter()
+                    .for_each(|record| self.forget(record)),
                 Sent::Interrupted => self.put_back(request.records),
             }
         }
@@ -290,7 +298,7 @@ impl Emitter {
             chain = self.replace_chain();
         }
         if resend {
-            self.pause(cancel).await;
+            self.pause(mode).await;
         }
         chain
     }
@@ -398,12 +406,7 @@ impl Emitter {
     }
 
     /// Posts `body`, retrying a failed request with the same bytes.
-    async fn send(
-        &mut self,
-        body: &Bytes,
-        records: usize,
-        cancel: Option<&CancellationToken>,
-    ) -> Sent {
+    async fn send(&mut self, body: &Bytes, records: usize, mode: Mode<'_>) -> Sent {
         let mut backoff = Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, Some(self.max_retries));
         loop {
             let err = match self.sink.post_bulk(body).await {
@@ -419,14 +422,22 @@ impl Emitter {
                 },
                 Err(err @ PostBulkError::Retryable(_)) => err,
             };
-            let retry = match cancel {
-                Some(cancel) => tokio::select! {
-                    retry = backoff.snooze() => retry,
+            let retry = match mode {
+                Mode::Running(cancel) => tokio::select! {
+                    retry = backoff.snooze() => retry.is_ok(),
                     () = cancel.cancelled() => return Sent::Interrupted,
                 },
-                None => backoff.snooze().await,
+                Mode::Stopping => {
+                    self.log(
+                        LogLevel::WARN,
+                        None,
+                        format!("{err}; Cedarling is shutting down, its {records} TRACE records are dropped"),
+                    );
+                    self.count(EmitterEvent::Dropped, records);
+                    return Sent::Lost;
+                },
             };
-            if retry.is_err() {
+            if !retry {
                 self.log(
                     LogLevel::WARN,
                     None,
@@ -440,7 +451,12 @@ impl Emitter {
 
     /// Applies Lock's answer for each record of `batch`. Returns whether a
     /// record goes back for a resend.
-    fn settle(&mut self, batch: Vec<Pending>, results: Vec<BulkItemResult>) -> bool {
+    fn settle(
+        &mut self,
+        batch: Vec<Pending>,
+        results: Vec<BulkItemResult>,
+        mode: Mode<'_>,
+    ) -> bool {
         let mut results: HashMap<usize, BulkItemResult> = results
             .into_iter()
             .map(|result| (result.index, result))
@@ -487,7 +503,14 @@ impl Emitter {
                 continue;
             }
             record.attempts += 1;
-            if record.attempts > self.max_retries {
+            if matches!(mode, Mode::Stopping) {
+                self.log(
+                    LogLevel::WARN,
+                    Some(record.record_id),
+                    format!("TRACE record dropped at shutdown (error: {error})"),
+                );
+                self.lose(&[record]);
+            } else if record.attempts > self.max_retries {
                 self.log(
                     LogLevel::WARN,
                     Some(record.record_id),
@@ -620,14 +643,12 @@ impl Emitter {
     }
 
     /// Waits before resending records Lock failed to store.
-    async fn pause(&self, cancel: Option<&CancellationToken>) {
-        let wait = tokio::time::sleep(WORKER_HTTP_RETRY_DUR);
-        match cancel {
-            Some(cancel) => tokio::select! {
-                () = wait => {},
+    async fn pause(&self, mode: Mode<'_>) {
+        if let Mode::Running(cancel) = mode {
+            tokio::select! {
+                () = tokio::time::sleep(WORKER_HTTP_RETRY_DUR) => {},
                 () = cancel.cancelled() => {},
-            },
-            None => wait.await,
+            }
         }
     }
 
@@ -720,6 +741,8 @@ mod tests {
     enum Reply {
         AcceptAll,
         Retryable,
+        /// The whole request refused, as Lock does with `403`.
+        Rejected,
         /// Per record: `None` accepted, `Some(id)` rejected with that error id.
         PerRecord(Vec<Option<&'static str>>),
     }
@@ -778,6 +801,11 @@ mod tests {
             match reply {
                 Reply::AcceptAll => Ok((0..count).map(|index| item(index, None)).collect()),
                 Reply::Retryable => Err(PostBulkError::Retryable("Lock is down".to_string())),
+                Reply::Rejected => Err(PostBulkError::Rejected {
+                    status: 403,
+                    error: Some("access_denied".to_string()),
+                    reason: None,
+                }),
                 Reply::PerRecord(errors) => Ok(errors
                     .into_iter()
                     .enumerate()
@@ -1311,6 +1339,86 @@ mod tests {
             "signing resumes right after the last signed record, without a gap"
         );
         handle.shut_down().await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn records_lost_with_their_request_are_counted_once() {
+        let lock = FakeLock::new([Reply::Retryable, Reply::Retryable, Reply::Rejected]);
+        let metrics = metrics();
+        let mut params = params(lock.clone(), metrics.clone());
+        params.max_retries = 1;
+        let emitter = start(params, 4, [draft()]);
+
+        lock.bodies(2).await;
+        emitter
+            .tx
+            .send(draft())
+            .await
+            .expect("the emitter is running");
+        lock.bodies(3).await;
+        emitter.handle.shut_down().await;
+
+        let stats = metrics.snapshot_and_reset().operational_stats;
+        assert_eq!(
+            stats.get("trace.dropped"),
+            Some(&1),
+            "the record given up after its retries"
+        );
+        assert_eq!(
+            stats.get("trace.rejected"),
+            Some(&1),
+            "the record of the refused request"
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn shutdown_sends_an_unanswered_batch_once() {
+        let lock = FakeLock::new(std::iter::repeat_with(|| Reply::Retryable).take(10));
+        let metrics = metrics();
+        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft(), draft()]);
+
+        lock.bodies(1).await;
+        emitter.handle.shut_down().await;
+
+        let bodies = lock.bodies(0).await;
+        assert_eq!(
+            bodies.len(),
+            2,
+            "one request before shutdown, one during it"
+        );
+        assert_eq!(
+            bodies[1], bodies[0],
+            "shutdown sends the held batch as it was"
+        );
+        assert_eq!(
+            counter(&metrics, "trace.dropped"),
+            Some(2),
+            "records Lock did not take at shutdown are dropped"
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn shutdown_does_not_resend_failed_records() {
+        let lock = FakeLock::new([
+            Reply::Retryable,
+            Reply::PerRecord(vec![Some("storage_failure"), Some("storage_failure")]),
+        ]);
+        let metrics = metrics();
+        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft(), draft()]);
+
+        lock.bodies(1).await;
+        emitter.handle.shut_down().await;
+
+        assert_eq!(
+            lock.bodies(0).await.len(),
+            2,
+            "records Lock failed to store are not sent again at shutdown"
+        );
+        assert_eq!(
+            counter(&metrics, "trace.dropped"),
+            Some(2),
+            "records Lock failed to store at shutdown are dropped"
+        );
     }
 
     #[tokio::test]

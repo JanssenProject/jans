@@ -177,7 +177,7 @@ What is retried:
 
 If the genesis record of the producer chain is lost (refused or dropped), or Lock Server refuses a record with `chain_not_registered` after it accepted the genesis record (for example, its database was restored), Lock Server would refuse every later record of that chain. Cedarling then logs a `WARN`, drops the records of that chain it still holds and opens a new chain.
 
-`Cedarling::shut_down` stops the emitter before the log. On shut down the emitter sends every record it still holds, with all retries, so stopping Cedarling while Lock Server is down can take as long as the retries.
+`Cedarling::shut_down` stops the emitter before the log. On shut down the emitter sends every record it still holds once, without retries or pauses, so stopping Cedarling does not wait for Lock Server to come back. Records Lock Server does not take then are logged at `WARN` and counted in `trace.dropped`.
 
 When Lock Server publishes no `trace_bulk_endpoint` and `CEDARLING_TRACE_ENDPOINT` is not set, Cedarling starts, logs a `WARN` once and reports `not_emitted_no_endpoint` for every decision.
 
