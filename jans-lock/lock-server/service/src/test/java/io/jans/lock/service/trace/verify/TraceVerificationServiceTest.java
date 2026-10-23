@@ -6,6 +6,7 @@
 
 package io.jans.lock.service.trace.verify;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -35,13 +36,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.BaseLockServiceTest;
+import io.jans.lock.trace.crypto.bc.CanonicalHashes;
 import io.jans.lock.trace.crypto.bc.JcsCanonicalizer;
 import io.jans.lock.trace.crypto.bc.Ed25519Capability;
 import io.jans.lock.trace.crypto.bc.Ed25519PublicKeys;
@@ -407,6 +411,102 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 				() -> guarded.verify(body("{}"), ctx("*")));
 
 		assertSame(original, ex);
+	}
+
+	// -- assertion_raw / assertion fidelity -------------------------------------------------------------
+
+	/**
+	 * Signs a fixture that carries Unicode and number members under unreserved top-level names.
+	 * The signature covers the JCS form, so any textual spelling of the same values must verify.
+	 */
+	private String signedFidelityAssertion() throws Exception {
+		ObjectNode extra = (ObjectNode) MAPPER.readTree("{\"x_emoji\":\"\uD83D\uDE00\",\"x_nfc\":\"\u00e9\","
+				+ "\"x_nfd\":\"e\u0301\",\"x_sep\":\"a\u2028b\u2029c\",\"x_ctl\":\"a\\u0000b\\u001fc\\u007fd\","
+				+ "\"x_exp\":1e2,\"x_frac\":1.5,\"x_zero\":0,\"x_big_exp\":1e21,\"x_small\":0.000001,\"x_tiny\":1e-7,"
+				+ "\"x_safe\":9007199254740991,\"x_over\":9007199254740993,"
+				+ "\"x_huge\":123456789012345678901234567890,\"x_arr\":[3,1,2,{\"b\":1,\"a\":[]}]}");
+		SignedAssertionFactory factory = SignedAssertionFactory.authorizationDecision();
+		extra.fields().forEachRemaining(member -> factory.withField(member.getValue(), member.getKey()));
+		return factory.sign(keyPair.getPrivate());
+	}
+
+	/** Every character above U+007F written as a {@code \\uXXXX} escape (UTF-16 code units). */
+	private static String asciiEscaped(String json) {
+		StringBuilder out = new StringBuilder();
+		for (char c : json.toCharArray()) {
+			if (c > 0x7f) {
+				out.append(String.format("\\u%04x", (int) c));
+			} else {
+				out.append(c);
+			}
+		}
+		return out.toString();
+	}
+
+	@Test
+	void testVerify_EscapedLiteralAndReSpelledNumbers_VerifyWithSameDigestAndRawPreserved() throws Exception {
+		String compact = signedFidelityAssertion();
+		assertTrue(compact.contains("\"x_exp\":100.0"), compact);
+		assertTrue(compact.contains("\"x_zero\":0,"), compact);
+		assertTrue(compact.contains("\"x_frac\":1.5"), compact);
+
+		String escaped = asciiEscaped(compact);
+		String respelled = compact.replace("\"x_exp\":100.0", "\"x_exp\":1E+2").replace("\"x_zero\":0,", "\"x_zero\":-0,")
+				.replace("\"x_frac\":1.5", "\"x_frac\":15e-1");
+		String reordered = SignedAssertionFactory.reorderAndPrettyPrint(compact);
+		assertNotEquals(compact, escaped);
+		assertNotEquals(compact, respelled);
+
+		VerifiedAssertion first = service.verify(body(compact), ctx("*"));
+		for (String variant : new String[] { escaped, respelled, reordered, asciiEscaped(respelled) }) {
+			VerifiedAssertion other = service.verify(body(variant), ctx("*"));
+
+			assertTrue(other.getVerification().isSignatureValid());
+			assertEquals(first.getContentDigest(), other.getContentDigest());
+			assertEquals(variant, other.getParsed().getRawText());
+			assertArrayEquals(variant.getBytes(StandardCharsets.UTF_8),
+					other.getParsed().getRawText().getBytes(StandardCharsets.UTF_8));
+		}
+		assertEquals(independentContentDigest(escaped), first.getContentDigest());
+	}
+
+	@Test
+	void testVerify_ReEmittedAssertion_JcsAndDigestEqualOriginal() throws Exception {
+		String compact = signedFidelityAssertion();
+		for (String received : new String[] { compact, asciiEscaped(compact) }) {
+			VerifiedAssertion verified = service.verify(body(received), ctx("*"));
+
+			// The response hop: ASSERTION_MAPPER re-parses the stored text, the JSON provider writes
+			// the tree, and a client parses that body.
+			JsonNode assertion = MAPPER.readTree(verified.getParsed().getRawText());
+			JsonNode wire = MAPPER.readTree(MAPPER.writeValueAsString(assertion));
+
+			assertEquals(JcsCanonicalizer.canonicalize(verified.getParsed().getRoot()), JcsCanonicalizer.canonicalize(wire));
+			assertEquals(verified.getContentDigest(), CanonicalHashes.sha256PrefixedOfJcs(wire));
+			assertEquals(verified.getContentDigest(), CanonicalHashes.sha256PrefixedOfJcs(assertion));
+		}
+	}
+
+	@Test
+	void testVerify_FidelityAssertion_JcsFormsOfNumbersAndStrings() throws Exception {
+		VerifiedAssertion verified = service.verify(body(signedFidelityAssertion()), ctx("*"));
+
+		String jcs = JcsCanonicalizer.canonicalize(verified.getParsed().getRoot());
+
+		assertTrue(jcs.contains("\"x_exp\":100,"), jcs);
+		assertTrue(jcs.contains("\"x_frac\":1.5,"), jcs);
+		assertTrue(jcs.endsWith("\"x_zero\":0}"), jcs);
+		assertTrue(jcs.contains("\"x_big_exp\":1e+21,"), jcs);
+		assertTrue(jcs.contains("\"x_small\":0.000001,"), jcs);
+		assertTrue(jcs.contains("\"x_tiny\":1e-7,"), jcs);
+		assertTrue(jcs.contains("\"x_safe\":9007199254740991,"), jcs);
+		// Documented limit: integers above 2^53-1 keep their exact digits; an ECMAScript verifier
+		// would print 9007199254740992 here.
+		assertTrue(jcs.contains("\"x_over\":9007199254740993,"), jcs);
+		assertTrue(jcs.contains("\"x_huge\":123456789012345678901234567890,"), jcs);
+		assertTrue(jcs.contains("\"x_ctl\":\"a\\u0000b\\u001fc\u007fd\""), jcs);
+		assertTrue(jcs.contains("\"x_sep\":\"a\u2028b\u2029c\""), jcs);
+		assertTrue(jcs.contains("\"x_arr\":[3,1,2,{\"a\":[],\"b\":1}]"), jcs);
 	}
 
 	// -- helpers ------------------------------------------------------------------------------------
