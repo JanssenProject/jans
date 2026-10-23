@@ -1006,6 +1006,7 @@ impl Cedarling {
                     PolicyStoreLoadError::LegacyJsonNotSupported
                         | PolicyStoreLoadError::ParseYaml(_)
                         | PolicyStoreLoadError::Conversion(_)
+                        | PolicyStoreLoadError::Migration(_)
                         | PolicyStoreLoadError::InvalidStore(_)
                 );
 

@@ -47,7 +47,6 @@ pub(crate) struct EntityBuilder {
     iss_entities: HashMap<EntityUid, Entity>,
     schema: Option<MappingSchema>,
     default_entities: DefaultEntities,
-    /// Kept so tests can build tokens that carry a configured issuer.
     /// `context.tokens` key of every configured token type, by request mapping.
     context_keys: HashMap<String, SmolStr>,
     /// Kept so tests can build tokens that carry a configured issuer.

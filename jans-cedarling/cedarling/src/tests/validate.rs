@@ -281,6 +281,41 @@ async fn test_validate_unsupported_spec_version_fails_metadata() {
     );
 }
 
+/// A store that cannot be migrated is a store problem, reported at the parse
+/// level rather than as an infrastructure error.
+#[tokio::test]
+async fn test_validate_migration_error_fails_parse() {
+    let builder = crate::common::policy_store::test_utils::fixtures::minimal_valid()
+        .with_spec_version(1)
+        .with_trusted_issuer(
+            "acme",
+            r#"{
+                "name": "Acme Corp",
+                "description": "",
+                "configuration_endpoint": "https://idp.acme.test/.well-known/openid-configuration"
+            }"#,
+        );
+    let config = crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::ArchiveBytes(
+            builder.build_archive().expect("should build archive"),
+        ),
+        ..Default::default()
+    };
+
+    let report =
+        Cedarling::validate_policy_store(&config, &crate::http::HttpClientConfig::default())
+            .await
+            .expect("a migration error is not an infrastructure error");
+    assert!(
+        matches!(
+            &report.parse,
+            LevelResult::Failed { errors }
+                if errors.iter().any(|e| e.message.contains("Failed to migrate the policy store"))
+        ),
+        "the parse level should fail with the migration error: {report:?}"
+    );
+}
+
 /// Minimal Agama YAML store whose `policy_stores` key is `key`.
 fn yaml_store_with_key(key: &str) -> crate::PolicyStoreConfig {
     let store = format!(

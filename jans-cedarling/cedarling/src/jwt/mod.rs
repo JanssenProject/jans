@@ -140,8 +140,8 @@ pub(crate) fn parse_numeric_date(value: &serde_json::Value) -> Option<i64> {
 }
 
 /// The issuer each JWT entity type belongs to, built from the full config so it
-/// doesn't depend on async loading. `validate_trusted_issuers_config` rejects an
-/// entity type declared by two issuers before `JwtService` is built.
+/// doesn't depend on async loading. `TokenTypes::build` rejects an entity type
+/// declared by two issuers when the store loads.
 fn issuers_by_entity_type(
     trusted_issuers: &HashMap<String, TrustedIssuer>,
 ) -> HashMap<String, Arc<TrustedIssuer>> {
