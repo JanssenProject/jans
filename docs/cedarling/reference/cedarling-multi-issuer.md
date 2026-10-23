@@ -1044,8 +1044,8 @@ for dropped in result.dropped_tokens():
 |-------------|---------|
 | `invalid_input` | The token input was malformed (empty mapping or payload). `reason.detail` is the stable slug (`"empty_mapping"` / `"empty_payload"`). |
 | `jwt_validation_failed` | Signature/claims validation failed, or no trusted issuer declares the token's mapping. |
-| `duplicate_token` | A token with the same issuer and token type was already accepted (see [Non-Deterministic Tokens](#non-deterministic-tokens)). |
-| `duplicate_mapping` | A later input with the same mapping replaced this one (last wins). |
+| `duplicate_token` | An earlier token with the same mapping was already accepted; this one was not validated (see [Non-Deterministic Tokens](#non-deterministic-tokens)). |
+| `duplicate_mapping` | No longer emitted: a second token for a mapping is reported as `duplicate_token`. Kept for compatibility. |
 | `no_processor_registered` | The mapping routes to a custom issuer but no processor is registered. |
 | `custom_processing_failed` | A registered custom processor rejected the token. |
 | `custom_processing_timed_out` | A registered custom processor exceeded `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS`. |
@@ -1053,7 +1053,7 @@ for dropped in result.dropped_tokens():
 
 The reason is deliberately claim-free: it never contains token payloads or claim
 values, so it is safe to log and surface to callers. `reason.message` is
-non-empty for every slug (e.g. `duplicate issuer and token-type combination`),
+non-empty for every slug (e.g. `a token with the same mapping was already accepted`),
 while `reason.detail` is set only for `invalid_input` and is absent (`None` /
 `null` / `nil`) otherwise. Order is not
 guaranteed; use each entry's `index` to correlate with the request `tokens`
@@ -1065,16 +1065,18 @@ batch) and repeats on every item's result.
 ### Non-Deterministic Tokens
 
 ```python
-# ERROR: Multiple tokens of same type from same issuer
+# Two tokens for the same mapping: policies could not tell which one to use
 tokens = [
-    TokenInput(mapping="Jans::Access_Token", payload="token1"),  # From Jans::Access_Token
-    TokenInput(mapping="Jans::Access_Token", payload="token2"),  # Also from Jans::Access_Token - ERROR!
+    TokenInput(mapping="Jans::Access_Token", payload="token1"),  # accepted
+    TokenInput(mapping="Jans::Access_Token", payload="token2"),  # dropped: duplicate_token
 ]
-
-# This non-deterministic.
-# Which token should policies reference?
-# Cedarling processes only the first item and writes log messages for all subsequent items that are skipped.
 ```
+
+A mapping names one token type of one issuer, so only one token per mapping is
+used. The first one that is accepted wins; later ones for the same mapping are
+dropped as `duplicate_token` and logged, without being validated. A token that
+fails validation does not count, so a later token for its mapping is still
+checked.
 
 ### Trusted Issuer Validation
 

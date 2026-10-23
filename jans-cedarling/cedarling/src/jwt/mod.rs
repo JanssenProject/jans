@@ -106,7 +106,6 @@ use issuer_index::IssuerIndex;
 use key_service::KeyService;
 use loading_state::TrustedIssuerLoadingState;
 use log_entry::JwtLogEntry;
-use smol_str::SmolStr;
 use status_list::{JwtStatus, JwtStatusError, StatusListCache};
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
@@ -178,14 +177,6 @@ struct TokenCallCtx<'a> {
     token: &'a TokenInput,
     index: usize,
     now: chrono::DateTime<Utc>,
-    seen_combinations: &'a mut HashSet<SeenToken>,
-}
-
-/// Accepted `(issuer, mapping)` pair seen in the current multi-issuer request.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct SeenToken {
-    issuer: SmolStr,
-    mapping: SmolStr,
 }
 
 /// Outcome of dispatching a single multi-issuer token input: either a
@@ -386,7 +377,6 @@ impl JwtService {
 
         let mut validated_tokens: HashMap<EntityTypeName, ValidatedToken> = HashMap::new();
         let mut dropped = Vec::new();
-        let mut seen_combinations = HashSet::new();
 
         let now = Utc::now();
 
@@ -412,25 +402,37 @@ impl JwtService {
             //
             // DEBT: this seam belongs in `Authz::multi_issuer_setup`, which would
             // split the input into custom and JWT tokens and leave `JwtService`
-            // JWT-only. It is not a pure move: two pieces of state the custom path
-            // borrows live in here and would have to come along.
-            //   - `seen_combinations` spans both branches, so the duplicate
-            //     (issuer, mapping) check has to move up with it or custom and JWT
-            //     tokens stop conflicting with each other.
-            //   - `token_cache` is owned by `JwtService` and used by the custom path
-            //     for `process` memoization, so it has to be shared or split.
-            // Worth its own PR with those two covered by tests, not a drive-by.
-            let mut ctx = TokenCallCtx {
-                token,
-                index,
-                now,
-                seen_combinations: &mut seen_combinations,
-            };
+            // JWT-only. It is not a pure move: `token_cache` is owned by
+            // `JwtService` and used by the custom path for `process` memoization,
+            // so it has to be shared or split. Worth its own PR with that covered
+            // by tests, not a drive-by.
+            let ctx = TokenCallCtx { token, index, now };
             let Some((entity_type, token_type)) = token_types.resolve(&token.mapping) else {
                 let reason = self.drop_unknown_mapping(&ctx);
                 dropped.push(DroppedToken::new(token.mapping.clone(), index, reason));
                 continue;
             };
+            // A mapping names one token type of one issuer, so a second token for
+            // it cannot be told apart from the first: the first accepted one wins,
+            // and later ones are dropped before being validated or processed.
+            if let Some(accepted) = validated_tokens.get(entity_type) {
+                if let Some(logger) = &self.logger {
+                    logger.log_any(JwtLogEntry::new(
+                        format!(
+                            "Non-deterministic token detected: '{entity_type}' at index {index} \
+                             duplicates the one accepted at index {}, skipping",
+                            accepted.index
+                        ),
+                        Some(LogLevel::WARN),
+                    ));
+                }
+                dropped.push(DroppedToken::new(
+                    token.mapping.clone(),
+                    index,
+                    DropReason::DuplicateToken,
+                ));
+                continue;
+            }
             let result = match &token_type.kind {
                 TokenTypeKind::Custom(token_meta) => {
                     let target = CustomTarget {
@@ -438,31 +440,14 @@ impl JwtService {
                         token_meta,
                         generation: token_types.generation(),
                     };
-                    self.handle_custom_token(custom_processor, target, custom_timeout, &mut ctx)
+                    self.handle_custom_token(custom_processor, target, custom_timeout, &ctx)
                         .await
                 },
-                TokenTypeKind::Jwt { issuer, .. } => self.validate_jwt_token(issuer, &mut ctx)?,
+                TokenTypeKind::Jwt { issuer, .. } => self.validate_jwt_token(issuer, &ctx)?,
             };
 
             match result {
                 TokenOutcome::Validated(cedar_token) => {
-                    if let Some(prior) = validated_tokens.get(entity_type) {
-                        let prior_index = prior.index;
-                        if let Some(logger) = &self.logger {
-                            logger.log_any(JwtLogEntry::new(
-                                format!(
-                                    "Duplicate mapping detected: '{entity_type}' \
-                                    at index {index} replaces index {prior_index} (last wins)"
-                                ),
-                                Some(LogLevel::WARN),
-                            ));
-                        }
-                        dropped.push(DroppedToken::new(
-                            token.mapping.clone(),
-                            prior_index,
-                            DropReason::DuplicateMapping,
-                        ));
-                    }
                     validated_tokens.insert(
                         entity_type.clone(),
                         ValidatedToken {
@@ -505,7 +490,7 @@ impl JwtService {
         custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
         target: CustomTarget<'_>,
         custom_timeout: Option<Duration>,
-        ctx: &mut TokenCallCtx<'_>,
+        ctx: &TokenCallCtx<'_>,
     ) -> TokenOutcome {
         let Some(processor) = custom_processor else {
             let err = MultiIssuerValidationError::CustomToken(
@@ -521,47 +506,11 @@ impl JwtService {
             return TokenOutcome::Dropped(DropReason::NoProcessorRegistered);
         };
 
-        let combination = SeenToken {
-            issuer: SmolStr::from(target.issuer.key_prefix()),
-            mapping: SmolStr::from(ctx.token.mapping.as_str()),
-        };
-        if ctx.seen_combinations.contains(&combination) {
-            if let Some(logger) = &self.logger {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "Non-deterministic custom token detected: type '{}' (duplicate found, skipping before processing)",
-                        ctx.token.mapping
-                    ),
-                    Some(LogLevel::WARN),
-                ));
-            }
-            return TokenOutcome::Dropped(DropReason::DuplicateToken);
-        }
-
         match self
             .process_custom_token(processor, target, ctx.token, custom_timeout, ctx.now)
             .await
         {
-            Ok(cedar_token) => {
-                let issuer = SmolStr::from(cedar_token.normalized_issuer().as_str());
-                if ctx.seen_combinations.insert(SeenToken {
-                    issuer,
-                    mapping: SmolStr::from(ctx.token.mapping.as_str()),
-                }) {
-                    TokenOutcome::Validated(cedar_token)
-                } else {
-                    if let Some(logger) = &self.logger {
-                        logger.log_any(JwtLogEntry::new(
-                            format!(
-                                "Non-deterministic custom token detected: type '{}' (duplicate found, skipping)",
-                                ctx.token.mapping
-                            ),
-                            Some(LogLevel::WARN),
-                        ));
-                    }
-                    TokenOutcome::Dropped(DropReason::DuplicateToken)
-                }
-            },
+            Ok(cedar_token) => TokenOutcome::Validated(cedar_token),
             Err(err) => {
                 // Skip and continue, logging timeout vs. processor error distinctly.
                 self.metrics.record_error(&err);
@@ -614,14 +563,11 @@ impl JwtService {
     fn validate_jwt_token(
         &self,
         trusted_iss: &Arc<TrustedIssuer>,
-        ctx: &mut TokenCallCtx<'_>,
+        ctx: &TokenCallCtx<'_>,
     ) -> Result<TokenOutcome, MultiIssuerValidationError> {
         let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(&ctx.token.mapping));
 
         if let Some(cedar_token) = self.token_cache.find(&token_kind, &ctx.token.payload) {
-            if !self.mark_jwt_seen(ctx, &cedar_token.normalized_issuer()) {
-                return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
-            }
             return Ok(TokenOutcome::Validated(cedar_token));
         }
 
@@ -629,12 +575,6 @@ impl JwtService {
         match self.validate_single_token(&token_kind, &ctx.token.payload) {
             Ok(validated_jwt) => {
                 self.metrics.record_jwt_validation(true);
-
-                // Check for non-deterministic tokens (graceful validation); the
-                // validator has checked the `iss` claim against this issuer.
-                if !self.mark_jwt_seen(ctx, trusted_iss.iss_claim()) {
-                    return Ok(TokenOutcome::Dropped(DropReason::DuplicateToken));
-                }
 
                 // Convert ValidatedJwt to Token
                 let claims = TokenClaims::try_from(validated_jwt.claims)
@@ -664,26 +604,6 @@ impl JwtService {
                 Ok(TokenOutcome::Dropped(DropReason::JwtValidationFailed))
             },
         }
-    }
-
-    /// Record the JWT's `(issuer, mapping)` pair as seen in this request.
-    /// Returns `false` and logs a warning when the pair was already accepted,
-    /// so the caller drops the token as [`DropReason::DuplicateToken`].
-    fn mark_jwt_seen(&self, ctx: &mut TokenCallCtx<'_>, issuer: &IssClaim) -> bool {
-        let inserted = ctx.seen_combinations.insert(SeenToken {
-            issuer: SmolStr::from(issuer.as_str()),
-            mapping: SmolStr::from(ctx.token.mapping.as_str()),
-        });
-        if !inserted && let Some(logger) = &self.logger {
-            logger.log_any(JwtLogEntry::new(
-                format!(
-                    "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
-                    ctx.token.mapping, issuer
-                ),
-                Some(LogLevel::WARN),
-            ));
-        }
-        inserted
     }
 
     /// Process a single custom (non-JWT) token via the registered processor.
@@ -1673,12 +1593,14 @@ mod test {
             )
             .expect("should sign token")
         };
+        // The other iss comes first: a token dropped by validation does not
+        // count as accepted, so the next one for the mapping is still checked.
         let tokens = vec![
-            TokenInput::new("Partner::Access_token".to_string(), token(&iss)),
             TokenInput::new(
                 "Partner::Access_token".to_string(),
                 token("https://other.example"),
             ),
+            TokenInput::new("Partner::Access_token".to_string(), token(&iss)),
         ];
 
         let out = svc
@@ -1687,14 +1609,14 @@ mod test {
             .expect("the token with the configured iss should validate");
         assert_eq!(
             out.tokens.get("Partner::Access_token").map(|t| t.index),
-            Some(0),
+            Some(1),
             "the token carrying the configured iss should be kept"
         );
         assert!(
             matches!(
                 &out.dropped[..],
                 [DroppedToken {
-                    index: 1,
+                    index: 0,
                     reason: DropReason::JwtValidationFailed,
                     ..
                 }]
@@ -2008,13 +1930,24 @@ mod test {
             TokenInput::new("Jans::Access_Token".to_string(), token_two), // Duplicate type from same issuer
         ];
 
-        let result = jwt_service
+        let out = jwt_service
             .validate_multi_issuer_tokens(&tokens, None, &token_types, None)
-            .await;
-        assert!(result.is_ok());
-
-        let validated_tokens = result.unwrap().tokens;
-        assert_eq!(validated_tokens.len(), 1); // Only the first token should be returned (graceful validation)
+            .await
+            .expect("a duplicate must not fail the request");
+        assert_eq!(
+            out.tokens.get("Jans::Access_Token").map(|t| t.index),
+            Some(0),
+            "the first token for the mapping should be kept"
+        );
+        assert_eq!(
+            out.dropped,
+            vec![DroppedToken::new(
+                "Jans::Access_Token",
+                1,
+                DropReason::DuplicateToken
+            )],
+            "the later token for the mapping should be dropped as a duplicate"
+        );
     }
 
     #[test]

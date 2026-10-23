@@ -256,8 +256,8 @@ context.tokens.acme_access_token.hasTag("scope")
 
 **Non-Deterministic Token Detection**:
 
-- System rejects requests with multiple tokens of the same type from the same issuer
-- Example: Two "Jans::Access_Token" from "Acme" issuer will fail
+- Only one token per mapping is used: the first accepted one
+- Later tokens for the same mapping are dropped as `duplicate_token` and logged
 - This prevents ambiguous policy evaluation
 
 ### Use Cases
