@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://jans.io/cedarling/policy-store/v2/trusted-issuers.schema.json",
     "title": "Cedarling trusted-issuers.json (policy store format v2)",
-    "description": "Map of Cedar entity type -> token type entry. Not expressible in JSON Schema and checked at load (D1, D4, D5): duplicate keys, one `issuer` = one kind / one `iss` / one key source, same `iss` with different `jwks` across issuers, unique `context.tokens` keys (case-insensitive issuer prefix), none of them `total_token_count`.",
+    "description": "Map of Cedar entity type -> token type entry. Not expressible in JSON Schema and checked at load: duplicate keys, one `issuer` = one kind / one `iss` / one key source, same `iss` with different `jwks` across issuers, unique `context.tokens` keys (case-insensitive issuer prefix), none of them `total_token_count`.",
     "type": "object",
     "propertyNames": {
         "$ref": "#/$defs/entityTypeName"
@@ -121,7 +121,7 @@
             "additionalProperties": false
         },
         "keySource": {
-            "description": "Exactly one form (D6).",
+            "description": "Exactly one form, so an issuer's keys have a single origin.",
             "oneOf": [
                 {
                     "title": "Discovery",

@@ -1278,7 +1278,8 @@ mod test {
         discovered_jwks.assert();
     }
 
-    /// Issuers sharing an `iss` and its keys are allowed (D4).
+    /// Issuers may share an `iss` when they agree on its keys: a token carrying
+    /// that `iss` then verifies the same way whichever token type names it.
     #[tokio::test]
     async fn key_sources_sharing_an_iss_and_jwks_both_load() {
         let mut server = Server::new_async().await;
