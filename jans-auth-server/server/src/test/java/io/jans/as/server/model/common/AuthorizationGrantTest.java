@@ -5,6 +5,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -27,7 +28,10 @@ import org.testng.annotations.Test;
 
 import java.util.Date;
 
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertNull;
 
 /**
@@ -111,5 +115,59 @@ public class AuthorizationGrantTest {
         authorizationGrant.fillPayloadOfAccessTokenJwt(claims, accessToken, context);
 
         assertNull(claims.getClaim("code"));
+    }
+
+    @Test
+    public void init_whenClientIsEphemeral_shouldGenerateEphemeralSub() {
+        authorizationGrant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, ephemeralClient(), new Date());
+
+        assertNotNull(authorizationGrant.getEphemeralSub());
+    }
+
+    @Test
+    public void init_whenClientIsNotEphemeral_shouldNotGenerateEphemeralSub() {
+        final Client client = new Client();
+        client.setSubjectType(SubjectType.PUBLIC);
+
+        authorizationGrant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
+
+        assertNull(authorizationGrant.getEphemeralSub());
+    }
+
+    @Test
+    public void getSub_whenClientIsEphemeral_shouldReturnSameValueOnEveryCall() {
+        authorizationGrant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, ephemeralClient(), new Date());
+
+        final String first = authorizationGrant.getSub();
+
+        assertEquals(first, authorizationGrant.getEphemeralSub());
+        assertEquals(first, authorizationGrant.getSub());
+        verifyNoInteractions(sectorIdentifierService);
+    }
+
+    @Test
+    public void getSub_whenEphemeralSubIsRestored_shouldReturnRestoredValue() {
+        authorizationGrant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, ephemeralClient(), new Date());
+        authorizationGrant.setEphemeralSub("restored-sub");
+
+        assertEquals("restored-sub", authorizationGrant.getSub());
+    }
+
+    @Test
+    public void getSub_whenTwoGrantsOfEphemeralClient_shouldReturnDifferentValues() {
+        final SimpleAuthorizationGrant other = new SimpleAuthorizationGrant();
+        final User user = new User();
+        final Client client = ephemeralClient();
+        authorizationGrant.init(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
+        other.init(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
+
+        assertFalse(authorizationGrant.getEphemeralSub().equals(other.getEphemeralSub()));
+        assertFalse(authorizationGrant.getSub().equals(other.getSub()));
+    }
+
+    private static Client ephemeralClient() {
+        final Client client = new Client();
+        client.setSubjectType(SubjectType.EPHEMERAL);
+        return client;
     }
 }

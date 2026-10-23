@@ -3,6 +3,7 @@ package io.jans.as.server.register.ws.rs;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.TrustedIssuerConfig;
+import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.ciba.CIBARegisterParamsValidatorService;
@@ -150,6 +151,31 @@ public class RegisterValidatorTest {
         registerValidator.applyTrustedIssuerConfig(trustedIssuerConfig, ssa);
 
         assertEquals("a b", ssa.getString("scope"));
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateEphemeralSubjectTypeBackchannelLogout_whenEphemeralWithLogoutUri_shouldFail() {
+        when(errorResponseFactory.createWebApplicationException(any(), any(), anyString())).thenReturn(new WebApplicationException());
+
+        final RegisterRequest request = new RegisterRequest();
+        request.setSubjectType(SubjectType.EPHEMERAL);
+        request.setBackchannelLogoutUri("https://example.org/logout");
+        registerValidator.validateEphemeralSubjectTypeBackchannelLogout(request);
+    }
+
+    @Test
+    public void validateEphemeralSubjectTypeBackchannelLogout_whenEphemeralWithoutLogoutUri_shouldPass() {
+        final RegisterRequest request = new RegisterRequest();
+        request.setSubjectType(SubjectType.EPHEMERAL);
+        registerValidator.validateEphemeralSubjectTypeBackchannelLogout(request);
+    }
+
+    @Test
+    public void validateEphemeralSubjectTypeBackchannelLogout_whenPublicWithLogoutUri_shouldPass() {
+        final RegisterRequest request = new RegisterRequest();
+        request.setSubjectType(SubjectType.PUBLIC);
+        request.setBackchannelLogoutUri("https://example.org/logout");
+        registerValidator.validateEphemeralSubjectTypeBackchannelLogout(request);
     }
 
     private JSONObject createSsaPayload() {
