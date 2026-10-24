@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -364,6 +365,56 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 	}
 
 	@Test
+	void testValidate_customFutureSkew_boundaryAcceptedAndNextSecondRejected() throws IOException {
+		Instant now = Instant.parse("2026-06-11T00:00:00Z");
+		setField(validator, "clock", Clock.fixed(now, ZoneOffset.UTC));
+		traceConfiguration.setMaxFutureSkewSeconds(45);
+
+		ObjectNode atLimit = loadFixture();
+		set(atLimit, MAPPER.getNodeFactory().numberNode(now.getEpochSecond() + 45), "trace", "signed_at");
+		validator.validate(assertionOf(atLimit));
+
+		ObjectNode pastLimit = loadFixture();
+		set(pastLimit, MAPPER.getNodeFactory().numberNode(now.getEpochSecond() + 46), "trace", "signed_at");
+		TraceValidationException ex = validateAndCapture(pastLimit);
+
+		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
+		assertEquals("signed_at_in_future", ex.getReason());
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = { 0, -5 })
+	void testValidate_nonPositiveFutureSkew_fallsBackToDefault(int configured) throws IOException {
+		Instant now = Instant.parse("2026-06-11T00:00:00Z");
+		setField(validator, "clock", Clock.fixed(now, ZoneOffset.UTC));
+		traceConfiguration.setMaxFutureSkewSeconds(configured);
+		long limit = now.getEpochSecond() + TraceConfiguration.DEFAULT_MAX_FUTURE_SKEW_SECONDS;
+
+		ObjectNode atLimit = loadFixture();
+		set(atLimit, MAPPER.getNodeFactory().numberNode(limit), "trace", "signed_at");
+		validator.validate(assertionOf(atLimit));
+
+		ObjectNode pastLimit = loadFixture();
+		set(pastLimit, MAPPER.getNodeFactory().numberNode(limit + 1), "trace", "signed_at");
+		TraceValidationException ex = validateAndCapture(pastLimit);
+
+		assertEquals("signed_at_in_future", ex.getReason());
+	}
+
+	@Test
+	void testValidate_signedAtFarInPast_acceptedNoLowerBound() throws IOException {
+		Instant now = Instant.parse("2026-06-11T00:00:00Z");
+		setField(validator, "clock", Clock.fixed(now, ZoneOffset.UTC));
+
+		for (long signedAt : new long[] { 0L, 1L, now.getEpochSecond() - 10L * 365 * 24 * 3600 }) {
+			ObjectNode root = loadFixture();
+			set(root, MAPPER.getNodeFactory().numberNode(signedAt), "trace", "signed_at");
+
+			validator.validate(assertionOf(root));
+		}
+	}
+
+	@Test
 	void testValidate_signedAtAtFutureSkewBoundary_accepted() throws IOException {
 		Instant now = Instant.parse("2026-06-11T00:00:00Z");
 		setField(validator, "clock", Clock.fixed(now, ZoneOffset.UTC));
@@ -535,6 +586,58 @@ class CommonAssertionValidatorTest extends BaseLockServiceTest {
 		event.putArray("decisions").addObject().set("late_flag", TextNode.valueOf("x"));
 
 		assertEquals(List.of("trace.event.decisions[0].late_flag"), reservedMembersOf(root));
+	}
+
+	@Test
+	void testValidate_lockDerivedMemberInInvocationFacts_ignoredAndListed() throws IOException {
+		ObjectNode root = loadFixture();
+		ObjectNode event = (ObjectNode) root.get("trace").get("event");
+		event.putObject("invocation").set("capability_ids", TextNode.valueOf("x"));
+
+		assertEquals(List.of("trace.event.invocation.capability_ids"), reservedMembersOf(root));
+
+		root = loadFixture();
+		event = (ObjectNode) root.get("trace").get("event");
+		ArrayNode invocations = event.putArray("invocations");
+		invocations.addObject().set("invocation_id", TextNode.valueOf("clean"));
+		invocations.addObject().set("candidate_flag", TextNode.valueOf("x"));
+
+		assertEquals(List.of("trace.event.invocations[1].candidate_flag"), reservedMembersOf(root));
+	}
+
+	@Test
+	void testValidate_lockDerivedMemberInUnscannedLocations_notReserved() throws IOException {
+		ObjectNode root = loadFixture();
+		ObjectNode trace = (ObjectNode) root.get("trace");
+		ObjectNode event = (ObjectNode) trace.get("event");
+		ObjectNode subject = trace.putObject("subject");
+		ObjectNode nested = event.putObject("decision").putObject("nested");
+		for (String member : new String[] { "cnf", "content_digest", TraceConstants.DOMAIN_FIELD }) {
+			((ObjectNode) root.get("producer_chain")).set(member, TextNode.valueOf("x"));
+			((ObjectNode) root.get("parent_record_ids").get(0)).set(member, TextNode.valueOf("x"));
+			subject.set(member, TextNode.valueOf("x"));
+			((ObjectNode) event.get("tokens").get(0)).set(member, TextNode.valueOf("x"));
+			nested.set(member, TextNode.valueOf("x"));
+		}
+		((ObjectNode) event.get("tokens").get(0)).set("cnf_key_thumbprint", TextNode.valueOf("x"));
+
+		assertTrue(reservedMembersOf(root).isEmpty());
+	}
+
+	static Stream<String> allReservedMemberNames() {
+		return Stream.concat(Stream.of(TraceConstants.DOMAIN_FIELD), TraceConstants.LOCK_DERIVED_MEMBERS.stream());
+	}
+
+	@ParameterizedTest
+	@MethodSource("allReservedMemberNames")
+	void testValidate_everyReservedMemberName_flaggedAtTopLevelAndInTraceEvent(String member) throws IOException {
+		ObjectNode topLevel = loadFixture();
+		topLevel.set(member, TextNode.valueOf("x"));
+		assertEquals(List.of(member), reservedMembersOf(topLevel));
+
+		ObjectNode inEvent = loadFixture();
+		((ObjectNode) inEvent.get("trace").get("event")).set(member, TextNode.valueOf("x"));
+		assertEquals(List.of("trace.event." + member), reservedMembersOf(inEvent));
 	}
 
 	@Test

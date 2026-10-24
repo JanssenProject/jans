@@ -39,6 +39,9 @@ final class EventKindValidationSupport {
 	static final Set<String> INVOCATION_OUTCOMES = Collections
 			.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("SUCCESS", "FAILURE")));
 
+	static final Set<String> EFFECT_STATUSES = Collections.unmodifiableSet(
+			new LinkedHashSet<>(Arrays.asList("planned", "dispatched", "confirmed", "failed", "reverted")));
+
 	private static final int MAX_FACT_TEXT_LENGTH = 512;
 
 	private static final int MAX_FACT_ID_LENGTH = 256;
@@ -125,11 +128,28 @@ final class EventKindValidationSupport {
 		}
 	}
 
+	/**
+	 * Like {@link #requireNonEmptyString} but a missing or {@code null} member is accepted; a present
+	 * member must still be a non-empty string.
+	 */
+	static void optionalNonEmptyString(JsonNode parent, String field, String path) {
+		JsonNode node = parent.get(field);
+		if (node == null || node.isNull()) {
+			return;
+		}
+		requireNonEmptyString(parent, field, path, null);
+	}
+
 	static void optionalHashString(JsonNode parent, String field, String path) {
 		JsonNode node = parent.get(field);
 		if (node == null || node.isNull()) {
 			return;
 		}
+		requireHashString(parent, field, path);
+	}
+
+	static void requireHashString(JsonNode parent, String field, String path) {
+		JsonNode node = requireField(parent, field, path);
 		if (!node.isTextual()) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + path);
 		}

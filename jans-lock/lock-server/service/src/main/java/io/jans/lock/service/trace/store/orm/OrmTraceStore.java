@@ -34,6 +34,7 @@ import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.ReceiptHead;
+import io.jans.lock.service.trace.model.ReceiptSettlement;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -83,7 +84,7 @@ public class OrmTraceStore implements TraceStore {
 	private static final String ATTR_LAST_SERVED_AT_MS = "jansTraceLastServedAtMs";
 
 	/**
-	 * Bound on {@code updateReceiptState}/{@code revokeProducerKey}'s internal, caller-invisible
+	 * Bound on {@code settleReceipt}/{@code revokeProducerKey}'s internal, caller-invisible
 	 * compare-and-swap retry: unlike {@code updateRecordFlags}, neither method
 	 * has a multi-step "plan then insert" gap a caller needs to recover from, so a losing CAS here is
 	 * always safe to retry with a fresh read and the same idempotent recomputation, fully inside this
@@ -330,32 +331,41 @@ public class OrmTraceStore implements TraceStore {
 	}
 
 	@Override
-	public boolean updateReceiptState(String domainId, long receiptSequence, TraceReceiptState state)
+	public ReceiptSettlement settleReceipt(String domainId, long receiptSequence, TraceReceiptState target)
 			throws TraceStorageException {
+		if (target == null || target == TraceReceiptState.PENDING) {
+			throw new IllegalArgumentException("A receipt settles to COMMITTED or VOID, not " + target);
+		}
 		String key = traceKeys.receiptKey(domainId, receiptSequence);
 		String dn = TraceKeys.receiptDn(baseDn(), key);
 		for (int attempt = 1; attempt <= INTERNAL_CAS_RETRY_LIMIT; attempt++) {
 			if (!persistenceEntryManager.contains(dn, TraceReceiptEntry.class)) {
-				return false;
+				return ReceiptSettlement.NOT_FOUND;
 			}
 			TraceReceiptEntry entity;
 			try {
 				entity = persistenceEntryManager.find(dn, TraceReceiptEntry.class, null);
 			} catch (EntryPersistenceException e) {
 				log.debug("TRACE receipt {} disappeared before state update", key);
-				return false;
+				return ReceiptSettlement.NOT_FOUND;
 			}
-			// Idempotent: re-setting the same absolute state is always safe to retry.
-			entity.setReceiptState(state.name());
+			TraceReceiptState current = entity.getReceiptStateEnum();
+			if (current == target) {
+				return ReceiptSettlement.ALREADY_SETTLED;
+			}
+			if (current != TraceReceiptState.PENDING) {
+				return ReceiptSettlement.CONFLICT;
+			}
+			entity.setReceiptState(target.name());
 			try {
 				persistenceEntryManager.updateWithVersion(entity);
-				return true;
+				return ReceiptSettlement.SETTLED;
 			} catch (VersionMismatchException e) {
-				log.debug("TRACE receipt {} version conflict updating state, retrying (attempt {}/{})", key, attempt,
+				log.debug("TRACE receipt {} version conflict updating state, re-reading (attempt {}/{})", key, attempt,
 						INTERNAL_CAS_RETRY_LIMIT);
 			} catch (EntryPersistenceException e) {
 				log.debug("TRACE receipt {} disappeared before state update", key);
-				return false;
+				return ReceiptSettlement.NOT_FOUND;
 			}
 		}
 		throw new TraceStorageException("merge_failed",
