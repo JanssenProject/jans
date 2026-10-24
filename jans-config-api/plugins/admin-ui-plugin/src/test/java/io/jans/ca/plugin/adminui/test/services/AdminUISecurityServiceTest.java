@@ -197,6 +197,25 @@ public class AdminUISecurityServiceTest {
     }
 
     @Test
+    public void testUploadPolicyStore_invalidCedarlingArchiveReturnsBadRequest() throws Exception {
+        java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
+            zipOutput.putNextEntry(new java.util.zip.ZipEntry("invalid.txt"));
+            zipOutput.write("not a Cedarling policy store".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zipOutput.closeEntry();
+        }
+
+        AdminUIPolicyStore store = new AdminUIPolicyStore();
+        store.setDisplayname("invalid-store");
+        store.setPolicyStore(java.util.Base64.getEncoder().encodeToString(archiveBytes.toByteArray()));
+
+        ApplicationException ex = expectThrows(ApplicationException.class,
+                () -> adminUISecurityService.uploadPolicyStore(store));
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        verify(entryManager, never()).persist(any());
+    }
+
+    @Test
     public void testUploadPolicyStore_domainMismatchRejected() throws Exception {
         io.jans.configapi.core.model.adminui.AUIConfiguration auiConfiguration =
                 mock(io.jans.configapi.core.model.adminui.AUIConfiguration.class);

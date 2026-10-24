@@ -22,6 +22,8 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
+import uniffi.cedarling_uniffi.Cedarling;
+import uniffi.cedarling_uniffi.CedarlingException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
@@ -36,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -366,13 +369,13 @@ public class AdminUISecurityService {
     /**
      * Validates a policy-store upload request.
      *
-     * <p>Ensures the request and its base64 document are present, that the decoded bytes are a
-     * zip archive, and that the trusted-issuer domain inside the archive matches the configured
-     * Admin UI web-server host.</p>
+    * <p>Ensures the request and its base64 document are present, that the decoded bytes are a
+    * zip archive Cedarling can initialize, and that the trusted-issuer domain inside the archive
+    * matches the configured Admin UI web-server host.</p>
      *
      * @param adminUIPolicyStore the policy store to validate
-     * @throws ApplicationException with HTTP 400 if the request is missing/malformed, not a zip,
-     *         or its domain does not match the configured host
+    * @throws ApplicationException with HTTP 400 if the request is missing/malformed, not a zip,
+    *         Cedarling cannot initialize with it, or its domain does not match the configured host
      */
     private void validateRequest(AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         if (adminUIPolicyStore == null) {
@@ -413,10 +416,28 @@ public class AdminUISecurityService {
         }
 
         try (InputStream cjarStream = new ByteArrayInputStream(zipBytes)) {
+            JSONObject cedarlingConfig = new JSONObject()
+                    .put("CEDARLING_APPLICATION_NAME", "AdminUI")
+                    .put("CEDARLING_LOG_TYPE", "off")
+                    .put("CEDARLING_LOG_LEVEL", "INFO");
+            ByteBuffer archiveBuffer = ByteBuffer.allocateDirect(zipBytes.length);
+            archiveBuffer.put(zipBytes);
+            archiveBuffer.flip();
+            try (Cedarling cedarling = Cedarling.Companion.loadFromJsonWithArchiveBytes(
+                cedarlingConfig.toString(), archiveBuffer)) {
+                cedarling.shutDown();
+            }
+
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             validatePolicyStoreDomain(cjarStream, auiConfiguration.getAuiWebServerHost());
         } catch (ApplicationException e) {
             throw e;
+        } catch (CedarlingException e) {
+            log.error("Cedarling initialization failed for uploaded policy-store.", e);
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.POLICY_STORE_INITIALIZATION_ERROR.getDescription() + ": " + e.getMessage()
+            );
         } catch (URISyntaxException | IOException e) {
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),

@@ -74,6 +74,11 @@
             <version>0.5.2</version>
             <scope>test</scope>
         </dependency>
+        <!-- cedarling -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>cedarling-java</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
