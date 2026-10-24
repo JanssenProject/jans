@@ -25,7 +25,7 @@ sudo SUSEConnect -p PackageHub/15.5/x86_64
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```shell
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.suse16.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse16.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -36,17 +36,17 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-suse16-0.0.0-nightly.bundle
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-suse16-replace-janssen-version-stable.bundle
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-suse16-0.0.0-nightly.bundle \
+          --bundle jans-suse16-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans-0.0.0-nightly.suse16.x86_64.rpm
+          jans-replace-janssen-version-stable.suse16.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -58,19 +58,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans-0.0.0-nightly.suse16.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.suse16.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.suse16.x86_64.rpm.sha256sum
+    echo 'paste-release-sha256sum jans-replace-janssen-version-stable.suse16.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
       ```text
-      jans-0.0.0-nightly.suse16.x86_64.rpm: OK
+      jans-replace-janssen-version-stable.suse16.x86_64.rpm: OK
       ```
 
 - Install the package
 
 ```
-sudo zypper install ~/jans-0.0.0-nightly.suse16.x86_64.rpm
+sudo zypper install ~/jans-replace-janssen-version-stable.suse16.x86_64.rpm
 ```
 
 !!! note "Expected zypper prompt during install"
