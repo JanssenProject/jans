@@ -1860,6 +1860,73 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Receipt chain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#receipt-states" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Receipt states
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-lock-settles-an-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How Lock settles an entry
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Lock settles an entry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#late-insert-after-void" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Late insert after VOID
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#receipt-hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Receipt hash
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-a-verifier-can-conclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What a verifier can conclude
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2473,6 +2540,73 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Receipt chain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#receipt-states" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Receipt states
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-lock-settles-an-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How Lock settles an entry
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Lock settles an entry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#late-insert-after-void" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Late insert after VOID
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#receipt-hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Receipt hash
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-a-verifier-can-conclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What a verifier can conclude
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2843,7 +2977,8 @@
 <p><strong>Default-domain fallback.</strong> A client that falls back to <code>defaultEvidenceDomainId</code> has no forwarding permission of its own. Its allowlist is <code>defaultAllowedProducerIds</code> (default: empty), never <code>"*"</code>. With the default empty list, an unbound client can read and administer the default domain but cannot submit any record: every submission fails with <code>403 producer_not_allowed</code>. To let unbound clients submit for specific producers, list those producers in <code>defaultAllowedProducerIds</code>. To let a client forward for a producer other than itself, give the client an explicit <code>clientDomainBindings</code> entry.</p>
 <p><strong>Forwarding.</strong> A client may submit a record only if the binding's <code>allowedProducerIds</code> contains the signed <code>producer</code> string exactly, or contains <code>"*"</code>. Otherwise the request fails with <code>403 producer_not_allowed</code>.</p>
 <p><strong>Limits.</strong> Lock applies the request limits (<code>maxRequestBytes</code>, <code>maxJsonDepth</code>, <code>maxStringLength</code>, <code>maxArrayLength</code>, <code>maxObjectMembers</code>) before any cryptographic work. A request over a limit fails with <code>400 invalid_request</code>. For bulk requests, <code>maxBulkRecords</code> bounds the array length and <code>maxBulkRequestBytes</code> bounds the whole body (always clamped to 16 MiB). <code>maxRequestBytes</code> still bounds each record in the batch.</p>
-<p><strong>Lateness.</strong> A record is flagged <code>late_flag: true</code> when Lock receives it more than <code>latenessThresholdSeconds</code> after its <code>signed_at</code>. Lateness alone never rejects a record. A <code>signed_at</code> that is more than <code>maxFutureSkewSeconds</code> ahead of Lock's clock is rejected with <code>invalid_assertion</code> (<code>signed_at_in_future</code>). The two properties are independent.</p>
+<p><strong>Lateness.</strong> A record is flagged <code>late_flag: true</code> when Lock receives it more than <code>latenessThresholdSeconds</code> after its <code>signed_at</code>. Lateness alone never rejects a record. A <code>signed_at</code> that is more than <code>maxFutureSkewSeconds</code> ahead of Lock's clock is rejected with <code>400 invalid_assertion</code> and reason <code>signed_at_in_future</code>. The two properties are independent.</p>
+<p><strong>Future skew.</strong> <code>maxFutureSkewSeconds</code> defaults to <code>300</code>. A value of <code>0</code> or less falls back to <code>300</code>. Lock compares whole seconds on its own clock: <code>signed_at</code> equal to <code>now + maxFutureSkewSeconds</code> is accepted, one second more is rejected. A rejection stores nothing and uses no receipt position. The producer can fix its clock and re-sign with a corrected <code>signed_at</code>, or retry the unchanged assertion once Lock's clock reaches the permitted skew window. There is no lower bound: a <code>signed_at</code> in the past is never rejected. The check is a plausibility test on a producer claim. It does not make an accepted <code>signed_at</code> accurate. Use <code>receipt_sequence</code> for Lock receipt order. <code>received_at</code> is Lock's observation time.</p>
 <p><strong>Neighbor-update retries.</strong> After a record is stored, Lock updates derived flags on neighboring records. Each update is a compare-and-swap write against the neighbor's version. On a version conflict, Lock re-reads the neighbor, recomputes the flag from its current state and retries, up to <code>correlationRetryLimit</code> times. When the budget is exhausted Lock logs a warning and gives up on that update. It never fails the request.</p>
 <p><strong>Chain registration mode.</strong> <code>chainRegistrationMode</code> is <code>PRE_REGISTERED</code> (default) or <code>FIRST_OBSERVED</code>. See <a href="#chain-registration-modes">Chain registration modes</a>. A value that is not one of the two names is treated as <code>PRE_REGISTERED</code> and logged once at <code>WARN</code>.</p>
 <p><strong>Crypto provider.</strong> <code>cryptoProvider</code> selects the implementation that parses producer keys, canonicalizes assertions, verifies signatures and computes receipt hashes. Values are matched case-insensitively:</p>
@@ -2856,7 +2991,7 @@
 <p><code>NATIVE</code> rejects small-order Ed25519 public keys that BouncyCastle accepts. After you switch to <code>NATIVE</code>, a registered key of that kind fails with <code>unknown_producer_key</code> or <code>stored_key_unusable</code>. Check registered keys before you switch.</p>
 <p>A value that is not one of the two names is treated as <code>JAVA</code> and logged once at <code>WARN</code>: <code>Unknown traceConfiguration.cryptoProvider '&lt;value&gt;', using JAVA</code>.</p>
 <p><strong>Policy store release check.</strong> <code>policyMismatchGraceSeconds</code> (default <code>300</code>) is how long after the last node stops serving a policy store release records judged under it still count as matching; see the acceptance window below. <code>policyReleaseRetentionDays</code> (default <code>30</code>) is how long a release no node serves any more is kept before it is deleted. A mismatch only sets <code>policy_mismatch_flag</code>; it never rejects a record. See <a href="#policy-store-release-check">Policy store release check</a>.</p>
-<p><strong>Timers.</strong> The receipt repair timer runs every <code>receiptRepairIntervalSeconds</code>. It settles receipt claims that stayed <code>PENDING</code> longer than <code>pendingReceiptTimeoutSeconds</code> (see <a href="#deployment-constraints">Deployment constraints</a>). Setting <code>enabled</code> to <code>false</code> makes every TRACE endpoint return a structured <code>invalid_request</code> error with reason <code>trace_disabled</code> and stops the timer.</p>
+<p><strong>Timers.</strong> The receipt repair timer runs every <code>receiptRepairIntervalSeconds</code>. It settles receipt claims that stayed <code>PENDING</code> longer than <code>pendingReceiptTimeoutSeconds</code>, up to 500 per run (see <a href="#receipt-chain">Receipt chain</a> and <a href="#deployment-constraints">Deployment constraints</a>). Lock derives its ingest deadline from <code>pendingReceiptTimeoutSeconds</code>. It has no setting of its own. Setting <code>enabled</code> to <code>false</code> makes every TRACE endpoint return a structured <code>invalid_request</code> error with reason <code>trace_disabled</code> and stops the timer.</p>
 <h2 id="registering-producer-keys-and-chains">Registering producer keys and chains<a class="headerlink" href="#registering-producer-keys-and-chains" title="Permanent link">#</a></h2>
 <p>Lock accepts a producer key only through the admin API. It never accepts a public key because it accompanied a record. Possession of a signing key does not let the holder define its own producer identity. Registration, in the administrator's evidence domain, grants the authority.</p>
 <p>The examples below use a token with the <code>trace.admin</code> scope:</p>
@@ -3029,7 +3164,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <li><code>trace.subject.workload_id</code> is required (non-empty string, at most 255 characters) for <code>AUTHORIZATION_DECISION</code> and <code>CAPABILITY_INVOKED</code>. <code>workload_instance_id</code> is optional. For <code>RUNTIME_EFFECT</code> the subject is optional and is validated when present.</li>
 <li>Producers sign capability <em>facts</em>, not a governance label. An <code>AUTHORIZATION_DECISION</code> carries a singular <code>decision</code> and a <code>CAPABILITY_INVOKED</code> carries a singular <code>invocation</code>. Each has <code>action</code> and <code>resource_type</code> (the Cedar action and resource type, never a resource id) and an <code>outcome</code>. See <a href="#event-kinds">Event kinds</a>. Lock does not resolve capability ids.</li>
 <li><code>tokens[]</code> holds references only: <code>issuer</code>, <code>token_type</code>, and either <code>jti</code> or <code>fingerprint</code>. Never send a raw bearer token. Lock rejects material that looks like a JWT. Token identity is <code>(domain, issuer, jti)</code>, never a bare <code>jti</code>.</li>
-<li>A producer should not sign a member that Lock derives or assigns itself: <code>evidence_domain_id</code>, <code>cnf</code>, <code>content_digest</code>, <code>receipt_sequence</code>, <code>received_at</code>, <code>prev_receipt_hash</code>, <code>coverage_gap_flag</code>, <code>chain_link_failure_flag</code>, <code>equivocation_flag</code>, <code>late_flag</code>, <code>policy_mismatch_flag</code>, <code>reserved_member_flag</code>, <code>unattributed_flag</code>, <code>candidate_flag</code>, <code>key_resolved</code>, <code>key_temporally_valid</code>, <code>key_not_revoked</code>, <code>key_authorized_for_producer</code>, <code>producer_authorized_for_claim</code>, <code>key_thumbprint</code>, <code>key_authorization_ref</code>, <code>verified_at</code>, <code>trust_tier</code>, <code>capability_resolution</code>, <code>capability_id</code> and <code>capability_ids</code>. Lock checks the top level, <code>trace</code>, <code>trace.policy</code>, <code>trace.event</code> and each <code>decision</code> or <code>invocation</code> fact. A record that carries one is not rejected: the member is ignored, Lock uses its own derived values, and the record is accepted with <code>reserved_member_flag: true</code> (GovOps profile §12). The member stays in the stored and returned <code>assertion</code>, because the signature covers it; its value there is producer-supplied and ignored, and Lock's own values are in <code>ingestion</code> and <code>verification</code>. The paths are stored and returned as <code>reserved_members</code>, for example <code>["trace.trust_tier"]</code>. Only the first 32 are kept; Lock logs the total count. Lock resolves the verification key only from the producer key registry, never from a key in the body.</li>
+<li>A producer should not sign a member that Lock derives or assigns itself: <code>evidence_domain_id</code>, <code>cnf</code>, <code>content_digest</code>, <code>receipt_sequence</code>, <code>received_at</code>, <code>prev_receipt_hash</code>, <code>coverage_gap_flag</code>, <code>chain_link_failure_flag</code>, <code>equivocation_flag</code>, <code>late_flag</code>, <code>policy_mismatch_flag</code>, <code>reserved_member_flag</code>, <code>unattributed_flag</code>, <code>candidate_flag</code>, <code>key_resolved</code>, <code>key_temporally_valid</code>, <code>key_not_revoked</code>, <code>key_authorized_for_producer</code>, <code>producer_authorized_for_claim</code>, <code>key_thumbprint</code>, <code>key_authorization_ref</code>, <code>verified_at</code>, <code>trust_tier</code>, <code>capability_resolution</code>, <code>capability_id</code> and <code>capability_ids</code>. Lock checks the top level, <code>trace</code>, <code>trace.policy</code>, <code>trace.event</code>, the singular <code>decision</code> and <code>invocation</code>, and each entry of <code>decisions[]</code> and <code>invocations[]</code>. It does not check <code>producer_chain</code>, <code>parent_record_ids[]</code>, <code>trace.subject</code>, <code>trace.runtime</code> or <code>tokens[]</code>, so a member with a reserved name there is not flagged. A record that carries one is not rejected: the member is ignored, Lock uses its own derived values, and the record is accepted with <code>reserved_member_flag: true</code> (GovOps profile §12). The member stays in the stored and returned <code>assertion</code>, because the signature covers it; its value there is producer-supplied and ignored, and Lock's own values are in <code>ingestion</code> and <code>verification</code>. The paths are stored and returned as <code>reserved_members</code>, for example <code>["trace.trust_tier"]</code>. Only the first 32 are kept, and the flag stays <code>true</code> when more were found. Lock logs the total count. A <code>cnf</code> member never supplies, replaces or limits a key. Lock resolves the verification key only from the producer key registry, never from a key in the body.</li>
 <li><code>producer_chain</code> can carry an optional <code>chain_link</code> member that references the previous chain head. It must be a JSON object, and only a genesis record (<code>sequence_number</code> 1) can carry it. On any other record Lock returns <code>400 invalid_genesis</code> with reason <code>chain_link_on_non_genesis</code>. Lock checks that <code>prev_producer_chain_id</code>, when present, is a non-empty string. It keeps the member unchanged inside the signed assertion, returns it unchanged on retrieval, and does not validate the link against the prior chain.</li>
 <li>The first record of a chain has <code>sequence_number</code> 1 and <code>prev_record_hash</code> set to <code>sha256:</code> followed by 64 zeros. Any other record needs the previous record's <code>content_digest</code> in <code>prev_record_hash</code>.</li>
 </ul>
@@ -3119,16 +3254,68 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <tr>
 <td><code>RUNTIME_EFFECT</code></td>
 <td>Target system or trusted observer</td>
-<td><code>trace.event.outcome</code>. It carries no <code>decision</code>, <code>decisions</code>, <code>invocation</code> or <code>invocations</code>. It normally has a <code>produced_effect</code> parent in <code>parent_record_ids</code>. Lock accepts it without one and notes a warning at debug level.</td>
+<td><code>trace.event.effect_status</code> (required): <code>planned</code>, <code>dispatched</code>, <code>confirmed</code>, <code>failed</code> or <code>reverted</code>. <code>trace.event.outcome</code>, required for every status except <code>planned</code>. <code>trace.event.result_digest</code>, required when the status is <code>confirmed</code>. It carries no <code>decision</code>, <code>decisions</code>, <code>invocation</code>, <code>invocations</code> or <code>trace.policy</code>. It normally has a <code>produced_effect</code> parent in <code>parent_record_ids</code>. Lock accepts it without one and notes a warning at debug level.</td>
 </tr>
 </tbody>
 </table>
+<p>Rules for <code>RUNTIME_EFFECT</code>:</p>
+<ul>
+<li><code>effect_status</code> is lowercase and matches exactly. Lock stores nothing extra for it: there is no index attribute and no response member. The value stays in the signed assertion.</li>
+<li><code>outcome</code> is free text. It is optional for <code>planned</code>. When present on a <code>planned</code> record, it must still be a non-empty string.</li>
+<li><code>result_digest</code> is <code>sha256:</code> followed by 64 lowercase hex characters. It is required for <code>confirmed</code> and optional for the other statuses. Lock checks the format from the record bytes alone. It does not compare the digest with a real result.</li>
+<li>Lock rejects a violation with <code>400 invalid_assertion</code> and one of these reasons:</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>Cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>missing:trace.event.effect_status</code></td>
+<td>The member is absent.</td>
+</tr>
+<tr>
+<td><code>type:trace.event.effect_status</code></td>
+<td>The value is not a string.</td>
+</tr>
+<tr>
+<td><code>invalid:trace.event.effect_status</code></td>
+<td>The value is not one of the five names. This includes a different letter case, for example <code>CONFIRMED</code>.</td>
+</tr>
+<tr>
+<td><code>missing:trace.event.outcome</code></td>
+<td><code>outcome</code> is absent and the status is not <code>planned</code>.</td>
+</tr>
+<tr>
+<td><code>empty:trace.event.outcome</code></td>
+<td><code>outcome</code> is an empty string.</td>
+</tr>
+<tr>
+<td><code>missing:trace.event.result_digest</code></td>
+<td>The status is <code>confirmed</code> and the digest is absent.</td>
+</tr>
+<tr>
+<td><code>invalid:trace.event.result_digest</code></td>
+<td>The digest is not in the <code>sha256:</code> form.</td>
+</tr>
+</tbody>
+</table>
+<p>A minimal <code>trace.event</code> for a confirmed effect:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;event&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;effect_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;confirmed&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;outcome&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment_posted&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;result_digest&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:&lt;64 lowercase hex characters&gt;&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
 <p>Rules for the capability facts:</p>
 <ul>
 <li><code>action</code> and <code>resource_type</code> are non-empty strings of at most 512 characters.</li>
 <li>For <code>AUTHORIZATION_DECISION</code>, <code>outcome</code> is <code>ALLOW</code> or <code>DENY</code>. For <code>CAPABILITY_INVOKED</code>, <code>outcome</code> is <code>SUCCESS</code> or <code>FAILURE</code>. The vocabularies are distinct, so an invocation with <code>ALLOW</code> or a decision with <code>SUCCESS</code> returns <code>400 invalid_assertion</code> with reason <code>invalid:trace.event.invocation.outcome</code> (or <code>invalid:trace.event.decision.outcome</code>, or the indexed plural path such as <code>invalid:trace.event.invocations[0].outcome</code>).</li>
 <li>An atomic batch evaluation can use the plural form instead. Each entry carries a <code>decision_id</code> or <code>invocation_id</code> (non-empty, at most 256 characters, unique within the array) and repeats <code>action</code>, <code>resource_type</code> and <code>outcome</code>. The record-level <code>trace.event.outcome</code> is not allowed in either form.</li>
-<li>Operation-binding digests are optional members of <code>trace.event</code>: <code>request_digest</code>, <code>input_digest</code> and <code>tool_call_digest</code> on <code>AUTHORIZATION_DECISION</code>, and <code>request_digest</code>, <code>tool_call_digest</code> and <code>result_digest</code> on <code>CAPABILITY_INVOKED</code> (and <code>result_digest</code> on <code>RUNTIME_EFFECT</code>). A present digest is <code>sha256:</code> followed by 64 lowercase hex characters. Any other string returns <code>400 invalid_assertion</code> with reason <code>invalid:trace.event.&lt;member&gt;</code>, and a non-string value returns <code>type:trace.event.&lt;member&gt;</code>. Lock stores them in the signed assertion and does not interpret them. <code>trace.policy.bundle_hash</code> keeps its own rule, which also accepts other <code>algorithm:digest</code> forms.</li>
+<li>Operation-binding digests are optional members of <code>trace.event</code>: <code>request_digest</code>, <code>input_digest</code> and <code>tool_call_digest</code> on <code>AUTHORIZATION_DECISION</code>, and <code>request_digest</code>, <code>tool_call_digest</code> and <code>result_digest</code> on <code>CAPABILITY_INVOKED</code> (and <code>result_digest</code> on <code>RUNTIME_EFFECT</code>, where <code>confirmed</code> requires it). A present digest is <code>sha256:</code> followed by 64 lowercase hex characters. Any other string returns <code>400 invalid_assertion</code> with reason <code>invalid:trace.event.&lt;member&gt;</code>, and a non-string value returns <code>type:trace.event.&lt;member&gt;</code>. Lock stores them in the signed assertion and does not interpret them. <code>trace.policy.bundle_hash</code> keeps its own rule, which also accepts other <code>algorithm:digest</code> forms.</li>
 <li>Both the singular and the plural member in one record, and a <code>resource_id</code> inside a fact, are rejected with <code>400 invalid_assertion</code> (reason such as <code>forbidden:trace.event.decisions</code>). A signed <code>capability_ids</code> is a Lock-derived member: it is ignored and flagged with <code>reserved_member_flag</code>.</li>
 </ul>
 <p>Lock validates the schema for the declared kind and rejects fields that contradict it. Lock does not infer that an authorization caused an invocation because their timestamps are close. Producers state causal relationships in <code>parent_record_ids</code>.</p>
@@ -3251,7 +3438,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <tr>
 <td><code>invalid_assertion</code></td>
 <td>400</td>
-<td>A schema violation in the assertion. <code>reason</code> names the field.</td>
+<td>A schema violation in the assertion. <code>reason</code> names the field. A <code>signed_at</code> ahead of Lock's clock by more than <code>maxFutureSkewSeconds</code> has reason <code>signed_at_in_future</code>. A <code>RUNTIME_EFFECT</code> without a valid <code>effect_status</code> has a reason from <a href="#event-kinds">Event kinds</a>.</td>
 </tr>
 <tr>
 <td><code>unsupported_profile</code></td>
@@ -3336,12 +3523,49 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <tr>
 <td><code>storage_failure</code></td>
 <td>500</td>
-<td>Persistence failed, or receipt allocation ran out of retries.</td>
+<td>Persistence failed. The <code>reason</code> names the case; see the table below this one.</td>
 </tr>
 <tr>
 <td><code>crypto_unavailable</code></td>
 <td>500</td>
 <td>The selected crypto provider (<code>cryptoProvider</code>) is not available or has no Ed25519 support. Lock fails closed and does not fall back to the other provider.</td>
+</tr>
+</tbody>
+</table>
+<p>Reasons of <code>storage_failure</code> that come from the receipt protocol (see <a href="#receipt-chain">Receipt chain</a>):</p>
+<table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>When</th>
+<th>Stored?</th>
+<th>Producer action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>receipt_allocation_exhausted</code></td>
+<td>No receipt position could be claimed within <code>receiptAllocationRetryLimit</code> tries.</td>
+<td>No.</td>
+<td>Send again.</td>
+</tr>
+<tr>
+<td><code>receipt_claim_expired</code></td>
+<td>The request passed its ingest deadline before the record insert. Lock settles the claim <code>VOID</code>.</td>
+<td>No.</td>
+<td>Send again. The new request claims a new position.</td>
+</tr>
+<tr>
+<td><code>race_record_missing</code></td>
+<td>Another request won the identity race and Lock cannot read its record. Lock settles the claim <code>VOID</code>.</td>
+<td>No.</td>
+<td>Send again.</td>
+</tr>
+<tr>
+<td><code>receipt_void_after_insert</code></td>
+<td>The record was stored after its claim became <code>VOID</code>.</td>
+<td>Yes. The record is kept.</td>
+<td>Do not expect success from a resend. See <a href="#late-insert-after-void">Late insert after VOID</a>.</td>
 </tr>
 </tbody>
 </table>
@@ -3433,11 +3657,14 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <span class="p">}</span>
 </code></pre></div>
 <ul>
-<li><code>assertion_raw</code> is the exact accepted text: Lock stores the request body as received and returns it unchanged, byte for byte. Lock never adds resolved claims, status, or receipt data to it.</li>
-<li><code>assertion</code> is the same text parsed as a JSON value. It is a re-emission, so member order, whitespace and number formatting can differ from the signed bytes. Use it when you want structure and <code>assertion_raw</code> when you need the original text.</li>
-<li>Both forms verify. The signature and <code>content_digest</code> are defined over the JCS (RFC 8785) form, and the JCS form of <code>assertion</code> and of <code>assertion_raw</code> is identical.</li>
+<li><code>assertion_raw</code> is the decoded JSON text of the accepted request. Lock decodes the body as UTF-8, rejects malformed UTF-8 and a leading byte-order mark, stores the text unchanged and returns it unchanged. It applies no normalization: whitespace, member order, number spelling, and the choice between a literal character and a <code>\uXXXX</code> escape stay as sent. Encoding <code>assertion_raw</code> as UTF-8 gives back the bytes of the request. For a record sent in a bulk request, the text is the source text of that array element. Lock never adds resolved claims, status, or receipt data to it. It is the source for archives and offline verification.</li>
+<li><code>assertion</code> is the same text parsed as a JSON value. It is a re-emission, so member order, whitespace and number formatting can differ from the signed bytes. Use it when you want structure and <code>assertion_raw</code> when you need the original text. If the two differ, <code>assertion_raw</code> decides.</li>
+<li>Both forms verify. The signature and <code>content_digest</code> are defined over the JCS (RFC 8785) form. The JCS form of <code>assertion</code> and of <code>assertion_raw</code> is identical because parsed values, member names and array order are preserved and because the parser enforces JCS-compatible input.</li>
+<li>Number and Unicode rules that follow from this: <code>1e2</code>, <code>100.0</code> and <code>100</code> are the same JCS number, and so are <code>-0</code> and <code>0</code>. Do not sign an integer above 2^53-1: Lock uses its exact digits, and a verifier that rounds to a double computes a different digest. A number that overflows a double (<code>1e400</code>), <code>NaN</code>, <code>Infinity</code>, <code>+1</code>, <code>01</code>, <code>.5</code> and <code>1.</code> are rejected. A literal character and its <code>\uXXXX</code> escape are the same value. Precomposed and combining forms of a character are different values: Lock does not normalize. A lone surrogate escape is rejected with <code>invalid_request</code> and reason <code>not_canonicalizable</code>. Duplicate member names are rejected, also when one is written as an escape.</li>
+<li><code>maxRequestBytes</code> bounds the size of <code>assertion_raw</code>. The <code>MEDIUMTEXT</code> and <code>TEXT</code> storage columns are larger.</li>
 <li><code>verification</code> records the admission decision Lock made at <code>verified_at</code>. It is written once at ingestion and never recomputed from the current key registry. <code>key_thumbprint</code> pins the exact key, independently of the non-unique <code>kid</code> selector: it is <code>sha256:</code> plus the lowercase hex SHA-256 of the RFC 7638 required-members JSON of the key (<code>{"crv":"Ed25519","kty":"OKP","x":"&lt;x&gt;"}</code>). <code>key_authorized</code> is a single boolean. It states that the key existed, was inside its validity window, was not revoked, was registered for the <code>producer_id</code> and was authorized for the record's <code>event_kind</code>. Every stored record has <code>key_authorized: true</code>, because a record that fails any admission check is rejected and never stored. Later revocation, expiry or re-scoping of the key never rewrites these values. Records stored before these two members existed omit them.</li>
 <li><code>ingestion</code> is Lock-derived metadata.</li>
+<li><code>ingestion.receipt_state</code> is <code>COMMITTED</code>, or <code>PENDING</code> for the short time before Lock settles the entry. Lock reads it from the receipt entry when it builds the response. It is not stored on the record. A stored record never shows <code>VOID</code>, with one exception: a record stored by a <a href="#late-insert-after-void">late insert after <code>VOID</code></a> shows <code>VOID</code>.</li>
 </ul>
 <p>If <code>producer_id</code> (or <code>execution_authority</code>) is omitted and the bare identifier matches more than one producer (or authority) in the domain, Lock returns <code>409 ambiguous_identifier</code>. It never guesses.</p>
 <h3 id="search-by-policy-store-release">Search by policy store release<a class="headerlink" href="#search-by-policy-store-release" title="Permanent link">#</a></h3>
@@ -3547,26 +3774,153 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <li><code>prev_receipt_hash</code>: the hash of the preceding receipt entry.</li>
 <li><code>receipt_hash</code>: the hash of this entry.</li>
 </ul>
-<p>Every receipt entry has a state: <code>PENDING</code> while Lock stores the record, <code>COMMITTED</code> once the record is stored, and <code>VOID</code> if the record was never stored. The retrieval response carries the state of a record's receipt entry as <code>ingestion.receipt_state</code>. A stored record shows <code>COMMITTED</code>, or <code>PENDING</code> during the short window between storing the record and settling its claim. It never shows <code>VOID</code>.</p>
-<p>The receipt hash binds the receipt profile tag <code>receipt_profile</code> (<code>tag:jans.io,2026:lock-trace-receipt-v1</code>), <code>evidence_domain_id</code>, <code>receipt_sequence</code>, <code>received_at</code>, <code>producer_id</code>, <code>record_id</code>, <code>content_digest</code>, and <code>prev_receipt_hash</code>. The hash input is the JCS canonical form of those eight members. <code>receipt_profile</code> is a string constant in every hash input. A change to this member set needs a new profile tag. <code>received_at</code> enters the hash as a JSON string in the RFC 3339 form with three fractional digits and <code>Z</code> (<code>2026-06-11T00:41:02.123Z</code>), and <code>receipt_sequence</code> as a JSON integer. A value shown without milliseconds would not reproduce the receipt hash. The first entry in a domain uses the all-zero sentinel as its <code>prev_receipt_hash</code>.</p>
-<p>A verifier can walk the receipts by sequence, recompute each hash, and check each committed entry against the stored record. This makes local insertion, deletion, and rewriting detectable.</p>
-<p>A verifier must accept a <code>VOID</code> entry whose hash and <code>prev_receipt_hash</code> linkage verify and which has no stored record. A <code>VOID</code> entry is a chain position that Lock allocated and then abandoned. It is not a missing entry, and a verifier must not report it as a gap. A <code>VOID</code> entry that has a stored record is an inconsistency. The receipt state is not part of the receipt hash, so settling an entry never changes the hashes of the chain.</p>
+<p>Lock writes the receipt entry and the record as two separate rows: it claims the position, inserts the record, then settles the entry. It is not one atomic write (see <a href="#deployment-constraints">Deployment constraints</a>).</p>
+<h3 id="receipt-states">Receipt states<a class="headerlink" href="#receipt-states" title="Permanent link">#</a></h3>
+<p>Every receipt entry has one of three states. The state is not part of the receipt hash.</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PENDING</code></td>
+<td>Lock claimed the position and has not settled it. Every entry starts here.</td>
+</tr>
+<tr>
+<td><code>COMMITTED</code></td>
+<td>The record that carries this entry is stored.</td>
+</tr>
+<tr>
+<td><code>VOID</code></td>
+<td>Lock allocated the position and abandoned it. Normally no record carries it.</td>
+</tr>
+</tbody>
+</table>
+<p>The only allowed transitions are <code>PENDING</code> to <code>COMMITTED</code> and <code>PENDING</code> to <code>VOID</code>. <code>COMMITTED</code> and <code>VOID</code> are terminal and never change. Applying the state an entry already has succeeds and changes nothing. Applying the other terminal state is a conflict and changes nothing. Each transition is a compare-and-swap on that one entry. On a version mismatch Lock re-reads the entry and applies the rules again, up to a fixed bound. If the retries run out, the entry stays <code>PENDING</code> and the repair timer settles it.</p>
+<p>The retrieval response carries the state as <code>ingestion.receipt_state</code> (see <a href="#retrieval">Retrieval</a>).</p>
+<h3 id="how-lock-settles-an-entry">How Lock settles an entry<a class="headerlink" href="#how-lock-settles-an-entry" title="Permanent link">#</a></h3>
+<p>A claim is satisfied if and only if the record stored under the claim's identity carries this receipt sequence and this <code>content_digest</code>. A record under the same identity with another receipt sequence belongs to another claim and does not satisfy it.</p>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Lock settles the entry as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The record insert succeeded.</td>
+<td><code>COMMITTED</code>. If this write fails, the entry stays <code>PENDING</code> and the repair timer settles it.</td>
+</tr>
+<tr>
+<td>The insert reported a failure, but a re-read shows the record is stored under this claim (for example a timeout after the database committed).</td>
+<td><code>COMMITTED</code>. The request succeeds.</td>
+</tr>
+<tr>
+<td>The insert failed and the re-read shows no record.</td>
+<td><code>VOID</code>. The request fails.</td>
+</tr>
+<tr>
+<td>The insert failed and the re-read failed too.</td>
+<td>Left <code>PENDING</code>. The request fails with the original failure. The repair timer settles it.</td>
+</tr>
+<tr>
+<td>Another request already stored the same identity.</td>
+<td><code>VOID</code>. The answer comes from the stored record.</td>
+</tr>
+<tr>
+<td>The repair timer finds a <code>PENDING</code> entry older than <code>pendingReceiptTimeoutSeconds</code> (counted from <code>received_at</code>) and the claim is satisfied.</td>
+<td><code>COMMITTED</code>.</td>
+</tr>
+<tr>
+<td>The repair timer finds such an entry and the claim is not satisfied.</td>
+<td><code>VOID</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>The repair timer never touches a <code>PENDING</code> entry younger than <code>pendingReceiptTimeoutSeconds</code>.</p>
+<p><strong>Ingest deadline.</strong> When Lock claims a position, it notes the time on its own clock. If its clock is past that time plus half of <code>pendingReceiptTimeoutSeconds</code> (60 seconds with the default of 120) just before the record insert, Lock does not insert. It settles the entry <code>VOID</code> and fails the request with <code>500 storage_failure</code> and reason <code>receipt_claim_expired</code>. Nothing is stored. The producer can send the record again, and the new request claims a new position. The deadline is half of the timeout, so it stays below the age at which the repair timer may void a claim. The other half covers clock differences between nodes, a database round trip and the time between receipt of the request and the claim.</p>
+<h4 id="late-insert-after-void">Late insert after VOID<a class="headerlink" href="#late-insert-after-void" title="Permanent link">#</a></h4>
+<p>The deadline narrows the window in which a record is inserted after the repair timer voided its claim. It cannot close the window, because the database ORM has no multi-entry transaction. A worker that passes the check and then stalls until the repair timer voids its claim can still insert the record. In that case:</p>
+<ul>
+<li>Lock never deletes the record. Records are immutable: a retry may already have been told the record was accepted, and other nodes may have derived flags from it.</li>
+<li>The entry stays <code>VOID</code>. The stored record carries a receipt that is <code>VOID</code>, and retrieval shows <code>ingestion.receipt_state</code> <code>VOID</code>.</li>
+<li>Lock does not update the flags of neighboring records because of this record. It logs the case at error level.</li>
+<li>The request fails with <code>500 storage_failure</code> and reason <code>receipt_void_after_insert</code>.</li>
+<li>A resend of the same content does not succeed. Lock does not acknowledge a record with a <code>VOID</code> receipt as a duplicate. It fails the same way. A resend with different content gets <code>409 record_conflict</code>.</li>
+<li>The record identity stays blocked until an operator acts. An administrative operation that gives the record a new receipt position is not implemented (see <a href="#deferred-features">Deferred features</a>).</li>
+</ul>
+<p>This case needs a worker that stalls past the deadline, so it is rare.</p>
+<h3 id="receipt-hash">Receipt hash<a class="headerlink" href="#receipt-hash" title="Permanent link">#</a></h3>
+<p>The receipt hash binds the receipt profile tag <code>receipt_profile</code> (<code>tag:jans.io,2026:lock-trace-receipt-v1</code>), <code>evidence_domain_id</code>, <code>receipt_sequence</code>, <code>received_at</code>, <code>producer_id</code>, <code>record_id</code>, <code>content_digest</code>, and <code>prev_receipt_hash</code>. The list is closed for this profile: no other member is hashed, and the receipt state is not hashed. The hash is <code>sha256:</code> followed by the lowercase hex SHA-256 of the UTF-8 bytes of the JCS canonical form of those eight members. <code>receipt_profile</code> is a string constant in every hash input. A different <code>receipt_profile</code> value means a different hash input, and a change to this member set needs a new profile tag. <code>received_at</code> enters the hash as a JSON string in the RFC 3339 form with three fractional digits and <code>Z</code> (<code>2026-06-11T00:41:02.123Z</code>), and <code>receipt_sequence</code> as a JSON integer. A value shown without milliseconds would not reproduce the receipt hash. The first entry in a domain uses the all-zero sentinel <code>sha256:0000000000000000000000000000000000000000000000000000000000000000</code> as its <code>prev_receipt_hash</code>.</p>
+<p>A writer can claim position n+1 while position n is still <code>PENDING</code>. The <code>prev_receipt_hash</code> of n+1 is the hash of entry n, whatever state n is in. Settling an entry never changes the hashes of the chain.</p>
+<h3 id="what-a-verifier-can-conclude">What a verifier can conclude<a class="headerlink" href="#what-a-verifier-can-conclude" title="Permanent link">#</a></h3>
+<p>From the receipt chain alone, a verifier can conclude:</p>
+<ul>
+<li>the hash of each entry, by recomputing it from the eight members;</li>
+<li>the linkage: each <code>prev_receipt_hash</code> equals the hash of the entry before it;</li>
+<li>the density: every sequence from 1 to the head has an entry; and</li>
+<li>that Lock allocated each position.</li>
+</ul>
+<p>The chain alone does not prove the state of an entry. The state is outside the hash, so the hash does not prove that an entry is <code>COMMITTED</code> or <code>VOID</code>. A verifier needs more for these conclusions:</p>
+<table>
+<thead>
+<tr>
+<th>Conclusion</th>
+<th>What the verifier needs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A record exists.</td>
+<td>An online lookup in the same evidence domain.</td>
+</tr>
+<tr>
+<td>A record is authentic.</td>
+<td>Check the record's signature and <code>content_digest</code>.</td>
+</tr>
+<tr>
+<td>An authenticated statement of an entry's state.</td>
+<td>A separately signed assertion. TRACE does not define one yet.</td>
+</tr>
+</tbody>
+</table>
+<p>A <code>VOID</code> entry keeps the chain continuous. It does not prove cryptographically that Lock accepted no record at that position.</p>
+<p>A verifier must accept a <code>VOID</code> entry whose hash and <code>prev_receipt_hash</code> linkage verify and which has no stored record. It is a position that Lock allocated and then abandoned, not a missing entry. A verifier must not report it as a gap. With an online lookup, a verifier reports these as defects:</p>
+<ul>
+<li>a <code>COMMITTED</code> entry with no stored record, or whose record carries another receipt sequence or another <code>content_digest</code>; and</li>
+<li>a <code>VOID</code> entry whose identity has a record that carries this entry's receipt sequence and <code>content_digest</code> (a <a href="#late-insert-after-void">late insert</a>).</li>
+</ul>
+<p>A <code>VOID</code> entry whose identity has a record with another receipt sequence is not a defect. That record belongs to the claim that won the identity race.</p>
 <div class="admonition warning">
 <p class="admonition-title">What the receipt chain does not protect against</p>
 <p>The receipt chain is local tamper evidence only. It has no signed checkpoints and no independent external anchor. It does not protect against an operator who can rewrite the whole chain, including every hash. Do not describe the receipt chain as proof of integrity against such an operator, and do not describe TRACE evidence as settled, complete, or externally anchored.</p>
 </div>
 <p>Producer order, Lock receipt order, and causal relationships are separate things. Producer order is what one producer signed in sequence. Receipt order is when Lock accepted records. <code>parent_record_ids</code> carries the causal relationships a producer asserted. None of them is a global event clock.</p>
 <h2 id="deployment-constraints">Deployment constraints<a class="headerlink" href="#deployment-constraints" title="Permanent link">#</a></h2>
-<p><strong>Multi-node deployments.</strong> The database ORM provides no transactions or sequences, so Lock allocates receipt positions using only primary-key uniqueness:</p>
+<p><strong>Multi-node deployments.</strong> The database ORM gives Lock two things for TRACE: per-entry compare-and-swap through <code>PersistenceEntryManager.updateWithVersion</code> (it throws <code>VersionMismatchException</code>; added in commit <code>393cd48bac9</code>, PR #15255) and primary-key uniqueness on insert. It has no multi-entry transaction and no sequence allocator. Lock does not target Couchbase or Spanner for TRACE, because they do not implement the compare-and-swap. The protocol below is the selected protocol under these persistence APIs. It is not the only possible protocol.</p>
 <ol>
-<li>A node reads the highest receipt and proposes the next sequence number.</li>
-<li>It inserts a <code>PENDING</code> receipt claim at that position. If another node claimed it first, the node re-reads and retries, up to <code>receiptAllocationRetryLimit</code> times, then fails with <code>500 storage_failure</code>.</li>
-<li>It stores the record, then marks the claim <code>COMMITTED</code>. If storing fails, it marks the claim <code>VOID</code>.</li>
+<li>A node reads the highest receipt, in any state, and proposes the next sequence number.</li>
+<li>It inserts a <code>PENDING</code> receipt claim at that position. If another node claimed it first, the node re-reads and retries, up to <code>receiptAllocationRetryLimit</code> times (default 8), then fails with <code>500 storage_failure</code> and reason <code>receipt_allocation_exhausted</code>.</li>
+<li>It stores the record, which carries the receipt sequence. Then it settles the claim as <code>COMMITTED</code>. If storing fails, it settles the claim as described in <a href="#how-lock-settles-an-entry">Receipt chain</a>.</li>
 </ol>
-<p>A node that stops between steps leaves a <code>PENDING</code> claim. The repair timer settles claims older than <code>pendingReceiptTimeoutSeconds</code>: <code>COMMITTED</code> if the record exists, otherwise <code>VOID</code>. <code>VOID</code> entries keep the chain dense and verifiable, because the receipt state is not part of the receipt hash. A claim without a record is never returned by any API.</p>
-<p>The database ORM has no transactions, so storing the record and appending its receipt entry is not a single atomic write. A failed request leaves no stored record, no index entry, and no <code>COMMITTED</code> receipt entry. It can leave a <code>VOID</code> receipt entry at the allocated position, and a <code>PENDING</code> entry is visible between the claim and its settlement. After a node stops, a <code>PENDING</code> entry stays until the repair timer settles it. That takes up to <code>pendingReceiptTimeoutSeconds</code> plus <code>receiptRepairIntervalSeconds</code>. A <code>VOID</code> entry stays in the chain permanently, because the <code>prev_receipt_hash</code> of the next entry binds its hash.</p>
+<p>A node that stops between steps leaves a <code>PENDING</code> claim. The repair timer settles claims older than <code>pendingReceiptTimeoutSeconds</code>: <code>COMMITTED</code> if the claim is satisfied, otherwise <code>VOID</code>. <code>VOID</code> entries keep the chain dense and verifiable, because the receipt state is not part of the receipt hash.</p>
+<p>Storing the record and appending its receipt entry is not a single atomic write. This has these consequences:</p>
+<ul>
+<li>A failed request leaves no stored record and no index entry. It can leave a <code>VOID</code> receipt entry at the allocated position. A <code>VOID</code> entry stays in the chain permanently, because the <code>prev_receipt_hash</code> of the next entry binds its hash.</li>
+<li>A <code>PENDING</code> entry is visible between the claim and its settlement. After a node stops, it stays until the repair timer settles it. That takes up to <code>pendingReceiptTimeoutSeconds</code> plus <code>receiptRepairIntervalSeconds</code> (defaults 120 and 300 seconds), as long as the backlog fits one repair run of 500 entries.</li>
+<li>The one exception to "no stored record" is the <a href="#late-insert-after-void">late insert after <code>VOID</code></a>: the record stays, shows <code>receipt_state</code> <code>VOID</code>, and the request fails.</li>
+</ul>
 <p><strong>Request size and column size.</strong> <code>maxRequestBytes</code> limits the size of one request body. The stored assertion is kept as text in a <code>MEDIUMTEXT</code> column on MySQL and a <code>TEXT</code> column on PostgreSQL. Keep <code>maxRequestBytes</code> and the per-record limit inside the bulk path well below the size of that column type for your database, and raise the limits only after checking it. Many TRACE identifiers are stored in <code>VARCHAR</code> columns of fixed width, which Lock's validation keeps the values within.</p>
 <p><strong>Upgrading.</strong> Search by policy store release, <code>policy_mismatch_flag</code> and <code>reserved_member_flag</code> use columns added in this release. An existing VM install must add them once; see <a href=".././lock-server/#upgrading-an-existing-deployment">Upgrading an Existing Deployment</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Breaking change for <code>RUNTIME_EFFECT</code> producers</p>
+<p><code>trace.event.effect_status</code> is now required on every <code>RUNTIME_EFFECT</code> record. Lock has no tolerance for a missing value. A producer that sent only <code>outcome</code> gets <code>400 invalid_assertion</code> with reason <code>missing:trace.event.effect_status</code>, and nothing is stored. Before you upgrade Lock, update each <code>RUNTIME_EFFECT</code> producer to sign one of <code>planned</code>, <code>dispatched</code>, <code>confirmed</code>, <code>failed</code> or <code>reverted</code>. A <code>confirmed</code> record also needs <code>result_digest</code>. Records that Lock stored earlier are not changed and stay retrievable.</p>
+<p>Receipt entries now have terminal states and an ingest deadline. See <a href="#receipt-chain">Receipt chain</a>. No schema change is needed for this.</p>
+</div>
 <p><strong>Time.</strong> Lock uses <code>received_at</code> for receipt order and treats <code>signed_at</code> as a producer claim. Keep node clocks synchronized.</p>
 <h2 id="deferred-features">Deferred features<a class="headerlink" href="#deferred-features" title="Permanent link">#</a></h2>
 <p>The current release does not implement:</p>
@@ -3577,6 +3931,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <li>settlement assessments or Lock-signed settlement receipts;</li>
 <li>execution completeness or assurance profiles;</li>
 <li>lineage checkpoints, <code>chain_link</code> validation, or claims of complete producer history;</li>
+<li>an administrative operation that gives a record with a <code>VOID</code> receipt a new receipt position, so the identity of a <a href="#late-insert-after-void">late insert</a> stays blocked until an operator acts;</li>
 <li>signed receipt checkpoints or external transparency anchoring;</li>
 <li>Evidence Packet export;</li>
 <li>delegation non-expansion analysis and authorization-transition reconstruction;</li>
@@ -3655,7 +4010,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 21, 2026
+    October 24, 2026
   </span>
 
     
