@@ -123,17 +123,22 @@ public class TraceIngestionService {
 		try {
 			store.insertRecord(stored);
 		} catch (DuplicateEntryException ex) {
-			ReceiptSettlement voided = receiptChain.voidClaim(domainId, claim.getSeq());
-			if (voided == ReceiptSettlement.CONFLICT) {
-				log.warn("Duplicate-identity race loser claim is already COMMITTED: domain={}, seq={}", domainId,
-						claim.getSeq());
-			}
 			Optional<StoredTraceRecord> raced = store.findRecord(identity);
 			if (!raced.isPresent()) {
+				receiptChain.voidClaim(domainId, claim.getSeq());
 				throw new TraceStorageException(REASON_RACE_RECORD_MISSING,
 						"Record missing after duplicate-entry race: " + identity);
 			}
-			return classifyAgainstExisting(raced.get(), verified.getContentDigest());
+			if (!TraceReceiptChain.carriesClaim(raced.get(), claim.getSeq(), verified.getContentDigest())) {
+				ReceiptSettlement voided = receiptChain.voidClaim(domainId, claim.getSeq());
+				if (voided == ReceiptSettlement.CONFLICT) {
+					log.warn("Duplicate-identity race loser claim is already COMMITTED: domain={}, seq={}",
+							domainId, claim.getSeq());
+				}
+				return classifyAgainstExisting(raced.get(), verified.getContentDigest());
+			}
+			log.warn("Duplicate reported for a record that carries this claim: domain={}, seq={}", domainId,
+					claim.getSeq());
 		} catch (TraceStorageException ex) {
 			if (!insertLanded(identity, claim, verified.getContentDigest(), ex)) {
 				throw ex;
