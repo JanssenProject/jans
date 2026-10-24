@@ -15,7 +15,6 @@ import io.jans.agama.engine.model.FlowResult;
 import io.jans.agama.engine.model.FlowStatus;
 import io.jans.agama.engine.script.ScriptUtils;
 import io.jans.agama.model.FlowMetadata;
-import io.jans.agama.model.EngineConfig;
 import io.jans.agama.model.Flow;
 import io.jans.util.Pair;
 
@@ -58,9 +57,6 @@ public class FlowService {
 
     @Inject
     private FlowUtils flowUtils;
-
-    @Inject
-    private EngineConfig engineConfig;
     
     @Inject
     private HttpServletRequest request;
@@ -315,16 +311,7 @@ public class FlowService {
             msg += fl.getCodeError() == null ? "has not been parsed yet" : "has errors";
             throw new IOException(msg);
         }
-        
-        if (!Optional.ofNullable(engineConfig.getDisableTCHV()).orElse(false)) {
 
-            String hash = fl.getTransHash();
-            //null hash means the code is being regenerated in this moment
-            if (hash != null && !flowUtils.hash(code).equals(hash))
-                throw new IOException("Transpiled code seems to have been altered. " +
-                        "Restore the code by increasing this flow's jansRevision attribute");
-        }
-        
     }
 
     private FlowStatus processPause(ContinuationPending pending, FlowStatus status)

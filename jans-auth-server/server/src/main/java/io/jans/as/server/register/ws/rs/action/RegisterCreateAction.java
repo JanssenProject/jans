@@ -127,6 +127,7 @@ public class RegisterCreateAction {
             registerValidator.validateRedirectUris(r);
             registerValidator.validateSubjectIdentifierAttribute(r);
             registerValidator.validateCiba(r);
+            registerValidator.validateEphemeralSubjectTypeBackchannelLogout(r);
 
             registerParamsValidator.validateLogoutUri(r.getFrontChannelLogoutUri(), r.getRedirectUris(), errorResponseFactory);
             registerParamsValidator.validateLogoutUri(r.getBackchannelLogoutUri(), r.getRedirectUris(), errorResponseFactory);

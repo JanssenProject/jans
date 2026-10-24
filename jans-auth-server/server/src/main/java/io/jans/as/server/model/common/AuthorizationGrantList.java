@@ -386,6 +386,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 result.setCodeChallenge(tokenEntity.getCodeChallenge());
                 result.setCodeChallengeMethod(tokenEntity.getCodeChallengeMethod());
                 result.setRedirectUri(tokenEntity.getAttributes().getRedirectUri());
+                if (StringUtils.isNotBlank(tokenEntity.getAttributes().getEphemeralSub())) {
+                    result.setEphemeralSub(tokenEntity.getAttributes().getEphemeralSub());
+                }
 
                 if (StringUtils.isNotBlank(jwtRequest)) {
                     try {
