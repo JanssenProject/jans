@@ -6,6 +6,7 @@
 
 package io.jans.lock.service.trace.receipt;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -79,6 +80,8 @@ public class TraceReceiptChain {
 	@Inject
 	private TraceCryptoProvider cryptoProvider;
 
+	private Clock clock = Clock.systemUTC();
+
 	private final ConcurrentHashMap<String, ReentrantLock> domainLocks = new ConcurrentHashMap<>();
 
 	/**
@@ -120,7 +123,7 @@ public class TraceReceiptChain {
 
 				try {
 					store.insertReceipt(row);
-					return new ReceiptClaim(seq, prevReceiptHash, receiptHash, receivedAtMs, System.currentTimeMillis());
+					return new ReceiptClaim(seq, prevReceiptHash, receiptHash, receivedAtMs, clock.millis());
 				} catch (DuplicateEntryException ex) {
 					log.debug("receipt position contended: domain={}, seq={}", domainId, seq);
 				}
@@ -186,21 +189,32 @@ public class TraceReceiptChain {
 	 * The ingest fence: how long after {@link ReceiptClaim#getClaimedAtMs()} a worker may still insert
 	 * its record. Derived as half of {@code pendingReceiptTimeoutSeconds}, so it stays strictly below
 	 * the age at which {@code TraceReceiptRepairTimer} may void the claim and leaves the other half
-	 * as margin for clock difference between nodes and a database round trip. The timer ages a claim
-	 * from {@code received_at}, which precedes the claim, so the margin also absorbs the time between
-	 * receipt of the request and the claim.
+	 * as margin for clock difference between nodes and a database round trip.
 	 */
 	public long fenceMs() {
 		return appConfiguration.getTraceConfiguration().getPendingReceiptTimeoutSeconds() * 1000L / 2;
 	}
 
 	/**
-	 * @return {@code true} once this node's clock is past {@code claimedAtMs + fenceMs()}: the worker
-	 *         must not insert its record any more. Narrows, but cannot close, the window in which a
-	 *         record is inserted after the claim was voided.
+	 * The latest age, counted from {@link ReceiptClaim#getReceivedAtMs()}, at which a worker may still
+	 * insert its record: three quarters of {@code pendingReceiptTimeoutSeconds}. The repair timer ages a
+	 * claim from {@code received_at}, which precedes the claim, so a claim made late would otherwise get a
+	 * fence that ends after the timer may void it. The remaining quarter is margin for clock difference
+	 * between nodes and a database round trip.
+	 */
+	public long receivedFenceMs() {
+		return appConfiguration.getTraceConfiguration().getPendingReceiptTimeoutSeconds() * 750L;
+	}
+
+	/**
+	 * @return {@code true} once this node's clock is past {@code claimedAtMs + fenceMs()} or past
+	 *         {@code receivedAtMs + receivedFenceMs()}, whichever comes first: the worker must not insert
+	 *         its record any more. Narrows, but cannot close, the window in which a record is inserted
+	 *         after the claim was voided.
 	 */
 	public boolean isFenceExpired(ReceiptClaim claim) {
-		return System.currentTimeMillis() > claim.getClaimedAtMs() + fenceMs();
+		long nowMs = clock.millis();
+		return nowMs > claim.getClaimedAtMs() + fenceMs() || nowMs > claim.getReceivedAtMs() + receivedFenceMs();
 	}
 
 	/**
