@@ -146,6 +146,7 @@ public final class TraceTestHarness {
 		setField(receiptChain, "store", store);
 		setField(receiptChain, "appConfiguration", appConfiguration);
 		setField(receiptChain, "cryptoProvider", provider);
+		setField(receiptChain, "clock", fixedClock(nowMs));
 
 		setField(repairTimer, "log", LoggerFactory.getLogger(TraceReceiptRepairTimer.class));
 		setField(repairTimer, "store", store);
@@ -199,12 +200,13 @@ public final class TraceTestHarness {
 	}
 
 	/**
-	 * Fixes "now" for both {@link CommonAssertionValidator}'s {@code signed_at_in_future} check and
-	 * the default {@code received_at_ms} used by {@link #ctx(String, String, String...)}.
+	 * Fixes "now" for {@link CommonAssertionValidator}'s {@code signed_at_in_future} check, the receipt
+	 * chain's fence and claim time, and the default {@code received_at_ms} used by {@link #ctx(String, String, String...)}.
 	 */
 	public void setNow(long nowMs) {
 		this.nowMs = nowMs;
 		setField(commonValidator, "clock", fixedClock(nowMs));
+		setField(receiptChain, "clock", fixedClock(nowMs));
 	}
 
 	public long now() {
