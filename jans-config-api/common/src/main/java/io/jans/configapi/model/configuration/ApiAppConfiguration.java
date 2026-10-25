@@ -7,6 +7,7 @@ import io.jans.core.cedarling.model.CedarlingConfiguration;
 import io.jans.core.cedarling.model.LockProtectionMode;
 import io.jans.doc.annotation.DocProperty;
 
+import java.util.Arrays;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,14 +28,22 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `false`.")
     private boolean disableLoggerTimer;
     
+    @DocProperty(description = "DB attribute name for storing user role", defaultValue = "jansAdminUIRole")
+    @Schema(description = "DB attribute name for storing user role")
+    private String roleAttributeName = "jansAdminUIRole";
+    
+    @DocProperty(description = " Role names corresponding to `admin` role", defaultValue = "[`admin`, `api-admin`]")
+    @Schema(description = "Role names corresponding to `admin` role")
+    private List<String> adminRoleNames = Arrays.asList("admin", "api-admin");
+    
     @Schema(description = "Flag to enable/disable User Role-Permission mapping check while authentication. Default value `true`.")
-    private boolean userRolePermissionValidationEnabled = true;
+    private boolean userPermissionValidationEnabled = true;
     
     @Schema(description = "Flag to enable/disable validating `User-inum` in Introspection response. Default value `true`.")
     private boolean validateUserInumInIntrospectionFlag = true;
         
     @Schema(description = "Flag to enable/disable to get user-role in Introspection response. Default value `true`.")
-    private boolean fetchUserRoleInIntrospectionFlag = true;
+    private boolean fetchUserDataInIntrospectionFlag = true;
 
     @Schema(description = "Client IDs exempt from the User Role-Permission mapping check. Only honoured for tokens that carry no user, so a user token is always checked. Empty by default.")
     private List<String> userRolePermissionExcludedClients;
@@ -97,6 +106,9 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "The path to the external log4j2 logging configuration.")
     private String externalLoggerConfiguration;
+    
+    @Schema(description = "List of Super Admin oAuth scopes.")
+    private List<String> superAdminScopes;
 
     @Schema(description = "Choose whether to disable JDK loggers.")
     private Boolean disableJdkLogger = true;
@@ -157,6 +169,22 @@ public class ApiAppConfiguration implements Configuration {
     public void setProtectionMode(LockProtectionMode protectionMode) {
         this.protectionMode = protectionMode;
     }
+    
+    public String getRoleAttributeName() {
+        return roleAttributeName;
+    }
+
+    public void setRoleAttributeName(String roleAttributeName) {
+        this.roleAttributeName = roleAttributeName;
+    }
+
+    public List<String> getAdminRoleNames() {
+        return adminRoleNames;
+    }
+
+    public void setAdminRoleNames(List<String> adminRoleNames) {
+        this.adminRoleNames = adminRoleNames;
+    }
 
     public boolean isDisableLoggerTimer() {
         return disableLoggerTimer;
@@ -166,12 +194,12 @@ public class ApiAppConfiguration implements Configuration {
         this.disableLoggerTimer = disableLoggerTimer;
     }
     
-    public boolean isUserRolePermissionValidationEnabled() {
-        return userRolePermissionValidationEnabled;
+    public boolean isUserPermissionValidationEnabled() {
+        return userPermissionValidationEnabled;
     }
 
-    public void setUserRolePermissionValidationEnabled(boolean userRolePermissionValidationEnabled) {
-        this.userRolePermissionValidationEnabled = userRolePermissionValidationEnabled;
+    public void setUserPermissionValidationEnabled(boolean userPermissionValidationEnabled) {
+        this.userPermissionValidationEnabled = userPermissionValidationEnabled;
     }
     
     public boolean isValidateUserInumInIntrospectionFlag() {
@@ -182,12 +210,12 @@ public class ApiAppConfiguration implements Configuration {
         this.validateUserInumInIntrospectionFlag = validateUserInumInIntrospectionFlag;
     }
     
-    public boolean isFetchUserRoleInIntrospectionFlag() {
-        return fetchUserRoleInIntrospectionFlag;
+    public boolean isFetchUserDataInIntrospectionFlag() {
+        return fetchUserDataInIntrospectionFlag;
     }
 
-    public void setFetchUserRoleInIntrospectionFlag(boolean fetchUserRoleInIntrospectionFlag) {
-        this.fetchUserRoleInIntrospectionFlag = fetchUserRoleInIntrospectionFlag;
+    public void setFetchUserDataInIntrospectionFlag(boolean fetchUserDataInIntrospectionFlag) {
+        this.fetchUserDataInIntrospectionFlag = fetchUserDataInIntrospectionFlag;
     }
 
     public List<String> getUserRolePermissionExcludedClients() {
@@ -357,6 +385,14 @@ public class ApiAppConfiguration implements Configuration {
     public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
+    
+    public List<String> getSuperAdminScopes() {
+        return superAdminScopes;
+    }
+
+    public void setSuperAdminScopes(List<String> superAdminScopes) {
+        this.superAdminScopes = superAdminScopes;
+    }
 
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
@@ -460,10 +496,11 @@ public class ApiAppConfiguration implements Configuration {
     @Override
     public String toString() {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
-                + " ,protectionMode=" + protectionMode + ", disableLoggerTimer=" + disableLoggerTimer
-                +" ,userRolePermissionValidationEnabled=" + userRolePermissionValidationEnabled
+                + " ,protectionMode=" + protectionMode + " ,roleAttributeName=" + roleAttributeName
+                + ", adminRoleNames=" + adminRoleNames + ", disableLoggerTimer=" + disableLoggerTimer
+                +" ,userPermissionValidationEnabled=" + userPermissionValidationEnabled
                 +" ,validateUserInumInIntrospectionFlag=" + validateUserInumInIntrospectionFlag
-                +" ,fetchUserRoleInIntrospectionFlag=" + fetchUserRoleInIntrospectionFlag
+                +" ,fetchUserDataInIntrospectionFlag=" + fetchUserDataInIntrospectionFlag
                 +" ,userRolePermissionExcludedClients=" + userRolePermissionExcludedClients
                 + ", disableAuditLogger=" + disableAuditLogger + ", customAttributeValidationEnabled="
                 + customAttributeValidationEnabled + ", acrValidationEnabled=" + acrValidationEnabled
@@ -476,7 +513,7 @@ public class ApiAppConfiguration implements Configuration {
                 + authOpenidTokenUrl + ", authOpenidRevokeUrl=" + authOpenidRevokeUrl + ", exclusiveAuthScopes="
                 + exclusiveAuthScopes + ", corsConfigurationFilters=" + corsConfigurationFilters + ", loggingLevel="
                 + loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
-                + externalLoggerConfiguration + ", disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount
+                + externalLoggerConfiguration + ", superAdminScopes=" + superAdminScopes +" ,disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount
                 + ", acrExclusionList=" + acrExclusionList + ", userExclusionAttributes=" + userExclusionAttributes
                 + ", userMandatoryAttributes=" + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration
                 + ", auditLogConf=" + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf

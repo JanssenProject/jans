@@ -1828,6 +1828,12 @@ components:
         fallbackEvents:
           type: integer
           format: int64
+        period:
+          type: string
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
         deviceTypes:
           type: object
           additionalProperties:
@@ -1838,23 +1844,25 @@ components:
           additionalProperties:
             type: integer
             format: int64
-        period:
-          type: string
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
+        registrationSuccesses:
+          type: integer
+          format: int64
         registrationFailures:
           type: integer
           format: int64
-        registrationAvgDuration:
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
+        authenticationAvgDuration:
           type: number
           format: double
-        authenticationAvgDuration:
+        registrationSuccessRate:
+          type: number
+          format: double
+        registrationAvgDuration:
           type: number
           format: double
         registrationAttempts:
@@ -1863,21 +1871,13 @@ components:
         authenticationSuccesses:
           type: integer
           format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
         authenticationSuccessRate:
           type: number
           format: double
-        registrationSuccessRate:
-          type: number
-          format: double
-        authenticationAttempts:
-          type: integer
-          format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

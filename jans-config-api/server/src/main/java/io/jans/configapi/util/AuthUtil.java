@@ -2,6 +2,7 @@ package io.jans.configapi.util;
 
 import com.unboundid.ldap.sdk.DN;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.common.User;
@@ -11,12 +12,14 @@ import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
+
 import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.model.configuration.AuditLogConf;
 import io.jans.configapi.model.configuration.DataFormatConversionConf;
 import io.jans.configapi.model.configuration.PluginConf;
 import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
+import io.jans.configapi.security.service.OpenIdService;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.model.role.RolePermissionMapping;
 import io.jans.configapi.core.rest.ProtectedApi;
@@ -60,8 +63,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -97,10 +102,17 @@ public class AuthUtil {
     @Inject
     AuthClientFactory authClientFactory;
 
+    @Inject 
+    OpenIdService openIdService;
+    
     public String getOpenIdConfigurationEndpoint() {
         return this.configurationService.find().getOpenIdConfigurationEndpoint();
     }
 
+    public String getAuthIssuerUrl() {
+        return this.configurationFactory.getApiAppConfiguration().getAuthIssuerUrl();
+    }
+    
     public String getAuthOpenidConfigurationUrl() {
         return this.configurationFactory.getApiAppConfiguration().getAuthOpenidConfigurationUrl();
     }
@@ -117,8 +129,16 @@ public class AuthUtil {
         return this.configurationFactory.getApiAppConfiguration().getPlugins();
     }
     
-    public boolean isUserRolePermissionValidationEnabled() {
-        return this.configurationFactory.getApiAppConfiguration().isUserRolePermissionValidationEnabled();
+    public String getRoleAttributeName() {
+        return this.configurationFactory.getApiAppConfiguration().getRoleAttributeName();
+    }
+    
+    public List<String> getAdminRoleNames() {
+        return this.configurationFactory.getApiAppConfiguration().getAdminRoleNames();
+    }
+    
+    public boolean isUserPermissionValidationEnabled() {
+        return this.configurationFactory.getApiAppConfiguration().isUserPermissionValidationEnabled();
     }
 
     public boolean isValidateUserInumInIntrospectionFlag() {
@@ -129,8 +149,89 @@ public class AuthUtil {
         return this.configurationFactory.getApiAppConfiguration().getUserRolePermissionExcludedClients();
     }
     
-    public boolean isFetchUserRoleInIntrospectionFlag() {
-        return this.configurationFactory.getApiAppConfiguration().isFetchUserRoleInIntrospectionFlag();
+    public List<String> getExcludedClients() {
+        List<String> excludedClients = getUserRolePermissionExcludedClients();
+        return excludedClients == null ? Collections.emptyList() : excludedClients;
+    }
+    
+    public boolean isUserRolePermissionExcluded(String inum) {
+        List<String> excludedClients = getExcludedClients();
+        if(excludedClients!=null && !excludedClients.isEmpty() && excludedClients.contains(inum)) {
+            return true;
+        }else{
+            return false;
+        }
+    }    
+    
+    public boolean isFetchUserDataInIntrospectionFlag() {
+        return this.configurationFactory.getApiAppConfiguration().isFetchUserDataInIntrospectionFlag();
+    }
+    
+    public List<String> getSuperAdminScopes() {
+        return this.configurationFactory.getApiAppConfiguration().getSuperAdminScopes();
+    }
+
+    public String getSuperAdminReadScope() {
+        String readScope = null;
+        if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
+            return readScope;
+        }
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/read-all")).findFirst().orElse(null);
+    }
+
+    public String getSuperAdminWriteScope() {
+        String writeScope = null;
+        if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
+            return writeScope;
+        }
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/write-all")).findFirst().orElse(null);
+    }
+
+    public String getSuperAdminDeleteScope() {
+        String deleteScope = null;
+        if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
+            return deleteScope;
+        }
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/delete-all")).findFirst().orElse(null);
+    }
+
+    public boolean hasSuperAdminReadScope(List<String> userScopes) {
+        if (userScopes == null || userScopes.isEmpty()) {
+            return false;
+        }
+        return userScopes.contains(getSuperAdminReadScope());
+    }
+
+    public boolean hasSuperAdminWriteScope(List<String> userScopes) {
+        if (userScopes == null || userScopes.isEmpty()) {
+            return false;
+        }
+        return userScopes.contains(getSuperAdminWriteScope());
+    }
+
+    public boolean hasSuperAdminDeleteScope(List<String> userScopes) {
+        if (userScopes == null || userScopes.isEmpty()) {
+            return false;
+        }
+        return userScopes.contains(getSuperAdminDeleteScope());
+    }
+    
+    public boolean hasSuperAdminScope(List<String> userScopes, final String httpRequestMethod) {
+        if (userScopes == null || userScopes.isEmpty() || StringUtils.isBlank(httpRequestMethod)) {
+            return false;
+        }
+
+        switch (httpRequestMethod) {
+        case ApiConstants.READ_REQUEST:
+            return hasSuperAdminReadScope(userScopes) || hasSuperAdminWriteScope(userScopes);
+    
+        case ApiConstants.DELETE_REQUEST:
+            return hasSuperAdminDeleteScope(userScopes) || hasSuperAdminWriteScope(userScopes);
+
+        default:
+            return hasSuperAdminWriteScope(userScopes);
+   
+        }
     }
     
     public String getIssuer() {
@@ -353,6 +454,26 @@ public class AuthUtil {
         }
         log.info("Final Method Scopes for resourceInfo:{}, scopes:{} ", resourceInfo, scopes);
     }
+    
+    public static List<String> getMethodSuperScopes(Method resourceMethod) {
+        log.info("getMethodSuperScopes() - Get Scopes for resourceMethod:{}", resourceMethod);
+        List<String> superScopes = null ;
+        
+        if(resourceMethod==null) {
+            return superScopes;
+        }
+        
+        ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
+
+        if (methodAnnotation != null) {
+            superScopes = new ArrayList<>();
+            superScopes.addAll(Stream.of(methodAnnotation.superScopes()).collect(Collectors.toList()));
+        }
+        
+        log.info("getMethodSuperScopes:() - Final Scopes for resourceMethod:{}, superScopes:{} ", resourceMethod, superScopes);
+        return superScopes;
+    }
+
 
     public String requestAccessToken(final String clientId, final List<String> scope) {
         log.info("Request for AccessToken - clientId:{}, scope:{} ", clientId, scope);
@@ -393,6 +514,47 @@ public class AuthUtil {
             }
         }
         return null;
+    }
+    
+    public List<String> getClientScope(final String clientId) {
+        log.info("Get scopes of Client:{} ", clientId);
+        List<String> scopes = null;
+        
+        if(StringUtils.isBlank(clientId)) {
+            return scopes;
+        }
+        // Get Client
+        Client client = this.clientService.getClientByInum(clientId);
+        if (client == null) {
+            return scopes;
+        }
+
+        // Prepare scope array
+         String[] scopeArray = client.getScopes();
+        if(scopeArray==null || scopeArray.length<=0) {
+            return scopes;
+        }
+        log.info(" scope to be scopeArray - {} ", Arrays.asList(scopeArray));
+        
+        // Assign scope
+        scopes = getScopeFromDn(scopeArray);
+        log.info(" Scope of clientId:{} is :{} ", clientId, scopes);
+        return scopes;
+    }
+    
+    
+    public List<String> getScopeFromDn( String[] scopes) {
+        List<String> scopeList = null;
+        if (scopes != null && scopes.length>0) {
+            scopeList = new ArrayList<>();
+            for (String dn : scopes) {
+                Scope scope = this.scopeService.getScopeByDn(dn);
+                if(scope!=null) {
+                scopeList.add(scope.getId());
+                }
+            }
+        }
+        return scopeList;
     }
 
     public void assignAllScope(final String clientId) {
@@ -652,30 +814,40 @@ public class AuthUtil {
         return getRequestedScopes(resourceInfo);
     }
 
-    public Set<String> getUserRolePermission(HttpHeaders httpHeaders) {
+    public List<String> getUserRolePermission(HttpHeaders httpHeaders) {
 
+        List<String> userPermissionList = new ArrayList<>();
         Set<String> userPermissionSet = null;
-        // Get user
+        
+        // Get userInum from header 
         String userInum = getUserInum(httpHeaders);
         log.info("userInum:{}", userInum);
+        if(StringUtils.isBlank(userInum)) {
+            return userPermissionList; 
+        }
 
-        // Get User details
+        // Get User details based on userInum
         User user = getUserByInum(userInum);
         log.info("userInum:{}, user:{}", userInum, user);
 
+        //Get user roles from DB
         List<String> userRoleList = getUserRole(user);
         log.info("userInum:{}, userRoleList:{}", userInum, userRoleList);
         if (userRoleList == null || userRoleList.isEmpty()) {
-            return userPermissionSet;
+            return userPermissionList;
         }
         log.info("userInum:{}, user:{}, userRoleList:{}", userInum, user, userRoleList);
 
+        //Fetch distinct permissions associated with role
         Set<String> safeSet = new HashSet<>(userRoleList);
         userPermissionSet = getUserPermission(safeSet);
+        if(userPermissionSet == null || userPermissionSet.isEmpty()) {
+            return userPermissionList;
+        }
+        userPermissionList = new ArrayList<>(userPermissionSet);        
+        log.info("userInum:{},userRole:{}, userPermissionSet:{}, userPermissionList:{}", userInum, userRoleList, userPermissionSet, userPermissionList);
 
-        log.info("userInum:{},userRole:{}, userPermissionSet:{}", userInum, userRoleList, userPermissionSet);
-
-        return userPermissionSet;
+        return userPermissionList;
     }
 
     public Set<String> getUserPermission(Set<String> userRoleSet) {
@@ -698,7 +870,7 @@ public class AuthUtil {
     }
 
     public List<String> getUserRole(User user) {
-        log.info("getUserRole user:{}", user);
+        log.info("getUserRole() - user:{}", user);
         List<String> userRoleList = null;
 
         if (user == null) {
@@ -710,13 +882,13 @@ public class AuthUtil {
             return userRoleList;
         }
 
-        userRoleList = getAttributeValueList(customAttributes, "jansAdminUIRole");
-        log.info(" user.getUserId():{}, jansAdminUIRole-userRoleList:{}", user.getUserId(), userRoleList);
+        userRoleList = getAttributeValueList(customAttributes, getRoleAttributeName());
+        log.info(" user.getUserId():{}, getRoleAttributeName():{}, userRoleList:{}", user.getUserId(), getRoleAttributeName(), userRoleList);
         if (userRoleList.isEmpty()) {
             return userRoleList;
         }
 
-        log.info(" user.getUserId():{}, userRoleList:{}", user.getUserId(), userRoleList);
+        log.info(" Returning user.getUserId():{}, userRoleList:{}", user.getUserId(), userRoleList);
         return userRoleList;
     }
 
@@ -746,7 +918,6 @@ public class AuthUtil {
         }
 
         return attributeValueList;
-
     }
 
     public String getUserInum(HttpHeaders httpHeaders) {
@@ -772,8 +943,20 @@ public class AuthUtil {
     }
 
     public IntrospectionResponse getIntrospectionResponse(String token) {
-        return AuthClientFactory.getIntrospectionResponse(token,
-                token.substring("Bearer".length()).trim(), this.getIssuer());
+        IntrospectionResponse introspectionResponse = null;
+        if(StringUtils.isBlank(token)) {
+            return introspectionResponse;
+        }
+        try {
+            introspectionResponse = openIdService.getIntrospectionResponse(token,
+                    token.substring("Bearer".length()).trim(), this.getAuthIssuerUrl());
+            log.debug("introspectionResponse:{}", introspectionResponse);
+        } catch (JsonProcessingException ex) {
+            log.error("AuthUtil::getIntrospectionResponse() - Error while token Introspection token:{}, exception:{} ", token, ex);
+            throw new WebApplicationException("AuthUtil::getIntrospectionResponse - Token is Invalid.", ex,
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+        return introspectionResponse;
     }
 
     public String getJsonNodeKeyValue(JsonNode jsonNode, String key) {
