@@ -441,6 +441,22 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     }
 
     @Override
+    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
+            SortOrder sortOrder, int start, int count, int chunkSize) {
+        if (StringHelper.isEmptyString(baseDN)) {
+            throw new MappingException("Base DN to find entries is null");
+        }
+
+        PagedResult<EntryData> searchResult = findEntriesImpl(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, sortBy, sortOrder,
+                false, null, SearchReturnDataType.SEARCH, start, count, chunkSize);
+        if (searchResult.getEntriesCount() == 0) {
+            return new ArrayList<T>(0);
+        }
+
+        return createEntities(baseDN, entryClass, searchResult);
+    }
+
+    @Override
     public <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
             SortOrder sortOrder, int start, int count, int chunkSize) {
         if (StringHelper.isEmptyString(baseDN)) {
@@ -469,6 +485,13 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     protected <T> PagedResult<EntryData> findEntriesImpl(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope,
             String[] ldapReturnAttributes, String sortBy, SortOrder sortOrder, BatchOperation<T> batchOperation, SearchReturnDataType returnDataType, int start,
             int count, int chunkSize) {
+        return findEntriesImpl(baseDN, entryClass, filter, scope, ldapReturnAttributes, sortBy, sortOrder, true, batchOperation, returnDataType, start,
+                count, chunkSize);
+    }
+
+    protected <T> PagedResult<EntryData> findEntriesImpl(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope,
+            String[] ldapReturnAttributes, String sortBy, SortOrder sortOrder, boolean applyDefaultSort, BatchOperation<T> batchOperation,
+            SearchReturnDataType returnDataType, int start, int count, int chunkSize) {
         // Check entry class
         checkEntryClass(entryClass, false);
         String[] objectClasses = getTypeObjectClasses(entryClass);
@@ -494,8 +517,9 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         LOG.trace("objectClasses: {}", ArrayHelper.toString(objectClasses));
         LOG.trace("Search filter: {}", searchFilter);
 
-        // Prepare default sort
-        OrderSpecifier<?>[] defaultSort = getDefaultSort(entryClass);
+        // Prepare default sort. An explicit sort can replace it: a trailing default sort key makes the database sort
+        // all matching rows instead of reading them in index order
+        OrderSpecifier<?>[] defaultSort = (applyDefaultSort || StringHelper.isEmpty(sortBy)) ? getDefaultSort(entryClass) : null;
 
         if (StringHelper.isNotEmpty(sortBy)) {
             OrderSpecifier<?> requestedSort = buildSort(sortBy, sortOrder);

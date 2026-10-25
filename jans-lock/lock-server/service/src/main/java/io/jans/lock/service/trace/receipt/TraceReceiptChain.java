@@ -200,7 +200,7 @@ public class TraceReceiptChain {
 	 *         record is inserted after the claim was voided.
 	 */
 	public boolean isFenceExpired(ReceiptClaim claim) {
-		return System.currentTimeMillis() > claim.getReceivedAtMs() + fenceMs();
+		return System.currentTimeMillis() > claim.getClaimedAtMs() + fenceMs();
 	}
 
 	/**
