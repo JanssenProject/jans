@@ -118,12 +118,12 @@ class TraceIngestBenchmark {
 
 	@Test
 	void ingestThroughput() throws Exception {
-		int records = Integer.getInteger("lock.benchmark.records", 1000);
+		int records = intProperty("lock.benchmark.records", 1000);
 		List<String> chainCounts = Arrays.asList(System.getProperty("lock.benchmark.chains", "1,4").split(","));
 		double minRate = Double.parseDouble(System.getProperty("lock.benchmark.min-rate", "0"));
 		double maxSlowdown = Double.parseDouble(System.getProperty("lock.benchmark.max-slowdown", "0"));
 
-		preloadReceipts(Integer.getInteger("lock.benchmark.preload", 0));
+		preloadReceipts(intProperty("lock.benchmark.preload", 0));
 
 		int run = 0;
 		for (String chainCount : chainCounts) {
@@ -141,6 +141,12 @@ class TraceIngestBenchmark {
 				}
 			}
 		}
+	}
+
+	/** Decimal only: {@code Integer.getInteger} would read {@code 010} as octal and {@code 08} as the default. */
+	private static int intProperty(String name, int defaultValue) {
+		String value = System.getProperty(name);
+		return (value == null || value.trim().isEmpty()) ? defaultValue : Integer.parseInt(value.trim());
 	}
 
 	private static void preloadReceipts(int count) throws Exception {

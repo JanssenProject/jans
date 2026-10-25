@@ -95,8 +95,11 @@ while getopts "c:n:k:p:m:s:ol:h" opt; do
 done
 
 for number in "${RECORDS}" "${PRELOAD}"; do
-    [[ "${number}" =~ ^[0-9]+$ ]] || { echo "Not a number: ${number}" >&2; usage 1; }
+    [[ "${number}" =~ ^[0-9]{1,9}$ ]] || { echo "Not a number (digits only, at most 9): ${number}" >&2; usage 1; }
 done
+# Plain decimal for the benchmark: strip leading zeros so 010 means 10, not octal 8
+RECORDS=$((10#${RECORDS}))
+PRELOAD=$((10#${PRELOAD}))
 [[ "${CHAINS}" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "Invalid chain list: ${CHAINS}" >&2; usage 1; }
 for number in "${MIN_RATE}" "${MAX_SLOWDOWN}"; do
     [[ -z "${number}" || "${number}" =~ ^[0-9]+([.][0-9]+)?$ ]] || { echo "Not a number: ${number}" >&2; usage 1; }
@@ -105,6 +108,9 @@ done
 for file in jans-sql.properties salt; do
     [[ -f "${PROFILE_DIR}/${file}" ]] || { echo "Missing ${PROFILE_DIR}/${file}; use -c <dir>" >&2; exit 1; }
 done
+
+# Maven runs from ${ROOT} and surefire from the service module: pass an absolute path
+PROFILE_DIR="$(cd "${PROFILE_DIR}" && pwd)"
 
 if [[ -z "${LOG_FILE}" ]]; then
     LOG_FILE="$(mktemp -t trace-ingest-bench.XXXXXX.log)"
