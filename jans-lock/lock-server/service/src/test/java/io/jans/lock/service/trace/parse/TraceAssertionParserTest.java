@@ -6,6 +6,7 @@
 
 package io.jans.lock.service.trace.parse;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -278,6 +279,123 @@ class TraceAssertionParserTest {
 
 		assertEquals(TraceValidationException.ERROR_INVALID_REQUEST, ex.getErrorId());
 		assertEquals("unreadable_body", ex.getReason());
+	}
+
+	// -- assertion_raw fidelity: the decoded text must re-encode to the received bytes ---------------
+
+	@Test
+	void testParse_variedUnicodeNumbersWhitespaceAndOrder_rawTextReEncodesToInputBytes() {
+		String body = "  {\"z\":\"\uD83D\uDE00\",\n\t\"a\":\"\\ud83d\\ude00\" , \"nfc\":\"\u00e9\",\"nfd\":\"e\u0301\","
+				+ "\"esc_nfd\":\"e\\u0301\",\"nul\":\"\\u0000\",\"us\":\"\\u001f\",\"ls\":\"\u2028\u2029\","
+				+ "\"n\":[1.0,1.50,1e2,1E+2,-0,-0.0,9007199254740991,9007199254740993,123456789012345678901234567890]}\r\n  ";
+		byte[] input = body.getBytes(StandardCharsets.UTF_8);
+
+		ParsedAssertion result = parser.parse(new ByteArrayInputStream(input));
+
+		assertArrayEquals(input, result.getRawText().getBytes(StandardCharsets.UTF_8));
+		assertEquals(body, result.getRawText());
+		assertEquals(-1, result.getRawText().indexOf('\u0000'));
+		assertTrue(result.getRawText().contains("\\u0000"));
+		assertEquals("z", result.getRoot().fieldNames().next());
+	}
+
+	@Test
+	void testParse_escapedAndLiteralFormsOfSameCharacter_equalValuesDifferentRawText() {
+		String literal = "{\"s\":\"\uD83D\uDE00 \u00e9\"}";
+		String escaped = "{\"s\":\"\\ud83d\\ude00 \\u00e9\"}";
+
+		ParsedAssertion fromLiteral = parser.parse(utf8(literal));
+		ParsedAssertion fromEscaped = parser.parse(utf8(escaped));
+
+		assertEquals(fromLiteral.getRoot().get("s").textValue(), fromEscaped.getRoot().get("s").textValue());
+		assertEquals(fromLiteral.getRoot(), fromEscaped.getRoot());
+		assertEquals(literal, fromLiteral.getRawText());
+		assertEquals(escaped, fromEscaped.getRawText());
+	}
+
+	@Test
+	void testParse_combiningSequenceAndPrecomposedForm_notNormalized() {
+		ParsedAssertion result = parser.parse(utf8("{\"nfc\":\"\u00e9\",\"nfd\":\"e\u0301\"}"));
+
+		assertEquals("\u00e9", result.getRoot().get("nfc").textValue());
+		assertEquals("e\u0301", result.getRoot().get("nfd").textValue());
+	}
+
+	@Test
+	void testParse_integersAtAndBeyondSafeRange_acceptedWithExactDigits() {
+		ParsedAssertion result = parser.parse(
+				utf8("{\"safe\":9007199254740991,\"over\":9007199254740993,\"huge\":123456789012345678901234567890}"));
+
+		assertEquals(9007199254740991L, result.getRoot().get("safe").longValue());
+		assertEquals(9007199254740993L, result.getRoot().get("over").longValue());
+		assertEquals(new java.math.BigInteger("123456789012345678901234567890"),
+				result.getRoot().get("huge").bigIntegerValue());
+	}
+
+	@Test
+	void testParse_loneSurrogateEscape_rejectedNotCanonicalizable() {
+		for (String body : new String[] { "{\"s\":\"\\ud800\"}", "{\"s\":\"\\udc00\"}",
+				"{\"s\":\"\\ud83d x\"}", "{\"s\":\"\\ude00\\ud83d\"}" }) {
+			TraceValidationException ex = assertThrows(TraceValidationException.class, () -> parser.parse(utf8(body)),
+					body);
+
+			assertEquals(TraceValidationException.ERROR_INVALID_REQUEST, ex.getErrorId());
+			assertEquals("not_canonicalizable", ex.getReason(), body);
+		}
+	}
+
+	@Test
+	void testParse_surrogateAndOverlongBytes_rejectedMalformedUtf8() {
+		byte[][] bodies = {
+				{ '{', '"', 's', '"', ':', '"', (byte) 0xED, (byte) 0xA0, (byte) 0x80, '"', '}' },
+				{ '{', '"', 's', '"', ':', '"', (byte) 0xC0, (byte) 0x80, '"', '}' },
+				{ '{', '"', 's', '"', ':', '"', (byte) 0xF4, (byte) 0x90, (byte) 0x80, (byte) 0x80, '"', '}' } };
+
+		for (byte[] bytes : bodies) {
+			TraceValidationException ex = assertThrows(TraceValidationException.class,
+					() -> parser.parse(new ByteArrayInputStream(bytes)));
+
+			assertEquals("malformed_utf8", ex.getReason());
+		}
+	}
+
+	@Test
+	void testParse_literalControlCharacterInString_rejectedMalformedJson() {
+		for (char control : new char[] { '\u0000', '\u0009', '\n', '\u001f' }) {
+			TraceValidationException ex = assertThrows(TraceValidationException.class,
+					() -> parser.parse(utf8("{\"s\":\"a" + control + "b\"}")));
+
+			assertEquals("malformed_json", ex.getReason());
+		}
+	}
+
+	@Test
+	void testParse_numberOverflowingDouble_rejected() {
+		for (String number : new String[] { "1e400", "-1e400" }) {
+			TraceValidationException ex = assertThrows(TraceValidationException.class,
+					() -> parser.parse(utf8("{\"n\":" + number + "}")), number);
+
+			assertEquals(TraceValidationException.ERROR_INVALID_REQUEST, ex.getErrorId());
+			assertEquals("not_canonicalizable", ex.getReason(), number);
+		}
+	}
+
+	@Test
+	void testParse_nonJsonNumberLiterals_rejectedMalformedJson() {
+		for (String number : new String[] { "NaN", "Infinity", "-Infinity", "+1", "01", ".5", "1.", "0x10" }) {
+			TraceValidationException ex = assertThrows(TraceValidationException.class,
+					() -> parser.parse(utf8("{\"n\":" + number + "}")), number);
+
+			assertEquals("malformed_json", ex.getReason(), number);
+		}
+	}
+
+	@Test
+	void testParse_duplicateKeyWrittenWithEscape_rejected() {
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> parser.parse(utf8("{\"a\":1,\"\\u0061\":2}")));
+
+		assertEquals("malformed_json", ex.getReason());
 	}
 
 }
