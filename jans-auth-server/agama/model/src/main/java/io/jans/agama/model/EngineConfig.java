@@ -35,6 +35,8 @@ public class EngineConfig {
     private Map<String, String> defaultResponseHeaders = Map.of(
             HttpHeaders.CACHE_CONTROL, "max-age=0, no-store");
 
+    private TrackingSettings trackingSettings = new TrackingSettings();
+
     public String getJsonErrorPage(String page) {
         return "json_"+ page;
     }
@@ -146,6 +148,14 @@ public class EngineConfig {
 
     public void setSerializeRules(Map<String, List<String>> serializeRules) {
         this.serializeRules = serializeRules;
+    }
+
+    public TrackingSettings getTrackingSettings() {        
+        return trackingSettings;
+    }
+
+    public void setTrackingSettings(TrackingSettings trackingSettings) {        
+        this.trackingSettings = trackingSettings;
     }
 
 }

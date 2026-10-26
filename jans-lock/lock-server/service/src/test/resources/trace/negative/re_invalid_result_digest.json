@@ -9,6 +9,7 @@
     "trace_execution_id": "exec-01JABCXYZQK8P5N9F2C7R3T4V6",
     "execution_authority": "spiffe://example.org/agent/planner",
     "event": {
+      "effect_status": "confirmed",
       "outcome": "COMPLETED",
       "result_digest": "not-a-digest",
       "target_id": "payment-authorization-service"

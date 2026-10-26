@@ -16,6 +16,7 @@ The Janssen Authentication Server is a [fully certified OpenID Provider (OP)](ht
 - Session Management [(spec)](http://openid.net/specs/openid-connect-session-1_0.html)
 - Front Channel Logout [(draft)](http://openid.net/specs/openid-connect-frontchannel-1_0.html)
 - Client Initiated Backchannel Authentication ([CIBA Core 1.0](https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html)) — see [the CIBA feature page](./ciba.md)
+- Ephemeral Subject Identifier 1.0 [(spec)](https://openid.net/specs/openid-connect-ephemeral-subject-identifier-1_0.html) — see [the subject identifiers page](./subject-identifiers.md#ephemeral-subject-identifiers)
 
 ## Protocol Overview
 OpenID Connect is an identity layer that profiles OAuth 2.0 to define a sign-in flow for applications (clients) to authenticate a person and obtain authorization to gather information (or "claims") about that person. For more information, see [OpenID Connect](http://openid.net/connect)

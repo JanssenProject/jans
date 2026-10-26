@@ -1594,7 +1594,7 @@ paths:
                   description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
                 subject_type:
                   type: string
-                  description: Subject type requested for the Client ID. Valid types include pairwise and public.
+                  description: Subject type requested for the Client ID. Valid types include pairwise, public and ephemeral (ephemeral must be enabled in subjectTypesSupported).
                 rpt_as_jwt:
                   type: boolean
                   description: Specifies whether RPT should be return as signed JWT.
@@ -1721,6 +1721,8 @@ paths:
                 backchannel_logout_uri:
                   type: string
                   description: RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
+                    Not supported for clients with the ephemeral subject type, such a request is rejected with invalid_client_metadata.
+                    On client update, sending an empty value removes the stored URI.
                 backchannel_logout_session_required:
                   type: boolean
                   description: Boolean value specifying whether the RP requires that a session ID Claim be included in the Logout Token
@@ -2085,7 +2087,7 @@ paths:
                   description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
                 subject_type:
                   type: string
-                  description: Subject type requested for the Client ID. Valid types include pairwise and public.
+                  description: Subject type requested for the Client ID. Valid types include pairwise, public and ephemeral (ephemeral must be enabled in subjectTypesSupported).
                 rpt_as_jwt:
                   type: boolean
                   description: Specifies whether RPT should be return as signed JWT.
@@ -2212,6 +2214,8 @@ paths:
                 backchannel_logout_uri:
                   type: string
                   description: RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
+                    Not supported for clients with the ephemeral subject type, such a request is rejected with invalid_client_metadata.
+                    On client update, sending an empty value removes the stored URI.
                 backchannel_logout_session_required:
                   type: boolean
                   description: Boolean value specifying whether the RP requires that a session ID Claim be included in the Logout Token
@@ -2556,7 +2560,7 @@ paths:
                     description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
                   subject_type:
                     type: string
-                    description: Subject type requested for the Client ID. Valid types include pairwise and public.
+                    description: Subject type requested for the Client ID. Valid types include pairwise, public and ephemeral (ephemeral must be enabled in subjectTypesSupported).
                   rpt_as_jwt:
                     type: boolean
                     description: Specifies whether RPT should be return as signed JWT.
@@ -2680,6 +2684,8 @@ paths:
                   backchannel_logout_uri:
                     type: string
                     description: RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
+                      Not supported for clients with the ephemeral subject type, such a request is rejected with invalid_client_metadata.
+                      On client update, sending an empty value removes the stored URI.
                   backchannel_logout_session_required:
                     type: boolean
                     description: Boolean value specifying whether the RP requires that a session ID Claim be included in the Logout Token

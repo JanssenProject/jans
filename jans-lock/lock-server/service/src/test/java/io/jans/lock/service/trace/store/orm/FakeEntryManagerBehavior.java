@@ -22,9 +22,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import org.mockito.invocation.InvocationOnMock;
 
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -63,14 +65,33 @@ final class FakeEntryManagerBehavior {
 
 	private final Map<Class<?>, Map<String, Object>> storesByClass = new HashMap<>();
 
+	private static final Map<PersistenceEntryManager, FakeEntryManagerBehavior> BY_MOCK = new ConcurrentHashMap<>();
+
 	private final PersistenceEntryManager mock = mock(PersistenceEntryManager.class);
+
+	private int pendingVersionConflicts;
+
+	private Consumer<Object> concurrentWriter;
 
 	private FakeEntryManagerBehavior() {
 		wire();
 	}
 
 	static PersistenceEntryManager create() {
-		return new FakeEntryManagerBehavior().mock;
+		FakeEntryManagerBehavior behavior = new FakeEntryManagerBehavior();
+		BY_MOCK.put(behavior.mock, behavior);
+		return behavior.mock;
+	}
+
+	/**
+	 * Makes the next {@code count} {@code updateWithVersion} calls lose a race: each first lets
+	 * {@code writer} change the stored entry, bumps its version, then throws
+	 * {@link VersionMismatchException}.
+	 */
+	static void injectVersionConflicts(PersistenceEntryManager manager, int count, Consumer<Object> writer) {
+		FakeEntryManagerBehavior behavior = BY_MOCK.get(manager);
+		behavior.pendingVersionConflicts = count;
+		behavior.concurrentWriter = writer;
 	}
 
 	private Map<String, Object> storeFor(Class<?> entryClass) {
@@ -107,6 +128,13 @@ final class FakeEntryManagerBehavior {
 			return null;
 		}).when(mock).merge(any());
 
+		when(mock.remove(anyString(), any(Class.class), any(Filter.class), anyInt())).thenAnswer(inv -> {
+			List<Object> matched = matchAll(inv, (Integer) inv.getArgument(3));
+			Map<String, Object> store = storeFor(inv.getArgument(1));
+			store.values().removeAll(matched);
+			return matched.size();
+		});
+
 		doAnswer(inv -> {
 			Object entity = inv.getArgument(0);
 			String dn = dnOf(entity);
@@ -120,6 +148,13 @@ final class FakeEntryManagerBehavior {
 			if (versionField == null) {
 				throw new UnsupportedOperationException(
 						"FakeEntryManagerBehavior: no @Version field on " + entryClass);
+			}
+			if (pendingVersionConflicts > 0) {
+				pendingVersionConflicts--;
+				concurrentWriter.accept(current);
+				Long racedVersion = (Long) versionField.get(current);
+				versionField.set(current, (racedVersion == null ? 0L : racedVersion) + 1);
+				throw new VersionMismatchException(dn, (Long) versionField.get(entity));
 			}
 			Long expected = (Long) versionField.get(entity);
 			Long storedVersion = (Long) versionField.get(current);
@@ -147,14 +182,18 @@ final class FakeEntryManagerBehavior {
 		});
 
 		when(mock.findEntries(anyString(), any(Class.class), any(Filter.class)))
-				.thenAnswer(inv -> matchAll(inv, -1));
+				.thenAnswer(inv -> readCopies(matchAll(inv, -1)));
 		when(mock.findEntries(anyString(), any(Class.class), any(Filter.class), anyInt()))
-				.thenAnswer(inv -> matchAll(inv, (Integer) inv.getArgument(3)));
+				.thenAnswer(inv -> readCopies(matchAll(inv, (Integer) inv.getArgument(3))));
 		when(mock.findEntries(anyString(), any(Class.class), any(Filter.class), any(String[].class)))
-				.thenAnswer(inv -> matchAll(inv, -1));
+				.thenAnswer(inv -> readCopies(matchAll(inv, -1)));
 
 		when(mock.findPagedEntries(anyString(), any(Class.class), any(Filter.class), any(), anyString(),
 				any(SortOrder.class), anyInt(), anyInt(), anyInt())).thenAnswer(this::pagedAnswer);
+
+		when(mock.findEntries(anyString(), any(Class.class), any(Filter.class), any(), anyString(),
+				any(SortOrder.class), anyInt(), anyInt(), anyInt()))
+				.thenAnswer(inv -> ((PagedResult) pagedAnswer(inv)).getEntries());
 
 		when(mock.countEntries(anyString(), any(Class.class), any(Filter.class)))
 				.thenAnswer(inv -> matchAll(inv, -1).size());
@@ -165,6 +204,19 @@ final class FakeEntryManagerBehavior {
 	 * ({@code sortByName}, falling back to {@code sortBy}) is applied inside the query, i.e.
 	 * before {@code limit} truncates the result.
 	 */
+	/**
+	 * Policy release reads return copies, like a real backend reading fresh rows, so a caller that
+	 * changes a found release cannot also change the stored one. Other entry types keep returning
+	 * the stored instances the existing tests rely on.
+	 */
+	private static List<Object> readCopies(List<Object> matched) {
+		List<Object> result = new ArrayList<>(matched.size());
+		for (Object entity : matched) {
+			result.add(entity instanceof TracePolicyReleaseEntry ? shallowCopy(entity) : entity);
+		}
+		return result;
+	}
+
 	private List<Object> matchAll(InvocationOnMock inv, int limit) {
 		String baseDn = inv.getArgument(0);
 		Class<?> entryClass = inv.getArgument(1);
@@ -262,6 +314,8 @@ final class FakeEntryManagerBehavior {
 			return matchesEquality(filter, entity);
 		case LESS_OR_EQUAL:
 			return matchesLessOrEqual(filter, entity);
+		case GREATER_OR_EQUAL:
+			return matchesGreaterOrEqual(filter, entity);
 		default:
 			throw new UnsupportedOperationException("FakeEntryManagerBehavior does not support: " + filter.getType());
 		}
@@ -292,6 +346,14 @@ final class FakeEntryManagerBehavior {
 		long actual = ((Number) attrValue).longValue();
 		long expected = ((Number) filter.getAssertionValue()).longValue();
 		return actual <= expected;
+	}
+
+	private static boolean matchesGreaterOrEqual(Filter filter, Object entity) {
+		Object attrValue = attrValue(entity, filter.getAttributeName());
+		if (!(attrValue instanceof Number)) {
+			return false;
+		}
+		return ((Number) attrValue).longValue() >= ((Number) filter.getAssertionValue()).longValue();
 	}
 
 	@SuppressWarnings("unchecked")

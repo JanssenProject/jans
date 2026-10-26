@@ -29,7 +29,7 @@ jsonwebkey = "0.4.0"
 chrono = "0.4"
 reqwest = { version = "0.13.2", features = ["json", "form"] }
 cedarling = { path = "cedarling" }
-jans-trace-core = { path = "jans-trace-core" }
+jans-trace-core = { path = "jans-trace-core", version = "0.0.0" }
 test_utils = { path = "test_utils" }
 sigstore-verifier = { path = "sigstore-verifier", version = "0.0.0" }
 wasm-bindgen = "0.2.103"

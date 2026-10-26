@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use anyhow::{Context, Result};
-use cedarling::{CedarEntityMapping, Cedarling, EntityData, RequestUnsigned};
+use cedarling::{AuthorizeOptions, CedarEntityMapping, Cedarling, EntityData, RequestUnsigned};
 use std::collections::HashMap;
 
 use clap::Args;
@@ -93,6 +93,7 @@ pub async fn run(config: cedarling::BootstrapConfig, args: AuthorizeArgs) -> Res
         action: args.action,
         resource,
         context: context_val,
+        options: AuthorizeOptions::default(),
     };
 
     let result = cedarling

@@ -1,6 +1,5 @@
 package io.jans.agama.engine.servlet;
 
-import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +14,6 @@ import io.jans.agama.engine.exception.FlowCrashException;
 import io.jans.agama.engine.exception.FlowTimeoutException;
 import io.jans.agama.engine.model.FlowResult;
 import io.jans.agama.engine.model.FlowStatus;
-import io.jans.agama.engine.service.FlowService;
 
 @WebServlet(urlPatterns = {
     "*" + ExecutionServlet.URL_SUFFIX,
@@ -32,9 +30,6 @@ public class ExecutionServlet extends BaseServlet {
 
     private static final String NO_ACTIVE_FLOW = "This flow may have already finished/timed out. " +
             "Login again to the website you were trying to access originally.";
-    
-    @Inject
-    private FlowService flowService;
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -74,7 +69,8 @@ public class ExecutionServlet extends BaseServlet {
             if (path.equals(expectedUrl)) {
                 page.setTemplatePath(engineConf.getTemplatesPath() + "/" + fstatus.getTemplatePath());
                 page.setDataModel(fstatus.getTemplateDataModel());
-                sendPageContents(response, fstatus.isNativeClient());
+                sendPageContents(response, fstatus.isNativeClient(),
+                        fstatus.getCurrentQname(), fstatus.getCurrentLine());                
             } else {
                 //This is an attempt to GET a page which is not the current page of this flow
                 //json-based clients must explicitly pass the content-type in GET requests
@@ -96,7 +92,7 @@ public class ExecutionServlet extends BaseServlet {
         
         String path = request.getServletPath();
         if (processCallback(response, fstatus, path)) return;
-        
+
         String expectedUrl = getExpectedUrl(fstatus);
         if (path.equals(expectedUrl)) {
             boolean aborting = request.getParameter(ABORT_PARAM) != null;

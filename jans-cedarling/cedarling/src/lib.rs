@@ -27,6 +27,7 @@ mod init;
 mod jwt;
 mod lock;
 mod log;
+mod trace;
 // is reexported in hidden bindings module
 #[doc(hidden)]
 pub mod sparkv;
@@ -59,8 +60,8 @@ pub use authz::request::{
     TokenInput,
 };
 pub use authz::{
-    AuthorizeError, AuthorizeResult, BatchItemError, DropReason, DroppedToken,
-    MultiIssuerAuthorizeResult, TokenInputError,
+    AuthorizeError, AuthorizeOptions, AuthorizeResult, BatchItemError, DropReason, DroppedToken,
+    MultiIssuerAuthorizeResult, TokenInputError, TraceContext,
 };
 pub use bootstrap_config::*;
 /// Identifier of a Cedar policy, re-exported from [`cedar_policy`] so callers can
@@ -83,11 +84,16 @@ use init::policy_store_refresh::{
 use init::policy_store_signature::ArchiveVerifier;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
+#[cfg(not(target_arch = "wasm32"))]
+pub use init::service_factory::{InvalidTraceKeyError, LoadProducerKeyError};
 use lock::InitLockServiceError;
 use lock::health_registry::HealthStatus;
 use log::interface::LogWriter;
 use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
+#[cfg(not(target_arch = "wasm32"))]
+use trace::ProducerKey;
+pub use trace::{ParseProducerIdError, ParseTraceSigningKidError, ProducerId, TraceSigningKid};
 
 use semver::Version;
 
@@ -134,6 +140,14 @@ pub enum InitCedarlingError {
     /// logs to the Lock Server.
     #[error("failed to initialize the Lock Service: {0}")]
     InitLockService(#[from] InitLockServiceError),
+    /// Error returned when TRACE is enabled without what it needs from the rest of
+    /// the configuration.
+    #[error(transparent)]
+    TraceSetup(#[from] TraceSetupError),
+    /// Error returned when TRACE is enabled but its signing key cannot be loaded.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[error(transparent)]
+    TraceKey(#[from] LoadProducerKeyError),
 }
 
 /// Sized wrapper around the custom token processor trait object so it can be
@@ -165,6 +179,10 @@ pub struct Cedarling {
     /// exits when [`Cedarling`] goes away. The leading `_` tells the compiler
     /// the field is intentionally not read.
     _refresh_handle: Option<Arc<PolicyStoreRefreshHandle>>,
+    /// TRACE signing key, loaded at startup so a bad key stops `new` instead of
+    /// failing every record later. Read by the TRACE emitter.
+    #[cfg(not(target_arch = "wasm32"))]
+    _trace_key: Option<Arc<ProducerKey>>,
 }
 
 impl Cedarling {
@@ -181,6 +199,14 @@ impl Cedarling {
 
     /// Create a new instance of the Cedarling application.
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
+        // Checked here as well as when decoding, so a `BootstrapConfig` built
+        // directly cannot skip it; before any network work, as it needs none.
+        if config.trace_config.is_some() {
+            bootstrap_config::check_trace_setup(
+                config.lock_config.is_some(),
+                &config.policy_store_config.source,
+            )?;
+        }
         let pdp_id = app_types::PdpID::new();
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName::from(config.application_name.clone()));
@@ -241,9 +267,22 @@ impl Cedarling {
             metrics.clone(),
         );
 
+        #[cfg(not(target_arch = "wasm32"))]
+        let trace_key = service_factory.trace_key().await?;
+
         // Log policy store metadata if available (new format only)
         if let Some(metadata) = service_factory.policy_store_metadata() {
             log_policy_store_metadata(&log, metadata);
+        }
+        // Compared with the `bundle_hash` Lock serves for the same `.cjar`.
+        if let Some(bundle_hash) = service_factory.policy_store_bundle_hash() {
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::INFO,
+                    None,
+                ))
+                .set_message(format!("Policy store bundle_hash: {bundle_hash}")),
+            );
         }
 
         if let Some(registry) = log.health_registry() {
@@ -277,6 +316,8 @@ impl Cedarling {
             data,
             metrics,
             _refresh_handle: refresh_handle,
+            #[cfg(not(target_arch = "wasm32"))]
+            _trace_key: trace_key,
         })
     }
 

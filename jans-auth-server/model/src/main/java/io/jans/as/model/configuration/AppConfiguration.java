@@ -279,7 +279,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This list details which OAuth 2.0 grant types are supported by this OP")
     private Set<GrantType> grantTypesSupported;
 
-    @DocProperty(description = "This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public.")
+    @DocProperty(description = "This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public. The ephemeral type is disabled by default.")
     private List<String> subjectTypesSupported;
 
     @DocProperty(description = "The default subject type used for dynamic client registration")

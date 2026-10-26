@@ -19,11 +19,12 @@
 //! Archives are **fully supported in WASM**:
 //! - Use `ArchiveVfs::from_buffer()` with bytes you fetch (works now)
 //! - Use `ArchiveSource::Url` with `load_policy_store()` (once URL fetching is implemented)
-//! - Only `from_file()` is native-only (requires file system access)
+//! - Only `from_file()` is native-only (requires file system access); it is test-only, as
+//!   the loader reads a `.cjar` into memory before opening it
 use super::errors::ArchiveError;
 use super::vfs_adapter::{DirEntry, VfsFileSystem};
 use std::io::{Cursor, Read, Seek};
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 use std::path::Path;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -238,7 +239,10 @@ impl ArchiveVfs<std::fs::File> {
     /// - Archive contains path traversal attempts
     /// - Archive is corrupted
     /// - Archive exceeds any of the `limits`
-    #[cfg(not(target_arch = "wasm32"))]
+    ///
+    /// Only tests open archives by path: the loader reads a `.cjar` into memory
+    /// first, so the bytes it hashes and parses are the same.
+    #[cfg(all(test, not(target_arch = "wasm32")))]
     pub(super) fn from_file<P: AsRef<Path>>(
         path: P,
         limits: ArchiveLimits,

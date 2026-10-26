@@ -6,6 +6,8 @@
 
 package io.jans.orm.test;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 
@@ -26,6 +28,8 @@ public abstract class BaseOrmTest {
 	public static final String COUCHBASE = "couchbase";
 	public static final String SPANNER = "spanner";
 	public static final String HYBRID = "hybrid";
+
+	private static final AtomicInteger INUM_SEQUENCE = new AtomicInteger();
 
 	protected PersistenceEntryManager entryManager;
 	protected String persistenceType;
@@ -51,7 +55,8 @@ public abstract class BaseOrmTest {
 	}
 
 	protected String getRandomInum() {
-		return String.format("%s-%04d", System.currentTimeMillis(), (int) (Math.random() * 10000));
+		// Random suffix collided when many entries were created within the same millisecond
+		return String.format("%s-%04d", System.currentTimeMillis(), INUM_SEQUENCE.incrementAndGet() % 10000);
 	}
 
 }

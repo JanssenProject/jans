@@ -7,9 +7,9 @@
 #![allow(dead_code)]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData, HttpClientConfig,
-    JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
-    RequestUnsigned,
+    AuthorizationConfig, AuthorizeOptions, BootstrapConfig, Cedarling, DataStoreConfig, EntityData,
+    HttpClientConfig, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, RequestUnsigned,
 };
 use serde::Deserialize;
 use serde_json::json;
@@ -159,6 +159,7 @@ async fn init_cedarling() -> Cedarling {
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
+        trace_config: None,
     })
     .await
     .expect("should initialize cedarling")
@@ -194,6 +195,7 @@ fn prepare_unsigned_request() -> RequestUnsigned {
         action: "Jans::Action::\"Update\"".to_string(),
         context: json!({}),
         resource,
+        options: AuthorizeOptions::default(),
     }
 }
 
