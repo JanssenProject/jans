@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.BaseLockServiceTest;
+import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.correlation.TraceCorrelationService;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.ingest.AcceptanceResult;
@@ -193,7 +194,7 @@ class TraceReceiptProtocolTest extends BaseLockServiceTest {
 		TraceReceiptChain chainSpy = spy(realChain);
 		doAnswer(inv -> {
 			ReceiptClaim claimed = (ReceiptClaim) inv.callRealMethod();
-			long longAgo = System.currentTimeMillis() - 3_600_000L;
+			long longAgo = harness.now() - 3_600_000L;
 			return new ReceiptClaim(claimed.getSeq(), claimed.getPrevReceiptHash(), claimed.getReceiptHash(),
 					claimed.getReceivedAtMs(), longAgo);
 		}).when(chainSpy).claim(any(), any(), any(), any(), any(), anyLong(), any());
@@ -228,7 +229,21 @@ class TraceReceiptProtocolTest extends BaseLockServiceTest {
 		assertFalse(harness.receiptChain().isFenceExpired(fresh));
 		assertTrue(harness.receiptChain().isFenceExpired(new ReceiptClaim(fresh.getSeq(), fresh.getPrevReceiptHash(),
 				fresh.getReceiptHash(), fresh.getReceivedAtMs(),
-				System.currentTimeMillis() - harness.receiptChain().fenceMs() - 1)));
+				harness.now() - harness.receiptChain().fenceMs() - 1)));
+	}
+
+	@Test
+	void testFence_ClaimMadeLateInRequest_ExpiresAtReceivedDeadlineBeforeClaimDeadline() {
+		harness.traceConfiguration().setPendingReceiptTimeoutSeconds(100);
+		long nowMs = harness.now();
+		// Claimed just now, but the request was received 80 s ago: past 3/4 of 100 s counted from receipt,
+		// although the claim based fence (50 s after the claim) has not ended.
+		ReceiptClaim late = new ReceiptClaim(1L, TraceConstants.ZERO_HASH, TraceConstants.ZERO_HASH, nowMs - 80_000L, nowMs);
+		ReceiptClaim prompt = new ReceiptClaim(1L, TraceConstants.ZERO_HASH, TraceConstants.ZERO_HASH, nowMs - 70_000L, nowMs);
+
+		assertEquals(75_000L, harness.receiptChain().receivedFenceMs());
+		assertTrue(harness.receiptChain().isFenceExpired(late));
+		assertFalse(harness.receiptChain().isFenceExpired(prompt));
 	}
 
 	// -- B: two settlers with opposite outcomes ------------------------------------------------------
