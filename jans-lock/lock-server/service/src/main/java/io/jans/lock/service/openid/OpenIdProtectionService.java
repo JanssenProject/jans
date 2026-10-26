@@ -1,6 +1,7 @@
 package io.jans.lock.service.openid;
 
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -38,6 +39,7 @@ import io.jans.service.security.api.ProtectedApi;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Response;
 
@@ -119,6 +121,12 @@ public class OpenIdProtectionService implements OpenIdProtection {
                 IntrospectionResponse iresp = null;
                 try {
                     iresp = introspectionService.introspectToken("Bearer " + bearerToken, bearerToken);
+                } catch (WebApplicationException e) {
+                    log.error(e.getMessage());
+                    if (e.getResponse().getStatus() == UNAUTHORIZED.getStatusCode()) {
+                        // The AS authenticates the introspection call with the token itself, so it answers 401 for an expired, revoked or unknown token
+                        return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Invalid token", "The access token is expired, revoked or invalid"));
+                    }
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }

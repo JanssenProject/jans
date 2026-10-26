@@ -193,7 +193,7 @@ class CedarlingProtectionServiceTest {
             Response response = service.processAuthorization(null, mock(ResourceInfo.class));
 
             assertStatus(UNAUTHORIZED, response);
-            assertEquals("Bearer", response.getHeaderString("WWW-Authenticate"));
+            assertEquals("Bearer realm=\"jans-lock\"", response.getHeaderString("WWW-Authenticate"));
         }
 
         @Test

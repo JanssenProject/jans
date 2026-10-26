@@ -48,6 +48,7 @@ import io.jans.as.model.jwt.JwtHeader;
 import io.jans.lock.service.OpenIdService;
 import io.jans.lock.service.security.AuthorizationOutcome;
 import io.jans.service.security.api.ProtectedApi;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
@@ -173,12 +174,35 @@ class OpenIdProtectionServiceTest {
 	}
 
 	@Test
+	void testAuthorize_IntrospectionAnswers401_Denied401InvalidToken() {
+		when(introspectionService.introspectToken("Bearer opaque-6", "opaque-6"))
+				.thenThrow(new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build()));
+
+		AuthorizationOutcome outcome = service.authorize("Bearer opaque-6", resourceInfo);
+
+		assertFalse(outcome.isAllowed());
+		assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertInvalidTokenChallenge(outcome);
+	}
+
+	@Test
+	void testAuthorize_IntrospectionAnswers500_Denied403() {
+		when(introspectionService.introspectToken("Bearer opaque-7", "opaque-7"))
+				.thenThrow(new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build()));
+
+		AuthorizationOutcome outcome = service.authorize("Bearer opaque-7", resourceInfo);
+
+		assertEquals(Response.Status.FORBIDDEN.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertNull(outcome.getErrorResponse().getHeaderString(HttpHeaders.WWW_AUTHENTICATE));
+	}
+
+	@Test
 	void testAuthorize_NoToken_Denied401() {
 		AuthorizationOutcome outcome = service.authorize(null, resourceInfo);
 
 		assertFalse(outcome.isAllowed());
 		assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), outcome.getErrorResponse().getStatus());
-		assertEquals("Bearer", outcome.getErrorResponse().getHeaderString(HttpHeaders.WWW_AUTHENTICATE));
+		assertEquals("Bearer realm=\"jans-lock\"", outcome.getErrorResponse().getHeaderString(HttpHeaders.WWW_AUTHENTICATE));
 	}
 
 	// -- JWT tokens -----------------------------------------------------------------------------

@@ -14,22 +14,25 @@ import jakarta.ws.rs.core.Response;
 /**
  * Builds the bearer-token error responses of RFC 6750 section 3.1: {@code 401} with
  * {@code error="invalid_token"} when a new token could help, {@code 403} with
- * {@code error="insufficient_scope"} when it could not, and a bare {@code Bearer} challenge when no
- * credentials were sent. The {@code detail} stays the response entity, as before; the
+ * {@code error="insufficient_scope"} when it could not, and a {@code Bearer} challenge without
+ * {@code error} when no credentials were sent. The {@code detail} stays the response entity, as before; the
  * {@code error_description} is a fixed string so token data never reaches the header.
  */
 public final class BearerChallenge {
 
 	private static final String SCHEME = "Bearer";
 
+	/** Fixed realm, so the challenge without {@code error} still carries an auth-param (RFC 6750 section 3). */
+	static final String REALM = "jans-lock";
+
 	private BearerChallenge() {
 	}
 
 	/**
-	 * @return {@code 401} carrying a {@code Bearer} challenge without {@code error}, as no credentials were sent
+	 * @return {@code 401} carrying a {@code Bearer} challenge with only the {@code realm}, as no credentials were sent
 	 */
 	public static Response missingCredentials(String detail) {
-		return Response.status(Response.Status.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE, SCHEME).entity(detail).build();
+		return Response.status(Response.Status.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE, SCHEME + " realm=\"" + REALM + "\"").entity(detail).build();
 	}
 
 	/**
