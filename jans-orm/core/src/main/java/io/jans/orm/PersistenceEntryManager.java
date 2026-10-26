@@ -125,6 +125,7 @@ public interface PersistenceEntryManager extends EntityManager {
      * supports it, so the database can read rows in index order. Backends which can't skip the count
      * fall back to findPagedEntries.
      */
+    @SuppressWarnings("java:S107")
     default <T> List<T> findEntries(String primaryKey, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
                                     SortOrder sortOrder, int start, int count, int chunkSize) {
         return findPagedEntries(primaryKey, entryClass, filter, ldapReturnAttributes, sortBy, sortOrder, start, count, chunkSize)

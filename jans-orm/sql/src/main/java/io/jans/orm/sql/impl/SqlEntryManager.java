@@ -78,9 +78,9 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
 	private static final GenericKeyConverter KEY_CONVERTER = new GenericKeyConverter(false);
 
-    private List<DeleteNotifier> subscribers;
+    private final List<DeleteNotifier> subscribers;
     
-    private boolean validateAfterUpdate;
+    private final boolean validateAfterUpdate;
 
     protected SqlEntryManager(SqlOperationService operationService) {
         this.operationService = operationService;
@@ -489,6 +489,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 count, chunkSize);
     }
 
+    @SuppressWarnings("java:S107")
     protected <T> PagedResult<EntryData> findEntriesImpl(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope,
             String[] ldapReturnAttributes, String sortBy, SortOrder sortOrder, boolean applyDefaultSort, BatchOperation<T> batchOperation,
             SearchReturnDataType returnDataType, int start, int count, int chunkSize) {
@@ -570,7 +571,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 			result = convertedExpression.toString();
 		} catch (Exception ex) {
 			// QueryDSL can't convert filter
-			LOG.error(String.format("QueryDSL can't build query based on filter: '%s'", result));
+			LOG.error("QueryDSL can't build query based on filter: '{}'", result);
 		}
 
 		return result;
