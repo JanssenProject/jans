@@ -27,6 +27,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Transpiler {
     
+    //Raise this number every time a backwards incompatible change is introduced
+    //in generated JS code. This will provoke flows retranspilation, see #15455
+    public static final String VERSION = String.valueOf(1);
+    
     public static final String UTIL_SCRIPT_NAME = "util.js";    
     public static final String UTIL_SCRIPT_CONTENTS;
     

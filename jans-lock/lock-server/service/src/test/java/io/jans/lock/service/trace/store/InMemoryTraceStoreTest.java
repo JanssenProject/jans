@@ -32,6 +32,7 @@ import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.ReceiptEntry;
+import io.jans.lock.service.trace.model.ReceiptSettlement;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.VerificationResult;
@@ -92,18 +93,18 @@ class InMemoryTraceStoreTest extends TraceStoreContractTest {
 	}
 
 	@Test
-	void testFailNextUpdateReceiptState_throwsOnce_thenSucceeds() throws Exception {
+	void testFailNextSettleReceipt_throwsOnce_thenSucceeds() throws Exception {
 		InMemoryTraceStore inMemoryStore = (InMemoryTraceStore) store;
 		TraceReceiptEntry row = newReceiptEntry(1L);
 		inMemoryStore.insertReceipt(row);
 
-		inMemoryStore.failNextUpdateReceiptState();
+		inMemoryStore.failNextSettleReceipt();
 		assertThrows(TraceStorageException.class,
-				() -> inMemoryStore.updateReceiptState(DOMAIN, 1L, TraceReceiptState.COMMITTED));
+				() -> inMemoryStore.settleReceipt(DOMAIN, 1L, TraceReceiptState.COMMITTED));
 		assertEquals(TraceReceiptState.PENDING, inMemoryStore.findReceipt(DOMAIN, 1L).get().getReceiptStateEnum());
 
-		boolean updated = inMemoryStore.updateReceiptState(DOMAIN, 1L, TraceReceiptState.COMMITTED);
-		assertTrue(updated);
+		ReceiptSettlement settled = inMemoryStore.settleReceipt(DOMAIN, 1L, TraceReceiptState.COMMITTED);
+		assertEquals(ReceiptSettlement.SETTLED, settled);
 		assertEquals(TraceReceiptState.COMMITTED, inMemoryStore.findReceipt(DOMAIN, 1L).get().getReceiptStateEnum());
 	}
 
