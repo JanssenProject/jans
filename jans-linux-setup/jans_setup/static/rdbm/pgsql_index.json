@@ -288,6 +288,9 @@
       "jansTraceDomainId",
       "jansTraceReceiptSeq",
       "jansTraceReceiptState"
+    ],
+    "custom": [
+      "(\"jansTraceDomainId\", \"jansTraceReceiptSeq\")"
     ]
   },
   "jansTracePolicyRelease": {

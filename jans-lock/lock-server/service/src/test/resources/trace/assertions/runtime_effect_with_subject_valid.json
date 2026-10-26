@@ -13,6 +13,7 @@
       "workload_instance_id": "pod-1"
     },
     "event": {
+      "effect_status": "confirmed",
       "outcome": "COMPLETED",
       "result_digest": "sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf7",
       "target_id": "payment-authorization-service"
