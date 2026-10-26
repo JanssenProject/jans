@@ -172,6 +172,19 @@ public class AdminUISecurityServiceTest {
     }
 
     @Test
+    public void testUploadPolicyStore_oversizedBase64RejectedBeforeDecoding() {
+        AdminUIPolicyStore store = new AdminUIPolicyStore();
+        store.setPolicyStore("A".repeat(3_000_001));
+
+        ApplicationException ex = expectThrows(ApplicationException.class,
+                () -> adminUISecurityService.uploadPolicyStore(store));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_UPLOAD_TOO_LARGE.getDescription());
+        verify(entryManager, never()).persist(any());
+    }
+
+    @Test
     public void testUploadPolicyStore_success() throws Exception {
         io.jans.configapi.core.model.adminui.AUIConfiguration auiConfiguration =
                 mock(io.jans.configapi.core.model.adminui.AUIConfiguration.class);
@@ -230,6 +243,34 @@ public class AdminUISecurityServiceTest {
         expectThrows(ApplicationException.class, () -> adminUISecurityService.uploadPolicyStore(store));
         verify(entryManager, never()).persist(any());
     }
+
+        @Test
+        public void testValidateTrustedIssuerDomainsRejectsMismatchedSecondaryIssuer() throws Exception {
+        java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
+            zipOutput.putNextEntry(new java.util.zip.ZipEntry("trusted-issuers/GluuFlexAdminUI.json"));
+            zipOutput.write("{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}"
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zipOutput.closeEntry();
+
+            zipOutput.putNextEntry(new java.util.zip.ZipEntry("trusted-issuers/Secondary.json"));
+            zipOutput.write("{\"configuration_endpoint\":\"https://issuer.example.invalid/.well-known/openid-configuration\"}"
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zipOutput.closeEntry();
+        }
+
+        Method validateTrustedIssuerDomains = AdminUISecurityService.class.getDeclaredMethod(
+            "validateTrustedIssuerDomains", byte[].class, String.class);
+        validateTrustedIssuerDomains.setAccessible(true);
+        java.lang.reflect.InvocationTargetException invocationException = expectThrows(
+            java.lang.reflect.InvocationTargetException.class,
+            () -> validateTrustedIssuerDomains.invoke(
+                adminUISecurityService, archiveBytes.toByteArray(), WEB_SERVER_HOST));
+
+        ApplicationException ex = (ApplicationException) invocationException.getCause();
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+        }
 
     // ---------------------------------------------------------------------
     // editPolicyStore

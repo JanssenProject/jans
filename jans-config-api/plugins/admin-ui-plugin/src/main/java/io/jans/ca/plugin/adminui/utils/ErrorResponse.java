@@ -81,6 +81,7 @@ public enum ErrorResponse {
     POLICY_STORE_GET_ERROR("Error in fetching policy-store"),
     POLICY_STORE_NOT_EXIST("Policy store does not exist"),
     BAD_REQUEST_IN_POLICY_STORE_UPLOAD("Bad Request: No Policy Store file provided"),
+    POLICY_STORE_UPLOAD_TOO_LARGE("Bad Request: Policy Store upload exceeds the maximum allowed size."),
     UNSUPPORTED_POLICY_STORE_EXTENSION("Bad Request: The Policy Store extension is not .cjar or of application/zip mime and is not supported"),
     POLICY_STORE_DOMAIN_NOT_MATCHING("The hostname of the configuration_endpoint in policy-store does not matches with hostname of OpenID Provider."),
     POLICY_STORE_INITIALIZATION_ERROR("Bad Request: Cedarling could not initialize with the provided policy-store"),
