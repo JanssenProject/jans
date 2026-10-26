@@ -129,8 +129,7 @@ public class Transpilation {
                     String th = pfl.getTransHash();
                     //the compiled code might have been generated using a version of the
                     //transpiler that is not the latest
-                    boolean upgrade = th != null && !th.equals(Transpiler.VERSION) &&
-                            !Optional.ofNullable(engineConfig.getDisableTCHV()).orElse(false); 
+                    boolean upgrade = th != null && !th.equals(Transpiler.VERSION); 
 
                     if (upgrade ||
                     //there might be a compilation of this Agama flow running already. If the node
