@@ -153,8 +153,8 @@ impl TraceRecorder {
                 if !self.queue.stopped.swap(true, Ordering::Relaxed) {
                     self.warn(
                         request_id,
-                        "the emitter has stopped; records are not emitted until Cedarling \
-                         starts again",
+                        "the emitter has stopped (Cedarling was shut down, or the emitter \
+                         ended unexpectedly); this instance emits no more records",
                     );
                 }
                 TraceRecordStatus::NotEmittedStopped

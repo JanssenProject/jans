@@ -15,9 +15,11 @@
 use std::borrow::Borrow;
 use std::collections::{HashMap, VecDeque};
 use std::num::NonZeroUsize;
+use std::panic::AssertUnwindSafe;
 use std::sync::{Arc, Mutex, PoisonError};
 
 use bytes::Bytes;
+use futures::FutureExt;
 use jans_trace_core::Limits;
 use jans_trace_core::assertion::{SignedAssertion, batch_body};
 use jans_trace_core::signature::TraceSigner;
@@ -114,8 +116,30 @@ pub(crate) fn spawn_emitter(
     }
     let cancel = CancellationToken::new();
     let chain = ProducerChain::open(params.producer_id.clone(), params.pdp_id);
+    let log = params.log.clone();
     let emitter = Emitter::new(params, &chain);
-    let join = spawn_task(emitter.run(chain, rx, cancel.clone()));
+    let run = AssertUnwindSafe(emitter.run(chain, rx, cancel.clone())).catch_unwind();
+    // A panic is a bug, but TRACE is side work: it is logged when it happens,
+    // and `shut_down` of the host still returns instead of failing on it.
+    let join = spawn_task(async move {
+        if let Err(panic) = run.await {
+            let reason = panic
+                .downcast_ref::<&str>()
+                .map(|reason| (*reason).to_string())
+                .or_else(|| panic.downcast_ref::<String>().cloned())
+                .unwrap_or_default();
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    None,
+                ))
+                .set_message(format!(
+                    "TRACE emitter stopped unexpectedly: {reason}; this instance emits no more \
+                     records"
+                )),
+            );
+        }
+    });
     Ok(EmitterHandle {
         cancel,
         join: Mutex::new(Some(join)),
@@ -931,6 +955,16 @@ mod tests {
         }
     }
 
+    /// A sink with a bug: it panics on the first request.
+    struct PanickingLock;
+
+    #[async_trait]
+    impl BulkSink for PanickingLock {
+        async fn post_bulk(&self, _body: &Bytes) -> Result<Vec<BulkItemResult>, PostBulkError> {
+            panic!("test sink panics");
+        }
+    }
+
     /// Signs with the test key and remembers the thread of every signature.
     struct ThreadRecordingSigner {
         inner: Ed25519Signer,
@@ -1674,6 +1708,33 @@ mod tests {
             .map(|body| records(body).len())
             .sum();
         assert_eq!(sent, 2, "shutdown sends what the channel held");
+    }
+
+    #[tokio::test]
+    async fn panicking_emitter_is_logged_and_does_not_fail_shut_down() {
+        let log = memory_log();
+        let mut params = params(FakeLock::new([]), metrics());
+        params.sink = Arc::new(PanickingLock);
+        params.log = log.clone();
+        let emitter = start(params, 4, [draft()]);
+
+        tokio::time::timeout(Duration::from_secs(10), emitter.tx.closed())
+            .await
+            .expect("the emitter task ends after the panic");
+        emitter.handle.shut_down().await;
+
+        let errors: Vec<String> = log
+            .pop_logs()
+            .iter()
+            .filter(|entry| entry["level"] == "ERROR")
+            .filter_map(|entry| entry["msg"].as_str().map(str::to_string))
+            .collect();
+        assert_eq!(errors.len(), 1, "the panic is logged once: {errors:?}");
+        assert!(
+            errors[0].contains("stopped unexpectedly") && errors[0].contains("test sink panics"),
+            "the error says the emitter stopped and why: {}",
+            errors[0]
+        );
     }
 
     #[tokio::test]
