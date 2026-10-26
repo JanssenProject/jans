@@ -14,7 +14,7 @@ pub(crate) struct Backoff {
     attempts: u32,
     max_attempts: Option<u32>,
     #[allow(clippy::struct_field_names)]
-    backoff_duration: Box<dyn Fn(u32) -> Duration + Send>,
+    backoff_duration: Box<dyn Fn(u32) -> Duration + Send + Sync>,
 }
 
 impl Backoff {
@@ -73,6 +73,16 @@ impl Backoff {
 
         sleep(backoff_duration).await;
         Ok(())
+    }
+
+    /// Counts an attempt and returns the delay before it, without waiting:
+    /// for a caller that waits itself, for example while watching for
+    /// cancellation. `max_attempts` is not checked.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(crate) fn next_delay(&mut self) -> Duration {
+        let delay = (self.backoff_duration)(self.attempts);
+        self.attempts = self.attempts.saturating_add(1);
+        delay
     }
 
     /// Resets `attempts` to `0`.

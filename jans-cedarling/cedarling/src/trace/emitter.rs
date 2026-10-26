@@ -161,6 +161,14 @@ enum GenesisState {
     Unregistered,
 }
 
+/// Whether Lock takes TRACE requests, judged by the last ones.
+enum LockState {
+    /// Lock took the last request; the next one goes without waiting.
+    Accepting,
+    /// Lock did not take the last requests in a row: each next one waits longer.
+    Refusing { backoff: Backoff },
+}
+
 /// What a round leaves: the chain to sign into next and how the round went.
 struct RoundEnd {
     chain: ProducerChain,
@@ -171,7 +179,7 @@ struct RoundEnd {
 enum RoundOutcome {
     /// Lock answered, or the round had nothing to send.
     Done,
-    /// The request was lost, or Lock will never register the chain.
+    /// The request was lost, or Lock never registered the chain.
     Failed,
 }
 
@@ -217,6 +225,8 @@ struct Emitter {
     chain_id: Uuid,
     /// What Lock did with the genesis record of the current chain.
     genesis: GenesisState,
+    /// Whether Lock took the last request, and how long to wait if not.
+    lock: LockState,
     /// Signed records in chain order.
     pending: VecDeque<Pending>,
 }
@@ -240,6 +250,7 @@ impl Emitter {
             limits,
             chain_id: chain.chain_id(),
             genesis: GenesisState::Unsigned,
+            lock: LockState::Accepting,
             pending: VecDeque::new(),
         };
         emitter.chain_opened();
@@ -269,10 +280,11 @@ impl Emitter {
                 let Ok(draft) = rx.try_recv() else { break };
                 drafts.push(draft);
             }
-            chain = self
-                .round(chain, drafts, Mode::Running(&cancel))
-                .await
-                .chain;
+            let end = self.round(chain, drafts, Mode::Running(&cancel)).await;
+            chain = end.chain;
+            if end.outcome == RoundOutcome::Failed {
+                self.back_off(&cancel).await;
+            }
         }
 
         // Stopping: send everything once; what Lock does not take is dropped.
@@ -294,6 +306,32 @@ impl Emitter {
                 self.drop_at_shutdown(rest.len());
                 break;
             }
+        }
+    }
+
+    /// Waits before the next request after Lock did not take one. The wait
+    /// grows with each failure in a row, so a Lock that is down or refuses
+    /// every record gets a request every few minutes, not one per batch or
+    /// per decision. Meanwhile the queue fills and decisions are turned away
+    /// from TRACE, never held.
+    async fn back_off(&mut self, cancel: &CancellationToken) {
+        let mut backoff = match std::mem::replace(&mut self.lock, LockState::Accepting) {
+            LockState::Refusing { backoff } => backoff,
+            LockState::Accepting => Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, None),
+        };
+        let delay = backoff.next_delay();
+        self.lock = LockState::Refusing { backoff };
+        self.log(
+            LogLevel::WARN,
+            None,
+            format!(
+                "Lock Server did not take the last TRACE request; the next one goes in {}s",
+                delay.as_secs()
+            ),
+        );
+        tokio::select! {
+            () = tokio::time::sleep(delay) => {},
+            () = cancel.cancelled() => {},
         }
     }
 
@@ -348,12 +386,17 @@ impl Emitter {
                 Sent::Interrupted => self.put_back(request.records),
             }
         }
-        if matches!(
-            self.genesis,
-            GenesisState::Lost | GenesisState::Unregistered
-        ) {
-            outcome = RoundOutcome::Failed;
-            chain = self.replace_chain();
+        match self.genesis {
+            // Lock refused the chain or never got its genesis record: the
+            // next genesis record would most likely fare the same.
+            GenesisState::Lost => {
+                outcome = RoundOutcome::Failed;
+                chain = self.replace_chain();
+            },
+            // Lock took the chain before; it forgot it once, so a new chain
+            // goes at once.
+            GenesisState::Unregistered => chain = self.replace_chain(),
+            GenesisState::Unsigned | GenesisState::Pending | GenesisState::Accepted => {},
         }
         if resend {
             self.pause(mode).await;
@@ -596,6 +639,14 @@ impl Emitter {
 
     fn accepted(&mut self, record: &Pending, flags: &[&str]) {
         self.count(EmitterEvent::Accepted, 1);
+        if matches!(self.lock, LockState::Refusing { .. }) {
+            self.lock = LockState::Accepting;
+            self.log(
+                LogLevel::INFO,
+                None,
+                "Lock Server accepts TRACE records again; requests go without waiting".to_string(),
+            );
+        }
         if self.is_current_genesis(record) {
             self.genesis = GenesisState::Accepted;
         }
@@ -791,10 +842,11 @@ mod tests {
     use crate::common::app_types::PdpID;
     use crate::common::policy_store::test_utils::fixtures;
     use crate::lock::{BulkItemResult, BulkSink, PostBulkError};
-    use crate::log::{TEST_LOGGER, gen_uuid7};
+    use crate::log::{LogStrategy, TEST_LOGGER, gen_uuid7};
     use crate::trace::record::{DecisionFacts, Outcome, PolicyFacts, RecordDraft, TokenRef};
     use crate::trace::test_utils::{CjarStore, cjar_store};
     use crate::trace::{ProducerKey, TraceRecordStatus, TraceRecorder};
+    use crate::{LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig};
 
     /// RFC 8410 section 10.3 example key: public test vector, not a secret.
     const KEY_PEM: &str = include_str!("../../../test_files/trace/producer_ed25519.pem");
@@ -1036,6 +1088,21 @@ mod tests {
         }
     }
 
+    fn memory_log() -> Logger {
+        Arc::new(LogStrategy::new(
+            &LogConfig {
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_item_size: None,
+                    max_items: None,
+                }),
+                log_level: LogLevel::DEBUG,
+            },
+            PdpID::new(),
+            None,
+        ))
+    }
+
     fn counter(metrics: &MetricsCollector, key: &str) -> Option<i64> {
         metrics
             .snapshot_and_reset()
@@ -1249,9 +1316,10 @@ mod tests {
 
         let started = tokio::time::Instant::now();
         let bodies = lock.bodies(2).await;
-        assert!(
-            started.elapsed() < WORKER_HTTP_RETRY_DUR,
-            "the new chain does not wait for a resend pause"
+        assert_eq!(
+            started.elapsed(),
+            WORKER_HTTP_RETRY_DUR,
+            "the new genesis record waits the first backoff, as after any refused request"
         );
         let old = records(&bodies[0]);
         assert_eq!(old.len(), 1, "the refused genesis record went alone");
@@ -1434,6 +1502,78 @@ mod tests {
             "signing resumes right after the last signed record, without a gap"
         );
         handle.shut_down().await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn refusing_lock_gets_requests_ever_more_rarely() {
+        let lock = FakeLock::new([
+            Reply::Rejected,
+            Reply::Rejected,
+            Reply::Rejected,
+            Reply::AcceptAll,
+            Reply::Rejected,
+        ]);
+        let log = memory_log();
+        let mut params = params(lock.clone(), metrics());
+        params.log = log.clone();
+        let emitter = start(params, 8, std::iter::repeat_with(draft).take(6));
+
+        let started = tokio::time::Instant::now();
+        let mut sent_at = Vec::new();
+        for count in 1..=5 {
+            lock.bodies(count).await;
+            sent_at.push(started.elapsed());
+        }
+        emitter
+            .tx
+            .send(draft())
+            .await
+            .expect("the emitter is running");
+        lock.bodies(6).await;
+        sent_at.push(started.elapsed());
+
+        let gaps: Vec<u64> = sent_at
+            .windows(2)
+            .map(|pair| {
+                pair[1]
+                    .checked_sub(pair[0])
+                    .expect("requests are seen in the order they are sent")
+                    .as_secs()
+            })
+            .collect();
+        assert_eq!(
+            gaps,
+            [10, 20, 40, 0, 10],
+            "the wait doubles while Lock refuses, is gone once it accepts, and starts over"
+        );
+        let logs = log.pop_logs();
+        let waits: Vec<&str> = logs
+            .iter()
+            .filter(|entry| entry["level"] == "WARN")
+            .filter_map(|entry| entry["msg"].as_str())
+            .filter(|message| message.contains("the next one goes in"))
+            .collect();
+        assert_eq!(
+            waits.len(),
+            4,
+            "each wait is announced with its length: {waits:?}"
+        );
+        assert!(
+            waits[2].contains("40s"),
+            "the third wait names its length: {}",
+            waits[2]
+        );
+        let recovered = logs
+            .iter()
+            .filter(|entry| entry["level"] == "INFO")
+            .filter_map(|entry| entry["msg"].as_str())
+            .filter(|message| message.contains("accepts TRACE records again"))
+            .count();
+        assert_eq!(
+            recovered, 2,
+            "each time Lock takes records again after refusing, it is logged once"
+        );
+        emitter.handle.shut_down().await;
     }
 
     #[tokio::test(start_paused = true)]
