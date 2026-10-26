@@ -58,6 +58,21 @@ public class AuthorizationGrantListTest {
     }
 
     @Test
+    public void asGrant_whenStoredSubAndUserNotFound_shouldReject() {
+        mockGrantInstance(client(SubjectType.EPHEMERAL));
+        when(userService.getUser("missing-user")).thenReturn(null);
+
+        assertNull(authorizationGrantList.asGrant(tokenEntity("stored-sub", "missing-user")));
+    }
+
+    @Test
+    public void asGrant_whenStoredSubAndNoUserId_shouldReject() {
+        mockGrantInstance(client(SubjectType.EPHEMERAL));
+
+        assertNull(authorizationGrantList.asGrant(tokenEntity("stored-sub", null)));
+    }
+
+    @Test
     public void asGrant_whenNonEphemeralClientAndNoStoredSub_shouldNotKeepEphemeralSub() {
         mockGrantInstance(client(SubjectType.PUBLIC));
 
