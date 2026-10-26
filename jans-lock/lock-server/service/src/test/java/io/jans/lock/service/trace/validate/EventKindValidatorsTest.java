@@ -1006,9 +1006,22 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@ParameterizedTest(name = "{0}")
-	@CsvSource({ "urn:jans:cedarling:custom-issuer:", "URN:jans:cedarling:custom-issuer:billing-api",
+	@CsvSource({ "urn:jans:cedarling:custom-issuer:billing:v2", "urn:jans:cedarling:custom-issuer:a%20b",
+			"urn:jans:cedarling:custom-issuer:svc_1.prod-eu@example" })
+	void testTokens_issuerCustomUrnNameChars_accepted(String issuer) throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		set(root, TextNode.valueOf(issuer), "trace", "event", "tokens", "0", "issuer");
+
+		registry.validate(parseAndCommonValidate(root));
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@CsvSource({ "urn:jans:cedarling:custom-issuer:","URN:jans:cedarling:custom-issuer:billing-api",
 			"urn:jans:cedarling:other:billing-api", "urn:example:billing-api",
-			"urn:jans:cedarling:custom-issuer:a#b" })
+			"urn:jans:cedarling:custom-issuer:a#b", "urn:jans:cedarling:custom-issuer:a?+b",
+			"urn:jans:cedarling:custom-issuer:a?=b", "urn:jans:cedarling:custom-issuer:?+b",
+			"urn:jans:cedarling:custom-issuer:a/b", "urn:jans:cedarling:custom-issuer:a%zz",
+			"urn:jans:cedarling:custom-issuer:a b" })
 	void testTokens_issuerInvalidUrn_throwsInvalidAssertion(String issuer) throws IOException {
 		ObjectNode root = loadFixture("authorization_decision_valid.json");
 		set(root, TextNode.valueOf(issuer), "trace", "event", "tokens", "0", "issuer");
