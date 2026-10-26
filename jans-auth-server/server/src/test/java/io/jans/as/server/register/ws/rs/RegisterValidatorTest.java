@@ -178,6 +178,31 @@ public class RegisterValidatorTest {
         registerValidator.validateEphemeralSubjectTypeBackchannelLogout(request);
     }
 
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateEphemeralSubjectTypeBackchannelLogout_whenEphemeralClientWithLogoutUri_shouldFail() {
+        when(errorResponseFactory.createWebApplicationException(any(), any(), anyString())).thenReturn(new WebApplicationException());
+
+        final io.jans.as.common.model.registration.Client client = new io.jans.as.common.model.registration.Client();
+        client.setSubjectType(SubjectType.EPHEMERAL);
+        client.getAttributes().setBackchannelLogoutUri(java.util.Collections.singletonList("https://example.org/logout"));
+        registerValidator.validateEphemeralSubjectTypeBackchannelLogout(client);
+    }
+
+    @Test
+    public void validateEphemeralSubjectTypeBackchannelLogout_whenEphemeralClientWithoutLogoutUri_shouldPass() {
+        final io.jans.as.common.model.registration.Client client = new io.jans.as.common.model.registration.Client();
+        client.setSubjectType(SubjectType.EPHEMERAL);
+        registerValidator.validateEphemeralSubjectTypeBackchannelLogout(client);
+    }
+
+    @Test
+    public void validateEphemeralSubjectTypeBackchannelLogout_whenPublicClientWithLogoutUri_shouldPass() {
+        final io.jans.as.common.model.registration.Client client = new io.jans.as.common.model.registration.Client();
+        client.setSubjectType(SubjectType.PUBLIC);
+        client.getAttributes().setBackchannelLogoutUri(java.util.Collections.singletonList("https://example.org/logout"));
+        registerValidator.validateEphemeralSubjectTypeBackchannelLogout(client);
+    }
+
     private JSONObject createSsaPayload() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("iss", "https://trusted.as.com");

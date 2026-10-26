@@ -9,6 +9,7 @@ import com.google.common.base.Strings;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.SoftwareStatementValidationType;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.TrustedIssuerConfig;
@@ -452,6 +453,18 @@ public class RegisterValidator {
     public void validateEphemeralSubjectTypeBackchannelLogout(RegisterRequest registerRequest) {
         if (registerRequest.getSubjectType() == SubjectType.EPHEMERAL
                 && StringUtils.isNotBlank(registerRequest.getBackchannelLogoutUri())) {
+            throw errorResponseFactory.createWebApplicationException(
+                    Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA,
+                    "Back-channel logout is not supported for clients with ephemeral subject type."
+            );
+        }
+    }
+
+    public void validateEphemeralSubjectTypeBackchannelLogout(Client client) {
+        if (SubjectType.EPHEMERAL.equals(client.getSubjectType())
+                && client.getAttributes().getBackchannelLogoutUri() != null
+                && client.getAttributes().getBackchannelLogoutUri().stream().anyMatch(StringUtils::isNotBlank)) {
             throw errorResponseFactory.createWebApplicationException(
                     Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA,
