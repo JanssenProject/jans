@@ -65,6 +65,7 @@ Not yet implemented
     ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
   ```
 - The service is running on `http://0.0.0.0:5000`. OpenAPI documentation is available at `/swagger-ui`
+- On `SIGTERM` the Gunicorn worker finishes in-flight requests, then calls Cedarling `shut_down()` from the `worker_exit` hook (`main/gunicorn_conf.py`) to flush queued TRACE records. `GUNICORN_GRACEFUL_TIMEOUT` (default `8` seconds) bounds this; keep it below the container stop grace period so the flush runs before `SIGKILL`. Flushing does not run under `flask run`.
 
 ## Docker Compose Instructions
 

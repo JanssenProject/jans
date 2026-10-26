@@ -32,6 +32,7 @@ The sidecar is a containerized Flask project that uses the `cedarling_python` bi
     - `-d` runs the sidecar in daemon mode in the background. Omit this if you want to run the sidecar in the foreground to monitor logs in real time.
     - `SIDECAR_DEBUG_RESPONSE` will cause the sidecar to return extra diagnostic information for each query if set to `True`. This may be useful to check which policies are being used to reach a decision.
     - `SIDECAR_TRACE_WORKLOAD_ID` (optional) sets the TRACE `workload_id` used when a request has no `Audit-Workload-ID` header. See [TRACE correlation](#trace-correlation).
+    - `GUNICORN_GRACEFUL_TIMEOUT` (optional, default `8`) is how many seconds Gunicorn waits on shutdown for in-flight requests and the TRACE flush. Keep it below the container stop grace period (for example Docker's default 10 seconds).
     - Take note of the output of the command. This is the container ID of the sidecar.
     - The sidecar runs in the background on port 5000. OpenAPI documentation is available at `http://0.0.0.0:5000/swagger-ui`
     - To stop the sidecar, run `docker container stop <container ID>`
@@ -154,6 +155,8 @@ When `Audit-Workload-ID` is missing, `workload_id` is the first non-empty value 
 3. `cedarling-sidecar`
 
 Cedarling emits a TRACE record only when `CEDARLING_TRACE` is enabled and Lock Server is set up for TRACE, see [TRACE properties](../reference/cedarling-properties.md#trace-properties).
+
+Records are queued and sent in the background. When the container stops, the Gunicorn worker finishes in-flight requests and then calls Cedarling `shut_down()` from its `worker_exit` hook, which sends the queued records once. This must finish within `GUNICORN_GRACEFUL_TIMEOUT`; records still queued when the process is killed are lost.
 
 When present, `trace_execution_id` is returned in the response `context`. With TRACE enabled, `trace_record_status` from the Cedarling decision log is returned as well, for example `emitted` or `not_emitted_queue_full`:
 
