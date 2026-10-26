@@ -75,6 +75,7 @@ class CedarlingInstance:
         self._bootstrap_config: str | None
         self._cedarling: Cedarling
         self.trace_workload_id = DEFAULT_TRACE_WORKLOAD_ID
+        self._is_shut_down = False
         if app is not None:
             self.init_app(app)
 
@@ -95,6 +96,16 @@ class CedarlingInstance:
         else:
             bootstrap_config = BootstrapConfig.load_from_json(self._bootstrap_config)
         self._cedarling = Cedarling(bootstrap_config)
+
+    def shut_down(self) -> None:
+        cedarling = getattr(self, "_cedarling", None)
+        if cedarling is None or self._is_shut_down:
+            return
+        self._is_shut_down = True
+        try:
+            cedarling.shut_down()
+        except Exception as e:
+            logger.warning(f"Exception during cedarling shutdown: {e}")
 
     def get_cedarling_instance(self) -> Cedarling:
         return self._cedarling

@@ -167,3 +167,25 @@ def test_resolve_trace_workload_id(monkeypatch):
     assert resolve_trace_workload_id("x" * 256, bootstrap) == "app-1"
     assert resolve_trace_workload_id(None, None) == "env-app"
     assert resolve_trace_workload_id(None, "{}") == DEFAULT_TRACE_WORKLOAD_ID
+
+
+def test_shut_down_calls_cedarling_once():
+    instance = make_instance(MagicMock())
+
+    instance.shut_down()
+    instance.shut_down()
+
+    instance._cedarling.shut_down.assert_called_once_with()
+
+
+def test_shut_down_ignores_cedarling_errors():
+    instance = make_instance(MagicMock())
+    instance._cedarling.shut_down.side_effect = RuntimeError("flush failed")
+
+    instance.shut_down()
+
+    instance._cedarling.shut_down.assert_called_once_with()
+
+
+def test_shut_down_without_cedarling():
+    CedarlingInstance().shut_down()
