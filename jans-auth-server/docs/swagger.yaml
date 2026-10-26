@@ -1721,6 +1721,8 @@ paths:
                 backchannel_logout_uri:
                   type: string
                   description: RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
+                    Not supported for clients with the ephemeral subject type, such a request is rejected with invalid_client_metadata.
+                    On client update, sending an empty value removes the stored URI.
                 backchannel_logout_session_required:
                   type: boolean
                   description: Boolean value specifying whether the RP requires that a session ID Claim be included in the Logout Token
@@ -2212,6 +2214,8 @@ paths:
                 backchannel_logout_uri:
                   type: string
                   description: RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
+                    Not supported for clients with the ephemeral subject type, such a request is rejected with invalid_client_metadata.
+                    On client update, sending an empty value removes the stored URI.
                 backchannel_logout_session_required:
                   type: boolean
                   description: Boolean value specifying whether the RP requires that a session ID Claim be included in the Logout Token
@@ -2680,6 +2684,8 @@ paths:
                   backchannel_logout_uri:
                     type: string
                     description: RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
+                      Not supported for clients with the ephemeral subject type, such a request is rejected with invalid_client_metadata.
+                      On client update, sending an empty value removes the stored URI.
                   backchannel_logout_session_required:
                     type: boolean
                     description: Boolean value specifying whether the RP requires that a session ID Claim be included in the Logout Token

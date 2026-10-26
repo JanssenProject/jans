@@ -29,8 +29,8 @@ import org.testng.annotations.Test;
 import java.util.Date;
 
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertNull;
 
@@ -154,6 +154,31 @@ public class AuthorizationGrantTest {
     }
 
     @Test
+    public void getSub_whenEphemeralSubIsMissing_shouldReturnBlankAndNotGenerate() {
+        authorizationGrant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, ephemeralClient(), new Date());
+        authorizationGrant.setEphemeralSub(null);
+
+        assertEquals("", authorizationGrant.getSub());
+        assertNull(authorizationGrant.getEphemeralSub());
+    }
+
+    @Test
+    public void init_whenEphemeralClientWithoutUser_shouldNotGenerateEphemeralSub() {
+        authorizationGrant.init(null, AuthorizationGrantType.CLIENT_CREDENTIALS, ephemeralClient(), new Date());
+
+        assertNull(authorizationGrant.getEphemeralSub());
+    }
+
+    @Test
+    public void getSub_whenEphemeralClientWithoutUser_shouldReturnClientId() {
+        final Client client = ephemeralClient();
+        client.setClientId("client-id");
+        authorizationGrant.init(null, AuthorizationGrantType.CLIENT_CREDENTIALS, client, new Date());
+
+        assertEquals("client-id", authorizationGrant.getSub());
+    }
+
+    @Test
     public void getSub_whenTwoGrantsOfEphemeralClient_shouldReturnDifferentValues() {
         final SimpleAuthorizationGrant other = new SimpleAuthorizationGrant();
         final User user = new User();
@@ -161,8 +186,8 @@ public class AuthorizationGrantTest {
         authorizationGrant.init(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
         other.init(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
 
-        assertFalse(authorizationGrant.getEphemeralSub().equals(other.getEphemeralSub()));
-        assertFalse(authorizationGrant.getSub().equals(other.getSub()));
+        assertNotEquals(authorizationGrant.getEphemeralSub(), other.getEphemeralSub());
+        assertNotEquals(authorizationGrant.getSub(), other.getSub());
     }
 
     private static Client ephemeralClient() {
